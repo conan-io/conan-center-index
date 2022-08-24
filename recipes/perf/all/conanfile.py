@@ -34,7 +34,7 @@ class Perf(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         autotools = AutoToolsBuildEnvironment(self)
-        with tools.chdir(os.path.join(self.build_folder, self._source_subfolder, "tools", "perf")):
+        with tools.files.chdir(self, os.path.join(self.build_folder, self._source_subfolder, "tools", "perf")):
             vars=autotools.vars
             vars["NO_LIBPYTHON"] = "1"
             autotools.make(vars=vars)

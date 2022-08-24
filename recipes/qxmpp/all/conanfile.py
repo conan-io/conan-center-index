@@ -80,7 +80,7 @@ class QxmppConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         if self.options.shared and self.settings.os == "Windows":
-            tools.mkdir(os.path.join(self.package_folder, "bin"))
+            tools.files.mkdir(self, os.path.join(self.package_folder, "bin"))
             rename(self, os.path.join(self.package_folder, "lib", "qxmpp.dll"),
                          os.path.join(self.package_folder, "bin", "qxmpp.dll"))
 

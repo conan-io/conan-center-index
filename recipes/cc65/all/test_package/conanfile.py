@@ -16,7 +16,7 @@ class TestPackageConan(ConanFile):
                 shutil.copy(os.path.join(self.source_folder, src), os.path.join(self.build_folder, src))
             for target in self._targets:
                 output = "hello_{}".format(target)
-                tools.mkdir(target)
+                tools.files.mkdir(self, target)
                 try:
                     # Try removing the output file to give confidence it is created by cc65
                     os.unlink(output)

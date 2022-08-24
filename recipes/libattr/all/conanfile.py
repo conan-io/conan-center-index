@@ -83,15 +83,15 @@ class LibAttrConan(ConanFile):
         return self._autotools
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.make()
 
     def package(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install()
-        tools.mkdir(self._pkg_res)
+        tools.files.mkdir(self, self._pkg_res)
         tools.files.rename(self, 
             os.path.join(self._pkg_etc, "xattr.conf"),
             os.path.join(self._pkg_res, "xattr.conf")

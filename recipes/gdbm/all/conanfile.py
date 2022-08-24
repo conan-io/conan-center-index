@@ -121,15 +121,15 @@ class GdbmConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
-            with tools.chdir("src"):
+            with tools.files.chdir(self, "src"):
                 autotools.make(target="maintainer-clean-generic")
             autotools.make()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install()
         tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")

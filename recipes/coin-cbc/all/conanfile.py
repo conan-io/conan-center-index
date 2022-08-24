@@ -135,7 +135,7 @@ class CoinCbcConan(ConanFile):
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         # Installation script expects include/coin to already exist
-        tools.mkdir(os.path.join(self.package_folder, "include", "coin"))
+        tools.files.mkdir(self, os.path.join(self.package_folder, "include", "coin"))
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()

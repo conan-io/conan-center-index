@@ -66,7 +66,7 @@ class PcapplusplusConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             config_args = [
                 "./{}".format(self._configure_sh_script),
                 "--libpcap-include-dir", tools.unix_path(self.deps_cpp_info["libpcap"].include_paths[0]),

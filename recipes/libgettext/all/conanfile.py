@@ -128,7 +128,7 @@ class GetTextConan(ConanFile):
                 args.extend(['RC=%s' % rc, 'WINDRES=%s' % rc])
         with tools.vcvars(self.settings) if (self._is_msvc or self._is_clang_cl) else tools.no_op():
             with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if (self._is_msvc or self._is_clang_cl) else tools.no_op():
-                with tools.chdir(os.path.join(self._source_subfolder, self._gettext_folder)):
+                with tools.files.chdir(self, os.path.join(self._source_subfolder, self._gettext_folder)):
                     env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
                     if self._is_msvc:
                         if not (self.settings.compiler == "Visual Studio" and

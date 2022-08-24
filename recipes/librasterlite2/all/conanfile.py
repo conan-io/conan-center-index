@@ -134,7 +134,7 @@ class Librasterlite2Conan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
             # relocatable shared libs on macOS
             tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
@@ -152,7 +152,7 @@ class Librasterlite2Conan(ConanFile):
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             with tools.run_environment(self):
                 autotools = self._configure_autotools()
                 autotools.install()

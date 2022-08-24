@@ -126,7 +126,7 @@ class TclConan(ConanFile):
         if "d" not in msvc_runtime_flag(self):
             opts.append("unchecked")
         with tools.vcvars(self.settings):
-            with tools.chdir(self._get_configure_dir("win")):
+            with tools.files.chdir(self, self._get_configure_dir("win")):
                 self.run('nmake -nologo -f "{cfgdir}/makefile.vc" INSTALLDIR="{pkgdir}" OPTS={opts} {targets}'.format(
                     cfgdir=self._get_configure_dir("win"),
                     pkgdir=self.package_folder,

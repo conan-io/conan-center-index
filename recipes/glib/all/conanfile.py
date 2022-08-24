@@ -200,7 +200,7 @@ class GLibConan(ConanFile):
 
     def _fix_library_names(self):
         if self.settings.compiler == "Visual Studio":
-            with tools.chdir(os.path.join(self.package_folder, "lib")):
+            with tools.files.chdir(self, os.path.join(self.package_folder, "lib")):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
                     self.output.info(f"rename {filename_old} into {filename_new}")

@@ -70,7 +70,7 @@ class ReadosmConan(ConanFile):
         target = "readosm_i.lib" if self.options.shared else "readosm.lib"
         optflags = ["-DDLL_EXPORT"] if self.options.shared else []
         system_libs = [lib + ".lib" for lib in self.deps_cpp_info.system_libs]
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             with tools.vcvars(self):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     self.run("nmake -f makefile.vc {} OPTFLAGS=\"{}\" SYSTEM_LIBS=\"{}\"".format(target,
@@ -87,7 +87,7 @@ class ReadosmConan(ConanFile):
                               "SUBDIRS = headers src tests examples",
                               "SUBDIRS = headers src")
 
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
             # Relocatable shared lib for Apple platforms
             tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
@@ -121,7 +121,7 @@ class ReadosmConan(ConanFile):
             self.copy("*.lib", dst="lib", src=self._source_subfolder)
             self.copy("*.dll", dst="bin", src=self._source_subfolder)
         else:
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 autotools = self._configure_autotools()
                 autotools.install()
             tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")

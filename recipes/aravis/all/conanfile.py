@@ -123,7 +123,7 @@ class AravisConan(ConanFile):
     def _fix_library_names(self, path):
         # https://github.com/mesonbuild/meson/issues/1412
         if not self.options.shared and self._is_msvc:
-            with tools.chdir(path):
+            with tools.files.chdir(self, path):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
                     self.output.info("rename %s into %s" % (filename_old, filename_new))

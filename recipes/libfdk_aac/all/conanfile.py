@@ -72,7 +72,7 @@ class LibFDKAACConan(ConanFile):
 
     @contextlib.contextmanager
     def _msvc_build_environment(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             with tools.vcvars(self):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     yield
@@ -103,7 +103,7 @@ class LibFDKAACConan(ConanFile):
             self.run("nmake -f Makefile.vc")
 
     def _build_autotools(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
             # relocatable shared lib on macOS
             tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")

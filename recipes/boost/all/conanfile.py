@@ -790,7 +790,7 @@ class BoostConan(ConanFile):
     def _build_bcp(self):
         folder = os.path.join(self.source_folder, self._source_subfolder, "tools", "bcp")
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
-            with tools.chdir(folder):
+            with tools.files.chdir(self, folder):
                 command = f"{self._b2_exe} -j{tools.cpu_count()} --abbreviate-paths toolset={self._toolset}"
                 command += " -d%d" % self.options.debug_level
                 self.output.warn(command)
@@ -798,7 +798,7 @@ class BoostConan(ConanFile):
 
     def _run_bcp(self):
         with tools.vcvars(self.settings) if self._is_msvc or self._is_clang_cl else tools.no_op():
-            with tools.chdir(self.source_folder):
+            with tools.files.chdir(self, self.source_folder):
                 os.mkdir(self._bcp_dir)
                 namespace = f"--namespace={self.options.namespace}"
                 alias = "--namespace-alias" if self.options.namespace_alias else ""
@@ -869,7 +869,7 @@ class BoostConan(ConanFile):
         # interferes with the compiler selection.
         use_vcvars = self._is_msvc and not self.settings.compiler.get_safe("toolset", default="")
         with tools.vcvars(self.settings) if use_vcvars else tools.no_op():
-            with tools.chdir(sources):
+            with tools.files.chdir(self, sources):
                 # To show the libraries *1
                 # self.run("%s --show-libraries" % b2_exe)
                 self.run(full_command, run_environment=True)
@@ -1371,7 +1371,7 @@ class BoostConan(ConanFile):
         dll_pdbs = glob.glob(os.path.join(self.package_folder, "lib", "*.dll")) + \
                     glob.glob(os.path.join(self.package_folder, "lib", "*.pdb"))
         if dll_pdbs:
-            tools.mkdir(os.path.join(self.package_folder, "bin"))
+            tools.files.mkdir(self, os.path.join(self.package_folder, "bin"))
             for bin_file in dll_pdbs:
                 rename(self, bin_file, os.path.join(self.package_folder, "bin", os.path.basename(bin_file)))
 

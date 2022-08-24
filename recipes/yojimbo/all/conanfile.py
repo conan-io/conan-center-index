@@ -93,7 +93,7 @@ class YojimboConan(ConanFile):
         else:
             generator = "gmake2"
 
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self.run("premake5 %s" % generator)
             
             if self.settings.compiler == "Visual Studio":

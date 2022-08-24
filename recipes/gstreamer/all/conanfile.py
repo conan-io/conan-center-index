@@ -101,7 +101,7 @@ class GStreamerConan(ConanFile):
     def _fix_library_names(self, path):
         # regression in 1.16
         if self.settings.compiler == "Visual Studio":
-            with tools.chdir(path):
+            with tools.files.chdir(self, path):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
                     self.output.info("rename %s into %s" % (filename_old, filename_new))

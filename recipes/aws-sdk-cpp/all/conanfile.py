@@ -454,7 +454,7 @@ class AwsSdkCppConan(ConanFile):
             tools.files.replace_in_file(self, os.path.join(self.package_folder, self._res_folder, file), "CMAKE_CURRENT_SOURCE_DIR", "AWS_NATIVE_SDK_ROOT", strict=False)
 
         # avoid getting error from hook
-        with tools.chdir(os.path.join(self.package_folder, self._res_folder)):
+        with tools.files.chdir(self, os.path.join(self.package_folder, self._res_folder)):
             rename(self, os.path.join("toolchains", "cmakeProjectConfig.cmake"), os.path.join("toolchains", "cmakeProjectConf.cmake"))
             tools.files.replace_in_file(self, os.path.join("cmake", "utilities.cmake"), "cmakeProjectConfig.cmake", "cmakeProjectConf.cmake")
 

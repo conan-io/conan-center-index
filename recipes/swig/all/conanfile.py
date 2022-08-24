@@ -119,7 +119,7 @@ class SwigConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        with tools.chdir(os.path.join(self._source_subfolder)):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder)):
             self.run("./autogen.sh", win_bash=tools.os_info.is_windows)
         with self._build_context():
             autotools = self._configure_autotools()

@@ -63,7 +63,7 @@ class GenieConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._patch_compiler("cccl", "cccl")
             with tools.vcvars(self.settings):
-                with tools.chdir(self._source_subfolder):
+                with tools.files.chdir(self, self._source_subfolder):
                     self.run("make", win_bash=tools.os_info.is_windows)
         else:
             cc = tools.get_env("CC")
@@ -81,7 +81,7 @@ class GenieConan(ConanFile):
             self._patch_compiler(cc, cxx)
 
             autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 autotools.make(args=["OS={}".format(self._os), "config={}".format(self._genie_config)])
 
     def package(self):

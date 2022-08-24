@@ -66,7 +66,7 @@ class LibgpiodConan(ConanFile):
         return self._autotools
 
     def build(self):
-        with tools.chdir(os.path.join(self._source_subfolder)):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder)):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True)
         autotools = self._configure_autotools()
         autotools.make()

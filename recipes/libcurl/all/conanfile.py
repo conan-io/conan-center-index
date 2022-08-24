@@ -468,7 +468,7 @@ class LibcurlConan(ConanFile):
         return version
 
     def _build_with_autotools(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             # autoreconf
             self.run("{} -fiv".format(tools.get_env("AUTORECONF") or "autoreconf"), win_bash=tools.os_info.is_windows, run_environment=True)
 
@@ -600,7 +600,7 @@ class LibcurlConan(ConanFile):
             tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         else:
             with tools.run_environment(self):
-                with tools.chdir(self._source_subfolder):
+                with tools.files.chdir(self, self._source_subfolder):
                     autotools, autotools_vars = self._configure_autotools()
                     autotools.install(vars=autotools_vars)
             tools.files.rmdir(self, os.path.join(self.package_folder, "share"))

@@ -79,7 +79,7 @@ class NasRecipe(ConanFile):
     def build(self):
         tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "server", "dia", "main.c"),
                               "\nFILE *yyin", "\nextern FILE *yyin")
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self.run("imake -DUseInstalled -I{} {}".format(self._imake_irulesrc, self._imake_defines), run_environment=True)
             autotools = self._configure_autotools()
             autotools.make(target="World",args=["-j1"] + self._imake_make_args)
@@ -87,7 +87,7 @@ class NasRecipe(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses")
 
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             tmp_install = os.path.join(self.build_folder, "prefix")
             install_args = [

@@ -106,11 +106,11 @@ class PremakeConan(ConanFile):
     def build(self):
         self._patch_sources()
         if self.settings.compiler == "Visual Studio":
-            with tools.chdir(os.path.join(self._source_subfolder, "build", self._msvc_build_dirname)):
+            with tools.files.chdir(self, os.path.join(self._source_subfolder, "build", self._msvc_build_dirname)):
                 msbuild = MSBuild(self)
                 msbuild.build("Premake5.sln", platforms={"x86": "Win32", "x86_64": "x64"})
         else:
-            with tools.chdir(os.path.join(self._source_subfolder, "build", self._gmake_build_dirname)):
+            with tools.files.chdir(self, os.path.join(self._source_subfolder, "build", self._gmake_build_dirname)):
                 env_build = AutoToolsBuildEnvironment(self)
                 env_build.make(target="Premake5", args=["verbose=1", "config={}".format(self._gmake_config)])
 

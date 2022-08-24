@@ -76,7 +76,7 @@ class DetoursConan(ConanFile):
         self._patch_sources()
         if is_msvc(self):
             with tools.vcvars(self):
-                with tools.chdir(os.path.join(self._source_subfolder, "src")):
+                with tools.files.chdir(self, os.path.join(self._source_subfolder, "src")):
                     self.run(f"nmake DETOURS_TARGET_PROCESSOR={self._target_processor}")
         else:
             cmake = self._configure_cmake()

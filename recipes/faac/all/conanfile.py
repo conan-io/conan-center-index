@@ -102,7 +102,7 @@ class FaacConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
             tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
             if self._is_mingw and self.options.shared:

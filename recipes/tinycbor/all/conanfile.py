@@ -54,12 +54,12 @@ class tinycborConan(ConanFile):
         return self._env_build, self._env_vars
 
     def _build_nmake(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             vcvars_command = tools.vcvars_command(self.settings)
             self.run("%s && nmake -f Makefile.nmake" % vcvars_command)
 
     def _build_make(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             env_build, env_vars = self._configure_autotools()
             env_build.make(vars=env_vars)
 
@@ -72,7 +72,7 @@ class tinycborConan(ConanFile):
             self._build_make()
 
     def _package_unix(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             env_build, env_vars = self._configure_autotools()
             env_build.install(vars=env_vars)
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

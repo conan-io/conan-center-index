@@ -45,17 +45,17 @@ class TestPackageConan(ConanFile):
         """ Test autotools integration """
         # Copy autotools directory to build folder
         shutil.copytree(os.path.join(self.source_folder, "autotools"), os.path.join(self.build_folder, "autotools"))
-        with tools.chdir("autotools"):
+        with tools.files.chdir(self, "autotools"):
             self.run("{} --install --verbose -Wall".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
 
-        tools.mkdir(self._package_folder)
+        tools.files.mkdir(self, self._package_folder)
         conf_args = [
             "--prefix={}".format(tools.unix_path(self._package_folder)),
             "--enable-shared", "--enable-static",
         ]
 
         os.mkdir("bin_autotools")
-        with tools.chdir("bin_autotools"):
+        with tools.files.chdir(self, "bin_autotools"):
             with self._build_context():
                 autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
                 autotools.libs = []
@@ -109,10 +109,10 @@ class TestPackageConan(ConanFile):
         cmake.install()
 
         # Copy autotools directory to build folder
-        with tools.chdir(autotools_folder):
+        with tools.files.chdir(self, autotools_folder):
             self.run("{} -ifv -Wall".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
 
-        with tools.chdir(autotools_folder):
+        with tools.files.chdir(self, autotools_folder):
             conf_args = [
                 "--enable-shared",
                 "--disable-static",
@@ -130,7 +130,7 @@ class TestPackageConan(ConanFile):
         """ Test existence of shared library """
         install_prefix = os.path.join(self.build_folder, "sis", "prefix")
 
-        with tools.chdir(install_prefix):
+        with tools.files.chdir(self, install_prefix):
             if self.settings.os == "Windows":
                 assert len(list(glob.glob(os.path.join("bin", "*.dll")))) > 0
             elif tools.is_apple_os(self.settings.os):

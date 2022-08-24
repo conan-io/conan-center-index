@@ -162,7 +162,7 @@ class ImageMagicConan(ConanFile):
         if self._is_msvc:
             self._build_msvc()
         else:
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 env_build = self._build_configure()
                 env_build.make()
 
@@ -215,7 +215,7 @@ class ImageMagicConan(ConanFile):
             tools.files.replace_in_file(self, project, "Win32", "x64")
             tools.files.replace_in_file(self, project, "/MACHINE:I386", "/MACHINE:x64")
 
-        with tools.chdir(os.path.join("VisualMagick", "configure")):
+        with tools.files.chdir(self, os.path.join("VisualMagick", "configure")):
 
             toolset = tools.msvs_toolset(self)
             tools.files.replace_in_file(self, 
@@ -297,7 +297,7 @@ class ImageMagicConan(ConanFile):
         )
 
         for module in self._modules:
-            with tools.chdir(os.path.join("VisualMagick", module)):
+            with tools.files.chdir(self, os.path.join("VisualMagick", module)):
                 msbuild = MSBuild(self)
                 msbuild.build(
                     project_file="CORE_%s_%s.vcxproj" % (module, suffix),
@@ -305,7 +305,7 @@ class ImageMagicConan(ConanFile):
                     platforms={"x86": "Win32", "x86_64": "x64"},
                 )
 
-        with tools.chdir(os.path.join("VisualMagick", "coders")):
+        with tools.files.chdir(self, os.path.join("VisualMagick", "coders")):
             pattern = (
                 "IM_MOD_*_%s.vcxproj" % suffix
                 if self.options.shared
@@ -368,11 +368,11 @@ class ImageMagicConan(ConanFile):
         return self._autotools
 
     def package(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             env_build = self._build_configure()
             env_build.install()
 
-        with tools.chdir(self.package_folder):
+        with tools.files.chdir(self, self.package_folder):
             # remove undesired files
             tools.files.rmdir(self, os.path.join("lib", "pkgconfig"))  # pc files
             tools.files.rmdir(self, "etc")

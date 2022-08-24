@@ -116,7 +116,7 @@ class VerilatorConan(ConanFile):
                 yacc = yacc[:-3]
         with tools.environment_append({"YACC": yacc}):
             if tools.Version(self.version) >= "4.224":
-               with tools.chdir(self._source_subfolder):
+               with tools.files.chdir(self, self._source_subfolder):
                     self.run("autoconf", win_bash=tools.os_info.is_windows, run_environment=True)
             self._autotools.configure(args=conf_args, configure_dir=os.path.join(self.build_folder, self._source_subfolder))
 

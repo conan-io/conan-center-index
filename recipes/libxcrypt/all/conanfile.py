@@ -74,7 +74,7 @@ class LibxcryptConan(ConanFile):
     def build(self):
         tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.am"),
                               "\nlibcrypt_la_LDFLAGS = ", "\nlibcrypt_la_LDFLAGS = -no-undefined ")
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
         autotools = self._configure_autotools()
         autotools.make()

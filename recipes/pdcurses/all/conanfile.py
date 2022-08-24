@@ -76,7 +76,7 @@ class PDCursesConan(ConanFile):
         return self._autotools
 
     def _build_windows(self):
-        with tools.chdir(os.path.join(self._source_subfolder, "wincon")):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder, "wincon")):
             args = []
             if self.options.shared:
                 args.append("DLL=Y")
@@ -104,7 +104,7 @@ class PDCursesConan(ConanFile):
         if self.settings.os == "Windows":
             self._build_windows()
         else:
-            with tools.chdir(os.path.join(self._source_subfolder, "x11")):
+            with tools.files.chdir(self, os.path.join(self._source_subfolder, "x11")):
                 autotools = self._configure_autotools()
                 autotools.make()
 
@@ -136,7 +136,7 @@ class PDCursesConan(ConanFile):
                 os.rename(os.path.join(self.package_folder, "lib", "pdcurses.a"),
                           os.path.join(self.package_folder, "lib", "libpdcurses.a"))
         else:
-            with tools.chdir(os.path.join(self._source_subfolder, "x11")):
+            with tools.files.chdir(self, os.path.join(self._source_subfolder, "x11")):
                 autotools = self._configure_autotools()
                 autotools.install()
                 tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))

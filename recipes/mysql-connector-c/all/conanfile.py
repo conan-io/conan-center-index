@@ -81,7 +81,7 @@ class MysqlConnectorCConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        tools.mkdir(os.path.join(self.package_folder, "licenses"))
+        tools.files.mkdir(self, os.path.join(self.package_folder, "licenses"))
         tools.files.rename(self, os.path.join(self.package_folder, "COPYING"), os.path.join(self.package_folder, "licenses", "COPYING"))
         tools.files.rename(self, os.path.join(self.package_folder, "COPYING-debug"), os.path.join(self.package_folder, "licenses", "COPYING-debug"))
         tools.files.rm(self, self.package_folder, "README*")

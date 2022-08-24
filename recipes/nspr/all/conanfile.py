@@ -120,7 +120,7 @@ class NsprConan(ConanFile):
         return autotools
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             # relocatable shared libs on macOS
             tools.files.replace_in_file(self, 
                 "configure",
@@ -133,7 +133,7 @@ class NsprConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             with self._build_context():
                 autotools = self._configure_autotools()
                 autotools.install()

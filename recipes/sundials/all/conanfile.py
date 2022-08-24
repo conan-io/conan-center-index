@@ -90,7 +90,7 @@ class SundialsConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         if self.settings.os == "Windows" and self.options.shared:
-            tools.mkdir(os.path.join(self.package_folder, "bin"))
+            tools.files.mkdir(self, os.path.join(self.package_folder, "bin"))
             for dll_path in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
                 shutil.move(dll_path, os.path.join(self.package_folder, "bin", os.path.basename(dll_path)))
 

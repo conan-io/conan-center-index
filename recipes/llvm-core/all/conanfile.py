@@ -272,7 +272,7 @@ class LLVMCoreConan(ConanFile):
                 self.copy(lib, dst='lib', src='lib')
 
             CMake(self).configure(args=['--graphviz=graph/llvm.dot'], source_dir='.', build_dir='.')
-            with tools.chdir('graph'):
+            with tools.files.chdir(self, 'graph'):
                 dot_text = tools.files.load(self, 'llvm.dot').replace('\r\n', '\n')
 
             dep_regex = re.compile(r'//\s(.+)\s->\s(.+)$', re.MULTILINE)

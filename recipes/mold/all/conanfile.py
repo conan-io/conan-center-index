@@ -74,7 +74,7 @@ class MoldConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autotools = AutoToolsBuildEnvironment(self)
             autotools.make(target="mold", args=['SYSTEM_TBB=1', 'SYSTEM_MIMALLOC=1'])
 

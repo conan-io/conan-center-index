@@ -127,7 +127,7 @@ class CapnprotoConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.build()
         else:
-            with tools.chdir(os.path.join(self._source_subfolder, "c++")):
+            with tools.files.chdir(self, os.path.join(self._source_subfolder, "c++")):
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")))
                 # relocatable shared libs on macOS
                 tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
@@ -152,7 +152,7 @@ class CapnprotoConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.install()
         else:
-            with tools.chdir(os.path.join(self._source_subfolder, "c++")):
+            with tools.files.chdir(self, os.path.join(self._source_subfolder, "c++")):
                 autotools = self._configure_autotools()
                 autotools.install()
             tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")

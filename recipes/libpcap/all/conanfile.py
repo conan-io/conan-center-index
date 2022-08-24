@@ -160,7 +160,7 @@ class LibPcapConan(ConanFile):
                     os.rmdir(subdir)
 
             # libpcap installs into a subfolder like x64 or amd64
-            with tools.chdir(self.package_folder):
+            with tools.files.chdir(self, self.package_folder):
                 flatten_filetree("bin")
                 flatten_filetree("lib")
         else:

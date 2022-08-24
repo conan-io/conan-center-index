@@ -94,7 +94,7 @@ class M4Conan(ConanFile):
             tools.files.patch(self, **patch)
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             tools.files.save(self, "help2man", '#!/usr/bin/env bash\n:')
             if os.name == 'posix':
                 os.chmod("help2man", os.stat("help2man").st_mode | 0o111)
@@ -104,7 +104,7 @@ class M4Conan(ConanFile):
             autotools.make()
             if tools.get_env("CONAN_RUN_TESTS", False):
                 self.output.info("Running m4 checks...")
-                with tools.chdir("tests"):
+                with tools.files.chdir(self, "tests"):
                     autotools.make(target="check")
 
     def package(self):

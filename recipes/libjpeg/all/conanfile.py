@@ -72,7 +72,7 @@ class LibjpegConan(ConanFile):
                               "\nccommon = -c ",
                               "\nccommon = -c -DLIBJPEG_BUILDING {}".format("" if self.options.shared else "-DLIBJPEG_STATIC "))
         # clean environment variables that might affect on the build (e.g. if set by Jenkins)
-        with tools.chdir(self._source_subfolder), tools.environment_append({"PROFILE": None, "TUNE": None, "NODEBUG": None}):
+        with tools.files.chdir(self, self._source_subfolder), tools.environment_append({"PROFILE": None, "TUNE": None, "NODEBUG": None}):
             shutil.copy("jconfig.vc", "jconfig.h")
             make_args = [
                 "nodebug=1" if self.settings.build_type != 'Debug' else "",

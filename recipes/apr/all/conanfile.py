@@ -111,7 +111,7 @@ class AprConan(ConanFile):
             cmake.build(target="libapr-1" if self.options.shared else "apr-1")
         else:
             if self._should_call_autoreconf:
-                with tools.chdir(self._source_subfolder):
+                with tools.files.chdir(self, self._source_subfolder):
                     self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
             autotools = self._configure_autotools()
             autotools.make()

@@ -53,11 +53,11 @@ class PciUtilsConan(ConanFile):
                        target=" ".join(targets))
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self._make(["all"])
 
     def package(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self._make(["install", "install-pcilib"])
 
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")

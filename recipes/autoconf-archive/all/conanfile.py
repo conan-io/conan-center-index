@@ -38,17 +38,17 @@ class AutoconfArchiveConan(ConanFile):
         return self._autotools
 
     def build(self):
-        with tools.chdir(os.path.join(self._source_subfolder)):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder)):
             self._autotools = self._configure_autotools()
             self._autotools.make()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        with tools.chdir(os.path.join(self._source_subfolder)):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder)):
             self._autotools = self._configure_autotools()
             self._autotools.install()
 
-        tools.mkdir(os.path.join(self.package_folder, "res"))
+        tools.files.mkdir(self, os.path.join(self.package_folder, "res"))
         tools.files.rename(self, os.path.join(self.package_folder, "share", "aclocal"),
                      os.path.join(self.package_folder, "res", "aclocal"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))

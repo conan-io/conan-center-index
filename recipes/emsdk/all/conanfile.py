@@ -52,7 +52,7 @@ class EmSDKConan(ConanFile):
         return ret
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             emsdk = "emsdk.bat" if tools.os_info.is_windows else "./emsdk"
             self._chmod_plus_x("emsdk")
 

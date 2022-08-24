@@ -461,7 +461,7 @@ class CPythonConan(ConanFile):
     def _msvc_package_layout(self):
         self._copy_essential_dlls()
         install_prefix = os.path.join(self.package_folder, self._msvc_install_subprefix)
-        tools.mkdir(install_prefix)
+        tools.files.mkdir(self, install_prefix)
         build_path = self._msvc_artifacts_path
         infix = "_d" if self.settings.build_type == "Debug" else ""
         # FIXME: if cross building, use a build python executable here

@@ -205,7 +205,7 @@ class TkConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._build_nmake("install")
         else:
-            with tools.chdir(self.build_folder):
+            with tools.files.chdir(self, self.build_folder):
                 autotools, make_args = self._configure_autotools()
                 autotools.install(args=make_args)
                 autotools.make(target="install-private-headers", args=make_args)

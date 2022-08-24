@@ -62,13 +62,13 @@ class FtjamConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
         # The configure MUST be run inside this directory
-        with tools.chdir(os.path.join(self.build_folder, self._source_subfolder, "builds", "unix")):
+        with tools.files.chdir(self, os.path.join(self.build_folder, self._source_subfolder, "builds", "unix")):
             self._autotools.configure()
         return self._autotools
 
     def build(self):
         self._patch_sources()
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             if self.settings.os == "Windows":
                 # toolset name of the system building ftjam
                 jam_toolset = self._jam_toolset(self.settings.os, self.settings.compiler)
@@ -96,7 +96,7 @@ class FtjamConan(ConanFile):
             else:
                 self.copy("*.exe", src=os.path.join(self._source_subfolder, "bin.nt"), dst=os.path.join(self.package_folder, "bin"))
         else:
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 autotools = self._configure_autotools()
                 autotools.install()
 

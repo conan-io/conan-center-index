@@ -50,7 +50,7 @@ class NativefiledialogConan(ConanFile):
             generator = "gmake2"
         subdir = os.path.join(self._source_subfolder, "build", "subdir")
         os.makedirs(subdir)
-        with tools.chdir(subdir):
+        with tools.files.chdir(self, subdir):
             os.rename(os.path.join("..", "premake5.lua"), "premake5.lua")
             self.run("premake5 %s" % generator)
             

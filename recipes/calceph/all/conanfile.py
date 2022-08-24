@@ -70,7 +70,7 @@ class CalcephConan(ConanFile):
             tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.vc"),
                                   "CFLAGS = /O2 /GR- /MD /nologo /EHs",
                                   "CFLAGS = /nologo /EHs")
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 with self._msvc_build_environment():
                     self.run("nmake -f Makefile.vc {}".format(self._nmake_args))
         else:
@@ -116,7 +116,7 @@ class CalcephConan(ConanFile):
     def package(self):
         self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
         if self._is_msvc:
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 with self._msvc_build_environment():
                     self.run("nmake -f Makefile.vc install {}".format(self._nmake_args))
             tools.files.rmdir(self, os.path.join(self.package_folder, "doc"))

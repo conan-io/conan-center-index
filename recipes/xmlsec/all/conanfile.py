@@ -90,7 +90,7 @@ class XmlSecConan(ConanFile):
 
     @contextmanager
     def _msvc_build_environment(self):
-        with tools.chdir(os.path.join(self._source_subfolder, "win32")):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder, "win32")):
             with tools.vcvars(self):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     yield
@@ -181,7 +181,7 @@ class XmlSecConan(ConanFile):
         if self._is_msvc:
             self._build_msvc()
         else:
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
                 # relocatable shared lib on macOS
                 tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")

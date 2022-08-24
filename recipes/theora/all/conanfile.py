@@ -100,7 +100,7 @@ class TheoraConan(ConanFile):
             "WholeProgramOptimization": "true" if any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", ""))) else "false",
         }
 
-        with tools.chdir(sln_dir):
+        with tools.files.chdir(self, sln_dir):
             msbuild = MSBuild(self)
             msbuild.build(sln, targets=targets, platforms={"x86": "Win32", "x86_64": "x64"}, properties=properties)
 

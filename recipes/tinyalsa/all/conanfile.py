@@ -34,14 +34,14 @@ class TinyAlsaConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             env_build = AutoToolsBuildEnvironment(self)
             env_build.make()
 
     def package(self):
         self.copy("NOTICE", dst="licenses", src=self._source_subfolder)
 
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             env_build = AutoToolsBuildEnvironment(self)
             env_build_vars = env_build.vars
             env_build_vars['PREFIX'] = self.package_folder
@@ -52,7 +52,7 @@ class TinyAlsaConan(ConanFile):
         if not self.options.with_utils:
             tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
 
-        with tools.chdir(os.path.join(self.package_folder, "lib")):
+        with tools.files.chdir(self, os.path.join(self.package_folder, "lib")):
             files = os.listdir()
             for f in files:
                 if (self.options.shared and f.endswith(".a")) or (not self.options.shared and not f.endswith(".a")):

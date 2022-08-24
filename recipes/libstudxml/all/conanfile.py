@@ -110,7 +110,7 @@ class LibStudXmlConan(ConanFile):
             # include dir, libc++ ends up including their 'version' file instead, causing a compile error
             tools.files.rm(self, self._source_subfolder, "version")
 
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
 
         autotools = self._configure_autotools()

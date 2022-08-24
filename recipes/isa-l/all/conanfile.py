@@ -46,7 +46,7 @@ class LibisalConan(ConanFile):
         tools.files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self.run("./autogen.sh")
             env_build = AutoToolsBuildEnvironment(self)
             extra_args = list()

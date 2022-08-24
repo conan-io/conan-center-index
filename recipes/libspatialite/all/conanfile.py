@@ -147,7 +147,7 @@ class LibspatialiteConan(ConanFile):
         system_libs = [lib + ".lib" for lib in self.deps_cpp_info.system_libs]
         if self.options.shared:
             optflags.append("-DDLL_EXPORT")
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             with tools.vcvars(self):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     self.run("nmake -f makefile.vc {} OPTFLAGS=\"{}\" SYSTEM_LIBS=\"{}\"".format(target,
@@ -164,7 +164,7 @@ class LibspatialiteConan(ConanFile):
                               "SUBDIRS = src test $(EXAMPLES)",
                               "SUBDIRS = src $(EXAMPLES)")
 
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
             # relocatable shared libs on macOS
             tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
@@ -231,7 +231,7 @@ class LibspatialiteConan(ConanFile):
             self.copy("*.lib", dst="lib", src=self._source_subfolder)
             self.copy("*.dll", dst="bin", src=self._source_subfolder)
         else:
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 with tools.run_environment(self):
                     autotools = self._configure_autotools()
                     autotools.install()

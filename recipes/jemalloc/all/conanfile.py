@@ -155,7 +155,7 @@ class JemallocConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
                 with tools.environment_append({"CC": "cl", "CXX": "cl"}) if self.settings.compiler == "Visual Studio" else tools.no_op():
-                    with tools.chdir(self._source_subfolder):
+                    with tools.files.chdir(self, self._source_subfolder):
                         # Do not use AutoToolsBuildEnvironment because we want to run configure as ./configure
                         self.run("./configure {}".format(" ".join(self._autotools_args)), win_bash=tools.os_info.is_windows)
             msbuild = MSBuild(self)

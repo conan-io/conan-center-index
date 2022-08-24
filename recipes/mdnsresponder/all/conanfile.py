@@ -89,7 +89,7 @@ class MdnsResponderConan(ConanFile):
         return self._autotools
 
     def _build_make(self):
-        with tools.chdir(self._posix_folder):
+        with tools.files.chdir(self, self._posix_folder):
             autotools = self._configure_autotools()
             autotools.make(args=self._make_build_args, target=self._make_build_targets)
 
@@ -142,8 +142,8 @@ class MdnsResponderConan(ConanFile):
 
     def _install_make(self):
         for dir in ["bin", "include", "lib", "sbin"]:
-            tools.mkdir(os.path.join(self.package_folder, dir))
-        with tools.chdir(self._posix_folder):
+            tools.files.mkdir(self, os.path.join(self.package_folder, dir))
+        with tools.files.chdir(self, self._posix_folder):
             autotools = self._configure_autotools()
             autotools.make(args=self._make_install_args, target=self._make_install_targets)
         # package the daemon in bin too

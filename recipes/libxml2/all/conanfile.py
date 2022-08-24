@@ -111,7 +111,7 @@ class Libxml2Conan(ConanFile):
 
     @contextmanager
     def _msvc_build_environment(self):
-        with tools.chdir(os.path.join(self._source_subfolder, 'win32')):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder, 'win32')):
             with tools.vcvars(self.settings):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     yield
@@ -180,7 +180,7 @@ class Libxml2Conan(ConanFile):
 
     @contextmanager
     def _mingw_build_environment(self):
-        with tools.chdir(os.path.join(self._source_subfolder, "win32")):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder, "win32")):
             with tools.environment_append(AutoToolsBuildEnvironment(self).vars):
                 yield
 
@@ -231,7 +231,7 @@ class Libxml2Conan(ConanFile):
 
     def _package_mingw(self):
         with self._mingw_build_environment():
-            tools.mkdir(os.path.join(self.package_folder, "include", "libxml2"))
+            tools.files.mkdir(self, os.path.join(self.package_folder, "include", "libxml2"))
             self.run("mingw32-make -f Makefile.mingw install-libs")
             if self.options.include_utils:
                 self.run("mingw32-make -f Makefile.mingw install-dist")

@@ -101,7 +101,7 @@ class MpdecimalConan(ConanFile):
             builds.append([libmpdecpp_folder, mpdecpp_target, mpdecxx_extra_flags])
         with tools.vcvars(self):
             for build_dir, target, extra_flags in builds:
-                with tools.chdir(build_dir):
+                with tools.files.chdir(self, build_dir):
                     self.run("""nmake /nologo /f Makefile.vc {target} MACHINE={machine} DEBUG={debug} DLL={dll} CONAN_CFLAGS="{cflags}" CONAN_CXXFLAGS="{cxxflags}" CONAN_LDFLAGS="{ldflags}" """.format(
                         target=target,
                         machine={"x86": "ppro", "x86_64": "x64"}[str(self.settings.arch)],  # FIXME: else, use ansi32 and ansi64
@@ -112,7 +112,7 @@ class MpdecimalConan(ConanFile):
                         ldflags=" ".join(autotools.link_flags),
                     ))
 
-        with tools.chdir(libmpdec_folder):
+        with tools.files.chdir(self, libmpdec_folder):
             shutil.copy("mpdecimal.h", dist_folder)
             if self.options.shared:
                 shutil.copy("libmpdec-{}.dll".format(self.version), os.path.join(dist_folder, "libmpdec-{}.dll".format(self.version)))
@@ -121,7 +121,7 @@ class MpdecimalConan(ConanFile):
             else:
                 shutil.copy("libmpdec-{}.lib".format(self.version), os.path.join(dist_folder, "libmpdec-{}.lib".format(self.version)))
         if self.options.cxx:
-            with tools.chdir(libmpdecpp_folder):
+            with tools.files.chdir(self, libmpdecpp_folder):
                 shutil.copy("decimal.hh", dist_folder)
                 shutil.copy("libmpdec++-{}.lib".format(self.version), os.path.join(dist_folder, "libmpdec++-{}.lib".format(self.version)))
 
@@ -159,15 +159,15 @@ class MpdecimalConan(ConanFile):
         if self._is_msvc:
             self._build_msvc()
         else:
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 self.run("autoreconf -fiv", win_bash=tools.os_info.is_windows)
                 autotools = self._configure_autotools()
                 self.output.info(tools.files.load(self, os.path.join("libmpdec", "Makefile")))
                 libmpdec, libmpdecpp = self._target_names
-                with tools.chdir("libmpdec"):
+                with tools.files.chdir(self, "libmpdec"):
                     autotools.make(target=libmpdec)
                 if self.options.cxx:
-                    with tools.chdir("libmpdec++"):
+                    with tools.files.chdir(self, "libmpdec++"):
                         autotools.make(target=libmpdecpp)
 
     def package(self):

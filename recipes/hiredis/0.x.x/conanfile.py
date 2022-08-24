@@ -55,13 +55,13 @@ class HiredisConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autoTools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             autoTools.make()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autoTools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             autoTools.install(vars={
                 "DESTDIR": tools.unix_path(self.package_folder),

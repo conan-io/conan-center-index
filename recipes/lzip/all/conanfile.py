@@ -41,8 +41,8 @@ class LzipConan(ConanFile):
 
     def _detect_compilers(self):
         tools.files.rmdir(self, "detectdir")
-        tools.mkdir("detectdir")
-        with tools.chdir("detectdir"):
+        tools.files.mkdir(self, "detectdir")
+        with tools.files.chdir(self, "detectdir"):
             tools.files.save(self, "CMakeLists.txt", textwrap.dedent("""\
                 cmake_minimum_required(VERSION 2.8)
                 project(test C CXX)

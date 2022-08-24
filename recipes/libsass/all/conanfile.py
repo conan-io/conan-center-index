@@ -65,7 +65,7 @@ class LibsassConan(ConanFile):
         return self._autotools
 
     def _build_autotools(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             tools.files.save(self, path="VERSION", content="%s" % self.version)
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")))
             autotools = self._configure_autotools()
@@ -80,7 +80,7 @@ class LibsassConan(ConanFile):
         tools.files.replace_in_file(self, makefile, "CFLAGS   += -O2", "")
         tools.files.replace_in_file(self, makefile, "CXXFLAGS += -O2", "")
         tools.files.replace_in_file(self, makefile, "LDFLAGS  += -O2", "")
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             env_vars = AutoToolsBuildEnvironment(self).vars
             env_vars.update({
                 "BUILD": "shared" if self.options.shared else "static",
@@ -94,7 +94,7 @@ class LibsassConan(ConanFile):
                 self.run("{} -f Makefile".format(self._make_program))
 
     def _build_visual_studio(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             properties = {
                 "LIBSASS_STATIC_LIB": "" if self.options.shared else "true",
                 "WholeProgramOptimization": "true" if any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", ""))) else "false",
@@ -115,7 +115,7 @@ class LibsassConan(ConanFile):
             self._build_autotools()
 
     def _install_autotools(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

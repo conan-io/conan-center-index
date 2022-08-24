@@ -40,7 +40,7 @@ class GumboParserConan(ConanFile):
 
     def _configure_autotools(self):
         if not self._autotools:
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 self.run("./autogen.sh", win_bash=tools.os_info.is_windows)
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             args = []

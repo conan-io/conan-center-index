@@ -553,7 +553,7 @@ class OpenSSLConan(ConanFile):
         return r"ms\ntdll.mak" if self.options.shared else r"ms\nt.mak"
 
     def _make(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             # workaround for clang-cl not producing .pdb files
             if self._is_clangcl:
                 tools.files.save(self, "ossl_static.pdb", "")
@@ -567,7 +567,7 @@ class OpenSSLConan(ConanFile):
             self._run_make()
 
     def _make_install(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self._run_make(targets=["install_sw"], parallel=False)
 
     @property
@@ -642,7 +642,7 @@ class OpenSSLConan(ConanFile):
                     os.unlink(os.path.join(self.package_folder, root, filename))
         if self._use_nmake:
             if self.settings.build_type == "Debug":
-                with tools.chdir(os.path.join(self.package_folder, "lib")):
+                with tools.files.chdir(self, os.path.join(self.package_folder, "lib")):
                     rename(self, "libssl.lib", "libssld.lib")
                     rename(self, "libcrypto.lib", "libcryptod.lib")
 

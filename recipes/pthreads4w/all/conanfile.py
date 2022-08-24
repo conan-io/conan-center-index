@@ -58,7 +58,7 @@ class Pthreads4WConan(ConanFile):
         return self._autotools
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             if self.settings.compiler == "Visual Studio":
                 tools.files.replace_in_file(self, "Makefile",
                     "	copy pthreadV*.lib $(LIBDEST)",
@@ -96,18 +96,18 @@ class Pthreads4WConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             if self.settings.compiler == "Visual Studio":
                 with tools.vcvars(self):
                     with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                         self.run("nmake install DESTROOT={}".format(self.package_folder))
             else:
                 autotools = self._configure_autotools()
-                tools.mkdir(os.path.join(self.package_folder, "include"))
-                tools.mkdir(os.path.join(self.package_folder, "lib"))
+                tools.files.mkdir(self, os.path.join(self.package_folder, "include"))
+                tools.files.mkdir(self, os.path.join(self.package_folder, "lib"))
                 autotools.make(target="install-headers")
                 if self.options.shared:
-                    tools.mkdir(os.path.join(self.package_folder, "bin"))
+                    tools.files.mkdir(self, os.path.join(self.package_folder, "bin"))
                     autotools.make(target="install-dlls")
                     autotools.make(target="install-implib-default")
                 else:

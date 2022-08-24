@@ -96,7 +96,7 @@ class LibdisasmConan(ConanFile):
     def build(self):
         for patch in self.conan_data["patches"].get(self.version, []):
             tools.files.patch(self, **patch)
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
         with self._build_context():
             autotools = self._configure_autotools()

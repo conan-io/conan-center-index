@@ -74,7 +74,7 @@ class OpusFileConan(ConanFile):
 
     def _build_vs(self):
         includedir = os.path.abspath(os.path.join(self._source_subfolder, "include"))
-        with tools.chdir(os.path.join(self._source_subfolder, "win32", "VS2015")):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder, "win32", "VS2015")):
             msbuild = MSBuild(self)
             build_type = str(self.settings.build_type)
             if not self.options.http:
@@ -104,7 +104,7 @@ class OpusFileConan(ConanFile):
         if self._is_msvc:
             self._build_vs()
         else:
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows, run_environment=True)
             autotools = self._configure_autotools()
             autotools.make()

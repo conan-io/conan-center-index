@@ -41,12 +41,12 @@ class LibmountConan(ConanFile):
         return self._autotools
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             env_build = self._configure_autotools()
             env_build.make()
 
     def package(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             env_build = self._configure_autotools()
             env_build.install()
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)

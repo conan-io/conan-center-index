@@ -71,7 +71,7 @@ class AafConan(ConanFile):
         self.copy("LEGAL/AAFSDKPSL.TXT", dst="licenses", src=self._source_subfolder, keep_path=False)
 
         if tools.is_apple_os(self.settings.os):
-            with tools.chdir(os.path.join(self.package_folder, "lib")):
+            with tools.files.chdir(self, os.path.join(self.package_folder, "lib")):
                 for dylib in glob.glob("*.dylib"):
                     command = "install_name_tool -id {0} {1}".format(os.path.basename(dylib), dylib)
                     self.output.info(command)

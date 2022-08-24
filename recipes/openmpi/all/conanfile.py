@@ -67,13 +67,13 @@ class OpenMPIConan(ConanFile):
         return self._autotools
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.make()
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

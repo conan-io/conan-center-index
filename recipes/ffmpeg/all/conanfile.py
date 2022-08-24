@@ -614,7 +614,7 @@ class FFMpegConan(ConanFile):
                     self.package_folder, "lib"), "*.def")
             else:
                 # ffmpeg produces `.a` files that are actually `.lib` files
-                with tools.chdir(os.path.join(self.package_folder, "lib")):
+                with tools.files.chdir(self, os.path.join(self.package_folder, "lib")):
                     for lib in glob.glob("*.a"):
                         rename(self, lib, lib[3:-2] + ".lib")
 

@@ -117,7 +117,7 @@ class LibdrmConan(ConanFile):
         meson = self._configure_meson()
         meson.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.mkdir(os.path.join(self.package_folder, "licenses"))
+        tools.files.mkdir(self, os.path.join(self.package_folder, "licenses"))
         # Extract the License/s from the header to a file
         tmp = tools.files.load(self, os.path.join(self._source_subfolder, "include", "drm", "drm.h"))
         license_contents = re.search("\*\/.*(\/\*(\*(?!\/)|[^*])*\*\/)", tmp, re.DOTALL)[1]

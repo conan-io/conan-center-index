@@ -57,7 +57,7 @@ class GperfConan(ConanFile):
 
     @contextmanager
     def _build_context(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             if self._is_msvc:
                 with tools.vcvars(self.settings):
                     env = {

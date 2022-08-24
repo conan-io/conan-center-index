@@ -154,7 +154,7 @@ class MpirConan(ConanFile):
         if self._is_msvc:
             self._build_visual_studio()
         else:
-            with tools.chdir(self._source_subfolder), self._build_context():
+            with tools.files.chdir(self, self._source_subfolder), self._build_context():
                 # relocatable shared lib on macOS
                 tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
                 autotools = self._configure_autotools()
@@ -176,7 +176,7 @@ class MpirConan(ConanFile):
             self.copy(pattern="*.dll*", dst="bin", src=lib_folder, keep_path=False)
             self.copy(pattern="*.lib", dst="lib", src=lib_folder, keep_path=False)
         else:
-            with tools.chdir(self._source_subfolder), self._build_context():
+            with tools.files.chdir(self, self._source_subfolder), self._build_context():
                 autotools = self._configure_autotools()
                 autotools.install()
             tools.files.rmdir(self, os.path.join(self.package_folder, "share"))

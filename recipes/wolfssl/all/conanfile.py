@@ -130,7 +130,7 @@ class WolfSSLConan(ConanFile):
         return self._autotools
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
         with self._build_context():
             autotools = self._configure_autotools()

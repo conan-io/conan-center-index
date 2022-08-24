@@ -63,13 +63,13 @@ class LibEstConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.make()
 
     def package(self):
         self.copy("*LICENSE", src=self._source_subfolder, dst="licenses")
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install()
         os.unlink(os.path.join(self.package_folder, "lib", "libest.la"))

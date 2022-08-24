@@ -66,7 +66,7 @@ class MSYS2Conan(ConanFile):
 
 
     def _update_pacman(self):
-        with tools.chdir(os.path.join(self._msys_dir, "usr", "bin")):
+        with tools.files.chdir(self, os.path.join(self._msys_dir, "usr", "bin")):
             try:
                 self._kill_pacman()
 
@@ -131,7 +131,7 @@ class MSYS2Conan(ConanFile):
 
         self._update_pacman()
 
-        with tools.chdir(os.path.join(self._msys_dir, "usr", "bin")):
+        with tools.files.chdir(self, os.path.join(self._msys_dir, "usr", "bin")):
             for package in packages:
                 self.run('bash -l -c "pacman -S %s --noconfirm"' % package)
             for package in ['pkgconf']:

@@ -71,12 +71,12 @@ class Libdc1394Conan(ConanFile):
                     os.path.join(self._source_subfolder, "config.sub"))
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
                     os.path.join(self._source_subfolder, "config.guess"))
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             env_build = self._configure_autotools()
             env_build.make()
 
     def package(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             env_build = self._configure_autotools()
             env_build.install()
 

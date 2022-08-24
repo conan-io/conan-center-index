@@ -91,7 +91,7 @@ class LibxsltConan(ConanFile):
             autotools.make()
 
     def _build_msvc(self):
-        with tools.chdir(os.path.join(self._source_subfolder, "win32")):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder, "win32")):
             debug = "yes" if self.settings.build_type == "Debug" else "no"
             static = "no" if self.options.shared else "yes"
 

@@ -92,7 +92,7 @@ class Argtable2Conan(ConanFile):
         autotools.libs = []
         vars = " ".join("CONAN_{}=\"{}\"".format(k, v) for k, v in autotools.vars.items())
         with tools.vcvars(self.settings):
-            with tools.chdir(os.path.join(self._source_subfolder, "src")):
+            with tools.files.chdir(self, os.path.join(self._source_subfolder, "src")):
                 self.run("nmake -f Makefile.nmake {} {}".format(target, vars), run_environment=True)
 
     def build(self):

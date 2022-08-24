@@ -63,16 +63,16 @@ class TinyMidiConan(ConanFile):
         return args
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autotools = self._get_autotools()
             make_args = self._make_args(autotools)
             autotools.make(args=make_args)
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        tools.mkdir(os.path.join(self.package_folder, "include"))
-        tools.mkdir(os.path.join(self.package_folder, "lib"))
-        with tools.chdir(self._source_subfolder):
+        tools.files.mkdir(self, os.path.join(self.package_folder, "include"))
+        tools.files.mkdir(self, os.path.join(self.package_folder, "lib"))
+        with tools.files.chdir(self, self._source_subfolder):
             autotools = self._get_autotools()
             make_args = self._make_args(autotools)
             autotools.install(args=make_args)

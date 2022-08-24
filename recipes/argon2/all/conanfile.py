@@ -77,7 +77,7 @@ class Argon2Conan(ConanFile):
             if self.options.shared:
                 tools.files.replace_in_file(self, argon2_header, "__declspec(dllexport)", "__declspec(dllimport)")
         else:
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
                 with tools.environment_append(autotools.vars):
                     autotools.make(args=self._make_args, target="libs")
@@ -92,7 +92,7 @@ class Argon2Conan(ConanFile):
                       os.path.join(self.package_folder, "lib", "argon2.lib"))
         else:
             autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 with tools.environment_append(autotools.vars):
                     autotools.install(args=self._make_args)
             # drop unneeded dirs
@@ -101,7 +101,7 @@ class Argon2Conan(ConanFile):
             if self.settings.os == "Windows" and self.options.shared:
                 os.unlink(os.path.join(self.package_folder, "lib", "libargon2.a"))
                 self.copy("libargon2.dll.a", src=self._source_subfolder, dst="lib")
-                tools.mkdir(os.path.join(self.package_folder, "bin"))
+                tools.files.mkdir(self, os.path.join(self.package_folder, "bin"))
                 os.rename(os.path.join(self.package_folder, "lib", "libargon2.dll"),
                           os.path.join(self.package_folder, "bin", "libargon2.dll"))
             # drop unneeded libs

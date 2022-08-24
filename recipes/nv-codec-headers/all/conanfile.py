@@ -38,7 +38,7 @@ class FFNvEncHeaders(ConanFile):
 
     def build(self):
         autotools = self._configure_autotools()
-        with tools.chdir(os.path.join(self.build_folder, self._source_subfolder)):
+        with tools.files.chdir(self, os.path.join(self.build_folder, self._source_subfolder)):
             autotools.make()
 
     def _extract_license(self):
@@ -51,7 +51,7 @@ class FFNvEncHeaders(ConanFile):
         self._extract_license()
 
         autotools = self._configure_autotools()
-        with tools.chdir(os.path.join(self.build_folder, self._source_subfolder)):
+        with tools.files.chdir(self, os.path.join(self.build_folder, self._source_subfolder)):
             autotools.install(args=["PREFIX={}".format(self.package_folder)])
 
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

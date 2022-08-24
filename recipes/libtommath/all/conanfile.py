@@ -76,7 +76,7 @@ class LibTomMathConan(ConanFile):
         arg_str = " ".join("{}=\"{}\"".format(k, v) for k, v in args.items())
 
         with tools.environment_append(args):
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 if self.settings.compiler == "Visual Studio":
                     if self.options.shared:
                         target = "tommath.dll"

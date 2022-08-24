@@ -68,7 +68,7 @@ class ConanXqilla(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
        
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
                 self.run(self._make_cmd)
 
     def package(self):
@@ -76,7 +76,7 @@ class ConanXqilla(ConanFile):
         self.copy("GPLv2", dst="licenses", src=os.path.join(self._source_subfolder, "xsd"))
         self.copy("FLOSSE", dst="licenses", src=os.path.join(self._source_subfolder, "xsd"))
 
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self.run(self._make_install_cmd)
         
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))

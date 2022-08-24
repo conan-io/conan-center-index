@@ -127,14 +127,14 @@ class UsocketsConan(ConanFile):
             tools.files.patch(self, **patch)
 
     def _build_msvc(self):
-        with tools.chdir(os.path.join(self._source_subfolder)):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder)):
             msbuild = MSBuild(self)
             msbuild.build(project_file="uSockets.vcxproj", platforms={"x86": "Win32"})
 
     def _build_configure(self):
         autotools = AutoToolsBuildEnvironment(self)
         autotools.fpic = self.options.get_safe("fPIC", False)
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             args = []
             if self.options.with_ssl == "openssl":
                 args.append("WITH_OPENSSL=1")

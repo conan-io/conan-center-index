@@ -34,7 +34,7 @@ class LinuxHeadersGenericConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        with tools.chdir(os.path.join(self._source_subfolder)):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder)):
             autotools = AutoToolsBuildEnvironment(self)
             autotools.make(target="headers")
 

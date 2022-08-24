@@ -672,7 +672,7 @@ class OpenSSLConan(ConanFile):
         return r"ms\ntdll.mak" if self.options.shared else r"ms\nt.mak"
 
     def _make(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             # workaround for clang-cl not producing .pdb files
             if self._is_clangcl:
                 tools.files.save(self, "ossl_static.pdb", "")
@@ -703,7 +703,7 @@ class OpenSSLConan(ConanFile):
                 self._run_make()
 
     def _make_install(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             # workaround for MinGW (https://github.com/openssl/openssl/issues/7653)
             if not os.path.isdir(os.path.join(self.package_folder, "bin")):
                 os.makedirs(os.path.join(self.package_folder, "bin"))
@@ -796,13 +796,13 @@ class OpenSSLConan(ConanFile):
                     os.unlink(os.path.join(self.package_folder, root, filename))
         if self._use_nmake:
             if self.settings.build_type == 'Debug' and self._full_version >= "1.1.0":
-                with tools.chdir(os.path.join(self.package_folder, 'lib')):
+                with tools.files.chdir(self, os.path.join(self.package_folder, 'lib')):
                     rename(self, "libssl.lib", "libssld.lib")
                     rename(self, "libcrypto.lib", "libcryptod.lib")
         # Old OpenSSL version family has issues with permissions.
         # See https://github.com/conan-io/conan/issues/5831
         if self._full_version < "1.1.0" and self.options.shared and self.settings.os in ("Android", "FreeBSD", "Linux"):
-            with tools.chdir(os.path.join(self.package_folder, "lib")):
+            with tools.files.chdir(self, os.path.join(self.package_folder, "lib")):
                 os.chmod("libssl.so.1.0.0", 0o755)
                 os.chmod("libcrypto.so.1.0.0", 0o755)
 

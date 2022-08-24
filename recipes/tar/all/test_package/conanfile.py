@@ -8,7 +8,7 @@ class TestPackageConan(ConanFile):
     def test(self):
         tar_bin = self.deps_user_info["tar"].tar
         if not tools.cross_building(self):
-            with tools.chdir(self.source_folder):
+            with tools.files.chdir(self, self.source_folder):
                 test_tar = os.path.join(self.build_folder, "test.tar.gz")
                 self.run("{} -czf {} conanfile.py".format(tar_bin, test_tar), run_environment=True)
             assert os.path.isfile("test.tar.gz")

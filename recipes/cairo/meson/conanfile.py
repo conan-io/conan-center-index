@@ -211,7 +211,7 @@ class CairoConan(ConanFile):
 
     def _fix_library_names(self):
         if self._is_msvc:
-            with tools.chdir(os.path.join(self.package_folder, "lib")):
+            with tools.files.chdir(self, os.path.join(self.package_folder, "lib")):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
                     self.output.info("rename %s into %s" % (filename_old, filename_new))

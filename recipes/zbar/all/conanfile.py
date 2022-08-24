@@ -101,7 +101,7 @@ class ZbarConan(ConanFile):
     def _configure_autotools(self):
         if not self._autotools:
             if tools.Version(self.version) >= "0.22":
-                with tools.chdir(self._source_subfolder):
+                with tools.files.chdir(self, self._source_subfolder):
                     self.run("autoreconf -fiv")
             self._autotools = AutoToolsBuildEnvironment(self)
             yes_no = lambda v: "yes" if v else "no"

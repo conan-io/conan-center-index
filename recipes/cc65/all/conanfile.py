@@ -57,7 +57,7 @@ class Cc65Conan(ConanFile):
                       build_type="Debug" if self.settings.build_type == "Debug" else "Release",
                       arch=arch, platforms=msvc_platforms)
         autotools = self._configure_autotools()
-        with tools.chdir(os.path.join(self._source_subfolder, "libsrc")):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder, "libsrc")):
             autotools.make()
 
     def _configure_autotools(self):
@@ -86,14 +86,14 @@ class Cc65Conan(ConanFile):
 
     def _build_autotools(self):
         autotools = self._configure_autotools()
-        with tools.chdir(os.path.join(self._source_subfolder)):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder)):
             autotools.make(args=self._make_args)
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.files.patch(self, **patch)
         if self.settings.compiler == "Visual Studio":
-            with tools.chdir(os.path.join(self._source_subfolder, "src")):
+            with tools.files.chdir(self, os.path.join(self._source_subfolder, "src")):
                 for fn in os.listdir("."):
                     if not fn.endswith(".vcxproj"):
                         continue
@@ -121,7 +121,7 @@ class Cc65Conan(ConanFile):
 
     def _package_autotools(self):
         autotools = self._configure_autotools()
-        with tools.chdir(os.path.join(self.build_folder, self._source_subfolder)):
+        with tools.files.chdir(self, os.path.join(self.build_folder, self._source_subfolder)):
             autotools.install(args=self._make_args)
 
         tools.files.rmdir(self, self._samplesdir)

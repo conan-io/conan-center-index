@@ -105,7 +105,7 @@ class AeronConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        with tools.chdir(self.package_folder):
+        with tools.files.chdir(self, self.package_folder):
             for dll in glob.glob(os.path.join("lib", "*.dll")):
                 shutil.move(dll, "bin")
 

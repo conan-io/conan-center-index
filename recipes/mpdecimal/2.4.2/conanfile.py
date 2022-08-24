@@ -146,7 +146,7 @@ class MpdecimalConan(ConanFile):
 
         autotools = AutoToolsBuildEnvironment(self)
 
-        with tools.chdir(libmpdec_folder):
+        with tools.files.chdir(self, libmpdec_folder):
             with tools.vcvars(self.settings):
                 self.run("""nmake /nologo MACHINE={machine} DLL={dll} CONAN_CFLAGS="{cflags}" CONAN_LDFLAGS="{ldflags}" """.format(
                     machine="ppro" if self.settings.arch == "x86" else "x64",
@@ -177,7 +177,7 @@ class MpdecimalConan(ConanFile):
         if self._is_msvc:
             self._build_msvc()
         else:
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 autotools = self._configure_autotools()
                 autotools.make()
 
@@ -190,7 +190,7 @@ class MpdecimalConan(ConanFile):
             self.copy("*.lib", src=distfolder, dst="lib")
             self.copy("*.dll", src=distfolder, dst="bin")
         else:
-            with tools.chdir(os.path.join(self.build_folder, self._source_subfolder)):
+            with tools.files.chdir(self, os.path.join(self.build_folder, self._source_subfolder)):
                 autotools = self._configure_autotools()
                 autotools.install()
             tools.files.rmdir(self, os.path.join(self.package_folder, "share"))

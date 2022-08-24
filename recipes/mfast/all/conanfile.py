@@ -116,7 +116,7 @@ class mFASTConan(ConanFile):
         cmake.install()
         self.copy("licence.txt", dst="licenses", src=self._source_subfolder)
 
-        tools.mkdir(os.path.join(self.package_folder, self._new_mfast_config_dir))
+        tools.files.mkdir(self, os.path.join(self.package_folder, self._new_mfast_config_dir))
         self._extract_fasttypegentarget_macro()
 
         tools.files.rmdir(self, os.path.join(self.package_folder, self._old_mfast_config_dir))

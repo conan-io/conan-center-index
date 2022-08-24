@@ -155,14 +155,14 @@ class OpenH264Conan(ConanFile):
     def build(self):
         self._patch_sources()
         with tools.vcvars(self) if (self._is_msvc or self._is_clang_cl) else tools.no_op():
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 env_build = AutoToolsBuildEnvironment(self)
                 env_build.make(args=self._make_args, target=self._library_filename)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         with tools.vcvars(self) if (self._is_msvc or self._is_clang_cl) else tools.no_op():
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 env_build = AutoToolsBuildEnvironment(self)
                 env_build.make(args=self._make_args, target="install-" + ("shared" if self.options.shared else "static-lib"))
 

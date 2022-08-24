@@ -96,7 +96,7 @@ class LibiconvConan(ConanFile):
             env_vars["RANLIB"] = ":"
 
         with tools.vcvars(self.settings) if (is_msvc(self) or self._is_clang_cl) else tools.no_op():
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 with tools.environment_append(env_vars):
                     yield
 

@@ -112,7 +112,7 @@ class CairoConan(ConanFile):
             self._build_configure()
 
     def _build_msvc(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             # https://cairographics.org/end_to_end_build_for_win32/
             win32_common = os.path.join("build", "Makefile.win32.common")
             tools.files.replace_in_file(self, win32_common, "-MD ", "-%s " % self.settings.compiler.runtime)
@@ -168,7 +168,7 @@ class CairoConan(ConanFile):
         return self._autotools
 
     def _build_configure(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             # disable build of test suite
             tools.files.replace_in_file(self, os.path.join("test", "Makefile.am"), "noinst_PROGRAMS = cairo-test-suite$(EXEEXT)",
                                   "")

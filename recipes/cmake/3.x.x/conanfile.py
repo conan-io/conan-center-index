@@ -93,7 +93,7 @@ class CMakeConan(ConanFile):
 
     def build(self):
         if self.options.bootstrap:
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 self.run(['./bootstrap', '--prefix={}'.format(self.package_folder), '--parallel={}'.format(tools.cpu_count())])
                 autotools = AutoToolsBuildEnvironment(self)
                 autotools.make()
@@ -113,7 +113,7 @@ class CMakeConan(ConanFile):
     def package(self):
         self.copy("Copyright.txt", dst="licenses", src=self._source_subfolder)
         if self.options.bootstrap:
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 autotools = AutoToolsBuildEnvironment(self)
                 autotools.install()
         else:

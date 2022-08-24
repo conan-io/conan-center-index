@@ -860,14 +860,14 @@ class GdalConan(ConanFile):
 
     @contextmanager
     def _msvc_build_environment(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             with tools.vcvars(self.settings):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     yield
 
     @contextmanager
     def _autotools_build_environment(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             with tools.run_environment(self):
                 with tools.environment_append({"PKG_CONFIG_PATH": tools.unix_path(self.build_folder)}):
                     yield

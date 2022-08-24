@@ -151,13 +151,13 @@ class NSSConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
-        with tools.chdir(os.path.join(self._source_subfolder, "nss")):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder, "nss")):
             with tools.vcvars(self) if self.settings.compiler == "Visual Studio" else tools.no_op():
                 self.run("make %s" % " ".join(self._make_args), run_environment=True)
 
     def package(self):
         self.copy("COPYING", src = os.path.join(self._source_subfolder, "nss"), dst = "licenses")
-        with tools.chdir(os.path.join(self._source_subfolder, "nss")):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder, "nss")):
             self.run("make install %s" % " ".join(self._make_args))
         self.copy("*",
                   src=os.path.join(self._source_subfolder, "dist", "public", "nss"),

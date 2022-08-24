@@ -55,7 +55,7 @@ class SevenZipConan(ConanFile):
 
     def _build_msvc(self):
         with tools.vcvars(self.settings):
-            with tools.chdir(os.path.join("CPP", "7zip")):
+            with tools.files.chdir(self, os.path.join("CPP", "7zip")):
                 self.run("nmake /f makefile PLATFORM=%s" % self._msvc_platform)
 
     def _build_autotools(self):
@@ -65,7 +65,7 @@ class SevenZipConan(ConanFile):
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
             extra_env["IS_MINGW"] = "1"
         with tools.environment_append(extra_env):
-            with tools.chdir(os.path.join("CPP", "7zip", "Bundles", "LzmaCon")):
+            with tools.files.chdir(self, os.path.join("CPP", "7zip", "Bundles", "LzmaCon")):
                 autotools.make(args=["-f", "makefile.gcc"], target="all")
 
     def _patch_sources(self):

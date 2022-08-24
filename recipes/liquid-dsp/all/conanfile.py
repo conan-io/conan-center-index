@@ -94,7 +94,7 @@ class LiquidDspConan(ConanFile):
         if self.settings.compiler != "Visual Studio" or (not self.options.shared):
             return
         self.run("cmd /c generate_link_library.bat")
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self.run(
                 "{} /def:libliquid.def /out:libliquid.lib /machine:{}".format(
                     os.getenv("AR"), "X86" if self.settings.arch == "x86" else "X64"
@@ -103,7 +103,7 @@ class LiquidDspConan(ConanFile):
             )
 
     def _rename_libraries(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             if self.settings.os == "Windows" and self.options.shared:
                 tools.files.rename(self, "libliquid.so", "libliquid.dll")
             elif self.settings.os == "Windows" and not self.options.shared:
@@ -156,7 +156,7 @@ class LiquidDspConan(ConanFile):
             configure_args.append("CFLAGS='{}'".format(" ".join(cflags)))
         configure_args_str = " ".join(configure_args)
         with self._build_context():
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 self.run("./bootstrap.sh", win_bash=tools.os_info.is_windows)
                 self.run(
                     "./configure {}".format(configure_args_str),

@@ -145,7 +145,7 @@ class MozjpegConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.build()
         else:
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")))
             autotools = self._configure_autotools()
             autotools.make()

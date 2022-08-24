@@ -64,7 +64,7 @@ class LibBsdConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self.run("autoreconf -fiv")
         autotools = self._configure_autotools()
         autotools.make()

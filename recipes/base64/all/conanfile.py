@@ -65,7 +65,7 @@ class Base64Conan(ConanFile):
             # ARM-specific instructions can be enabled here
             extra_env = {}
         with tools.environment_append(extra_env):
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 autotools.make(target="lib/libbase64.a")
 
     def build(self):

@@ -85,7 +85,7 @@ class LcmsConan(ConanFile):
             vc_sln_subdir = "VC2013"
         else:
             vc_sln_subdir = "VC2015"
-        with tools.chdir(os.path.join(self._source_subfolder, "Projects", vc_sln_subdir )):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder, "Projects", vc_sln_subdir )):
             target = "lcms2_DLL" if self.options.shared else "lcms2_static"
             if self.settings.compiler == "Visual Studio" and \
                tools.Version(self.settings.compiler.version) <= "12":

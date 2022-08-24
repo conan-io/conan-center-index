@@ -97,7 +97,7 @@ class XZUtils(ConanFile):
     def _build_msvc(self):
         # windows\INSTALL-MSVC.txt
         msvc_version = "vs2017" if Version(self.settings.compiler.version) >= "15" else "vs2013"
-        with tools.chdir(os.path.join(self._source_subfolder, "windows", msvc_version)):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder, "windows", msvc_version)):
             target = "liblzma_dll" if self.options.shared else "liblzma"
             msbuild = MSBuild(self)
             msbuild.build(

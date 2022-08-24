@@ -106,7 +106,7 @@ class SerfConan(ConanFile):
             })
 
         escape_str = lambda x : "\"{}\"".format(x)
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             with self._build_context():
                     self.run("scons {} {}".format(" ".join(escape_str(s) for s in args), " ".join("{}={}".format(k, escape_str(v)) for k, v in kwargs.items())), run_environment=True)
 
@@ -124,7 +124,7 @@ class SerfConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             with self._build_context():
                 self.run("scons install -Y \"{}\"".format(os.path.join(self.source_folder, self._source_subfolder)), run_environment=True)
 
@@ -137,7 +137,7 @@ class SerfConan(ConanFile):
             if self.options.shared:
                 for file in glob.glob(os.path.join(self.package_folder, "lib", "serf-{}.*".format(self._version_major))):
                     os.unlink(file)
-                tools.mkdir(os.path.join(self.package_folder, "bin"))
+                tools.files.mkdir(self, os.path.join(self.package_folder, "bin"))
                 os.rename(os.path.join(self.package_folder, "lib", "libserf-{}.dll".format(self._version_major)),
                           os.path.join(self.package_folder, "bin", "libserf-{}.dll".format(self._version_major)))
             else:

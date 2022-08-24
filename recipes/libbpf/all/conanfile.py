@@ -68,12 +68,12 @@ class LibbpfConan(ConanFile):
         tools.files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autotools, make_args = self._configure_autotools()
             autotools.make(args=make_args)
 
     def package(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autotools, make_args = self._configure_autotools()
             autotools.install(args=make_args)
 

@@ -70,7 +70,7 @@ class LibUSBConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _build_visual_studio(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             # Assume we're using the latest Visual Studio and default to libusb_2019.sln
             # (or libusb_2017.sln for libusb < 1.0.24).
             # If we're not using the latest Visual Studio, select an appropriate solution file.

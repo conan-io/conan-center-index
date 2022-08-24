@@ -74,14 +74,14 @@ class LibcapConan(ConanFile):
     def build(self):
         self._patch_sources()
 
-        with tools.chdir(os.path.join(self._source_subfolder, self.name)):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder, self.name)):
             env_build, env_build_vars = self._configure_autotools()
             env_build.make(vars=env_build_vars)
 
     def package(self):
         self.copy("License", dst="licenses", src=self._source_subfolder)
 
-        with tools.chdir(os.path.join(self._source_subfolder, self.name)):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder, self.name)):
             env_build, env_build_vars = self._configure_autotools()
 
             env_build.make(target="install-common-cap", vars=env_build_vars)

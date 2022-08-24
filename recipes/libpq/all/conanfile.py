@@ -96,7 +96,7 @@ class LibpqConan(ConanFile):
                 args.append('--disable-rpath')
             if self._is_clang8_x86:
                 self._autotools.flags.append("-msse2")
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 self._autotools.configure(args=args)
         return self._autotools
 
@@ -158,7 +158,7 @@ class LibpqConan(ConanFile):
             with tools.vcvars(self.settings):
                 config = "DEBUG" if self.settings.build_type == "Debug" else "RELEASE"
                 with tools.environment_append({"CONFIG": config}):
-                    with tools.chdir(os.path.join(self._source_subfolder, "src", "tools", "msvc")):
+                    with tools.files.chdir(self, os.path.join(self._source_subfolder, "src", "tools", "msvc")):
                         self.run("perl build.pl libpq")
                         if not self.options.shared:
                             self.run("perl build.pl libpgport")
@@ -178,18 +178,18 @@ class LibpqConan(ConanFile):
                     "#! /bin/sh\nexport DYLD_LIBRARY_PATH={}:$DYLD_LIBRARY_PATH\n".format(libpaths),
                 )
             autotools = self._configure_autotools()
-            with tools.chdir(os.path.join(self._source_subfolder, "src", "backend")):
+            with tools.files.chdir(self, os.path.join(self._source_subfolder, "src", "backend")):
                 autotools.make(args=self._make_args, target="generated-headers")
-            with tools.chdir(os.path.join(self._source_subfolder, "src", "common")):
+            with tools.files.chdir(self, os.path.join(self._source_subfolder, "src", "common")):
                 autotools.make(args=self._make_args)
             if tools.Version(self.version) >= "12":
-                with tools.chdir(os.path.join(self._source_subfolder, "src", "port")):
+                with tools.files.chdir(self, os.path.join(self._source_subfolder, "src", "port")):
                     autotools.make(args=self._make_args)
-            with tools.chdir(os.path.join(self._source_subfolder, "src", "include")):
+            with tools.files.chdir(self, os.path.join(self._source_subfolder, "src", "include")):
                 autotools.make(args=self._make_args)
-            with tools.chdir(os.path.join(self._source_subfolder, "src", "interfaces", "libpq")):
+            with tools.files.chdir(self, os.path.join(self._source_subfolder, "src", "interfaces", "libpq")):
                 autotools.make(args=self._make_args)
-            with tools.chdir(os.path.join(self._source_subfolder, "src", "bin", "pg_config")):
+            with tools.files.chdir(self, os.path.join(self._source_subfolder, "src", "bin", "pg_config")):
                 autotools.make(args=self._make_args)
 
     def _remove_unused_libraries_from_package(self):
@@ -228,17 +228,17 @@ class LibpqConan(ConanFile):
                 self.copy("*.lib", src=self._source_subfolder, dst="lib", keep_path=False)
         else:
             autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)#self._configure_autotools()
-            with tools.chdir(os.path.join(self._source_subfolder, "src", "common")):
+            with tools.files.chdir(self, os.path.join(self._source_subfolder, "src", "common")):
                 autotools.install(args=self._make_args)
-            with tools.chdir(os.path.join(self._source_subfolder, "src", "include")):
+            with tools.files.chdir(self, os.path.join(self._source_subfolder, "src", "include")):
                 autotools.install(args=self._make_args)
-            with tools.chdir(os.path.join(self._source_subfolder, "src", "interfaces", "libpq")):
+            with tools.files.chdir(self, os.path.join(self._source_subfolder, "src", "interfaces", "libpq")):
                 autotools.install(args=self._make_args)
             if tools.Version(self.version) >= "12":
-                with tools.chdir(os.path.join(self._source_subfolder, "src", "port")):
+                with tools.files.chdir(self, os.path.join(self._source_subfolder, "src", "port")):
                     autotools.install(args=self._make_args)
 
-            with tools.chdir(os.path.join(self._source_subfolder, "src", "bin", "pg_config")):
+            with tools.files.chdir(self, os.path.join(self._source_subfolder, "src", "bin", "pg_config")):
                 autotools.install(args=self._make_args)
 
             self._remove_unused_libraries_from_package()

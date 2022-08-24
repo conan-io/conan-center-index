@@ -97,17 +97,17 @@ class LibRHashConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.make()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install()
             autotools.make(target="install-lib-headers")
-            with tools.chdir("librhash"):
+            with tools.files.chdir(self, "librhash"):
                 if self.options.shared:
                     autotools.make(target="install-so-link")
         tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))

@@ -16,5 +16,5 @@ class SolaceTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            with tools.chdir("bin"):
+            with tools.files.chdir(self, "bin"):
                 self.run(".%sexample" % os.sep, run_environment=True)

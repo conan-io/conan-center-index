@@ -122,7 +122,7 @@ class IceoryxConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         if self.options.toml_config:
-            tools.mkdir(os.path.join(self.package_folder, "res"))
+            tools.files.mkdir(self, os.path.join(self.package_folder, "res"))
             tools.files.rename(self, os.path.join(self.package_folder, "etc", "roudi_config_example.toml"),
                          os.path.join(self.package_folder, "res", "roudi_config.toml"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "etc"))

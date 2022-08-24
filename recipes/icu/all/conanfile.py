@@ -113,7 +113,7 @@ class ICUBase(ConanFile):
             build_env.update({'CC': 'cl', 'CXX': 'cl'})
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.environment_append(build_env):
-                with tools.chdir(build_dir):
+                with tools.files.chdir(self, build_dir):
                     # workaround for https://unicode-org.atlassian.net/browse/ICU-20531
                     os.makedirs(os.path.join("data", "out", "tmp"))
                     # workaround for "No rule to make target 'out/tmp/dirs.timestamp'"
@@ -239,7 +239,7 @@ class ICUBase(ConanFile):
         build_dir = os.path.join(self.build_folder, self._source_subfolder, "build")
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.environment_append(env_build.vars):
-                with tools.chdir(build_dir):
+                with tools.files.chdir(self, build_dir):
                     command = "{make} {silent} install".format(make=self._make_tool,
                                                                silent=self._silent)
                     self.run(command, win_bash=tools.os_info.is_windows)
@@ -248,7 +248,7 @@ class ICUBase(ConanFile):
             shutil.move(dll, os.path.join(self.package_folder, "bin"))
 
         if self.settings.os != "Windows" and self.options.data_packaging in ["files", "archive"]:
-            tools.mkdir(os.path.join(self.package_folder, "res"))
+            tools.files.mkdir(self, os.path.join(self.package_folder, "res"))
             shutil.move(self._data_path, os.path.join(self.package_folder, "res"))
 
         # Copy some files required for cross-compiling

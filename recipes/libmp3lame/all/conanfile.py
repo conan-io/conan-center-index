@@ -77,7 +77,7 @@ class LibMP3LameConan(ConanFile):
 
     @contextmanager
     def _msvc_build_environment(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             with tools.vcvars(self.settings):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     yield

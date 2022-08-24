@@ -85,7 +85,7 @@ class GiflibConan(ConanFile):
         # add unistd.h for VS
         shutil.copy("unistd.h", os.path.join(self._source_subfolder, "lib"))
 
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             if self.settings.arch == "x86":
                 host = "i686-w64-mingw32"
             elif self.settings.arch == "x86_64":
@@ -134,7 +134,7 @@ class GiflibConan(ConanFile):
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             if tools.is_apple_os(self.settings.os):
                 # relocatable shared lib on macOS
                 tools.files.replace_in_file(self, 

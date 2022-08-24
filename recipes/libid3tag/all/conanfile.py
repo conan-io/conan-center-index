@@ -69,7 +69,7 @@ class LibId3TagConan(ConanFile):
 
     def _build_msvc(self):
         kwargs = {}
-        with tools.chdir(os.path.join(self._source_subfolder, "msvc++")):
+        with tools.files.chdir(self, os.path.join(self._source_subfolder, "msvc++")):
             # cl : Command line error D8016: '/ZI' and '/Gy-' command-line options are incompatible
             tools.files.replace_in_file(self, "libid3tag.dsp", "/ZI ", "")
             if self.settings.compiler == "clang":

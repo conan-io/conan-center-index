@@ -41,7 +41,7 @@ class LuajitConan(ConanFile):
 
     def build(self):
         if self.settings.compiler == 'Visual Studio':
-            with tools.chdir(os.path.join(self._source_subfolder, 'src')):
+            with tools.files.chdir(self, os.path.join(self._source_subfolder, 'src')):
                 env_build = VisualStudioBuildEnvironment(self)
                 with tools.environment_append(env_build.vars), tools.vcvars(self):
                     variant = '' if self.options.shared else 'static'
@@ -76,7 +76,7 @@ class LuajitConan(ConanFile):
                     major, minor, _ = platform.mac_ver()[0].split(".")
                     version = "%s.%s" % (major, minor)
                 env["MACOSX_DEPLOYMENT_TARGET"] = version
-            with tools.chdir(self._source_subfolder), tools.environment_append(env):
+            with tools.files.chdir(self, self._source_subfolder), tools.environment_append(env):
                 env_build = self._configure_autotools()
                 env_build.make(args=["PREFIX=%s" % self.package_folder])
 
@@ -94,7 +94,7 @@ class LuajitConan(ConanFile):
             self.copy("lua51.lib", dst="lib", src=ljs)
             self.copy("lua51.dll", dst="bin", src=ljs)
         else:
-            with tools.chdir(self._source_subfolder):
+            with tools.files.chdir(self, self._source_subfolder):
                 env_build = self._configure_autotools()
                 env_build.install(args=["PREFIX=%s" % self.package_folder])
             tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

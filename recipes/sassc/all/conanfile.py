@@ -67,7 +67,7 @@ class SasscConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             if self._is_msvc:
                 self._build_msbuild()
             else:
@@ -77,7 +77,7 @@ class SasscConan(ConanFile):
                 autotools.make()
 
     def package(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             if self._is_msvc:
                 self.copy("*.exe", dst="bin", src=os.path.join(self._source_subfolder, "bin"), keep_path=False)
             else:

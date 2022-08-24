@@ -58,7 +58,7 @@ class LibdeflateConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _build_msvc(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             with tools.vcvars(self):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     target = "libdeflate.dll" if self.options.shared else "libdeflatestatic.lib"
@@ -66,7 +66,7 @@ class LibdeflateConan(ConanFile):
 
     def _build_make(self):
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autotools.make()
 
     def build(self):
@@ -87,7 +87,7 @@ class LibdeflateConan(ConanFile):
 
     def _package_make(self):
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             autotools.install(args=["PREFIX={}".format(self.package_folder)])
         tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

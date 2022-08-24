@@ -749,7 +749,7 @@ class QtConan(ConanFile):
             args.append(str(self.options.config))
 
         os.mkdir("build_folder")
-        with tools.chdir("build_folder"):
+        with tools.files.chdir(self, "build_folder"):
             with tools.vcvars(self) if self._is_msvc else tools.no_op():
                 build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": [self.build_folder]}
                 if self.settings.os == "Windows":
@@ -777,7 +777,7 @@ class QtConan(ConanFile):
         return os.path.join("lib", "cmake", "Qt5{0}".format(module), "conan_qt_qt5_{0}private.cmake".format(module.lower()))
 
     def package(self):
-        with tools.chdir("build_folder"):
+        with tools.files.chdir(self, "build_folder"):
             self.run("%s install" % self._make_program())
         tools.files.save(self, os.path.join(self.package_folder, "bin", "qt.conf"), """[Paths]
 Prefix = ..

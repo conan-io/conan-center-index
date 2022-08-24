@@ -89,7 +89,7 @@ class LibnameConan(ConanFile):
             meson.install()
         
         if self.settings.compiler in ["Visual Studio", "msvc"] and not self.options.shared:
-            with tools.chdir(os.path.join(self.package_folder, "lib")):
+            with tools.files.chdir(self, os.path.join(self.package_folder, "lib")):
                 if os.path.isfile("libgraphene-1.0.a"):
                     tools.files.rename(self, "libgraphene-1.0.a", "graphene-1.0.lib")
                 
