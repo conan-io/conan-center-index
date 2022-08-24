@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 import os
 
 
@@ -12,7 +13,7 @@ class GeotransTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             # NOTE: In order to use this library, the MPCCS_DATA environment variable *must* be set.
             # The path to the appropriate data directory is available in the env_info variable. This can be
             # accessed from a consumer package using `self.deps_env_info["geotrans"].MPCCS_DATA.
