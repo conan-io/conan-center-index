@@ -1,5 +1,5 @@
 from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.33.0"
@@ -43,17 +43,17 @@ class BitmagicConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._cppstd)
+            tools.build.check_min_cppstd(self, self._cppstd)
 
         minimum_version = self._minimum_compilers_version(self._cppstd).get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
+            if tools.scm.Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("{} requires C++{}, which your compiler does not support.".format(self.name, self._cppstd))
         else:
             self.output.warn("{0} requires C++{1}. Your compiler is unknown. Assuming it supports C++{1}.".format(self.name, self._cppstd))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def package(self):

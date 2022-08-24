@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 import os
 
 
@@ -9,7 +10,7 @@ class TestPackageConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         if not self.settings.compiler.get_safe("cppstd"):
-            if tools.Version(self.deps_cpp_info["bitmagic"].version) < "7.5.0":
+            if tools.scm.Version(self.deps_cpp_info["bitmagic"].version) < "7.5.0":
                 cmake.definitions["CMAKE_CXX_STANDARD"] = 11
             else:
                 cmake.definitions["CMAKE_CXX_STANDARD"] = 17
@@ -17,6 +18,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
