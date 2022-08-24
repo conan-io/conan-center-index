@@ -113,7 +113,7 @@ class CspiceConan(ConanFile):
         cmake.install()
 
     def _extract_license(self):
-        spiceusr_header = tools.load(os.path.join(self._source_subfolder, "include", "SpiceUsr.h"))
+        spiceusr_header = tools.files.load(self, os.path.join(self._source_subfolder, "include", "SpiceUsr.h"))
         begin = spiceusr_header.find("-Disclaimer")
         end = spiceusr_header.find("-Required_Reading", begin)
         return spiceusr_header[begin:end]

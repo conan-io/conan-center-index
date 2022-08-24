@@ -160,7 +160,7 @@ class FreetypeConan(ConanFile):
         """).format(version=version, staticlibs=staticlibs))
 
     def _extract_libtool_version(self):
-        conf_raw = tools.load(os.path.join(self._source_subfolder, "builds", "unix", "configure.raw"))
+        conf_raw = tools.files.load(self, os.path.join(self._source_subfolder, "builds", "unix", "configure.raw"))
         return next(re.finditer(r"^version_info='([0-9:]+)'", conf_raw, flags=re.M)).group(1).replace(":", ".")
 
     @property
@@ -256,7 +256,7 @@ class FreetypeConan(ConanFile):
         self.env_info.FT2_CONFIG = freetype_config
         self._chmod_plus_x(freetype_config)
 
-        libtool_version = tools.load(self._libtool_version_txt).strip()
+        libtool_version = tools.files.load(self, self._libtool_version_txt).strip()
         self.user_info.LIBTOOL_VERSION = libtool_version
         # FIXME: need to do override the pkg_config version (pkg_config_custom_content does not work)
         # self.cpp_info.version["pkg_config"] = pkg_config_version

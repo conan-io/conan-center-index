@@ -87,7 +87,7 @@ class FtjamConan(ConanFile):
                 autotools.make()
 
     def package(self):
-        txt = tools.load(os.path.join(self._source_subfolder, "jam.c"))
+        txt = tools.files.load(self, os.path.join(self._source_subfolder, "jam.c"))
         license_txt = txt[:txt.find("*/")+3]
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_txt)
         if self.settings.os == "Windows":

@@ -26,7 +26,7 @@ class GnuConfigConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _extract_license(self):
-        txt_lines = tools.load(os.path.join(self.source_folder, self._source_subfolder, "config.guess")).splitlines()
+        txt_lines = tools.files.load(self, os.path.join(self.source_folder, self._source_subfolder, "config.guess")).splitlines()
         start_index = None
         end_index = None
         for line_i, line in enumerate(txt_lines):

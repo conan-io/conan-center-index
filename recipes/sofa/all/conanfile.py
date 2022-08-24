@@ -66,7 +66,7 @@ class SofaConan(ConanFile):
         cmake.install()
 
     def _get_license(self):
-        sofa_header = tools.load(os.path.join(self._source_subfolder, self.version, "c", "src", "sofa.h"))
+        sofa_header = tools.files.load(self, os.path.join(self._source_subfolder, self.version, "c", "src", "sofa.h"))
         begin = sofa_header.find("/*----------------------------------------------------------------------")
         return sofa_header[begin:]
 

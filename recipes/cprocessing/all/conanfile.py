@@ -69,7 +69,7 @@ class CProcessingConan(ConanFile):
         self.copy("*.h", "include", os.path.join(self._source_subfolder, "lib"))
 
         # Extract the License/s from README.md to a file
-        tmp = tools.load(os.path.join(self._source_subfolder, "README.md"))
+        tmp = tools.files.load(self, os.path.join(self._source_subfolder, "README.md"))
         license_contents = re.search("(## Author.*)", tmp, re.DOTALL)[1]
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE.md"), license_contents)
 

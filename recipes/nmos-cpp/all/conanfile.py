@@ -124,7 +124,7 @@ class NmosCppConan(ConanFile):
     def _create_components_file_from_cmake_target_file(self, target_file_path):
         components = {}
 
-        target_content = tools.load(target_file_path)
+        target_content = tools.files.load(self, target_file_path)
 
         cmake_functions = re.findall(r"(?P<func>add_library|set_target_properties)[\n|\s]*\([\n|\s]*(?P<args>[^)]*)\)", target_content)
         for (cmake_function_name, cmake_function_args) in cmake_functions:
@@ -227,7 +227,7 @@ class NmosCppConan(ConanFile):
             libdir = os.path.join(libdir, config_install_dir)
 
         def _register_components():
-            components_json_file = tools.load(self._components_helper_filepath)
+            components_json_file = tools.files.load(self, self._components_helper_filepath)
             components = json.loads(components_json_file)
             for component_name, values in components.items():
                 cmake_target = values["cmake_target"]

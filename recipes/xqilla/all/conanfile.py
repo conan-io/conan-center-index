@@ -103,7 +103,7 @@ class ConanXqilla(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("README", dst="licenses/LICENSE.mapm", src=os.path.join(self._source_subfolder, "src", "mapm"))
 
-        tmp = tools.load(os.path.join(self._source_subfolder, "src", "yajl", "yajl_buf.h"))
+        tmp = tools.files.load(self, os.path.join(self._source_subfolder, "src", "yajl", "yajl_buf.h"))
         license_contents = tmp[2:tmp.find("*/", 1)] 
         tools.save("LICENSE", license_contents)
         self.copy("LICENSE", dst="licenses/LICENSE.yajl",  ignore_case=True, keep_path=False)

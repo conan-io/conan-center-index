@@ -159,7 +159,7 @@ class JerryScriptStackConan(ConanFile):
 
     def package_id(self):
         if self.options.profile not in self._predefined_profiles:
-            self.info.options.profile = tools.load(str(self.options.profile))
+            self.info.options.profile = tools.files.load(self, str(self.options.profile))
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],

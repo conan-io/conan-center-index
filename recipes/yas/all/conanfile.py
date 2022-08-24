@@ -22,7 +22,7 @@ class YasConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _extract_license(self):
-        header = tools.load(os.path.join(
+        header = tools.files.load(self, os.path.join(
             self.source_folder, self._source_subfolder,
             "include", "yas", "binary_oarchive.hpp"))
         license_contents = header[:header.find("#")] \

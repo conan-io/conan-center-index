@@ -714,9 +714,9 @@ class QtConan(ConanFile):
             cmake_err_log = os.path.join(self.build_folder, "CMakeFiles", "CMakeError.log")
             cmake_out_log = os.path.join(self.build_folder, "CMakeFiles", "CMakeOutput.log")
             if os.path.isfile(cmake_err_log):
-                self.output.info(tools.load(cmake_err_log))
+                self.output.info(tools.files.load(self, cmake_err_log))
             if os.path.isfile(cmake_out_log):
-                self.output.info(tools.load(cmake_out_log))
+                self.output.info(tools.files.load(self, cmake_out_log))
             raise
         return cmake
 

@@ -67,7 +67,7 @@ class XorgGccmakedep(ConanFile):
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        conf_ac_text = tools.load(os.path.join(self._source_subfolder, "configure.ac"))
+        conf_ac_text = tools.files.load(self, os.path.join(self._source_subfolder, "configure.ac"))
         topblock = re.match("((?:dnl[^\n]*\n)+)", conf_ac_text, flags=re.MULTILINE).group(1)
         license_text = re.subn(r"^dnl(|\s+([^\n]*))", r"\1", topblock, flags=re.MULTILINE)[0]
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_text)

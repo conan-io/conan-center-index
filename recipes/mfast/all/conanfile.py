@@ -156,7 +156,7 @@ class mFASTConan(ConanFile):
 
     def _extract_fasttypegentarget_macro(self):
         if tools.Version(self.version) < "1.2.2":
-            config_file_content = tools.load(os.path.join(self.package_folder, self._old_mfast_config_dir, "mFASTConfig.cmake"))
+            config_file_content = tools.files.load(self, os.path.join(self.package_folder, self._old_mfast_config_dir, "mFASTConfig.cmake"))
             begin = config_file_content.find("macro(FASTTYPEGEN_TARGET Name)")
             end = config_file_content.find("endmacro()", begin) + len("endmacro()")
             macro_str = config_file_content[begin:end]
@@ -185,7 +185,7 @@ class mFASTConan(ConanFile):
             endif()
         """.format(fast_type_rel_path=fast_type_rel_path))
         module_abs_path = os.path.join(self.package_folder, self._fast_type_gen_target_file)
-        old_content = tools.load(module_abs_path)
+        old_content = tools.files.load(self, module_abs_path)
         new_content = exec_target_content + old_content
         tools.save(module_abs_path, new_content)
 

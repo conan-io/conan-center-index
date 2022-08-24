@@ -57,7 +57,7 @@ class TinyplyConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def _extract_license(self):
-        readme = tools.load(os.path.join(self.source_folder, self._source_subfolder, "readme.md"))
+        readme = tools.files.load(self, os.path.join(self.source_folder, self._source_subfolder, "readme.md"))
         begin = readme.find("## License")
         return readme[begin:]
 

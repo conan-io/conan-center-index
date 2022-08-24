@@ -1405,7 +1405,7 @@ Examples = bin/datadir/examples""")
                 self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
             self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
 
-        qt5core_config_extras_mkspec_dir_cmake = tools.load(
+        qt5core_config_extras_mkspec_dir_cmake = tools.files.load(self, 
             os.path.join("lib", "cmake", "Qt5Core", "Qt5CoreConfigExtrasMkspecDir.cmake"))
         mkspecs_dir_begin = qt5core_config_extras_mkspec_dir_cmake.find("mkspecs/")
         mkspecs_dir_end = qt5core_config_extras_mkspec_dir_cmake.find("\"", mkspecs_dir_begin)

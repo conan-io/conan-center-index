@@ -34,7 +34,7 @@ class IrrXMLConan(ConanFile):
         os.rename(extracted_folder, self._source_subfolder)
 
     def _extract_license(self):
-        header = tools.load(os.path.join(self.package_folder, "include", "irrXML.h"))
+        header = tools.files.load(self, os.path.join(self.package_folder, "include", "irrXML.h"))
         license_contents = header[header.find(r"\section license License")+25:header.find(r"\section history", 1)]
         tools.save("LICENSE", license_contents)
 

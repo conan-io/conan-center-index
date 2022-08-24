@@ -76,7 +76,7 @@ class LibharuConan(ConanFile):
         cmake.build()
 
     def _extract_license(self):
-        readme = tools.load(os.path.join(self._source_subfolder, "README"))
+        readme = tools.files.load(self, os.path.join(self._source_subfolder, "README"))
         match = next(re.finditer("\n[^\n]*license[^\n]*\n", readme, flags=re.I | re.A))
         return readme[match.span()[1]:].strip("*").strip()
 

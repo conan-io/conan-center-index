@@ -119,7 +119,7 @@ class LibdrmConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.mkdir(os.path.join(self.package_folder, "licenses"))
         # Extract the License/s from the header to a file
-        tmp = tools.load(os.path.join(self._source_subfolder, "include", "drm", "drm.h"))
+        tmp = tools.files.load(self, os.path.join(self._source_subfolder, "include", "drm", "drm.h"))
         license_contents = re.search("\*\/.*(\/\*(\*(?!\/)|[^*])*\*\/)", tmp, re.DOTALL)[1]
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
 

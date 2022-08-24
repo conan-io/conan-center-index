@@ -21,7 +21,7 @@ class MattiasgustavssonLibsConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _extract_licenses(self):
-        header = tools.load(os.path.join(self._source_subfolder, "thread.h"))
+        header = tools.files.load(self, os.path.join(self._source_subfolder, "thread.h"))
         mit_content = header[header.find("ALTERNATIVE A - "):header.find("ALTERNATIVE B -")]
         tools.save("LICENSE_MIT", mit_content)
         unlicense_content = header[header.find("ALTERNATIVE B - "):header.rfind("*/", 1)]

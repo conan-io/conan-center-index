@@ -85,7 +85,7 @@ class PugiXmlConan(ConanFile):
             cmake.build()
 
     def package(self):
-        readme_contents = tools.load(os.path.join(self._source_subfolder, "readme.txt"))
+        readme_contents = tools.files.load(self, os.path.join(self._source_subfolder, "readme.txt"))
         license_contents = readme_contents[readme_contents.find("This library is"):]
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
         if self.options.header_only:

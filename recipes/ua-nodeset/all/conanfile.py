@@ -20,7 +20,7 @@ class UaNodeSetConan(ConanFile):
         return "source_subfolder"
 
     def _extract_license(self):
-        content = tools.load(os.path.join(self.source_folder, self._source_subfolder, "AnsiC", "opcua_clientapi.c"))
+        content = tools.files.load(self, os.path.join(self.source_folder, self._source_subfolder, "AnsiC", "opcua_clientapi.c"))
         license_contents = content[2:content.find("*/", 1)]
         tools.save("LICENSE", license_contents)
 

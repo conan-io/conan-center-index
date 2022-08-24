@@ -63,7 +63,7 @@ class QwtConan(ConanFile):
     def _patch_qwt_config_files(self):
         # qwtconfig.pri
         qwtconfig_path = os.path.join(self.source_folder, self._source_subfolder, "qwtconfig.pri")
-        qwtconfig = tools.load(qwtconfig_path)
+        qwtconfig = tools.files.load(self, qwtconfig_path)
 
         qwtconfig = "CONFIG += conan_basic_setup\ninclude(../conanbuildinfo.pri)\n" + qwtconfig
         qwtconfig += "QWT_CONFIG {}= QwtDll\n".format("+" if self.options.shared else "-")
@@ -77,7 +77,7 @@ class QwtConan(ConanFile):
 
         # qwtbuild.pri
         qwtbuild_path = os.path.join(self.source_folder, self._source_subfolder, "qwtbuild.pri")
-        qwtbuild = tools.load(qwtbuild_path)
+        qwtbuild = tools.files.load(self, qwtbuild_path)
         # set build type
         qwtbuild += "CONFIG -= debug_and_release\n"
         qwtbuild += "CONFIG -= build_all\n"

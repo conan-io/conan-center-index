@@ -444,7 +444,7 @@ class OpenCascadeConan(ConanFile):
         modules = {}
 
         # MODULES file lists all modules and all possible components per module
-        modules_content = tools.load(os.path.join(self.build_folder, self._source_subfolder, "adm", "MODULES"))
+        modules_content = tools.files.load(self, os.path.join(self.build_folder, self._source_subfolder, "adm", "MODULES"))
         packaged_libs_list = tools.collect_libs(self, "lib")
         for module_line in modules_content.splitlines():
             components = {}
@@ -453,7 +453,7 @@ class OpenCascadeConan(ConanFile):
             for component_name in components_list:
                 component_deps = {}
                 # EXTERNLIB file stores dependencies of each component. External dependencies are prefixed with CSF_
-                externlib_content = tools.load(os.path.join(self.build_folder, self._source_subfolder,
+                externlib_content = tools.files.load(self, os.path.join(self.build_folder, self._source_subfolder,
                                                "src", component_name, "EXTERNLIB"))
                 for dependency in externlib_content.splitlines():
                     if dependency.startswith("TK") and dependency in packaged_libs_list:
@@ -517,7 +517,7 @@ class OpenCascadeConan(ConanFile):
                 self.cpp_info.components[conan_component_module_name].names["cmake_find_package"] = module
                 self.cpp_info.components[conan_component_module_name].names["cmake_find_package_multi"] = module
 
-        occt_modules_json_content = tools.load(self._modules_helper_filepath)
+        occt_modules_json_content = tools.files.load(self, self._modules_helper_filepath)
         occt_modules = json.loads(occt_modules_json_content)
         _register_components(occt_modules)
 

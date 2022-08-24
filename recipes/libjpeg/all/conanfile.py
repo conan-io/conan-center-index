@@ -159,7 +159,7 @@ class LibjpegConan(ConanFile):
         # Remove export decorations of transupp symbols
         for relpath in os.path.join("include", "transupp.h"), os.path.join("res", "transupp.c"):
             path = os.path.join(self.package_folder, relpath)
-            tools.save(path, re.subn(r"(?:EXTERN|GLOBAL)\(([^)]+)\)", r"\1", tools.load(path))[0])
+            tools.save(path, re.subn(r"(?:EXTERN|GLOBAL)\(([^)]+)\)", r"\1", tools.files.load(self, path))[0])
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")

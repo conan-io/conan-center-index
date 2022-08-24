@@ -116,7 +116,7 @@ class PDCursesConan(ConanFile):
 
     @property
     def _license_text(self):
-        readme = tools.load(os.path.join(self._source_subfolder, self._subsystem_folder, "README.md"))
+        readme = tools.files.load(self, os.path.join(self._source_subfolder, self._subsystem_folder, "README.md"))
         match = re.search(r"Distribution Status\n[\-]+(?:[\r\n])+((?:[0-9a-z .,;*]+[\r\n])+)", readme,
                           re.IGNORECASE | re.MULTILINE)
         if not match:

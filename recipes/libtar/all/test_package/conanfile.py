@@ -33,7 +33,7 @@ class TestPackageConan(ConanFile):
             self.run("{} {}".format(bin_path, "test.tar"), run_environment=True)
             if not os.path.exists("hello_world"):
                 raise ConanException("file not extracted")
-            extracted_text = tools.load("hello_world")
+            extracted_text = tools.files.load(self, "hello_world")
             if extracted_text != "secret text\n":
                 raise ConanException("File not loaded correctly. Got \"{}\"".format(repr(extracted_text)))
 

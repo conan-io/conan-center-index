@@ -14,7 +14,7 @@ class CuteHeadersConan(ConanFile):
 
     def _extract_license(self):
         file = os.path.join(self.package_folder, "include/cute_math2d.h")
-        file_content = tools.load(file)
+        file_content = tools.files.load(self, file)
         return file_content[file_content.rfind('/*'):]
 
     @property

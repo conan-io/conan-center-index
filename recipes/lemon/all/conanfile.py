@@ -44,7 +44,7 @@ class LemonConan(ConanFile):
         cmake.build()
 
     def _extract_license_text(self):
-        header = tools.load(os.path.join(self._source_subfolder, "tool", "lempar.c"))
+        header = tools.files.load(self, os.path.join(self._source_subfolder, "tool", "lempar.c"))
         return "\n".join(line.strip(" \n*") for line in header[3:header.find("*******", 1)].splitlines())
 
     def package(self):

@@ -100,7 +100,7 @@ class MpfrConan(ConanFile):
         return self._cmake
 
     def _extract_makefile_variable(self, makefile, variable):
-        makefile_contents = tools.load(makefile)
+        makefile_contents = tools.files.load(self, makefile)
         match = re.search("{}[ \t]*=[ \t]*((?:(?:[a-zA-Z0-9 \t.=/_-])|(?:\\\\\"))*(?:\\\\\n(?:(?:[a-zA-Z0-9 \t.=/_-])|(?:\\\"))*)*)\n".format(variable), makefile_contents)
         if not match:
             raise ConanException("Cannot extract variable {} from {}".format(variable, makefile_contents))
@@ -146,7 +146,7 @@ class MpfrConan(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
         if self.settings.os == "Windows":
-            cmakelists_in = tools.load("CMakeLists.txt.in")
+            cmakelists_in = tools.files.load(self, "CMakeLists.txt.in")
             sources, headers, definitions = self._extract_mpfr_autotools_variables()
             tools.save(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"), cmakelists_in.format(
                 mpfr_sources=" ".join(sources),

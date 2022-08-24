@@ -293,7 +293,7 @@ class LibcurlConan(ConanFile):
                 # add directives to build dll
                 # used only for native mingw-make
                 if not cross_building(self):
-                    added_content = tools.load("lib_Makefile_add.am")
+                    added_content = tools.files.load(self, "lib_Makefile_add.am")
                     tools.save(lib_makefile, added_content, append=True)
 
     def _patch_cmake(self):

@@ -14,4 +14,4 @@ class TestPackageConan(ConanFile):
             assert os.path.isfile("test.tar.gz")
             self.run("{} -tf test.tar.gz".format(tar_bin), run_environment=True)
             self.run("{} -xf test.tar.gz".format(tar_bin), run_environment=True)
-            assert tools.load(os.path.join(self.source_folder, "conanfile.py")) == tools.load(os.path.join(self.build_folder, "conanfile.py"))
+            assert tools.files.load(self, os.path.join(self.source_folder, "conanfile.py")) == tools.files.load(self, os.path.join(self.build_folder, "conanfile.py"))

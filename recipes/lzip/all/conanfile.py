@@ -52,8 +52,8 @@ class LzipConan(ConanFile):
                 file(WRITE cxx.txt "${CMAKE_CXX_COMPILER}")
                 """))
             CMake(self).configure(source_folder="detectdir", build_folder="detectdir")
-            cc = tools.load("cc.txt").strip()
-            cxx = tools.load("cxx.txt").strip()
+            cc = tools.files.load(self, "cc.txt").strip()
+            cxx = tools.files.load(self, "cxx.txt").strip()
         return cc, cxx
 
     def source(self):

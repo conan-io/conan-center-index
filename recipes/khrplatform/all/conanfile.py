@@ -19,7 +19,7 @@ class KhrplatformConan(ConanFile):
 
     def package(self):
         self.copy(pattern="khrplatform.h", dst=os.path.join("include", "KHR"))
-        license_data = tools.load(os.path.join(self.source_folder, "khrplatform.h"))
+        license_data = tools.files.load(self, os.path.join(self.source_folder, "khrplatform.h"))
         begin = license_data.find("/*") + len("/*")
         end = license_data.find("*/")
         license_data = license_data[begin:end]

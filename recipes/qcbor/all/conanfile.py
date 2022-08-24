@@ -66,7 +66,7 @@ class QCBORConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
         # Extract the License/s from README.md to a file
-        tmp = tools.load(os.path.join(self._source_subfolder, "inc", "qcbor", "qcbor.h"))
+        tmp = tools.files.load(self, os.path.join(self._source_subfolder, "inc", "qcbor", "qcbor.h"))
         license_contents = re.search("( Copyright.*) =====", tmp, re.DOTALL)[1]
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
 

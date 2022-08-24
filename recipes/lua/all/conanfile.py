@@ -60,7 +60,7 @@ class LuaConan(ConanFile):
 
     def package(self):
         # Extract the License/s from the header to a file
-        tmp = tools.load( os.path.join(self._source_subfolder, "src", "lua.h") )
+        tmp = tools.files.load(self,  os.path.join(self._source_subfolder, "src", "lua.h") )
         license_contents = tmp[tmp.find("/***", 1):tmp.find("****/", 1)]
         tools.save(os.path.join(self.package_folder, "licenses", "COPYING.txt"), license_contents)
         cmake = self._configure_cmake()

@@ -71,7 +71,7 @@ class QrCodeGeneratorConan(ConanFile):
     def _extract_license(self):
         header_name = ("QrCode.hpp" if tools.Version(self.version) < "1.7.0"
                        else "qrcodegen.hpp")
-        header = tools.load(os.path.join(
+        header = tools.files.load(self, os.path.join(
             self._source_subfolder, "cpp", header_name))
         license_contents = header[2:header.find("*/", 1)]
         return license_contents

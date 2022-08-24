@@ -50,7 +50,7 @@ class TinycthreadConan(ConanFile):
 
     def _extract_license(self):
         file = os.path.join(self.source_folder, self._source_subfolder, "source", "tinycthread.h")
-        file_content = tools.load(file)
+        file_content = tools.files.load(self, file)
 
         license_start = file_content.find("Copyright")
         license_end = file_content.find("*/")

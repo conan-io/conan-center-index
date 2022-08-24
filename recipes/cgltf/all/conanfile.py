@@ -71,7 +71,7 @@ class CgltfConan(ConanFile):
 
     @staticmethod
     def _remove_implementation(header_fullpath):
-        header_content = tools.load(header_fullpath)
+        header_content = tools.files.load(self, header_fullpath)
         begin = header_content.find("/*\n *\n * Stop now, if you are only interested in the API.")
         end = header_content.find("/* cgltf is distributed under MIT license:", begin)
         implementation = header_content[begin:end]

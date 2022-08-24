@@ -273,7 +273,7 @@ class PhysXConan(ConanFile):
         self._copy_external_bin()
 
     def _get_license(self):
-        readme = tools.load(os.path.join(self.source_folder, self._source_subfolder, "README.md"))
+        readme = tools.files.load(self, os.path.join(self.source_folder, self._source_subfolder, "README.md"))
         begin = readme.find("Copyright")
         end = readme.find("\n## Introduction", begin)
         return readme[begin:end]

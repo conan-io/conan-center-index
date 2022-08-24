@@ -25,7 +25,7 @@ class WglextConan(ConanFile):
 
     def package(self):
         self.copy(pattern="wglext.h", dst=os.path.join("include", "GL"))
-        license_data = tools.load(os.path.join(self.source_folder, "wglext.h"))
+        license_data = tools.files.load(self, os.path.join(self.source_folder, "wglext.h"))
         begin = license_data.find("/*") + len("/*")
         end = license_data.find("*/")
         license_data = license_data[begin:end]

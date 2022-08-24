@@ -23,7 +23,7 @@ class CajunJsonApiConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def _extract_license(self):
-        file_content = tools.load(os.path.join(self.source_folder, self._source_subfolder, "test.cpp"))
+        file_content = tools.files.load(self, os.path.join(self.source_folder, self._source_subfolder, "test.cpp"))
         return file_content[:file_content.find("*/")]
 
     def package(self):

@@ -43,7 +43,7 @@ class GlmConan(ConanFile):
         return int(self.version.rsplit(".", 1)[-1])
 
     def _get_license(self):
-        manual = tools.load(os.path.join(self.source_folder, self._source_subfolder, "manual.md"))
+        manual = tools.files.load(self, os.path.join(self.source_folder, self._source_subfolder, "manual.md"))
         begin = manual.find("### The Happy Bunny License (Modified MIT License)")
         end = manual.find("\n![](./doc/manual/frontpage2.png)", begin)
         return manual[begin:end]

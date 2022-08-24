@@ -60,7 +60,7 @@ class AwsCdiSdkConan(ConanFile):
         return self._cmake
 
     def _detect_compilers(self):
-        cmake_cache = tools.load(os.path.join(self.build_folder, "CMakeCache.txt"))
+        cmake_cache = tools.files.load(self, os.path.join(self.build_folder, "CMakeCache.txt"))
         cc = re.search("CMAKE_C_COMPILER:FILEPATH=(.*)", cmake_cache)[1]
         cxx = re.search("CMAKE_CXX_COMPILER:FILEPATH=(.*)", cmake_cache)[1]
         return cc, cxx
