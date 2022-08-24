@@ -123,7 +123,7 @@ class MariadbConnectorcConan(ConanFile):
         cmake.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "symbols"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
+        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.pdb")
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libmariadb")

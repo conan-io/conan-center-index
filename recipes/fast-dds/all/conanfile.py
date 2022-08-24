@@ -120,11 +120,11 @@ class FastDDSConan(ConanFile):
             src=os.path.join(self.package_folder, "tools"),
             dst=os.path.join(os.path.join(self.package_folder, "bin", "tools"))
         )
-        tools.remove_files_by_mask(
+        tools.files.rm(self, 
             directory=os.path.join(self.package_folder, "lib"),
             pattern="*.pdb"
         )
-        tools.remove_files_by_mask(
+        tools.files.rm(self, 
             directory=os.path.join(self.package_folder, "bin"),
             pattern="*.pdb"
         )

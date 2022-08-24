@@ -101,11 +101,11 @@ class GDCMConan(ConanFile):
         cmake.install()
         if self.settings.os == "Windows":
             bin_dir = os.path.join(self.package_folder, "bin")
-            tools.remove_files_by_mask(bin_dir, "[!gs]*.dll")
-            tools.remove_files_by_mask(bin_dir, "*.pdb")
+            tools.files.rm(self, bin_dir, "[!gs]*.dll")
+            tools.files.rm(self, bin_dir, "*.pdb")
         lib_dir = os.path.join(self.package_folder, "lib")
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(os.path.join(lib_dir, self._gdcm_subdir), "[!U]*.cmake") #leave UseGDCM.cmake untouched
+        tools.files.rm(self, os.path.join(lib_dir, self._gdcm_subdir), "[!U]*.cmake") #leave UseGDCM.cmake untouched
         self._create_cmake_variables(os.path.join(self.package_folder, self._gdcm_cmake_variables_path))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed

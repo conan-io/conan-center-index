@@ -133,8 +133,8 @@ class GslConan(ConanFile):
             autotools.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "include", "gsl"), "*.c")
+        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
+        tools.files.rm(self, os.path.join(self.package_folder, "include", "gsl"), "*.c")
 
         os.unlink(os.path.join(self.package_folder, "bin", "gsl-config"))
 

@@ -115,7 +115,7 @@ class ScnlibConan(ConanFile):
             tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
             tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if tools.Version(self.version) >= "1.0":
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "include", "scn", "detail"), "*.cmake")
+            tools.files.rm(self, os.path.join(self.package_folder, "include", "scn", "detail"), "*.cmake")
             tools.files.rmdir(self, os.path.join(self.package_folder, "include", "scn", "detail", "CMakeFiles"))
             tools.files.rmdir(self, os.path.join(self.package_folder, "include", "scn", "detail", "deps", "CMakeFiles"))
 

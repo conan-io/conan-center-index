@@ -117,14 +117,14 @@ class NetcdfConan(ConanFile):
         cmake.install()
 
         os.unlink(os.path.join(self.package_folder, "bin", "nc-config"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.settings")
+        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.settings")
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.os == "Windows" and self.options.shared:
             for vc_file in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), vc_file)
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*[!.dll]")
+                tools.files.rm(self, os.path.join(self.package_folder, "bin"), vc_file)
+            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*[!.dll]")
         else:
             tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
 

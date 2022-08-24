@@ -78,11 +78,11 @@ class FastCDRConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(
+        tools.files.rm(self, 
             directory=os.path.join(self.package_folder, "lib"),
             pattern="*.pdb"
         )
-        tools.remove_files_by_mask(
+        tools.files.rm(self, 
             directory=os.path.join(self.package_folder, "bin"),
             pattern="*.pdb"
         )

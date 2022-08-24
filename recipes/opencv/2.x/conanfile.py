@@ -219,7 +219,7 @@ class OpenCVConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "staticlib"))
-        tools.remove_files_by_mask(self.package_folder, "*.cmake")
+        tools.files.rm(self, self.package_folder, "*.cmake")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(

@@ -194,15 +194,15 @@ class XmlSecConan(ConanFile):
         if self._is_msvc:
             self._package_msvc()
             if not self.options.shared:
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.dll")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+                tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.dll")
+            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.pdb")
             os.unlink(os.path.join(self.package_folder, "lib", "libxmlsec-openssl_a.lib" if self.options.shared else "libxmlsec-openssl.lib"))
             os.unlink(os.path.join(self.package_folder, "lib", "libxmlsec_a.lib" if self.options.shared else "libxmlsec.lib"))
         else:
             autotools = self._configure_autotools()
             autotools.install()
             tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
             tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             os.remove(os.path.join(self.package_folder, "lib", "xmlsec1Conf.sh"))
 

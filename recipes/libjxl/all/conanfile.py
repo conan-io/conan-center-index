@@ -81,8 +81,8 @@ class LibjxlConan(ConanFile):
 
         if self.options.shared:
             libs_dir = os.path.join(self.package_folder, "lib")
-            tools.remove_files_by_mask(libs_dir, "*.a")
-            tools.remove_files_by_mask(libs_dir, "*-static.lib")
+            tools.files.rm(self, libs_dir, "*.a")
+            tools.files.rm(self, libs_dir, "*-static.lib")
 
             if self.settings.os == "Windows":
                 self.copy("jxl_dec.dll", src="bin", dst="bin")

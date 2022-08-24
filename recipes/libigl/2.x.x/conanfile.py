@@ -113,8 +113,8 @@ class LibiglConan(ConanFile):
 
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if not self.options.header_only:
-            tools.remove_files_by_mask(self.package_folder, "*.c")
-            tools.remove_files_by_mask(self.package_folder, "*.cpp")
+            tools.files.rm(self, self.package_folder, "*.c")
+            tools.files.rm(self, self.package_folder, "*.cpp")
 
     def package_id(self):
         if self.options.header_only:

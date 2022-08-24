@@ -120,7 +120,7 @@ class LibGphoto2(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
-        tools.remove_files_by_mask(self.package_folder, "*.la")
+        tools.files.rm(self, self.package_folder, "*.la")
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 

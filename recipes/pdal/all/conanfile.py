@@ -185,7 +185,7 @@ class PdalConan(ConanFile):
         cmake.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "pdal-config*")
+        tools.files.rm(self, os.path.join(self.package_folder, "bin"), "pdal-config*")
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_vars_file)
         )

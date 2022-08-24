@@ -108,7 +108,7 @@ class LibStudXmlConan(ConanFile):
         if self.settings.compiler.get_safe("libcxx") == "libc++":
             # libc++ includes a file called 'version', and since libstudxml adds source_subfolder as an
             # include dir, libc++ ends up including their 'version' file instead, causing a compile error
-            tools.remove_files_by_mask(self._source_subfolder, "version")
+            tools.files.rm(self, self._source_subfolder, "version")
 
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
@@ -151,7 +151,7 @@ class LibStudXmlConan(ConanFile):
         else:
             autotools = self._configure_autotools()
             autotools.install()
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libstudxml.la")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "libstudxml.la")
             tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 

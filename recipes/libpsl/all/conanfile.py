@@ -90,7 +90,7 @@ class LibPslConan(ConanFile):
         meson = self._configure_meson()
         meson.install()
 
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+        tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.pdb")
         if not self.options.shared and self.settings.compiler == "Visual Studio":
             os.rename(os.path.join(self.package_folder, "lib", "libpsl.a"),
                       os.path.join(self.package_folder, "lib", "psl.lib"))

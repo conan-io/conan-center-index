@@ -95,13 +95,13 @@ class Iir1Conan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libiir_static.*")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "iir_static.*")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "libiir_static.*")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "iir_static.*")
         else:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "iir.*")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "iir.*")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libiir.*")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "libiir.*")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "iir.*")
+            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "iir.*")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "libiir.*")
+            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "libiir.*")
 
     def package_info(self):
         name = "iir" if self.options.shared else "iir_static"

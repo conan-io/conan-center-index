@@ -152,7 +152,7 @@ class DracoConan(ConanFile):
         else:
             tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
             if self.options.shared:
-                tools.remove_files_by_mask(
+                tools.files.rm(self, 
                     os.path.join(self.package_folder, "lib"),
                     "*draco.a",
                 )

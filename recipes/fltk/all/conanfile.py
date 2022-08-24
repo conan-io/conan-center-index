@@ -87,7 +87,7 @@ class FltkConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "FLTK.framework"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "CMake"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "fltk-config*")
+        tools.files.rm(self, os.path.join(self.package_folder, "bin"), "fltk-config*")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "fltk")

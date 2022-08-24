@@ -1375,7 +1375,7 @@ class BoostConan(ConanFile):
             for bin_file in dll_pdbs:
                 rename(self, bin_file, os.path.join(self.package_folder, "bin", os.path.basename(bin_file)))
 
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+        tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.pdb")
 
     def _create_emscripten_libs(self):
         # Boost Build doesn't create the libraries, but it gets close,

@@ -122,7 +122,7 @@ class mFASTConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, self._old_mfast_config_dir))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if self.options.shared:
-            tools.remove_files_by_mask(
+            tools.files.rm(self, 
                 os.path.join(self.package_folder, "lib"),
                 "*_static*" if self.settings.os == "Windows" else "*.a"
             )

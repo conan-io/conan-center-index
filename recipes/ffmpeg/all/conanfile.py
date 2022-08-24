@@ -610,7 +610,7 @@ class FFMpegConan(ConanFile):
                     if fn.endswith(".lib"):
                         rename(self, os.path.join(self.package_folder, "bin", fn),
                                os.path.join(self.package_folder, "lib", fn))
-                tools.remove_files_by_mask(os.path.join(
+                tools.files.rm(self, os.path.join(
                     self.package_folder, "lib"), "*.def")
             else:
                 # ffmpeg produces `.a` files that are actually `.lib` files

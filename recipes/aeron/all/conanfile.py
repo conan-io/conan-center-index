@@ -117,15 +117,15 @@ class AeronConan(ConanFile):
 
         libs_folder = os.path.join(self.package_folder, "lib")
         if self.options.shared:
-            tools.remove_files_by_mask(libs_folder, "*.a")
-            tools.remove_files_by_mask(libs_folder, "*static.lib")
-            tools.remove_files_by_mask(libs_folder, "aeron_client.lib")
+            tools.files.rm(self, libs_folder, "*.a")
+            tools.files.rm(self, libs_folder, "*static.lib")
+            tools.files.rm(self, libs_folder, "aeron_client.lib")
         else:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.dll")
-            tools.remove_files_by_mask(libs_folder, "*.so")
-            tools.remove_files_by_mask(libs_folder, "*.dylib")
-            tools.remove_files_by_mask(libs_folder, "*shared.lib")
-            tools.remove_files_by_mask(libs_folder, "aeron.lib")
+            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.dll")
+            tools.files.rm(self, libs_folder, "*.so")
+            tools.files.rm(self, libs_folder, "*.dylib")
+            tools.files.rm(self, libs_folder, "*shared.lib")
+            tools.files.rm(self, libs_folder, "aeron.lib")
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")

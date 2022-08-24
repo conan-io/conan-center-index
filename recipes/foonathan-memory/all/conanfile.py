@@ -120,7 +120,7 @@ class FoonathanMemory(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         tools.files.rmdir(self, self._pkg_cmake)
         tools.files.rmdir(self, self._pkg_share)
-        tools.remove_files_by_mask(
+        tools.files.rm(self, 
             directory=os.path.join(self.package_folder, "lib"),
             pattern="*.pdb"
         )

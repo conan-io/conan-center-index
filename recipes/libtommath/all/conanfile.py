@@ -123,7 +123,7 @@ class LibTomMathConan(ConanFile):
         else:
             self._run_makefile("install")
 
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         if self.settings.compiler == "Visual Studio" and self.options.shared:

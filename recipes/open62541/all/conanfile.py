@@ -367,9 +367,9 @@ class Open62541Conan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        tools.remove_files_by_mask(os.path.join(
+        tools.files.rm(self, os.path.join(
             self.package_folder, "bin"), '*.pdb')
-        tools.remove_files_by_mask(os.path.join(
+        tools.files.rm(self, os.path.join(
             self.package_folder, "lib"), '*.pdb')
 
         for cmake_file in glob.glob(os.path.join(self.package_folder, self._module_subfolder, "*")):

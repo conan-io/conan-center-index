@@ -91,7 +91,7 @@ class LibdeflateConan(ConanFile):
             autotools.install(args=["PREFIX={}".format(self.package_folder)])
         tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(
+        tools.files.rm(self, 
             os.path.join(self.package_folder, "lib"),
             "*.a" if self.options.shared else "*.[so|dylib]*",
         )

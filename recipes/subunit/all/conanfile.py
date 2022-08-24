@@ -126,8 +126,8 @@ class SubunitConan(ConanFile):
             ]
             autotools.install(args=install_args)
 
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pod")
+        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
+        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.pod")
         for d in glob.glob(os.path.join(self.package_folder, "lib", "python*")):
             tools.files.rmdir(self, d)
         for d in glob.glob(os.path.join(self.package_folder, "lib", "*")):

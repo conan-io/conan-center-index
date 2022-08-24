@@ -90,7 +90,7 @@ class LibreSSLConan(ConanFile):
         self.copy("*COPYING", dst="licenses", keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "include"), "*.cmake")
+        tools.files.rm(self, os.path.join(self.package_folder, "include"), "*.cmake")
         tools.files.rmdir(self, os.path.join(self.package_folder, "include", "CMakeFiles"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))

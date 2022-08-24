@@ -70,7 +70,7 @@ class AclConan(ConanFile):
         autotools.install()
         self.copy("COPYING", dst="licenses", src=self._doc_folder)
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         
     def package_info(self):

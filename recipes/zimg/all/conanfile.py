@@ -114,7 +114,7 @@ class ZimgConan(ConanFile):
         autotools.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
 
     def _package_msvc(self):
         self.copy("zimg.h", src=os.path.join(self._source_subfolder, "src", "zimg", "api"), dst="include")

@@ -119,7 +119,7 @@ class LibsassConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(self.package_folder, "*.la")
+        tools.files.rm(self, self.package_folder, "*.la")
 
     def _install_mingw(self):
         self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))

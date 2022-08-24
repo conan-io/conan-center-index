@@ -100,7 +100,7 @@ class JasperConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.settings.os == "Windows":
             for dll_prefix in ["concrt", "msvcp", "vcruntime"]:
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"),
+                tools.files.rm(self, os.path.join(self.package_folder, "bin"),
                                            "{}*.dll".format(dll_prefix))
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path)

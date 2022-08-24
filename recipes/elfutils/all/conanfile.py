@@ -133,10 +133,10 @@ class ElfutilsConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.a")
         else:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so.1")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.so")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.so.1")
         
     def package_info(self):
         # library components

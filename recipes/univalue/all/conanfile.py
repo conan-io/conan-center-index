@@ -104,7 +104,7 @@ class UnivalueConan(ConanFile):
             autotools.install()
 
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             tools.rename(os.path.join(self.package_folder, "lib", "univalue.dll.lib"),
                          os.path.join(self.package_folder, "lib", "univalue.lib"))

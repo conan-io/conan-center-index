@@ -197,8 +197,8 @@ class GtkConan(ConanFile):
 
         self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
+        tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.pdb")
+        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.pdb")
 
     def package_info(self):
         if self._gtk3:

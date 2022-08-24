@@ -287,7 +287,7 @@ class Libxml2Conan(ConanFile):
                 os.remove(os.path.join(self.package_folder, "bin", "libxml2.dll"))
             os.remove(os.path.join(self.package_folder, "lib", "libxml2_a_dll.lib"))
             os.remove(os.path.join(self.package_folder, "lib", "libxml2_a.lib" if self.options.shared else "libxml2.lib"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.pdb")
         elif self._is_mingw_windows:
             self._package_mingw()
             if self.options.shared:
@@ -304,10 +304,10 @@ class Libxml2Conan(ConanFile):
             if self.options.include_utils:
                 autotools.make(["install", "xmllint", "xmlcatalog", "xml2-config"])
 
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.sh")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.sh")
             for prefix in ["run", "test"]:
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), prefix + "*")
+                tools.files.rm(self, os.path.join(self.package_folder, "bin"), prefix + "*")
             tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
             tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
             tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

@@ -92,7 +92,7 @@ class IgnitionToolsConan(ConanFile):
 
         # Remove MS runtime files
         for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), dll_pattern_to_remove)
+            tools.files.rm(self, os.path.join(self.package_folder, "bin"), dll_pattern_to_remove)
 
     def package_info(self):
         version_major = tools.Version(self.version).major

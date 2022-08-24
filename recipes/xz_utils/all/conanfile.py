@@ -151,7 +151,7 @@ class XZUtils(ConanFile):
             autotools.install()
             tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
 
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path),

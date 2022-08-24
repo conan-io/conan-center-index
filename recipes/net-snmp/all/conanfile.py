@@ -177,7 +177,7 @@ class NetSnmpConan(ConanFile):
 
     def _package_unix(self):
         self._configure_autotools().install(args=["NOAUTODEPS=1"])
-        tools.remove_files_by_mask(self.package_folder, "README")
+        tools.files.rm(self, self.package_folder, "README")
         tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
         lib_dir = os.path.join(self.package_folder, "lib")
         for entry in os.listdir(lib_dir):

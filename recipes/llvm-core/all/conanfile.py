@@ -330,7 +330,7 @@ class LLVMCoreConan(ConanFile):
 
         tools.files.rmdir(self, os.path.join(self.package_folder, 'share'))
 
-        tools.remove_files_by_mask(self.package_folder, "LLVMExports*.cmake")
+        tools.files.rm(self, self.package_folder, "LLVMExports*.cmake")
         tools.rename(os.path.join(self.package_folder, self._module_subfolder, 'LLVM-Config.cmake'),
                      os.path.join(self.package_folder, self._module_subfolder, 'LLVM-ConfigInternal.cmake'))
         tools.rename(os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfig.cmake'),
@@ -344,7 +344,7 @@ class LLVMCoreConan(ConanFile):
                               "LLVM-ConfigInternal.cmake")
 
         for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
-            tools.remove_files_by_mask(self.package_folder, mask)
+            tools.files.rm(self, self.package_folder, mask)
 
         for name in os.listdir(lib_path):
             fullname = os.path.join(lib_path, name)

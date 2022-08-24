@@ -139,7 +139,7 @@ class GlibmmConan(ConanFile):
         meson.install()
 
         if is_msvc(self):
-            tools.remove_files_by_mask(
+            tools.files.rm(self, 
                 os.path.join(self.package_folder, "bin"), "*.pdb")
             if not self.options.shared:
                 rename(

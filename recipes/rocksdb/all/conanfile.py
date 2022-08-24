@@ -185,7 +185,7 @@ class RocksDB(ConanFile):
 
     def _remove_static_libraries(self):
         for static_lib_name in ["lib*.a", "rocksdb.lib"]:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), static_lib_name)
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), static_lib_name)
 
     def _remove_cpp_headers(self):
         for path in glob.glob(os.path.join(self.package_folder, "include", "rocksdb", "*")):

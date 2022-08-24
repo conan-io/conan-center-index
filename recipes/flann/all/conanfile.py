@@ -132,7 +132,7 @@ class FlannConan(ConanFile):
         if self.settings.os == "Windows":
             if self.options.shared:
                 for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
-                    tools.remove_files_by_mask(
+                    tools.files.rm(self, 
                         os.path.join(self.package_folder, "bin"),
                         dll_pattern_to_remove,
                     )
@@ -141,7 +141,7 @@ class FlannConan(ConanFile):
         # Remove static/dynamic libraries depending on the build mode
         libs_pattern_to_remove = ["*flann_cpp_s.*", "*flann_s.*"] if self.options.shared else ["*flann_cpp.*", "*flann.*"]
         for lib_pattern_to_remove in libs_pattern_to_remove:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), lib_pattern_to_remove)
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), lib_pattern_to_remove)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")

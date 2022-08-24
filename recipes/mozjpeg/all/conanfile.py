@@ -159,13 +159,13 @@ class MozjpegConan(ConanFile):
         else:
             autotools = self._configure_autotools()
             autotools.install()
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
 
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         # remove binaries and pdb files
         for bin_pattern_to_remove in ["cjpeg*", "djpeg*", "jpegtran*", "tjbench*", "wrjpgcom*", "rdjpgcom*", "*.pdb"]:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), bin_pattern_to_remove)
+            tools.files.rm(self, os.path.join(self.package_folder, "bin"), bin_pattern_to_remove)
 
     def _lib_name(self, name):
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio" and not self.options.shared:

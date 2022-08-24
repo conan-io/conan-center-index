@@ -118,8 +118,8 @@ class PahoMqttcConan(ConanFile):
         self.copy(pattern="MQTT*.h", src=os.path.join(self._source_subfolder, "src"), dst="include")
         self.copy(os.path.join("lib", "*{}.*".format(self._lib_target)), dst="lib", keep_path=False)
         self.copy(os.path.join("bin", "*{}.*".format(self._lib_target)), dst="bin", keep_path=False)
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.pdb")
+        tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.pdb")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "eclipse-paho-mqtt-c"

@@ -111,7 +111,7 @@ class OpenVDBConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         # Remove FindXXX files from OpenVDB. Let Conan do the job
-        tools.remove_files_by_mask(os.path.join(self._source_subfolder, "cmake"), "Find*")
+        tools.files.rm(self, os.path.join(self._source_subfolder, "cmake"), "Find*")
         with open("FindBlosc.cmake", "w") as f:
             f.write(
                 """find_package(c-blosc)

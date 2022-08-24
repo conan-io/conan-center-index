@@ -145,8 +145,8 @@ class VulkanValidationLayersConan(ConanFile):
         if self.settings.os == "Windows":
             # import lib is useless, validation layers are loaded at runtime
             lib_dir = os.path.join(self.package_folder, "lib")
-            tools.remove_files_by_mask(lib_dir, "VkLayer_khronos_validation.lib")
-            tools.remove_files_by_mask(lib_dir, "libVkLayer_khronos_validation.dll.a")
+            tools.files.rm(self, lib_dir, "VkLayer_khronos_validation.lib")
+            tools.files.rm(self, lib_dir, "libVkLayer_khronos_validation.dll.a")
             # move dll and json manifest files in bin folder
             bin_dir = os.path.join(self.package_folder, "bin")
             tools.mkdir(bin_dir)

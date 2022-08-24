@@ -464,7 +464,7 @@ class AwsSdkCppConan(ConanFile):
         cmake.install()
         if self._is_msvc:
             self.copy(pattern="*.lib", dst="lib", keep_path=False)
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.lib")
+            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.lib")
 
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

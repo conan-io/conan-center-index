@@ -91,7 +91,7 @@ class AcadoConan(ConanFile):
         self.copy("*", src=qpoases_sources_from, dst=self._qpoases_sources)
 
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(self.package_folder, "*.pdb")
+        tools.files.rm(self, self.package_folder, "*.pdb")
 
     def package_info(self):
         acado_template_paths = os.path.join(self.package_folder, "include", "acado", "code_generation", "templates")

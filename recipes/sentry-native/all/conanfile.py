@@ -168,7 +168,7 @@ class SentryNativeConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*pdb")
+        tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*pdb")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "sentry")

@@ -56,7 +56,7 @@ class BaicalP7Conan(ConanFile):
         self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "Headers"))
         cmake = self._configure_cmake()
         cmake.install()
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "include"), "*.cmake")
+        tools.files.rm(self, os.path.join(self.package_folder, "include"), "*.cmake")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "p7"

@@ -86,7 +86,7 @@ class AvahiConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         tools.files.rmdir(self, os.path.join(self.package_folder, "etc"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):

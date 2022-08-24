@@ -228,7 +228,7 @@ class CrashpadConan(ConanFile):
                          os.path.join(self.package_folder, "bin", "crashpad_handler.com"))
 
         # Remove accidentally copied libraries. These are used by the executables, not by the libraries.
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*getopt*")
+        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*getopt*")
 
         tools.save(os.path.join(self.package_folder, "lib", "cmake", "crashpad-cxx.cmake"),
                    textwrap.dedent("""\

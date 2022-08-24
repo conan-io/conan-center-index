@@ -230,18 +230,18 @@ class LibMysqlClientCConan(ConanFile):
         os.mkdir(os.path.join(self.package_folder, "licenses"))
         rename(self, os.path.join(self.package_folder, "LICENSE"), os.path.join(self.package_folder, "licenses", "LICENSE"))
         os.remove(os.path.join(self.package_folder, "README"))
-        tools.remove_files_by_mask(self.package_folder, "*.pdb")
+        tools.files.rm(self, self.package_folder, "*.pdb")
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "docs"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.os == "Windows" and self.options.shared:
             self.copy("*.dll", "bin", keep_path=False)
         if self.options.shared:
-            tools.remove_files_by_mask(self.package_folder, "*.a")
+            tools.files.rm(self, self.package_folder, "*.a")
         else:
-            tools.remove_files_by_mask(self.package_folder, "*.dll")
-            tools.remove_files_by_mask(self.package_folder, "*.dylib")
-            tools.remove_files_by_mask(self.package_folder, "*.so*")
+            tools.files.rm(self, self.package_folder, "*.dll")
+            tools.files.rm(self, self.package_folder, "*.dylib")
+            tools.files.rm(self, self.package_folder, "*.so*")
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "mysqlclient")

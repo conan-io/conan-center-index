@@ -84,7 +84,7 @@ class LiblslConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "lslver*")
+        tools.files.rm(self, os.path.join(self.package_folder, "bin"), "lslver*")
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)

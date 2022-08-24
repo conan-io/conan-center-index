@@ -146,7 +146,7 @@ class OpenFstConan(ConanFile):
             tools.files.rmdir(self, lib_subdir)
 
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(lib_dir, "*.la")
+        tools.files.rm(self, lib_dir, "*.la")
 
     @property
     def _get_const_fsts_libs(self):

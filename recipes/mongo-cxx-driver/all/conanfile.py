@@ -173,7 +173,7 @@ class MongoCxxConan(ConanFile):
 
         if self.settings.os == "Windows":
             for vc_file in ("concrt", "msvcp", "vcruntime"):
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "{}*.dll".format(vc_file))
+                tools.files.rm(self, os.path.join(self.package_folder, "bin"), "{}*.dll".format(vc_file))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 

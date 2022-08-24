@@ -60,7 +60,7 @@ class TmxliteConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         # unvendor miniz
-        tools.remove_files_by_mask(os.path.join(self._source_subfolder, "tmxlite", "src"), "miniz*")
+        tools.files.rm(self, os.path.join(self._source_subfolder, "tmxlite", "src"), "miniz*")
         tools.replace_in_file(os.path.join(self._source_subfolder, "tmxlite", "src", "CMakeLists.txt"),
                               "${PROJECT_DIR}/miniz.c", "")
         # unvendor pugixml

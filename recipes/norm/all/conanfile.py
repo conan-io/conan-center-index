@@ -59,7 +59,7 @@ class NormConan(ConanFile):
         cmake.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*proto*")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*proto*")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "norm"

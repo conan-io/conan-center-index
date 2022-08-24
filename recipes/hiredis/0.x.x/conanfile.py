@@ -67,7 +67,7 @@ class HiredisConan(ConanFile):
                 "DESTDIR": tools.unix_path(self.package_folder),
                 "PREFIX": "",
             })
-        tools.remove_files_by_mask(
+        tools.files.rm(self, 
             os.path.join(self.package_folder, "lib"),
             "*.a" if self.options.shared else "*.[so|dylib]*",
         )

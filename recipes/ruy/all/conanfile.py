@@ -110,7 +110,7 @@ class RuyConan(ConanFile):
         self.copy(pattern="*", dst="lib", src="lib")
         self.copy(pattern="*", dst="bin", src="bin")
 
-        tools.remove_files_by_mask(self.package_folder, "*.pdb")
+        tools.files.rm(self, self.package_folder, "*.pdb")
 
     def package_info(self):
         self.cpp_info.libs = ["ruy_frontend",

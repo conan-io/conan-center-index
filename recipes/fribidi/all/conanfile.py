@@ -86,7 +86,7 @@ class FriBiDiCOnan(ConanFile):
             lib_a = os.path.join(self.package_folder, "lib", "libfribidi.a")
             if os.path.isfile(lib_a):
                 tools.rename(lib_a, os.path.join(self.package_folder, "lib", "fribidi.lib"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.pdb")
 
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 

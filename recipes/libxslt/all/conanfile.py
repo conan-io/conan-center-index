@@ -191,8 +191,8 @@ class LibxsltConan(ConanFile):
             autotools.install()
             os.remove(os.path.join(self.package_folder, "bin", "xslt-config"))
             tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.sh")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.sh")
             tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):

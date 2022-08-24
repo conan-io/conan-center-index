@@ -90,7 +90,7 @@ class LibSigCppConanV2(ConanFile):
         meson = self._configure_meson()
         meson.install()
         if self.settings.compiler == "Visual Studio":
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.pdb")
             if not self.options.shared:
                 rename(self,
                        os.path.join(self.package_folder, "lib", "libsigc-2.0.a"),

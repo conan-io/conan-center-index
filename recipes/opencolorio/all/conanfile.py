@@ -113,7 +113,7 @@ class OpenColorIOConan(ConanFile):
             tools.files.patch(self, **patch)
 
         for module in ("expat", "lcms2", "pystring", "yaml-cpp", "Imath"):
-            tools.remove_files_by_mask(os.path.join(self._source_subfolder, "share", "cmake", "modules"), "Find"+module+".cmake")
+            tools.files.rm(self, os.path.join(self._source_subfolder, "share", "cmake", "modules"), "Find"+module+".cmake")
 
     def build(self):
         self._patch_sources()
@@ -135,9 +135,9 @@ class OpenColorIOConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         # nop for 2.x
-        tools.remove_files_by_mask(self.package_folder, "OpenColorIOConfig*.cmake")
+        tools.files.rm(self, self.package_folder, "OpenColorIOConfig*.cmake")
 
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+        tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.pdb")
 
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 

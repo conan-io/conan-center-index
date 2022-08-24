@@ -235,7 +235,7 @@ class OpenSceneGraphConanFile(ConanFile):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
 
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(self.package_folder, "*.pdb")
+        tools.files.rm(self, self.package_folder, "*.pdb")
 
     def package_info(self):
         # FindOpenSceneGraph.cmake is shipped with cmake and is a traditional cmake script

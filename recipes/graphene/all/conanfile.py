@@ -94,7 +94,7 @@ class LibnameConan(ConanFile):
                     tools.rename("libgraphene-1.0.a", "graphene-1.0.lib")
                 
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(self.package_folder, "*.pdb")
+        tools.files.rm(self, self.package_folder, "*.pdb")
 
     def package_info(self):
         self.cpp_info.components["graphene-1.0"].libs = ["graphene-1.0"]

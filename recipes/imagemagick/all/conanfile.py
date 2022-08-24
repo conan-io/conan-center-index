@@ -377,7 +377,7 @@ class ImageMagicConan(ConanFile):
             tools.files.rmdir(self, os.path.join("lib", "pkgconfig"))  # pc files
             tools.files.rmdir(self, "etc")
             tools.files.rmdir(self, "share")
-            tools.remove_files_by_mask("lib", "*.la")
+            tools.files.rm(self, "lib", "*.la")
 
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         if self._is_msvc:

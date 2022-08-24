@@ -107,12 +107,12 @@ class Argon2Conan(ConanFile):
             # drop unneeded libs
             if self.options.shared:
                 if self.settings.os != "Windows":
-                    tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a*")
+                    tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.a*")
             else:
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dll")
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so")
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so.*")
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dylib")
+                tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.dll")
+                tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.so")
+                tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.so.*")
+                tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.dylib")
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libargon2"
