@@ -1,6 +1,7 @@
-from conans import ConanFile, CMake, Meson, tools
+from conan import ConanFile
+from conans import CMake, Meson, tools
 from conan.tools import files
-from conans.errors import ConanInvalidConfiguration, ConanException
+from conan.errors import ConanInvalidConfiguration, ConanException
 from tempfile import TemporaryDirectory
 import functools
 import os
@@ -86,22 +87,22 @@ class GdkPixbufConan(ConanFile):
             self.build_requires("gobject-introspection/1.70.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
         meson_build = os.path.join(self._source_subfolder, "meson.build")
-        tools.replace_in_file(meson_build, "subdir('tests')", "#subdir('tests')")
-        tools.replace_in_file(meson_build, "subdir('thumbnailer')", "#subdir('thumbnailer')")
-        tools.replace_in_file(meson_build,
-                              "gmodule_dep.get_variable(pkgconfig: 'gmodule_supported')" if tools.Version(self.version) >= "2.42.6"
+        tools.files.replace_in_file(self, meson_build, "subdir('tests')", "#subdir('tests')")
+        tools.files.replace_in_file(self, meson_build, "subdir('thumbnailer')", "#subdir('thumbnailer')")
+        tools.files.replace_in_file(self, meson_build,
+                              "gmodule_dep.get_variable(pkgconfig: 'gmodule_supported')" if tools.scm.Version(self.version) >= "2.42.6"
                               else "gmodule_dep.get_pkgconfig_variable('gmodule_supported')", "'true'")
         # workaround https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/issues/203
-        if tools.Version(self.version) >= "2.42.6":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "build-aux", "post-install.py"),
+        if tools.scm.Version(self.version) >= "2.42.6":
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "build-aux", "post-install.py"),
                                   "close_fds=True", "close_fds=(sys.platform != 'win32')")
 
     @property
@@ -142,14 +143,14 @@ class GdkPixbufConan(ConanFile):
     def _configure_meson(self):
         meson = Meson(self)
         defs = {}
-        if tools.Version(self.version) >= "2.42.0":
+        if tools.scm.Version(self.version) >= "2.42.0":
             defs["introspection"] = "false"
         else:
             defs["gir"] = "false"
         defs["docs"] = "false"
         defs["man"] = "false"
         defs["installed_tests"] = "false"
-        if tools.Version(self.version) >= "2.42.8":
+        if tools.scm.Version(self.version) >= "2.42.8":
             defs["png"] = "enabled" if self.options.with_libpng else "disabled"
             defs["tiff"] = "enabled" if self.options.with_libtiff else "disabled"
             defs["jpeg"] = "enabled" if self.options.with_libjpeg else "disabled"
@@ -188,9 +189,9 @@ class GdkPixbufConan(ConanFile):
             meson.install()
         if str(self.settings.compiler) in ["Visual Studio", "msvc"] and not self.options.shared:
             files.rename(self, os.path.join(self.package_folder, "lib", "libgdk_pixbuf-2.0.a"), os.path.join(self.package_folder, "lib", "gdk_pixbuf-2.0.lib"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(self.package_folder, "*.pdb")
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
+        tools.files.rm(self, "*.pdb", self.package_folder)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "gdk-pixbuf-2.0")
