@@ -94,7 +94,6 @@ class ThriftConan(ConanFile):
         for option, value in self.options.items():
             if option.startswith("with_"):
                 tc.variables[option.upper()] = value
-        tc.variables["BOOST_ROOT"] = self.dependencies["boost"].package_folder
         tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_COMPILER"] = True
         tc.variables["BUILD_LIBRARIES"] = True
