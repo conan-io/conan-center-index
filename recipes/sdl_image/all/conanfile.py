@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 import os
@@ -73,6 +74,9 @@ class SDLImageConan(ConanFile):
             del self.settings.compiler.cppstd
         except Exception:
             pass
+        if self.options.shared:
+            # sdl static into sdl_image shared is not allowed
+            self.options["sdl"].shared = True
 
     def requirements(self):
         self.requires("sdl/2.0.20")
@@ -84,6 +88,10 @@ class SDLImageConan(ConanFile):
             self.requires("libpng/1.6.37")
         if self.options.with_libwebp:
             self.requires("libwebp/1.2.4")
+
+    def validate(self):
+        if self.info.options.shared and not self.dependencies["sdl"].options.shared:
+            raise ConanInvalidConfiguration("sdl_image shared requires sdl shared")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
