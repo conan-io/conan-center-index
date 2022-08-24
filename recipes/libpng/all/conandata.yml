@@ -7,7 +7,7 @@ sources:
     sha256: "738e2eb31abc1140f2d6c914f0f69748b49f2ae7ffc05e7a073abafc08f37441"
 patches:
   "1.6.37":
-    - patch_file: "patches/CMakeLists-zlib.patch"
+    - patch_file: "patches/0001-1.6.37-cmakefile-zlib.patch"
       patch_description: "Update ZLib include and library paths for conan to provide lib. Remove Zlib dll definition."
       patch_type: "backport"
   "1.5.30":
