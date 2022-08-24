@@ -203,9 +203,9 @@ class CrashpadConan(ConanFile):
         def lib_filename(name):
             prefix, suffix = ("", ".lib")  if self.settings.compiler == "Visual Studio" else ("lib", ".a")
             return "{}{}{}".format(prefix, name, suffix)
-        tools.rename(os.path.join(self._source_subfolder, "out", "Default", "obj", "client", lib_filename("common")),
+        tools.files.rename(self, os.path.join(self._source_subfolder, "out", "Default", "obj", "client", lib_filename("common")),
                      os.path.join(self._source_subfolder, "out", "Default", "obj", "client", lib_filename("client_common")))
-        tools.rename(os.path.join(self._source_subfolder, "out", "Default", "obj", "handler", lib_filename("common")),
+        tools.files.rename(self, os.path.join(self._source_subfolder, "out", "Default", "obj", "handler", lib_filename("common")),
                      os.path.join(self._source_subfolder, "out", "Default", "obj", "handler", lib_filename("handler_common")))
 
     def package(self):
@@ -224,7 +224,7 @@ class CrashpadConan(ConanFile):
         self.copy("crashpad_handler.exe", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
         self.copy("crashpad_handler_com.com", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
         if self.settings.os == "Windows":
-            tools.rename(os.path.join(self.package_folder, "bin", "crashpad_handler_com.com"),
+            tools.files.rename(self, os.path.join(self.package_folder, "bin", "crashpad_handler_com.com"),
                          os.path.join(self.package_folder, "bin", "crashpad_handler.com"))
 
         # Remove accidentally copied libraries. These are used by the executables, not by the libraries.

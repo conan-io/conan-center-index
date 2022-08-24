@@ -74,7 +74,7 @@ class LibibertyConan(ConanFile):
         if os.path.exists(lib_arch_dir):
             libdir = os.path.join(self.package_folder, "lib")
             tools.files.rmdir(self, libdir)
-            tools.rename(lib_arch_dir, libdir)
+            tools.files.rename(self, lib_arch_dir, libdir)
 
     def package_info(self):
         self.cpp_info.libs = ["iberty"]

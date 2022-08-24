@@ -67,8 +67,8 @@ class MysqlConnectorCConan(ConanFile):
         sources_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
         sources_cmake_orig = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
 
-        tools.rename(sources_cmake, sources_cmake_orig)
-        tools.rename("CMakeLists.txt", sources_cmake)
+        tools.files.rename(self, sources_cmake, sources_cmake_orig)
+        tools.files.rename(self, "CMakeLists.txt", sources_cmake)
 
         for patch in self.conan_data["patches"][self.version]:
             tools.files.patch(self, **patch)
@@ -82,8 +82,8 @@ class MysqlConnectorCConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.mkdir(os.path.join(self.package_folder, "licenses"))
-        tools.rename(os.path.join(self.package_folder, "COPYING"), os.path.join(self.package_folder, "licenses", "COPYING"))
-        tools.rename(os.path.join(self.package_folder, "COPYING-debug"), os.path.join(self.package_folder, "licenses", "COPYING-debug"))
+        tools.files.rename(self, os.path.join(self.package_folder, "COPYING"), os.path.join(self.package_folder, "licenses", "COPYING"))
+        tools.files.rename(self, os.path.join(self.package_folder, "COPYING-debug"), os.path.join(self.package_folder, "licenses", "COPYING-debug"))
         tools.files.rm(self, self.package_folder, "README*")
         tools.files.rm(self, self.package_folder, "*.pdb")
         tools.files.rmdir(self, os.path.join(self.package_folder, "docs"))

@@ -292,7 +292,7 @@ class Libxml2Conan(ConanFile):
             self._package_mingw()
             if self.options.shared:
                 os.remove(os.path.join(self.package_folder, "lib", "libxml2.a"))
-                tools.rename(os.path.join(self.package_folder, "lib", "libxml2.lib"),
+                tools.files.rename(self, os.path.join(self.package_folder, "lib", "libxml2.lib"),
                              os.path.join(self.package_folder, "lib", "libxml2.dll.a"))
             else:
                 os.remove(os.path.join(self.package_folder, "bin", "libxml2.dll"))

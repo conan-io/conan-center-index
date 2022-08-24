@@ -101,7 +101,7 @@ class LibltcConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         os.unlink(os.path.join(self.package_folder, "lib", "libltc.la"))
         if self.settings.compiler == "Visual Studio" and self.options.shared:
-            tools.rename(os.path.join(self.package_folder, "lib", "ltc.dll.lib"),
+            tools.files.rename(self, os.path.join(self.package_folder, "lib", "ltc.dll.lib"),
                     os.path.join(self.package_folder, "lib", "ltc.lib"))
 
     def package_info(self):

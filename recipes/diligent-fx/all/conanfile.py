@@ -90,7 +90,7 @@ class DiligentFxConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
-        tools.rename(src=os.path.join(self.package_folder, "include", "source_subfolder"),
+        tools.files.rename(self, src=os.path.join(self.package_folder, "include", "source_subfolder"),
                      dst=os.path.join(self.package_folder, "include", "DiligentFx"))
         shutil.move(os.path.join(self.package_folder, "Shaders"), 
                     os.path.join(self.package_folder, "res", "Shaders"))

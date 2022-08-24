@@ -127,7 +127,7 @@ class CoinClpConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.compiler == "Visual Studio":
             for l in ("Clp", "ClpSolver", "OsiClp"):
-                tools.rename(os.path.join(self.package_folder, "lib", "lib{}.a").format(l),
+                tools.files.rename(self, os.path.join(self.package_folder, "lib", "lib{}.a").format(l),
                              os.path.join(self.package_folder, "lib", "{}.lib").format(l))
 
     def package_info(self):

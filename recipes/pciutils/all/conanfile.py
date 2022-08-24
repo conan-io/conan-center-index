@@ -38,7 +38,7 @@ class PciUtilsConan(ConanFile):
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
-        tools.rename(extracted_dir, self._source_subfolder)
+        tools.files.rename(self, extracted_dir, self._source_subfolder)
 
     def _make(self, targets):
         yes_no = lambda v: "yes" if v else "no"
@@ -64,7 +64,7 @@ class PciUtilsConan(ConanFile):
         self.copy("*.h", src=self._source_subfolder, dst="include", keep_path=True)
 
         if self.options.shared:
-            tools.rename(src=os.path.join(self._source_subfolder, "lib", "libpci.so.3.7.0"),
+            tools.files.rename(self, src=os.path.join(self._source_subfolder, "lib", "libpci.so.3.7.0"),
                 dst=os.path.join(self.package_folder, "lib", "libpci.so"))
 
         tools.files.rmdir(self, os.path.join(self.package_folder, "sbin"))

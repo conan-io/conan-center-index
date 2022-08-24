@@ -331,9 +331,9 @@ class LLVMCoreConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, 'share'))
 
         tools.files.rm(self, self.package_folder, "LLVMExports*.cmake")
-        tools.rename(os.path.join(self.package_folder, self._module_subfolder, 'LLVM-Config.cmake'),
+        tools.files.rename(self, os.path.join(self.package_folder, self._module_subfolder, 'LLVM-Config.cmake'),
                      os.path.join(self.package_folder, self._module_subfolder, 'LLVM-ConfigInternal.cmake'))
-        tools.rename(os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfig.cmake'),
+        tools.files.rename(self, os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfig.cmake'),
                      os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfigInternal.cmake'))
 
         tools.replace_in_file(os.path.join(self.package_folder, self._module_subfolder, 'AddLLVM.cmake'),

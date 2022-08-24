@@ -105,11 +105,11 @@ class LiquidDspConan(ConanFile):
     def _rename_libraries(self):
         with tools.chdir(self._source_subfolder):
             if self.settings.os == "Windows" and self.options.shared:
-                tools.rename("libliquid.so", "libliquid.dll")
+                tools.files.rename(self, "libliquid.so", "libliquid.dll")
             elif self.settings.os == "Windows" and not self.options.shared:
-                tools.rename("libliquid.a", "libliquid.lib")
+                tools.files.rename(self, "libliquid.a", "libliquid.lib")
             elif self.settings.os == "Macos" and not self.options.shared:
-                tools.rename("libliquid.ar", "libliquid.a")
+                tools.files.rename(self, "libliquid.ar", "libliquid.a")
 
     @contextmanager
     def _build_context(self):

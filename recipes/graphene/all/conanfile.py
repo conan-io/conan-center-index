@@ -91,7 +91,7 @@ class LibnameConan(ConanFile):
         if self.settings.compiler in ["Visual Studio", "msvc"] and not self.options.shared:
             with tools.chdir(os.path.join(self.package_folder, "lib")):
                 if os.path.isfile("libgraphene-1.0.a"):
-                    tools.rename("libgraphene-1.0.a", "graphene-1.0.lib")
+                    tools.files.rename(self, "libgraphene-1.0.a", "graphene-1.0.lib")
                 
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rm(self, self.package_folder, "*.pdb")

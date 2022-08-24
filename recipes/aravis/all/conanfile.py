@@ -127,7 +127,7 @@ class AravisConan(ConanFile):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
                     self.output.info("rename %s into %s" % (filename_old, filename_new))
-                    tools.rename(filename_old, filename_new)
+                    tools.files.rename(self, filename_old, filename_new)
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses", keep_path=False)

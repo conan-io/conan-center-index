@@ -317,15 +317,15 @@ class CPythonConan(ConanFile):
         This is needed for static cpython or for disabled optional dependencies (e.g. tkinter=False)
         Restore it afterwards because it is needed to build some targets.
         """
-        tools.rename(os.path.join(self._source_subfolder, "PCbuild", "pcbuild.sln"),
+        tools.files.rename(self, os.path.join(self._source_subfolder, "PCbuild", "pcbuild.sln"),
                      os.path.join(self._source_subfolder, "PCbuild", "pcbuild.sln.bak"))
-        tools.rename(os.path.join(self._source_subfolder, "PCbuild", "pcbuild.proj"),
+        tools.files.rename(self, os.path.join(self._source_subfolder, "PCbuild", "pcbuild.proj"),
                      os.path.join(self._source_subfolder, "PCbuild", "pcbuild.proj.bak"))
         with tools.vcvars(self.settings):
             self.run("devenv \"{}\" /upgrade".format(project_file), run_environment=True)
-        tools.rename(os.path.join(self._source_subfolder, "PCbuild", "pcbuild.sln.bak"),
+        tools.files.rename(self, os.path.join(self._source_subfolder, "PCbuild", "pcbuild.sln.bak"),
                      os.path.join(self._source_subfolder, "PCbuild", "pcbuild.sln"))
-        tools.rename(os.path.join(self._source_subfolder, "PCbuild", "pcbuild.proj.bak"),
+        tools.files.rename(self, os.path.join(self._source_subfolder, "PCbuild", "pcbuild.proj.bak"),
                      os.path.join(self._source_subfolder, "PCbuild", "pcbuild.proj"))
 
     @property

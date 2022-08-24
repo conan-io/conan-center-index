@@ -145,10 +145,10 @@ class GetTextConan(ConanFile):
         self.copy(pattern="*gnuintl*.so*", dst="lib", src=self._source_subfolder, keep_path=False, symlinks=True)
         self.copy(pattern="*gnuintl*.dylib", dst="lib", src=self._source_subfolder, keep_path=False, symlinks=True)
         self.copy(pattern="*libgnuintl.h", dst="include", src=self._source_subfolder, keep_path=False)
-        tools.rename(os.path.join(self.package_folder, "include", "libgnuintl.h"),
+        tools.files.rename(self, os.path.join(self.package_folder, "include", "libgnuintl.h"),
                      os.path.join(self.package_folder, "include", "libintl.h"))
         if (self._is_msvc or self._is_clang_cl) and self.options.shared:
-            tools.rename(os.path.join(self.package_folder, "lib", "gnuintl.dll.lib"),
+            tools.files.rename(self, os.path.join(self.package_folder, "lib", "gnuintl.dll.lib"),
                          os.path.join(self.package_folder, "lib", "gnuintl.lib"))
 
     def package_info(self):

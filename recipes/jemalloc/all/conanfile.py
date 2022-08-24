@@ -204,7 +204,7 @@ class JemallocConan(ConanFile):
             autotools.make(target="install_lib_shared" if self.options.shared else "install_lib_static")
             autotools.make(target="install_include")
             if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-                tools.rename(os.path.join(self.package_folder, "lib", "{}.lib".format(self._library_name)),
+                tools.files.rename(self, os.path.join(self.package_folder, "lib", "{}.lib".format(self._library_name)),
                              os.path.join(self.package_folder, "lib", "lib{}.a".format(self._library_name)))
                 if not self.options.shared:
                     os.unlink(os.path.join(self.package_folder, "lib", "jemalloc.lib"))

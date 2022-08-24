@@ -142,7 +142,7 @@ class OpenFstConan(ConanFile):
         lib_subdir = os.path.join(self.package_folder, "lib", "fst")
         if os.path.exists(lib_subdir):
             for fn in os.listdir(lib_subdir):
-                tools.rename(os.path.join(lib_subdir, fn), os.path.join(lib_dir, "lib{}".format(fn)))
+                tools.files.rename(self, os.path.join(lib_subdir, fn), os.path.join(lib_dir, "lib{}".format(fn)))
             tools.files.rmdir(self, lib_subdir)
 
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))

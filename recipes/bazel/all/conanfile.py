@@ -44,7 +44,7 @@ class BazelConan(ConanFile):
         self.copy(pattern=self._bazel_filename, dst="bin")
         old_target_filename = os.path.join(self.package_folder, "bin", self._bazel_filename)
         new_target_filename = os.path.join(self.package_folder, "bin", "bazel" + self._program_suffix)
-        tools.rename(old_target_filename, new_target_filename)
+        tools.files.rename(self, old_target_filename, new_target_filename)
         self._chmod_plus_x(new_target_filename)
 
     def package_info(self):

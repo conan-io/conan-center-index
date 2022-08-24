@@ -97,7 +97,7 @@ class CspiceConan(ConanFile):
             os.remove(filename)
         else:
             tools.files.get(self, **data)
-        tools.rename(self.name, self._source_subfolder)
+        tools.files.rename(self, self.name, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:

@@ -144,7 +144,7 @@ class XZUtils(ConanFile):
             self.copy(pattern="*.lib", dst="lib", src=bin_dir, keep_path=False)
             if self.options.shared:
                 self.copy(pattern="*.dll", dst="bin", src=bin_dir, keep_path=False)
-            tools.rename(os.path.join(self.package_folder, "lib", "liblzma.lib"),
+            tools.files.rename(self, os.path.join(self.package_folder, "lib", "liblzma.lib"),
                          os.path.join(self.package_folder, "lib", "lzma.lib"))
         else:
             autotools = self._configure_autotools()

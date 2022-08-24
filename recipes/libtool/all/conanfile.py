@@ -181,13 +181,13 @@ class LibtoolConan(ConanFile):
 
         binpath = os.path.join(self.package_folder, "bin")
         if self.settings.os == "Windows":
-            tools.rename(os.path.join(binpath, "libtoolize"),
+            tools.files.rename(self, os.path.join(binpath, "libtoolize"),
                          os.path.join(binpath, "libtoolize.exe"))
-            tools.rename(os.path.join(binpath, "libtool"),
+            tools.files.rename(self, os.path.join(binpath, "libtool"),
                          os.path.join(binpath, "libtool.exe"))
 
         if self.settings.compiler == "Visual Studio" and self.options.shared:
-            tools.rename(os.path.join(self.package_folder, "lib", "ltdl.dll.lib"),
+            tools.files.rename(self, os.path.join(self.package_folder, "lib", "ltdl.dll.lib"),
                          os.path.join(self.package_folder, "lib", "ltdl.lib"))
 
         # allow libtool to link static libs into shared for more platforms

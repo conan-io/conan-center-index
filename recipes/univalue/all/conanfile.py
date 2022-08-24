@@ -106,7 +106,7 @@ class UnivalueConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
         if self.settings.compiler == "Visual Studio" and self.options.shared:
-            tools.rename(os.path.join(self.package_folder, "lib", "univalue.dll.lib"),
+            tools.files.rename(self, os.path.join(self.package_folder, "lib", "univalue.dll.lib"),
                          os.path.join(self.package_folder, "lib", "univalue.lib"))
 
     def package_info(self):

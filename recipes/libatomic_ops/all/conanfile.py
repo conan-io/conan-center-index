@@ -102,7 +102,7 @@ class Libatomic_opsConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             for lib in ["atomic_ops_gpl", "atomic_ops"]:
-                tools.rename(os.path.join(self.package_folder, "lib", "{}.dll.lib".format(lib)),
+                tools.files.rename(self, os.path.join(self.package_folder, "lib", "{}.dll.lib".format(lib)),
                              os.path.join(self.package_folder, "lib", "{}.lib".format(lib)))
 
     def package_info(self):

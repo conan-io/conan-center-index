@@ -116,7 +116,7 @@ class FastDDSConan(ConanFile):
         cmake.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        tools.rename(
+        tools.files.rename(self, 
             src=os.path.join(self.package_folder, "tools"),
             dst=os.path.join(os.path.join(self.package_folder, "bin", "tools"))
         )

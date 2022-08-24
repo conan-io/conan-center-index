@@ -209,7 +209,7 @@ class LibdbConan(ConanFile):
 
             msvc_libs = [_lib_to_msvc_lib(lib) for lib in self._libs]
             for lib, msvc_lib in zip(self._libs, msvc_libs):
-                tools.rename(os.path.join(libdir, "{}.lib".format(msvc_lib)),
+                tools.files.rename(self, os.path.join(libdir, "{}.lib".format(msvc_lib)),
                              os.path.join(libdir, "{}.lib".format(lib)))
         else:
             autotools = self._configure_autotools()
@@ -218,7 +218,7 @@ class LibdbConan(ConanFile):
             if self.settings.os == "Windows":
                 for fn in os.listdir(libdir):
                     if fn.endswith(".dll"):
-                        tools.rename(os.path.join(libdir, fn), os.path.join(bindir, fn))
+                        tools.files.rename(self, os.path.join(libdir, fn), os.path.join(bindir, fn))
                 for fn in os.listdir(bindir):
                     if not fn.endswith(".dll"):
                         binpath = os.path.join(bindir, fn)

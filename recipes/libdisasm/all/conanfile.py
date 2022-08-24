@@ -116,7 +116,7 @@ class LibdisasmConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             dlllib = os.path.join(self.package_folder, "lib", "disasm.dll.lib")
             if os.path.exists(dlllib):
-                tools.rename(dlllib, os.path.join(self.package_folder, "lib", "disasm.lib"))
+                tools.files.rename(self, dlllib, os.path.join(self.package_folder, "lib", "disasm.lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["disasm"]

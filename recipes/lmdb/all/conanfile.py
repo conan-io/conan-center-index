@@ -53,7 +53,7 @@ class lmdbConan(ConanFile):
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version])
         root = "openldap-LMDB_{}".format(self.version)
-        tools.rename(os.path.join(root, "libraries", "liblmdb"), self._source_subfolder)
+        tools.files.rename(self, os.path.join(root, "libraries", "liblmdb"), self._source_subfolder)
         tools.files.rmdir(self, root)
 
     def build(self):

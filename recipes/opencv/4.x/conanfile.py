@@ -525,7 +525,7 @@ class OpenCVConan(ConanFile):
         cmake.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "cmake"))
         if os.path.isfile(os.path.join(self.package_folder, "setup_vars_opencv4.cmd")):
-            tools.rename(os.path.join(self.package_folder, "setup_vars_opencv4.cmd"),
+            tools.files.rename(self, os.path.join(self.package_folder, "setup_vars_opencv4.cmd"),
                          os.path.join(self.package_folder, "res", "setup_vars_opencv4.cmd"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed

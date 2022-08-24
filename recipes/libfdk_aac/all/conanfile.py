@@ -144,7 +144,7 @@ class LibFDKAACConan(ConanFile):
             with self._msvc_build_environment():
                 self.run("nmake -f Makefile.vc prefix=\"{}\" install".format(self.package_folder))
             if self.options.shared:
-                tools.rename(os.path.join(self.package_folder, "lib", "fdk-aac.dll.lib"),
+                tools.files.rename(self, os.path.join(self.package_folder, "lib", "fdk-aac.dll.lib"),
                              os.path.join(self.package_folder, "lib", "fdk-aac.lib"))
         else:
             autotools = self._configure_autotools()

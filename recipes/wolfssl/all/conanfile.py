@@ -149,7 +149,7 @@ class WolfSSLConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.compiler == "Visual Studio" and self.options.shared:
-            tools.rename(os.path.join(self.package_folder, "lib", "wolfssl.dll.lib"),
+            tools.files.rename(self, os.path.join(self.package_folder, "lib", "wolfssl.dll.lib"),
                          os.path.join(self.package_folder, "lib", "wolfssl.lib"))
 
     def package_info(self):

@@ -171,7 +171,7 @@ class NSSConan(ConanFile):
             self.copy("*", src = f)
 
         for dll_file in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
-            tools.rename(dll_file, os.path.join(self.package_folder, "bin", os.path.basename(dll_file)))
+            tools.files.rename(self, dll_file, os.path.join(self.package_folder, "bin", os.path.basename(dll_file)))
 
         if self.options.shared:
             tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.a")

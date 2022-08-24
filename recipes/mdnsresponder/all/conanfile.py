@@ -147,7 +147,7 @@ class MdnsResponderConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.make(args=self._make_install_args, target=self._make_install_targets)
         # package the daemon in bin too
-        tools.rename(os.path.join(self.package_folder, "sbin", "mdnsd"),
+        tools.files.rename(self, os.path.join(self.package_folder, "sbin", "mdnsd"),
                      os.path.join(self.package_folder, "bin", "mdnsd"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "sbin"))
         absolute_to_relative_symlinks(self, self.package_folder)
@@ -161,7 +161,7 @@ class MdnsResponderConan(ConanFile):
         self.copy("dnssd.dll", dst="bin", src=self._msvc_build_folder("mDNSWindows", "DLL"))
         self.copy("dnssdStatic.lib", dst="lib", src=self._msvc_build_folder("mDNSWindows", "DLLStub"))
         # rename consistently with Bonjour SDK
-        tools.rename(src=os.path.join(self.package_folder, "lib", "dnssdStatic.lib"),
+        tools.files.rename(self, src=os.path.join(self.package_folder, "lib", "dnssdStatic.lib"),
                      dst=os.path.join(self.package_folder, "lib", "dnssd.lib"))
         self.copy("dns-sd.exe", dst="bin", src=self._msvc_build_folder("Clients", "DNS-SD.VisualStudio"))
 

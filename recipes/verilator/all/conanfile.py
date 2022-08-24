@@ -164,7 +164,7 @@ class VerilatorConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "bin", "share", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "bin", "share", "verilator", "examples"))
         os.unlink(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-config-version.cmake"))
-        tools.rename(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-config.cmake"),
+        tools.files.rename(self, os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-config.cmake"),
                      os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"))
         tools.replace_in_file(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"), 
                             "${CMAKE_CURRENT_LIST_DIR}", "${CMAKE_CURRENT_LIST_DIR}/../../..")

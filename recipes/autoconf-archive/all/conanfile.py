@@ -49,7 +49,7 @@ class AutoconfArchiveConan(ConanFile):
             self._autotools.install()
 
         tools.mkdir(os.path.join(self.package_folder, "res"))
-        tools.rename(os.path.join(self.package_folder, "share", "aclocal"),
+        tools.files.rename(self, os.path.join(self.package_folder, "share", "aclocal"),
                      os.path.join(self.package_folder, "res", "aclocal"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 

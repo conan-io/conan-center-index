@@ -153,7 +153,7 @@ class GiflibConan(ConanFile):
         tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if self._is_msvc and self.options.shared:
-            tools.rename(os.path.join(self.package_folder, "lib", "gif.dll.lib"),
+            tools.files.rename(self, os.path.join(self.package_folder, "lib", "gif.dll.lib"),
                          os.path.join(self.package_folder, "lib", "gif.lib"))
 
     def package_info(self):

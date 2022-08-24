@@ -133,7 +133,7 @@ class CunitConan(ConanFile):
                 autotools.install()
 
         if self.settings.compiler == "Visual Studio" and self.options.shared:
-            tools.rename(os.path.join(self.package_folder, "lib", "cunit.dll.lib"),
+            tools.files.rename(self, os.path.join(self.package_folder, "lib", "cunit.dll.lib"),
                          os.path.join(self.package_folder, "lib", "cunit.lib"))
 
         tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
