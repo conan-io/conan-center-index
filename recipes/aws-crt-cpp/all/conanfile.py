@@ -43,7 +43,7 @@ class AwsCrtCpp(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "11")
+            tools.build.check_min_cppstd(self, self, "11")
 
     def requirements(self):
         self.requires("aws-c-event-stream/0.2.7")

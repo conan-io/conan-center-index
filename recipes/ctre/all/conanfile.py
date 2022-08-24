@@ -26,7 +26,7 @@ class CtreConan(ConanFile):
 
         min_gcc = "7.4" if ctre_version < "3" else "8"
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
+            tools.build.check_min_cppstd(self, self, "17")
         if is_msvc(self):
             if compiler_version < "15":
                 raise ConanInvalidConfiguration("{}/{} doesn't support MSVC < 15".format(self.name, self.version))

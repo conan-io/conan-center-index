@@ -76,7 +76,7 @@ class OpenFstConan(ConanFile):
         }
 
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 17)
+            tools.build.check_min_cppstd(self, self, 17)
         minimum_compiler = compilers.get(str(self.settings.compiler))
         if minimum_compiler:
             if tools.Version(self.settings.compiler.version) < minimum_compiler:

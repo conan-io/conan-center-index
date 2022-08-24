@@ -46,7 +46,7 @@ class LibunifexConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(
+            tools.build.check_min_cppstd(self, 
                 self, self._minimum_standard)
 
         def lazy_lt_semver(v1, v2):

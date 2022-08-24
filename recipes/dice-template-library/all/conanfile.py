@@ -29,7 +29,7 @@ class DiceTemplateLibrary(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._min_cppstd)
+            tools.build.check_min_cppstd(self, self, self._min_cppstd)
         if self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration("apple-clang is not supported because a full concept implementation is needed")
         if self.settings.compiler == "Visual Studio":

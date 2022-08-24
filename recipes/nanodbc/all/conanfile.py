@@ -51,7 +51,7 @@ class NanodbcConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 14)
+            tools.build.check_min_cppstd(self, self, 14)
         _minimum_compiler = self._compiler_cxx14.get(str(self.settings.compiler))
         if _minimum_compiler:
             if tools.Version(self.settings.compiler.version) < _minimum_compiler:

@@ -46,7 +46,7 @@ class TaoCPPJSONConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, self._min_cppstd_required)
+            tools.build.check_min_cppstd(self, self, self._min_cppstd_required)
         if tools.Version(self.version) >= "1.0.0-beta.11":
             min_compiler_version = self._min_compilers_version.get(str(self.settings.compiler), False)
             if min_compiler_version:

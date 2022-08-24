@@ -42,7 +42,7 @@ class WasmtimeCppConan(ConanFile):
     def validate(self):
         compiler = self.settings.compiler
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 17)
+            tools.build.check_min_cppstd(self, self, 17)
         min_version = self._minimum_compilers_version[str(compiler)]
         try:
             if tools.Version(compiler.version) < min_version:

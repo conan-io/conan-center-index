@@ -84,7 +84,7 @@ class UsocketsConan(ConanFile):
             return
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, cppstd)
+            tools.build.check_min_cppstd(self, self, cppstd)
 
         minimum_version = self._minimum_compilers_version(cppstd).get(str(self.settings.compiler), False)
         if minimum_version:

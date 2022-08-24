@@ -74,7 +74,7 @@ class GlslangConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            tools.build.check_min_cppstd(self, self, 11)
 
         # see https://github.com/KhronosGroup/glslang/issues/2283
         glslang_version = tools.Version(self.version)

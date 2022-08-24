@@ -105,7 +105,7 @@ class ceressolverConan(ConanFile):
             # 1.x uses ceres-solver specific FindXXX.cmake modules
             self.generators.append("cmake_find_package")
             if self.settings.compiler.get_safe("cppstd"):
-                tools.check_min_cppstd(self, 14)
+                tools.build.check_min_cppstd(self, self, 14)
             self._check_cxx14_supported()
 
     def source(self):

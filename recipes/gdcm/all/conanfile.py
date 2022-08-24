@@ -63,7 +63,7 @@ class GDCMConan(ConanFile):
         if self.options.shared and self._is_msvc and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration("shared gdcm can't be built with MT or MTd")
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "11")
+            tools.build.check_min_cppstd(self, self, "11")
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],

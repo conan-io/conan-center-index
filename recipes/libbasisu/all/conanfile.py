@@ -68,7 +68,7 @@ class LibBasisUniversalConan(ConanFile):
         elif tools.Version(self.settings.compiler.version) < min_version:
             raise ConanInvalidConfiguration("{} {} does not support compiler with version {} {}, minimum supported compiler version is {} ".format(self.name, self.version, self.settings.compiler, self.settings.compiler.version, min_version))
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            tools.build.check_min_cppstd(self, self, 11)
 
     def configure(self):
         if self.options.shared:

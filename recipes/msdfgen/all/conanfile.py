@@ -61,7 +61,7 @@ class MsdfgenConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            tools.build.check_min_cppstd(self, self, 11)
         if self._is_msvc and self.options.shared:
             raise ConanInvalidConfiguration("msdfgen shared not supported by Visual Studio")
         if self.options.with_skia:

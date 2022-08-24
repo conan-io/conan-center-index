@@ -91,7 +91,7 @@ class LibpqxxConan(ConanFile):
                     "Macos Mojave (10.14) and earlier cannot to be built because C++ standard library too old.")
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, minimum_cpp_standard)
+            tools.build.check_min_cppstd(self, self, minimum_cpp_standard)
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],

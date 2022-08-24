@@ -40,7 +40,7 @@ class CProcessingConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 20)
+            tools.build.check_min_cppstd(self, self, 20)
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]

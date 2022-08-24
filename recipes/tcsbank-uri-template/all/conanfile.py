@@ -63,7 +63,7 @@ class TCSBankUriTemplateConan(ConanFile):
         # Exclude compiler.cppstd < 17
         min_req_cppstd = "17"
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, min_req_cppstd)
+            tools.build.check_min_cppstd(self, self, min_req_cppstd)
         else:
             self.output.warn("%s recipe lacks information about the %s compiler"
                              " standard version support." % (self.name, compiler_name))

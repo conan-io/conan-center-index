@@ -54,7 +54,7 @@ class ICCConan(ConanFile):
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+            tools.build.check_min_cppstd(self, self, self._minimum_cpp_standard)
 
         os = self.settings.os
         if os not in ("Windows", "Linux"):

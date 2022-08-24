@@ -52,7 +52,7 @@ class FTXUIConan(ConanFile):
         if compiler == 'gcc' and version < '8':
             raise ConanInvalidConfiguration("gcc 8 required")
         if compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
+            tools.build.check_min_cppstd(self, self, "17")
         if is_msvc(self) and self.options.shared and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration("shared with static runtime not supported")
 

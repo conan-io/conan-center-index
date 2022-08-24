@@ -98,7 +98,7 @@ class OpenVDBConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 14)
+            tools.build.check_min_cppstd(self, self, 14)
         if self.settings.arch not in ("x86", "x86_64"):
             if self.options.simd:
                 raise ConanInvalidConfiguration("Only intel architectures support SSE4 or AVX.")

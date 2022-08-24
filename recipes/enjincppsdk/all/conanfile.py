@@ -87,7 +87,7 @@ class EnjinCppSdk(ConanFile):
         compiler = self.settings.compiler
 
         if compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 17)
+            tools.build.check_min_cppstd(self, self, 17)
 
         minimum_version = self._minimum_compilers_version.get(str(compiler), False)
         if not minimum_version:

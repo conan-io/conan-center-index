@@ -39,7 +39,7 @@ class PahoMqttCppConan(ConanFile):
 
         minimal_cpp_standard = "11"
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, minimal_cpp_standard)
+            tools.build.check_min_cppstd(self, self, minimal_cpp_standard)
 
         self.options["paho-mqtt-c"].shared = self.options.shared
         self.options["paho-mqtt-c"].ssl = self.options.ssl

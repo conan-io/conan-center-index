@@ -40,7 +40,7 @@ class AwsCdiSdkConan(ConanFile):
         if not getattr(self.options["aws-sdk-cpp"], "monitoring"):
             raise ConanInvalidConfiguration("This package requires the monitoring AWS SDK")
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            tools.build.check_min_cppstd(self, self, 11)
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],

@@ -64,7 +64,7 @@ class STXConan(ConanFile):
         compiler_version = tools.Version(self.settings.compiler.version)
 
         if compiler.get_safe('cppstd'):
-            tools.check_min_cppstd(self, 17)
+            tools.build.check_min_cppstd(self, self, 17)
 
         if compiler == 'Visual Studio' and compiler_version < 16:
             raise ConanInvalidConfiguration(

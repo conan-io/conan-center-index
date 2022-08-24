@@ -78,7 +78,7 @@ class MsixConan(ConanFile):
     def _validate_compiler_settings(self):
         compiler = self.settings.compiler
         if compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
+            tools.build.check_min_cppstd(self, self, "17")
 
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:

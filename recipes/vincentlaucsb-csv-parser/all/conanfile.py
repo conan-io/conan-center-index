@@ -21,7 +21,7 @@ class VincentlaucsbCsvParserConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+            tools.build.check_min_cppstd(self, self, 11)
 
         compiler = self.settings.compiler
         compiler_version = tools.Version(self.settings.compiler.version)

@@ -57,7 +57,7 @@ class FlannConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._min_cppstd)
+            tools.build.check_min_cppstd(self, self, self._min_cppstd)
 
     def requirements(self):
         self.requires("lz4/1.9.3")

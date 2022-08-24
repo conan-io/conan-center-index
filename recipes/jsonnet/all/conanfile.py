@@ -58,7 +58,7 @@ class JsonnetConan(ConanFile):
             raise ConanInvalidConfiguration("jsonnet does not support cross building")
 
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "11")
+            tools.build.check_min_cppstd(self, self, "11")
 
         if self.options.shared and is_msvc(self) and "d" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration("shared {} is not supported with MTd/MDd runtime".format(self.name))

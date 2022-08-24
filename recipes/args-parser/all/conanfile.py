@@ -28,7 +28,7 @@ class ArgsParserConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "14")
+            tools.build.check_min_cppstd(self, self, "14")
 
         compiler = str(self.settings.compiler)
         if compiler not in self._compilers_minimum_version:

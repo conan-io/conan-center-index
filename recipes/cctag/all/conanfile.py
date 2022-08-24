@@ -79,7 +79,7 @@ class CCTagConan(ConanFile):
             )
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 14)
+            tools.build.check_min_cppstd(self, self, 14)
 
         # FIXME: add cuda support
         if self.options.with_cuda:

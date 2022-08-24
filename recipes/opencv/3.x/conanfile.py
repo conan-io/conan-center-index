@@ -112,7 +112,7 @@ class OpenCVConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd") and self.options.with_openexr:
-            tools.check_min_cppstd(self, 11)
+            tools.build.check_min_cppstd(self, self, 11)
         if self.options.shared and self._is_msvc and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration("Visual Studio with static runtime is not supported for shared library.")
         if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "4":

@@ -64,7 +64,7 @@ class SpirvtoolsConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            tools.build.check_min_cppstd(self, self, 11)
 
     def _validate_dependency_graph(self):
         if self.deps_cpp_info["diligentgraphics-spirv-headers"].version != self._get_compatible_spirv_headers_version:

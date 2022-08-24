@@ -251,7 +251,7 @@ class QtConan(ConanFile):
     def validate(self):
         # C++ minimum standard required
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 17)
+            tools.build.check_min_cppstd(self, self, 17)
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn("C++17 support required. Your compiler is unknown. Assuming it supports C++17.")

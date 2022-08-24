@@ -60,7 +60,7 @@ class FruitConan(ConanFile):
                                             " supported." % (self.name, compiler, compiler_version))
 
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "11")
+            tools.build.check_min_cppstd(self, self, "11")
 
     @property
     def _extracted_dir(self):

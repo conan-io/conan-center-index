@@ -25,7 +25,7 @@ class DbgMacroConan(ConanFile):
     def configure(self):
         minimal_cpp_standard = "11"
         if self.settings.get_safe("compiler.cppstd"):
-            tools.check_min_cppstd(self, minimal_cpp_standard)
+            tools.build.check_min_cppstd(self, self, minimal_cpp_standard)
 
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration(

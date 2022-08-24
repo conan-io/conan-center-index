@@ -42,7 +42,7 @@ class FakeItConan(ConanFile):
     def validate(self):
         minimal_cpp_standard = "11"
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, minimal_cpp_standard)
+            tools.build.check_min_cppstd(self, self, minimal_cpp_standard)
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)

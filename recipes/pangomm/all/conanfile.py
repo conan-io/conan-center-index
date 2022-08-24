@@ -39,9 +39,9 @@ class PangommConan(ConanFile):
 
         if self.settings.compiler.get_safe("cppstd"):
             if self._is_2_48_api:
-                tools.check_min_cppstd(self, 17)
+                tools.build.check_min_cppstd(self, self, 17)
             elif self._is_1_4_api:
-                tools.check_min_cppstd(self, 11)
+                tools.build.check_min_cppstd(self, self, 11)
 
     @property
     def _source_subfolder(self):

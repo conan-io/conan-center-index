@@ -24,7 +24,7 @@ class FoxgloveWebSocketConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
+            tools.build.check_min_cppstd(self, self, "17")
         if (self.settings.compiler == "gcc" or self.settings.compiler == "clang") and tools.Version(self.settings.compiler.version) <= 8:
             raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
         if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) <= "16.8":

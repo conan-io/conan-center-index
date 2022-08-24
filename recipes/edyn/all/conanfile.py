@@ -59,7 +59,7 @@ class EdynConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 17)
+            tools.build.check_min_cppstd(self, self, 17)
         try:
             minimum_required_compiler_version = self._compiler_required[str(self.settings.compiler)]
             if tools.Version(self.settings.compiler.version) < minimum_required_compiler_version:

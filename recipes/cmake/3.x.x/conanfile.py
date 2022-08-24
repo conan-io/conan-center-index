@@ -49,7 +49,7 @@ class CMakeConan(ConanFile):
 
         minimal_cpp_standard = "11"
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, minimal_cpp_standard)
+            tools.build.check_min_cppstd(self, self, minimal_cpp_standard)
 
         minimal_version = {
             "gcc": "4.8",

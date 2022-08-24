@@ -75,7 +75,7 @@ class mFASTConan(ConanFile):
     def validate(self):
         if tools.Version(self.version) >= "1.2.2":
             if self.settings.compiler.get_safe("cppstd"):
-                tools.check_min_cppstd(self, 14)
+                tools.build.check_min_cppstd(self, self, 14)
 
             def lazy_lt_semver(v1, v2):
                 lv1 = [int(v) for v in v1.split(".")]

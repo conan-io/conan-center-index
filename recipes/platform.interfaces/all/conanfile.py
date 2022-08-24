@@ -44,7 +44,7 @@ class PlatformInterfacesConan(ConanFile):
                                             "which is not supported "
                                             "by {} {}.".format(self.version, self.settings.compiler, self.settings.compiler, self.settings.compiler.version))
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 20)
+            tools.build.check_min_cppstd(self, self, 20)
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)

@@ -19,7 +19,7 @@ class RangelessConan(ConanFile):
     def configure(self):
         minimal_cpp_standard = "14"
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, minimal_cpp_standard)
+            tools.build.check_min_cppstd(self, self, minimal_cpp_standard)
 
     def package_id(self):
         self.info.header_only()

@@ -37,7 +37,7 @@ class Sqlpp11Conan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, self._min_stdcpp_version)
+            tools.build.check_min_cppstd(self, self, self._min_stdcpp_version)
 
         if self._min_stdcpp_version > 11:
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)

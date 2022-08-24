@@ -20,7 +20,7 @@ class CajunJsonApiConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+            tools.build.check_min_cppstd(self, self, 11)
 
     def _extract_license(self):
         file_content = tools.files.load(self, os.path.join(self.source_folder, self._source_subfolder, "test.cpp"))

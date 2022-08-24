@@ -33,7 +33,7 @@ class Seqan3Conan(ConanFile):
             raise ConanInvalidConfiguration("SeqAn3 only supports GCC.")
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 20)
+            tools.build.check_min_cppstd(self, self, 20)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
             if tools.Version(self.settings.compiler.version) < minimum_version:
