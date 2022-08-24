@@ -113,8 +113,7 @@ class CairoConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            files.patch(self, **patch)
+        files.apply_conandata_patches(self)
         if microsoft.is_msvc(self):
             self._build_msvc()
         else:
@@ -237,8 +236,10 @@ class CairoConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "cairo-all-do-no-use")
+        self.cpp_info.names["pkg_config"] = "cairo-all-do-not-use"
 
         self.cpp_info.components["cairo_"].set_property("pkg_config_name", "cairo")
+        self.cpp_info.components["cairo_"].names["pkg_config"] = "cairo"
         self.cpp_info.components["cairo_"].libs = ["cairo"]
         self.cpp_info.components["cairo_"].includedirs.insert(0, os.path.join("include", "cairo"))
         self.cpp_info.components["cairo_"].requires = ["pixman::pixman", "libpng::libpng", "zlib::zlib"]
@@ -272,34 +273,42 @@ class CairoConan(ConanFile):
 
         if self.settings.os == "Windows":
             self.cpp_info.components["cairo-win32"].set_property("pkg_config_name", "cairo-win32")
+            self.cpp_info.components["cairo-win32"].names["pkg_config"] = "cairo-win32"
             self.cpp_info.components["cairo-win32"].requires = ["cairo_", "pixman::pixman", "libpng::libpng"]
 
         if self.options.get_safe("with_glib", True):
             self.cpp_info.components["cairo-gobject"].set_property("pkg_config_name", "cairo-gobject")
+            self.cpp_info.components["cairo-gobject"].names["pkg_config"] = "cairo-gobject"
             self.cpp_info.components["cairo-gobject"].libs = ["cairo-gobject"]
             self.cpp_info.components["cairo-gobject"].requires = ["cairo_", "glib::gobject-2.0", "glib::glib-2.0"]
         if self.settings.os != "Windows":
             if self.options.with_fontconfig:
                 self.cpp_info.components["cairo-fc"].set_property("pkg_config_name", "cairo-fc")
+                self.cpp_info.components["cairo-fc"].names["pkg_config"] = "cairo-fc"
                 self.cpp_info.components["cairo-fc"].requires = ["cairo_", "fontconfig::fontconfig"]
             if self.options.get_safe("with_freetype", True):
                 self.cpp_info.components["cairo-ft"].set_property("pkg_config_name", "cairo-ft")
+                self.cpp_info.components["cairo-ft"].names["pkg_config"] = "cairo-ft"
                 self.cpp_info.components["cairo-ft"].requires = ["cairo_", "freetype::freetype"]
 
             self.cpp_info.components["cairo-pdf"].set_property("pkg_config_name", "cairo-pdf")
+            self.cpp_info.components["cairo-pdf"].names["pkg_config"] = "cairo-pdf"
             self.cpp_info.components["cairo-pdf"].requires = ["cairo_", "zlib::zlib"]
 
         if self.settings.os == "Linux":
             if self.options.with_xlib:
                 self.cpp_info.components["cairo-xlib"].set_property("pkg_config_name", "cairo-xlib")
+                self.cpp_info.components["cairo-xlib"].names["pkg_config"] = "cairo-xlib"
                 self.cpp_info.components["cairo-xlib"].requires = ["cairo_", "xorg::x11", "xorg::xext"]
 
         if tools.is_apple_os(self.settings.os):
             self.cpp_info.components["cairo-quartz"].set_property("pkg_config_name", "cairo-quartz")
+            self.cpp_info.components["cairo-quartz"].names["pkg_config"] = "cairo-quartz"
             self.cpp_info.components["cairo-quartz"].requires = ["cairo_"]
             self.cpp_info.components["cairo-quartz"].frameworks.extend(["CoreFoundation", "CoreGraphics", "ApplicationServices"])
 
             self.cpp_info.components["cairo-quartz-font"].set_property("pkg_config_name", "cairo-quartz-font")
+            self.cpp_info.components["cairo-quartz-font"].names["pkg_config"] = "cairo-quartz-font"
             self.cpp_info.components["cairo-quartz-font"].requires = ["cairo_"]
 
     def package_id(self):
