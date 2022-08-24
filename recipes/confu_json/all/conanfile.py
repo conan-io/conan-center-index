@@ -4,7 +4,7 @@ from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-
+required_conan_version = ">=1.50.0"
 
 class ConfuJson(ConanFile):
     name = "confu_json"
@@ -40,7 +40,7 @@ class ConfuJson(ConanFile):
                 "Visual Studio is not supported in versions before confu_json/0.0.9")
         if self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration(
-                "apple-clang is not supported because of missing concept support")
+                "apple-clang is not supported. Pull request welcome")
         if self.settings.compiler.get_safe("cppstd"):
             tools.build.check_min_cppstd(self, self._minimum_cpp_standard)
 
