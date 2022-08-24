@@ -1,8 +1,9 @@
 import conan
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import AutotoolsDeps, AutotoolsToolchain, Autotools
-from conans.tools import Version, check_min_cppstd, remove_files_by_mask
-
+from conan.tools import files
+from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
 import functools
 import os
 from pathlib import Path
@@ -112,7 +113,7 @@ class OpenGrmConan(conan.ConanFile):
         autotools.install()
 
         conan.tools.files.rmdir(self, Path(self.package_folder) / "share")
-        remove_files_by_mask(Path(self.package_folder) / "lib", "*.la")
+        files.rm(Path(self.package_folder) / "lib", "*.la")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenGrm")
