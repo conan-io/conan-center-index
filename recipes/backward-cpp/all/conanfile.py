@@ -1,5 +1,6 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools
+from conans import CMake
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.43.0"
@@ -41,7 +42,7 @@ class BackwardCppConan(ConanFile):
     @property
     def _supported_os(self):
         supported_os = ["Linux", "Macos", "Android"]
-        if tools.Version(self.version) >= "1.5":
+        if tools.scm.Version(self.version) >= "1.5":
             supported_os.append("Windows")
         return supported_os
 
@@ -82,7 +83,7 @@ class BackwardCppConan(ConanFile):
             raise ConanInvalidConfiguration("upstream backward-cpp v{0} is not"
                 " supported in {1}.".format(self.version, self.settings.os))
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            tools.build.check_min_cppstd(self, 11)
         if self.settings.os == "Macos":
             if self.settings.arch == "armv8":
                 raise ConanInvalidConfiguration("Macos M1 not supported yet")
@@ -91,7 +92,7 @@ class BackwardCppConan(ConanFile):
                                                 " is supported on Macos")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
@@ -112,7 +113,7 @@ class BackwardCppConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
     def build(self):
         self._patch_sources()
@@ -123,7 +124,7 @@ class BackwardCppConan(ConanFile):
         self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "backward"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "backward"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Backward")
@@ -138,7 +139,7 @@ class BackwardCppConan(ConanFile):
         self.cpp_info.defines.append("BACKWARD_HAS_DWARF={}".format(int(self._has_stack_details("dwarf"))))
         self.cpp_info.defines.append("BACKWARD_HAS_PDB_SYMBOL={}".format(int(self.settings.os == "Windows")))
 
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl"])
         if self.settings.os == "Windows":
