@@ -1,0 +1,98 @@
+Exporting package recipe
+cppcheck/2.7.5@andrei/test exports: File 'conandata.yml' found. Exporting it...
+cppcheck/2.7.5@andrei/test exports: Copied 1 '.yml' file: conandata.yml
+cppcheck/2.7.5@andrei/test exports_sources: Copied 1 '.txt' file: CMakeLists.txt
+cppcheck/2.7.5@andrei/test exports_sources: Copied 4 '.patch' files: 0001-cmake-source-dir.patch, 0001-cmake-source-dir-2.5.patch, 0003-handle-exename-on-macos.patch, 0002-htmlreport-python3.patch
+cppcheck/2.7.5@andrei/test: The stored package has not changed
+cppcheck/2.7.5@andrei/test: Using the exported files summary hash as the recipe revision: 093c81f5f57519242e9d81e24bdde657 
+cppcheck/2.7.5@andrei/test: Exported revision: 093c81f5f57519242e9d81e24bdde657
+Configuration:
+[settings]
+arch=x86_64
+arch_build=x86_64
+build_type=Release
+compiler=gcc
+compiler.cppstd=17
+compiler.libcxx=libstdc++11
+compiler.version=11.2
+os=Linux
+os_build=Linux
+[options]
+cmake:with_openssl=False
+vulkan-loader:shared=True
+[build_requires]
+[env]
+
+cppcheck/2.7.5@andrei/test (test package): Installing package
+Requirements
+    bzip2/1.0.8 from 'conancenter' - Cache
+    cppcheck/2.7.5@andrei/test from local cache - Cache
+    mpir/3.0.0 from 'conancenter' - Cache
+    pcre/8.45 from 'conancenter' - Cache
+    z3/4.8.8 from 'conancenter' - Cache
+    zlib/1.2.12 from 'conancenter' - Cache
+Packages
+    bzip2/1.0.8:e18203d1df1519e4a855a273390f0f15fef1850c - Cache
+    cppcheck/2.7.5@andrei/test:1d9ead6a97a194a3b2b637aec26cb3ff3b918348 - Cache
+    mpir/3.0.0:822a1f19c75696d857ad1676d29fd7db03273ab0 - Cache
+    pcre/8.45:ee94394f876c5add99031cc672b5a33d18f4bc66 - Cache
+    z3/4.8.8:d6467cb48ea3a7942ca0f9026b5a59dea8ccee90 - Cache
+    zlib/1.2.12:b6f45f661d53342860982dee02186c649186beee - Cache
+
+Installing (downloading, building) binaries...
+bzip2/1.0.8: Already installed!
+bzip2/1.0.8: Appending PATH environment variable: /home/andrei/.conan/data/bzip2/1.0.8/_/_/package/e18203d1df1519e4a855a273390f0f15fef1850c/bin
+mpir/3.0.0: Already installed!
+zlib/1.2.12: Already installed!
+pcre/8.45: Already installed!
+pcre/8.45: Appending PATH environment variable: /home/andrei/.conan/data/pcre/8.45/_/_/package/ee94394f876c5add99031cc672b5a33d18f4bc66/bin
+z3/4.8.8: Already installed!
+cppcheck/2.7.5@andrei/test: Already installed!
+cppcheck/2.7.5@andrei/test: Append /home/andrei/.conan/data/cppcheck/2.7.5/andrei/test/package/1d9ead6a97a194a3b2b637aec26cb3ff3b918348/bin to environment variable PATH
+cppcheck/2.7.5@andrei/test (test package): Generator txt created conanbuildinfo.txt
+cppcheck/2.7.5@andrei/test (test package): Aggregating env generators
+cppcheck/2.7.5@andrei/test (test package): Generated conaninfo.txt
+cppcheck/2.7.5@andrei/test (test package): Generated graphinfo
+Using lockfile: '/home/andrei/sources/conan-center-index/recipes/cppcheck/all/test_package/build/723a985a2fff5b1a074e0cdab6051609ee91156d/conan.lock'
+Using cached profile from lockfile
+cppcheck/2.7.5@andrei/test (test package): Calling build()
+cppcheck/2.7.5@andrei/test (test package): Running test()
+
+----Running------
+> cppcheck --enable=warning,style,performance --std=c++11 .
+-----------------
+Checking build/723a985a2fff5b1a074e0cdab6051609ee91156d/file_to_check.cpp ...
+1/2 files checked 50% done
+Checking file_to_check.cpp ...
+2/2 files checked 100% done
+
+----Running------
+> cppcheck-htmlreport -h
+-----------------
+Usage: cppcheck-htmlreport [options]
+
+Options:
+  -h, --help            show this help message and exit
+  --title=TITLE         The title of the project.
+  --file=FILE           The cppcheck xml output file to read defects from. You
+                        can combine results from several xml reports i.e. "--
+                        file file1.xml --file file2.xml ..". Default is
+                        reading from stdin.
+  --report-dir=REPORT_DIR
+                        The directory where the HTML report content is
+                        written.
+  --source-dir=SOURCE_DIR
+                        Base directory where source code files can be found.
+  --add-author-information=ADD_AUTHOR_INFORMATION
+                        Blame information to include. Adds specified author
+                        information. Specify as comma-separated list of either
+                        "name", "email", "date" or "n","e","d". Default:
+                        "n,e,d"
+  --source-encoding=SOURCE_ENCODING
+                        Encoding of source code.
+  --blame-options=BLAME_OPTIONS
+                        [-w, -M] blame options which you can use to get author
+                        and author mail  -w --> not including white spaces and
+                        returns original author of the line  -M --> not
+                        including moving of lines and returns original author
+                        of the line
