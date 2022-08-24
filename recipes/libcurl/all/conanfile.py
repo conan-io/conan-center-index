@@ -449,7 +449,7 @@ class LibcurlConan(ConanFile):
         # Cross building flags
         if cross_building(self):
             if self.settings.os == "Linux" and "arm" in self.settings.arch:
-                tc.configure_args.append("--host=%s".format(self._get_linux_arm_host()))
+                tc.configure_args.append("--host={}".format(self._get_linux_arm_host()))
             elif self.settings.os == "iOS":
                 tc.configure_args.append("--enable-threaded-resolver")
                 tc.configure_args.append("--disable-verbose")
