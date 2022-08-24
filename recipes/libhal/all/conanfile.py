@@ -38,7 +38,7 @@ class LibHALConan(ConanFile):
             "Visual Studio": "17",
             "msvc": "19.22",
             "clang": "13",
-            "apple-clang": "13"
+            "apple-clang": "13.1.6"
         }
 
     def validate(self):
