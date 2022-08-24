@@ -177,7 +177,7 @@ class ProtobufConan(ConanFile):
         # Set DYLD_LIBRARY_PATH in command line to avoid issues with shared protobuf
         # (even with virtualrunenv, this fix might be required due to SIP)
         # Only works with cmake, cmake_find_package or cmake_find_package_multi generators
-        if is_apple_os(self.settings.os):
+        if is_apple_os(self):
             replace_in_file(self,
                 protobuf_config_cmake,
                 "add_custom_command(",

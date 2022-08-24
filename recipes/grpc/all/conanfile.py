@@ -309,7 +309,7 @@ class grpcConan(ConanFile):
             return ["wsock32"] if self.settings.os == "Windows" else []
 
         def corefoundation():
-            return ["CoreFoundation"] if tools_legacy.is_apple_os(self.settings.os) else []
+            return ["CoreFoundation"] if tools_legacy.is_apple_os(self) else []
 
         components = {
             "address_sorting": {

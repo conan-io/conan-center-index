@@ -142,7 +142,7 @@ class Sqlite3Conan(ConanFile):
         tc.variables["HAVE_FDATASYNC"] = True
         tc.variables["HAVE_GMTIME_R"] = True
         tc.variables["HAVE_LOCALTIME_R"] = self.settings.os != "Windows"
-        tc.variables["HAVE_POSIX_FALLOCATE"] = not (self.settings.os in ["Windows", "Android"] or tools_legacy.is_apple_os(self.settings.os))
+        tc.variables["HAVE_POSIX_FALLOCATE"] = not (self.settings.os in ["Windows", "Android"] or tools_legacy.is_apple_os(self))
         tc.variables["HAVE_STRERROR_R"] = True
         tc.variables["HAVE_USLEEP"] = True
         tc.variables["DISABLE_GETHOSTUUID"] = self.options.disable_gethostuuid

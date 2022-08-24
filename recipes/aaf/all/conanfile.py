@@ -49,7 +49,7 @@ class AafConan(ConanFile):
 
         cmake = CMake(self)
 
-        if tools.apple.is_apple_os(self.settings.os):
+        if tools.apple.is_apple_os(self):
             cmake.definitions["PLATFORM"] = "apple-clang"
         elif self.settings.compiler == "Visual Studio":
             cmake.definitions["PLATFORM"] = "vc"
