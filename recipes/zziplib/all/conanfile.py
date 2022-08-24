@@ -1,10 +1,11 @@
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
+required_conan_version = ">=1.51.3"
 
 
 class ZziplibConan(ConanFile):
@@ -95,7 +96,10 @@ class ZziplibConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "zziplib-all-do-not-use")
 
-        suffix = f"-{Version(self.version).major}" if self.settings.build_type == "Release" else ""
+        suffix = ""
+        if self.settings.build_type == "Release" and \
+           (not self.options.shared or self.settings.os == "Windows" or is_apple_os(self)):
+            suffix += f"-{Version(self.version).major}"
 
         # libzzip
         self.cpp_info.components["zzip"].set_property("pkg_config_name", "zziplib")
