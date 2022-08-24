@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools import files
 from conans import AutoToolsBuildEnvironment
-import os
 import functools
 
 required_conan_version = ">=1.33.0"
@@ -65,12 +64,11 @@ class libxftConan(ConanFile):
         with files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install(args=["-j1"])
-        files.rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        files.rmdir(self, os.path.join(self.package_folder, "share"))
+        files.rm(self, "*.la", f"{self.package_folder}/lib"), recursive=True)
+        files.rmdir(self, f"{self.package_folder}/lib/pkgconfig"))
+        files.rmdir(self, f"{self.package_folder}/share"))
 
     def package_info(self):
         self.cpp_info.names['pkg_config'] = "Xft"
         self.cpp_info.set_property("pkg_config_name", "xft")
         self.cpp_info.libs = ["Xft"]
-
