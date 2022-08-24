@@ -137,22 +137,25 @@ class SDLImageConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.set_property("cmake_target_aliases", ["SDL2_image::SDL2_image-static"])
         self.cpp_info.set_property("pkg_config_name", "SDL2_image")
-        self.cpp_info.libs = ["SDL2_image"]
-        self.cpp_info.includedirs.append(os.path.join("include", "SDL2"))
-
-        # TODO: to remove, tt's a workaround to support conan v1 generators
-        # (fixed in conan 1.51.1 by https://github.com/conan-io/conan/pull/11790)
-        self.cpp_info.requires = ["sdl::sdl"]
-        if self.options.with_libtiff:
-            self.cpp_info.requires.append("libtiff::libtiff")
-        if self.options.with_libjpeg:
-            self.cpp_info.requires.append("libjpeg::libjpeg")
-        if self.options.with_libpng:
-            self.cpp_info.requires.append("libpng::libpng")
-        if self.options.with_libwebp:
-            self.cpp_info.requires.append("libwebp::libwebp")
+        # TODO: back to global scope in conan v2 once legacy generators removed
+        self.cpp_info.components["_sdl_image"].libs = ["SDL2_image"]
+        self.cpp_info.components["_sdl_image"].includedirs.append(os.path.join("include", "SDL2"))
 
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.names["cmake_find_package"] = "SDL2_image"
         self.cpp_info.names["cmake_find_package_multi"] = "SDL2_image"
         self.cpp_info.names["pkg_config"] = "SDL2_image"
+        target_name = "SDL2_image" if self.options.shared else "SDL2_image-static"
+        self.cpp_info.components["_sdl_image"].names["cmake_find_package"] = target_name
+        self.cpp_info.components["_sdl_image"].names["cmake_find_package_multi"] = target_name
+        self.cpp_info.components["_sdl_image"].set_property("cmake_target_name", "SDL2_image::SDL2_image")
+        self.cpp_info.components["_sdl_image"].set_property("pkg_config_name", "SDL2_image")
+        self.cpp_info.components["_sdl_image"].requires = ["sdl::sdl"]
+        if self.options.with_libtiff:
+            self.cpp_info.components["_sdl_image"].requires.append("libtiff::libtiff")
+        if self.options.with_libjpeg:
+            self.cpp_info.components["_sdl_image"].requires.append("libjpeg::libjpeg")
+        if self.options.with_libpng:
+            self.cpp_info.components["_sdl_image"].requires.append("libpng::libpng")
+        if self.options.with_libwebp:
+            self.cpp_info.components["_sdl_image"].requires.append("libwebp::libwebp")
