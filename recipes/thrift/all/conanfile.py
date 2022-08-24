@@ -75,7 +75,8 @@ class ThriftConan(ConanFile):
             self.requires("qt/5.15.4")
 
     def build_requirements(self):
-        if self._settings_build.compiler in ["Visual Studio", "msvc"]:
+        # TODO: use is_msvc with build_context in conan >=1.52.0 (see https://github.com/conan-io/conan/pull/11949)
+        if str(self._settings_build.compiler) in ["Visual Studio", "msvc"]:
             self.tool_requires("winflexbison/2.5.24")
         else:
             self.tool_requires("flex/2.6.4")
