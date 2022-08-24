@@ -1,6 +1,6 @@
 import os
 import glob
-from conan import ConanFile, tools$
+from conan import ConanFile, tools
 
 
 class RgbcxConan(ConanFile):

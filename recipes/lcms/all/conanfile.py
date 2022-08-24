@@ -1,4 +1,5 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
+from conan import ConanFile, tools
+from conans import AutoToolsBuildEnvironment, MSBuild
 import os
 import re
 import shutil

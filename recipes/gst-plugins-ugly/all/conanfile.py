@@ -1,4 +1,5 @@
-from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
+from conan import ConanFile, tools
+from conans import Meson, VisualStudioBuildEnvironment
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import msvc_runtime_flag
 import glob

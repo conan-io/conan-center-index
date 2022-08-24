@@ -1,4 +1,5 @@
-from conans import ConanFile, tools, errors
+from conan import ConanFile, tools
+from conans import errors
 
 required_conan_version = ">=1.33.0"
 

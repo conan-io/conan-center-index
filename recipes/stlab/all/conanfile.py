@@ -1,4 +1,4 @@
-from conan import ConanFile, tools$
+from conan import ConanFile, tools
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os

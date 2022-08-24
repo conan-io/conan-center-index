@@ -1,4 +1,5 @@
-from conans import ConanFile, tools, Meson
+from conan import ConanFile, tools
+from conans import Meson
 from conan.errors import ConanInvalidConfiguration
 import os
 

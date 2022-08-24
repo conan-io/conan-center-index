@@ -1,6 +1,7 @@
 import os
 import platform
-from conans import ConanFile, tools, VisualStudioBuildEnvironment, AutoToolsBuildEnvironment
+from conan import ConanFile, tools
+from conans import VisualStudioBuildEnvironment, AutoToolsBuildEnvironment
 
 
 class LuajitConan(ConanFile):

@@ -1,5 +1,5 @@
 import os
-from conan import ConanFile, tools$
+from conan import ConanFile, tools
 
 
 class PortableFileDialogsConan(ConanFile):

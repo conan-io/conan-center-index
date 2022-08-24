@@ -2,7 +2,8 @@ import os
 
 from conan.tools.build import cross_building
 from conan.tools.microsoft import is_msvc
-from conans import ConanFile, tools, Meson
+from conan import ConanFile, tools
+from conans import Meson
 from conan.errors import ConanInvalidConfiguration
 from conans.tools import rmdir
 

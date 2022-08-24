@@ -1,5 +1,6 @@
 from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
+from conan import ConanFile, tools
+from conans import AutoToolsBuildEnvironment, MSBuild
 from conan.errors import ConanInvalidConfiguration
 import contextlib
 import os

@@ -1,5 +1,5 @@
 import os
-from conan import ConanFile, tools$
+from conan import ConanFile, tools
 
 required_conan_version = ">=1.40.1" # For https://github.com/conan-io/conan/pull/9568
 

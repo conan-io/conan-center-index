@@ -1,4 +1,4 @@
-from conan import ConanFile, tools$
+from conan import ConanFile, tools
 
 
 class TestPackageConan(ConanFile):

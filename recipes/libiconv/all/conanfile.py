@@ -1,5 +1,6 @@
 from conan.tools.files import rename
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conan import ConanFile, tools
+from conans import AutoToolsBuildEnvironment
 from conan.tools.microsoft import is_msvc
 from contextlib import contextmanager
 import os

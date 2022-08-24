@@ -1,6 +1,7 @@
 import os
 
-from conans import ConanFile, tools, MSBuild, AutoToolsBuildEnvironment
+from conan import ConanFile, tools
+from conans import MSBuild, AutoToolsBuildEnvironment
 from conan.errors import ConanInvalidConfiguration
 
 

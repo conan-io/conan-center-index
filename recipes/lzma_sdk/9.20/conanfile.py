@@ -1,4 +1,5 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
+from conan import ConanFile, tools
+from conans import AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 import os
 
 required_conan_version = ">=1.33.0"

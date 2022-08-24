@@ -1,4 +1,5 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
+from conan import ConanFile, tools
+from conans import AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from contextlib import contextmanager
 from conan.tools.files import rename
 import functools

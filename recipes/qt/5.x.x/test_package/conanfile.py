@@ -1,7 +1,8 @@
 import os
 import shutil
 
-from conans import ConanFile, tools, Meson, RunEnvironment, CMake
+from conan import ConanFile, tools
+from conans import Meson, RunEnvironment, CMake
 from conans.errors import ConanException
 
 

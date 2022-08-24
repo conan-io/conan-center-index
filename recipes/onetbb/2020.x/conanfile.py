@@ -1,5 +1,5 @@
 from conan.tools.microsoft import msvc_runtime_flag
-from conan import ConanFile, tools$
+from conan import ConanFile, tools
 from conan.errors import ConanInvalidConfiguration, ConanException
 import os
 import textwrap
