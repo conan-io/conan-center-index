@@ -1,5 +1,6 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools
+from conans import CMake
+from conan.errors import ConanInvalidConfiguration
 import functools
 import os
 
@@ -59,13 +60,13 @@ class Catch2Conan(ConanFile):
             self.info.header_only()
 
     def validate(self):
-        if tools.Version(self.version) < "2.13.1" and self.settings.arch == "armv8":
+        if tools.scm.Version(self.version) < "2.13.1" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("ARMv8 is supported by 2.13.1+ only! give up!")
-        if self.options.with_main and tools.Version(self.version) < "2.13.4":
+        if self.options.with_main and tools.scm.Version(self.version) < "2.13.4":
             raise ConanInvalidConfiguration("Option with_main not supported with versions < 2.13.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -86,7 +87,7 @@ class Catch2Conan(ConanFile):
         # Catch2 does skip install if included as subproject:
         # https://github.com/catchorg/Catch2/blob/79a5cd795c387e2da58c13e9dcbfd9ea7a2cfb30/CMakeLists.txt#L100-L102
         main_cml = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(main_cml, "if (NOT_SUBPROJECT)", "if (TRUE)")
+        tools.files.replace_in_file(self, main_cml, "if (NOT_SUBPROJECT)", "if (TRUE)")
         if self.options.with_main:
             cmake = self._configure_cmake()
             cmake.build()
@@ -95,8 +96,8 @@ class Catch2Conan(ConanFile):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         for cmake_file in ["ParseAndAddCatchTests.cmake", "Catch.cmake", "CatchAddTests.cmake"]:
             self.copy(
                 cmake_file,

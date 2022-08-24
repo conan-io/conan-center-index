@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 from conans.tools import Version
 import os
 
@@ -13,6 +14,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             self.run(os.path.join("bin", "standalone"), run_environment=True)
             self.run(os.path.join("bin", "benchmark"), run_environment=True)
