@@ -181,7 +181,6 @@ class LibpngConan(ConanFile):
         self.cpp_info.set_property("pkg_config_aliases", [f"libpng{major_min_version}"])
 
         prefix = "lib" if is_msvc(self) else ""
-        suffix = "d" if self.settings.build_type == "Debug" else ""
-        self.cpp_info.libs = [f"{prefix}png{suffix}"]
+        self.cpp_info.libs = [f"{prefix}png"]
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
