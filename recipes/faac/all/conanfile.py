@@ -1,6 +1,6 @@
 from conan.tools.files import apply_conandata_patches
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 import functools
 import os
 

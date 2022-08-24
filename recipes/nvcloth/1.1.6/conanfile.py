@@ -2,7 +2,7 @@ import os
 import shutil
 
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc_static_runtime, is_msvc
 
 required_conan_version = ">=1.35.0"

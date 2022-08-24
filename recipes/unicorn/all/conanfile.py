@@ -1,5 +1,5 @@
 from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 import functools
 import os
 import stat

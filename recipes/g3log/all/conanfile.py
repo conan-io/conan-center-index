@@ -2,7 +2,7 @@ import os
 from os import path
 from conans import ConanFile, CMake, tools
 from conans.tools import Version
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 
 
 class G3logConan(ConanFile):

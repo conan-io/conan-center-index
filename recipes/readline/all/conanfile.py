@@ -1,6 +1,6 @@
 import os
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 
 
 class ReadLineConan(ConanFile):

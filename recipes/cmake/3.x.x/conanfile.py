@@ -3,7 +3,7 @@ from conan import ConanFile
 from conan.tools.scm import Version
 from conan.tools.files import rmdir, get
 from conans import tools, AutoToolsBuildEnvironment, CMake
-from conans.errors import ConanInvalidConfiguration, ConanException
+from conan.errors import ConanInvalidConfiguration, ConanException
 
 required_conan_version = ">=1.35.0"
 

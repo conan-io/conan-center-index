@@ -1,6 +1,6 @@
 import functools
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 
 required_conan_version = ">=1.33.0"

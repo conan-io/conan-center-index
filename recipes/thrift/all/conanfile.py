@@ -1,5 +1,5 @@
 from conans import tools, CMake, ConanFile
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 import textwrap

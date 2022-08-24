@@ -3,7 +3,7 @@ import os
 from conan.tools.build import cross_building
 from conan.tools.microsoft import is_msvc
 from conans import ConanFile, tools, Meson
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conans.tools import rmdir
 
 required_conan_version = ">=1.33.0"

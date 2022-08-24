@@ -5,7 +5,7 @@ from io import StringIO
 from conan import ConanFile
 from conans import CMake, tools
 from conan.tools.files import get, copy
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 
 from helpers import parse_proto_libraries
 

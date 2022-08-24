@@ -1,6 +1,6 @@
 from conans import ConanFile, Meson, tools
 from conan.tools.files import rename
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
 import shutil
 import os

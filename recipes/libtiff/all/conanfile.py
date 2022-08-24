@@ -1,7 +1,7 @@
 from conan.tools.files import get, rename, rmdir
 from conan.tools.microsoft import is_msvc
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conans.tools import Version
 import os
 

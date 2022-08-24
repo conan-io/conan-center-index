@@ -2,7 +2,7 @@ from conan.tools.files import rename
 from conan.tools.microsoft import is_msvc
 from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import functools
 import os

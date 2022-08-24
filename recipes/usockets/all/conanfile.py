@@ -1,7 +1,7 @@
 import os
 
 from conans import ConanFile, tools, MSBuild, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 
 
 class UsocketsConan(ConanFile):

@@ -1,6 +1,6 @@
 from conans import ConanFile, tools, CMake
 import os
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 
 
 class CppJwtConan(ConanFile):

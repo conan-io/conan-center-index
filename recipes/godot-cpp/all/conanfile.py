@@ -2,7 +2,7 @@ import glob
 import os
 
 from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 
 
 class GodotCppConan(ConanFile):

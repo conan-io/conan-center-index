@@ -1,6 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conan.tools.files import rename
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conans.tools import os_info
 import os
 import functools

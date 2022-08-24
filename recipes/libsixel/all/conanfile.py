@@ -1,7 +1,7 @@
 import os
 import functools
 from conans import ConanFile, Meson, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.33.0"

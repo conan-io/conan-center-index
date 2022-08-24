@@ -1,6 +1,6 @@
 from conan.tools.files import rename
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 import os
 import contextlib
 import glob

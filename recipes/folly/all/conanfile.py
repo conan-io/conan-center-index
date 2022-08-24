@@ -3,7 +3,7 @@ from conan.tools.build import can_run
 from conan.tools.scm import Version
 from conan.tools import files
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 import functools
 import os
 

@@ -1,6 +1,6 @@
 from conans import ConanFile, CMake, Meson, tools
 from conan.tools import files
-from conans.errors import ConanInvalidConfiguration, ConanException
+from conan.errors import ConanInvalidConfiguration, ConanException
 from tempfile import TemporaryDirectory
 import functools
 import os

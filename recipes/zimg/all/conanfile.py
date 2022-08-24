@@ -1,7 +1,7 @@
 from conan.tools.files import rename
 from conan.tools.microsoft import is_msvc
 from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 import functools
 import os
 

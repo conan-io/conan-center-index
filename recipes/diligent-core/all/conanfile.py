@@ -1,5 +1,5 @@
 from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 import os
 from conan.tools.build import cross_building
 

@@ -1,6 +1,6 @@
 import functools
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 
 
 class PbtoolsConan(ConanFile):

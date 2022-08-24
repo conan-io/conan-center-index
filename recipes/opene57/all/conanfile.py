@@ -1,6 +1,6 @@
 from conans import ConanFile, tools, CMake
 from conan.tools.microsoft import msvc_runtime_flag
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 import os
 
 class Opene57Conan(ConanFile):

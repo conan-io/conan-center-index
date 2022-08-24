@@ -1,7 +1,7 @@
 import os
 import sys
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 
 
 class NinjaConan(ConanFile):

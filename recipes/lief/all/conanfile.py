@@ -1,6 +1,6 @@
 import os
 from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 
 
 class LiefConan(ConanFile):

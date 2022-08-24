@@ -10,7 +10,7 @@ from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.microsoft import msvc_runtime_flag
 from conans import tools, RunEnvironment, CMake
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conans.model import Generator
 
 required_conan_version = ">=1.43.0"

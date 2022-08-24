@@ -1,4 +1,4 @@
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conans import ConanFile, CMake, tools
 from collections import defaultdict
 import json

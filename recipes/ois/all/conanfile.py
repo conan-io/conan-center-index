@@ -1,7 +1,7 @@
 import os
 import glob
 from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 
 class OisConan(ConanFile):
     name = "ois"

@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conans import CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 
 class KcovConan(ConanFile):
     name = "kcov"

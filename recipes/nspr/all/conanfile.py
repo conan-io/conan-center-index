@@ -1,7 +1,7 @@
 from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.files import rename
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 import contextlib
 import functools
 import os

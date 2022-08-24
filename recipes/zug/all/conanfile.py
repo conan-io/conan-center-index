@@ -1,7 +1,7 @@
 import os
 from conans import ConanFile, tools
 from conan.tools.microsoft import is_msvc
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 
 
 class ZugConan(ConanFile):

@@ -1,5 +1,5 @@
 from conans import tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conan import ConanFile
 from conan.tools.build import cross_building
 import os

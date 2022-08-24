@@ -1,5 +1,5 @@
 from conans import AutoToolsBuildEnvironment, CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 import contextlib
 import os
 import textwrap
