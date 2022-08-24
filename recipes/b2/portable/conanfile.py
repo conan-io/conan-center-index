@@ -1,5 +1,5 @@
 from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.33.0"
@@ -54,7 +54,7 @@ class B2Conan(ConanFile):
                 "Option toolset 'cxx' and 'cross-cxx' requires 'use_cxx_env=True'")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination="source")
 
     def build(self):
