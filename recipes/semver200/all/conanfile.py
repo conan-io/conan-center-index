@@ -3,6 +3,7 @@ from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, copy, get
 from conan.tools.build import check_min_cppstd
 from conans import CMake
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.50.0"
 
@@ -39,7 +40,9 @@ class SemVer200Conan(ConanFile):
             self.copy(p["patch_file"])
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.info.settings.os == "Windows" and self.info.options.shared:
+              raise ConanInvalidConfiguration("Shared library on Windows not supported")
+        if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, 14)
 
     def configure(self):
