@@ -70,6 +70,6 @@ class Etc2compConan(ConanFile):
         self.copy("*.h", dst=os.path.join("include"), src=os.path.join(self._source_subfolder, "EtcLib"), keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")

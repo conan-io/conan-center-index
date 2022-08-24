@@ -134,7 +134,7 @@ class IXWebSocketConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ixwebsocket"
         self.cpp_info.names["cmake_find_package_multi"] = "ixwebsocket"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["wsock32", "ws2_32", "shlwapi"])
             if bool(self.options.tls):

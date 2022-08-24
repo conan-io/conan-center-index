@@ -112,7 +112,7 @@ class FastCDRConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "fastcdr")
         self.cpp_info.set_property("cmake_target_name", "fastcdr")
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("FASTCDR_DYN_LINK")
 

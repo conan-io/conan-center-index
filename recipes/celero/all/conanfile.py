@@ -116,7 +116,7 @@ class CeleroConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Celero")
         self.cpp_info.set_property("cmake_target_name", "celero")
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if not self.options.shared:
             self.cpp_info.defines = ["CELERO_STATIC"]
         if self.settings.os in ("FreeBSD", "Linux"):

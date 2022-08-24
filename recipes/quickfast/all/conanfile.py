@@ -64,7 +64,7 @@ class QuickfastConan(ConanFile):
         self.copy("license.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         self.cpp_info.includedirs.append(os.path.join("include", "quickfast"))
 
         if not self.options.shared:

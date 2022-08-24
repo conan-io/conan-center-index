@@ -131,7 +131,7 @@ class AeronConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.defines.append("_ENABLE_EXTENDED_ALIGNED_STORAGE")
 

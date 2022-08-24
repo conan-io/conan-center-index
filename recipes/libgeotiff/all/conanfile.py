@@ -140,6 +140,6 @@ class LibgeotiffConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_vars_file]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_target_file]
 
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")

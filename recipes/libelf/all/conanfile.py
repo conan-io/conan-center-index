@@ -123,6 +123,6 @@ class LibelfConan(ConanFile):
             files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         self.cpp_info.set_property("pkg_config_name", "libelf")
         self.cpp_info.includedirs = [os.path.join("include", "libelf"), "include"]

@@ -445,7 +445,7 @@ class OpenCascadeConan(ConanFile):
 
         # MODULES file lists all modules and all possible components per module
         modules_content = tools.files.load(self, os.path.join(self.build_folder, self._source_subfolder, "adm", "MODULES"))
-        packaged_libs_list = tools.collect_libs(self, "lib")
+        packaged_libs_list = tools.files.collect_libs(self, self, "lib")
         for module_line in modules_content.splitlines():
             components = {}
             module_components = module_line.split()

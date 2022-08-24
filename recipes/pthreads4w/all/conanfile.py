@@ -114,7 +114,7 @@ class Pthreads4WConan(ConanFile):
                     autotools.make(target="install-lib-default")
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         self.cpp_info.defines.append(self._exception_scheme_definition)
         if not self.options.shared:
             self.cpp_info.defines.append("__PTW32_STATIC_LIB")

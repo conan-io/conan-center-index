@@ -154,6 +154,6 @@ class GoogleAPIS(ConanFile):
 
     def package_info(self):
         # We are not creating components, we can just collect the libraries
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["m"])

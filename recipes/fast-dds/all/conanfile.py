@@ -154,7 +154,7 @@ class FastDDSConan(ConanFile):
 
         # component fastrtps
         self.cpp_info.components["fastrtps"].set_property("cmake_target_name", "fastrtps")
-        self.cpp_info.components["fastrtps"].libs = tools.collect_libs(self)
+        self.cpp_info.components["fastrtps"].libs = tools.files.collect_libs(self, self)
         self.cpp_info.components["fastrtps"].requires = [
             "fast-cdr::fast-cdr",
             "asio::asio",

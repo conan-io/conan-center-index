@@ -98,7 +98,7 @@ class MBitsArgsConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "mbits"
         self.cpp_info.components["libargs"].names["cmake_find_package"] = "args"
         self.cpp_info.components["libargs"].names["cmake_find_package_multi"] = "args"
-        self.cpp_info.components["libargs"].libs = tools.collect_libs(self)
+        self.cpp_info.components["libargs"].libs = tools.files.collect_libs(self, self)
 
         # FIXME: CMake imported target shouldn't be namespaced (requires https://github.com/conan-io/conan/issues/7615)
         # https://github.com/mbits-libs/args/blob/72f5f2b87ae39f26638a585fa4ad0b96b4152ae6/CMakeLists.txt#L152

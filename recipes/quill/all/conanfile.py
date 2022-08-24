@@ -126,7 +126,7 @@ class QuillConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         self.cpp_info.defines = ["QUILL_FMT_EXTERNAL"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:

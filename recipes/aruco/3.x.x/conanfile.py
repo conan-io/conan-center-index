@@ -79,4 +79,4 @@ class ArucoConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "aruco")
         self.cpp_info.includedirs.append(os.path.join("include", "aruco"))
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)

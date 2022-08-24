@@ -519,7 +519,7 @@ class CPythonConan(ConanFile):
             if add:
                 packages[name] = fn
         for fname in packages.values():
-            tools.unzip(filename=os.path.join(whldir, fname), destination=os.path.join(self.package_folder, "bin", "Lib", "site-packages"))
+            tools.files.unzip(self, filename=os.path.join(whldir, fname), destination=os.path.join(self.package_folder, "bin", "Lib", "site-packages"))
 
         self.run("{} -c \"import compileall; compileall.compile_dir('{}')\"".format(os.path.join(build_path, self._cpython_interpreter_name), os.path.join(self.package_folder, self._msvc_install_subprefix, "Lib").replace("\\", "/")),
                  run_environment=True)

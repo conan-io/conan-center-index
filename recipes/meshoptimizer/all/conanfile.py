@@ -78,7 +78,7 @@ class MeshOptimizerConan(ConanFile):
             os.remove(f)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if not self.options.shared and tools.stdcpp_library(self):
             self.cpp_info.system_libs.append(tools.stdcpp_library(self))
         if self.options.shared and self.settings.os == "Windows":

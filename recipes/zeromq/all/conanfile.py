@@ -164,7 +164,7 @@ class ZeroMQConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libzmq")
 
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.components["libzmq"].libs = tools.collect_libs(self)
+        self.cpp_info.components["libzmq"].libs = tools.files.collect_libs(self, self)
         if self.settings.os == "Windows":
             self.cpp_info.components["libzmq"].system_libs = ["iphlpapi", "ws2_32"]
         elif self.settings.os in ["Linux", "FreeBSD"]:

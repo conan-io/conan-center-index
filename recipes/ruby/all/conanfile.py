@@ -167,7 +167,7 @@ class RubyConan(ConanFile):
             os.path.join(self.package_folder, "include", f"ruby-{version}"),
             os.path.dirname(os.path.dirname(config_file))
         ]
-        rubylib.libs = tools.collect_libs(self)
+        rubylib.libs = tools.files.collect_libs(self, self)
         if is_msvc(self):
             if self.options.shared:
                 rubylib.libs = list(filter(lambda l: not l.endswith("-static"), rubylib.libs))

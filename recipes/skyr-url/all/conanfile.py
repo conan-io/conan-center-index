@@ -122,7 +122,7 @@ class SkyrUrlConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "skyr::skyr-url")
 
         self.cpp_info.components["url"].name = "skyr-url"
-        self.cpp_info.components["url"].libs = tools.collect_libs(self)
+        self.cpp_info.components["url"].libs = tools.files.collect_libs(self, self)
         self.cpp_info.components["url"].requires = ["tl-expected::tl-expected", "range-v3::range-v3"]
         if self.options.with_json:
             self.cpp_info.components["url"].requires.append("nlohmann_json::nlohmann_json")

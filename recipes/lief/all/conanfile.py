@@ -112,7 +112,7 @@ class LiefConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "lief"
         self.cpp_info.names["cmake_find_package"] = "LIEF"
         self.cpp_info.names["cmake_find_package_multi"] = "LIEF"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         self.cpp_info.defines = ["_GLIBCXX_USE_CXX11_ABI=1"]
         if self.options.shared:
             self.cpp_info.defines.append("LIEF_IMPORT")

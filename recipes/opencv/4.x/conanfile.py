@@ -774,12 +774,12 @@ class OpenCVConan(ConanFile):
                             os.path.join("sdk", "native", "staticlibs", tools.to_android_abi(str(self.settings.arch))))
                         if conan_component == "opencv_core":
                             self.cpp_info.components[conan_component].libdirs.append("lib")
-                            self.cpp_info.components[conan_component].libs += tools.collect_libs(self)
+                            self.cpp_info.components[conan_component].libs += tools.files.collect_libs(self, self)
 
                 if self.settings.os in ["iOS", "Macos", "Linux", "Neutrino"]:
                     if not self.options.shared:
                         if conan_component == "opencv_core":
-                            libs = list(filter(lambda x: not x.startswith("opencv"), tools.collect_libs(self)))
+                            libs = list(filter(lambda x: not x.startswith("opencv"), tools.files.collect_libs(self, self)))
                             self.cpp_info.components[conan_component].libs += libs
 
                 # TODO: to remove in conan v2 once cmake_find_package* generators removed

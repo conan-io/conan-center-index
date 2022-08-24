@@ -66,4 +66,4 @@ class CargsConan(ConanFile):
         self.copy(pattern="*.dll", dst="bin", src=bin_dir, keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)

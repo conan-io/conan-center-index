@@ -169,7 +169,7 @@ class OpenALConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "OpenAL"
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
 
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         self.cpp_info.includedirs.append(os.path.join("include", "AL"))
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m"])

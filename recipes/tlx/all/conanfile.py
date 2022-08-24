@@ -113,7 +113,7 @@ class TlxConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "tlx")
         self.cpp_info.set_property("cmake_target_name", "tlx")
         self.cpp_info.set_property("pkg_config_name", "tlx")
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
 

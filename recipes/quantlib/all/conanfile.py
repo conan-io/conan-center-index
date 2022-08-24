@@ -75,4 +75,4 @@ class QuantlibConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "quantlib"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)

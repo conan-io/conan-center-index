@@ -137,7 +137,7 @@ class GeographiclibConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "geographiclib")
         self.cpp_info.set_property("cmake_target_name", "GeographicLib::GeographicLib")
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         self.cpp_info.defines.append("GEOGRAPHICLIB_SHARED_LIB={}".format("1" if self.options.shared else "0"))
 
         if self.options.tools:

@@ -179,6 +179,6 @@ class TensorflowLiteConan(ConanFile):
             defines.append("TFLITE_WITH_RUY")
 
         self.cpp_info.defines = defines
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("dl")

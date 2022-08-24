@@ -68,7 +68,7 @@ class TinyXmlConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses")
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.options.with_stl:
             self.cpp_info.defines = ["TIXML_USE_STL"]
         self.cpp_info.names["cmake_find_package"] = "TinyXML"

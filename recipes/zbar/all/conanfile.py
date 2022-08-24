@@ -148,7 +148,7 @@ class ZbarConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "zbar"
         self.cpp_info.set_property("pkg_config_name", "zbar")
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.settings.os in ("FreeBSD", "Linux") and self.options.enable_pthread:
             self.cpp_info.system_libs = ["pthread"]
         if tools.is_apple_os(self.settings.os):

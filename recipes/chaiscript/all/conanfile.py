@@ -72,7 +72,7 @@ class ChaiScriptConan(ConanFile):
 
     def package_info(self):
         if not self.options.header_only:
-            self.cpp_info.libs = tools.collect_libs(self)
+            self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.options.use_std_make_shared:
             self.cpp_info.defines.append("CHAISCRIPT_USE_STD_MAKE_SHARED")
         if self.settings.os == "Linux":

@@ -156,7 +156,7 @@ class LibStudXmlConan(ConanFile):
             tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         self.cpp_info.names["pkg_config"] = "libstudxml"
 
         # If built with makefile, static library mechanism is provided by their buildsystem already

@@ -54,7 +54,7 @@ class QtXlsxWriterConan(ConanFile):
             url = source["url"]
             filename = url.rsplit("/", 1)[-1]
             tools.files.download(self, url, filename, sha256=source["sha256"])
-        tools.unzip(os.path.join(self.source_folder, "v0.3.0.zip"), self._source_subfolder, strip_root=True)
+        tools.files.unzip(self, os.path.join(self.source_folder, "v0.3.0.zip"), self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -70,4 +70,4 @@ class QtXlsxWriterConan(ConanFile):
     def package_info(self):
         if not self.options.shared:
             self.cpp_info.defines = ["QTXLSX_STATIC"]
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)

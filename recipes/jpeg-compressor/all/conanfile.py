@@ -77,4 +77,4 @@ class JpegCompressorConan(ConanFile):
         tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENCE.txt"), self._extract_license())
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)

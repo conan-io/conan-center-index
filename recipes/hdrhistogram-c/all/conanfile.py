@@ -83,7 +83,7 @@ class HdrhistogramcConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "hdr_histogram::{}".format(target))
 
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.components["hdr_histrogram"].libs = tools.collect_libs(self)
+        self.cpp_info.components["hdr_histrogram"].libs = tools.files.collect_libs(self, self)
         self.cpp_info.components["hdr_histrogram"].includedirs.append(os.path.join("include", "hdr"))
         if not self.options.shared:
             if self.settings.os in ["Linux", "FreeBSD"]:

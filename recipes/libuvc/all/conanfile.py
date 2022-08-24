@@ -100,7 +100,7 @@ class LibuvcConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "LibUVC::{}".format(cmake_target))
         self.cpp_info.set_property("pkg_config_name", "libuvc")
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.components["_libuvc"].libs = tools.collect_libs(self)
+        self.cpp_info.components["_libuvc"].libs = tools.files.collect_libs(self, self)
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "libuvc"

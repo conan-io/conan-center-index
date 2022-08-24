@@ -128,7 +128,7 @@ class CppRestSDKConan(ConanFile):
         self.cpp_info.components["cpprestsdk_openssl_internal"].requires = ["openssl::openssl"]
         # cpprest
         self.cpp_info.components["cpprest"].set_property("cmake_target_name", "cpprestsdk::cpprest")
-        self.cpp_info.components["cpprest"].libs = tools.collect_libs(self)
+        self.cpp_info.components["cpprest"].libs = tools.files.collect_libs(self, self)
         self.cpp_info.components["cpprest"].requires = ["cpprestsdk_boost_internal", "cpprestsdk_openssl_internal"]
         if self.settings.os == "Linux":
             self.cpp_info.components["cpprest"].system_libs.append("pthread")

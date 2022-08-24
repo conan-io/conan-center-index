@@ -186,7 +186,7 @@ class ProjConan(ConanFile):
         self.cpp_info.components["projlib"].names["cmake_find_package"] = "proj"
         self.cpp_info.components["projlib"].names["cmake_find_package_multi"] = "proj"
 
-        self.cpp_info.components["projlib"].libs = tools.collect_libs(self)
+        self.cpp_info.components["projlib"].libs = tools.files.collect_libs(self, self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["projlib"].system_libs.append("m")
             if self.options.threadsafe:

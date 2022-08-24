@@ -200,7 +200,7 @@ class TclConan(ConanFile):
         systemlibs = []
         libdirs = []
         for root, _, _ in os.walk(os.path.join(self.package_folder, "lib"), topdown=False):
-            newlibs = tools.collect_libs(self, root)
+            newlibs = tools.files.collect_libs(self, self, root)
             if newlibs:
                 libs.extend(newlibs)
                 libdirs.append(root)

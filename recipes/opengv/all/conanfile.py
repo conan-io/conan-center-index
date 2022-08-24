@@ -147,7 +147,7 @@ class opengvConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "opengv")
         self.cpp_info.set_property("cmake_target_name", "opengv")
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.options.with_python_bindings:
             opengv_dist_packages = os.path.join(self.package_folder, "lib", "python3", "dist-packages")
             self.runenv_info.prepend_path("PYTHONPATH", opengv_dist_packages)

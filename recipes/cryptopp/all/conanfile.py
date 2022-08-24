@@ -132,7 +132,7 @@ class CryptoPPConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libcryptopp")
 
         # TODO: back to global scope once cmake_find_package* generators removed
-        self.cpp_info.components["libcryptopp"].libs = tools.collect_libs(self)
+        self.cpp_info.components["libcryptopp"].libs = tools.files.collect_libs(self, self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libcryptopp"].system_libs = ["pthread", "m"]
         elif self.settings.os == "SunOS":

@@ -123,7 +123,7 @@ class freeglutConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", pkg_config)
 
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.components["freeglut_"].libs = tools.collect_libs(self)
+        self.cpp_info.components["freeglut_"].libs = tools.files.collect_libs(self, self)
         if self.settings.os == "Linux":
             self.cpp_info.components["freeglut_"].system_libs.extend(["pthread", "m", "dl", "rt"])
         elif self.settings.os == "Windows":

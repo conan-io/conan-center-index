@@ -1358,7 +1358,7 @@ class BoostConan(ConanFile):
 
         if self._is_msvc and self._shared:
             # Some boost releases contain both static and shared variants of some libraries (if shared=True)
-            all_libs = set(tools.collect_libs(self, "lib"))
+            all_libs = set(tools.files.collect_libs(self, self, "lib"))
             static_libs = set(l for l in all_libs if l.startswith("lib"))
             shared_libs = all_libs.difference(static_libs)
             static_libs = set(l[3:] for l in static_libs)
@@ -1578,7 +1578,7 @@ class BoostConan(ConanFile):
                     libprefix = "lib"
                 return libprefix + n
 
-            all_detected_libraries = set(l[:-4] if l.endswith(".dll") else l for l in tools.collect_libs(self))
+            all_detected_libraries = set(l[:-4] if l.endswith(".dll") else l for l in tools.files.collect_libs(self, self))
             all_expected_libraries = set()
             incomplete_components = []
 

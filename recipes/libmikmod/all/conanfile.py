@@ -119,7 +119,7 @@ class LibmikmodConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if not self.options.shared:
             self.cpp_info.defines = ["MIKMOD_STATIC"]
         self.cpp_info.filenames["pkg_config"] = "libmikmod"

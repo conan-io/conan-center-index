@@ -89,4 +89,4 @@ class FlintConan(ConanFile):
             self.cpp_info.system_libs = ["pthread", "m"]
 
         self.cpp_info.includedirs.append(os.path.join("include", "flint"))
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)

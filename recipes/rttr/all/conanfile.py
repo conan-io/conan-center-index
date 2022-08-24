@@ -94,7 +94,7 @@ class RTTRConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "rttr")
         self.cpp_info.set_property("cmake_target_name", "RTTR::{}".format(cmake_target))
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["_rttr"].libs = tools.collect_libs(self)
+        self.cpp_info.components["_rttr"].libs = tools.files.collect_libs(self, self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_rttr"].system_libs = ["dl", "pthread"]
         if self.options.shared:

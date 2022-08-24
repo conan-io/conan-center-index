@@ -79,7 +79,7 @@ class LibspatialindexConan(ConanFile):
     def _get_lib_suffix(self):
         suffix = ""
         if self.settings.compiler == "Visual Studio":
-            libs = tools.collect_libs(self)
+            libs = tools.files.collect_libs(self, self)
             for lib in libs:
                 if "spatialindex_c" in lib:
                     suffix = lib.split("spatialindex_c", 1)[1]

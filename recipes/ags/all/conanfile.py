@@ -86,4 +86,4 @@ class AGSConan(ConanFile):
                 self.copy(static_lib, dst="lib", src=os.path.join(ags_lib_path, "lib"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)

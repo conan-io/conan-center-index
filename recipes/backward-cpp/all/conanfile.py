@@ -139,7 +139,7 @@ class BackwardCppConan(ConanFile):
         self.cpp_info.defines.append("BACKWARD_HAS_DWARF={}".format(int(self._has_stack_details("dwarf"))))
         self.cpp_info.defines.append("BACKWARD_HAS_PDB_SYMBOL={}".format(int(self.settings.os == "Windows")))
 
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl"])
         if self.settings.os == "Windows":

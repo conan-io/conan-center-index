@@ -155,7 +155,7 @@ class FlatbuffersConan(ConanFile):
 
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         if not self.options.header_only:
-            self.cpp_info.components["libflatbuffers"].libs = tools.collect_libs(self)
+            self.cpp_info.components["libflatbuffers"].libs = tools.files.collect_libs(self, self)
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["libflatbuffers"].system_libs.append("m")
 

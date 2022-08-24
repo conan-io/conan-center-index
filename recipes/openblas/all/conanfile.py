@@ -133,7 +133,7 @@ endif()"""
         self.cpp_info.components["openblas_component"].includedirs.append(
             os.path.join("include", "openblas")
         )
-        self.cpp_info.components["openblas_component"].libs = tools.collect_libs(self)
+        self.cpp_info.components["openblas_component"].libs = tools.files.collect_libs(self, self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["openblas_component"].system_libs.append("m")
             if self.options.use_thread:

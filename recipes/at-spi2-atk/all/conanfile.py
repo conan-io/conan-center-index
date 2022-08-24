@@ -88,7 +88,7 @@ class AtSPI2AtkConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         self.cpp_info.includedirs = [os.path.join('include', 'at-spi2-atk', '2.0')]
         self.cpp_info.names['pkg_config'] = 'atk-bridge-2.0'
 

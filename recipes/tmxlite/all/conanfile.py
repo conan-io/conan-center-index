@@ -92,7 +92,7 @@ class TmxliteConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if not self.options.shared:
             self.cpp_info.defines.append("TMXLITE_STATIC")
         if self.settings.os == "Android":

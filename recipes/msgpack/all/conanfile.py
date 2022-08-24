@@ -127,7 +127,7 @@ class MsgpackConan(ConanFile):
         if self.options.c_api:
             self.cpp_info.components["msgpackc"].names["cmake_find_package"] = "msgpackc"
             self.cpp_info.components["msgpackc"].names["cmake_find_package_multi"] = "msgpackc"
-            self.cpp_info.components["msgpackc"].libs = tools.collect_libs(self)
+            self.cpp_info.components["msgpackc"].libs = tools.files.collect_libs(self, self)
         if self.options.cpp_api:
             self.cpp_info.components["msgpackc-cxx"].names["cmake_find_package"] = "msgpackc-cxx"
             self.cpp_info.components["msgpackc-cxx"].names["cmake_find_package_multi"] = "msgpackc-cxx"

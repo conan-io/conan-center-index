@@ -88,7 +88,7 @@ class CAresConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libcares")
 
         # TODO: back to global scope once cmake_find_package* generators removed
-        self.cpp_info.components["cares"].libs = tools.collect_libs(self)
+        self.cpp_info.components["cares"].libs = tools.files.collect_libs(self, self)
         if not self.options.shared:
             self.cpp_info.components["cares"].defines.append("CARES_STATICLIB")
         if self.settings.os == "Linux":

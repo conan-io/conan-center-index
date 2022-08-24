@@ -106,7 +106,7 @@ class LibBasisUniversalConan(ConanFile):
         self.copy(pattern="*.dll", dst="bin", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         self.cpp_info.names["cmake_find_package"] = self.name
         self.cpp_info.names["cmake_find_package_multi"] = self.name
         self.cpp_info.includedirs = ["include", os.path.join("include", self.name)]

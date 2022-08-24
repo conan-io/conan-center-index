@@ -84,7 +84,7 @@ class HazelcastCppClient(ConanFile):
         self.cpp_info.names["cmake_find_package"] = self._cmake_name
         self.cpp_info.names["cmake_find_package_multi"] = self._cmake_name
 
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         self.cpp_info.defines = ["BOOST_THREAD_VERSION=5"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")

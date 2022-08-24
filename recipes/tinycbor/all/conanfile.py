@@ -91,7 +91,7 @@ class tinycborConan(ConanFile):
             self._package_unix()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
         self.cpp_info.includedirs = ["include", os.path.join("include","tinycbor")]

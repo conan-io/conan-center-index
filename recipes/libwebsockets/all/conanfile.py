@@ -503,7 +503,7 @@ class LibwebsocketsConan(ConanFile):
         pkgconfig_name = "libwebsockets" if self.options.shared else "libwebsockets_static"
         self.cpp_info.set_property("pkg_config_name", pkgconfig_name)
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["_libwebsockets"].libs = tools.collect_libs(self)
+        self.cpp_info.components["_libwebsockets"].libs = tools.files.collect_libs(self, self)
         if self.settings.os == "Windows":
             self.cpp_info.components["_libwebsockets"].system_libs.extend(["ws2_32", "crypt32"])
         elif self.settings.os in ["Linux", "FreeBSD"]:

@@ -87,7 +87,7 @@ class OpenvrConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "openvr"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         self.cpp_info.includedirs.append(os.path.join("include", "openvr"))
 
         if not self.options.shared:

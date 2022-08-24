@@ -87,7 +87,7 @@ class QuickfixConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
 
         if self.options.with_ssl:
             self.cpp_info.defines.append("HAVE_SSL=1")

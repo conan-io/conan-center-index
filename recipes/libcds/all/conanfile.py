@@ -88,7 +88,7 @@ class LibcdsConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "LibCDS")
         self.cpp_info.set_property("cmake_target_name", "LibCDS::{}".format(cmake_target))
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["_libcds"].libs = tools.collect_libs(self)
+        self.cpp_info.components["_libcds"].libs = tools.files.collect_libs(self, self)
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.components["_libcds"].defines = ["CDS_BUILD_STATIC_LIB"]
         if self.settings.os in ["Linux", "FreeBSD"]:

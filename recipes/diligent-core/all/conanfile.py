@@ -182,7 +182,7 @@ class DiligentCoreConan(ConanFile):
         tools.files.rm(self, self.package_folder, "objects.a")
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         # included as discussed here https://github.com/conan-io/conan-center-index/pull/10732#issuecomment-1123596308
         self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include"))
         self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "DiligentCore", "Common"))

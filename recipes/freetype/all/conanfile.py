@@ -247,7 +247,7 @@ class FreetypeConan(ConanFile):
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
         self.cpp_info.set_property("pkg_config_name", "freetype2")
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
         self.cpp_info.includedirs.append(os.path.join("include", "freetype2"))

@@ -106,4 +106,4 @@ class PugiXmlConan(ConanFile):
             if self.options.no_exceptions:
                 self.cpp_info.defines.append("PUGIXML_NO_EXCEPTIONS")
         else:
-            self.cpp_info.libs = tools.collect_libs(self)
+            self.cpp_info.libs = tools.files.collect_libs(self, self)

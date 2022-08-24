@@ -210,7 +210,7 @@ class RocksDB(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "RocksDB")
         self.cpp_info.set_property("cmake_target_name", "RocksDB::{}".format(cmake_target))
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["librocksdb"].libs = tools.collect_libs(self)
+        self.cpp_info.components["librocksdb"].libs = tools.files.collect_libs(self, self)
         if self.settings.os == "Windows":
             self.cpp_info.components["librocksdb"].system_libs = ["shlwapi", "rpcrt4"]
             if self.options.shared:

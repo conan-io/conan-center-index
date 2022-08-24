@@ -110,7 +110,7 @@ class PistacheConan(ConanFile):
         suffix = "_{}".format("shared" if self.options.shared else "static")
         self.cpp_info.components["libpistache"].names["cmake_find_package"] = "pistache" + suffix
         self.cpp_info.components["libpistache"].names["cmake_find_package_multi"] = "pistache" + suffix
-        self.cpp_info.components["libpistache"].libs = tools.collect_libs(self)
+        self.cpp_info.components["libpistache"].libs = tools.files.collect_libs(self, self)
         self.cpp_info.components["libpistache"].requires = ["rapidjson::rapidjson"]
         if self.options.with_ssl:
             self.cpp_info.components["libpistache"].requires.append("openssl::openssl")

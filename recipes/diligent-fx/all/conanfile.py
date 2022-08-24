@@ -101,7 +101,7 @@ class DiligentFxConan(ConanFile):
         self.copy(pattern="*.a", src=self._build_subfolder, dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx", "Components", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx", "GLTF_PBR_Renderer", "interface"))

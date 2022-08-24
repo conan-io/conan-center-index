@@ -137,7 +137,7 @@ class LibSigCppConan(ConanFile):
 
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["sigc++"].includedirs = [os.path.join("include", "sigc++-3.0")]
-        self.cpp_info.components["sigc++"].libs = tools.collect_libs(self)
+        self.cpp_info.components["sigc++"].libs = tools.files.collect_libs(self, self)
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["sigc++"].system_libs.append("m")
 

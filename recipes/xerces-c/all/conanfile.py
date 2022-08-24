@@ -152,7 +152,7 @@ class XercesCConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "XercesC")
         self.cpp_info.set_property("cmake_target_name", "XercesC::XercesC")
         self.cpp_info.set_property("pkg_config_name", "xerces-c")
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ["CoreFoundation", "CoreServices"]
         elif self.settings.os in ["Linux", "FreeBSD"]:

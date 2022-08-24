@@ -81,7 +81,7 @@ class LibRawConan(ConanFile):
         self.copy("LICENSE.*", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
 
         if self.settings.os == "Windows":
             self.cpp_info.defines.append("WIN32")

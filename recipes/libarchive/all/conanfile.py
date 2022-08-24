@@ -231,7 +231,7 @@ class LibarchiveConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "LibArchive"
         self.cpp_info.names["cmake_find_package_multi"] = "LibArchive"
 
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.settings.os == "Windows" and self.options.with_cng:
             self.cpp_info.system_libs.append("bcrypt")
         if str(self.settings.compiler) in ["Visual Studio", "msvc"] and not self.options.shared:

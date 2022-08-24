@@ -105,4 +105,4 @@ class TCSBankUriTemplateConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "uri-template"
         self.cpp_info.names["cmake_find_package"] = "uri-template"
         self.cpp_info.names["cmake_find_package_multi"] = "uri-template"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)

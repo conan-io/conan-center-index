@@ -194,7 +194,7 @@ class MicroprofileConan(ConanFile):
         tools.files.save(self, filename, "".join(defines_list))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         self.cpp_info.names["cmake_find_package"] = self.name
         self.cpp_info.names["cmake_find_package_multi"] = self.name
         if self.settings.os == "Windows":

@@ -98,7 +98,7 @@ class FltkConan(ConanFile):
 
         if self.options.shared and self.settings.os == "Windows":
             self.cpp_info.defines.append("FL_DLL")
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.settings.os in ("Linux", "FreeBSD"):
             if self.options.with_threads:
                 self.cpp_info.system_libs.extend(['pthread', 'dl'])

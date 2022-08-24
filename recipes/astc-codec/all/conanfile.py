@@ -67,7 +67,7 @@ class AstcCodecConan(ConanFile):
         self.copy("*.a", src=os.path.join(self._build_subfolder, "lib"), dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self, self)
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))

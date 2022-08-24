@@ -87,7 +87,7 @@ class ImathConan(ConanFile):
         imath_lib = self.cpp_info.components["imath_lib"]
         imath_lib.set_property("cmake_target_name", "Imath::Imath")
         imath_lib.set_property("pkg_config_name", "Imath")
-        imath_lib.libs = tools.collect_libs(self)
+        imath_lib.libs = tools.files.collect_libs(self, self)
         imath_lib.requires = ["imath_config"]
         if self.settings.os == "Windows" and self.options.shared:
             imath_lib.defines.append("IMATH_DLL")
