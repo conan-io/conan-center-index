@@ -112,7 +112,7 @@ class GnConan(ConanFile):
                 time.sleep(1)
                 build_args = [
                     "-C", "out",
-                    "-j{}".format(tools.cpu_count()),
+                    "-j{}".format(tools.cpu_count(self, )),
                 ]
                 self.run("ninja {}".format(" ".join(build_args)), run_environment=True)
 

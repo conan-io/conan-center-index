@@ -104,7 +104,7 @@ class LibTomMathConan(ConanFile):
                         makefile,
                         target,
                         arg_str,
-                        tools.cpu_count(),
+                        tools.cpu_count(self, ),
                     ), run_environment=True)
 
     def build(self):

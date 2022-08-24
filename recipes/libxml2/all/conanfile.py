@@ -225,9 +225,9 @@ class Libxml2Conan(ConanFile):
             fix_library(self.options.zlib, "zlib", "z")
             fix_library(self.options.lzma, "xz_utils", "lzma")
 
-            self.run("mingw32-make -j{} -f Makefile.mingw libxml libxmla".format(tools.cpu_count()))
+            self.run("mingw32-make -j{} -f Makefile.mingw libxml libxmla".format(tools.cpu_count(self, )))
             if self.options.include_utils:
-                self.run("mingw32-make -j{} -f Makefile.mingw utils".format(tools.cpu_count()))
+                self.run("mingw32-make -j{} -f Makefile.mingw utils".format(tools.cpu_count(self, )))
 
     def _package_mingw(self):
         with self._mingw_build_environment():

@@ -198,7 +198,7 @@ class CrashpadConan(ConanFile):
                     targets.append("crashpad_handler_com")
                 self.run("ninja -C out/Default {targets} -j{parallel}".format(
                     targets=" ".join(targets),
-                    parallel=tools.cpu_count()), run_environment=True)
+                    parallel=tools.cpu_count(self, )), run_environment=True)
 
         def lib_filename(name):
             prefix, suffix = ("", ".lib")  if self.settings.compiler == "Visual Studio" else ("lib", ".a")

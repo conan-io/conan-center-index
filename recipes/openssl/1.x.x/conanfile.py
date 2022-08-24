@@ -654,7 +654,7 @@ class OpenSSLConan(ConanFile):
             # See https://github.com/openssl/openssl/issues/298
             if self._full_version < "1.0.2d":
                 parallel = False
-            command.append(("-j%s" % tools.cpu_count()) if parallel else "-j1")
+            command.append(("-j%s" % tools.cpu_count(self, )) if parallel else "-j1")
         self.run(" ".join(command), win_bash=self._win_bash)
 
     @property

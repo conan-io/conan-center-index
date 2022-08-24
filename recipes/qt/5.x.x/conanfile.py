@@ -751,7 +751,7 @@ class QtConan(ConanFile):
         os.mkdir("build_folder")
         with tools.files.chdir(self, "build_folder"):
             with tools.vcvars(self) if self._is_msvc else tools.no_op():
-                build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": [self.build_folder]}
+                build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(self, ), "PKG_CONFIG_PATH": [self.build_folder]}
                 if self.settings.os == "Windows":
                     build_env["PATH"] = [os.path.join(self.source_folder, "qt5", "gnuwin32", "bin")]
 

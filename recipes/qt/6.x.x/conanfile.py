@@ -564,7 +564,7 @@ class QtConan(ConanFile):
         with tools.vcvars(self) if self._is_msvc else tools.no_op():
             # next lines force cmake package to be in PATH before the one provided by visual studio (vcvars)
             build_env = tools.RunEnvironment(self).vars if self._is_msvc else {}
-            build_env["MAKEFLAGS"] = "j%d" % tools.cpu_count()
+            build_env["MAKEFLAGS"] = "j%d" % tools.cpu_count(self, )
             build_env["PKG_CONFIG_PATH"] = [self.build_folder]
             if self.settings.os == "Windows":
                 if "PATH" not in build_env:

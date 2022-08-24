@@ -420,7 +420,7 @@ class BotanConan(ConanFile):
         make_ldflags = 'LDFLAGS=-lc++abi' if self._is_linux_clang_libcxx else ''
 
         make_cmd = ('{ldflags}' ' {make}' ' -j{cpucount}').format(
-                        ldflags=make_ldflags, make=self._make_program, cpucount=tools.cpu_count())
+                        ldflags=make_ldflags, make=self._make_program, cpucount=tools.cpu_count(self, ))
         return make_cmd
 
     @property

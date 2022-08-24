@@ -25,7 +25,7 @@ class TestPackageConan(ConanFile):
             raise ConanException("scons --version does not return correct version")
 
         scons_args = [
-            "-j", str(tools.cpu_count()),
+            "-j", str(tools.cpu_count(self, )),
             "-C", self.source_folder,
             "-f", os.path.join(self.source_folder, "SConstruct"),
         ]

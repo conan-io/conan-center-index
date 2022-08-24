@@ -535,7 +535,7 @@ class OpenSSLConan(ConanFile):
         if targets:
             command.extend(targets)
         if not self._use_nmake:
-            command.append(("-j%s" % tools.cpu_count()) if parallel else "-j1")
+            command.append(("-j%s" % tools.cpu_count(self, )) if parallel else "-j1")
         self.run(" ".join(command), win_bash=self._win_bash)
 
     @property

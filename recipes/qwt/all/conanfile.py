@@ -96,7 +96,7 @@ class QwtConan(ConanFile):
             self.run("{} && jom".format(vcvars))
         else:
             self.run("qmake {}".format(self._source_subfolder), run_environment=True)
-            self.run("make -j {}".format(tools.cpu_count()))
+            self.run("make -j {}".format(tools.cpu_count(self, )))
 
     def package(self):
         self.copy("COPYING", src=os.path.join(self._source_subfolder), dst="licenses")

@@ -63,7 +63,7 @@ class TestPackageConan(ConanFile):
                 ]
                 self.run("gn gen {}".format(" ".join(gn_args)), run_environment=True)
             with self._build_context():
-                self.run("ninja -v -j{} -C bin".format(tools.cpu_count()), run_environment=True)
+                self.run("ninja -v -j{} -C bin".format(tools.cpu_count(self, )), run_environment=True)
 
     def test(self):
         if not tools.build.cross_building(self, self.settings):

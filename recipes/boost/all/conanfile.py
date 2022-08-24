@@ -791,7 +791,7 @@ class BoostConan(ConanFile):
         folder = os.path.join(self.source_folder, self._source_subfolder, "tools", "bcp")
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.files.chdir(self, folder):
-                command = f"{self._b2_exe} -j{tools.cpu_count()} --abbreviate-paths toolset={self._toolset}"
+                command = f"{self._b2_exe} -j{tools.cpu_count(self, )} --abbreviate-paths toolset={self._toolset}"
                 command += " -d%d" % self.options.debug_level
                 self.output.warn(command)
                 self.run(command, run_environment=True)
@@ -1134,7 +1134,7 @@ class BoostConan(ConanFile):
         flags.extend([
             "install",
             f"--prefix={self.package_folder}",
-            f"-j{tools.cpu_count()}",
+            f"-j{tools.cpu_count(self, )}",
             "--abbreviate-paths",
             "-d%d" % self.options.debug_level,
         ])

@@ -104,7 +104,7 @@ class GodotCppConan(ConanFile):
             " ".join([
                 "scons",
                 "-C{}".format(self._source_subfolder),
-                "-j{}".format(tools.cpu_count()),
+                "-j{}".format(tools.cpu_count(self, )),
                 "generate_bindings=yes",
                 "use_custom_api_file=yes",
                 "bits={}".format(self._bits),

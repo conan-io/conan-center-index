@@ -122,7 +122,7 @@ class ICUBase(ConanFile):
                     self.run(self._build_config_cmd, win_bash=tools.os_info.is_windows)
                     command = "{make} {silent} -j {cpu_count}".format(make=self._make_tool,
                                                                       silent=self._silent,
-                                                                      cpu_count=tools.cpu_count())
+                                                                      cpu_count=tools.cpu_count(self, ))
                     self.run(command, win_bash=tools.os_info.is_windows)
                     if self.options.with_unit_tests:
                         command = "{make} {silent} check".format(make=self._make_tool,

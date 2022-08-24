@@ -142,7 +142,7 @@ class LiquidDspConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        ncpus = tools.cpu_count()
+        ncpus = tools.cpu_count(self, )
         configure_args = []
         cflags = ["-static-libgcc"]
         if self.settings.build_type == "Debug":

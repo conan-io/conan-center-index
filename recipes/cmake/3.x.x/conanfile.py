@@ -94,7 +94,7 @@ class CMakeConan(ConanFile):
     def build(self):
         if self.options.bootstrap:
             with tools.files.chdir(self, self._source_subfolder):
-                self.run(['./bootstrap', '--prefix={}'.format(self.package_folder), '--parallel={}'.format(tools.cpu_count())])
+                self.run(['./bootstrap', '--prefix={}'.format(self.package_folder), '--parallel={}'.format(tools.cpu_count(self, ))])
                 autotools = AutoToolsBuildEnvironment(self)
                 autotools.make()
         else:
