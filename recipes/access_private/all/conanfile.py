@@ -1,6 +1,6 @@
 import os
 
-from conans import ConanFile, tools
+from conan import ConanFile, tools
 
 
 class AccessPrivateConan(ConanFile):
@@ -19,10 +19,10 @@ class AccessPrivateConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            tools.build.check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         url = self.conan_data["sources"][self.version]["url"]
         extracted_dir = "access_private-" + \
             os.path.splitext(os.path.basename(url))[0]
