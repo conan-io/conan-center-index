@@ -64,9 +64,9 @@ class libxftConan(ConanFile):
         with files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install(args=["-j1"])
-        files.rm(self, "*.la", f"{self.package_folder}/lib"), recursive=True)
-        files.rmdir(self, f"{self.package_folder}/lib/pkgconfig"))
-        files.rmdir(self, f"{self.package_folder}/share"))
+        files.rm(self, "*.la", f"{self.package_folder}/lib", recursive=True)
+        files.rmdir(self, f"{self.package_folder}/lib/pkgconfig")
+        files.rmdir(self, f"{self.package_folder}/share")
 
     def package_info(self):
         self.cpp_info.names['pkg_config'] = "Xft"
