@@ -685,17 +685,17 @@ class GdalConan(ConanFile):
 
         yes_no = lambda v: "yes" if v else "no"
         internal_no = lambda v: "internal" if v else "no"
-        rootpath = lambda req: tools.unix_path(self.deps_cpp_info[req].rootpath)
+        rootpath = lambda req: tools.microsoft.unix_path(self, self.deps_cpp_info[req].rootpath)
         rootpath_no = lambda v, req: rootpath(req) if v else "no"
 
         args = []
-        args.append("--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))))
+        args.append("--datarootdir={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "res"))))
         # Shared/Static
         args.extend([
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "--enable-shared={}".format(yes_no(self.options.shared)),
         ])
-        args.append("--includedir={}".format(tools.unix_path(os.path.join(self.package_folder, "include", "gdal"))))
+        args.append("--includedir={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "include", "gdal"))))
 
         # Enable C++14 if requested in conan profile or if with_charls enabled
         if (self.settings.compiler.cppstd and tools.valid_min_cppstd(self, 14)) or self.options.with_charls:
@@ -809,8 +809,8 @@ class GdalConan(ConanFile):
         if self.options.with_opencl:
             args.extend([
                 "--with-opencl",
-                "--with-opencl-include={}".format(tools.unix_path(self.deps_cpp_info["opencl-headers"].include_paths[0])),
-                "--with-opencl-lib=-L{}".format(tools.unix_path(self.deps_cpp_info["opencl-icd-loader"].lib_paths[0]))
+                "--with-opencl-include={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["opencl-headers"].include_paths[0])),
+                "--with-opencl-lib=-L{}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["opencl-icd-loader"].lib_paths[0]))
             ])
         else:
             args.append("--without-opencl")
@@ -869,7 +869,7 @@ class GdalConan(ConanFile):
     def _autotools_build_environment(self):
         with tools.files.chdir(self, self._source_subfolder):
             with tools.run_environment(self):
-                with tools.environment_append({"PKG_CONFIG_PATH": tools.unix_path(self.build_folder)}):
+                with tools.environment_append({"PKG_CONFIG_PATH": tools.microsoft.unix_path(self, self.build_folder)}):
                     yield
 
     def build(self):

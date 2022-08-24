@@ -145,7 +145,7 @@ class LibdbConan(ConanFile):
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
         if self.options.with_tcl:
-            conf_args.append("--with-tcl={}".format(tools.unix_path(os.path.join(self.deps_cpp_info["tcl"].rootpath, "lib"))))
+            conf_args.append("--with-tcl={}".format(tools.microsoft.unix_path(self, os.path.join(self.deps_cpp_info["tcl"].rootpath, "lib"))))
         self._autotools.configure(configure_dir=os.path.join(self.source_folder, self._source_subfolder, "dist"), args=conf_args)
         if self.settings.os == "Windows" and self.options.shared:
             tools.files.replace_in_file(self, os.path.join(self.build_folder, "libtool"),

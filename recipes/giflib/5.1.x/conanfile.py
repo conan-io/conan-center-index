@@ -101,7 +101,7 @@ class GiflibConan(ConanFile):
             if not self.options.shared:
                 cflags = "-DUSE_GIF_LIB"
 
-            prefix = tools.unix_path(os.path.abspath(self.package_folder))
+            prefix = tools.microsoft.unix_path(self, os.path.abspath(self.package_folder))
             with tools.vcvars(self.settings):
                 command = "./configure " \
                           "{options} " \

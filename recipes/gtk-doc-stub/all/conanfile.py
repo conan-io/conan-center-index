@@ -39,8 +39,8 @@ class GtkDocStubConan(ConanFile):
     def _configure_autotools(self):
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         args = [
-            "--datadir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
-            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
+            "--datadir={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "res"))),
+            "--datarootdir={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "res"))),
         ]
         autotools.configure(args=args, configure_dir=self._source_subfolder)
         return autotools
@@ -60,6 +60,6 @@ class GtkDocStubConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = ["res"]
 
-        automake_dir = tools.unix_path(os.path.join(self.package_folder, "res", "aclocal"))
+        automake_dir = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "res", "aclocal"))
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(automake_dir))
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(automake_dir)

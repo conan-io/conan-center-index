@@ -69,10 +69,10 @@ class LibAttrConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(
             self, win_bash=tools.os_info.is_windows)
         conf_args = [
-            "--prefix={}".format(tools.unix_path(self.package_folder)),
-            "--bindir={}".format(tools.unix_path(
+            "--prefix={}".format(tools.microsoft.unix_path(self, self.package_folder)),
+            "--bindir={}".format(tools.microsoft.unix_path(self, 
                 os.path.join(self.package_folder, "bin"))),
-            "--libdir={}".format(tools.unix_path(
+            "--libdir={}".format(tools.microsoft.unix_path(self, 
                 os.path.join(self.package_folder, "lib")))
         ]
         if self.options.shared:

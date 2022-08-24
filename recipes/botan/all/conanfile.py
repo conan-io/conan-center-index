@@ -379,7 +379,7 @@ class BotanConan(ConanFile):
 
         call_python = 'python' if self.settings.os == 'Windows' else ''
 
-        prefix = tools.unix_path(self.package_folder) if self._is_mingw_windows else self.package_folder
+        prefix = tools.microsoft.unix_path(self, self.package_folder) if self._is_mingw_windows else self.package_folder
 
         botan_abi = ' '.join(botan_abi_flags) if botan_abi_flags else ' '
         botan_cxx_extras = ' '.join(botan_extra_cxx_flags) if botan_extra_cxx_flags else ' '

@@ -28,9 +28,9 @@ class TestPackageConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
                 with tools.environment_append({
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "CC": "{} cl -nologo".format(tools.microsoft.unix_path(self, self.deps_user_info["automake"].compile)),
+                    "CXX": "{} cl -nologo".format(tools.microsoft.unix_path(self, self.deps_user_info["automake"].compile)),
+                    "AR": "{} lib".format(tools.microsoft.unix_path(self, self.deps_user_info["automake"].ar_lib)),
                     "LD": "link",
                 }):
                     yield
@@ -50,7 +50,7 @@ class TestPackageConan(ConanFile):
 
         tools.files.mkdir(self, self._package_folder)
         conf_args = [
-            "--prefix={}".format(tools.unix_path(self._package_folder)),
+            "--prefix={}".format(tools.microsoft.unix_path(self, self._package_folder)),
             "--enable-shared", "--enable-static",
         ]
 
@@ -116,12 +116,12 @@ class TestPackageConan(ConanFile):
             conf_args = [
                 "--enable-shared",
                 "--disable-static",
-                "--prefix={}".format(tools.unix_path(os.path.join(install_prefix))),
+                "--prefix={}".format(tools.microsoft.unix_path(self, os.path.join(install_prefix))),
             ]
             with self._build_context():
                 autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
                 autotools.libs = []
-                autotools.link_flags.append("-L{}".format(tools.unix_path(os.path.join(install_prefix, "lib"))))
+                autotools.link_flags.append("-L{}".format(tools.microsoft.unix_path(self, os.path.join(install_prefix, "lib"))))
                 autotools.configure(args=conf_args, configure_dir=autotools_folder)
                 autotools.make(args=["V=1"])
                 autotools.install()

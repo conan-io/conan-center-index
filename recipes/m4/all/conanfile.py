@@ -74,7 +74,7 @@ class M4Conan(ConanFile):
         if self._is_msvc:
             with tools.vcvars(self.settings):
                 env.update({
-                    "AR": "{}/build-aux/ar-lib lib".format(tools.unix_path(self._source_subfolder)),
+                    "AR": "{}/build-aux/ar-lib lib".format(tools.microsoft.unix_path(self, self._source_subfolder)),
                     "CC": "cl -nologo",
                     "CXX": "cl -nologo",
                     "LD": "link",

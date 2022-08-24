@@ -139,7 +139,7 @@ class GmpConan(ConanFile):
                     "CXX": "cl -nologo",
                     "AR": "{} lib".format(self._user_info_build["automake"].ar_lib.replace("\\", "/")),
                     "LD": "link -nologo",
-                    "NM": "python {}".format(tools.unix_path(os.path.join(self.build_folder, "dumpbin_nm.py"))),
+                    "NM": "python {}".format(tools.microsoft.unix_path(self, os.path.join(self.build_folder, "dumpbin_nm.py"))),
                 }
                 with tools.environment_append(env):
                     yield

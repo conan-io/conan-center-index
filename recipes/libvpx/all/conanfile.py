@@ -96,7 +96,7 @@ class LibVPXConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_autotools(self):
         args = [
-            "--prefix={}".format(tools.unix_path(self.package_folder)),
+            "--prefix={}".format(tools.microsoft.unix_path(self, self.package_folder)),
             "--disable-examples",
             "--disable-unit-tests",
             "--disable-tools",

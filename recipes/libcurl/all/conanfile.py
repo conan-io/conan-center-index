@@ -375,26 +375,26 @@ class LibcurlConan(ConanFile):
             "--enable-unix-sockets={}".format(yes_no(self.options.with_unix_sockets)),
         ]
         if self.options.with_ssl == "openssl":
-            params.append("--with-ssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath)))
+            params.append("--with-ssl={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["openssl"].rootpath)))
         else:
             params.append("--without-ssl")
         if self.options.with_ssl == "wolfssl":
-            params.append("--with-wolfssl={}".format(tools.unix_path(self.deps_cpp_info["wolfssl"].rootpath)))
+            params.append("--with-wolfssl={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["wolfssl"].rootpath)))
         else:
             params.append("--without-wolfssl")
 
         if self.options.with_libssh2:
-            params.append("--with-libssh2={}".format(tools.unix_path(self.deps_cpp_info["libssh2"].rootpath)))
+            params.append("--with-libssh2={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["libssh2"].rootpath)))
         else:
             params.append("--without-libssh2")
 
         if self.options.with_nghttp2:
-            params.append("--with-nghttp2={}".format(tools.unix_path(self.deps_cpp_info["libnghttp2"].rootpath)))
+            params.append("--with-nghttp2={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["libnghttp2"].rootpath)))
         else:
             params.append("--without-nghttp2")
 
         if self.options.with_zlib:
-            params.append("--with-zlib={}".format(tools.unix_path(self.deps_cpp_info["zlib"].rootpath)))
+            params.append("--with-zlib={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["zlib"].rootpath)))
         else:
             params.append("--without-zlib")
 

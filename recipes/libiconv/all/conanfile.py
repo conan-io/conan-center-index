@@ -70,8 +70,8 @@ class LibiconvConan(ConanFile):
             cxx = "cl" if is_msvc(self) else os.environ.get("CXX", "clang-cl")
             lib = "lib" if is_msvc(self) else os.environ.get("AR", "llvm-lib")
             build_aux_path = os.path.join(self.build_folder, self._source_subfolder, "build-aux")
-            lt_compile = tools.unix_path(os.path.join(build_aux_path, "compile"))
-            lt_ar = tools.unix_path(os.path.join(build_aux_path, "ar-lib"))
+            lt_compile = tools.microsoft.unix_path(self, os.path.join(build_aux_path, "compile"))
+            lt_ar = tools.microsoft.unix_path(self, os.path.join(build_aux_path, "ar-lib"))
             env_vars.update({
                 "CC": "{} {} -nologo".format(lt_compile, cc),
                 "CXX": "{} {} -nologo".format(lt_compile, cxx),

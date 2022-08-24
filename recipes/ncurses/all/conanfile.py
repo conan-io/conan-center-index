@@ -134,7 +134,7 @@ class NCursesConan(ConanFile):
             "--without-profile",
             "--with-sp-funcs",
             "--disable-rpath",
-            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
+            "--datarootdir={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "res"))),
             "--disable-pc-files",
         ]
         build = None

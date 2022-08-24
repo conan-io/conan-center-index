@@ -63,7 +63,7 @@ class LibalsaConan(ConanFile):
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "--enable-python={}".format(yes_no(not self.options.disable_python)),
-            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
+            "--datarootdir={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "res"))),
         ]
         self._autotools.configure(args=args)
         return self._autotools

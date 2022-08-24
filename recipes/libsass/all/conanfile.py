@@ -84,7 +84,7 @@ class LibsassConan(ConanFile):
             env_vars = AutoToolsBuildEnvironment(self).vars
             env_vars.update({
                 "BUILD": "shared" if self.options.shared else "static",
-                "PREFIX": tools.unix_path(os.path.join(self.package_folder)),
+                "PREFIX": tools.microsoft.unix_path(self, os.path.join(self.package_folder)),
                 # Don't force static link to mingw libs, leave this decision to consumer (through LDFLAGS in env)
                 "STATIC_ALL": "0",
                 "STATIC_LIBGCC": "0",

@@ -381,8 +381,8 @@ class OpenSSLConan(ConanFile):
     @property
     def _configure_args(self):
         openssldir = self.options.openssldir or self._get_default_openssl_dir()
-        prefix = tools.unix_path(self.package_folder) if self._win_bash else self.package_folder
-        openssldir = tools.unix_path(openssldir) if self._win_bash else openssldir
+        prefix = tools.microsoft.unix_path(self, self.package_folder) if self._win_bash else self.package_folder
+        openssldir = tools.microsoft.unix_path(self, openssldir) if self._win_bash else openssldir
         args = [
             '"%s"' % (self._target),
             "shared" if self.options.shared else "no-shared",
@@ -623,7 +623,7 @@ class OpenSSLConan(ConanFile):
         make_program = tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make") or tools.which("mingw32-make"))
         if not make_program:
             raise Exception('could not find "make" executable. please set "CONAN_MAKE_PROGRAM" environment variable')
-        make_program = tools.unix_path(make_program)
+        make_program = tools.microsoft.unix_path(self, make_program)
         return make_program
 
     def _replace_runtime_in_file(self, filename):

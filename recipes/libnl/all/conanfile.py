@@ -41,7 +41,7 @@ class LibNlConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
         config_args = [
-            "--prefix={}".format(tools.unix_path(self.package_folder)),
+            "--prefix={}".format(tools.microsoft.unix_path(self, self.package_folder)),
         ]
         if self.options.shared:
             config_args.extend(["--enable-shared=yes", "--enable-static=no"])

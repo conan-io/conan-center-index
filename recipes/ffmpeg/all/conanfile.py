@@ -365,7 +365,7 @@ class FFMpegConan(ConanFile):
 
     @contextlib.contextmanager
     def _build_context(self):
-        with tools.environment_append({"PKG_CONFIG_PATH": tools.unix_path(self.build_folder)}):
+        with tools.environment_append({"PKG_CONFIG_PATH": tools.microsoft.unix_path(self, self.build_folder)}):
             if self._is_msvc:
                 with tools.vcvars(self):
                     yield

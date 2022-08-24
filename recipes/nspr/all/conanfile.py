@@ -91,7 +91,7 @@ class NsprConan(ConanFile):
             "--enable-64bit={}".format(yes_no(self.settings.arch in ("armv8", "x86_64", "mips64", "ppc64", "ppc64le"))),
             "--enable-strip={}".format(yes_no(self.settings.build_type not in ("Debug", "RelWithDebInfo"))),
             "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
-            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
+            "--datarootdir={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "res"))),
             "--disable-cplus",
         ]
         if self._is_msvc:
@@ -198,7 +198,7 @@ class NsprConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["winmm", "ws2_32"])
 
-        aclocal = tools.unix_path(os.path.join(self.package_folder, "res", "aclocal"))
+        aclocal = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "res", "aclocal"))
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(aclocal))
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(aclocal)
 

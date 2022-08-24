@@ -86,7 +86,7 @@ class GetTextConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         libiconv_prefix = self.deps_cpp_info["libiconv"].rootpath
-        libiconv_prefix = tools.unix_path(libiconv_prefix) if tools.os_info.is_windows else libiconv_prefix
+        libiconv_prefix = tools.microsoft.unix_path(self, libiconv_prefix) if tools.os_info.is_windows else libiconv_prefix
         args = ["HELP2MAN=/bin/true",
                 "EMACS=no",
                 "--disable-nls",
@@ -118,11 +118,11 @@ class GetTextConan(ConanFile):
             cl = "cl" if self._is_msvc else os.environ.get("CC", 'clang-cl')
             lib = "lib" if self._is_msvc else os.environ.get('AR', "llvm-lib")
             link = "link" if self._is_msvc else os.environ.get("LD", "lld-link")
-            args.extend(["CC=%s %s -nologo" % (tools.unix_path(self._user_info_build["automake"].compile), cl),
+            args.extend(["CC=%s %s -nologo" % (tools.microsoft.unix_path(self, self._user_info_build["automake"].compile), cl),
                          "LD=%s" % link,
                          "NM=dumpbin -symbols",
                          "STRIP=:",
-                         "AR=%s %s" % (tools.unix_path(self._user_info_build["automake"].ar_lib), lib),
+                         "AR=%s %s" % (tools.microsoft.unix_path(self, self._user_info_build["automake"].ar_lib), lib),
                          "RANLIB=:"])
             if rc:
                 args.extend(['RC=%s' % rc, 'WINDRES=%s' % rc])

@@ -176,7 +176,7 @@ class TkConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         yes_no = lambda v: "yes" if v else "no"
         conf_args = [
-            "--with-tcl={}".format(tools.unix_path(tclConfigShFolder)),
+            "--with-tcl={}".format(tools.microsoft.unix_path(self, tclConfigShFolder)),
             "--enable-threads",
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-symbols={}".format(yes_no(self.settings.build_type == "Debug")),

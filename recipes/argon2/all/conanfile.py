@@ -55,7 +55,7 @@ class Argon2Conan(ConanFile):
     @property
     def _make_args(self):
         return (
-            "PREFIX={}".format(tools.unix_path(self.package_folder)),
+            "PREFIX={}".format(tools.microsoft.unix_path(self, self.package_folder)),
             "LIBRARY_REL=lib",
             "KERNEL_NAME={}".format(self._kernel_name),
             "RUN_EXT={}".format(".exe" if self.settings.os == "Windows" else ""),

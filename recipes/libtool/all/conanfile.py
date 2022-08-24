@@ -87,8 +87,8 @@ class LibtoolConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) >= "12":
             self._autotools.flags.append("-FS")
         conf_args = [
-            "--datarootdir={}".format(tools.unix_path(self._datarootdir)),
-            "--prefix={}".format(tools.unix_path(self.package_folder)),
+            "--datarootdir={}".format(tools.microsoft.unix_path(self, self._datarootdir)),
+            "--prefix={}".format(tools.microsoft.unix_path(self, self.package_folder)),
             "--enable-shared",
             "--enable-static",
             "--enable-ltdl-install",
@@ -203,11 +203,11 @@ class LibtoolConan(ConanFile):
     @property
     def _libtool_relocatable_env(self):
         return {
-            "LIBTOOL_PREFIX": tools.unix_path(self.package_folder),
-            "LIBTOOL_DATADIR": tools.unix_path(self._datarootdir),
-            "LIBTOOL_PKGAUXDIR": tools.unix_path(os.path.join(self._datarootdir, "libtool", "build-aux")),
-            "LIBTOOL_PKGLTDLDIR": tools.unix_path(os.path.join(self._datarootdir, "libtool")),
-            "LIBTOOL_ACLOCALDIR": tools.unix_path(os.path.join(self._datarootdir, "aclocal")),
+            "LIBTOOL_PREFIX": tools.microsoft.unix_path(self, self.package_folder),
+            "LIBTOOL_DATADIR": tools.microsoft.unix_path(self, self._datarootdir),
+            "LIBTOOL_PKGAUXDIR": tools.microsoft.unix_path(self, os.path.join(self._datarootdir, "libtool", "build-aux")),
+            "LIBTOOL_PKGLTDLDIR": tools.microsoft.unix_path(self, os.path.join(self._datarootdir, "libtool")),
+            "LIBTOOL_ACLOCALDIR": tools.microsoft.unix_path(self, os.path.join(self._datarootdir, "aclocal")),
         }
 
     def package_info(self):
@@ -226,7 +226,7 @@ class LibtoolConan(ConanFile):
 
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
 
-        libtoolize = tools.unix_path(os.path.join(self.package_folder, "bin", "libtoolize" + bin_ext))
+        libtoolize = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "libtoolize" + bin_ext))
         self.output.info("Setting LIBTOOLIZE env to {}".format(libtoolize))
         self.env_info.LIBTOOLIZE = libtoolize
 
@@ -234,7 +234,7 @@ class LibtoolConan(ConanFile):
             self.output.info("Setting {} environment variable to {}".format(key, value))
             setattr(self.env_info, key, value)
 
-        libtool_aclocal = tools.unix_path(os.path.join(self._datarootdir, "aclocal"))
+        libtool_aclocal = tools.microsoft.unix_path(self, os.path.join(self._datarootdir, "aclocal"))
         self.output.info("Appending ACLOCAL_PATH env: {}".format(libtool_aclocal))
         self.env_info.ACLOCAL_PATH.append(libtool_aclocal)
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(libtool_aclocal))

@@ -88,7 +88,7 @@ class LibffiConan(ConanFile):
     def _build_context(self):
         extra_env_vars = {}
         if tools.os_info.is_windows and (self._is_msvc or self.settings.compiler == "clang") :
-            msvcc = tools.unix_path(os.path.join(self.source_folder, self._source_subfolder, "msvcc.sh"))
+            msvcc = tools.microsoft.unix_path(self, os.path.join(self.source_folder, self._source_subfolder, "msvcc.sh"))
             msvcc_args = []
             if self._is_msvc:
                 if self.settings.arch == "x86_64":
@@ -102,8 +102,8 @@ class LibffiConan(ConanFile):
                 msvcc = "{} {}".format(msvcc, " ".join(msvcc_args))
             extra_env_vars.update(tools.vcvars_dict(self.settings))
             extra_env_vars.update({
-                "INSTALL": tools.unix_path(os.path.join(self.source_folder, self._source_subfolder, "install-sh")),
-                "LIBTOOL": tools.unix_path(os.path.join(self.source_folder, self._source_subfolder, "ltmain.sh")),
+                "INSTALL": tools.microsoft.unix_path(self, os.path.join(self.source_folder, self._source_subfolder, "install-sh")),
+                "LIBTOOL": tools.microsoft.unix_path(self, os.path.join(self.source_folder, self._source_subfolder, "ltmain.sh")),
                 "CC": msvcc,
                 "CXX": msvcc,
                 "LD": "link",

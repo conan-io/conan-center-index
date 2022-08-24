@@ -164,7 +164,7 @@ class LibxsltConan(ConanFile):
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "--with-python=no",
-            "--with-libxml-src={}".format(tools.unix_path(self.deps_cpp_info["libxml2"].rootpath)),
+            "--with-libxml-src={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["libxml2"].rootpath)),
         ]
         for name in self._option_names:
             value = getattr(self.options, name)

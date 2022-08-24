@@ -120,7 +120,7 @@ class CyrusSaslConan(ConanFile):
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
 
         yes_no = lambda v: "yes" if v else "no"
-        rootpath = lambda req: tools.unix_path(self.deps_cpp_info[req].rootpath)
+        rootpath = lambda req: tools.microsoft.unix_path(self, self.deps_cpp_info[req].rootpath)
         rootpath_no = lambda v, req: rootpath(req) if v else "no"
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),

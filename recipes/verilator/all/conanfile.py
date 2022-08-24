@@ -85,9 +85,9 @@ class VerilatorConan(ConanFile):
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
             build_env = {
-                "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                "CC": "{} cl -nologo".format(tools.microsoft.unix_path(self, self.deps_user_info["automake"].compile)),
+                "CXX": "{} cl -nologo".format(tools.microsoft.unix_path(self, self.deps_user_info["automake"].compile)),
+                "AR": "{} lib".format(tools.microsoft.unix_path(self, self.deps_user_info["automake"].ar_lib)),
             }
             with tools.vcvars(self.settings):
                 with tools.environment_append(build_env):
@@ -108,7 +108,7 @@ class VerilatorConan(ConanFile):
             self._autotools.defines.append("YY_NO_UNISTD_H")
             self._autotools.flags.append("-FS")
         conf_args = [
-            "--datarootdir={}/bin/share".format(tools.unix_path(self.package_folder)),
+            "--datarootdir={}/bin/share".format(tools.microsoft.unix_path(self, self.package_folder)),
         ]
         yacc = tools.get_env("YACC")
         if yacc:
@@ -131,7 +131,7 @@ class VerilatorConan(ConanFile):
         if self.settings.build_type == "Debug":
             args.append("DEBUG=1")
         if self.settings.compiler == "Visual Studio":
-            args.append("PROGLINK={}".format(tools.unix_path(os.path.join(self.build_folder, self._source_subfolder, "msvc_link.sh"))))
+            args.append("PROGLINK={}".format(tools.microsoft.unix_path(self, os.path.join(self.build_folder, self._source_subfolder, "msvc_link.sh"))))
         return args
 
     def _patch_sources(self):

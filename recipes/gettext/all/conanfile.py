@@ -63,11 +63,11 @@ class GetTextConan(ConanFile):
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
             env = {
-                "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                "CC": "{} cl -nologo".format(tools.microsoft.unix_path(self, self._user_info_build["automake"].compile)),
                 "LD": "link -nologo",
                 "NM": "dumpbin -symbols",
                 "STRIP": ":",
-                "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
+                "AR": "{} lib".format(tools.microsoft.unix_path(self, self._user_info_build["automake"].ar_lib)),
                 "RANLIB": ":",
             }
             with tools.vcvars(self):
@@ -82,11 +82,11 @@ class GetTextConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
-        libiconv_prefix = tools.unix_path(self.deps_cpp_info["libiconv"].rootpath)
+        libiconv_prefix = tools.microsoft.unix_path(self, self.deps_cpp_info["libiconv"].rootpath)
         args = [
             "HELP2MAN=/bin/true",
             "EMACS=no",
-            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
+            "--datarootdir={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "res"))),
             "--with-libiconv-prefix={}".format(libiconv_prefix),
             "--disable-shared",
             "--disable-static",
@@ -148,12 +148,12 @@ class GetTextConan(ConanFile):
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
-        aclocal = tools.unix_path(os.path.join(self.package_folder, "res", "aclocal"))
+        aclocal = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "res", "aclocal"))
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(aclocal))
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(aclocal)
 
-        autopoint = tools.unix_path(os.path.join(self.package_folder, "bin", "autopoint"))
+        autopoint = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "autopoint"))
         self.output.info("Setting AUTOPOINT environment variable: {}".format(autopoint))
         self.env_info.AUTOPOINT = autopoint
 
-        self.env_info.GETTEXT_ROOT_UNIX = tools.unix_path(self.package_folder)
+        self.env_info.GETTEXT_ROOT_UNIX = tools.microsoft.unix_path(self, self.package_folder)

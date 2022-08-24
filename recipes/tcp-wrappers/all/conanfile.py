@@ -55,7 +55,7 @@ class TcpWrappersConan(ConanFile):
         with tools.files.chdir(self, self._source_subfolder):
             autotools = AutoToolsBuildEnvironment(self)
             make_args = [
-                "REAL_DAEMON_DIR={}".format(tools.unix_path(os.path.join(self.package_folder, "bin"))),
+                "REAL_DAEMON_DIR={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin"))),
                 "-j1",
                 "SHEXT={}".format(self._shext),
             ]

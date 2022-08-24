@@ -54,6 +54,6 @@ class AutoconfArchiveConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        aclocal_path = tools.unix_path(os.path.join(self.package_folder, "res", "aclocal"))
+        aclocal_path = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "res", "aclocal"))
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment var: {}".format(aclocal_path))
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(aclocal_path)

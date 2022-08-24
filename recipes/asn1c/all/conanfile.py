@@ -52,7 +52,7 @@ class Asn1cConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         conf_args = [
-                "--datarootdir={}".format(tools.unix_path(self._datarootdir)),
+                "--datarootdir={}".format(tools.microsoft.unix_path(self, self._datarootdir)),
         ]
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools

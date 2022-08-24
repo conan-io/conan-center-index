@@ -149,7 +149,7 @@ class CairoConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         yes_no = lambda v: "yes" if v else "no"
         configure_args = [
-            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
+            "--datarootdir={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "res"))),
             "--enable-ft={}".format(yes_no(self.options.with_freetype)),
             "--enable-gobject={}".format(yes_no(self.options.with_glib)),
             "--enable-fc={}".format(yes_no(self.options.get_safe("with_fontconfig"))),

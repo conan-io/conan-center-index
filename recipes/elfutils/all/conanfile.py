@@ -165,71 +165,71 @@ class ElfutilsConan(ConanFile):
 
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
         
-        addr2line = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-addr2line" + bin_ext))
+        addr2line = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "eu-addr2line" + bin_ext))
         self.output.info("Setting ADDR2LINE to {}".format(addr2line))
         self.env_info.ADDR2LINE = addr2line
 
-        ar = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-ar" + bin_ext))
+        ar = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "eu-ar" + bin_ext))
         self.output.info("Setting AR to {}".format(ar))
         self.env_info.AR = ar
 
-        elfclassify = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-elfclassify" + bin_ext))
+        elfclassify = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "eu-elfclassify" + bin_ext))
         self.output.info("Setting ELFCLASSIFY to {}".format(elfclassify))
         self.env_info.ELFCLASSIFY = elfclassify
 
-        elfcmp = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-elfcmp" + bin_ext))
+        elfcmp = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "eu-elfcmp" + bin_ext))
         self.output.info("Setting ELFCMP to {}".format(elfcmp))
         self.env_info.ELFCMP = elfcmp
 
-        elfcompress = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-elfcompress" + bin_ext))
+        elfcompress = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "eu-elfcompress" + bin_ext))
         self.output.info("Setting ELFCOMPRESS to {}".format(elfcompress))
         self.env_info.ELFCOMPRESS = elfcompress
 
-        elflint = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-elflint" + bin_ext))
+        elflint = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "eu-elflint" + bin_ext))
         self.output.info("Setting ELFLINT to {}".format(elflint))
         self.env_info.ELFLINT = elflint
 
-        findtextrel = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-findtextrel" + bin_ext))
+        findtextrel = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "eu-findtextrel" + bin_ext))
         self.output.info("Setting FINDTEXTREL to {}".format(findtextrel))
         self.env_info.FINDTEXTREL = findtextrel
 
-        make_debug_archive = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-make-debug-archive" + bin_ext))
+        make_debug_archive = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "eu-make-debug-archive" + bin_ext))
         self.output.info("Setting MAKE_DEBUG_ARCHIVE to {}".format(make_debug_archive))
         self.env_info.MAKE_DEBUG_ARCHIVE = make_debug_archive
 
-        nm = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-nm" + bin_ext))
+        nm = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "eu-nm" + bin_ext))
         self.output.info("Setting NM to {}".format(nm))
         self.env_info.NM = nm
 
-        objdump = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-objdump" + bin_ext))
+        objdump = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "eu-objdump" + bin_ext))
         self.output.info("Setting OBJDUMP to {}".format(objdump))
         self.env_info.OBJDUMP = objdump
 
-        ranlib = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-ranlib" + bin_ext))
+        ranlib = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "eu-ranlib" + bin_ext))
         self.output.info("Setting RANLIB to {}".format(ranlib))
         self.env_info.RANLIB = ranlib
 
-        readelf = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-readelf" + bin_ext))
+        readelf = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "eu-readelf" + bin_ext))
         self.output.info("Setting READELF to {}".format(readelf))
         self.env_info.READELF = readelf
 
-        size = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-size" + bin_ext))
+        size = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "eu-size" + bin_ext))
         self.output.info("Setting SIZE to {}".format(size))
         self.env_info.SIZE = size
 
-        stack = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-stack" + bin_ext))
+        stack = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "eu-stack" + bin_ext))
         self.output.info("Setting STACK to {}".format(stack))
         self.env_info.STACK = stack
 
-        strings = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-strings" + bin_ext))
+        strings = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "eu-strings" + bin_ext))
         self.output.info("Setting STRINGS to {}".format(strings))
         self.env_info.STRINGS = strings
 
-        strip = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-strip" + bin_ext))
+        strip = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "eu-strip" + bin_ext))
         self.output.info("Setting STRIP to {}".format(strip))
         self.env_info.STRIP = strip
 
-        unstrip = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-unstrip" + bin_ext))
+        unstrip = tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "eu-unstrip" + bin_ext))
         self.output.info("Setting UNSTRIP to {}".format(unstrip))
         self.env_info.UNSTRIP = unstrip
 

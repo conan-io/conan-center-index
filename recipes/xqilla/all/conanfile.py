@@ -66,7 +66,7 @@ class ConanXqilla(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
         conf_args = [
-            "--with-xerces={}".format(tools.unix_path(self.deps_cpp_info["xerces-c"].rootpath)),
+            "--with-xerces={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["xerces-c"].rootpath)),
         ]
         
         if not self.settings.compiler.cppstd:

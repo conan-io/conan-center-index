@@ -73,8 +73,8 @@ class MpfrConan(ConanFile):
         yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-thread-safe",
-            "--with-gmp-include={}".format(tools.unix_path(os.path.join(self.deps_cpp_info[str(self.options.exact_int)].rootpath, "include"))),
-            "--with-gmp-lib={}".format(tools.unix_path(os.path.join(self.deps_cpp_info[str(self.options.exact_int)].rootpath, "lib"))),
+            "--with-gmp-include={}".format(tools.microsoft.unix_path(self, os.path.join(self.deps_cpp_info[str(self.options.exact_int)].rootpath, "include"))),
+            "--with-gmp-lib={}".format(tools.microsoft.unix_path(self, os.path.join(self.deps_cpp_info[str(self.options.exact_int)].rootpath, "lib"))),
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]

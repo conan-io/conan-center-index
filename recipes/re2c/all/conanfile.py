@@ -52,10 +52,10 @@ class Re2CConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self):
                 env = {
-                    "CC": "{} -nologo".format(tools.unix_path(os.path.join(self.build_folder, "msvc_cl.sh"))),
-                    "CXX": "{} -nologo".format(tools.unix_path(os.path.join(self.build_folder, "msvc_cl.sh"))),
-                    "LD": "{} -nologo".format(tools.unix_path(os.path.join(self.build_folder, "msvc_cl.sh"))),
-                    "CXXLD": "{} -nologo".format(tools.unix_path(os.path.join(self.build_folder, "msvc_cl.sh"))),
+                    "CC": "{} -nologo".format(tools.microsoft.unix_path(self, os.path.join(self.build_folder, "msvc_cl.sh"))),
+                    "CXX": "{} -nologo".format(tools.microsoft.unix_path(self, os.path.join(self.build_folder, "msvc_cl.sh"))),
+                    "LD": "{} -nologo".format(tools.microsoft.unix_path(self, os.path.join(self.build_folder, "msvc_cl.sh"))),
+                    "CXXLD": "{} -nologo".format(tools.microsoft.unix_path(self, os.path.join(self.build_folder, "msvc_cl.sh"))),
                     "AR": "lib",
                 }
                 with tools.environment_append(env):

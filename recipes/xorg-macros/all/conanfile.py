@@ -52,7 +52,7 @@ class XorgMacrosConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
         conf_args = [
-            f"--datarootdir={tools.unix_path(self._datarootdir)}",
+            f"--datarootdir={tools.microsoft.unix_path(self, self._datarootdir)}",
         ]
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
@@ -87,6 +87,6 @@ class XorgMacrosConan(ConanFile):
             name="util-macros",
         ))
 
-        aclocal = tools.unix_path(os.path.join(self._datarootdir, "aclocal"))
+        aclocal = tools.microsoft.unix_path(self, os.path.join(self._datarootdir, "aclocal"))
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(aclocal))
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(aclocal)

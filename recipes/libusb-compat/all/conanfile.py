@@ -103,7 +103,7 @@ class LibUSBCompatConan(ConanFile):
             # Use absolute paths of the libraries instead of the library names only.
             # Otherwise, the configure script will say that the compiler not working
             # (because it interprets the libs as input source files)
-            self._autotools.libs = list(tools.unix_path(l) for l in self._absolute_dep_libs_win) + self.deps_cpp_info.system_libs
+            self._autotools.libs = list(tools.microsoft.unix_path(self, l) for l in self._absolute_dep_libs_win) + self.deps_cpp_info.system_libs
         conf_args = [
             "--disable-examples-build",
             "--enable-log" if self.options.enable_logging else "--disable-log",
@@ -112,7 +112,7 @@ class LibUSBCompatConan(ConanFile):
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
-        pkg_config_paths = [tools.unix_path(os.path.abspath(self.install_folder))]
+        pkg_config_paths = [tools.microsoft.unix_path(self, os.path.abspath(self.install_folder))]
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder, pkg_config_paths=pkg_config_paths)
         return self._autotools
 
@@ -121,10 +121,10 @@ class LibUSBCompatConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
                 env = {
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "CC": "{} cl -nologo".format(tools.microsoft.unix_path(self, self.deps_user_info["automake"].compile)),
+                    "CXX": "{} cl -nologo".format(tools.microsoft.unix_path(self, self.deps_user_info["automake"].compile)),
                     "LD": "link -nologo",
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "AR": "{} lib".format(tools.microsoft.unix_path(self, self.deps_user_info["automake"].ar_lib)),
                     "DLLTOOL": ":",
                     "OBJDUMP": ":",
                     "RANLIB": ":",

@@ -81,7 +81,7 @@ class UnivalueConan(ConanFile):
                     "CPP": "cl -nologo -EP",
                     "LD": "link",
                     "CXXLD": "link",
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "AR": "{} lib".format(tools.microsoft.unix_path(self, self.deps_user_info["automake"].ar_lib)),
                     "NM": "dumpbin -symbols",
                 }
                 with tools.environment_append(env):

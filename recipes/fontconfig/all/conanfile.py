@@ -85,10 +85,10 @@ class FontconfigConan(ConanFile):
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "--disable-docs",
             "--disable-nls",
-            "--sysconfdir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin", "etc"))),
-            "--datadir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin", "share"))),
-            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin", "share"))),
-            "--localstatedir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin", "var"))),
+            "--sysconfdir={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "etc"))),
+            "--datadir={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "share"))),
+            "--datarootdir={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "share"))),
+            "--localstatedir={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin", "var"))),
         ]
         autotools.configure(configure_dir=self._source_subfolder, args=args)
         files.replace_in_file(self, "Makefile", "po-conf test", "po-conf")

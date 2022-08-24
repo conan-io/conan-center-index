@@ -100,9 +100,9 @@ class LibGphoto2(ConanFile):
             "--with-libexif={}".format(auto_no(self.options.with_libexif)),
             "--with-libxml-2.0={}".format(auto_no(self.options.with_libxml2)),
             "--disable-nls",
-            "--datadir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
-            "udevscriptdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
-            "utilsdir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin"))),
+            "--datadir={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "res"))),
+            "udevscriptdir={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "res"))),
+            "utilsdir={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin"))),
         ]
         if not self.options.with_libjpeg:
             args.append("--without-jpeg")

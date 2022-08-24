@@ -61,11 +61,11 @@ class TestPackageConan(ConanFile):
 
         if self._system_cc:
             with tools.vcvars(self) if is_msvc(self) else tools.no_op():
-                self.run("{} {} test_package_1.c -o script_test".format(tools.unix_path(compile_script), self._system_cc), win_bash=tools.os_info.is_windows)
+                self.run("{} {} test_package_1.c -o script_test".format(tools.microsoft.unix_path(self, compile_script), self._system_cc), win_bash=tools.os_info.is_windows)
 
     def _build_autotools(self):
         """Test autoreconf + configure + make"""
-        with tools.environment_append({"AUTOMAKE_CONAN_INCLUDES": [tools.unix_path(self.source_folder)]}):
+        with tools.environment_append({"AUTOMAKE_CONAN_INCLUDES": [tools.microsoft.unix_path(self, self.source_folder)]}):
             self.run("{} -fiv".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
         self.run("{} --help".format(os.path.join(self.build_folder, "configure").replace("\\", "/")), win_bash=tools.os_info.is_windows)
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)

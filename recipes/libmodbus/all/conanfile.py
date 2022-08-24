@@ -60,7 +60,7 @@ class LibmodbusConan(ConanFile):
         conf_args = [
             "--disable-tests",
             "--without-documentation",
-            "--prefix={}".format(tools.unix_path(self.package_folder)),
+            "--prefix={}".format(tools.microsoft.unix_path(self, self.package_folder)),
         ]
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
@@ -80,7 +80,7 @@ class LibmodbusConan(ConanFile):
                     "CC": "cl -nologo",
                     "CXX": "cl -nologo",
                     "LD": "link -nologo",
-                    "AR": "{} \"lib -nologo -verbose\"".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "AR": "{} \"lib -nologo -verbose\"".format(tools.microsoft.unix_path(self, self.deps_user_info["automake"].ar_lib)),
                     "RANLIB": ":",
                     "STRING": ":",
                     "NM": "dumpbin -symbols"}

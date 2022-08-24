@@ -191,9 +191,9 @@ class XapianCoreConan(ConanFile):
         self.output.info("Appending PATH environment variable: {}".format(binpath))
         self.env_info.PATH.append(binpath)
 
-        xapian_aclocal = tools.unix_path(os.path.join(self._datarootdir, "aclocal"))
+        xapian_aclocal = tools.microsoft.unix_path(self, os.path.join(self._datarootdir, "aclocal"))
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(xapian_aclocal))
-        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(tools.unix_path(xapian_aclocal))
+        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(tools.microsoft.unix_path(self, xapian_aclocal))
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "xapian"

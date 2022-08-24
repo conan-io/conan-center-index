@@ -61,15 +61,15 @@ class GperfConan(ConanFile):
             if self._is_msvc:
                 with tools.vcvars(self.settings):
                     env = {
-                        "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                        "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                        "CC": "{} cl -nologo".format(tools.microsoft.unix_path(self, self._user_info_build["automake"].compile)),
+                        "CXX": "{} cl -nologo".format(tools.microsoft.unix_path(self, self._user_info_build["automake"].compile)),
                         "CFLAGS": "-{}".format(self.settings.compiler.runtime),
                         "CXXLAGS": "-{}".format(self.settings.compiler.runtime),
                         "CPPFLAGS": "-D_WIN32_WINNT=_WIN32_WINNT_WIN8",
                         "LD": "link",
                         "NM": "dumpbin -symbols",
                         "STRIP": ":",
-                        "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
+                        "AR": "{} lib".format(tools.microsoft.unix_path(self, self._user_info_build["automake"].ar_lib)),
                         "RANLIB": ":",
                     }
                     with tools.environment_append(env):

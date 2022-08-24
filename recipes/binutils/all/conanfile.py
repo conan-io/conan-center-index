@@ -150,7 +150,7 @@ class BinutilsConan(ConanFile):
             "--with-system-zlib",
             "--disable-nls",
             f"--program-prefix={self.options.prefix}",
-            f"exec_prefix={tools.unix_path(self._exec_prefix)}",
+            f"exec_prefix={tools.microsoft.unix_path(self, self._exec_prefix)}",
         ]
         autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return autotools

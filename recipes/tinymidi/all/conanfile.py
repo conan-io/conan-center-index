@@ -54,7 +54,7 @@ class TinyMidiConan(ConanFile):
 
     def _make_args(self, autotools):
         args = [
-            "INSTALL_PREFIX={}".format(tools.unix_path(self.package_folder)),
+            "INSTALL_PREFIX={}".format(tools.microsoft.unix_path(self, self.package_folder)),
             "COMPILE_FLAGS={}".format(autotools.vars["CFLAGS"]),
             "LINKING_FLAGS={} -o".format(autotools.vars["LDFLAGS"]),
         ]

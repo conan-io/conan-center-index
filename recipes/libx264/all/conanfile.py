@@ -88,7 +88,7 @@ class LibX264Conan(ConanFile):
         args = [
             "--bit-depth=%s" % str(self.options.bit_depth),
             "--disable-cli",
-            "--prefix={}".format(tools.unix_path(self.package_folder)),
+            "--prefix={}".format(tools.microsoft.unix_path(self, self.package_folder)),
         ]
         if self.options.shared:
             args.append("--enable-shared")
@@ -111,7 +111,7 @@ class LibX264Conan(ConanFile):
             if self.settings.os == "Android":
                 # the as of ndk does not work well for building libx264
                 self._override_env["AS"] = os.environ["CC"]
-                ndk_root = tools.unix_path(os.environ["NDK_ROOT"])
+                ndk_root = tools.microsoft.unix_path(self, os.environ["NDK_ROOT"])
                 arch = {
                     "armv7": "arm",
                     "armv8": "aarch64",

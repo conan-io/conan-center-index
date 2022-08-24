@@ -22,7 +22,7 @@ class TestPackageConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self):
                 env = {
-                    "AR": "{} lib".format(tools.unix_path(os.path.join(self.build_folder, "build-aux", "ar-lib"))),
+                    "AR": "{} lib".format(tools.microsoft.unix_path(self, os.path.join(self.build_folder, "build-aux", "ar-lib"))),
                     "CC": "cl -nologo",
                     "CXX": "cl -nologo",
                     "LD": "link -nologo",

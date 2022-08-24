@@ -76,9 +76,9 @@ class LibRHashConan(ConanFile):
             "--enable-openssl" if self.options.with_openssl else "--disable-openssl",
             "--disable-gettext",
             # librhash's configure script is custom and does not understand "--bindir=${prefix}/bin" arguments
-            "--prefix={}".format(tools.unix_path(self.package_folder)),
-            "--bindir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin"))),
-            "--libdir={}".format(tools.unix_path(os.path.join(self.package_folder, "lib"))),
+            "--prefix={}".format(tools.microsoft.unix_path(self, self.package_folder)),
+            "--bindir={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "bin"))),
+            "--libdir={}".format(tools.microsoft.unix_path(self, os.path.join(self.package_folder, "lib"))),
             # the configure script does not use CPPFLAGS, so add it to CFLAGS/CXXFLAGS
             "--extra-cflags={}".format("{} {}".format(vars["CFLAGS"], vars["CPPFLAGS"])),
             "--extra-ldflags={}".format(vars["LDFLAGS"]),

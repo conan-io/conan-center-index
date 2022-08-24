@@ -64,7 +64,7 @@ class HiredisConan(ConanFile):
         with tools.files.chdir(self, self._source_subfolder):
             autoTools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             autoTools.install(vars={
-                "DESTDIR": tools.unix_path(self.package_folder),
+                "DESTDIR": tools.microsoft.unix_path(self, self.package_folder),
                 "PREFIX": "",
             })
         tools.files.rm(self, 

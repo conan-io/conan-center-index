@@ -91,7 +91,7 @@ class NettleTLS(ConanFile):
         # srcdir in unix path causes some troubles in asm files on Windows
         if self.settings.os == "Windows":
             tools.files.replace_in_file(self, os.path.join(self.build_folder, "config.m4"),
-                                  tools.unix_path(os.path.join(self.build_folder, self._source_subfolder)),
+                                  tools.microsoft.unix_path(self, os.path.join(self.build_folder, self._source_subfolder)),
                                   os.path.join(self.build_folder, self._source_subfolder).replace("\\", "/"))
         return self._autotools
 

@@ -113,7 +113,7 @@ class OpenH264Conan(ConanFile):
     def _make_args(self):
         prefix = os.path.abspath(self.package_folder)
         if tools.os_info.is_windows:
-            prefix = tools.unix_path(prefix)
+            prefix = tools.microsoft.unix_path(self, prefix)
         args = [
             "ARCH={}".format(self._make_arch),
             "PREFIX={}".format(prefix),

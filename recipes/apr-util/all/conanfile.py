@@ -139,18 +139,18 @@ class AprUtilConan(ConanFile):
             if self.settings.os == "Linux":
                 self._autotools.libs.append("dl")
         conf_args = [
-            "--with-apr={}".format(tools.unix_path(self.deps_cpp_info["apr"].rootpath)),
+            "--with-apr={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["apr"].rootpath)),
             "--with-crypto" if self._with_crypto else "--without-crypto",
-            "--with-iconv={}".format(tools.unix_path(self.deps_cpp_info["libiconv"].rootpath)),
-            "--with-openssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath)) if self.options.with_openssl else "--without-openssl",
-            "--with-expat={}".format(tools.unix_path(self.deps_cpp_info["expat"].rootpath)) if self.options.with_expat else "--without-expat",
-            "--with-mysql={}".format(tools.unix_path(self.deps_cpp_info["libmysqlclient"].rootpath)) if self.options.with_mysql else "--without-mysql",
-            "--with-pgsql={}".format(tools.unix_path(self.deps_cpp_info["libpq"].rootpath)) if self.options.with_postgresql else "--without-pgsql",
-            "--with-sqlite3={}".format(tools.unix_path(self.deps_cpp_info["sqlite3"].rootpath)) if self.options.with_sqlite3 else "--without-sqlite3",
-            "--with-ldap={}".format(tools.unix_path(self.deps_cpp_info["ldap"].rootpath)) if self.options.with_ldap else "--without-ldap",
-            "--with-berkeley-db={}".format(tools.unix_path(self.deps_cpp_info["libdb"].rootpath)) if self.options.dbm == "db" else "--without-berkeley-db",
-            "--with-gdbm={}".format(tools.unix_path(self.deps_cpp_info["gdbm"].rootpath)) if self.options.dbm == "gdbm" else "--without-gdbm",
-            "--with-ndbm={}".format(tools.unix_path(self.deps_cpp_info["ndbm"].rootpath)) if self.options.dbm == "ndbm" else "--without-ndbm",
+            "--with-iconv={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["libiconv"].rootpath)),
+            "--with-openssl={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["openssl"].rootpath)) if self.options.with_openssl else "--without-openssl",
+            "--with-expat={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["expat"].rootpath)) if self.options.with_expat else "--without-expat",
+            "--with-mysql={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["libmysqlclient"].rootpath)) if self.options.with_mysql else "--without-mysql",
+            "--with-pgsql={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["libpq"].rootpath)) if self.options.with_postgresql else "--without-pgsql",
+            "--with-sqlite3={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["sqlite3"].rootpath)) if self.options.with_sqlite3 else "--without-sqlite3",
+            "--with-ldap={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["ldap"].rootpath)) if self.options.with_ldap else "--without-ldap",
+            "--with-berkeley-db={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["libdb"].rootpath)) if self.options.dbm == "db" else "--without-berkeley-db",
+            "--with-gdbm={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["gdbm"].rootpath)) if self.options.dbm == "gdbm" else "--without-gdbm",
+            "--with-ndbm={}".format(tools.microsoft.unix_path(self, self.deps_cpp_info["ndbm"].rootpath)) if self.options.dbm == "ndbm" else "--without-ndbm",
         ]
         if self.options.dbm:
             conf_args.append("--with-dbm={}".format(self.options.dbm))
@@ -198,9 +198,9 @@ class AprUtilConan(ConanFile):
         self.output.info("Appending PATH env var : {}".format(binpath))
         self.env_info.PATH.append(binpath)
 
-        apr_util_root = tools.unix_path(self.package_folder)
+        apr_util_root = tools.microsoft.unix_path(self, self.package_folder)
         self.output.info("Settings APR_UTIL_ROOT environment var: {}".format(apr_util_root))
         self.env_info.APR_UTIL_ROOT = apr_util_root
 
         if self.settings.compiler != "Visual Studio":
-            self.env_info.APRUTIL_LDFLAGS = " ".join(tools.unix_path("-L{}".format(l)) for l in self.deps_cpp_info.lib_paths)
+            self.env_info.APRUTIL_LDFLAGS = " ".join(tools.microsoft.unix_path(self, "-L{}".format(l)) for l in self.deps_cpp_info.lib_paths)

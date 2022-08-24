@@ -149,7 +149,7 @@ class PkgConfConan(ConanFile):
         self.buildenv_info.define_path("PKG_CONFIG", pkg_config)
         self.env_info.PKG_CONFIG = pkg_config # remove in conan v2?
 
-        automake_extra_includes = tools.unix_path(os.path.join(self.package_folder , "bin", "aclocal").replace("\\", "/"))
+        automake_extra_includes = tools.microsoft.unix_path(self, os.path.join(self.package_folder , "bin", "aclocal").replace("\\", "/"))
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES env var: {}".format(automake_extra_includes))
         self.buildenv_info.prepend_path("AUTOMAKE_CONAN_INCLUDES", automake_extra_includes)
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(automake_extra_includes) # remove in conan v2?
