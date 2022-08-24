@@ -80,7 +80,7 @@ class ICUBase(ConanFile):
         del self.info.options.with_unit_tests  # ICU unit testing shouldn't affect the package's ID
         del self.info.options.silent  # Verbosity doesn't affect package's ID
         if self.info.options.dat_package_file:
-            dat_package_file_sha256 = tools.sha256sum(str(self.info.options.dat_package_file))
+            dat_package_file_sha256 = tools.files.check_sha256(self, str(self.info.options.dat_package_file))
             self.info.options.dat_package_file = dat_package_file_sha256
 
     @property
