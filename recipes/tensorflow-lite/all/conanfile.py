@@ -62,8 +62,6 @@ class TensorflowLiteConan(ConanFile):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
-        if Version(self.version) >= "2.9.1":
-            self.copy("patches/remove_simple_memory_arena_debug_dump.patch")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -89,7 +87,6 @@ class TensorflowLiteConan(ConanFile):
         self.requires("ruy/cci.20220628")
         if self.options.with_xnnpack:
             self.requires("xnnpack/cci.20220621")
-
         if self.options.with_xnnpack or self.options.get_safe("with_nnapi", False):
             self.requires("fp16/cci.20210320")
 
@@ -111,14 +108,6 @@ class TensorflowLiteConan(ConanFile):
 
     def build(self):
         files.apply_conandata_patches(self)
-
-        # Shared build fails on Windows with
-        # simple_memory_arena_debug_dump.obj : error LNK2005: "void __cdecl tflite::DumpArenaInfo(...) already defined in simple_memory_arena.obj
-        # Resolve the conflict by removing the conflicting
-        # implementation for now.
-        if Version(self.version) >= "2.9.1" and self.settings.os == "Windows" and self.options.shared:
-            tools.patch(patch_file="patches/remove_simple_memory_arena_debug_dump.patch", base_path="src")
-
         cmake = self._configure_cmake()
         cmake.build()
 
