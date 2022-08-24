@@ -101,14 +101,8 @@ class ThriftConan(ConanFile):
         tc.variables["BUILD_TUTORIALS"] = False
         if is_msvc(self):
             tc.variables["WITH_MT"] = is_msvc_static_runtime(self)
-        # Make optional libs "findable"
-        if self.options.with_openssl:
-            tc.variables["OPENSSL_ROOT_DIR"] = self.dependencies["openssl"].package_folder
-        if self.options.with_zlib:
-            tc.variables["ZLIB_ROOT"] = self.dependencies["zlib"].package_folder
-        tc.variables["WITH_LIBEVENT"] = self.options.with_libevent
-        if self.options.with_libevent:
-            tc.variables["LIBEVENT_ROOT"] = self.dependencies["libevent"].package_folder
+        # This policy doesn't matter for us, but avoids a warning
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0074"] = "NEW"
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
