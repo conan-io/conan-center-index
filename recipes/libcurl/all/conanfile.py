@@ -1,15 +1,15 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.microsoft import is_msvc
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, chdir, copy, download, get, load, replace_in_file, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, download, get, load, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.microsoft.subsystems import unix_path
 from conan.tools.scm import Version
-# TODO: Update to conan.tools.apple after 1.51.3
-from conans.tools import is_apple_os, get_env, os_info
+# TODO: Migrate
+from conans.tools import get_env, os_info
 
 import os
 import re
@@ -154,7 +154,7 @@ class LibcurlConan(ConanFile):
         if not self._has_metalink_option:
             del self.options.with_libmetalink
         # Default options
-        self.options.with_ssl = "darwinssl" if is_apple_os(self.settings.os) else "openssl"
+        self.options.with_ssl = "darwinssl" if is_apple_os(self) else "openssl"
 
     def configure(self):
         if self.options.shared:
@@ -189,7 +189,7 @@ class LibcurlConan(ConanFile):
     def validate(self):
         if self.options.with_ssl == "schannel" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("schannel only suppported on Windows.")
-        if self.options.with_ssl == "darwinssl" and not is_apple_os(self.settings.os):
+        if self.options.with_ssl == "darwinssl" and not is_apple_os(self):
             raise ConanInvalidConfiguration("darwinssl only suppported on Apple like OS (Macos, iOS, watchOS or tvOS).")
         if self.options.with_ssl == "wolfssl" and self._is_using_cmake_build and Version(self.version) < "7.70.0":
             raise ConanInvalidConfiguration("Before 7.70.0, libcurl has no wolfssl support for Visual Studio or \"Windows to Android cross compilation\"")
@@ -614,7 +614,7 @@ class LibcurlConan(ConanFile):
                 self.cpp_info.components["curl"].system_libs.append("wldap32")
             if self.options.with_ssl == "schannel":
                 self.cpp_info.components["curl"].system_libs.append("crypt32")
-        elif is_apple_os(self.settings.os):
+        elif is_apple_os(self):
             if Version(self.version) >= "7.77.0":
                 self.cpp_info.components["curl"].frameworks.append("SystemConfiguration")
             if self.options.with_ldap:
