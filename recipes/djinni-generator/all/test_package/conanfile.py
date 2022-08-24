@@ -1,6 +1,6 @@
 
 from io import StringIO
-from conans import ConanFile, tools
+from conan import ConanFile, tools
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch"
@@ -9,7 +9,7 @@ class TestPackageConan(ConanFile):
         pass # please no warning that we build nothing
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.build.cross_building(self, self.settings):
             output = StringIO()
             self.run("djinni --help", output=output, run_environment=True)
             output.seek(0, 0)
