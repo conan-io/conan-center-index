@@ -1,7 +1,6 @@
 import functools
 
-from conan import ConanFile, tools
-from conan.tools.cmake import CMake
+from conans import ConanFile, CMake, tools
 
 required_conan_version = ">=1.43.0"
 

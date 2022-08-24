@@ -1,8 +1,7 @@
 import os
 import subprocess
 from six import StringIO
-from conan import ConanFile, tools
-from conan.tools.cmake import CMake
+from conans import ConanFile, CMake, tools
 
 class NmosCppTestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"

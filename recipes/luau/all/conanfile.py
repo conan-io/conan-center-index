@@ -1,5 +1,4 @@
-from conan import ConanFile, tools
-from conan.tools.cmake import CMake
+from conans import ConanFile, CMake, tools
 from conan.tools.microsoft import is_msvc
 import os
 import functools

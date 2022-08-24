@@ -1,8 +1,7 @@
 import json
 import os
 import re
-from conan import ConanFile, tools
-from conan.tools.cmake import CMake
+from conans import ConanFile, CMake, tools
 
 required_conan_version = ">=1.33.0"
 

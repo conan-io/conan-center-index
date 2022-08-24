@@ -1,6 +1,5 @@
 from conan.tools.microsoft import is_msvc
-from conan import ConanFile, tools
-from conan.tools.cmake import CMake
+from conans import ConanFile, CMake, tools
 from conan.errors import ConanInvalidConfiguration
 import functools
 import os

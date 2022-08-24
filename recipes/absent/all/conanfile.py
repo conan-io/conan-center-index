@@ -1,5 +1,4 @@
-from conan import ConanFile, tools
-from conan.tools.cmake import CMake
+from conans import ConanFile, CMake, tools
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -35,7 +34,7 @@ class AbsentConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, "17")
+            tools.check_min_cppstd(self, "17")
 
         def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]

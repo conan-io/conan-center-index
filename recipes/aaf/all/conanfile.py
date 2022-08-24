@@ -1,6 +1,5 @@
 from conan.tools.files import apply_conandata_patches
-from conan import ConanFile, tools
-from conan.tools.cmake import CMake
+from conans import ConanFile, CMake, tools
 from conan.errors import ConanInvalidConfiguration
 import os
 import glob
