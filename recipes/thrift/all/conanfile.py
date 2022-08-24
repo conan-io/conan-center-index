@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, get, rm, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -119,8 +119,15 @@ class ThriftConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate(scope="build")
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # TODO: To remove in conan v2, but it's still needed if building with 1 profile.
+        #       May also be removed if flex & bison recipes define cmake_find_mode property to "none" in their package_info()
+        for f in ["Findflex.cmake", "flex-config.cmake", "Findbison.cmake", "bison-config.cmake"]:
+            rm(self, f, self.generators_folder)
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
