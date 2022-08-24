@@ -161,7 +161,7 @@ class LibjpegTurboConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "doc"))
         # remove binaries and pdb files
         for pattern_to_remove in ["cjpeg*", "djpeg*", "jpegtran*", "tjbench*", "wrjpgcom*", "rdjpgcom*", "*.pdb"]:
-            tools.files.rm(self, os.path.join(self.package_folder, "bin"), pattern_to_remove)
+            tools.files.rm(self, pattern_to_remove, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libjpeg-turbo")

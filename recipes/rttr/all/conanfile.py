@@ -87,7 +87,7 @@ class RTTRConan(ConanFile):
         cmake.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "cmake"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
-        tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.pdb")
+        tools.files.rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         cmake_target = "Core" if self.options.shared else "Core_Lib"

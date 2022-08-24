@@ -108,7 +108,7 @@ class Opene57Conan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         os.remove(os.path.join(self.package_folder, "CHANGELOG.md"))
-        tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.dll")
+        tools.files.rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         if self.options.with_tools:

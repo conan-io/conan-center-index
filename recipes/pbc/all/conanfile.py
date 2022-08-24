@@ -90,7 +90,7 @@ class PbcConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
-        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
+        tools.files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["pbc"]

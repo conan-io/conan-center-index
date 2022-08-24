@@ -119,7 +119,7 @@ class IgnitionUitlsConan(ConanFile):
 
         # Remove MS runtime files
         for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
-            tools.files.rm(self, os.path.join(self.package_folder, "bin"), dll_pattern_to_remove)
+            tools.files.rm(self, dll_pattern_to_remove, os.path.join(self.package_folder, "bin"))
         
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path),

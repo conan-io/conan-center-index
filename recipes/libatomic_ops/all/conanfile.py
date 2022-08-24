@@ -97,7 +97,7 @@ class Libatomic_opsConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
+        tools.files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.compiler == "Visual Studio" and self.options.shared:

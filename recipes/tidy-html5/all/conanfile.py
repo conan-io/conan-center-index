@@ -79,10 +79,10 @@ class TidyHtml5Conan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.pdb")
+        tools.files.rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         if self.options.shared:
             to_remove = "*tidy_static*" if self.settings.os == "Windows" else "*.a"
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), to_remove)
+            tools.files.rm(self, to_remove, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "tidy"

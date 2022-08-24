@@ -109,7 +109,7 @@ class LibId3TagConan(ConanFile):
     def _install_autotools(self):
         autotools = self._configure_autotools()
         autotools.install()
-        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
+        tools.files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package(self):
         self.copy("COPYRIGHT", dst="licenses", src=self._source_subfolder)

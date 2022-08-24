@@ -63,7 +63,7 @@ class libxftConan(ConanFile):
         with tools.files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install(args=["-j1"])
-        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
+        tools.files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 

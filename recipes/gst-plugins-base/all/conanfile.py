@@ -271,7 +271,7 @@ class GStPluginsBaseConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
-        tools.files.rm(self, self.package_folder, "*.pdb")
+        tools.files.rm(self, "*.pdb", self.package_folder)
 
     def package_id(self):
         self.info.requires["glib"].full_package_mode()

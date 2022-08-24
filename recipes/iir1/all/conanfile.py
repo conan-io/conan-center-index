@@ -95,13 +95,13 @@ class Iir1Conan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         if self.options.shared:
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "libiir_static.*")
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "iir_static.*")
+            tools.files.rm(self, "libiir_static.*", os.path.join(self.package_folder, "lib"))
+            tools.files.rm(self, "iir_static.*", os.path.join(self.package_folder, "lib"))
         else:
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "iir.*")
-            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "iir.*")
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "libiir.*")
-            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "libiir.*")
+            tools.files.rm(self, "iir.*", os.path.join(self.package_folder, "lib"))
+            tools.files.rm(self, "iir.*", os.path.join(self.package_folder, "bin"))
+            tools.files.rm(self, "libiir.*", os.path.join(self.package_folder, "lib"))
+            tools.files.rm(self, "libiir.*", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         name = "iir" if self.options.shared else "iir_static"

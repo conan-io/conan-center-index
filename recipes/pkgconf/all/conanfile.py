@@ -108,7 +108,7 @@ class PkgConfConan(ConanFile):
             meson.install()
 
         if self._is_msvc:
-            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.pdb")
+            tools.files.rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
             if self.options.enable_lib and not self.options.shared:
                 os.rename(os.path.join(self.package_folder, "lib", "libpkgconf.a"),
                           os.path.join(self.package_folder, "lib", "pkgconf.lib"),)

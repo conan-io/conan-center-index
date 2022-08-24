@@ -83,7 +83,7 @@ class C4CoreConan(ConanFile):
         cmake.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "cmake"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        tools.files.rm(self, os.path.join(self.package_folder, "include"), "*.natvis")
+        tools.files.rm(self, "*.natvis", os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "c4core")

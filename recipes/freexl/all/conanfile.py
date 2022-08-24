@@ -114,7 +114,7 @@ class FreexlConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
             tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
+            tools.files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "freexl")

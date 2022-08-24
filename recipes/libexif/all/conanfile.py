@@ -102,7 +102,7 @@ class LibexifConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             tools.files.rename(self, os.path.join(self.package_folder, "lib", "exif.dll.lib"),
                          os.path.join(self.package_folder, "lib", "exif.lib"))
-        tools.files.rm(self, self.package_folder, "*.la")
+        tools.files.rm(self, "*.la", self.package_folder)
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 

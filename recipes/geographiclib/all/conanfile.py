@@ -132,7 +132,7 @@ class GeographiclibConan(ConanFile):
         for folder in ["share", os.path.join("lib", "python"), os.path.join("lib", "pkgconfig"),
                        os.path.join("lib", "cmake"), "sbin", "python", "matlab", "doc", "cmake"]:
             tools.files.rmdir(self, os.path.join(os.path.join(self.package_folder, folder)))
-        tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.pdb")
+        tools.files.rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "geographiclib")

@@ -129,10 +129,10 @@ class SpirvtoolsConan(ConanFile):
         if self.options.shared:
             for file_name in ["*SPIRV-Tools", "*SPIRV-Tools-opt", "*SPIRV-Tools-link", "*SPIRV-Tools-reduce"]:
                 for ext in [".a", ".lib"]:
-                    tools.files.rm(self, os.path.join(self.package_folder, "lib"), file_name + ext)
+                    tools.files.rm(self, file_name + ext, os.path.join(self.package_folder, "lib"))
         else:
-            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*SPIRV-Tools-shared.dll")
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*SPIRV-Tools-shared*")
+            tools.files.rm(self, "*SPIRV-Tools-shared.dll", os.path.join(self.package_folder, "bin"))
+            tools.files.rm(self, "*SPIRV-Tools-shared*", os.path.join(self.package_folder, "lib"))
 
         if self.options.shared:
             targets = {"SPIRV-Tools-shared": "diligentgraphics-spirv-tools::SPIRV-Tools"}

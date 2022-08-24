@@ -183,10 +183,10 @@ class SpirvtoolsConan(ConanFile):
                 "*SPIRV-Tools-reduce", "*SPIRV-Tools-lint",
             ]:
                 for ext in [".a", ".lib"]:
-                    tools.files.rm(self, os.path.join(self.package_folder, "lib"), file_name + ext)
+                    tools.files.rm(self, file_name + ext, os.path.join(self.package_folder, "lib"))
         else:
-            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*SPIRV-Tools-shared.dll")
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*SPIRV-Tools-shared*")
+            tools.files.rm(self, "*SPIRV-Tools-shared.dll", os.path.join(self.package_folder, "bin"))
+            tools.files.rm(self, "*SPIRV-Tools-shared*", os.path.join(self.package_folder, "lib"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         if self.options.shared:

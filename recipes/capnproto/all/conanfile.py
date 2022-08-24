@@ -155,7 +155,7 @@ class CapnprotoConan(ConanFile):
             with tools.files.chdir(self, os.path.join(self._source_subfolder, "c++")):
                 autotools = self._configure_autotools()
                 autotools.install()
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
+            tools.files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         for cmake_file in glob.glob(os.path.join(self.package_folder, self._cmake_folder, "*")):
             if os.path.basename(cmake_file) != "CapnProtoMacros.cmake":

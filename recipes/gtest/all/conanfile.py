@@ -158,7 +158,7 @@ class GTestConan(ConanFile):
         cmake.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.pdb")
+        tools.files.rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
     @property
     def _postfix(self):

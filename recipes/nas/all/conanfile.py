@@ -105,9 +105,9 @@ class NasRecipe(ConanFile):
         self.copy("*", src=os.path.join(tmp_install, "lib"), dst="lib")
 
         if self.options.shared:
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.a")
+            tools.files.rm(self, "*.a", os.path.join(self.package_folder, "lib"))
         else:
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.so*")
+            tools.files.rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["audio"]

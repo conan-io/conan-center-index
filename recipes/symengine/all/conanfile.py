@@ -79,7 +79,7 @@ class SymengineConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         # [CMAKE-MODULES-CONFIG-FILES (KB-H016)]
-        tools.files.rm(self, self.package_folder, "*.cmake")
+        tools.files.rm(self, "*.cmake", self.package_folder)
         # [DEFAULT PACKAGE LAYOUT (KB-H013)]
         tools.files.rmdir(self, os.path.join(self.package_folder, "CMake"))
 

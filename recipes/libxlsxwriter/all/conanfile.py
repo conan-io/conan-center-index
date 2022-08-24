@@ -98,7 +98,7 @@ class LibxlsxwriterConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("License.txt", src=self._source_subfolder, dst="licenses")
-        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.pc")
+        tools.files.rm(self, "*.pc", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["xlsxwriter"]

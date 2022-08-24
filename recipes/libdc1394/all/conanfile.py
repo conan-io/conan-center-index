@@ -83,7 +83,7 @@ class Libdc1394Conan(ConanFile):
         self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
+        tools.files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libdc1394-{}".format(tools.scm.Version(self.version).major)

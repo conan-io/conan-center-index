@@ -103,7 +103,7 @@ class NloptConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
-        tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.pdb")
+        tools.files.rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "NLopt")

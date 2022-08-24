@@ -160,7 +160,7 @@ class TensorflowLiteConan(ConanFile):
         self.copy("*", dst="lib", src=os.path.join(self._build_subfolder, "lib"))
         if self.options.shared:
             self.copy("*", dst="bin", src=os.path.join(self._build_subfolder, "bin"))
-            tools.files.rm(self, self.package_folder, "*.pdb")
+            tools.files.rm(self, "*.pdb", self.package_folder)
         self._create_cmake_module_alias_target(os.path.join(self.package_folder, self._module_file))
 
     def package_info(self):

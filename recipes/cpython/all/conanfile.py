@@ -531,7 +531,7 @@ class CPythonConan(ConanFile):
                 self._msvc_package_copy()
             else:
                 self._msvc_package_layout()
-            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "vcruntime*")
+            tools.files.rm(self, "vcruntime*", os.path.join(self.package_folder, "bin"))
         else:
             autotools = self._configure_autotools()
             autotools.install()

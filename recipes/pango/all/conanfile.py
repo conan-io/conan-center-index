@@ -131,7 +131,7 @@ class PangoConan(ConanFile):
                     self.output.info("rename %s into %s" % (filename_old, filename_new))
                     shutil.move(filename_old, filename_new)
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.files.rm(self, self.package_folder, "*.pdb")
+        tools.files.rm(self, "*.pdb", self.package_folder)
 
     def package_info(self):
         self.cpp_info.components['pango_'].libs = ['pango-1.0']

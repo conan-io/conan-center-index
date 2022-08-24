@@ -906,14 +906,14 @@ class GdalConan(ConanFile):
         if is_msvc(self):
             with self._msvc_build_environment():
                 self.run("nmake -f makefile.vc devinstall {}".format(" ".join(self._nmake_args)))
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.pdb")
+            tools.files.rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         else:
             with self._autotools_build_environment():
                 autotools = self._configure_autotools()
                 autotools.install()
             tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "gdalplugins"))
             tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
+            tools.files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "GDAL")

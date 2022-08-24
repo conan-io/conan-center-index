@@ -61,7 +61,7 @@ class Box2dConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.pdb")
+        tools.files.rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "box2d"

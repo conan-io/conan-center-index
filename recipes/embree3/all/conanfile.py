@@ -190,12 +190,12 @@ class EmbreeConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "cmake"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
-        tools.files.rm(self, os.path.join(self.package_folder), "*.command")
-        tools.files.rm(self, os.path.join(self.package_folder), "*.cmake")
+        tools.files.rm(self, "*.command", os.path.join(self.package_folder))
+        tools.files.rm(self, "*.cmake", os.path.join(self.package_folder))
 
         if self.settings.os == "Windows" and self.options.shared:
             for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
-                tools.files.rm(self, os.path.join(self.package_folder), dll_pattern_to_remove)
+                tools.files.rm(self, dll_pattern_to_remove, os.path.join(self.package_folder))
         else:
             tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
 

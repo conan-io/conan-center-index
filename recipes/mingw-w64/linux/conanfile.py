@@ -224,7 +224,7 @@ class MingwConan(ConanFile):
 
     def package(self):
         self.copy("COPYING", src=os.path.join(self.build_folder, "sources", "mingw-w64"), dst="licenses")
-        tools.files.rm(self, self.package_folder, "*.la")
+        tools.files.rm(self, "*.la", self.package_folder)
         tools.files.rmdir(self, os.path.join(self.package_folder, "share", "man"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share", "doc"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

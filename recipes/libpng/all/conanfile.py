@@ -165,7 +165,7 @@ class LibpngConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         if self.options.shared:
-            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*[!.dll]")
+            tools.files.rm(self, "*[!.dll]", os.path.join(self.package_folder, "bin"))
         else:
             rmdir(self, os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "lib", "libpng"))

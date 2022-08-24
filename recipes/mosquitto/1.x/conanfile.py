@@ -99,9 +99,9 @@ class MosquittoConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "etc"))
         if not self.options.shared:
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.so*")
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.dll*")
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.dylib")
+            tools.files.rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
+            tools.files.rm(self, "*.dll*", os.path.join(self.package_folder, "lib"))
+            tools.files.rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         lib_suffix = "_static" if not self.options.shared else ""

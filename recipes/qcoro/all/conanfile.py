@@ -114,7 +114,7 @@ class QCoroConan(ConanFile):
         cmake.install()
 
         for mask in ["Find*.cmake", "*Config*.cmake", "*-config.cmake", "*Targets*.cmake"]:
-            tools.files.rm(self, self.package_folder, mask)
+            tools.files.rm(self, mask, self.package_folder)
 
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "QCoro6"

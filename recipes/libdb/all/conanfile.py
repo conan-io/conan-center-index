@@ -235,10 +235,10 @@ class LibdbConan(ConanFile):
                     tools.files.rmdir(self, bindir)
 
             tools.files.rmdir(self, os.path.join(self.package_folder, "docs"))
-            tools.files.rm(self, libdir, "*.la")
+            tools.files.rm(self, "*.la", libdir)
             if not self.options.shared:
                 # autotools installs the static libraries twice as libXXX.a and libXXX-5.3.a ==> remove libXXX-5.3.a
-                tools.files.rm(self, libdir, "*-{}.a".format(".".join(self._major_minor_version)))
+                tools.files.rm(self, "*-{}.a".format(".".join(self._major_minor_version)), libdir)
 
     @property
     def _major_minor_version(self):

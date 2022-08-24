@@ -52,7 +52,7 @@ class OpenfbxConan(ConanFile):
 
     def _patch_sources(self):
         # unvendor miniz
-        tools.files.rm(self, os.path.join(self._source_subfolder, "src"), "miniz*")
+        tools.files.rm(self, "miniz*", os.path.join(self._source_subfolder, "src"))
 
     def _configure_cmake(self):
         if self._cmake:

@@ -191,7 +191,7 @@ class GdkPixbufConan(ConanFile):
             files.rename(self, os.path.join(self.package_folder, "lib", "libgdk_pixbuf-2.0.a"), os.path.join(self.package_folder, "lib", "gdk_pixbuf-2.0.lib"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
-        tools.files.rm(self, self.package_folder, "*.pdb")
+        tools.files.rm(self, "*.pdb", self.package_folder)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "gdk-pixbuf-2.0")

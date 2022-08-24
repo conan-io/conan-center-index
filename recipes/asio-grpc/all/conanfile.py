@@ -77,7 +77,7 @@ class AsioGrpcConan(ConanFile):
         cmake.definitions["ASIO_GRPC_USE_BOOST_CONTAINER"] = self.options.use_boost_container
         cmake.configure()
         cmake.install()
-        tools.files.rm(self, os.path.join(self.package_folder, "lib", "cmake", "asio-grpc"), "asio-grpc*")
+        tools.files.rm(self, "asio-grpc*", os.path.join(self.package_folder, "lib", "cmake", "asio-grpc"))
 
     def package_info(self):
         self.cpp_info.builddirs = [os.path.join("lib", "cmake", "asio-grpc")]

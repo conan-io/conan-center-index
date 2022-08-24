@@ -122,7 +122,7 @@ class LibbacktraceConan(ConanFile):
         if self._is_msvc:
             rename(self, os.path.join(lib_folder, "libbacktrace.lib"),
                          os.path.join(lib_folder, "backtrace.lib"))
-        tools.files.rm(self, lib_folder, "*.la")
+        tools.files.rm(self, "*.la", lib_folder)
 
     def package_info(self):
         self.cpp_info.libs = ["backtrace"]

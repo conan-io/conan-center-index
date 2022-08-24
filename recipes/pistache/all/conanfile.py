@@ -99,7 +99,7 @@ class PistacheConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.options.shared:
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.a")
+            tools.files.rm(self, "*.a", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         # TODO: Pistache does not use namespace

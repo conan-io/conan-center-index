@@ -74,7 +74,7 @@ class GPGErrorConan(ConanFile):
         env_build = self._configure()
         env_build.install()
         self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
-        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*la")
+        tools.files.rm(self, "*la", os.path.join(self.package_folder, "lib"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 

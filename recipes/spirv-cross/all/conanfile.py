@@ -145,8 +145,8 @@ class SpirvCrossConan(ConanFile):
             self.copy(pattern="spirv-cross*", dst="bin", src=os.path.join("build_subfolder_exe", "bin"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
-        tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.ilk")
-        tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.pdb")
+        tools.files.rm(self, "*.ilk", os.path.join(self.package_folder, "bin"))
+        tools.files.rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {target: "spirv-cross::{}".format(target) for target in self._spirv_cross_components.keys()}

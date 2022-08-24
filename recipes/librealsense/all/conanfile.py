@@ -114,8 +114,8 @@ class LibrealsenseConan(ConanFile):
         cmake.install()
         if self.options.shared:
             postfix = "d" if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug" else ""
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "libfw{}.*".format(postfix))
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "librealsense-file{}.*".format(postfix))
+            tools.files.rm(self, "libfw{}.*".format(postfix), os.path.join(self.package_folder, "lib"))
+            tools.files.rm(self, "librealsense-file{}.*".format(postfix), os.path.join(self.package_folder, "lib"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 

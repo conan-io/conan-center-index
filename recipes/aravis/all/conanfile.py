@@ -139,9 +139,9 @@ class AravisConan(ConanFile):
         if self.options.gst_plugin:
             self._fix_library_names(os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.files.rm(self, self.package_folder, "*.pdb")
+        tools.files.rm(self, "*.pdb", self.package_folder)
         if not self.options.tools:
-            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "arv-*")
+            tools.files.rm(self, "arv-*", os.path.join(self.package_folder, "bin"))
 
     def package_id(self):
         self.info.requires["glib"].full_package_mode()

@@ -133,10 +133,10 @@ class ElfutilsConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.options.shared:
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.a")
+            tools.files.rm(self, "*.a", os.path.join(self.package_folder, "lib"))
         else:
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.so")
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.so.1")
+            tools.files.rm(self, "*.so", os.path.join(self.package_folder, "lib"))
+            tools.files.rm(self, "*.so.1", os.path.join(self.package_folder, "lib"))
         
     def package_info(self):
         # library components

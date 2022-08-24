@@ -179,7 +179,7 @@ class AprUtilConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-            tools.files.rm(self, os.path.join(self.package_folder, "lib", "apr-util-1"), "*.la")
+            tools.files.rm(self, "*.la", os.path.join(self.package_folder, "lib", "apr-util-1"))
             os.unlink(os.path.join(self.package_folder, "lib", "libaprutil-1.la"))
             tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 

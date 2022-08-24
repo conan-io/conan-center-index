@@ -361,7 +361,7 @@ class SDLConan(ConanFile):
             self.copy(pattern="COPYING.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.files.rm(self, os.path.join(self.package_folder, "bin"), "sdl2-config")
+        tools.files.rm(self, "sdl2-config", os.path.join(self.package_folder, "bin"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "cmake"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

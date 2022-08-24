@@ -76,7 +76,7 @@ class UserspaceRCUConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
 
-        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
+        tools.files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 

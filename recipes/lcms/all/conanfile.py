@@ -147,10 +147,10 @@ class LcmsConan(ConanFile):
             autotools.install()
             tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
             tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
+            tools.files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
             # remove utilities
             if self.settings.os == "Windows" and self.options.shared:
-                tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*[!.dll]")
+                tools.files.rm(self, "*[!.dll]", os.path.join(self.package_folder, "bin"))
             else:
                 tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
 

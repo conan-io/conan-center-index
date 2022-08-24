@@ -130,14 +130,14 @@ class Antlr4CppRuntimeConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         if self.options.shared:
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*antlr4-runtime-static.*")
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*antlr4-runtime.a")
+            tools.files.rm(self, "*antlr4-runtime-static.*", os.path.join(self.package_folder, "lib"))
+            tools.files.rm(self, "*antlr4-runtime.a", os.path.join(self.package_folder, "lib"))
         else:
-            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.dll")
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "antlr4-runtime.lib")
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*antlr4-runtime.so*")
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*antlr4-runtime.dll*")
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*antlr4-runtime.*dylib")
+            tools.files.rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
+            tools.files.rm(self, "antlr4-runtime.lib", os.path.join(self.package_folder, "lib"))
+            tools.files.rm(self, "*antlr4-runtime.so*", os.path.join(self.package_folder, "lib"))
+            tools.files.rm(self, "*antlr4-runtime.dll*", os.path.join(self.package_folder, "lib"))
+            tools.files.rm(self, "*antlr4-runtime.*dylib", os.path.join(self.package_folder, "lib"))
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
         # FIXME: this also removes lib/cmake/antlr4-generator

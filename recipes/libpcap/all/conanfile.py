@@ -149,9 +149,9 @@ class LibPcapConan(ConanFile):
         if self.settings.os == "Windows":
             cmake = self._configure_cmake()
             cmake.install()
-            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.pdb")
+            tools.files.rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
             if self.options.shared:
-                tools.files.rm(self, os.path.join(self.package_folder, "lib"), "pcap_static.lib")
+                tools.files.rm(self, "pcap_static.lib", os.path.join(self.package_folder, "lib"))
 
             def flatten_filetree(folder):
                 for file in glob.glob(folder + "/**/*"):
@@ -169,7 +169,7 @@ class LibPcapConan(ConanFile):
             tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
             tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             if self.options.shared:
-                tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.a")
+                tools.files.rm(self, "*.a", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libpcap")

@@ -774,10 +774,10 @@ class QtConan(ConanFile):
                 tools.files.rmdir(self, os.path.join(self.package_folder, "licenses", module))
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
-            tools.files.rm(self, self.package_folder, mask)
-        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la*")
-        tools.files.rm(self, self.package_folder, "*.pdb*")
-        tools.files.rm(self, self.package_folder, "ensure_pro_file.cmake")
+            tools.files.rm(self, mask, self.package_folder)
+        tools.files.rm(self, "*.la*", os.path.join(self.package_folder, "lib"))
+        tools.files.rm(self, "*.pdb*", self.package_folder)
+        tools.files.rm(self, "ensure_pro_file.cmake", self.package_folder)
         os.remove(os.path.join(self.package_folder, "bin", "qt-cmake-private-install.cmake"))
 
         for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):

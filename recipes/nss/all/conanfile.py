@@ -174,10 +174,10 @@ class NSSConan(ConanFile):
             tools.files.rename(self, dll_file, os.path.join(self.package_folder, "bin", os.path.basename(dll_file)))
 
         if self.options.shared:
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.a")
+            tools.files.rm(self, "*.a", os.path.join(self.package_folder, "lib"))
         else:
-            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.so")
-            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.dll")
+            tools.files.rm(self, "*.so", os.path.join(self.package_folder, "lib"))
+            tools.files.rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
 
 
 
