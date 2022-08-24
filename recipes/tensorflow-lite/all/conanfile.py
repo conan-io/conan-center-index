@@ -99,7 +99,7 @@ class TensorflowLiteConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 14)
+            tools.check_min_cppstd(self, 17 if Version(self.version) >= "2.9.1" else 14)
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if not minimum_version:
