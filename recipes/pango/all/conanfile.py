@@ -52,12 +52,16 @@ class PangoConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
-            raise ConanInvalidConfiguration("this recipe does not support GCC before version 5. contributions are welcome")
+            raise ConanInvalidConfiguration(
+                "this recipe does not support GCC before version 5. contributions are welcome")
         if self.options.with_xft and not self.settings.os in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("Xft can only be used on Linux and FreeBSD")
 
         if self.options.with_xft and (not self.options.with_freetype or not self.options.with_fontconfig):
             raise ConanInvalidConfiguration("Xft requires freetype and fontconfig")
+
+        if self.options["glib"].shared and microsoft.is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration("Linking shared glib against static MSVC runtime is not supported")
 
         if self.options.shared and (not self.options["glib"].shared
                                     or not self.options["harfbuzz"].shared or
@@ -156,6 +160,7 @@ class PangoConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "pango-all-do-no-use")
+        self.cpp_info.names["pkg_config"] = "pango-all-do-no-use"
 
         self.cpp_info.components["pango_"].set_property("pkg_config_name", "pango")
         self.cpp_info.components["pango_"].names["pkg_config"] = "pango"
@@ -183,34 +188,40 @@ class PangoConan(ConanFile):
 
         if self.options.with_freetype:
             self.cpp_info.components["pangoft2"].set_property("pkg_config_name", "pangoft2")
+            self.cpp_info.components["pangoft2"].names["pkg_config"] = "pangoft2"
             self.cpp_info.components["pangoft2"].libs = ["pangoft2-1.0"]
             self.cpp_info.components["pangoft2"].requires = ["pango_", "freetype::freetype"]
             self.cpp_info.components["pangoft2"].includedirs = [os.path.join(self.package_folder, "include", "pango-1.0")]
 
         if self.options.with_fontconfig:
             self.cpp_info.components["pangofc"].set_property("pkg_config_name", "pangofc")
+            self.cpp_info.components["pangofc"].names["pkg_config"] = "pangofc"
             if self.options.with_freetype:
                 self.cpp_info.components["pangofc"].requires = ["pangoft2"]
 
         if self.settings.os != "Windows":
             self.cpp_info.components["pangoroot"].set_property("pkg_config_name", "pangoroot")
+            self.cpp_info.components["pangoroot"].names["pkg_config"] = "pangoroot"
             if self.options.with_freetype:
                 self.cpp_info.components["pangoroot"].requires = ["pangoft2"]
 
         if self.options.with_xft:
             self.cpp_info.components["pangoxft"].set_property("pkg_config_name", "pangoxft")
+            self.cpp_info.components["pangoxft"].names["pkg_config"] = "pangoxft"
             self.cpp_info.components["pangoxft"].libs = ["pangoxft-1.0"]
             self.cpp_info.components["pangoxft"].requires = ["pango_", "pangoft2"]
             self.cpp_info.components["pangoxft"].includedirs = [os.path.join(self.package_folder, "include", "pango-1.0")]
 
         if self.settings.os == "Windows":
             self.cpp_info.components["pangowin32"].set_property("pkg_config_name", "pangowin32")
+            self.cpp_info.components["pangowin32"].names["pkg_config"] = "pangowin32"
             self.cpp_info.components["pangowin32"].libs = ["pangowin32-1.0"]
             self.cpp_info.components["pangowin32"].requires = ["pango_"]
             self.cpp_info.components["pangowin32"].system_libs.append("gdi32")
 
         if self.options.with_cairo:
             self.cpp_info.components["pangocairo"].set_property("pkg_config_name", "pangocairo")
+            self.cpp_info.components["pangocairo"].names["pkg_config"] = "pangocairo"
             self.cpp_info.components["pangocairo"].libs = ["pangocairo-1.0"]
             self.cpp_info.components["pangocairo"].requires = ["pango_"]
             if self.options.with_freetype:
