@@ -52,7 +52,7 @@ class BisonConan(ConanFile):
             self.build_requires("flex/2.6.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     @contextlib.contextmanager
@@ -60,13 +60,13 @@ class BisonConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self):
                 env = {
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "CC": "{} cl -nologo".format(tools.microsoft.unix_path(self, self.deps_user_info["automake"].compile)),
+                    "CXX": "{} cl -nologo".format(tools.microsoft.unix_path(self, self.deps_user_info["automake"].compile)),
                     "CFLAGS": "-{}".format(self.settings.compiler.runtime),
                     "LD": "link",
                     "NM": "dumpbin -symbols",
                     "STRIP": ":",
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "AR": "{} lib".format(tools.microsoft.unix_path(self, self.deps_user_info["automake"].ar_lib)),
                     "RANLIB": ":",
                 }
                 with tools.environment_append(env):
@@ -106,30 +106,30 @@ class BisonConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
         if self.settings.os == "Windows":
             # replace embedded unix paths by windows paths
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.in"),
                                   "echo '#define BINDIR \"$(bindir)\"';",
                                   "echo '#define BINDIR \"$(shell cygpath -m \"$(bindir)\")\"';")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.in"),
                                   "echo '#define PKGDATADIR \"$(pkgdatadir)\"';",
                                   "echo '#define PKGDATADIR \"$(shell cygpath -m \"$(pkgdatadir)\")\"';")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.in"),
                                   "echo '#define DATADIR \"$(datadir)\"';",
                                   "echo '#define DATADIR \"$(shell cygpath -m \"$(datadir)\")\"';")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.in"),
                                   "echo '#define DATAROOTDIR \"$(datarootdir)\"';",
                                   "echo '#define DATAROOTDIR \"$(shell cygpath -m \"$(datarootdir)\")\"';")
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.in"),
                               "dist_man_MANS = $(top_srcdir)/doc/bison.1",
                               "dist_man_MANS =")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "yacc.in"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "yacc.in"),
                               "@prefix@",
                               "${}_ROOT".format(self.name.upper()))
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "yacc.in"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "yacc.in"),
                               "@bindir@",
                               "${}_ROOT/bin".format(self.name.upper()))
 
