@@ -24,7 +24,8 @@ class LibHALConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     @property
     def _min_cppstd(self):
@@ -43,6 +44,7 @@ class LibHALConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
             lv2 = [int(v) for v in v2.split(".")]
@@ -63,6 +65,9 @@ class LibHALConan(ConanFile):
         basic_layout(self)
 
     def package(self):
-        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"),  src=self.source_folder)
-        copy(self, "*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
-        copy(self, "*.hpp", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
+        copy(self, "LICENSE", dst=os.path.join(
+            self.package_folder, "licenses"),  src=self.source_folder)
+        copy(self, "*.h", dst=os.path.join(self.package_folder, "include"),
+             src=os.path.join(self.source_folder, "include"))
+        copy(self, "*.hpp", dst=os.path.join(self.package_folder,
+             "include"), src=os.path.join(self.source_folder, "include"))
