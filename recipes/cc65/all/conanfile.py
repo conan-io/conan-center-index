@@ -124,8 +124,8 @@ class Cc65Conan(ConanFile):
         with tools.chdir(os.path.join(self.build_folder, self._source_subfolder)):
             autotools.install(args=self._make_args)
 
-        tools.rmdir(self._samplesdir)
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, self._samplesdir)
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)

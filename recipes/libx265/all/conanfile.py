@@ -152,12 +152,12 @@ class Libx265Conan(ConanFile):
                         os.path.join(self.package_folder, "lib", "x265.lib"))
 
         if self.settings.os != "Windows" or not self.options.shared:
-            tools.rmdir(os.path.join(self.package_folder, "bin"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
         else:
             for file in os.listdir(os.path.join(self.package_folder, "bin")):
                 if not file.endswith(".dll"):
                     os.unlink(os.path.join(self.package_folder, "bin", file))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "x265")

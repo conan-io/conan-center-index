@@ -40,7 +40,7 @@ class LzipConan(ConanFile):
         del self.info.settings.compiler
 
     def _detect_compilers(self):
-        tools.rmdir("detectdir")
+        tools.files.rmdir(self, "detectdir")
         tools.mkdir("detectdir")
         with tools.chdir("detectdir"):
             tools.save("CMakeLists.txt", textwrap.dedent("""\
@@ -94,7 +94,7 @@ class LzipConan(ConanFile):
             with tools.environment_append({"CONAN_CPU_COUNT": "1"}):
                 autotools.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")

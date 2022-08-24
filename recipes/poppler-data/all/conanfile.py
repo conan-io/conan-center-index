@@ -57,7 +57,7 @@ class PopplerDataConan(ConanFile):
         self.copy("COPYING*", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self._datadir, "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self._datadir, "pkgconfig"))
 
     @property
     def _poppler_datadir(self):

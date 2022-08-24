@@ -209,9 +209,9 @@ class TkConan(ConanFile):
                 autotools, make_args = self._configure_autotools()
                 autotools.install(args=make_args)
                 autotools.make(target="install-private-headers", args=make_args)
-                tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "man"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+                tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "man"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
         # FIXME: move to patch
         tkConfigShPath = os.path.join(self.package_folder, "lib", "tkConfig.sh")

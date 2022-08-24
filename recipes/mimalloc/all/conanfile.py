@@ -161,8 +161,8 @@ class MimallocConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
         if self.options.get_safe("single_object"):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"),
@@ -180,7 +180,7 @@ class MimallocConan(ConanFile):
                 self.copy("mimalloc-redirect32.dll", src=os.path.join(self._source_subfolder, "bin"),
                           dst="bin")
 
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
         cmake_target = "mimalloc" if self.options.shared else "mimalloc-static"
         self._create_cmake_module_alias_targets(

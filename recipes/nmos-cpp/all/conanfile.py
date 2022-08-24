@@ -117,7 +117,7 @@ class NmosCppConan(ConanFile):
         cmake_folder = os.path.join(self.package_folder, "lib", "cmake")
         self._create_components_file_from_cmake_target_file(os.path.join(cmake_folder, "nmos-cpp", "nmos-cpp-targets.cmake"))
         # remove the project's own generated config-file package
-        tools.rmdir(cmake_folder)
+        tools.files.rmdir(self, cmake_folder)
 
     # based on abseil recipe
     # see https://github.com/conan-io/conan-center-index/blob/master/recipes/abseil/all/conanfile.py

@@ -84,7 +84,7 @@ class TinyDnnConan(ConanFile):
         cmake.definitions["USE_GEMMLOWP"] = False
         cmake.configure()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "tinydnn")

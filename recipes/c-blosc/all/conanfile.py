@@ -87,7 +87,7 @@ class CbloscConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         # Remove folder containing custom FindLib.cmake files
-        tools.rmdir(os.path.join(self._source_subfolder, "cmake"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "cmake"))
 
     def _configure_cmake(self):
         if self._cmake:
@@ -124,7 +124,7 @@ class CbloscConan(ConanFile):
             self.copy(license_file, dst="licenses", src=os.path.join(self._source_subfolder, "LICENSES"))
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "blosc")

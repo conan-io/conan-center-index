@@ -92,9 +92,9 @@ class AutomakeConan(ConanFile):
         self.copy("COPYING*", src=self._source_subfolder, dst="licenses")
         autotools = self._configure_autotools()
         autotools.install()
-        tools.rmdir(os.path.join(self._datarootdir, "info"))
-        tools.rmdir(os.path.join(self._datarootdir, "man"))
-        tools.rmdir(os.path.join(self._datarootdir, "doc"))
+        tools.files.rmdir(self, os.path.join(self._datarootdir, "info"))
+        tools.files.rmdir(self, os.path.join(self._datarootdir, "man"))
+        tools.files.rmdir(self, os.path.join(self._datarootdir, "doc"))
 
         if self.settings.os == "Windows":
             binpath = os.path.join(self.package_folder, "bin")

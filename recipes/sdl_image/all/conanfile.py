@@ -121,7 +121,7 @@ class SDLImageConan(ConanFile):
         return cmake
 
     def build(self):
-        tools.rmdir(os.path.join(self._source_subfolder, "external"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "external"))
         cmake = self._configure_cmake()
         cmake.build()
 

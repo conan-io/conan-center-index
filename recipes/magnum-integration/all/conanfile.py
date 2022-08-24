@@ -128,7 +128,7 @@ class MagnumIntegrationConan(ConanFile):
         cm = self._configure_cmake()
         cm.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):

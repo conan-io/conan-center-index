@@ -96,8 +96,8 @@ class MosquittoConan(ConanFile):
         self.copy(pattern="mosquitto.conf", src=self._source_subfolder, dst="res")
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "etc"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "etc"))
         if not self.options.shared:
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so*")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dll*")

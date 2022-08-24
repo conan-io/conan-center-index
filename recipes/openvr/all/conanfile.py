@@ -60,7 +60,7 @@ class OpenvrConan(ConanFile):
         # Unvendor jsoncpp (we rely on our CMake wrapper for jsoncpp injection)
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                               "jsoncpp.cpp", "")
-        tools.rmdir(os.path.join(self._source_subfolder, "src", "json"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "src", "json"))
 
     def _configure_cmake(self):
         if self._cmake:
@@ -83,7 +83,7 @@ class OpenvrConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy(pattern="openvr_api*.dll", dst="bin", src="bin", keep_path=False)
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "openvr"

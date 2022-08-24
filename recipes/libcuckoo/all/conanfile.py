@@ -45,7 +45,7 @@ class LibCuckooConan(ConanFile):
         # Copy license files
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         # Remove CMake config files (only files in share)
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_id(self):
         self.info.header_only()

@@ -83,7 +83,7 @@ class LibbpfConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("LICENSE.BSD-2-Clause", dst="licenses", src=self._source_subfolder)
         self.copy("LICENSE.LGPL-2.1", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libbpf"

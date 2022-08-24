@@ -92,7 +92,7 @@ class KtxConan(ConanFile):
                               "#include \"encoder/lodepng.h\"",
                               "#include <lodepng.h>")
         ## zstd
-        tools.rmdir(os.path.join(basisu_dir, "zstd"))
+        tools.files.rmdir(self, os.path.join(basisu_dir, "zstd"))
         tools.replace_in_file(cmakelists, "lib/basisu/zstd/zstd.c", "")
 
     def _configure_cmake(self):
@@ -113,7 +113,7 @@ class KtxConan(ConanFile):
         self.copy("*", dst="licenses", src=os.path.join(self._source_subfolder, "LICENSES"))
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Ktx")

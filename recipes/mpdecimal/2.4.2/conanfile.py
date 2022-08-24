@@ -193,7 +193,7 @@ class MpdecimalConan(ConanFile):
             with tools.chdir(os.path.join(self.build_folder, self._source_subfolder)):
                 autotools = self._configure_autotools()
                 autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         if self._is_msvc:

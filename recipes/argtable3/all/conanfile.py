@@ -87,8 +87,8 @@ class Argtable3Conan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
         # These targets were for versions <= 3.2.0 (newer create argtable3::argtable3)
         target_name = "argtable3" if self.options.shared else "argtable3_static"

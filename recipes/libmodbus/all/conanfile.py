@@ -109,8 +109,8 @@ class LibmodbusConan(ConanFile):
             autotools.install()
 
         os.unlink(os.path.join(self.package_folder, "lib", "libmodbus.la"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             tools.rename(os.path.join(self.package_folder, "lib", "modbus.dll.lib"),
                          os.path.join(self.package_folder, "lib", "modbus.lib"))

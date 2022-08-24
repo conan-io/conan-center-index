@@ -78,7 +78,7 @@ class TidyHtml5Conan(ConanFile):
         self.copy("LICENSE.md", dst="licenses", src=os.path.join(self._source_subfolder, 'README'))
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
         if self.options.shared:
             to_remove = "*tidy_static*" if self.settings.os == "Windows" else "*.a"

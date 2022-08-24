@@ -114,7 +114,7 @@ class XtrConan(ConanFile):
         self.copy("*/libxtr.a", src="build", dst="lib", keep_path=False)
         self.copy("*/xtrctl", src="build", dst="bin", keep_path=False)
 
-        tools.rmdir(os.path.join(self.package_folder, "man"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "man"))
 
     def package_info(self):
         self.cpp_info.libs = ["xtr"]

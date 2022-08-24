@@ -189,7 +189,7 @@ class GlibmmConan(ConanFile):
                 self._glibmm_lib(),
                 self._giomm_lib()
         ]:
-            tools.rmdir(os.path.join(self.package_folder, "lib",
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib",
                                      dir_to_remove))
 
     def package_info(self):

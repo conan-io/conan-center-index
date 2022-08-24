@@ -87,7 +87,7 @@ class ZziplibConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy(pattern="COPYING.LIB", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "zziplib-all-do-not-use")

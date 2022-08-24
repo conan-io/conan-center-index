@@ -148,8 +148,8 @@ class PangommConan(ConanFile):
             os.path.join(self.package_folder, "include",
                          f"pangomm-{self._api_version}", "pangommconfig.h"))
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, 
             os.path.join(self.package_folder, "lib",
                          "pangomm-{self._api_version}", "include"))
 

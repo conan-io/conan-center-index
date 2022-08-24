@@ -250,7 +250,7 @@ class Open62541Conan(ConanFile):
 
                 get(self, **submodule_data)
                 submodule_source = os.path.join(self._source_subfolder, path)
-                tools.rmdir(submodule_source)
+                tools.files.rmdir(self, submodule_source)
                 rename(self, archive_name, submodule_source)
 
     def _get_log_level(self):
@@ -375,8 +375,8 @@ class Open62541Conan(ConanFile):
         for cmake_file in glob.glob(os.path.join(self.package_folder, self._module_subfolder, "*")):
             if not cmake_file.endswith(self._module_file_rel_path):
                 os.remove(cmake_file)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         self.copy("generate_*.py", src=self._tools_subfolder, dst=os.path.join("res", "tools"))
         self.copy("nodeset_compiler/*", src=self._tools_subfolder, dst=os.path.join("res", "tools"))
 

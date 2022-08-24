@@ -66,7 +66,7 @@ class SiConan(ConanFile):
         cmake.definitions["SI_INSTALL_LIBRARY"] = True
         cmake.configure(build_folder=self._build_subfolder)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_target_name", "SI::SI")

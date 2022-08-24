@@ -144,14 +144,14 @@ class LcmsConan(ConanFile):
         else:
             autotools = self._configure_autotools()
             autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "share"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
             # remove utilities
             if self.settings.os == "Windows" and self.options.shared:
                 tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*[!.dll]")
             else:
-                tools.rmdir(os.path.join(self.package_folder, "bin"))
+                tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "lcms2")

@@ -79,7 +79,7 @@ class AwsCCommon(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "aws-c-common"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "aws-c-common"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "aws-c-common")

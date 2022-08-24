@@ -53,7 +53,7 @@ class MPUnitsConan(ConanFile):
         cmake = CMake(self)
         cmake.configure(source_folder=os.path.join(self._source_subfolder, "src"))
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_id(self):
         self.info.header_only()

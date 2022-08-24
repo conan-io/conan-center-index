@@ -171,14 +171,14 @@ class NetSnmpConan(ConanFile):
 
     def _remove(self, path):
         if os.path.isdir(path):
-            tools.rmdir(path)
+            tools.files.rmdir(self, path)
         else:
             os.remove(path)
 
     def _package_unix(self):
         self._configure_autotools().install(args=["NOAUTODEPS=1"])
         tools.remove_files_by_mask(self.package_folder, "README")
-        tools.rmdir(os.path.join(self.package_folder, "bin"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
         lib_dir = os.path.join(self.package_folder, "lib")
         for entry in os.listdir(lib_dir):
             if not entry.startswith("libnetsnmp.") or entry.endswith(".la"):

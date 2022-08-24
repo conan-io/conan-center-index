@@ -104,7 +104,7 @@ class GDCMConan(ConanFile):
             tools.remove_files_by_mask(bin_dir, "[!gs]*.dll")
             tools.remove_files_by_mask(bin_dir, "*.pdb")
         lib_dir = os.path.join(self.package_folder, "lib")
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         tools.remove_files_by_mask(os.path.join(lib_dir, self._gdcm_subdir), "[!U]*.cmake") #leave UseGDCM.cmake untouched
         self._create_cmake_variables(os.path.join(self.package_folder, self._gdcm_cmake_variables_path))
 

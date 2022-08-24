@@ -104,7 +104,7 @@ class LibSigCppConanV2(ConanFile):
             )
 
         for dir_to_remove in ["pkgconfig", "sigc++-2.0"]:
-            tools.rmdir(os.path.join(
+            tools.files.rmdir(self, os.path.join(
                 self.package_folder, "lib", dir_to_remove))
 
     def package_info(self):

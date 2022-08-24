@@ -71,7 +71,7 @@ class HiredisConan(ConanFile):
             os.path.join(self.package_folder, "lib"),
             "*.a" if self.options.shared else "*.[so|dylib]*",
         )
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "hiredis")

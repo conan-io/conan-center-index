@@ -75,7 +75,7 @@ class HdrhistogramcConan(ConanFile):
         cmake.install()
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
         self.copy("COPYING.txt", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         target = "hdr_histogram" if self.options.shared else "hdr_histogram_static"

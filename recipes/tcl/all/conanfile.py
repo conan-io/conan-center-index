@@ -169,9 +169,9 @@ class TclConan(ConanFile):
             autotools.install()
             autotools.make(target="install-private-headers")
 
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "man"))
-            tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "man"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
         tclConfigShPath = os.path.join(self.package_folder, "lib", "tclConfig.sh")
         package_path = self.package_folder

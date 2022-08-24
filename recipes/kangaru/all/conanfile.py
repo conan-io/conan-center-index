@@ -69,7 +69,7 @@ class KangaruConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib"))
         self.copy(os.path.join(self._source_subfolder, "LICENSE"), "licenses")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed

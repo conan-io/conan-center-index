@@ -185,8 +185,8 @@ class GtsamConan(ConanFile):
         cmake.install()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         self.copy("LICENSE.BSD", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "CMake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "CMake"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(

@@ -125,9 +125,9 @@ class SpdlogConan(ConanFile):
         else:
             cmake = self._configure_cmake()
             cmake.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "spdlog", "cmake"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "spdlog", "cmake"))
 
     def package_info(self):
         target = "spdlog_header_only" if self.options.header_only else "spdlog"

@@ -96,7 +96,7 @@ class LibcapConan(ConanFile):
                                else "install-static-psx")
                 env_build.make(target=install_psx, vars=env_build_vars)
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.components["cap"].names["pkg_config"] = "libcap"

@@ -122,8 +122,8 @@ class LibXMLPlusPlus(ConanFile):
             os.path.join(self.package_folder, "lib", f"libxml++-{lib_version}", "include", "libxml++config.h"),
             os.path.join(self.package_folder, "include", f"libxml++-{lib_version}", "libxml++config.h"))
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", f"libxml++-{lib_version}"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", f"libxml++-{lib_version}"))
 
         if is_msvc(self):
             tools.remove_files_by_mask(

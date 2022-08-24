@@ -128,12 +128,12 @@ class OpenColorIOConan(ConanFile):
         if not self.options.shared:
             self.copy("*", src=os.path.join(self.package_folder,
                       "lib", "static"), dst="lib")
-            tools.rmdir(os.path.join(self.package_folder, "lib", "static"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "static"))
 
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         # nop for 2.x
         tools.remove_files_by_mask(self.package_folder, "OpenColorIOConfig*.cmake")
 

@@ -82,7 +82,7 @@ class SfmlConan(ConanFile):
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-        tools.rmdir(os.path.join(self._source_subfolder, "extlibs"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "extlibs"))
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -110,7 +110,7 @@ class SfmlConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(

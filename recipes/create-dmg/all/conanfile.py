@@ -34,7 +34,7 @@ class CreateDmgConan(ConanFile):
         self.copy("create-dmg", dst="bin", src=self._source_subfolder)
         self.copy("*", dst=os.path.join("res", "create-dmg", "support"), src=os.path.join(self._source_subfolder,"support"))
 
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_id(self):
         self.info.header_only()

@@ -77,7 +77,7 @@ class LibjxlConan(ConanFile):
         cmake.install()
 
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         if self.options.shared:
             libs_dir = os.path.join(self.package_folder, "lib")

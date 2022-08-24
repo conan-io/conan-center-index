@@ -34,7 +34,7 @@ class GhcFilesystemRecipe(ConanFile):
         cmake.definitions["GHC_FILESYSTEM_WITH_INSTALL"] = True
         cmake.configure(source_folder=self._source_subfolder)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ghc_filesystem")

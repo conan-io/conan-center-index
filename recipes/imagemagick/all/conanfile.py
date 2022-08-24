@@ -374,9 +374,9 @@ class ImageMagicConan(ConanFile):
 
         with tools.chdir(self.package_folder):
             # remove undesired files
-            tools.rmdir(os.path.join("lib", "pkgconfig"))  # pc files
-            tools.rmdir("etc")
-            tools.rmdir("share")
+            tools.files.rmdir(self, os.path.join("lib", "pkgconfig"))  # pc files
+            tools.files.rmdir(self, "etc")
+            tools.files.rmdir(self, "share")
             tools.remove_files_by_mask("lib", "*.la")
 
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)

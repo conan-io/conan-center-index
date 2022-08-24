@@ -130,8 +130,8 @@ class CoinOsiConan(ConanFile):
                 os.rename(os.path.join(self.package_folder, "lib", "lib{}.lib").format(l),
                           os.path.join(self.package_folder, "lib", "{}.lib").format(l))
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.components["libosi"].libs = ["Osi"]

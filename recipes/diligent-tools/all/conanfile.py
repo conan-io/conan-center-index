@@ -116,7 +116,7 @@ class DiligentToolsConan(ConanFile):
         self.copy(pattern="*.dylib", src=self._build_subfolder, dst="lib", keep_path=False)
         self.copy(pattern="*.lib", src=self._build_subfolder, dst="lib", keep_path=False)
         self.copy(pattern="*.a", src=self._build_subfolder, dst="lib", keep_path=False)
-        tools.rmdir(os.path.join(self.package_folder, "Licenses"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "Licenses"))
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):

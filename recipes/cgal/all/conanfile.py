@@ -87,15 +87,15 @@ class CgalConan(ConanFile):
         self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         if self.options.get_safe("shared"):
             for root, _, filenames in os.walk(os.path.join(self.package_folder, "bin")):
                 for filename in filenames:
                     if not filename.endswith(".dll"):
                         os.unlink(os.path.join(root, filename))
         else:
-            tools.rmdir(os.path.join(self.package_folder, "bin"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         # TODO: add components

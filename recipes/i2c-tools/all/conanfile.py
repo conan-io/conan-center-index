@@ -72,7 +72,7 @@ class I2cConan(ConanFile):
         autotools.flags += [f"-I{path}" for path in autotools.include_paths]
         with tools.chdir(self._source_subfolder):
             autotools.install(args=self._make_args)
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["i2c"]

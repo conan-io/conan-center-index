@@ -292,10 +292,10 @@ class CernRootConan(ConanFile):
         cmake.install()
         # Fix for CMAKE-MODULES-CONFIG-FILES (KB-H016)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib", "cmake"), "*Config*.cmake")
-        tools.rmdir(os.path.join(self.package_folder, "res", "README"))
-        tools.rmdir(os.path.join(self.package_folder, "res", "share", "man"))
-        tools.rmdir(os.path.join(self.package_folder, "res", "share", "doc"))
-        tools.rmdir(os.path.join(self.package_folder, "res", "tutorials"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "res", "README"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "res", "share", "man"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "res", "share", "doc"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "res", "tutorials"))
 
     def package_info(self):
         # FIXME: ROOT generates multiple CMake files

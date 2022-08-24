@@ -155,14 +155,14 @@ class MozjpegConan(ConanFile):
         if self._use_cmake:
             cmake = self._configure_cmake()
             cmake.install()
-            tools.rmdir(os.path.join(self.package_folder, "doc"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "doc"))
         else:
             autotools = self._configure_autotools()
             autotools.install()
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         # remove binaries and pdb files
         for bin_pattern_to_remove in ["cjpeg*", "djpeg*", "jpegtran*", "tjbench*", "wrjpgcom*", "rdjpgcom*", "*.pdb"]:
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), bin_pattern_to_remove)

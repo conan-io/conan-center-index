@@ -42,9 +42,9 @@ class StbConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         self.copy("*.h", src=self._source_subfolder, dst="include")
         self.copy("stb_vorbis.c", src=self._source_subfolder, dst="include")
-        tools.rmdir(os.path.join(self.package_folder, "include", "tests"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "include", "tests"))
         if tools.Version(self._version) >= "20210713":
-            tools.rmdir(os.path.join(self.package_folder, "include", "deprecated"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "include", "deprecated"))
         if self.options.get_safe("with_deprecated", False):
             self.copy("*.h", src=os.path.join(self._source_subfolder, "deprecated"), dst="include")
             self.copy("stb_image.c", src=os.path.join(self._source_subfolder, "deprecated"), dst="include")

@@ -112,12 +112,12 @@ class ScnlibConan(ConanFile):
         else:
             cmake = self._configure_cmake()
             cmake.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-            tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if tools.Version(self.version) >= "1.0":
             tools.remove_files_by_mask(os.path.join(self.package_folder, "include", "scn", "detail"), "*.cmake")
-            tools.rmdir(os.path.join(self.package_folder, "include", "scn", "detail", "CMakeFiles"))
-            tools.rmdir(os.path.join(self.package_folder, "include", "scn", "detail", "deps", "CMakeFiles"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "include", "scn", "detail", "CMakeFiles"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "include", "scn", "detail", "deps", "CMakeFiles"))
 
     def package_info(self):
         target = "scn-header-only" if self.options.header_only else "scn"

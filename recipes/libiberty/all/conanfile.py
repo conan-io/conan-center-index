@@ -45,8 +45,8 @@ class LibibertyConan(ConanFile):
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-        tools.rmdir(os.path.join(self._source_subfolder, "gcc"))
-        tools.rmdir(os.path.join(self._source_subfolder, "libstdc++-v3"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "gcc"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "libstdc++-v3"))
 
     def _configure_autotools(self):
         if self._autotools:
@@ -73,7 +73,7 @@ class LibibertyConan(ConanFile):
         lib_arch_dir = os.path.join(self.package_folder, "lib{}".format(arch))
         if os.path.exists(lib_arch_dir):
             libdir = os.path.join(self.package_folder, "lib")
-            tools.rmdir(libdir)
+            tools.files.rmdir(self, libdir)
             tools.rename(lib_arch_dir, libdir)
 
     def package_info(self):

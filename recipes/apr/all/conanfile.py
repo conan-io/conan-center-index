@@ -126,8 +126,8 @@ class AprConan(ConanFile):
             autotools.install()
 
             os.unlink(os.path.join(self.package_folder, "lib", "libapr-1.la"))
-            tools.rmdir(os.path.join(self.package_folder, "build-1"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "build-1"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
             apr_rules_mk = os.path.join(self.package_folder, "bin", "build-1", "apr_rules.mk")
             apr_rules_cnt = open(apr_rules_mk).read()

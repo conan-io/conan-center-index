@@ -86,8 +86,8 @@ class AutoconfConan(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "bin", "share", "info"))
-        tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "bin", "share", "info"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "bin", "share", "man"))
 
     def package_info(self):
         self.cpp_info.libdirs = []

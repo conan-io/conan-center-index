@@ -87,9 +87,9 @@ class BenchmarkConan(ConanFile):
         cmake.install()
 
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
+        tools.files.rmdir(self, os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        tools.files.rmdir(self, os.path.join(self.package_folder, 'lib', 'cmake'))
+        tools.files.rmdir(self, os.path.join(self.package_folder, 'share'))
 
     def package_info(self):
         self.cpp_info.libs = ["benchmark", "benchmark_main"]

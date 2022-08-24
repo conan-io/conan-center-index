@@ -130,7 +130,7 @@ class ProjConan(ConanFile):
 
         # unvendor nlohmann_json
         if tools.Version(self.version) < "8.1.0":
-            tools.rmdir(os.path.join(self._source_subfolder, "include", "proj", "internal", "nlohmann"))
+            tools.files.rmdir(self, os.path.join(self._source_subfolder, "include", "proj", "internal", "nlohmann"))
 
     def _configure_cmake(self):
         if self._cmake:
@@ -165,9 +165,9 @@ class ProjConan(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         proj_version = tools.Version(self.version)

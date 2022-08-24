@@ -96,8 +96,8 @@ class Argon2Conan(ConanFile):
                 with tools.environment_append(autotools.vars):
                     autotools.install(args=self._make_args)
             # drop unneeded dirs
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "bin"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
             if self.settings.os == "Windows" and self.options.shared:
                 os.unlink(os.path.join(self.package_folder, "lib", "libargon2.a"))
                 self.copy("libargon2.dll.a", src=self._source_subfolder, dst="lib")

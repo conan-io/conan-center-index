@@ -53,7 +53,7 @@ class KcovConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         self.copy("COPYING*", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):

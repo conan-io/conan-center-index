@@ -59,10 +59,10 @@ class UncrustifyConan(ConanFile):
             os.remove(os.path.join(self.package_folder, "ChangeLog"))
             os.remove(os.path.join(self.package_folder, "HELP"))
             os.remove(os.path.join(self.package_folder, "README.md"))
-            tools.rmdir(os.path.join(self.package_folder, "cfg"))
-            tools.rmdir(os.path.join(self.package_folder, "doc"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "cfg"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "doc"))
 
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_id(self):
         del self.info.settings.compiler

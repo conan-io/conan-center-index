@@ -200,7 +200,7 @@ class LibUSBCompatConan(ConanFile):
 
             os.unlink(os.path.join(self.package_folder, "bin", "libusb-config"))
             os.unlink(os.path.join(self.package_folder, "lib", "libusb.la"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libusb"

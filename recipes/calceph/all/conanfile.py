@@ -119,13 +119,13 @@ class CalcephConan(ConanFile):
             with tools.chdir(self._source_subfolder):
                 with self._msvc_build_environment():
                     self.run("nmake -f Makefile.vc install {}".format(self._nmake_args))
-            tools.rmdir(os.path.join(self.package_folder, "doc"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "doc"))
         else:
             autotools = self._configure_autotools()
             autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "libexec"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "libexec"))
 
     def package_info(self):
         prefix = "lib" if self._is_msvc else ""

@@ -116,13 +116,13 @@ class FreeImageConan(ConanFile):
         return cmake
 
     def build(self):
-        tools.rmdir(os.path.join(self._source_subfolder, "Source", "LibPNG"))
-        tools.rmdir(os.path.join(self._source_subfolder, "Source", "LibTIFF4"))
-        tools.rmdir(os.path.join(self._source_subfolder, "Source", "LibOpenJPEG"))
-        tools.rmdir(os.path.join(self._source_subfolder, "Source", "LibJXR"))
-        tools.rmdir(os.path.join(self._source_subfolder, "Source", "LibWebP"))
-        tools.rmdir(os.path.join(self._source_subfolder, "Source", "LibRawLite"))
-        tools.rmdir(os.path.join(self._source_subfolder, "Source", "OpenEXR"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "Source", "LibPNG"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "Source", "LibTIFF4"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "Source", "LibOpenJPEG"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "Source", "LibJXR"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "Source", "LibWebP"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "Source", "LibRawLite"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "Source", "OpenEXR"))
 
         for patch in self.conan_data.get("patches", {}).get(self.version, {}):
             tools.patch(**patch)

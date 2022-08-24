@@ -150,8 +150,8 @@ class LibtoolConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-        tools.rmdir(os.path.join(self._datarootdir, "info"))
-        tools.rmdir(os.path.join(self._datarootdir, "man"))
+        tools.files.rmdir(self, os.path.join(self._datarootdir, "info"))
+        tools.files.rmdir(self, os.path.join(self._datarootdir, "man"))
 
         os.unlink(os.path.join(self.package_folder, "lib", "libltdl.la"))
         if self.options.shared:

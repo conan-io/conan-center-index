@@ -86,7 +86,7 @@ class MysqlConnectorCConan(ConanFile):
         tools.rename(os.path.join(self.package_folder, "COPYING-debug"), os.path.join(self.package_folder, "licenses", "COPYING-debug"))
         tools.remove_files_by_mask(self.package_folder, "README*")
         tools.remove_files_by_mask(self.package_folder, "*.pdb")
-        tools.rmdir(os.path.join(self.package_folder, "docs"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "docs"))
 
     def package_info(self):
         self.cpp_info.libs = ["libmysql" if self.options.shared and self.settings.os == "Windows" else "mysqlclient"]

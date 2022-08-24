@@ -232,9 +232,9 @@ class LibdbConan(ConanFile):
                             os.remove(os.path.join(bindir, fn))
 
                 if not os.listdir(bindir):
-                    tools.rmdir(bindir)
+                    tools.files.rmdir(self, bindir)
 
-            tools.rmdir(os.path.join(self.package_folder, "docs"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "docs"))
             tools.remove_files_by_mask(libdir, "*.la")
             if not self.options.shared:
                 # autotools installs the static libraries twice as libXXX.a and libXXX-5.3.a ==> remove libXXX-5.3.a

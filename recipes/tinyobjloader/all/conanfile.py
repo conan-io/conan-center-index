@@ -69,8 +69,8 @@ class TinyObjLoaderConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "tinyobjloader"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "tinyobjloader"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         cmake_target = "tinyobjloader_double" if self.options.double else "tinyobjloader"

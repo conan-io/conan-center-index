@@ -55,7 +55,7 @@ class ScdocInstallerConan(ConanFile):
             autotools.install(args=[f"PREFIX={self.package_folder}"])
         self.copy(pattern="COPYING", dst="licenses",
                   src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libdirs = []

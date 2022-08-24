@@ -79,7 +79,7 @@ class ConanXqilla(ConanFile):
         with tools.chdir(self._source_subfolder):
             self.run(self._make_install_cmd)
         
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")

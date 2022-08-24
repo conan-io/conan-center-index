@@ -143,8 +143,8 @@ class SpirvCrossConan(ConanFile):
         cmake.install()
         if self.options.build_executable and not self._are_proper_binaries_available_for_executable:
             self.copy(pattern="spirv-cross*", dst="bin", src=os.path.join("build_subfolder_exe", "bin"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.ilk")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
         self._create_cmake_module_alias_targets(

@@ -48,7 +48,7 @@ class YojimboConan(ConanFile):
 
                 tools.files.get(self, **submodule_data)
                 submodule_source = os.path.join(self._source_subfolder, path)
-                tools.rmdir(submodule_source)
+                tools.files.rmdir(self, submodule_source)
 
     def build(self):
 

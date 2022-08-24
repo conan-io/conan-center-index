@@ -73,9 +73,9 @@ class CnCborStackConan(ConanFile):
         cmake.install()
         os.remove(os.path.join(self.package_folder, "README.md"))
         os.remove(os.path.join(self.package_folder, "LICENSE"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cn-cbor", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cn-cbor", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)

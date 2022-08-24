@@ -87,7 +87,7 @@ class OpenjpegConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "lib", self._openjpeg_subdir))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", self._openjpeg_subdir))
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self._create_cmake_module_alias_targets(

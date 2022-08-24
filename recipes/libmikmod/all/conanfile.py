@@ -115,8 +115,8 @@ class LibmikmodConan(ConanFile):
         cmake.install()
         os.remove(os.path.join(self.package_folder, "bin", "libmikmod-config"))
         if not self.options.shared:
-            tools.rmdir(os.path.join(self.package_folder, "bin"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)

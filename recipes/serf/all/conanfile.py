@@ -128,7 +128,7 @@ class SerfConan(ConanFile):
             with self._build_context():
                 self.run("scons install -Y \"{}\"".format(os.path.join(self.source_folder, self._source_subfolder)), run_environment=True)
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.settings.os == "Windows":
             for file in glob.glob(os.path.join(self.package_folder, "lib", "*.exp")):
                 os.unlink(file)

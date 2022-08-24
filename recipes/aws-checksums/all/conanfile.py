@@ -74,7 +74,7 @@ class AwsChecksums(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "aws-checksums"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "aws-checksums"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "aws-checksums")

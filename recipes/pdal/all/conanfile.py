@@ -146,11 +146,11 @@ class PdalConan(ConanFile):
         if not self.options.get_safe("with_unwind", False):
             tools.replace_in_file(util_cmakelists, "include(${PDAL_CMAKE_DIR}/unwind.cmake)", "")
         # remove vendored eigen
-        tools.rmdir(os.path.join(self._source_subfolder, "vendor", "eigen"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "vendor", "eigen"))
         # remove vendored nanoflann. include path is patched
-        tools.rmdir(os.path.join(self._source_subfolder, "vendor", "nanoflann"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "vendor", "nanoflann"))
         # remove vendored boost
-        tools.rmdir(os.path.join(self._source_subfolder, "vendor", "pdalboost"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "vendor", "pdalboost"))
         tools.replace_in_file(top_cmakelists, "add_subdirectory(vendor/pdalboost)", "")
         tools.replace_in_file(util_cmakelists, "${PDAL_BOOST_LIB_NAME}", "Boost::filesystem")
         tools.replace_in_file(os.path.join(self._source_subfolder, "pdal", "util", "FileUtils.cpp"),
@@ -183,8 +183,8 @@ class PdalConan(ConanFile):
         self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "pdal-config*")
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_vars_file)

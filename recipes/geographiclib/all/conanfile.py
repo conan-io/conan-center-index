@@ -131,7 +131,7 @@ class GeographiclibConan(ConanFile):
         cmake.install()
         for folder in ["share", os.path.join("lib", "python"), os.path.join("lib", "pkgconfig"),
                        os.path.join("lib", "cmake"), "sbin", "python", "matlab", "doc", "cmake"]:
-            tools.rmdir(os.path.join(os.path.join(self.package_folder, folder)))
+            tools.files.rmdir(self, os.path.join(os.path.join(self.package_folder, folder)))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
 
     def package_info(self):

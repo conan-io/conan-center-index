@@ -166,7 +166,7 @@ class OpenH264Conan(ConanFile):
                 env_build = AutoToolsBuildEnvironment(self)
                 env_build.make(args=self._make_args, target="install-" + ("shared" if self.options.shared else "static-lib"))
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "openh264")

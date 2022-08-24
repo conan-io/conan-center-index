@@ -79,7 +79,7 @@ class LibUnistringConan(ConanFile):
         autotools.install()
 
         os.unlink(os.path.join(self.package_folder, "lib", "libunistring.la"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["unistring"]

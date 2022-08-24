@@ -76,7 +76,7 @@ class MsdfgenConan(ConanFile):
             tools.patch(**patch)
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         # unvendor lodepng & tinyxml2
-        tools.rmdir(os.path.join(self._source_subfolder, "lib"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "lib"))
         tools.replace_in_file(cmakelists, "\"lib/*.cpp\"", "")
         tools.replace_in_file(cmakelists,
                               "target_link_libraries(msdfgen-ext PUBLIC msdfgen::msdfgen Freetype::Freetype)",
@@ -108,7 +108,7 @@ class MsdfgenConan(ConanFile):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "msdfgen")

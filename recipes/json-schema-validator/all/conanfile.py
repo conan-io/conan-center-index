@@ -99,7 +99,7 @@ class JsonSchemaValidatorConan(ConanFile):
             self.copy("json-schema.hpp",
                       dst=os.path.join("include", "nlohmann"),
                       src=os.path.join(self._source_subfolder, "src"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(

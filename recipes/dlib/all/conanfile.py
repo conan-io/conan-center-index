@@ -179,7 +179,7 @@ class DlibConan(ConanFile):
             os.path.join("include", "dlib", "cmake_utils"),
             os.path.join("include", "dlib", "external", "pybind11", "tools")
         ]:
-            tools.rmdir(os.path.join(self.package_folder, dir_to_remove))
+            tools.files.rmdir(self, os.path.join(self.package_folder, dir_to_remove))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "dlib")

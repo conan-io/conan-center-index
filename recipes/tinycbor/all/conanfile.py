@@ -75,8 +75,8 @@ class tinycborConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             env_build, env_vars = self._configure_autotools()
             env_build.install(vars=env_vars)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "bin"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def _package_visual(self):
         self.copy("tinycbor.lib", src=os.path.join(self._source_subfolder, "lib"), dst="lib")

@@ -90,7 +90,7 @@ class OpencoreAmrConan(ConanFile):
         self._autotools.install()
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             for lib in ("opencore-amrwb", "opencore-amrnb"):
                 tools.rename(os.path.join(self.package_folder, "lib", "{}.dll.lib".format(lib)),

@@ -308,9 +308,9 @@ class Libxml2Conan(ConanFile):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.sh")
             for prefix in ["run", "test"]:
                 tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), prefix + "*")
-            tools.rmdir(os.path.join(self.package_folder, "share"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         for header in ["win32config.h", "wsockcompat.h"]:
             self.copy(pattern=header, src=os.path.join(self._source_subfolder, "include"),

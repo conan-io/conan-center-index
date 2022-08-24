@@ -149,7 +149,7 @@ class MdnsResponderConan(ConanFile):
         # package the daemon in bin too
         tools.rename(os.path.join(self.package_folder, "sbin", "mdnsd"),
                      os.path.join(self.package_folder, "bin", "mdnsd"))
-        tools.rmdir(os.path.join(self.package_folder, "sbin"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "sbin"))
         absolute_to_relative_symlinks(self, self.package_folder)
 
     def _msvc_build_folder(self, *argv):

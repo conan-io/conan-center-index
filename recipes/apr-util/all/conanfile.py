@@ -181,7 +181,7 @@ class AprUtilConan(ConanFile):
 
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib", "apr-util-1"), "*.la")
             os.unlink(os.path.join(self.package_folder, "lib", "libaprutil-1.la"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "apr-util-1"

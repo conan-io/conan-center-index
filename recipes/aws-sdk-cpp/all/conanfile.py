@@ -466,8 +466,8 @@ class AwsSdkCppConan(ConanFile):
             self.copy(pattern="*.lib", dst="lib", keep_path=False)
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.lib")
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         self._create_project_cmake_module()
 

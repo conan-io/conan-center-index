@@ -98,8 +98,8 @@ class Libatomic_opsConan(ConanFile):
             autotools.install()
 
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             for lib in ["atomic_ops_gpl", "atomic_ops"]:
                 tools.rename(os.path.join(self.package_folder, "lib", "{}.dll.lib".format(lib)),

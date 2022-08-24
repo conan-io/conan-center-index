@@ -267,8 +267,8 @@ class PhysXConan(ConanFile):
         self.copy(pattern="*.lib", dst="lib", src=out_lib_dir, keep_path=False)
         self.copy(pattern="*.dll", dst="bin", src=out_lib_dir, keep_path=False)
 
-        tools.rmdir(out_lib_dir)
-        tools.rmdir(os.path.join(self.package_folder, "source"))
+        tools.files.rmdir(self, out_lib_dir)
+        tools.files.rmdir(self, os.path.join(self.package_folder, "source"))
 
         self._copy_external_bin()
 

@@ -74,7 +74,7 @@ class FlannConan(ConanFile):
             tools.patch(**patch)
 
         # remove embedded lz4
-        tools.rmdir(os.path.join(self._source_subfolder, "src", "cpp", "flann", "ext"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "src", "cpp", "flann", "ext"))
 
         if tools.Version(self.version) > "1.9.1":
             return
@@ -126,8 +126,8 @@ class FlannConan(ConanFile):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         # Remove vc runtimes
         if self.settings.os == "Windows":
             if self.options.shared:
@@ -137,7 +137,7 @@ class FlannConan(ConanFile):
                         dll_pattern_to_remove,
                     )
             else:
-                tools.rmdir(os.path.join(self.package_folder, "bin"))
+                tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
         # Remove static/dynamic libraries depending on the build mode
         libs_pattern_to_remove = ["*flann_cpp_s.*", "*flann_s.*"] if self.options.shared else ["*flann_cpp.*", "*flann.*"]
         for lib_pattern_to_remove in libs_pattern_to_remove:

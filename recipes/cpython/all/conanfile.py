@@ -282,8 +282,8 @@ class CPythonConan(ConanFile):
                                   "MultiThreadedDebugDLL", runtime_library)
 
         # Remove vendored packages
-        tools.rmdir(os.path.join(self._source_subfolder, "Modules", "_decimal", "libmpdec"))
-        tools.rmdir(os.path.join(self._source_subfolder, "Modules", "expat"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "Modules", "_decimal", "libmpdec"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "Modules", "expat"))
 
         if self.options.get_safe("with_curses", False):
             # FIXME: this will link to ALL libraries of ncurses. Only need to link to ncurses(w) (+ eventually tinfo)
@@ -484,7 +484,7 @@ class CPythonConan(ConanFile):
         python_args = " ".join("\"{}\"".format(a) for a in layout_args)
         self.run("{} {}".format(python_built, python_args), run_environment=True)
 
-        tools.rmdir(os.path.join(self.package_folder, "bin", "tcl"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "bin", "tcl"))
 
         for file in os.listdir(install_prefix):
             if re.match("vcruntime.*", file):
@@ -505,7 +505,7 @@ class CPythonConan(ConanFile):
         self.copy("*", src=os.path.join(self._source_subfolder, "Include"), dst=os.path.join(self.package_folder, self._msvc_install_subprefix, "include"))
         self.copy("pyconfig.h", src=os.path.join(self._source_subfolder, "PC"), dst=os.path.join(self.package_folder, self._msvc_install_subprefix, "include"))
         self.copy("*.py", src=os.path.join(self._source_subfolder, "lib"), dst=os.path.join(self.package_folder, self._msvc_install_subprefix, "Lib"))
-        tools.rmdir(os.path.join(self.package_folder, self._msvc_install_subprefix, "Lib", "test"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, self._msvc_install_subprefix, "Lib", "test"))
 
         packages = {}
         get_name_version = lambda fn: fn.split(".", 2)[:2]
@@ -535,8 +535,8 @@ class CPythonConan(ConanFile):
         else:
             autotools = self._configure_autotools()
             autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
             # Rewrite shebangs of python scripts
             for filename in os.listdir(os.path.join(self.package_folder, "bin")):

@@ -134,11 +134,11 @@ class GetTextConan(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
-        tools.rmdir(os.path.join(self.package_folder, "include"))
-        tools.rmdir(os.path.join(self.package_folder, "share", "doc"))
-        tools.rmdir(os.path.join(self.package_folder, "share", "info"))
-        tools.rmdir(os.path.join(self.package_folder, "share", "man"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "include"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share", "doc"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share", "info"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share", "man"))
 
     def package_info(self):
         self.cpp_info.libdirs = []

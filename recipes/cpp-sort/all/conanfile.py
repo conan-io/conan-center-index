@@ -72,7 +72,7 @@ class CppSortConan(ConanFile):
             self.copy(license_file, dst="licenses", src=self._source_subfolder)
 
         # Remove CMake config files (only files in lib)
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "cpp-sort"

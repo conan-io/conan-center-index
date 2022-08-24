@@ -597,13 +597,13 @@ class LibcurlConan(ConanFile):
         if self._is_using_cmake_build:
             cmake = self._configure_cmake()
             cmake.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         else:
             with tools.run_environment(self):
                 with tools.chdir(self._source_subfolder):
                     autotools, autotools_vars = self._configure_autotools()
                     autotools.install(vars=autotools_vars)
-            tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
             for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
                 os.remove(la_file)
             if self._is_mingw and self.options.shared:
@@ -611,7 +611,7 @@ class LibcurlConan(ConanFile):
                 self.copy(pattern="*.dll", dst="bin", keep_path=False)
                 self.copy(pattern="*.dll.a", dst="lib", keep_path=False)
                 self.copy(pattern="*.lib", dst="lib", keep_path=False)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CURL")

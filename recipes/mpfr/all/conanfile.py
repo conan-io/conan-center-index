@@ -167,8 +167,8 @@ class MpfrConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
             os.unlink(os.path.join(self.package_folder, "lib", "libmpfr.la"))
-            tools.rmdir(os.path.join(self.package_folder, "share"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = ["mpfr"]

@@ -80,8 +80,8 @@ class LibAVIFConan(ConanFile):
     def package(self):
         self.copy("LICENSE", "licenses", self._source_subfolder)
         self._configure_cmake().install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         # TODO: remove in conan v2
         alias = os.path.join(self.package_folder, self._alias_path)

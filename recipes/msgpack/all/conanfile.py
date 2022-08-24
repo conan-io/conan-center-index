@@ -116,8 +116,8 @@ class MsgpackConan(ConanFile):
         if self.options.c_api:
             cmake = self._configure_cmake()
             cmake.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         else:
             self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
             self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))

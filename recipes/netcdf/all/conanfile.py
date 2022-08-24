@@ -118,15 +118,15 @@ class NetcdfConan(ConanFile):
 
         os.unlink(os.path.join(self.package_folder, "bin", "nc-config"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.settings")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.os == "Windows" and self.options.shared:
             for vc_file in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
                 tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), vc_file)
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*[!.dll]")
         else:
-            tools.rmdir(os.path.join(self.package_folder, "bin"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "netCDF")

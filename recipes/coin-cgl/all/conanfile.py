@@ -137,8 +137,8 @@ class CoinCglConan(ConanFile):
                    os.path.join(self.package_folder, "lib", "libCgl.a"),
                    os.path.join(self.package_folder, "lib", "Cgl.lib"))
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["Cgl"]

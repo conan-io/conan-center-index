@@ -63,7 +63,7 @@ class CryptoPPPEMConan(ConanFile):
         dst_folder = os.path.join(self.source_folder, self._source_subfolder)
         shutil.move(os.path.join(src_folder, "CMakeLists.txt"), os.path.join(dst_folder, "CMakeLists.txt"))
         shutil.move(os.path.join(src_folder, "cryptopp-config.cmake"), os.path.join(dst_folder, "cryptopp-config.cmake"))
-        tools.rmdir(src_folder)
+        tools.files.rmdir(self, src_folder)
         
         # Get license
         tools.files.download(self, "https://unlicense.org/UNLICENSE", "UNLICENSE", sha256="7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c")
@@ -107,7 +107,7 @@ class CryptoPPPEMConan(ConanFile):
         self.copy(pattern="UNLICENSE", dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),

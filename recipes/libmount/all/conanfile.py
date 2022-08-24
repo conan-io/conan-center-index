@@ -50,9 +50,9 @@ class LibmountConan(ConanFile):
             env_build = self._configure_autotools()
             env_build.install()
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "sbin"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "sbin"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         os.remove(os.path.join(self.package_folder, "lib", "libblkid.la"))
         os.remove(os.path.join(self.package_folder, "lib", "libmount.la"))
 

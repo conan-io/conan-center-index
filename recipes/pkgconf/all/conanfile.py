@@ -114,14 +114,14 @@ class PkgConfConan(ConanFile):
                           os.path.join(self.package_folder, "lib", "pkgconf.lib"),)
         
         if not self.options.enable_lib:
-            tools.rmdir(os.path.join(self.package_folder, "lib"))
-            tools.rmdir(os.path.join(self.package_folder, "include"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "include"))
 
-        tools.rmdir(os.path.join(self.package_folder, "share", "man"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share", "man"))
         os.rename(os.path.join(self.package_folder, "share", "aclocal"),
                   os.path.join(self.package_folder, "bin", "aclocal"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_id(self):
         if not self.options.enable_lib:

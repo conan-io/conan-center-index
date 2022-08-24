@@ -146,11 +146,11 @@ class DracoConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         if tools.Version(self.version) < "1.4.0":
-            tools.rmdir(os.path.join(self.package_folder, "lib", "draco"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "draco"))
         else:
-            tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
             if self.options.shared:
                 tools.remove_files_by_mask(
                     os.path.join(self.package_folder, "lib"),

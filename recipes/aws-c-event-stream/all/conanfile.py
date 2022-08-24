@@ -70,7 +70,7 @@ class AwsCEventStream(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "aws-c-event-stream"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "aws-c-event-stream"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "aws-c-event-stream")

@@ -157,7 +157,7 @@ class CairommConan(ConanFile):
             )
 
         for dir_to_remove in ["pkgconfig", f"cairomm-{self._abi_version()}"]:
-            tools.rmdir(os.path.join(self.package_folder, "lib",
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib",
                                      dir_to_remove))
 
     def package_info(self):

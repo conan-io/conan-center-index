@@ -143,9 +143,9 @@ class OpenFstConan(ConanFile):
         if os.path.exists(lib_subdir):
             for fn in os.listdir(lib_subdir):
                 tools.rename(os.path.join(lib_subdir, fn), os.path.join(lib_dir, "lib{}".format(fn)))
-            tools.rmdir(lib_subdir)
+            tools.files.rmdir(self, lib_subdir)
 
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         tools.remove_files_by_mask(lib_dir, "*.la")
 
     @property

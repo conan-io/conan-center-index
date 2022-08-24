@@ -353,7 +353,7 @@ class OpenCascadeConan(ConanFile):
 
     def _replace_package_folder(self, source, target):
         if os.path.isdir(os.path.join(self.package_folder, source)):
-            tools.rmdir(os.path.join(self.package_folder, target))
+            tools.files.rmdir(self, os.path.join(self.package_folder, target))
             rename(self, os.path.join(self.package_folder, source),
                          os.path.join(self.package_folder, target))
 
@@ -368,8 +368,8 @@ class OpenCascadeConan(ConanFile):
             "OCCT_LGPL_EXCEPTION.txt",
             src=self._source_subfolder,
             dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         if self.settings.build_type == "Debug":
             self._replace_package_folder("libd", "lib")
             self._replace_package_folder("bind", "bin")

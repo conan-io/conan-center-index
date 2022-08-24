@@ -102,7 +102,7 @@ class Bullet3Conan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("LICENSE.txt", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         for cmake_file in glob.glob(os.path.join(self.package_folder, self._module_subfolder, "*.cmake")):
             if os.path.basename(cmake_file) != "UseBullet.cmake":
                 os.remove(cmake_file)

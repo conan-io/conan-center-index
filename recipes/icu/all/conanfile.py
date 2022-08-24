@@ -255,10 +255,10 @@ class ICUBase(ConanFile):
         self.copy("icucross.mk", src=os.path.join(build_dir, "config"), dst="config")
         self.copy("icucross.inc", src=os.path.join(build_dir, "config"), dst="config")
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "icu"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "man"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "icu"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "man"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     @property
     def _data_path(self):

@@ -142,14 +142,14 @@ class LibMysqlClientCConan(ConanFile):
                 "INCLUDE(%s)\n" % lib,
                 "",
                 strict=False)
-        tools.rmdir(os.path.join(self._source_subfolder, "extra"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "extra"))
         for folder in ["client", "man", "mysql-test", "libbinlogstandalone"]:
-            tools.rmdir(os.path.join(self._source_subfolder, folder))
+            tools.files.rmdir(self, os.path.join(self._source_subfolder, folder))
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 "ADD_SUBDIRECTORY(%s)\n" % folder,
                 "",
                 strict=False)
-        tools.rmdir(os.path.join(self._source_subfolder, "storage", "ndb"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "storage", "ndb"))
         for t in ["INCLUDE(cmake/boost.cmake)\n", "MYSQL_CHECK_EDITLINE()\n"]:
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 t,
@@ -231,9 +231,9 @@ class LibMysqlClientCConan(ConanFile):
         rename(self, os.path.join(self.package_folder, "LICENSE"), os.path.join(self.package_folder, "licenses", "LICENSE"))
         os.remove(os.path.join(self.package_folder, "README"))
         tools.remove_files_by_mask(self.package_folder, "*.pdb")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "docs"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "docs"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.os == "Windows" and self.options.shared:
             self.copy("*.dll", "bin", keep_path=False)
         if self.options.shared:

@@ -128,8 +128,8 @@ class GoogleCloudCppConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, 'lib', "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        tools.files.rmdir(self, os.path.join(self.package_folder, 'lib', "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
         self.cpp_info.components["common"].requires = ["abseil::absl_any", "abseil::absl_flat_hash_map", "abseil::absl_memory", "abseil::absl_optional", "abseil::absl_time"]

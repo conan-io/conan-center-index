@@ -155,9 +155,9 @@ class DiligentCoreConan(ConanFile):
         tools.rename(src=os.path.join(self.package_folder, "include", "source_subfolder"),
         dst=os.path.join(self.package_folder, "include", "DiligentCore"))
 
-        tools.rmdir(os.path.join(self.package_folder, "Licenses"))
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
-        tools.rmdir(os.path.join(self.package_folder, "bin"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "Licenses"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
 
         if self.options.shared:

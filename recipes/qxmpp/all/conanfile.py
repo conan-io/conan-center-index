@@ -76,8 +76,8 @@ class QxmppConan(ConanFile):
         self.copy("LICENSE.LGPL", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         if self.options.shared and self.settings.os == "Windows":
             tools.mkdir(os.path.join(self.package_folder, "bin"))

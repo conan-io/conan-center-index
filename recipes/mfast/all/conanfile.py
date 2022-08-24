@@ -119,8 +119,8 @@ class mFASTConan(ConanFile):
         tools.mkdir(os.path.join(self.package_folder, self._new_mfast_config_dir))
         self._extract_fasttypegentarget_macro()
 
-        tools.rmdir(os.path.join(self.package_folder, self._old_mfast_config_dir))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, self._old_mfast_config_dir))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if self.options.shared:
             tools.remove_files_by_mask(
                 os.path.join(self.package_folder, "lib"),

@@ -172,17 +172,17 @@ class SociConan(ConanFile):
 
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "cmake"))
 
         if os.path.isdir(os.path.join(self.package_folder, "lib64")):
             if os.path.isdir(os.path.join(self.package_folder, "lib")):
                 self.copy("*", dst="lib", src="lib64", keep_path=False, symlinks=True)
-                tools.rmdir(os.path.join(self.package_folder, "lib64"))
+                tools.files.rmdir(self, os.path.join(self.package_folder, "lib64"))
             else:
                 rename(self, os.path.join(self.package_folder, "lib64"), os.path.join(self.package_folder, "lib"))
 
         os.remove(os.path.join(self.package_folder, "include", "soci", "soci-config.h.in"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "SOCI")

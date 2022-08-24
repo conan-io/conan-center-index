@@ -145,10 +145,10 @@ class LibjpegConan(ConanFile):
             if self.settings.os == "Windows" and self.options.shared:
                 tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*[!.dll]")
             else:
-                tools.rmdir(os.path.join(self.package_folder, "bin"))
+                tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
         for fn in ("jpegint.h", "transupp.h",):
             self.copy(fn, src=self._source_subfolder, dst="include")

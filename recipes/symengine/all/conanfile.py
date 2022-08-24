@@ -81,7 +81,7 @@ class SymengineConan(ConanFile):
         # [CMAKE-MODULES-CONFIG-FILES (KB-H016)]
         tools.remove_files_by_mask(self.package_folder, "*.cmake")
         # [DEFAULT PACKAGE LAYOUT (KB-H013)]
-        tools.rmdir(os.path.join(self.package_folder, "CMake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
         self.cpp_info.libs = ["symengine"]

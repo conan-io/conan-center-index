@@ -224,9 +224,9 @@ class MingwConan(ConanFile):
     def package(self):
         self.copy("COPYING", src=os.path.join(self.build_folder, "sources", "mingw-w64"), dst="licenses")
         tools.remove_files_by_mask(self.package_folder, "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "share", "man"))
-        tools.rmdir(os.path.join(self.package_folder, "share", "doc"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share", "man"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share", "doc"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         # replace with relative symlinks so they'll resolve correctly on consumer's machine
         os.unlink(os.path.join(self.package_folder, 'mingw'))
         os.unlink(os.path.join(self.package_folder, self._target_tag, 'lib64'))

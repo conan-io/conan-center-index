@@ -92,7 +92,7 @@ class OpenldapConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("COPYRIGHT", dst="licenses", src=self._source_subfolder)
         for folder in ["var", "share", "etc", "lib/pkgconfig", "res"]:
-            tools.rmdir(os.path.join(self.package_folder, folder))
+            tools.files.rmdir(self, os.path.join(self.package_folder, folder))
         tools.remove_files_by_mask(
             os.path.join(
                 self.package_folder,

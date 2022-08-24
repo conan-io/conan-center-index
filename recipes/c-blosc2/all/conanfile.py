@@ -120,7 +120,7 @@ class CBlosc2Conan(ConanFile):
             self.copy(license_file, dst="licenses", src=os.path.join(self._source_subfolder, "LICENSES"))
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         # Remove MS runtime files
         for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:

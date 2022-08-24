@@ -60,7 +60,7 @@ class BtyaccConan(ConanFile):
         self.copy("README", "licenses", self._source_subfolder)
         self.copy("README.BYACC", "licenses", self._source_subfolder)
         self._configure_cmake().install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         variables = os.path.join(self.package_folder, self._variables)
         content = textwrap.dedent("""\
             set(BTYACC_EXECUTABLE "${CMAKE_CURRENT_LIST_DIR}/btyacc")

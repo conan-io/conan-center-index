@@ -89,8 +89,8 @@ class LibdeflateConan(ConanFile):
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         with tools.chdir(self._source_subfolder):
             autotools.install(args=["PREFIX={}".format(self.package_folder)])
-        tools.rmdir(os.path.join(self.package_folder, "bin"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(
             os.path.join(self.package_folder, "lib"),
             "*.a" if self.options.shared else "*.[so|dylib]*",

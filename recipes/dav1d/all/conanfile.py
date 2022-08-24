@@ -106,7 +106,7 @@ class Dav1dConan(ConanFile):
         meson = self._configure_meson()
         meson.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")

@@ -176,11 +176,11 @@ class LibVPXConan(ConanFile):
         with tools.vcvars(self) if self._is_msvc else tools.no_op():
             autotools = self._configure_autotools()
             autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         if self._is_msvc:
             # don't trust install target
-            tools.rmdir(os.path.join(self.package_folder, "lib"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib"))
             libdir = os.path.join(
                 "Win32" if self.settings.arch == "x86" else "x64",
                 "Debug" if self.settings.build_type == "Debug" else "Release",

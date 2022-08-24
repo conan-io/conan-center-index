@@ -144,10 +144,10 @@ class XapianCoreConan(ConanFile):
 
         os.unlink(os.path.join(os.path.join(self.package_folder, "bin", "xapian-config")))
         os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libxapian.la")))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self._datarootdir, "doc"))
-        tools.rmdir(os.path.join(self._datarootdir, "man"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self._datarootdir, "doc"))
+        tools.files.rmdir(self, os.path.join(self._datarootdir, "man"))
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path)
         )

@@ -139,7 +139,7 @@ class PDCursesConan(ConanFile):
             with tools.chdir(os.path.join(self._source_subfolder, "x11")):
                 autotools = self._configure_autotools()
                 autotools.install()
-                tools.rmdir(os.path.join(self.package_folder, "bin"))
+                tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         if self.settings.os == "Windows":

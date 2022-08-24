@@ -124,7 +124,7 @@ class LibTomMathConan(ConanFile):
             self._run_makefile("install")
 
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             os.rename(os.path.join(self.package_folder, "lib", "tommath.dll.lib"),

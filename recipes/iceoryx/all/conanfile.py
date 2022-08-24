@@ -119,13 +119,13 @@ class IceoryxConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         if self.options.toml_config:
             tools.mkdir(os.path.join(self.package_folder, "res"))
             tools.rename(os.path.join(self.package_folder, "etc", "roudi_config_example.toml"),
                          os.path.join(self.package_folder, "res", "roudi_config.toml"))
-        tools.rmdir(os.path.join(self.package_folder, "etc"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "etc"))
         # bring to default package structure
         if (tools.Version(self.version) >= "2.0.0"):
             include_paths = ["iceoryx_binding_c", "iceoryx_hoofs", "iceoryx_posh", "iceoryx_versions.hpp"]

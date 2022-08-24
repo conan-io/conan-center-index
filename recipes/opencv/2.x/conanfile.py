@@ -104,7 +104,7 @@ class OpenCVConan(ConanFile):
     def _patch_opencv(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        tools.rmdir(os.path.join(self._source_subfolder, "3rdparty"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "3rdparty"))
 
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
 
@@ -216,9 +216,9 @@ class OpenCVConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "staticlib"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "staticlib"))
         tools.remove_files_by_mask(self.package_folder, "*.cmake")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed

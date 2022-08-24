@@ -112,7 +112,7 @@ class SimdjsonConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):

@@ -169,14 +169,14 @@ class SpirvtoolsConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools"))
-        tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-link"))
-        tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-opt"))
-        tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-reduce"))
-        tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-lint"))
-        tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-diff"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "SPIRV-Tools"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "SPIRV-Tools-link"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "SPIRV-Tools-opt"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "SPIRV-Tools-reduce"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "SPIRV-Tools-lint"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "SPIRV-Tools-diff"))
         if self.options.shared:
             for file_name in [
                 "*SPIRV-Tools", "*SPIRV-Tools-opt", "*SPIRV-Tools-link",

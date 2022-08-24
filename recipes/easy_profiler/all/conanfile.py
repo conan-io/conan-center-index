@@ -78,7 +78,7 @@ class EasyProfilerConan(ConanFile):
         self.copy("LICENSE.APACHE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         os.remove(os.path.join(self.package_folder, "LICENSE.MIT"))
         os.remove(os.path.join(self.package_folder, "LICENSE.APACHE"))
         if self.settings.os == "Windows":

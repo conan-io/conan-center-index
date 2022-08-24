@@ -94,7 +94,7 @@ class SobjectizerConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("license*", src=self._source_subfolder, dst="licenses",  ignore_case=True, keep_path=False)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         cmake_target = "SharedLib" if self.options.shared else "StaticLib"

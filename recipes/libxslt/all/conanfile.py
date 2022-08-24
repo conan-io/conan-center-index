@@ -190,10 +190,10 @@ class LibxsltConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
             os.remove(os.path.join(self.package_folder, "bin", "xslt-config"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.sh")
-            tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")

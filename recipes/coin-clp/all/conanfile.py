@@ -123,8 +123,8 @@ class CoinClpConan(ConanFile):
             autotools.install(args=["-j1"]) # due to configure generated with old autotools version
 
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.compiler == "Visual Studio":
             for l in ("Clp", "ClpSolver", "OsiClp"):
                 tools.rename(os.path.join(self.package_folder, "lib", "lib{}.a").format(l),

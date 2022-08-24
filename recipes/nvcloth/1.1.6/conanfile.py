@@ -77,7 +77,7 @@ class NvclothConan(ConanFile):
         return cmake
     
     def _remove_samples(self):
-        tools.rmdir(os.path.join(self._source_subfolder, "NvCloth", "samples"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "NvCloth", "samples"))
 
     def _patch_sources(self):
         # There is no reason to force consumer of PhysX public headers to use one of

@@ -243,11 +243,11 @@ class LibpqConan(ConanFile):
 
             self._remove_unused_libraries_from_package()
 
-            tools.rmdir(os.path.join(self.package_folder, "include", "postgresql", "server"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "include", "postgresql", "server"))
             self.copy(pattern="*.h", dst=os.path.join("include", "catalog"), src=os.path.join(self._source_subfolder, "src", "include", "catalog"))
         self.copy(pattern="*.h", dst=os.path.join("include", "catalog"), src=os.path.join(self._source_subfolder, "src", "backend", "catalog"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def _construct_library_name(self, name):
         if self._is_msvc:

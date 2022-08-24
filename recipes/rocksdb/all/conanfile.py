@@ -203,7 +203,7 @@ class RocksDB(ConanFile):
         if self.options.shared:
             self._remove_static_libraries()
             self._remove_cpp_headers() # Force stable ABI for shared libraries
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         cmake_target = "rocksdb-shared" if self.options.shared else "rocksdb"

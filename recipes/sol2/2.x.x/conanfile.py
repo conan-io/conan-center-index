@@ -58,9 +58,9 @@ class Sol2Conan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         # constains just # , "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         # constains just # , "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_id(self):
         self.info.header_only()

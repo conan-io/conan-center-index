@@ -70,8 +70,8 @@ class LibgcryptConan(ConanFile):
         env_build.install()
         self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["gcrypt"]

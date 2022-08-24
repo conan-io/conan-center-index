@@ -126,7 +126,7 @@ class IslConan(ConanFile):
             autotools.install()
 
         os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libisl.la")))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "isl"

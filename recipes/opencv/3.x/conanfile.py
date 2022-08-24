@@ -126,7 +126,7 @@ class OpenCVConan(ConanFile):
                   destination=self._contrib_folder, strip_root=True)
 
     def _patch_opencv(self):
-        tools.rmdir(os.path.join(self._source_subfolder, "3rdparty"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "3rdparty"))
         if self.options.contrib:
             freetype_cmake = os.path.join(self._contrib_folder, "modules", "freetype", "CMakeLists.txt")
             tools.replace_in_file(freetype_cmake, "ocv_check_modules(FREETYPE freetype2)", "find_package(Freetype REQUIRED)")
@@ -294,8 +294,8 @@ class OpenCVConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "cmake"))
         if os.path.isfile(os.path.join(self.package_folder, "setup_vars_opencv3.cmd")):
             os.rename(os.path.join(self.package_folder, "setup_vars_opencv3.cmd"),
                       os.path.join(self.package_folder, "res", "setup_vars_opencv3.cmd"))

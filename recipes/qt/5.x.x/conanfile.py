@@ -795,8 +795,8 @@ Examples = bin/datadir/examples""")
         self.copy("*LICENSE*", src="qt5/", dst="licenses")
         for module in self._submodules:
             if not self.options.get_safe(module):
-                tools.rmdir(os.path.join(self.package_folder, "licenses", module))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+                tools.files.rmdir(self, os.path.join(self.package_folder, "licenses", module))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
             tools.remove_files_by_mask(self.package_folder, mask)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la*")
@@ -810,7 +810,7 @@ Examples = bin/datadir/examples""")
         for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
             module = os.path.join(self.package_folder, "lib", "cmake", m, "%sMacros.cmake" % m)
             if not os.path.isfile(module):
-                tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", m))
+                tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake", m))
 
         extension = ""
         if self.settings.os == "Windows":

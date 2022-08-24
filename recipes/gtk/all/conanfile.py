@@ -196,7 +196,7 @@ class GtkConan(ConanFile):
             meson.install()
 
         self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
 

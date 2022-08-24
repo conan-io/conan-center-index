@@ -131,8 +131,8 @@ class CoinUtilsConan(ConanFile):
             autotools.install(args=["-j1"])
 
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
         if self.settings.compiler == "Visual Studio":
             os.rename(os.path.join(self.package_folder, "lib", "libCoinUtils.a"),

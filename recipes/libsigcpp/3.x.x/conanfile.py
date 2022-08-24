@@ -106,7 +106,7 @@ class LibSigCppConan(ConanFile):
                 os.path.join(self.package_folder, "include", "sigc++-3.0", os.path.basename(header_file))
             )
         for dir_to_remove in ["cmake", "pkgconfig", "sigc++-3.0"]:
-            tools.rmdir(os.path.join(self.package_folder, "lib", dir_to_remove))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", dir_to_remove))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(

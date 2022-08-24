@@ -47,10 +47,10 @@ class TinyAlsaConan(ConanFile):
             env_build_vars['PREFIX'] = self.package_folder
             env_build.install(vars=env_build_vars)
 
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
         if not self.options.with_utils:
-            tools.rmdir(os.path.join(self.package_folder, "bin"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
 
         with tools.chdir(os.path.join(self.package_folder, "lib")):
             files = os.listdir()

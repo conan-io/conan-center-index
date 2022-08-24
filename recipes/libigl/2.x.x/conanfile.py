@@ -111,7 +111,7 @@ class LibiglConan(ConanFile):
         self.copy("LICENSE.GPL", dst="licenses", src=self._source_subfolder)
         self.copy("LICENSE.MPL2", dst="licenses", src=self._source_subfolder)
 
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if not self.options.header_only:
             tools.remove_files_by_mask(self.package_folder, "*.c")
             tools.remove_files_by_mask(self.package_folder, "*.cpp")

@@ -97,8 +97,8 @@ class LuajitConan(ConanFile):
             with tools.chdir(self._source_subfolder):
                 env_build = self._configure_autotools()
                 env_build.install(args=["PREFIX=%s" % self.package_folder])
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["lua51" if self.settings.compiler == "Visual Studio" else "luajit-5.1"]

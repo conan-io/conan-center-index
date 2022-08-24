@@ -71,7 +71,7 @@ class NsprConan(ConanFile):
         tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination="tmp", strip_root=True)
         rename(self, os.path.join("tmp", "nspr"), self._source_subfolder)
-        tools.rmdir("tmp")
+        tools.files.rmdir(self, "tmp")
 
     @contextlib.contextmanager
     def _build_context(self):
@@ -137,9 +137,9 @@ class NsprConan(ConanFile):
             with self._build_context():
                 autotools = self._configure_autotools()
                 autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "bin"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "bin"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.os == "Windows":
             if self.options.shared:
                 os.mkdir(os.path.join(self.package_folder, "bin"))

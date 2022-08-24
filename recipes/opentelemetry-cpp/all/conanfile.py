@@ -120,7 +120,7 @@ class OpenTelemetryCppConan(ConanFile):
             protos_cmake_path,
             "set(PROTO_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto\")",
             f"set(PROTO_PATH \"{protos_path}\")")
-        tools.rmdir(os.path.join(self._source_subfolder, "api", "include", "opentelemetry", "nostd", "absl"))
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "api", "include", "opentelemetry", "nostd", "absl"))
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
@@ -134,7 +134,7 @@ class OpenTelemetryCppConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._otel_cmake_variables_path)
         )

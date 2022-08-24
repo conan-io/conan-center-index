@@ -129,12 +129,12 @@ class SubunitConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pod")
         for d in glob.glob(os.path.join(self.package_folder, "lib", "python*")):
-            tools.rmdir(d)
+            tools.files.rmdir(self, d)
         for d in glob.glob(os.path.join(self.package_folder, "lib", "*")):
             if os.path.isdir(d):
-                tools.rmdir(d)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "Library"))
+                tools.files.rmdir(self, d)
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "Library"))
 
     def package_info(self):
         self.cpp_info.components["libsubunit"].libs = ["subunit"]

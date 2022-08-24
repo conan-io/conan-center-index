@@ -434,7 +434,7 @@ class GdalConan(ConanFile):
         if tools.Version(self.version) >= "3.1.0":
             embedded_libs.append(os.path.join("ogr", "ogrsf_frmts", "flatgeobuf", "flatbuffers"))
         for lib_subdir in embedded_libs:
-            tools.rmdir(os.path.join(self._source_subfolder, lib_subdir))
+            tools.files.rmdir(self, os.path.join(self._source_subfolder, lib_subdir))
 
         # OpenCL headers
         tools.replace_in_file(os.path.join(self._source_subfolder, "alg", "gdalwarpkernel_opencl.h"),
@@ -911,8 +911,8 @@ class GdalConan(ConanFile):
             with self._autotools_build_environment():
                 autotools = self._configure_autotools()
                 autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "gdalplugins"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "gdalplugins"))
+            tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):

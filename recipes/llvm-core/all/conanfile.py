@@ -328,7 +328,7 @@ class LLVMCoreConan(ConanFile):
                 old_alias_targets
             )
 
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
+        tools.files.rmdir(self, os.path.join(self.package_folder, 'share'))
 
         tools.remove_files_by_mask(self.package_folder, "LLVMExports*.cmake")
         tools.rename(os.path.join(self.package_folder, self._module_subfolder, 'LLVM-Config.cmake'),

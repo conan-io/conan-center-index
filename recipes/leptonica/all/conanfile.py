@@ -183,9 +183,9 @@ class LeptonicaConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy(pattern="leptonica-license.txt", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))  # since 1.81.0
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))  # since 1.81.0
+        tools.files.rmdir(self, os.path.join(self.package_folder, "cmake"))
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(

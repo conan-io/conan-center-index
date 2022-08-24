@@ -54,7 +54,7 @@ class lmdbConan(ConanFile):
         tools.files.get(self, **self.conan_data["sources"][self.version])
         root = "openldap-LMDB_{}".format(self.version)
         tools.rename(os.path.join(root, "libraries", "liblmdb"), self._source_subfolder)
-        tools.rmdir(root)
+        tools.files.rmdir(self, root)
 
     def build(self):
         cmake = self._configure_cmake()

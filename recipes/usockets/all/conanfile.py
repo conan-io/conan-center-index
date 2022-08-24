@@ -164,7 +164,7 @@ class UsocketsConan(ConanFile):
         self.copy(pattern="*.a", src=self._source_subfolder, dst="lib", keep_path=False)
         self.copy(pattern="*.lib", src=self._source_subfolder, dst="lib", keep_path=False)
         # drop internal headers
-        tools.rmdir(os.path.join(self.package_folder, "include", "internal"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "include", "internal"))
 
     def package_id(self):
         # Deprecated options

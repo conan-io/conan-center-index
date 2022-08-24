@@ -222,7 +222,7 @@ class CairoConan(ConanFile):
         tools.remove_files_by_mask(self.package_folder, "*.la")
 
         self.copy("COPYING*", src=self._source_subfolder, dst="licenses", keep_path=False)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
 
     def package_info(self):

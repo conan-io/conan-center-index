@@ -154,7 +154,7 @@ class LibX264Conan(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self._is_msvc:
             ext = ".dll.lib" if self.options.shared else ".lib"
             rename(self, os.path.join(self.package_folder, "lib", "libx264{}".format(ext)),
