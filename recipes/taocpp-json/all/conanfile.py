@@ -56,7 +56,7 @@ class TaoCPPJSONConan(ConanFile):
                 self.output.warn("taocpp-json requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder,
+        tools.files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder,
                   strip_root=True)
 
     def package(self):

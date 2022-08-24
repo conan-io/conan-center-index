@@ -41,7 +41,7 @@ class GFortranConan(ConanFile):
                 os.unlink(filename)
                 os.rename("mingw64", "source_subfolder_Windows")
             elif it != "Windows":
-                tools.get(**url[it])
+                tools.files.get(self, **url[it])
                 pattern = "gcc-*" if it == "Linux" else "usr"
                 os.rename(glob.glob(pattern)[0], "source_subfolder_{}".format(it))
 

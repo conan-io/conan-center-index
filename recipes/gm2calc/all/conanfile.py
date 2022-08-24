@@ -44,7 +44,7 @@ class Gm2calcConan(ConanFile):
         self.requires("eigen/3.3.9")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         conan.tools.files.rename(self, "GM2Calc-{}".format(self.version), self._source_subfolder)
 
     def build(self):

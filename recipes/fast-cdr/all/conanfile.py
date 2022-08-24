@@ -56,7 +56,7 @@ class FastCDRConan(ConanFile):
             raise ConanInvalidConfiguration("Mixing a dll eprosima library with a static runtime is a bad idea")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True,
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True,
                   destination=self._source_subfolder)
 
     def _configure_cmake(self):

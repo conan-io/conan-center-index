@@ -27,7 +27,7 @@ class JwasmConan(ConanFile):
         del self.info.settings.compiler
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename("JWasm-" + self.version, self._source_subfolder)
 
     def _patch_sources(self):

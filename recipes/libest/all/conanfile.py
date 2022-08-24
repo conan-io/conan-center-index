@@ -42,7 +42,7 @@ class LibEstConan(ConanFile):
         self.requires("openssl/1.1.1q")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-r" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 

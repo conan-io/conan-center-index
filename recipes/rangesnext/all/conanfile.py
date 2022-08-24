@@ -29,7 +29,7 @@ class RangesnextConan(ConanFile):
             raise ConanInvalidConfiguration("rangesnext requires C++20, which your compiler does not fully support.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         include_folder = os.path.join(self._source_subfolder, "include")

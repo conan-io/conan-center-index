@@ -95,7 +95,7 @@ class ImaglConan(ConanFile):
             print("Your compiler is {} {} and is compatible.".format(str(self.settings.compiler), compiler_version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):

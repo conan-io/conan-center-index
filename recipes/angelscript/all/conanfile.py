@@ -54,7 +54,7 @@ class AngelScriptConan(ConanFile):
 
     def source(self):
         # Website blocks default user agent string.
-        tools.get(
+        tools.files.get(self, 
             **self.conan_data["sources"][self.version],
             destination=self._source_subfolder,
             headers={"User-Agent": "ConanCenter"},

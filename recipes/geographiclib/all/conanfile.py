@@ -84,7 +84,7 @@ class GeographiclibConan(ConanFile):
             raise ConanInvalidConfiguration("extended, quadruple and variable precisions not yet supported in this recipe")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):

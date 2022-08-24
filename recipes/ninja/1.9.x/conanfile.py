@@ -42,7 +42,7 @@ class NinjaConan(ConanFile):
                 self.run("%s configure.py --bootstrap" % sys.executable)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename("ninja-%s" % self.version, self._source_subfolder)
 
     def build(self):

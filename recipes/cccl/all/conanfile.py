@@ -32,7 +32,7 @@ class CcclConan(ConanFile):
         del self.info.options.verbose
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
         cccl_path = os.path.join(self.source_folder, self._source_subfolder, "cccl")

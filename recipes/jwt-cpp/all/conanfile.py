@@ -30,7 +30,7 @@ class JwtCppConan(ConanFile):
             self.requires("picojson/1.3.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)

@@ -237,10 +237,10 @@ class OpenCVConan(ConanFile):
             self.build_requires(self._protobuf_version)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][0],
+        tools.files.get(self, **self.conan_data["sources"][self.version][0],
                   destination=self._source_subfolder, strip_root=True)
 
-        tools.get(**self.conan_data["sources"][self.version][1],
+        tools.files.get(self, **self.conan_data["sources"][self.version][1],
                   destination=self._contrib_folder, strip_root=True)
 
     def _patch_opencv(self):

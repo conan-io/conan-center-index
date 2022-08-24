@@ -82,8 +82,8 @@ class CrashpadConan(ConanFile):
             tools.check_min_cppstd(self, 14)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version]["crashpad"], destination=self._source_subfolder, strip_root=True)
-        tools.get(**self.conan_data["sources"][self.version]["mini_chromium"],
+        tools.files.get(self, **self.conan_data["sources"][self.version]["crashpad"], destination=self._source_subfolder, strip_root=True)
+        tools.files.get(self, **self.conan_data["sources"][self.version]["mini_chromium"],
                   destination=os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium"), strip_root=True)
 
     @property

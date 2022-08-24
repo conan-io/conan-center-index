@@ -15,7 +15,7 @@ class GraphthewyConan(ConanFile):
     no_copy_source = True
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     @property

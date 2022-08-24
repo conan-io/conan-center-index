@@ -51,7 +51,7 @@ class NodesoupConan(ConanFile):
                 raise ConanInvalidConfiguration("The version of libstdc++(11) of the current compiler does not support building nodesoup")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):

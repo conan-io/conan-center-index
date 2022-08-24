@@ -47,7 +47,7 @@ class SerfConan(ConanFile):
         self.build_requires("scons/4.3.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename(glob.glob("serf-*")[0], self._source_subfolder)
 
     def _patch_sources(self):

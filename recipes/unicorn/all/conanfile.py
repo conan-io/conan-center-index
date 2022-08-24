@@ -84,7 +84,7 @@ class UnicornConan(ConanFile):
         self.info.options.supported_archs = ",".join(self._supported_archs)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     @property

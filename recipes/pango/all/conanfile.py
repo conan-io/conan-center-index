@@ -91,7 +91,7 @@ class PangoConan(ConanFile):
         self.requires("fribidi/1.0.12")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
     def _configure_meson(self):

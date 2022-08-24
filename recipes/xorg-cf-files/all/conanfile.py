@@ -52,7 +52,7 @@ class XorgCfFilesConan(ConanFile):
         # self.info.settings.os  # FIXME: can be removed once c3i is able to test multiple os'es from one common package
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     @property

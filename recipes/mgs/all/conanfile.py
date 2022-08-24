@@ -33,7 +33,7 @@ class MgsConan(ConanFile):
             self.output.warn("mgs requires C++14. Your compiler is unknown. Assuming it supports C++14.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename(self.name, self._source_subfolder)
 
     def package(self):

@@ -31,7 +31,7 @@ class logcConan(ConanFile):
         return "build_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         tools.rename(glob.glob(self.name + "-*/")[0], self._source_subfolder)
 
     def _configure_cmake(self):

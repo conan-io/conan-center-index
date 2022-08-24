@@ -74,7 +74,7 @@ class IXWebSocketConan(ConanFile):
             raise ConanInvalidConfiguration("This version doesn't support OpenSSL with Windows; use v7.9.3 or newer for this to be valid")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):

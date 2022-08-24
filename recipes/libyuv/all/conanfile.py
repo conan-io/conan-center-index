@@ -44,7 +44,7 @@ class LibyuvConan(ConanFile):
             self.requires("libjpeg-turbo/2.0.5")
 
     def source(self):
-        tools.get(**self.conan_data["sources"]
+        tools.files.get(self, **self.conan_data["sources"]
                   [self.version], destination=self._source_subfolder)
 
     def _configure_cmake(self):

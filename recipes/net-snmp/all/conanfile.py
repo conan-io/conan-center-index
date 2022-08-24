@@ -44,7 +44,7 @@ class NetSnmpConan(ConanFile):
             )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def config_options(self):
         if self.settings.os == "Windows":

@@ -68,7 +68,7 @@ class NsprConan(ConanFile):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination="tmp", strip_root=True)
         rename(self, os.path.join("tmp", "nspr"), self._source_subfolder)
         tools.rmdir("tmp")

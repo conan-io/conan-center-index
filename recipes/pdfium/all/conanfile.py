@@ -68,13 +68,13 @@ class PdfiumConan(ConanFile):
                 raise ConanInvalidConfiguration("pdfium needs at least compiler version {}".format(min_compiler_version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version]["pdfium-cmake"],
+        tools.files.get(self, **self.conan_data["sources"][self.version]["pdfium-cmake"],
                   destination="pdfium-cmake", strip_root=True)
-        tools.get(**self.conan_data["sources"][self.version]["pdfium"],
+        tools.files.get(self, **self.conan_data["sources"][self.version]["pdfium"],
                   destination=self._source_subfolder)
-        tools.get(**self.conan_data["sources"][self.version]["trace_event"],
+        tools.files.get(self, **self.conan_data["sources"][self.version]["trace_event"],
                   destination=os.path.join(self._source_subfolder, "base", "trace_event", "common"))
-        tools.get(**self.conan_data["sources"][self.version]["chromium_build"],
+        tools.files.get(self, **self.conan_data["sources"][self.version]["chromium_build"],
                   destination=os.path.join(self._source_subfolder, "build"))
 
     def _configure_cmake(self):

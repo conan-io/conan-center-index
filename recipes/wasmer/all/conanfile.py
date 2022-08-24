@@ -54,7 +54,7 @@ class WasmerConan(ConanFile):
         self.info.settings.compiler = self._compiler_alias
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)][self._compiler_alias],
+        tools.files.get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)][self._compiler_alias],
                   destination=self.source_folder)
 
     def package(self):

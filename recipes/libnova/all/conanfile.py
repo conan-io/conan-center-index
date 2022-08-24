@@ -65,7 +65,7 @@ class LibnovaConan(ConanFile):
         self._generate_git_tag_archive_sourceforge(self.conan_data["sources"][self.version]["post"]["url"])
 
         # Download archive
-        tools.get(**self.conan_data["sources"][self.version]["archive"],
+        tools.files.get(self, **self.conan_data["sources"][self.version]["archive"],
                   destination=self._source_subfolder, strip_root=True)
 
     def build(self):

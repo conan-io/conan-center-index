@@ -45,7 +45,7 @@ class LibMbusConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + \
             os.path.basename(
                 self.conan_data["sources"][self.version]["url"]).split(".")[0]

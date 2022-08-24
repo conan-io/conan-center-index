@@ -49,7 +49,7 @@ class LibSELinuxConan(ConanFile):
 
     def source(self):
         for download in self.conan_data["sources"][self.version]:
-            tools.get(**download)
+            tools.files.get(self, **download)
 
     @property
     def _sepol_soversion(self):

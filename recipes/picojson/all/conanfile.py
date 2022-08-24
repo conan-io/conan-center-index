@@ -14,7 +14,7 @@ class PicoJSONConan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename(glob.glob("picojson-*")[0], self._source_subfolder)
 
     def package(self):

@@ -58,7 +58,7 @@ class WasmtimeCppConan(ConanFile):
             self.output.warn(msg)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        tools.files.get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def package(self):
         shutil.copytree(os.path.join(self.source_folder, "include"),

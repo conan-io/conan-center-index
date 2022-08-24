@@ -42,7 +42,7 @@ class IntelNeon2sseConan(ConanFile):
             raise ConanInvalidConfiguration("neon2sse only supports arch={x86,x86_64}")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
 
     def build(self):

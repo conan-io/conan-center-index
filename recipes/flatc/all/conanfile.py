@@ -29,7 +29,7 @@ class FlatcConan(ConanFile):
             tools.patch(**patch)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = "flatbuffers-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 

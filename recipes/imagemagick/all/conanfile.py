@@ -140,7 +140,7 @@ class ImageMagicConan(ConanFile):
             )
 
     def source(self):
-        tools.get(
+        tools.files.get(self, 
             **self.conan_data["sources"][self.version]["source"],
             destination=self._source_subfolder,
             strip_root=True
@@ -150,7 +150,7 @@ class ImageMagicConan(ConanFile):
             visualmagick_version = list(
                 self.conan_data["sources"][self.version]["visualmagick"].keys()
             )[0]
-            tools.get(
+            tools.files.get(self, 
                 **self.conan_data["sources"][self.version]["visualmagick"][
                     visualmagick_version
                 ],

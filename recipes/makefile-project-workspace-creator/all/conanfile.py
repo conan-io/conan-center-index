@@ -23,7 +23,7 @@ class MPCGeneratorConan(ConanFile):
         pass
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename("MPC-MPC_" + self.version.replace(".", "_"), self._source_subfolder)
 
     def package(self):

@@ -39,7 +39,7 @@ class DawHeaderLibrariesConan(ConanFile):
             self.output.warn("{0} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        tools.files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         cmake = CMake(self)

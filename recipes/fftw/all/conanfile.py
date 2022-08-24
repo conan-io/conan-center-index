@@ -69,7 +69,7 @@ class FFTWConan(ConanFile):
                 raise ConanInvalidConfiguration("Shared fftw with threads and not combinedthreads can't be built on Windows")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     @functools.lru_cache(1)

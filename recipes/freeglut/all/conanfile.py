@@ -75,7 +75,7 @@ class freeglutConan(ConanFile):
             raise ConanInvalidConfiguration("%s does not support gcc >= 10 and clang >= 11" % self.name)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):

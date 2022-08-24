@@ -54,7 +54,7 @@ class AwsCCommon(ConanFile):
             raise ConanInvalidConfiguration("Static runtime + shared is not working for more recent releases")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):

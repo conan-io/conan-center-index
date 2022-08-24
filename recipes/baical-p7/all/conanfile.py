@@ -34,7 +34,7 @@ class BaicalP7Conan(ConanFile):
             raise ConanInvalidConfiguration("P7 only supports Windows and Linux at this time")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination= self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], destination= self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:

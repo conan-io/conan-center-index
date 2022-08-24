@@ -35,7 +35,7 @@ class NodejsConan(ConanFile):
             raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
 
     def build(self):
-        tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)][self._nodejs_arch], destination=self._source_subfolder, strip_root=True)
+        tools.files.get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][self._nodejs_arch], destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)

@@ -81,7 +81,7 @@ class FruitConan(ConanFile):
                                     tarredgzippedFile.getmembers()))
                 tarredgzippedFile.extractall(".", members=members)
         else:
-            tools.get(**self.conan_data["sources"][self.version])
+            tools.files.get(self, **self.conan_data["sources"][self.version])
 
     def source(self):
         self._get_source()

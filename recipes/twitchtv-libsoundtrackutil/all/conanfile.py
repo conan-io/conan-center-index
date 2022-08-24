@@ -54,7 +54,7 @@ class TwitchTvLibSoundtrackUtilConan(ConanFile):
             self.output.warn("unknown compiler, assuming C++17 support")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename("{}-{}".format("libsoundtrackutil", self.version), self._source_subfolder)
 
     def _configure_cmake(self):

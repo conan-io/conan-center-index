@@ -56,7 +56,7 @@ class CppTaskflowConan(ConanFile):
                                             " supported." % (self.name, min_req_cppstd, compiler, tools.Version(self.settings.compiler.version.value)))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename("taskflow-" + self.version, self._source_subfolder)
 
     def package(self):

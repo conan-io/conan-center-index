@@ -117,7 +117,7 @@ class MSYS2Conan(ConanFile):
         pass
 
     def build(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                     destination=os.path.join(self.package_folder, "bin"))
         with lock():
             self._do_build()

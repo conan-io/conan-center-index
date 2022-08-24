@@ -69,7 +69,7 @@ class LiefConan(ConanFile):
             self.requires("frozen/1.0.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = "LIEF-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 

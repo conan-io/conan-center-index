@@ -46,7 +46,7 @@ class BacnetStackConan(ConanFile):
             raise ConanInvalidConfiguration("Windows shared builds are not supported right now, see issue https://github.com/bacnet-stack/bacnet-stack/issues/49")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         if self.version.startswith("2020"):
             extracted_dir = self.name + "-" + os.path.basename(self.conan_data["sources"][self.version]["url"]).split(".")[0]
         else:

@@ -40,7 +40,7 @@ class PbcConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:

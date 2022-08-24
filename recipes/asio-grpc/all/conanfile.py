@@ -68,7 +68,7 @@ class AsioGrpcConan(ConanFile):
         self.info.options.use_boost_container = self.options.use_boost_container
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses")

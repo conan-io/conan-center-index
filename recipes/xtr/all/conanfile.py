@@ -73,7 +73,7 @@ class XtrConan(ConanFile):
                 f"{self.name} requires {self.settings.compiler} version {minimum_version[compiler]} or later")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def get_defines(self):
         defines = []

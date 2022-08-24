@@ -51,7 +51,7 @@ class PfrConan(ConanFile):
             self.output.warn(msg)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][0])
+        tools.files.get(self, **self.conan_data["sources"][self.version][0])
         extracted_dir = self.name + "-" + self.version
         rename(self, extracted_dir, self._source_subfolder)
 

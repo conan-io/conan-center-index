@@ -67,7 +67,7 @@ class ZfpConan(ConanFile):
             self.output.warn("Conan package for OpenMP is not available, this package will be used from system.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):

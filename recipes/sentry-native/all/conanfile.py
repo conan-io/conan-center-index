@@ -140,7 +140,7 @@ class SentryNativeConan(ConanFile):
             self.build_requires("pkgconf/1.7.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):

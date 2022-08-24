@@ -44,7 +44,7 @@ class MuParserConan(ConanFile):
             self.output.warn("Conan package for OpenMP is not available, this package will be used from system.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = "{}-{}".format(self.name, self.version)
         os.rename(extracted_dir, self._source_subfolder)
 

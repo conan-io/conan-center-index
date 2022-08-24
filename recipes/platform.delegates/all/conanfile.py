@@ -58,7 +58,7 @@ class PlatformDelegatesConan(ConanFile):
             
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy("*.h", dst="include", src=self._internal_cpp_subfolder)

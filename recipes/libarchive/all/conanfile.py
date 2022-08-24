@@ -123,7 +123,7 @@ class LibarchiveConan(ConanFile):
             raise ConanInvalidConfiguration("libxml2 and expat options are exclusive. They cannot be used together as XML engine")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):

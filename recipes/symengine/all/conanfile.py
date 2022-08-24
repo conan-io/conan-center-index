@@ -43,7 +43,7 @@ class SymengineConan(ConanFile):
             self.requires("gmp/6.2.1")
 
     def source(self):
-        tools.get(
+        tools.files.get(self, 
             **self.conan_data["sources"][self.version],
             strip_root=True,
             destination=self._source_subfolder,

@@ -54,7 +54,7 @@ class B2Conan(ConanFile):
                 "Option toolset 'cxx' and 'cross-cxx' requires 'use_cxx_env=True'")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination="source")
 
     def build(self):

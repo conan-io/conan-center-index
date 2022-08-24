@@ -48,7 +48,7 @@ class Md4cConan(ConanFile):
             raise tools.ConanInvalidConfiguration("utf-16 options is not supported on non-Windows platforms")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
 
     @functools.lru_cache(1)

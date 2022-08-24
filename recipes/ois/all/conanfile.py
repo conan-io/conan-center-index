@@ -45,7 +45,7 @@ class OisConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = "OIS-{}".format(self.version)
         os.rename(extracted_dir, self._source_subfolder)
 

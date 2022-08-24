@@ -53,7 +53,7 @@ class SvgwriteConan(ConanFile):
                                             " supported." % (self.name, compiler, compiler_version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_folder = self.name + "-v" + self.version
         os.rename(extracted_folder, self._source_subfolder)
 

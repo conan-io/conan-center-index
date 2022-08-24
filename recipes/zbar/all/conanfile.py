@@ -95,7 +95,7 @@ class ZbarConan(ConanFile):
             raise ConanInvalidConfiguration("{} can't be built on cross building environment currently because autopoint(part of gettext) doesn't execute correctly.".format(self.name))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):

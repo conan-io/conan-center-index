@@ -61,7 +61,7 @@ class CoConan(ConanFile):
             self.build_requires("cmake/3.20.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
     def build(self):

@@ -43,7 +43,7 @@ SeqAn is easy to use and simplifies the development of new software tools with a
 
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = "seqan-seqan-v" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 

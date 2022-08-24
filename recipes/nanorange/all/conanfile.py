@@ -40,7 +40,7 @@ class NanorangeConan(ConanFile):
                     raise ConanInvalidConfiguration("NanoRange requires a compiler that supports at least C++17")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         url = self.conan_data["sources"][self.version]["url"]
         commit = url[url.rfind("/")+1:url.find(".tar.gz")]
         extracted_folder = "NanoRange-" + commit

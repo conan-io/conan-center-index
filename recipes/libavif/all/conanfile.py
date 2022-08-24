@@ -55,7 +55,7 @@ class LibAVIFConan(ConanFile):
     def source(self):
         root = self._source_subfolder
         get_args = self.conan_data["sources"][self.version]
-        tools.get(**get_args, destination=root, strip_root=True)
+        tools.files.get(self, **get_args, destination=root, strip_root=True)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):

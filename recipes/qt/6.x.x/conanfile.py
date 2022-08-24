@@ -423,7 +423,7 @@ class QtConan(ConanFile):
             self.build_requires("wayland/1.21.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination="qt6")
 
         # patching in source method because of no_copy_source attribute

@@ -52,7 +52,7 @@ class NasRecipe(ConanFile):
         self.build_requires("xorg-gccmakedep/1.0.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][0], destination=self._source_subfolder, strip_root=True)
+        tools.files.get(self, **self.conan_data["sources"][self.version][0], destination=self._source_subfolder, strip_root=True)
         tools.download(filename="LICENSE", **self.conan_data["sources"][self.version][1])
 
     @property

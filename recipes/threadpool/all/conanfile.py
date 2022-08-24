@@ -16,7 +16,7 @@ class threadpoolConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         listdir = os.listdir()
         extracted_dir = [i for i in listdir if "ThreadPool" in i][0]
         os.rename(extracted_dir, self._source_subfolder)

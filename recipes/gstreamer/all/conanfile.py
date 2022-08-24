@@ -69,7 +69,7 @@ class GStreamerConan(ConanFile):
             self.build_requires("flex/2.6.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename("%s-%s" % (self.name, self.version), self._source_subfolder)
 
     def _configure_meson(self):

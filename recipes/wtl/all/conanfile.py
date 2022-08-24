@@ -14,7 +14,7 @@ class WTLConan(ConanFile):
     no_copy_source = True
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
 
     def package(self):
         self.copy("*", dst="include", src=os.path.join(self.source_folder, "include"))

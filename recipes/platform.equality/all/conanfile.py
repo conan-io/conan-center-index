@@ -56,7 +56,7 @@ class PlatformInterfacesConan(ConanFile):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy("*.h", dst="include", src=self._internal_cpp_subfolder)

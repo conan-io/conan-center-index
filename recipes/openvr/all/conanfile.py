@@ -46,7 +46,7 @@ class OpenvrConan(ConanFile):
         self.requires("jsoncpp/1.9.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = "{}-{}".format(self.name, self.version)
         os.rename(extracted_dir, self._source_subfolder)
 

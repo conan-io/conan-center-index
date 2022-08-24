@@ -61,7 +61,7 @@ class PDCursesConan(ConanFile):
             self.build_requires("make/4.2.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename("PDCurses-{}".format(self.version), self._source_subfolder)
 
     def _configure_autotools(self):

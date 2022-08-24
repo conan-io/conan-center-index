@@ -63,7 +63,7 @@ class LLVMOpenMpConan(ConanFile):
             raise ConanInvalidConfiguration("ARM v8 not supported")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = "openmp-{}.src".format(self.version)
         os.rename(extracted_dir, self._source_subfolder)
 

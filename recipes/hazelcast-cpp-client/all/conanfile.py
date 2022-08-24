@@ -49,7 +49,7 @@ class HazelcastCppClient(ConanFile):
             self.requires("openssl/1.1.1k")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def _configure_cmake(self):

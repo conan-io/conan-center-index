@@ -65,7 +65,7 @@ class DiligentCoreConan(ConanFile):
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package_id(self):
         if self.settings.compiler == "Visual Studio":

@@ -101,7 +101,7 @@ class TesseractConan(ConanFile):
             raise ConanInvalidConfiguration("{} requires a {} version >= {}, but {} was found".format(self.name, compiler, minimal_version[compiler], compiler_version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     @functools.lru_cache(1)

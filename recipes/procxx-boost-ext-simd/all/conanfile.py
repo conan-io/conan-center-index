@@ -36,7 +36,7 @@ class ProCxxBoostExSimdConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_folder = "boost.simd-" + self.version
         os.rename(extracted_folder, self._source_subfolder)
 

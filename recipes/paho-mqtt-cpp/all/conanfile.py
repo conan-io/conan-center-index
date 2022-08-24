@@ -56,7 +56,7 @@ class PahoMqttCppConan(ConanFile):
             self.requires("paho-mqtt-c/1.3.1") # https://github.com/eclipse/paho.mqtt.cpp/releases/tag/v1.1
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:

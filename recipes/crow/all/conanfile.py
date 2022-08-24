@@ -20,7 +20,7 @@ class CrowConan(ConanFile):
         self.requires("boost/1.69.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = "crow-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 

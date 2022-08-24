@@ -30,7 +30,7 @@ class BoostDepConan(ConanFile):
         del self.info.settings.compiler
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][0])
+        tools.files.get(self, **self.conan_data["sources"][self.version][0])
         os.rename("boostdep-boost-{}".format(self.version), self._source_subfolder)
         license_info = self.conan_data["sources"][self.version][1]
         tools.download(filename=os.path.basename(license_info["url"]), **license_info)

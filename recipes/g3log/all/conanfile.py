@@ -48,7 +48,7 @@ class G3logConan(ConanFile):
                                                     self.settings.compiler.version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         dir_postfix = self.conan_data["sources"][self.version]["url"].split("/")[-1][:-7]
         os.rename("g3log-{}".format(dir_postfix), self._source_subfolder)
 

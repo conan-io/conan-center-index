@@ -122,7 +122,7 @@ class GtsamConan(ConanFile):
             raise ConanInvalidConfiguration("GTSAM does not support shared builds on MSVC. see https://github.com/borglab/gtsam/issues/1087")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):

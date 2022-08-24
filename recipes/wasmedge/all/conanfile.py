@@ -41,7 +41,7 @@ class WasmedgeConan(ConanFile):
         self.info.settings.compiler = self._compiler_alias
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)][self._compiler_alias][0],
+        tools.files.get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)][self._compiler_alias][0],
                   destination=self._source_subfolder, strip_root=True)
         tools.download(filename="LICENSE",
                        **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)][self._compiler_alias][1])

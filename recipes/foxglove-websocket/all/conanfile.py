@@ -19,7 +19,7 @@ class FoxgloveWebSocketConan(ConanFile):
     _source_package_path = os.path.join(_source_root, "cpp", "foxglove-websocket")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_root)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_root)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):

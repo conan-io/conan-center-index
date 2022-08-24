@@ -75,7 +75,7 @@ class XkbcommonConan(ConanFile):
             self.build_requires("wayland/1.20.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
         # Conan doesn't provide a `wayland-scanner.pc` file for the package in the _build_ context
         tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),

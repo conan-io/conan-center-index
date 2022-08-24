@@ -66,7 +66,7 @@ class RuyConan(ConanFile):
         self.requires("cpuinfo/cci.20201217")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                 destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):

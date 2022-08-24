@@ -48,7 +48,7 @@ class NeargyeSemverConan(ConanFile):
                 (self.name, min_req_cppstd, compiler, tools.Version(self.settings.compiler.version.value)))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        tools.files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")

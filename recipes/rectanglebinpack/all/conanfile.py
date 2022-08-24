@@ -46,7 +46,7 @@ class RectangleBinPackConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][0],
+        tools.files.get(self, **self.conan_data["sources"][self.version][0],
                   strip_root=True, destination=self._source_subfolder)
         tools.download(filename="LICENSE", **self.conan_data["sources"][self.version][1])
 

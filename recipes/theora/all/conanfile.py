@@ -63,7 +63,7 @@ class TheoraConan(ConanFile):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][0], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version][0], strip_root=True, destination=self._source_subfolder)
 
         source = self.conan_data["sources"][self.version][1]
         url = source["url"]

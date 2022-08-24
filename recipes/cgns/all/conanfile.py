@@ -52,7 +52,7 @@ class CgnsConan(ConanFile):
             self.requires("hdf5/1.12.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename("CGNS-" + self.version, self._source_subfolder)
 
     def _configure_cmake(self):

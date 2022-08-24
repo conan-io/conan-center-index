@@ -56,7 +56,7 @@ class CclientConan(ConanFile):
             self.requires("openssl/1.1.1q")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_msvc(self):
         opt_flags = "/O2 /Ob2 /DNDEBUG"

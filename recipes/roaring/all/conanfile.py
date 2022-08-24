@@ -60,7 +60,7 @@ class RoaringConan(ConanFile):
                 raise ConanInvalidConfiguration("roaring >= 3.0.0 requires at least apple-clang 11 to support runtime dispatching.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     @functools.lru_cache(1)

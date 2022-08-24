@@ -49,7 +49,7 @@ class SimpleWebSocketServerConan(ConanFile):
             raise ConanInvalidConfiguration("simple-websocket-server versions <=2.0.1 require boost < 1.74.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = "Simple-WebSocket-Server-v" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 

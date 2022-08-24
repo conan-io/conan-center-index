@@ -46,7 +46,7 @@ class LibFtdi(ConanFile):
             del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename("libftdi-{}".format(self.version), self._source_subfolder)
 
     def requirements(self):

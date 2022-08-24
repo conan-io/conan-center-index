@@ -59,7 +59,7 @@ class MatioConan(ConanFile):
             raise ConanInvalidConfiguration("Support of version 7.3 MAT files requires HDF5")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):

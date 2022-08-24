@@ -46,7 +46,7 @@ class EntityXConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename("entityx-" + self.version, self._source_subfolder)
 
     def validate(self):

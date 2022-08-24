@@ -44,7 +44,7 @@ class LibqrencodeConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename("libqrencode-{}".format(self.version), self._source_subfolder)
 
     def _configure_cmake(self):

@@ -56,7 +56,7 @@ class LibrealsenseConan(ConanFile):
 
     def source(self):
         sources = self.conan_data["sources"][self.version]
-        tools.get(**sources["source"], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **sources["source"], strip_root=True, destination=self._source_subfolder)
         for firmware in sources["firmware"]:
             filename = os.path.basename(urllib.parse.urlparse(firmware["url"]).path)
             tools.download(filename=filename, **firmware)

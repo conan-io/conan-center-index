@@ -48,7 +48,7 @@ class PthreadpoolConan(ConanFile):
         self.requires("fxdiv/cci.20200417")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = glob.glob("pthreadpool-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
 

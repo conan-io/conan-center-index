@@ -44,7 +44,7 @@ class AwsCHttp(ConanFile):
         self.requires("aws-c-io/0.10.20")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):

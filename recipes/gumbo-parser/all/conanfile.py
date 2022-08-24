@@ -34,7 +34,7 @@ class GumboParserConan(ConanFile):
         self.build_requires("libtool/2.4.6")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_folder = "gumbo-parser-{0}".format(self.version)
         os.rename(extracted_folder, self._source_subfolder)
 

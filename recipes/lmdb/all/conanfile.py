@@ -50,7 +50,7 @@ class lmdbConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         root = "openldap-LMDB_{}".format(self.version)
         tools.rename(os.path.join(root, "libraries", "liblmdb"), self._source_subfolder)
         tools.rmdir(root)

@@ -37,7 +37,7 @@ class MathterConan(ConanFile):
             self.output.warn("mathter requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename("Mathter-" + self.version, self._source_subfolder)
             
     def package(self):

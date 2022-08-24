@@ -66,7 +66,7 @@ class LibUSBConan(ConanFile):
                 self.requires("libudev/system")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _build_visual_studio(self):

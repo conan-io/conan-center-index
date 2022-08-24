@@ -58,7 +58,7 @@ class LibreSSLConan(ConanFile):
             raise ConanInvalidConfiguration("Static runtime linked into shared LibreSSL not supported")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
         if tools.Version(self.version) >= "3.1.1":
             tools.replace_in_file(

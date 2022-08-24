@@ -59,7 +59,7 @@ class LibPslConan(ConanFile):
             self.requires("libunistring/0.9.10")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename("libpsl-{}".format(self.version), self._source_subfolder)
 
     @property

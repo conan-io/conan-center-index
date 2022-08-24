@@ -22,7 +22,7 @@ class AccessPrivateConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         url = self.conan_data["sources"][self.version]["url"]
         extracted_dir = "access_private-" + \
             os.path.splitext(os.path.basename(url))[0]

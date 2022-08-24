@@ -39,7 +39,7 @@ class GenieConan(ConanFile):
             raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        tools.files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     @property
     def _os(self):

@@ -57,7 +57,7 @@ class GeotransConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(
+        tools.files.get(self, 
             **self.conan_data["sources"][self.version],
             strip_root=True,
             destination=self._source_subfolder,

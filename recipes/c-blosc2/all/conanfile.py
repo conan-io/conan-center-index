@@ -73,7 +73,7 @@ class CBlosc2Conan(ConanFile):
             self.requires("zstd/1.5.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):

@@ -40,7 +40,7 @@ class PExportsConan(ConanFile):
 
     def source(self):
         filename = "pexports.tar.xz"
-        tools.get(**self.conan_data["sources"][self.version], filename=filename,
+        tools.files.get(self, **self.conan_data["sources"][self.version], filename=filename,
                   destination=self._source_subfolder, strip_root=True)
 
     @property

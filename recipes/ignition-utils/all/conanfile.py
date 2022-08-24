@@ -83,7 +83,7 @@ class IgnitionUitlsConan(ConanFile):
         self.build_requires("ignition-cmake/2.10.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake is not None:

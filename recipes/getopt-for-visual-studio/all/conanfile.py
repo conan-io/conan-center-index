@@ -22,7 +22,7 @@ class GetoptForVisualStudio(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename("Getopt-for-Visual-Studio-{}".format(os.path.splitext(os.path.basename(self.conan_data["sources"][self.version]["url"]))[0]), self._source_subfolder)
 
     def build(self):

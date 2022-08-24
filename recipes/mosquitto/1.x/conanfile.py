@@ -47,7 +47,7 @@ class MosquittoConan(ConanFile):
             self.requires("libwebsockets/4.1.6")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = self.name.replace("-", ".") + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 

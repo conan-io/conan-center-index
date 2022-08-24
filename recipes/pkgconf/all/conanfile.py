@@ -68,7 +68,7 @@ class PkgConfConan(ConanFile):
         self.build_requires("meson/0.62.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        tools.files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     @property
     def _sharedstatedir(self):

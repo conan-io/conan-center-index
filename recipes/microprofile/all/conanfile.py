@@ -129,7 +129,7 @@ class MicroprofileConan(ConanFile):
             self.requires("vulkan-loader/1.2.182")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][0], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version][0], strip_root=True, destination=self._source_subfolder)
         tools.download(filename="LICENSE", **self.conan_data["sources"][self.version][1])
 
     def build(self):

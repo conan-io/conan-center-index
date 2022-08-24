@@ -417,7 +417,7 @@ class QtConan(ConanFile):
             self.requires("md4c/0.4.8")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination="qt5")
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

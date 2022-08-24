@@ -48,10 +48,10 @@ class MingwConan(ConanFile):
             if package == "gcc":
                 continue
             self.output.info("Downloading {} from {}".format(package, arch_data[package]['url']))
-            tools.get(**arch_data[package], strip_root=True, destination=os.path.join(self.build_folder, "sources", package))
+            tools.files.get(self, **arch_data[package], strip_root=True, destination=os.path.join(self.build_folder, "sources", package))
         # Download gcc version
         gcc_data = arch_data["gcc"][str(self.options.gcc)]
-        tools.get(**gcc_data, strip_root=True, destination=os.path.join(self.build_folder, "sources", "gcc"))
+        tools.files.get(self, **gcc_data, strip_root=True, destination=os.path.join(self.build_folder, "sources", "gcc"))
 
     @property
     def _target_tag(self):

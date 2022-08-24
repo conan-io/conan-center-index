@@ -18,7 +18,7 @@ class JomInstallerConan(ConanFile):
             raise ConanInvalidConfiguration("Only Windows supported")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         tools.download('https://code.qt.io/cgit/qt-labs/jom.git/plain/LICENSE.GPL?h=v%s' % self.version, filename='LICENSE.GPL')
 
     def package(self):

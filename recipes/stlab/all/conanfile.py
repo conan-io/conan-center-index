@@ -46,7 +46,7 @@ class Stlab(ConanFile):
             self.requires("libdispatch/5.3.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = "libraries-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 

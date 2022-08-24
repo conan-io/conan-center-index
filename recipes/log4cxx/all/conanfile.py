@@ -82,7 +82,7 @@ class Log4cxxConan(ConanFile):
         #OSError: [WinError 123] The filename, directory name, or volume label syntax is incorrect:
         #'source_subfolder\\src\\test\\resources\\output\\xyz\\:'
         pattern = "*[!:]"
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True,
                   pattern=pattern)
 

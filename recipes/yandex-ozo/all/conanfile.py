@@ -49,7 +49,7 @@ class YandexOzoConan(ConanFile):
         self._validate_compiler_settings()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy(pattern="*", dst=os.path.join("include", "ozo"), src=os.path.join(self._source_subfolder, "include", "ozo"))

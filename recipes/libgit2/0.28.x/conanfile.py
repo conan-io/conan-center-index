@@ -91,7 +91,7 @@ class LibGit2Conan(ConanFile):
                 raise ConanInvalidConfiguration("win32 is only valid on Windows")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     _cmake_https = {

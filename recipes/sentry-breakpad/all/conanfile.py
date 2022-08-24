@@ -48,7 +48,7 @@ class SentryBreakpadConan(ConanFile):
                 raise ConanInvalidConfiguration("Versions <=0.2.6 do not support Windows")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):

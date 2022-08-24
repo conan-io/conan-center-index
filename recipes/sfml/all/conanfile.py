@@ -79,7 +79,7 @@ class SfmlConan(ConanFile):
             raise ConanInvalidConfiguration("sfml:graphics=True requires sfml:window=True")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
         tools.rmdir(os.path.join(self._source_subfolder, "extlibs"))
 

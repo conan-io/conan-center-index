@@ -58,7 +58,7 @@ class LibRawConan(ConanFile):
             self.requires("jasper/2.0.33")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename("LibRaw-" + self.version, self._source_subfolder)
 
     def _configure_cmake(self):

@@ -53,7 +53,7 @@ class CoseCConan(ConanFile):
             self.requires("openssl/1.1.1h")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename(glob.glob("COSE-C-*")[0], self._source_subfolder)
 
     def _configure_cmake(self):

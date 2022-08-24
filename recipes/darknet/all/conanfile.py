@@ -71,7 +71,7 @@ class DarknetConan(ConanFile):
             self.requires("opencv/2.4.13.7")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder,
+        tools.files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder,
                   strip_root=True)
 
     def build(self):

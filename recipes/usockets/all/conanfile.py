@@ -119,7 +119,7 @@ class UsocketsConan(ConanFile):
             self.requires("boost/1.79.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename("uSockets-%s" % self.version, self._source_subfolder)
 
     def _patch_sources(self):

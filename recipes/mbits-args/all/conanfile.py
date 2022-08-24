@@ -66,7 +66,7 @@ class MBitsArgsConan(ConanFile):
                                                 .format(self.settings.compiler.version, minimum_version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename("args-{}".format(self.version),
                   self._source_subfolder)
 

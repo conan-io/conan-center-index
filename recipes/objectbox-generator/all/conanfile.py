@@ -26,7 +26,7 @@ class PackageConan(ConanFile):
         del self.info.settings.build_type
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)],
+        tools.files.get(self, **self.conan_data["sources"][self.version][str(self.settings.os)],
                   destination=self.source_folder)
         tools.download(**self.conan_data["sources"][self.version]["License"], filename="LICENSE.txt")
 

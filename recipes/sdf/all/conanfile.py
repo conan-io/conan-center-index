@@ -18,7 +18,7 @@ class SdfConan(ConanFile):
         return os.path.join(self.source_folder, "source_subfolder")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = glob.glob('SDF-*/')[0]
         os.rename(extracted_dir, self._source_subfolder)
 

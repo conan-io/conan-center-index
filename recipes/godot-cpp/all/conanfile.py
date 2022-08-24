@@ -61,7 +61,7 @@ class GodotCppConan(ConanFile):
         return self.deps_cpp_info["godot_headers"]
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         tools.rename(glob.glob("godot-cpp-*")[0], self._source_subfolder)
 
     def requirements(self):

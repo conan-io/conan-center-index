@@ -25,7 +25,7 @@ class McapConan(ConanFile):
         return os.path.join(self._source_subfolder, "cpp", "mcap")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def requirements(self):
         self.requires("lz4/1.9.3")

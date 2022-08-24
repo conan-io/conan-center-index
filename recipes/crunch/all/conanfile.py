@@ -36,7 +36,7 @@ class CrunchConan(ConanFile):
             raise ConanInvalidConfiguration("Crunch is not supported on {}.".format(self.settings.os))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = glob.glob('crunch-*/')[0]
         os.rename(extracted_dir, self._source_subfolder)
 

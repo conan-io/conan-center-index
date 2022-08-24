@@ -55,7 +55,7 @@ class StructoptConan(ConanFile):
             self.output.warn("{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         cmake = CMake(self)

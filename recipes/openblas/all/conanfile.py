@@ -55,7 +55,7 @@ class OpenblasConan(ConanFile):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
     def source(self):
-        tools.get(
+        tools.files.get(self, 
             **self.conan_data["sources"][self.version],
             strip_root=True,
             destination=self._source_subfolder

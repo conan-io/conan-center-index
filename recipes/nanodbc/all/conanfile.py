@@ -65,7 +65,7 @@ class NanodbcConan(ConanFile):
             self.requires("odbc/2.3.9")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename(glob.glob("nanodbc-*")[0], self._source_subfolder)
 
     def _configure_cmake(self):

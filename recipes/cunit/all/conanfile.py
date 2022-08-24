@@ -62,7 +62,7 @@ class CunitConan(ConanFile):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
         with tools.chdir(self._source_subfolder):
             for f in glob.glob("*.c"):
                 os.chmod(f, 0o644)

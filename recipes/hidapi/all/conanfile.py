@@ -60,7 +60,7 @@ class HidapiConan(ConanFile):
             self.build_requires("libtool/2.4.6")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "configure.ac"),

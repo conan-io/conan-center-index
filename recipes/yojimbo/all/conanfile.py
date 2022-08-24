@@ -33,7 +33,7 @@ class YojimboConan(ConanFile):
         self.requires("mbedtls/2.25.0")
  
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
         
         submodule_filename = os.path.join(self.recipe_folder, 'submoduledata.yml')
         with open(submodule_filename, 'r') as submodule_stream:
@@ -46,7 +46,7 @@ class YojimboConan(ConanFile):
                     "strip_root": True
                 }
 
-                tools.get(**submodule_data)
+                tools.files.get(self, **submodule_data)
                 submodule_source = os.path.join(self._source_subfolder, path)
                 tools.rmdir(submodule_source)
 

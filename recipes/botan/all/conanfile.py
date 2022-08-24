@@ -174,7 +174,7 @@ class BotanConan(ConanFile):
             raise ConanInvalidConfiguration("botan:single_amalgamation=True requires botan:amalgamation=True")
 
     def source(self):
-        tools.get(**self.conan_data['sources'][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data['sources'][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
         for patch in self.conan_data.get('patches', {}).get(self.version, []):

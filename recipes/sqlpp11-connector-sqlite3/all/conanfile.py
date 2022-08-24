@@ -44,7 +44,7 @@ class sqlpp11Conan(ConanFile):
             self.requires("sqlite3/3.32.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 

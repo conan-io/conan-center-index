@@ -53,11 +53,11 @@ class CryptoPPPEMConan(ConanFile):
         suffix = "CRYPTOPP_{}".format(self.version.replace(".", "_"))
 
         # Get sources
-        tools.get(**self.conan_data["sources"][self.version]["source"],
+        tools.files.get(self, **self.conan_data["sources"][self.version]["source"],
                   strip_root=True, destination=self._source_subfolder)
 
         # Get CMakeLists
-        tools.get(**self.conan_data["sources"][self.version]["cmake"])
+        tools.files.get(self, **self.conan_data["sources"][self.version]["cmake"])
         src_folder = os.path.join(self.source_folder, "cryptopp-cmake-" + suffix)
         dst_folder = os.path.join(self.source_folder, self._source_subfolder)
         shutil.move(os.path.join(src_folder, "CMakeLists.txt"), os.path.join(dst_folder, "CMakeLists.txt"))

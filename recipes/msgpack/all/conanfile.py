@@ -82,7 +82,7 @@ class MsgpackConan(ConanFile):
             self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = "msgpack-c-cpp-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 

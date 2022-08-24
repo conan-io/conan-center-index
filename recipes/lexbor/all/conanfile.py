@@ -52,7 +52,7 @@ class LexborConan(ConanFile):
             raise tools.ConanInvalidConfiguration("{}/{} doesn't support build_separately option(yet).".format(self.name, self.version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
 
     @functools.lru_cache(1)
