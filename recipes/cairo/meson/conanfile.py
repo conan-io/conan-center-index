@@ -1,5 +1,5 @@
 from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 import contextlib
 import glob
 import os
@@ -145,7 +145,7 @@ class CairoConan(ConanFile):
             yield
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_meson(self):
@@ -198,11 +198,11 @@ class CairoConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
         # Dependency freetype2 found: NO found 2.11.0 but need: '>= 9.7.3'
         if self.options.with_freetype:
-            tools.replace_in_file("freetype2.pc",
+            tools.files.replace_in_file(self, "freetype2.pc",
                                   "Version: %s" % self.deps_cpp_info["freetype"].version,
                                   "Version: 9.7.3")
         with self._build_context():
@@ -211,11 +211,11 @@ class CairoConan(ConanFile):
 
     def _fix_library_names(self):
         if self._is_msvc:
-            with tools.chdir(os.path.join(self.package_folder, "lib")):
+            with tools.files.chdir(self, os.path.join(self.package_folder, "lib")):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
                     self.output.info("rename %s into %s" % (filename_old, filename_new))
-                    tools.rename(filename_old, filename_new)
+                    tools.files.rename(self, filename_old, filename_new)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
@@ -224,8 +224,8 @@ class CairoConan(ConanFile):
             meson = self._configure_meson()
             meson.install()
         self._fix_library_names()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.pdb")
 
     def package_info(self):
         self.cpp_info.components["cairo_"].names["pkg_config"] = "cairo"
@@ -255,7 +255,7 @@ class CairoConan(ConanFile):
             self.cpp_info.components["cairo_"].requires.extend(["xorg::xcb", "xorg::xcb-render", "xorg::xcb-shm"])
         if self.options.get_safe("with_xlib") and self.options.get_safe("with_xcb"):
             self.cpp_info.components["cairo_"].requires.append("xorg::x11-xcb")
-        if tools.is_apple_os(self.settings.os):
+        if tools.apple.is_apple_os(self):
             self.cpp_info.components["cairo_"].frameworks.append("CoreGraphics")
         if self.settings.os == "Windows":
             self.cpp_info.components["cairo_"].system_libs.extend(["gdi32", "msimg32", "user32"])
@@ -308,7 +308,7 @@ class CairoConan(ConanFile):
             self.cpp_info.components["cairo-xcb-shm"].names["pkg_config"] = "cairo-xcb-shm"
             self.cpp_info.components["cairo-xcb-shm"].requires = ["cairo_", "xorg::xcb-shm"]
 
-        if tools.is_apple_os(self.settings.os):
+        if tools.apple.is_apple_os(self):
             self.cpp_info.components["cairo-quartz"].names["pkg_config"] = "cairo-quartz"
             self.cpp_info.components["cairo-quartz"].requires = ["cairo_"]
 
