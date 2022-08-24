@@ -5,3 +5,4 @@ sources:
 patches:
   "1.1.4":
     - patch_file: "patches/0001-make-restrict-alias.patch"
+    - patch_file: "patches/0002-export-symbols.patch"

@@ -20,7 +20,7 @@ target_sources(bzip3 PRIVATE
 target_include_directories(bzip3 PUBLIC ${BZIP3_SRC_DIR}/include)
 set_target_properties(bzip3 PROPERTIES
     PUBLIC_HEADER "${BZIP3_INC}"
-    WINDOWS_EXPORT_ALL_SYMBOLS ON
+    C_VISIBILITY_PRESET hidden
     C_EXTENSIONS OFF
 )
 if (with_thread)

@@ -1,0 +1,16 @@
+--- a/include/common.h
++++ b/include/common.h
+@@ -46,8 +46,12 @@ static void write_neutral_s32(u8 * data, s32 value) {
+     data[3] = (value >> 24) & 0xFF;
+ }
+ 
+-#ifdef __MINGW32__
++#ifdef bzip3_EXPORTS
++#ifdef _WIN32
+     #define PUBLIC_API __declspec(dllexport)
++#else
++    #define PUBLIC_API __attribute__((visibility("default")))
++#endif
+ #else
+     #define PUBLIC_API
+ #endif
