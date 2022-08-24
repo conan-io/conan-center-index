@@ -1,4 +1,7 @@
 sources:
+  "20220623.0":
+    url: "https://github.com/abseil/abseil-cpp/archive/20220623.0.tar.gz"
+    sha256: "4208129b49006089ba1d6710845a45e31c59b0ab6bff9e5788a87f55c5abd602"
   "20211102.0":
     url: "https://github.com/abseil/abseil-cpp/archive/20211102.0.tar.gz"
     sha256: "dcf71b9cba8dc0ca9940c4b316a0c796be8fab42b070bb6b7cab62b48f0e66c4"
@@ -12,6 +15,14 @@ sources:
     url: "https://github.com/abseil/abseil-cpp/archive/20200225.3.tar.gz"
     sha256: "66d4d009050f39c104b03f79bdca9d930c4964016f74bf24867a43fbdbd00d23"
 patches:
+  "20220623.0":
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0005-has-unique-object-representations.patch"
+      base_path: "source_subfolder"
+      patch_description: "Workaround bug in GCC 7.2"
+      patch_source: "https://github.com/abseil/abseil-cpp/pull/1250"
+      patch_type: "backport"
   "20211102.0":
     - patch_file: "patches/0003-absl-string-libm.patch"
       base_path: "source_subfolder"

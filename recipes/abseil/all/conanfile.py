@@ -1,10 +1,17 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import apply_conandata_patches, get, copy, rmdir, replace_in_file, load
+from conan.tools.build import cross_building, check_min_cppstd
+from conan.tools.microsoft import is_msvc
+from conan.errors import ConanInvalidConfiguration
+from conans import CMake
+from conans.tools import is_apple_os
 import json
 import os
 import re
+import functools
 
-required_conan_version = ">=1.43.0"
+
+required_conan_version = ">=1.50.0"
 
 
 class AbseilConan(ConanFile):
@@ -27,15 +34,10 @@ class AbseilConan(ConanFile):
 
     short_paths = True
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -53,32 +55,30 @@ class AbseilConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
-        if self.options.shared and self._is_msvc:
+            check_min_cppstd(self, 11)
+        if self.options.shared and is_msvc(self):
             # upstream tries its best to export symbols, but it's broken for the moment
             raise ConanInvalidConfiguration("abseil shared not availabe for Visual Studio (yet)")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["ABSL_ENABLE_INSTALL"] = True
-        self._cmake.definitions["ABSL_PROPAGATE_CXX_STD"] = True
-        self._cmake.definitions["BUILD_TESTING"] = False
-        if tools.cross_building(self):
-            self._cmake.definitions["CONAN_ABSEIL_SYSTEM_PROCESSOR"] = str(self.settings.arch)
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["ABSL_ENABLE_INSTALL"] = True
+        cmake.definitions["ABSL_PROPAGATE_CXX_STD"] = True
+        cmake.definitions["BUILD_TESTING"] = False
+        if cross_building(self):
+            cmake.definitions["CONAN_ABSEIL_SYSTEM_PROCESSOR"] = str(self.settings.arch)
+        cmake.configure()
+        return cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
-        abi_file = _ABIFile("abi.h")
+        abi_file = _ABIFile(self, "abi.h")
         abi_file.replace_in_options_file(os.path.join(self._source_subfolder, "absl", "base", "options.h"))
         cmake.build()
 
@@ -91,20 +91,20 @@ class AbseilConan(ConanFile):
         return "cxx_std.cmake"
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.build_folder, self._source_subfolder))
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         cmake_folder = os.path.join(self.package_folder, "lib", "cmake")
         components = self._create_components_file_from_cmake_target_file(os.path.join(cmake_folder, "absl", "abslTargets.cmake"))
-        tools.rmdir(cmake_folder)
+        rmdir(self, cmake_folder)
 
         # Create a build-module that will propagate the required cxx_std to consumers of this recipe's targets
         # TODO: Revisit with feedback from https://github.com/conan-io/conan/issues/10281
         os.makedirs(os.path.join(self.package_folder, self._module_path))
         with open(os.path.join(self.package_folder, self._module_path, self._cxx_std_build_module), 'w', encoding='utf-8') as f:
             f.write("cmake_minimum_required(VERSION 3.1)\n\n")
-            cxx_std_required = _ABIFile("abi.h").cxx_std()
+            cxx_std_required = _ABIFile(self, "abi.h").cxx_std()
             for _, values in components.items():
                 cmake_target = values["cmake_target"]
                 f.write(f"target_compile_features(absl::{cmake_target} INTERFACE cxx_std_{cxx_std_required})\n")
@@ -151,7 +151,7 @@ class AbseilConan(ConanFile):
                                     for system_lib in ["bcrypt", "advapi32", "dbghelp"]:
                                         if system_lib in dependency:
                                             components[potential_lib_name].setdefault("system_libs", []).append(system_lib)
-                                elif tools.is_apple_os(self.settings.os):
+                                elif is_apple_os(self.settings.os):
                                     for framework in ["CoreFoundation"]:
                                         if framework in dependency:
                                             components[potential_lib_name].setdefault("frameworks", []).append(framework)
@@ -173,7 +173,7 @@ class AbseilConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "absl")
 
-        components_json_file = tools.load(self._components_helper_filepath)
+        components_json_file = load(self, self._components_helper_filepath)
         abseil_components = json.loads(components_json_file)
         for pkgconfig_name, values in abseil_components.items():
             cmake_target = values["cmake_target"]
@@ -184,9 +184,9 @@ class AbseilConan(ConanFile):
             self.cpp_info.components[pkgconfig_name].system_libs = values.get("system_libs", [])
             self.cpp_info.components[pkgconfig_name].frameworks = values.get("frameworks", [])
             self.cpp_info.components[pkgconfig_name].requires = values.get("requires", [])
-            if self._is_msvc and self.settings.compiler.get_safe("cppstd") == "20":
+            if is_msvc(self) and self.settings.compiler.get_safe("cppstd") == "20":
                 self.cpp_info.components[pkgconfig_name].defines.extend(["_HAS_DEPRECATED_RESULT_OF", "_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING"])
-            
+
             self.cpp_info.components[pkgconfig_name].names["cmake_find_package"] = cmake_target
             self.cpp_info.components[pkgconfig_name].names["cmake_find_package_multi"] = cmake_target
 
@@ -202,8 +202,9 @@ class AbseilConan(ConanFile):
 class _ABIFile:
     abi = {}
 
-    def __init__(self, filepath):
-        abi_h = tools.load(filepath)
+    def __init__(self, conanfile, filepath):
+        self.conanfile = conanfile
+        abi_h = load(self, filepath)
         for line in abi_h.splitlines():
             if line.startswith("#define"):
                 tokens = line.split()
@@ -212,9 +213,9 @@ class _ABIFile:
 
     def replace_in_options_file(self, options_filepath):
         for name, value in self.abi.items():
-            tools.replace_in_file(options_filepath,
+            replace_in_file(self.conanfile, options_filepath,
                     "#define ABSL_OPTION_{} 2".format(name),
                     "#define ABSL_OPTION_{} {}".format(name, value))
-    
+
     def cxx_std(self):
         return 17 if any([v == "1" for k, v in self.abi.items()]) else 11
