@@ -1,6 +1,7 @@
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools
+from conans import CMake
+from conan.errors import ConanInvalidConfiguration
 import functools
 import os
 import textwrap
@@ -68,8 +69,8 @@ class Antlr4CppRuntimeConan(ConanFile):
             # So far ANTLR delivers macOS binary package.
 
         compiler = self.settings.compiler
-        compiler_version = tools.Version(self.settings.compiler.version)
-        antlr_version = tools.Version(self.version)
+        compiler_version = tools.scm.Version(self.settings.compiler.version)
+        antlr_version = tools.scm.Version(self.version)
 
         if compiler == "Visual Studio" and compiler_version < "16":
             raise ConanInvalidConfiguration("library claims C2668 'Ambiguous call to overloaded function'")
@@ -82,7 +83,7 @@ class Antlr4CppRuntimeConan(ConanFile):
             # for newest version we need C++17 compatible compiler here
 
             if self.settings.get_safe("compiler.cppstd"):
-                tools.check_min_cppstd(self, "17")
+                tools.build.check_min_cppstd(self, "17")
 
             minimum_version = self.compiler_required_cpp17.get(str(self.settings.compiler), False)
             if minimum_version:
@@ -99,12 +100,12 @@ class Antlr4CppRuntimeConan(ConanFile):
             self.build_requires("pkgconf/1.7.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -128,19 +129,19 @@ class Antlr4CppRuntimeConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime-static.*")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime.a")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*antlr4-runtime-static.*")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*antlr4-runtime.a")
         else:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.dll")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "antlr4-runtime.lib")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime.so*")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime.dll*")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime.*dylib")
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.files.rm(self, os.path.join(self.package_folder, "bin"), "*.dll")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "antlr4-runtime.lib")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*antlr4-runtime.so*")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*antlr4-runtime.dll*")
+            tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*antlr4-runtime.*dylib")
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
         # FIXME: this also removes lib/cmake/antlr4-generator
         # This cmake config script is needed to provide the cmake function `antlr4_generate`
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generatores removed
         self._create_cmake_module_alias_targets(
@@ -158,7 +159,7 @@ class Antlr4CppRuntimeConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """)
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
