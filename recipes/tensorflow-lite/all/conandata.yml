@@ -12,6 +12,7 @@ patches:
   "2.9.1":
     - patch_file: "patches/msvc_fixes.patch"
       patch_description: "Fix Windows build: Apply fixes for compatibility with MSVC from master"
+      patch_source: "https://github.com/tensorflow/tensorflow/pull/56408"
       patch_type: "backport"
       base_path: "src"
     - patch_file: "patches/dependencies_2_9.patch"
