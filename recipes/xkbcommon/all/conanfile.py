@@ -1,6 +1,7 @@
-from conans import ConanFile, Meson, tools
-from conans.errors import ConanInvalidConfiguration
-import os
+from conan import ConanFile
+from conan.tools import scm, files
+from conan.errors import ConanInvalidConfiguration
+from conans import Meson, tools
 
 required_conan_version = ">=1.36.0"
 
@@ -42,7 +43,7 @@ class XkbcommonConan(ConanFile):
 
     @property
     def _has_xkbregistry_option(self):
-        return tools.Version(self.version) >= "1.0.0"
+        return scm.Version(self.version) >= "1.0.0"
 
     def config_options(self):
         if not self._has_xkbregistry_option:
@@ -75,18 +76,18 @@ class XkbcommonConan(ConanFile):
             self.build_requires("wayland/1.20.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
         # Conan doesn't provide a `wayland-scanner.pc` file for the package in the _build_ context
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+        files.replace_in_file(self, f"{self._source_subfolder}/meson.build",
                               "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
                               "# wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)")
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+        files.replace_in_file(self, f"{self._source_subfolder}/meson.build",
                               "if not wayland_client_dep.found() or not wayland_protocols_dep.found() or not wayland_scanner_dep.found()",
                               "if not wayland_client_dep.found() or not wayland_protocols_dep.found()")
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+        files.replace_in_file(self, f"{self._source_subfolder}/meson.build",
                               "wayland_scanner = find_program(wayland_scanner_dep.get_pkgconfig_variable('wayland_scanner'))",
                               "wayland_scanner = find_program('wayland-scanner')")
 
@@ -97,16 +98,10 @@ class XkbcommonConan(ConanFile):
             "enable-wayland": self.options.get_safe("with_wayland", False),
             "enable-docs": False,
             "enable-x11": self.options.with_x11,
-            "libdir": os.path.join(self.package_folder, "lib"),
+            "libdir": f"{self.package_folder}/lib",
             "default_library": ("shared" if self.options.shared else "static")}
         if self._has_xkbregistry_option:
             defs["enable-xkbregistry"] = self.options.xkbregistry
-
-        # workaround for https://github.com/conan-io/conan-center-index/issues/3377
-        # FIXME: do not remove this pkg-config file once xorg recipe fixed
-        xeyboard_config_pkgfile = os.path.join(self.build_folder, "xkeyboard-config.pc")
-        if os.path.isfile(xeyboard_config_pkgfile):
-            os.remove(xeyboard_config_pkgfile)
 
         self._meson = Meson(self)
         self._meson.configure(
@@ -125,8 +120,8 @@ class XkbcommonConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         meson = self._configure_meson()
         meson.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        files.rmdir(self, f"{self.package_folder}/lib/pkgconfig")
+        files.rmdir(self, f"{self.package_folder}/share")
 
     def package_info(self):
         self.cpp_info.components["libxkbcommon"].set_property("pkg_config_name", "xkbcommon")
@@ -145,9 +140,9 @@ class XkbcommonConan(ConanFile):
             self.cpp_info.components["xkbcli-interactive-wayland"].libs = []
             self.cpp_info.components["xkbcli-interactive-wayland"].requires = ["wayland::wayland", "wayland-protocols::wayland-protocols"]
 
-        if tools.Version(self.version) >= "1.0.0":
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        if scm.Version(self.version) >= "1.0.0":
+            bin_path = f"{self.package_folder}/bin"
+            self.output.info(f"Appending PATH environment variable: {bin_path}")
             self.env_info.PATH.append(bin_path)
 
         # unofficial, but required to avoid side effects (libxkbcommon component
