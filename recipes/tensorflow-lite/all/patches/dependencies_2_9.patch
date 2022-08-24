@@ -1,5 +1,5 @@
 diff --git a/tensorflow/lite/CMakeLists.txt b/tensorflow/lite/CMakeLists.txt
-index 40f9485b5d6..38aab88bd44 100644
+index 40f9485b5d6..f184ac5d30d 100644
 --- a/tensorflow/lite/CMakeLists.txt
 +++ b/tensorflow/lite/CMakeLists.txt
 @@ -50,14 +50,8 @@ if(NOT TENSORFLOW_SOURCE_DIR)
@@ -46,22 +46,16 @@ index 40f9485b5d6..38aab88bd44 100644
  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang$")
    # TFLite uses deprecated methods in neon2sse which generates a huge number of
    # warnings so surpress these until they're fixed.
-@@ -390,12 +387,14 @@ endif()
- if(TFLITE_ENABLE_XNNPACK)
-   find_package(fp16_headers REQUIRED)
-   find_package(xnnpack REQUIRED)
-+  find_package(pthreadpool REQUIRED)
-   populate_tflite_source_vars("delegates/xnnpack"
-     TFLITE_DELEGATES_XNNPACK_SRCS
+@@ -395,7 +392,7 @@ if(TFLITE_ENABLE_XNNPACK)
      FILTER ".*(_test|_tester)\\.(cc|h)"
    )
    list(APPEND TFLITE_TARGET_DEPENDENCIES
-     XNNPACK
-+    pthreadpool
+-    XNNPACK
++    xnnpack::xnnpack
    )
    list(APPEND TFLITE_TARGET_PUBLIC_OPTIONS "-DTFLITE_BUILD_WITH_XNNPACK_DELEGATE")
  endif()
-@@ -499,18 +498,17 @@ target_include_directories(tensorflow-lite
+@@ -499,18 +496,17 @@ target_include_directories(tensorflow-lite
  target_link_libraries(tensorflow-lite
    PUBLIC
      Eigen3::Eigen
