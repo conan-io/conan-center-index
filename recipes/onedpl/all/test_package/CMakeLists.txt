@@ -6,6 +6,7 @@ conan_basic_setup(TARGETS)
 
 find_package(ParallelSTL REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
+message(STATUS "OneDPL test version: ${ONEDPL_VERSION_MAJOR}")
+add_executable(${PROJECT_NAME} test_package.${ONEDPL_VERSION_MAJOR}.cpp)
 target_link_libraries(${PROJECT_NAME} pstl::ParallelSTL)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)

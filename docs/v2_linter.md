@@ -38,23 +38,39 @@ argument, please, check the [Conan documentation](https://docs.conan.io/en/lates
 
 Here is a list of different imports and their new equivalent (note that the interface for most of this functions changed, see their respective link to the documentation):
 
-| **Conan v1** | **Conan v2** |
-|---|---|
-| conans.tools.get | [conan.tools.files.get](https://docs.conan.io/en/latest/reference/conanfile/tools/files/downloads.html#conan-tools-files-get) |
-| conans.tools.cross_building | [conan.tools.build.cross_building](https://docs.conan.io/en/latest/reference/conanfile/tools/build.html#conan-tools-build-cross-building) |
-| conans.tools.rmdir | [conan.tools.files.rmdir](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-rmdir) |
-| conans.tools.Version | [conan.tools.scm.Version](https://docs.conan.io/en/latest/reference/conanfile/tools/scm/other.html#version) |
+| **Conan v1** | **Conan v2** | **Required Conan Version** |
+|---|---|---|
+| conans.tools.get | [conan.tools.files.get](https://docs.conan.io/en/latest/reference/conanfile/tools/files/downloads.html#conan-tools-files-get) | 1.41.0 |
+| conans.tools.download | [conan.tools.files.download](https://docs.conan.io/en/latest/reference/conanfile/tools/files/downloads.html#conan-tools-files-download) | 1.41.0 |
+| conans.tools.rmdir | [conan.tools.files.rmdir](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-rmdir) | 1.47.0 |
+| conans.tools.patch | [conan.tools.files.patch](https://docs.conan.io/en/latest/reference/tools.html#tools-patch) | 1.35.0 |
+| conans.tools.remove_files_by_mask | [conan.tools.files.rm](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-rm) | 1.50.0 |
+| conans.copy | [conan.tools.files.copy](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-copy) | 1.46.0 |
+| conans.tools.load | [conan.tools.files.load](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-load) | 1.35.0 |
+| conans.tools.save | [conan.tools.files.save](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-save) | 1.35.0 |
+| conans.tools.rename | [conan.tools.files.rename](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-rename) | 1.37.0 |
+| conans.tools.replace_in_file | [conan.tools.files.replace_in_file](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-replace-in-file) | 1.46.0 |
+| conans.tools.mkdir | [conan.tools.files.mkdir](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-mkdir) | 1.35.0 |
+| conans.tools.chdir | [conan.tools.files.chdir](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-chdir) | 1.40.0 |
+| conans.tools.unzip | [conan.tools.files.unzip](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-unzip) | 1.46.0 |
+| conans.tools.collect_libs | [conan.tools.files.collect_libs](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-collect-libs) | 1.46.0 |
+| conans.tools.Version | [conan.tools.scm.Version](https://docs.conan.io/en/latest/reference/conanfile/tools/scm/other.html#version) | 1.46.0 |
+| conans.tools.sha256sum | [conan.tools.files.check_sha256](https://docs.conan.io/en/latest/reference/conanfile/tools/files/checksum.html#conan-tools-files-check-sha256) | 1.46.0 |
+| conans.tools.unix_path | [conan.tools.microsoft.unix_path](https://docs.conan.io/en/latest/reference/conanfile/tools/microsoft.html#conan-tools-microsoft-unix-path) | 1.47.0 |
+| conans.tools.is_apple_os | [conan.tools.apple.is_apple_os](https://docs.conan.io/en/latest/reference/conanfile/tools/apple.html#is-apple-os) | 1.51.3 |
+| conans.tools.cpu_count | [conan.tools.build.build_jobs](https://docs.conan.io/en/latest/reference/conanfile/tools/build.html#conan-tools-build-build-jobs) | 1.43.0 |
+| conans.tools.check_min_cppstd | [conan.tools.build.check_min_cppstd](https://docs.conan.io/en/latest/reference/conanfile/tools/build.html#conan-tools-build-check-min-cppstd) | 1.50.0 |
+| conans.tools.cross_building | [conan.tools.build.cross_building](https://docs.conan.io/en/latest/reference/conanfile/tools/build.html#conan-tools-build-cross-building) | 1.46.0 |
+| conans.errors.ConanInvalidConfiguration | [conan.errors.ConanInvalidConfiguration](https://docs.conan.io/en/latest/migrating_to_2.0/recipes.html#migrating-the-recipes) | 1.47.0 |
+| conans.errors.ConanException | [conan.errors.ConanException](https://docs.conan.io/en/latest/migrating_to_2.0/recipes.html#migrating-the-recipes) | 1.47.0 |
 
 
-# Disable linter for `test_v1_*/conanfile.py`
+# Disable linter for a specific conanfile
 
-Using the pattern `test_v1_*/conanfile.py` you can write a test that will be executed using only Conan v1,
-you probably don't want v2-migration linter to check this file, as it will likely contain syntax that is
-specific to Conan v1.
+If for some reason a conanfile of a recipe or a test_package is not yet prepared to pass
+all the checks of the linter, it can be skipped from `pylint` adding the following comment to the file:
 
-To skip the file you just need to add the following comment to the file and `pylint` will skip it:
-
-**`test_v1_*/conanfile.py`**
+**`conanfile.py`**
 ```python
 # pylint: skip-file
 from conans import ConanFile, CMake, tools

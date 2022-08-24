@@ -1,4 +1,4 @@
-from conans import CMake, ConanFile, tools
+from conans import CMake, ConanFile
 from conan.tools.build import cross_building
 import os
 

@@ -1,6 +1,16 @@
 # Preparing recipes for Conan 2.0
 
-<!-- toc --><!-- endToc -->
+<!-- toc -->
+## Contents
+
+  * [New cpp_info set_property model](#new-cpp_info-set_property-model)
+    * [CMakeDeps](#cmakedeps)
+    * [Update required_conan_version to ">=1.43.0"](#update-required_conan_version-to-1430)
+    * [Translating .names information to cmake_target_name, cmake_module_target_name and cmake_file_name](#translating-names-information-to-cmake_target_name-cmake_module_target_name-and-cmake_file_name)
+    * [Translating .filenames information to cmake_file_name, cmake_module_file_name and cmake_find_mode](#translating-filenames-information-to-cmake_file_name-cmake_module_file_name-and-cmake_find_mode)
+    * [Understanding some workarounds with the .names attribute model in recipes](#understanding-some-workarounds-with-the-names-attribute-model-in-recipes)
+    * [Translating .build_modules to cmake_build_modules](#translating-build_modules-to-cmake_build_modules)
+    * [PkgConfigDeps](#pkgconfigdeps)<!-- endToc -->
 
 > ⚠️  Refer to [road to Conan v2](v2_roadmap.md) to know the steps that
 > will be taken in ConanCenter and this repository to start running
