@@ -44,7 +44,7 @@ class XorgCfFilesConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def validate(self):
-        if tools.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self, self.settings.os):
             raise ConanInvalidConfiguration("This recipe does not support Apple operating systems.")
 
     def package_id(self):

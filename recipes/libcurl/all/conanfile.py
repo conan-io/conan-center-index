@@ -157,7 +157,7 @@ class LibcurlConan(ConanFile):
         if not self._has_metalink_option:
             del self.options.with_libmetalink
         # Default options
-        self.options.with_ssl = "darwinssl" if tools.is_apple_os(self, self.settings.os) else "openssl"
+        self.options.with_ssl = "darwinssl" if tools.apple.is_apple_os(self, self.settings.os) else "openssl"
 
     def configure(self):
         if self.options.shared:
@@ -192,7 +192,7 @@ class LibcurlConan(ConanFile):
     def validate(self):
         if self.options.with_ssl == "schannel" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("schannel only suppported on Windows.")
-        if self.options.with_ssl == "darwinssl" and not tools.is_apple_os(self, self.settings.os):
+        if self.options.with_ssl == "darwinssl" and not tools.apple.is_apple_os(self, self.settings.os):
             raise ConanInvalidConfiguration("darwinssl only suppported on Apple like OS (Macos, iOS, watchOS or tvOS).")
         if self.options.with_ssl == "wolfssl" and self._is_using_cmake_build and tools.scm.Version(self, self.version) < "7.70.0":
             raise ConanInvalidConfiguration("Before 7.70.0, libcurl has no wolfssl support for Visual Studio or \"Windows to Android cross compilation\"")
@@ -473,7 +473,7 @@ class LibcurlConan(ConanFile):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF") or "autoreconf"), win_bash=tools.os_info.is_windows, run_environment=True)
 
             # fix generated autotools files to have relocatable binaries
-            if tools.is_apple_os(self, self.settings.os):
+            if tools.apple.is_apple_os(self, self.settings.os):
                 tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
 
             self.run("chmod +x configure")
@@ -507,7 +507,7 @@ class LibcurlConan(ConanFile):
         if self._is_mingw:
             autotools.defines.append("_AMD64_")
 
-        if cross_building(self) and tools.is_apple_os(self, self.settings.os):
+        if cross_building(self) and tools.apple.is_apple_os(self, self.settings.os):
             autotools.defines.extend(['HAVE_SOCKET', 'HAVE_FCNTL_O_NONBLOCK'])
 
         configure_args = self._get_configure_command_args()
@@ -638,7 +638,7 @@ class LibcurlConan(ConanFile):
                 self.cpp_info.components["curl"].system_libs.append("wldap32")
             if self.options.with_ssl == "schannel":
                 self.cpp_info.components["curl"].system_libs.append("crypt32")
-        elif tools.is_apple_os(self, self.settings.os):
+        elif tools.apple.is_apple_os(self, self.settings.os):
             if tools.scm.Version(self, self.version) >= "7.77.0":
                 self.cpp_info.components["curl"].frameworks.append("SystemConfiguration")
             if self.options.with_ldap:

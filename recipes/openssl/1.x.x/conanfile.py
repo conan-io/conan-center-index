@@ -773,7 +773,7 @@ class OpenSSLConan(ConanFile):
         return make_program
 
     def _patch_install_name(self):
-        if tools.is_apple_os(self, self.settings.os) and self.options.shared:
+        if tools.apple.is_apple_os(self, self.settings.os) and self.options.shared:
             old_str = '-install_name $(INSTALLTOP)/$(LIBDIR)/'
             new_str = '-install_name @rpath/'
 

@@ -53,7 +53,7 @@ class LibmikmodConan(ConanFile):
             del self.options.with_oss
             del self.options.with_pulse
         # Apple
-        if tools.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self, self.settings.os):
             del self.options.with_coreaudio
 
     def configure(self):

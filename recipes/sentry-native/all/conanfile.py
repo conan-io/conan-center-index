@@ -68,13 +68,13 @@ class SentryNativeConan(ConanFile):
         # Configure default transport
         if self.settings.os == "Windows":
             self.options.transport = "winhttp"
-        elif self.settings.os in ("FreeBSD", "Linux") or self.settings.os == "Macos":  # Don't use tools.is_apple_os(self, os) here
+        elif self.settings.os in ("FreeBSD", "Linux") or self.settings.os == "Macos":  # Don't use tools.apple.is_apple_os(self, os) here
             self.options.transport = "curl"
         else:
             self.options.transport = "none"
 
         # Configure default backend
-        if self.settings.os == "Windows" or self.settings.os == "Macos":  # Don't use tools.is_apple_os(self, os) here
+        if self.settings.os == "Windows" or self.settings.os == "Macos":  # Don't use tools.apple.is_apple_os(self, os) here
             # FIXME: for self.version < 0.4: default backend is "breakpad" when building with MSVC for Windows xp; else: backend=none
             self.options.backend = "crashpad"
         elif self.settings.os in ("FreeBSD", "Linux"):

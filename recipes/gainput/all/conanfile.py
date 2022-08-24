@@ -79,7 +79,7 @@ class GainputConan(ConanFile):
             self.cpp_info.system_libs.extend(["xinput", "ws2_32"])
         elif self.settings.os == "Android":
             self.cpp_info.system_libs.extend(["native_app_glue", "log", "android"])
-        elif tools.is_apple_os(self, self.settings.os):
+        elif tools.apple.is_apple_os(self, self.settings.os):
             self.cpp_info.frameworks.extend(["Foundation", "IOKit", "GameController"])
             if self.settings.os == "iOS":
                 self.cpp_info.frameworks.extend(["UIKit", "CoreMotion"])

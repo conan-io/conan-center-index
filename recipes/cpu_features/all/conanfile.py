@@ -58,7 +58,7 @@ class CpuFeaturesConan(ConanFile):
         if tools.scm.Version(self, self.version) >= "0.7.0":
             self._cmake.definitions["BUILD_TESTING"] = False
         # TODO: should be handled by CMake helper
-        if tools.is_apple_os(self, self.settings.os) and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
+        if tools.apple.is_apple_os(self, self.settings.os) and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
             self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
         self._cmake.configure() # Does not support out of source builds
         return self._cmake

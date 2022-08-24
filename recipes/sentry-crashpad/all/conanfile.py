@@ -127,7 +127,7 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["crashpad_mini_chromium"].libs = ["mini_chromium"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["crashpad_mini_chromium"].system_libs.append("pthread")
-        elif tools.is_apple_os(self, self.settings.os):
+        elif tools.apple.is_apple_os(self, self.settings.os):
             self.cpp_info.components["crashpad_mini_chromium"].frameworks = ["CoreFoundation", "Foundation", "Security"]
             if self.settings.os == "Macos":
                 self.cpp_info.components["crashpad_mini_chromium"].frameworks.extend(["ApplicationServices", "IOKit"])
@@ -138,7 +138,7 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["crashpad_compat"].set_property("cmake_target_name", "crashpad::compat")
         self.cpp_info.components["crashpad_compat"].includedirs.append(os.path.join("include", "crashpad"))
         # On Apple crashpad_compat is an interface library
-        if not tools.is_apple_os(self, self.settings.os):
+        if not tools.apple.is_apple_os(self, self.settings.os):
             self.cpp_info.components["crashpad_compat"].libs = ["crashpad_compat"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["crashpad_compat"].system_libs.append("dl")

@@ -80,7 +80,7 @@ class GlslangConan(ConanFile):
         glslang_version = tools.scm.Version(self, self.version)
         if (self.options.shared and
             (self.settings.os == "Windows" or \
-             (glslang_version >= "7.0.0" and glslang_version < "11.0.0" and tools.is_apple_os(self, self.settings.os)))
+             (glslang_version >= "7.0.0" and glslang_version < "11.0.0" and tools.apple.is_apple_os(self, self.settings.os)))
            ):
             raise ConanInvalidConfiguration(
                 "glslang {} shared library build is broken on {}".format(
@@ -156,7 +156,7 @@ class GlslangConan(ConanFile):
         self._cmake.definitions["USE_CCACHE"] = False
         if (glslang_version < "7.0.0" or glslang_version >= "11.6.0") and self.settings.os == "Windows":
             self._cmake.definitions["OVERRIDE_MSVCCRT"] = False
-        if tools.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self, self.settings.os):
             self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
             # Generate a relocatable shared lib on Macos
             self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"

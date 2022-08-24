@@ -65,5 +65,5 @@ class ConanRecipe(ConanFile):
             self.cpp_info.system_libs = ["rt", "pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["setupapi"]
-        elif tools.is_apple_os(self, self.settings.os):
+        elif tools.apple.is_apple_os(self, self.settings.os):
             self.cpp_info.frameworks = ["IOKit", "Foundation"]

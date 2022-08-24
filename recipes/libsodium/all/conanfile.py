@@ -144,7 +144,7 @@ class LibsodiumConan(ConanFile):
         else:
             if self._is_mingw:
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")), cwd=self._source_subfolder, win_bash=tools.os_info.is_windows)
-            if tools.is_apple_os(self, self.settings.os):
+            if tools.apple.is_apple_os(self, self.settings.os):
                 # Relocatable shared lib for Apple platforms
                 tools.files.replace_in_file(self, 
                     os.path.join(self._source_subfolder, "configure"),

@@ -49,7 +49,7 @@ class CprConan(ConanFile):
     def _supports_openssl(self):
         # https://github.com/libcpr/cpr/commit/b036a3279ba62720d1e43362d32202bf412ea152
         # https://github.com/libcpr/cpr/releases/tag/1.5.0
-        return tools.scm.Version(self, self.version) >= "1.5.0" and not tools.is_apple_os(self, self.settings.os)
+        return tools.scm.Version(self, self.version) >= "1.5.0" and not tools.apple.is_apple_os(self, self.settings.os)
 
     @property
     def _supports_winssl(self):
@@ -60,7 +60,7 @@ class CprConan(ConanFile):
     @property
     def _supports_darwinssl(self):
         # https://github.com/libcpr/cpr/releases/tag/1.6.1
-        return tools.scm.Version(self, self.version) >= "1.6.1" and tools.is_apple_os(self, self.settings.os)
+        return tools.scm.Version(self, self.version) >= "1.6.1" and tools.apple.is_apple_os(self, self.settings.os)
 
     @property
     def _can_auto_ssl(self):
@@ -68,7 +68,7 @@ class CprConan(ConanFile):
         return not self._uses_old_cmake_options and not (
            #  https://github.com/libcpr/cpr/issues/546
             tools.scm.Version(self, self.version) in ["1.6.0", "1.6.1"]
-            and tools.is_apple_os(self, self.settings.os)
+            and tools.apple.is_apple_os(self, self.settings.os)
         )
 
     @property

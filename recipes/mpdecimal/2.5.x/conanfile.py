@@ -141,7 +141,7 @@ class MpdecimalConan(ConanFile):
 
     @property
     def _shared_suffix(self):
-        if tools.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self, self.settings.os):
             return ".dylib"
         return {
             "Windows": ".dll",
@@ -151,7 +151,7 @@ class MpdecimalConan(ConanFile):
     def _target_names(self):
         libsuffix = self._shared_suffix if self.options.shared else ".a"
         versionsuffix = ".{}".format(self.version) if self.options.shared else ""
-        suffix = "{}{}".format(versionsuffix, libsuffix) if tools.is_apple_os(self, self.settings.os) or self.settings.os == "Windows" else "{}{}".format(libsuffix, versionsuffix)
+        suffix = "{}{}".format(versionsuffix, libsuffix) if tools.apple.is_apple_os(self, self.settings.os) or self.settings.os == "Windows" else "{}{}".format(libsuffix, versionsuffix)
         return "libmpdec{}".format(suffix), "libmpdec++{}".format(suffix)
 
     def build(self):

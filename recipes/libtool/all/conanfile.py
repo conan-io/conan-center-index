@@ -118,7 +118,7 @@ class LibtoolConan(ConanFile):
     def _shared_ext(self):
         if self.settings.os == "Windows":
             return "dll"
-        elif tools.is_apple_os(self, self.settings.os):
+        elif tools.apple.is_apple_os(self, self.settings.os):
             return "dylib"
         else:
             return "so"

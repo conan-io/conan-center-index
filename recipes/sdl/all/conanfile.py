@@ -149,7 +149,7 @@ class SDLConan(ConanFile):
             raise ConanInvalidConfiguration("On macOS iconv can't be disabled")
 
         # SDL>=2.0.18 requires xcode 12 or higher because it uses CoreHaptics.
-        if tools.scm.Version(self, self.version) >= "2.0.18" and tools.is_apple_os(self, self.settings.os) and tools.scm.Version(self, self.settings.compiler.version) < "12":
+        if tools.scm.Version(self, self.version) >= "2.0.18" and tools.apple.is_apple_os(self, self.settings.os) and tools.scm.Version(self, self.settings.compiler.version) < "12":
             raise ConanInvalidConfiguration("{}/{} requires xcode 12 or higher".format(self.name, self.version))
 
         if self.settings.os == "Linux":
@@ -424,7 +424,7 @@ class SDLConan(ConanFile):
                 self.cpp_info.components["libsdl2"].requires.append("egl::egl")
             if self.options.libunwind:
                 self.cpp_info.components["libsdl2"].requires.append("libunwind::libunwind")
-        elif tools.is_apple_os(self, self.settings.os):
+        elif tools.apple.is_apple_os(self, self.settings.os):
             self.cpp_info.components["libsdl2"].frameworks = [
                 "CoreVideo", "CoreAudio", "AudioToolbox",
                 "AVFoundation", "Foundation", "QuartzCore",

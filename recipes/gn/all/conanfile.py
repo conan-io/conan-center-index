@@ -84,7 +84,7 @@ class GnConan(ConanFile):
 
     @staticmethod
     def _to_gn_platform(os_, compiler):
-        if tools.is_apple_os(self, os_):
+        if tools.apple.is_apple_os(self, os_):
             return "darwin"
         if compiler == "Visual Studio":
             return "msvc"

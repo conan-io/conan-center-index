@@ -43,7 +43,7 @@ class PDCursesConan(ConanFile):
             del self.options.enable_widec
 
     def configure(self):
-        if tools.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self, self.settings.os):
             raise ConanInvalidConfiguration("pdcurses does not support Apple")
         if self.options.with_sdl:
             raise ConanInvalidConfiguration("conan-center-index has no packages for sdl (yet)")

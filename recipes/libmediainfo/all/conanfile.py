@@ -82,7 +82,7 @@ class LibmediainfoConan(ConanFile):
         if self.settings.build_type == "Debug":
             if self.settings.os == "Windows":
                 postfix += "d"
-            elif tools.is_apple_os(self, self.settings.os):
+            elif tools.apple.is_apple_os(self, self.settings.os):
                 postfix += "_debug"
         tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Source", "MediaInfoDLL", "MediaInfoDLL.h"),
                               "MediaInfo.dll",
@@ -136,7 +136,7 @@ class LibmediainfoConan(ConanFile):
         if self.settings.build_type == "Debug":
             if self.settings.os == "Windows":
                 postfix += "d"
-            elif tools.is_apple_os(self, self.settings.os):
+            elif tools.apple.is_apple_os(self, self.settings.os):
                 postfix += "_debug"
         self.cpp_info.libs = ["mediainfo" + postfix]
         if self.settings.os in ["Linux", "FreeBSD"]:

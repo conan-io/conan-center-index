@@ -97,7 +97,7 @@ class CAresConan(ConanFile):
             self.cpp_info.components["cares"].system_libs.extend(["ws2_32", "advapi32"])
             if tools.scm.Version(self, self.version) >= "1.18.0":
                 self.cpp_info.components["cares"].system_libs.append("iphlpapi")
-        elif tools.is_apple_os(self, self.settings.os):
+        elif tools.apple.is_apple_os(self, self.settings.os):
             self.cpp_info.components["cares"].system_libs.append("resolv")
 
         if self.options.tools:
