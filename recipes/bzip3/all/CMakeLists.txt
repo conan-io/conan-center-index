@@ -24,6 +24,8 @@ set_target_properties(bzip3 PROPERTIES
     C_EXTENSIONS OFF
 )
 if (with_thread)
+    find_package(Threads REQUIRED)
+    target_link_libraries(bzip3 PRIVATE Threads::Threads)
     target_compile_definitions(bzip3 PRIVATE "PTHREAD")
 endif()
 
