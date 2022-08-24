@@ -60,16 +60,16 @@ class Pthreads4WConan(ConanFile):
     def build(self):
         with tools.chdir(self._source_subfolder):
             if self.settings.compiler == "Visual Studio":
-                tools.replace_in_file("Makefile",
+                tools.files.replace_in_file(self, "Makefile",
                     "	copy pthreadV*.lib $(LIBDEST)",
                     "	if exist pthreadV*.lib copy pthreadV*.lib $(LIBDEST)")
-                tools.replace_in_file("Makefile",
+                tools.files.replace_in_file(self, "Makefile",
                     "	copy libpthreadV*.lib $(LIBDEST)",
                     "	if exist libpthreadV*.lib copy libpthreadV*.lib $(LIBDEST)")
-                tools.replace_in_file("Makefile", "XCFLAGS=\"/MD\"", "")
-                tools.replace_in_file("Makefile", "XCFLAGS=\"/MDd\"", "")
-                tools.replace_in_file("Makefile", "XCFLAGS=\"/MT\"", "")
-                tools.replace_in_file("Makefile", "XCFLAGS=\"/MTd\"", "")
+                tools.files.replace_in_file(self, "Makefile", "XCFLAGS=\"/MD\"", "")
+                tools.files.replace_in_file(self, "Makefile", "XCFLAGS=\"/MDd\"", "")
+                tools.files.replace_in_file(self, "Makefile", "XCFLAGS=\"/MT\"", "")
+                tools.files.replace_in_file(self, "Makefile", "XCFLAGS=\"/MTd\"", "")
                 target = {
                     "CPP": "VCE",
                     "SEH": "SSE",

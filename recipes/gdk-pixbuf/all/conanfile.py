@@ -95,14 +95,14 @@ class GdkPixbufConan(ConanFile):
             tools.files.patch(self, **patch)
 
         meson_build = os.path.join(self._source_subfolder, "meson.build")
-        tools.replace_in_file(meson_build, "subdir('tests')", "#subdir('tests')")
-        tools.replace_in_file(meson_build, "subdir('thumbnailer')", "#subdir('thumbnailer')")
-        tools.replace_in_file(meson_build,
+        tools.files.replace_in_file(self, meson_build, "subdir('tests')", "#subdir('tests')")
+        tools.files.replace_in_file(self, meson_build, "subdir('thumbnailer')", "#subdir('thumbnailer')")
+        tools.files.replace_in_file(self, meson_build,
                               "gmodule_dep.get_variable(pkgconfig: 'gmodule_supported')" if tools.Version(self.version) >= "2.42.6"
                               else "gmodule_dep.get_pkgconfig_variable('gmodule_supported')", "'true'")
         # workaround https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/issues/203
         if tools.Version(self.version) >= "2.42.6":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "build-aux", "post-install.py"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "build-aux", "post-install.py"),
                                   "close_fds=True", "close_fds=(sys.platform != 'win32')")
 
     @property

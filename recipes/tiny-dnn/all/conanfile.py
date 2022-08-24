@@ -72,7 +72,7 @@ class TinyDnnConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join(self._source_subfolder, "tiny_dnn", "util", "image.h"),
             "third_party/", "",
         )

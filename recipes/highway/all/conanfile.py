@@ -80,9 +80,9 @@ class HighwayConan(ConanFile):
             tools.files.patch(self, **patch)
         # Honor fPIC option
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmakelists,
+        tools.files.replace_in_file(self, cmakelists,
                               "set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)", "")
-        tools.replace_in_file(cmakelists,
+        tools.files.replace_in_file(self, cmakelists,
                               "set_property(TARGET hwy PROPERTY "
                               "POSITION_INDEPENDENT_CODE ON)", "")
 

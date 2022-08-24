@@ -52,8 +52,8 @@ class GenieConan(ConanFile):
         }[str(self.settings.os)]
 
     def _patch_compiler(self, cc, cxx):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "build", "gmake.{}".format(self._os), "genie.make"), "CC  = gcc", "CC  = {}".format(cc))
-        tools.replace_in_file(os.path.join(self._source_subfolder, "build", "gmake.{}".format(self._os), "genie.make"), "CXX = g++", "CXX = {}".format(cxx))
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "build", "gmake.{}".format(self._os), "genie.make"), "CC  = gcc", "CC  = {}".format(cc))
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "build", "gmake.{}".format(self._os), "genie.make"), "CXX = g++", "CXX = {}".format(cxx))
 
     @property
     def _genie_config(self):

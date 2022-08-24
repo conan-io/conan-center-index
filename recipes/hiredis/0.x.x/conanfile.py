@@ -51,7 +51,7 @@ class HiredisConan(ConanFile):
         # Do not force PIC if static
         if not self.options.shared:
             makefile = os.path.join(self._source_subfolder, "Makefile")
-            tools.replace_in_file(makefile, "-fPIC ", "")
+            tools.files.replace_in_file(self, makefile, "-fPIC ", "")
 
     def build(self):
         self._patch_sources()

@@ -130,11 +130,11 @@ class CapnprotoConan(ConanFile):
             with tools.chdir(os.path.join(self._source_subfolder, "c++")):
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")))
                 # relocatable shared libs on macOS
-                tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
+                tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
                 # avoid SIP issues on macOS when dependencies are shared
                 if tools.is_apple_os(self.settings.os):
                     libpaths = ":".join(self.deps_cpp_info.lib_paths)
-                    tools.replace_in_file(
+                    tools.files.replace_in_file(self, 
                         "configure",
                         "#! /bin/sh\n",
                         "#! /bin/sh\nexport DYLD_LIBRARY_PATH={}:$DYLD_LIBRARY_PATH\n".format(libpaths),
@@ -176,7 +176,7 @@ class CapnprotoConan(ConanFile):
             set(CAPNP_INCLUDE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/../../../include")
             function(CAPNP_GENERATE_CPP SOURCES HEADERS)
         """)
-        tools.replace_in_file(os.path.join(self.package_folder, self._cmake_folder, "CapnProtoMacros.cmake"),
+        tools.files.replace_in_file(self, os.path.join(self.package_folder, self._cmake_folder, "CapnProtoMacros.cmake"),
                               "function(CAPNP_GENERATE_CPP SOURCES HEADERS)",
                               find_execs)
 

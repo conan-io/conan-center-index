@@ -92,8 +92,8 @@ class AeronConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "/MTd", "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "/MT", "")
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"), "/MTd", "")
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"), "/MT", "")
 
     def build(self):
         self._patch_sources()

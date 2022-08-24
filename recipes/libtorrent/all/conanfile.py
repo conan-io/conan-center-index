@@ -137,18 +137,18 @@ class LibtorrentConan(ConanFile):
         for patch_data in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch_data)
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "/W4", "")
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"), "/W4", "")
         if tools.Version(self.version) < "2.0":
             if self.options.enable_iconv:
                 replace = "find_public_dependency(Iconv REQUIRED)"
             else:
                 replace = "set(Iconv_FOUND OFF)"
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                   "find_public_dependency(Iconv)",
                                   replace)
             if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libstdc++":
                 # https://github.com/arvidn/libtorrent/issues/3557
-                tools.replace_in_file(os.path.join(self._source_subfolder, "include", "libtorrent", "file_storage.hpp"),
+                tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "include", "libtorrent", "file_storage.hpp"),
                                       "file_entry& operator=(file_entry&&) & noexcept = default;",
                                       "file_entry& operator=(file_entry&&) & = default;")
 

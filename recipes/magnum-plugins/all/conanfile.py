@@ -97,22 +97,22 @@ class MagnumConan(ConanFile):
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               'set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})',
                               "")
         assimp_importer_cmake_file = os.path.join(self._source_subfolder, "src", "MagnumPlugins", "AssimpImporter", "CMakeLists.txt")
-        tools.replace_in_file(assimp_importer_cmake_file,
+        tools.files.replace_in_file(self, assimp_importer_cmake_file,
                               "find_package(Assimp REQUIRED)",
                               "find_package(assimp REQUIRED)")
-        tools.replace_in_file(assimp_importer_cmake_file,
+        tools.files.replace_in_file(self, assimp_importer_cmake_file,
                               "Assimp::Assimp",
                               "assimp::assimp")
 
         harfbuzz_cmake_file = os.path.join(self._source_subfolder, "src", "MagnumPlugins", "HarfBuzzFont", "CMakeLists.txt")
-        tools.replace_in_file(harfbuzz_cmake_file,
+        tools.files.replace_in_file(self, harfbuzz_cmake_file,
                               "find_package(HarfBuzz REQUIRED)",
                               "find_package(harfbuzz REQUIRED)")
-        tools.replace_in_file(harfbuzz_cmake_file,
+        tools.files.replace_in_file(self, harfbuzz_cmake_file,
                               "HarfBuzz::HarfBuzz",
                               "harfbuzz::harfbuzz")
 

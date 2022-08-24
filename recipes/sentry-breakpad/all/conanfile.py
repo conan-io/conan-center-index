@@ -87,7 +87,7 @@ class SentryBreakpadConan(ConanFile):
         ]
 
         for file in files_to_patch:
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 os.path.join(self._source_subfolder, "external", "breakpad", file),
                 "#include \"third_party/lss/linux_syscall_support.h\"",
                 "#include <linux_syscall_support.h>"

@@ -137,11 +137,11 @@ class LibjpegTurboConan(ConanFile):
             tools.files.patch(self, **patch)
 
         # use standard GNUInstallDirs.cmake - custom one is broken
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "include(cmakescripts/GNUInstallDirs.cmake)",
                               "include(GNUInstallDirs)")
         # do not override /MT by /MD if shared
-        tools.replace_in_file(os.path.join(self._source_subfolder, "sharedlib", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "sharedlib", "CMakeLists.txt"),
                               """string(REGEX REPLACE "/MT" "/MD" ${var} "${${var}}")""",
                               "")
 

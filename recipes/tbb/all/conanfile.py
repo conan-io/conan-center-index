@@ -103,11 +103,11 @@ class TBBConan(ConanFile):
 
         # Get the version of the current compiler instead of gcc
         linux_include = os.path.join(self._source_subfolder, "build", "linux.inc")
-        tools.replace_in_file(linux_include, "shell gcc", "shell $(CC)")
-        tools.replace_in_file(linux_include, "= gcc", "= $(CC)")
+        tools.files.replace_in_file(self, linux_include, "shell gcc", "shell $(CC)")
+        tools.files.replace_in_file(self, linux_include, "= gcc", "= $(CC)")
 
         if self.version != "2019_u9" and self.settings.build_type == "Debug":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile"), "release", "debug")
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile"), "release", "debug")
 
         if str(self._base_compiler) in ["Visual Studio", "msvc"]:
             tools.files.save(self, 

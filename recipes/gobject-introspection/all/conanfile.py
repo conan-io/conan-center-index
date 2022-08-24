@@ -70,12 +70,12 @@ class GobjectIntrospectionConan(ConanFile):
         return meson
 
     def build(self):
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join(self._source_subfolder, "meson.build"),
             "subdir('tests')",
             "#subdir('tests')",
         )
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join(self._source_subfolder, "meson.build"),
             "if meson.version().version_compare('>=0.54.0')",
             "if false",

@@ -138,9 +138,9 @@ class MpfrConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         if self.options.exact_int == "mpir":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "configure"),
                                        "-lgmp", "-lmpir")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "mpfr.h"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "mpfr.h"),
                                        "<gmp.h>", "<mpir.h>")
             tools.files.save(self, "gmp.h", "#pragma once\n#include <mpir.h>\n")
         with self._build_context():

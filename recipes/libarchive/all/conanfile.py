@@ -173,20 +173,20 @@ class LibarchiveConan(ConanFile):
         cmakelists_path = os.path.join(self._source_subfolder, "CMakeLists.txt")
 
         # it can possibly override CMAKE_MODULE_PATH provided by generator
-        tools.replace_in_file(cmakelists_path,
+        tools.files.replace_in_file(self, cmakelists_path,
                               "SET(CMAKE_MODULE_PATH",
                               "LIST(APPEND CMAKE_MODULE_PATH")
         # allow openssl on macOS
         if self.options.with_openssl:
-            tools.replace_in_file(cmakelists_path,
+            tools.files.replace_in_file(self, cmakelists_path,
                                   "IF(ENABLE_OPENSSL AND NOT CMAKE_SYSTEM_NAME MATCHES \"Darwin\")",
                                   "IF(ENABLE_OPENSSL)")
         # wrong lzma cmake var name
         if self.options.with_lzma:
-            tools.replace_in_file(cmakelists_path, "LIBLZMA_INCLUDE_DIR", "LIBLZMA_INCLUDE_DIRS")
+            tools.files.replace_in_file(self, cmakelists_path, "LIBLZMA_INCLUDE_DIR", "LIBLZMA_INCLUDE_DIRS")
         # add possible names for lz4 library
         if not self.options.shared:
-            tools.replace_in_file(cmakelists_path,
+            tools.files.replace_in_file(self, cmakelists_path,
                                   "FIND_LIBRARY(LZ4_LIBRARY NAMES lz4 liblz4)",
                                   "FIND_LIBRARY(LZ4_LIBRARY NAMES lz4 liblz4 lz4_static liblz4_static)")
 
@@ -202,11 +202,11 @@ class LibarchiveConan(ConanFile):
 
         # Exclude static/shared targets from install
         if self.options.shared:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "libarchive", "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "libarchive", "CMakeLists.txt"),
                                   "INSTALL(TARGETS archive archive_static",
                                   "INSTALL(TARGETS archive")
         else:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "libarchive", "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "libarchive", "CMakeLists.txt"),
                                   "INSTALL(TARGETS archive archive_static",
                                   "INSTALL(TARGETS archive_static")
 

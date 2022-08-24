@@ -82,7 +82,7 @@ class LibxsltConan(ConanFile):
             self._build_msvc()
         else:
             # Relocatable shared libs on macOS
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 os.path.join(self._source_subfolder, "configure"),
                 "-install_name \\$rpath/",
                 "-install_name @rpath/"
@@ -135,18 +135,18 @@ class LibxsltConan(ConanFile):
 
                 def fix_library(option, package, old_libname):
                     if option:
-                        tools.replace_in_file("Makefile.msvc",
+                        tools.files.replace_in_file(self, "Makefile.msvc",
                                               "LIBS = %s" % old_libname,
                                               "LIBS = %s" % format_libs(package))
 
                 if "icu" in self.deps_cpp_info.deps:
                     fix_library(True, 'icu', 'wsock32.lib')
 
-                tools.replace_in_file("Makefile.msvc", "libxml2.lib", format_libs("libxml2"))
-                tools.replace_in_file("Makefile.msvc", "libxml2_a.lib", format_libs("libxml2"))
+                tools.files.replace_in_file(self, "Makefile.msvc", "libxml2.lib", format_libs("libxml2"))
+                tools.files.replace_in_file(self, "Makefile.msvc", "libxml2_a.lib", format_libs("libxml2"))
 
                 # Avoid to indirectly build both static & shared when we build utils
-                tools.replace_in_file(
+                tools.files.replace_in_file(self, 
                     "Makefile.msvc",
                     "$(UTILS) : $(UTILS_INTDIR) $(BINDIR) libxslt libxslta libexslt libexslta",
                     "$(UTILS) : $(UTILS_INTDIR) $(BINDIR) libxslt{0} libexslt{0}".format("" if self.options.shared else "a"),

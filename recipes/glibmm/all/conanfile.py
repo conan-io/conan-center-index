@@ -87,7 +87,7 @@ class GlibmmConan(ConanFile):
             # when building a static build !defined(GLiBMM_GEN_EXTRA_DEFS_STATIC)
             # evaluates to 0
             if not self.options.shared:
-                tools.replace_in_file(
+                tools.files.replace_in_file(self, 
                     os.path.join(self._source_subfolder, "tools",
                                  "extra_defs_gen", "generate_extra_defs.h"),
                     "#if defined (_MSC_VER) && !defined (GLIBMM_GEN_EXTRA_DEFS_STATIC)",
@@ -99,7 +99,7 @@ class GlibmmConan(ConanFile):
             # the problem is that older versions of Windows SDK is not standard
             # conformant! see:
             # https://developercommunity.visualstudio.com/t/error-c2760-in-combaseapih-with-windows-sdk-81-and/185399
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 os.path.join(self._source_subfolder, "meson.build"),
                 "cpp_std=c++", "cpp_std=vc++")
 

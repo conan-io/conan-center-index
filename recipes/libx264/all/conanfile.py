@@ -143,7 +143,7 @@ class LibX264Conan(ConanFile):
     def build(self):
         with self._build_context():
             # relocatable shared lib on macOS
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "configure"),
                                   "-install_name \\$(DESTDIR)\\$(libdir)/",
                                   "-install_name @rpath/")
             autotools = self._configure_autotools()

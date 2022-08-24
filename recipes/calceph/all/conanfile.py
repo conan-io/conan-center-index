@@ -67,7 +67,7 @@ class CalcephConan(ConanFile):
 
     def build(self):
         if self._is_msvc:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.vc"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.vc"),
                                   "CFLAGS = /O2 /GR- /MD /nologo /EHs",
                                   "CFLAGS = /nologo /EHs")
             with tools.chdir(self._source_subfolder):
@@ -75,7 +75,7 @@ class CalcephConan(ConanFile):
                     self.run("nmake -f Makefile.vc {}".format(self._nmake_args))
         else:
             # relocatable shared lib on macOS
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "configure"),
                                   "-install_name \\$rpath/",
                                   "-install_name @rpath/")
             autotools = self._configure_autotools()

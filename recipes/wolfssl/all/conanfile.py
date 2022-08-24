@@ -135,7 +135,7 @@ class WolfSSLConan(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
             if self.settings.compiler == "Visual Studio" and (tools.Version(self.version) < "4.7" or self.version == "5.0.0"):
-                tools.replace_in_file("libtool",
+                tools.files.replace_in_file(self, "libtool",
                                       "AR_FLAGS=\"Ucru\"", "AR_FLAGS=\"cru\"")
             autotools.make()
 

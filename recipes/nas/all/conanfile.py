@@ -77,7 +77,7 @@ class NasRecipe(ConanFile):
         return ["IRULESRC={}".format(self._imake_irulesrc), "IMAKE_DEFINES={}".format(self._imake_defines)]
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "server", "dia", "main.c"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "server", "dia", "main.c"),
                               "\nFILE *yyin", "\nextern FILE *yyin")
         with tools.chdir(self._source_subfolder):
             self.run("imake -DUseInstalled -I{} {}".format(self._imake_irulesrc, self._imake_defines), run_environment=True)

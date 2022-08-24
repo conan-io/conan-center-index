@@ -83,12 +83,12 @@ class FlannConan(ConanFile):
         flann_cpp_dir = os.path.join(self._source_subfolder, "src", "cpp")
         tools.files.save(self, os.path.join(flann_cpp_dir, "empty.cpp"), "\n")
 
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join(flann_cpp_dir, "CMakeLists.txt"),
             'add_library(flann_cpp SHARED "")',
             'add_library(flann_cpp SHARED empty.cpp)'
         )
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join(flann_cpp_dir, "CMakeLists.txt"),
             'add_library(flann SHARED "")',
             'add_library(flann SHARED empty.cpp)'

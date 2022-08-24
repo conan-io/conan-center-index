@@ -133,14 +133,14 @@ class WtConan(ConanFile):
             tools.files.patch(self, **patch)
 
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmakelists, "find_package(OpenSSL)", "#find_package(OpenSSL)")
-        tools.replace_in_file(cmakelists, "INCLUDE(cmake/WtFindMysql.txt)", "#INCLUDE(cmake/WtFindMysql.txt)")
-        tools.replace_in_file(cmakelists, "INCLUDE(cmake/WtFindPostgresql.txt)", "#INCLUDE(cmake/WtFindPostgresql.txt)")
+        tools.files.replace_in_file(self, cmakelists, "find_package(OpenSSL)", "#find_package(OpenSSL)")
+        tools.files.replace_in_file(self, cmakelists, "INCLUDE(cmake/WtFindMysql.txt)", "#INCLUDE(cmake/WtFindMysql.txt)")
+        tools.files.replace_in_file(self, cmakelists, "INCLUDE(cmake/WtFindPostgresql.txt)", "#INCLUDE(cmake/WtFindPostgresql.txt)")
         if self.settings.os != "Windows":
-            tools.replace_in_file(cmakelists, "INCLUDE(cmake/WtFindOdbc.txt)", "#INCLUDE(cmake/WtFindOdbc.txt)")
+            tools.files.replace_in_file(self, cmakelists, "INCLUDE(cmake/WtFindOdbc.txt)", "#INCLUDE(cmake/WtFindOdbc.txt)")
 
         # Do not pollute rpath of shared libs of the install tree on macOS please
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             cmakelists,
             "IF(APPLE)\n  SET(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/lib\")",
             "if(0)",

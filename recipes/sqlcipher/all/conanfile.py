@@ -142,11 +142,11 @@ class SqlcipherConan(ConanFile):
         configure = os.path.join(self._source_subfolder, "configure")
         self._chmod_plus_x(configure)
         # relocatable shared libs on macOS
-        tools.replace_in_file(configure, "-install_name \\$rpath/", "-install_name @rpath/")
+        tools.files.replace_in_file(self, configure, "-install_name \\$rpath/", "-install_name @rpath/")
         # avoid SIP issues on macOS when dependencies are shared
         if tools.is_apple_os(self.settings.os):
             libpaths = ":".join(self.deps_cpp_info.lib_paths)
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 configure,
                 "#! /bin/sh\n",
                 "#! /bin/sh\nexport DYLD_LIBRARY_PATH={}:$DYLD_LIBRARY_PATH\n".format(libpaths),
@@ -185,7 +185,7 @@ class SqlcipherConan(ConanFile):
         autotools.configure(configure_dir=self._source_subfolder, args=args, vars=env_vars)
         if self.settings.os == "Windows":
             # sqlcipher will create .exe for the build machine, which we defined to Linux...
-            tools.replace_in_file("Makefile", "BEXE = .exe", "BEXE = ")
+            tools.files.replace_in_file(self, "Makefile", "BEXE = .exe", "BEXE = ")
         return autotools
 
     def _use_commoncrypto(self):

@@ -43,15 +43,15 @@ class LibProtobufMutatorConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def _patch_sources(self):
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join(self._source_subfolder, 'CMakeLists.txt'),
             """include_directories(${PROTOBUF_INCLUDE_DIRS})""",
             """include_directories(${protobuf_INCLUDE_DIRS})""")
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join(self._source_subfolder, 'CMakeLists.txt'),
             """set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/external)""",
             """# (disabled by conan) set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/external)""")
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join(self._source_subfolder, 'CMakeLists.txt'),
             """add_subdirectory(examples EXCLUDE_FROM_ALL)""",
             """# (disabled by conan) add_subdirectory(examples EXCLUDE_FROM_ALL)""")

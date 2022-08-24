@@ -43,7 +43,7 @@ class TinygltfConan(ConanFile):
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "tiny_gltf.h"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "tiny_gltf.h"),
                               "#include \"json.hpp\"",
                               "#include <nlohmann/json.hpp>")
 

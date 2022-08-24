@@ -71,13 +71,13 @@ class LibId3TagConan(ConanFile):
         kwargs = {}
         with tools.chdir(os.path.join(self._source_subfolder, "msvc++")):
             # cl : Command line error D8016: '/ZI' and '/Gy-' command-line options are incompatible
-            tools.replace_in_file("libid3tag.dsp", "/ZI ", "")
+            tools.files.replace_in_file(self, "libid3tag.dsp", "/ZI ", "")
             if self.settings.compiler == "clang":
-                tools.replace_in_file("libid3tag.dsp", "CPP=cl.exe", "CPP=clang-cl.exe")
-                tools.replace_in_file("libid3tag.dsp", "RSC=rc.exe", "RSC=llvm-rc.exe")
+                tools.files.replace_in_file(self, "libid3tag.dsp", "CPP=cl.exe", "CPP=clang-cl.exe")
+                tools.files.replace_in_file(self, "libid3tag.dsp", "RSC=rc.exe", "RSC=llvm-rc.exe")
                 kwargs["toolset"] = "ClangCl"
             if self.settings.arch == "x86_64":
-                tools.replace_in_file("libid3tag.dsp", "Win32", "x64")
+                tools.files.replace_in_file(self, "libid3tag.dsp", "Win32", "x64")
             with tools.vcvars(self.settings):
                 self.run("devenv /Upgrade libid3tag.dsp")
             msbuild = MSBuild(self)

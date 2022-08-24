@@ -141,36 +141,36 @@ class PdalConan(ConanFile):
 
         # disabling libxml2 support is only done via patching
         if not self.options.with_xml:
-            tools.replace_in_file(top_cmakelists, "include(${PDAL_CMAKE_DIR}/libxml2.cmake)", "")
+            tools.files.replace_in_file(self, top_cmakelists, "include(${PDAL_CMAKE_DIR}/libxml2.cmake)", "")
         # disabling libunwind support is only done via patching
         if not self.options.get_safe("with_unwind", False):
-            tools.replace_in_file(util_cmakelists, "include(${PDAL_CMAKE_DIR}/unwind.cmake)", "")
+            tools.files.replace_in_file(self, util_cmakelists, "include(${PDAL_CMAKE_DIR}/unwind.cmake)", "")
         # remove vendored eigen
         tools.files.rmdir(self, os.path.join(self._source_subfolder, "vendor", "eigen"))
         # remove vendored nanoflann. include path is patched
         tools.files.rmdir(self, os.path.join(self._source_subfolder, "vendor", "nanoflann"))
         # remove vendored boost
         tools.files.rmdir(self, os.path.join(self._source_subfolder, "vendor", "pdalboost"))
-        tools.replace_in_file(top_cmakelists, "add_subdirectory(vendor/pdalboost)", "")
-        tools.replace_in_file(util_cmakelists, "${PDAL_BOOST_LIB_NAME}", "Boost::filesystem")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "pdal", "util", "FileUtils.cpp"),
+        tools.files.replace_in_file(self, top_cmakelists, "add_subdirectory(vendor/pdalboost)", "")
+        tools.files.replace_in_file(self, util_cmakelists, "${PDAL_BOOST_LIB_NAME}", "Boost::filesystem")
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "pdal", "util", "FileUtils.cpp"),
                               "pdalboost::", "boost::")
         # No rpath manipulation
-        tools.replace_in_file(top_cmakelists, "include(${PDAL_CMAKE_DIR}/rpath.cmake)", "")
+        tools.files.replace_in_file(self, top_cmakelists, "include(${PDAL_CMAKE_DIR}/rpath.cmake)", "")
         # No reexport
-        tools.replace_in_file(top_cmakelists,
+        tools.files.replace_in_file(self, top_cmakelists,
                               "set(PDAL_REEXPORT \"-Wl,-reexport_library,$<TARGET_FILE:${PDAL_UTIL_LIB_NAME}>\")",
                               "")
         # fix static build
         if not self.options.shared:
-            tools.replace_in_file(top_cmakelists, "add_definitions(\"-DPDAL_DLL_EXPORT=1\")", "")
-            tools.replace_in_file(top_cmakelists,
+            tools.files.replace_in_file(self, top_cmakelists, "add_definitions(\"-DPDAL_DLL_EXPORT=1\")", "")
+            tools.files.replace_in_file(self, top_cmakelists,
                                   "${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME}",
                                   "${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME} ${PDAL_ARBITER_LIB_NAME} ${PDAL_KAZHDAN_LIB_NAME}")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "macros.cmake"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "macros.cmake"),
                                   "        install(TARGETS ${_name}",
                                   "    endif()\n    if (PDAL_LIB_TYPE STREQUAL \"STATIC\" OR NOT ${_library_type} STREQUAL \"STATIC\")\n         install(TARGETS ${_name}")
-            tools.replace_in_file(util_cmakelists,
+            tools.files.replace_in_file(self, util_cmakelists,
                                   "PDAL_ADD_FREE_LIBRARY(${PDAL_UTIL_LIB_NAME} SHARED ${PDAL_UTIL_SOURCES})",
                                   "PDAL_ADD_FREE_LIBRARY(${PDAL_UTIL_LIB_NAME} ${PDAL_LIB_TYPE} ${PDAL_UTIL_SOURCES})")
 

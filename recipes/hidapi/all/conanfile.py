@@ -63,7 +63,7 @@ class HidapiConan(ConanFile):
         tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "configure.ac"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "configure.ac"),
                               "AC_CONFIG_MACRO_DIR", "dnl AC_CONFIG_MACRO_DIR")
 
     @functools.lru_cache(1)
@@ -85,7 +85,7 @@ class HidapiConan(ConanFile):
             with tools.chdir(self._source_subfolder):
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
                 # relocatable shared lib on macOS
-                tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
+                tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
             autotools = self._configure_autotools()
             autotools.make()
 

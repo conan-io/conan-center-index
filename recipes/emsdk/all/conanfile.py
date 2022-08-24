@@ -78,13 +78,13 @@ class EmSDKConan(ConanFile):
         toolchain = os.path.join(emscripten, "cmake", "Modules", "Platform", "Emscripten.cmake")
         # FIXME: conan should add the root of conan package requirements to CMAKE_PREFIX_PATH (LIBRARY/INCLUDE -> ONLY; PROGRAM -> NEVER)
         # allow to find conan libraries
-        tools.replace_in_file(toolchain,
+        tools.files.replace_in_file(self, toolchain,
                               "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)",
                               "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)")
-        tools.replace_in_file(toolchain,
+        tools.files.replace_in_file(self, toolchain,
                               "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)",
                               "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)")
-        tools.replace_in_file(toolchain,
+        tools.files.replace_in_file(self, toolchain,
                               "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)",
                               "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)")
         if not tools.cross_building(self):

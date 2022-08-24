@@ -45,7 +45,7 @@ class SasscConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join(self.build_folder, self._source_subfolder, "win", "sassc.vcxproj"),
             "$(LIBSASS_DIR)\\win\\libsass.targets",
             os.path.join(self.build_folder, "conanbuildinfo.props"))

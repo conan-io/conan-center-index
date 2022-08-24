@@ -52,9 +52,9 @@ class PlutoVGConan(ConanFile):
         return self._cmake
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "add_library(plutovg STATIC)", "add_library(plutovg)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "add_subdirectory(example)", "")
 
         cmake = self._configure_cmake()

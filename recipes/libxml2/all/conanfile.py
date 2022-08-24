@@ -156,7 +156,7 @@ class Libxml2Conan(ConanFile):
                         if not libname.endswith('.lib'):
                             libname += '.lib'
                         libs.append(libname)
-                    tools.replace_in_file("Makefile.msvc",
+                    tools.files.replace_in_file(self, "Makefile.msvc",
                                           "LIBS = $(LIBS) %s" % old_libname,
                                           "LIBS = $(LIBS) %s" % ' '.join(libs))
 
@@ -215,7 +215,7 @@ class Libxml2Conan(ConanFile):
             # build
             def fix_library(option, package, old_libname):
                 if option:
-                    tools.replace_in_file(
+                    tools.files.replace_in_file(self, 
                         "Makefile.mingw",
                         "LIBS += -l{}".format(old_libname),
                         "LIBS += -l{}".format(" -l".join(self.deps_cpp_info[package].libs)),
@@ -255,11 +255,11 @@ class Libxml2Conan(ConanFile):
     def _patch_sources(self):
         # Break dependency of install on build
         for makefile in ("Makefile.mingw", "Makefile.msvc"):
-            tools.replace_in_file(os.path.join(self._source_subfolder, "win32", makefile),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "win32", makefile),
                                                "install-libs : all",
                                                "install-libs :")
         # relocatable shared lib on macOS
-        tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "configure"),
                               "-install_name \\$rpath/",
                               "-install_name @rpath/")
 

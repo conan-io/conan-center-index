@@ -120,7 +120,7 @@ class RmluiConan(ConanFile):
             self._source_subfolder, "CMakeLists.txt")
 
         for key, value in replace_mapping.items():
-            tools.replace_in_file(cmakelists_path, key, value)
+            tools.files.replace_in_file(self, cmakelists_path, key, value)
 
     def build(self):
         self._patch_sources()

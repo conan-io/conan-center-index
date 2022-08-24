@@ -76,11 +76,11 @@ class LibConfuseConan(ConanFile):
             yield
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.in"),
                               "SUBDIRS = m4 po src $(EXAMPLES) tests doc",
                               "SUBDIRS = m4 src")
         if not self.options.shared:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "confuse.h"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "confuse.h"),
                                   "__declspec (dllimport)", "")
 
     def build(self):

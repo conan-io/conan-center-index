@@ -60,7 +60,7 @@ class TaglibConan(ConanFile):
             os.path.join(self._source_subfolder, "taglib", "CMakeLists.txt"),
             os.path.join(self._source_subfolder, "bindings", "c", "CMakeLists.txt"),
         ]:
-            tools.replace_in_file(cmakelists, "INSTALL_NAME_DIR ${LIB_INSTALL_DIR}", "")
+            tools.files.replace_in_file(self, cmakelists, "INSTALL_NAME_DIR ${LIB_INSTALL_DIR}", "")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):

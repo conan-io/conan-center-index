@@ -64,7 +64,7 @@ class LibSigCppConanV2(ConanFile):
 
     def build(self):
         if not self.options.shared:
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 os.path.join(self._source_subfolder, "sigc++config.h.meson"),
                 "define SIGC_DLL 1", "undef SIGC_DLL")
         with tools.environment_append(tools.RunEnvironment(self).vars):

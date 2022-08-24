@@ -79,16 +79,16 @@ class XZUtils(ConanFile):
                 windows_target_platform_version_new = "<WindowsTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</WindowsTargetPlatformVersion>"
             else:
                 windows_target_platform_version_new = "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>"
-            tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma.vcxproj"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma.vcxproj"),
                                   windows_target_platform_version_old,
                                   windows_target_platform_version_new)
-            tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma_dll.vcxproj"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma_dll.vcxproj"),
                                   windows_target_platform_version_old,
                                   windows_target_platform_version_new)
 
         # Allow to install relocatable shared lib on macOS
         if tools.is_apple_os(self.settings.os):
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 os.path.join(self._source_subfolder, "configure"),
                 "-install_name \\$rpath/",
                 "-install_name @rpath/",

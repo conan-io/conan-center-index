@@ -76,7 +76,7 @@ class AtkConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, 'meson.build'),
             "subdir('tests')",
             "#subdir('tests')")
         meson = self._configure_meson()

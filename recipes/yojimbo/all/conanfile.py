@@ -67,16 +67,16 @@ class YojimboConan(ConanFile):
             lib_path_str = lib_path_str.replace("\\", "/")
             
             # Edit the premake script to use conan rather than bundled dependencies
-            tools.replace_in_file(premake_path, "includedirs { \".\", \"./windows\"", "includedirs { \".\", %s" % include_path_str, strict=True)
-            tools.replace_in_file(premake_path, "libdirs { \"./windows\" }", "libdirs { %s }" % lib_path_str, strict=True)
+            tools.files.replace_in_file(self, premake_path, "includedirs { \".\", \"./windows\"", "includedirs { \".\", %s" % include_path_str, strict=True)
+            tools.files.replace_in_file(self, premake_path, "libdirs { \"./windows\" }", "libdirs { %s }" % lib_path_str, strict=True)
             
             # Edit the premake script to change the name of libsodium
-            tools.replace_in_file(premake_path, "\"sodium\"", "\"libsodium\"", strict=True)
+            tools.files.replace_in_file(self, premake_path, "\"sodium\"", "\"libsodium\"", strict=True)
             
         else:
         
         	# Edit the premake script to use  conan rather than local dependencies
-            tools.replace_in_file(premake_path, "\"/usr/local/include\"", include_path_str, strict=True)
+            tools.files.replace_in_file(self, premake_path, "\"/usr/local/include\"", include_path_str, strict=True)
             
             
         # Build using premake

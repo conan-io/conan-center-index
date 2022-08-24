@@ -110,10 +110,10 @@ class PangoConan(ConanFile):
 
     def build(self):
         meson_build = os.path.join(self._source_subfolder, "meson.build")
-        tools.replace_in_file(meson_build, "subdir('tests')", "")
-        tools.replace_in_file(meson_build, "subdir('tools')", "")
-        tools.replace_in_file(meson_build, "subdir('utils')", "")
-        tools.replace_in_file(meson_build, "subdir('examples')", "")
+        tools.files.replace_in_file(self, meson_build, "subdir('tests')", "")
+        tools.files.replace_in_file(self, meson_build, "subdir('tools')", "")
+        tools.files.replace_in_file(self, meson_build, "subdir('utils')", "")
+        tools.files.replace_in_file(self, meson_build, "subdir('examples')", "")
         with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if is_msvc(self) else tools.no_op():
             meson = self._configure_meson()
             meson.build()

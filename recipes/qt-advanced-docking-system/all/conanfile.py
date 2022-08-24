@@ -65,7 +65,7 @@ class QtADS(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
 
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             f"{self.source_folder}/{self._source_subfolder}/src/ads_globals.cpp",
             "#include <qpa/qplatformnativeinterface.h>",
             f"#include <{self._qt_version}/QtGui/qpa/qplatformnativeinterface.h>"

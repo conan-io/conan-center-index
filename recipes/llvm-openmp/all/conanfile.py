@@ -84,7 +84,7 @@ class LLVMOpenMpConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        tools.replace_in_file(os.path.join(self._source_subfolder, "runtime/CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "runtime/CMakeLists.txt"),
                               "add_subdirectory(test)", "")
         cmake = self._configure_cmake()
         cmake.build()

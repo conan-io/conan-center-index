@@ -77,13 +77,13 @@ class MsdfgenConan(ConanFile):
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         # unvendor lodepng & tinyxml2
         tools.files.rmdir(self, os.path.join(self._source_subfolder, "lib"))
-        tools.replace_in_file(cmakelists, "\"lib/*.cpp\"", "")
-        tools.replace_in_file(cmakelists,
+        tools.files.replace_in_file(self, cmakelists, "\"lib/*.cpp\"", "")
+        tools.files.replace_in_file(self, cmakelists,
                               "target_link_libraries(msdfgen-ext PUBLIC msdfgen::msdfgen Freetype::Freetype)",
                               "target_link_libraries(msdfgen-ext PUBLIC msdfgen::msdfgen ${CONAN_LIBS})")
         # very weird but required for Visual Studio when libs are unvendored (at least for Ninja generator)
         if self._is_msvc:
-            tools.replace_in_file(cmakelists,
+            tools.files.replace_in_file(self, cmakelists,
                                   "set_target_properties(msdfgen-standalone PROPERTIES ARCHIVE_OUTPUT_DIRECTORY archive OUTPUT_NAME msdfgen)",
                                   "set_target_properties(msdfgen-standalone PROPERTIES OUTPUT_NAME msdfgen IMPORT_PREFIX foo)")
 

@@ -61,14 +61,14 @@ class TmxliteConan(ConanFile):
             tools.files.patch(self, **patch)
         # unvendor miniz
         tools.files.rm(self, os.path.join(self._source_subfolder, "tmxlite", "src"), "miniz*")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "tmxlite", "src", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "tmxlite", "src", "CMakeLists.txt"),
                               "${PROJECT_DIR}/miniz.c", "")
         # unvendor pugixml
         tools.files.rmdir(self, os.path.join(self._source_subfolder, "tmxlite", "src", "detail"))
-        tools.replace_in_file(os.path.join(self._source_subfolder, "tmxlite", "src", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "tmxlite", "src", "CMakeLists.txt"),
                               "${PROJECT_DIR}/detail/pugixml.cpp", "")
         # Don't inject -O3 in compile flags
-        tools.replace_in_file(os.path.join(self._source_subfolder, "tmxlite", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "tmxlite", "CMakeLists.txt"),
                               "-O3", "")
 
     def _configure_cmake(self):

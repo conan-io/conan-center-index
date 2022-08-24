@@ -64,7 +64,7 @@ class TgbotConan(ConanFile):
 
     def _patch_sources(self):
         # Don't force PIC
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)",
             ""

@@ -77,7 +77,7 @@ class AutomakeConan(ConanFile):
             tools.files.patch(self, **patch)
         if self.settings.os == "Windows":
             # tracing using m4 on Windows returns Windows paths => use cygpath to convert to unix paths
-            tools.replace_in_file(os.path.join(self._source_subfolder, "bin", "aclocal.in"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "bin", "aclocal.in"),
                                                "          $map_traced_defs{$arg1} = $file;",
                                                "          $file = `cygpath -u $file`;\n"
                                                "          $file =~ s/^\\s+|\\s+$//g;\n"

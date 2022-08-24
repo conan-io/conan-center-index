@@ -72,7 +72,7 @@ class OdbcConan(ConanFile):
             os.path.join(self._source_subfolder, "configure"),
             os.path.join(self._source_subfolder, "libltdl", "configure"),
         ]:
-            tools.replace_in_file(configure, "-install_name \\$rpath/", "-install_name @rpath/")
+            tools.files.replace_in_file(self, configure, "-install_name \\$rpath/", "-install_name @rpath/")
 
     @functools.lru_cache(1)
     def _configure_autotools(self):

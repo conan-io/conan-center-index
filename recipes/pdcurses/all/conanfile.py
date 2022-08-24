@@ -89,13 +89,13 @@ class PDCursesConan(ConanFile):
 
     def _patch_sources(self):
         if self.settings.compiler == "Visual Studio":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "wincon", "Makefile.vc"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "wincon", "Makefile.vc"),
                                   "$(CFLAGS)",
                                   "$(CFLAGS) -{}".format(self.settings.compiler.runtime))
-        tools.replace_in_file(os.path.join(self._source_subfolder, "x11", "Makefile.in"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "x11", "Makefile.in"),
                               "$(INSTALL) -c -m 644 $(osdir)/libXCurses.a $(libdir)/libXCurses.a",
                               "-$(INSTALL) -c -m 644 $(osdir)/libXCurses.a $(libdir)/libXCurses.a")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "x11", "Makefile.in"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "x11", "Makefile.in"),
                               "\nall:\t",
                               "\nall:\t{}\t#".format("@SHL_TARGETS@" if self.options.shared else "$(LIBCURSES)"))
 

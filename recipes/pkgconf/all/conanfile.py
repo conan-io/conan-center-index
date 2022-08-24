@@ -88,10 +88,10 @@ class PkgConfConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         if not self.options.get_safe("shared", False):
-            tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"),
                                   "'-DLIBPKGCONF_EXPORT'",
                                   "'-DPKGCONFIG_IS_STATIC'")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"),
             "project('pkgconf', 'c',",
             "project('pkgconf', 'c',\ndefault_options : ['c_std=gnu99'],")
 

@@ -85,12 +85,12 @@ class FlatbuffersConan(ConanFile):
 
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         # Prefer manual injection of current version in build(), otherwise it tries to call git
-        tools.replace_in_file(cmakelists, "include(CMake/Version.cmake)", "")
+        tools.files.replace_in_file(self, cmakelists, "include(CMake/Version.cmake)", "")
         # No warnings as errors
-        tools.replace_in_file(cmakelists, "/WX", "")
-        tools.replace_in_file(cmakelists, "-Werror ", "")
+        tools.files.replace_in_file(self, cmakelists, "/WX", "")
+        tools.files.replace_in_file(self, cmakelists, "-Werror ", "")
         # Install dll to bin folder
-        tools.replace_in_file(cmakelists,
+        tools.files.replace_in_file(self, cmakelists,
                               "RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}",
                               "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}")
 

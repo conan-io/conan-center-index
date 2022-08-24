@@ -139,7 +139,7 @@ class PhysXConan(ConanFile):
 
         # There is no reason to force consumer of PhysX public headers to use one of
         # NDEBUG or _DEBUG, since none of them relies on NDEBUG or _DEBUG
-        tools.replace_in_file(os.path.join(self._source_subfolder, "pxshared", "include", "foundation", "PxPreprocessor.h"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "pxshared", "include", "foundation", "PxPreprocessor.h"),
                               "#error Exactly one of NDEBUG and _DEBUG needs to be defined!",
                               "// #error Exactly one of NDEBUG and _DEBUG needs to be defined!")
 
@@ -148,7 +148,7 @@ class PhysXConan(ConanFile):
         # Remove global and specifics hard-coded PIC settings
         # (conan's CMake build helper properly sets CMAKE_POSITION_INDEPENDENT_CODE
         # depending on options)
-        tools.replace_in_file(os.path.join(physx_source_cmake_dir, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(physx_source_cmake_dir, "CMakeLists.txt"),
                               "SET(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
         for cmake_file in (
             "FastXml.cmake",
@@ -168,15 +168,15 @@ class PhysXConan(ConanFile):
             "SimulationController.cmake",
         ):
             target, _ = os.path.splitext(os.path.basename(cmake_file))
-            tools.replace_in_file(os.path.join(physx_source_cmake_dir, cmake_file),
+            tools.files.replace_in_file(self, os.path.join(physx_source_cmake_dir, cmake_file),
                                   "SET_TARGET_PROPERTIES({} PROPERTIES POSITION_INDEPENDENT_CODE TRUE)".format(target),
                                   "")
 
         # No error for compiler warnings
-        tools.replace_in_file(os.path.join(physx_source_cmake_dir, "windows", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(physx_source_cmake_dir, "windows", "CMakeLists.txt"),
                               "/WX", "")
         for cmake_os in ("linux", "mac", "android", "ios"):
-            tools.replace_in_file(os.path.join(physx_source_cmake_dir, cmake_os, "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(physx_source_cmake_dir, cmake_os, "CMakeLists.txt"),
                                   "-Werror", "")
 
     @functools.lru_cache(1)

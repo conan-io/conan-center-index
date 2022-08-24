@@ -66,13 +66,13 @@ class NsimdConan(ConanFile):
 
     def _patch_sources(self):
         cmakefile_path = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmakefile_path,
+        tools.files.replace_in_file(self, cmakefile_path,
                               " SHARED ",
                               " ")
-        tools.replace_in_file(cmakefile_path,
+        tools.files.replace_in_file(self, cmakefile_path,
                               "RUNTIME DESTINATION lib",
                               "RUNTIME DESTINATION bin")
-        tools.replace_in_file(cmakefile_path,
+        tools.files.replace_in_file(self, cmakefile_path,
                               "set_property(TARGET ${o} PROPERTY POSITION_INDEPENDENT_CODE ON)",
                               "")
 

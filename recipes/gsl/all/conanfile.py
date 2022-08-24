@@ -83,7 +83,7 @@ class GslConan(ConanFile):
             tools.files.patch(self, **patch)
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows, run_environment=True)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "configure"),
                               r"-install_name \$rpath/",
                               "-install_name @rpath/")
 

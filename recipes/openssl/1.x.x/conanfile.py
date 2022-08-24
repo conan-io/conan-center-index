@@ -450,7 +450,7 @@ class OpenSSLConan(ConanFile):
         # since _patch_makefile_org will replace binutils variables
         # use a more restricted regular expresion to prevent that Configure script trying to do it again
         configure = os.path.join(self._source_subfolder, "Configure")
-        tools.replace_in_file(configure, r"s/^AR=\s*ar/AR= $ar/;", r"s/^AR=\s*ar\b/AR= $ar/;")
+        tools.files.replace_in_file(self, configure, r"s/^AR=\s*ar/AR= $ar/;", r"s/^AR=\s*ar\b/AR= $ar/;")
 
     def _adjust_path(self, path):
         return path.replace("\\", "/") if self._settings_build.os == "Windows" else path
@@ -463,18 +463,18 @@ class OpenSSLConan(ConanFile):
         with tools.environment_append(env_build.vars):
             if not "CROSS_COMPILE" in os.environ:
                 cc = os.environ.get("CC", "cc")
-                tools.replace_in_file(makefile_org, "CC= cc\n", "CC= %s %s\n" % (self._adjust_path(cc), os.environ["CFLAGS"]))
+                tools.files.replace_in_file(self, makefile_org, "CC= cc\n", "CC= %s %s\n" % (self._adjust_path(cc), os.environ["CFLAGS"]))
                 if "AR" in os.environ:
-                    tools.replace_in_file(makefile_org, "AR=ar $(ARFLAGS) r\n", "AR=%s $(ARFLAGS) r\n" % self._adjust_path(os.environ["AR"]))
+                    tools.files.replace_in_file(self, makefile_org, "AR=ar $(ARFLAGS) r\n", "AR=%s $(ARFLAGS) r\n" % self._adjust_path(os.environ["AR"]))
                 if "RANLIB" in os.environ:
-                    tools.replace_in_file(makefile_org, "RANLIB= ranlib\n", "RANLIB= %s\n" % self._adjust_path(os.environ["RANLIB"]))
+                    tools.files.replace_in_file(self, makefile_org, "RANLIB= ranlib\n", "RANLIB= %s\n" % self._adjust_path(os.environ["RANLIB"]))
                 rc = os.environ.get("WINDRES", os.environ.get("RC"))
                 if rc:
-                    tools.replace_in_file(makefile_org, "RC= windres\n", "RC= %s\n" % self._adjust_path(rc))
+                    tools.files.replace_in_file(self, makefile_org, "RC= windres\n", "RC= %s\n" % self._adjust_path(rc))
                 if "NM" in os.environ:
-                    tools.replace_in_file(makefile_org, "NM= nm\n", "NM= %s\n" % self._adjust_path(os.environ["NM"]))
+                    tools.files.replace_in_file(self, makefile_org, "NM= nm\n", "NM= %s\n" % self._adjust_path(os.environ["NM"]))
                 if "AS" in os.environ:
-                    tools.replace_in_file(makefile_org, "AS=$(CC) -c\n", "AS=%s\n" % self._adjust_path(os.environ["AS"]))
+                    tools.files.replace_in_file(self, makefile_org, "AS=$(CC) -c\n", "AS=%s\n" % self._adjust_path(os.environ["AS"]))
 
     def _get_env_build(self):
         if not self._env_build:
@@ -695,8 +695,8 @@ class OpenSSLConan(ConanFile):
                 self._replace_runtime_in_file(os.path.join("ms", "nt.mak"))
                 self._replace_runtime_in_file(os.path.join("ms", "ntdll.mak"))
                 if self.settings.arch == "x86":
-                    tools.replace_in_file(os.path.join("ms", "nt.mak"), "-WX", "")
-                    tools.replace_in_file(os.path.join("ms", "ntdll.mak"), "-WX", "")
+                    tools.files.replace_in_file(self, os.path.join("ms", "nt.mak"), "-WX", "")
+                    tools.files.replace_in_file(self, os.path.join("ms", "ntdll.mak"), "-WX", "")
 
                 self._run_make(makefile=self._nmake_makefile)
             else:
@@ -778,13 +778,13 @@ class OpenSSLConan(ConanFile):
             new_str = '-install_name @rpath/'
 
             makefile = "Makefile" if self._full_version >= "1.1.1" else "Makefile.shared"
-            tools.replace_in_file(makefile, old_str, new_str, strict=self.in_local_cache)
+            tools.files.replace_in_file(self, makefile, old_str, new_str, strict=self.in_local_cache)
 
     def _replace_runtime_in_file(self, filename):
         runtime = msvc_runtime_flag(self)
         for e in ["MDd", "MTd", "MD", "MT"]:
-            tools.replace_in_file(filename, "/{} ".format(e), "/{} ".format(runtime), strict=False)
-            tools.replace_in_file(filename, "/{}\"".format(e), "/{}\"".format(runtime), strict=False)
+            tools.files.replace_in_file(self, filename, "/{} ".format(e), "/{} ".format(runtime), strict=False)
+            tools.files.replace_in_file(self, filename, "/{}\"".format(e), "/{}\"".format(runtime), strict=False)
 
     def package(self):
         self.copy(src=self._source_subfolder, pattern="*LICENSE", dst="licenses")

@@ -266,7 +266,7 @@ class CPythonConan(ConanFile):
         for patch in self.conan_data.get("patches",{}).get(self.version, []):
             tools.files.patch(self, **patch)
         if self._is_py3 and tools.Version(self._version_number_only) < "3.10":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "setup.py"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "setup.py"),
                                   ":libmpdec.so.2", "mpdec")
         if self.settings.compiler == "Visual Studio":
             runtime_library = {
@@ -276,9 +276,9 @@ class CPythonConan(ConanFile):
                 "MDd": "MultiThreadedDebugDLL",
             }[str(self.settings.compiler.runtime)]
             self.output.info("Patching runtime")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pyproject.props"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "PCbuild", "pyproject.props"),
                                   "MultiThreadedDLL", runtime_library)
-            tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pyproject.props"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "PCbuild", "pyproject.props"),
                                   "MultiThreadedDebugDLL", runtime_library)
 
         # Remove vendored packages
@@ -287,27 +287,27 @@ class CPythonConan(ConanFile):
 
         if self.options.get_safe("with_curses", False):
             # FIXME: this will link to ALL libraries of ncurses. Only need to link to ncurses(w) (+ eventually tinfo)
-            tools.replace_in_file(os.path.join(self._source_subfolder, "setup.py"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "setup.py"),
                                   "curses_libs = ",
                                   "curses_libs = {} #".format(repr(self.deps_cpp_info["ncurses"].libs + self.deps_cpp_info["ncurses"].system_libs)))
 
         # Enable static MSVC cpython
         if not self.options.shared:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pythoncore.vcxproj"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "PCbuild", "pythoncore.vcxproj"),
                                   "<PreprocessorDefinitions>","<PreprocessorDefinitions>Py_NO_BUILD_SHARED;")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pythoncore.vcxproj"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "PCbuild", "pythoncore.vcxproj"),
                                   "Py_ENABLE_SHARED", "Py_NO_ENABLE_SHARED")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pythoncore.vcxproj"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "PCbuild", "pythoncore.vcxproj"),
                                   "DynamicLibrary", "StaticLibrary")
 
-            tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "python.vcxproj"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "PCbuild", "python.vcxproj"),
                                   "<Link>", "<Link><AdditionalDependencies>shlwapi.lib;ws2_32.lib;pathcch.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "python.vcxproj"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "PCbuild", "python.vcxproj"),
                                   "<PreprocessorDefinitions>", "<PreprocessorDefinitions>Py_NO_ENABLE_SHARED;")
 
-            tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pythonw.vcxproj"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "PCbuild", "pythonw.vcxproj"),
                                   "<Link>", "<Link><AdditionalDependencies>shlwapi.lib;ws2_32.lib;pathcch.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pythonw.vcxproj"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "PCbuild", "pythonw.vcxproj"),
                                   "<ItemDefinitionGroup>", "<ItemDefinitionGroup><ClCompile><PreprocessorDefinitions>Py_NO_ENABLE_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile>")
 
     def _upgrade_single_project_file(self, project_file):

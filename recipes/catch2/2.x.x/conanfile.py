@@ -87,7 +87,7 @@ class Catch2Conan(ConanFile):
         # Catch2 does skip install if included as subproject:
         # https://github.com/catchorg/Catch2/blob/79a5cd795c387e2da58c13e9dcbfd9ea7a2cfb30/CMakeLists.txt#L100-L102
         main_cml = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(main_cml, "if (NOT_SUBPROJECT)", "if (TRUE)")
+        tools.files.replace_in_file(self, main_cml, "if (NOT_SUBPROJECT)", "if (TRUE)")
         if self.options.with_main:
             cmake = self._configure_cmake()
             cmake.build()

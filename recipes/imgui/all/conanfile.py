@@ -52,7 +52,7 @@ class IMGUIConan(ConanFile):
 
     def _patch_sources(self):
         # Ensure we take into account export_headers
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join(self._source_subfolder, "imgui.h"),
             "#ifdef IMGUI_USER_CONFIG",
             "#include \"imgui_export_headers.h\"\n\n#ifdef IMGUI_USER_CONFIG"

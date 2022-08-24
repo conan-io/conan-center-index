@@ -52,10 +52,10 @@ class CgalConan(ConanFile):
 
     def _patch_sources(self):
         if tools.Version(self.version) < "5.3":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                 "CMAKE_SOURCE_DIR", "CMAKE_CURRENT_SOURCE_DIR")
         else:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                 "if(NOT PROJECT_NAME)", "if(TRUE)")
 
     def configure(self):

@@ -72,8 +72,8 @@ class SevenZipConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             fn = os.path.join("CPP", "Build.mak")
             os.chmod(fn, 0o644)
-            tools.replace_in_file(fn, "-MT", "-{}".format(str(self.settings.compiler.runtime)))
-            tools.replace_in_file(fn, "-MD", "-{}".format(str(self.settings.compiler.runtime)))
+            tools.files.replace_in_file(self, fn, "-MT", "-{}".format(str(self.settings.compiler.runtime)))
+            tools.files.replace_in_file(self, fn, "-MD", "-{}".format(str(self.settings.compiler.runtime)))
 
     def build(self):
         self._patch_sources()

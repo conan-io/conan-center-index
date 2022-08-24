@@ -90,18 +90,18 @@ class NettleTLS(ConanFile):
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         # srcdir in unix path causes some troubles in asm files on Windows
         if self.settings.os == "Windows":
-            tools.replace_in_file(os.path.join(self.build_folder, "config.m4"),
+            tools.files.replace_in_file(self, os.path.join(self.build_folder, "config.m4"),
                                   tools.unix_path(os.path.join(self.build_folder, self._source_subfolder)),
                                   os.path.join(self.build_folder, self._source_subfolder).replace("\\", "/"))
         return self._autotools
 
     def _patch_sources(self):
         makefile_in = os.path.join(self._source_subfolder, "Makefile.in")
-        tools.replace_in_file(makefile_in,
+        tools.files.replace_in_file(self, makefile_in,
                               "SUBDIRS = tools testsuite examples",
                               "SUBDIRS = ")
         # Fix broken tests for compilers like apple-clang with -Werror,-Wimplicit-function-declaration
-        tools.replace_in_file(os.path.join(self._source_subfolder, "aclocal.m4"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "aclocal.m4"),
                               "cat >conftest.c <<EOF",
                               "cat >conftest.c <<EOF\n#include <stdlib.h>")
 

@@ -63,7 +63,7 @@ class LibevConan(ConanFile):
 
     def _patch_sources(self):
         # relocatable shared lib on macOS
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join(self._source_subfolder, "configure"),
             "-install_name \\$rpath/",
             "-install_name @rpath/",

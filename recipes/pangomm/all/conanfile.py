@@ -93,7 +93,7 @@ class PangommConan(ConanFile):
             os.path.join(self.deps_cpp_info["glibmm"].rootpath, libdir) for
             libdir in self.deps_cpp_info["glibmm"].libdirs]
 
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join(self._source_subfolder, "tools",
                          "extra_defs_gen", "meson.build"),
             "required: glibmm_dep.type_name() != 'internal',",
@@ -105,7 +105,7 @@ class PangommConan(ConanFile):
             # the problem is that older versions of Windows SDK is not standard
             # conformant! see:
             # https://developercommunity.visualstudio.com/t/error-c2760-in-combaseapih-with-windows-sdk-81-and/185399
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 os.path.join(self._source_subfolder, "meson.build"),
                 "cpp_std=c++", "cpp_std=vc++")
 

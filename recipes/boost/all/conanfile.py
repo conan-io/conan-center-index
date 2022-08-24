@@ -818,28 +818,28 @@ class BoostConan(ConanFile):
     def build(self):
         if cross_building(self, skip_x64_x86=True):
             # When cross building, do not attempt to run the test-executable (assume they work)
-            tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "libs", "stacktrace", "build", "Jamfile.v2"),
+            tools.files.replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "libs", "stacktrace", "build", "Jamfile.v2"),
                                   "$(>) > $(<)",
                                   "echo \"\" > $(<)", strict=False)
         # Older clang releases require a thread_local variable to be initialized by a constant value
-        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
+        tools.files.replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                               "/* thread_local */", "thread_local", strict=False)
-        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
+        tools.files.replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                               "/* static __thread */", "static __thread", strict=False)
         if self.settings.compiler == "apple-clang" or (self.settings.compiler == "clang" and Version(self.settings.compiler.version) < 6):
-            tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
+            tools.files.replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                                   "thread_local", "/* thread_local */")
-            tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
+            tools.files.replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                                   "static __thread", "/* static __thread */")
-        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "tools", "build", "src", "tools", "gcc.jam"),
+        tools.files.replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "tools", "build", "src", "tools", "gcc.jam"),
                               "local generic-os = [ set.difference $(all-os) : aix darwin vxworks solaris osf hpux ] ;",
                               "local generic-os = [ set.difference $(all-os) : aix darwin vxworks solaris osf hpux iphone appletv ] ;",
                               strict=False)
-        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "tools", "build", "src", "tools", "gcc.jam"),
+        tools.files.replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "tools", "build", "src", "tools", "gcc.jam"),
                               "local no-threading = android beos haiku sgi darwin vxworks ;",
                               "local no-threading = android beos haiku sgi darwin vxworks iphone appletv ;",
                               strict=False)
-        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "libs", "fiber", "build", "Jamfile.v2"),
+        tools.files.replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "libs", "fiber", "build", "Jamfile.v2"),
                               "    <conditional>@numa",
                               "    <link>shared:<library>.//boost_fiber : <conditional>@numa",
                               strict=False)

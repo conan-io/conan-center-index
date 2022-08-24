@@ -62,7 +62,7 @@ class LibreSSLConan(ConanFile):
         tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
         if tools.Version(self.version) >= "3.1.1":
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                     os.path.join(self._source_subfolder, "CMakeLists.txt"),
                     "cmake_minimum_required (VERSION 3.16.4)",
                     "cmake_minimum_required (VERSION 3.15.6)"

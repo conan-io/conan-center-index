@@ -62,7 +62,7 @@ class GlogConan(ConanFile):
             tools.files.patch(self, **patch)
         # do not force PIC
         if tools.Version(self.version) <= "0.5.0":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                   "set_target_properties (glog PROPERTIES POSITION_INDEPENDENT_CODE ON)",
                                   "")
 

@@ -93,16 +93,16 @@ class LibmikmodConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "CMAKE_SOURCE_DIR",
                               "PROJECT_SOURCE_DIR")
 
          # Ensure missing dependencies yields errors
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "MESSAGE(WARNING",
                               "MESSAGE(FATAL_ERROR")
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "drivers", "drv_alsa.c"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "drivers", "drv_alsa.c"),
                               "alsa_pcm_close(pcm_h);",
                               "if (pcm_h) alsa_pcm_close(pcm_h);")
 

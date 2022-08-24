@@ -57,8 +57,8 @@ class SeasocksConan(ConanFile):
     def _patch_sources(self):
         # No warnings as errors
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmakelists, "-Werror", "")
-        tools.replace_in_file(cmakelists, "-pedantic-errors", "")
+        tools.files.replace_in_file(self, cmakelists, "-Werror", "")
+        tools.files.replace_in_file(self, cmakelists, "-pedantic-errors", "")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):

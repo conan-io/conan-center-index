@@ -101,7 +101,7 @@ class AprConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         if self.options.force_apr_uuid:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "include", "apr.h.in"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "include", "apr.h.in"),
                                   "@osuuid@", "0")
 
     def build(self):

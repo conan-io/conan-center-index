@@ -67,15 +67,15 @@ class Argon2Conan(ConanFile):
         vcxproj = os.path.join(self._source_subfolder, "vs2015", "Argon2OptDll", "Argon2OptDll.vcxproj")
         argon2_header = os.path.join(self._source_subfolder, "include", "argon2.h")
         if not self.options.shared:
-            tools.replace_in_file(argon2_header, "__declspec(dllexport)", "")
-            tools.replace_in_file(vcxproj, "DynamicLibrary", "StaticLibrary")
-        tools.replace_in_file(vcxproj, "<ClCompile>", "<ClCompile><AdditionalIncludeDirectories>$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>")
-        tools.replace_in_file(vcxproj, "<WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>", "")
+            tools.files.replace_in_file(self, argon2_header, "__declspec(dllexport)", "")
+            tools.files.replace_in_file(self, vcxproj, "DynamicLibrary", "StaticLibrary")
+        tools.files.replace_in_file(self, vcxproj, "<ClCompile>", "<ClCompile><AdditionalIncludeDirectories>$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>")
+        tools.files.replace_in_file(self, vcxproj, "<WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>", "")
         if self.settings.compiler == "Visual Studio":
             msbuild = MSBuild(self)
             msbuild.build(os.path.join(self._source_subfolder, "Argon2.sln"), targets=("Argon2OptDll",))#, platforms={"x86": "Win32"})
             if self.options.shared:
-                tools.replace_in_file(argon2_header, "__declspec(dllexport)", "__declspec(dllimport)")
+                tools.files.replace_in_file(self, argon2_header, "__declspec(dllexport)", "__declspec(dllimport)")
         else:
             with tools.chdir(self._source_subfolder):
                 autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)

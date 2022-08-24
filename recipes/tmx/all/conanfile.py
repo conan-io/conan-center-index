@@ -58,7 +58,7 @@ class TmxConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "${CMAKE_BINARY_DIR}", "${CMAKE_CURRENT_BINARY_DIR}")
 
     @functools.lru_cache(1)

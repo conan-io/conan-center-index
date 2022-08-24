@@ -90,18 +90,18 @@ class ProjConan(ConanFile):
             tools.files.patch(self, **patch)
 
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmakelists, "/W4", "")
+        tools.files.replace_in_file(self, cmakelists, "/W4", "")
 
         # Let CMake install shared lib with a clean rpath !
         if tools.Version(self.version) >= "7.1.0" and tools.Version(self.version) < "9.0.0":
-            tools.replace_in_file(cmakelists,
+            tools.files.replace_in_file(self, cmakelists,
                                   "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)",
                                   "")
 
         # Trick to find sqlite3 executable for build machine
         # TODO: shouldn't be necessary in conan v2 with VirtualBuildEnv?
         sqlite3_exe = " ".join("\"{}\"".format(path.replace("\\", "/")) for path in self.deps_env_info["sqlite3"].PATH)
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             cmakelists,
             "find_program(EXE_SQLITE3 sqlite3)",
             "find_program(EXE_SQLITE3 sqlite3 PATHS {} NO_DEFAULT_PATH)".format(sqlite3_exe),
@@ -120,7 +120,7 @@ class ProjConan(ConanFile):
                     cmake_sqlite_call = "generate_proj_db.cmake"
                     pattern = "\"${EXE_SQLITE3}\""
                 lib_paths = self.deps_cpp_info["sqlite3"].lib_paths
-                tools.replace_in_file(
+                tools.files.replace_in_file(self, 
                     os.path.join(self._source_subfolder, "data", cmake_sqlite_call),
                     "COMMAND {}".format(pattern),
                     "COMMAND ${{CMAKE_COMMAND}} -E env \"DYLD_LIBRARY_PATH={}\" {}".format(

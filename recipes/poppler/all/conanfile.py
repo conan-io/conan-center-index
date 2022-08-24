@@ -236,9 +236,9 @@ class PopplerConan(ConanFile):
             tools.files.patch(self, **patchdata)
         if tools.Version(self.version) < "21.07.0" and not self.options.shared:
             poppler_global = os.path.join(self._source_subfolder, "cpp", "poppler-global.h")
-            tools.replace_in_file(poppler_global, "__declspec(dllimport)", "")
-            tools.replace_in_file(poppler_global, "__declspec(dllexport)", "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            tools.files.replace_in_file(self, poppler_global, "__declspec(dllimport)", "")
+            tools.files.replace_in_file(self, poppler_global, "__declspec(dllexport)", "")
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "FREETYPE_INCLUDE_DIRS",
                               "Freetype_INCLUDE_DIRS")
 

@@ -105,7 +105,7 @@ else()
   set (NO_LAPACK 1)
 endif()"""
 
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join(self._source_subfolder, "cmake", "f_check.cmake"),
             search,
             replace,

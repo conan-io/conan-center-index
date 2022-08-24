@@ -75,7 +75,7 @@ class CryptoPPPEMConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         # Honor fPIC option
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "SET(CMAKE_POSITION_INDEPENDENT_CODE 1)", "")
 
     def _configure_cmake(self):

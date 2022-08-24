@@ -92,24 +92,24 @@ class LzmaSdkConan(ConanFile):
 
     def _patch_sources(self):
         if self.settings.compiler == "Visual Studio":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CPP", "Build.mak"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CPP", "Build.mak"),
                                   "-MT\r", "-" + str(self.settings.compiler.runtime))
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CPP", "Build.mak"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CPP", "Build.mak"),
                                   "-MD\r", "-" + str(self.settings.compiler.runtime))
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CPP", "Build.mak"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CPP", "Build.mak"),
                                   " -WX ", " ")
 
         # Patches for other build systems
-        tools.replace_in_file(os.path.join(self._source_subfolder, "C", "Util", "7z", "makefile.gcc"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "C", "Util", "7z", "makefile.gcc"),
                               "CFLAGS = ",
                               "CFLAGS = -fpermissive ")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "C", "Util", "7z", "makefile.gcc"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "C", "Util", "7z", "makefile.gcc"),
                               ": 7zAlloc.c",
                               ": ../../7zAlloc.c")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "C", "Util", "Lzma", "makefile.gcc"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "C", "Util", "Lzma", "makefile.gcc"),
                               "CFLAGS = ",
                               "CFLAGS = -fpermissive ")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CPP", "Common", "MyString.h"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CPP", "Common", "MyString.h"),
                               "#ifdef _WIN32\r\n",
                               "#ifdef _WIN32\r\n#ifndef UNDER_CE\r\n#include <windows.h>\r\n#endif\r\n")
 

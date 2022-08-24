@@ -126,7 +126,7 @@ class Nghttp2Conan(ConanFile):
                        "${CMAKE_CURRENT_SOURCE_DIR}/includes)\n",
                        append=True)
         target_libnghttp2 = "nghttp2" if self.options.shared else "nghttp2_static"
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                               "\n"
                               "link_libraries(\n"
                               "  nghttp2\n",
@@ -134,12 +134,12 @@ class Nghttp2Conan(ConanFile):
                               "link_libraries(\n"
                               "  {} ${{CONAN_LIBS}}\n".format(target_libnghttp2))
         if not self.options.shared:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                                   "\n"
                                   "  add_library(nghttp2_asio SHARED\n",
                                   "\n"
                                   "  add_library(nghttp2_asio\n")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                                   "\n"
                                   "  target_link_libraries(nghttp2_asio\n"
                                   "    nghttp2\n",

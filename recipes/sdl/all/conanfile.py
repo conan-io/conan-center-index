@@ -179,14 +179,14 @@ class SDLConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                         'check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)',
                         '# check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)')
 
         # Ensure to find wayland-scanner from wayland recipe in build requirements (or requirements if 1 profile)
         if self.options.get_safe("wayland") and tools.Version(self.version) >= "2.0.18":
             wayland_bin_path = " ".join("\"{}\"".format(path) for path in self.deps_env_info["wayland"].PATH)
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 os.path.join(self._source_subfolder, "cmake", "sdlchecks.cmake"),
                 "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED)",
                 "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED PATHS {} NO_DEFAULT_PATH)".format(wayland_bin_path),

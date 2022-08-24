@@ -111,12 +111,12 @@ class OpenCVConan(ConanFile):
         # allow to find conan-supplied OpenEXR
         if self.options.with_openexr:
             find_openexr = os.path.join(self._source_subfolder, "cmake", "OpenCVFindOpenEXR.cmake")
-            tools.replace_in_file(find_openexr,
+            tools.files.replace_in_file(self, find_openexr,
                                   r'SET(OPENEXR_ROOT "C:/Deploy" CACHE STRING "Path to the OpenEXR \"Deploy\" folder")',
                                   "")
-            tools.replace_in_file(find_openexr, r'set(OPENEXR_ROOT "")', "")
-            tools.replace_in_file(find_openexr, "SET(OPENEXR_LIBSEARCH_SUFFIXES x64/Release x64 x64/Debug)", "")
-            tools.replace_in_file(find_openexr, "SET(OPENEXR_LIBSEARCH_SUFFIXES Win32/Release Win32 Win32/Debug)", "")
+            tools.files.replace_in_file(self, find_openexr, r'set(OPENEXR_ROOT "")', "")
+            tools.files.replace_in_file(self, find_openexr, "SET(OPENEXR_LIBSEARCH_SUFFIXES x64/Release x64 x64/Debug)", "")
+            tools.files.replace_in_file(self, find_openexr, "SET(OPENEXR_LIBSEARCH_SUFFIXES Win32/Release Win32 Win32/Debug)", "")
 
             def openexr_library_names(name):
                 # OpenEXR library may have different names, depends on namespace versioning, static, debug, etc.
@@ -137,30 +137,30 @@ class OpenCVConan(ConanFile):
                 return " ".join(names)
 
             for lib in ["Half", "Iex", "Imath", "IlmImf", "IlmThread"]:
-                tools.replace_in_file(find_openexr, "NAMES %s" % lib, "NAMES %s" % openexr_library_names(lib))
+                tools.files.replace_in_file(self, find_openexr, "NAMES %s" % lib, "NAMES %s" % openexr_library_names(lib))
 
-            tools.replace_in_file(cmakelists,
+            tools.files.replace_in_file(self, cmakelists,
                                 "project(OpenCV CXX C)", "project(OpenCV CXX C)\nset(CMAKE_CXX_STANDARD 11)")
 
         for cascade in ["lbpcascades", "haarcascades"]:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "data", "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "data", "CMakeLists.txt"),
                                   "share/OpenCV/%s" % cascade, "res/%s" % cascade)
 
-        tools.replace_in_file(cmakelists, "staticlib", "lib")
-        tools.replace_in_file(cmakelists, "ANDROID OR NOT UNIX", "FALSE")
-        tools.replace_in_file(cmakelists, "${OpenCV_ARCH}/${OpenCV_RUNTIME}/", "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "modules", "highgui", "CMakeLists.txt"), "JASPER_", "Jasper_")
+        tools.files.replace_in_file(self, cmakelists, "staticlib", "lib")
+        tools.files.replace_in_file(self, cmakelists, "ANDROID OR NOT UNIX", "FALSE")
+        tools.files.replace_in_file(self, cmakelists, "${OpenCV_ARCH}/${OpenCV_RUNTIME}/", "")
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "modules", "highgui", "CMakeLists.txt"), "JASPER_", "Jasper_")
 
         # relocatable shared lib on macOS
-        tools.replace_in_file(cmakelists, "cmake_policy(SET CMP0042 OLD)", "cmake_policy(SET CMP0042 NEW)")
+        tools.files.replace_in_file(self, cmakelists, "cmake_policy(SET CMP0042 OLD)", "cmake_policy(SET CMP0042 NEW)")
         # Cleanup RPATH
-        tools.replace_in_file(cmakelists,
+        tools.files.replace_in_file(self, cmakelists,
                               "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/${OPENCV_LIB_INSTALL_PATH}\")",
                               "")
-        tools.replace_in_file(cmakelists, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
+        tools.files.replace_in_file(self, cmakelists, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
 
         # Do not try to detect Python
-        tools.replace_in_file(cmakelists, "include(cmake/OpenCVDetectPython.cmake)", "")
+        tools.files.replace_in_file(self, cmakelists, "include(cmake/OpenCVDetectPython.cmake)", "")
 
     def _configure_cmake(self):
         if self._cmake:

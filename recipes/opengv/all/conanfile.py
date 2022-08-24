@@ -86,13 +86,13 @@ class opengvConan(ConanFile):
             find_package(Eigen3 REQUIRED)
             set(ADDITIONAL_INCLUDE_DIRS ${Eigen3_INCLUDE_DIRS} ${Eigen3_INCLUDE_DIR}/unsupported)"""
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                             textwrap.dedent(old),
                             textwrap.dedent(new)
         )
 
         # Use conan's pybind11
-        tools.replace_in_file(os.path.join(self._source_subfolder, "python", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "python", "CMakeLists.txt"),
                             "add_subdirectory(pybind11)",
                             "find_package(pybind11 REQUIRED)"
         )
@@ -106,7 +106,7 @@ class opengvConan(ConanFile):
             IF(1)
               #set(BUILD_SHARED_LIBS OFF)"""
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                             textwrap.dedent(old),
                             textwrap.dedent(new)
         )

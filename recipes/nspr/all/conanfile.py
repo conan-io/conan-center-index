@@ -122,7 +122,7 @@ class NsprConan(ConanFile):
     def build(self):
         with tools.chdir(self._source_subfolder):
             # relocatable shared libs on macOS
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 "configure",
                 "-install_name @executable_path/",
                 "-install_name @rpath/"
@@ -154,10 +154,10 @@ class NsprConan(ConanFile):
                     os.unlink(os.path.join(self.package_folder, "lib", "{}{}.{}".format(libprefix, lib, libsuffix)))
                     os.unlink(os.path.join(self.package_folder, "lib", "{}.dll".format(lib)))
             if not self.options.shared:
-                tools.replace_in_file(os.path.join(self.package_folder, "include", "nspr", "prtypes.h"),
+                tools.files.replace_in_file(self, os.path.join(self.package_folder, "include", "nspr", "prtypes.h"),
                                       "#define NSPR_API(__type) PR_IMPORT(__type)",
                                       "#define NSPR_API(__type) extern __type")
-                tools.replace_in_file(os.path.join(self.package_folder, "include", "nspr", "prtypes.h"),
+                tools.files.replace_in_file(self, os.path.join(self.package_folder, "include", "nspr", "prtypes.h"),
                                       "#define NSPR_DATA_API(__type) PR_IMPORT_DATA(__type)",
                                       "#define NSPR_DATA_API(__type) extern __type")
         else:

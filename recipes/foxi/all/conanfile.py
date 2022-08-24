@@ -42,9 +42,9 @@ class FoxiConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmakelists, "add_msvc_runtime_flag(foxi_loader)", "")
-        tools.replace_in_file(cmakelists, "add_msvc_runtime_flag(foxi_dummy)", "")
-        tools.replace_in_file(cmakelists,
+        tools.files.replace_in_file(self, cmakelists, "add_msvc_runtime_flag(foxi_loader)", "")
+        tools.files.replace_in_file(self, cmakelists, "add_msvc_runtime_flag(foxi_dummy)", "")
+        tools.files.replace_in_file(self, cmakelists,
                               "DESTINATION lib",
                               "RUNTIME DESTINATION bin ARCHIVE DESTINATION lib LIBRARY DESTINATION lib")
 

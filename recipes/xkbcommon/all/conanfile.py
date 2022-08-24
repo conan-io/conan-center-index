@@ -78,15 +78,15 @@ class XkbcommonConan(ConanFile):
         tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
         # Conan doesn't provide a `wayland-scanner.pc` file for the package in the _build_ context
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"),
                               "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
                               "# wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)")
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"),
                               "if not wayland_client_dep.found() or not wayland_protocols_dep.found() or not wayland_scanner_dep.found()",
                               "if not wayland_client_dep.found() or not wayland_protocols_dep.found()")
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"),
                               "wayland_scanner = find_program(wayland_scanner_dep.get_pkgconfig_variable('wayland_scanner'))",
                               "wayland_scanner = find_program('wayland-scanner')")
 

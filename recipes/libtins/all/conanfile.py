@@ -62,10 +62,10 @@ class LibTinsConan(ConanFile):
 
     def _patch_sources(self):
         # Use Findlibpcap.cmake from cmake_find_package
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "FIND_PACKAGE(PCAP REQUIRED)",
                               "find_package(libpcap REQUIRED)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                               "${PCAP_LIBRARY}",
                               "libpcap::libpcap")
 

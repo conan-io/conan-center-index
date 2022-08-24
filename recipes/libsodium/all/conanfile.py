@@ -146,7 +146,7 @@ class LibsodiumConan(ConanFile):
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")), cwd=self._source_subfolder, win_bash=tools.os_info.is_windows)
             if tools.is_apple_os(self.settings.os):
                 # Relocatable shared lib for Apple platforms
-                tools.replace_in_file(
+                tools.files.replace_in_file(self, 
                     os.path.join(self._source_subfolder, "configure"),
                     "-install_name \\$rpath/",
                     "-install_name @rpath/"

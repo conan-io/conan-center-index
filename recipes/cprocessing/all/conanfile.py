@@ -61,7 +61,7 @@ class CProcessingConan(ConanFile):
                   destination=self._source_subfolder)
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "PImage.h"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "lib", "PImage.h"),
             "stb/stb_image.h",
             "stb_image.h")
 

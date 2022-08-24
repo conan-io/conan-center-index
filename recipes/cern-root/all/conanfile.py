@@ -147,7 +147,7 @@ class CernRootConan(ConanFile):
         # There is currently no way to change these names
         # see: https://github.com/conan-io/conan/issues/4430
         # Patch ROOT CMake to use Conan dependencies
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join(self.source_folder, self._source_subfolder, "CMakeLists.txt"),
             "project(ROOT)",
             textwrap.dedent("""\
@@ -165,7 +165,7 @@ class CernRootConan(ConanFile):
                     set(SQLITE_LIBRARIES SQLite::SQLite3)
             """).format(install_folder=self.install_folder.replace("\\", "/"))
         )
-        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "CMakeLists.txt"),
                               "set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)",
                               "list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)")
 

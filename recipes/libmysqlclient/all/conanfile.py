@@ -134,37 +134,37 @@ class LibMysqlClientCConan(ConanFile):
         if not self._with_lz4:
             libs_to_remove.append("lz4")
         for lib in libs_to_remove:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 "MYSQL_CHECK_%s()\n" % lib.upper(),
                 "",
                 strict=False)
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 "INCLUDE(%s)\n" % lib,
                 "",
                 strict=False)
         tools.files.rmdir(self, os.path.join(self._source_subfolder, "extra"))
         for folder in ["client", "man", "mysql-test", "libbinlogstandalone"]:
             tools.files.rmdir(self, os.path.join(self._source_subfolder, folder))
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 "ADD_SUBDIRECTORY(%s)\n" % folder,
                 "",
                 strict=False)
         tools.files.rmdir(self, os.path.join(self._source_subfolder, "storage", "ndb"))
         for t in ["INCLUDE(cmake/boost.cmake)\n", "MYSQL_CHECK_EDITLINE()\n"]:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 t,
                 "",
                 strict=False)
         if self._with_zstd:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "zstd.cmake"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "zstd.cmake"),
                 "NAMES zstd",
                 "NAMES zstd %s" % self.deps_cpp_info["zstd"].libs[0])
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
             "NAMES ssl",
             "NAMES ssl %s" % self.deps_cpp_info["openssl"].components["ssl"].libs[0])
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
             "NAMES crypto",
             "NAMES crypto %s" % self.deps_cpp_info["openssl"].components["crypto"].libs[0])
 
@@ -173,7 +173,7 @@ class LibMysqlClientCConan(ConanFile):
         if tools.Version(self.version) > "8.0.17":
             deps_shared.extend(["KERBEROS", "SASL", "LDAP", "PROTOBUF", "CURL"])
         for dep in deps_shared:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                   "MYSQL_CHECK_{}_DLLS()".format(dep),
                                   "")
 
@@ -182,10 +182,10 @@ class LibMysqlClientCConan(ConanFile):
         rename(self, sources_cmake, sources_cmake_orig)
         rename(self, "CMakeLists.txt", sources_cmake)
         if self.settings.os == "Macos":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "libmysql", "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "libmysql", "CMakeLists.txt"),
                 "COMMAND %s" % ("$<TARGET_FILE:libmysql_api_test>" if tools.Version(self.version) < "8.0.25" else "libmysql_api_test"),
                 "COMMAND DYLD_LIBRARY_PATH=%s %s" %(os.path.join(self.build_folder, "library_output_directory"), os.path.join(self.build_folder, "runtime_output_directory", "libmysql_api_test")))
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "install_macros.cmake"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "install_macros.cmake"),
             "  INSTALL_DEBUG_SYMBOLS(",
             "  # INSTALL_DEBUG_SYMBOLS(")
 

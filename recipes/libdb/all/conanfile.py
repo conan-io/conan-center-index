@@ -111,13 +111,13 @@ class LibdbConan(ConanFile):
                             os.path.join(self._source_subfolder, subdir, "config.guess"))
 
         for file in glob.glob(os.path.join(self._source_subfolder, "build_windows", "VS10", "*.vcxproj")):
-            tools.replace_in_file(file,
+            tools.files.replace_in_file(self, file,
                                   "<PropertyGroup Label=\"Globals\">",
                                   "<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>")
 
         dist_configure = os.path.join(self._source_subfolder, "dist", "configure")
-        tools.replace_in_file(dist_configure, "../$sqlite_dir", "$sqlite_dir")
-        tools.replace_in_file(dist_configure,
+        tools.files.replace_in_file(self, dist_configure, "../$sqlite_dir", "$sqlite_dir")
+        tools.files.replace_in_file(self, dist_configure,
                               "\n    --disable-option-checking)",
                               "\n    --datarootdir=*)"
                               "\n      ;;"
@@ -148,10 +148,10 @@ class LibdbConan(ConanFile):
             conf_args.append("--with-tcl={}".format(tools.unix_path(os.path.join(self.deps_cpp_info["tcl"].rootpath, "lib"))))
         self._autotools.configure(configure_dir=os.path.join(self.source_folder, self._source_subfolder, "dist"), args=conf_args)
         if self.settings.os == "Windows" and self.options.shared:
-            tools.replace_in_file(os.path.join(self.build_folder, "libtool"),
+            tools.files.replace_in_file(self, os.path.join(self.build_folder, "libtool"),
                                   "\ndeplibs_check_method=",
                                   "\ndeplibs_check_method=pass_all\n#deplibs_check_method=")
-            tools.replace_in_file(os.path.join(self.build_folder, "Makefile"),
+            tools.files.replace_in_file(self, os.path.join(self.build_folder, "Makefile"),
                                   ".a",
                                   ".dll.a")
         return self._autotools

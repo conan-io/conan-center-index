@@ -68,15 +68,15 @@ class LcmsConan(ConanFile):
            str(self.settings.compiler) == "msvc":
             # since VS2015 vsnprintf is built-in
             path = os.path.join(self._source_subfolder, "src", "lcms2_internal.h")
-            tools.replace_in_file(path, "#       define vsnprintf  _vsnprintf", "")
+            tools.files.replace_in_file(self, path, "#       define vsnprintf  _vsnprintf", "")
         if (self.settings.compiler == "Visual Studio" and compiler_version >= "16") or \
            (str(self.settings.compiler) == "msvc" and compiler_version >= "192"):
             # since VS2019, don't need to specify the WindowsTargetPlatformVersion
             path = os.path.join(self._source_subfolder, "Projects", "VC2015", "lcms2_static", "lcms2_static.vcxproj")
-            tools.replace_in_file(path, "<WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>", "")
+            tools.files.replace_in_file(self, path, "<WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>", "")
         if self.settings.os == "Android" and self._settings_build.os == "Windows":
             # remove escape for quotation marks, to make ndk on windows happy
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "configure"),
                                   "s/[	 `~#$^&*(){}\\\\|;'\\\''\"<>?]/\\\\&/g",
                                   "s/[	 `~#$^&*(){}\\\\|;<>?]/\\\\&/g")
 

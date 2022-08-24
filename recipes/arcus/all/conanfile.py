@@ -60,14 +60,14 @@ class ArcusConan(ConanFile):
 
     def _patch_sources(self):
         # Do not force PIC
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "set(CMAKE_POSITION_INDEPENDENT_CODE ON)",
                               "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "set_target_properties(Arcus PROPERTIES COMPILE_FLAGS -fPIC)",
                               "")
         # TODO: this patch could be removed when CMake variables fixed in protobuf recipe
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "target_link_libraries(Arcus PUBLIC ${PROTOBUF_LIBRARIES})",
                               "target_link_libraries(Arcus PUBLIC protobuf::libprotobuf)")
 

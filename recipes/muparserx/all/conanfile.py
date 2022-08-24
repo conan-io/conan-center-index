@@ -45,7 +45,7 @@ class MuparserxConan(ConanFile):
         return self._cmake
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "set_property(TARGET muparserx PROPERTY POSITION_INDEPENDENT_CODE TRUE)", "")
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"), "set_property(TARGET muparserx PROPERTY POSITION_INDEPENDENT_CODE TRUE)", "")
         cmake = self._configure_cmake()
         cmake.build()
 

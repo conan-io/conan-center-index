@@ -83,9 +83,9 @@ class TrantorConan(ConanFile):
     def _patch_sources(self):
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         # fix c-ares imported target
-        tools.replace_in_file(cmakelists, "c-ares_lib", "c-ares::cares")
+        tools.files.replace_in_file(self, cmakelists, "c-ares_lib", "c-ares::cares")
         # Cleanup rpath in shared lib
-        tools.replace_in_file(cmakelists, "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}\")", "")
+        tools.files.replace_in_file(self, cmakelists, "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}\")", "")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):

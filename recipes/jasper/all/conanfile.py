@@ -85,7 +85,7 @@ class JasperConan(ConanFile):
             "set(CMAKE_INSTALL_RPATH\n		  \"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\")",
         ]
         for cmd_to_remove in cmds_to_remove:
-            tools.replace_in_file(cmakelists, cmd_to_remove, "")
+            tools.files.replace_in_file(self, cmakelists, cmd_to_remove, "")
 
     def build(self):
         self._patch_sources()

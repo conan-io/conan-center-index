@@ -41,7 +41,7 @@ class MsdfAtlasGenConan(ConanFile):
         cmakelists = os.path.join(
             self._source_subfolder, "CMakeLists.txt")
 
-        tools.replace_in_file(cmakelists,
+        tools.files.replace_in_file(self, cmakelists,
                               "add_subdirectory(msdfgen)", "")
         tools.save_append(cmakelists,
                           "install(TARGETS msdf-atlas-gen-standalone DESTINATION bin)")

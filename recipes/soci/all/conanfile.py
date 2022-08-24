@@ -119,18 +119,18 @@ class SociConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmakelists,
+        tools.files.replace_in_file(self, cmakelists,
                               "set(CMAKE_MODULE_PATH ${SOCI_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})",
                               "list(APPEND CMAKE_MODULE_PATH ${SOCI_SOURCE_DIR}/cmake)")
-        tools.replace_in_file(cmakelists,
+        tools.files.replace_in_file(self, cmakelists,
                               "set(CMAKE_MODULE_PATH ${SOCI_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})",
                               "list(APPEND CMAKE_MODULE_PATH ${SOCI_SOURCE_DIR}/cmake/modules)")
 
         # Remove hardcoded install_name_dir, it prevents relocatable shared lib on macOS
         soci_backend_cmake = os.path.join(self._source_subfolder, "cmake", "SociBackend.cmake")
         soci_core_cmake = os.path.join(self._source_subfolder, "src", "core", "CMakeLists.txt")
-        tools.replace_in_file(soci_backend_cmake, "INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib", "")
-        tools.replace_in_file(soci_core_cmake, "INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib", "")
+        tools.files.replace_in_file(self, soci_backend_cmake, "INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib", "")
+        tools.files.replace_in_file(self, soci_core_cmake, "INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib", "")
 
     def _configure_cmake(self):
         if self._cmake:

@@ -80,14 +80,14 @@ class LibVPXConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         # relocatable shared lib on macOS
-        tools.replace_in_file(os.path.join(self._source_subfolder, "build", "make", "Makefile"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "build", "make", "Makefile"),
                               "-dynamiclib",
                               "-dynamiclib -install_name @rpath/$$(LIBVPX_SO)")
         # Disable LTO for Visual Studio when CFLAGS doesn't contain -GL
         if self._is_msvc:
             lto = any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", "")))
             if not lto:
-                tools.replace_in_file(
+                tools.files.replace_in_file(self, 
                     os.path.join(self._source_subfolder, "build", "make", "gen_msvs_vcxproj.sh"),
                     "tag_content WholeProgramOptimization true",
                     "tag_content WholeProgramOptimization false",

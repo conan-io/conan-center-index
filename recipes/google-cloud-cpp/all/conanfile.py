@@ -108,7 +108,7 @@ class GoogleCloudCppConan(ConanFile):
 
         if tools.Version(self.version) < "1.33.0":
             # Do not override CMAKE_CXX_STANDARD if provided
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 textwrap.dedent("""\
                     set(CMAKE_CXX_STANDARD
                         11

@@ -94,7 +94,7 @@ class LibmodbusConan(ConanFile):
             tools.files.patch(self, **patch)
         if not self.options.shared:
             for decl in ("__declspec(dllexport)", "__declspec(dllimport)"):
-                tools.replace_in_file(os.path.join(self._source_subfolder, "src", "modbus.h"), decl, "")
+                tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "modbus.h"), decl, "")
 
     def build(self):
         self._patch_sources()

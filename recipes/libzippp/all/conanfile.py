@@ -66,7 +66,7 @@ class LibZipppConan(ConanFile):
         return self._cmake
 
     def _patch_source(self):
-        tools.replace_in_file('source_subfolder/CMakeLists.txt',
+        tools.files.replace_in_file(self, 'source_subfolder/CMakeLists.txt',
                               'find_package(LIBZIP MODULE REQUIRED)',
                               'find_package(libzip REQUIRED CONFIG)')
 

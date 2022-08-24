@@ -98,23 +98,23 @@ class MagnumIntegrationConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               'set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})',
                               "")
         # Casing
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "GlmIntegration", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "Magnum", "GlmIntegration", "CMakeLists.txt"),
                               "find_package(GLM REQUIRED)",
                               "find_package(glm REQUIRED)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "GlmIntegration", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "Magnum", "GlmIntegration", "CMakeLists.txt"),
                               "GLM::GLM",
                               "glm::glm")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "ImGuiIntegration", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "Magnum", "ImGuiIntegration", "CMakeLists.txt"),
                               "find_package(ImGui REQUIRED Sources)",
                               "find_package(imgui REQUIRED Sources)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "ImGuiIntegration", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "Magnum", "ImGuiIntegration", "CMakeLists.txt"),
                               "ImGui::ImGui",
                               "imgui::imgui")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "ImGuiIntegration", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "Magnum", "ImGuiIntegration", "CMakeLists.txt"),
                               "ImGui::Sources",
                               "")
 

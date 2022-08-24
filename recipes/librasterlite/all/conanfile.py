@@ -91,11 +91,11 @@ class LibrasterliteConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
             # relocatable shared libs on macOS
-            tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
+            tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
             # avoid SIP issues on macOS when dependencies are shared
             if tools.is_apple_os(self.settings.os):
                 libpaths = ":".join(self.deps_cpp_info.lib_paths)
-                tools.replace_in_file(
+                tools.files.replace_in_file(self, 
                     "configure",
                     "#! /bin/sh\n",
                     "#! /bin/sh\nexport DYLD_LIBRARY_PATH={}:$DYLD_LIBRARY_PATH\n".format(libpaths),

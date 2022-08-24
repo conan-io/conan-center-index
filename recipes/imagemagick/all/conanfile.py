@@ -171,27 +171,27 @@ class ImageMagicConan(ConanFile):
             tools.files.patch(self, **patch)
 
         # FIXME: package LiquidRescale  aka liblqr
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join("VisualMagick", "lqr", "Config.txt"),
             "#define MAGICKCORE_LQR_DELEGATE",
             "",
         )
         # FIXME: package LibRaw
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join("VisualMagick", "libraw", "Config.txt"),
             "#define MAGICKCORE_RAW_R_DELEGATE",
             "",
         )
 
         # FIXME: package FLIF (FLIF: Free Lossless Image Format)
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join("VisualMagick", "flif", "Config.txt"),
             "#define MAGICKCORE_FLIF_DELEGATE",
             "",
         )
 
         # FIXME: package librsvg
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join("VisualMagick", "librsvg", "Config.txt"),
             "#define MAGICKCORE_RSVG_DELEGATE",
             "",
@@ -199,12 +199,12 @@ class ImageMagicConan(ConanFile):
 
         if not self.options.shared:
             for module in self._modules:
-                tools.replace_in_file(
+                tools.files.replace_in_file(self, 
                     os.path.join("VisualMagick", module, "Config.txt"),
                     "[DLL]",
                     "[STATIC]",
                 )
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 os.path.join("VisualMagick", "coders", "Config.txt"),
                 "[DLLMODULE]",
                 "[STATIC]\n[DEFINES]\n_MAGICKLIB_",
@@ -212,13 +212,13 @@ class ImageMagicConan(ConanFile):
 
         if self.settings.arch == "x86_64":
             project = os.path.join("VisualMagick", "configure", "configure.vcxproj")
-            tools.replace_in_file(project, "Win32", "x64")
-            tools.replace_in_file(project, "/MACHINE:I386", "/MACHINE:x64")
+            tools.files.replace_in_file(self, project, "Win32", "x64")
+            tools.files.replace_in_file(self, project, "/MACHINE:I386", "/MACHINE:x64")
 
         with tools.chdir(os.path.join("VisualMagick", "configure")):
 
             toolset = tools.msvs_toolset(self)
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 "configure.vcxproj",
                 "<PlatformToolset>v120</PlatformToolset>",
                 "<PlatformToolset>%s</PlatformToolset>" % toolset,
@@ -263,13 +263,13 @@ class ImageMagicConan(ConanFile):
         baseconfig = os.path.join(
             self._source_subfolder, "MagickCore", "magick-baseconfig.h"
         )
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             baseconfig,
             "#define MAGICKCORE__OPENCL",
             "#undef MAGICKCORE__OPENCL",
             strict=False,
         )
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             baseconfig,
             "#define MAGICKCORE_HAVE_CL_CL_H",
             "#undef MAGICKCORE_HAVE_CL_CL_H",
@@ -289,7 +289,7 @@ class ImageMagicConan(ConanFile):
             if self.options.shared
             else "CORE_coders_%s.vcxproj" % suffix
         )
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join("VisualMagick", "coders", project),
             '<ClCompile Include="..\\..\\ImageMagick\\coders\\emf.c">',
             '<ClCompile Include="..\\..\\ImageMagick\\coders\\emf.c">\n'

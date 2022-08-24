@@ -51,13 +51,13 @@ class Rvo2Conan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                     "add_subdirectory(examples)",
                     "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                     "DESTINATION include",
                     "DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                     "RVO DESTINATION lib",
                     "RVO RUNTIME LIBRARY ARCHIVE")
 

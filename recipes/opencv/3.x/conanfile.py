@@ -129,29 +129,29 @@ class OpenCVConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self._source_subfolder, "3rdparty"))
         if self.options.contrib:
             freetype_cmake = os.path.join(self._contrib_folder, "modules", "freetype", "CMakeLists.txt")
-            tools.replace_in_file(freetype_cmake, "ocv_check_modules(FREETYPE freetype2)", "find_package(Freetype REQUIRED)")
-            tools.replace_in_file(freetype_cmake, "FREETYPE_", "Freetype_")
+            tools.files.replace_in_file(self, freetype_cmake, "ocv_check_modules(FREETYPE freetype2)", "find_package(Freetype REQUIRED)")
+            tools.files.replace_in_file(self, freetype_cmake, "FREETYPE_", "Freetype_")
 
-            tools.replace_in_file(freetype_cmake, "ocv_check_modules(HARFBUZZ harfbuzz)", "find_package(harfbuzz REQUIRED)")
-            tools.replace_in_file(freetype_cmake, "HARFBUZZ_", "harfbuzz_")
+            tools.files.replace_in_file(self, freetype_cmake, "ocv_check_modules(HARFBUZZ harfbuzz)", "find_package(harfbuzz REQUIRED)")
+            tools.files.replace_in_file(self, freetype_cmake, "HARFBUZZ_", "harfbuzz_")
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
 
         # Cleanup RPATH
         if tools.Version(self.version) < "3.4.8":
             install_layout_file = os.path.join(self._source_subfolder, "CMakeLists.txt")
         else:
             install_layout_file = os.path.join(self._source_subfolder, "cmake", "OpenCVInstallLayout.cmake")
-        tools.replace_in_file(install_layout_file,
+        tools.files.replace_in_file(self, install_layout_file,
                               "ocv_update(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/${OPENCV_LIB_INSTALL_PATH}\")",
                               "")
-        tools.replace_in_file(install_layout_file, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
+        tools.files.replace_in_file(self, install_layout_file, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
 
         if self.options.contrib and tools.Version(self.version) <= "3.4.12":
             sfm_cmake = os.path.join(self._contrib_folder, "modules", "sfm", "CMakeLists.txt")
             search = '  find_package(Glog QUIET)\nendif()'
-            tools.replace_in_file(sfm_cmake, search, """{}
+            tools.files.replace_in_file(self, sfm_cmake, search, """{}
             if(NOT GFLAGS_LIBRARIES AND TARGET gflags::gflags)
               set(GFLAGS_LIBRARIES gflags::gflags)
             endif()

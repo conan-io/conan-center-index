@@ -125,7 +125,7 @@ class GlslangConan(ConanFile):
                 cmake_files_to_fix.append({"target": "MachineIndependent", "relpath": os.path.join("glslang", "CMakeLists.txt")})
                 cmake_files_to_fix.append({"target": "GenericCodeGen", "relpath": os.path.join("glslang", "CMakeLists.txt")})
             for cmake_file in cmake_files_to_fix:
-                tools.replace_in_file(os.path.join(self._source_subfolder, cmake_file["relpath"]),
+                tools.files.replace_in_file(self, os.path.join(self._source_subfolder, cmake_file["relpath"]),
                                       "set_property(TARGET {} PROPERTY POSITION_INDEPENDENT_CODE ON)".format(cmake_file["target"]),
                                       "")
 

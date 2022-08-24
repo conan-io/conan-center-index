@@ -49,22 +49,22 @@ class LuajitConan(ConanFile):
         else:
             buildmode = 'shared' if self.options.shared else 'static'
             makefile = os.path.join(self._source_subfolder, 'src', 'Makefile')
-            tools.replace_in_file(makefile,
+            tools.files.replace_in_file(self, makefile,
                                   'BUILDMODE= mixed',
                                   'BUILDMODE= %s' % buildmode)
-            tools.replace_in_file(makefile,
+            tools.files.replace_in_file(self, makefile,
                                   'TARGET_DYLIBPATH= $(TARGET_LIBPATH)/$(TARGET_DYLIBNAME)',
                                   'TARGET_DYLIBPATH= $(TARGET_DYLIBNAME)')
             # adjust mixed mode defaults to build either .so or .a, but not both
             if not self.options.shared:
-                tools.replace_in_file(makefile,
+                tools.files.replace_in_file(self, makefile,
                                       'TARGET_T= $(LUAJIT_T) $(LUAJIT_SO)',
                                       'TARGET_T= $(LUAJIT_T) $(LUAJIT_A)')
-                tools.replace_in_file(makefile,
+                tools.files.replace_in_file(self, makefile,
                                       'TARGET_DEP= $(LIB_VMDEF) $(LUAJIT_SO)',
                                       'TARGET_DEP= $(LIB_VMDEF) $(LUAJIT_A)')
             else:
-                tools.replace_in_file(makefile,
+                tools.files.replace_in_file(self, makefile,
                                       'TARGET_O= $(LUAJIT_A)',
                                       'TARGET_O= $(LUAJIT_SO)')
             env = dict()

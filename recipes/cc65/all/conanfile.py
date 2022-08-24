@@ -97,13 +97,13 @@ class Cc65Conan(ConanFile):
                 for fn in os.listdir("."):
                     if not fn.endswith(".vcxproj"):
                         continue
-                    tools.replace_in_file(fn, "v141", tools.msvs_toolset(self))
-                    tools.replace_in_file(fn, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
+                    tools.files.replace_in_file(self, fn, "v141", tools.msvs_toolset(self))
+                    tools.files.replace_in_file(self, fn, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
         if self.settings.os == "Windows":
             # Add ".exe" suffix to calls from cl65 to other utilities
             for fn, var in (("cc65", "CC65"), ("ca65", "CA65"), ("co65", "CO65"), ("ld65", "LD65"), ("grc65", "GRC")):
                 v = "{},".format(var).ljust(5)
-                tools.replace_in_file(os.path.join(self._source_subfolder, "src", "cl65", "main.c"),
+                tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "cl65", "main.c"),
                                       "CmdInit (&{v} CmdPath, \"{n}\");".format(v=v, n=fn),
                                       "CmdInit (&{v} CmdPath, \"{n}.exe\");".format(v=v, n=fn))
 

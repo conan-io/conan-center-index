@@ -110,26 +110,26 @@ class BisonConan(ConanFile):
 
         if self.settings.os == "Windows":
             # replace embedded unix paths by windows paths
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.in"),
                                   "echo '#define BINDIR \"$(bindir)\"';",
                                   "echo '#define BINDIR \"$(shell cygpath -m \"$(bindir)\")\"';")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.in"),
                                   "echo '#define PKGDATADIR \"$(pkgdatadir)\"';",
                                   "echo '#define PKGDATADIR \"$(shell cygpath -m \"$(pkgdatadir)\")\"';")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.in"),
                                   "echo '#define DATADIR \"$(datadir)\"';",
                                   "echo '#define DATADIR \"$(shell cygpath -m \"$(datadir)\")\"';")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.in"),
                                   "echo '#define DATAROOTDIR \"$(datarootdir)\"';",
                                   "echo '#define DATAROOTDIR \"$(shell cygpath -m \"$(datarootdir)\")\"';")
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.in"),
                               "dist_man_MANS = $(top_srcdir)/doc/bison.1",
                               "dist_man_MANS =")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "yacc.in"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "yacc.in"),
                               "@prefix@",
                               "${}_ROOT".format(self.name.upper()))
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "yacc.in"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "yacc.in"),
                               "@bindir@",
                               "${}_ROOT/bin".format(self.name.upper()))
 

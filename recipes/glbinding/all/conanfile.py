@@ -55,16 +55,16 @@ class GlbindingConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         # Don't force PIC
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "CompileOptions.cmake"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "CompileOptions.cmake"),
                               "POSITION_INDEPENDENT_CODE ON", "")
         # Don't replace /W3 by /W4
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "CompileOptions.cmake"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "CompileOptions.cmake"),
                               "/W4", "")
         # No whole program optimization
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "CompileOptions.cmake"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "CompileOptions.cmake"),
                               "/GL", "")
         # Don't populate rpath
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "if(NOT SYSTEM_DIR_INSTALL)", "if(0)")
 
     @functools.lru_cache(1)

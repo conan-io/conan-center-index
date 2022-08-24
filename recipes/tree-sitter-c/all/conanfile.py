@@ -55,7 +55,7 @@ class TreeSitterCConan(ConanFile):
 
     def _patch_sources(self):
         if not self.options.shared:
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 os.path.join(self._source_subfolder, "src", "parser.c"),
                 "__declspec(dllexport)", ""
             )

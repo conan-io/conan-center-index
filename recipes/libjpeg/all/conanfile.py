@@ -68,7 +68,7 @@ class LibjpegConan(ConanFile):
 
     def _build_nmake(self):
         shutil.copy("Win32.Mak", os.path.join(self._source_subfolder, "Win32.Mak"))
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Win32.Mak"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Win32.Mak"),
                               "\nccommon = -c ",
                               "\nccommon = -c -DLIBJPEG_BUILDING {}".format("" if self.options.shared else "-DLIBJPEG_STATIC "))
         # clean environment variables that might affect on the build (e.g. if set by Jenkins)
@@ -82,18 +82,18 @@ class LibjpegConan(ConanFile):
                 link = os.environ.get('LD', 'lld-link')
                 lib = os.environ.get('AR', 'llvm-lib')
                 rc = os.environ.get('RC', 'llvm-rc')
-                tools.replace_in_file('Win32.Mak', 'cc     = cl', 'cc     = %s' % cl)
-                tools.replace_in_file('Win32.Mak', 'link   = link', 'link   = %s' % link)
-                tools.replace_in_file('Win32.Mak', 'implib = lib', 'implib = %s' % lib)
-                tools.replace_in_file('Win32.Mak', 'rc     = Rc', 'rc     = %s' % rc)
+                tools.files.replace_in_file(self, 'Win32.Mak', 'cc     = cl', 'cc     = %s' % cl)
+                tools.files.replace_in_file(self, 'Win32.Mak', 'link   = link', 'link   = %s' % link)
+                tools.files.replace_in_file(self, 'Win32.Mak', 'implib = lib', 'implib = %s' % lib)
+                tools.files.replace_in_file(self, 'Win32.Mak', 'rc     = Rc', 'rc     = %s' % rc)
             # set flags directly in makefile.vc
             # cflags are critical for the library. ldflags and ldlibs are only for binaries
             if self.settings.compiler.runtime in ["MD", "MDd"]:
-                tools.replace_in_file("makefile.vc", "(cvars)", "(cvarsdll)")
-                tools.replace_in_file("makefile.vc", "(conlibs)", "(conlibsdll)")
+                tools.files.replace_in_file(self, "makefile.vc", "(cvars)", "(cvarsdll)")
+                tools.files.replace_in_file(self, "makefile.vc", "(conlibs)", "(conlibsdll)")
             else:
-                tools.replace_in_file("makefile.vc", "(cvars)", "(cvarsmt)")
-                tools.replace_in_file("makefile.vc", "(conlibs)", "(conlibsmt)")
+                tools.files.replace_in_file(self, "makefile.vc", "(cvars)", "(cvarsmt)")
+                tools.files.replace_in_file(self, "makefile.vc", "(conlibs)", "(conlibsmt)")
             target = "{}/libjpeg.lib".format( "shared" if self.options.shared else "static" )
             with tools.vcvars(self.settings):
                 self.run("nmake -f makefile.vc {} {}".format(" ".join(make_args), target))
@@ -116,7 +116,7 @@ class LibjpegConan(ConanFile):
             tools.files.patch(self, **patch)
         # Fix rpath in LC_ID_DYLIB of installed shared libs on macOS
         if tools.is_apple_os(self.settings.os):
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 os.path.join(self._source_subfolder, "configure"),
                 "-install_name \\$rpath/",
                 "-install_name @rpath/",

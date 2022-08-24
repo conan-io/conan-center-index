@@ -118,13 +118,13 @@ class Libx265Conan(ConanFile):
 
     def _patch_sources(self):
         cmakelists = os.path.join(self._source_subfolder, "source", "CMakeLists.txt")
-        tools.replace_in_file(cmakelists,
+        tools.files.replace_in_file(self, cmakelists,
                                 "if((WIN32 AND ENABLE_CLI) OR (WIN32 AND ENABLE_SHARED))",
                                 "if(FALSE)")
         if self.settings.os == "Android":
-            tools.replace_in_file(cmakelists,
+            tools.files.replace_in_file(self, cmakelists,
                 "list(APPEND PLATFORM_LIBS pthread)", "")
-            tools.replace_in_file(cmakelists,
+            tools.files.replace_in_file(self, cmakelists,
                 "list(APPEND PLATFORM_LIBS rt)", "")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)

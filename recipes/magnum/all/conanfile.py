@@ -357,7 +357,7 @@ class MagnumConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               'set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})',
                               "")
         # Get rid of cmake_dependent_option, it can activate features when we try to disable them,
@@ -370,24 +370,24 @@ class MagnumConan(ConanFile):
             f.truncate()
 
         # GLFW naming
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
                               "find_package(GLFW)",
                               "find_package(glfw3)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
                               "GLFW_FOUND",
                               "glfw3_FOUND")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
                               "GLFW::GLFW",
                               "glfw")
 
         # EGL naming
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
                               "find_package(EGL)",
                               "find_package(egl_system)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
                               "EGL_FOUND",
                               "egl_system_FOUND")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
                               "EGL::EGL",
                               "egl::egl")
 

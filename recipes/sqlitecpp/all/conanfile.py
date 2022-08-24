@@ -71,7 +71,7 @@ class SQLiteCppConan(ConanFile):
            tools.Version(self.settings.compiler.version) < "6.0" and \
            self.settings.compiler.libcxx == "libc++" and \
            tools.Version(self.version) < "3":
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 os.path.join(self._source_subfolder, "include", "SQLiteCpp", "Utils.h"),
                 "const nullptr_t nullptr = {};",
                 "")

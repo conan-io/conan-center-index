@@ -45,7 +45,7 @@ class I2cConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile"),
                               "SRCDIRS	:= include lib eeprom stub tools $(EXTRA)",
                               "SRCDIRS	:= include lib $(EXTRA)")
 

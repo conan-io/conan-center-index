@@ -97,14 +97,14 @@ class Pagmo2Conan(ConanFile):
 
     def _patch_sources(self):
         # do not force MT runtime for static lib
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "if(YACMA_COMPILER_IS_MSVC AND PAGMO_BUILD_STATIC_LIBRARY)",
                               "if(0)")
         # No warnings as errors
         yacma_cmake = os.path.join(self._source_subfolder, "cmake_modules", "yacma", "YACMACompilerLinkerSettings.cmake")
-        tools.replace_in_file(yacma_cmake, "list(APPEND _YACMA_CXX_FLAGS_DEBUG \"-Werror\")", "")
-        tools.replace_in_file(yacma_cmake, "_YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(/W4)", "")
-        tools.replace_in_file(yacma_cmake, "_YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(/WX)", "")
+        tools.files.replace_in_file(self, yacma_cmake, "list(APPEND _YACMA_CXX_FLAGS_DEBUG \"-Werror\")", "")
+        tools.files.replace_in_file(self, yacma_cmake, "_YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(/W4)", "")
+        tools.files.replace_in_file(self, yacma_cmake, "_YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(/WX)", "")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):

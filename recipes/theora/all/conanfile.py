@@ -84,14 +84,14 @@ class TheoraConan(ConanFile):
 
         # fix hard-coded ogg names
         if self.options.shared:
-            tools.replace_in_file(vcproj_path,
+            tools.files.replace_in_file(self, vcproj_path,
                                   "libogg.lib",
                                   format_libs(self.deps_cpp_info["ogg"].libs))
 
         # Honor vc runtime from profile
         if "MT" in msvc_runtime_flag(self):
-            tools.replace_in_file(vcproj_path, 'RuntimeLibrary="2"', 'RuntimeLibrary="0"')
-            tools.replace_in_file(vcproj_path, 'RuntimeLibrary="3"', 'RuntimeLibrary="1"')
+            tools.files.replace_in_file(self, vcproj_path, 'RuntimeLibrary="2"', 'RuntimeLibrary="0"')
+            tools.files.replace_in_file(self, vcproj_path, 'RuntimeLibrary="3"', 'RuntimeLibrary="1"')
 
         sln = "{}_{}.sln".format(project, config)
         targets = ["libtheora" if self.options.shared else "libtheora_static"]
@@ -128,11 +128,11 @@ class TheoraConan(ConanFile):
             permission = stat.S_IMODE(os.lstat(configure).st_mode)
             os.chmod(configure, (permission | stat.S_IEXEC))
             # relocatable shared libs on macOS
-            tools.replace_in_file(configure, "-install_name \\$rpath/", "-install_name @rpath/")
+            tools.files.replace_in_file(self, configure, "-install_name \\$rpath/", "-install_name @rpath/")
             # avoid SIP issues on macOS when dependencies are shared
             if tools.is_apple_os(self.settings.os):
                 libpaths = ":".join(self.deps_cpp_info.lib_paths)
-                tools.replace_in_file(
+                tools.files.replace_in_file(self, 
                     configure,
                     "#! /bin/sh\n",
                     "#! /bin/sh\nexport DYLD_LIBRARY_PATH={}:$DYLD_LIBRARY_PATH\n".format(libpaths),

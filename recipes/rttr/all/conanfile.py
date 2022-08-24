@@ -58,7 +58,7 @@ class RTTRConan(ConanFile):
             tools.files.patch(self, **patch)
         # No warnings as errors
         for target in ["rttr_core", "rttr_core_lib", "rttr_core_s", "rttr_core_lib_s"]:
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 os.path.join(self._source_subfolder, "src", "rttr", "CMakeLists.txt"),
                 "set_compiler_warnings({})".format(target), "",
             )

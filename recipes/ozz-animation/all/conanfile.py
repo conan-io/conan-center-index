@@ -45,9 +45,9 @@ class OzzAnimationConan(ConanFile):
 
     def build(self):
         for before, after in [('string(REGEX REPLACE "/MT" "/MD" ${flag} "${${flag}}")', ""), ('string(REGEX REPLACE "/MD" "/MT" ${flag} "${${flag}}")', "")]:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "build-utils", "cmake", "compiler_settings.cmake"), before, after)
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "build-utils", "cmake", "compiler_settings.cmake"), before, after)
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "animation", "offline", "tools", "CMakeLists.txt"), 
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "animation", "offline", "tools", "CMakeLists.txt"), 
                               "if(NOT EMSCRIPTEN)",
                               "if(NOT CMAKE_CROSSCOMPILING)")
 

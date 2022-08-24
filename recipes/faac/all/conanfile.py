@@ -104,9 +104,9 @@ class FaacConan(ConanFile):
         apply_conandata_patches(self)
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
-            tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
+            tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
             if self._is_mingw and self.options.shared:
-                tools.replace_in_file(os.path.join("libfaac", "Makefile"),
+                tools.files.replace_in_file(self, os.path.join("libfaac", "Makefile"),
                                       "\nlibfaac_la_LIBADD = ",
                                       "\nlibfaac_la_LIBADD = -no-undefined ")
         autotools = self._configure_autotools()

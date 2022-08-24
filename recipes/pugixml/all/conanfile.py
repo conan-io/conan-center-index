@@ -78,9 +78,9 @@ class PugiXmlConan(ConanFile):
             header_file = os.path.join(self._source_subfolder, "src", "pugiconfig.hpp")
             # For the library build mode, options applied via change the configuration file
             if self.options.wchar_mode:
-                tools.replace_in_file(header_file, "// #define PUGIXML_WCHAR_MODE", '''#define PUGIXML_WCHAR_MODE''')
+                tools.files.replace_in_file(self, header_file, "// #define PUGIXML_WCHAR_MODE", '''#define PUGIXML_WCHAR_MODE''')
             if self.options.no_exceptions:
-                tools.replace_in_file(header_file, "// #define PUGIXML_NO_EXCEPTIONS", '''#define PUGIXML_NO_EXCEPTIONS''')
+                tools.files.replace_in_file(self, header_file, "// #define PUGIXML_NO_EXCEPTIONS", '''#define PUGIXML_NO_EXCEPTIONS''')
             cmake = self._configure_cmake()
             cmake.build()
 

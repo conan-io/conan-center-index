@@ -64,7 +64,7 @@ class UnivalueConan(ConanFile):
             conf_args.extend(["--disable-shared", "--enable-static"])
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         if self.settings.compiler == "Visual Studio":
-            tools.replace_in_file("libtool", "-Wl,-DLL,-IMPLIB", "-link -DLL -link -DLL -link -IMPLIB")
+            tools.files.replace_in_file(self, "libtool", "-Wl,-DLL,-IMPLIB", "-link -DLL -link -DLL -link -IMPLIB")
         return self._autotools
 
     def _patch_sources(self):

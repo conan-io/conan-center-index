@@ -437,7 +437,7 @@ class GdalConan(ConanFile):
             tools.files.rmdir(self, os.path.join(self._source_subfolder, lib_subdir))
 
         # OpenCL headers
-        tools.replace_in_file(os.path.join(self._source_subfolder, "alg", "gdalwarpkernel_opencl.h"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "alg", "gdalwarpkernel_opencl.h"),
                               "#include <OpenCL/OpenCL.h>",
                               "#include <CL/opencl.h>")
 
@@ -446,16 +446,16 @@ class GdalConan(ConanFile):
             configure_ac = os.path.join(self._source_subfolder, "configure.ac")
             # Workaround for nc-config not packaged in netcdf recipe (gdal relies on it to check nc4 and hdf4 support in netcdf):
             if self.options.with_netcdf and self.options["netcdf"].netcdf4 and self.options["netcdf"].with_hdf5:
-                tools.replace_in_file(configure_ac,
+                tools.files.replace_in_file(self, configure_ac,
                                       "NETCDF_HAS_NC4=no",
                                       "NETCDF_HAS_NC4=yes")
             # Fix zlib checks and -lz injection to ensure to use external zlib and not fail others checks
             if self.options.get_safe("with_zlib", True):
                 zlib_name = self.deps_cpp_info["zlib"].libs[0]
-                tools.replace_in_file(configure_ac,
+                tools.files.replace_in_file(self, configure_ac,
                                       "AC_CHECK_LIB(z,",
                                       "AC_CHECK_LIB({},".format(zlib_name))
-                tools.replace_in_file(configure_ac,
+                tools.files.replace_in_file(self, configure_ac,
                                       "-lz ",
                                       "-l{} ".format(zlib_name))
             # Workaround for autoconf 2.71
@@ -466,25 +466,25 @@ class GdalConan(ConanFile):
         if not self.options.tools:
             # autotools
             gnumakefile_apps = os.path.join(self._source_subfolder, "apps", "GNUmakefile")
-            tools.replace_in_file(gnumakefile_apps,
+            tools.files.replace_in_file(self, gnumakefile_apps,
                                   "default:	gdal-config-inst gdal-config $(BIN_LIST)",
                                   "default:	gdal-config-inst gdal-config")
             if tools.Version(self.version) < "3.4.0":
                 clean_pattern = "$(RM) *.o $(BIN_LIST) core gdal-config gdal-config-inst"
             else:
                 clean_pattern = "$(RM) *.o $(BIN_LIST) $(NON_DEFAULT_LIST) core gdal-config gdal-config-inst"
-            tools.replace_in_file(gnumakefile_apps,
+            tools.files.replace_in_file(self, gnumakefile_apps,
                                   clean_pattern,
                                   "$(RM) *.o core gdal-config gdal-config-inst")
-            tools.replace_in_file(gnumakefile_apps,
+            tools.files.replace_in_file(self, gnumakefile_apps,
                                   "for f in $(BIN_LIST) ; do $(INSTALL) $$f $(DESTDIR)$(INST_BIN) ; done",
                                   "")
             # msvc
             vcmakefile_apps = os.path.join(self._source_subfolder, "apps", "makefile.vc")
-            tools.replace_in_file(vcmakefile_apps,
+            tools.files.replace_in_file(self, vcmakefile_apps,
                                   "default:	",
                                   "default:	\n\nold-default:	")
-            tools.replace_in_file(vcmakefile_apps,
+            tools.files.replace_in_file(self, vcmakefile_apps,
                                   "copy *.exe $(BINDIR)",
                                   "")
 
@@ -525,11 +525,11 @@ class GdalConan(ConanFile):
         self._replace_in_nmake_opt("ADD_LIBS	=", "ADD_LIBS={}".format(" ".join([lib + ".lib" for lib in self.deps_cpp_info.system_libs])))
         # Trick to enable OpenCL (option missing in upstream nmake files)
         if self.options.with_opencl:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "alg", "makefile.vc"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "alg", "makefile.vc"),
                                   "$(GEOS_CFLAGS)", "$(GEOS_CFLAGS) /DHAVE_OPENCL")
 
     def _replace_in_nmake_opt(self, str1, str2):
-        tools.replace_in_file(os.path.join(self.build_folder, self._source_subfolder, "nmake.opt"), str1, str2)
+        tools.files.replace_in_file(self, os.path.join(self.build_folder, self._source_subfolder, "nmake.opt"), str1, str2)
 
     @property
     def _nmake_args(self):
@@ -883,17 +883,17 @@ class GdalConan(ConanFile):
             with self._autotools_build_environment():
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
                 # Required for cross-build to iOS, see https://github.com/OSGeo/gdal/issues/4123
-                tools.replace_in_file(os.path.join("port", "cpl_config.h.in"),
+                tools.files.replace_in_file(self, os.path.join("port", "cpl_config.h.in"),
                                       "/* port/cpl_config.h.in",
                                       "#pragma once\n/* port/cpl_config.h.in")
                 # Relocatable shared lib on macOS
-                tools.replace_in_file("configure",
+                tools.files.replace_in_file(self, "configure",
                                       "-install_name \\$rpath/",
                                       "-install_name @rpath/")
                 # avoid SIP issues on macOS when dependencies are shared
                 if tools.is_apple_os(self.settings.os):
                     libpaths = ":".join(self.deps_cpp_info.lib_paths)
-                    tools.replace_in_file(
+                    tools.files.replace_in_file(self, 
                         "configure",
                         "#! /bin/sh\n",
                         "#! /bin/sh\nexport DYLD_LIBRARY_PATH={}:$DYLD_LIBRARY_PATH\n".format(libpaths),

@@ -50,7 +50,7 @@ class LibconfigConan(ConanFile):
 
     def build(self):
         # https://github.com/hyperrealm/libconfig/issues/119
-        tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"), "_STDLIB_H", "")
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"), "_STDLIB_H", "")
         cmake = self._configure_cmake()
         cmake.build()
 

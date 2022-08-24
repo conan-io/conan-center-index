@@ -152,7 +152,7 @@ class CrashpadConan(ConanFile):
             tools.files.patch(self, **patch)
 
         if self.settings.compiler == "Visual Studio":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "zlib", "BUILD.gn"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "third_party", "zlib", "BUILD.gn"),
                                   "libs = [ \"z\" ]",
                                   "libs = [ {} ]".format(", ".join("\"{}.lib\"".format(l) for l in self.deps_cpp_info["zlib"].libs)))
 
@@ -160,7 +160,7 @@ class CrashpadConan(ConanFile):
             toolchain_path = os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium", "build", "config", "BUILD.gn")
             # Remove gcc-incompatible compiler arguments
             for comp_arg in ("-Wheader-hygiene", "-Wnewline-eof", "-Wstring-conversion", "-Wexit-time-destructors", "-fobjc-call-cxx-cdtors", "-Wextra-semi", "-Wimplicit-fallthrough"):
-                tools.replace_in_file(toolchain_path,
+                tools.files.replace_in_file(self, toolchain_path,
                                       "\"{}\"".format(comp_arg), "\"\"")
 
         autotools = AutoToolsBuildEnvironment(self)

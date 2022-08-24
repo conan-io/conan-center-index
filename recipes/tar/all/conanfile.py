@@ -76,7 +76,7 @@ class TarConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         if self.settings.compiler == "Visual Studio":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "gnu", "faccessat.c"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "gnu", "faccessat.c"),
                                   "_GL_INCLUDING_UNISTD_H", "_GL_INCLUDING_UNISTD_H_NOP")
         autotools = self._configure_autotools()
         autotools.make()

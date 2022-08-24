@@ -117,7 +117,7 @@ class LibPcapConan(ConanFile):
             configure_args.append("--host=arm-linux")
         self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
         # Relocatable shared lib on macOS
-        tools.replace_in_file("Makefile", "-install_name $(libdir)/", "-install_name @rpath/")
+        tools.files.replace_in_file(self, "Makefile", "-install_name $(libdir)/", "-install_name @rpath/")
         return self._autotools
 
     def _configure_cmake(self):

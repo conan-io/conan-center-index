@@ -65,17 +65,17 @@ class OpenH264Conan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         if self._is_msvc:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "build", "platform-msvc.mk"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "build", "platform-msvc.mk"),
                                   "CFLAGS_OPT += -MT",
                                   "CFLAGS_OPT += -{}".format(msvc_runtime_flag(self)))
-            tools.replace_in_file(os.path.join(self._source_subfolder, "build", "platform-msvc.mk"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "build", "platform-msvc.mk"),
                                   "CFLAGS_DEBUG += -MTd -Gm",
                                   "CFLAGS_DEBUG += -{} -Gm".format(msvc_runtime_flag(self)))
         if self.settings.os == "Android":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "codec", "build", "android", "dec", "jni", "Application.mk"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "codec", "build", "android", "dec", "jni", "Application.mk"),
                                   "APP_STL := stlport_shared",
                                   "APP_STL := {}".format(self.settings.compiler.libcxx))
-            tools.replace_in_file(os.path.join(self._source_subfolder, "codec", "build", "android", "dec", "jni", "Application.mk"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "codec", "build", "android", "dec", "jni", "Application.mk"),
                                   "APP_PLATFORM := android-12",
                                   "APP_PLATFORM := {}".format(self._android_target))
 

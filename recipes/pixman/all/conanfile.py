@@ -60,17 +60,17 @@ class PixmanConan(ConanFile):
 
     def _patch_sources(self):
         if self.settings.compiler == "Visual Studio":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.win32.common"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.win32.common"),
                                   "-MDd ", "-{} ".format(str(self.settings.compiler.runtime)))
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.win32.common"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.win32.common"),
                                   "-MD ", "-{} ".format(str(self.settings.compiler.runtime)))
         if tools.is_apple_os(self.settings.os):
             # https://lists.freedesktop.org/archives/pixman/2014-November/003461.html
             test_makefile = os.path.join(self._source_subfolder, "test", "Makefile.in")
-            tools.replace_in_file(test_makefile,
+            tools.files.replace_in_file(self, test_makefile,
                                   "region_test_OBJECTS = region-test.$(OBJEXT)",
                                   "region_test_OBJECTS = region-test.$(OBJEXT) utils.$(OBJEXT)")
-            tools.replace_in_file(test_makefile,
+            tools.files.replace_in_file(self, test_makefile,
                                   "scaling_helpers_test_OBJECTS = scaling-helpers-test.$(OBJEXT)",
                                   "scaling_helpers_test_OBJECTS = scaling-helpers-test.$(OBJEXT) utils.$(OBJEXT)")
 

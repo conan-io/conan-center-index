@@ -71,18 +71,18 @@ class LibffiConan(ConanFile):
             tools.files.patch(self, **patch)
         # Generate rpath friendly shared lib on macOS
         configure_path = os.path.join(self._source_subfolder, "configure")
-        tools.replace_in_file(configure_path, "-install_name \\$rpath/", "-install_name @rpath/")
+        tools.files.replace_in_file(self, configure_path, "-install_name \\$rpath/", "-install_name @rpath/")
 
         if tools.Version(self.version) < "3.3":
             if self.settings.compiler == "clang" and tools.Version(str(self.settings.compiler.version)) >= 7.0:
                 # https://android.googlesource.com/platform/external/libffi/+/ca22c3cb49a8cca299828c5ffad6fcfa76fdfa77
                 sysv_s_src = os.path.join(self._source_subfolder, "src", "arm", "sysv.S")
-                tools.replace_in_file(sysv_s_src, "fldmiad", "vldmia")
-                tools.replace_in_file(sysv_s_src, "fstmiad", "vstmia")
-                tools.replace_in_file(sysv_s_src, "fstmfdd\tsp!,", "vpush")
+                tools.files.replace_in_file(self, sysv_s_src, "fldmiad", "vldmia")
+                tools.files.replace_in_file(self, sysv_s_src, "fstmiad", "vstmia")
+                tools.files.replace_in_file(self, sysv_s_src, "fstmfdd\tsp!,", "vpush")
 
                 # https://android.googlesource.com/platform/external/libffi/+/7748bd0e4a8f7d7c67b2867a3afdd92420e95a9f
-                tools.replace_in_file(sysv_s_src, "stmeqia", "stmiaeq")
+                tools.files.replace_in_file(self, sysv_s_src, "stmeqia", "stmiaeq")
 
     @contextlib.contextmanager
     def _build_context(self):

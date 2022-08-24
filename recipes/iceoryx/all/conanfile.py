@@ -98,7 +98,7 @@ class IceoryxConan(ConanFile):
                 os.path.join("iceoryx_posh", "CMakeLists.txt"),
                 os.path.join(iceoryx_utils, "CMakeLists.txt")
         ]:
-            tools.replace_in_file(os.path.join(self._source_subfolder, cmake_file), "POSITION_INDEPENDENT_CODE ON", "")
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, cmake_file), "POSITION_INDEPENDENT_CODE ON", "")
 
     def _configure_cmake(self):
         if self._cmake:

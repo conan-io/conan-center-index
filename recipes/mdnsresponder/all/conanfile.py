@@ -117,14 +117,14 @@ class MdnsResponderConan(ConanFile):
             dllstub_vcxproj = os.path.join(self._source_subfolder, "mDNSWindows", "DLLStub", "DLLStub.vcxproj")
             dns_sd_vcxproj = os.path.join(self._source_subfolder, "Clients", "DNS-SD.VisualStudio", "dns-sd.vcxproj")
             for vcxproj in [dll_vcxproj, dllstub_vcxproj, dns_sd_vcxproj]:
-                tools.replace_in_file(vcxproj, "<RuntimeLibrary>MultiThreaded</RuntimeLibrary>", "<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>")
-                tools.replace_in_file(vcxproj, "<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>", "<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>")
+                tools.files.replace_in_file(self, vcxproj, "<RuntimeLibrary>MultiThreaded</RuntimeLibrary>", "<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>")
+                tools.files.replace_in_file(self, vcxproj, "<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>", "<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>")
 
         # could use glob and replace_in_file(strict=False, ...)
         dll_rc = os.path.join(self._source_subfolder, "mDNSWindows", "DLL", "dll.rc")
         dns_sd_rc = os.path.join(self._source_subfolder, "Clients", "DNS-SD.VisualStudio", "dns-sd.rc")
         for rc in [dll_rc, dns_sd_rc]:
-            tools.replace_in_file(rc, "afxres.h", "winres.h")
+            tools.files.replace_in_file(self, rc, "afxres.h", "winres.h")
 
         msbuild = MSBuild(self)
         msbuild.build(sln, targets=self._msvc_targets, platforms=self._msvc_platforms, definitions=self._msvc_definitions)

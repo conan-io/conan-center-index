@@ -121,7 +121,7 @@ class ImakeConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
-        # tools.replace_in_file(os.path.join(self._source_subfolder, ""))
+        # tools.files.replace_in_file(self, os.path.join(self._source_subfolder, ""))
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make(args=["V=1"])

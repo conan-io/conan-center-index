@@ -115,13 +115,13 @@ class CairoConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             # https://cairographics.org/end_to_end_build_for_win32/
             win32_common = os.path.join("build", "Makefile.win32.common")
-            tools.replace_in_file(win32_common, "-MD ", "-%s " % self.settings.compiler.runtime)
-            tools.replace_in_file(win32_common, "-MDd ", "-%s " % self.settings.compiler.runtime)
-            tools.replace_in_file(win32_common, "$(ZLIB_PATH)/lib/zlib1.lib",
+            tools.files.replace_in_file(self, win32_common, "-MD ", "-%s " % self.settings.compiler.runtime)
+            tools.files.replace_in_file(self, win32_common, "-MDd ", "-%s " % self.settings.compiler.runtime)
+            tools.files.replace_in_file(self, win32_common, "$(ZLIB_PATH)/lib/zlib1.lib",
                                                 self.deps_cpp_info["zlib"].libs[0] + ".lib")
-            tools.replace_in_file(win32_common, "$(LIBPNG_PATH)/lib/libpng16.lib",
+            tools.files.replace_in_file(self, win32_common, "$(LIBPNG_PATH)/lib/libpng16.lib",
                                                 self.deps_cpp_info["libpng"].libs[0] + ".lib")
-            tools.replace_in_file(win32_common, "$(FREETYPE_PATH)/lib/freetype.lib",
+            tools.files.replace_in_file(self, win32_common, "$(FREETYPE_PATH)/lib/freetype.lib",
                                                 self.deps_cpp_info["freetype"].libs[0] + ".lib")
             with tools.vcvars(self.settings):
                 env_msvc = VisualStudioBuildEnvironment(self)
@@ -170,10 +170,10 @@ class CairoConan(ConanFile):
     def _build_configure(self):
         with tools.chdir(self._source_subfolder):
             # disable build of test suite
-            tools.replace_in_file(os.path.join("test", "Makefile.am"), "noinst_PROGRAMS = cairo-test-suite$(EXEEXT)",
+            tools.files.replace_in_file(self, os.path.join("test", "Makefile.am"), "noinst_PROGRAMS = cairo-test-suite$(EXEEXT)",
                                   "")
             if self.options.with_freetype:
-                tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "src", "cairo-ft-font.c"),
+                tools.files.replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "src", "cairo-ft-font.c"),
                                       "#if HAVE_UNISTD_H", "#ifdef HAVE_UNISTD_H")
 
             tools.touch(os.path.join("boilerplate", "Makefile.am.features"))

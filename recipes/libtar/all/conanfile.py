@@ -72,7 +72,7 @@ class LibTarConan(ConanFile):
 
     def _patch_sources(self):
         if self.options.with_zlib:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure.ac"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "configure.ac"),
                                   "AC_CHECK_LIB([z], [gzread])",
                                   "AC_CHECK_LIB([{}], [gzread])".format(self.deps_cpp_info["zlib"].libs[0]))
 

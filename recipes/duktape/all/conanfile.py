@@ -52,7 +52,7 @@ class DuktapeConan(ConanFile):
         # which is quite an unusual combination to have.
         # The most crucial option is --dll which just flips this define.
         if self.settings.os == "Windows" and self.options.shared:
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 os.path.join(self._source_subfolder, "src", "duk_config.h"),
                 "#undef DUK_F_DLL_BUILD",
                 "#define DUK_F_DLL_BUILD",

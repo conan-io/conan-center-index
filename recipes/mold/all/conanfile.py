@@ -45,9 +45,9 @@ class MoldConan(ConanFile):
 
     def _patch_sources(self):
         if self.settings.compiler == "apple-clang":
-            tools.replace_in_file("source_subfolder/Makefile", "-std=c++20", "-std=c++2a")
+            tools.files.replace_in_file(self, "source_subfolder/Makefile", "-std=c++20", "-std=c++2a")
 
-        tools.replace_in_file("source_subfolder/Makefile", "-Ithird-party/xxhash ", "-I{} -I{} -I{} -I{} -I{}".format(
+        tools.files.replace_in_file(self, "source_subfolder/Makefile", "-Ithird-party/xxhash ", "-I{} -I{} -I{} -I{} -I{}".format(
         self._get_include_path("zlib"),
         self._get_include_path("openssl"),
         self._get_include_path("xxhash"),
@@ -55,10 +55,10 @@ class MoldConan(ConanFile):
         self._get_include_path("onetbb")
         ))
 
-        tools.replace_in_file("source_subfolder/Makefile", "MOLD_LDFLAGS += -ltbb", "MOLD_LDFLAGS += -L{} -ltbb".format(
+        tools.files.replace_in_file(self, "source_subfolder/Makefile", "MOLD_LDFLAGS += -ltbb", "MOLD_LDFLAGS += -L{} -ltbb".format(
             self.deps_cpp_info["onetbb"].lib_paths[0]))
 
-        tools.replace_in_file("source_subfolder/Makefile", "MOLD_LDFLAGS += -lmimalloc", "MOLD_LDFLAGS += -L{} -lmimalloc".format(
+        tools.files.replace_in_file(self, "source_subfolder/Makefile", "MOLD_LDFLAGS += -lmimalloc", "MOLD_LDFLAGS += -L{} -lmimalloc".format(
             self.deps_cpp_info["mimalloc"].lib_paths[0]))
 
     def requirements(self):

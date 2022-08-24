@@ -243,7 +243,7 @@ class LibcurlConan(ConanFile):
 
     def _patch_misc_files(self):
         if self.options.with_largemaxwritesize:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "include", "curl", "curl.h"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "include", "curl", "curl.h"),
                                   "define CURL_MAX_WRITE_SIZE 16384",
                                   "define CURL_MAX_WRITE_SIZE 10485760")
 
@@ -251,7 +251,7 @@ class LibcurlConan(ConanFile):
         # for additional info, see this comment https://github.com/conan-io/conan-center-index/pull/1008#discussion_r386122685
         if self.settings.compiler == "apple-clang" and self.settings.compiler.version == "9.1":
             if self.options.with_ssl == "darwinssl":
-                tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "vtls", "sectransp.c"),
+                tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "lib", "vtls", "sectransp.c"),
                                       "#define CURL_BUILD_MAC_10_13 MAC_OS_X_VERSION_MAX_ALLOWED >= 101300",
                                       "#define CURL_BUILD_MAC_10_13 0")
 
@@ -263,31 +263,31 @@ class LibcurlConan(ConanFile):
         # - link errors if mingw shared or iOS/tvOS/watchOS
         # - it makes recipe consistent with CMake build where we don't build curl tool
         top_makefile = os.path.join(self._source_subfolder, "Makefile.am")
-        tools.replace_in_file(top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
-        tools.replace_in_file(top_makefile, "include src/Makefile.inc", "")
+        tools.files.replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
+        tools.files.replace_in_file(self, top_makefile, "include src/Makefile.inc", "")
 
         if self._is_mingw:
             # patch for zlib naming in mingw
             if self.options.with_zlib:
                 configure_ac = os.path.join(self._source_subfolder, "configure.ac")
                 zlib_name = self.deps_cpp_info["zlib"].libs[0]
-                tools.replace_in_file(configure_ac,
+                tools.files.replace_in_file(self, configure_ac,
                                       "AC_CHECK_LIB(z,",
                                       "AC_CHECK_LIB({},".format(zlib_name))
-                tools.replace_in_file(configure_ac,
+                tools.files.replace_in_file(self, configure_ac,
                                       "-lz ",
                                       "-l{} ".format(zlib_name))
 
             if self.options.shared:
                 # patch for shared mingw build
                 lib_makefile = os.path.join(self._source_subfolder, "lib", "Makefile.am")
-                tools.replace_in_file(lib_makefile,
+                tools.files.replace_in_file(self, lib_makefile,
                                       "noinst_LTLIBRARIES = libcurlu.la",
                                       "")
-                tools.replace_in_file(lib_makefile,
+                tools.files.replace_in_file(self, lib_makefile,
                                       "noinst_LTLIBRARIES =",
                                       "")
-                tools.replace_in_file(lib_makefile,
+                tools.files.replace_in_file(self, lib_makefile,
                                       "lib_LTLIBRARIES = libcurl.la",
                                       "noinst_LTLIBRARIES = libcurl.la")
                 # add directives to build dll
@@ -302,24 +302,24 @@ class LibcurlConan(ConanFile):
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         # Custom findZstd.cmake file relies on pkg-config file, make sure that it's consumed on all platforms
         if self._has_zstd_option:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMake", "FindZstd.cmake"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMake", "FindZstd.cmake"),
                                   "if(UNIX)", "if(TRUE)")
         # TODO: check this patch, it's suspicious
-        tools.replace_in_file(cmakelists,
+        tools.files.replace_in_file(self, cmakelists,
                               "include(CurlSymbolHiding)", "")
 
         # libnghttp2
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             cmakelists,
             "find_package(NGHTTP2 REQUIRED)",
             "find_package(libnghttp2 REQUIRED)",
         )
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             cmakelists,
             "include_directories(${NGHTTP2_INCLUDE_DIRS})",
             "",
         )
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             cmakelists,
             "list(APPEND CURL_LIBS ${NGHTTP2_LIBRARIES})",
             "list(APPEND CURL_LIBS libnghttp2::nghttp2)",
@@ -328,7 +328,7 @@ class LibcurlConan(ConanFile):
         # INTERFACE_LIBRARY (generated by the cmake_find_package generator) targets doesn't have the LOCATION property.
         # So skipp the LOCATION check in the CMakeLists.txt
         if tools.Version(self.version) >= "7.80.0":
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 cmakelists,
                 'get_target_property(_lib "${_libname}" LOCATION)',
                 """get_target_property(_type "${_libname}" TYPE)
@@ -474,7 +474,7 @@ class LibcurlConan(ConanFile):
 
             # fix generated autotools files to have relocatable binaries
             if tools.is_apple_os(self.settings.os):
-                tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
+                tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
 
             self.run("chmod +x configure")
 

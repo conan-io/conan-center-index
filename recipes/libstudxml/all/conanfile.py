@@ -89,8 +89,8 @@ class LibStudXmlConan(ConanFile):
         proj_path = os.path.join(self._source_subfolder, "xml", "libstudxml-vc{}.vcxproj".format(vc_ver))
 
         if not self.options.shared:
-            tools.replace_in_file(proj_path, "DynamicLibrary", "StaticLibrary")
-            tools.replace_in_file(proj_path, "LIBSTUDXML_DYNAMIC_LIB", "LIBSTUDXML_STATIC_LIB")
+            tools.files.replace_in_file(self, proj_path, "DynamicLibrary", "StaticLibrary")
+            tools.files.replace_in_file(self, proj_path, "LIBSTUDXML_DYNAMIC_LIB", "LIBSTUDXML_STATIC_LIB")
 
         msbuild = MSBuild(self)
         msbuild.build(sln_path, platforms={"x86": "Win32"})

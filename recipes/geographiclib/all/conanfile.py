@@ -93,13 +93,13 @@ class GeographiclibConan(ConanFile):
             tools.files.patch(self, **patch)
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         # it does not work on Windows but is not needed
-        tools.replace_in_file(cmakelists, "add_subdirectory (js)", "")
+        tools.files.replace_in_file(self, cmakelists, "add_subdirectory (js)", "")
         # Don't install system libs
-        tools.replace_in_file(cmakelists, "include (InstallRequiredSystemLibraries)", "")
+        tools.files.replace_in_file(self, cmakelists, "include (InstallRequiredSystemLibraries)", "")
         # Don't build tools if asked
         if not self.options.tools:
-            tools.replace_in_file(cmakelists, "add_subdirectory (tools)", "")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "CMakeLists.txt"),
+            tools.files.replace_in_file(self, cmakelists, "add_subdirectory (tools)", "")
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "CMakeLists.txt"),
                                   "${TOOLS}", "")
 
     def _configure_cmake(self):

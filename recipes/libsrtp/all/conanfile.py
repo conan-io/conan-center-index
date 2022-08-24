@@ -65,7 +65,7 @@ class ConanRecipe(ConanFile):
         return self._cmake
 
     def build(self):
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "install(TARGETS srtp2 DESTINATION lib)",
             (

@@ -428,7 +428,7 @@ class QtConan(ConanFile):
 
         # patching in source method because of no_copy_source attribute
 
-        tools.replace_in_file(os.path.join("qt6", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join("qt6", "CMakeLists.txt"),
                         "enable_testing()",
                         "include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)\nconan_basic_setup(KEEP_RPATHS)\n"
                                "set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
@@ -440,12 +440,12 @@ class QtConan(ConanFile):
             tools.files.patch(self, **patch)
         if tools.Version(self.version) >= "6.2.0":
             for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
-                tools.replace_in_file(os.path.join(self.source_folder, "qt6", "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
+                tools.files.replace_in_file(self, os.path.join(self.source_folder, "qt6", "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
                                       "  if (enable_precompiled_headers) {\n    if (is_win) {",
                                       "  if (enable_precompiled_headers) {\n    if (false) {"
                                       )
 
-        tools.replace_in_file(os.path.join("qt6", "qtbase", "cmake", "QtInternalTargets.cmake"),
+        tools.files.replace_in_file(self, os.path.join("qt6", "qtbase", "cmake", "QtInternalTargets.cmake"),
                               "-Zc:wchar_t",
                               "-Zc:wchar_t -Zc:twoPhase-")
         for f in ["FindPostgreSQL.cmake"]:
@@ -456,8 +456,8 @@ class QtConan(ConanFile):
         # workaround QTBUG-94356
         if tools.Version(self.version) >= "6.1.1":
             zlib_file_name = "FindWrapSystemZLIB.cmake" if tools.Version(self.version) >= "6.3.1" else "FindWrapZLIB.cmake"
-            tools.replace_in_file(os.path.join("qt6", "qtbase", "cmake", zlib_file_name), '"-lz"', 'ZLIB::ZLIB')
-            tools.replace_in_file(os.path.join("qt6", "qtbase", "configure.cmake"),
+            tools.files.replace_in_file(self, os.path.join("qt6", "qtbase", "cmake", zlib_file_name), '"-lz"', 'ZLIB::ZLIB')
+            tools.files.replace_in_file(self, os.path.join("qt6", "qtbase", "configure.cmake"),
                 "set_property(TARGET ZLIB::ZLIB PROPERTY IMPORTED_GLOBAL TRUE)",
                 "")
 
@@ -722,22 +722,22 @@ class QtConan(ConanFile):
 
     def build(self):
         for f in glob.glob("*.cmake"):
-            tools.replace_in_file(f,
+            tools.files.replace_in_file(self, f,
                 "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,SHARED_LIBRARY>:>",
                 "", strict=False)
-            tools.replace_in_file(f,
+            tools.files.replace_in_file(self, f,
                 "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,MODULE_LIBRARY>:>",
                 "", strict=False)
-            tools.replace_in_file(f,
+            tools.files.replace_in_file(self, f,
                 "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:>",
                 "", strict=False)
-            tools.replace_in_file(f,
+            tools.files.replace_in_file(self, f,
                 "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,SHARED_LIBRARY>:-Wl,--export-dynamic>",
                 "", strict=False)
-            tools.replace_in_file(f,
+            tools.files.replace_in_file(self, f,
                 "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,MODULE_LIBRARY>:-Wl,--export-dynamic>",
                 "", strict=False)
-            tools.replace_in_file(f,
+            tools.files.replace_in_file(self, f,
                 " IMPORTED)\n",
                 " IMPORTED GLOBAL)\n", strict=False)
 

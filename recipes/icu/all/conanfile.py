@@ -137,14 +137,14 @@ class ICUBase(ConanFile):
             # https://unicode-org.atlassian.net/projects/ICU/issues/ICU-20545
             srcdir = os.path.join(self.build_folder, self._source_subfolder, "source")
             makeconv_cpp = os.path.join(srcdir, "tools", "makeconv", "makeconv.cpp")
-            tools.replace_in_file(makeconv_cpp,
+            tools.files.replace_in_file(self, makeconv_cpp,
                                   "pathBuf.appendPathPart(arg, localError);",
                                   "pathBuf.append(\"/\", localError); pathBuf.append(arg, localError);")
 
         # relocatable shared libs on macOS
         mh_darwin = os.path.join(self._source_subfolder, "source", "config", "mh-darwin")
-        tools.replace_in_file(mh_darwin, "-install_name $(libdir)/$(notdir", "-install_name @rpath/$(notdir")
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, mh_darwin, "-install_name $(libdir)/$(notdir", "-install_name @rpath/$(notdir")
+        tools.files.replace_in_file(self, 
             mh_darwin,
             "-install_name $(notdir $(MIDDLE_SO_TARGET)) $(PKGDATA_TRAILING_SPACE)",
             "-install_name @rpath/$(notdir $(MIDDLE_SO_TARGET))",

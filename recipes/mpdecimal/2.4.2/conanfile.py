@@ -70,68 +70,68 @@ class MpdecimalConan(ConanFile):
             static_ext = ".a"
             main_version, _ = self.version.split(".", 1)
 
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "configure"),
                                   "libmpdec.a",
                                   "libmpdec{}".format(static_ext))
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "configure"),
                                   "libmpdec.so",
                                   "libmpdec{}".format(shared_ext))
 
             makefile_in = os.path.join(self._source_subfolder, "Makefile.in")
             mpdec_makefile_in = os.path.join(self._source_subfolder, "libmpdec", "Makefile.in")
-            tools.replace_in_file(makefile_in,
+            tools.files.replace_in_file(self, makefile_in,
                                   "libdir = @libdir@",
                                   "libdir = @libdir@\n"
                                   "bindir = @bindir@")
             if self.options.shared:
                 if self.settings.os == "Windows":
-                    tools.replace_in_file(makefile_in,
+                    tools.files.replace_in_file(self, makefile_in,
                                           "LIBSHARED = @LIBSHARED@",
                                           "LIBSHARED = libmpdec-{}{}".format(main_version, shared_ext))
-                    tools.replace_in_file(makefile_in,
+                    tools.files.replace_in_file(self, makefile_in,
                                           "install: FORCE",
                                           "install: FORCE\n"
                                           "\t$(INSTALL) -d -m 755 $(DESTDIR)$(bindir)")
-                    tools.replace_in_file(makefile_in,
+                    tools.files.replace_in_file(self, makefile_in,
                                           "\t$(INSTALL) -m 755 libmpdec/$(LIBSHARED) $(DESTDIR)$(libdir)\n",
                                           "\t$(INSTALL) -m 755 libmpdec/$(LIBSHARED) $(DESTDIR)$(bindir)\n")
-                    tools.replace_in_file(makefile_in,
+                    tools.files.replace_in_file(self, makefile_in,
                                           "\tcd $(DESTDIR)$(libdir) && ln -sf $(LIBSHARED) $(LIBSONAME) && ln -sf $(LIBSHARED) libmpdec.so\n",
                                           "")
                 else:
-                    tools.replace_in_file(makefile_in,
+                    tools.files.replace_in_file(self, makefile_in,
                                           "\t$(INSTALL) -m 644 libmpdec/$(LIBSTATIC) $(DESTDIR)$(libdir)\n",
                                           "")
-                    tools.replace_in_file(makefile_in,
+                    tools.files.replace_in_file(self, makefile_in,
                                           "\tcd $(DESTDIR)$(libdir) && ln -sf $(LIBSHARED) $(LIBSONAME) && ln -sf $(LIBSHARED) libmpdec.so",
                                           "\tcd $(DESTDIR)$(libdir) && ln -sf $(LIBSHARED) $(LIBSONAME) && ln -sf $(LIBSHARED) libmpdec{}".format(shared_ext))
             else:
-                tools.replace_in_file(makefile_in,
+                tools.files.replace_in_file(self, makefile_in,
                                       "\t$(INSTALL) -m 755 libmpdec/$(LIBSHARED) $(DESTDIR)$(libdir)\n",
                                       "")
-                tools.replace_in_file(makefile_in,
+                tools.files.replace_in_file(self, makefile_in,
                                       "\tcd $(DESTDIR)$(libdir) && ln -sf $(LIBSHARED) $(LIBSONAME) && ln -sf $(LIBSHARED) libmpdec.so\n",
                                       "")
 
-            tools.replace_in_file(mpdec_makefile_in,
+            tools.files.replace_in_file(self, mpdec_makefile_in,
                                   "default: $(LIBSTATIC) $(LIBSHARED)",
                                   "default: $({})".format("LIBSHARED" if self.options.shared else "LIBSTATIC"))
 
             if self.settings.os == "Windows":
-                tools.replace_in_file(mpdec_makefile_in,
+                tools.files.replace_in_file(self, mpdec_makefile_in,
                                       "LIBSHARED = @LIBSHARED@",
                                       "LIBSHARED = libmpdec-{}{}".format(main_version, shared_ext))
-                tools.replace_in_file(mpdec_makefile_in,
+                tools.files.replace_in_file(self, mpdec_makefile_in,
                                       "\tln -sf $(LIBSHARED) libmpdec.so",
                                       "")
-                tools.replace_in_file(mpdec_makefile_in,
+                tools.files.replace_in_file(self, mpdec_makefile_in,
                                       "\tln -sf $(LIBSHARED) $(LIBSONAME)",
                                       "")
-                tools.replace_in_file(mpdec_makefile_in,
+                tools.files.replace_in_file(self, mpdec_makefile_in,
                                       "CONFIGURE_LDFLAGS =",
                                       "CONFIGURE_LDFLAGS = -Wl,--out-implib,libmpdec{}".format(static_ext))
             else:
-                tools.replace_in_file(mpdec_makefile_in,
+                tools.files.replace_in_file(self, mpdec_makefile_in,
                                       "libmpdec.so",
                                       "libmpdec{}".format(shared_ext))
 

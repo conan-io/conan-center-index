@@ -130,10 +130,10 @@ class GtsamConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         if is_msvc(self):
-            tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "GtsamBuildTypes.cmake"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "GtsamBuildTypes.cmake"),
                                   "/MD ",
                                   "/{} ".format(msvc_runtime_flag(self)))
-            tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "GtsamBuildTypes.cmake"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "GtsamBuildTypes.cmake"),
                                   "/MDd ",
                                   "/{} ".format(msvc_runtime_flag(self)))
 

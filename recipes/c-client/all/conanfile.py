@@ -70,7 +70,7 @@ class CclientConan(ConanFile):
         cflags = f"{runtime} {warnings} /GS {opt_flags}"
         search = "EXTRACFLAGS ="
         replace = f"EXTRACFLAGS = {cflags}"
-        tools.replace_in_file(r"src\osdep\nt\makefile.w2k", search, replace)
+        tools.files.replace_in_file(self, r"src\osdep\nt\makefile.w2k", search, replace)
 
     def _build_msvc(self):
         make = "nmake /nologo /f makefile.w2k"
@@ -93,9 +93,9 @@ class CclientConan(ConanFile):
         self._chmod_x(f"{unix}/mkauths")
         search = "SSLDIR=/usr/local/ssl"
         ssldir = self.deps_cpp_info["openssl"].rootpath
-        tools.replace_in_file(f"{unix}/Makefile", search, f"SSLDIR={ssldir}")
+        tools.files.replace_in_file(self, f"{unix}/Makefile", search, f"SSLDIR={ssldir}")
         # This is from the Homebrew Formula
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             "src/osdep/unix/ssl_unix.c",
             "#include <x509v3.h>\n#include <ssl.h>",
             "#include <ssl.h>\n#include <x509v3.h>"

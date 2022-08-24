@@ -85,15 +85,15 @@ class NetSnmpConan(ConanFile):
         if self.options.with_ipv6:
             search_replace.append(("$b_ipv6 = false", "$b_ipv6 = true"))
         for search, replace in search_replace:
-            tools.replace_in_file("win32\\build.pl", search, replace)
+            tools.files.replace_in_file(self, "win32\\build.pl", search, replace)
         runtime = self.settings.compiler.runtime
-        tools.replace_in_file("win32\\Configure", '"/runtime', f'"/{runtime}')
+        tools.files.replace_in_file(self, "win32\\Configure", '"/runtime', f'"/{runtime}')
         link_lines = "\n".join(
             f'#    pragma comment(lib, "{lib}.lib")'
             for lib in ssl_info.libs + ssl_info.system_libs
         )
         config = r"win32\net-snmp\net-snmp-config.h.in"
-        tools.replace_in_file(config, "/* Conan: system_libs */", link_lines)
+        tools.files.replace_in_file(self, config, "/* Conan: system_libs */", link_lines)
 
     def _build_msvc(self):
         if self.should_configure:
@@ -130,7 +130,7 @@ class NetSnmpConan(ConanFile):
         return autotools
 
     def _patch_unix(self):
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             "configure",
             "-install_name \\$rpath/",
             "-install_name @rpath/"
@@ -138,12 +138,12 @@ class NetSnmpConan(ConanFile):
         crypto_libs = self.deps_cpp_info["openssl"].system_libs
         if len(crypto_libs) != 0:
             crypto_link_flags = " -l".join(crypto_libs)
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 "configure",
                 'LIBCRYPTO="-l${CRYPTO}"',
                 'LIBCRYPTO="-l${CRYPTO} -l%s"' % (crypto_link_flags,)
             )
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 "configure",
                 'LIBS="-lcrypto  $LIBS"',
                 f'LIBS="-lcrypto -l{crypto_link_flags} $LIBS"'

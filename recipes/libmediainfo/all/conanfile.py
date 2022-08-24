@@ -75,7 +75,7 @@ class LibmediainfoConan(ConanFile):
             tools.files.patch(self, **patch)
 
         rename(self, "Findtinyxml2.cmake", "FindTinyXML.cmake")
-        tools.replace_in_file("FindTinyXML.cmake", "tinyxml2_LIBRARIES", "TinyXML_LIBRARIES")
+        tools.files.replace_in_file(self, "FindTinyXML.cmake", "tinyxml2_LIBRARIES", "TinyXML_LIBRARIES")
 
         # TODO: move this to a patch (see how https://github.com/MediaArea/MediaInfoLib/issues/1408 if addressed by upstream)
         postfix = ""
@@ -84,10 +84,10 @@ class LibmediainfoConan(ConanFile):
                 postfix += "d"
             elif tools.is_apple_os(self.settings.os):
                 postfix += "_debug"
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Source", "MediaInfoDLL", "MediaInfoDLL.h"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Source", "MediaInfoDLL", "MediaInfoDLL.h"),
                               "MediaInfo.dll",
                               "MediaInfo{}.dll".format(postfix))
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Source", "MediaInfoDLL", "MediaInfoDLL.h"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Source", "MediaInfoDLL", "MediaInfoDLL.h"),
                               "libmediainfo.0.dylib",
                               "libmediainfo{}.0.dylib".format(postfix))
 

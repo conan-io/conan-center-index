@@ -85,31 +85,31 @@ class FreetypeConan(ConanFile):
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         find_harfbuzz = "find_package(HarfBuzz {})".format("1.3.0" if scm.Version(self.version) < "2.10.2" else "${HARFBUZZ_MIN_VERSION}")
         if_harfbuzz_found = "if ({})".format("HARFBUZZ_FOUND" if scm.Version(self.version) < "2.11.0" else "HarfBuzz_FOUND")
-        tools.replace_in_file(cmakelists, find_harfbuzz, "")
-        tools.replace_in_file(cmakelists, if_harfbuzz_found, "if(0)")
+        tools.files.replace_in_file(self, cmakelists, find_harfbuzz, "")
+        tools.files.replace_in_file(self, cmakelists, if_harfbuzz_found, "if(0)")
         if not self.options.with_png:
-            tools.replace_in_file(cmakelists, "find_package(PNG)", "")
-            tools.replace_in_file(cmakelists, "if (PNG_FOUND)", "if(0)")
+            tools.files.replace_in_file(self, cmakelists, "find_package(PNG)", "")
+            tools.files.replace_in_file(self, cmakelists, "if (PNG_FOUND)", "if(0)")
         if not self.options.with_zlib:
-            tools.replace_in_file(cmakelists, "find_package(ZLIB)", "")
-            tools.replace_in_file(cmakelists, "if (ZLIB_FOUND)", "if(0)")
+            tools.files.replace_in_file(self, cmakelists, "find_package(ZLIB)", "")
+            tools.files.replace_in_file(self, cmakelists, "if (ZLIB_FOUND)", "if(0)")
         if not self.options.with_bzip2:
-            tools.replace_in_file(cmakelists, "find_package(BZip2)", "")
-            tools.replace_in_file(cmakelists, "if (BZIP2_FOUND)", "if(0)")
+            tools.files.replace_in_file(self, cmakelists, "find_package(BZip2)", "")
+            tools.files.replace_in_file(self, cmakelists, "if (BZIP2_FOUND)", "if(0)")
         if self._has_with_brotli_option:
             # the custom FindBrotliDec of upstream is too fragile
-            tools.replace_in_file(cmakelists,
+            tools.files.replace_in_file(self, cmakelists,
                                   "find_package(BrotliDec REQUIRED)",
                                   "find_package(Brotli REQUIRED)\n"
                                   "set(BROTLIDEC_FOUND 1)\n"
                                   "set(BROTLIDEC_LIBRARIES \"Brotli::Brotli\")")
             if not self.options.with_brotli:
-                tools.replace_in_file(cmakelists, "find_package(BrotliDec)", "")
-                tools.replace_in_file(cmakelists, "if (BROTLIDEC_FOUND)", "if(0)")
+                tools.files.replace_in_file(self, cmakelists, "find_package(BrotliDec)", "")
+                tools.files.replace_in_file(self, cmakelists, "if (BROTLIDEC_FOUND)", "if(0)")
 
         config_h = os.path.join(self._source_subfolder, "include", "freetype", "config", "ftoption.h")
         if self.options.subpixel:
-            tools.replace_in_file(config_h, "/* #define FT_CONFIG_OPTION_SUBPIXEL_RENDERING */", "#define FT_CONFIG_OPTION_SUBPIXEL_RENDERING")
+            tools.files.replace_in_file(self, config_h, "/* #define FT_CONFIG_OPTION_SUBPIXEL_RENDERING */", "#define FT_CONFIG_OPTION_SUBPIXEL_RENDERING")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -140,15 +140,15 @@ class FreetypeConan(ConanFile):
         shutil.copy(freetype_config_in, freetype_config)
         libs = "-lfreetyped" if self.settings.build_type == "Debug" else "-lfreetype"
         staticlibs = f"-lm {libs}" if self.settings.os == "Linux" else libs
-        tools.replace_in_file(freetype_config, r"%PKG_CONFIG%", r"/bin/false")  # never use pkg-config
-        tools.replace_in_file(freetype_config, r"%prefix%", r"$conan_prefix")
-        tools.replace_in_file(freetype_config, r"%exec_prefix%", r"$conan_exec_prefix")
-        tools.replace_in_file(freetype_config, r"%includedir%", r"$conan_includedir")
-        tools.replace_in_file(freetype_config, r"%libdir%", r"$conan_libdir")
-        tools.replace_in_file(freetype_config, r"%ft_version%", r"$conan_ftversion")
-        tools.replace_in_file(freetype_config, r"%LIBSSTATIC_CONFIG%", r"$conan_staticlibs")
-        tools.replace_in_file(freetype_config, r"-lfreetype", libs)
-        tools.replace_in_file(freetype_config, r"export LC_ALL", textwrap.dedent("""\
+        tools.files.replace_in_file(self, freetype_config, r"%PKG_CONFIG%", r"/bin/false")  # never use pkg-config
+        tools.files.replace_in_file(self, freetype_config, r"%prefix%", r"$conan_prefix")
+        tools.files.replace_in_file(self, freetype_config, r"%exec_prefix%", r"$conan_exec_prefix")
+        tools.files.replace_in_file(self, freetype_config, r"%includedir%", r"$conan_includedir")
+        tools.files.replace_in_file(self, freetype_config, r"%libdir%", r"$conan_libdir")
+        tools.files.replace_in_file(self, freetype_config, r"%ft_version%", r"$conan_ftversion")
+        tools.files.replace_in_file(self, freetype_config, r"%LIBSSTATIC_CONFIG%", r"$conan_staticlibs")
+        tools.files.replace_in_file(self, freetype_config, r"-lfreetype", libs)
+        tools.files.replace_in_file(self, freetype_config, r"export LC_ALL", textwrap.dedent("""\
             export LC_ALL
             BINDIR=$(dirname $0)
             conan_prefix=$(dirname $BINDIR)

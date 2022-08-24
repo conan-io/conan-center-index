@@ -58,15 +58,15 @@ class UchardetConan(ConanFile):
     def _patch_sources(self):
         # the following fixes that apply to uchardet version 0.0.7
         # fix broken cmake
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "${CMAKE_BINARY_DIR}",
             "${CMAKE_CURRENT_BINARY_DIR}")
         # fix problem with mac os
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
             'string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} TARGET_ARCHITECTURE)',
             'string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" TARGET_ARCHITECTURE)')
         # disable building tests
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "add_subdirectory(test)",
             "#add_subdirectory(test)")
 

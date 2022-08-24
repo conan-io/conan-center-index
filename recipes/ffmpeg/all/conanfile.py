@@ -353,13 +353,13 @@ class FFMpegConan(ConanFile):
             # suppress MSVC linker warnings: https://trac.ffmpeg.org/ticket/7396
             # warning LNK4049: locally defined symbol x264_levels imported
             # warning LNK4049: locally defined symbol x264_bit_depth imported
-            tools.replace_in_file(os.path.join(self._source_subfolder, "libavcodec", "libx264.c"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "libavcodec", "libx264.c"),
                                   "#define X264_API_IMPORTS 1", "")
         if self.options.with_ssl == "openssl":
             # https://trac.ffmpeg.org/ticket/5675
             openssl_libraries = " ".join(
                 ["-l%s" % lib for lib in self.deps_cpp_info["openssl"].libs])
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "configure"),
                                   "check_lib openssl openssl/ssl.h SSL_library_init -lssl -lcrypto -lws2_32 -lgdi32 ||",
                                   "check_lib openssl openssl/ssl.h OPENSSL_init_ssl %s || " % openssl_libraries)
 
@@ -586,7 +586,7 @@ class FFMpegConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "configure"),
                               "echo libx264.lib", "echo x264.lib")
         if self.options.with_libx264:
             shutil.copy("x264.pc", "libx264.pc")

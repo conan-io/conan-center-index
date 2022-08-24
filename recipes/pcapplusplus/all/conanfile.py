@@ -59,7 +59,7 @@ class PcapplusplusConan(ConanFile):
 
     def _patch_sources(self):
         if not self.options.get_safe("fPIC"):
-            tools.replace_in_file(os.path.join(self._source_subfolder, "PcapPlusPlus.mk.common"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "PcapPlusPlus.mk.common"),
                                   "-fPIC", "")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)

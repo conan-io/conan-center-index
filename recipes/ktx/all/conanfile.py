@@ -78,22 +78,22 @@ class KtxConan(ConanFile):
             tools.files.patch(self, **patch)
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         # Allow CMake wrapper
-        tools.replace_in_file(cmakelists, "${CMAKE_SOURCE_DIR}", "${CMAKE_CURRENT_SOURCE_DIR}")
-        tools.replace_in_file(cmakelists, "${CMAKE_BINARY_DIR}", "${CMAKE_CURRENT_BINARY_DIR}")
+        tools.files.replace_in_file(self, cmakelists, "${CMAKE_SOURCE_DIR}", "${CMAKE_CURRENT_SOURCE_DIR}")
+        tools.files.replace_in_file(self, cmakelists, "${CMAKE_BINARY_DIR}", "${CMAKE_CURRENT_BINARY_DIR}")
         # Unvendor several libs (we rely on CMake wrapper to link those libs)
         # It's worth noting that vendored jpeg-compressor can't be replaced by CCI equivalent
         basisu_dir = os.path.join(self.build_folder, self._source_subfolder, "lib", "basisu")
         ## lodepng (the patch file 0002-lodepng-no-export-symbols is important, in order to not try to export lodepng symbols)
         os.remove(os.path.join(basisu_dir, "encoder", "lodepng.cpp"))
         os.remove(os.path.join(basisu_dir, "encoder", "lodepng.h"))
-        tools.replace_in_file(cmakelists, "lib/basisu/encoder/lodepng.cpp", "")
-        tools.replace_in_file(cmakelists, "lib/basisu/encoder/lodepng.h", "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "tools", "toktx", "pngimage.cc"),
+        tools.files.replace_in_file(self, cmakelists, "lib/basisu/encoder/lodepng.cpp", "")
+        tools.files.replace_in_file(self, cmakelists, "lib/basisu/encoder/lodepng.h", "")
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "tools", "toktx", "pngimage.cc"),
                               "#include \"encoder/lodepng.h\"",
                               "#include <lodepng.h>")
         ## zstd
         tools.files.rmdir(self, os.path.join(basisu_dir, "zstd"))
-        tools.replace_in_file(cmakelists, "lib/basisu/zstd/zstd.c", "")
+        tools.files.replace_in_file(self, cmakelists, "lib/basisu/zstd/zstd.c", "")
 
     def _configure_cmake(self):
         if self._cmake:

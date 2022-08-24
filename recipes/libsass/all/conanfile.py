@@ -77,9 +77,9 @@ class LibsassConan(ConanFile):
 
     def _build_mingw(self):
         makefile = os.path.join(self._source_subfolder, "Makefile")
-        tools.replace_in_file(makefile, "CFLAGS   += -O2", "")
-        tools.replace_in_file(makefile, "CXXFLAGS += -O2", "")
-        tools.replace_in_file(makefile, "LDFLAGS  += -O2", "")
+        tools.files.replace_in_file(self, makefile, "CFLAGS   += -O2", "")
+        tools.files.replace_in_file(self, makefile, "CXXFLAGS += -O2", "")
+        tools.files.replace_in_file(self, makefile, "LDFLAGS  += -O2", "")
         with tools.chdir(self._source_subfolder):
             env_vars = AutoToolsBuildEnvironment(self).vars
             env_vars.update({

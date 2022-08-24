@@ -158,12 +158,12 @@ class LibUSBCompatConan(ConanFile):
                     os.path.join(self._source_subfolder, "config.guess"))
         if self.settings.os == "Windows":
             api = "__declspec(dllexport)" if self.options.shared else ""
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure.ac"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "configure.ac"),
                                   "\nAC_DEFINE([API_EXPORTED]",
                                   "\nAC_DEFINE([API_EXPORTED], [{}], [API])\n#".format(api))
             # libtool disallows building shared libraries that link to static libraries
             # This will override this and add the dependency
-            tools.replace_in_file(os.path.join(self._source_subfolder, "ltmain.sh"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "ltmain.sh"),
                                   "droppeddeps=yes", "droppeddeps=no && func_append newdeplibs \" $a_deplib\"")
 
     @property
@@ -181,7 +181,7 @@ class LibUSBCompatConan(ConanFile):
                 libusb_sources=" ".join(sources),
                 libusb_headers=" ".join(headers),
             ))
-            tools.replace_in_file("config.h", "\n#define API_EXPORTED", "\n#define API_EXPORTED //")
+            tools.files.replace_in_file(self, "config.h", "\n#define API_EXPORTED", "\n#define API_EXPORTED //")
             cmake = self._configure_cmake()
             cmake.build()
         else:

@@ -145,7 +145,7 @@ class VerilatorConan(ConanFile):
             pass
 
         if self.settings.compiler == "Visual Studio":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Makefile_obj.in"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "Makefile_obj.in"),
                                   "${LINK}", "${PROGLINK}")
 
     def build(self):
@@ -166,10 +166,10 @@ class VerilatorConan(ConanFile):
         os.unlink(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-config-version.cmake"))
         tools.files.rename(self, os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-config.cmake"),
                      os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"))
-        tools.replace_in_file(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"), 
+        tools.files.replace_in_file(self, os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"), 
                             "${CMAKE_CURRENT_LIST_DIR}", "${CMAKE_CURRENT_LIST_DIR}/../../..")
         if self.settings.build_type == "Debug":
-            tools.replace_in_file(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"),
+            tools.files.replace_in_file(self, os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"),
                                  "verilator_bin", "verilator_bin_dbg")
 
         shutil.move(os.path.join(self.package_folder, "bin", "share", "verilator", "include"), 

@@ -53,7 +53,7 @@ class FtjamConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "jamgram.c"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "jamgram.c"),
                               "\n#line", "\n//#line")
 
     def _configure_autotools(self):

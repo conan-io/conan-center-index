@@ -73,7 +73,7 @@ class QcustomplotConan(ConanFile):
             tools.files.patch(self, **patch)
         if int(tools.Version(self.version).major) >= 2:
             # allow static qcustomplot with shared qt, and vice versa
-            tools.replace_in_file(os.path.join(self._source_subfolder, "qcustomplot.h"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "qcustomplot.h"),
                                   "#if defined(QT_STATIC_BUILD)",
                                   "#if 0" if self.options.shared else "#if 1")
 

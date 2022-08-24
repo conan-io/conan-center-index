@@ -343,7 +343,7 @@ class OpenSSLConan(ConanFile):
         # since _patch_makefile_org will replace binutils variables
         # use a more restricted regular expresion to prevent that Configure script trying to do it again
         configure = os.path.join(self._source_subfolder, "Configure")
-        tools.replace_in_file(configure, r"s/^AR=\s*ar/AR= $ar/;", r"s/^AR=\s*ar\b/AR= $ar/;")
+        tools.files.replace_in_file(self, configure, r"s/^AR=\s*ar/AR= $ar/;", r"s/^AR=\s*ar\b/AR= $ar/;")
 
     def _patch_makefile_org(self):
         # https://wiki.openssl.org/index.php/Compilation_and_Installation#Modifying_Build_Settings
@@ -356,18 +356,18 @@ class OpenSSLConan(ConanFile):
         with tools.environment_append(env_build.vars):
             if not "CROSS_COMPILE" in os.environ:
                 cc = os.environ.get("CC", "cc")
-                tools.replace_in_file(makefile_org, "CC= cc\n", "CC= %s %s\n" % (adjust_path(cc), os.environ["CFLAGS"]))
+                tools.files.replace_in_file(self, makefile_org, "CC= cc\n", "CC= %s %s\n" % (adjust_path(cc), os.environ["CFLAGS"]))
                 if "AR" in os.environ:
-                    tools.replace_in_file(makefile_org, "AR=ar $(ARFLAGS) r\n", "AR=%s $(ARFLAGS) r\n" % adjust_path(os.environ["AR"]))
+                    tools.files.replace_in_file(self, makefile_org, "AR=ar $(ARFLAGS) r\n", "AR=%s $(ARFLAGS) r\n" % adjust_path(os.environ["AR"]))
                 if "RANLIB" in os.environ:
-                    tools.replace_in_file(makefile_org, "RANLIB= ranlib\n", "RANLIB= %s\n" % adjust_path(os.environ["RANLIB"]))
+                    tools.files.replace_in_file(self, makefile_org, "RANLIB= ranlib\n", "RANLIB= %s\n" % adjust_path(os.environ["RANLIB"]))
                 rc = os.environ.get("WINDRES", os.environ.get("RC"))
                 if rc:
-                    tools.replace_in_file(makefile_org, "RC= windres\n", "RC= %s\n" % adjust_path(rc))
+                    tools.files.replace_in_file(self, makefile_org, "RC= windres\n", "RC= %s\n" % adjust_path(rc))
                 if "NM" in os.environ:
-                    tools.replace_in_file(makefile_org, "NM= nm\n", "NM= %s\n" % adjust_path(os.environ["NM"]))
+                    tools.files.replace_in_file(self, makefile_org, "NM= nm\n", "NM= %s\n" % adjust_path(os.environ["NM"]))
                 if "AS" in os.environ:
-                    tools.replace_in_file(makefile_org, "AS=$(CC) -c\n", "AS=%s\n" % adjust_path(os.environ["AS"]))
+                    tools.files.replace_in_file(self, makefile_org, "AS=$(CC) -c\n", "AS=%s\n" % adjust_path(os.environ["AS"]))
 
     @functools.lru_cache(1)
     def _get_env_build(self):
@@ -629,8 +629,8 @@ class OpenSSLConan(ConanFile):
     def _replace_runtime_in_file(self, filename):
         runtime = msvc_runtime_flag(self)
         for e in ["MDd", "MTd", "MD", "MT"]:
-            tools.replace_in_file(filename, f"/{e} ", f"/{runtime} ", strict=False)
-            tools.replace_in_file(filename, f"/{e}\"", f"/{runtime}\"", strict=False)
+            tools.files.replace_in_file(self, filename, f"/{e} ", f"/{runtime} ", strict=False)
+            tools.files.replace_in_file(self, filename, f"/{e}\"", f"/{runtime}\"", strict=False)
 
     def package(self):
         self.copy("*LICENSE*", src=self._source_subfolder, dst="licenses")

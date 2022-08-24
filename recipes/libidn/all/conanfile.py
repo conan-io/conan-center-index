@@ -110,7 +110,7 @@ class LibIdnConan(ConanFile):
                 ssize = "signed long long int"
             else:
                 ssize = "signed long int"
-            tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "stringprep.h"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "lib", "stringprep.h"),
                                   "ssize_t", ssize)
         with self._build_context():
             autotools = self._configure_autotools()

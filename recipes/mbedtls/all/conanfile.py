@@ -85,8 +85,8 @@ class MBedTLSConan(ConanFile):
         if tools.Version(self.version) < "2.23.0":
             # No warnings as errors
             cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-            tools.replace_in_file(cmakelists, "-Werror", "")
-            tools.replace_in_file(cmakelists, "/WX", "")
+            tools.files.replace_in_file(self, cmakelists, "-Werror", "")
+            tools.files.replace_in_file(self, cmakelists, "/WX", "")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):

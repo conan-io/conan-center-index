@@ -136,14 +136,14 @@ class XmlSecConan(ConanFile):
                     libs.append(libname)
                 return " ".join(libs)
 
-            tools.replace_in_file("Makefile.msvc", "libxml2.lib", format_libs("libxml2"))
-            tools.replace_in_file("Makefile.msvc", "libxml2_a.lib", format_libs("libxml2"))
+            tools.files.replace_in_file(self, "Makefile.msvc", "libxml2.lib", format_libs("libxml2"))
+            tools.files.replace_in_file(self, "Makefile.msvc", "libxml2_a.lib", format_libs("libxml2"))
             if self.options.with_xslt:
-                tools.replace_in_file("Makefile.msvc", "libxslt.lib", format_libs("libxslt"))
-                tools.replace_in_file("Makefile.msvc", "libxslt_a.lib", format_libs("libxslt"))
+                tools.files.replace_in_file(self, "Makefile.msvc", "libxslt.lib", format_libs("libxslt"))
+                tools.files.replace_in_file(self, "Makefile.msvc", "libxslt_a.lib", format_libs("libxslt"))
 
             if self.settings.build_type == "Debug":
-                tools.replace_in_file("Makefile.msvc", "libcrypto.lib", "libcryptod.lib")
+                tools.files.replace_in_file(self, "Makefile.msvc", "libcrypto.lib", "libcryptod.lib")
 
             self.run("nmake /f Makefile.msvc")
 
@@ -184,7 +184,7 @@ class XmlSecConan(ConanFile):
             with tools.chdir(self._source_subfolder):
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
                 # relocatable shared lib on macOS
-                tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
+                tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
             autotools = self._configure_autotools()
             autotools.make()
 

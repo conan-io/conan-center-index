@@ -79,18 +79,18 @@ class ReadosmConan(ConanFile):
 
     def _build_autotools(self):
         # fix MinGW
-        tools.replace_in_file(os.path.join(self._source_subfolder, "configure.ac"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "configure.ac"),
                               "AC_CHECK_LIB(z,",
                               "AC_CHECK_LIB({},".format(self.deps_cpp_info["zlib"].libs[0]))
         # Disable tests & examples
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.am"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.am"),
                               "SUBDIRS = headers src tests examples",
                               "SUBDIRS = headers src")
 
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
             # Relocatable shared lib for Apple platforms
-            tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
+            tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
             autotools = self._configure_autotools()
             autotools.make()
 

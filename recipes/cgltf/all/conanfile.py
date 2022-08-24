@@ -75,7 +75,7 @@ class CgltfConan(ConanFile):
         begin = header_content.find("/*\n *\n * Stop now, if you are only interested in the API.")
         end = header_content.find("/* cgltf is distributed under MIT license:", begin)
         implementation = header_content[begin:end]
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             header_fullpath,
             implementation,
             (

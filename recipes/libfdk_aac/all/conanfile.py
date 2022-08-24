@@ -80,36 +80,36 @@ class LibFDKAACConan(ConanFile):
     def _build_vs(self):
         with self._msvc_build_environment():
             # Rely on flags injected by conan
-            tools.replace_in_file("Makefile.vc",
+            tools.files.replace_in_file(self, "Makefile.vc",
                                   "CFLAGS   = /nologo /W3 /Ox /MT",
                                   "CFLAGS   = /nologo")
-            tools.replace_in_file("Makefile.vc",
+            tools.files.replace_in_file(self, "Makefile.vc",
                                   "MKDIR_FLAGS = -p",
                                   "MKDIR_FLAGS =")
             # Build either shared or static, and don't build utility (it always depends on static lib)
-            tools.replace_in_file("Makefile.vc", "copy $(PROGS) $(bindir)", "")
-            tools.replace_in_file("Makefile.vc", "copy $(LIB_DEF) $(libdir)", "")
+            tools.files.replace_in_file(self, "Makefile.vc", "copy $(PROGS) $(bindir)", "")
+            tools.files.replace_in_file(self, "Makefile.vc", "copy $(LIB_DEF) $(libdir)", "")
             if self.options.shared:
-                tools.replace_in_file("Makefile.vc",
+                tools.files.replace_in_file(self, "Makefile.vc",
                                       "all: $(LIB_DEF) $(STATIC_LIB) $(SHARED_LIB) $(IMP_LIB) $(PROGS)",
                                       "all: $(LIB_DEF) $(SHARED_LIB) $(IMP_LIB)")
-                tools.replace_in_file("Makefile.vc", "copy $(STATIC_LIB) $(libdir)", "")
+                tools.files.replace_in_file(self, "Makefile.vc", "copy $(STATIC_LIB) $(libdir)", "")
             else:
-                tools.replace_in_file("Makefile.vc",
+                tools.files.replace_in_file(self, "Makefile.vc",
                                       "all: $(LIB_DEF) $(STATIC_LIB) $(SHARED_LIB) $(IMP_LIB) $(PROGS)",
                                       "all: $(STATIC_LIB)")
-                tools.replace_in_file("Makefile.vc", "copy $(IMP_LIB) $(libdir)", "")
-                tools.replace_in_file("Makefile.vc", "copy $(SHARED_LIB) $(bindir)", "")
+                tools.files.replace_in_file(self, "Makefile.vc", "copy $(IMP_LIB) $(libdir)", "")
+                tools.files.replace_in_file(self, "Makefile.vc", "copy $(SHARED_LIB) $(bindir)", "")
             self.run("nmake -f Makefile.vc")
 
     def _build_autotools(self):
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
             # relocatable shared lib on macOS
-            tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
+            tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
             if self.settings.os == "Android" and tools.os_info.is_windows:
                 # remove escape for quotation marks, to make ndk on windows happy
-                tools.replace_in_file("configure",
+                tools.files.replace_in_file(self, "configure",
                     "s/[	 `~#$^&*(){}\\\\|;'\\\''\"<>?]/\\\\&/g", "s/[	 `~#$^&*(){}\\\\|;<>?]/\\\\&/g")
         autotools = self._configure_autotools()
         autotools.make()

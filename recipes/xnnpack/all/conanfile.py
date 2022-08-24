@@ -63,7 +63,7 @@ class XnnpackConan(ConanFile):
         self.requires("pthreadpool/cci.20210218")
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "CMakeLists.txt"),
                               "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}",
                               "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}")
 

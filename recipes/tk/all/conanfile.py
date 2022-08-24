@@ -67,41 +67,41 @@ class TkConan(ConanFile):
             if build_system != "win":
                 # When disabling 64-bit support (in 32-bit), this test must be 0 in order to use "long long" for 64-bit ints
                 # (${tcl_type_64bit} can be either "__int64" or "long long")
-                tools.replace_in_file(os.path.join(config_dir, "configure"),
+                tools.files.replace_in_file(self, os.path.join(config_dir, "configure"),
                                       "(sizeof(${tcl_type_64bit})==sizeof(long))",
                                       "(sizeof(${tcl_type_64bit})!=sizeof(long))")
 
             makefile_in = os.path.join(config_dir, "Makefile.in")
             # Avoid clearing CFLAGS and LDFLAGS in the makefile
-            # tools.replace_in_file(makefile_in, "\nCFLAGS{}".format(" " if (build_system == "win" and name == "tcl") else "\t"), "\n#CFLAGS\t")
-            tools.replace_in_file(makefile_in, "\nLDFLAGS\t", "\n#LDFLAGS\t")
-            tools.replace_in_file(makefile_in, "${CFLAGS}", "${CFLAGS} ${CPPFLAGS}")
+            # tools.files.replace_in_file(self, makefile_in, "\nCFLAGS{}".format(" " if (build_system == "win" and name == "tcl") else "\t"), "\n#CFLAGS\t")
+            tools.files.replace_in_file(self, makefile_in, "\nLDFLAGS\t", "\n#LDFLAGS\t")
+            tools.files.replace_in_file(self, makefile_in, "${CFLAGS}", "${CFLAGS} ${CPPFLAGS}")
 
         rules_ext_vc = os.path.join(self.source_folder, self._source_subfolder, "win", "rules-ext.vc")
-        tools.replace_in_file(rules_ext_vc,
+        tools.files.replace_in_file(self, rules_ext_vc,
                               "\n_RULESDIR = ",
                               "\n_RULESDIR = .\n#_RULESDIR = ")
         rules_vc = os.path.join(self.source_folder, self._source_subfolder, "win", "rules.vc")
-        tools.replace_in_file(rules_vc,
+        tools.files.replace_in_file(self, rules_vc,
                               r"$(_TCLDIR)\generic",
                               r"$(_TCLDIR)\include")
-        tools.replace_in_file(rules_vc,
+        tools.files.replace_in_file(self, rules_vc,
                               "\nTCLSTUBLIB",
                               "\n#TCLSTUBLIB")
-        tools.replace_in_file(rules_vc,
+        tools.files.replace_in_file(self, rules_vc,
                               "\nTCLIMPLIB",
                               "\n#TCLIMPLIB")
 
         win_makefile_in = os.path.join(self._get_configure_folder("win"), "Makefile.in")
-        tools.replace_in_file(win_makefile_in, "\nTCL_GENERIC_DIR", "\n#TCL_GENERIC_DIR")
+        tools.files.replace_in_file(self, win_makefile_in, "\nTCL_GENERIC_DIR", "\n#TCL_GENERIC_DIR")
 
         win_rules_vc = os.path.join(self._source_subfolder, "win", "rules.vc")
-        tools.replace_in_file(win_rules_vc,
+        tools.files.replace_in_file(self, win_rules_vc,
                               "\ncwarn = $(cwarn) -WX",
                               "\n# cwarn = $(cwarn) -WX")
         # disable whole program optimization to be portable across different MSVC versions.
         # See conan-io/conan-center-index#4811 conan-io/conan-center-index#4094
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             win_rules_vc,
             "OPTIMIZATIONS  = $(OPTIMIZATIONS) -GL",
             "# OPTIMIZATIONS  = $(OPTIMIZATIONS) -GL")
@@ -217,13 +217,13 @@ class TkConan(ConanFile):
         tkConfigShPath = os.path.join(self.package_folder, "lib", "tkConfig.sh")
         if os.path.exists(tkConfigShPath):
             pkg_path = os.path.join(self.package_folder).replace('\\', '/')
-            tools.replace_in_file(tkConfigShPath,
+            tools.files.replace_in_file(self, tkConfigShPath,
                                   pkg_path,
                                   "${TK_ROOT}")
-            tools.replace_in_file(tkConfigShPath,
+            tools.files.replace_in_file(self, tkConfigShPath,
                                   "\nTK_BUILD_",
                                   "\n#TK_BUILD_")
-            tools.replace_in_file(tkConfigShPath,
+            tools.files.replace_in_file(self, tkConfigShPath,
                                   "\nTK_SRC_DIR",
                                   "\n#TK_SRC_DIR")
 

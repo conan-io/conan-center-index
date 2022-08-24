@@ -69,7 +69,7 @@ class DetoursConan(ConanFile):
 
     def _patch_sources(self):
         if is_msvc(self):
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Makefile"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "Makefile"),
                                   "/MT ", f"/{self.settings.compiler.runtime} ")
 
     def build(self):

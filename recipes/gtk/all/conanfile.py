@@ -174,13 +174,13 @@ class GtkConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         if self._gtk3:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), "\ntest(\n", "\nfalse and test(\n")
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"), "\ntest(\n", "\nfalse and test(\n")
         if "4.2.0" <= tools.Version(self.version) < "4.6.1":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"),
                                   "gtk_update_icon_cache: true",
                                   "gtk_update_icon_cache: false")
         if "4.6.2" <= tools.Version(self.version):
-            tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"),
                                   "dependency(is_msvc_like ? ",
                                   "dependency(false ? ")
         with tools.environment_append(tools.RunEnvironment(self).vars):

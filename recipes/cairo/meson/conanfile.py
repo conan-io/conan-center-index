@@ -202,7 +202,7 @@ class CairoConan(ConanFile):
 
         # Dependency freetype2 found: NO found 2.11.0 but need: '>= 9.7.3'
         if self.options.with_freetype:
-            tools.replace_in_file("freetype2.pc",
+            tools.files.replace_in_file(self, "freetype2.pc",
                                   "Version: %s" % self.deps_cpp_info["freetype"].version,
                                   "Version: 9.7.3")
         with self._build_context():

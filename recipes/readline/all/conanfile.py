@@ -74,9 +74,9 @@ class ReadLineConan(ConanFile):
         return self._autotools
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "shlib", "Makefile.in"), "-o $@ $(SHARED_OBJ) $(SHLIB_LIBS)",
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "shlib", "Makefile.in"), "-o $@ $(SHARED_OBJ) $(SHLIB_LIBS)",
                               "-o $@ $(SHARED_OBJ) $(SHLIB_LIBS) -ltermcap")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"), "@TERMCAP_LIB@", "-ltermcap")
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.in"), "@TERMCAP_LIB@", "-ltermcap")
 
     def build(self):
         self._patch_sources()

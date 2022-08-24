@@ -68,11 +68,11 @@ class LibxcryptConan(ConanFile):
         ]
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         if self.settings.os == "Windows":
-            tools.replace_in_file("libtool", "-DPIC", "")
+            tools.files.replace_in_file(self, "libtool", "-DPIC", "")
         return self._autotools
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.am"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.am"),
                               "\nlibcrypt_la_LDFLAGS = ", "\nlibcrypt_la_LDFLAGS = -no-undefined ")
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)

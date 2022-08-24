@@ -69,7 +69,7 @@ class WasmerConan(ConanFile):
         else:
             self.copy("wasmer.lib", src=srclibdir, dst="lib", keep_path=False)
             self.copy("libwasmer.a", src=srclibdir, dst="lib", keep_path=False)
-            tools.replace_in_file(os.path.join(self.package_folder, "include", "wasm.h"),
+            tools.files.replace_in_file(self, os.path.join(self.package_folder, "include", "wasm.h"),
                                   "__declspec(dllimport)", "")
 
         self.copy("LICENSE", dst="licenses", src=self.source_folder)

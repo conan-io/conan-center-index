@@ -89,9 +89,9 @@ class SimdjsonConan(ConanFile):
         if tools.Version(self.version) < "1.0.0":
             # Those flags are not set in 1.0.0 since SIMDJSON_DEVELOPER_MODE is disabled in non-top project
             simd_flags_file = os.path.join(self._source_subfolder, "cmake", "simdjson-flags.cmake")
-            tools.replace_in_file(simd_flags_file, "target_compile_options(simdjson-internal-flags INTERFACE -fPIC)", "")
-            tools.replace_in_file(simd_flags_file, "-Werror", "")
-            tools.replace_in_file(simd_flags_file, "/WX", "")
+            tools.files.replace_in_file(self, simd_flags_file, "target_compile_options(simdjson-internal-flags INTERFACE -fPIC)", "")
+            tools.files.replace_in_file(self, simd_flags_file, "-Werror", "")
+            tools.files.replace_in_file(self, simd_flags_file, "/WX", "")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):

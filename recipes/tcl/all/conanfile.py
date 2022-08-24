@@ -79,35 +79,35 @@ class TclConan(ConanFile):
             tools.files.patch(self, **patch)
 
         if tools.is_apple_os(self.settings.os) and self.settings.arch not in ("x86", "x86_64"):
-            tools.replace_in_file(os.path.join(self._get_configure_dir(), "configure"), "#define HAVE_CPUID 1", "#undef HAVE_CPUID")
+            tools.files.replace_in_file(self, os.path.join(self._get_configure_dir(), "configure"), "#define HAVE_CPUID 1", "#undef HAVE_CPUID")
 
         unix_config_dir = self._get_configure_dir("unix")
         # When disabling 64-bit support (in 32-bit), this test must be 0 in order to use "long long" for 64-bit ints
         # (${tcl_type_64bit} can be either "__int64" or "long long")
-        tools.replace_in_file(os.path.join(unix_config_dir, "configure"),
+        tools.files.replace_in_file(self, os.path.join(unix_config_dir, "configure"),
                               "(sizeof(${tcl_type_64bit})==sizeof(long))",
                               "(sizeof(${tcl_type_64bit})!=sizeof(long))")
 
         unix_makefile_in = os.path.join(unix_config_dir, "Makefile.in")
         # Avoid building internal libraries as shared libraries
-        tools.replace_in_file(unix_makefile_in, "--enable-shared --enable-threads", "--enable-threads")
+        tools.files.replace_in_file(self, unix_makefile_in, "--enable-shared --enable-threads", "--enable-threads")
         # Avoid clearing CFLAGS and LDFLAGS in the makefile
-        tools.replace_in_file(unix_makefile_in, "\nCFLAGS\t", "\n#CFLAGS\t")
-        tools.replace_in_file(unix_makefile_in, "\nLDFLAGS\t", "\n#LDFLAGS\t")
+        tools.files.replace_in_file(self, unix_makefile_in, "\nCFLAGS\t", "\n#CFLAGS\t")
+        tools.files.replace_in_file(self, unix_makefile_in, "\nLDFLAGS\t", "\n#LDFLAGS\t")
         # Use CFLAGS and CPPFLAGS as argument to CC
-        tools.replace_in_file(unix_makefile_in, "${CFLAGS}", "${CFLAGS} ${CPPFLAGS}")
+        tools.files.replace_in_file(self, unix_makefile_in, "${CFLAGS}", "${CFLAGS} ${CPPFLAGS}")
         # nmake creates a temporary file with mixed forward/backward slashes
         # force the filename to avoid cryptic error messages
         win_config_dir = self._get_configure_dir("win")
         win_makefile_vc = os.path.join(win_config_dir, "makefile.vc")
-        tools.replace_in_file(win_makefile_vc, "@type << >$@", "type <<temp.tmp >$@")
+        tools.files.replace_in_file(self, win_makefile_vc, "@type << >$@", "type <<temp.tmp >$@")
 
         win_rules_vc = os.path.join(self._source_subfolder, "win", "rules.vc")
         # do not treat nmake build warnings as errors
-        tools.replace_in_file(win_rules_vc, "cwarn = $(cwarn) -WX", "")
+        tools.files.replace_in_file(self, win_rules_vc, "cwarn = $(cwarn) -WX", "")
         # disable whole program optimization to be portable across different MSVC versions.
         # See conan-io/conan-center-index#4811 conan-io/conan-center-index#4094
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             win_rules_vc,
             "OPTIMIZATIONS  = $(OPTIMIZATIONS) -GL",
             "")
@@ -149,7 +149,7 @@ class TclConan(ConanFile):
         # https://core.tcl.tk/tcl/tktview/840660e5a1
         for root, _, files in os.walk(self.build_folder):
             if "Makefile" in files:
-                tools.replace_in_file(os.path.join(root, "Makefile"), "-Dstrtod=fixstrtod", "", strict=False)
+                tools.files.replace_in_file(self, os.path.join(root, "Makefile"), "-Dstrtod=fixstrtod", "", strict=False)
         return autotools
 
     def build(self):
@@ -181,17 +181,17 @@ class TclConan(ConanFile):
             drive, path = os.path.splitdrive(self.build_folder)
             build_folder = "".join([drive, path.lower().replace("\\", "/")])
 
-        tools.replace_in_file(tclConfigShPath,
+        tools.files.replace_in_file(self, tclConfigShPath,
                               package_path,
                               "${TCL_ROOT}")
-        tools.replace_in_file(tclConfigShPath,
+        tools.files.replace_in_file(self, tclConfigShPath,
                               build_folder,
                               "${TCL_BUILD_ROOT}")
 
-        tools.replace_in_file(tclConfigShPath,
+        tools.files.replace_in_file(self, tclConfigShPath,
                               "\nTCL_BUILD_",
                               "\n#TCL_BUILD_")
-        tools.replace_in_file(tclConfigShPath,
+        tools.files.replace_in_file(self, tclConfigShPath,
                               "\nTCL_SRC_DIR",
                               "\n#TCL_SRC_DIR")
 

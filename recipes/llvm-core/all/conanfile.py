@@ -106,7 +106,7 @@ class LLVMCoreConan(ConanFile):
 
     def _patch_build(self):
         if os.path.exists('FindIconv.cmake'):
-            tools.replace_in_file('FindIconv.cmake', 'iconv charset', 'iconv')
+            tools.files.replace_in_file(self, 'FindIconv.cmake', 'iconv charset', 'iconv')
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -336,10 +336,10 @@ class LLVMCoreConan(ConanFile):
         tools.files.rename(self, os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfig.cmake'),
                      os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfigInternal.cmake'))
 
-        tools.replace_in_file(os.path.join(self.package_folder, self._module_subfolder, 'AddLLVM.cmake'),
+        tools.files.replace_in_file(self, os.path.join(self.package_folder, self._module_subfolder, 'AddLLVM.cmake'),
                               "include(LLVM-Config)",
                               "include(LLVM-ConfigInternal)")
-        tools.replace_in_file(os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfigInternal.cmake'),
+        tools.files.replace_in_file(self, os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfigInternal.cmake'),
                               "LLVM-Config.cmake",
                               "LLVM-ConfigInternal.cmake")
 

@@ -69,8 +69,8 @@ class C4CoreConan(ConanFile):
         return self._cmake
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "c4/ext/fast_float_all.h", "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "c4", "ext", "fast_float.hpp"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"), "c4/ext/fast_float_all.h", "")
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "c4", "ext", "fast_float.hpp"),
             '#include "c4/ext/fast_float_all.h"',
             '#include "fast_float/fast_float.h"')
 

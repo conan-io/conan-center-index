@@ -110,7 +110,7 @@ class MpirConan(ConanFile):
                 "Debug" if "d" in msvc_runtime_flag(self) else "",
                 "DLL" if "MD" in msvc_runtime_flag(self) else "",
             )
-            tools.replace_in_file(props_path, old_runtime, new_runtime)
+            tools.files.replace_in_file(self, props_path, old_runtime, new_runtime)
         msbuild = MSBuild(self)
         for vcxproj_path in self._vcxproj_paths:
             msbuild.build(vcxproj_path, platforms=self._platforms, upgrade_project=False)
@@ -156,7 +156,7 @@ class MpirConan(ConanFile):
         else:
             with tools.chdir(self._source_subfolder), self._build_context():
                 # relocatable shared lib on macOS
-                tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
+                tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
                 autotools = self._configure_autotools()
                 autotools.make()
 

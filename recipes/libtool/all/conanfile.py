@@ -193,10 +193,10 @@ class LibtoolConan(ConanFile):
         # allow libtool to link static libs into shared for more platforms
         libtool_m4 = os.path.join(self._datarootdir, "aclocal", "libtool.m4")
         method_pass_all = "lt_cv_deplibs_check_method=pass_all"
-        tools.replace_in_file(libtool_m4,
+        tools.files.replace_in_file(self, libtool_m4,
                               "lt_cv_deplibs_check_method='file_magic ^x86 archive import|^x86 DLL'",
                               method_pass_all)
-        tools.replace_in_file(libtool_m4,
+        tools.files.replace_in_file(self, libtool_m4,
                               "lt_cv_deplibs_check_method='file_magic file format (pei*-i386(.*architecture: i386)?|pe-arm-wince|pe-x86-64)'",
                               method_pass_all)
 

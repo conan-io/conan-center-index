@@ -77,7 +77,7 @@ class Dav1dConan(ConanFile):
             destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"),
                               "subdir('doc')", "")
 
     def _configure_meson(self):

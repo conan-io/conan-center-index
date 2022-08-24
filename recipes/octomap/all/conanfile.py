@@ -77,18 +77,18 @@ class OctomapConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "octomap", "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "octomap", "CMakeLists.txt"),
                               "SET( BASE_DIR ${CMAKE_SOURCE_DIR} )",
                               "SET( BASE_DIR ${CMAKE_BINARY_DIR} )")
         compiler_settings = os.path.join(self._source_subfolder, "octomap", "CMakeModules", "CompilerSettings.cmake")
         # Do not force PIC
-        tools.replace_in_file(compiler_settings, "ADD_DEFINITIONS(-fPIC)", "")
+        tools.files.replace_in_file(self, compiler_settings, "ADD_DEFINITIONS(-fPIC)", "")
         # No -Werror
         if tools.Version(self.version) >= "1.9.6":
-            tools.replace_in_file(compiler_settings, "-Werror", "")
+            tools.files.replace_in_file(self, compiler_settings, "-Werror", "")
         # we want a clean rpath in installed shared libs
-        tools.replace_in_file(compiler_settings, "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/lib\")", "")
-        tools.replace_in_file(compiler_settings, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
+        tools.files.replace_in_file(self, compiler_settings, "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/lib\")", "")
+        tools.files.replace_in_file(self, compiler_settings, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
 
     def package(self):
         self.copy("LICENSE.txt", dst="licenses", src=os.path.join(self._source_subfolder, "octomap"))

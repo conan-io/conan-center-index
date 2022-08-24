@@ -136,12 +136,12 @@ class RmluiConan(ConanFile):
         cmakelists_path = os.path.join(
             self._source_subfolder, "CMakeLists.txt")
         for key, value in replace_mapping.items():
-            tools.replace_in_file(cmakelists_path, key, value, strict=False)
+            tools.files.replace_in_file(self, cmakelists_path, key, value, strict=False)
 
         if self.options.with_thirdparty_containers:
             config_path = os.path.join(self._source_subfolder,
                                        "Include", "RmlUi", "Config", "Config.h")
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 config_path, "\"../Core/Containers/robin_hood.h\"", "<robin_hood.h>")
 
     def build(self):

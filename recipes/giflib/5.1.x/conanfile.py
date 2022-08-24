@@ -66,7 +66,7 @@ class GiflibConan(ConanFile):
 
     def build(self):
         # disable util build - tools and internal libs
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.in"),
                               "SUBDIRS = lib util pic $(am__append_1)",
                               "SUBDIRS = lib pic $(am__append_1)")
 
@@ -78,9 +78,9 @@ class GiflibConan(ConanFile):
     def build_visual(self):
         # fully replace gif_lib.h for VS, with patched version
         ver_components = self.version.split(".")
-        tools.replace_in_file("gif_lib.h", "@GIFLIB_MAJOR@", ver_components[0])
-        tools.replace_in_file("gif_lib.h", "@GIFLIB_MINOR@", ver_components[1])
-        tools.replace_in_file("gif_lib.h", "@GIFLIB_RELEASE@", ver_components[2])
+        tools.files.replace_in_file(self, "gif_lib.h", "@GIFLIB_MAJOR@", ver_components[0])
+        tools.files.replace_in_file(self, "gif_lib.h", "@GIFLIB_MINOR@", ver_components[1])
+        tools.files.replace_in_file(self, "gif_lib.h", "@GIFLIB_RELEASE@", ver_components[2])
         shutil.copy("gif_lib.h", os.path.join(self._source_subfolder, "lib"))
         # add unistd.h for VS
         shutil.copy("unistd.h", os.path.join(self._source_subfolder, "lib"))
@@ -137,7 +137,7 @@ class GiflibConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             if tools.is_apple_os(self.settings.os):
                 # relocatable shared lib on macOS
-                tools.replace_in_file(
+                tools.files.replace_in_file(self, 
                     "configure",
                     "-install_name \\$rpath/\\$soname",
                     "-install_name \\@rpath/\\$soname"

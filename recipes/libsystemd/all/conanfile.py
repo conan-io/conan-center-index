@@ -140,7 +140,7 @@ class LibsystemdConan(ConanFile):
             tools.files.patch(self, **patch)
 
         meson_build = os.path.join(self._source_subfolder, "meson.build")
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             meson_build, """relative_source_path = run_command('realpath',
                                    '--relative-to=@0@'.format(project_build_root),
                                    project_source_root).stdout().strip()""",

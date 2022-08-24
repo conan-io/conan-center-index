@@ -61,7 +61,7 @@ class LibavrocppConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
-        tools.replace_in_file(
+        tools.files.replace_in_file(self, 
             os.path.join(os.path.join(self._source_subfolder, "lang", "c++"), "CMakeLists.txt"),
             "${SNAPPY_LIBRARIES}", "${Snappy_LIBRARIES}"
         )

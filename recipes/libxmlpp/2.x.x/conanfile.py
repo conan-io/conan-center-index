@@ -83,7 +83,7 @@ class LibXMLPlusPlus(ConanFile):
             # that older versions of the Windows SDK isn't standard conformant!
             # see:
             # https://developercommunity.visualstudio.com/t/error-c2760-in-combaseapih-with-windows-sdk-81-and/185399
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 os.path.join(self._source_subfolder, "meson.build"),
                 "cpp_std=c++", "cpp_std=vc++")
 

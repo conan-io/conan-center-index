@@ -81,7 +81,7 @@ class RuyConan(ConanFile):
 
     def build(self):
         # 1. Allow Shared builds
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ruy_cc_library.cmake"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "ruy_cc_library.cmake"),
                               "add_library(${_NAME} STATIC",
                               "add_library(${_NAME}"
                               )
@@ -91,12 +91,12 @@ class RuyConan(ConanFile):
         cpuinfoLibs = self.deps_cpp_info["cpuinfo"].libs + self.deps_cpp_info["cpuinfo"].system_libs
         libsListAsString = ";".join(cpuinfoLibs)
         if int(self.version.strip('cci.')) < 20220628:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "ruy", "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "ruy", "CMakeLists.txt"),
                                   "set(ruy_6_cpuinfo \"cpuinfo\")",
                                   f"set(ruy_6_cpuinfo \"{libsListAsString}\")"
                                   )
         else:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "ruy", "CMakeLists.txt"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "ruy", "CMakeLists.txt"),
                                   "set(ruy_6_cpuinfo_cpuinfo \"cpuinfo::cpuinfo\")",
                                   f"set(ruy_6_cpuinfo_cpuinfo \"{libsListAsString}\")"
                                   )

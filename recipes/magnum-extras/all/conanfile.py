@@ -101,7 +101,7 @@ class MagnumExtrasConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               'set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})',
                               "")
 
@@ -109,7 +109,7 @@ class MagnumExtrasConan(ConanFile):
                       os.path.join("src", "player","CMakeLists.txt")]
         app_name = "{}Application".format("XEgl" if self.options.application == "xegl" else str(self.options.application).capitalize())
         for cmakelist in cmakelists:
-            tools.replace_in_file(os.path.join(self._source_subfolder, cmakelist),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, cmakelist),
                                   "Magnum::Application",
                                   "Magnum::{}".format(app_name))
 

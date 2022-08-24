@@ -107,11 +107,11 @@ class Librasterlite2Conan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         # Disable tests, tools and examples
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.am"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.am"),
                               "SUBDIRS = headers src test tools examples",
                               "SUBDIRS = headers src")
         # fix MinGW
-        tools.replace_in_file(os.path.join(self._source_subfolder, "configure.ac"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "configure.ac"),
                               "AC_CHECK_LIB(z,",
                               "AC_CHECK_LIB({},".format(self.deps_cpp_info["zlib"].libs[0]))
 
@@ -137,11 +137,11 @@ class Librasterlite2Conan(ConanFile):
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
             # relocatable shared libs on macOS
-            tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
+            tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
             # avoid SIP issues on macOS when dependencies are shared
             if tools.is_apple_os(self.settings.os):
                 libpaths = ":".join(self.deps_cpp_info.lib_paths)
-                tools.replace_in_file(
+                tools.files.replace_in_file(self, 
                     "configure",
                     "#! /bin/sh\n",
                     "#! /bin/sh\nexport DYLD_LIBRARY_PATH={}:$DYLD_LIBRARY_PATH\n".format(libpaths),

@@ -52,7 +52,7 @@ class PoshlibConan(ConanFile):
         return self._cmake
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "posh.h"),
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "posh.h"),
                               "defined _ARM",
                               "defined _ARM || defined __arm64")
         cmake = self._configure_cmake()

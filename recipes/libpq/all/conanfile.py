@@ -115,11 +115,11 @@ class LibpqConan(ConanFile):
             # https://www.postgresql.org/docs/8.3/install-win32-libpq.html
             # https://github.com/postgres/postgres/blob/master/src/tools/msvc/README
             if not self.options.shared:
-                tools.replace_in_file(os.path.join(self._source_subfolder, "src", "tools", "msvc", "MKvcbuild.pm"),
+                tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "tools", "msvc", "MKvcbuild.pm"),
                                       "$libpq = $solution->AddProject('libpq', 'dll', 'interfaces',",
                                       "$libpq = $solution->AddProject('libpq', 'lib', 'interfaces',")
             system_libs = ", ".join(["'{}.lib'".format(lib) for lib in self.deps_cpp_info.system_libs])
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "tools", "msvc", "Project.pm"),
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "src", "tools", "msvc", "Project.pm"),
                                   "libraries             => [],",
                                   "libraries             => [{}],".format(system_libs))
             if self.settings.compiler == "Visual Studio":
@@ -135,24 +135,24 @@ class LibpqConan(ConanFile):
                     "DLL" if self.settings.compiler.runtime == "dynamic" else "",
                 )
             msbuild_project_pm = os.path.join(self._source_subfolder, "src", "tools", "msvc", "MSBuildProject.pm")
-            tools.replace_in_file(msbuild_project_pm, "</Link>", """</Link>
+            tools.files.replace_in_file(self, msbuild_project_pm, "</Link>", """</Link>
     <Lib>
       <TargetMachine>$targetmachine</TargetMachine>
     </Lib>""")
-            tools.replace_in_file(msbuild_project_pm, "'MultiThreadedDebugDLL'", "'%s'" % runtime)
-            tools.replace_in_file(msbuild_project_pm, "'MultiThreadedDLL'", "'%s'" % runtime)
+            tools.files.replace_in_file(self, msbuild_project_pm, "'MultiThreadedDebugDLL'", "'%s'" % runtime)
+            tools.files.replace_in_file(self, msbuild_project_pm, "'MultiThreadedDLL'", "'%s'" % runtime)
             config_default_pl = os.path.join(self._source_subfolder, "src", "tools", "msvc", "config_default.pl")
             solution_pm = os.path.join(self._source_subfolder, "src", "tools", "msvc", "Solution.pm")
             if self.options.with_openssl:
                 for ssl in ["VC\libssl32", "VC\libssl64", "libssl"]:
-                    tools.replace_in_file(solution_pm,
+                    tools.files.replace_in_file(self, solution_pm,
                                           "%s.lib" % ssl,
                                           "%s.lib" % self.deps_cpp_info["openssl"].libs[0])
                 for crypto in ["VC\libcrypto32", "VC\libcrypto64", "libcrypto"]:
-                    tools.replace_in_file(solution_pm,
+                    tools.files.replace_in_file(self, solution_pm,
                                           "%s.lib" % crypto,
                                           "%s.lib" % self.deps_cpp_info["openssl"].libs[1])
-                tools.replace_in_file(config_default_pl,
+                tools.files.replace_in_file(self, config_default_pl,
                                       "openssl   => undef",
                                       "openssl   => '%s'" % self.deps_cpp_info["openssl"].rootpath.replace("\\", "/"))
             with tools.vcvars(self.settings):
@@ -164,7 +164,7 @@ class LibpqConan(ConanFile):
                             self.run("perl build.pl libpgport")
         else:
             # relocatable shared lib on macOS
-            tools.replace_in_file(
+            tools.files.replace_in_file(self, 
                 os.path.join(self._source_subfolder, "src", "Makefile.shlib"),
                 "-install_name '$(libdir)/",
                 "-install_name '@rpath/",
@@ -172,7 +172,7 @@ class LibpqConan(ConanFile):
             # avoid SIP issues on macOS when dependencies are shared
             if tools.is_apple_os(self.settings.os):
                 libpaths = ":".join(self.deps_cpp_info.lib_paths)
-                tools.replace_in_file(
+                tools.files.replace_in_file(self, 
                     os.path.join(self._source_subfolder, "configure"),
                     "#! /bin/sh\n",
                     "#! /bin/sh\nexport DYLD_LIBRARY_PATH={}:$DYLD_LIBRARY_PATH\n".format(libpaths),
