@@ -78,7 +78,7 @@ class LibVPXConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         # relocatable shared lib on macOS
         tools.replace_in_file(os.path.join(self._source_subfolder, "build", "make", "Makefile"),
                               "-dynamiclib",

@@ -36,7 +36,7 @@ class InnoextractConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         os.remove(os.path.join(self._source_subfolder, 'cmake', 'FindLZMA.cmake'))
         os.remove(os.path.join(self._source_subfolder, 'cmake', 'Findiconv.cmake'))
         cmake = self._configure_cmake()

@@ -67,7 +67,7 @@ class LibSELinuxConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         _sepol_subfolder, _selinux_subfolder = self._subfolders
         pcre_inc = os.path.join(self.deps_cpp_info["pcre2"].rootpath,
                                 self.deps_cpp_info["pcre2"].includedirs[0])

@@ -84,7 +84,7 @@ class PangommConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
         # glibmm_generate_extra_defs library does not provide any standard way
         # for discovery, which is why pangomm uses "find_library" method instead

@@ -124,7 +124,7 @@ class UsocketsConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
     def _build_msvc(self):
         with tools.chdir(os.path.join(self._source_subfolder)):

@@ -73,7 +73,7 @@ class Z3Conan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         tools.save(os.path.join(self._build_subfolder, "gmp.h"), textwrap.dedent("""\
             #pragma once
             #include <mpir.h>

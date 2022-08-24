@@ -51,7 +51,7 @@ class NsyncConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "CMakeLists.txt"),

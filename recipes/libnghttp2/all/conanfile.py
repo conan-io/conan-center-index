@@ -117,7 +117,7 @@ class Nghttp2Conan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         if not self.options.shared:
             # easier to patch here rather than have patch 'nghttp_static_include_directories' for each version
             tools.save(os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"),

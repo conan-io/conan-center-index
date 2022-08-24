@@ -48,7 +48,7 @@ class EazylzmaConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         cmake = CMake(self)
         cmake.configure()
         cmake.build(target=self._libname)

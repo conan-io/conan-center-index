@@ -72,7 +72,7 @@ class ZintConan(ConanFile):
 
     def _patch_source(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         # Don't override CMAKE_OSX_SYSROOT, it can easily break consumers.
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "CMakeLists.txt"),

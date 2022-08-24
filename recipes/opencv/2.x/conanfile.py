@@ -103,7 +103,7 @@ class OpenCVConan(ConanFile):
 
     def _patch_opencv(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         tools.files.rmdir(self, os.path.join(self._source_subfolder, "3rdparty"))
 
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")

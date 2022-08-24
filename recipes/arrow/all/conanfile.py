@@ -455,7 +455,7 @@ class ArrowConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         if tools.Version(self.version) >= "7.0.0":
             for filename in glob.glob(os.path.join(self._source_subfolder, "cpp", "cmake_modules", "Find*.cmake")):
                 if os.path.basename(filename) not in [

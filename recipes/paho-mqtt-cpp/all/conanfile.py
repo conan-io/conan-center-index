@@ -80,7 +80,7 @@ class PahoMqttCppConan(ConanFile):
             raise ConanInvalidConfiguration("{}/{} requires paho-mqtt-c =< 1.3.1".format(self.name, self.version))
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         cmake = self._configure_cmake()
         cmake.build()
 

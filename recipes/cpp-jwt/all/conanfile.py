@@ -64,7 +64,7 @@ class CppJwtConan(ConanFile):
         return self._cmake
 
     def package(self):
-        tools.patch(**self.conan_data["patches"][self.version])
+        tools.files.patch(self, **self.conan_data["patches"][self.version])
         self.copy(pattern="LICENSE*", dst="licenses",
                   src=self._source_subfolder)
         cmake = self._configure_cmake()

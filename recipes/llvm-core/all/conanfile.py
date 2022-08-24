@@ -102,7 +102,7 @@ class LLVMCoreConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get('patches', {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
     def _patch_build(self):
         if os.path.exists('FindIconv.cmake'):

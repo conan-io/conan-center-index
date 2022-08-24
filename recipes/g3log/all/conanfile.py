@@ -81,7 +81,7 @@ class G3logConan(ConanFile):
     def build(self):
         if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
             for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
+                tools.files.patch(self, **patch)
         cmake = self._configure_cmake()
         cmake.build()
 

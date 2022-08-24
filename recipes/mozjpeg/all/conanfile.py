@@ -140,7 +140,7 @@ class MozjpegConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         if self._use_cmake:
             cmake = self._configure_cmake()
             cmake.build()

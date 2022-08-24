@@ -128,7 +128,7 @@ class LibMysqlClientCConan(ConanFile):
 
     def _patch_files(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
         libs_to_remove = ["icu", "libevent", "re2", "rapidjson", "protobuf", "libedit"]
         if not self._with_lz4:

@@ -105,7 +105,7 @@ class GlslangConan(ConanFile):
 
     def _patches_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         # Do not force PIC if static (but keep it if shared, because OGLCompiler, OSDependent,
         # GenericCodeGen and MachineIndependent are still static and linked to glslang shared)
         if not self.options.shared:

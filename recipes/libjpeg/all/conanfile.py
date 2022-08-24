@@ -113,7 +113,7 @@ class LibjpegConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         # Fix rpath in LC_ID_DYLIB of installed shared libs on macOS
         if tools.is_apple_os(self.settings.os):
             tools.replace_in_file(

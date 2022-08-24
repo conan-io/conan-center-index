@@ -186,7 +186,7 @@ class CernRootConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         self._patch_source_cmake()
         self._fix_source_permissions()
 

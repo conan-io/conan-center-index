@@ -155,7 +155,7 @@ class OpenSceneGraphConanFile(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"].get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
         for package in ("Fontconfig", "Freetype", "GDAL", "GIFLIB", "GTA", "Jasper", "OpenEXR"):
             # Prefer conan's find package scripts over osg's

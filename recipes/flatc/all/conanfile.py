@@ -27,7 +27,7 @@ class FlatcConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version])

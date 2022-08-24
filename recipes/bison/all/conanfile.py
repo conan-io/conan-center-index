@@ -106,7 +106,7 @@ class BisonConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
         if self.settings.os == "Windows":
             # replace embedded unix paths by windows paths

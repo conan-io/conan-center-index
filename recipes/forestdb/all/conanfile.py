@@ -58,7 +58,7 @@ class ForestDBConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         cmake = CMake(self)
         cmake.definitions["SNAPPY_OPTION"] = "Disable"
         if self.options.with_snappy:

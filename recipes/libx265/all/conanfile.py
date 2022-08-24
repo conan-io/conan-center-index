@@ -127,7 +127,7 @@ class Libx265Conan(ConanFile):
             tools.replace_in_file(cmakelists,
                 "list(APPEND PLATFORM_LIBS rt)", "")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
     def build(self):
         self._patch_sources()

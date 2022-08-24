@@ -92,7 +92,7 @@ class GmpConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         # Relocatable shared lib on macOS & fix permission issue
         if tools.is_apple_os(self.settings.os):
             configure_file = os.path.join(self._source_subfolder, "configure")

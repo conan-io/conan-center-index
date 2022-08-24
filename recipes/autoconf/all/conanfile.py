@@ -68,7 +68,7 @@ class AutoconfConan(ConanFile):
 
     def _patch_files(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
     @contextlib.contextmanager
     def _build_context(self):

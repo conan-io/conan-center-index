@@ -123,7 +123,7 @@ class ThriftConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         for f in ["Findflex.cmake", "Findbison.cmake"]:
             if os.path.isfile(f):
                 os.unlink(f)

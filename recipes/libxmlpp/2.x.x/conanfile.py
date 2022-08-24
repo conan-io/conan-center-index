@@ -75,7 +75,7 @@ class LibXMLPlusPlus(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
         if is_msvc(self):
             # when using cpp_std=c++NM the /permissive- flag is added which

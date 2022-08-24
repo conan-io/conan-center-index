@@ -66,7 +66,7 @@ class GPGErrorConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         env_build = self._configure()
         env_build.make()
 

@@ -70,7 +70,7 @@ class ZstdConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         # Don't force PIC
         if tools.Version(self.version) >= "1.4.5":
             tools.replace_in_file(os.path.join(self._source_subfolder, "build", "cmake", "lib", "CMakeLists.txt"),

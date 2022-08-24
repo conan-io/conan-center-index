@@ -109,7 +109,7 @@ class LibpqConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
         if self._is_msvc:
             # https://www.postgresql.org/docs/8.3/install-win32-libpq.html

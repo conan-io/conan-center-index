@@ -88,7 +88,7 @@ class LiquidDspConan(ConanFile):
     def _patch_sources(self):
         if self.settings.os == "Windows":
             for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
+                tools.files.patch(self, **patch)
 
     def _gen_link_library(self):
         if self.settings.compiler != "Visual Studio" or (not self.options.shared):

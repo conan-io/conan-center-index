@@ -32,7 +32,7 @@ class Perf(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         autotools = AutoToolsBuildEnvironment(self)
         with tools.chdir(os.path.join(self.build_folder, self._source_subfolder, "tools", "perf")):
             vars=autotools.vars

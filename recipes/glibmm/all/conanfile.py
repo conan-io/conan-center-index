@@ -79,7 +79,7 @@ class GlibmmConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
         if is_msvc(self):
             # GLiBMM_GEN_EXTRA_DEFS_STATIC is not defined anywhere and is not

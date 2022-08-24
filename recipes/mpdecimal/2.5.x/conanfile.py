@@ -73,7 +73,7 @@ class MpdecimalConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
     def _build_msvc(self):
         libmpdec_folder = os.path.join(self.build_folder, self._source_subfolder, "libmpdec")

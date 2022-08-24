@@ -66,7 +66,7 @@ class SQLiteCppConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         if self.settings.compiler == "clang" and \
            tools.Version(self.settings.compiler.version) < "6.0" and \
            self.settings.compiler.libcxx == "libc++" and \

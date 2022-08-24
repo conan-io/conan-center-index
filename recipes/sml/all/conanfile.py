@@ -44,8 +44,8 @@ class SMLConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        # tools.patch(patch_file="patches/0001-fix-clang12-error.patch")
+            tools.files.patch(self, **patch)
+        # tools.files.patch(self, patch_file="patches/0001-fix-clang12-error.patch")
 
     def package(self):
         self.copy(pattern="*", dst="include",

@@ -69,7 +69,7 @@ class CryptoPPConan(ConanFile):
             shutil.copyfile(os.path.join(tools.get_env("ANDROID_NDK_HOME"), "sources", "android", "cpufeatures", "cpu-features.h"),
                             os.path.join(self._source_subfolder, "cpu-features.h"))
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         # Honor fPIC option
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "SET(CMAKE_POSITION_INDEPENDENT_CODE 1)", "")

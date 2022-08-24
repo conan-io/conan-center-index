@@ -101,7 +101,7 @@ class CBlosc2Conan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
         for filename in glob.glob(os.path.join(self._source_subfolder, "cmake", "Find*.cmake")):
             if os.path.basename(filename) not in [

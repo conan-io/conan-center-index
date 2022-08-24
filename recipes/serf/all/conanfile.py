@@ -52,7 +52,7 @@ class SerfConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         pc_in = os.path.join(self._source_subfolder, "build", "serf.pc.in")
         tools.save(pc_in, tools.load(pc_in))
 

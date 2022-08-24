@@ -100,7 +100,7 @@ class MongoCDriverConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         to_replace_old_new = [
             # Fix Snappy
             {"old": "include (FindSnappy)\nif (SNAPPY_INCLUDE_DIRS)",

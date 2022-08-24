@@ -147,7 +147,7 @@ class MimallocConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         if microsoft.is_msvc(self) and self.settings.arch == "x86":
             tools.replace_path_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                        "mimalloc-redirect.lib", "mimalloc-redirect32.lib")

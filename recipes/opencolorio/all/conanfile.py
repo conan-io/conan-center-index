@@ -110,7 +110,7 @@ class OpenColorIOConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
         for module in ("expat", "lcms2", "pystring", "yaml-cpp", "Imath"):
             tools.remove_files_by_mask(os.path.join(self._source_subfolder, "share", "cmake", "modules"), "Find"+module+".cmake")

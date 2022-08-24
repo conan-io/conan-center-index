@@ -71,7 +71,7 @@ class MysqlConnectorCConan(ConanFile):
         tools.rename("CMakeLists.txt", sources_cmake)
 
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
     def build(self):
         self._patch_sources()

@@ -136,7 +136,7 @@ class MicroprofileConan(ConanFile):
     def build(self):
         self._create_defines_file(os.path.join(self._source_subfolder, "microprofile.config.h"))
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         cmake = self._configure_cmake()
         cmake.build()
 

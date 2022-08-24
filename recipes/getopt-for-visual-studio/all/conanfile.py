@@ -27,7 +27,7 @@ class GetoptForVisualStudio(ConanFile):
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
     @property
     def _license_text(self):

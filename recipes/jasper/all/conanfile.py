@@ -76,7 +76,7 @@ class JasperConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         # Clean rpath in installed shared lib
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         cmds_to_remove = [

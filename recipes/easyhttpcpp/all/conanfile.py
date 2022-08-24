@@ -66,7 +66,7 @@ class EasyhttpcppConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"].get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
     def build(self):
         for comp in self._required_poco_components:

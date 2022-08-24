@@ -72,7 +72,7 @@ class LibMP3LameConan(ConanFile):
 
     def _apply_patch(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "include", "libmp3lame.sym"), "lame_init_old\n", "")
 
     @contextmanager

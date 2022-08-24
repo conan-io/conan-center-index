@@ -89,7 +89,7 @@ class LibSigCppConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         if not self.options.shared:
             tools.replace_in_file(os.path.join(self._source_subfolder, "sigc++config.h.cmake"),
                                   "define SIGC_DLL 1", "undef SIGC_DLL")

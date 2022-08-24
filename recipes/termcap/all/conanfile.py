@@ -70,7 +70,7 @@ class TermcapConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
         if self.settings.os == "Windows":
             for src in self._extract_sources()[0]:

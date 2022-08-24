@@ -91,7 +91,7 @@ class Cc65Conan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         if self.settings.compiler == "Visual Studio":
             with tools.chdir(os.path.join(self._source_subfolder, "src")):
                 for fn in os.listdir("."):

@@ -68,7 +68,7 @@ class LibaecConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         if tools.Version(self.version) < "1.0.6":
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                   "add_subdirectory(tests)", "")

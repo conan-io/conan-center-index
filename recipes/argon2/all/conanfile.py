@@ -63,7 +63,7 @@ class Argon2Conan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         vcxproj = os.path.join(self._source_subfolder, "vs2015", "Argon2OptDll", "Argon2OptDll.vcxproj")
         argon2_header = os.path.join(self._source_subfolder, "include", "argon2.h")
         if not self.options.shared:

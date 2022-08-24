@@ -107,7 +107,7 @@ class SpirvtoolsConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         # CMAKE_POSITION_INDEPENDENT_CODE was set ON for the entire
         # project in the lists file.
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),

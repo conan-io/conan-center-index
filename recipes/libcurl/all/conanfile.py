@@ -236,7 +236,7 @@ class LibcurlConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         self._patch_misc_files()
         self._patch_autotools()
         self._patch_cmake()

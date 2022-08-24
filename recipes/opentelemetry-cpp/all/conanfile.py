@@ -123,7 +123,7 @@ class OpenTelemetryCppConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self._source_subfolder, "api", "include", "opentelemetry", "nostd", "absl"))
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
     def build(self):
         self._patch_sources()

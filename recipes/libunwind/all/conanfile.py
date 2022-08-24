@@ -76,7 +76,7 @@ class LiunwindConan(ConanFile):
 
     def build(self):
         for patch_data in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch_data)
+            tools.files.patch(self, **patch_data)
         autotools = self._configure_autotools()
         autotools.make()
 

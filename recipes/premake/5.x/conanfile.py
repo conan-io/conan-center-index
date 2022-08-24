@@ -98,7 +98,7 @@ class PremakeConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         if self.options.get_safe("lto", None) == False:
             for fn in glob.glob(os.path.join(self._source_subfolder, "build", self._gmake_build_dirname, "*.make")):
                 tools.replace_in_file(fn, "-flto", "", strict=False)

@@ -348,7 +348,7 @@ class Open62541Conan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         if tools.Version(self.version) >= "1.3.1":
             os.unlink(os.path.join(self._source_subfolder, "tools", "cmake", "FindPython3.cmake"))
 

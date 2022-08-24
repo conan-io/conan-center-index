@@ -78,7 +78,7 @@ class MariadbConnectorcConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
         root_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
         tools.replace_in_file(root_cmake, "${ZLIB_LIBRARY}", "${ZLIB_LIBRARIES}")

@@ -85,7 +85,7 @@ class CbloscConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         # Remove folder containing custom FindLib.cmake files
         tools.files.rmdir(self, os.path.join(self._source_subfolder, "cmake"))
 

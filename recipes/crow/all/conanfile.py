@@ -30,7 +30,7 @@ class CrowConan(ConanFile):
             raise ConanInvalidConfiguration("Crow requires Boost <1.70.0")
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         cmake = CMake(self)
         cmake.configure(source_folder=self._source_subfolder)
         cmake.build()

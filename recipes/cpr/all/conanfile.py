@@ -147,7 +147,7 @@ class CprConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
     def _get_cmake_option(self, option):
         CPR_1_6_CMAKE_OPTIONS_TO_OLD = {

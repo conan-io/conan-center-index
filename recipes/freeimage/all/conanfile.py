@@ -125,7 +125,7 @@ class FreeImageConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self._source_subfolder, "Source", "OpenEXR"))
 
         for patch in self.conan_data.get("patches", {}).get(self.version, {}):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         cmake = self._configure_cmake()
         cmake.build()
 

@@ -45,7 +45,7 @@ class EnchantConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         self._configure_cmake().build()
 
     def package(self):

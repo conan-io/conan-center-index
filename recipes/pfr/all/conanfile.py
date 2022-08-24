@@ -57,7 +57,7 @@ class PfrConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
     def package(self):
         include_folder = os.path.join(self._source_subfolder, "include")

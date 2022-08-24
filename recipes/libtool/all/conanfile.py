@@ -102,7 +102,7 @@ class LibtoolConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
                     os.path.join(self._source_subfolder, "build-aux", "config.sub"))
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,

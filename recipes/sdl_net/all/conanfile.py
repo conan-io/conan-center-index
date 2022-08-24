@@ -71,7 +71,7 @@ class SdlnetConan(ConanFile):
         if tools.Version(self.deps_cpp_info["sdl"].version).major != tools.Version(self.version).major:
             raise ConanInvalidConfiguration(f"The major versions of {self.name} and sdl must be the same")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         cmake = self._configure_cmake()
         cmake.build()
 

@@ -264,7 +264,7 @@ class CPythonConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches",{}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         if self._is_py3 and tools.Version(self._version_number_only) < "3.10":
             tools.replace_in_file(os.path.join(self._source_subfolder, "setup.py"),
                                   ":libmpdec.so.2", "mpdec")

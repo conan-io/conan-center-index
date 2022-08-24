@@ -90,7 +90,7 @@ class NvclothConan(ConanFile):
             os.path.join(self.build_folder, self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h.origin")
         )
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         
         if self.settings.build_type == "Debug":
             shutil.copy(

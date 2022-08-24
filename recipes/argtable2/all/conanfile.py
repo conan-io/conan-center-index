@@ -97,7 +97,7 @@ class Argtable2Conan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         if self.settings.compiler == "Visual Studio":
             self._run_nmake("argtable2.dll" if self.options.shared else "argtable2.lib")
         else:

@@ -74,7 +74,7 @@ class AutomakeConan(ConanFile):
 
     def _patch_files(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         if self.settings.os == "Windows":
             # tracing using m4 on Windows returns Windows paths => use cygpath to convert to unix paths
             tools.replace_in_file(os.path.join(self._source_subfolder, "bin", "aclocal.in"),

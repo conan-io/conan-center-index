@@ -65,7 +65,7 @@ class TinyExrConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
     def package(self):
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._extracted_license)

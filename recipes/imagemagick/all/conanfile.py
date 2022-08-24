@@ -168,7 +168,7 @@ class ImageMagicConan(ConanFile):
 
     def _build_msvc(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, {}):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
 
         # FIXME: package LiquidRescale  aka liblqr
         tools.replace_in_file(

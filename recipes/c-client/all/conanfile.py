@@ -108,7 +108,7 @@ class CclientConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         if self._is_msvc:
             self._patch_msvc()
             self._build_msvc()

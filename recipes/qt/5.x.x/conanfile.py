@@ -421,7 +421,7 @@ class QtConan(ConanFile):
                   strip_root=True, destination="qt5")
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
             tools.replace_in_file(os.path.join(self.source_folder, "qt5", "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
                                   "  if (enable_precompiled_headers) {\n    if (is_win) {",

@@ -130,7 +130,7 @@ class PdalConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         # drop conflicting CMake files
         # LASzip works fine
         for module in ("ZSTD", "ICONV", "GeoTIFF", "Curl"):
