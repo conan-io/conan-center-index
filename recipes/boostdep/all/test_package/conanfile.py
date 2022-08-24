@@ -9,7 +9,7 @@ class DefaultNameConan(ConanFile):
         pass
 
     def test(self):
-        if tools.cross_building(self.settings):
+        if tools.build.cross_building(self, self.settings):
             return
         tools.files.mkdir(self, "libs")
         tools.files.save(self, "Jamroot", "")

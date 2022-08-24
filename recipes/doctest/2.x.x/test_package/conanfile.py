@@ -17,6 +17,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings) or tools.os_info.is_windows:
+        if not tools.build.cross_building(self, self.settings) or tools.os_info.is_windows:
             cmake = self._configure_cmake()
             cmake.test()

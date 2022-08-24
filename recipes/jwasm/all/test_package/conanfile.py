@@ -6,7 +6,7 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch"
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.build.cross_building(self, self.settings):
             self.run("jwasm -h", run_environment=True, ignore_errors=True)
             asm_file = os.path.join(self.source_folder, "Lin64_1.asm") # content from https://www.japheth.de/JWasm/Lin64_1.html
             obj_file = os.path.join(self.build_folder, "Lin64_1.o")

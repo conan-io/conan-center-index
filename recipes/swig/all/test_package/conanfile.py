@@ -12,7 +12,7 @@ class TestPackageConan(ConanFile):
         return not (self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug")
 
     def build(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not tools.build.cross_building(self, self, skip_x64_x86=True):
             self.run("swig -swiglib", run_environment=True)
             if self._can_build:
                 cmake = CMake(self)
@@ -21,7 +21,7 @@ class TestPackageConan(ConanFile):
                 cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             if self._can_build:
                 cmake = CMake(self)
                 cmake.test(output_on_failure=True)

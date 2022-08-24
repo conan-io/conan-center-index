@@ -64,7 +64,7 @@ class LibdwarfConan(ConanFile):
         cmake.definitions["BUILD_SHARED"] = self.options.shared
         cmake.definitions["BUILD_DWARFGEN"] = False
         cmake.definitions["BUILD_DWARFEXAMPLE"] = False
-        if tools.cross_building(self):
+        if tools.build.cross_building(self, self):
             cmake.definitions["HAVE_UNUSED_ATTRIBUTE_EXITCODE"] = "0"
             cmake.definitions["HAVE_UNUSED_ATTRIBUTE_EXITCODE__TRYRUN_OUTPUT"] = ""
         cmake.configure(build_folder=self._build_subfolder)

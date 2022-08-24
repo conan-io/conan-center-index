@@ -13,7 +13,7 @@ class TestPackageConan(ConanFile):
         return not (self.options["libjpeg"].shared and self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime)
 
     def build_requirements(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self) and \
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self) and \
            self.settings.os == "Macos" and self.settings.arch == "armv8":
             # Workaround for CMake bug with error message:
             # Attempting to use @rpath without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being
@@ -28,7 +28,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if tools.cross_building(self):
+        if tools.build.cross_building(self, self):
             return
         img_name = os.path.join(self.source_folder, "testimg.jpg")
         out_img = os.path.join(self.build_folder, "outimg.jpg")

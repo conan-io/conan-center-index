@@ -386,7 +386,7 @@ class GdalConan(ConanFile):
                 raise ConanInvalidConfiguration("gdal {} depends on reentrant qhull.".format(self.version))
             elif not self._has_reentrant_qhull_support and self.options["qhull"].reentrant:
                 raise ConanInvalidConfiguration("gdal {} depends on non-reentrant qhull.".format(self.version))
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self):
             if self.options.shared:
                 raise ConanInvalidConfiguration("GDAL build system can't cross-build shared lib")
             if self.options.tools:

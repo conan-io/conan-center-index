@@ -19,7 +19,7 @@ class TestPackageConan(ConanFile):
         elif tools.os_info.is_windows:
             exe_name += ".exe"
         exec_path = os.path.join("bin", exe_name)
-        if tools.cross_building(self.settings):
+        if tools.build.cross_building(self, self.settings):
             assert(os.path.exists(exec_path))
         else:
             self.run(exec_path, run_environment=True)

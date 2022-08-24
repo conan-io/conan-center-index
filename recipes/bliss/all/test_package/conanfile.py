@@ -13,7 +13,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings, skip_x64_x86=True):
+        if not tools.build.cross_building(self, self.settings, skip_x64_x86=True):
             self.run("bliss {}".format(os.path.join(self.source_folder, "graph.cnf")), run_environment=True)
 
             bin_path = os.path.join("bin", "test_package")

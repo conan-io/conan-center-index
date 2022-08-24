@@ -11,7 +11,7 @@ class ReadExcelTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             bin_path = os.path.join("bin", "read-excel.test")
             xls_path = os.path.join(self.source_folder, "sample.xls");
             self.run("{} \"{}\"".format(bin_path, xls_path), run_environment=True)

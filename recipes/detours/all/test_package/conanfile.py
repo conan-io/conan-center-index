@@ -15,7 +15,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not tools.build.cross_building(self, self, skip_x64_x86=True):
             bin_path = os.path.join("bin", "test_package")
             buffer = io.StringIO()
             self.run(f"{bin_path} \"{os.path.join(self.build_folder, 'bin')}\"", run_environment=True, output=buffer)

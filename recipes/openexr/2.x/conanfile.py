@@ -50,7 +50,7 @@ class OpenEXRConan(ConanFile):
         self.requires("zlib/1.2.12")
 
     def validate(self):
-        if tools.Version(self.version) < "2.5.0" and hasattr(self, "settings_build") and tools.cross_building(self):
+        if tools.Version(self.version) < "2.5.0" and hasattr(self, "settings_build") and tools.build.cross_building(self, self):
             # cross-build supported since https://github.com/AcademySoftwareFoundation/openexr/pull/606
             raise ConanInvalidConfiguration("Cross-build not supported before openexr 2.5.0")
 

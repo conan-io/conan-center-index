@@ -104,7 +104,7 @@ class DCMTKConan(ConanFile):
             self.requires("tcp-wrappers/7.6")
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self) and \
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self) and \
            self.settings.os == "Macos" and self.settings.arch == "armv8":
             # FIXME: Probable issue with flags, build includes header 'mmintrin.h'
             raise ConanInvalidConfiguration("Cross building to Macos M1 is not supported (yet)")

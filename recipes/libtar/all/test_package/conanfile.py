@@ -26,7 +26,7 @@ class TestPackageConan(ConanFile):
             bio.seek(0)
             f.addfile(tarinfo, bio)
 
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             if os.path.exists("hello_world"):
                 raise ConanException("file extracted by tar archive should not exist yet")
             bin_path = os.path.join("bin", "test_package")

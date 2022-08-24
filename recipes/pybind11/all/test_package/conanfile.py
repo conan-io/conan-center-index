@@ -22,7 +22,7 @@ class TestPackageConan(ConanFile):
         return sys.executable
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             with tools.environment_append({"PYTHONPATH": "lib"}):
                 self.run("{} {}".format(self._python_interpreter, os.path.join(
                     self.source_folder, "test.py")), run_environment=True)

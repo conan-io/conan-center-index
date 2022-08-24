@@ -8,5 +8,5 @@ class DefaultNameConan(ConanFile):
         pass
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.build.cross_building(self, self.settings):
             self.run("perl -S mpc.pl --version", run_environment=True)

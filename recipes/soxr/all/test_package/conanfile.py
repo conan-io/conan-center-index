@@ -12,7 +12,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             # core component
             bin_path = os.path.join("bin", "test_package_core")
             self.run(bin_path, run_environment=True)

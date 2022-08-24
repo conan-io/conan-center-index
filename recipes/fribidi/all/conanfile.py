@@ -47,7 +47,7 @@ class FriBiDiCOnan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
     def build_requirements(self):

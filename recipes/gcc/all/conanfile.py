@@ -71,7 +71,7 @@ class GccConan(ConanFile):
     def configure(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows builds aren't supported (yet), sorry")
-        if tools.cross_building(self.settings):
+        if tools.build.cross_building(self, self.settings):
             raise ConanInvalidConfiguration("no cross-building support (yet), sorry")
 
     def source(self):

@@ -14,6 +14,6 @@ class NetlinkTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             bin_path = os.path.join(self.build_folder, "bin", "show_links")
             self.run(bin_path, cwd=self.source_folder, run_environment=True)

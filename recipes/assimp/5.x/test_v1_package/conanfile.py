@@ -14,7 +14,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             obj_path = os.path.join(self.source_folder, os.pardir, "test_package", "box.obj")
 
             bin_path = os.path.join("bin", "test_package")

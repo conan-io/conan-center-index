@@ -256,7 +256,7 @@ class CPythonConan(ConanFile):
             self._autotools.link_flags.append("-lpthread")
 
         build = None
-        if tools.cross_building(self) and not tools.cross_building(self, skip_x64_x86=True):
+        if tools.build.cross_building(self, self) and not tools.build.cross_building(self, self, skip_x64_x86=True):
             # Building from x86_64 to x86 is not a "real" cross build, so set build == host
             build = tools.get_gnu_triplet(str(self.settings.os), str(self.settings.arch), str(self.settings.compiler))
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder, build=build)

@@ -62,7 +62,7 @@ class ReadLineConan(ConanFile):
             configure_args.extend(["--enable-shared", "--disable-static"])
         else:
             configure_args.extend(["--enable-static", "--disable-shared"])
-        if tools.cross_building(self.settings):
+        if tools.build.cross_building(self, self.settings):
             configure_args.append("bash_cv_wcwidth_broken=yes")
 
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)

@@ -37,7 +37,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             for exec in self._executables:
                 self.run("magnum-{} --help".format(exec), run_environment=True)
 

@@ -50,7 +50,7 @@ class GoogleCloudCppConan(ConanFile):
         if self.settings.os == 'Windows' and self.options.shared:
             raise ConanInvalidConfiguration("Fails to compile for Windows as a DLL")
 
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self):
             raise ConanInvalidConfiguration("Recipe not prepared for cross-building (yet)")
 
         if tools.Version(self.version) >= "1.30.0":

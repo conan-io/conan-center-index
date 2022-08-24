@@ -11,7 +11,7 @@ class TestPackageConan(ConanFile):
     def build(self):
         # TODO: Add some test for the cross-building scenario
 
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             calc_wsdl = os.path.join(self.source_folder, os.pardir, "test_package", "calc.wsdl")
             self.output.info("Generating code from WSDL '{}'".format(calc_wsdl))
             self.run("wsdl2h -o calc.h {}".format(calc_wsdl), run_environment=True)
@@ -22,6 +22,6 @@ class TestPackageConan(ConanFile):
             cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)

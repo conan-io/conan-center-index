@@ -9,7 +9,7 @@ class TestPackage(ConanFile):
         pass # nothing to build, but tests should not warn
 
     def test(self):
-        if tools.cross_building(self):
+        if tools.build.cross_building(self, self):
             return
             # OK, this needs some explanation
             # You basically do not crosscompile that package, never

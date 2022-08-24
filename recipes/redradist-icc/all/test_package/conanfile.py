@@ -13,6 +13,6 @@ class ICCTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             bin_path = os.path.join('bin', 'example')
             self.run(bin_path, run_environment=True)

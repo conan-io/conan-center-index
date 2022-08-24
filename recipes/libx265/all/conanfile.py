@@ -104,7 +104,7 @@ class Libx265Conan(ConanFile):
             self._cmake.definitions["STATIC_LINK_CRT"] = "MT" in msvc_runtime_flag(self)
         if self.settings.os == "Linux":
             self._cmake.definitions["PLATFORM_LIBS"] = "dl"
-        if tools.cross_building(self.settings):
+        if tools.build.cross_building(self, self.settings):
             # FIXME: too specific and error prone, should be delegated to CMake helper
             cmake_system_processor = {
                 "armv8": "aarch64",
@@ -112,7 +112,7 @@ class Libx265Conan(ConanFile):
             }.get(str(self.settings.arch), str(self.settings.arch))
             self._cmake.definitions["CONAN_LIBX265_SYSTEM_PROCESSOR"] = cmake_system_processor
         if "arm" in self.settings.arch:
-            self._cmake.definitions["CROSS_COMPILE_ARM"] = tools.cross_building(self.settings)
+            self._cmake.definitions["CROSS_COMPILE_ARM"] = tools.build.cross_building(self, self.settings)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 

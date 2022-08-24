@@ -73,7 +73,7 @@ class LibPcapConan(ConanFile):
     def validate(self):
         if tools.Version(self.version) < "1.10.0" and self.settings.os == "Macos" and self.options.shared:
             raise ConanInvalidConfiguration("libpcap {} can not be built as shared on OSX.".format(self.version))
-        if hasattr(self, "settings_build") and tools.cross_building(self) and \
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self) and \
            self.options.shared and tools.is_apple_os(self.settings.os):
             raise ConanInvalidConfiguration("cross-build of libpcap shared is broken on Apple")
         if tools.Version(self.version) < "1.10.1" and self.settings.os == "Windows" and not self.options.shared:
@@ -110,7 +110,7 @@ class LibPcapConan(ConanFile):
             "--disable-dbus",
             "--disable-rdma",
         ]
-        if tools.cross_building(self):
+        if tools.build.cross_building(self, self):
             target_os = "linux" if self.settings.os == "Linux" else "null"
             configure_args.append("--with-pcap=%s" % target_os)
         elif "arm" in self.settings.arch and self.settings.os == "Linux":

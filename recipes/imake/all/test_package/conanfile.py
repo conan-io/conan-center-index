@@ -34,11 +34,11 @@ class TestPackageConan(ConanFile):
     def build(self):
         for src in self.exports_sources:
             shutil.copy(os.path.join(self.source_folder, src), os.path.join(self.build_folder, src))
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             with self._build_context():
                 self.run("imake", run_environment=True)
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             autotools = AutoToolsBuildEnvironment(self)
             autotools.make()

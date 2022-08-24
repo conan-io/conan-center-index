@@ -28,7 +28,7 @@ class FtjamConan(ConanFile):
     def validate(self):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("ftjam doesn't build with Visual Studio yet")
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self):
             raise ConanInvalidConfiguration("ftjam can't be cross-built")
 
     def package_id(self):

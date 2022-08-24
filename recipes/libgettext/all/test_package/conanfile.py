@@ -20,7 +20,7 @@ class TestPackageConan(ConanFile):
                         os.path.join(self.source_folder, locale, "LC_MESSAGES", "conan.mo"))
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             bin_path = os.path.join("bin", "test_package")
             for locale in ["en_US", "ru_RU", "es_ES"]:
                 with tools.environment_append({"LANG": locale}):

@@ -107,7 +107,7 @@ class LibX264Conan(ConanFile):
         if self._with_nasm:
             # FIXME: get using user_build_info
             self._override_env["AS"] = os.path.join(self.dependencies.build["nasm"].package_folder, "bin", "nasm{}".format(".exe" if tools.os_info.is_windows else "")).replace("\\", "/")
-        if tools.cross_building(self):
+        if tools.build.cross_building(self, self):
             if self.settings.os == "Android":
                 # the as of ndk does not work well for building libx264
                 self._override_env["AS"] = os.environ["CC"]

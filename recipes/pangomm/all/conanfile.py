@@ -34,7 +34,7 @@ class PangommConan(ConanFile):
         return "2.48" if self._is_2_48_api else "1.4"
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
         if self.settings.compiler.get_safe("cppstd"):

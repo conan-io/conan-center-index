@@ -14,7 +14,7 @@ class LibiglTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.build.cross_building(self, self.settings):
             bin_path = os.path.join("bin", "example")
             self.run(bin_path, run_environment=True)
 

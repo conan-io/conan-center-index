@@ -8,14 +8,14 @@ class TestPackageConan(ConanFile):
     generators = "cmake"
 
     def build(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not tools.build.cross_building(self, self, skip_x64_x86=True):
             with tools.run_environment(self):
                 cmake = CMake(self)
                 cmake.configure()
                 cmake.build()
 
     def test(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not tools.build.cross_building(self, self, skip_x64_x86=True):
             self.run("win_flex --version", run_environment=True)
             self.run("win_bison --version", run_environment=True)
 

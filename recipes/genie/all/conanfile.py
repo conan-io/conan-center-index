@@ -35,7 +35,7 @@ class GenieConan(ConanFile):
                 self.build_requires("msys2/cci.latest")
     
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self):
             raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
 
     def source(self):

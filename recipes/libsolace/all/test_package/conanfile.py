@@ -15,6 +15,6 @@ class SolaceTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.build.cross_building(self, self.settings):
             with tools.files.chdir(self, "bin"):
                 self.run(".%sexample" % os.sep, run_environment=True)

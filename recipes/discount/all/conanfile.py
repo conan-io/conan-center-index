@@ -47,7 +47,7 @@ class DiscountConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self):
             raise ConanInvalidConfiguration("discount doesn't support cross-build yet")
 
     def source(self):

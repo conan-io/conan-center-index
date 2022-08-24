@@ -22,7 +22,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             if self.options["ffmpeg"].with_programs:
                 self.run("ffmpeg --help", run_environment=True)
 

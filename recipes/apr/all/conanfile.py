@@ -60,7 +60,7 @@ class AprConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self):
             raise ConanInvalidConfiguration("apr cannot be cross compiled due to runtime checks")
 
     def build_requirements(self):
@@ -91,7 +91,7 @@ class AprConan(ConanFile):
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
-        if tools.cross_building(self):
+        if tools.build.cross_building(self, self):
             #
             conf_args.append("apr_cv_mutex_robust_shared=yes")
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)

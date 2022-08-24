@@ -9,7 +9,7 @@ class TestPackageConan(ConanFile):
     exports_sources = "a.cpp", "b.cpp", "main.c", "main.cpp", "wscript"
 
     def build(self):
-        if tools.cross_building(self.settings):
+        if tools.build.cross_building(self, self.settings):
             return
 
         for src in self.exports_sources:
@@ -36,7 +36,7 @@ class TestPackageConan(ConanFile):
             yield
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.build.cross_building(self, self.settings):
             with self._add_ld_search_path():
                 self.run(os.path.join("build", "app"), run_environment=True)
                 self.run(os.path.join("build", "app2"), run_environment=True)

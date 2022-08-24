@@ -15,7 +15,7 @@ class TestPackage(ConanFile):
         pass  # nothing to build, but tests should not warn
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             output = StringIO()
             self.run("java --version", output=output, run_environment=True)
             print(output.getvalue)

@@ -67,7 +67,7 @@ class TestPackageConan(ConanFile):
         return self.settings.compiler != "Visual Studio" or self.options["cpython"].shared
 
     def build(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not tools.build.cross_building(self, self, skip_x64_x86=True):
             command = "{} --version".format(self.deps_user_info["cpython"].python)
             buffer = StringIO()
             self.run(command, output=buffer, ignore_errors=True, run_environment=True)
@@ -100,7 +100,7 @@ class TestPackageConan(ConanFile):
             cmake.configure()
         cmake.build()
 
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not tools.build.cross_building(self, self, skip_x64_x86=True):
             if self._supports_modules:
                 with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
                     modsrcfolder = "py2" if tools.Version(self.deps_cpp_info["cpython"].version).major < "3" else "py3"
@@ -150,7 +150,7 @@ class TestPackageConan(ConanFile):
             return False
 
     def test(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not tools.build.cross_building(self, self, skip_x64_x86=True):
             self.run("{} -c \"print('hello world')\"".format(self.deps_user_info["cpython"].python), run_environment=True)
 
             buffer = StringIO()

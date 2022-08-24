@@ -13,7 +13,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not tools.build.cross_building(self, self, skip_x64_x86=True):
             bin_ext = ".exe" if self.settings.os == "Windows" else ""
             bin_path = os.path.join("bin", f"test_package{bin_ext}")
 

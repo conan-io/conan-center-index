@@ -8,7 +8,7 @@ class GoogleguetzliTestConan(ConanFile):
 
     def test(self):
         bees_path = os.path.join(self.source_folder, "bees.png")
-        if not tools.cross_building(self.settings):
+        if not tools.build.cross_building(self, self.settings):
             app = "guetzli"
             if self.settings.os == "Windows":
                 app += ".exe"

@@ -76,7 +76,7 @@ class CpuinfoConan(ConanFile):
         cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
 
         # CMAKE_SYSTEM_PROCESSOR must be manually set if cross-building
-        if tools.cross_building(self):
+        if tools.build.cross_building(self, self):
             cmake_system_processor = {
                 "armv8": "arm64",
                 "armv8.3": "arm64",

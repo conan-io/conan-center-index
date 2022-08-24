@@ -6,7 +6,7 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch",
 
     def test(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not tools.build.cross_building(self, self, skip_x64_x86=True):
             self.run("nasm --version", run_environment=True)
             asm_file = os.path.join(self.source_folder, "hello_linux.asm")
             out_file = os.path.join(self.build_folder, "hello_linux.o")

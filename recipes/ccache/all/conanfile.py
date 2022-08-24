@@ -80,7 +80,7 @@ class CcacheConan(ConanFile):
         del self.info.settings.compiler
 
     def build_requirements(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self) and \
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self) and \
            self.settings.os == "Macos" and self.settings.arch == "armv8":
             self.build_requires("cmake/3.22.0")
 

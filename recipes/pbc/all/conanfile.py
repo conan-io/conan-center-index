@@ -59,7 +59,7 @@ class PbcConan(ConanFile):
         # No idea why this is necessary, but if you don't set CC this way, then
         # configure complains that it can't find gmp.
         if (
-            tools.cross_building(self.settings)
+            tools.build.cross_building(self, self.settings)
             and self.settings.compiler == "apple-clang"
         ):
 

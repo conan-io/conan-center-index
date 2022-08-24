@@ -121,7 +121,7 @@ class LibjpegTurboConan(ConanFile):
         if tools.Version(self.version) <= "2.1.0":
             cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False # avoid configuration error if building for iOS/tvOS/watchOS
 
-        if tools.cross_building(self):
+        if tools.build.cross_building(self, self):
             # TODO: too specific and error prone, should be delegated to a conan helper function
             cmake_system_processor = {
                 "armv8": "aarch64",

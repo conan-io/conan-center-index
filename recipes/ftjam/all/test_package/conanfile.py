@@ -14,7 +14,7 @@ class TestPackage(ConanFile):
         for f in ("header.h", "main.c", "source.c", "Jamfile"):
             shutil.copy(os.path.join(self.source_folder, f),
                         os.path.join(self.build_folder, f))
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             assert os.path.isfile(tools.get_env("JAM"))
 
             vars = AutoToolsBuildEnvironment(self).vars
@@ -26,6 +26,6 @@ class TestPackage(ConanFile):
                 self.run("{} -d7".format(tools.get_env("JAM")), run_environment=True)
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             bin_path = os.path.join(".", "test_package")
             self.run(bin_path, run_environment=True)

@@ -72,7 +72,7 @@ class CoinCglConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("coin-cgl does not support shared builds on Windows")
         # FIXME: This issue likely comes from very old autotools versions used to produce configure.
-        if hasattr(self, "settings_build") and tools.cross_building(self) and self.options.shared:
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self) and self.options.shared:
             raise ConanInvalidConfiguration("coin-cgl shared not supported yet when cross-building")
 
     def source(self):

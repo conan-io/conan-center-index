@@ -14,7 +14,7 @@ class TestPackageConan(ConanFile):
             cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             executable_ext = ".exe" if self.settings.os == "Windows" else ""
             if self.options["magnum-extras"].player:
                 assert os.path.exists(os.path.join(self.deps_cpp_info["magnum-extras"].rootpath, "bin", "magnum-player{}".format(executable_ext)))

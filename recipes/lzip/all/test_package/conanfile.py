@@ -8,7 +8,7 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     def test(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not tools.build.cross_building(self, self, skip_x64_x86=True):
             lzip = os.path.join(self.deps_cpp_info["lzip"].bin_paths[0], "lzip")
             self.run("{} --version".format(lzip))
 

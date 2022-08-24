@@ -343,7 +343,7 @@ class ArrowConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        if tools.cross_building(self.settings):
+        if tools.build.cross_building(self, self.settings):
             cmake_system_processor = {
                 "armv8": "aarch64",
                 "armv8.3": "aarch64",

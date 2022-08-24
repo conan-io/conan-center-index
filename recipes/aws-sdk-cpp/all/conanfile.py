@@ -421,7 +421,7 @@ class AwsSdkCppConan(ConanFile):
         if self._is_msvc and not self._use_aws_crt_cpp:
             self._cmake.definitions["FORCE_SHARED_CRT"] = "MD" in msvc_runtime_flag(self)
 
-        if tools.cross_building(self):
+        if tools.build.cross_building(self, self):
             self._cmake.definitions["CURL_HAS_H2_EXITCODE"] = "0"
             self._cmake.definitions["CURL_HAS_H2_EXITCODE__TRYRUN_OUTPUT"] = ""
             self._cmake.definitions["CURL_HAS_TLS_PROXY_EXITCODE"] = "0"

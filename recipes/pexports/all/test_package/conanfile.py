@@ -15,7 +15,7 @@ class TestPackageConan(ConanFile):
             cmake.build()
 
     def test(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not tools.build.cross_building(self, self, skip_x64_x86=True):
             self.run("pexports -H", run_environment=True)
             if self.settings.os == "Windows":
                 bin_path = os.path.join("bin", "test_package")

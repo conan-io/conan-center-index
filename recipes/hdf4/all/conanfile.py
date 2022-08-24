@@ -97,7 +97,7 @@ class Hdf4Conan(ConanFile):
         self._cmake.definitions["HDF4_BUILD_TOOLS"] = False
         self._cmake.definitions["HDF4_BUILD_EXAMPLES"] = False
         self._cmake.definitions["HDF4_BUILD_JAVA"] = False
-        if tools.cross_building(self):
+        if tools.build.cross_building(self, self):
             self._cmake.definitions["H4_PRINTF_LL_TEST_RUN"] = "0"
             self._cmake.definitions["H4_PRINTF_LL_TEST_RUN__TRYRUN_OUTPUT"] = ""
         self._cmake.configure(build_folder=self._build_subfolder)

@@ -56,7 +56,7 @@ class LibXMLPlusPlus(ConanFile):
             self.requires("glibmm/2.72.1")
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
         if self.settings.compiler.get_safe("cppstd"):

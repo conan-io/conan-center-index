@@ -16,6 +16,6 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         # can't run in Linux agents (headless)
-        if not (tools.cross_building(self) or self.settings.os == "Linux"):
+        if not (tools.build.cross_building(self, self) or self.settings.os == "Linux"):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)

@@ -90,7 +90,7 @@ class MozjpegConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        if tools.cross_building(self.settings):
+        if tools.build.cross_building(self, self.settings):
             # FIXME: too specific and error prone, should be delegated to CMake helper
             cmake_system_processor = {
                 "armv8": "aarch64",

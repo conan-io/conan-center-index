@@ -17,7 +17,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.build.cross_building(self, self.settings):
             self.run(os.path.join("bin", "test_package"), run_environment=True)
             if self.options["catch2"].with_main:
                 self.run(os.path.join("bin", "standalone"), run_environment=True)

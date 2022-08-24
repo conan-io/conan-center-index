@@ -29,7 +29,7 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         # Check the package provides working binaries
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             self.run("emcc -v", run_environment=True)
             self.run("em++ -v", run_environment=True)
 

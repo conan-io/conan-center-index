@@ -35,7 +35,7 @@ class TestPackageConan(ConanFile):
     def test(self):
         from io import StringIO
 
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             bin_path = os.path.join(".", "test_package")
             output = StringIO()
             self.run(bin_path, run_environment=True, ignore_errors=True, output=output)

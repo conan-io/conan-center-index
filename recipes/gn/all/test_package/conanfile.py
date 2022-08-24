@@ -55,7 +55,7 @@ class TestPackageConan(ConanFile):
         }.get(str(self.settings.arch), str(self.settings.arch))
 
     def build(self):
-        if not tools.cross_building(self.settings):
+        if not tools.build.cross_building(self, self.settings):
             with tools.files.chdir(self, self.source_folder):
                 gn_args = [
                     os.path.relpath(os.path.join(self.build_folder, "bin"), os.getcwd()).replace("\\", "/"),
@@ -66,5 +66,5 @@ class TestPackageConan(ConanFile):
                 self.run("ninja -v -j{} -C bin".format(tools.cpu_count()), run_environment=True)
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.build.cross_building(self, self.settings):
             self.run(os.path.join("bin", "test_package"), run_environment=True)

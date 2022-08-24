@@ -15,7 +15,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.build.cross_building(self, self.settings):
             if self.options["msgpack"].c_api:
                 bin_c_path = os.path.join("bin", "test_package_c")
                 self.run(bin_c_path, run_environment=True)

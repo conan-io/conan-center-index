@@ -84,7 +84,7 @@ class CMakeConan(ConanFile):
                 self._cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.with_openssl
                 if self.options.with_openssl:
                     self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = not self.options["openssl"].shared
-            if tools.cross_building(self):
+            if tools.build.cross_building(self, self):
                 self._cmake.definitions["HAVE_POLL_FINE_EXITCODE"] = ''
                 self._cmake.definitions["HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT"] = ''
             self._cmake.configure(source_folder=self._source_subfolder)

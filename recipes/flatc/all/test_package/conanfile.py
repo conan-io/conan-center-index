@@ -8,7 +8,7 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "cmake_find_package"
     
     def build_requirements(self):
-        if tools.cross_building(self.settings):
+        if tools.build.cross_building(self, self.settings):
             self.build_requires(str(self.requires["flatc"]))
         
     def build(self):
@@ -17,6 +17,6 @@ class TestPackageConan(ConanFile):
         cmake.build(target="flatbuffers")
         
     def test(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not tools.build.cross_building(self, self, skip_x64_x86=True):
             self.run("flatc --version", run_environment=True)
             self.run("flathash fnv1_16 conan", run_environment=True)

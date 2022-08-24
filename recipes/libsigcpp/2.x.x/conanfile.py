@@ -30,7 +30,7 @@ class LibSigCppConanV2(ConanFile):
     short_paths = True
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self):
             raise ConanInvalidConfiguration("Cross-building not implemented")
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)

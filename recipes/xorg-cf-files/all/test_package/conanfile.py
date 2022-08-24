@@ -32,7 +32,7 @@ class TestPackageConan(ConanFile):
     def build(self):
         for src in self.exports_sources:
             shutil.copy(os.path.join(self.source_folder, src), os.path.join(self.build_folder, src))
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             with self._build_context():
                 self.run("imake -DUseInstalled -I{}".format(self.deps_user_info["xorg-cf-files"].CONFIG_PATH), run_environment=True)
         with self._build_context():
@@ -41,5 +41,5 @@ class TestPackageConan(ConanFile):
                 autotools.make(target="test_package")
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             self.run(os.path.join(".", "test_package"), run_environment=True)

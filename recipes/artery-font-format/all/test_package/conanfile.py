@@ -13,7 +13,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             bin_path = os.path.join("bin", "test_package")
             arfont = os.path.join(self.source_folder, "example.arfont")
             self.run("{} {}".format(bin_path, arfont), run_environment=True)

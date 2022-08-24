@@ -13,7 +13,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.build.cross_building(self, self.settings):
             bin_path = os.path.join("bin", "test_package")
             wav_path = os.path.join(self.source_folder, "sine.wav")
             self.run("{0} {1}".format(bin_path, wav_path), run_environment=True)

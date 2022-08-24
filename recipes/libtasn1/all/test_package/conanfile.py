@@ -13,7 +13,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.build.cross_building(self, self.settings):
             bin_path = os.path.join("bin", "test_package")
             asn = os.path.join(self.source_folder, "pkix.asn")
             self.run("{} {}".format(bin_path, asn), run_environment=True)

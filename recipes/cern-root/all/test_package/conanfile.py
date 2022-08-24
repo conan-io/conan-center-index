@@ -35,7 +35,7 @@ class TestPackageConan(ConanFile):
             return "11"
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             self._check_binaries_are_found()
             self._check_root_dictionaries()
 

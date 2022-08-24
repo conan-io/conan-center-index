@@ -72,7 +72,7 @@ class CorradeConan(ConanFile):
             raise ConanInvalidConfiguration("Component 'utility' is required for 'test_suite', 'interconnect' and 'plugin_manager'")
 
     def build_requirements(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self, skip_x64_x86=True):
             self.build_requires("corrade/{}".format(self.version))
 
     def source(self):

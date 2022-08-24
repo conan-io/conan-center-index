@@ -20,7 +20,7 @@ class TestPackageConan(ConanFile):
 
         self.run("eu-ar r {0} {1}".format(archive_path, bin_path), run_environment=True)
         self.run("eu-objdump -d {0}".format(bin_path), run_environment=True)
-        if not tools.cross_building(self.settings):            
+        if not tools.build.cross_building(self, self.settings):            
             self.run("{} {}".format(bin_path, bin_path), run_environment=True)
 
             self.run("{} {}".format(bin_path, archive_path), run_environment=True)

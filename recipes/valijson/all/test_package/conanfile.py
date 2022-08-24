@@ -18,7 +18,7 @@ class TestPackageConan(ConanFile):
         self.requires("picojson/1.3.0")
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.build.cross_building(self, self.settings):
             bin_path = os.path.join("bin", "test_package")
             schema_file = os.path.abspath(os.path.join(self.source_folder, "schema.json"))
             valid_file = os.path.abspath(os.path.join(self.source_folder, "valid.json"))

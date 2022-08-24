@@ -62,7 +62,7 @@ class CoinUtilsConan(ConanFile):
         # FIXME: This issue likely comes from very old autotools versions used to produce configure.
         #        It might be fixed by calling autoreconf, but https://github.com/coin-or-tools/BuildTools
         #        should be packaged and added to build requirements.
-        if hasattr(self, "settings_build") and tools.cross_building(self) and self.options.shared:
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self) and self.options.shared:
             raise ConanInvalidConfiguration("coin-utils shared not supported yet when cross-building")
 
     def build_requirements(self):

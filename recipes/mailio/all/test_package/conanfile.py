@@ -14,7 +14,7 @@ class mailioTestConan(ConanFile):
         cmake.build()
 
     def build_requirements(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self) and \
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self) and \
             self.settings.os == "Macos" and self.settings.arch == "armv8":
             # Workaround for CMake bug with error message:
             # Attempting to use @rpath without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being
@@ -24,6 +24,6 @@ class mailioTestConan(ConanFile):
             self.build_requires("cmake/3.22.0")
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)

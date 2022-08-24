@@ -11,7 +11,7 @@ class TestPackageConan(ConanFile):
     _targets = ("c64", "apple2")
 
     def build(self):
-        if not tools.cross_building(self.settings):
+        if not tools.build.cross_building(self, self.settings):
             for src in self.exports_sources:
                 shutil.copy(os.path.join(self.source_folder, src), os.path.join(self.build_folder, src))
             for target in self._targets:
@@ -28,6 +28,6 @@ class TestPackageConan(ConanFile):
                 self.run("{p} -o {o} -t {t} {t}/hello.o {t}/text.o {t}.lib".format(o=output, p=os.environ["LD65"], t=target))
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.build.cross_building(self, self.settings):
             for target in self._targets:
                 assert os.path.isfile("hello_{}".format(target))

@@ -53,7 +53,7 @@ class Dav1dConan(ConanFile):
             del self.options.with_avx512
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
     def configure(self):

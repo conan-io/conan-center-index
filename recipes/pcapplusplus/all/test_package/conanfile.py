@@ -13,7 +13,7 @@ class PcapplusplusTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             bin_path = os.path.join("bin", "test_package")
             pcap_file_path = os.path.join(self.source_folder, "1_packet.pcap")
             self.run("{0} {1}".format(bin_path, pcap_file_path), run_environment=True)

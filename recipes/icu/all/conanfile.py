@@ -91,7 +91,7 @@ class ICUBase(ConanFile):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
-        if tools.cross_building(self, skip_x64_x86=True) and hasattr(self, 'settings_build'):
+        if tools.build.cross_building(self, self, skip_x64_x86=True) and hasattr(self, 'settings_build'):
             self.build_requires("icu/{}".format(self.version))
 
     def source(self):
@@ -187,7 +187,7 @@ class ICUBase(ConanFile):
             args.append("--disable-extras")
 
         env_build = self._configure_autotools()
-        if tools.cross_building(self, skip_x64_x86=True):
+        if tools.build.cross_building(self, self, skip_x64_x86=True):
             if self.settings.os in ["iOS", "tvOS", "watchOS"]:
                 args.append("--host={}".format(tools.get_gnu_triplet("Macos", str(self.settings.arch))))
             elif env_build.host:

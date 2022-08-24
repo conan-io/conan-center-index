@@ -87,7 +87,7 @@ class EmSDKConan(ConanFile):
         tools.files.replace_in_file(self, toolchain,
                               "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)",
                               "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)")
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             with tools.environment_append(self._emscripten_env):
                 self.run("embuilder build MINIMAL", run_environment=True) # force cache population
                 # the line below forces emscripten to accept the cache as-is, even after re-location

@@ -13,7 +13,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if tools.cross_building(self.settings):
+        if tools.build.cross_building(self, self.settings):
             return
         bin_path = os.path.join("bin", "test_package")
         self.run("coz run --- " + bin_path, run_environment=True)

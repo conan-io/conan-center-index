@@ -15,7 +15,7 @@ class TestPackageConan(ConanFile):
     @contextlib.contextmanager
     def _buildenv(self):
         # TODO: conan v2: replace by VirtualBuildEnv and always add grpc to build requirements
-        if tools.cross_building(self):
+        if tools.build.cross_building(self, self):
             yield
         else:
             with tools.run_environment(self):
@@ -28,7 +28,7 @@ class TestPackageConan(ConanFile):
         # of build requirements so that gprc_cpp_plugin can find its
         # shared dependencies (in build context as well)
         # should be fixed by using: CMakeToolchain + VirtualBuildEnv
-        if tools.cross_building(self) and self.options["grpc"].shared:
+        if tools.build.cross_building(self, self) and self.options["grpc"].shared:
             return
         with self._buildenv():
             cmake = CMake(self)
@@ -40,6 +40,6 @@ class TestPackageConan(ConanFile):
             cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)

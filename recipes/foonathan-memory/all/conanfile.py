@@ -93,7 +93,7 @@ class FoonathanMemory(ConanFile):
     def validate(self):
         # FIXME: jenkins servers throw error with this combination 
         # quick fix until somebody can reproduce
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self):
             raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
             raise ConanInvalidConfiguration("package currently do not support cross build to Macos armv8")
 

@@ -7,7 +7,7 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch"
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             output = StringIO()
             self.run("cmake --version", output=output, run_environment=True)
             output_str = str(output.getvalue())

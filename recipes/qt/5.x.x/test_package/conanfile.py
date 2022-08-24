@@ -24,7 +24,7 @@ class TestPackageConan(ConanFile):
 
     def _meson_supported(self):
         return self.options["qt"].shared and\
-            not tools.cross_building(self) and\
+            not tools.build.cross_building(self, self) and\
             not tools.os_info.is_macos and\
             not self._is_mingw()
 
@@ -113,7 +113,7 @@ class TestPackageConan(ConanFile):
         self.run(os.path.join("bin", "test_package"), run_environment=True)
 
     def test(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not tools.build.cross_building(self, self, skip_x64_x86=True):
             self._test_with_qmake()
             self._test_with_meson()
             self._test_with_cmake_find_package_multi()

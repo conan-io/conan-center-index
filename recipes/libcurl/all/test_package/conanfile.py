@@ -31,7 +31,7 @@ class TestPackageConan(ConanFile):
             return os.path.join("bin", "test_package")
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             self.run(self._test_executable, run_environment=True)
         else:
             # We will dump information for the generated executable

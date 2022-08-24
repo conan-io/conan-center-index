@@ -46,6 +46,6 @@ class TestPackageConan(ConanFile):
             autotools.configure()
 
     def test(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not tools.build.cross_building(self, self, skip_x64_x86=True):
             for exe in ["gettext", "ngettext", "msgcat", "msgmerge"]:
                 self.run("{} --version".format(exe), run_environment=True)

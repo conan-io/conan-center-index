@@ -67,7 +67,7 @@ class LibDaemonConan(ConanFile):
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "--disable-examples",
         ]
-        if tools.cross_building(self):
+        if tools.build.cross_building(self, self):
             args.append("ac_cv_func_setpgrp_void=yes")
         self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools

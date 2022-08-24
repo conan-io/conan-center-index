@@ -6,7 +6,7 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch", "build_type", "compiler"
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             output = StringIO()
             self.run("innoextract --version", output=output,
                      run_environment=True)

@@ -33,7 +33,7 @@ class CairommConan(ConanFile):
         return "1.16" if tools.Version(self.version) >= "1.16.0" else "1.0"
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self):
             raise ConanInvalidConfiguration("Cross-building not implemented")
         if self.settings.compiler.get_safe("cppstd"):
             if self._abi_version() == "1.16":

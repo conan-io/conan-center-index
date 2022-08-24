@@ -22,7 +22,7 @@ class TestPackageConan(ConanFile):
             if not flex_bin.startswith(self.deps_cpp_info["flex"].rootpath):
                 raise ConanException("Wrong flex executable captured")
 
-        if not tools.cross_building(self, skip_x64_x86=True) or hasattr(self, "settings_build"):
+        if not tools.build.cross_building(self, self, skip_x64_x86=True) or hasattr(self, "settings_build"):
             self.run("flex --version", run_environment=not hasattr(self, "settings_build"))
 
             print(os.environ["PATH"])
@@ -32,7 +32,7 @@ class TestPackageConan(ConanFile):
             cmake.build()
 
     def test(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not tools.build.cross_building(self, self, skip_x64_x86=True):
             bin_path = os.path.join("bin", "test_package")
             src = os.path.join(self.source_folder, "basic_nr.txt")
             self.run("{} {}".format(bin_path, src), run_environment=True)

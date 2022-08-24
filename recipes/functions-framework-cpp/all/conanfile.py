@@ -97,7 +97,7 @@ class FunctionsFrameworkCppConan(ConanFile):
         if self._is_msvc and self.options.shared:
             raise ConanInvalidConfiguration("Fails to build for Visual Studio as a DLL")
 
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and tools.build.cross_building(self, self):
             raise ConanInvalidConfiguration(
                 "Recipe not prepared for cross-building (yet)"
             )
