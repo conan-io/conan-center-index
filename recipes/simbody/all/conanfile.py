@@ -8,16 +8,30 @@ import textwrap
 
 class SimbodyConan(ConanFile):
     name = "simbody"
+    description = "High-performance, open-source toolkit for science- and engineering-quality simulation"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/simbody/simbody"
-    description = "High-performance, open-source toolkit for science- and engineering-quality simulation"
     topics = ("high-performance", "science", "simulation")
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
     exports_sources = "CMakeLists.txt", "patches/**"
-
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
     _cmake = None
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
 
     @property
     def _module_file_rel_path(self):
@@ -27,26 +41,21 @@ class SimbodyConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def _configure_cmake(self):
-        if self._cmake is not None:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure(source_folder=self._source_subfolder)
-        return self._cmake
-
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],  
                     destination=self._source_subfolder, strip_root=True)
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+
     def build(self):
-        version_major = Version(self.version).major
-        env_build = RunEnvironment(self)
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.files.patch(**patch)
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
