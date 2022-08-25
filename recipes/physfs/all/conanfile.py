@@ -1,12 +1,12 @@
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir, save
 from conan.tools.microsoft import is_msvc
-from conans import tools as tools_legacy
 import os
 import textwrap
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.51.3"
 
 
 class PhysfsConan(ConanFile):
@@ -143,7 +143,7 @@ class PhysfsConan(ConanFile):
         else:
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.append("pthread")
-            elif tools_legacy.is_apple_os(self.settings.os):
+            elif is_apple_os(self):
                 self.cpp_info.frameworks.extend(["Foundation", "IOKit"])
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
