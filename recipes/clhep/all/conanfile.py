@@ -1,8 +1,12 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get
+from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class ClhepConan(ConanFile):
@@ -24,25 +28,10 @@ class ClhepConan(ConanFile):
     }
 
     short_paths = True
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,33 +42,33 @@ class ClhepConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
-        if self._is_msvc and self.options.shared:
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
+        if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration("CLHEP doesn't properly build its shared libs with Visual Studio")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CLHEP_SINGLE_THREAD"] = False
+        tc.variables["CLHEP_BUILD_DOCS"] = False
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, "CLHEP"))
         cmake.build()
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["CLHEP_SINGLE_THREAD"] = False
-        self._cmake.definitions["CLHEP_BUILD_DOCS"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
     def package(self):
-        self.copy(pattern="COPYING*", dst="licenses", src=os.path.join(self._source_subfolder, "CLHEP"))
-        cmake = self._configure_cmake()
+        copy(self, "COPYING*", src=os.path.join(self.source_folder, "CLHEP"), dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     @property
@@ -107,19 +96,19 @@ class ClhepConan(ConanFile):
         suffix = "" if self.options.shared else "S"
 
         self.cpp_info.set_property("cmake_file_name", "CLHEP")
-        self.cpp_info.set_property("cmake_target_name", "CLHEP::CLHEP{}".format(suffix))
+        self.cpp_info.set_property("cmake_target_name", f"CLHEP::CLHEP{suffix}")
         self.cpp_info.set_property("pkg_config_name", "clhep")
 
         for component in self._clhep_components:
             name = component["name"]
             conan_comp = name.lower()
-            cmake_target = "{}{}".format(name, suffix)
-            pkg_config_name = "clhep-{}".format(name.lower())
-            lib_name = "CLHEP-{}-{}".format(name, self.version)
+            cmake_target = f"{name}{suffix}"
+            pkg_config_name = f"clhep-{name.lower()}"
+            lib_name = f"CLHEP-{name}-{self.version}"
             system_libs = component.get("system_libs", [])
             requires = component.get("requires", [])
 
-            self.cpp_info.components[conan_comp].set_property("cmake_target_name", "CLHEP::{}".format(cmake_target))
+            self.cpp_info.components[conan_comp].set_property("cmake_target_name", f"CLHEP::{cmake_target}")
             self.cpp_info.components[conan_comp].set_property("pkg_config_name", pkg_config_name)
             self.cpp_info.components[conan_comp].libs = [lib_name]
             self.cpp_info.components[conan_comp].system_libs = system_libs
@@ -135,8 +124,8 @@ class ClhepConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "CLHEP"
         self.cpp_info.names["cmake_find_package_multi"] = "CLHEP"
         self.cpp_info.names["pkg_config"] = "clhep"
-        self.cpp_info.components["clheplib"].names["cmake_find_package"] = "CLHEP{}".format(suffix)
-        self.cpp_info.components["clheplib"].names["cmake_find_package_multi"] = "CLHEP{}".format(suffix)
-        self.cpp_info.components["clheplib"].set_property("cmake_target_name", "CLHEP::CLHEP{}".format(suffix))
+        self.cpp_info.components["clheplib"].names["cmake_find_package"] = f"CLHEP{suffix}"
+        self.cpp_info.components["clheplib"].names["cmake_find_package_multi"] = f"CLHEP{suffix}"
+        self.cpp_info.components["clheplib"].set_property("cmake_target_name", f"CLHEP::CLHEP{suffix}")
         self.cpp_info.components["clheplib"].names["pkg_config"] = "clhep"
         self.cpp_info.components["clheplib"].set_property("pkg_config_name", "clhep")
