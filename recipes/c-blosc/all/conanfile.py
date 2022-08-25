@@ -3,7 +3,7 @@ from conan.tools.files import apply_conandata_patches
 from conans import CMake
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.47.0"
 
 
 class CbloscConan(ConanFile):
