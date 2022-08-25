@@ -3,6 +3,8 @@ import os
 from conan import ConanFile, tools
 
 
+required_conan_version = "1.50.0"
+
 class AccessPrivateConan(ConanFile):
     name = "access_private"
     description = "Access private members and statics of a C++ class"
