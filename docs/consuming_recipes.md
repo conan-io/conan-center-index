@@ -18,7 +18,7 @@ There can be several root causes if a recipe (a new revision) stopped to work in
 
  * **Fixes in recipes** that modify the libraries they are creating: exported symbols,
    compiler flags, generated files for your build system, CMake target names,...
-   
+
    Every contributor tries to do their best and reviewers do an amazing work checking that the
    changes are really improving recipes.
 
@@ -36,7 +36,7 @@ There can be several root causes if a recipe (a new revision) stopped to work in
    New recipe revisions can take into account changes that are introduced in new Conan client
    version, sometimes these changes modify some experimental behavior without modifying recipe syntax.
 
-   When these changes are in the critical path to Conan v2 we can introduce the 
+   When these changes are in the critical path to Conan v2 we can introduce the
    `required_conan_version` statement to be sure that people using these new experimental
    features are using the required Conan version and testing the actual behavior of those
    features (feedback about them is very important to Conan).
@@ -50,7 +50,7 @@ There are two main ways you can isolate your project from changes in recipes:
    new recipe revisions are only pushed to your Artifactory after they have been validated
    in your project.
  * **Pin the version of every reference you consume in your project** using recipe revisions
-   and lockfiles. 
+   and lockfiles.
 
 
 ### Use your own Artifactory instance
@@ -58,7 +58,7 @@ There are two main ways you can isolate your project from changes in recipes:
 Using your own Artifactory instance is not as complicated as it sounds. You can [deploy it
 on-premise](https://conan.io/downloads.html) or use a [cloud provided solution](https://jfrog.com/start-free/?isConan=true) for free.
 
-Once you have configured your Artifactory instance, you should ensure that your project is 
+Once you have configured your Artifactory instance, you should ensure that your project is
 using only that remote (`conan remote list`). Conan makes it easy to use different configurations
 per project (check `CONAN_USER_HOME` env variable) or to store the configuration in some external
 file or repository so you can shared and install it using one command (`conan config install ...`).
@@ -123,8 +123,7 @@ The two basic commands you need to know ([full docs here](https://docs.conan.io/
    conan install conanfile.txt --lockfile=locks/project.lock
    ```
 
-If your project is managing several configurations, you would probably like to have a look to
-_base lockfiles_ and _lockfile bundles_ in the documentation.
+If your project is managing several configurations, you would probably like to have a look to [base lockfiles](https://docs.conan.io/en/latest/versioning/lockfiles/configurations.html#base-lockfiles) and [lockfile bundles](https://docs.conan.io/en/latest/versioning/lockfiles/bundle.html) in the documentation.
 
 
 ---
