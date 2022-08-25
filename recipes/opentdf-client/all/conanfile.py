@@ -37,8 +37,12 @@ class OpenTDFConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
+        if Version(self.version) < "1.1.5":
+            vsMin = "17"
+        else:
+            vsMin = "16"
         return {
-            "Visual Studio": "16",
+            "Visual Studio": vsMin,
             "msvc": "19.22",
             "gcc": "7.5.0",
             "clang": "12",
