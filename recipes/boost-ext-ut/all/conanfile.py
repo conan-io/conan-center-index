@@ -58,8 +58,10 @@ class UTConan(ConanFile):
 
         check_min_vs(self, "192")
 
-        if is_msvc(self) and not self.options.get_safe("disable_module"):
-            raise ConanInvalidConfiguration("The 'disable_module' option must be enabled when using MSVC.")
+        if is_msvc(self):
+            check_min_vs(self, "192")
+            if not self.options.get_safe("disable_module", True):
+                self.output.warn("The 'disable_module' option must be enabled when using MSVC.")
         if not is_msvc(self):
             min_version = self._minimum_compilers_version.get(
                 str(self.settings.compiler))
