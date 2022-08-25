@@ -56,8 +56,6 @@ class UTConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} version 1.1.8 may not be built with MSVC. "
                                             "Please use at least version 1.1.9 with MSVC.")
 
-        check_min_vs(self, "192")
-
         if is_msvc(self):
             check_min_vs(self, "192")
             if not self.options.get_safe("disable_module", True):
