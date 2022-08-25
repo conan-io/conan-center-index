@@ -36,23 +36,31 @@ class UTConan(ConanFile):
             "gcc": "9",
         }
 
-    def layout(self):
-        cmake_layout(self)
-
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             copy(self, patch["patch_file"], self.recipe_folder, self.export_sources_folder)
 
+    def config_options(self):
+        if Version(self.version) <= "1.1.8":
+            del self.options.disable_module
+        elif is_msvc(self):
+            self.options.disable_module = True
+
+    def layout(self):
+        cmake_layout(self)
+
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
+        if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
         if Version(self.version) <= "1.1.8" and is_msvc(self):
-            raise ConanInvalidConfiguration("{} version 1.1.8 may not be built with MSVC. "
+            raise ConanInvalidConfiguration(f"{self.name} version 1.1.8 may not be built with MSVC. "
                                             "Please use at least version 1.1.9 with MSVC.")
 
         check_min_vs(self, "192")
 
-        if not is_msvc(self):
+        if is_msvc(self) and "disable_module" in self.options.values:
+            raise ConanInvalidConfiguration("The 'disable_module' option must be enabled when using MSVC.")
+        else:
             min_version = self._minimum_compilers_version.get(
                 str(self.settings.compiler))
             if not min_version:
@@ -63,12 +71,6 @@ class UTConan(ConanFile):
                     raise ConanInvalidConfiguration(
                         f"{self.name} requires C++{self._minimum_cpp_standard} support. "
                         f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
-
-    def config_options(self):
-        if Version(self.version) <= "1.1.8":
-            del self.options.disable_module
-        elif is_msvc(self):
-            self.options.disable_module = True
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
