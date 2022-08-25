@@ -13,9 +13,9 @@ required_conan_version = ">=1.45.0"
 class LibcurlConan(ConanFile):
     name = "libcurl"
     description = "command line tool and library for transferring data with URLs"
-    license = "MIT"
+    license = "curl"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://curl.haxx.se"
+    homepage = "https://curl.se"
     topics = ("curl", "data-transfer",
             "ftp", "gopher", "http", "imap", "ldap", "mqtt", "pop3", "rtmp", "rtsp",
             "scp", "sftp", "smb", "smtp", "telnet", "tftp")
