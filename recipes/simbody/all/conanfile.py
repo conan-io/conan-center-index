@@ -13,7 +13,6 @@ class SimbodyConan(ConanFile):
     homepage = "https://github.com/simbody/simbody"
     topics = ("high-performance", "science", "simulation")
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = "CMakeLists.txt", "patches/**"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
