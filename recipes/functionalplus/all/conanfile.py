@@ -62,11 +62,11 @@ class FunctionalPlusConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "FunctionalPlus")
         self.cpp_info.set_property("cmake_target_name", "FunctionalPlus::fplus")
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.components["fplus"].bindirs = []
-        self.cpp_info.components["fplus"].frameworkdirs = []
-        self.cpp_info.components["fplus"].libdirs = []
-        self.cpp_info.components["fplus"].resdirs = []
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["fplus"].system_libs = ["pthread"]
 
@@ -76,3 +76,7 @@ class FunctionalPlusConan(ConanFile):
         self.cpp_info.components["fplus"].names["cmake_find_package"] = "fplus"
         self.cpp_info.components["fplus"].names["cmake_find_package_multi"] = "fplus"
         self.cpp_info.components["fplus"].set_property("cmake_target_name", "FunctionalPlus::fplus")
+        self.cpp_info.components["fplus"].bindirs = []
+        self.cpp_info.components["fplus"].frameworkdirs = []
+        self.cpp_info.components["fplus"].libdirs = []
+        self.cpp_info.components["fplus"].resdirs = []
