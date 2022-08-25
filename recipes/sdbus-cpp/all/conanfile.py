@@ -13,7 +13,7 @@ class SdbusCppConan(ConanFile):
     homepage = "https://github.com/Kistler-Group/sdbus-cpp"
     description = "High-level C++ D-Bus library for Linux designed" \
                   " to provide easy-to-use yet powerful API in modern C++"
-    topics = ("conan", "dbus", "sd-bus", "sdbus-c++", "sdbus-cpp")
+    topics = ("dbus", "sd-bus", "sdbus-c++", "sdbus-cpp")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
