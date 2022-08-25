@@ -1,6 +1,5 @@
 from conan import ConanFile, tools
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.scm import Version
 import os
 import textwrap
@@ -55,9 +54,9 @@ class SimbodyConan(ConanFile):
         cmake.build()
 
     def package(self):
-        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
+        tools.files.copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        cmake = cmake = CMake(self)
         cmake.install()
         tools.files.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         
@@ -70,10 +69,10 @@ class SimbodyConan(ConanFile):
             set(simbody_VERSION_PATCH {patch})
             set(simbody_VERSION_STRING "{major}.{minor}.{patch}")
         """.format(major=version.major, minor=version.minor, patch=version.patch))
-        tools.save(module_file, content)
+        tools.files.save(module_file, content)
 
     def package_info(self):
-        version_major = tools.Version(self.version).major
+        version_major = Version(self.version).major
         simbody_cmake_component = f"simbody{version_major}"
         base_module_path = os.path.join(self.package_folder, "lib", "cmake", simbody_cmake_component)
         
