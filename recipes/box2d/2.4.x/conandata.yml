@@ -8,4 +8,3 @@ sources:
 patches:
   "2.4.0":
     - patch_file: "patches/install-and-allow-shared.patch"
-      base_path: "source_subfolder"
