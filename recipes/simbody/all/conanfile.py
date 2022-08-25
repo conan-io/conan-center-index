@@ -13,6 +13,7 @@ class SimbodyConan(ConanFile):
     homepage = "https://github.com/simbody/simbody"
     topics = ("high-performance", "science", "simulation")
     settings = "os", "compiler", "build_type", "arch"
+    exports_sources = "CMakeLists.txt"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -21,7 +22,6 @@ class SimbodyConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    _cmake = None
 
     def config_options(self):
         if self.settings.os == "Windows":
