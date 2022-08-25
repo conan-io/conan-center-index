@@ -181,7 +181,7 @@ class SDLConan(ConanFile):
             destination=self._source_subfolder)
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+        for data in self.conan_data.get("patches", {}).get(self.version, []):
             apply_patch(**patch)
 
         replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
