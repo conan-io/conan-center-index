@@ -234,7 +234,7 @@ class LibcurlConan(ConanFile):
         #     but does not work on OS X 10.11 with SIP)
         # 2. copying dylib's to the build directory (fortunately works on OS X)
         if self.settings.os == "Macos":
-            copy(self, "*.dylib*", dst=self.source_folder, keep_path=False)
+            copy(self, "*.dylib*", src=self.build_folder, dst=self.source_folder, keep_path=False)
 
     def build(self):
         self._patch_sources()
@@ -574,7 +574,7 @@ class LibcurlConan(ConanFile):
 
     def package(self):
         copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        self.copy("cacert.pem", dst="res")
+        copy(self, pattern="cacert.pem", src=self.build_folder, dst="res")
         if self._is_using_cmake_build:
             cmake = CMake(self)
             cmake.install()
@@ -587,9 +587,9 @@ class LibcurlConan(ConanFile):
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
             if self._is_mingw and self.options.shared:
                 # Handle only mingw libs
-                self.copy(pattern="*.dll", dst="bin", keep_path=False)
-                self.copy(pattern="*.dll.a", dst="lib", keep_path=False)
-                self.copy(pattern="*.lib", dst="lib", keep_path=False)
+                copy(self, pattern="*.dll", src=self.build_folder, dst="bin", keep_path=False)
+                copy(self, pattern="*.dll.a", src=self.build_folder, dst="lib", keep_path=False)
+                copy(self, pattern="*.lib", src=self.build_folder, dst="lib", keep_path=False)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
