@@ -1,6 +1,6 @@
-import os
+from os.path import join
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, copy, get
 from conan.tools.build import check_min_cppstd
 from conans import CMake
 
@@ -57,13 +57,18 @@ class JungleConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE*", src=self._source_subfolder, dst="licenses")
-        self.copy("*.a*", dst="lib", src="lib")
-        self.copy("*.lib", dst="lib", src="lib")
-        self.copy("*.so*", dst="lib", src="lib", symlinks=True)
-        self.copy("*.dylib*", dst="lib", src="lib", symlinks=True)
-        self.copy("*.dll*", dst="bin", src="lib")
-        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"), keep_path=True)
+        src_dir = join(self.source_folder, self._source_subfolder)
+        copy(self, "LICENSE*", src_dir, join(self.package_folder, "licenses"))
+
+        hdr_src = join(src_dir, "include")
+        copy(self, "*.h", hdr_src, join(self.package_folder, "include"), keep_path=True)
+
+        lib_dir = join(self.package_folder, "lib")
+        copy(self, "*.a", self.build_folder, lib_dir, keep_path=False)
+        copy(self, "*.lib", self.build_folder, lib_dir, keep_path=False)
+        copy(self, "*.so*", self.build_folder, lib_dir, keep_path=False)
+        copy(self, "*.dylib*", self.build_folder, lib_dir, keep_path=False)
+        copy(self, "*.dll*", self.build_folder, join(self.package_folder, "bin"), keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["jungle"]
