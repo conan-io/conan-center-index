@@ -9,7 +9,7 @@ from conans import CMake, tools
 import functools
 import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.51.3"
 
 
 class SDLConan(ConanFile):
