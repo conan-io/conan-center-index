@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.files import get, replace_in_file, rm, rmdir
-from conan.tools.files import patch as apply_patch
+from conan.tools.files import patch
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conans import CMake, tools
