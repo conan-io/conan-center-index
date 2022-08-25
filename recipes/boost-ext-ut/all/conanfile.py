@@ -50,7 +50,7 @@ class UTConan(ConanFile):
         cmake_layout(self)
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
         if Version(self.version) <= "1.1.8" and is_msvc(self):
             raise ConanInvalidConfiguration(f"{self.name} version 1.1.8 may not be built with MSVC. "
