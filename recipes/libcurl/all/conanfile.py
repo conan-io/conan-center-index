@@ -14,7 +14,7 @@ from conans.tools import get_env, os_info
 import os
 import re
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.3"
 
 
 class LibcurlConan(ConanFile):
@@ -204,8 +204,8 @@ class LibcurlConan(ConanFile):
         else:
             self.build_requires("libtool/2.4.6")
             self.build_requires("pkgconf/1.7.4")
-            if self._settings_build.os == "Windows" and not get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/cci.latest")
+            if self._settings_build.os == "Windows" and not get_env("CONAN_BASH_PATH") and self.conf.get("tools.microsoft.bash:path"):
+                self.tool_requires("msys2/cci.latest")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -220,6 +220,8 @@ class LibcurlConan(ConanFile):
             self._generate_with_cmake()
         else:
             self._generate_with_autotools()
+        ms = VirtualBuildEnv(self)
+        ms.generate(scope="build")
 
     # TODO: remove imports once rpath of shared libs of libcurl dependencies fixed on macOS
     def imports(self):
@@ -231,7 +233,7 @@ class LibcurlConan(ConanFile):
         #     but does not work on OS X 10.11 with SIP)
         # 2. copying dylib's to the build directory (fortunately works on OS X)
         if self.settings.os == "Macos":
-            self.copy("*.dylib*", dst=self.source_folder, keep_path=False)
+            copy(self, "*.dylib*", dst=self.source_folder, keep_path=False)
 
     def build(self):
         self._patch_sources()
@@ -570,7 +572,7 @@ class LibcurlConan(ConanFile):
         tc.generate()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self.source_folder)
+        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         self.copy("cacert.pem", dst="res")
         if self._is_using_cmake_build:
             cmake = CMake(self)
