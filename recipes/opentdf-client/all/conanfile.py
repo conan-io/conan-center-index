@@ -61,7 +61,7 @@ class OpenTDFConan(ConanFile):
                 raise ConanInvalidConfiguration(f"{self.name} requires C++{self._minimum_cpp_standard} support."
                                                  "The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
         if is_msvc_static_runtime(self):
-             raise ConanInvalidConfiguration("this package can not be built with MT or MTd at this time")
+            raise ConanInvalidConfiguration("this package can not be built with MT or MTd at this time")
 
     def requirements(self):
         self.requires("openssl/1.1.1q")
