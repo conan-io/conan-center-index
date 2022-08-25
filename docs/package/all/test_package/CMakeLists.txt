@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.8)
 
 project(test_package C) # if the project is pure C
 project(test_package CXX) # if the project uses c++
