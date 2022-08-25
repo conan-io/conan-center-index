@@ -150,6 +150,8 @@ class LibcurlConan(ConanFile):
             self.copy(patch["patch_file"])
 
     def config_options(self):
+        if tools.Version(self.version) < "7.10.4":
+            self.license = "MIT"
         if self.settings.os == "Windows":
             del self.options.fPIC
         if not self._has_zstd_option:
