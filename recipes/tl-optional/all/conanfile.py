@@ -54,3 +54,7 @@ class TlOptionalConan(ConanFile):
         self.cpp_info.components["optional"].names["cmake_find_package"] = "optional"
         self.cpp_info.components["optional"].names["cmake_find_package_multi"] = "optional"
         self.cpp_info.components["optional"].set_property("cmake_target_name", "tl::optional")
+        self.cpp_info.components["optional"].bindirs = []
+        self.cpp_info.components["optional"].frameworkdirs = []
+        self.cpp_info.components["optional"].libdirs = []
+        self.cpp_info.components["optional"].resdirs = []
