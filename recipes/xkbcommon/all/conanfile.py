@@ -3,7 +3,7 @@ from conan.tools import scm, files
 from conan.errors import ConanInvalidConfiguration
 from conans import Meson, tools
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.50.0"
 
 
 class XkbcommonConan(ConanFile):
