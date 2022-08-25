@@ -554,6 +554,36 @@ class BoostConan(ConanFile):
         if self._with_iconv:
             self.requires("libiconv/1.17")
 
+    def get_enabled_pythons(self):
+        enabled_pythons = {version: self.options.get_safe(f"python{version.xy}") for version in PYTHON_VERSIONS}
+
+        if not any(enabled_pythons.values()):
+            enabled_pythons[self._python.version] = True
+            setattr(self.info.options, f"python{self._python.version.xy}", True)
+
+        return enabled_pythons
+
+    def add_python_compatible_packages(self, info):
+        # Should be compatible with *any* extra versions
+        # (max 2^len(PYTHON_VERSIONS) packages)
+        # but limiting it to just any one extra
+        for (version, enabled) in self.get_enabled_pythons().items():
+            if not enabled:
+                compatible_pkg = info.clone()
+                setattr(compatible_pkg.options, f"python{version.xy}", True)
+                self.compatible_packages.append(compatible_pkg)
+
+    def python_package_id(self):
+        for version in PYTHON_VERSIONS:
+            # PATH to the interpreter is not important, only version matters
+            delattr(self.info.options, f"python{version.xy}_executable")
+
+        if self.options.without_python:
+            for version in PYTHON_VERSIONS:
+                delattr(self.info.options, f"python{version.xy}")
+        else:
+            self.add_python_compatible_packages(self.info)
+
     def package_id(self):
         del self.info.options.i18n_backend
 
@@ -564,14 +594,7 @@ class BoostConan(ConanFile):
             del self.info.options.debug_level
             del self.info.options.filesystem_version
             del self.info.options.pch
-
-            for version in PYTHON_VERSIONS:
-                # PATH to the interpreter is not important, only version matters
-                delattr(self.info.options, f"python{version.xy}_executable")
-
-                # only enabled versions matter
-                if self.options.without_python or not self.options.get_safe(f"python{version.xy}"):
-                    delattr(self.info.options, f"python{version.xy}")
+            self.python_package_id()
 
     def build_requirements(self):
         if not self.options.header_only:
