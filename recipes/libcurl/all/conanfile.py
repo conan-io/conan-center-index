@@ -214,7 +214,7 @@ class LibcurlConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
-        download(self, "https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True)
+        download(self, "https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True, sha256="6ed95025fba2aef0ce7b647607225745624497f876d74ef6ec22b26e73e9de77")
 
     def generate(self):
         if self._is_using_cmake_build:
