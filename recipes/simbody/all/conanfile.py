@@ -58,7 +58,7 @@ class SimbodyConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = cmake = CMake(self)
         cmake.install()
-        tools.files.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         
 
     @staticmethod
@@ -69,7 +69,7 @@ class SimbodyConan(ConanFile):
             set(simbody_VERSION_PATCH {patch})
             set(simbody_VERSION_STRING "{major}.{minor}.{patch}")
         """.format(major=version.major, minor=version.minor, patch=version.patch))
-        tools.files.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     def package_info(self):
         version_major = Version(self.version).major
