@@ -1,4 +1,7 @@
-from conan import CMake, ConanFile, tools, RunEnvironment
+from conan import ConanFile, tools
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -32,14 +35,14 @@ class SimbodyConan(ConanFile):
         return self._cmake
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],  
+        tools.files.get(self, **self.conan_data["sources"][self.version],  
                     destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        version_major = tools.Version(self.version).major
+        version_major = Version(self.version).major
         env_build = RunEnvironment(self)
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -47,7 +50,7 @@ class SimbodyConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         
 
     @staticmethod
