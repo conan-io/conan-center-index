@@ -40,7 +40,7 @@ class SemVer200Conan(ConanFile):
 
     def validate(self):
         if self.info.settings.os == "Windows" and self.info.options.shared:
-              raise ConanInvalidConfiguration("Shared library on Windows not supported")
+            raise ConanInvalidConfiguration("Shared library on Windows is not supported.")
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, 14)
 
