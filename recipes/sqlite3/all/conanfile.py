@@ -118,6 +118,7 @@ class Sqlite3Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["SQLITE3_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.variables["SQLITE3_VERSION"] = self.version
         tc.variables["SQLITE3_BUILD_EXECUTABLE"] = self.options.build_executable
         tc.variables["THREADSAFE"] = self.options.threadsafe
