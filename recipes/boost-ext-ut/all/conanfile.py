@@ -67,9 +67,7 @@ class UTConan(ConanFile):
     def config_options(self):
         if Version(self.version) <= "1.1.8":
             del self.options.disable_module
-
-    def configure(self):
-        if is_msvc(self) and "disable_module" in self.options.values:
+        elif is_msvc(self):
             self.options.disable_module = True
 
     def source(self):
