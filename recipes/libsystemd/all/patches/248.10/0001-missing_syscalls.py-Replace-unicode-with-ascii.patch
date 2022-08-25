@@ -1,6 +1,6 @@
-From 591863a8b4287b69d62fb02117b2b21b98bf4030 Mon Sep 17 00:00:00 2001
+From 512223a1ada207304787fb24a6da9e844b381239 Mon Sep 17 00:00:00 2001
 From: Sergey Bobrenok <bobrofon@gmail.com>
-Date: Sun, 6 Jun 2021 11:01:23 +0300
+Date: Wed, 17 Aug 2022 22:31:13 +0300
 Subject: [PATCH] missing_syscalls.py: Replace unicode with ascii
 
 In some system configurations 'find_program('missing_syscalls.py')' may
@@ -13,10 +13,10 @@ fail with error:
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/basic/missing_syscalls.py b/src/basic/missing_syscalls.py
-index 550be48cf4..8b56c93857 100644
+index 1bfa31ba37..cc353fe723 100644
 --- a/src/basic/missing_syscalls.py
 +++ b/src/basic/missing_syscalls.py
-@@ -27,7 +27,7 @@ def dictify(f):
+@@ -32,7 +32,7 @@ def dictify(f):
  
  @dictify
  def parse_syscall_table(filename):
@@ -26,5 +26,5 @@ index 550be48cf4..8b56c93857 100644
          items = line.split()
          if len(items) >= 2:
 -- 
-2.31.1
+2.37.2
 
