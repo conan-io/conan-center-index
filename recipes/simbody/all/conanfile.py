@@ -1,5 +1,4 @@
-from conans import CMake, ConanFile, tools, RunEnvironment
-import conan.tools.files
+from conan import CMake, ConanFile, tools, RunEnvironment
 import os
 import textwrap
 
@@ -65,13 +64,10 @@ class SimbodyConan(ConanFile):
         version_major = tools.Version(self.version).major
         simbody_cmake_component = f"simbody{version_major}"
         base_module_path = os.path.join(self.package_folder, "lib", "cmake", simbody_cmake_component)
-        utils_targets_file = os.path.join(base_module_path, f"{simbody_cmake_component}-utilities-targets.cmake")
         
         self.cpp_info.names["cmake_find_package"] = simbody_cmake_component
         self.cpp_info.names["cmake_find_package_multi"] = simbody_cmake_component
-        self.cpp_info.names["cmake_paths"] = simbody_cmake_component
 
         self.cpp_info.components[simbody_cmake_component].names["cmake_find_package"] = simbody_cmake_component
         self.cpp_info.components[simbody_cmake_component].names["cmake_find_package_multi"] = simbody_cmake_component
-        self.cpp_info.components[simbody_cmake_component].names["cmake_paths"] = simbody_cmake_component
         self.cpp_info.components[simbody_cmake_component].builddirs.append(os.path.join(base_module_path, f"cmake{version_major}"))
