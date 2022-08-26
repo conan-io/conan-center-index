@@ -1,14 +1,12 @@
-from conan.tools.microsoft import msvc_runtime_flag, is_msvc
-from conan.tools.files import get, rmdir, replace_in_file
-from conan.tools.scm import Version
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conans import CMake
-import functools
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
-
-required_conan_version = ">=1.48.0"
+required_conan_version = ">=1.50.0"
 
 
 class PCRE2Conan(ConanFile):
@@ -45,16 +43,9 @@ class PCRE2Conan(ConanFile):
         "grep_support_callout_fork": True,
     }
 
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake", "cmake_find_package"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -63,8 +54,14 @@ class PCRE2Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
         if not self.options.build_pcre2grep:
             del self.options.with_zlib
             del self.options.with_bzip2
@@ -82,12 +79,43 @@ class PCRE2Conan(ConanFile):
         if self.info.options.build_pcre2grep and not self.info.options.build_pcre2_8:
             raise ConanInvalidConfiguration("build_pcre2_8 must be enabled for the pcre2grep program")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        # Mandatory because upstream CMakeLists overrides BUILD_SHARED_LIBS as a CACHE variable
+        # (see https://github.com/conan-io/conan/issues/11840)
+        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
+        if Version(self.version) >= "10.38":
+            tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
+        tc.variables["PCRE2_BUILD_PCRE2GREP"] = self.options.build_pcre2grep
+        tc.variables["PCRE2_SUPPORT_LIBZ"] = self.options.get_safe("with_zlib", False)
+        tc.variables["PCRE2_SUPPORT_LIBBZ2"] = self.options.get_safe("with_bzip2", False)
+        tc.variables["PCRE2_BUILD_TESTS"] = False
+        if is_msvc(self):
+            tc.variables["PCRE2_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+        tc.variables["PCRE2_DEBUG"] = self.settings.build_type == "Debug"
+        tc.variables["PCRE2_BUILD_PCRE2_8"] = self.options.build_pcre2_8
+        tc.variables["PCRE2_BUILD_PCRE2_16"] = self.options.build_pcre2_16
+        tc.variables["PCRE2_BUILD_PCRE2_32"] = self.options.build_pcre2_32
+        tc.variables["PCRE2_SUPPORT_JIT"] = self.options.support_jit
+        tc.variables["PCRE2GREP_SUPPORT_CALLOUT_FORK"] = self.options.get_safe("grep_support_callout_fork", False)
+        if Version(self.version) < "10.38":
+            # relocatable shared libs on Macos
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.generate()
+
+        cd = CMakeDeps(self)
+        cd.generate()
 
     def _patch_sources(self):
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        apply_conandata_patches(self)
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         # Do not add ${PROJECT_SOURCE_DIR}/cmake because it contains a custom
         # FindPackageHandleStandardArgs.cmake which can break conan generators
         if Version(self.version) < "10.34":
@@ -99,37 +127,15 @@ class PCRE2Conan(ConanFile):
                               "RUNTIME DESTINATION bin",
                               "RUNTIME DESTINATION bin BUNDLE DESTINATION bin")
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        if Version(self.version) >= "10.38":
-            cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
-        cmake.definitions["PCRE2_BUILD_PCRE2GREP"] = self.options.build_pcre2grep
-        cmake.definitions["PCRE2_SUPPORT_LIBZ"] = self.options.get_safe("with_zlib", False)
-        cmake.definitions["PCRE2_SUPPORT_LIBBZ2"] = self.options.get_safe("with_bzip2", False)
-        cmake.definitions["PCRE2_BUILD_TESTS"] = False
-        if is_msvc(self):
-            cmake.definitions["PCRE2_STATIC_RUNTIME"] = "MT" in msvc_runtime_flag(self)
-        cmake.definitions["PCRE2_DEBUG"] = self.settings.build_type == "Debug"
-        cmake.definitions["PCRE2_BUILD_PCRE2_8"] = self.options.build_pcre2_8
-        cmake.definitions["PCRE2_BUILD_PCRE2_16"] = self.options.build_pcre2_16
-        cmake.definitions["PCRE2_BUILD_PCRE2_32"] = self.options.build_pcre2_32
-        cmake.definitions["PCRE2_SUPPORT_JIT"] = self.options.support_jit
-        cmake.definitions["PCRE2GREP_SUPPORT_CALLOUT_FORK"] = self.options.get_safe("grep_support_callout_fork", False)
-        if Version(self.version) < "10.38":
-            # relocatable shared libs on Macos
-            cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
-
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENCE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENCE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "cmake"))
         rmdir(self, os.path.join(self.package_folder, "man"))
