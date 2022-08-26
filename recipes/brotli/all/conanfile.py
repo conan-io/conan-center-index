@@ -79,7 +79,7 @@ class BrotliConan(ConanFile):
             tc.preprocessor_definitions["BROTLI_BUILD_LITTLE_ENDIAN"] = 1
         if self.options.enable_portable:
             tc.preprocessor_definitions["BROTLI_BUILD_PORTABLE"] = 1
-        if not(self.options.enable_rbit):
+        if not self.options.enable_rbit:
             tc.preprocessor_definitions["BROTLI_BUILD_NO_RBIT"] = 1
         if self.options.enable_debug:
             tc.preprocessor_definitions["BROTLI_DEBUG"] = 1
