@@ -79,6 +79,10 @@ class Tixi3Conan(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs = ['include/tixi3']
         self.cpp_info.libs = ['tixi3']
+
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ['Shlwapi']
+
         self.cpp_info.set_property("cmake_target_aliases", ["tixi3"])
         self.cpp_info.libdirs = ['lib']
         self.cpp_info.bindirs = ['bin']
