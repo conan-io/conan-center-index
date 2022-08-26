@@ -21,6 +21,7 @@ class SimbodyConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "openblas:build_lapack": True
     }
 
     def config_options(self):
@@ -38,6 +39,10 @@ class SimbodyConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def requirements(self):
+        self.requires("openblas/0.3.17")
+        self.requires("opengl/system")
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],  
