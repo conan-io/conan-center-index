@@ -152,67 +152,46 @@ class MpirConan(ConanFile):
             self._autotools.configure(args=args)
         return self._autotools
 
+    def _patch_new_msvc_version(self, ver, toolset):
+        new_dir = os.path.join(self._source_subfolder, f'build.vc{ver}')
+        conan.tools.files.copy(self, pattern="*", src=os.path.join(self._source_subfolder, 'build.vc15'), dst=new_dir)
+
+        for root, _, files in os.walk(new_dir):
+            for file in files:
+                full_file = os.path.join(root, file)
+                tools.replace_in_file(full_file, "<PlatformToolset>v141</PlatformToolset>", f"<PlatformToolset>{toolset}</PlatformToolset>", strict=False)
+                tools.replace_in_file(full_file, "prebuild skylake\\avx x64 15", f"prebuild skylake\\avx x64 {ver}", strict=False)
+                tools.replace_in_file(full_file, "prebuild p3 Win32 15", f"prebuild p3 Win32 {ver}", strict=False)
+                tools.replace_in_file(full_file, "prebuild gc Win32 15", f"prebuild gc Win32 {ver}", strict=False)
+                tools.replace_in_file(full_file, "prebuild gc x64 15", f"prebuild gc x64 {ver}", strict=False)
+                tools.replace_in_file(full_file, "prebuild haswell\\avx x64 15", f"prebuild haswell\\avx x64 {ver}", strict=False)
+                tools.replace_in_file(full_file, "prebuild core2 x64 15", f"prebuild core2 x64 {ver}", strict=False)
+                tools.replace_in_file(full_file, 'postbuild "$(TargetPath)" 15', f'postbuild "$(TargetPath)" {ver}', strict=False)
+                tools.replace_in_file(full_file, 'check_config $(Platform) $(Configuration) 15', f'check_config $(Platform) $(Configuration) {ver}', strict=False)
+
     def _patch_sources(self):
         if self._is_msvc:
+            self._patch_new_msvc_version(16, "v142")
+            self._patch_new_msvc_version(17, "v143")
 
-            # self.output.info(f"build.vc15 exists: {os.path.isfile('build.vc15')}")
-            # self.output.info(f"source/build.vc15 exists: {os.path.isfile(os.path.join(self._source_subfolder, 'build.vc15'))}")
+            # conan.tools.files.copy(self, pattern="*", src=os.path.join(self._source_subfolder, 'build.vc15'), dst=os.path.join(self._source_subfolder, 'build.vc16'))
 
-            conan.tools.files.copy(self, pattern="*", src=os.path.join(self._source_subfolder, 'build.vc15'), dst=os.path.join(self._source_subfolder, 'build.vc16'))
-
-            self.output.info(f"vc16: {os.path.join(self._source_subfolder, 'build.vc16')}")
-
-            # self.output.info(f"build.vc16 exists: {os.path.isfile('build.vc16')}")
-            # self.output.info(f"source/build.vc16 exists: {os.path.isfile(os.path.join(self._source_subfolder, 'build.vc16'))}")
-
-
-            # self.output.info("build.vc15 *********************************")
-            # for root, _, files in os.walk("build.vc15"):
+            # vc16dir = os.path.join(self._source_subfolder, 'build.vc16')
+            # for root, _, files in os.walk(vc16dir):
             #     for file in files:
-            #         self.output.info(f"file: {os.path.join(root, file)}")
+            #         full_file = os.path.join(root, file)
+            #         tools.replace_in_file(full_file, "<PlatformToolset>v141</PlatformToolset>", "<PlatformToolset>v142</PlatformToolset>", strict=False)
+            #         tools.replace_in_file(full_file, "prebuild skylake\\avx x64 15", "prebuild skylake\\avx x64 16", strict=False)
+            #         tools.replace_in_file(full_file, "prebuild p3 Win32 15", "prebuild p3 Win32 16", strict=False)
+            #         tools.replace_in_file(full_file, "prebuild gc Win32 15", "prebuild gc Win32 16", strict=False)
+            #         tools.replace_in_file(full_file, "prebuild gc x64 15", "prebuild gc x64 16", strict=False)
+            #         tools.replace_in_file(full_file, "prebuild haswell\\avx x64 15", "prebuild haswell\\avx x64 16", strict=False)
+            #         tools.replace_in_file(full_file, "prebuild core2 x64 15", "prebuild core2 x64 16", strict=False)
 
-            # self.output.info("source/build.vc15 *********************************")
-            # for root, _, files in os.walk(os.path.join(self._source_subfolder, "build.vc15")):
-            #     for file in files:
-            #         self.output.info(f"file: {os.path.join(root, file)}")
+            #         tools.replace_in_file(full_file, 'postbuild "$(TargetPath)" 15', 'postbuild "$(TargetPath)" 16', strict=False)
+            #         tools.replace_in_file(full_file, 'check_config $(Platform) $(Configuration) 15', 'check_config $(Platform) $(Configuration) 16', strict=False)
 
-
-            # self.output.info("build.vc16 *********************************")
-            # for root, _, files in os.walk("build.vc16"):
-            #     for file in files:
-            #         self.output.info(f"file: {os.path.join(root, file)}")
-
-            vc16dir = os.path.join(self._source_subfolder, 'build.vc16')
-            self.output.info(f"vc16dir: {vc16dir}")
-            for root, _, files in os.walk(vc16dir):
-                for file in files:
-                    full_file = os.path.join(root, file)
-                    tools.replace_in_file(full_file, "<PlatformToolset>v141</PlatformToolset>", "<PlatformToolset>v142</PlatformToolset>", strict=False)
-                    tools.replace_in_file(full_file, "prebuild skylake\\avx x64 15", "prebuild skylake\\avx x64 16", strict=False)
-                    tools.replace_in_file(full_file, "prebuild p3 Win32 15", "prebuild p3 Win32 16", strict=False)
-                    tools.replace_in_file(full_file, "prebuild gc Win32 15", "prebuild gc Win32 16", strict=False)
-                    tools.replace_in_file(full_file, "prebuild gc x64 15", "prebuild gc x64 16", strict=False)
-                    tools.replace_in_file(full_file, "prebuild haswell\\avx x64 15", "prebuild haswell\\avx x64 16", strict=False)
-                    tools.replace_in_file(full_file, "prebuild core2 x64 15", "prebuild core2 x64 16", strict=False)
-
-                    tools.replace_in_file(full_file, 'postbuild "$(TargetPath)" 15', 'postbuild "$(TargetPath)" 16', strict=False)
-                    tools.replace_in_file(full_file, 'check_config $(Platform) $(Configuration) 15', 'check_config $(Platform) $(Configuration) 16', strict=False)
-
-                    self.output.info(f"full_file: {full_file}")
-
-                    # with open(full_file, mode='r') as file:
-                    #     all_of_it = file.read()
-                    #     self.output.info(f"all_of_it: {all_of_it}")
-
-            # for root, _, files in os.walk(self.build_folder):
-            #     if "Makefile" in files:
-            #         tools.replace_in_file(os.path.join(root, "Makefile"), "-Dstrtod=fixstrtod", "", strict=False)
-
-
-            # fn = os.path.join("CPP", "Build.mak")
-            # os.chmod(fn, 0o644)
-            # tools.replace_in_file(fn, "-MT", "-{}".format(str(self.settings.compiler.runtime)))
-            # tools.replace_in_file(fn, "-MD", "-{}".format(str(self.settings.compiler.runtime)))
+            #         self.output.info(f"full_file: {full_file}")
 
 
     def build(self):
