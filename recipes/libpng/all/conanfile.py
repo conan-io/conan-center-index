@@ -72,7 +72,10 @@ class LibpngConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         try:
             del self.settings.compiler.libcxx
         except Exception:
@@ -150,9 +153,9 @@ class LibpngConan(ConanFile):
         tc.generate()
 
     def validate(self):
-        if self.info.settings.os == "Macos" and self.info.settings.arch == "armv8" and \
-           self.info.options.shared and Version(self.version) < "1.6":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support shared library.")
+        # INFO: https://github.com/glennrp/libpng/issues/372
+        if cross_building(self) and self.info.settings.os == "Macos":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support cross-building on Mac M1 library.")
 
     def build(self):
         apply_conandata_patches(self)
