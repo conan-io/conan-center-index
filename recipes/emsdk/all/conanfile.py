@@ -121,15 +121,14 @@ class EmSDKConan(ConanFile):
             self.output.warn("You've added {}/{} as a build requirement, while os={} != Emscripten".format(self.name, self.version, self.settings_target.os))
             return
 
-
         toolchain = os.path.join(self.package_folder, "bin", "upstream", "emscripten", "cmake", "Modules", "Platform", "Emscripten.cmake")
-        self.output.info("Creating CONAN_CMAKE_TOOLCHAIN_FILE environment variable: %s" % toolchain)
-        self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = toolchain
+        self.conf_info.prepend("tools.cmake.cmaketoolchain:user_toolchain", toolchain)
 
-        self.env_info.CC = self._define_tool_var("CC", "emcc")
-        self.env_info.CXX = self._define_tool_var("CXX", "em++")
-        self.env_info.RANLIB = self._define_tool_var("RANLIB", "emranlib")
-        self.env_info.AR = self._define_tool_var("AR", "emar")
+        self.buildenv_info.define_path("CC", self._define_tool_var("CC", "emcc"))
+        self.buildenv_info.define_path("CXX", self._define_tool_var("CXX", "em++"))
+        self.buildenv_info.define_path("RANLIB", self._define_tool_var("RANLIB", "emranlib"))
+        self.buildenv_info.define_path("AR", self._define_tool_var("AR", "emar"))
+
         self.cpp_info.builddirs = [
             "bin/releases/src",
             "bin/upstream/emscripten/cmake/Modules",
@@ -139,3 +138,12 @@ class EmSDKConan(ConanFile):
             "bin/upstream/emscripten/tests/cmake/target_library",
             "bin/upstream/lib/cmake/llvm",
         ]
+
+        # TODO: to remove in conan v2?
+        self.output.info("Creating CONAN_CMAKE_TOOLCHAIN_FILE environment variable: %s" % toolchain)
+        self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = toolchain
+
+        self.env_info.CC = self._define_tool_var("CC", "emcc")
+        self.env_info.CXX = self._define_tool_var("CXX", "em++")
+        self.env_info.RANLIB = self._define_tool_var("RANLIB", "emranlib")
+        self.env_info.AR = self._define_tool_var("AR", "emar")
