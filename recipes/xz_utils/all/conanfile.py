@@ -1,29 +1,27 @@
 from conan import ConanFile
-from conans import AutoToolsBuildEnvironment, MSBuild
+from conans import MSBuild
 from conans import tools as tools_legacy
+from conan.tools.apple import is_apple_os
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 from conan.tools.files import replace_in_file, chdir, rmdir, rm, rename, get, save, copy
+from conan.tools.layout import basic_layout
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.env import VirtualBuildEnv
 import os
 import textwrap
-import functools
 
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.3"
 
 
 class XZUtilsConan(ConanFile):
     name = "xz_utils"
-    description = (
-        "XZ Utils is free general-purpose data compression software with a high "
-        "compression ratio. XZ Utils were written for POSIX-like systems, but also "
-        "work on some not-so-POSIX systems. XZ Utils are the successor to LZMA Utils."
-    )
+    description = "A free general-purpose data compression software with a high compression ratio"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tukaani.org/xz"
     topics = ("lzma", "xz", "compression")
     license = "Unlicense", "LGPL-2.1-or-later",  "GPL-2.0-or-later", "GPL-3.0-or-later"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -33,10 +31,6 @@ class XZUtilsConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     @property
     def _settings_build(self):
@@ -53,7 +47,10 @@ class XZUtilsConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         try:
             del self.settings.compiler.cppstd
         except:
@@ -63,14 +60,20 @@ class XZUtilsConan(ConanFile):
         except:
             pass
 
+    @property
+    def _should_install_msys2(self):
+        return self._settings_build.os == "Windows" and \
+               not is_msvc(self) and \
+               not tools_legacy.get_env("CONAN_BASH_PATH") and \
+               not self.conf.get("tools.microsoft.bash:path")
+
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not is_msvc(self) and \
-           not tools_legacy.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        if self._should_install_msys2:
+            self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+                  destination=self.source_folder, strip_root=True)
 
     def _apply_patches(self):
         if Version(self.version) == "5.2.4" and is_msvc(self):
@@ -85,18 +88,17 @@ class XZUtilsConan(ConanFile):
                 windows_target_platform_version_new = "<WindowsTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</WindowsTargetPlatformVersion>"
             else:
                 windows_target_platform_version_new = "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>"
-            replace_in_file(self, os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma.vcxproj"),
+            replace_in_file(self, os.path.join(self.source_folder, "windows", "vs2017", "liblzma.vcxproj"),
                                   windows_target_platform_version_old,
                                   windows_target_platform_version_new)
-            replace_in_file(self, os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma_dll.vcxproj"),
+            replace_in_file(self, os.path.join(self.source_folder, "windows", "vs2017", "liblzma_dll.vcxproj"),
                                   windows_target_platform_version_old,
                                   windows_target_platform_version_new)
 
         # INFO: Allow to install relocatable shared lib on macOS
-        # TODO: Import from Apple after 1.52.0
-        if tools_legacy.is_apple_os(self.settings.os):
+        if is_apple_os(self):
             replace_in_file(self,
-                os.path.join(self._source_subfolder, "configure"),
+                os.path.join(self.source_folder, "configure"),
                 "-install_name \\$rpath/",
                 "-install_name @rpath/",
             )
@@ -104,7 +106,7 @@ class XZUtilsConan(ConanFile):
     def _build_msvc(self):
         # windows\INSTALL-MSVC.txt
         msvc_version = "vs2017" if Version(self.settings.compiler.version) >= "15" else "vs2013"
-        with chdir(self, os.path.join(self._source_subfolder, "windows", msvc_version)):
+        with chdir(self, os.path.join(self.source_folder, "windows", msvc_version)):
             target = "liblzma_dll" if self.options.shared else "liblzma"
             msbuild = MSBuild(self)
             msbuild.build(
@@ -114,38 +116,44 @@ class XZUtilsConan(ConanFile):
                 platforms={"x86": "Win32", "x86_64": "x64"},
                 upgrade_project=Version(self.settings.compiler.version) >= "17")
 
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools_legacy.os_info.is_windows)
-        args = ["--disable-doc"]
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.append("--disable-doc")
         if self.settings.os != "Windows" and self.options.get_safe("fPIC", True):
-            args.append("--with-pic")
+            tc.configure_args.append("--with-pic")
         if self.options.shared:
-            args.extend(["--disable-static", "--enable-shared"])
+            tc.configure_args.extend(["--disable-static", "--enable-shared"])
         else:
-            args.extend(["--enable-static", "--disable-shared"])
+            tc.configure_args.extend(["--enable-static", "--disable-shared"])
         if self.settings.build_type == "Debug":
-            args.append("--enable-debug")
-        autotools.configure(configure_dir=self._source_subfolder, args=args, build=False)
-        return autotools
+            tc.configure_args.append("--enable-debug")
+        tc.generate()
+        if self._should_install_msys2:
+            tc = VirtualBuildEnv(self)
+            tc.generate()
 
     def build(self):
         self._apply_patches()
         if is_msvc(self):
             self._build_msvc()
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
+            autotools.autoreconf()
+            autotools.configure()
             autotools.make()
 
     def package(self):
-        copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.build_folder, self._source_subfolder))
+        copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         if is_msvc(self):
-            inc_dir = os.path.join(self.build_folder, self._source_subfolder, "src", "liblzma", "api")
+            inc_dir = os.path.join(self.source_folder, "src", "liblzma", "api")
             copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=inc_dir, keep_path=True)
             arch = {"x86": "Win32", "x86_64": "x64"}.get(str(self.settings.arch))
             target = "liblzma_dll" if self.options.shared else "liblzma"
             msvc_version = "vs2017" if Version(self.settings.compiler.version) >= "15" else "vs2013"
-            bin_dir = os.path.join(self.build_folder, self._source_subfolder, "windows", msvc_version,
+            bin_dir = os.path.join(self.source_folder, "windows", msvc_version,
                                    self._effective_msbuild_type, arch, target)
             copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=bin_dir, keep_path=False)
             if self.options.shared:
@@ -153,7 +161,7 @@ class XZUtilsConan(ConanFile):
             rename(self, os.path.join(self.package_folder, "lib", "liblzma.lib"),
                          os.path.join(self.package_folder, "lib", "lzma.lib"))
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
             autotools.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "share"))
@@ -168,7 +176,7 @@ class XZUtilsConan(ConanFile):
     @staticmethod
     def _create_cmake_module_variables(conanfile, module_file, version):
         # TODO: also add LIBLZMA_HAS_AUTO_DECODER, LIBLZMA_HAS_EASY_ENCODER & LIBLZMA_HAS_LZMA_PRESET
-        content = textwrap.dedent("""\
+        content = textwrap.dedent(f"""\
             if(DEFINED LibLZMA_FOUND)
                 set(LIBLZMA_FOUND ${{LibLZMA_FOUND}})
             endif()
@@ -178,16 +186,16 @@ class XZUtilsConan(ConanFile):
             if(DEFINED LibLZMA_LIBRARIES)
                 set(LIBLZMA_LIBRARIES ${{LibLZMA_LIBRARIES}})
             endif()
-            set(LIBLZMA_VERSION_MAJOR {major})
-            set(LIBLZMA_VERSION_MINOR {minor})
-            set(LIBLZMA_VERSION_PATCH {patch})
-            set(LIBLZMA_VERSION_STRING "{major}.{minor}.{patch}")
-        """.format(major=version.major, minor=version.minor, patch=version.patch))
+            set(LIBLZMA_VERSION_MAJOR {version.major})
+            set(LIBLZMA_VERSION_MINOR {version.minor})
+            set(LIBLZMA_VERSION_PATCH {version.patch})
+            set(LIBLZMA_VERSION_STRING "{version.major}.{version.minor}.{version.patch}")
+        """)
         save(conanfile, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "LibLZMA")
