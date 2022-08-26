@@ -1,8 +1,8 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
+from conan.tools.env import Environment
 from conan.tools.files import chdir, copy, get, replace_in_file
 from conan.tools.layout import basic_layout
-from conans import tools as tools_legacy
 import json
 import os
 
@@ -40,6 +40,39 @@ class EmSDKConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
+    @property
+    def _path(self):
+        return [
+            self.package_folder,
+            os.path.join(self.package_folder, "bin", "upstream", "emscripten"),
+        ]
+
+    @property
+    def _emsdk(self):
+        return self.package_folder
+
+    @property
+    def _emscripten(self):
+        return os.path.join(self.package_folder, "bin", "upstream", "emscripten")
+
+    @property
+    def _em_config(self):
+        return os.path.join(self.package_folder, "bin", ".emscripten")
+
+    @property
+    def _em_cache(self):
+        return os.path.join(self.package_folder,  "bin", ".emscripten_cache")
+
+    def generate(self):
+        env = Environment()
+        env.prepend_path("PATH", self._path)
+        env.define_path("EMSDK", self._emsdk)
+        env.define_path("EMSCRIPTEN", self._emscripten)
+        env.define_path("EM_CONFIG", self._em_config)
+        env.define_path("EM_CACHE", self._em_cache)
+        envvars = env.vars(self, scope="emsdk")
+        envvars.save_script("emsdk_env_file")
+
     @staticmethod
     def _chmod_plus_x(filename):
         if os.name == "posix":
@@ -74,19 +107,6 @@ class EmSDKConan(ConanFile):
                     self.run(f"{emsdk} install {value}")
                     self.run(f"{emsdk} activate {value}")
 
-    @property
-    def _emscripten_env(self):
-        return {
-            "PATH": [
-                self.package_folder,
-                os.path.join(self.package_folder, "bin", "upstream", "emscripten"),
-            ],
-            "EMSDK": self.package_folder,
-            "EMSCRIPTEN": os.path.join(self.package_folder, "bin", "upstream", "emscripten"),
-            "EM_CONFIG": os.path.join(self.package_folder, "bin", ".emscripten"),
-            "EM_CACHE": os.path.join(self.package_folder,  "bin", ".emscripten_cache"),
-        }
-
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"))
@@ -104,17 +124,15 @@ class EmSDKConan(ConanFile):
                               "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)",
                               "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)")
         if not cross_building(self):
-            with tools_legacy.environment_append(self._emscripten_env):
-                self.run("embuilder build MINIMAL", run_environment=True) # force cache population
-                # the line below forces emscripten to accept the cache as-is, even after re-location
-                # https://github.com/emscripten-core/emscripten/issues/15053#issuecomment-920950710
-                os.remove(os.path.join(self._emscripten_env["EM_CACHE"], "sanity.txt"))
+            self.run("embuilder build MINIMAL", env="conanemsdk") # force cache population
+            # the line below forces emscripten to accept the cache as-is, even after re-location
+            # https://github.com/emscripten-core/emscripten/issues/15053#issuecomment-920950710
+            os.remove(os.path.join(self._em_cache, "sanity.txt"))
 
-    def _define_tool_var(self, name, value):
+    def _define_tool_var(self, value):
         suffix = ".bat" if self.settings.os == "Windows" else ""
-        path = os.path.join(self.package_folder, "bin", "upstream", "emscripten", f"{value}{suffix}")
+        path = os.path.join(self._emscripten, f"{value}{suffix}")
         self._chmod_plus_x(path)
-        self.output.info(f"Creating {name} environment variable: {path}")
         return path
 
     def package_info(self):
@@ -135,15 +153,15 @@ class EmSDKConan(ConanFile):
         toolchain = os.path.join(self.package_folder, "bin", "upstream", "emscripten", "cmake", "Modules", "Platform", "Emscripten.cmake")
         self.conf_info.prepend("tools.cmake.cmaketoolchain:user_toolchain", toolchain)
 
-        self.buildenv_info.define_path("EMSDK", self.package_folder)
-        self.buildenv_info.define_path("EMSCRIPTEN", os.path.join(self.package_folder, "bin", "upstream", "emscripten"))
-        self.buildenv_info.define_path("EM_CONFIG", os.path.join(self.package_folder, "bin", ".emscripten"))
-        self.buildenv_info.define_path("EM_CACHE", os.path.join(self.package_folder, "bin", ".emscripten_cache"))
+        self.buildenv_info.define_path("EMSDK", self._emsdk)
+        self.buildenv_info.define_path("EMSCRIPTEN", self._emscripten)
+        self.buildenv_info.define_path("EM_CONFIG", self._em_config)
+        self.buildenv_info.define_path("EM_CACHE",  self._em_cache)
 
-        self.buildenv_info.define_path("CC", self._define_tool_var("CC", "emcc"))
-        self.buildenv_info.define_path("CXX", self._define_tool_var("CXX", "em++"))
-        self.buildenv_info.define_path("RANLIB", self._define_tool_var("RANLIB", "emranlib"))
-        self.buildenv_info.define_path("AR", self._define_tool_var("AR", "emar"))
+        self.buildenv_info.define_path("CC", self._define_tool_var("emcc"))
+        self.buildenv_info.define_path("CXX", self._define_tool_var("em++"))
+        self.buildenv_info.define_path("RANLIB", self._define_tool_var("emranlib"))
+        self.buildenv_info.define_path("AR", self._define_tool_var("emar"))
 
         self.cpp_info.builddirs = [
             "bin/releases/src",
@@ -155,13 +173,14 @@ class EmSDKConan(ConanFile):
             "bin/upstream/lib/cmake/llvm",
         ]
 
-        # TODO: to remove in conan v2?
-        self.output.info(f"Creating CONAN_CMAKE_TOOLCHAIN_FILE environment variable: {toolchain}")
+        # TODO: to remove in conan v2
         self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = toolchain
-        self.env_info.CC = self._define_tool_var("CC", "emcc")
-        self.env_info.CXX = self._define_tool_var("CXX", "em++")
-        self.env_info.RANLIB = self._define_tool_var("RANLIB", "emranlib")
-        self.env_info.AR = self._define_tool_var("AR", "emar")
-        for var, val in self._emscripten_env.items():
-            self.output.info(f"Creating {var} environment variable: {val}")
-            setattr(self.env_info, var, val)
+        self.env_info.CC = self._define_tool_var("emcc")
+        self.env_info.CXX = self._define_tool_var("em++")
+        self.env_info.RANLIB = self._define_tool_var("emranlib")
+        self.env_info.AR = self._define_tool_var("emar")
+        self.env_info.PATH.extend(self._path)
+        self.env_info.EMSDK = self._emsdk
+        self.env_info.EMSCRIPTEN = self._emscripten
+        self.env_info.EM_CONFIG = self._em_config
+        self.env_info.EM_CACHE = self._em_cache

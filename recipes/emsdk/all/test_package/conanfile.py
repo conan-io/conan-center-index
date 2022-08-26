@@ -37,10 +37,10 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         # Check the package provides working binaries
-        self.run("emcc -v", env="conanbuild")
-        self.run("em++ -v", env="conanbuild")
+        self.run("emcc -v")
+        self.run("em++ -v")
 
         # Run the project that was built using emsdk
         if self.settings.os == "Emscripten":
             test_file = os.path.join(self.cpp.build.bindirs[0], "test_package.js")
-            self.run(f"node {test_file}", env="conanrun")
+            self.run(f"node {test_file}")
