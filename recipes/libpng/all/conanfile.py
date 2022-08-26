@@ -155,7 +155,7 @@ class LibpngConan(ConanFile):
     def validate(self):
         # INFO: https://github.com/glennrp/libpng/issues/372
         if cross_building(self) and self.info.settings.os == "Macos":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support cross-building on Mac M1 library.")
+            raise ConanInvalidConfiguration(f"{self.ref} does not support cross-building on Mac M1 library. See glennrp/libpng#372")
 
     def build(self):
         apply_conandata_patches(self)
