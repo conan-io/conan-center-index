@@ -5,6 +5,12 @@ sources:
 patches:
   "cci.20220801":
     - patch_file: "patches/0001-cmake_patches.patch"
+      patch_description: "Provide CMake correct dependency discovery logic."
+      patch_type: "conan"
       base_path: "source_subfolder"
+      sha256: "2f847610184e680fa2d40e496c2094fc10aa55c4b652e56240c765cfc3a51a75"
     - patch_file: "patches/0002-boost-asio.patch"
+      patch_description: "Use Boost::Asio rather than Asio solo project."
+      patch_type: "portability"
       base_path: "source_subfolder"
+      sha256: "704a08e63422eed7fcb1f9f794f57007862c9540ea7319ec14873813a33eac6e"

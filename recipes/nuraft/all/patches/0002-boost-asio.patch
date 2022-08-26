@@ -11,11 +11,10 @@ index ceb4f70..4623667 100644
  
  #include <atomic>
  #include <ctime>
-@@ -49,11 +49,12 @@ limitations under the License.
+@@ -49,11 +49,11 @@ limitations under the License.
  #include <thread>
  #include <regex>
  
-+#define USE_BOOST_ASIO
  #ifdef USE_BOOST_ASIO
      using namespace boost;
      #define ERROR_CODE system::error_code
