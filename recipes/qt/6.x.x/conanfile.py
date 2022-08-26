@@ -337,7 +337,7 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.37") # needs to be < 10.38 or qt fails to detect visual studio static library
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.221.0")
+            self.requires("vulkan-loader/1.3.216.0")
             if tools.is_apple_os(self.settings.os):
                 self.requires("moltenvk/1.1.10")
         if self.options.with_glib:
@@ -1040,10 +1040,10 @@ class QtConan(ConanFile):
             _create_plugin("QIcoPlugin", "qico", "imageformats", ["Gui"])
             if self.options.get_safe("with_libjpeg"):
                 jpeg_reqs = ["Gui"]
-                if self.options.with_libjpeg == "libjpeg-turbo": 
-                     jpeg_reqs.append("libjpeg-turbo::libjpeg-turbo") 
-                if self.options.with_libjpeg == "libjpeg": 
-                     jpeg_reqs.append("libjpeg::libjpeg") 
+                if self.options.with_libjpeg == "libjpeg-turbo":
+                     jpeg_reqs.append("libjpeg-turbo::libjpeg-turbo")
+                if self.options.with_libjpeg == "libjpeg":
+                     jpeg_reqs.append("libjpeg::libjpeg")
                 _create_plugin("QJpegPlugin", "qjpeg", "imageformats", jpeg_reqs)
 
         if self.options.with_sqlite3:
