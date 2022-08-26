@@ -1,0 +1,19 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b60c27c2..9ff0a965 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -532,10 +532,10 @@ set(BUILD_USING_OTHER_LAPACK "" CACHE STRING
+ if(WIN32)
+     set(LAPACK_PLATFORM_DEFAULT lapack;blas)
+ else()
+-    find_package(BLAS)
+-    find_package(LAPACK)
+-    if(BLAS_FOUND AND LAPACK_FOUND)
+-        set(LAPACK_PLATFORM_DEFAULT ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
++    find_package(OpenBLAS REQUIRED)
++    #find_package(LAPACK REQUIRED)
++    if(OpenBLAS_FOUND)
++        set(LAPACK_PLATFORM_DEFAULT ${OpenBLAS_LIBRARIES})
+     else()
+         message(WARNING "Could not find blas/lapack")
+     endif()
