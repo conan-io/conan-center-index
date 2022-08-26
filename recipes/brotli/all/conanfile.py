@@ -107,24 +107,6 @@ class BrotliConan(ConanFile):
         self.cpp_info.components["brotlicommon"].set_property("pkg_config_name", "libbrotlicommon")
         self.cpp_info.components["brotlicommon"].includedirs.append(includedir)
         self.cpp_info.components["brotlicommon"].libs = [self._get_decorated_lib("brotlicommon")]
-        if self.options.get_safe("target_bits") == 32:
-            self.cpp_info.components["brotlicommon"].defines.append("BROTLI_BUILD_32_BIT")
-        if self.options.get_safe("target_bits") == 64:
-            self.cpp_info.components["brotlicommon"].defines.append("BROTLI_BUILD_64_BIT")
-        if self.options.get_safe("endianness") == "big":
-            self.cpp_info.components["brotlicommon"].defines.append("BROTLI_BUILD_BIG_ENDIAN")
-        if self.options.get_safe("endianness") == "neutral":
-            self.cpp_info.components["brotlicommon"].defines.append("BROTLI_BUILD_ENDIAN_NEUTRAL")
-        if self.options.get_safe("endianness") == "little":
-            self.cpp_info.components["brotlicommon"].defines.append("BROTLI_BUILD_LITTLE_ENDIAN")
-        if self.options.enable_portable:
-            self.cpp_info.components["brotlicommon"].defines.append("BROTLI_BUILD_PORTABLE")
-        if not(self.options.enable_rbit):
-            self.cpp_info.components["brotlicommon"].defines.append("BROTLI_BUILD_NO_RBIT")
-        if self.options.enable_debug:
-            self.cpp_info.components["brotlicommon"].defines.append("BROTLI_DEBUG")
-        if self.options.enable_log:
-            self.cpp_info.components["brotlicommon"].defines.append("BROTLI_ENABLE_LOG")
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.components["brotlicommon"].defines.append("BROTLI_SHARED_COMPILATION")
         # brotlidec
