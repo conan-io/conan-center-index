@@ -238,21 +238,18 @@ class AndroidNDKConan(ConanFile):
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):
+        self.cpp_info.includedirs = []
+
         # test shall pass, so this runs also in the build as build requirement context
         # ndk-build: https://developer.android.com/ndk/guides/ndk-build
-        self.env_info.PATH.append(self.package_folder)
+        self.cpp_info.bindirs.append(".")
 
         # You should use the ANDROID_NDK_ROOT environment variable to indicate where the NDK is located.
         # That's what most NDK-related scripts use (inside the NDK, and outside of it).
         # https://groups.google.com/g/android-ndk/c/qZjhOaynHXc
-        self.output.info(f"Creating ANDROID_NDK_ROOT environment variable: {self.package_folder}")
         self.buildenv_info.define_path("ANDROID_NDK_ROOT", self.package_folder)
-        self.env_info.ANDROID_NDK_ROOT = self.package_folder
 
-        self.output.info(f"Creating ANDROID_NDK_HOME environment variable: {self.package_folder}")
         self.buildenv_info.define_path("ANDROID_NDK_HOME", self.package_folder)
-        self.env_info.ANDROID_NDK_HOME = self.package_folder
-        self.cpp_info.includedirs = []
 
         #  this is not enough, I can kill that .....
         if not hasattr(self, "settings_target"):
@@ -268,36 +265,20 @@ class AndroidNDKConan(ConanFile):
             self.output.warn(f"You've added {self.name}/{self.version} as a build requirement, while os={self.settings_target.os} != Android")
             return
 
-        cmake_system_processor = self._cmake_system_processor
-        if cmake_system_processor:
-            self.output.info(f"Creating CONAN_CMAKE_SYSTEM_PROCESSOR environment variable: {cmake_system_processor}")
-            self.env_info.CONAN_CMAKE_SYSTEM_PROCESSOR = cmake_system_processor
-        else:
-            self.output.warn("Could not find a valid CMAKE_SYSTEM_PROCESSOR variable, supported by CMake")
-
-        self.output.info(f"Creating NDK_ROOT environment variable: {self._ndk_root}")
         self.buildenv_info.define_path("NDK_ROOT", self._ndk_root)
-        self.env_info.NDK_ROOT = self._ndk_root
 
-        self.output.info(f"Creating CHOST environment variable: {self._llvm_triplet}")
         self.buildenv_info.define("CHOST", self._llvm_triplet)
-        self.env_info.CHOST = self._llvm_triplet
 
         ndk_sysroot = os.path.join(self._ndk_root, "sysroot")
-        self.output.info(f"Creating CONAN_CMAKE_FIND_ROOT_PATH environment variable: {ndk_sysroot}")
-        self.env_info.CONAN_CMAKE_FIND_ROOT_PATH = ndk_sysroot
-
-        self.output.info(f"Creating SYSROOT environment variable: {ndk_sysroot}")
         self.buildenv_info.define_path("SYSROOT", ndk_sysroot)
-        self.env_info.SYSROOT = ndk_sysroot
 
-        self.output.info(f"Creating self.cpp_info.sysroot: {ndk_sysroot}")
         self.cpp_info.sysroot = ndk_sysroot
 
-        self.output.info(f"Creating ANDROID_NATIVE_API_LEVEL environment variable: {self.settings_target.os.api_level}")
         self.buildenv_info.define("ANDROID_NATIVE_API_LEVEL", str(self.settings_target.os.api_level))
-        self.env_info.ANDROID_NATIVE_API_LEVEL = str(self.settings_target.os.api_level)
 
+        # TODO: It's not clear how this all mechanism of cmake-wrapper should be emulated in conan v2,
+        # and actually if it matters at all.
+        # Is it not the purpose of the toolchain defined later to pass all these informations?
         self._chmod_plus_x(os.path.join(self.package_folder, "cmake-wrapper"))
         cmake_wrapper = "cmake-wrapper.cmd" if self.settings.os == "Windows" else "cmake-wrapper"
         cmake_wrapper = os.path.join(self.package_folder, cmake_wrapper)
@@ -305,14 +286,10 @@ class AndroidNDKConan(ConanFile):
         self.env_info.CONAN_CMAKE_PROGRAM = cmake_wrapper
 
         toolchain = os.path.join(self.package_folder, "build", "cmake", "android.toolchain.cmake")
-        self.output.info(f"Creating CONAN_CMAKE_TOOLCHAIN_FILE environment variable: {toolchain}")
         self.conf_info.prepend("tools.cmake.cmaketoolchain:user_toolchain", toolchain)
-        self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = toolchain
 
         self.buildenv_info.define_path("CC", self._define_tool_var("CC", "clang"))
         self.buildenv_info.define_path("CXX", self._define_tool_var("CXX", "clang++"))
-        self.env_info.CC = self._define_tool_var("CC", "clang")
-        self.env_info.CXX = self._define_tool_var("CXX", "clang++")
 
         # Versions greater than 23 had the naming convention
         # changed to no longer include the triplet.
@@ -326,6 +303,41 @@ class AndroidNDKConan(ConanFile):
         self.buildenv_info.define_path("OBJCOPY", self._define_tool_var("OBJCOPY", "objcopy", bare))
         self.buildenv_info.define_path("OBJDUMP", self._define_tool_var("OBJDUMP", "objdump", bare))
         self.buildenv_info.define_path("READELF", self._define_tool_var("READELF", "readelf", bare))
+        # there doesn't seem to be an 'elfedit' included anymore.
+        if self._ndk_version_major < 23:
+            self.buildenv_info.define_path("ELFEDIT", self._define_tool_var("ELFEDIT", "elfedit", bare))
+
+        # The `ld` tool changed naming conventions earlier than others
+        if self._ndk_version_major >= 22:
+            self.buildenv_info.define_path("LD", self._define_tool_var_naked("LD", "ld"))
+        else:
+            self.buildenv_info.define_path("LD", self._define_tool_var("LD", "ld"))
+
+        self.buildenv_info.define("ANDROID_PLATFORM", f"android-{self.settings_target.os.api_level}")
+        self.buildenv_info.define("ANDROID_TOOLCHAIN", "clang")
+        self.buildenv_info.define("ANDROID_ABI", self._android_abi)
+        libcxx_str = str(self.settings_target.compiler.libcxx)
+        self.buildenv_info.define("ANDROID_STL", libcxx_str if libcxx_str.startswith("c++_") else "c++_shared")
+
+        self.conf_info.define("tools.android:ndk_path", self.package_folder)
+
+        # TODO: conan v1 stuff to remove later
+        self.env_info.PATH.append(self.package_folder)
+        self.env_info.ANDROID_NDK_ROOT = self.package_folder
+        self.env_info.ANDROID_NDK_HOME = self.package_folder
+        cmake_system_processor = self._cmake_system_processor
+        if cmake_system_processor:
+            self.env_info.CONAN_CMAKE_SYSTEM_PROCESSOR = cmake_system_processor
+        else:
+            self.output.warn("Could not find a valid CMAKE_SYSTEM_PROCESSOR variable, supported by CMake")
+        self.env_info.NDK_ROOT = self._ndk_root
+        self.env_info.CHOST = self._llvm_triplet
+        self.env_info.CONAN_CMAKE_FIND_ROOT_PATH = ndk_sysroot
+        self.env_info.SYSROOT = ndk_sysroot
+        self.env_info.ANDROID_NATIVE_API_LEVEL = str(self.settings_target.os.api_level)
+        self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = toolchain
+        self.env_info.CC = self._define_tool_var("CC", "clang")
+        self.env_info.CXX = self._define_tool_var("CXX", "clang++")
         self.env_info.AR = self._define_tool_var("AR", "ar", bare)
         self.env_info.AS = self._define_tool_var("AS", "as", bare)
         self.env_info.RANLIB = self._define_tool_var("RANLIB", "ranlib", bare)
@@ -335,36 +347,20 @@ class AndroidNDKConan(ConanFile):
         self.env_info.OBJCOPY = self._define_tool_var("OBJCOPY", "objcopy", bare)
         self.env_info.OBJDUMP = self._define_tool_var("OBJDUMP", "objdump", bare)
         self.env_info.READELF = self._define_tool_var("READELF", "readelf", bare)
-        # there doesn't seem to be an 'elfedit' included anymore.
         if self._ndk_version_major < 23:
-            self.buildenv_info.define_path("ELFEDIT", self._define_tool_var("ELFEDIT", "elfedit", bare))
             self.env_info.ELFEDIT = self._define_tool_var("ELFEDIT", "elfedit")
-
-        # The `ld` tool changed naming conventions earlier than others
         if self._ndk_version_major >= 22:
-            self.buildenv_info.define_path("LD", self._define_tool_var_naked("LD", "ld"))
             self.env_info.LD = self._define_tool_var_naked("LD", "ld")
         else:
-            self.buildenv_info.define_path("LD", self._define_tool_var("LD", "ld"))
             self.env_info.LD = self._define_tool_var("LD", "ld")
-
-        self.buildenv_info.define("ANDROID_PLATFORM", f"android-{self.settings_target.os.api_level}")
-        self.buildenv_info.define("ANDROID_TOOLCHAIN", "clang")
-        self.buildenv_info.define("ANDROID_ABI", self._android_abi)
         self.env_info.ANDROID_PLATFORM = f"android-{self.settings_target.os.api_level}"
         self.env_info.ANDROID_TOOLCHAIN = "clang"
         self.env_info.ANDROID_ABI = self._android_abi
-        libcxx_str = str(self.settings_target.compiler.libcxx)
-        self.buildenv_info.define("ANDROID_STL", libcxx_str if libcxx_str.startswith("c++_") else "c++_shared")
         self.env_info.ANDROID_STL = libcxx_str if libcxx_str.startswith("c++_") else "c++_shared"
-
         self.env_info.CMAKE_FIND_ROOT_PATH_MODE_PROGRAM = "BOTH"
         self.env_info.CMAKE_FIND_ROOT_PATH_MODE_LIBRARY = "BOTH"
         self.env_info.CMAKE_FIND_ROOT_PATH_MODE_INCLUDE = "BOTH"
         self.env_info.CMAKE_FIND_ROOT_PATH_MODE_PACKAGE = "BOTH"
-
-        self.conf_info.define("tools.android:ndk_path", self.package_folder)
-
 
     def _unzip_fix_symlinks(self, url, target_folder, sha256):
         # Python's built-in module 'zipfile' won't handle symlinks (https://bugs.python.org/issue37921)
