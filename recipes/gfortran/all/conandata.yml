@@ -1,5 +1,5 @@
 sources:
-  "10.2.0":
+  "10.2":
     "url":
       "Windows":
         url: "https://downloads.sourceforge.net/project/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/ray_linn/GCC-10.X-with-ada/GCC-10.2.0-crt-8.0.0-with-ada-20201019.7z"
