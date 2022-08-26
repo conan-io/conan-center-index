@@ -181,16 +181,23 @@ class MpirConan(ConanFile):
 
             for root, _, files in os.walk("build.vc16"):
                 for file in files:
-                    tools.replace_in_file(os.path.join(root, file), "<PlatformToolset>v141</PlatformToolset>", "<PlatformToolset>v142</PlatformToolset>")
-                    tools.replace_in_file(os.path.join(root, file), "prebuild skylake\\avx x64 15", "prebuild skylake\\avx x64 16")
-                    tools.replace_in_file(os.path.join(root, file), "prebuild p3 Win32 15", "prebuild p3 Win32 16")
-                    tools.replace_in_file(os.path.join(root, file), "prebuild gc Win32 15", "prebuild gc Win32 16")
-                    tools.replace_in_file(os.path.join(root, file), "prebuild gc x64 15", "prebuild gc x64 16")
-                    tools.replace_in_file(os.path.join(root, file), "prebuild haswell\\avx x64 15", "prebuild haswell\\avx x64 16")
-                    tools.replace_in_file(os.path.join(root, file), "prebuild core2 x64 15", "prebuild core2 x64 16")
+                    full_file = os.path.join(root, file)
+                    tools.replace_in_file(full_file, "<PlatformToolset>v141</PlatformToolset>", "<PlatformToolset>v142</PlatformToolset>")
+                    tools.replace_in_file(full_file, "prebuild skylake\\avx x64 15", "prebuild skylake\\avx x64 16")
+                    tools.replace_in_file(full_file, "prebuild p3 Win32 15", "prebuild p3 Win32 16")
+                    tools.replace_in_file(full_file, "prebuild gc Win32 15", "prebuild gc Win32 16")
+                    tools.replace_in_file(full_file, "prebuild gc x64 15", "prebuild gc x64 16")
+                    tools.replace_in_file(full_file, "prebuild haswell\\avx x64 15", "prebuild haswell\\avx x64 16")
+                    tools.replace_in_file(full_file, "prebuild core2 x64 15", "prebuild core2 x64 16")
 
-                    tools.replace_in_file(os.path.join(root, file), 'postbuild "$(TargetPath)" 15', 'postbuild "$(TargetPath)" 16')
-                    tools.replace_in_file(os.path.join(root, file), 'check_config $(Platform) $(Configuration) 15', 'check_config $(Platform) $(Configuration) 16')
+                    tools.replace_in_file(full_file, 'postbuild "$(TargetPath)" 15', 'postbuild "$(TargetPath)" 16')
+                    tools.replace_in_file(full_file, 'check_config $(Platform) $(Configuration) 15', 'check_config $(Platform) $(Configuration) 16')
+
+                    self.output.info(f"full_file: {full_file}")
+
+                    with open(full_file, mode='r') as file:
+                        all_of_it = file.read()
+                        self.output.info(f"all_of_it: {all_of_it}")
 
             # for root, _, files in os.walk(self.build_folder):
             #     if "Makefile" in files:
