@@ -1,13 +1,14 @@
 from conan import ConanFile
-from conans import MSBuild
 from conans import tools as tools_legacy
 from conan.tools.apple import is_apple_os
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 from conan.tools.files import replace_in_file, chdir, rmdir, rm, rename, get, save, copy
-from conan.tools.layout import basic_layout
+from conan.tools.layout import basic_layout, vs_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.microsoft import MSBuildToolchain, MSBuild, VCVars
 from conan.tools.env import VirtualBuildEnv
+from conan.errors import ConanException
 import os
 import textwrap
 
@@ -106,34 +107,41 @@ class XZUtilsConan(ConanFile):
     def _build_msvc(self):
         # windows\INSTALL-MSVC.txt
         msvc_version = "vs2017" if Version(self.settings.compiler.version) >= "15" else "vs2013"
-        with chdir(self, os.path.join(self.source_folder, "windows", msvc_version)):
-            target = "liblzma_dll" if self.options.shared else "liblzma"
-            msbuild = MSBuild(self)
-            msbuild.build(
-                "xz_win.sln",
-                targets=[target],
-                build_type=self._effective_msbuild_type,
-                platforms={"x86": "Win32", "x86_64": "x64"},
-                upgrade_project=Version(self.settings.compiler.version) >= "17")
+        #with chdir(self, os.path.join(self.source_folder, "windows", msvc_version)):
+        # XXX: Target and update are missing
+        target = "liblzma_dll" if self.options.shared else "liblzma"
+        msbuild = MSBuild(self)
+        msbuild.build_type = self._effective_msbuild_type
+        msbuild.platform = {"x86": "Win32", "x86_64": "x64"}.get(str(self.settings.build_type), msbuild.platform)
+        msbuild.build(os.path.join(self.source_folder, "windows", msvc_version, "xz_win.sln"))
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        if is_msvc(self):
+            vs_layout(self)
+        else:
+            basic_layout(self, src_folder="src")
 
     def generate(self):
-        tc = AutotoolsToolchain(self)
-        tc.configure_args.append("--disable-doc")
-        if self.settings.os != "Windows" and self.options.get_safe("fPIC", True):
-            tc.configure_args.append("--with-pic")
-        if self.options.shared:
-            tc.configure_args.extend(["--disable-static", "--enable-shared"])
-        else:
-            tc.configure_args.extend(["--enable-static", "--disable-shared"])
-        if self.settings.build_type == "Debug":
-            tc.configure_args.append("--enable-debug")
-        tc.generate()
-        if self._should_install_msys2:
-            tc = VirtualBuildEnv(self)
+        if is_msvc(self):
+            tc = MSBuildToolchain(self)
             tc.generate()
+            tc = VCVars(self)
+            tc.generate()
+        else:
+            tc = AutotoolsToolchain(self)
+            tc.configure_args.append("--disable-doc")
+            if self.settings.os != "Windows" and self.options.get_safe("fPIC", True):
+                tc.configure_args.append("--with-pic")
+            if self.options.shared:
+                tc.configure_args.extend(["--disable-static", "--enable-shared"])
+            else:
+                tc.configure_args.extend(["--enable-static", "--disable-shared"])
+            if self.settings.build_type == "Debug":
+                tc.configure_args.append("--enable-debug")
+            tc.generate()
+            if self._should_install_msys2:
+                tc = VirtualBuildEnv(self)
+                tc.generate()
 
     def build(self):
         self._apply_patches()
@@ -141,7 +149,10 @@ class XZUtilsConan(ConanFile):
             self._build_msvc()
         else:
             autotools = Autotools(self)
-            autotools.autoreconf()
+            try:
+                autotools.autoreconf()
+            except ConanException:
+                pass
             autotools.configure()
             autotools.make()
 
