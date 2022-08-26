@@ -97,7 +97,7 @@ class PodofoConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["PODOFO_BUILD_LIB_ONLY"] = True
+        cmake.definitions["PODOFO_BUILD_TOOLS"] = True
         cmake.definitions["PODOFO_BUILD_SHARED"] = self.options.shared
         cmake.definitions["PODOFO_BUILD_STATIC"] = not self.options.shared
         if not self.options.threadsafe:
