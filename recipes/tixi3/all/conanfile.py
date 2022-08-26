@@ -39,11 +39,10 @@ class Tixi3Conan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        # tixi is a c library
-        del self.settings.compiler.libcxx
-
         if self.options.shared:
             del self.options.fPIC
+
+        # tixi is a c library
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
