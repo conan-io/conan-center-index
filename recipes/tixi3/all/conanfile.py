@@ -1,8 +1,6 @@
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag
-from conans import ConanFile, tools
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools import files
+from conan import ConanFile
 import os
 
 required_conan_version = ">=1.45.0"
@@ -51,10 +49,10 @@ class Tixi3Conan(ConanFile):
             self.copy(patch["patch_file"])
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self.source_subfolder)
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(
+            files.patch(self,
                 patch_file=patch["patch_file"],
                 base_path=self.source_subfolder)
 
@@ -68,14 +66,15 @@ class Tixi3Conan(ConanFile):
         cmake.install()
 
         # remove package generated cmake config files
-        tools.rmdir(os.path.join(self.package_folder, "lib", "tixi3"))
+        files.rmdir(self, 
+            os.path.join(self.package_folder, "lib", "tixi3"))
 
         # copy the LICENSE file
         self.copy("LICENSE", dst="licenses", src=self.source_subfolder)
 
         # remove share directory, which only contains documentation,
         # expamples...
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.includedirs = ['include/tixi3']
