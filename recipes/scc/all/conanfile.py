@@ -57,7 +57,7 @@ class SystemcComponentsConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def build_requirements(self):
-        self.build_requires("cmake/3.16.2")
+        self.tool_requires("cmake/3.24.0")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
