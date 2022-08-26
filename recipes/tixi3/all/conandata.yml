@@ -1,0 +1,7 @@
+sources:
+  "3.3.0":
+    sha256: "988d79ccd53c815d382cff0c244c0bb8e393986377dfb45385792766adf6f6a9"
+    url: "https://github.com/DLR-SC/tixi/archive/refs/tags/v3.3.0.tar.gz"
+patches:
+  "3.3.0":
+     - patch_file: "patches/link_curl.patch"
