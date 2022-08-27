@@ -1,0 +1,30 @@
+From bb01fe6bdf2e52939698de928a1fbeaf3cce4259 Mon Sep 17 00:00:00 2001
+From: Ilya Fedin <fedin-ilja2010@ya.ru>
+Date: Tue, 12 Apr 2022 14:02:36 +0400
+Subject: [PATCH] Fix build on CentOS 7
+
+This little change fixes the build on CentOS 7
+
+Pick-to: 6.3
+Change-Id: Ic9717147c10ca78e36d6311944de417c6420211d
+Reviewed-by: Thiago Macieira <thiago.macieira@intel.com>
+---
+ src/corelib/plugin/qelfparser_p.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/corelib/plugin/qelfparser_p.cpp b/src/corelib/plugin/qelfparser_p.cpp
+index c6ccda92fb..def1e2494a 100644
+--- a/src/corelib/plugin/qelfparser_p.cpp
++++ b/src/corelib/plugin/qelfparser_p.cpp
+@@ -409,7 +409,9 @@ Q_DECL_UNUSED Q_DECL_COLD_FUNCTION static QDebug &operator<<(QDebug &d, ElfHeade
+     case EM_NONE:       d << ", no machine"; break;
+     case EM_ARM:        d << ", ARM"; break;
+     case EM_AARCH64:    d << ", AArch64"; break;
++#ifdef EM_BLACKFIN
+     case EM_BLACKFIN:   d << ", Blackfin"; break;
++#endif
+     case EM_IA_64:      d << ", IA-64"; break;
+     case EM_MIPS:       d << ", MIPS"; break;
+     case EM_PPC:        d << ", PowerPC"; break;
+-- 
+2.34.1

@@ -70,6 +70,8 @@ patches:
       base_path: "qt6/qtwebengine"
     - patch_file: "patches/CVE-2022-1096-qtwebengine-6.3.diff"
       base_path: "qt6/qtwebengine"
+    - patch_file: "patches/311d29d.patch"
+      base_path: "qt6/qtbase"
   "6.3.1":
     - base_path: "qt6/qtbase/cmake"
       patch_file: "patches/qt6-pri-helpers-fix.diff"
