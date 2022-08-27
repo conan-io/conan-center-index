@@ -1041,9 +1041,9 @@ class QtConan(ConanFile):
             if self.options.get_safe("with_libjpeg"):
                 jpeg_reqs = ["Gui"]
                 if self.options.with_libjpeg == "libjpeg-turbo":
-                     jpeg_reqs.append("libjpeg-turbo::libjpeg-turbo")
+                    jpeg_reqs.append("libjpeg-turbo::libjpeg-turbo")
                 if self.options.with_libjpeg == "libjpeg":
-                     jpeg_reqs.append("libjpeg::libjpeg")
+                    jpeg_reqs.append("libjpeg::libjpeg")
                 _create_plugin("QJpegPlugin", "qjpeg", "imageformats", jpeg_reqs)
 
         if self.options.with_sqlite3:
