@@ -167,25 +167,25 @@ class EmSDKConan(ConanFile):
         self.buildenv_info.define_path("STRIP", self._define_tool_var("emstrip"))
 
         self.cpp_info.builddirs = [
-            "bin/releases/src",
-            "bin/upstream/emscripten/cmake/Modules",
-            "bin/upstream/emscripten/cmake/Modules/Platform",
-            "bin/upstream/emscripten/system/lib/libunwind/cmake/Modules",
-            "bin/upstream/emscripten/system/lib/libunwind/cmake",
-            "bin/upstream/emscripten/tests/cmake/target_library",
-            "bin/upstream/lib/cmake/llvm",
+            os.path.join("bin", "releases", "src"),
+            os.path.join("bin", "upstream", "emscripten", "cmake", "Modules"),
+            os.path.join("bin", "upstream", "emscripten", "cmake", "Modules", "Platform"),
+            os.path.join("bin", "upstream", "emscripten", "system", "lib", "libunwind", "cmake", "Modules"),
+            os.path.join("bin", "upstream", "emscripten", "system", "lib", "libunwind", "cmake"),
+            os.path.join("bin", "upstream", "emscripten", "tests", "cmake", "target_library"),
+            os.path.join("bin", "upstream", "lib", "cmake", "llvm"),
         ]
 
-        # TODO: to remove in conan v2
+        # TODO: conan v1 stuff, to remove in conan v2?
+        self.env_info.PATH.extend(self._paths)
         self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = toolchain
+        self.env_info.EMSDK = self._emsdk
+        self.env_info.EMSCRIPTEN = self._emscripten
+        self.env_info.EM_CONFIG = self._em_config
+        self.env_info.EM_CACHE = self._em_cache
         self.env_info.CC = self._define_tool_var("emcc")
         self.env_info.CXX = self._define_tool_var("em++")
         self.env_info.AR = self._define_tool_var("emar")
         self.env_info.NM = self._define_tool_var("emnm")
         self.env_info.RANLIB = self._define_tool_var("emranlib")
         self.env_info.STRIP = self._define_tool_var("emstrip")
-        self.env_info.PATH.extend(self._paths)
-        self.env_info.EMSDK = self._emsdk
-        self.env_info.EMSCRIPTEN = self._emscripten
-        self.env_info.EM_CONFIG = self._em_config
-        self.env_info.EM_CACHE = self._em_cache
