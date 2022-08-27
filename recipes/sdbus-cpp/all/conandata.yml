@@ -19,4 +19,3 @@ patches:
   "1.0.0":
     - base_path: "source_subfolder"
       patch_file: "patches/0002-correct-readme-cpack-resource-path.patch"
-
