@@ -41,11 +41,12 @@ class EmSDKConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     @property
-    def _path(self):
-        return [
-            self.package_folder,
-            os.path.join(self.package_folder, "bin", "upstream", "emscripten"),
-        ]
+    def _relative_paths(self):
+        return [".", os.path.join("bin", "upstream", "emscripten")]
+
+    @property
+    def _paths(self):
+        return [os.path.join(self.package_folder, path) for path in self._relative_paths]
 
     @property
     def _emsdk(self):
@@ -65,7 +66,7 @@ class EmSDKConan(ConanFile):
 
     def generate(self):
         env = Environment()
-        env.prepend_path("PATH", self._path)
+        env.prepend_path("PATH", self._paths)
         env.define_path("EMSDK", self._emsdk)
         env.define_path("EMSCRIPTEN", self._emscripten)
         env.define_path("EM_CONFIG", self._em_config)
@@ -136,7 +137,7 @@ class EmSDKConan(ConanFile):
         return path
 
     def package_info(self):
-        self.cpp_info.bindirs.append(os.path.join("bin", "upstream", "emscripten"))
+        self.cpp_info.bindirs.extend(self._relative_paths)
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
@@ -179,7 +180,7 @@ class EmSDKConan(ConanFile):
         self.env_info.CXX = self._define_tool_var("em++")
         self.env_info.RANLIB = self._define_tool_var("emranlib")
         self.env_info.AR = self._define_tool_var("emar")
-        self.env_info.PATH.extend(self._path)
+        self.env_info.PATH.extend(self._paths)
         self.env_info.EMSDK = self._emsdk
         self.env_info.EMSCRIPTEN = self._emscripten
         self.env_info.EM_CONFIG = self._em_config
