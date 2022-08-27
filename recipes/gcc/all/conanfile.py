@@ -37,7 +37,7 @@ class GccConan(ConanFile):
             '--disable-multilib',
             '--disable-bootstrap',
             f'--prefix={self.package_folder}',
-            '--libexecdir=$prefix/bin/libexec'
+            f'--libexecdir={self.package_folder}/bin/libexec'
             f'--with-zlib={self.deps_cpp_info["zlib"].rootpath}',
             f'--with-gmp={self.deps_cpp_info["gmp"].rootpath}',
             f'--with-mpc={self.deps_cpp_info["mpc"].rootpath}',
@@ -93,7 +93,7 @@ class GccConan(ConanFile):
             self.auto_tools.make('install-strip')
         rmdir(self, os.path.join(self.package_folder, 'share'))
         rm(self, '*.la', self.package_folder, recursive=True)
-        copy(self, pattern='COPYING*', dst=os.path.join(self.package_folder, "licenses"), src=self.folders.source)
+        copy(self, pattern='COPYING*', dst=os.path.join(self.package_folder, 'licenses'), src=self.source_folder)
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, 'bin')
