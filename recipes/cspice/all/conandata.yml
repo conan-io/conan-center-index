@@ -117,4 +117,6 @@ patches:
     - patch_file: "patches/isatty.patch"
   "0066":
     - patch_file: "patches/isatty.patch"
-    - patch_file: "patches/patches20171106.patch" # from https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066_patches
+    - patch_file: "patches/patches20171106.patch"
+      patch_type: "backport"
+      patch_source: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066_patches"
