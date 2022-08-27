@@ -1,14 +1,29 @@
 import os
 
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.files import copy
 
 
 class SdbusCppTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = ("cmake", "pkg_config")
+    generators = "CMakeToolchain", "PkgConfigDeps"
+    test_type = "explicit"
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.4")
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
+
+    def generate(self):
+        # workaround for https://gitlab.kitware.com/cmake/cmake/-/issues/18150
+        copy(self, "*.pc", self.generators_folder,
+             os.path.join(self.generators_folder, "lib", "pkgconfig"))
 
     def build(self):
         cmake = CMake(self)
@@ -16,6 +31,6 @@ class SdbusCppTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "example")
-            self.run(bin_path, run_environment=True)
+        if can_run(self):
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "example")
+            self.run(bin_path, env="conanrun")
