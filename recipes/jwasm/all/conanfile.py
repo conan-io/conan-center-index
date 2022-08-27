@@ -1,41 +1,57 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file
 import os
+
+required_conan_version = ">=1.46.0"
 
 
 class JwasmConan(ConanFile):
     name = "jwasm"
     description = "JWasm is intended to be a free Masm-compatible assembler."
     license = "Watcom-1.0"
-    topics = ("conan", "jwasm", "masm", "assembler")
+    topics = ("jwasm", "masm", "assembler")
     homepage = "https://github.com/JWasm/JWasm"
     url = "https://github.com/conan-io/conan-center-index"
 
     settings = "os", "arch", "compiler", "build_type"
 
-    exports_sources = "CMakeLists.txt", "patches/*"
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
     def package_id(self):
         del self.info.settings.compiler
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("JWasm-" + self.version, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              'string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")',
-                              "")
+        apply_conandata_patches(self)
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "CMakeLists.txt"),
+            'string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")',
+            "",
+        )
 
     def build(self):
         self._patch_sources()
@@ -44,11 +60,16 @@ class JwasmConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("License.txt", dst="licenses", src=self._source_subfolder)
+        copy(self, "License.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         suffix = ".exe" if self.settings.os == "Windows" else ""
-        self.copy("jwasm" + suffix, dst="bin", src="bin")
+        copy(self, f"jwasm{suffix}", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
+
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
