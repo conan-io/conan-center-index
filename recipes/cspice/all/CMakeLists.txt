@@ -1,12 +1,9 @@
 cmake_minimum_required(VERSION 3.7)
-project(cspice C)
-
-include(conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
+project(cspice LANGUAGES C)
 
 include(GNUInstallDirs)
 
-option(BUILD_UTILITIES "Build cspice utilities" ON)
+option(CSPICE_BUILD_UTILITIES "Build cspice utilities" ON)
 
 add_compile_options(
   $<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:AppleClang>>:-Wno-implicit-int>
@@ -30,7 +27,7 @@ add_compile_options(
   $<$<AND:$<C_COMPILER_ID:AppleClang>,$<VERSION_GREATER_EQUAL:${CMAKE_C_COMPILER_VERSION},12>>:-Wno-error=implicit-function-declaration>
 )
 
-set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/src)
+set(SRC_DIR ${CSPICE_SRC_DIR}/src)
 
 file(GLOB CSPICE_SRC_FILES ${SRC_DIR}/cspice/*.c)
 add_library(cspice ${CSPICE_SRC_FILES})
@@ -54,10 +51,10 @@ install(
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
-file(GLOB INCLUDE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/include/*.h)
+file(GLOB INCLUDE_FILES ${CSPICE_SRC_DIR}/include/*.h)
 install(FILES ${INCLUDE_FILES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-if(BUILD_UTILITIES)
+if(CSPICE_BUILD_UTILITIES)
   # csupport is common to all utilities
   file(GLOB CSUPPORT_SRC_FILES "${SRC_DIR}/csupport/*.c")
   add_library(csupport STATIC ${CSUPPORT_SRC_FILES})
