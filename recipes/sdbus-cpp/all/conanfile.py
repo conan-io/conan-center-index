@@ -12,7 +12,7 @@ required_conan_version = ">=1.51.0"
 
 class SdbusCppConan(ConanFile):
     name = "sdbus-cpp"
-    license = "LGPL-2.1-or-later"
+    license = "LicenseRef-LGPL-2.1-or-later-WITH-sdbus-cpp-LGPL-exception-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Kistler-Group/sdbus-cpp"
     description = "High-level C++ D-Bus library for Linux designed" \
@@ -48,6 +48,9 @@ class SdbusCppConan(ConanFile):
                  self.export_sources_folder)
 
     def configure(self):
+        if Version(self.version) < "0.9.0":
+            self.license = "LGPL-2.1-or-later"
+
         if self.options.shared:
             del self.options.fPIC
 
