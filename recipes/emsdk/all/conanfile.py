@@ -161,8 +161,10 @@ class EmSDKConan(ConanFile):
 
         self.buildenv_info.define_path("CC", self._define_tool_var("emcc"))
         self.buildenv_info.define_path("CXX", self._define_tool_var("em++"))
-        self.buildenv_info.define_path("RANLIB", self._define_tool_var("emranlib"))
         self.buildenv_info.define_path("AR", self._define_tool_var("emar"))
+        self.buildenv_info.define_path("NM", self._define_tool_var("emnm"))
+        self.buildenv_info.define_path("RANLIB", self._define_tool_var("emranlib"))
+        self.buildenv_info.define_path("STRIP", self._define_tool_var("emstrip"))
 
         self.cpp_info.builddirs = [
             "bin/releases/src",
@@ -178,8 +180,10 @@ class EmSDKConan(ConanFile):
         self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = toolchain
         self.env_info.CC = self._define_tool_var("emcc")
         self.env_info.CXX = self._define_tool_var("em++")
-        self.env_info.RANLIB = self._define_tool_var("emranlib")
         self.env_info.AR = self._define_tool_var("emar")
+        self.env_info.NM = self._define_tool_var("emnm")
+        self.env_info.RANLIB = self._define_tool_var("emranlib")
+        self.env_info.STRIP = self._define_tool_var("emstrip")
         self.env_info.PATH.extend(self._paths)
         self.env_info.EMSDK = self._emsdk
         self.env_info.EMSCRIPTEN = self._emscripten
