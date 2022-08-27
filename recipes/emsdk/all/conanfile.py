@@ -42,7 +42,7 @@ class EmSDKConan(ConanFile):
 
     @property
     def _relative_paths(self):
-        return [".", os.path.join("bin", "upstream", "emscripten")]
+        return ["bin", os.path.join("bin", "upstream", "emscripten")]
 
     @property
     def _paths(self):
@@ -137,7 +137,7 @@ class EmSDKConan(ConanFile):
         return path
 
     def package_info(self):
-        self.cpp_info.bindirs.extend(self._relative_paths)
+        self.cpp_info.bindirs = self._relative_paths
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
