@@ -50,7 +50,7 @@ class EmSDKConan(ConanFile):
 
     @property
     def _emsdk(self):
-        return self.package_folder
+        return os.path.join(self.package_folder, "bin")
 
     @property
     def _emscripten(self):
@@ -62,7 +62,7 @@ class EmSDKConan(ConanFile):
 
     @property
     def _em_cache(self):
-        return os.path.join(self.package_folder,  "bin", ".emscripten_cache")
+        return os.path.join(self.package_folder, "bin", ".emscripten_cache")
 
     def generate(self):
         env = Environment()
