@@ -1,8 +1,9 @@
+from conan.tools.files import apply_conandata_patches
 from conans import ConanFile, CMake, tools
 import functools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.51.3"
 
 
 class CppcheckConan(ConanFile):
@@ -27,8 +28,7 @@ class CppcheckConan(ConanFile):
         return "build_subfolder"
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         tools.replace_in_file(os.path.join(self._source_subfolder, "cli", "CMakeLists.txt"),
                               "RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}",
                               "DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}")
