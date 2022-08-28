@@ -2,7 +2,7 @@ import os
 from conans import CMake, tools
 from conan import ConanFile
 from conan.tools.scm import Version
-from conan.tools.files import apply_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, get, rm, rmdir, replace_in_file
 from conan.tools.build.cross_building import cross_building
 
 required_conan_version = ">=1.50.2"
@@ -165,7 +165,7 @@ class LibpngConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*[!.dll]")
+            rm(self, "*[!.dll]", os.path.join(self.package_folder, "bin"))
         else:
             rmdir(self, os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "lib", "libpng"))
