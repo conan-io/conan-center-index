@@ -6,7 +6,6 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.gnu import PkgConfigDeps, AutotoolsDeps
 from conan.tools.files import apply_conandata_patches, get, replace_in_file, rmdir, chdir, rm, load, save, copy
 from conan.tools.apple import is_apple_os
-import re
 import os
 import glob
 import shutil
