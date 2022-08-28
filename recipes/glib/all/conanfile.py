@@ -135,7 +135,7 @@ class GLibConan(ConanFile):
         tc = MesonToolchain(self)
 
         defs = dict()
-        if is_apple_os(self.settings.os):
+        if is_apple_os(self):
             defs["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
         defs["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
         defs["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
