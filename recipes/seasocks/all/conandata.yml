@@ -2,3 +2,6 @@ sources:
   "1.4.4":
     url: "https://github.com/mattgodbolt/seasocks/archive/v1.4.4.tar.gz"
     sha256: "5ec016ee87d4985a031212fa23a00de3de5f0fa1ceb82d7b9a3d1c189356bf8d"
+  "1.4.5":
+    url: "https://github.com/mattgodbolt/seasocks/archive/v1.4.5.tar.gz"
+    sha256: "82211959cf8aabc85b300358c5f68cf9c56dfdf4eaa09e548580fce908acfc1b"
