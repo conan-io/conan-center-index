@@ -91,7 +91,7 @@ class GLibConan(ConanFile):
             # for Linux, gettext is provided by libc
             self.requires("libgettext/0.21")
 
-        if is_apple_os(self.settings.os):
+        if is_apple_os(self):
             self.requires("libiconv/1.17")
 
     def validate(self):
