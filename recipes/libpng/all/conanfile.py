@@ -5,7 +5,7 @@ from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, get, rm, rmdir, replace_in_file
 from conan.tools.build.cross_building import cross_building
 
-required_conan_version = ">=1.50.2"
+required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
 
 
 class LibpngConan(ConanFile):
