@@ -240,7 +240,7 @@ class QtConan(ConanFile):
             del self.options.with_libjpeg
             del self.options.with_libpng
             del self.options.with_md4c
-        
+
         if not self.options.with_dbus:
             del self.options.with_atspi
 
@@ -338,7 +338,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_pulseaudio", default=False) and not self.options["pulseaudio"].with_glib:
             # https://bugreports.qt.io/browse/QTBUG-95952
             raise ConanInvalidConfiguration("Pulseaudio needs to be built with glib option or qt's configure script won't detect it")
-        
+
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
 
@@ -623,7 +623,7 @@ class QtConan(ConanFile):
             args.append("-dbus-linked")
         else:
             args.append("-no-dbus")
-            
+
         args.append("-feature-gssapi" if self.options.get_safe("with_gssapi", False) else "-no-feature-gssapi")
 
         for opt, conf_arg in [
@@ -926,7 +926,7 @@ Examples = bin/datadir/examples""")
         libsuffix = ""
         if not self.options.multiconfiguration:
             if self.settings.build_type == "Debug":
-                if self.settings.os == "Windows":
+                if self.settings.os == "Windows" and self._is_msvc:
                     libsuffix = "d"
                 elif tools.is_apple_os(self.settings.os):
                     libsuffix = "_debug"
@@ -1037,8 +1037,8 @@ Examples = bin/datadir/examples""")
                 self.cpp_info.components["qtFontDatabaseSupport"].requires.append("fontconfig::fontconfig")
             if self.options.get_safe("with_freetype"):
                 self.cpp_info.components["qtFontDatabaseSupport"].requires.append("freetype::freetype")
-                
-            
+
+
             _create_module("ThemeSupport", ["Core", "Gui"])
             _create_module("AccessibilitySupport", ["Core", "Gui"])
             if self.options.get_safe("with_vulkan"):
@@ -1053,7 +1053,7 @@ Examples = bin/datadir/examples""")
 
             if self.settings.os in ["Android", "Emscripten"]:
                 _create_module("EglSupport", ["Core", "Gui"])
-                
+
             if self.settings.os == "Windows":
                 windows_reqs = ["Core", "Gui"]
                 windows_reqs.extend(["EventDispatcherSupport", "FontDatabaseSupport", "ThemeSupport", "AccessibilitySupport"])
@@ -1076,7 +1076,7 @@ Examples = bin/datadir/examples""")
                 if self.options.get_safe("with_vulkan"):
                     cocoa_reqs.append("VulkanSupport")
                 if self.options.widgets:
-                    cocoa_reqs.append("PrintSupport")                    
+                    cocoa_reqs.append("PrintSupport")
                 _create_plugin("QCocoaIntegrationPlugin", "qcocoa", "platforms", cocoa_reqs)
                 _create_plugin("QMacStylePlugin", "qmacstyle", "styles", cocoa_reqs)
                 self.cpp_info.components["QCocoaIntegrationPlugin"].frameworks = ["AppKit", "Carbon", "CoreServices", "CoreVideo",
@@ -1090,7 +1090,7 @@ Examples = bin/datadir/examples""")
             elif self.settings.os == "Emscripten":
                 _create_plugin("QWasmIntegrationPlugin", "qwasm", "platforms", ["Core", "Gui", "EventDispatcherSupport", "FontDatabaseSupport", "EglSupport"])
             elif self.settings.os in ["Linux", "FreeBSD"]:
-                service_support_reqs = ["Core", "Gui"]                
+                service_support_reqs = ["Core", "Gui"]
                 if self.options.with_dbus:
                     service_support_reqs.append("DBus")
                 _create_module("ServiceSupport", service_support_reqs)
