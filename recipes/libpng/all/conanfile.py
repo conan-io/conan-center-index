@@ -140,7 +140,7 @@ class LibpngConan(ConanFile):
         self._cmake.definitions["PNG_STATIC"] = not self.options.shared
         self._cmake.definitions["PNG_DEBUG"] = self.settings.build_type == "Debug"
         self._cmake.definitions["PNG_PREFIX"] = self.options.api_prefix
-        self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False # prevents configure error on non-macOS
+        self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False # prevents configure error on shared iOS/tvOS/watchOS
         if cross_building(self):
             self._cmake.definitions["CONAN_LIBPNG_SYSTEM_PROCESSOR"] = self._libpng_cmake_system_processor
         if self._has_neon_support:
