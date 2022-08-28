@@ -1,9 +1,11 @@
-from conan.tools.files import apply_conandata_patches
-from conans import CMake, ConanFile, tools
-import functools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class QXlsxConan(ConanFile):
@@ -24,14 +26,7 @@ class QXlsxConan(ConanFile):
         "fPIC": True
     }
 
-    generators = "cmake", "cmake_find_package_multi"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
@@ -46,27 +41,29 @@ class QXlsxConan(ConanFile):
     def requirements(self):
         self.requires("qt/5.15.5")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                destination=self._source_subfolder, strip_root=True)
+    def layout(self):
+        cmake_layout(self)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["QT_VERSION_MAJOR"] = tools.Version(self.deps_cpp_info["qt"].version).major
-        cmake.configure()
-        return cmake
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["QT_VERSION_MAJOR"] = Version(self.deps_cpp_info["qt"].version).major
+        tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder="QXlsx")
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "QXlsx")

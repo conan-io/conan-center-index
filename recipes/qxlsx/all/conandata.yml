@@ -8,6 +8,4 @@ sources:
 patches:
   "1.4.3":
     - patch_file: "patches/0001-allow-shared.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-add-install-target.patch"
-      base_path: "source_subfolder"
