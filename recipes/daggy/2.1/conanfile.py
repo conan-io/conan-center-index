@@ -28,7 +28,8 @@ class DaggyConan(ConanFile):
         "shared": False,
         "fPIC": True
     }
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_paths", "cmake_find_package"
+    tool_requires = "cmake/3.23.1"
     _cmake = None
 
     @property
@@ -47,9 +48,6 @@ class DaggyConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-
-    def build_requirements(self):
-        self.build_requires("cmake/3.21.3")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -89,7 +87,8 @@ class DaggyConan(ConanFile):
             raise ConanInvalidConfiguration("Shared Qt lib is required.") 
 
     def requirements(self):
-        self.requires("qt/6.2.2")
+        self.requires("openssl/1.1.1q")
+        self.requires("qt/6.3.1")
         self.requires("kainjow-mustache/4.1")
 
         if self.options.with_yaml:
