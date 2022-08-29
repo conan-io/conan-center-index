@@ -1,19 +1,25 @@
 sources:
-  "0.8.3":
-    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v0.8.3.tar.gz"
-    sha256: "0fd575ae0f463773dd9141242d1133731e2b780fd6526650ce992ba711d88628"
-  "1.0.0":
-    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v1.0.0.tar.gz"
-    sha256: "3db82112c0d8a171a4115d761e3a592b62091fa7600988736652595178ae4e94"
-  "1.1.0":
-    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v1.1.0.tar.gz"
-    sha256: "35e939fdd9c796522702c9c8762dd59b5c47f3440c01ba9feb9921c042780b55"
-
   "1.2.0":
     url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v1.2.0.tar.gz"
     sha256: "7f7231904abb6a996b8c18ddc5fb50078ef5dff5191649abf9f127aff41d24e9"
-patches:
+  "1.1.0":
+    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v1.1.0.tar.gz"
+    sha256: "35e939fdd9c796522702c9c8762dd59b5c47f3440c01ba9feb9921c042780b55"
+  "1.0.0":
+    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v1.0.0.tar.gz"
+    sha256: "3db82112c0d8a171a4115d761e3a592b62091fa7600988736652595178ae4e94"
   "0.8.3":
-    - patch_file: "patches/0001-xml2cpp-Add-missing-EXPAT-include-dirs-136.patch"
+    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v0.8.3.tar.gz"
+    sha256: "0fd575ae0f463773dd9141242d1133731e2b780fd6526650ce992ba711d88628"
+
+patches:
   "1.0.0":
     - patch_file: "patches/0002-correct-readme-cpack-resource-path.patch"
+      patch_description: "fix out of tree build by using proper paths in cmake file"
+      patch_type: "backport"
+      patch_source: "https://github.com/Kistler-Group/sdbus-cpp/commit/0b8f2d97524f354bcaf816b27b6139a5b0c480ba"
+  "0.8.3":
+    - patch_file: "patches/0001-xml2cpp-Add-missing-EXPAT-include-dirs-136.patch"
+      patch_description: "fix build error by adding missing headers"
+      patch_type: "backport"
+      patch_source: "https://github.com/Kistler-Group/sdbus-cpp/commit/fb008445b15b452f461c34667f4991f5ce06e481"

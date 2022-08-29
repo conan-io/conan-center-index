@@ -7,7 +7,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.51.0"
 
 
 class SdbusCppConan(ConanFile):
@@ -17,7 +17,7 @@ class SdbusCppConan(ConanFile):
     homepage = "https://github.com/Kistler-Group/sdbus-cpp"
     description = "High-level C++ D-Bus library for Linux designed" \
                   " to provide easy-to-use yet powerful API in modern C++"
-    topics = ("dbus", "sd-bus", "sdbus-c++", "sdbus-cpp")
+    topics = ("dbus", "sd-bus", "sdbus-c++")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -29,11 +29,7 @@ class SdbusCppConan(ConanFile):
         "fPIC": True,
         "with_code_gen": False,
     }
-    exports_sources = "patches/**"
     generators = "PkgConfigDeps"
-
-    def layout(self):
-        cmake_layout(self)
 
     @property
     def _minimum_cpp_standard(self):
@@ -45,6 +41,11 @@ class SdbusCppConan(ConanFile):
             "gcc": "7",
             "clang": "6",
         }
+
+    def export_sources(self):
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder,
+                 self.export_sources_folder)
 
     def configure(self):
         if self.options.shared:
@@ -71,6 +72,9 @@ class SdbusCppConan(ConanFile):
 
     def requirements(self):
         self.requires("libsystemd/251.4")
+
+    def layout(self):
+        cmake_layout(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -105,9 +109,12 @@ class SdbusCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "sdbus-c++")
         self.cpp_info.components["sdbus-c++"].libs = ["sdbus-c++"]
-        self.cpp_info.components["sdbus-c++"].requires.append("libsystemd::libsystemd")
-        self.cpp_info.components["sdbus-c++"].set_property("cmake_target_name", "SDBusCpp::sdbus-c++")
-        self.cpp_info.components["sdbus-c++"].set_property("pkg_config_name", "sdbus-c++")
+        self.cpp_info.components["sdbus-c++"].requires.append(
+            "libsystemd::libsystemd")
+        self.cpp_info.components["sdbus-c++"].set_property(
+            "cmake_target_name", "SDBusCpp::sdbus-c++")
+        self.cpp_info.components["sdbus-c++"].set_property(
+            "pkg_config_name", "sdbus-c++")
 
         if self.options.with_code_gen:
             bin_path = os.path.join(self.package_folder, "bin")
