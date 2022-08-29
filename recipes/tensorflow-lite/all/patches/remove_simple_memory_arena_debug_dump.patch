@@ -1,14 +1,18 @@
 diff --git a/tensorflow/lite/CMakeLists.txt b/tensorflow/lite/CMakeLists.txt
-index f184ac5d30d..f59f9ea717c 100644
---- a/tensorflow/lite/CMakeLists.txt
-+++ b/tensorflow/lite/CMakeLists.txt
-@@ -199,6 +199,6 @@ if(CMAKE_SYSTEM_NAME MATCHES "Android")
+--- tensorflow/lite/CMakeLists.txt
++++ tensorflow/lite/CMakeLists.txt
+@@ -201,11 +201,11 @@
+   find_library(ANDROID_LOG_LIB log)
  endif()
--# Build a list of source files to compile into the TF Lite library.
+ # Build a list of source files to compile into the TF Lite library.
  populate_tflite_source_vars("." TFLITE_SRCS)
+-
+-# This particular file is excluded because the more explicit approach to enable
+-# XNNPACK delegate is preferred to the weak-symbol one.
 +if(CMAKE_SYSTEM_NAME MATCHES "Windows" AND BUILD_SHARED_LIBS)
 +  list(FILTER TFLITE_SRCS EXCLUDE REGEX ".*simple_memory_arena_debug_dump\\.cc$")
 +endif()
+ list(FILTER TFLITE_SRCS EXCLUDE REGEX ".*tflite_with_xnnpack\\.cc$")
  
--# This particular file is excluded because the more explicit approach to enable
--# XNNPACK delegate is preferred to the weak-symbol one.
+ # Exclude Flex related files.
+ list(FILTER TFLITE_SRCS EXCLUDE REGEX ".*with_selected_ops\\.cc$")
