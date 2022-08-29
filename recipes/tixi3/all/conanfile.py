@@ -46,17 +46,21 @@ class Tixi3Conan(ConanFile):
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+            self.copy(patch["patch_file"], src=self.recipe_folder, dst=self.export_sources_folder)
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self.source_subfolder)
+
+    def _patch_source(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             files.patch(self,
                 patch_file=patch["patch_file"],
                 base_path=self.source_subfolder)
 
     def build(self):
+        self._patch_source()
+
         cmake = CMake(self)
         cmake.configure(build_script_folder=self.source_subfolder)
         cmake.build()
