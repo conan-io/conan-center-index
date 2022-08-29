@@ -1,8 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 import conan.tools as tools
-from conan.tools.files import get,load, save
-from conan.tools.scm import Version
+from conan.tools.files import get,load, save, download
 import os
 import glob
 
@@ -39,7 +38,7 @@ class GFortranConan(ConanFile):
         for it in data.keys():
             if self.settings.os == "Windows" and it == "Windows":
                 filename = data[it]["x86_64"]["filename"]
-                tools.download(** data[it]["x86_64"])
+                download(self, ** data[it]["x86_64"])
                 self.run("7z x {0}".format(filename))
                 os.unlink(filename)
                 os.rename("mingw64", "source_subfolder_Windows")
