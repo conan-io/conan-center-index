@@ -1,4 +1,5 @@
 from conan import ConanFile, tools
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.scm import Version
 import os
@@ -17,12 +18,20 @@ class SimbodyConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+         "build_lapack": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "openblas:build_lapack": True
+        "build_lapack": True
     }
+
+    def validate(self):
+        if self.options.build_lapack:
+            raise ConanInvalidConfiguration(
+                "build simbody from sources locally with default_options \"openblas:build_lapack\": True"
+            )
+
 
     def config_options(self):
         if self.settings.os == "Windows":
