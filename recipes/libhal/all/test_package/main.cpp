@@ -6,12 +6,12 @@
 class test_pwm : public hal::pwm
 {
 private:
-  virtual hal::status driver_frequency(hal::hertz p_frequency) noexcept
+  hal::status driver_frequency(hal::hertz p_frequency) noexcept override
   {
     std::printf("frequency = %f Hz\n", p_frequency);
     return {};
   }
-  virtual hal::status driver_duty_cycle(hal::percentage p_position) noexcept
+  hal::status driver_duty_cycle(hal::percentage p_position) noexcept override
   {
     std::printf("duty cycle = %f %%\n", p_position.value());
     return {};
