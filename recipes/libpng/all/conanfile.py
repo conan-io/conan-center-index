@@ -4,6 +4,7 @@ from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, get, rmdir, replace_in_file, copy, rm
 from conan.tools.microsoft import is_msvc
 from conan.tools.build.cross_building import cross_building
+from conan.tools.apple import is_apple_os
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -152,6 +153,10 @@ class LibpngConan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
+
+    def validate(self):
+        if Version(self.version) < "1.6" and self.info.settings.arch == "armv8" and is_apple_os(self):
+            raise ConanInvalidConfiguration(f"{self.ref} could not be cross build on Mac.")
 
     def build(self):
         apply_conandata_patches(self)
