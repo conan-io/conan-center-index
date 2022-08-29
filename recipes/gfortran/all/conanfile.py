@@ -37,8 +37,9 @@ class GFortranConan(ConanFile):
         data = self.conan_data["sources"][self.version]
         for it in data.keys():
             if self.settings.os == "Windows" and it == "Windows":
-                filename = data[it]["x86_64"]["filename"]
                 download(self, ** data[it]["x86_64"])
+                pattern = "GCC-*"
+                filename = glob.glob(pattern)[0]
                 self.run("7z x {0}".format(filename))
                 os.unlink(filename)
                 os.rename("mingw64", "source_subfolder_Windows")

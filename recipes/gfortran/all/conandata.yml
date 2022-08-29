@@ -3,7 +3,6 @@ sources:
     "Windows":
       "x86_64":
         url: "https://downloads.sourceforge.net/project/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/ray_linn/GCC-10.X-with-ada/GCC-10.2.0-crt-8.0.0-with-ada-20201019.7z"
-        filename: "GCC-10.2.0-crt-8.0.0-with-ada-20201019.7z"
         sha256: "5c3fc254494bc24eb201870f4b781d401cf7279bd03ea1aba6f2ffae771ded44"
     "Linux":
       "x86_64":
