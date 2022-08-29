@@ -58,12 +58,8 @@ class Tixi3Conan(ConanFile):
         files.get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self.export_sources_folder)
 
-    def _patch_source(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            files.patch(self, patch_file=patch["patch_file"])
-
     def build(self):
-        self._patch_source()
+        files.apply_conandata_patches(self)
 
         cmake = CMake(self)
         cmake.configure()
