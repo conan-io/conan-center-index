@@ -1,4 +1,4 @@
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools import files
 from conan import ConanFile
 import os
@@ -24,8 +24,6 @@ class Tixi3Conan(ConanFile):
         "fPIC": True,
     }
 
-    source_subfolder = "_src_"
-
     def generate(self):
         tc = CMakeToolchain(self)
         tc.generate()
@@ -36,6 +34,9 @@ class Tixi3Conan(ConanFile):
         self.requires("libxml2/2.9.14")
         self.requires("libxslt/1.1.34")
         self.requires("libcurl/7.84.0")
+
+    def layout(self):
+        cmake_layout(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -55,19 +56,17 @@ class Tixi3Conan(ConanFile):
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self.source_subfolder)
+                  strip_root=True, destination=self.export_sources_folder)
 
     def _patch_source(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            files.patch(self,
-                patch_file=patch["patch_file"],
-                base_path=self.source_subfolder)
+            files.patch(self, patch_file=patch["patch_file"])
 
     def build(self):
         self._patch_source()
 
         cmake = CMake(self)
-        cmake.configure(build_script_folder=self.source_subfolder)
+        cmake.configure()
         cmake.build()
 
     def package(self):
@@ -79,7 +78,7 @@ class Tixi3Conan(ConanFile):
             os.path.join(self.package_folder, "lib", "tixi3"))
 
         # copy the LICENSE file
-        self.copy("LICENSE", dst="licenses", src=self.source_subfolder)
+        self.copy("LICENSE", dst="licenses", src=self.export_sources_folder)
 
         # remove share directory, which only contains documentation,
         # expamples...
