@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, get
 import os
 
 required_conan_version = ">=1.46.0"
@@ -44,25 +44,16 @@ class JwasmConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            'string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")',
-            "",
-        )
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
         copy(self, "License.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        suffix = ".exe" if self.settings.os == "Windows" else ""
-        copy(self, f"jwasm{suffix}", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"))
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.frameworkdirs = []
