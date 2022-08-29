@@ -1,13 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, load, save
 from conan.tools.scm import Version
-from conans import tools as tools_legacy
 import os
 import textwrap
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.51.3"
 
 
 class Sqlite3Conan(ConanFile):
@@ -93,13 +93,13 @@ class Sqlite3Conan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         try:
-           del self.settings.compiler.libcxx
+            del self.settings.compiler.libcxx
         except Exception:
-           pass
+            pass
         try:
-           del self.settings.compiler.cppstd
+            del self.settings.compiler.cppstd
         except Exception:
-           pass
+            pass
 
     def validate(self):
         if self.info.options.build_executable:
@@ -118,6 +118,7 @@ class Sqlite3Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["SQLITE3_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.variables["SQLITE3_VERSION"] = self.version
         tc.variables["SQLITE3_BUILD_EXECUTABLE"] = self.options.build_executable
         tc.variables["THREADSAFE"] = self.options.threadsafe
@@ -142,7 +143,7 @@ class Sqlite3Conan(ConanFile):
         tc.variables["HAVE_FDATASYNC"] = True
         tc.variables["HAVE_GMTIME_R"] = True
         tc.variables["HAVE_LOCALTIME_R"] = self.settings.os != "Windows"
-        tc.variables["HAVE_POSIX_FALLOCATE"] = not (self.settings.os in ["Windows", "Android"] or tools_legacy.is_apple_os(self.settings.os))
+        tc.variables["HAVE_POSIX_FALLOCATE"] = not (self.settings.os in ["Windows", "Android"] or is_apple_os(self))
         tc.variables["HAVE_STRERROR_R"] = True
         tc.variables["HAVE_USLEEP"] = True
         tc.variables["DISABLE_GETHOSTUUID"] = self.options.disable_gethostuuid
