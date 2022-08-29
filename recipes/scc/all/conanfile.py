@@ -5,7 +5,7 @@ from conans import tools, CMake
 from conan.errors import ConanInvalidConfiguration
 import functools
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 class SystemcComponentsConan(ConanFile):
     name = "scc"
