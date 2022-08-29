@@ -2,12 +2,12 @@ sources:
   "10.2":
     "url":
       "Windows":
-        url: "https://downloads.sourceforge.net/project/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/ray_linn/GCC-10.X-with-ada/GCC-10.2.0-crt-8.0.0-with-ada-20201019.7z"
-        filename: "GCC-10.2.0-crt-8.0.0-with-ada-20201019.7z"
-        sha256: "5c3fc254494bc24eb201870f4b781d401cf7279bd03ea1aba6f2ffae771ded44"
+        url: https://downloads.sourceforge.net/project/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/ray_linn/GCC-10.X-with-ada/GCC-10.2.0-crt-8.0.0-with-ada-20201019.7z
+        filename: GCC-10.2.0-crt-8.0.0-with-ada-20201019.7z
+        sha256: 5c3fc254494bc24eb201870f4b781d401cf7279bd03ea1aba6f2ffae771ded44
       "Linux":
-        url: "https://gfortran.meteodat.ch/download/x86_64/releases/gcc-10.2.0.tar.xz"
-        sha256: "5cfaf152db442bb967963ca62d4590980cb2664c5902c1a9578fc8a9c6efe40f"
+        url: https://gfortran.meteodat.ch/download/x86_64/releases/gcc-10.2.0.tar.xz
+        sha256: 5cfaf152db442bb967963ca62d4590980cb2664c5902c1a9578fc8a9c6efe40f
       "Macos":
-        url: "https://downloads.sourceforge.net/project/hpc/hpc/g95/gfortran-10.2-bin.tar.gz"
-        sha256: "2de46f571eefc2b544db4ed6c958c78a5e3e78c4b4b5daab38aabc1b08dd5666"
+        url: https://downloads.sourceforge.net/project/hpc/hpc/g95/gfortran-10.2-bin.tar.gz
+        sha256: 2de46f571eefc2b544db4ed6c958c78a5e3e78c4b4b5daab38aabc1b08dd5666
