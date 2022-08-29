@@ -1,0 +1,165 @@
+diff --git a/tensorflow/lite/CMakeLists.txt b/tensorflow/lite/CMakeLists.txt
+--- tensorflow/lite/CMakeLists.txt
++++ tensorflow/lite/CMakeLists.txt
+@@ -394,9 +394,9 @@
+     TFLITE_DELEGATES_XNNPACK_SRCS
+     FILTER ".*(_test|_tester)\\.(cc|h)"
+   )
+   list(APPEND TFLITE_TARGET_DEPENDENCIES
+-    XNNPACK
++    xnnpack::xnnpack
+   )
+   list(APPEND TFLITE_TARGET_PUBLIC_OPTIONS "-DTFLITE_BUILD_WITH_XNNPACK_DELEGATE")
+ endif()
+ if(TFLITE_ENABLE_EXTERNAL_DELEGATE)
+@@ -507,9 +507,9 @@
+     absl::synchronization
+     absl::variant
+-    farmhash
++    farmhash::farmhash
+-    fft2d_fftsg2d
++    fft::fft
+-    flatbuffers
++    flatbuffers::libflatbuffers
+-    gemmlowp
++    gemmlowp::eight_bit_int_gemm
+-    ruy
++    ruy::ruy
+     ${CMAKE_DL_LIBS}
+     ${TFLITE_TARGET_DEPENDENCIES}
+diff --git a/tensorflow/lite/tools/cmake/modules/Findeigen.cmake b/tensorflow/lite/tools/cmake/modules/Findeigen.cmake
+--- tensorflow/lite/tools/cmake/modules/Findeigen.cmake
++++ tensorflow/lite/tools/cmake/modules/Findeigen.cmake
+@@ -14,8 +14,10 @@
+ # limitations under the License.
+ 
+ # tensorflow-lite uses find_package for this package, so override the system
+ # installation and build from source instead.
++find_package(Eigen3 REQUIRED)
++add_library(eigen ALIAS Eigen3::Eigen)
+ include(eigen)
+ if(eigen_POPULATED)
+   set(EIGEN_FOUND TRUE)
+   get_target_property(EIGEN_INCLUDE_DIRS eigen INTERFACE_DIRECTORIES)
+diff --git a/tensorflow/lite/tools/cmake/modules/Findfft2d.cmake b/tensorflow/lite/tools/cmake/modules/Findfft2d.cmake
+--- tensorflow/lite/tools/cmake/modules/Findfft2d.cmake
++++ tensorflow/lite/tools/cmake/modules/Findfft2d.cmake
+@@ -14,8 +14,10 @@
+ # limitations under the License.
+ 
+ # tensorflow-lite uses find_package for this package, so override the system
+ # installation and build from source instead.
++find_package(fft REQUIRED)
++add_library(fft2d ALIAS fft::fft)
+ include(fft2d)
+ if(fft2d_POPULATED)
+   set(FFT2D_FOUND TRUE CACHE BOOL "Found FF2D")
+   get_target_property(FFT2D_INCLUDE_DIRS fft2d INCLUDE_DIRECTORIES)
+diff --git a/tensorflow/lite/tools/cmake/modules/Findneon2sse.cmake b/tensorflow/lite/tools/cmake/modules/Findneon2sse.cmake
+--- tensorflow/lite/tools/cmake/modules/Findneon2sse.cmake
++++ tensorflow/lite/tools/cmake/modules/Findneon2sse.cmake
+@@ -14,8 +14,10 @@
+ # limitations under the License.
+ 
+ # tensorflow-lite uses find_package for this package, so override the system
+ # installation and build from source instead.
++find_package(intel-neon2sse REQUIRED)
++add_library(NEON_2_SSE ALIAS intel-neon2sse::intel-neon2sse)
+ include(neon2sse)
+ if(neon2sse_POPULATED)
+   set(NEON2SSE_FOUND TRUE)
+   get_target_property(NEON2SSE_INCLUDE_DIRS NEON_2_SSE INTERFACE_DIRECTORIES)
+diff --git a/tensorflow/lite/tools/cmake/modules/Findopencl_headers.cmake b/tensorflow/lite/tools/cmake/modules/Findopencl_headers.cmake
+--- tensorflow/lite/tools/cmake/modules/Findopencl_headers.cmake
++++ tensorflow/lite/tools/cmake/modules/Findopencl_headers.cmake
+@@ -13,4 +13,12 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
+ include(opencl_headers)
++
++find_package(OpenCLHeaders REQUIRED)
++get_target_property(OPENCL_HEADERS_INCLUDE_DIRS OpenCL::Headers INTERFACE_INCLUDE_DIRECTORIES)
++
++include_directories(
++  AFTER
++   "${OPENCL_HEADERS_INCLUDE_DIRS}/"
++)
+diff --git a/tensorflow/lite/tools/cmake/modules/Findfp16_headers.cmake b/tensorflow/lite/tools/cmake/modules/Findfp16_headers.cmake
+--- tensorflow/lite/tools/cmake/modules/Findfp16_headers.cmake
++++ tensorflow/lite/tools/cmake/modules/Findfp16_headers.cmake
+@@ -13,4 +13,12 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
+ include(fp16_headers)
++
++find_package(fp16 REQUIRED)
++get_target_property(FP_HEADERS_INCLUDE_DIRS fp16::fp16 INTERFACE_INCLUDE_DIRECTORIES)
++
++include_directories(
++  AFTER
++   "${FP_HEADERS_INCLUDE_DIRS}/"
++)
+diff --git a/tensorflow/lite/tools/cmake/modules/Findflatbuffers.cmake b/tensorflow/lite/tools/cmake/modules/Findflatbuffers.cmake
+--- tensorflow/lite/tools/cmake/modules/Findflatbuffers.cmake
++++ tensorflow/lite/tools/cmake/modules/Findflatbuffers.cmake
+@@ -14,12 +14,14 @@
+ # limitations under the License.
+ 
+ # tensorflow-lite uses find_package for this package, so override the system
+ # installation and build from source instead.
++find_package(Flatbuffers)
++add_library(flatbuffers ALIAS flatbuffers::libflatbuffers)
+ include(flatbuffers)
+ if(flatbuffers_POPULATED)
+   set(FLATBUFFERS_FOUND TRUE)
+   get_target_property(FLATBUFFERS_INCLUDE_DIRS flatbuffers INCLUDE_DIRECTORIES)
+   set(FLATBUFFERS_LIBRARIES flatbuffers)
+   set(FLATBUFFERS_PROJECT_DIR "${flatbuffers_SOURCE_DIR}" CACHE STRING
+     "Flatbuffers project dir"
+   )
+diff --git a/tensorflow/lite/tools/cmake/modules/Findvulkan_headers.cmake b/tensorflow/lite/tools/cmake/modules/Findvulkan_headers.cmake
+--- tensorflow/lite/tools/cmake/modules/Findvulkan_headers.cmake
++++ tensorflow/lite/tools/cmake/modules/Findvulkan_headers.cmake
+@@ -13,4 +13,12 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
+ include(vulkan_headers)
++
++find_package(VulkanHeaders REQUIRED)
++get_target_property(VULKAN_HEADERS_INCLUDE_DIRS Vulkan::Headers INTERFACE_INCLUDE_DIRECTORIES)
++
++include_directories(
++  AFTER
++   "${VULKAN_HEADERS_INCLUDE_DIRS}/"
++)
+diff --git a/tensorflow/lite/tools/cmake/modules/egl_headers.cmake b/tensorflow/lite/tools/cmake/modules/egl_headers.cmake
+--- tensorflow/lite/tools/cmake/modules/egl_headers.cmake
++++ tensorflow/lite/tools/cmake/modules/egl_headers.cmake
+@@ -16,9 +16,9 @@
+ if(TARGET egl_headers OR egl_headers_POPULATED)
+   return()
+ endif()
+ 
+-include(FetchContent)
++include(OverridableFetchContent)
+ 
+ OverridableFetchContent_Declare(
+   egl_headers
+   GIT_REPOSITORY https://github.com/KhronosGroup/EGL-Registry.git
+diff --git a/tensorflow/lite/tools/cmake/modules/opengl_headers.cmake b/tensorflow/lite/tools/cmake/modules/opengl_headers.cmake
+--- tensorflow/lite/tools/cmake/modules/opengl_headers.cmake
++++ tensorflow/lite/tools/cmake/modules/opengl_headers.cmake
+@@ -16,9 +16,9 @@
+ if(TARGET opengl_headers OR opengl_headers_POPULATED)
+   return()
+ endif()
+ 
+-include(FetchContent)
++include(OverridableFetchContent)
+ 
+ OverridableFetchContent_Declare(
+   opengl_headers
+   GIT_REPOSITORY https://github.com/KhronosGroup/OpenGL-Registry.git
