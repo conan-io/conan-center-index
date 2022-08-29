@@ -55,7 +55,8 @@ class LibgdConan(ConanFile):
         self.requires("zlib/1.2.11")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
-            self.requires("getopt-for-visual-studio/20200201")
+            if self.settings.compiler == "Visual Studio":
+                self.requires("getopt-for-visual-studio/20200201")
         if self.options.with_jpeg:
             self.requires("libjpeg/9d")
         if self.options.with_tiff:
