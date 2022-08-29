@@ -1,5 +1,8 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+import conan.tools as tools
+from conan.tools.files import get,load, save
+from conan.tools.scm import Version
 import os
 import glob
 
@@ -41,14 +44,15 @@ class GFortranConan(ConanFile):
                 os.unlink(filename)
                 os.rename("mingw64", "source_subfolder_Windows")
             elif it != "Windows":
-                tools.get(** data[it]["x86_64"])
+                get(self, ** data[it]["x86_64"])
                 pattern = "gcc-*" if it == "Linux" else "usr"
                 os.rename(glob.glob(pattern)[0], "source_subfolder_{}".format(it))
+                break
 
     def _extract_license(self):
-        info = tools.load(os.path.join(self.source_folder, "source_subfolder_Linux", "share", "info", "gfortran.info"))
+        info = load(self, os.path.join(self.source_folder, "source_subfolder_Linux", "share", "info", "gfortran.info"))
         license_contents = info[info.find("Version 3"):info.find("END OF TERMS", 1)]
-        tools.save("LICENSE", license_contents)
+        save(self, "LICENSE", license_contents)
 
     def package(self):
         self._extract_license()
