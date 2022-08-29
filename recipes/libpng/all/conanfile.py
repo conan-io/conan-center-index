@@ -148,14 +148,10 @@ class LibpngConan(ConanFile):
             tc.variables["PNG_INTEL_SSE"] = self._neon_msa_sse_vsx_mapping[str(self.options.sse)]
         if self._has_vsx_support:
             tc.variables["PNG_POWERPC_VSX"] = self._neon_msa_sse_vsx_mapping[str(self.options.vsx)]
+        tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
-
-    def validate(self):
-        # INFO: https://github.com/glennrp/libpng/issues/372
-        if cross_building(self) and self.info.settings.os == "Macos":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support cross-building on Mac M1 library. See glennrp/libpng#372")
 
     def build(self):
         apply_conandata_patches(self)
