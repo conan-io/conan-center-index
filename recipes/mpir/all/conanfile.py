@@ -109,7 +109,6 @@ class MpirConan(ConanFile):
                 "Debug" if "d" in msvc_runtime_flag(self) else "",
                 "DLL" if "MD" in msvc_runtime_flag(self) else "",
             )
-            self.output.info(f"--++--++--++--++--++--++--++--++--++--++ props_path: {props_path}")
             replace_in_file(self, props_path, old_runtime, new_runtime)
         msbuild = MSBuild(self)
         for vcxproj_path in self._vcxproj_paths:
