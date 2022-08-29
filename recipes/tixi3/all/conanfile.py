@@ -56,7 +56,7 @@ class Tixi3Conan(ConanFile):
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self.export_sources_folder)
+                  strip_root=True, destination=self.source_folder)
 
     def build(self):
         files.apply_conandata_patches(self)
@@ -69,15 +69,8 @@ class Tixi3Conan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        # remove package generated cmake config files
-        files.rmdir(self, 
-            os.path.join(self.package_folder, "lib", "tixi3"))
-
-        # copy the LICENSE file
-        self.copy("LICENSE", dst="licenses", src=self.export_sources_folder)
-
-        # remove share directory, which only contains documentation,
-        # expamples...
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "tixi3"))
+        files.copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
