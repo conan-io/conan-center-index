@@ -17,13 +17,13 @@ class SystemcComponentsConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "fPIC": [True, False],
-        "sc_with_phases_callbacks": [True, False],
-        "sc_with_phases_callback_tracing": [True, False]
+        "enable_phase_callbacks": [True, False],
+        "enable_phase_callbacks_tracing": [True, False]
     }
     default_options = {
         "fPIC": True,
-        "sc_with_phases_callbacks": False,
-        "sc_with_phases_callback_tracing": False
+        "enable_phase_callbacks": False,
+        "enable_phase_callbacks_tracing": False
     }
     generators = "cmake"
 
@@ -62,8 +62,8 @@ class SystemcComponentsConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["SC_WITH_PHASE_CALLBACKS"] = self.options.sc_with_phases_callbacks
-        cmake.definitions["SC_WITH_PHASE_CALLBACK_TRACING"] = self.options.sc_with_phases_callback_tracing
+        cmake.definitions["SC_WITH_PHASE_CALLBACKS"] = self.options.enable_phase_callbacks
+        cmake.definitions["SC_WITH_PHASE_CALLBACK_TRACING"] = self.options.enable_phase_callbacks_tracing
         cmake.definitions["BUILD_SCC_DOCUMENTATION"] = False
         cmake.definitions["SCC_LIB_ONLY"] = True
         if self.settings.os == "Windows":
