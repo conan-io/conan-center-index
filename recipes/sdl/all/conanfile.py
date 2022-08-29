@@ -182,7 +182,7 @@ class SDLConan(ConanFile):
 
     def _patch_sources(self):
         for data in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(**data)
+            patch(self, **data)
 
         replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                         'check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)',
