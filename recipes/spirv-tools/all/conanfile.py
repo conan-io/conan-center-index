@@ -1,13 +1,16 @@
 from conan import ConanFile
+from conan.errors import ConanException
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rm, rmdir, save
 from conan.tools.scm import Version
 from conans import tools as tools_legacy
+import functools
 import os
 import textwrap
+import yaml
 
-required_conan_version = ">=1.51.0"
+required_conan_version = ">=1.50.0"
 
 
 class SpirvtoolsConan(ConanFile):
@@ -44,6 +47,19 @@ class SpirvtoolsConan(ConanFile):
         return lv1 >= lv2
 
     @property
+    def _dependencies_filename(self):
+        return f"dependencies-{self.version}.yml"
+
+    @property
+    @functools.lru_cache(1)
+    def _dependencies_versions(self):
+        dependencies_filepath = os.path.join(self.recipe_folder, "dependencies", self._dependencies_filename)
+        if not os.path.isfile(dependencies_filepath):
+            raise ConanException(f"Cannot find {dependencies_filepath}")
+        cached_dependencies = yaml.safe_load(open(dependencies_filepath))
+        return cached_dependencies
+
+    @property
     def _has_spirv_tools_lint(self):
         return (Version(self.version) < "2016.6" or # spirv-tools with vulkan versioning
                 Version(self.version) >= "2021.3")
@@ -53,6 +69,9 @@ class SpirvtoolsConan(ConanFile):
         # TODO: use tools.Version comparison once https://github.com/conan-io/conan/issues/10000 is fixed
         return ((self._greater_equal_semver(self.version, "1.3.211") and Version(self.version) < "2016.6") or # spirv-tools with vulkan versioning
                 Version(self.version) >= "2022.2")
+
+    def export(self):
+        copy(self, f"dependencies/{self._dependencies_filename}", self.recipe_folder, self.export_folder)
 
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
@@ -66,30 +85,17 @@ class SpirvtoolsConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def requirements(self):
-        self.requires("spirv-headers/{}".format(self._get_compatible_spirv_headers_version))
+    def _require(self, recipe_name):
+        if recipe_name not in self._dependencies_versions:
+            raise ConanException(f"{recipe_name} is missing in {self._dependencies_filename}")
+        return f"{recipe_name}/{self._dependencies_versions[recipe_name]}"
 
-    @property
-    def _get_compatible_spirv_headers_version(self):
-        return {
-            "1.3.224.1": "1.3.224.0",
-            "2021.4": "1.2.198.0",
-            "2021.3": "cci.20210811",
-            "2021.2": "cci.20210616",
-            "2020.5": "1.5.4",
-            "2020.3": "1.5.3",
-            "2019.2": "1.5.1",
-        }.get(str(self.version), self.version)
+    def requirements(self):
+        self.requires(self._require("spirv-headers"))
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
-
-    def validate_build(self):
-        if self.dependencies["spirv-headers"].ref.version != self._get_compatible_spirv_headers_version:
-            self.output.warn(
-                f"spirv-tools/{self.version} should require spirv-headers/{self._get_compatible_spirv_headers_version}",
-            )
 
     def layout(self):
         cmake_layout(self, src_folder="src")
