@@ -20,4 +20,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "tixi3_conan_test")
-            self.run(bin_path, run_environment=True)
+            self.run(bin_path, env="conanrun")
