@@ -32,16 +32,16 @@ class GFortranConan(ConanFile):
             self.build_requires("7zip/19.00")
 
     def source(self):
-        url = self.conan_data["sources"][self.version]["url"]
-        for it in url.keys():
+        data = self.conan_data["sources"][self.version]
+        for it in data.keys():
             if self.settings.os == "Windows" and it == "Windows":
-                filename = url[it]["filename"]
-                tools.download(**url[it])
+                filename = data[it]["x86_64"]["filename"]
+                tools.download(** data[it]["x86_64"])
                 self.run("7z x {0}".format(filename))
                 os.unlink(filename)
                 os.rename("mingw64", "source_subfolder_Windows")
             elif it != "Windows":
-                tools.get(**url[it])
+                tools.get(** data[it]["x86_64"])
                 pattern = "gcc-*" if it == "Linux" else "usr"
                 os.rename(glob.glob(pattern)[0], "source_subfolder_{}".format(it))
 
