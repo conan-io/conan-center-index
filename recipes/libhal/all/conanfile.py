@@ -42,7 +42,7 @@ class LibHALConan(ConanFile):
         }
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
+        if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
         def lazy_lt_semver(v1, v2):
