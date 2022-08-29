@@ -28,7 +28,7 @@ class SpyConan(ConanFile):
             "gcc": "7.4",
             "Visual Studio": "15.7",
             "clang": "6",
-            "apple-clang": "10",
+            "apple-clang": "12",
         }
 
     def package_id(self):
