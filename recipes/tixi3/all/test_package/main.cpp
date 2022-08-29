@@ -16,4 +16,5 @@ int main()
     std::cout << str << std::endl;
     
     tixiCloseDocument(handle);
+    return 0;
 }
