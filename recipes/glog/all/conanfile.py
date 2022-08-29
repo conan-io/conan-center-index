@@ -18,12 +18,14 @@ class GlogConan(ConanFile):
         "fPIC": [True, False],
         "with_gflags": [True, False],
         "with_threads": [True, False],
+        "with_unwind": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_gflags": True,
         "with_threads": True,
+        "with_unwind": True,
     }
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
@@ -37,16 +39,22 @@ class GlogConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            del self.options.with_unwind
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         if self.options.with_gflags:
             self.options["gflags"].shared = self.options.shared
+        if self.options.with_unwind:
+            self.options["libunwind"].shared = self.options.shared
 
     def requirements(self):
         if self.options.with_gflags:
             self.requires("gflags/2.2.2")
+        if self.options.get_safe("with_unwind"):
+            self.requires("libunwind/1.6.2")
 
     def build_requirements(self):
         if tools.Version(self.version) >= "0.6.0":
@@ -79,7 +87,7 @@ class GlogConan(ConanFile):
                 self._cmake.definitions["HAVE_SYS_SYSCALL_H"] = False
             else:
                 self._cmake.definitions["WITH_SYMBOLIZE"] = True
-            self._cmake.definitions["WITH_UNWIND"] = True
+            self._cmake.definitions["WITH_UNWIND"] = self.options.get_safe("with_unwind", default=False)
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.configure()
         return self._cmake
@@ -108,6 +116,6 @@ class GlogConan(ConanFile):
             self.cpp_info.system_libs = ["dbghelp"]
             self.cpp_info.defines = ["GLOG_NO_ABBREVIATED_SEVERITIES"]
             decl = "__declspec(dllimport)" if self.options.shared else ""
-            self.cpp_info.defines.append("GOOGLE_GLOG_DLL_DECL={}".format(decl))
+            self.cpp_info.defines.append(f"GOOGLE_GLOG_DLL_DECL={decl}")
         if self.options.with_gflags and not self.options.shared:
             self.cpp_info.defines.extend(["GFLAGS_DLL_DECLARE_FLAG=", "GFLAGS_DLL_DEFINE_FLAG="])
