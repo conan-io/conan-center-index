@@ -77,7 +77,7 @@ class Tixi3Conan(ConanFile):
         files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.includedirs = ['include/tixi3']
+        self.cpp_info.includedirs.append(os.path.join("include", "tixi3"))
         self.cpp_info.libs = ['tixi3']
 
         if self.settings.os == "Windows":
