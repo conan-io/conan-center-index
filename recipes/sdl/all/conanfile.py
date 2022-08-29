@@ -142,7 +142,7 @@ class SDLConan(ConanFile):
             if self.options.nas:
                 self.requires("nas/1.9.4")
             if self.options.wayland:
-                self.requires("wayland/1.20.0")
+                self.requires("wayland/1.21.0")
                 self.requires("xkbcommon/1.4.1")
                 self.requires("egl/system")
             if self.options.libunwind:
