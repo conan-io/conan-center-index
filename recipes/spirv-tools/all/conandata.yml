@@ -29,29 +29,18 @@ sources:
 patches:
   "2021.4":
     - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2021.3.patch"
-      base_path: "source_subfolder"
   "2021.3":
     - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2021.3.patch"
-      base_path: "source_subfolder"
   "2021.2":
     - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2021.2.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-allow-more-platforms-2020.3.patch"
-      base_path: "source_subfolder"
   "2020.5":
     - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2020.5.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-allow-more-platforms-2020.3.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-support-SPV_KHR_fragment_shading_rate.patch"
-      base_path: "source_subfolder"
   "2020.3":
     - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2020.3.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-allow-more-platforms-2020.3.patch"
-      base_path: "source_subfolder"
   "2019.2":
     - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2019.2.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-allow-more-platforms-2019.2.patch"
-      base_path: "source_subfolder"
