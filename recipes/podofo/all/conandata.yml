@@ -8,7 +8,5 @@ sources:
 patches:
   "0.9.7":
     - patch_file: "patches/0001-fix-cmake-0.9.7.patch"
-      base_path: "source_subfolder"
   "0.9.6":
     - patch_file: "patches/0001-fix-cmake-0.9.6.patch"
-      base_path: "source_subfolder"
