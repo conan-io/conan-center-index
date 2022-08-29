@@ -183,7 +183,7 @@ class MpirConan(ConanFile):
                 autotools.make()
 
     def package(self):
-        copy(self, "COPYING*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "COPYING*", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, self._source_subfolder))
         if is_msvc(self):
             lib_folder = os.path.join(self.build_folder, self._source_subfolder, self._dll_or_lib,
                                     self._platforms.get(str(self.settings.arch)),
