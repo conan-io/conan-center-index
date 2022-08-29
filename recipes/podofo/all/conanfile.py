@@ -24,6 +24,7 @@ class PodofoConan(ConanFile):
         "with_tiff": [True, False],
         "with_png": [True, False],
         "with_unistring": [True, False],
+        "with_tools": [True, False],
     }
     default_options = {
         "shared": False,
@@ -35,6 +36,7 @@ class PodofoConan(ConanFile):
         "with_tiff": True,
         "with_png": True,
         "with_unistring": True,
+        "with_tools": False,
     }
 
     generators = "cmake", "cmake_find_package"
@@ -97,7 +99,7 @@ class PodofoConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["PODOFO_BUILD_TOOLS"] = True
+        cmake.definitions["PODOFO_BUILD_TOOLS"] = self.options.with_tools
         cmake.definitions["PODOFO_BUILD_SHARED"] = self.options.shared
         cmake.definitions["PODOFO_BUILD_STATIC"] = not self.options.shared
         if not self.options.threadsafe:
