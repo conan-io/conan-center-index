@@ -72,7 +72,6 @@ class TensorflowLiteConan(ConanFile):
         self.requires("gemmlowp/cci.20210928")
         self.requires("opencl-headers/2022.05.18")
         self.requires("vulkan-headers/1.3.221")
-        # self.requires("egl/system")
         if self.settings.arch in ("x86", "x86_64"):
             self.requires("intel-neon2sse/cci.20210225")
         if self.options.with_ruy or True: # Upstream always calls find_package
@@ -88,6 +87,7 @@ class TensorflowLiteConan(ConanFile):
 
     def layout(self):
         cmake_layout(self)
+        # TODO: once https://github.com/conan-io/conan/pull/11889 is available
         self.folders.build = f"build_folder/{self.settings.build_type}" # conflict with upstream files
         self.folders.generators = "build_folder/generators" # conflict with upstream files
 
@@ -105,7 +105,7 @@ class TensorflowLiteConan(ConanFile):
             # Not defined by Conan for Apple Silicon. See https://github.com/conan-io/conan/pull/8026
             tc.cache_variables["CMAKE_SYSTEM_PROCESSOR"] = "arm64"
 
-        # Find "populate" values to avoid custom find modules
+        # Custom FindModules use a "populate" this will skip the logic to vendor deps
         tc.variables["abseil-cpp_POPULATED"] = True
         tc.variables["clog_POPULATED"] = True
         tc.variables["cpuinfo_POPULATED"] = True
