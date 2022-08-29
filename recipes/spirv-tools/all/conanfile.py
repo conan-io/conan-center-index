@@ -72,6 +72,7 @@ class SpirvtoolsConan(ConanFile):
     @property
     def _get_compatible_spirv_headers_version(self):
         return {
+            "1.3.224.1": "1.3.224.0",
             "2021.4": "1.2.198.0",
             "2021.3": "cci.20210811",
             "2021.2": "cci.20210616",
