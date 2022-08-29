@@ -1,10 +1,4 @@
 sources:
-  "2.6.0":
-    url: "https://github.com/tensorflow/tensorflow/archive/refs/tags/v2.6.0.tar.gz"
-    sha256: "41b32eeaddcbc02b0583660bcf508469550e4cd0f86b22d2abe72dfebeacde0f"
-  "2.6.2":
-    url: "https://github.com/tensorflow/tensorflow/archive/refs/tags/v2.6.2.tar.gz"
-    sha256: "e68c1d346fc3d529653530ca346b2c62f5b31bd4fcca7ffc9c65bb39ab2f6ed3"
   "2.9.1":
     url: "https://github.com/tensorflow/tensorflow/archive/refs/tags/v2.9.1.tar.gz"
     sha256: "6eaf86ead73e23988fe192da1db68f4d3828bcdd0f3a9dc195935e339c95dbdc"
@@ -14,21 +8,10 @@ patches:
       patch_description: "Fix Windows build: Apply fixes for compatibility with MSVC from master"
       patch_source: "https://github.com/tensorflow/tensorflow/pull/56408"
       patch_type: "backport"
-      base_path: "src"
-    - patch_file: "patches/dependencies_2_9.patch"
+    - patch_file: "patches/fix-cmake-targets.patch"
       patch_description: "Dependency compatibility: Patch CMakeLists.txt, updating package names, target names, etc"
       patch_type: "conan"
-      base_path: "src"
     - patch_file: "patches/remove_simple_memory_arena_debug_dump.patch"
       patch_description: "Shared build fails on Windows with error LNK2005. Resolve the conflict by removing the conflicting implementation for now."
-      base_path: "src"
-  "2.6.0":
-    - patch_file: "patches/dependencies_2_6.patch"
-      patch_description: "Dependency compatibility: Patch CMakeLists.txt, updating package names, target names, etc"
-      patch_type: "conan"
-      base_path: "src"
-  "2.6.2":
-    - patch_file: "patches/dependencies_2_6.patch"
-      patch_description: "Dependency compatibility: Patch CMakeLists.txt, updating package names, target names, etc"
-      patch_type: "conan"
-      base_path: "src"
+      patch_source: "https://github.com/tensorflow/tensorflow/pull/57477"
+      patch_type: "backport"
