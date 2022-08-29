@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.50.0"
@@ -33,6 +32,9 @@ class CppcheckConan(ConanFile):
             self.requires("z3/4.8.8")
         if self.options.have_rules:
             self.requires("pcre/8.45")
+
+    def layout(self):
+        cmake_layout(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
