@@ -1,4 +1,4 @@
-from conan.tools.cmake import CMake
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
 from conan.tools import files
 from conan import ConanFile
 import os
@@ -25,7 +25,12 @@ class Tixi3Conan(ConanFile):
     }
 
     source_subfolder = "_src_"
-    generators = ["CMakeDeps", "CMakeToolchain"]
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def requirements(self):
         self.requires("libxml2/2.9.14")
