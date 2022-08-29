@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(Tixi-Conan-TestPackage)
+project(Tixi-Conan-TestPackage CXX)
 
 find_package(tixi3 REQUIRED)
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1.2)
-project(tixi3_conan_test)
+project(tixi3_conan_test CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
