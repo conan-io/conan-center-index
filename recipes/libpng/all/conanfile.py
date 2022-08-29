@@ -192,7 +192,7 @@ class LibpngConan(ConanFile):
 
         prefix = "lib" if is_msvc(self) else ""
         suffix = major_min_version if is_msvc(self) else ""
-        suffix += "d" if is_msvc(self) and self.build_type == "Debug" else ""
+        suffix += "d" if is_msvc(self) and self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = [f"{prefix}png{suffix}"]
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
