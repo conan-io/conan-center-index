@@ -2,8 +2,8 @@ import os
 import textwrap
 import functools
 
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, CMake, tools
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
@@ -71,7 +71,7 @@ class GoogleCloudCppConan(ConanFile):
 
     def requirements(self):
         self.requires('protobuf/3.21.4')
-        self.requires('grpc/1.45.2')
+        self.requires('grpc/1.48.0')
         self.requires('nlohmann_json/3.10.5')
         self.requires('crc32c/1.1.2')
         self.requires('abseil/20211102.0')
