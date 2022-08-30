@@ -1,7 +1,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
-#include <nuraft.hxx>
+#include <libnuraft/nuraft.hxx>
 
 using namespace nuraft;
 

@@ -62,7 +62,7 @@ index 87685ff..4ecec33 100644
  
  set(STATIC_LIB_SRC
      $<TARGET_OBJECTS:RAFT_CORE_OBJ>)
-@@ -249,54 +216,9 @@ set(STATIC_LIB_SRC
+@@ -249,54 +216,11 @@ set(STATIC_LIB_SRC
  # === Executables ===
  set(LIBRARY_NAME "nuraft")
  
@@ -87,7 +87,6 @@ index 87685ff..4ecec33 100644
 +add_library(nuraft ${STATIC_LIB_SRC})
 +target_link_libraries(nuraft Boost::Boost OpenSSL::OpenSSL)
 
-+include_directories(BEFORE ${EXAMPLES_SRC})
  
  # === Tests ===
 -add_subdirectory("${PROJECT_SOURCE_DIR}/tests")
@@ -117,6 +116,8 @@ index 87685ff..4ecec33 100644
 -# === Install Targets ===
 -install(TARGETS static_lib ARCHIVE DESTINATION lib)
 -install(TARGETS shared_lib LIBRARY DESTINATION lib)
--install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/libnuraft DESTINATION include)
++install(TARGETS nuraft ARCHIVE DESTINATION lib)
++install(TARGETS nuraft LIBRARY DESTINATION lib)
+ install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/libnuraft DESTINATION include)
 -
 -

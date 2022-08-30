@@ -69,20 +69,9 @@ class NuRaftConan(ConanFile):
         cmake.build()
 
     def package(self):
-        lib_dir = join(self.package_folder, "lib")
+        cmake = self._configure_cmake()
+        cmake.install()
         copy(self, "LICENSE", join(self.source_folder, self._source_subfolder), join(self.package_folder, "licenses/"), keep_path=False)
-        copy(self, "*.lib", self.build_folder, lib_dir, keep_path=False)
-        copy(self, "*.a", self.build_folder, lib_dir, keep_path=False)
-        copy(self, "*.so*", self.build_folder, lib_dir, keep_path=False)
-        copy(self, "*.dylib*", self.build_folder, lib_dir, keep_path=False)
-        copy(self, "*.dll*", self.build_folder, join(self.package_folder, "bin"), keep_path=False)
-
-        hdr_src = join(self.source_folder, self._source_subfolder, "include")
-        hdr_dst = join(self.package_folder, "include")
-
-        copy(self, "*.hxx", hdr_src, hdr_dst, keep_path=False)
-        copy(self, "*callback.h", hdr_src, hdr_dst, keep_path=False)
-        copy(self, "*event_awaiter.h", hdr_src, hdr_dst, keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["nuraft"]
