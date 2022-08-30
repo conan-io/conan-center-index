@@ -41,7 +41,5 @@ sources:
 patches:
   "1.2.182":
     - patch_file: "patches/fix-mingw-1.2.182.patch"
-      base_path: "source_subfolder"
   "1.2.154.0":
     - patch_file: "patches/fix-mingw-1.2.154.0.patch"
-      base_path: "source_subfolder"
