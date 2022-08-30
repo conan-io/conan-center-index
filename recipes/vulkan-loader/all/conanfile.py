@@ -138,6 +138,7 @@ class VulkanLoaderConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "FindVulkanHeaders.cmake"),
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
@@ -145,8 +146,16 @@ class VulkanLoaderConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "loader", "CMakeLists.txt"),
                               "if(${configuration} MATCHES \"/MD\")",
                               "if(FALSE)")
+
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         # No warnings as errors
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "/WX", "")
+        replace_in_file(self, cmakelists, "/WX", "")
+        # This fix is needed due to CMAKE_FIND_PACKAGE_PREFER_CONFIG ON in CMakeToolchain (see https://github.com/conan-io/conan/issues/10387).
+        # Indeed we want to use upstream Find modules of xcb, x11, wayland and directfb. There are properly using pkgconfig under the hood.
+        replace_in_file(self, cmakelists, "find_package(XCB REQUIRED)", "find_package(XCB REQUIRED MODULE)")
+        replace_in_file(self, cmakelists, "find_package(X11 REQUIRED)", "find_package(X11 REQUIRED MODULE)")
+        replace_in_file(self, cmakelists, "find_package(Wayland REQUIRED)", "find_package(Wayland REQUIRED MODULE)")
+        replace_in_file(self, cmakelists, "find_package(DirectFB REQUIRED)", "find_package(DirectFB REQUIRED MODULE)")
 
     def build(self):
         self._patch_sources()
