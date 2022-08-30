@@ -801,10 +801,10 @@ Examples = bin/datadir/examples""")
                 rmdir(self, os.path.join(self.package_folder, "licenses", module))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
-            rm(self, mask, self.package_folder)
-        rm(self, "*.la*", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb*", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+            rm(self, mask, self.package_folder, recursive=True)
+        rm(self, "*.la*", os.path.join(self.package_folder, "lib"), recursive=True)
+        rm(self, "*.pdb*", os.path.join(self.package_folder, "lib"), recursive=True)
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"), recursive=True)
         # "Qt5Bootstrap" is internal Qt library - removing it to avoid linking error, since it contains
         # symbols that are also in "Qt5Core.lib". It looks like there is no "Qt5Bootstrap.dll".
         for fl in glob.glob(os.path.join(self.package_folder, "lib", "*Qt5Bootstrap*")):
