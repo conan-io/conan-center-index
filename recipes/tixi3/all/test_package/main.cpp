@@ -5,7 +5,7 @@
 int main()
 {
     TixiDocumentHandle handle = -1;
-    char* str = nullptr;
+    char* str = NULL;
     
     tixiCreateDocument("root", &handle);
     
