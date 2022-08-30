@@ -122,7 +122,8 @@ class SpirvtoolsConan(ConanFile):
         #   with BUILD_SHARED_LIBS injection (which doesn't work due to symbols visibility, at least for msvc)
         # - From 2020.5, static and shared libs are fully controlled by upstream CMakeLists.txt
         if Version(self.version) >= "2016.6" and Version(self.version) < "2020.5":
-            tc.cache_variables["BUILD_SHARED_LIBS"] = "OFF"
+            tc.blocks.remove("shared")
+            tc.variables["BUILD_SHARED_LIBS"] = False
         # From 2020.6, same behavior than above but through a weird combination
         # of SPIRV_TOOLS_BUILD_STATIC and BUILD_SHARED_LIBS.
         if Version(self.version) < "2016.6" or Version(self.version) >= "2020.6":
