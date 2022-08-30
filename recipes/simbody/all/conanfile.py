@@ -2,9 +2,11 @@ from conan import ConanFile, tools
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.scm import Version
+from conan.tools.files import copy, get, rmdir, save
 import os
 import textwrap
 
+required_conan_version = ">=1.50.0"
 
 class SimbodyConan(ConanFile):
     name = "simbody"
@@ -17,20 +19,16 @@ class SimbodyConan(ConanFile):
     exports_sources = "CMakeLists.txt"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
-         "build_lapack": [True, False]
+        "fPIC": [True, False]
     }
     default_options = {
         "shared": False,
-        "fPIC": True,
-        "build_lapack": True
+        "fPIC": True
     }
 
     def validate(self):
-        if self.options.build_lapack:
-            raise ConanInvalidConfiguration(
-                "build simbody from sources locally with default_options \"openblas:build_lapack\": True"
-            )
+        if not self.dependencies["openblas"].options.build_lapack:
+            raise ConanInvalidConfiguration(f"{self.name} requires the openblas:build_lapack": True")
 
 
     def config_options(self):
@@ -45,20 +43,20 @@ class SimbodyConan(ConanFile):
     def _module_file_rel_path(self):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def requirements(self):
         self.requires("openblas/0.3.17")
         self.requires("opengl/system")
 
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version],  
-                    destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],  
+                    destination=self.source_folder, strip_root=True)
+
+    def layout(self):
+        cmake_layout(self, src_folder="Simbody/src")
 
     def generate(self):
-        tc = CMakeToolchain(self)
+        tc.generate()
+        tc = CMakeDeps(self)
         tc.generate()
 
     def build(self):
@@ -67,11 +65,10 @@ class SimbodyConan(ConanFile):
         cmake.build()
 
     def package(self):
-        tools.files.copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = cmake = CMake(self)
         cmake.install()
-        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         
 
     @staticmethod
@@ -82,7 +79,7 @@ class SimbodyConan(ConanFile):
             set(simbody_VERSION_PATCH {patch})
             set(simbody_VERSION_STRING "{major}.{minor}.{patch}")
         """.format(major=version.major, minor=version.minor, patch=version.patch))
-        tools.files.save(self, module_file, content)
+        save(self, module_file, content)
 
     def package_info(self):
         version_major = Version(self.version).major
