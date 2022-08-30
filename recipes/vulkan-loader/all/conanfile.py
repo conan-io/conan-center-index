@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
@@ -127,6 +127,11 @@ class VulkanLoaderConan(ConanFile):
         if self._is_pkgconf_needed:
            pkg = PkgConfigDeps(self)
            pkg.generate()
+           # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
+           env = Environment()
+           env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
+           envvars = env.vars(self)
+           envvars.save_script("conanbuildenv_pkg_config_path")
         if self._is_pkgconf_needed or self._is_mingw:
             env = VirtualBuildEnv(self)
             env.generate()
