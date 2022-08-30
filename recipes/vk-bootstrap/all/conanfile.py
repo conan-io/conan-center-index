@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, get
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conans import tools as tools_legacy
@@ -100,18 +100,8 @@ class VkBootstrapConan(ConanFile):
             tc.variables["VK_BOOTSTRAP_WERROR"] = False
         tc.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        # Honor VK_BOOTSTRAP_TEST disabled
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            "if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR VK_BOOTSTRAP_TEST)",
-            "if(VK_BOOTSTRAP_TEST)",
-        )
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
