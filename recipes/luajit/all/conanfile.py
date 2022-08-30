@@ -90,7 +90,9 @@ class LuajitConan(ConanFile):
                 env["MACOSX_DEPLOYMENT_TARGET"] = version
             with chdir(self, self._source_subfolder), tools.environment_append(env):
                 env_build = self._configure_autotools()
-                env_build.make(args=[f"PREFIX={self.package_folder}"])
+                compiler = "clang" if "clang" in str(self.settings.compiler) else str(self.settings.compiler)
+                compiler = tools.get_env("CC", compiler)
+                env_build.make(args=[f"PREFIX={self.package_folder}", f"CC={compiler}"])
 
     def package(self):
         copy(self, "COPYRIGHT", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, self._source_subfolder))
