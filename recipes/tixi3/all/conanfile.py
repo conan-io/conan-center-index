@@ -47,17 +47,17 @@ class Tixi3Conan(ConanFile):
         if self.options.shared:
             try:
                 del self.options.fPIC
-            except:
+            except Exception:
                 pass
 
         # tixi is a c library
         try:
             del self.settings.compiler.libcxx
-        except:
+        except Exception:
             pass
         try:
             del self.settings.compiler.cppstd
-        except:
+        except Exception:
             pass
 
     def export_sources(self):
