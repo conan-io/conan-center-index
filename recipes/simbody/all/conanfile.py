@@ -1,8 +1,9 @@
-from conan import ConanFile, tools
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 from conan.tools.files import copy, get, rmdir, save
+from conan.tools.patches import apply_conandata_patches
 import os
 import textwrap
 
@@ -38,10 +39,6 @@ class SimbodyConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
-
     def requirements(self):
         self.requires("openblas/0.3.17")
         self.requires("opengl/system")
@@ -54,7 +51,7 @@ class SimbodyConan(ConanFile):
         cmake_layout(self, src_folder="Simbody/src")
 
     def generate(self):
-        tc = CMakeDeps(self)
+        tc = CMakeToolchain(self)(self)
         tc.generate()
 
     def build(self):
@@ -64,6 +61,7 @@ class SimbodyConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        apply_conandata_patches(self)
         cmake = cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
