@@ -173,7 +173,7 @@ class SDLConan(ConanFile):
             del self.info.options.sdl2main
 
     def build_requirements(self):
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+        if self.settings.os == "Macos" and tools.is_cross_building(self):
             # Workaround for CMake bug with error message:
             # Attempting to use @rpath without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being
             # set. This could be because you are using a Mac OS X version less than 10.5
