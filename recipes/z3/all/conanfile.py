@@ -1,9 +1,11 @@
 from conans import CMake, ConanFile, tools
-from conans.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.files import get, patch, rmdir
+from conan.tools.scm import Version
+from conan.errors import ConanException, ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class Z3Conan(ConanFile):
@@ -66,7 +68,7 @@ class Z3Conan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+            destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -93,14 +95,14 @@ class Z3Conan(ConanFile):
         }
 
     def validate(self):
-        if tools.Version(self.version) >= tools.Version("4.8.11"):
+        if Version(self.version) >= "4.8.11":
             if self.settings.compiler.get_safe("cppstd"):
                 tools.check_min_cppstd(self, "17")
             compiler = self.settings.compiler
             min_version = self._compilers_minimum_version\
                 .get(str(compiler), False)
             if min_version:
-                if tools.Version(compiler.version) < min_version:
+                if Version(compiler.version) < min_version:
                     raise ConanInvalidConfiguration(
                         f"{self.name} requires C++17, which {compiler} {compiler.version} does not support.")
             else:
@@ -108,8 +110,8 @@ class Z3Conan(ConanFile):
                     f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        for it in self.conan_data.get("patches", {}).get(self.version, []):
+            patch(self, **it)
 
         if self.options.multiprecision == "mpir":
             tools.save(os.path.join(self._build_subfolder, "gmp.h"), textwrap.dedent("""\
@@ -124,8 +126,8 @@ class Z3Conan(ConanFile):
         self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Z3")
