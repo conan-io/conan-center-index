@@ -1,6 +1,6 @@
 # Consuming recipes
 
-Recipes in this repository are evolving continously, contributors are creating pull-requests
+Recipes in this repository are evolving continuously, contributors are creating pull-requests
 fixing issues and adding new features every day. It is expected that from time to time these
 new recipe revisions stop to work in your project.
 
@@ -41,7 +41,6 @@ There can be several root causes if a recipe (a new revision) stopped to work in
    features are using the required Conan version and testing the actual behavior of those
    features (feedback about them is very important to Conan).
 
-
 ## Isolate your project from upstream changes
 
 There are two main ways you can isolate your project from changes in recipes:
@@ -51,7 +50,6 @@ There are two main ways you can isolate your project from changes in recipes:
    in your project.
  * **Pin the version of every reference you consume in your project** using recipe revisions
    and lockfiles.
-
 
 ### Use your own Artifactory instance
 
@@ -63,11 +61,11 @@ using only that remote (`conan remote list`). Conan makes it easy to use differe
 per project (check `CONAN_USER_HOME` env variable) or to store the configuration in some external
 file or repository so you can shared and install it using one command (`conan config install ...`).
 
-
 ### Use recipe revisions and lockfiles
 
 If you don't want to deploy and maintain your own Artifactory instance, you can isolate from
-changes in upstream recipes in ConanCenter using [recipe revisions](https://docs.conan.io/en/latest/versioning/revisions.html) and [lockfiles](https://docs.conan.io/en/latest/versioning/lockfiles.html) (please, read linked Conan documentation for more detailed
+changes in upstream recipes in ConanCenter using [recipe revisions](https://docs.conan.io/en/latest/versioning/revisions.html)
+and [lockfiles](https://docs.conan.io/en/latest/versioning/lockfiles.html) (please, read linked Conan documentation for more detailed
 explanation).
 
 Recipe revisions and lockfiles can be used to define exactly the binary you want to use in
@@ -80,13 +78,14 @@ is a hash added to the reference and can be used in Conan at the same place as r
 revisions:
 
  * In the command line:
-   ```
+
+   ```sh
    conan install openssl/3.0.1@#1955937e88f13a02aa4fdae98c3f9fb8
    ```
 
  * In a `conanfile.txt` file:
 
-   ```ini
+   ```txt
    [requires]
    openssl/3.0.1@#1955937e88f13a02aa4fdae98c3f9fb8
    ```
@@ -113,18 +112,17 @@ The two basic commands you need to know ([full docs here](https://docs.conan.io/
 
  * Create lockfile from `conanfile.txt` file:
 
-   ```
+   ```sh
    conan lock create conanfile.txt --lockfile-out=locks/project.lock
    ```
 
  * Consume a lockfile:
 
-   ```
+   ```sh
    conan install conanfile.txt --lockfile=locks/project.lock
    ```
 
 If your project is managing several configurations, you would probably like to have a look to [base lockfiles](https://docs.conan.io/en/latest/versioning/lockfiles/configurations.html#base-lockfiles) and [lockfile bundles](https://docs.conan.io/en/latest/versioning/lockfiles/bundle.html) in the documentation.
-
 
 ---
 
