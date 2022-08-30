@@ -56,7 +56,7 @@ class VkBootstrapConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("vulkan-headers/1.3.204.1")
+        self.requires("vulkan-headers/1.3.224.0")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
