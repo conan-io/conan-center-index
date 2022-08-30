@@ -106,7 +106,11 @@ class Tixi3Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.includedirs.append(os.path.join("include", "tixi3"))
-        self.cpp_info.libs = ['tixi3']
+
+        if self.settings.build_type != "Debug":
+            self.cpp_info.libs = ['tixi3']
+        else:
+            self.cpp_info.libs = ['tixi3-d']
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ['Shlwapi']
