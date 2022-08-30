@@ -11,15 +11,9 @@ sources:
 patches:
   "2.7.5":
     - patch_file: "patches/0001-cmake-source-dir-2.5.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-htmlreport-python3.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-handle-exename-on-macos.patch"
-      base_path: "source_subfolder"
   "2.7.4":
     - patch_file: "patches/0001-cmake-source-dir-2.5.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-htmlreport-python3.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-handle-exename-on-macos.patch"
-      base_path: "source_subfolder"
