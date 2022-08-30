@@ -106,7 +106,7 @@ class VulkanLoaderConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["VULKAN_HEADERS_INSTALL_DIR"] = self.dependencies["vulkan-headers"].package_folder
+        tc.variables["VULKAN_HEADERS_INSTALL_DIR"] = self.dependencies["vulkan-headers"].package_folder.replace("\\", "/")
         tc.variables["BUILD_TESTS"] = False
         tc.variables["USE_CCACHE"] = False
         if self.settings.os == "Linux":
