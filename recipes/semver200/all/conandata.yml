@@ -7,7 +7,7 @@ patches:
     - patch_file: "patches/0001-unused-var-fix.patch"
       patch_description: "Avoids: error: unused parameter 's' [-Werror,-Wunused-parameter]"
       patch_source: "https://github.com/zmarko/semver/pull/4"
-      patch_type: "backport"
+      patch_type: "portability"
       sha256: "ea7b241e8f37295e7943977fc66eaa6fa85d647b73c8cc1f4b566fd8078b0897"
     - patch_file: "patches/0002-macro-invocation-fix.patch"
       patch_description: "Fix minor() and major() macros invocation"
