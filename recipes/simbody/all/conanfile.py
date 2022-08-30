@@ -50,7 +50,7 @@ class SimbodyConan(ConanFile):
         cmake_layout(self, src_folder="Simbody/src")
 
     def generate(self):
-        tc = CMakeToolchain(self)(self)
+        tc = CMakeToolchain(self)
         tc.generate()
 
     def build(self):
