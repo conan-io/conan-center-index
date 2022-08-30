@@ -1,5 +1,4 @@
 import os
-import shutil
 
 from conan import ConanFile
 from conan.tools.scm import Version
@@ -7,7 +6,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, apply_conandata_patches, copy, rmdir
 
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.50.0"
 
 
 class FmtConan(ConanFile):
@@ -42,10 +41,16 @@ class FmtConan(ConanFile):
     def generate(self):
         if not self.options.header_only:
             tc = CMakeToolchain(self)
-            tc.generate()  
+            tc.cache_variables["FMT_DOC"] = False
+            tc.cache_variables["FMT_TEST"] = False
+            tc.cache_variables["FMT_INSTALL"] = True
+            tc.cache_variables["FMT_LIB_DIR"] = "lib"
+            if self._has_with_os_api_option:
+                tc.cache_variables["FMT_OS"] = bool(self.options.with_os_api)
+            tc.generate()
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -64,8 +69,8 @@ class FmtConan(ConanFile):
             del self.options.fPIC
 
     def package_id(self):
-        if self.info.options.header_only:  # might be changed to self.info.clear() in 1.50
-            self.info.header_only()
+        if self.info.options.header_only:
+            self.info.clear()
         else:
             del self.info.options.with_fmt_alias
 
@@ -76,17 +81,7 @@ class FmtConan(ConanFile):
         apply_conandata_patches(self)
         if not self.options.header_only:
             cmake = CMake(self)
-            # FIXME : https://github.com/conan-io/conan/issues/11476
-            # can be replaced by https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmaketoolchain.html#cache-variables in 1.50
-            cache_entries = {
-                "FMT_DOC": "False",
-                "FMT_TEST": "False",
-                "FMT_INSTALL": "True",
-                "FMT_LIB_DIR": "lib"
-            }
-            if self._has_with_os_api_option:
-                cache_entries["FMT_OS"] = self.options.with_os_api
-            cmake.configure(variables=cache_entries)
+            cmake.configure()
             cmake.build()
 
     def package(self):
@@ -134,3 +129,5 @@ class FmtConan(ConanFile):
         self.cpp_info.components["_fmt"].names["cmake_find_package"] = target
         self.cpp_info.components["_fmt"].names["cmake_find_package_multi"] = target
         self.cpp_info.components["_fmt"].set_property("cmake_target_name", "fmt::{}".format(target))
+        # FIXME: Remove as soon as Conan client provide a hotfix. See conan-io/conan-center-index#12149
+        self.cpp_info.components["_fmt"].builddirs = [""]

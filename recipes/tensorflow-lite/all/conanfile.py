@@ -1,10 +1,13 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools import files
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
+from conans import CMake, tools
 import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class TensorflowLiteConan(ConanFile):
@@ -31,7 +34,7 @@ class TensorflowLiteConan(ConanFile):
         "with_ruy": False,
         "with_nnapi": False,
         "with_mmap": True,
-        "with_xnnpack": True,
+        "with_xnnpack": True
     }
 
 
@@ -71,8 +74,6 @@ class TensorflowLiteConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            if self.settings.os == "Linux":
-                self.options["ruy"].shared = True
 
     def requirements(self):
         self.requires("abseil/20211102.0")
@@ -83,40 +84,30 @@ class TensorflowLiteConan(ConanFile):
         self.requires("gemmlowp/cci.20210928")
         if self.settings.arch in ("x86", "x86_64"):
             self.requires("intel-neon2sse/cci.20210225")
-        self.requires("ruy/cci.20210622")
+        self.requires("ruy/cci.20220628")
         if self.options.with_xnnpack:
-            self.requires("xnnpack/cci.20211210")
+            self.requires("xnnpack/cci.20220621")
+        if self.options.with_xnnpack or self.options.get_safe("with_nnapi", False):
             self.requires("fp16/cci.20210320")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/3.24.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 14)
-
-        def lazy_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
+            tools.check_min_cppstd(self, 17 if Version(self.version) >= "2.9.1" else 14)
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn(f"{self.name} requires C++14. Your compiler is unknown. Assuming it supports C++14.")
-        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
+        elif Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.name} requires C++14, which your compiler does not support.")
-        if self.options.shared:
-            if self.settings.os == "Linux" and not self.options["ruy"].shared:
-                raise ConanInvalidConfiguration(
-                        f"The project {self.name}/{self.version} with shared=True on Linux requires ruy:shared=True")
-
-    def build_requirements(self):
-        self.build_requires("ninja/1.10.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        files.apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -125,7 +116,7 @@ class TensorflowLiteConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions.update({
             "CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS": True,
-            "TFLITE_ENABLE_RUY": self.options.get_safe("with_ruy", False),
+            "TFLITE_ENABLE_RUY": self.options.with_ruy,
             "TFLITE_ENABLE_NNAPI": self.options.get_safe("with_nnapi", False),
             "TFLITE_ENABLE_GPU": False,
             "TFLITE_ENABLE_XNNPACK": self.options.with_xnnpack,
@@ -151,7 +142,7 @@ class TensorflowLiteConan(ConanFile):
 
     @property
     def _module_file(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
@@ -159,6 +150,7 @@ class TensorflowLiteConan(ConanFile):
         self.copy("*", dst="lib", src=os.path.join(self._build_subfolder, "lib"))
         if self.options.shared:
             self.copy("*", dst="bin", src=os.path.join(self._build_subfolder, "bin"))
+        if self.settings.build_type == "Debug":
             tools.remove_files_by_mask(self.package_folder, "*.pdb")
         self._create_cmake_module_alias_target(os.path.join(self.package_folder, self._module_file))
 
@@ -174,7 +166,7 @@ class TensorflowLiteConan(ConanFile):
         defines = []
         if not self.options.shared:
             defines.append("TFL_STATIC_LIBRARY_BUILD")
-        if self.options.get_safe("with_ruy", False):
+        if self.options.with_ruy:
             defines.append("TFLITE_WITH_RUY")
 
         self.cpp_info.defines = defines

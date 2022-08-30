@@ -1,5 +1,10 @@
 # Changelog
 
+### 18-August-2022 - 15:21 CEST
+
+- [fix] Conan v2: Check recipe revision only if it has been successfully exported.
+- [feature]: Consider changes from `master` before merging a pull-request. If those changes result in a new recipe revision, the pull-request is triggered again.
+
 ### 8-August-2022 - 11:25 CEST
 
 - [fix] Take into account status checks from GitHub actions before merging a pull-request.
@@ -210,23 +215,25 @@
 - [fix] Parse integer value when assigning properties.
 
 ### 18-October-2021 - 17:05 CEST
- - [config] Upgrade Conan version to 1.40.4
- - [fix] Replace `Unauthorized User` label by `User-approval pending`
- - [feat] Remove `os_build` and `arch_build` from generated profiles
+
+- [config] Upgrade Conan version to 1.40.4
+- [fix] Replace `Unauthorized User` label by `User-approval pending`
+- [feat] Remove `os_build` and `arch_build` from generated profiles
 
 ### 11-October-2021 - 12:14 CEST
- - [configs] Configurable Github statuses to check
- - [configs] Pairing between configurations and workers (docker images, win/macos servers,...) is configurable in runtime.
- - [feature] Early(iest) stop after failure: ignore any extra messages. It provides faster feedback for users.
- - [feature] Skip stale pull-requests from automatic review requests.
- - [feature] Add node-pool with more resources. It allows the CI to delegate certain builds that require higher RAM limits to it (configured manually).
- - [fix] Removed EAP, now it should be named _"Access requests"_ everywhere
- - [fix] Improved checks for infrastructure and configuration. It also fixes the auto-generated documentation for _"Supported platforms and configurations"_.
- - [job] New job to remove dead branches from CI
+
+- [configs] Configurable Github statuses to check
+- [configs] Pairing between configurations and workers (docker images, win/macos servers,...) is configurable in runtime.
+- [feature] Early(iest) stop after failure: ignore any extra messages. It provides faster feedback for users.
+- [feature] Skip stale pull-requests from automatic review requests.
+- [feature] Add node-pool with more resources. It allows the CI to delegate certain builds that require higher RAM limits to it (configured manually).
+- [fix] Removed EAP, now it should be named _"Access requests"_ everywhere
+- [fix] Improved checks for infrastructure and configuration. It also fixes the auto-generated documentation for _"Supported platforms and configurations"_.
+- [job] New job to remove dead branches from CI
 
 ### 01-October-2021 - 13:08 CEST
 
-- [hotfix] Apply patch for https://github.com/conan-io/conan/issues/9695 (Added root certificate for Let's encrypt)
+- [hotfix] Apply patch for <https://github.com/conan-io/conan/issues/9695> (Added root certificate for Let's encrypt)
 
 ### 21-September-2021 - 12:09 CEST
 
@@ -276,10 +283,10 @@
 
 ### 01-June-2021 - 08:59 CEST
 
- - [feature] RequestReviews: Add column to enable/disable review requests (any user).
- - [testing] Use declared Conan version to run tests.
- - [internal] Pay some technical debt.
- - [internal] Simplify workflow, all packages already have properties.
+- [feature] RequestReviews: Add column to enable/disable review requests (any user).
+- [testing] Use declared Conan version to run tests.
+- [internal] Pay some technical debt.
+- [internal] Simplify workflow, all packages already have properties.
 
 ### 25-May-2021 - 13:42 CEST
 
@@ -318,7 +325,7 @@
 - [feature] Stop generating packages for apple-clang 9.1.
 - [feature] Raise error if `ConanInvalidConfiguration` is raised from `build()` method.
 - [feature] BuildSingleReference: All PRs use the new workflow.
-- [feature] Allow modifications in the *.github* folder for GitHub bots and actions.
+- [feature] Allow modifications in the _.github_ folder for GitHub bots and actions.
 - [feature] Use BuildSingleReference job to build packages (if needed) during a merge.
 - [feature] BuildSingleReference: Add build environment property to packages.
 - [feature] Tapaholes: Delete repositories after running jobs.
@@ -535,27 +542,35 @@
 - [fix] Fix checkExportSanity function
 
 ### 24-June-2020 - 10:55 CEST
+
 - Updated Conan client to the 1.26.1 version in Windows and Mac agents.
 
 ### 18-June-2020 - 18:40 CEST
+
 - Remove short paths limitation in all Windows agents.
 
 ### 04-June-2020 - 10:39 CEST
+
 - Add `CONAN_SKIP_BROKEN_SYMLINKS_CHECK=1` in master jobs.
 
 ### 02-June-2020 - 13:06 CEST
+
 - Avoid partial rebuilds in master jobs. Added `all_packages_done` property for every reference to track the completion of packages creation.
 
 ### 02-June-2020 - 00:02 CEST
+
 - Updated CMake to 3.16.4 in Windows and Mac agents.
 
 ### 20-May-2020 - 10:34 CEST
+
 - Updated Conan client to the 1.25.2 version in Windows and Mac agents.
 
 ### 14-May-2020 - 15:52 CEST
+
 - Updated Conan client to 1.25.1 version in Windows and Mac agents.
 
 ### 13-May-2020 - 09:47 CEST (08e2be6)
+
 - [refact] Simplify around ComputePackageID and CreatePackage
 - [refact] No need to pass 'winTmpPath' everywhere
 - Move the 'retryIze' call inside the scope of the node (Might improve [#1020](https://github.com/conan-io/conan-center-index/issues/1020))
