@@ -4,6 +4,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get, apply_conandata_patches
 from conans import CMake
 from conans.tools import check_min_cppstd
+import functools
 
 required_conan_version = ">=1.50.0"
 
@@ -64,7 +65,7 @@ class NuRaftConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        cmake = self.cmakeGet()
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
@@ -80,7 +81,6 @@ class NuRaftConan(ConanFile):
         hdr_dir = join(self.package_folder, join("include", "libnuraft"))
 
         copy(self, "*.hxx", hdr_src, join(self.package_folder, "include"), keep_path=True)
-        copy(self, "*in_memory_log_store.hxx", self.source_folder, hdr_dir, keep_path=False)
         copy(self, "*callback.h", self.source_folder, hdr_dir, keep_path=False)
         copy(self, "*event_awaiter.h", self.source_folder, hdr_dir, keep_path=False)
 

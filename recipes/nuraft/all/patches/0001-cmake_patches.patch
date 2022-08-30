@@ -83,16 +83,15 @@ index 87685ff..1fc9199 100644
  # === Source files ===
  set(RAFT_CORE
      ${ROOT_SRC}/asio_service.cxx
-@@ -240,6 +259,8 @@ set(RAFT_CORE
+@@ -240,6 +259,7 @@ set(RAFT_CORE
      ${ROOT_SRC}/snapshot_sync_req.cxx
      ${ROOT_SRC}/srv_config.cxx
      ${ROOT_SRC}/stat_mgr.cxx
-+    examples/in_memory_log_store.cxx
      )
  add_library(RAFT_CORE_OBJ OBJECT ${RAFT_CORE})
 +target_link_libraries(RAFT_CORE_OBJ Boost::Boost OpenSSL::OpenSSL)
  
-@@ -249,54 +269,26 @@ set(STATIC_LIB_SRC
+@@ -249,54 +269,25 @@ set(STATIC_LIB_SRC
  # === Executables ===
  set(LIBRARY_NAME "nuraft")
  
@@ -137,7 +136,7 @@ index 87685ff..1fc9199 100644
 +#add_test(NAME TestRunner COMMAND test_runner)
  
  # === Tests ===
- add_subdirectory("${PROJECT_SOURCE_DIR}/tests")
+-add_subdirectory("${PROJECT_SOURCE_DIR}/tests")
 -
 -
 -if (CODE_COVERAGE GREATER 0)
@@ -167,96 +166,3 @@ index 87685ff..1fc9199 100644
 -install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/libnuraft DESTINATION include)
 -
 -
-diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
-index 5ceccce..f6dc2f0 100644
---- a/tests/CMakeLists.txt
-+++ b/tests/CMakeLists.txt
-@@ -1,83 +1,9 @@
- # === Basic Raft server functionality test ===
-+include_directories(BEFORE "${PROJECT_SOURCE_DIR}/tests")
-+include_directories(BEFORE "${PROJECT_SOURCE_DIR}/src")
- add_executable(raft_server_test
-                unit/raft_server_test.cxx
-                unit/fake_network.cxx
--               ${EXAMPLES_SRC}/logger.cc
--               ${EXAMPLES_SRC}/in_memory_log_store.cxx)
--add_dependencies(raft_server_test
--                 static_lib)
--target_link_libraries(raft_server_test
--                      ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME})
--
--# === Failure recovery & conflict resolution test ===
--add_executable(failure_test
--               unit/failure_test.cxx
--               unit/fake_network.cxx
--               ${EXAMPLES_SRC}/logger.cc
--               ${EXAMPLES_SRC}/in_memory_log_store.cxx)
--add_dependencies(failure_test
--                 static_lib)
--target_link_libraries(failure_test
--                      ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME})
--
--# === ASIO network stuff test ===
--add_executable(asio_service_test
--               unit/asio_service_test.cxx
--               ${EXAMPLES_SRC}/logger.cc
--               ${EXAMPLES_SRC}/in_memory_log_store.cxx)
--add_dependencies(asio_service_test
--                 static_lib
--                 build_ssl_key)
--target_link_libraries(asio_service_test
--                      ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME}
--                      ${LIBRARIES})
--
--# === Benchmark ===
--add_executable(raft_bench
--               bench/raft_bench.cxx
--               ${EXAMPLES_SRC}/logger.cc
--               ${EXAMPLES_SRC}/in_memory_log_store.cxx)
--add_dependencies(raft_bench
--                 static_lib)
--target_link_libraries(raft_bench
--                      ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME}
--                      ${LIBRARIES})
--
--
--# === Other modules ===
--add_executable(buffer_test
--               unit/buffer_test.cxx)
--add_dependencies(buffer_test
--                 static_lib)
--target_link_libraries(buffer_test
--                      ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME})
--
--add_executable(serialization_test
--               unit/serialization_test.cxx)
--add_dependencies(serialization_test
--                 static_lib)
--target_link_libraries(serialization_test
--                      ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME})
--
--add_executable(timer_test
--               unit/timer_test.cxx)
--add_dependencies(timer_test
--                 static_lib)
--target_link_libraries(timer_test
--                      ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME}
--                      ${LIBRARIES})
--
--add_executable(strfmt_test
--               unit/strfmt_test.cxx)
--add_dependencies(strfmt_test
--                 static_lib)
--target_link_libraries(strfmt_test
--                      ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME})
--
--add_executable(stat_mgr_test
--               unit/stat_mgr_test.cxx)
--add_dependencies(stat_mgr_test
--                 static_lib)
--target_link_libraries(stat_mgr_test
--                      ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME})
--
-+               ${EXAMPLES_SRC}/logger.cc)
-+add_test(NAME RaftServerTest COMMAND raft_server_test)
-+target_link_libraries(raft_server_test nuraft)
