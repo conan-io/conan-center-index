@@ -14,6 +14,8 @@ sources:
 patches:
   "0.5":
     - patch_file: "patches/0001-fix-cmake-0.5.patch"
+  "0.4":
+    - patch_file: "patches/0001-fix-cmake-0.4.patch"
   "0.3.1":
     - patch_file: "patches/0001-fix-cmake-0.3.1.patch"
   "0.2":
