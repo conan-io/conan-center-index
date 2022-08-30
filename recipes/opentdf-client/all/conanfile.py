@@ -8,7 +8,7 @@ from conan.tools.microsoft import is_msvc_static_runtime
 import functools
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.51.3"
 
 
 class OpenTDFConan(ConanFile):
@@ -20,8 +20,8 @@ class OpenTDFConan(ConanFile):
     license = "BSD-3-Clause-Clear"
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"fPIC": [True, False]}
-    default_options = {"fPIC": True}
+    options = {"fPIC": [True, False], "branch_version" : [True, False], "allow_libiconv": [True, False]}
+    default_options = {"fPIC": True, "branch_version": False, "allow_libiconv": True}
 
     @property
     def _source_subfolder(self):
@@ -39,7 +39,7 @@ class OpenTDFConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "17" if Version(self.version) < "1.1.5" else "15",
-            "msvc": "19.22",
+            "msvc": "193" if Version(self.version) < "1.1.5" else "191",
             "gcc": "7.5.0",
             "clang": "12",
             "apple-clang": "12.0.0",
@@ -79,8 +79,24 @@ class OpenTDFConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        self.output.warn(f'{self.name} building with self.options.allow_libiconv={self.options.allow_libiconv}')
+        if not self.options.allow_libiconv:
+            self.output.warn(f'{self.name} attempting to disable libiconv in libxml2 and boost')
+            self.options["libxml2"].iconv = False
+            self.options["libxml2"].icu = False
+            self.options["boost"].i18n_backend_iconv = "off"
+            self.options["boost"].i18n_backend_icu = False
+            self.options["boost"].without_locale = True
+        else:
+            self.output.warn(f'{self.name} building with stock libxml2 and boost')
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        if self.options.branch_version:
+            self.output.warn("Building branch_version = {}".format(self.version))
+            self.run("git clone git@github.com:opentdf/client-cpp.git --depth 1 --branch " + self.version + " " + self._source_subfolder)
+        else:
+            get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for data in self.conan_data.get("patches", {}).get(self.version, []):
