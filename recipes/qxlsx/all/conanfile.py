@@ -26,8 +26,8 @@ class QXlsxConan(ConanFile):
     }
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -50,6 +50,8 @@ class QXlsxConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["QT_VERSION_MAJOR"] = Version(self.deps_cpp_info["qt"].version).major
+        tc.generate()
+        tc = CMakeDeps(self)
         tc.generate()
 
     def build(self):
