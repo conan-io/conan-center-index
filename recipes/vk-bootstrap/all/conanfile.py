@@ -87,12 +87,14 @@ class VkBootstrapConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["VK_BOOTSTRAP_TEST"] = False
-        if Version(self.version) >= "0.3.0":
-            vulkan_headers = self.dependencies["vulkan-headers"]
-            includedirs = ";".join(
-                [os.path.join(vulkan_headers.package_folder, includedir).replace("\\", "/")
-                 for includedir in vulkan_headers.cpp_info.includedirs],
-            )
+        vulkan_headers = self.dependencies["vulkan-headers"]
+        includedirs = ";".join(
+            [os.path.join(vulkan_headers.package_folder, includedir).replace("\\", "/")
+             for includedir in vulkan_headers.cpp_info.includedirs],
+        )
+        if Version(self.version) < "0.3.0":
+            tc.variables["Vulkan_INCLUDE_DIR"] = includedirs
+        else:
             tc.variables["VK_BOOTSTRAP_VULKAN_HEADER_DIR"] = includedirs
         if Version(self.version) >= "0.4.0":
             tc.variables["VK_BOOTSTRAP_WERROR"] = False
