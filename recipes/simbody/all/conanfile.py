@@ -1,6 +1,6 @@
 from conan import ConanFile, tools
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 from conan.tools.files import copy, get, rmdir, save
 import os
@@ -28,8 +28,7 @@ class SimbodyConan(ConanFile):
 
     def validate(self):
         if not self.dependencies["openblas"].options.build_lapack:
-            raise ConanInvalidConfiguration(f"{self.name} requires the openblas:build_lapack": True")
-
+            raise ConanInvalidConfiguration(f"{self.name} requires the openblas:build_lapack: True")
 
     def config_options(self):
         if self.settings.os == "Windows":
