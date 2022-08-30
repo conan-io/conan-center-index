@@ -1,11 +1,13 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 87685ff..1fc9199 100644
+index 87685ff..4ecec33 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -26,41 +44,41 @@ endif()
+@@ -24,43 +24,8 @@ if (CODE_COVERAGE GREATER 0)
+     message(STATUS "---- CODE COVERAGE DETECTION MODE ----")
+ endif()
  
- 
- # === Find ASIO ===
+-
+-# === Find ASIO ===
 -if (BOOST_INCLUDE_PATH AND BOOST_LIBRARY_PATH)
 -    # If Boost path (both include and library) is given,
 -    # use Boost's ASIO.
@@ -36,46 +38,15 @@ index 87685ff..1fc9199 100644
 -else ()
 -    message(STATUS "ASIO include path: " ${ASIO_INCLUDE_DIR})
 -endif ()
-+#if (BOOST_INCLUDE_PATH AND BOOST_LIBRARY_PATH)
-+#    # If Boost path (both include and library) is given,
-+#    # use Boost's ASIO.
-+#    message(STATUS "Boost include path: " ${BOOST_INCLUDE_PATH})
-+#    message(STATUS "Boost library path: " ${BOOST_LIBRARY_PATH})
-+#
-+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_BOOST_ASIO")
-+#
-+#    set(ASIO_INCLUDE_DIR ${BOOST_INCLUDE_PATH})
-+#    set(LIBBOOST_SYSTEM "${BOOST_LIBRARY_PATH}/libboost_system.a")
-+#
-+#else ()
-+#    # If not, ASIO standalone mode.
-+#    FIND_PATH(ASIO_INCLUDE_DIR
-+#              NAME asio.hpp
-+#              HINTS ${PROJECT_SOURCE_DIR}/asio/asio/include
-+#                    $ENV{HOME}/local/include
-+#                    /opt/local/include
-+#                    /usr/local/include
-+#                    /usr/include)
-+#
-+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DASIO_STANDALONE")
-+#
-+#endif ()
-+
-+#if (NOT ASIO_INCLUDE_DIR)
-+#    message(FATAL_ERROR "Can't find ASIO header files")
-+#else ()
-+#    message(STATUS "ASIO include path: " ${ASIO_INCLUDE_DIR})
-+#endif ()
- 
- 
+-
+-
  # === Includes ===
  include_directories(BEFORE ./)
 -include_directories(BEFORE ${ASIO_INCLUDE_DIR})
-+#include_directories(BEFORE ${ASIO_INCLUDE_DIR})
  include_directories(BEFORE ${PROJECT_SOURCE_DIR}/include)
  include_directories(BEFORE ${PROJECT_SOURCE_DIR}/include/libnuraft)
  include_directories(BEFORE ${PROJECT_SOURCE_DIR}/examples)
-@@ -213,6 +231,7 @@ if (NOT (DISABLE_SSL GREATER 0))
+@@ -213,6 +178,7 @@ if (NOT (DISABLE_SSL GREATER 0))
      )
  endif ()
  
@@ -83,15 +54,15 @@ index 87685ff..1fc9199 100644
  # === Source files ===
  set(RAFT_CORE
      ${ROOT_SRC}/asio_service.cxx
-@@ -240,6 +259,7 @@ set(RAFT_CORE
-     ${ROOT_SRC}/snapshot_sync_req.cxx
-     ${ROOT_SRC}/srv_config.cxx
+@@ -242,6 +208,7 @@ set(RAFT_CORE
      ${ROOT_SRC}/stat_mgr.cxx
      )
  add_library(RAFT_CORE_OBJ OBJECT ${RAFT_CORE})
 +target_link_libraries(RAFT_CORE_OBJ Boost::Boost OpenSSL::OpenSSL)
  
-@@ -249,54 +269,25 @@ set(STATIC_LIB_SRC
+ set(STATIC_LIB_SRC
+     $<TARGET_OBJECTS:RAFT_CORE_OBJ>)
+@@ -249,54 +216,9 @@ set(STATIC_LIB_SRC
  # === Executables ===
  set(LIBRARY_NAME "nuraft")
  
@@ -113,27 +84,10 @@ index 87685ff..1fc9199 100644
 -
 -# === Examples ===
 -add_subdirectory("${PROJECT_SOURCE_DIR}/examples")
--
 +add_library(nuraft ${STATIC_LIB_SRC})
 +target_link_libraries(nuraft Boost::Boost OpenSSL::OpenSSL)
-+
+
 +include_directories(BEFORE ${EXAMPLES_SRC})
-+#set(TEST_SRCS
-+#      "tests/src/test_async_result.cxx"
-+#      "tests/src/test_buffer.cxx"
-+#      "tests/src/test_everything_together.cxx"
-+#      "tests/src/test_impls.cxx"
-+#      "tests/src/test_logger.cxx"
-+#      "tests/src/test_log_store.cxx"
-+#      "tests/src/test_ptr.cxx"
-+#      "tests/src/test_runner.cxx"
-+#      "tests/src/test_scheduler.cxx"
-+#      "tests/src/test_serialization.cxx"
-+#      "tests/src/test_strfmt.cxx"
-+#    )
-+#add_executable(test_runner ${TEST_SRCS})
-+#target_link_libraries(test_runner nuraft)
-+#add_test(NAME TestRunner COMMAND test_runner)
  
  # === Tests ===
 -add_subdirectory("${PROJECT_SOURCE_DIR}/tests")
