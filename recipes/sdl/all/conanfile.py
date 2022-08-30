@@ -208,6 +208,7 @@ class SDLConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions["SDL2_DISABLE_INSTALL"] = False  # SDL2_* options will get renamed to SDL_ options in the next SDL release
         if tools.is_apple_os(self):
             cmake.definitions["CMAKE_OSX_ARCHITECTURES"] = {
                 "armv8": "arm64",
