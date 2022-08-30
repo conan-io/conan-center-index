@@ -133,7 +133,10 @@ class CryptoPPConan(ConanFile):
                 dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        if Version(self.version) < "8.7.0":
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        else:
+            rmdir(self, os.path.join(self.package_folder, "share"))
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
