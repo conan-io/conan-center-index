@@ -1,11 +1,14 @@
-from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.microsoft import msvc_runtime_flag, is_msvc
+from conan.tools.build import cross_building
+from conan.tools.files import get, copy, replace_in_file, chdir, rmdir, rm
+from conan.tools.scm import Version
+from conans import tools, AutoToolsBuildEnvironment, MSBuild
+from conan.errors import ConanInvalidConfiguration
 import contextlib
 import os
 
-required_conan_version = ">=1.33.0"
-
+required_conan_version = ">=1.50.0"
 
 class MpirConan(ConanFile):
     name = "mpir"
@@ -42,10 +45,6 @@ class MpirConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -53,7 +52,7 @@ class MpirConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self._is_msvc and self.options.shared:
+        if is_msvc(self) and self.options.shared:
             del self.options.enable_cxx
         if not self.options.get_safe("enable_cxx", False):
             del self.settings.compiler.libcxx
@@ -62,18 +61,18 @@ class MpirConan(ConanFile):
             self.provides.append("gmp")
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building doesn't work (yet)")
 
     def build_requirements(self):
-        self.build_requires("yasm/1.3.0")
-        if not self._is_msvc:
-            self.build_requires("m4/1.4.19")
+        self.tool_requires("yasm/1.3.0")
+        if not is_msvc(self):
+            self.tool_requires("m4/1.4.19")
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/cci.latest")
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(keep_permissions=True, **self.conan_data["sources"][self.version],
+        get(self, keep_permissions=True, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
     @property
@@ -86,7 +85,7 @@ class MpirConan(ConanFile):
 
     @property
     def _vcxproj_paths(self):
-        compiler_version = self.settings.compiler.version if tools.Version(self.settings.compiler.version) < "16" else "15"
+        compiler_version = self.settings.compiler.version if Version(self.settings.compiler.version) <= "16" else "16"
         build_subdir = "build.vc{}".format(compiler_version)
         vcxproj_paths = [
             os.path.join(self._source_subfolder, build_subdir,
@@ -110,7 +109,7 @@ class MpirConan(ConanFile):
                 "Debug" if "d" in msvc_runtime_flag(self) else "",
                 "DLL" if "MD" in msvc_runtime_flag(self) else "",
             )
-            tools.replace_in_file(props_path, old_runtime, new_runtime)
+            replace_in_file(self, props_path, old_runtime, new_runtime)
         msbuild = MSBuild(self)
         for vcxproj_path in self._vcxproj_paths:
             msbuild.build(vcxproj_path, platforms=self._platforms, upgrade_project=False)
@@ -150,43 +149,67 @@ class MpirConan(ConanFile):
             self._autotools.configure(args=args)
         return self._autotools
 
+    def _patch_new_msvc_version(self, ver, toolset):
+        new_dir = os.path.join(self._source_subfolder, f'build.vc{ver}')
+        copy(self, pattern="*", src=os.path.join(self._source_subfolder, 'build.vc15'), dst=new_dir)
+
+        for root, _, files in os.walk(new_dir):
+            for file in files:
+                full_file = os.path.join(root, file)
+                replace_in_file(self, full_file, "<PlatformToolset>v141</PlatformToolset>", f"<PlatformToolset>{toolset}</PlatformToolset>", strict=False)
+                replace_in_file(self, full_file, "prebuild skylake\\avx x64 15", f"prebuild skylake\\avx x64 {ver}", strict=False)
+                replace_in_file(self, full_file, "prebuild p3 Win32 15", f"prebuild p3 Win32 {ver}", strict=False)
+                replace_in_file(self, full_file, "prebuild gc Win32 15", f"prebuild gc Win32 {ver}", strict=False)
+                replace_in_file(self, full_file, "prebuild gc x64 15", f"prebuild gc x64 {ver}", strict=False)
+                replace_in_file(self, full_file, "prebuild haswell\\avx x64 15", f"prebuild haswell\\avx x64 {ver}", strict=False)
+                replace_in_file(self, full_file, "prebuild core2 x64 15", f"prebuild core2 x64 {ver}", strict=False)
+                replace_in_file(self, full_file, 'postbuild "$(TargetPath)" 15', f'postbuild "$(TargetPath)" {ver}', strict=False)
+                replace_in_file(self, full_file, 'check_config $(Platform) $(Configuration) 15', f'check_config $(Platform) $(Configuration) {ver}', strict=False)
+
+    def _patch_sources(self):
+        if is_msvc(self):
+            self._patch_new_msvc_version(16, "v142")
+            self._patch_new_msvc_version(17, "v143")
+
     def build(self):
-        if self._is_msvc:
+        self._patch_sources()
+        if is_msvc(self):
             self._build_visual_studio()
         else:
-            with tools.chdir(self._source_subfolder), self._build_context():
+            with chdir(self, self._source_subfolder), self._build_context():
                 # relocatable shared lib on macOS
-                tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
+                replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
                 autotools = self._configure_autotools()
                 autotools.make()
 
     def package(self):
-        self.copy("COPYING*", dst="licenses", src=self._source_subfolder)
-        if self._is_msvc:
-            lib_folder = os.path.join(self._source_subfolder, self._dll_or_lib,
+        copy(self, "COPYING*", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, self._source_subfolder))
+        if is_msvc(self):
+            lib_folder = os.path.join(self.build_folder, self._source_subfolder, self._dll_or_lib,
                                     self._platforms.get(str(self.settings.arch)),
                                     str(self.settings.build_type))
-            self.copy("mpir.h", dst="include", src=lib_folder, keep_path=True)
+            include_folder = os.path.join(self.package_folder, "include")
+            copy(self, "mpir.h", dst=include_folder, src=lib_folder, keep_path=True)
             if self.options.enable_gmpcompat:
-                self.copy("gmp.h", dst="include", src=lib_folder, keep_path=True)
+                copy(self, "gmp.h", dst=include_folder, src=lib_folder, keep_path=True)
             if self.options.get_safe("enable_cxx"):
-                self.copy("mpirxx.h", dst="include", src=lib_folder, keep_path=True)
+                copy(self, "mpirxx.h", dst=include_folder, src=lib_folder, keep_path=True)
                 if self.options.enable_gmpcompat:
-                    self.copy("gmpxx.h", dst="include", src=lib_folder, keep_path=True)
-            self.copy(pattern="*.dll*", dst="bin", src=lib_folder, keep_path=False)
-            self.copy(pattern="*.lib", dst="lib", src=lib_folder, keep_path=False)
+                    copy(self, "gmpxx.h", dst=include_folder, src=lib_folder, keep_path=True)
+            copy(self, pattern="*.dll*", dst=os.path.join(self.package_folder, "bin"), src=lib_folder, keep_path=False)
+            copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=lib_folder, keep_path=False)
         else:
-            with tools.chdir(self._source_subfolder), self._build_context():
+            with chdir(self, self._source_subfolder), self._build_context():
                 autotools = self._configure_autotools()
                 autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "share"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+            rmdir(self, os.path.join(self.package_folder, "share"))
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         if self.options.get_safe("enable_cxx"):
             self.cpp_info.libs.append("mpirxx")
         self.cpp_info.libs.append("mpir")
-        if self.options.enable_gmpcompat and not self._is_msvc:
+        if self.options.enable_gmpcompat and not is_msvc(self):
             if self.options.get_safe("enable_cxx"):
                 self.cpp_info.libs.append("gmpxx")
             self.cpp_info.libs.append("gmp")
