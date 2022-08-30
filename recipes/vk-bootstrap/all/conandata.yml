@@ -14,10 +14,7 @@ sources:
 patches:
   "0.5":
     - patch_file: "patches/0001-fix-cmake-0.5.patch"
-      base_path: "source_subfolder"
   "0.3.1":
     - patch_file: "patches/0001-fix-cmake-0.3.1.patch"
-      base_path: "source_subfolder"
   "0.2":
     - patch_file: "patches/0001-fix-cmake-0.2.patch"
-      base_path: "source_subfolder"
