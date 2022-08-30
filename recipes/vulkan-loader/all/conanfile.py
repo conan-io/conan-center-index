@@ -4,6 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import os
 
@@ -39,6 +40,11 @@ class VulkanLoaderConan(ConanFile):
     @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
+
+    @property
+    def _is_pkgconf_needed(self):
+        return self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib") or \
+               self.options.get_safe("with_wsi_wayland") or self.options.get_safe("with_wsi_directfb")
 
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
@@ -86,8 +92,7 @@ class VulkanLoaderConan(ConanFile):
             self.output.warn("vulkan-loader should be built & consumed with the same version than vulkan-headers.")
 
     def build_requirements(self):
-        if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib") or \
-           self.options.get_safe("with_wsi_wayland") or self.options.get_safe("with_wsi_directfb"):
+        if self._is_pkgconf_needed:
             self.tool_requires("pkgconf/1.7.4")
         if self._is_mingw:
             self.tool_requires("jwasm/2.13")
@@ -119,8 +124,12 @@ class VulkanLoaderConan(ConanFile):
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
-        env = VirtualBuildEnv(self)
-        env.generate()
+        if self._is_pkgconf_needed:
+           pkg = PkgConfigDeps(self)
+           pkg.generate()
+        if self._is_pkgconf_needed or self._is_mingw:
+            env = VirtualBuildEnv(self)
+            env.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
