@@ -38,7 +38,7 @@ class GlogConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os not in ["Linux", "FreeBSD"]:
+        if self.settings.os not in ["Linux", "FreeBSD"] or Version(self.version) < "0.5.0":
             del self.options.with_unwind
 
     def configure(self):
@@ -53,7 +53,8 @@ class GlogConan(ConanFile):
     def requirements(self):
         if self.options.with_gflags:
             self.requires("gflags/2.2.2")
-        if self.options.get_safe("with_unwind"):
+        # 0.4.0 requires libunwind unconditionally
+        if self.options.get_safe("with_unwind") or (Version(self.version) < "0.5.0" and self.settings.os in ["Linux", "FreeBSD"]):
             self.requires("libunwind/1.6.2")
 
     def build_requirements(self):
