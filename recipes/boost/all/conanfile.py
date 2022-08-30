@@ -1,5 +1,6 @@
-from conan.tools.build import cross_building
-from conan.tools.files import rename, rmdir, get
+from conan.tools.apple import is_apple_os
+from conan.tools.build import build_jobs, check_min_cppstd, cross_building
+from conan.tools.files import chdir, get, mkdir, rename, replace_in_file, rm, rmdir, save
 from conan.tools.files.patches import apply_conandata_patches
 from conan.tools.microsoft import msvc_runtime_flag
 from conan import ConanFile
@@ -20,7 +21,7 @@ try:
 except ImportError:
     from io import StringIO
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.51.3"
 
 
 # When adding (or removing) an option, also add this option to the list in
@@ -288,7 +289,7 @@ class BoostConan(ConanFile):
         # iconv is off by default on Windows and Solaris
         if self._is_windows_platform or self.settings.os == "SunOS":
             self.options.i18n_backend_iconv = "off"
-        elif tools.is_apple_os(self.settings.os):
+        elif is_apple_os(self):
             self.options.i18n_backend_iconv = "libiconv"
         elif self.settings.os == "Android":
             # bionic provides iconv since API level 28
@@ -443,7 +444,7 @@ class BoostConan(ConanFile):
                     raise ConanInvalidConfiguration("This compiler is too old to build Boost.nowide.")
 
             if self.settings.compiler.cppstd:
-                tools.check_min_cppstd(self, 11)
+                check_min_cppstd(self, 11)
             else:
                 version_cxx11_standard = self._min_compiler_version_default_cxx11
                 if version_cxx11_standard:
@@ -456,7 +457,7 @@ class BoostConan(ConanFile):
         if not all((self.options.without_fiber, self.options.get_safe("without_json", True))):
             # fiber/json require a c++11-able compiler.
             if self.settings.compiler.cppstd:
-                tools.check_min_cppstd(self, 11)
+                check_min_cppstd(self, 11)
             else:
                 version_cxx11_standard = self._min_compiler_version_default_cxx11
                 if version_cxx11_standard:
@@ -470,7 +471,7 @@ class BoostConan(ConanFile):
             # Starting from 1.76.0, Boost.Math requires a compiler with c++ standard 11 or higher
             if not self.options.without_math:
                 if self.settings.compiler.cppstd:
-                    tools.check_min_cppstd(self, 11)
+                    check_min_cppstd(self, 11)
                 else:
                     min_compiler_version = self._min_compiler_version_default_cxx11
                     if min_compiler_version is not None:
@@ -481,7 +482,7 @@ class BoostConan(ConanFile):
             # Starting from 1.79.0, Boost.Wave requires a compiler with c++ standard 11 or higher
             if not self.options.without_wave:
                 if self.settings.compiler.cppstd:
-                    tools.check_min_cppstd(self, 11)
+                    check_min_cppstd(self, 11)
                 else:
                     min_compiler_version = self._min_compiler_version_default_cxx11
                     if min_compiler_version is not None:
@@ -790,16 +791,16 @@ class BoostConan(ConanFile):
     def _build_bcp(self):
         folder = os.path.join(self.source_folder, self._source_subfolder, "tools", "bcp")
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
-            with tools.chdir(folder):
-                command = f"{self._b2_exe} -j{tools.cpu_count()} --abbreviate-paths toolset={self._toolset}"
+            with chdir(self, folder):
+                command = f"{self._b2_exe} -j{build_jobs(self)} --abbreviate-paths toolset={self._toolset}"
                 command += " -d%d" % self.options.debug_level
                 self.output.warn(command)
                 self.run(command, run_environment=True)
 
     def _run_bcp(self):
         with tools.vcvars(self.settings) if self._is_msvc or self._is_clang_cl else tools.no_op():
-            with tools.chdir(self.source_folder):
-                os.mkdir(self._bcp_dir)
+            with chdir(self, self.source_folder):
+                mkdir(self, self._bcp_dir)
                 namespace = f"--namespace={self.options.namespace}"
                 alias = "--namespace-alias" if self.options.namespace_alias else ""
                 boostdir = f"--boost={self._source_subfolder}"
@@ -818,28 +819,28 @@ class BoostConan(ConanFile):
     def build(self):
         if cross_building(self, skip_x64_x86=True):
             # When cross building, do not attempt to run the test-executable (assume they work)
-            tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "libs", "stacktrace", "build", "Jamfile.v2"),
+            replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "libs", "stacktrace", "build", "Jamfile.v2"),
                                   "$(>) > $(<)",
                                   "echo \"\" > $(<)", strict=False)
         # Older clang releases require a thread_local variable to be initialized by a constant value
-        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
+        replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                               "/* thread_local */", "thread_local", strict=False)
-        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
+        replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                               "/* static __thread */", "static __thread", strict=False)
         if self.settings.compiler == "apple-clang" or (self.settings.compiler == "clang" and Version(self.settings.compiler.version) < 6):
-            tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
+            replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                                   "thread_local", "/* thread_local */")
-            tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
+            replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                                   "static __thread", "/* static __thread */")
-        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "tools", "build", "src", "tools", "gcc.jam"),
+        replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "tools", "build", "src", "tools", "gcc.jam"),
                               "local generic-os = [ set.difference $(all-os) : aix darwin vxworks solaris osf hpux ] ;",
                               "local generic-os = [ set.difference $(all-os) : aix darwin vxworks solaris osf hpux iphone appletv ] ;",
                               strict=False)
-        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "tools", "build", "src", "tools", "gcc.jam"),
+        replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "tools", "build", "src", "tools", "gcc.jam"),
                               "local no-threading = android beos haiku sgi darwin vxworks ;",
                               "local no-threading = android beos haiku sgi darwin vxworks iphone appletv ;",
                               strict=False)
-        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "libs", "fiber", "build", "Jamfile.v2"),
+        replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "libs", "fiber", "build", "Jamfile.v2"),
                               "    <conditional>@numa",
                               "    <link>shared:<library>.//boost_fiber : <conditional>@numa",
                               strict=False)
@@ -869,7 +870,7 @@ class BoostConan(ConanFile):
         # interferes with the compiler selection.
         use_vcvars = self._is_msvc and not self.settings.compiler.get_safe("toolset", default="")
         with tools.vcvars(self.settings) if use_vcvars else tools.no_op():
-            with tools.chdir(sources):
+            with chdir(self, sources):
                 # To show the libraries *1
                 # self.run("%s --show-libraries" % b2_exe)
                 self.run(full_command, run_environment=True)
@@ -1084,14 +1085,20 @@ class BoostConan(ConanFile):
                           "define=BOOST_USE_UCONTEXT=1"])
         flags.append("pch=on" if self.options.pch else "pch=off")
 
-        if tools.is_apple_os(self.settings.os):
-            if self.settings.get_safe("os.version"):
-                cxx_flags.append(tools.apple_deployment_target_flag(self.settings.os,
-                                                                    self.settings.get_safe("os.version"),
-                                                                    self.settings.get_safe("os.sdk"),
-                                                                    self.settings.get_safe("os.subsystem"),
-                                                                    self.settings.get_safe("arch")))
-                if self.settings.get_safe("os.subsystem") == "catalyst":
+        if is_apple_os(self):
+            os_version = self.settings.get_safe("os.version")
+            if os_version:
+                os_subsystem = self.settings.get_safe("os.subsystem")
+                deployment_target_flag = tools.apple_deployment_target_flag(
+                    self.settings.os,
+                    os_version,
+                    self.settings.get_safe("os.sdk"),
+                    os_subsystem,
+                    self.settings.get_safe("arch")
+                )
+                cxx_flags.append(deployment_target_flag)
+                link_flags.append(deployment_target_flag)
+                if os_subsystem == "catalyst":
                     cxx_flags.append("--target=arm64-apple-ios-macabi")
                     link_flags.append("--target=arm64-apple-ios-macabi")
 
@@ -1134,7 +1141,7 @@ class BoostConan(ConanFile):
         flags.extend([
             "install",
             f"--prefix={self.package_folder}",
-            f"-j{tools.cpu_count()}",
+            f"-j{build_jobs(self)}",
             "--abbreviate-paths",
             "-d%d" % self.options.debug_level,
         ])
@@ -1169,7 +1176,7 @@ class BoostConan(ConanFile):
     def _ar(self):
         if os.environ.get("AR"):
             return os.environ["AR"]
-        if tools.is_apple_os(self.settings.os) and self.settings.compiler == "apple-clang":
+        if is_apple_os(self) and self.settings.compiler == "apple-clang":
             return tools.XCRun(self.settings).ar
         return None
 
@@ -1177,7 +1184,7 @@ class BoostConan(ConanFile):
     def _ranlib(self):
         if os.environ.get("RANLIB"):
             return os.environ["RANLIB"]
-        if tools.is_apple_os(self.settings.os) and self.settings.compiler == "apple-clang":
+        if is_apple_os(self) and self.settings.compiler == "apple-clang":
             return tools.XCRun(self.settings).ranlib
         return None
 
@@ -1185,7 +1192,7 @@ class BoostConan(ConanFile):
     def _cxx(self):
         if os.environ.get("CXX"):
             return os.environ["CXX"]
-        if tools.is_apple_os(self.settings.os) and self.settings.compiler == "apple-clang":
+        if is_apple_os(self) and self.settings.compiler == "apple-clang":
             return tools.XCRun(self.settings).cxx
         compiler_version = str(self.settings.compiler.version)
         major = compiler_version.split(".", maxsplit=1)[0]
@@ -1238,7 +1245,7 @@ class BoostConan(ConanFile):
         else:
             contents += f' {cxx_fwd_slahes}'
 
-        if tools.is_apple_os(self.settings.os):
+        if is_apple_os(self):
             if self.settings.compiler == "apple-clang":
                 contents += f" -isysroot {tools.XCRun(self.settings).sdk_path}"
             if self.settings.get_safe("arch"):
@@ -1276,7 +1283,7 @@ class BoostConan(ConanFile):
 
         self.output.warn(contents)
         filename = f"{folder}/user-config.jam"
-        tools.save(filename,  contents)
+        save(self, filename, contents)
 
     @property
     def _toolset_version(self):
@@ -1295,7 +1302,7 @@ class BoostConan(ConanFile):
             return "clang-win"
         if self.settings.os == "Emscripten" and self.settings.compiler == "clang":
             return "emscripten"
-        if self.settings.compiler == "gcc" and tools.is_apple_os(self.settings.os):
+        if self.settings.compiler == "gcc" and is_apple_os(self):
             return "darwin"
         if self.settings.compiler == "apple-clang":
             return "clang-darwin"
@@ -1371,11 +1378,11 @@ class BoostConan(ConanFile):
         dll_pdbs = glob.glob(os.path.join(self.package_folder, "lib", "*.dll")) + \
                     glob.glob(os.path.join(self.package_folder, "lib", "*.pdb"))
         if dll_pdbs:
-            tools.mkdir(os.path.join(self.package_folder, "bin"))
+            mkdir(self, os.path.join(self.package_folder, "bin"))
             for bin_file in dll_pdbs:
                 rename(self, bin_file, os.path.join(self.package_folder, "bin", os.path.basename(bin_file)))
 
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def _create_emscripten_libs(self):
         # Boost Build doesn't create the libraries, but it gets close,
@@ -1685,7 +1692,7 @@ class BoostConan(ConanFile):
                     self.cpp_info.components["stacktrace_windbg"].system_libs.extend(["ole32", "dbgeng"])
                     self.cpp_info.components["stacktrace_windbg_cached"].defines.append("BOOST_STACKTRACE_USE_WINDBG_CACHED")
                     self.cpp_info.components["stacktrace_windbg_cached"].system_libs.extend(["ole32", "dbgeng"])
-                elif tools.is_apple_os(self.settings.os) or self.settings.os == "FreeBSD":
+                elif is_apple_os(self) or self.settings.os == "FreeBSD":
                     self.cpp_info.components["stacktrace"].defines.append("BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED")
 
             if not self.options.without_python:
