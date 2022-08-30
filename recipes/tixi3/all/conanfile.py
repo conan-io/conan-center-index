@@ -2,6 +2,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools import files
 from conan import ConanFile
 import os
+import textwrap
 
 required_conan_version = ">=1.45.0"
 
@@ -74,6 +75,17 @@ class Tixi3Conan(ConanFile):
         cmake.configure()
         cmake.build()
 
+    def _create_cmake_module_alias_targets(self, module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent(f"""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """)
+        files.save(self, module_file, content)
+
     def package(self):
         cmake = CMake(self)
         cmake.install()
@@ -81,6 +93,16 @@ class Tixi3Conan(ConanFile):
         files.rmdir(self, os.path.join(self.package_folder, "lib", "tixi3"))
         files.copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         files.rmdir(self, os.path.join(self.package_folder, "share"))
+
+        # provide alias target tixi3 for v1 packages
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"tixi3": "tixi3::tixi3"}
+        )
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.includedirs.append(os.path.join("include", "tixi3"))
@@ -91,3 +113,8 @@ class Tixi3Conan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "tixi3")
         self.cpp_info.set_property("cmake_target_name", "tixi3")
+
+        # provide alias target tixi3 for v1 packages
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
