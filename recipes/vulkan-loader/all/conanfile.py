@@ -81,7 +81,7 @@ class VulkanLoaderConan(ConanFile):
         if self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) < 15:
             # FIXME: It should build but Visual Studio 2015 container in CI of CCI seems to lack some Win SDK headers
             raise ConanInvalidConfiguration("Visual Studio < 2017 not yet supported in this recipe")
-        # to replace by some version range check
+        # TODO: to replace by some version range check
         if self.dependencies["vulkan-headers"].ref.version != self.version:
             self.output.warn("vulkan-loader should be built & consumed with the same version than vulkan-headers.")
 
