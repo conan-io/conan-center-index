@@ -4,8 +4,8 @@ sources:
       url: "https://github.com/weidai11/cryptopp/archive/CRYPTOPP_8_7_0.tar.gz"
       sha256: "8d6a4064b8e9f34cd3e838f5a12c40067ee7b95ee37d9173ec273cb0913e7ca2"
     cmake:
-      url: "https://github.com/abdes/cryptopp-cmake/archive/75db4db150f7b85a9a21069501b39e8652c5c2fd.tar.gz"
-      sha256: "20517438c56cb5eaf9bb3f7091ef1a427ad00978beffa99484db3bc21bdb03b6"
+      url: "https://github.com/abdes/cryptopp-cmake/archive/c7fa777bb92d2e6adc1d13bb9215790be0984cda.tar.gz"
+      sha256: "f85294b27650abee4bd33962f947d972e5b033b7c573fb9259d149b2bf5e1497"
   "8.6.0":
     source:
       url: "https://github.com/weidai11/cryptopp/archive/CRYPTOPP_8_6_0.tar.gz"
