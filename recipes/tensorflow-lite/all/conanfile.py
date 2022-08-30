@@ -41,7 +41,7 @@ class TensorflowLiteConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "5",
+            "gcc": "8",
             "Visual Studio": "14",
             "clang": "3.4",
             "apple-clang": "5.1",
@@ -169,8 +169,8 @@ class TensorflowLiteConan(ConanFile):
         files.copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
         files.copy(self, "*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
         files.copy(self, "*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
-        files.copy(self, "*.lib", src=os.path.join(self.build_folder), dst=os.path.join(self.package_folder, "lib"))
-        files.copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"))
+        files.copy(self, "*.lib", src=os.path.join(self.build_folder), dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        files.copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "tensorflowlite")
