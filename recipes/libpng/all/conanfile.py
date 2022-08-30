@@ -182,9 +182,10 @@ class LibpngConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "PNG"
 
         prefix = "lib" if self._is_msvc else ""
-        suffix = "d" if self.settings.build_type == "Debug" else ""
         major_min_version = f"{Version(self.version).major}{Version(self.version).minor}"
+        suffix = major_min_version if self._is_msvc else ""
+        suffix += "d" if self._is_msvc and self.settings.build_type == "Debug" else ""
 
-        self.cpp_info.libs = ["{}png{}{}".format(prefix, major_min_version, suffix)]
+        self.cpp_info.libs = [f"{prefix}png{suffix}"]
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
