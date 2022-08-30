@@ -47,9 +47,9 @@ class LuajitConan(ConanFile):
             self._env_build = AutoToolsBuildEnvironment(self)
         return self._env_build
 
-    #def validate(self):
-    #    if Version(self.version) < "2.1.0-beta1" and self.settings.os == "Macos" and self.settings.arch == "armv8":
-    #        raise ConanInvalidConfiguration(f"{self.ref} is not supported by Mac M1. Please, try any version >=2.1")
+    def validate(self):
+        if Version(self.version) < "2.1.0-beta1" and self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported by Mac M1. Please, try any version >=2.1")
 
     def build(self):
         if is_msvc(self):
