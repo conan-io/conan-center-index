@@ -1,6 +1,6 @@
 from conan import ConanFile, tools
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 from conan.tools.files import copy, get, rmdir, save
 import os
@@ -54,7 +54,6 @@ class SimbodyConan(ConanFile):
         cmake_layout(self, src_folder="Simbody/src")
 
     def generate(self):
-        tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
 
