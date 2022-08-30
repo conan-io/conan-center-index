@@ -91,8 +91,6 @@ class CryptoPPConan(ConanFile):
             tc.cache_variables["CRYPTOPP_USE_INTERMEDIATE_OBJECTS_TARGET"] = False
             if self.settings.os == "Android":
                 tc.cache_variables["CRYPTOPP_NATIVE_ARCH"] = True
-            if self.settings.os == "Macos" and self.settings.arch == "armv8" and Version(self.version) <= "8.4.0":
-                tc.cache_variables["CMAKE_CXX_FLAGS"] = "-march=armv8-a"
         tc.generate()
 
     def _patch_sources(self):
@@ -126,8 +124,9 @@ class CryptoPPConan(ConanFile):
 
     def package(self):
         copy(self, "License.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "LICENSE", src=os.path.join(self.source_folder, "cryptopp-cmake"),
-             dst=os.path.join(self.package_folder, "licenses"))
+        if Version(self.version) >= "8.7.0":
+            copy(self, "LICENSE", src=os.path.join(self.source_folder, "cryptopp-cmake"),
+                dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
