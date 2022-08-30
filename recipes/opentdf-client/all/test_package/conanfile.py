@@ -6,8 +6,6 @@ import os
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package_multi"
-    options = {"branch_version" : [True, False], "allow_libiconv": [True, False]}
-    default_options = {"branch_version": False, "allow_libiconv": True}
 
     def build(self):
         cmake = CMake(self)
