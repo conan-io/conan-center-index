@@ -56,7 +56,8 @@ class NuRaftConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
-    def cmakeGet(self):
+    @functools.lru_cache(1)
+    def _configure_cmake(self):
         cmake = CMake(self)
         cmake.configure()
         return cmake
