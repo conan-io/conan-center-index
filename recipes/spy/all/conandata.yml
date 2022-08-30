@@ -5,6 +5,3 @@ sources:
   "0.0.4":
     url: "https://github.com/jfalcou/spy/archive/0.0.4.tar.gz"
     sha256: "714285028c841114fb305780f4c2fe41ab5300cd8955ddee26bc817937d7aa4c"
-  "0.0.3":
-    url: "https://github.com/jfalcou/spy/archive/0.0.3.tar.gz"
-    sha256: "ea9efbda82676c010fa736bcb1e3890d6767be0251663d5a4322df1c6aa90c85"
