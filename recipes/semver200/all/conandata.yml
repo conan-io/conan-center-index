@@ -11,5 +11,5 @@ patches:
       sha256: "ea7b241e8f37295e7943977fc66eaa6fa85d647b73c8cc1f4b566fd8078b0897"
     - patch_file: "patches/0002-macro-invocation-fix.patch"
       patch_description: "Fix minor() and major() macros invocation"
-      patch_type: "backport"
+      patch_type: "portability"
       sha256: "ae12e00b4e1710b105491283ea10fa9c8e8015c623ce6784645f709b3a00efd7"
