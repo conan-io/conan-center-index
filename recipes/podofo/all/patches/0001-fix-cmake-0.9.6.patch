@@ -9,7 +9,7 @@
  
  
  # Builds must use this CMakeLists.txt, not the one in src/ or somewhere else.
-@@ -313,73 +313,69 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
+@@ -313,73 +313,70 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
  ENDIF(CMAKE_COMPILER_IS_GNUCXX)
  
  FIND_PACKAGE(ZLIB REQUIRED)
@@ -27,7 +27,7 @@
 -ELSE(LIBCRYPTO_FOUND)
 -	MESSAGE("OpenSSL's libCrypto not found. Encryption support will be disabled")
 -ENDIF(LIBCRYPTO_FOUND)
-+	LINK_LIBRARIES(OpenSSL::OpenSSL)
++	LINK_LIBRARIES(openssl::openssl)
 +  INCLUDE(CheckCSourceCompiles)
 +
 +  SET(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
@@ -57,7 +57,8 @@
 +ENDIF()
 +
 +if(PODOFO_WITH_LIBIDN)
- 
++  FIND_PACKAGE(LIBIDN)
+-
 -IF(LIBIDN_FOUND)
  	SET(PODOFO_HAVE_LIBIDN TRUE)
 -	INCLUDE_DIRECTORIES(${LIBIDN_INCLUDE_DIR})
@@ -65,7 +66,7 @@
 -ELSE(LIBIDN_FOUND)
 -	MESSAGE("Libidn not found. AES-256 Encryption support will be disabled")
 -ENDIF(LIBIDN_FOUND)
-+	LINK_LIBRARIES(CONAN_PKG::libidn)
++	LINK_LIBRARIES(libidn::libidn)
 +ENDIF()
  
 -FIND_PACKAGE(LIBJPEG)
@@ -122,12 +123,13 @@
 -  MESSAGE("LibUnistring not found. Unistring support will be disabled")
 -  SET(UNISTRING_LIBRARY "")
 -ENDIF(UNISTRING_FOUND)
-+  LINK_LIBRARIES(CONAN_PKG::libunistring)
++  FIND_PACKAGE(libunistring REQUIRED)
++  LINK_LIBRARIES(libunistring::libunistring)
 +ENDIF()
  
  
  IF(NOT PODOFO_BUILD_LIB_ONLY)
-@@ -396,11 +392,11 @@ ENDIF(CppUnit_FOUND)
+@@ -396,11 +393,11 @@ ENDIF(CppUnit_FOUND)
  
  ENDIF(NOT PODOFO_BUILD_LIB_ONLY)
  
@@ -136,13 +138,13 @@
 -FIND_PACKAGE(FREETYPE REQUIRED)
 -MESSAGE("Found freetype library at ${FREETYPE_LIBRARIES}, headers ${FREETYPE_INCLUDE_DIR}")
 +FIND_PACKAGE(Freetype REQUIRED)
-+LINK_LIBRARIES(Freetype::Freetype)
++LINK_LIBRARIES(freetype)
  
 +if(0)
  FIND_PACKAGE(LIBSTLPORT)
  SET(stlport_libraries_if_use_stlport)
  IF(USE_STLPORT)
-@@ -415,16 +411,13 @@ IF(USE_STLPORT)
+@@ -415,16 +412,13 @@ IF(USE_STLPORT)
  		MESSAGE(FATAL_ERROR "STLPort use requested, but STLPort not found.")
  	ENDIF(LIBSTLPORT_FOUND)
  ENDIF(USE_STLPORT)
@@ -162,7 +164,7 @@
  ELSE(WANT_FONTCONFIG)
  	# Might as well look for it anyway. This also sets the appropriate
  	# variables to empty values.
-@@ -516,6 +509,7 @@
+@@ -516,6 +510,7 @@
    INCLUDE_DIRECTORIES(${FONTCONFIG_INCLUDE_DIR})
  ENDIF(FONTCONFIG_FOUND AND WANT_FONTCONFIG)
 
@@ -170,7 +172,7 @@
  IF(WIN32 OR PODOFO_BUILD_STATIC)
    SET(PODOFO_LIB
        podofo
-@@ -546,10 +540,18 @@
+@@ -546,10 +541,18 @@
 
  ADD_SUBDIRECTORY(src)
  IF(NOT PODOFO_BUILD_LIB_ONLY)
