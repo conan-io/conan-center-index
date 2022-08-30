@@ -44,11 +44,20 @@ class Tixi3Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except:
+                pass
 
         # tixi is a c library
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except:
+            pass
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
