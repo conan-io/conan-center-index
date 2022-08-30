@@ -102,15 +102,15 @@ class ImageMagicConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.with_bzlib:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.with_lcms:
-            self.requires("lcms/2.11")
+            self.requires("lcms/2.13.1")
         if self.options.with_openexr:
-            self.requires("openexr/2.5.7")
+            self.requires("openexr/3.1.5")
         if self.options.with_heic:
             self.requires("libheif/1.12.0")
         if self.options.with_jbig:
@@ -118,21 +118,21 @@ class ImageMagicConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.0")
+            self.requires("libjpeg-turbo/2.1.4")
         if self.options.with_openjp2:
-            self.requires("openjpeg/2.4.0")
+            self.requires("openjpeg/2.5.0")
         if self.options.with_pango:
-            self.requires("pango/1.50.7")
+            self.requires("pango/1.50.8")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_tiff:
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.4.0")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.0")
+            self.requires("libwebp/1.2.4")
         if self.options.with_xml2:
-            self.requires("libxml2/2.9.10")
+            self.requires("libxml2/2.9.14")
         if self.options.with_freetype:
-            self.requires("freetype/2.10.4")
+            self.requires("freetype/2.12.1")
         if self.options.with_djvu:
             # FIXME: missing djvu recipe
             self.output.warn(
