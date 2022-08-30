@@ -1,6 +1,14 @@
+from conan import ConanFile
+from conan.tools.scm import Version
+from conan.tools.files import get, chdir, replace_in_file, copy, rmdir
+from conan.tools.microsoft import is_msvc
+from conans import tools, VisualStudioBuildEnvironment, AutoToolsBuildEnvironment
+from conan.errors import ConanInvalidConfiguration
 import os
 import platform
-from conans import ConanFile, tools, VisualStudioBuildEnvironment, AutoToolsBuildEnvironment
+
+
+required_conan_version = ">=1.50.0"
 
 
 class LuajitConan(ConanFile):
@@ -9,7 +17,7 @@ class LuajitConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://luajit.org"
     description = "LuaJIT is a Just-In-Time Compiler (JIT) for the Lua programming language."
-    topics = ("conan", "lua", "jit")
+    topics = ("lua", "jit")
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False]}
@@ -22,7 +30,7 @@ class LuajitConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def configure(self):
         if self.options.shared:
@@ -39,9 +47,13 @@ class LuajitConan(ConanFile):
             self._env_build = AutoToolsBuildEnvironment(self)
         return self._env_build
 
+    #def validate(self):
+    #    if Version(self.version) < "2.1.0-beta1" and self.settings.os == "Macos" and self.settings.arch == "armv8":
+    #        raise ConanInvalidConfiguration(f"{self.ref} is not supported by Mac M1. Please, try any version >=2.1")
+
     def build(self):
-        if self.settings.compiler == 'Visual Studio':
-            with tools.chdir(os.path.join(self._source_subfolder, 'src')):
+        if is_msvc(self):
+            with chdir(self, os.path.join(self._source_subfolder, 'src')):
                 env_build = VisualStudioBuildEnvironment(self)
                 with tools.environment_append(env_build.vars), tools.vcvars(self):
                     variant = '' if self.options.shared else 'static'
@@ -49,22 +61,22 @@ class LuajitConan(ConanFile):
         else:
             buildmode = 'shared' if self.options.shared else 'static'
             makefile = os.path.join(self._source_subfolder, 'src', 'Makefile')
-            tools.replace_in_file(makefile,
+            replace_in_file(self, makefile,
                                   'BUILDMODE= mixed',
                                   'BUILDMODE= %s' % buildmode)
-            tools.replace_in_file(makefile,
+            replace_in_file(self, makefile,
                                   'TARGET_DYLIBPATH= $(TARGET_LIBPATH)/$(TARGET_DYLIBNAME)',
                                   'TARGET_DYLIBPATH= $(TARGET_DYLIBNAME)')
             # adjust mixed mode defaults to build either .so or .a, but not both
             if not self.options.shared:
-                tools.replace_in_file(makefile,
+                replace_in_file(self, makefile,
                                       'TARGET_T= $(LUAJIT_T) $(LUAJIT_SO)',
                                       'TARGET_T= $(LUAJIT_T) $(LUAJIT_A)')
-                tools.replace_in_file(makefile,
+                replace_in_file(self, makefile,
                                       'TARGET_DEP= $(LIB_VMDEF) $(LUAJIT_SO)',
                                       'TARGET_DEP= $(LIB_VMDEF) $(LUAJIT_A)')
             else:
-                tools.replace_in_file(makefile,
+                replace_in_file(self, makefile,
                                       'TARGET_O= $(LUAJIT_A)',
                                       'TARGET_O= $(LUAJIT_SO)')
             env = dict()
@@ -73,20 +85,19 @@ class LuajitConan(ConanFile):
                 # is not set then it's forced to 10.4, which breaks compile on Mojave.
                 version = self.settings.get_safe("os.version")
                 if not version and platform.system() == "Darwin":
-                    platform.mac_ver
-                    listversion = platform.mac_ver()[0].split(".")
-                    major = listversion[0]
-                    minor = listversion[1]
-                    version = "%s.%s" % (major, minor)
+                    macversion = Version(platform.mac_ver()[0])
+                    version = f"{macversion.major}.{macversion.minor}"
                 env["MACOSX_DEPLOYMENT_TARGET"] = version
-            with tools.chdir(self._source_subfolder), tools.environment_append(env):
+            with chdir(self, self._source_subfolder), tools.environment_append(env):
                 env_build = self._configure_autotools()
-                env_build.make(args=["PREFIX=%s" % self.package_folder])
+                compiler = "clang" if "clang" in str(self.settings.compiler) else str(self.settings.compiler)
+                compiler = tools.get_env("CC", compiler)
+                env_build.make(args=[f"PREFIX={self.package_folder}", f"CC={compiler}"])
 
     def package(self):
-        self.copy("COPYRIGHT", dst="licenses", src=self._source_subfolder)
-        if self.settings.compiler == 'Visual Studio':
-            ljs = os.path.join(self._source_subfolder, "src")
+        copy(self, "COPYRIGHT", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, self._source_subfolder))
+        if is_msvc(self):
+            ljs = os.path.join(self.build_folder, self._source_subfolder, "src")
             inc = os.path.join(self.package_folder, "include", "luajit-2.0")
             self.copy("lua.h", dst=inc, src=ljs)
             self.copy("lualib.h", dst=inc, src=ljs)
@@ -97,14 +108,16 @@ class LuajitConan(ConanFile):
             self.copy("lua51.lib", dst="lib", src=ljs)
             self.copy("lua51.dll", dst="bin", src=ljs)
         else:
-            with tools.chdir(self._source_subfolder):
+            with chdir(self, self._source_subfolder):
                 env_build = self._configure_autotools()
                 env_build.install(args=["PREFIX=%s" % self.package_folder])
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "share"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["lua51" if self.settings.compiler == "Visual Studio" else "luajit-5.1"]
-        self.cpp_info.includedirs = [os.path.join(self.package_folder, "include", "luajit-2.0")]
-        if self.settings.os == "Linux":
+        self.cpp_info.libs = ["lua51" if is_msvc(self) else "luajit-5.1"]
+        luaversion = Version(self.version)
+        self.cpp_info.includedirs = [os.path.join("include", f"luajit-{luaversion.major}.{luaversion.minor}")]
+        self.output.info(f"***** INCLUDE DIRS: {self.cpp_info.includedirs}")
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "dl"])
