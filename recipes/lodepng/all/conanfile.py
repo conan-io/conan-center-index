@@ -35,6 +35,14 @@ class LodepngConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
     def validate(self):
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
