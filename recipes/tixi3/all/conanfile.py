@@ -72,7 +72,9 @@ class Tixi3Conan(ConanFile):
         files.apply_conandata_patches(self)
 
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(variables={
+            "TIXI_BUILD_EXAMPLES": "OFF"
+        })
         cmake.build()
 
     def _create_cmake_module_alias_targets(self, module_file, targets):

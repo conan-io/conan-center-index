@@ -5,3 +5,4 @@ sources:
 patches:
   "3.3.0":
     - patch_file: "patches/link_curl.patch"
+    - patch_file: "patches/disable_tixi_examples.patch"
