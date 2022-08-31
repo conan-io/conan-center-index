@@ -140,7 +140,7 @@ class MSYS2Conan(ConanFile):
 
         self._update_pacman()
 
-        with chdir(os.path.join(self._msys_dir, "usr", "bin")):
+        with chdir(self, os.path.join(self._msys_dir, "usr", "bin")):
             for package in packages:
                 self.run(f'bash -l -c "pacman -S {package}--noconfirm"')
             for package in ['pkgconf']:
