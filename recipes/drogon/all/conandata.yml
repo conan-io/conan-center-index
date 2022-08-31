@@ -8,11 +8,8 @@ sources:
 patches:
   "1.8.0":
     - base_path: "source_subfolder"
-      patch_file: "patches/1.8.0-0001-disable_trantor.patch"
+      patch_file: "patches/1.8.0.patch"
     - base_path: "source_subfolder"
-      patch_file: "patches/1.8.0-0002-remove-boost-components.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.8.0-0003-find-package-trantor.patch"
   "1.7.5":
     - base_path: "source_subfolder"
       patch_file: "patches/1.7.5-0001-disable_trantor.patch"
