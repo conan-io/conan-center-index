@@ -11,7 +11,7 @@ class Tixi3Conan(ConanFile):
     name = "tixi3"
     url = "https://github.com/conan-io/conan-center-index"
     description = "A simple xml interface based on libxml2 and libxslt"
-    topics = ("tixi3", "xml")
+    topics = ("xml", "xml2", "xslt")
     homepage = "https://github.com/DLR-SC/tixi"
     license = "Apache-2.0"
 
@@ -27,6 +27,7 @@ class Tixi3Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["TIXI_BUILD_EXAMPLES"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -72,9 +73,7 @@ class Tixi3Conan(ConanFile):
         files.apply_conandata_patches(self)
 
         cmake = CMake(self)
-        cmake.configure(variables={
-            "TIXI_BUILD_EXAMPLES": "OFF"
-        })
+        cmake.configure()
         cmake.build()
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
