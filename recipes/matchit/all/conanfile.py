@@ -18,7 +18,7 @@ class MatchitConan(ConanFile):
                    " library for C++17 with macro-free APIs.")
     topics = ("lightweight", "cpp17", "header-only", "pattern-matching")
     no_copy_source = True
-    settings = "compiler"
+    settings = "arch", "build_type", "compiler", "os"
 
     _compiler_required_cpp17 = {
         "Visual Studio": "16",
