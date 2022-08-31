@@ -1,9 +1,9 @@
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-from glob import glob
-import os
+from conan import ConanFile
+from conan.tools import files
+from conan.errors import ConanInvalidConfiguration
+from conans import CMake
 
-
+required_conan_version = ">=1.41.0"
 
 class SshtConan(ConanFile):
     name = "ssht"
@@ -28,15 +28,16 @@ class SshtConan(ConanFile):
         return "build_subfolder"
 
     def config_options(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("SSHT requires C99 support for complex numbers.")
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+    
+    def validate(self):
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("SSHT requires C99 support for complex numbers.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob('ssht-*/')[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def cmake(self):
