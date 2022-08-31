@@ -1,5 +1,4 @@
-from conan import ConanFile
-from conan.tools.cmake import cmake_layout
+from conans import ConanFile
 import os
 
 
@@ -12,15 +11,12 @@ class TestPackageConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
-
-    def layout(self):
-        cmake_layout(self)
+        self.build_requires(self.tested_reference_str)
 
     def test(self):
         self.run("jwasm -h", ignore_errors=True)
         obj_file = os.path.join(self.build_folder, "Lin64_1.o")
-        asm_file = os.path.join(self.source_folder, "Lin64_1.asm") # content from https://www.japheth.de/JWasm/Lin64_1.html
+        asm_file = os.path.join(self.source_folder, os.pardir, "test_package", "Lin64_1.asm") # content from https://www.japheth.de/JWasm/Lin64_1.html
         self.run(f"jwasm -elf64 -Fo={obj_file} {asm_file}")
         if self._settings_build.os == "Linux" and self._settings_build.arch == "x86_64":
             bin_file = os.path.join(self.build_folder, "Lin64_1")
