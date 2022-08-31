@@ -7,10 +7,17 @@ Conan Center Index is the source index of recipes of the [ConanCenter](https://c
 This repository includes a Continuous Integration system that will build automatically the Conan packages for the recipes submitted via
 [Pull Request](https://github.com/conan-io/conan-center-index/pulls).
 
+### Add ConanCenter remote
+
+ConanCenter remote is configured by default in any Conan client installation. If, for any reason, you need to add it manually, just execute:
+
+```
+conan remote add conancenter https://center.conan.io
+```
 
 ### How to consume recipes
 
-ConanCenter is added as a remote by default to Conan client, so starting to use recipes from this repository is as easy as running
+Starting to use recipes from this repository is as easy as running
 one simple command after installing Conan:
 
 ```
