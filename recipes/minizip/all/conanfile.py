@@ -3,7 +3,7 @@ from conan.tools import files
 from conans import CMake
 import functools
 
-required_conan_version = ">=1.41.0"
+required_conan_version = ">=1.46.0"
 
 
 class MinizipConan(ConanFile):
