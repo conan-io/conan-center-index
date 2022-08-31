@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index f83e119..46a23fd 100755
+index ca6dff2..712e2a2 100755
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -177,7 +177,8 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")

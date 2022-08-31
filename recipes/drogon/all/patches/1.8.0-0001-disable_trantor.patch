@@ -1,16 +1,16 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 146d2b8..f83e119 100755
+index ca6dff2..c6ac439 100755
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -52,7 +52,6 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
- endif ()
+@@ -16,7 +16,6 @@ option(BUILD_CTL "Build drogon_ctl" ${BUILD_PROGRAMS})
+ option(BUILD_EXAMPLES "Build examples" ${BUILD_PROGRAMS})
+ option(BUILD_ORM "Build orm" ON)
+ option(COZ_PROFILING "Use coz for profiling" OFF)
+-option(BUILD_SHARED_LIBS "Build drogon as a shared lib" OFF)
+ option(BUILD_DOC "Build Doxygen documentation" OFF)
+ option(BUILD_BROTLI "Build Brotli" ON)
  
- if (BUILD_DROGON_SHARED)
--    set(BUILD_TRANTOR_SHARED TRUE)
-     set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
-     find_package(Threads)
-     # set(BUILD_EXAMPLES FALSE)
-@@ -110,7 +109,6 @@ target_include_directories(
+@@ -106,7 +105,6 @@ target_include_directories(
      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/orm_lib/inc>
      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/nosql_lib/redis/inc>
      $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
@@ -18,7 +18,7 @@ index 146d2b8..f83e119 100755
      $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/exports>
      $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}>)
  
-@@ -120,8 +118,6 @@ if (WIN32)
+@@ -116,8 +114,6 @@ if (WIN32)
          PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third_party/mman-win32>)
  endif (WIN32)
  

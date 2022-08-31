@@ -1,10 +1,10 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 46a23fd..d2e2f69 100755
+index ca6dff2..df13d78 100755
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -118,7 +118,8 @@ if (WIN32)
-         PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third_party/mman-win32>)
- endif (WIN32)
+@@ -118,7 +118,8 @@ endif (WIN32)
+ 
+ add_subdirectory(trantor)
  
 -target_link_libraries(${PROJECT_NAME} PUBLIC trantor)
 +find_package(Trantor REQUIRED)
