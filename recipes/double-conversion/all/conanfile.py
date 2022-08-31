@@ -5,7 +5,7 @@ from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.50.0"
 
 
 class DoubleConversionConan(ConanFile):
@@ -48,6 +48,8 @@ class DoubleConversionConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
 
