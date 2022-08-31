@@ -137,7 +137,7 @@ class LibUSBConan(ConanFile):
             for vcxproj in ["fxload_2017", "getopt_2017", "hotplugtest_2017", "libusb_dll_2017",
                             "libusb_static_2017", "listdevs_2017", "stress_2017", "testlibusb_2017", "xusb_2017"]:
                 vcxproj_path = os.path.join(self.build_folder, "msvc", "%s.vcxproj" % vcxproj)
-                replace_in_file(vcxproj_path, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
+                replace_in_file(self, vcxproj_path, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
 
     def build(self):
         if is_msvc(self):
