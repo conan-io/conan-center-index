@@ -1,8 +1,18 @@
 sources:
+  "1.8.0":
+    url: "https://github.com/drogonframework/drogon/archive/refs/tags/v1.8.0.tar.gz"
+    sha256: "bc6503cf213ed961d4a5e9fd7cb8e75b6b11045a67840ea2241e57321dd8711b"
   "1.7.5":
     url: "https://github.com/drogonframework/drogon/archive/refs/tags/v1.7.5.tar.gz"
     sha256: "e2af7c55dcabafef16f26f5b3242692f5a2b54c19b7b626840bf9132d24766f6"
 patches:
+  "1.8.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.8.0-0001-disable_trantor.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.8.0-0002-remove-boost-components.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.8.0-0003-find-package-trantor.patch"
   "1.7.5":
     - base_path: "source_subfolder"
       patch_file: "patches/1.7.5-0001-disable_trantor.patch"
