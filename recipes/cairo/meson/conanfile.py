@@ -250,7 +250,7 @@ class CairoConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "cairo-all-do-no-use"
 
         self.cpp_info.components["cairo_"].set_property("pkg_config_name", "cairo")
-        self.cpp_info.components["cairo_"].names["pkg_config_name"] = "cairo"
+        self.cpp_info.components["cairo_"].names["pkg_config"] = "cairo"
         self.cpp_info.components["cairo_"].libs = ["cairo"]
         self.cpp_info.components["cairo_"].includedirs.insert(0, os.path.join("include", "cairo"))
 
