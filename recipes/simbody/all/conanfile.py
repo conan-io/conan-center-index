@@ -67,7 +67,7 @@ class SimbodyConan(ConanFile):
         
 
     @staticmethod
-    def _create_cmake_module_variables(self, module_file, version):
+    def _create_cmake_module_variables(module_file, version):
         content = textwrap.dedent("""\
             set(simbody_VERSION_MAJOR {major})
             set(simbody_VERSION_MINOR {minor})
