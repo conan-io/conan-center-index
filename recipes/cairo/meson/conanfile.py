@@ -121,8 +121,8 @@ class CairoConan(ConanFile):
             self.requires("egl/system")
 
     def build_requirements(self):
-        self.build_requires("meson/0.63.1")
-        self.build_requires("pkgconf/1.7.4")
+        self.tool_requires("meson/0.63.1")
+        self.tool_requires("pkgconf/1.7.4")
 
     def validate(self):
         if self.options.get_safe("with_xlib_xrender") and not self.options.get_safe("with_xlib"):

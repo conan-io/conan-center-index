@@ -102,11 +102,11 @@ class CairoConan(ConanFile):
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+            self.tool_requires("msys2/cci.latest")
         if not microsoft.is_msvc(self):
-            self.build_requires("libtool/2.4.6")
-            self.build_requires("pkgconf/1.7.4")
-            self.build_requires("gtk-doc-stub/cci.20181216")
+            self.tool_requires("libtool/2.4.6")
+            self.tool_requires("pkgconf/1.7.4")
+            self.tool_requires("gtk-doc-stub/cci.20181216")
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version],
