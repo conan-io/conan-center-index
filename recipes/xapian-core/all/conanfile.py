@@ -2,13 +2,14 @@ from conan import ConanFile
 from conan.tools.files import rename, apply_conandata_patches, replace_in_file, rmdir, save, rm, get
 from conan.tools.microsoft import is_msvc
 from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
+from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conans import AutoToolsBuildEnvironment, tools
 from contextlib import contextmanager
 import functools
 import textwrap
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.51.0"
 
 
 class XapianCoreConan(ConanFile):
@@ -105,7 +106,7 @@ class XapianCoreConan(ConanFile):
                 vs_ide_version = self.settings.compiler.version
             else:
                 vs_ide_version = msvc_version_to_vs_ide_version(self.settings.compiler.version)
-            if tools.Version(vs_ide_version) >= "12":
+            if Version(vs_ide_version) >= "12":
                 autotools.flags.append("-FS")
         conf_args = [
             "--datarootdir={}".format(self._datarootdir.replace("\\", "/")),
@@ -151,8 +152,7 @@ class XapianCoreConan(ConanFile):
             f"{self.package_folder}/{self._module_file_rel_path}"
         )
 
-    @staticmethod
-    def _create_cmake_module_variables(module_file):
+    def _create_cmake_module_variables(self, module_file):
         content = textwrap.dedent("""\
             set(XAPIAN_FOUND TRUE)
             set(XAPIAN_INCLUDE_DIR ${xapian_INCLUDE_DIR}
