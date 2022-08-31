@@ -1,5 +1,5 @@
 from conans import CMake, ConanFile, tools
-from conan.tools.files import get, patch, rmdir
+from conan.tools.files import apply_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 from conan.errors import ConanException, ConanInvalidConfiguration
 import os
@@ -110,8 +110,7 @@ class Z3Conan(ConanFile):
                     f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
     def build(self):
-        for it in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(self, **it)
+        apply_conandata_patches(self)
 
         if self.options.multiprecision == "mpir":
             tools.save(os.path.join(self._build_subfolder, "gmp.h"), textwrap.dedent("""\
