@@ -1,33 +1,25 @@
 versions:
-  "0.51.2":
-    folder: all
-  "0.52.1":
-    folder: all
-  "0.53.2":
-    folder: all
-  "0.54.3":
-    folder: all
-  "0.55.3":
-    folder: all
-  "0.56.2":
-    folder: all
-  "0.57.2":
-    folder: all
-  "0.58.1":
-    folder: all
-  "0.59.3":
-    folder: all
-  "0.60.2":
-    folder: all
-  "0.61.2":
-    folder: all
-  "0.62.0":
-    folder: all
-  "0.62.1":
-    folder: all
-  "0.62.2":
+  "0.63.1":
     folder: all
   "0.63.0":
     folder: all
-  "0.63.1":
+  "0.62.2":
+    folder: all
+  "0.62.1":
+    folder: all
+  "0.62.0":
+    folder: all
+  "0.61.2":
+    folder: all
+  "0.60.2":
+    folder: all
+  "0.59.3":
+    folder: all
+  "0.58.1":
+    folder: all
+  "0.57.2":
+    folder: all
+  "0.56.2":
+    folder: all
+  "0.55.3":
     folder: all
