@@ -5,12 +5,11 @@ from conan.tools.layout import basic_layout, vs_layout
 from conan.tools.gnu import AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps, Autotools
 from conan.tools.env import VirtualBuildEnv
 from conan.errors import ConanException
-# TODO: Update when Conan 1.52.0 is available in CCI
-from conans.tools import Version
+from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.48.0"
+required_conan_version = ">=1.50.0"
 
 
 class LibUSBConan(ConanFile):
@@ -51,7 +50,10 @@ class LibUSBConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         try:
             del self.settings.compiler.libcxx
         except Exception:
