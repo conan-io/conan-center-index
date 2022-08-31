@@ -50,14 +50,14 @@ class MSYS2Conan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     # "exclude_files" "packages" "additional_packages" values are a comma separated list
     options = {
-        "exclude_files": "ANY",
-        "packages": "ANY",
-        "additional_packages": "ANY"
+        "exclude_files": ["ANY"],
+        "packages": ["ANY"],
+        "additional_packages": ["ANY"],
     }
     default_options = {
         "exclude_files": "*/link.exe",
         "packages": "base-devel,binutils,gcc",
-        "additional_packages": None
+        "additional_packages": None,
     }
 
     short_paths = True
@@ -142,7 +142,7 @@ class MSYS2Conan(ConanFile):
 
         with chdir(self, os.path.join(self._msys_dir, "usr", "bin")):
             for package in packages:
-                self.run(f'bash -l -c "pacman -S {package}--noconfirm"')
+                self.run(f'bash -l -c "pacman -S {package} --noconfirm"')
             for package in ['pkgconf']:
                 self.run(f'bash -l -c "pacman -Rs -d -d $(pacman -Qsq {package}) --noconfirm"')
 
