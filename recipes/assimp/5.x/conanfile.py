@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
@@ -6,7 +7,7 @@ from conan.tools.scm import Version
 from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
 
 
 class AssimpConan(ConanFile):
@@ -185,6 +186,10 @@ class AssimpConan(ConanFile):
         if self._depends_on_openddlparser:
             self.requires("openddl-parser/0.5.0")
 
+    def validate(self):
+        if self._depends_on_clipper and Version(self.dependencies["clipper"].ref.version).major != "4":
+            raise ConanInvalidConfiguration("Only 'clipper/4.x' is supported")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -252,11 +257,6 @@ class AssimpConan(ConanFile):
             rmdir(self, os.path.join(self.source_folder, "contrib", vendor))
 
     def build(self):
-        # TODO: Move to 'validate()' once there is a way to get the resolved version of dependencies there
-        # FIXME: doesn't work with the new conan v2 model
-        # if self._depends_on_clipper and Version(self.deps_cpp_info["clipper"].version).major != "4":
-        #     raise ConanInvalidConfiguration("Only 'clipper/4.x' is supported")
-
         self._patch_sources()
         cmake = CMake(self)
         cmake.configure()

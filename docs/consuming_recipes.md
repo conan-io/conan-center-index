@@ -1,6 +1,6 @@
 # Consuming recipes
 
-Recipes in this repository are evolving continously, contributors are creating pull-requests
+Recipes in this repository are evolving continuously, contributors are creating pull-requests
 fixing issues and adding new features every day. It is expected that from time to time these
 new recipe revisions stop to work in your project.
 
@@ -18,7 +18,7 @@ There can be several root causes if a recipe (a new revision) stopped to work in
 
  * **Fixes in recipes** that modify the libraries they are creating: exported symbols,
    compiler flags, generated files for your build system, CMake target names,...
-   
+
    Every contributor tries to do their best and reviewers do an amazing work checking that the
    changes are really improving recipes.
 
@@ -36,11 +36,10 @@ There can be several root causes if a recipe (a new revision) stopped to work in
    New recipe revisions can take into account changes that are introduced in new Conan client
    version, sometimes these changes modify some experimental behavior without modifying recipe syntax.
 
-   When these changes are in the critical path to Conan v2 we can introduce the 
+   When these changes are in the critical path to Conan v2 we can introduce the
    `required_conan_version` statement to be sure that people using these new experimental
    features are using the required Conan version and testing the actual behavior of those
    features (feedback about them is very important to Conan).
-
 
 ## Isolate your project from upstream changes
 
@@ -50,24 +49,23 @@ There are two main ways you can isolate your project from changes in recipes:
    new recipe revisions are only pushed to your Artifactory after they have been validated
    in your project.
  * **Pin the version of every reference you consume in your project** using recipe revisions
-   and lockfiles. 
-
+   and lockfiles.
 
 ### Use your own Artifactory instance
 
 Using your own Artifactory instance is not as complicated as it sounds. You can [deploy it
 on-premise](https://conan.io/downloads.html) or use a [cloud provided solution](https://jfrog.com/start-free/?isConan=true) for free.
 
-Once you have configured your Artifactory instance, you should ensure that your project is 
+Once you have configured your Artifactory instance, you should ensure that your project is
 using only that remote (`conan remote list`). Conan makes it easy to use different configurations
 per project (check `CONAN_USER_HOME` env variable) or to store the configuration in some external
 file or repository so you can shared and install it using one command (`conan config install ...`).
 
-
 ### Use recipe revisions and lockfiles
 
 If you don't want to deploy and maintain your own Artifactory instance, you can isolate from
-changes in upstream recipes in ConanCenter using [recipe revisions](https://docs.conan.io/en/latest/versioning/revisions.html) and [lockfiles](https://docs.conan.io/en/latest/versioning/lockfiles.html) (please, read linked Conan documentation for more detailed
+changes in upstream recipes in ConanCenter using [recipe revisions](https://docs.conan.io/en/latest/versioning/revisions.html)
+and [lockfiles](https://docs.conan.io/en/latest/versioning/lockfiles.html) (please, read linked Conan documentation for more detailed
 explanation).
 
 Recipe revisions and lockfiles can be used to define exactly the binary you want to use in
@@ -80,13 +78,14 @@ is a hash added to the reference and can be used in Conan at the same place as r
 revisions:
 
  * In the command line:
-   ```
+
+   ```sh
    conan install openssl/3.0.1@#1955937e88f13a02aa4fdae98c3f9fb8
    ```
 
  * In a `conanfile.txt` file:
 
-   ```ini
+   ```txt
    [requires]
    openssl/3.0.1@#1955937e88f13a02aa4fdae98c3f9fb8
    ```
@@ -113,19 +112,17 @@ The two basic commands you need to know ([full docs here](https://docs.conan.io/
 
  * Create lockfile from `conanfile.txt` file:
 
-   ```
+   ```sh
    conan lock create conanfile.txt --lockfile-out=locks/project.lock
    ```
 
  * Consume a lockfile:
 
-   ```
+   ```sh
    conan install conanfile.txt --lockfile=locks/project.lock
    ```
 
-If your project is managing several configurations, you would probably like to have a look to
-_base lockfiles_ and _lockfile bundles_ in the documentation.
-
+If your project is managing several configurations, you would probably like to have a look to [base lockfiles](https://docs.conan.io/en/latest/versioning/lockfiles/configurations.html#base-lockfiles) and [lockfile bundles](https://docs.conan.io/en/latest/versioning/lockfiles/bundle.html) in the documentation.
 
 ---
 

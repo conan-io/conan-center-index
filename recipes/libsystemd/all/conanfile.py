@@ -1,10 +1,16 @@
 import os
 import re
 
-from conans import ConanFile, Meson, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, copy, get, \
+    replace_in_file
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.2"
+
 
 class LibsystemdConan(ConanFile):
     name = "libsystemd"
@@ -30,43 +36,33 @@ class LibsystemdConan(ConanFile):
         "with_xz": True,
         "with_zstd": True,
     }
-    generators = "pkg_config"
+    generators = "PkgConfigDeps"
     exports_sources = "patches/**"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def configure(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Only Linux supported")
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+
+    def validate(self):
+        if self.info.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Only Linux supported")
 
     def build_requirements(self):
-        if tools.Version(self.version) >= "249.5":
-            self.build_requires("meson/0.60.2")
-        elif tools.Version(self.version) >= "248.3":
-            # Mason 0.60.0.rc1 introduced a breaking change addressed in 249.5
-            # https://github.com/mesonbuild/meson/commit/43302d3296baff6aeaf8e03f5d701b0402e37a6c
-            # https://github.com/systemd/systemd-stable/commit/c29537f39e4f413a6cbfe9669fa121bdd6d8b36f
-            self.build_requires("meson/0.59.3")
-        else:
-            # incompatible change in meson/0.57.2:
-            # https://github.com/mesonbuild/meson/pull/8526
-            self.build_requires("meson/0.57.1")
-        self.build_requires("m4/1.4.19")
-        self.build_requires("gperf/3.1")
-        self.build_requires("pkgconf/1.7.4")
+        self.tool_requires("meson/0.63.1")
+        self.tool_requires("m4/1.4.19")
+        self.tool_requires("gperf/3.1")
+        self.tool_requires("pkgconf/1.7.4")
 
     def requirements(self):
-        self.requires("libcap/2.58")
+        self.requires("libcap/2.62")
         self.requires("libmount/2.36.2")
         if self.options.with_selinux:
             self.requires("libselinux/3.3")
@@ -75,15 +71,17 @@ class LibsystemdConan(ConanFile):
         if self.options.with_xz:
             self.requires("xz_utils/5.2.5")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.0")
+            self.requires("zstd/1.5.2")
+
+    def layout(self):
+        basic_layout(self, src_folder="source")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _so_version(self):
-        meson_build = os.path.join(self._source_subfolder, "meson.build")
+        meson_build = os.path.join(self.source_folder, "meson.build")
         with open(meson_build, "r") as build_file:
             for line in build_file:
                 match = re.match(r"^libsystemd_version = '(.*)'$", line)
@@ -91,20 +89,22 @@ class LibsystemdConan(ConanFile):
                     return match.group(1)
         return ""
 
-    def _configure_meson(self):
-        meson = Meson(self)
-        defs = dict()
-        defs["selinux"] = "true" if self.options.with_selinux else "false"
-        defs["lz4"] = "true" if self.options.with_lz4 else "false"
-        defs["xz"] = "true" if self.options.with_xz else "false"
-        defs["zstd"] = "true" if self.options.with_zstd else "false"
+    def generate(self):
+        tc = MesonToolchain(self)
+        tc.project_options["selinux"] = ("true" if self.options.with_selinux
+                                         else "false")
+        tc.project_options["lz4"] = ("true" if self.options.with_lz4
+                                     else "false")
+        tc.project_options["xz"] = "true" if self.options.with_xz else "false"
+        tc.project_options["zstd"] = ("true" if self.options.with_zstd
+                                      else "false")
 
         if self.options.shared:
-            defs["static-libsystemd"] = "false"
+            tc.project_options["static-libsystemd"] = "false"
         elif self.options.fPIC:
-            defs["static-libsystemd"] = "pic"
+            tc.project_options["static-libsystemd"] = "pic"
         else:
-            defs["static-libsystemd"] = "no-pic"
+            tc.project_options["static-libsystemd"] = "no-pic"
 
         # options unrelated to libsystemd
         unrelated = [
@@ -124,57 +124,83 @@ class LibsystemdConan(ConanFile):
             "link-networkd-shared", "link-timesyncd-shared", "kernel-install",
             "libiptc", "elfutils", "repart", "homed", "importd", "acl",
             "dns-over-tls", "gnu-efi", "valgrind", "log-trace"]
+
+        if Version(self.version) >= "247.1":
+            unrelated.append("oomd")
+        if Version(self.version) >= "248.1":
+            unrelated.extend(["sysext", "nscd"])
+        if Version(self.version) >= "251.1":
+            unrelated.append("link-boot-shared")
+
         for opt in unrelated:
-            defs[opt] = "false"
+            tc.project_options[opt] = "false"
 
-        # 'rootprefix' is unused during libsystemd packaging but systemd v248
+        # 'rootprefix' is unused during libsystemd packaging but systemd > v247
         # build files require 'prefix' to be a subdirectory of 'rootprefix'.
-        defs["rootprefix"] = self.package_folder
+        tc.project_options["rootprefix"] = self.package_folder
 
-        meson.configure(source_folder=self._source_subfolder,
-                        build_folder=self._build_subfolder, defs=defs)
-        return meson
+        # There are a few places in libsystemd where pkgconfig dependencies are
+        # not used in compile time and only used in link time. And because of
+        # that it is not enough to use the 'PkgConfigDeps' generator here. It
+        # is also required to provide a path to the header files directly to
+        # the compiler.
+        for dependency in self.dependencies.values():
+            for includedir in dependency.cpp_info.includedirs:
+                tc.c_args.append("-I{}".format(includedir))
+
+        tc.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
-        meson_build = os.path.join(self._source_subfolder, "meson.build")
-        tools.replace_in_file(
-            meson_build, """relative_source_path = run_command('realpath',
-                                   '--relative-to=@0@'.format(project_build_root),
-                                   project_source_root).stdout().strip()""",
-            "relative_source_path = '../{}'".format(self._source_subfolder))
+        meson_build = os.path.join(self.source_folder, "meson.build")
+        replace_in_file(self, meson_build, "@CONAN_SRC_REL_PATH@",
+                        "'../{}'".format(os.path.basename(self.source_folder)))
 
     def build(self):
         self._patch_sources()
 
-        meson = self._configure_meson()
-        target = ("libsystemd.so.{}".format(self._so_version)
-                  if self.options.shared else "libsystemd.a")
-        meson.build(targets=["version.h", target])
+        meson = Meson(self)
+        meson.configure()
+        target = ("systemd:shared_library" if self.options.shared
+                  else "systemd:static_library")
+        meson.build(target="version.h {}".format(target))
 
     def package(self):
-        self.copy(pattern="LICENSE.LGPL2.1", dst="licenses",
-                  src=self._source_subfolder)
-        self.copy(pattern="*.h", dst=os.path.join("include", "systemd"),
-                  src=os.path.join(self._source_subfolder, "src", "systemd"))
+        copy(self, "LICENSE.LGPL2.1", self.source_folder,
+             os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.h", os.path.join(self.source_folder, "src", "systemd"),
+             os.path.join(self.package_folder, "include", "systemd"))
 
         if self.options.shared:
-            self.copy(pattern="libsystemd.so", dst="lib",
-                      src=self._build_subfolder, symlinks=True)
-            self.copy(pattern="libsystemd.so.{}".format(self._so_version.split('.')),
-                      dst="lib", src=self._build_subfolder, symlinks=True)
-            self.copy(pattern="libsystemd.so.{}".format(self._so_version),
-                      dst="lib", src=self._build_subfolder, symlinks=True)
+            copy(self, "libsystemd.so", self.build_folder,
+                 os.path.join(self.package_folder, "lib"))
+            copy(self, "libsystemd.so.{}".format(self._so_version.split('.')),
+                 self.build_folder, os.path.join(self.package_folder, "lib"))
+            copy(self, "libsystemd.so.{}".format(self._so_version),
+                 self.build_folder, os.path.join(self.package_folder, "lib"))
         else:
-            self.copy(pattern="libsystemd.a", dst="lib",
-                      src=self._build_subfolder)
+            copy(self, "libsystemd.a", self.build_folder,
+                 os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["systemd"]
         # FIXME: this `.version` should only happen for the `pkg_config`
         #  generator (see https://github.com/conan-io/conan/issues/8202)
         # systemd uses only major version in its .pc file
-        self.cpp_info.version = tools.Version(self.version).major
+        self.cpp_info.version = Version(self.version).major
+        self.cpp_info.set_property("component_version",
+                                   Version(self.version).major)
         self.cpp_info.system_libs = ["rt", "pthread", "dl"]
+
+        # FIXME: remove this block and set required_conan_version to >=1.51.1
+        #  (see https://github.com/conan-io/conan/pull/11790)
+        self.cpp_info.requires = ["libcap::libcap", "libmount::libmount"]
+        if self.options.with_selinux:
+            self.cpp_info.requires.append("libselinux::libselinux")
+        if self.options.with_lz4:
+            self.cpp_info.requires.append("lz4::lz4")
+        if self.options.with_xz:
+            self.cpp_info.requires.append("xz_utils::xz_utils")
+        if self.options.with_zstd:
+            self.cpp_info.requires.append("zstd::zstd")

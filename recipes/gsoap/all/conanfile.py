@@ -1,10 +1,12 @@
 from conan import ConanFile
-from conan import tools
+from conan.tools.build import cross_building
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get
 import os
-import shutil
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.46.0"
+
 
 class GsoapConan(ConanFile):
     name = "gsoap"
@@ -16,28 +18,57 @@ class GsoapConan(ConanFile):
     topics = ("gsoap", "logging")
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "fPIC": [True, False],
         "with_openssl": [True, False],
         "with_ipv6": [True, False],
         "with_cookies": [True, False],
         "with_c_locale": [True, False],
     }
     default_options = {
-        'with_openssl': True,
-        'with_ipv6': True,
-        'with_cookies': True,
-        'with_c_locale': True,
+        "fPIC": True,
+        "with_openssl": True,
+        "with_ipv6": True,
+        "with_cookies": True,
+        "with_c_locale": True,
     }
+
+    exports_sources = "CMakeLists.txt", "cmake/*.cmake"
     short_paths = True
 
-    def export_sources(self):
-        tools.files.copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
-        tools.files.copy(self, "*.cmake", os.path.join(self.recipe_folder, "src"), os.path.join(self.export_sources_folder, "src"))
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.files.copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def requirements(self):
+        if self.options.with_openssl:
+            self.requires("openssl/1.1.1q")
+            self.requires("zlib/1.2.12")
+
+    def build_requirements(self):
+        if cross_building(self, skip_x64_x86=True) and hasattr(self, "settings_build"):
+            self.tool_requires("gsoap/{}".format(self.version))
+
+        # TODO: use is_msvc with build profile when possible (see https://github.com/conan-io/conan/issues/11926)
+        if str(self._settings_build.compiler) in ["Visual Studio", "msvc"]:
+            self.tool_requires("winflexbison/2.5.24")
+        else:
+            self.tool_requires("bison/3.7.6")
+            self.tool_requires("flex/2.6.4")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def generate(self):
         toolchain = CMakeToolchain(self)
-        toolchain.variables["GSOAP_PATH"] = "."
+        toolchain.variables["GSOAP_PATH"] = self.source_folder.replace("\\", "/")
         toolchain.variables["BUILD_TOOLS"] = True
         toolchain.variables["WITH_OPENSSL"] = self.options.with_openssl
         toolchain.variables["WITH_IPV6"] = self.options.with_ipv6
@@ -48,40 +79,19 @@ class GsoapConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def layout(self):
-        cmake_layout(self)
-
-    def source(self):
-        tools.files.get(self,
-            **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        ms = VirtualBuildEnv(self)
+        ms.generate()
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder=".")
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
-    def build_requirements(self):
-        if tools.build.cross_building(self, skip_x64_x86=True) and hasattr(self, 'settings_build'):
-            self.tool_requires("gsoap/{}".format(self.version))
-
-        if self.settings.os == "Windows" or (hasattr(self, "settings_build") and self.settings_build.os == "Windows"):
-            self.tool_requires("winflexbison/2.5.24")
-        else:
-            self.tool_requires("bison/3.7.6")
-            self.tool_requires("flex/2.6.4")
-
-    def requirements(self):
-        if self.options.with_openssl:
-            self.requires("openssl/1.1.1q")
-            self.requires("zlib/1.2.12")
-
     def package(self):
-        tools.files.copy(self, "GPLv2_license.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        tools.files.copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "GPLv2_license.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        shutil.move(os.path.join(self.package_folder, 'import'), os.path.join(self.package_folder, 'bin', 'import'))
 
     def package_info(self):
         defines = []
@@ -100,3 +110,7 @@ class GsoapConan(ConanFile):
         if self.options.with_c_locale:
             defines.append("WITH_C_LOCALE")
         self.cpp_info.defines = defines
+
+        # TODO: remove this block if required_conan_version changed to 1.51.1 or higher
+        #       (see https://github.com/conan-io/conan/pull/11790)
+        self.cpp_info.requires = ["openssl::openssl", "zlib::zlib"]

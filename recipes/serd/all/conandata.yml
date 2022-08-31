@@ -1,11 +1,4 @@
 sources:
-  #"0.30.12":
-  # serd:
-  #   url: "https://gitlab.com/drobilla/serd/-/archive/v0.30.12/serd-v0.30.12.tar.gz"
-  #   sha256: "dd218aabc7df91f21b7c5ee8cea2604b7a88a4fb4d853215d3d1183d6749f19c"
-  # autowaf:
-  #   url: "https://gitlab.com/drobilla/autowaf/-/archive/aeef9f5fdf416d9b68c61c75de7dae409f1ac6a4/autowaf-aeef9f5fdf416d9b68c61c75de7dae409f1ac6a4.tar.gz"
-  #   sha256: "824f719bb77b9e0ae12fd80fe5b97194add6cd8b877c9fd8723e89d7c1940484"
   "0.30.14":
     url: "https://gitlab.com/drobilla/serd/-/archive/v0.30.14/serd-v0.30.14.tar.gz"
     sha256: "5b8d620afda474861f159b18af5e49d0ea1a9d48ff7879b23b92a058ce7aad68"
