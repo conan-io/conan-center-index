@@ -9,8 +9,8 @@ import os
 required_conan_version = ">=1.50.0"
 
 
-class SemVer200Conan(ConanFile):
-    name = "semver200"
+class ZmarokSemverConan(ConanFile):
+    name = "zmarok-semver"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zmarko/semver"
@@ -64,7 +64,7 @@ class SemVer200Conan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         # Parent Build system does not support installation; so we must manually package
         hdr_src = os.path.join(self.source_folder, "include")
-        hdr_dst = os.path.join(self.package_folder, "include", self.name)
+        hdr_dst = os.path.join(self.package_folder, "include")
         copy(self, "*.h", hdr_src, hdr_dst)
         copy(self, "*.inl", hdr_src, hdr_dst)
 
