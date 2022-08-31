@@ -62,7 +62,7 @@ class Tixi3Conan(ConanFile):
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"], src=self.recipe_folder, dst=self.export_sources_folder)
+            files.copy(self, patch["patch_file"], src=self.recipe_folder, dst=self.export_sources_folder)
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version],
@@ -116,6 +116,8 @@ class Tixi3Conan(ConanFile):
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ['shlwapi']
+
+        self.cpp_info.frameworks.extend(["Foundation"])
 
         self.cpp_info.set_property("cmake_file_name", "tixi3")
         self.cpp_info.set_property("cmake_target_name", "tixi3")
