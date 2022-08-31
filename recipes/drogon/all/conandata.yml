@@ -8,7 +8,7 @@ sources:
 patches:
   "1.8.0":
     - base_path: "source_subfolder"
-      patch_file: "patches/1.8.0.patch"
+      patch_file: "patches/1.8.0-0001-disable-unused-data.patch"
     - base_path: "source_subfolder"
   "1.7.5":
     - base_path: "source_subfolder"
