@@ -1,10 +1,13 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
+from conan.tools.files import get, apply_conandata_patches, rm, rmdir, rename
+from conan.tools.scm import Version
+from conans import AutoToolsBuildEnvironment, tools
 import contextlib
-import os
 import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
 
 
 class CoinUtilsConan(ConanFile):
@@ -62,7 +65,7 @@ class CoinUtilsConan(ConanFile):
         # FIXME: This issue likely comes from very old autotools versions used to produce configure.
         #        It might be fixed by calling autoreconf, but https://github.com/coin-or-tools/BuildTools
         #        should be packaged and added to build requirements.
-        if hasattr(self, "settings_build") and tools.cross_building(self) and self.options.shared:
+        if hasattr(self, "settings_build") and cross_building(self) and self.options.shared:
             raise ConanInvalidConfiguration("coin-utils shared not supported yet when cross-building")
 
     def build_requirements(self):
@@ -76,7 +79,7 @@ class CoinUtilsConan(ConanFile):
             self.build_requires("automake/1.16.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     @contextlib.contextmanager
     def _build_context(self):
@@ -100,7 +103,7 @@ class CoinUtilsConan(ConanFile):
         self._autotools.libs = []
         if self.settings.compiler == "Visual Studio":
             self._autotools.cxx_flags.append("-EHsc")
-            if tools.Version(self.settings.compiler.version) >= "12":
+            if Version(self.settings.compiler.version) >= "12":
                 self._autotools.flags.append("-FS")
         yes_no = lambda v: "yes" if v else "no"
         configure_args = [
@@ -108,18 +111,17 @@ class CoinUtilsConan(ConanFile):
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
         if self.settings.compiler == "Visual Studio":
-            configure_args.append("--enable-msvc={}".format(self.settings.compiler.runtime))
+            configure_args.append(f"--enable-msvc={self.settings.compiler.runtime}")
         self._autotools.configure(configure_dir=self._source_subfolder, args=configure_args)
         return self._autotools
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         if self.settings.compiler != "Visual Studio":
             shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                        os.path.join(self._source_subfolder, "config.sub"))
+                        f"{self._source_subfolder}/config.sub")
             shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                        os.path.join(self._source_subfolder, "config.guess"))
+                        f"{self._source_subfolder}/config.guess")
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
@@ -130,17 +132,17 @@ class CoinUtilsConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install(args=["-j1"])
 
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rm(self, "*.la", f"{self.package_folder}/lib")
+        rmdir(self, f"{self.package_folder}/lib/pkgconfig")
+        rmdir(self, f"{self.package_folder}/share")
 
         if self.settings.compiler == "Visual Studio":
-            os.rename(os.path.join(self.package_folder, "lib", "libCoinUtils.a"),
-                      os.path.join(self.package_folder, "lib", "CoinUtils.lib"))
+            rename(self, f"{self.package_folder}/lib/libCoinUtils.a",
+                         f"{self.package_folder}/lib/CoinUtils.lib")
 
     def package_info(self):
         self.cpp_info.libs = ["CoinUtils"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["m"]
-        self.cpp_info.includedirs.append(os.path.join("include", "coin"))
+        self.cpp_info.includedirs.append(include/coin")
         self.cpp_info.names["pkg_config"] = "coinutils"
