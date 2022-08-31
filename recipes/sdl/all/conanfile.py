@@ -170,7 +170,7 @@ class SDLConan(ConanFile):
             del self.info.options.sdl2main
 
     def build_requirements(self):
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+        if self.settings.os == "Macos" and tools.cross_building(self):
             # Workaround for CMake bug with error message:
             # Attempting to use @rpath without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being
             # set. This could be because you are using a Mac OS X version less than 10.5
@@ -205,6 +205,7 @@ class SDLConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions["SDL2_DISABLE_INSTALL"] = False  # SDL2_* options will get renamed to SDL_ options in the next SDL release
         if tools.is_apple_os(self):
             cmake.definitions["CMAKE_OSX_ARCHITECTURES"] = {
                 "armv8": "arm64",
