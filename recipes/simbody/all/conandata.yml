@@ -6,3 +6,5 @@ sources:
 patches:
   "3.7.0":
     - patch_file: "patches/0001-simbody-3.7.0-cmake-fixes.patch"
+      patch_description: "Fix Lapack and OpenBLAS target import on CMake"
+      patch_type: "backport"
