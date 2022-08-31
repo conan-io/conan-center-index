@@ -141,8 +141,8 @@ class XapianCoreConan(ConanFile):
             rename(self, f"{self.package_folder}/lib/libxapian.lib",
                          f"{self.package_folder}/lib/xapian.lib")
 
-        rm(self, "xapian-config", f"{self.package_folder}/bin"))
-        rm(self, "libxapian.la", f"{self.package_folder}/lib"))
+        rm(self, "xapian-config", f"{self.package_folder}/bin")
+        rm(self, "libxapian.la", f"{self.package_folder}/lib")
         rmdir(self, f"{self.package_folder}/lib/cmake")
         rmdir(self, f"{self.package_folder}/lib/pkgconfig")
         rmdir(self, f"{self._datarootdir}/doc")
