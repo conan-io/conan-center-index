@@ -3,7 +3,7 @@ from conan.tools import files
 from conan.errors import ConanInvalidConfiguration
 from conans import CMake
 
-required_conan_version = ">=1.41.0"
+required_conan_version = ">=1.50.0"
 
 class SshtConan(ConanFile):
     name = "ssht"
