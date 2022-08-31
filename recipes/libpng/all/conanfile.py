@@ -183,7 +183,6 @@ class LibpngConan(ConanFile):
         # TODO: Remove after Conan 2.0
         self.cpp_info.names["cmake_find_package"] = "PNG"
         self.cpp_info.names["cmake_find_package_multi"] = "PNG"
-        self.cpp_info.names["pkg_config_name"] = ["libpng"]
 
         self.cpp_info.set_property("cmake_file_name", "PNG")
         self.cpp_info.set_property("cmake_target_name", "PNG::PNG")
