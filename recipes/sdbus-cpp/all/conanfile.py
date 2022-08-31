@@ -115,6 +115,8 @@ class SdbusCppConan(ConanFile):
             "cmake_target_name", "SDBusCpp::sdbus-c++")
         self.cpp_info.components["sdbus-c++"].set_property(
             "pkg_config_name", "sdbus-c++")
+        self.cpp_info.components["sdbus-c++"].system_libs = [
+            "pthread", "m"]
 
         if self.options.with_code_gen:
             bin_path = os.path.join(self.package_folder, "bin")
