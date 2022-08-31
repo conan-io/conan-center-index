@@ -64,17 +64,6 @@ class SimbodyConan(ConanFile):
         cmake = cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        
-
-    @staticmethod
-    def _create_cmake_module_variables(module_file, version):
-        content = textwrap.dedent("""\
-            set(simbody_VERSION_MAJOR {major})
-            set(simbody_VERSION_MINOR {minor})
-            set(simbody_VERSION_PATCH {patch})
-            set(simbody_VERSION_STRING "{major}.{minor}.{patch}")
-        """.format(major=version.major, minor=version.minor, patch=version.patch))
-        save(self, module_file, content)
 
     def package_info(self):
         version_major = Version(self.version).major
