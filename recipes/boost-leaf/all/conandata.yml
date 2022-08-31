@@ -1,0 +1,4 @@
+sources:
+  "1.81.0-prerelease":
+    url: "https://github.com/boostorg/leaf/archive/refs/tags/1.81.0-prerelease.tar.gz"
+    sha256: "ce434749631cd978ae657e2007d814b5ddf6bb1a2701b855d08cfdd0c145bf90"
