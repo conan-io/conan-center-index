@@ -16,12 +16,7 @@ class MatchitConan(ConanFile):
     license = "Apache-2.0"
     description = ("match(it): A lightweight header-only pattern-matching"
                    " library for C++17 with macro-free APIs.")
-    topics = (
-        "conan",
-        "matchit",
-        "cpp17",
-        "header-only",
-    )
+    topics = ("lightweight", "cpp17", "header-only", "pattern-matching")
     no_copy_source = True
     settings = "compiler"
 
