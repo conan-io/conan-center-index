@@ -27,7 +27,7 @@
 -ELSE(LIBCRYPTO_FOUND)
 -	MESSAGE("OpenSSL's libCrypto not found. Encryption support will be disabled")
 -ENDIF(LIBCRYPTO_FOUND)
-+	LINK_LIBRARIES(openssl::openssl)
++	LINK_LIBRARIES(OpenSSL::SSL OpenSSL::Crypto)
 +  INCLUDE(CheckCSourceCompiles)
 +
 +  SET(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})

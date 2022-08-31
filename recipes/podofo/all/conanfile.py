@@ -45,13 +45,13 @@ class PodofoConan(ConanFile):
 
     generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
 
-    def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
-
     @property
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -105,10 +105,10 @@ class PodofoConan(ConanFile):
             check_min_cppstd(self, 11)
         except ConanInvalidConfiguration:
             if Version(self.version) >= "0.9.7":
-                tc.variables["CMAKE_CXX_STANDARD"] = 11
+                tc.cache_variables["CMAKE_CXX_STANDARD"] = 11
 
         # To install relocatable shared lib on Macos
-        tc.variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
 
         # Custom CMake options injected in our patch, required to ensure reproducible builds
         tc.variables["PODOFO_WITH_OPENSSL"] = self.options.with_openssl
