@@ -91,5 +91,5 @@ class MinizipConan(ConanFile):
 
         if self.options.tools:
             bin_path = f"{self.package_folder}/bin"
-            self.output.info(f"Appending PATH environment variable: {bin_path})
+            self.output.info(f"Appending PATH environment variable: {bin_path}")
             self.env_info.PATH.append(bin_path)
