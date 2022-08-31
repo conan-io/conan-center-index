@@ -144,5 +144,5 @@ class CoinUtilsConan(ConanFile):
         self.cpp_info.libs = ["CoinUtils"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["m"]
-        self.cpp_info.includedirs.append(include/coin")
+        self.cpp_info.includedirs.append("include/coin")
         self.cpp_info.names["pkg_config"] = "coinutils"
