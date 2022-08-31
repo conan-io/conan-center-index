@@ -62,5 +62,9 @@ class MatchitConan(ConanFile):
         self.info.clear()
 
     def package_info(self):
+        # TODO: Remove after Conan 2.0
         self.cpp_info.names["cmake_find_package"] = "matchit"
         self.cpp_info.names["cmake_find_package_multi"] = "matchit"
+
+        self.cpp_info.set_property("cmake_target_name", "matchit::matchit")
+        self.cpp_info.set_property("cmake_file_name", "matchit")
