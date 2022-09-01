@@ -64,7 +64,7 @@ class CairommConan(ConanFile):
             # conformant! see:
             # https://developercommunity.visualstudio.com/t/error-c2760-in-combaseapih-with-windows-sdk-81-and/185399
             files.replace_in_file(self,
-                os.path.join(self._source_subfolder, "meson.build"),
+                os.path.join(self.source_folder, "meson.build"),
                 "cpp_std=c++", "cpp_std=vc++")
 
     def config_options(self):
