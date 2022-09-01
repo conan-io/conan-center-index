@@ -15,3 +15,4 @@ patches:
     - patch_file: "patches/fix-macosCrossCompile.patch"
   "0.7.2":
     - patch_file: "patches/fix-macosCrossCompile.patch"
+    
