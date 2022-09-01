@@ -78,6 +78,10 @@ class HarfbuzzConan(ConanFile):
                 "Linking shared glib with the MSVC static runtime is not supported"
             )
 
+    def build_requirements(self):
+        self.tool_requires("meson/0.63.1")
+        self.tool_requires("pkgconf/1.7.3")
+
     def requirements(self):
         if self.options.with_freetype:
             self.requires("freetype/2.12.1")
