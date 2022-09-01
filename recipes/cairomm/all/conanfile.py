@@ -4,14 +4,16 @@ import shutil
 
 from conan import ConanFile
 from conan.tools import (
+    apple,
     build,
     files,
     microsoft,
     scm
 )
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.gnu import PkgConfigDeps
 from conan.errors import ConanInvalidConfiguration
-from conans import Meson
-from conans import tools
 
 
 class CairommConan(ConanFile):
@@ -32,7 +34,6 @@ class CairommConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "pkg_config"
     exports_sources = "patches/**"
     short_paths = True
 
@@ -53,14 +54,6 @@ class CairommConan(ConanFile):
                 "Linking against static cairo would cause shared cairomm to link "
                 "against static glib which can cause problems."
             )
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def _patch_sources(self):
         files.apply_conandata_patches(self)
@@ -85,8 +78,8 @@ class CairommConan(ConanFile):
             self.options["cairo"].shared = True
 
     def build_requirements(self):
-        self.build_requires("meson/0.59.1")
-        self.build_requires("pkgconf/1.7.4")
+        self.tool_requires("meson/0.63.1")
+        self.tool_requires("pkgconf/1.7.4")
 
     def requirements(self):
         self.requires("cairo/1.17.4")
@@ -96,34 +89,38 @@ class CairommConan(ConanFile):
         else:
             self.requires("libsigcpp/2.10.8")
 
-    def source(self):
-        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+    def layout(self):
+        return basic_layout(self, src_folder="source_subfolder")
 
-    def build(self):
-        self._patch_sources()
-        with tools.environment_append(tools.RunEnvironment(self).vars):
-            meson = self._configure_meson()
-            meson.build()
+    def generate(self):
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
-    def _configure_meson(self):
-        meson = Meson(self)
-        defs = {
+        tc = MesonToolchain(self)
+        tc.project_options.update({
             "build-examples": "false",
             "build-documentation": "false",
             "build-tests": "false",
             "msvc14x-parallel-installable": "false",
             "default_library": "shared" if self.options.shared else "static",
-        }
-        meson.configure(
-            defs=defs,
-            build_folder=self._build_subfolder,
-            source_folder=self._source_subfolder,
-            pkg_config_paths=[self.install_folder],
-        )
+        })
+        tc.generate()
+
+    def source(self):
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
+
+    def build(self):
+        self._patch_sources()
+        meson = self._configure_meson()
+        meson.build()
+
+    def _configure_meson(self):
+        meson = Meson(self)
+        meson.configure()
         return meson
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
+        self.copy("COPYING", dst="licenses", src=self.source_folder)
         meson = self._configure_meson()
         meson.install()
         if microsoft.is_msvc(self):
@@ -155,7 +152,7 @@ class CairommConan(ConanFile):
         self.cpp_info.components[cairomm_lib_name].includedirs = [os.path.join("include", cairomm_lib_name)]
         self.cpp_info.components[cairomm_lib_name].libs = [cairomm_lib_name]
 
-        if tools.is_apple_os(self.settings.os):
+        if apple.is_apple_os(self):
             self.cpp_info.components[cairomm_lib_name].frameworks = ["CoreFoundation"]
 
         if self._abi_version == "1.16":
