@@ -391,6 +391,9 @@ class SDLConan(ConanFile):
 
         postfix = "d" if self.settings.os != "Android" and self.settings.build_type == "Debug" else ""
 
+        if self.version >= "2.0.24" and self.settings.os == "Windows":
+            postfix += "-static"
+
         # SDL2
         self.cpp_info.components["libsdl2"].set_property("cmake_target_name", "SDL2::SDL2")
         if not self.options.shared:
