@@ -1,11 +1,15 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools import build, files
+from conan.tools.cmake import CMake
+from conan.tools.layout import basic_layout
+from conan.errors import ConanInvalidConfiguration
+
 import glob
 import os
 import shutil
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.2"
 
 
 class LibSigCppConan(ConanFile):
@@ -26,16 +30,8 @@ class LibSigCppConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
+    generators = "CMakeToolchain"
     _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -61,7 +57,7 @@ class LibSigCppConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-           tools.check_min_cppstd(self, 17)
+           build.check_min_cppstd(self, 17)
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -75,28 +71,30 @@ class LibSigCppConan(ConanFile):
         elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration("libsigcpp requires C++17, which your compiler does not support.")
 
+    def layout(self):
+        return basic_layout(self, src_folder="source_subfolder")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        files.get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        files.apply_conandata_patches(self)
         if not self.options.shared:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "sigc++config.h.cmake"),
+            files.replace_in_file(self, os.path.join(self.source_folder, "sigc++config.h.cmake"),
                                   "define SIGC_DLL 1", "undef SIGC_DLL")
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
+        self.copy("COPYING", dst="licenses", src=self.source_folder)
         cmake = self._configure_cmake()
         cmake.install()
         for header_file in glob.glob(os.path.join(self.package_folder, "lib", "sigc++-3.0", "include", "*.h")):
@@ -105,7 +103,7 @@ class LibSigCppConan(ConanFile):
                 os.path.join(self.package_folder, "include", "sigc++-3.0", os.path.basename(header_file))
             )
         for dir_to_remove in ["cmake", "pkgconfig", "sigc++-3.0"]:
-            tools.rmdir(os.path.join(self.package_folder, "lib", dir_to_remove))
+            files.rmdir(self, os.path.join(self.package_folder, "lib", dir_to_remove))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
@@ -113,8 +111,7 @@ class LibSigCppConan(ConanFile):
             {"sigc-3.0": "sigc++-3::sigc-3.0"}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent("""\
@@ -123,7 +120,7 @@ class LibSigCppConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        files.save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
@@ -136,7 +133,7 @@ class LibSigCppConan(ConanFile):
 
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["sigc++"].includedirs = [os.path.join("include", "sigc++-3.0")]
-        self.cpp_info.components["sigc++"].libs = tools.collect_libs(self)
+        self.cpp_info.components["sigc++"].libs = files.collect_libs(self)
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["sigc++"].system_libs.append("m")
 
