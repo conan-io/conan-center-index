@@ -29,6 +29,7 @@ class CMinpackConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_EXAMPLES"] = "OFF"
         tc.variables["CMINPACK_LIB_INSTALL_DIR"] = "lib"
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def layout(self):
@@ -61,11 +62,7 @@ class CMinpackConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        # moving this into the toolchain variables is not sufficient
-        # right now. required for setting shared option
-        cmake.configure(variables={
-            "CMAKE_POLICY_DEFAULT_CMP0077":  "NEW"
-        })
+        cmake.configure()
         cmake.build()
 
     def package(self):
