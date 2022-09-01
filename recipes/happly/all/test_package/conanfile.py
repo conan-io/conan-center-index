@@ -1,7 +1,8 @@
 import glob
 import os
 
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 
 
 class TestPackageConan(ConanFile):
@@ -14,7 +15,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.build.cross_building(self, self.settings):
             self.run(os.path.join("bin", "test_package"))
             # Let's check if the *.ply file has been created successfully
             ply_format_file = glob.glob("*.ply")[0]
