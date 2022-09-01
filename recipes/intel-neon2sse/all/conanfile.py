@@ -1,5 +1,6 @@
-from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools
+from conans import CMake
+from conan.errors import ConanInvalidConfiguration
 import os
 
 
@@ -42,7 +43,7 @@ class IntelNeon2sseConan(ConanFile):
             raise ConanInvalidConfiguration("neon2sse only supports arch={x86,x86_64}")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
 
     def build(self):
@@ -53,7 +54,7 @@ class IntelNeon2sseConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_id(self):
         self.info.header_only()
