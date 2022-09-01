@@ -74,6 +74,7 @@ class AutoconfConan(ConanFile):
         bin_path = Path(self.package_folder, "bin")
         self.output.info(f"Appending PATH env var with : {bin_path}")
         self.buildenv_info.prepend_path("PATH", str(bin_path))
+        self.env_info.PATH.append(str(bin_path))
 
         ac_macrodir = self._autoconf_datarootdir
         self.output.info(f"Setting AC_MACRODIR to {ac_macrodir}")
