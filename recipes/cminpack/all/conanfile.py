@@ -2,7 +2,6 @@ from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools import files
 from conan import ConanFile
 import os
-import textwrap
 
 required_conan_version = ">=1.45.0"
 
@@ -79,7 +78,7 @@ class CMinpackConan(ConanFile):
         files.copy(self, "CopyrightMINPACK.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         files.rmdir(self, os.path.join(self.package_folder, "share")) # contains cmake config files
 
-    def library_postfix(self):
+    def _library_postfix(self):
         postfix = ""
         if not self.options.shared:
             postfix += "_s" # for static
@@ -92,11 +91,11 @@ class CMinpackConan(ConanFile):
         minpack_include_dir = os.path.join("include", "cminpack-1")
         
         # the double precision version
-        self.cpp_info.libs = ['cminpack' + self.library_postfix()]
+        self.cpp_info.libs = ['cminpack' + self._library_postfix()]
         self.cpp_info.includedirs.append(minpack_include_dir)
         
         # the single precision version
-        self.cpp_info.components['cminpacks'].libs = ['cminpacks' + self.library_postfix()]
+        self.cpp_info.components['cminpacks'].libs = ['cminpacks' + self._library_postfix()]
         self.cpp_info.components['cminpacks'].includedirs.append(minpack_include_dir)
         self.cpp_info.components['cminpacks'].defines.append("__cminpack_float__")
 
