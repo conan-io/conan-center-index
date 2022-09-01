@@ -1,12 +1,12 @@
 from six import StringIO
-from conans import ConanFile, tools
+from conan import ConanFile, tools
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "build_type", "compiler"
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self):
             output = StringIO()
             self.run("innoextract --version", output=output,
                      run_environment=True)
