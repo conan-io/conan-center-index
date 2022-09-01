@@ -1,7 +1,8 @@
+from conan.tools.microsoft import is_msvc
 from conans import ConanFile, tools, CMake
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.45.0"
 
 
 class LibgdConan(ConanFile):
@@ -55,7 +56,7 @@ class LibgdConan(ConanFile):
         self.requires("zlib/1.2.11")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
-            if self.settings.compiler == "Visual Studio":
+            if is_msvc(self):
                 self.requires("getopt-for-visual-studio/20200201")
         if self.options.with_jpeg:
             self.requires("libjpeg/9d")
