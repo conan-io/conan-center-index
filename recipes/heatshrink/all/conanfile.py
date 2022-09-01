@@ -1,6 +1,7 @@
 import os
 
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 
 required_conan_version = ">=1.36.0"
 
@@ -44,20 +45,20 @@ class HeatshrinkConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        tools.files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         config_file = os.path.join(self._source_subfolder, "heatshrink_config.h")
         if not self.options.dynamic_alloc:
-            tools.replace_in_file(config_file,
+            tools.files.replace_in_file(self, config_file,
                 "#define HEATSHRINK_DYNAMIC_ALLOC 1",
                 "#define HEATSHRINK_DYNAMIC_ALLOC 0")
         if self.options.debug_log:
-            tools.replace_in_file(config_file,
+            tools.files.replace_in_file(self, config_file,
                 "#define HEATSHRINK_DEBUGGING_LOGS 0",
                 "#define HEATSHRINK_DEBUGGING_LOGS 1")
         if not self.options.use_index:
-            tools.replace_in_file(config_file,
+            tools.files.replace_in_file(self, config_file,
                 "#define HEATSHRINK_USE_INDEX 1",
                 "#define HEATSHRINK_USE_INDEX 0")
 

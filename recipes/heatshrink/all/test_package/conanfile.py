@@ -1,5 +1,6 @@
 import os
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 
 class DawHeaderLibrariesTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
@@ -11,5 +12,5 @@ class DawHeaderLibrariesTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self):
             self.run(os.path.join("bin", "test_package"), run_environment=True)
