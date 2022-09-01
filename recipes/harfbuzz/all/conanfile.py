@@ -101,9 +101,12 @@ class HarfbuzzConan(ConanFile):
         deps.generate()
 
         tc = MesonToolchain(self)
+
+        version = scm.Version(self.version)
+        graphite_option = "graphite2" if version >= "3.1.0" else "graphite"
         tc.project_options.update({
             "freetype": is_enabled(self.options.with_freetype),
-            "graphite2": is_enabled(False),
+            graphite_option: is_enabled(False),
             "glib": is_enabled(self.options.with_glib),
             "icu": is_enabled(self.options.with_icu),
             "tests": is_enabled(False),
