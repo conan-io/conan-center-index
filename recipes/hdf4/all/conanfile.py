@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 import os
 
 required_conan_version = ">=1.33.0"
@@ -64,12 +65,12 @@ class Hdf4Conan(ConanFile):
             self.requires("szip/2.1.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -96,7 +97,7 @@ class Hdf4Conan(ConanFile):
         self._cmake.definitions["HDF4_BUILD_TOOLS"] = False
         self._cmake.definitions["HDF4_BUILD_EXAMPLES"] = False
         self._cmake.definitions["HDF4_BUILD_JAVA"] = False
-        if tools.cross_building(self):
+        if tools.build.cross_building(self):
             self._cmake.definitions["H4_PRINTF_LL_TEST_RUN"] = "0"
             self._cmake.definitions["H4_PRINTF_LL_TEST_RUN__TRYRUN_OUTPUT"] = ""
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -106,7 +107,7 @@ class Hdf4Conan(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         os.remove(os.path.join(self.package_folder, "lib", "libhdf4.settings"))
 
     def package_info(self):
