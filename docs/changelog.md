@@ -1,5 +1,13 @@
 # Changelog
 
+### 1-September-2022 - 10:21 CEST
+
+- [feature] Avoid test_package folders that don't match the Conan version.
+- [feature] Keep at least 3 days of job logs.
+- [fix] Properly encode GitHub API URLs.
+- [fix] Replace invalid chars when generating profiles.
+- [refactor] Refactors around the GitHub classes implementation.
+
 ### 18-August-2022 - 15:21 CEST
 
 - [fix] Conan v2: Check recipe revision only if it has been successfully exported.
