@@ -72,7 +72,7 @@ class BdwGcConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if Version(self.version) <= "8.0.6":
+        if Version(self.version) < "8.2.0":
             del self.options.throw_bad_alloc_library
         if not self.options.cplusplus:
             del self.settings.compiler.libcxx
@@ -128,7 +128,7 @@ class BdwGcConan(ConanFile):
     @property
     def _libs(self):
         libs = []
-        if self.options.get_safe("throw_bad_alloc_library"):
+        if self.options.cplusplus and self.options.get_safe("throw_bad_alloc_library"):
             libs.append("gctba")
         if self.options.cplusplus:
             libs.append("gccpp")
