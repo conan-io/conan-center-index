@@ -26,7 +26,5 @@ class ImportTools(BaseChecker):
         names = [name for name, _ in node.names]
         if basename == 'conan' and 'tools' in names:
             self.add_message("conan-import-tools", node=node)
-        elif basename == 'conan.tools':
-            self.add_message("conan-import-tools", node=node)
         elif re.match(r'conan\.tools\.[^.]+\..+', basename):
             self.add_message("conan-import-tools", node=node)
