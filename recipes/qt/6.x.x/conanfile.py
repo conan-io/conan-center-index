@@ -12,7 +12,7 @@ from conan.tools.build import cross_building, check_min_cppstd, build_jobs
 from conan.tools.files import get, replace_in_file, apply_conandata_patches, save, load, rm, rmdir
 from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
-from conans import RunEnvironment, CMake
+from conans import RunEnvironment, CMake, tools
 from conan.errors import ConanInvalidConfiguration
 from conans.model import Generator
 
