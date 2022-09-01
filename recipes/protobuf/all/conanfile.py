@@ -5,14 +5,13 @@ from conan.tools.build import cross_building
 from conan.errors import ConanInvalidConfiguration
 from conan import ConanFile
 from conans import CMake
-# TODO: Update to conan.tools.apple after 1.51.3
-from conans.tools import is_apple_os
+from conan.tools.apple import is_apple_os
 
 import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.51.3"
 
 
 class ProtobufConan(ConanFile):
