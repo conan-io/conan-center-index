@@ -50,7 +50,7 @@ class AutoconfConan(ConanFile):
         autotool = Autotools(self)
         autotool.configure()
         autotool.make()
-        autotool.install(args=[f"DESTDIR={unix_path(self.package_folder)}"])
+        autotool.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
 
     def package(self):
         packager = AutoPackager(self)
@@ -75,29 +75,29 @@ class AutoconfConan(ConanFile):
         ac_macrodir = self._autoconf_datarootdir
         self.output.info(f"Setting AC_MACRODIR to {ac_macrodir}")
         self.buildenv_info.define_path("AC_MACRODIR", str(ac_macrodir))
-        self.env_info.AC_MACRODIR = unix_path(str(ac_macrodir))
+        self.env_info.AC_MACRODIR = unix_path(self, str(ac_macrodir))
 
         autoconf = Path(self.package_folder, "bin", "autoconf")
         self.output.info(f"Setting AUTOCONF to {autoconf}")
         self.buildenv_info.define_path("AUTOCONF", str(autoconf))
-        self.env_info.AUTOCONF = unix_path(str(autoconf))
+        self.env_info.AUTOCONF = unix_path(self, str(autoconf))
 
         autoreconf = Path(self.package_folder, "bin", "autoreconf")
         self.output.info(f"Setting AUTORECONF to {autoreconf}")
         self.buildenv_info.define_path("AUTORECONF", str(autoreconf))
-        self.env_info.AUTORECONF = unix_path(str(autoreconf))
+        self.env_info.AUTORECONF = unix_path(self, str(autoreconf))
 
         autoheader = Path(self.package_folder, "bin", "autoheader")
         self.output.info(f"Setting AUTOHEADER to {autoheader}")
         self.buildenv_info.define_path("AUTOHEADER", str(autoheader))
-        self.env_info.AUTOHEADER = unix_path(str(autoheader))
+        self.env_info.AUTOHEADER = unix_path(self, str(autoheader))
 
         autom4te = Path(self.package_folder, "bin", "autom4te")
         self.output.info(f"Setting AUTOM4TE to {autom4te}")
         self.buildenv_info.define_path("AUTOM4TE", str(autom4te))
-        self.env_info.AUTOM4TE = unix_path(str(autom4te))
+        self.env_info.AUTOM4TE = unix_path(self, str(autom4te))
 
         autom4te_perllibdir = self._autoconf_datarootdir
         self.output.info(f"Setting AUTOM4TE_PERLLIBDIR to {autom4te_perllibdir}")
         self.buildenv_info.define_path("AUTOM4TE_PERLLIBDIR", str(autom4te_perllibdir))
-        self.env_info.AUTOM4TE_PERLLIBDIR = unix_path(str(autom4te_perllibdir))
+        self.env_info.AUTOM4TE_PERLLIBDIR = unix_path(self, str(autom4te_perllibdir))
