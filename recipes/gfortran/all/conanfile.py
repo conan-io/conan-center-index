@@ -34,21 +34,8 @@ class GFortranConan(ConanFile):
             self.build_requires("7zip/19.00")
 
     def source(self):
-        data = self.conan_data["sources"][self.version]
-        for it in data.keys():
-            if self.settings.os == "Windows" and it == "Windows":
-                filename = data[it]["x86_64"]["filename"]
-                download(self, ** data[it]["x86_64"])
-                pattern = "GCC-*"
-                filename = glob.glob(pattern)[0]
-                self.run("7z x {0}".format(filename))
-                os.unlink(filename)
-                os.rename("mingw64", "source_subfolder_Windows")
-            elif it != "Windows":
-                get(self, ** data[it]["x86_64"])
-                pattern = "gcc-*" if it == "Linux" else "usr"
-                os.rename(glob.glob(pattern)[0], "source_subfolder_{}".format(it))
-                break
+        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)],
+                  destination=self.source_folder, strip_root=True)
 
 
     def _extract_license(self):
