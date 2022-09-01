@@ -391,10 +391,11 @@ class SDLConan(ConanFile):
 
         postfix = "d" if self.settings.os != "Android" and self.settings.build_type == "Debug" else ""
 
-        if self.version >= "2.0.24" and is_msvc(self) and not self.options.shared:
-            postfix = "-static" + postfix
-
         # SDL2
+        lib_postfix = postfix
+        if self.version >= "2.0.24" and is_msvc(self) and not self.options.shared:
+            lib_postfix = "-static" + postfix
+
         self.cpp_info.components["libsdl2"].set_property("cmake_target_name", "SDL2::SDL2")
         if not self.options.shared:
             self.cpp_info.components["libsdl2"].set_property("cmake_target_aliases", ["SDL2::SDL2-static"])
@@ -405,7 +406,7 @@ class SDLConan(ConanFile):
         self.cpp_info.components["libsdl2"].names["cmake_find_package_multi"] = sdl2_cmake_target
 
         self.cpp_info.components["libsdl2"].includedirs.append(os.path.join("include", "SDL2"))
-        self.cpp_info.components["libsdl2"].libs = ["SDL2" + postfix]
+        self.cpp_info.components["libsdl2"].libs = ["SDL2" + lib_postfix]
         if self.options.get_safe("iconv", False):
             self.cpp_info.components["libsdl2"].requires.append("libiconv::libiconv")
         if self.settings.os == "Linux":
