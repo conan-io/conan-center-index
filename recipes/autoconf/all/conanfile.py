@@ -50,9 +50,7 @@ class AutoconfConan(ConanFile):
         autotool = Autotools(self)
         autotool.configure()
         autotool.make()
-        subsystem = deduce_subsystem(self, scope="build")
-        install_path = subsystem_path(subsystem, self.package_folder)
-        autotool.install(args=[f"DESTDIR={install_path}"])
+        autotool.install(args=[f"DESTDIR={unix_path(self.package_folder)}"])
 
     def package(self):
         packager = AutoPackager(self)
