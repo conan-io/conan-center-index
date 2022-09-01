@@ -54,21 +54,21 @@ sources:
             sha256: "515bcac3520cd546d9d14372b7930ab48b43f1c5dc258a9f61a82b22c0107eef"
           - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.9.1/LICENSE"
             sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
-    #Macos:
-      ## MacOS x86_64 depends system llvm library.
-      #"x86_64":
-      #  "gcc":
-      #    - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.9.1/WasmEdge-0.9.1-darwin_x86_64.tar.gz"
-      #      sha256: "10aa4d15b67577d66b2589320bb0ddc5436199657098647ba5d006a214a6411f"
-      #    - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.9.1/LICENSE"
-      #      sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
-      ## MacOS armv8 seems to be corrupted.
-      #"armv8":
-      #  "gcc":
-      #    - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.9.1/WasmEdge-0.9.1-darwin_arm64.tar.gz"
-      #      sha256: "079fc86e4058d87b760462fc2ff5f1c80cf08119b39ac0776d0136a8b785d0e5"
-      #    - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.9.1/LICENSE"
-      #      sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    # Macos:
+    ## MacOS x86_64 depends system llvm library.
+    # "x86_64":
+    #   "gcc":
+    #     - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.9.1/WasmEdge-0.9.1-darwin_x86_64.tar.gz"
+    #       sha256: "10aa4d15b67577d66b2589320bb0ddc5436199657098647ba5d006a214a6411f"
+    #     - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.9.1/LICENSE"
+    #       sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    ## MacOS armv8 seems to be corrupted.
+    # "armv8":
+    #   "gcc":
+    #     - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.9.1/WasmEdge-0.9.1-darwin_arm64.tar.gz"
+    #       sha256: "079fc86e4058d87b760462fc2ff5f1c80cf08119b39ac0776d0136a8b785d0e5"
+    #     - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.9.1/LICENSE"
+    #       sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
   "0.9.0":
     Windows:
       "x86_64":
