@@ -4,7 +4,7 @@ from conan.errors import ConanInvalidConfiguration
 import os
 import functools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.46.0"
 
 class HighwayConan(ConanFile):
     name = "highway"
