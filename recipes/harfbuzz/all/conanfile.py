@@ -1,12 +1,12 @@
-import functools
-import os
-
 from conan import ConanFile
-from conan.tools import apple, build, files, microsoft, scm
+from conan.tools import apple, files, microsoft, scm
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conans.tools import stdcpp_library
+
+import functools
+import os
 
 required_conan_version = ">=1.51.3"
 
