@@ -1,4 +1,4 @@
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools import files
 from conan import ConanFile
 import os
@@ -30,8 +30,6 @@ class CMinpackConan(ConanFile):
         tc.variables["BUILD_EXAMPLES"] = "OFF"
         tc.variables["CMINPACK_LIB_INSTALL_DIR"] = "lib"
         tc.generate()
-        deps = CMakeDeps(self)
-        deps.generate()
 
     def layout(self):
         cmake_layout(self)
