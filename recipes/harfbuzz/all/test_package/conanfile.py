@@ -1,10 +1,17 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools import build
+from conan.tools.cmake import CMake
+
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "CMakeDeps", "CMakeToolchain"
+    test_type = "explicit"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def build(self):
         cmake = CMake(self)
@@ -12,8 +19,8 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not build.cross_building(self):
             font = os.path.join(self.source_folder, "example.ttf")
-            bin_path = os.path.join("bin", "test_package")
+            bin_path = os.path.join(self.build_folder, "test_package")
             self.run("{} {}".format(bin_path, font), run_environment=True)
 

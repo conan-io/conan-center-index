@@ -1,12 +1,14 @@
-from conan import ConanFile
-from conan.tools import files, microsoft, scm
-from conan .errors import ConanInvalidConfiguration
-from conans import CMake, tools
-
 import functools
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools import apple, build, files, microsoft, scm
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
+from conan.tools.layout import basic_layout
+from conan.errors import ConanInvalidConfiguration
+from conans.tools import stdcpp_library
+
+required_conan_version = ">=1.51.3"
 
 
 class HarfbuzzConan(ConanFile):
@@ -42,16 +44,6 @@ class HarfbuzzConan(ConanFile):
     }
 
     short_paths = True
-
-    generators = "cmake", "cmake_find_package"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -94,33 +86,44 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_glib:
             self.requires("glib/2.73.1")
 
+    def layout(self):
+        return basic_layout(self, src_folder="source_subfolder")
+
+    def generate(self):
+        deps = CMakeDeps(self)
+        deps.generate()
+
+        tc = CMakeToolchain(self)
+        tc.variables.update({
+            "HB_HAVE_FREETYPE": self.options.with_freetype,
+            "HB_HAVE_GRAPHITE2": False,
+            "HB_HAVE_GLIB": self.options.with_glib,
+            "HB_HAVE_ICU": self.options.with_icu,
+            "HB_BUILD_UTILS": False,
+            "HB_BUILD_SUBSET": self.options.with_subset,
+            "HB_HAVE_GOBJECT": False,
+            "HB_HAVE_INTROSPECTION": False
+        })
+        if apple.is_apple_os(self):
+            tc.variables["HB_HAVE_CORETEXT"] = True
+        elif self.settings.os == "Windows":
+            tc.variables["HB_HAVE_GDI"] = self.options.with_gdi
+            tc.variables["HB_HAVE_UNISCRIBE"] = self.options.with_uniscribe
+            tc.variables["HB_HAVE_DIRECTWRITE"] = self.options.with_directwrite
+        if self.settings.compiler == "gcc" and self.settings.os == "Windows":
+            tc.variables["CMAKE_C_FLAGS"] = "-Wa,-mbig-obj"
+            tc.variables["CMAKE_CXX_FLAGS"] = "-Wa,-mbig-obj"
+
+        tc.generate()
+
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+                  destination=self.source_folder, strip_root=True)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["HB_HAVE_FREETYPE"] = self.options.with_freetype
-        cmake.definitions["HB_HAVE_GRAPHITE2"] = False
-        cmake.definitions["HB_HAVE_GLIB"] = self.options.with_glib
-        cmake.definitions["HB_HAVE_ICU"] = self.options.with_icu
-        if tools.is_apple_os(self.settings.os):
-            cmake.definitions["HB_HAVE_CORETEXT"] = True
-        elif self.settings.os == "Windows":
-            cmake.definitions["HB_HAVE_GDI"] = self.options.with_gdi
-            cmake.definitions["HB_HAVE_UNISCRIBE"] = self.options.with_uniscribe
-            cmake.definitions["HB_HAVE_DIRECTWRITE"] = self.options.with_directwrite
-        cmake.definitions["HB_BUILD_UTILS"] = False
-        cmake.definitions["HB_BUILD_SUBSET"] = self.options.with_subset
-        cmake.definitions["HB_HAVE_GOBJECT"] = False
-        cmake.definitions["HB_HAVE_INTROSPECTION"] = False
-        # fix for MinGW debug build
-        if self.settings.compiler == "gcc" and self.settings.os == "Windows":
-            cmake.definitions["CMAKE_C_FLAGS"] = "-Wa,-mbig-obj"
-            cmake.definitions["CMAKE_CXX_FLAGS"] = "-Wa,-mbig-obj"
-
-        cmake.configure(build_folder=self._build_subfolder)
+        cmake.configure()
         return cmake
 
     def build(self):
@@ -129,7 +132,7 @@ class HarfbuzzConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
+        self.copy("COPYING", dst="licenses", src=self.source_folder)
         cmake = self._configure_cmake()
         cmake.install()
         files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
@@ -155,10 +158,10 @@ class HarfbuzzConan(ConanFile):
                 self.cpp_info.system_libs.append("usp10")
             if self.options.with_directwrite:
                 self.cpp_info.system_libs.append("dwrite")
-        if tools.is_apple_os(self.settings.os):
+        if apple.is_apple_os(self):
             self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText"])
         if not self.options.shared:
-            libcxx = tools.stdcpp_library(self)
+            libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
 
