@@ -15,7 +15,7 @@ class FoonathanMemoryConan(ConanFile):
     homepage = "https://github.com/foonathan/memory"
     url = "https://github.com/conan-io/conan-center-index"
     description = "STL compatible C++ memory allocator library"
-    topics = ("memory", "STL", "RawAllocator")
+    topics = ("memory", "stl", "rawallocator")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
