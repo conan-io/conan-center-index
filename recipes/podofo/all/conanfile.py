@@ -1,10 +1,11 @@
-from conan.errors import ConanInvalidConfiguration
-from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.build import check_min_cppstd
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
-from conan.tools.scm import Version
 import os
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.50.0"
 
@@ -43,12 +44,6 @@ class PodofoConan(ConanFile):
         "with_tools": False,
     }
 
-    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
             copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
@@ -56,7 +51,7 @@ class PodofoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self._is_msvc:
+        if is_msvc(self):
             # libunistring recipe raises for Visual Studio
             # TODO: Enable again when fixed?
             self.options.with_unistring = False
@@ -77,7 +72,7 @@ class PodofoConan(ConanFile):
         if self.options.with_jpeg:
             self.requires("libjpeg/9d")
         if self.options.with_tiff:
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.4.0")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_unistring:
