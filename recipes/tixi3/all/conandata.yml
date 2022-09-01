@@ -5,4 +5,8 @@ sources:
 patches:
   "3.3.0":
     - patch_file: "patches/link_curl.patch"
+      patch_description: "Fix CMake target name for libcurl"
+      patch_type: "conan"
     - patch_file: "patches/disable_tixi_examples.patch"
+      patch_description: "Keep build examples as optional"
+      patch_type: "conan"
