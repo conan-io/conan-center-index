@@ -84,7 +84,7 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_icu:
             self.requires("icu/71.1")
         if self.options.with_glib:
-            self.requires("glib/2.73.1")
+            self.requires("glib/2.73.3")
 
     def layout(self):
         return basic_layout(self, src_folder="source_subfolder")
