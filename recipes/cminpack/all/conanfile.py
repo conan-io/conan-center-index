@@ -98,6 +98,10 @@ class CMinpackConan(ConanFile):
             self.cpp_info.system_libs.append("m")
             self.cpp_info.components['cminpacks'].system_libs.append("m")
 
+        # required apple frameworks
+        self.cpp_info.frameworks.append("Accelerate")
+        self.cpp_info.components['cminpacks'].frameworks.append("Accelerate")
+
         if not self.options.shared and self.settings.os == "Windows":
             self.cpp_info.defines.append("CMINPACK_NO_DLL")
             self.cpp_info.components['cminpacks'].defines.append("CMINPACK_NO_DLL")
