@@ -1,5 +1,6 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools
+from conans import CMake
+from conan.errors import ConanInvalidConfiguration
 
 import os
 
@@ -49,7 +50,7 @@ class HyperscanConan(ConanFile):
         return "build_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version])
         os.rename("hyperscan-{0}".format(self.version), self._source_subfolder)
 
     def build_requirements(self):
@@ -61,7 +62,7 @@ class HyperscanConan(ConanFile):
             self.requires("pcre/8.45")
 
     def validate(self):
-        tools.check_min_cppstd(self, "11")
+        tools.build.check_min_cppstd(self, "11")
 
         if self.settings.arch not in ["x86", "x86_64"]:
             raise ConanInvalidConfiguration("Hyperscan only support x86 architecture")
@@ -95,7 +96,7 @@ class HyperscanConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -103,8 +104,8 @@ class HyperscanConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "hyperscan"
