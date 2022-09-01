@@ -1,13 +1,17 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake
+from conan.tools import build
+
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake", "pkg_config"
+    generators = "CMakeDeps", "CMakeToolchain"
+    test_type = "explicit"
 
-    def build_requirements(self):
-        self.build_requires("pkgconf/1.7.4")
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def build(self):
         cmake = CMake(self)
@@ -15,6 +19,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
+        if not build.cross_building(self):
+            bin_path = os.path.join(self.build_folder, "test_package")
             self.run(bin_path, run_environment=True)
