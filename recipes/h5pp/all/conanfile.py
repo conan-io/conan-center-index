@@ -3,7 +3,7 @@ from conan import ConanFile, tools
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.46.0"
 
 
 class H5ppConan(ConanFile):
