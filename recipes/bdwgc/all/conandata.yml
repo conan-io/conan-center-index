@@ -5,9 +5,12 @@ sources:
   "8.0.6":
     url: "https://github.com/ivmai/bdwgc/releases/download/v8.0.6/gc-8.0.6.tar.gz"
     sha256: "3b4914abc9fa76593596773e4da671d7ed4d5390e3d46fbf2e5f155e121bea11"
+  "8.2.2":
+    url: "https://github.com/ivmai/bdwgc/releases/download/v8.2.2/gc-8.2.2.tar.gz"
+    sha256: "f30107bcb062e0920a790ffffa56d9512348546859364c23a14be264b38836a0"
 patches:
   "8.0.4":
-    - patch_file: "patches/update-cmake.patch"
+    - patch_file: "patches/update-cmake-8_0_4.patch"
       base_path: "source_subfolder"
   "8.0.6":
     - patch_file: "patches/update-cmake-8_0_6.patch"
