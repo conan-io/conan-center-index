@@ -53,7 +53,7 @@ class LibgdConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
             if is_msvc(self):
@@ -61,9 +61,9 @@ class LibgdConan(ConanFile):
         if self.options.with_jpeg:
             self.requires("libjpeg/9d")
         if self.options.with_tiff:
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.4.0")
         if self.options.with_freetype:
-            self.requires("freetype/2.11.0")
+            self.requires("freetype/2.12.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
