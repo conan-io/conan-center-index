@@ -91,7 +91,10 @@ class BdwGcConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         for option, _ in self._autotools_options_defaults:
-            self._cmake.definitions["enable_{}".format(option)] = self.options.get_safe(option)
+            if option == "cord":
+                self._cmake.definitions["build_cord"] = self.options.get_safe(option)
+            else:
+                self._cmake.definitions["enable_{}".format(option)] = self.options.get_safe(option)
         self._cmake.definitions["disable_gc_debug"] = not self.options.gc_debug
         self._cmake.definitions["disable_handle_fork"] = not self.options.handle_fork
         self._cmake.definitions["install_headers"] = True
