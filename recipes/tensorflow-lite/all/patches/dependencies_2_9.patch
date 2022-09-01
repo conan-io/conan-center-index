@@ -1,0 +1,81 @@
+diff --git a/tensorflow/lite/CMakeLists.txt b/tensorflow/lite/CMakeLists.txt
+index 40f9485b5d6..f184ac5d30d 100644
+--- a/tensorflow/lite/CMakeLists.txt
++++ b/tensorflow/lite/CMakeLists.txt
+@@ -50,14 +50,8 @@ if(NOT TENSORFLOW_SOURCE_DIR)
+ endif()
+ set(TF_SOURCE_DIR "${TENSORFLOW_SOURCE_DIR}/tensorflow")
+ set(TFLITE_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}")
+-set(CMAKE_MODULE_PATH
+-  "${TFLITE_SOURCE_DIR}/tools/cmake/modules"
+-  ${CMAKE_MODULE_PATH}
+-)
+-set(CMAKE_PREFIX_PATH
+-  "${TFLITE_SOURCE_DIR}/tools/cmake/modules"
+-  ${CMAKE_PREFIX_PATH}
+-)
++list(APPEND CMAKE_MODULE_PATH "${TFLITE_SOURCE_DIR}/tools/cmake/modules")
++list(APPEND CMAKE_PREFIX_PATH "${TFLITE_SOURCE_DIR}/tools/cmake/modules")
+ include(CMakeDependentOption)
+ option(TFLITE_ENABLE_RUY "Enable experimental RUY integration" OFF)
+ option(TFLITE_ENABLE_RESOURCE "Enable experimental support for resources" ON)
+@@ -138,12 +132,11 @@ macro(populate_tf_source_vars RELATIVE_DIR SOURCES_VAR)
+ endmacro()
+ # Find TensorFlow Lite dependencies.
+ find_package(absl REQUIRED)
+-find_package(eigen REQUIRED)
++find_package(Eigen3 REQUIRED)
+ find_package(farmhash REQUIRED)
+-find_package(fft2d REQUIRED)
+-find_package(flatbuffers REQUIRED)
++find_package(fft REQUIRED)
++find_package(Flatbuffers REQUIRED)
+ find_package(gemmlowp REQUIRED)
+-find_package(neon2sse REQUIRED)
+ find_package(clog REQUIRED)
+ find_package(cpuinfo REQUIRED)  #CPUINFO is used by XNNPACK and RUY library
+ find_package(ruy REQUIRED)
+@@ -162,6 +155,10 @@ set(TFLITE_TARGET_PUBLIC_OPTIONS "")
+ set(TFLITE_TARGET_PRIVATE_OPTIONS "")
+ # Additional library dependencies based upon enabled features.
+ set(TFLITE_TARGET_DEPENDENCIES "")
++if (NOT CMAKE_SYSTEM_PROCESSOR OR CMAKE_SYSTEM_PROCESSOR MATCHES "x86")
++        find_package(NEON_2_SSE REQUIRED)
++        list(APPEND TFLITE_TARGET_DEPENDENCIES NEON_2_SSE::NEON_2_SSE)
++endif()
+ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang$")
+   # TFLite uses deprecated methods in neon2sse which generates a huge number of
+   # warnings so surpress these until they're fixed.
+@@ -395,7 +392,7 @@ if(TFLITE_ENABLE_XNNPACK)
+     FILTER ".*(_test|_tester)\\.(cc|h)"
+   )
+   list(APPEND TFLITE_TARGET_DEPENDENCIES
+-    XNNPACK
++    xnnpack::xnnpack
+   )
+   list(APPEND TFLITE_TARGET_PUBLIC_OPTIONS "-DTFLITE_BUILD_WITH_XNNPACK_DELEGATE")
+ endif()
+@@ -499,18 +496,17 @@ target_include_directories(tensorflow-lite
+ target_link_libraries(tensorflow-lite
+   PUBLIC
+     Eigen3::Eigen
+-    NEON_2_SSE
+     absl::flags
+     absl::hash
+     absl::status
+     absl::strings
+     absl::synchronization
+     absl::variant
+-    farmhash
+-    fft2d_fftsg2d
+-    flatbuffers
+-    gemmlowp
+-    ruy
++    farmhash::farmhash
++    fft::fft
++    flatbuffers::flatbuffers
++    gemmlowp::eight_bit_int_gemm
++    ruy::ruy
+     ${CMAKE_DL_LIBS}
+     ${TFLITE_TARGET_DEPENDENCIES}
+ )

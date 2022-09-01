@@ -1,8 +1,14 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
+from conans import tools as tools_legacy
+import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.50.0"
 
 
 class CpppeglibConan(ConanFile):
@@ -16,8 +22,8 @@ class CpppeglibConan(ConanFile):
     no_copy_source = True
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return "17"
 
     @property
     def _compilers_minimum_version(self):
@@ -29,34 +35,41 @@ class CpppeglibConan(ConanFile):
         }
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 17)
+            check_min_cppstd(self, self._min_cppstd)
 
-        def lazy_lt_semver(v1, v2):
+        def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
             lv2 = [int(v) for v in v2.split(".")]
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn("{} {} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name, self.version))
-        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration("{} {} requires C++17, which your compiler does not support.".format(self.name, self.version))
+        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration(
+                f"{self.name} {self.version} requires C++{self._min_cppstd}, which your compiler does not support.",
+            )
 
-        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) == "7" and \
-           tools.stdcpp_library(self) == "stdc++":
-            raise ConanInvalidConfiguration("{} {} does not support clang 7 with libstdc++.".format(self.name, self.version))
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) == "7" and \
+           tools_legacy.stdcpp_library(self) == "stdc++":
+            raise ConanInvalidConfiguration(f"{self.name} {self.version} does not support clang 7 with libstdc++.")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("peglib.h", dst="include", src=self._source_subfolder)
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "peglib.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
