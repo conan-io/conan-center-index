@@ -47,7 +47,6 @@ class HarfbuzzConan(ConanFile):
     short_paths = True
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
