@@ -4,8 +4,8 @@ from pathlib import Path
 from conan import ConanFile
 from conan.tools.files import get, AutoPackager, apply_conandata_patches, rmdir
 from conan.tools.gnu import Autotools
+from conan.tools.microsoft import unix_path
 from conan.tools.layout import basic_layout
-from conans.client.subsystems import deduce_subsystem, subsystem_path
 
 required_conan_version = ">=1.50.0"
 
@@ -69,8 +69,6 @@ class AutoconfConan(ConanFile):
         return Path(self._datarootdir, "autoconf")
 
     def package_info(self):
-        subsystem = deduce_subsystem(self, scope="build")
-
         bin_path = Path(self.package_folder, "bin")
         self.output.info(f"Appending PATH env var with : {bin_path}")
         self.buildenv_info.prepend_path("PATH", str(bin_path))
@@ -79,29 +77,29 @@ class AutoconfConan(ConanFile):
         ac_macrodir = self._autoconf_datarootdir
         self.output.info(f"Setting AC_MACRODIR to {ac_macrodir}")
         self.buildenv_info.define_path("AC_MACRODIR", str(ac_macrodir))
-        self.env_info.AC_MACRODIR = subsystem_path(subsystem, str(ac_macrodir))
+        self.env_info.AC_MACRODIR = unix_path(str(ac_macrodir))
 
         autoconf = Path(self.package_folder, "bin", "autoconf")
         self.output.info(f"Setting AUTOCONF to {autoconf}")
         self.buildenv_info.define_path("AUTOCONF", str(autoconf))
-        self.env_info.AUTOCONF = subsystem_path(subsystem, str(autoconf))
+        self.env_info.AUTOCONF = unix_path(str(autoconf))
 
         autoreconf = Path(self.package_folder, "bin", "autoreconf")
         self.output.info(f"Setting AUTORECONF to {autoreconf}")
         self.buildenv_info.define_path("AUTORECONF", str(autoreconf))
-        self.env_info.AUTORECONF = subsystem_path(subsystem, str(autoreconf))
+        self.env_info.AUTORECONF = unix_path(str(autoreconf))
 
         autoheader = Path(self.package_folder, "bin", "autoheader")
         self.output.info(f"Setting AUTOHEADER to {autoheader}")
         self.buildenv_info.define_path("AUTOHEADER", str(autoheader))
-        self.env_info.AUTOHEADER = subsystem_path(subsystem, str(autoheader))
+        self.env_info.AUTOHEADER = unix_path(str(autoheader))
 
         autom4te = Path(self.package_folder, "bin", "autom4te")
         self.output.info(f"Setting AUTOM4TE to {autom4te}")
         self.buildenv_info.define_path("AUTOM4TE", str(autom4te))
-        self.env_info.AUTOM4TE = subsystem_path(subsystem, str(autom4te))
+        self.env_info.AUTOM4TE = unix_path(str(autom4te))
 
         autom4te_perllibdir = self._autoconf_datarootdir
         self.output.info(f"Setting AUTOM4TE_PERLLIBDIR to {autom4te_perllibdir}")
         self.buildenv_info.define_path("AUTOM4TE_PERLLIBDIR", str(autom4te_perllibdir))
-        self.env_info.AUTOM4TE_PERLLIBDIR = subsystem_path(subsystem, str(autom4te_perllibdir))
+        self.env_info.AUTOM4TE_PERLLIBDIR = unix_path(str(autom4te_perllibdir))
