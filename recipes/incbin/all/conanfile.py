@@ -1,5 +1,5 @@
-from conans.errors import ConanInvalidConfiguration
-from conans import ConanFile, tools
+from conan.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools
 
 required_conan_version = ">=1.33.0"
 
@@ -22,7 +22,7 @@ class IncbinConan(ConanFile):
             raise ConanInvalidConfiguration("Currently incbin recipe is not supported for Visual Studio because it requires external command 'incbin'.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        tools.files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("UNLICENSE", "licenses", self._source_subfolder)
