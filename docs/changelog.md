@@ -2,7 +2,7 @@
 
 ### 1-September-2022 - 10:21 CEST
 
-- [feature] Avoid test_package folders that don't match the Conan version.
+- [feature] Avoid `test_v?_package` folders that don't match the Conan version.
 - [feature] Keep at least 3 days of job logs.
 - [fix] Properly encode GitHub API URLs.
 - [fix] Replace invalid chars when generating profiles.
