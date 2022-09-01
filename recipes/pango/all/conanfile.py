@@ -95,8 +95,8 @@ class PangoConan(ConanFile):
                 self.options["cairo"].shared = True
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.4")
-        self.build_requires("meson/0.63.2")
+        self.tool_requires("pkgconf/1.7.4")
+        self.tool_requires("meson/0.63.1")
 
     def requirements(self):
         if self.options.with_freetype:
