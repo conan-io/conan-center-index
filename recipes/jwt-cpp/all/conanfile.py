@@ -50,3 +50,6 @@ class JwtCppConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "jwt-cpp"
         self.cpp_info.names["cmake_find_package_multi"] = "jwt-cpp"
+
+        if self._supports_generic_json:
+            self.cpp_info.defines.append("JWT_DISABLE_PICOJSON")
