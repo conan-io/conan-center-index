@@ -77,4 +77,5 @@ class ZmarokSemverConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["semver"]
-        self.cpp_info.system_libs = ["m"]
+        if not self.settings.os in ["Windows"]:
+            self.cpp_info.system_libs = ["m"]
