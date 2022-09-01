@@ -143,6 +143,7 @@ class HarfbuzzConan(ConanFile):
         meson = self._configure_meson()
         meson.install()
         files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "harfbuzz"
