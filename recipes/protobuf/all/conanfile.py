@@ -1,5 +1,5 @@
 from conan.tools.files import rename, get, apply_conandata_patches, replace_in_file, rmdir, rm
-from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
 from conan.tools.build import cross_building
 from conan.errors import ConanInvalidConfiguration
@@ -50,10 +50,6 @@ class ProtobufConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _is_clang_cl(self):
@@ -125,7 +121,7 @@ class ProtobufConan(ConanFile):
             cmake.definitions["protobuf_BUILD_LIBPROTOC"] = True
         if self._can_disable_rtti:
             cmake.definitions["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
-        if self._is_msvc or self._is_clang_cl:
+        if is_msvc(self) or self._is_clang_cl:
             runtime = msvc_runtime_flag(self)
             if not runtime:
                 runtime = self.settings.get_safe("compiler.runtime")
@@ -176,7 +172,7 @@ class ProtobufConan(ConanFile):
         # Set DYLD_LIBRARY_PATH in command line to avoid issues with shared protobuf
         # (even with virtualrunenv, this fix might be required due to SIP)
         # Only works with cmake, cmake_find_package or cmake_find_package_multi generators
-        if is_apple_os(self.settings.os):
+        if is_apple_os(self):
             replace_in_file(self,
                 protobuf_config_cmake,
                 "add_custom_command(",
@@ -245,7 +241,7 @@ class ProtobufConan(ConanFile):
         ]
         self.cpp_info.set_property("cmake_build_modules", build_modules)
 
-        lib_prefix = "lib" if (self._is_msvc or self._is_clang_cl) else ""
+        lib_prefix = "lib" if (is_msvc(self) or self._is_clang_cl) else ""
         lib_suffix = "d" if self.settings.build_type == "Debug" and self.options.debug_suffix else ""
 
         # libprotobuf
