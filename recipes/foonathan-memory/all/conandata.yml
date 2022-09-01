@@ -1,7 +1,7 @@
 sources:
   "0.7.2":
     url: "https://github.com/foonathan/memory/archive/refs/tags/v0.7-2.tar.gz"
-    sha256: "19eb61c5cba6ccc40b8ee741350fd29402a46641ba752c30b7079528d87dbc79"
+    sha256: "8aba7211bb0e59b7538decda453e492cc6e36f8781508ed92b38cbafe8a48762"
   "0.7.1":
     url: "https://github.com/foonathan/memory/archive/refs/tags/v0.7-1.tar.gz"
     sha256: "19eb61c5cba6ccc40b8ee741350fd29402a46641ba752c30b7079528d87dbc79"
