@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools import apple, files, microsoft, scm
-from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
+from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conans.tools import stdcpp_library
@@ -90,29 +91,29 @@ class HarfbuzzConan(ConanFile):
         return basic_layout(self, src_folder="source_subfolder")
 
     def generate(self):
-        deps = CMakeDeps(self)
+        def is_enabled(value):
+            return "enabled" if value else "disabled"
+
+        deps = PkgConfigDeps(self)
         deps.generate()
 
-        tc = CMakeToolchain(self)
-        tc.variables.update({
-            "HB_HAVE_FREETYPE": self.options.with_freetype,
-            "HB_HAVE_GRAPHITE2": False,
-            "HB_HAVE_GLIB": self.options.with_glib,
-            "HB_HAVE_ICU": self.options.with_icu,
-            "HB_BUILD_UTILS": False,
-            "HB_BUILD_SUBSET": self.options.with_subset,
-            "HB_HAVE_GOBJECT": False,
-            "HB_HAVE_INTROSPECTION": False
+        tc = MesonToolchain(self)
+        tc.project_options.update({
+            "freetype": is_enabled(self.options.with_freetype),
+            "graphite2": is_enabled(False),
+            "glib": is_enabled(self.options.with_glib),
+            "icu": is_enabled(self.options.with_icu),
+            "tests": is_enabled(False),
+            "docs": is_enabled(False)
         })
         if apple.is_apple_os(self):
-            tc.variables["HB_HAVE_CORETEXT"] = True
+            tc.project_options["coretext"] = is_enabled(True)
         elif self.settings.os == "Windows":
-            tc.variables["HB_HAVE_GDI"] = self.options.with_gdi
-            tc.variables["HB_HAVE_UNISCRIBE"] = self.options.with_uniscribe
-            tc.variables["HB_HAVE_DIRECTWRITE"] = self.options.with_directwrite
+            tc.project_options["gdi"] = is_enabled(self.options.with_gdi)
+            tc.project_options["directwrite"] = is_enabled(self.options.with_directwrite)
         if self.settings.compiler == "gcc" and self.settings.os == "Windows":
-            tc.variables["CMAKE_C_FLAGS"] = "-Wa,-mbig-obj"
-            tc.variables["CMAKE_CXX_FLAGS"] = "-Wa,-mbig-obj"
+            tc.c_args = ["-Wa", "-mbig-obj"]
+            tc.cpp_args = ["-Wa", "-mbig-obj"]
 
         tc.generate()
 
@@ -121,20 +122,20 @@ class HarfbuzzConan(ConanFile):
                   destination=self.source_folder, strip_root=True)
 
     @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+    def _configure_meson(self):
+        meson = Meson(self)
+        meson.configure()
+        return meson
 
     def build(self):
         files.apply_conandata_patches(self)
-        cmake = self._configure_cmake()
-        cmake.build()
+        meson = self._configure_meson()
+        meson.build()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self.source_folder)
-        cmake = self._configure_cmake()
-        cmake.install()
+        meson = self._configure_meson()
+        meson.install()
         files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
