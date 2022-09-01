@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conans import CMake
 from conan.tools.scm import Version
-from conan.tools.files import apply_conandata_patches, get, save
+from conan.tools.files import apply_conandata_patches, get, save, rmdir
 from conan.errors import ConanException
 import os
 
@@ -121,6 +121,9 @@ class BdwGcConan(ConanFile):
         save(self, os.path.join(self.package_folder, "licenses", "COPYRIGHT"), self._extract_copyright())
         cmake = self._configure_cmake()
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     @property
     def _libs(self):
