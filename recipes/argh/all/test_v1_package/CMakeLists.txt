@@ -7,5 +7,5 @@ conan_basic_setup(TARGETS)
 find_package(argh REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE argh::argh)
+target_link_libraries(${PROJECT_NAME} PRIVATE argh)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
