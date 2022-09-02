@@ -1,5 +1,8 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools
+from conan.tools.scm import Version
+from conan.tools import files
+from conan.errors import ConanInvalidConfiguration
+from conans import AutoToolsBuildEnvironment
 import os
 
 required_conan_version = ">=1.45.0"
@@ -42,12 +45,12 @@ class MoldConan(ConanFile):
         include_path = self.deps_cpp_info[dependency].rootpath
         include_path = os.path.join(include_path, "include")
         return include_path
-
+        
     def _patch_sources(self):
         if self.settings.compiler == "apple-clang":
-            tools.replace_in_file("source_subfolder/Makefile", "-std=c++20", "-std=c++2a")
+            files.replace_in_file(self, "source_subfolder/Makefile", "-std=c++20", "-std=c++2a")
 
-        tools.replace_in_file("source_subfolder/Makefile", "-Ithird-party/xxhash ", "-I{} -I{} -I{} -I{} -I{}".format(
+        files.replace_in_file(self, "source_subfolder/Makefile", "-Ithird-party/xxhash ", "-I{} -I{} -I{} -I{} -I{}".format(
         self._get_include_path("zlib"),
         self._get_include_path("openssl"),
         self._get_include_path("xxhash"),
@@ -55,10 +58,10 @@ class MoldConan(ConanFile):
         self._get_include_path("onetbb")
         ))
 
-        tools.replace_in_file("source_subfolder/Makefile", "MOLD_LDFLAGS += -ltbb", "MOLD_LDFLAGS += -L{} -ltbb".format(
+        files.replace_in_file(self, "source_subfolder/Makefile", "MOLD_LDFLAGS += -ltbb", "MOLD_LDFLAGS += -L{} -ltbb".format(
             self.deps_cpp_info["onetbb"].lib_paths[0]))
 
-        tools.replace_in_file("source_subfolder/Makefile", "MOLD_LDFLAGS += -lmimalloc", "MOLD_LDFLAGS += -L{} -lmimalloc".format(
+        files.replace_in_file(self, "source_subfolder/Makefile", "MOLD_LDFLAGS += -lmimalloc", "MOLD_LDFLAGS += -L{} -lmimalloc".format(
             self.deps_cpp_info["mimalloc"].lib_paths[0]))
 
     def requirements(self):
@@ -69,12 +72,12 @@ class MoldConan(ConanFile):
         self.requires("mimalloc/2.0.6")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         self._patch_sources()
-        with tools.chdir(self._source_subfolder):
+        with files.chdir(self, self._source_subfolder):
             autotools = AutoToolsBuildEnvironment(self)
             autotools.make(target="mold", args=['SYSTEM_TBB=1', 'SYSTEM_MIMALLOC=1'])
 
