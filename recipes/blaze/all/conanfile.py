@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
+from conan.tools.files import chdir, copy, get, rename, rmdir
 from conan.tools.layout import basic_layout
 import os
 
@@ -28,8 +28,12 @@ class BlazeConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def source(self):
+        base_source_dir = os.path.join(self.source_folder, os.pardir)
         get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+            destination=base_source_dir, strip_root=True)
+        with chdir(self, base_source_dir):
+            rmdir(self, self.source_folder)
+            rename(self, src=f"blaze-{self.version}", dst=self.source_folder)
 
     def build(self):
         pass
