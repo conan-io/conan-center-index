@@ -20,8 +20,8 @@ class OpenTDFConan(ConanFile):
     license = "BSD-3-Clause-Clear"
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"fPIC": [True, False], "branch_version" : [True, False], "allow_libiconv": [True, False]}
-    default_options = {"fPIC": True, "branch_version": False, "allow_libiconv": True}
+    options = {"fPIC": [True, False], "allow_libiconv": [True, False]}
+    default_options = {"fPIC": True, "allow_libiconv": True}
 
     @property
     def _source_subfolder(self):
@@ -92,11 +92,7 @@ class OpenTDFConan(ConanFile):
             self.output.warn(f'{self.name} building with stock libxml2 and boost')
 
     def source(self):
-        if self.options.branch_version:
-            self.output.warn("Building branch_version = {}".format(self.version))
-            self.run("git clone git@github.com:opentdf/client-cpp.git --depth 1 --branch " + self.version + " " + self._source_subfolder)
-        else:
-            get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for data in self.conan_data.get("patches", {}).get(self.version, []):
