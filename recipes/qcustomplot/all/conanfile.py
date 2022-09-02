@@ -1,9 +1,12 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
 
 
 class QcustomplotConan(ConanFile):
@@ -26,16 +29,10 @@ class QcustomplotConan(ConanFile):
         "with_opengl": False,
     }
 
-    generators = "cmake", "cmake_find_package_multi"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -49,56 +46,66 @@ class QcustomplotConan(ConanFile):
         self.options["qt"].shared = True
 
     def requirements(self):
-        if int(tools.Version(self.version).major) >= 2:
+        if Version(self.version) >= "2.0.0":
             self.requires("qt/6.3.0")
         else:
             self.requires("qt/5.15.3")
+        if self.options.with_opengl and self.settings.os == "Windows":
+            self.requires("opengl/system")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            min_cppstd = "11" if tools.Version(self.deps_cpp_info["qt"].version) < "6.0.0" else "17"
-            tools.check_min_cppstd(self, min_cppstd)
-        if not (self.options["qt"].gui and self.options["qt"].widgets):
+        if self.info.settings.compiler.cppstd:
+            min_cppstd = "11" if Version(self.dependencies["qt"].ref.version) < "6.0.0" else "17"
+            check_min_cppstd(self, min_cppstd)
+        if not (self.dependencies["qt"].options.gui and self.dependencies["qt"].options.widgets):
             raise ConanInvalidConfiguration("qcustomplot requires qt gui and widgets")
-        if self.options.with_opengl and self.options["qt"].opengl == "no":
+        if self.info.options.with_opengl and self.dependencies["qt"].options.opengl == "no":
             raise ConanInvalidConfiguration("qcustomplot with opengl requires Qt with opengl enabled")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["QCUSTOMPLOT_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["QCUSTOMPLOT_VERSION"] = self.version
+        tc.variables["QCUSTOMPLOT_VERSION_MAJOR"] = str(Version(self.version).major)
+        tc.variables["QT_VERSION"] = self.dependencies["qt"].ref.version
+        tc.variables["QCUSTOMPLOT_USE_OPENGL"] = self.options.with_opengl
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        if int(tools.Version(self.version).major) >= 2:
+        apply_conandata_patches(self)
+        if Version(self.version) >= "2.0.0":
             # allow static qcustomplot with shared qt, and vice versa
-            tools.replace_in_file(os.path.join(self._source_subfolder, "qcustomplot.h"),
+            replace_in_file(self, os.path.join(self.source_folder, "qcustomplot.h"),
                                   "#if defined(QT_STATIC_BUILD)",
                                   "#if 0" if self.options.shared else "#if 1")
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["QT_VERSION"] = self.deps_cpp_info["qt"].version
-        cmake.definitions["QCUSTOMPLOT_USE_OPENGL"] = self.options.with_opengl
-        cmake.configure()
-        return cmake
-
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy("GPL.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "GPL.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
         postfix = "d" if self.settings.build_type == "Debug" else ""
-        self.cpp_info.libs = ["qcustomplot" + postfix]
+        self.cpp_info.libs = [f"qcustomplot{postfix}"]
+        self.cpp_info.requires = ["qt::qtCore", "qt::qtGui", "qt::qtWidgets", "qt::qtPrintSupport"]
         if self.options.shared:
             self.cpp_info.defines.append("QCUSTOMPLOT_USE_LIBRARY")
         if self.options.with_opengl:
             self.cpp_info.defines.append("QCUSTOMPLOT_USE_OPENGL")
-        self.cpp_info.requires = ["qt::qtCore", "qt::qtGui", "qt::qtWidgets", "qt::qtPrintSupport"]
+            if self.settings.os == "Windows":
+                self.cpp_info.requires.append("opengl::opengl")
