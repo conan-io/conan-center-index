@@ -8,7 +8,7 @@ required_conan_version = ">=1.47.0"
 
 class IttApiConan(ConanFile):
     name = "ittapi"
-    license = "dual licensed under GPLv2 and 3-Clause BSD licenses"
+    license = ("BSD-3-Clause", "GPL-2.0-only")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/intel/ittapi"
     description = (
@@ -33,9 +33,14 @@ class IttApiConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        # We have no C++ files.
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -46,7 +51,7 @@ class IttApiConan(ConanFile):
 
     def generate(self):
         toolchain = CMakeToolchain(self)
-        toolchain.variables["ITT_API_IPT_SUPPORT"] = 1 if self.options.ptmark else 0
+        toolchain.variables["ITT_API_IPT_SUPPORT"] = self.options.ptmark
         toolchain.generate()
 
     def build(self):
