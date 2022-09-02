@@ -1,10 +1,10 @@
 sources:
-  "3.10.0":
-    url: "https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tgz"
-    sha256: "c4e0cbad57c90690cb813fb4663ef670b4d0f587d8171e2c42bd4c9245bd2758"
-  "3.9.7":
-    url: "https://www.python.org/ftp/python/3.9.7/Python-3.9.7.tgz"
-    sha256: "a838d3f9360d157040142b715db34f0218e535333696a5569dc6f854604eb9d1"
+  "3.10.6":
+    url: "https://www.python.org/ftp/python/3.10.6/Python-3.10.6.tar.xz"
+    sha256: "f795ff87d11d4b0c7c33bc8851b0c28648d8a4583aa2100a98c22b4326b6d3f3"
+  "3.9.13":
+    url: "https://www.python.org/ftp/python/3.9.13/Python-3.9.13.tar.xz"
+    sha256: "125b0c598f1e15d2aa65406e83f792df7d171cdf38c16803b149994316a3080f"
   "3.8.12":
     url: "https://www.python.org/ftp/python/3.8.12/Python-3.8.12.tgz"
     sha256: "316aa33f3b7707d041e73f246efedb297a70898c4b91f127f66dc8d80c596f1a"
@@ -15,29 +15,29 @@ sources:
     url: "https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz"
     sha256: "da3080e3b488f648a3d7a4560ddee895284c3380b11d6de75edb986526b9a814"
 patches:
-  "3.10.0":
-    - patch_file: "patches/3.10.0-0001-msvc.patch"
+  "3.10.6":
+    - patch_file: "patches/3.10.6-0001-msvc.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/3.9.7-0002-_msi-vcxproj.patch"
+    - patch_file: "patches/3.9.13-0002-_msi-vcxproj.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/3.10.0-0003-_ctypes-ffi.patch"
+    - patch_file: "patches/3.10.6-0003-_ctypes-ffi.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/3.10.0-0004-setup.py-pass-CFLAGS-CPPFLAGS.patch"
+    - patch_file: "patches/3.10.6-0004-setup.py-pass-CFLAGS-CPPFLAGS.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/3.10.0-0005-disable-macos-tcltk.patch"
+    - patch_file: "patches/3.10.6-0005-disable-macos-tcltk.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
       base_path: "source_subfolder"
-  "3.9.7":
-    - patch_file: "patches/3.9.7-0001-msvc.patch"
+  "3.9.13":
+    - patch_file: "patches/3.9.13-0001-msvc.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/3.9.7-0002-_msi-vcxproj.patch"
+    - patch_file: "patches/3.9.13-0002-_msi-vcxproj.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/3.9.7-0003-_ctypes-ffi.patch"
+    - patch_file: "patches/3.9.13-0003-_ctypes-ffi.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/3.9.7-0004-setup.py-pass-CFLAGS-CPPFLAGS.patch"
+    - patch_file: "patches/3.9.13-0004-setup.py-pass-CFLAGS-CPPFLAGS.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/3.9.7-0005-disable-macos-tcltk.patch"
+    - patch_file: "patches/3.9.13-0005-disable-macos-tcltk.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
       base_path: "source_subfolder"

@@ -24,7 +24,7 @@ else:
 setup(
     name="test_package",
     version="1.0",
-    use_2to3=True,
+#    use_2to3=True,
     ext_modules=[
         Extension("spam", [os.path.join(subdir, "test_module.c")]),
     ],

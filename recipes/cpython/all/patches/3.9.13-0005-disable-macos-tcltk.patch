@@ -1,6 +1,6 @@
 --- setup.py
 +++ setup.py
-@@ -1986,8 +1986,8 @@
+@@ -1990,8 +1990,8 @@ class PyBuildExt(build_ext):
          # Rather than complicate the code below, detecting and building
          # AquaTk is a separate method. Only one Tkinter will be built on
          # Darwin - either AquaTk, if it is found, or X11 based Tk.

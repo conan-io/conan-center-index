@@ -1,6 +1,6 @@
 --- Makefile.pre.in
 +++ Makefile.pre.in
-@@ -630,10 +630,10 @@
+@@ -629,10 +629,10 @@ sharedmods: $(BUILDPYTHON) pybuilddir.txt Modules/_math.o
  	    *\ -s*|s*) quiet="-q";; \
  	    *) quiet="";; \
  	esac; \
