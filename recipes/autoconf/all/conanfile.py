@@ -49,6 +49,7 @@ class AutoconfConan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="source")
+        self.cpp.package.includedirs = []  # KB-H071: It is a tool that doesn't contain headers, removing the include directory.
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
