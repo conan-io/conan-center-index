@@ -8,7 +8,7 @@ from contextlib import contextmanager
 import os
 import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
 
 
 class CoinClpConan(ConanFile):
