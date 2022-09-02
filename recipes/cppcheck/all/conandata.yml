@@ -11,7 +11,9 @@ sources:
 patches:
   "2.9":
     - patch_file: "patches/0001-cmake-source-dir-2.9-a8f878e88.patch"
+      patch_source: "https://github.com/danmar/cppcheck/pull/4430"
     - patch_file: "patches/0002-htmlreport-python3-25f6bfc87.patch"
+      patch_source: "https://github.com/danmar/cppcheck/pull/4430"
   "2.7.5":
     - patch_file: "patches/0001-cmake-source-dir-2.5.patch"
     - patch_file: "patches/0002-htmlreport-python3-25f6bfc87.patch"
