@@ -14,21 +14,6 @@
  
  if (CODE_COVERAGE GREATER 0)
      set(CMAKE_BUILD_TYPE "Debug")
-@@ -45,10 +49,10 @@ set(LIBDL dl)
- 
- # Includes
- include_directories(BEFORE ./)
--include_directories(BEFORE ${PROJECT_SOURCE_DIR}/src)
--include_directories(BEFORE ${PROJECT_SOURCE_DIR}/include)
--include_directories(BEFORE ${PROJECT_SOURCE_DIR}/tools)
--include_directories(BEFORE ${PROJECT_SOURCE_DIR}/tests)
-+include_directories(BEFORE ${TOP_SOURCE_DIR}/src)
-+include_directories(BEFORE ${TOP_SOURCE_DIR}/include)
-+include_directories(BEFORE ${TOP_SOURCE_DIR}/tests)
-+include_directories(BEFORE ${TOP_SOURCE_DIR}/examples)
- 
- # Compiler flags
- set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 @@ -100,7 +100,8 @@ if (TESTSUITE_NO_COLOR GREATER 0)
      add_definitions(-DTESTSUITE_NO_COLOR=1)
  endif()
