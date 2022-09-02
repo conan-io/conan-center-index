@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.files import apply_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.build import cross_building
 from conan.tools.scm import Version
 from conans import CMake, tools
 import functools
@@ -170,7 +171,7 @@ class SDLConan(ConanFile):
             del self.info.options.sdl2main
 
     def build_requirements(self):
-        if self.settings.os == "Macos" and tools.cross_building(self):
+        if self.settings.os == "Macos" and cross_building(self):
             # Workaround for CMake bug with error message:
             # Attempting to use @rpath without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being
             # set. This could be because you are using a Mac OS X version less than 10.5
@@ -206,7 +207,7 @@ class SDLConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["SDL2_DISABLE_INSTALL"] = False  # SDL2_* options will get renamed to SDL_ options in the next SDL release
-        if tools.is_apple_os(self):
+        if is_apple_os(self):
             cmake.definitions["CMAKE_OSX_ARCHITECTURES"] = {
                 "armv8": "arm64",
             }.get(str(self.settings.arch), str(self.settings.arch))
