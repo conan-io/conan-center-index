@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, replace_in_file
 import os
 
 required_conan_version = ">=1.47.0"
@@ -20,7 +20,7 @@ class IttApiConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "fPIC": [True, False],  # @note fPIC is always enabled by the underlying CMake file. So we ignore this option.
+        "fPIC": [True, False],
         "ptmark": [True, False],
     }
     default_options = {
@@ -33,6 +33,7 @@ class IttApiConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        # We have no C++ files, so we delete unused options.
         try:
             del self.settings.compiler.libcxx
         except Exception:
@@ -49,7 +50,15 @@ class IttApiConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
+    def _patch_sources(self):
+        # Don't force PIC
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+            "set(CMAKE_C_FLAGS \"${CMAKE_C_FLAGS} -fPIC\")",
+            ""
+        )
+
     def generate(self):
+        self._patch_sources()
         toolchain = CMakeToolchain(self)
         toolchain.variables["ITT_API_IPT_SUPPORT"] = self.options.ptmark
         toolchain.generate()
