@@ -88,7 +88,7 @@ class WaylandConan(ConanFile):
                 # Only wayland is the build_require. There is no need to apply suffixes.
                 pc.build_context_activated = ["wayland"]
                 tc.project_options["build.pkg_config_path"] = self.generators_folder
-            elif self.is_build_context:  # wayland is being built as build_require
+            elif self.dependencies["expat"].is_build_context:  # wayland is being built as build_require
                 # If wayland is the build_require, all its dependencies are treated as build_requires
                 pc.build_context_activated = ["libffi", "expat", "libxml2", "libiconv", "zlib"]
         tc.generate()
