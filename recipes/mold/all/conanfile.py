@@ -26,9 +26,9 @@ class MoldConan(ConanFile):
             raise ConanInvalidConfiguration('Mold can only be built with libstdc++11; specify mold:compiler.libcxx=libstdc++11 in your build profile')
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f'{self.name} can not be built on {self.settings.os}.')
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "11":
-            raise ConanInvalidConfiguration("GCC version 11 or higher required")
-        if (self.settings.compiler == "clang" or self.settings.compiler == "apple-clang") and tools.Version(self.settings.compiler.version) < "12":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "10":
+            raise ConanInvalidConfiguration("GCC version 10 or higher required")
+        if (self.settings.compiler == "clang" or self.settings.compiler == "apple-clang") and Version(self.settings.compiler.version) < "12":
             raise ConanInvalidConfiguration("Clang version 12 or higher required")
         if self.settings.compiler == "apple-clang" and "armv8" == self.settings.arch :
             raise ConanInvalidConfiguration(f'{self.name} is still not supported by Mac M1.')
@@ -47,7 +47,7 @@ class MoldConan(ConanFile):
         return include_path
         
     def _patch_sources(self):
-        if self.settings.compiler == "apple-clang":
+        if self.settings.compiler == "apple-clang" or (self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "11"):
             files.replace_in_file(self, "source_subfolder/Makefile", "-std=c++20", "-std=c++2a")
 
         files.replace_in_file(self, "source_subfolder/Makefile", "-Ithird-party/xxhash ", "-I{} -I{} -I{} -I{} -I{}".format(
