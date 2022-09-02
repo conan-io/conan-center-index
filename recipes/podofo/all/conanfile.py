@@ -112,6 +112,9 @@ class PodofoConan(ConanFile):
         tc.variables["PODOFO_WITH_TIFF"] = self.options.with_tiff
         tc.variables["PODOFO_WITH_PNG"] = self.options.with_png
         tc.variables["PODOFO_WITH_UNISTRING"] = self.options.with_unistring
+        tc.variables["PODOFO_HAVE_OPENSSL_1_1"] = Version(self.deps_cpp_info["openssl"].version) >= "1.1"
+        if self.options.with_openssl and ("no_rc4" in self.options["openssl"]):
+            tc.variables["PODOFO_HAVE_OPENSSL_NO_RC4"] = self.options["openssl"].no_rc4
         tc.generate()
 
         deps = CMakeDeps(self)
