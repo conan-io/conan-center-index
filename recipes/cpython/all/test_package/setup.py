@@ -18,8 +18,8 @@ if PY2:
 elif PY3:
     subdir = "py3"
     from setuptools import setup, Extension, __version__ as setuptools_versions
-    from conans import tools
-    use_2to3 = tools.Version(setuptools_versions) <= tools.Version("58.0.0")
+    import pkg_resources
+    use_2to3 = pkg_resources.parse_version(setuptools_versions) <= pkg_resources.parse_version("58.0.0")
 else:
     raise Exception
 
