@@ -73,6 +73,7 @@ class CoinClpConan(ConanFile):
             self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
             self.build_requires("automake/1.16.4")
+        self.build_requires("pkgconf/1.7.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -80,18 +81,19 @@ class CoinClpConan(ConanFile):
 
     @contextmanager
     def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
-                env = {
-                    "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                    "LD": "{} link -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                    "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
+        with tools.environment_append({"PKG_CONFIG_PATH": self.install_folder}):
+            if self.settings.compiler == "Visual Studio":
+                with tools.vcvars(self.settings):
+                    env = {
+                        "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                        "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                        "LD": "{} link -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                        "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
+                    }
+                    with tools.environment_append(env):
+                        yield
+            else:
+                yield
 
     def _configure_autotools(self):
         if self._autotools:
