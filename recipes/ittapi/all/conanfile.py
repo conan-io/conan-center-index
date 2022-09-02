@@ -21,7 +21,7 @@ class IttApiConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "fPIC": [True, False],
+        "fPIC": [True, False], # @note fPIC is always enabled by the underlying CMake file. So we ignore this option.
         "ptmark": [True, False],
     }
     default_options = {
@@ -37,12 +37,6 @@ class IttApiConan(ConanFile):
         # We have no C++ files.
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-
-    def validate(self):
-        if self.options.get_safe("fPIC", True) is False:
-            raise ConanInvalidConfiguration(
-                "fPIC is always enabled by underlying CMake file."
-            )
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -71,20 +65,8 @@ class IttApiConan(ConanFile):
         copy(self, "GPL-2.0-only.txt", src=os.path.join(self.source_folder, "LICENSES"), dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "ITT")
-        self.cpp_info.set_property("pkg_config_name", "itt")
-
-        ittnotify = self.cpp_info.components["ittnotify"]
-        ittnotify.set_property("cmake_target_name", "ITT::ittnotify")
         if self.settings.os == "Windows":
-            ittnotify.libs = ["libittnotify"]
+            self.cpp_info.libs = ['libittnotify']
         else:
-            ittnotify.libs = ["ittnotify"]
-            ittnotify.system_libs = ["dl"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "ITT"
-        self.cpp_info.names["cmake_find_package_multi"] = "ITT"
-        self.cpp_info.names["pkg_config"] = "itt"
-        ittnotify.names["cmake_find_package"] = "ittnotify"
-        ittnotify.names["cmake_find_package_multi"] = "ittnotify"
+            self.cpp_info.libs = ['ittnotify']
+            self.cpp_info.system_libs = ['dl']
