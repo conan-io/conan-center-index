@@ -264,6 +264,9 @@ class QtConan(ConanFile):
         if Version(self.version) >= "6.3.0" and self.settings.compiler == "clang" and "libstdc++" in str(self.settings.compiler.libcxx):
             raise ConanInvalidConfiguration("Qt needs recent libstdc++, with charconv. please switch to gcc, of to libc++")
 
+        if Version(self.version) < "6.3.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) >= "11":
+            raise ConanInvalidConfiguration("Qt lower then 6.3.0 needs to be compiled for gcc with a version lower then 11")
+
         if self.options.get_safe("qtwebengine"):
             if not self.options.shared:
                 raise ConanInvalidConfiguration("Static builds of Qt WebEngine are not supported")
