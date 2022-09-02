@@ -2,7 +2,7 @@ from functools import lru_cache
 from os import environ, path
 
 from conan import ConanFile
-from conan.tools.files import get, apply_conandata_patches, rmdir
+from conan.tools.files import get, apply_conandata_patches, rmdir, copy
 from conan.tools.gnu import Autotools
 from conan.tools.microsoft import unix_path
 from conan.tools.layout import basic_layout
@@ -68,6 +68,7 @@ class AutoconfConan(ConanFile):
         autotools = self._autotools()
         # KB-H013 we're packaging an application, place everything under bin
         autotools.install(args=[f"DESTDIR={unix_path(self, path.join(self.package_folder, 'bin'))}"])
+        copy(self, "COPYING*", src=self.source_folder, dst=path.join(self.package_folder, "licenses"))
         rmdir(self, path.join(self._datarootdir, "info"))
         rmdir(self, path.join(self._datarootdir, "man"))
 
