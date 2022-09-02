@@ -1,19 +1,5 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -13,9 +16,10 @@ endif ()
- message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
- 
- 
--set(ROOT_SRC ${PROJECT_SOURCE_DIR}/src)
--set(CMAKE_DIR ${PROJECT_SOURCE_DIR}/cmake)
--set(FDB_LIB_DIR ${PROJECT_SOURCE_DIR}/third_party/forestdb/build)
-+set(TOP_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-+set(ROOT_SRC ${TOP_SOURCE_DIR}/src)
-+set(CMAKE_DIR ${TOP_SOURCE_DIR}/cmake)
-+set(FDB_LIB_DIR ${TOP_SOURCE_DIR}/third_party/forestdb/build)
- 
- if (CODE_COVERAGE GREATER 0)
-     set(CMAKE_BUILD_TYPE "Debug")
 @@ -100,7 +100,8 @@ if (TESTSUITE_NO_COLOR GREATER 0)
      add_definitions(-DTESTSUITE_NO_COLOR=1)
  endif()
@@ -48,8 +34,7 @@
 --- a/tests/CMakeLists.txt
 +++ b/tests/CMakeLists.txt
 @@ -1,14 +1,11 @@
--set(TEST_DIR ${PROJECT_SOURCE_DIR}/tests)
-+set(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+ set(TEST_DIR ${PROJECT_SOURCE_DIR}/tests)
  set(UNIT_TEST_DIR ${TEST_DIR}/unit)
  set(JUNGLE_TEST_DIR ${TEST_DIR}/jungle)
  set(STRESS_TEST_DIR ${TEST_DIR}/stress)
