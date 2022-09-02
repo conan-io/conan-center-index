@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 import os
@@ -21,7 +20,7 @@ class IttApiConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "fPIC": [True, False], # @note fPIC is always enabled by the underlying CMake file. So we ignore this option.
+        "fPIC": [True, False],  # @note fPIC is always enabled by the underlying CMake file. So we ignore this option.
         "ptmark": [True, False],
     }
     default_options = {
