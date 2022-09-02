@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conans import AutoToolsBuildEnvironment
 import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.47.0"
 
 class MoldConan(ConanFile):
     name = "mold"
