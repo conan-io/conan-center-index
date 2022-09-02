@@ -86,8 +86,11 @@ class CMinpackConan(ConanFile):
         minpack_include_dir = os.path.join("include", "cminpack-1")
         
         # the double precision version
-        self.cpp_info.libs = ['cminpack' + self._library_postfix()]
-        self.cpp_info.includedirs.append(minpack_include_dir)
+        self.cpp_info.components['cminpackd'].libs = ['cminpack' + self._library_postfix()]
+        self.cpp_info.components['cminpackd'].includedirs.append(minpack_include_dir)
+        self.cpp_info.components["cminpackd"].set_property("cmake_target_name", "cminpack::cminpack")
+        self.cpp_info.components["cminpackd"].names["cmake_find_package"] = "cminpack"
+        self.cpp_info.components["cminpackd"].names["cmake_find_package_multi"] = "cminpack"
         
         # the single precision version
         self.cpp_info.components['cminpacks'].libs = ['cminpacks' + self._library_postfix()]
@@ -95,13 +98,13 @@ class CMinpackConan(ConanFile):
         self.cpp_info.components['cminpacks'].defines.append("__cminpack_float__")
 
         if self.settings.os != "Windows":
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components['cminpackd'].system_libs.append("m")
             self.cpp_info.components['cminpacks'].system_libs.append("m")
 
         # required apple frameworks
-        self.cpp_info.frameworks.append("Accelerate")
+        self.cpp_info.components['cminpackd'].frameworks.append("Accelerate")
         self.cpp_info.components['cminpacks'].frameworks.append("Accelerate")
 
         if not self.options.shared and self.settings.os == "Windows":
-            self.cpp_info.defines.append("CMINPACK_NO_DLL")
+            self.cpp_info.components['cminpackd'].defines.append("CMINPACK_NO_DLL")
             self.cpp_info.components['cminpacks'].defines.append("CMINPACK_NO_DLL")
