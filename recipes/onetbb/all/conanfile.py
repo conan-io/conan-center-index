@@ -129,7 +129,7 @@ class OneTBBConan(ConanFile):
             tbbmalloc.set_property("cmake_target_name", "TBB::tbbmalloc")
             tbbmalloc.libs = [lib_name("tbbmalloc")]
             if self.settings.os in ["Linux", "FreeBSD"]:
-                tbbmalloc.system_libs = ["dl", "pthread"]
+                tbbmalloc.system_libs = ["m", "dl", "pthread"]
 
             # tbbmalloc_proxy
             if self.options.tbbproxy:
