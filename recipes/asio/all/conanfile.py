@@ -37,6 +37,7 @@ class Asio(ConanFile):
         copy(self, "*.ipp", src=include_dir, dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "asio")
         self.cpp_info.defines.append("ASIO_STANDALONE")
         self.cpp_info.bindirs = []
         self.cpp_info.frameworkdirs = []
