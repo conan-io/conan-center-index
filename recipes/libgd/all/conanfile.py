@@ -76,8 +76,11 @@ class LibgdConan(ConanFile):
         for patch_file in self.conan_data.get("patches", {}).get(self.version, []):
             patch(self, **patch_file)
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        replace_in_file(self, cmakelists, "${CMAKE_SOURCE_DIR}", "${CMAKE_CURRENT_SOURCE_DIR}")
-        replace_in_file(self, cmakelists, "SET(CMAKE_MODULE_PATH \"${GD_SOURCE_DIR}/cmake/modules\")", "LIST(APPEND CMAKE_MODULE_PATH \"${GD_SOURCE_DIR}/cmake/modules\")")
+        replace_in_file(self, cmakelists, "${CMAKE_SOURCE_DIR}",
+                        "${CMAKE_CURRENT_SOURCE_DIR}")
+        replace_in_file(self, cmakelists,
+                        "SET(CMAKE_MODULE_PATH \"${GD_SOURCE_DIR}/cmake/modules\")",
+                        "LIST(APPEND CMAKE_MODULE_PATH \"${GD_SOURCE_DIR}/cmake/modules\")")
         replace_in_file(self, os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                         "RUNTIME DESTINATION bin",
                         "RUNTIME DESTINATION bin BUNDLE DESTINATION bin")
