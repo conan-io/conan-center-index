@@ -14,11 +14,21 @@ class BrigandConan(ConanFile):
     topics = ("meta-programming", "boost", "runtime", "header-only")
     homepage = "https://github.com/edouarda/brigand"
     license = "BSL-1.0"
+
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "with_boost": [True, False],
+    }
+    default_options = {
+        "with_boost": True,
+    }
+
     no_copy_sources = True
 
     def requirements(self):
-        self.requires("boost/1.79.0")
+        if self.options.with_boost:
+            # TODO: add transitive_headers=True & bump required_conan_version to >=1.52.0
+            self.requires("boost/1.79.0")
 
     def package_id(self):
         self.info.clear()
@@ -48,4 +58,7 @@ class BrigandConan(ConanFile):
         self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
-        self.cpp_info.requires = ["boost::headers"]
+        if self.options.with_boost:
+            self.cpp_info.requires = ["boost::headers"]
+        else:
+            self.cpp_info.defines("BRIGAND_NO_BOOST_SUPPORT")
