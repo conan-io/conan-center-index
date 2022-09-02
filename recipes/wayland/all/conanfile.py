@@ -1,13 +1,15 @@
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
-import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class WaylandConan(ConanFile):
@@ -35,7 +37,7 @@ class WaylandConan(ConanFile):
         "enable_dtd_validation": True,
     }
 
-    generators = "PkgConfigDeps", "VirtualBuildEnv", "VirtualRunEnv"
+    generators = "VirtualBuildEnv", "VirtualRunEnv"
 
     def configure(self):
         if self.options.shared:
@@ -79,21 +81,22 @@ class WaylandConan(ConanFile):
         tc.project_options["libraries"] = self.options.enable_libraries
         tc.project_options["dtd_validation"] = self.options.enable_dtd_validation
         tc.project_options["documentation"] = False
+        pc = PkgConfigDeps(self)
         if Version(self.version) >= "1.18.91":
             tc.project_options["scanner"] = True
+            if cross_building(self):
+                # Only wayland is the build_require. There is no need to apply suffixes.
+                pc.build_context_activated = ["wayland"]
+                tc.project_options["build.pkg_config_path"] = self.generators_folder
+            elif self.is_build_context:  # wayland is being built as build_require
+                # If wayland is the build_require, all its dependencies are treated as build_requires
+                pc.build_context_activated = ["libffi", "expat", "libxml2", "libiconv", "zlib"]
         tc.generate()
+        pc.generate()
 
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
                         "subdir('tests')", "#subdir('tests')")
-
-        if cross_building(self):
-            replace_in_file(self, f"{self.source_folder}/src/meson.build",
-                            "scanner_dep = dependency('wayland-scanner', native: true, version: meson.project_version())",
-                                "# scanner_dep = dependency('wayland-scanner', native: true, version: meson.project_version())")
-            replace_in_file(self, f"{self.source_folder}/src/meson.build",
-                            "wayland_scanner_for_build = find_program(scanner_dep.get_variable(pkgconfig: 'wayland_scanner'))",
-                                "wayland_scanner_for_build = find_program('wayland-scanner')")
 
     def build(self):
         self._patch_sources()
