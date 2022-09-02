@@ -43,13 +43,13 @@ class WaylandConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         try:
-           del self.settings.compiler.libcxx
+            del self.settings.compiler.libcxx
         except Exception:
-           pass
+            pass
         try:
-           del self.settings.compiler.cppstd
+            del self.settings.compiler.cppstd
         except Exception:
-           pass
+            pass
 
     def requirements(self):
         if self.options.enable_libraries:
@@ -90,7 +90,7 @@ class WaylandConan(ConanFile):
                 tc.project_options["build.pkg_config_path"] = self.generators_folder
             elif self.dependencies["expat"].is_build_context:  # wayland is being built as build_require
                 # If wayland is the build_require, all its dependencies are treated as build_requires
-                pc.build_context_activated = [dep.ref.name  for _, dep in self.dependencies.host.items()]
+                pc.build_context_activated = [dep.ref.name for _, dep in self.dependencies.host.items()]
         tc.generate()
         pc.generate()
 
