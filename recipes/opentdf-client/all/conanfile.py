@@ -57,7 +57,7 @@ class OpenTDFConan(ConanFile):
         # check minimum version of compiler
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
-            self.output.warn(f'{self.name} recipe lacks information about the {self.settings.compiler} compiler support.')
+            self.output.info(f'{self.name} recipe lacks information about the {self.settings.compiler} compiler support.')
         else:
             if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(f'{self.name} requires {self.settings.compiler} {self.settings.compiler.version} but found {min_version}')
@@ -80,16 +80,16 @@ class OpenTDFConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        self.output.warn(f'{self.name} building with self.options.allow_libiconv={self.options.allow_libiconv}')
+        self.output.info(f'{self.name} building with self.options.allow_libiconv={self.options.allow_libiconv}')
         if not self.options.allow_libiconv:
-            self.output.warn(f'{self.name} attempting to disable libiconv in libxml2 and boost')
+            self.output.info(f'{self.name} attempting to disable libiconv in libxml2 and boost')
             self.options["libxml2"].iconv = False
             self.options["libxml2"].icu = False
             self.options["boost"].i18n_backend_iconv = "off"
             self.options["boost"].i18n_backend_icu = False
             self.options["boost"].without_locale = True
         else:
-            self.output.warn(f'{self.name} building with stock libxml2 and boost')
+            self.output.info(f'{self.name} building with stock libxml2 and boost')
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
