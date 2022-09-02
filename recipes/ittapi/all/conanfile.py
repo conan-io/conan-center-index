@@ -58,7 +58,7 @@ class IttApiConan(ConanFile):
         if self.settings.os == "Windows":
             copy(self, "libittnotify.lib", src=f"bin/{self.settings.build_type}", dst=os.path.join(self.package_folder, "lib"))
         else:
-            copy(self, "libittnotify.a", src=f"bin", dst=os.path.join(self.package_folder, "lib"))
+            copy(self, "libittnotify.a", src="bin", dst=os.path.join(self.package_folder, "lib"))
         copy(self, "*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
         copy(self, "BSD-3-Clause.txt", src=os.path.join(self.source_folder, "LICENSES"), dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "GPL-2.0-only.txt", src=os.path.join(self.source_folder, "LICENSES"), dst=os.path.join(self.package_folder, "licenses"))
