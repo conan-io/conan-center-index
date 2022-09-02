@@ -286,7 +286,6 @@ class AndroidNDKConan(ConanFile):
         self.env_info.CONAN_CMAKE_PROGRAM = cmake_wrapper
 
         toolchain = os.path.join(self.package_folder, "build", "cmake", "android.toolchain.cmake")
-        self.conf_info.prepend("tools.cmake.cmaketoolchain:user_toolchain", toolchain)
 
         self.buildenv_info.define_path("CC", self._define_tool_var("CC", "clang"))
         self.buildenv_info.define_path("CXX", self._define_tool_var("CXX", "clang++"))
