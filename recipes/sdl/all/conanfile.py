@@ -250,8 +250,6 @@ class SDLConan(ConanFile):
                     tc.variables["HAVE_XF86VM_H"] = True
                 tc.variables["VIDEO_WAYLAND"] = self.options.wayland
                 if self.options.wayland:
-                    # FIXME: Otherwise 2.0.16 links with system wayland (from egl/system requirement)
-                    cmake_extra_ldflags += ["-L{}".format(os.path.join(self.dependencies.host["wayland"].package_folder, it)) for it in self.dependencies.host["wayland"].cpp_info.libdirs]
                     tc.variables["WAYLAND_SHARED"] = self.dependencies.host["wayland"].options.shared
                     tc.variables["WAYLAND_SCANNER_1_15_FOUND"] = 1  # FIXME: Check actual build-requires version
 
@@ -315,8 +313,6 @@ class SDLConan(ConanFile):
                     tc.variables["HAVE_XF86VM_H"] = True
                 tc.variables["SDL_WAYLAND"] = self.options.wayland
                 if self.options.wayland:
-                    # FIXME: Otherwise 2.0.16 links with system wayland (from egl/system requirement)
-                    cmake_extra_ldflags += ["-L{}".format(os.path.join(self.dependencies.host["wayland"].package_folder, it)) for it in self.dependencies.host["wayland"].cpp_info.libdirs]
                     tc.variables["SDL_WAYLAND_SHARED"] = self.dependencies.host["wayland"].options.shared
 
                 tc.variables["SDL_DIRECTFB"] = self.options.directfb
@@ -329,8 +325,12 @@ class SDLConan(ConanFile):
             tc.variables["SDL2_DISABLE_SDL2MAIN"] = not self.options.sdl2main
 
         # Add extra information collected from the deps
-        tc.variables["EXTRA_LDFLAGS"] = " ".join(cmake_extra_ldflags)
+        lib_paths = [os.path.join(dependency.package_folder, libdir) for _, dependency in self.dependencies.host.items() for libdir in dependency.cpp_info.libdirs]
+        cmake_extra_ldflags = [f"-L{lib_path}" for lib_path in lib_paths] + cmake_extra_ldflags
+        tc.variables["EXTRA_LDFLAGS"] = ";".join(cmake_extra_ldflags)
         include_paths = [os.path.join(dependency.package_folder, includedir) for _, dependency in self.dependencies.host.items() for includedir in dependency.cpp_info.includedirs]
+        extra_cflags = [f"-I{include_path}" for include_path in include_paths]
+        tc.variables["EXTRA_CFLAGS"] = ";".join(extra_cflags)
         tc.variables["CMAKE_REQUIRED_INCLUDES"] = ";".join(include_paths)
 
         # picked up from CMakeLists wrapper during conan v2 migration but don't know why it's needed
