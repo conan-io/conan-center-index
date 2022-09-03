@@ -86,7 +86,7 @@ class DaggyConan(ConanFile):
             raise ConanInvalidConfiguration("Shared Qt lib is required.") 
 
     def build_requirenments(self):
-        self.tool_requires("cmake/3.23.1")
+        self.tool_requires("cmake/3.23.1", force_host_context=True)
 
     def requirements(self):
         self.requires("qt/6.3.1")

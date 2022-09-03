@@ -8,7 +8,7 @@ class DaggyTestConan(ConanFile):
     generators = "cmake", "cmake_paths", "cmake_find_package"
 
     def build_requirenments(self):
-        self.tool_requires("cmake/3.23.1")
+        self.tool_requires("cmake/3.23.1", force_host_context=True)
 
     def build(self):
         cmake = CMake(self)
