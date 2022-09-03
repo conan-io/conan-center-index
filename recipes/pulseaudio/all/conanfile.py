@@ -139,10 +139,8 @@ class PulseAudioConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["pulse"].set_property("pkg_config_name", "libpulse")
-        self.cpp_info.components["pulse"].libs = ["pulse"]
-        if not self.options.shared:
-            self.cpp_info.components["pulse"].libs.append(f"pulsecommon-{self.version}")
-        self.cpp_info.components["pulse"].libdirs = ["lib", os.path.join("lib", "pulseaudio")]
+        self.cpp_info.components["pulse"].libs = ["pulse", f"pulsecommon-{self.version}"]
+        self.cpp_info.components["pulse"].libdirs.append(os.path.join("lib", "pulseaudio"))
         self.cpp_info.components["pulse"].requires = ["libiconv::libiconv", "libsndfile::libsndfile", "libcap::libcap", "libtool::libtool"]
         if self.options.with_alsa:
             self.cpp_info.components["pulse"].requires.append("libalsa::libalsa")
