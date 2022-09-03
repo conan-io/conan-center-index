@@ -112,6 +112,8 @@ class PulseAudioConan(ConanFile):
         ])
         for lib in ["alsa", "x11", "openssl", "dbus"]:
             tc.configure_args.append(f"--enable-{lib}={yes_no(getattr(self.options, 'with_' + lib))}")
+        # TODO: to remove when automatically handled by AutotoolsToolchain
+        tc.configure_args.append("--libexecdir=${prefix}/bin")
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
@@ -133,7 +135,6 @@ class PulseAudioConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "libexec"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
 
     def package_info(self):
