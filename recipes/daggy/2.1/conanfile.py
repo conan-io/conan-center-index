@@ -29,6 +29,7 @@ class DaggyConan(ConanFile):
         "fPIC": True
     }
     generators = "cmake", "cmake_paths", "cmake_find_package"
+    tool_requires = "cmake/3.23.1"
     _cmake = None
 
     @property
@@ -86,7 +87,7 @@ class DaggyConan(ConanFile):
             raise ConanInvalidConfiguration("Shared Qt lib is required.") 
 
     def build_requirenments(self):
-        self.tool_requires("cmake/3.23.1", force_host_context=True)
+        self.tool_requires("cmake/3.23.1")
 
     def requirements(self):
         self.requires("qt/6.3.1")
@@ -102,7 +103,8 @@ class DaggyConan(ConanFile):
         if self._cmake:
             return self._cmake
 
-        self._cmake = CMake(self)
+        cmake_path = f"{self.dependencies.build['cmake'].package_folder}/bin/cmake"
+        self._cmake = CMake(self, cmake_program=cmake_path)
         self._cmake.definitions["SSH2_SUPPORT"] = self.options.with_ssh2
         self._cmake.definitions["YAML_SUPPORT"] = self.options.with_yaml
         self._cmake.definitions["CONSOLE"] = self.options.with_console
