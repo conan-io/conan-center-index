@@ -90,6 +90,7 @@ class DaggyConan(ConanFile):
         self.tool_requires("cmake/3.23.1")
 
     def requirements(self):
+        self.requires("pcre2/10.40")
         self.requires("qt/6.3.1")
         self.requires("kainjow-mustache/4.1")
 
