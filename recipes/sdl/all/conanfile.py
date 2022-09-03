@@ -187,7 +187,7 @@ class SDLConan(ConanFile):
             tc.variables["CMAKE_OSX_ARCHITECTURES"] = {
                 "armv8": "arm64",
             }.get(str(self.settings.arch), str(self.settings.arch))
-        cmake_extra_ldflags = []
+        extra_ldflags = []
         if self.settings.os != "Windows" and not self.options.shared:
             tc.variables["SDL_STATIC_PIC"] = self.options.fPIC
         if is_msvc(self) and not self.options.shared:
@@ -222,7 +222,7 @@ class SDLConan(ConanFile):
                     tc.variables["SNDIO_SHARED"] = self.dependencies["sndio"].options.shared
                 tc.variables["NAS"] = self.options.nas
                 if self.options.nas:
-                    cmake_extra_ldflags += ["-lXau"]  # FIXME: SDL sources doesn't take into account transitive dependencies
+                    extra_ldflags.append("-lXau")  # FIXME: SDL sources doesn't take into account transitive dependencies
                     tc.variables["NAS_SHARED"] = self.dependencies["nas"].options.shared
                 tc.variables["VIDEO_X11"] = self.options.x11
                 if self.options.x11:
@@ -285,7 +285,7 @@ class SDLConan(ConanFile):
                     tc.variables["SDL_SNDIO_SHARED"] = self.dependencies["sndio"].options.shared
                 tc.variables["SDL_NAS"] = self.options.nas
                 if self.options.nas:
-                    cmake_extra_ldflags += ["-lXau"]  # FIXME: SDL sources doesn't take into account transitive dependencies
+                    extra_ldflags.append("-lXau")  # FIXME: SDL sources doesn't take into account transitive dependencies
                     tc.variables["SDL_NAS_SHARED"] = self.dependencies["nas"].options.shared
                 tc.variables["SDL_X11"] = self.options.x11
                 if self.options.x11:
@@ -326,8 +326,8 @@ class SDLConan(ConanFile):
 
         # Add extra information collected from the deps
         lib_paths = [os.path.join(dependency.package_folder, libdir) for _, dependency in self.dependencies.host.items() for libdir in dependency.cpp_info.libdirs]
-        cmake_extra_ldflags = [f"-L{lib_path}" for lib_path in lib_paths] + cmake_extra_ldflags
-        tc.variables["EXTRA_LDFLAGS"] = ";".join(cmake_extra_ldflags)
+        extra_ldflags = [f"-L{lib_path}" for lib_path in lib_paths] + extra_ldflags
+        tc.variables["EXTRA_LDFLAGS"] = ";".join(extra_ldflags)
         include_paths = [os.path.join(dependency.package_folder, includedir) for _, dependency in self.dependencies.host.items() for includedir in dependency.cpp_info.includedirs]
         extra_cflags = [f"-I{include_path}" for include_path in include_paths]
         tc.variables["EXTRA_CFLAGS"] = ";".join(extra_cflags)
