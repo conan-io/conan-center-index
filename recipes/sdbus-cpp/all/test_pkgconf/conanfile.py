@@ -8,7 +8,7 @@ from conan.tools.files import copy
 
 class SdbusCppTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeToolchain", "PkgConfigDeps"
+    generators = "CMakeToolchain", "PkgConfigDeps", "VirtualRunEnv"
     test_type = "explicit"
 
     def build_requirements(self):

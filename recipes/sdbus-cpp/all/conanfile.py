@@ -77,7 +77,7 @@ class SdbusCppConan(ConanFile):
         self.requires("libsystemd/251.4")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
