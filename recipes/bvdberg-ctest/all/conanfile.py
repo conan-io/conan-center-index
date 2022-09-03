@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 import os
@@ -18,6 +19,10 @@ class BvdbergCtestConan(ConanFile):
 
     def package_id(self):
         self.info.clear()
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows not supported")
 
     def layout(self):
         basic_layout(self, src_folder="src")
