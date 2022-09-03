@@ -1,11 +1,11 @@
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rm, rmdir
 from conan.tools.scm import Version
-from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.3"
 
 
 class CAresConan(ConanFile):
@@ -94,7 +94,7 @@ class CAresConan(ConanFile):
             self.cpp_info.components["cares"].system_libs.extend(["ws2_32", "advapi32"])
             if Version(self.version) >= "1.18.0":
                 self.cpp_info.components["cares"].system_libs.append("iphlpapi")
-        elif tools_legacy.is_apple_os(self.settings.os):
+        elif is_apple_os(self):
             self.cpp_info.components["cares"].system_libs.append("resolv")
 
         if self.options.tools:

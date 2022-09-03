@@ -1,8 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.files import copy, get, mkdir, replace_in_file, rmdir, save
-from conan.tools.gnu.pkgconfigdeps.pc_files_creator import get_pc_files_and_content
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
@@ -82,20 +81,19 @@ class WaylandConan(ConanFile):
         tc.project_options["documentation"] = False
         if Version(self.version) >= "1.18.91":
             tc.project_options["scanner"] = True
-
-            # Generate PC files for the tool_requires wayland package to ensure wayland-scanner is found for build machine.
-            if cross_building(self):
-                native_generators_folder = os.path.join(self.generators_folder, "native")
-                mkdir(self, native_generators_folder)
-                for target in ["wayland", "expat", "libxml2", "libiconv"]:
-                    for pc_name, pc_content in get_pc_files_and_content(self, self.dependencies.build[target]).items():
-                        save(self, os.path.join(native_generators_folder, pc_name), pc_content)
-                tc.project_options["build.pkg_config_path"] = native_generators_folder
         tc.generate()
 
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
                         "subdir('tests')", "#subdir('tests')")
+
+        if cross_building(self):
+            replace_in_file(self, f"{self.source_folder}/src/meson.build",
+                            "scanner_dep = dependency('wayland-scanner', native: true, version: meson.project_version())",
+                                "# scanner_dep = dependency('wayland-scanner', native: true, version: meson.project_version())")
+            replace_in_file(self, f"{self.source_folder}/src/meson.build",
+                            "wayland_scanner_for_build = find_program(scanner_dep.get_variable(pkgconfig: 'wayland_scanner'))",
+                                "wayland_scanner_for_build = find_program('wayland-scanner')")
 
     def build(self):
         self._patch_sources()

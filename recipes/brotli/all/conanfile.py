@@ -18,10 +18,22 @@ class BrotliConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "target_bits": [64, 32, None],
+        "endianness": ["big", "little", "neutral", None],
+        "enable_portable": [True, False],
+        "enable_rbit": [True, False],
+        "enable_debug": [True, False],
+        "enable_log": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "target_bits": None,
+        "endianness": None,
+        "enable_portable": False,
+        "enable_rbit": True,
+        "enable_debug": False,
+        "enable_log": False,
     }
 
     def export_sources(self):
@@ -55,6 +67,24 @@ class BrotliConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BROTLI_BUNDLED_MODE"] = False
         tc.variables["BROTLI_DISABLE_TESTS"] = True
+        if self.options.get_safe("target_bits") == 32:
+            tc.preprocessor_definitions["BROTLI_BUILD_32_BIT"] = 1
+        elif self.options.get_safe("target_bits") == 64:
+            tc.preprocessor_definitions["BROTLI_BUILD_64_BIT"] = 1
+        if self.options.get_safe("endianness") == "big":
+            tc.preprocessor_definitions["BROTLI_BUILD_BIG_ENDIAN"] = 1
+        elif self.options.get_safe("endianness") == "neutral":
+            tc.preprocessor_definitions["BROTLI_BUILD_ENDIAN_NEUTRAL"] = 1
+        elif self.options.get_safe("endianness") == "little":
+            tc.preprocessor_definitions["BROTLI_BUILD_LITTLE_ENDIAN"] = 1
+        if self.options.enable_portable:
+            tc.preprocessor_definitions["BROTLI_BUILD_PORTABLE"] = 1
+        if not self.options.enable_rbit:
+            tc.preprocessor_definitions["BROTLI_BUILD_NO_RBIT"] = 1
+        if self.options.enable_debug:
+            tc.preprocessor_definitions["BROTLI_DEBUG"] = 1
+        if self.options.enable_log:
+            tc.preprocessor_definitions["BROTLI_ENABLE_LOG"] = 1
         # To install relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()

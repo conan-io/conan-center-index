@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
-from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.3"
 
 
 class CCTZConan(ConanFile):
@@ -80,7 +80,7 @@ class CCTZConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "cctz")
         self.cpp_info.set_property("cmake_target_name", "cctz::cctz")
         self.cpp_info.libs = ["cctz"]
-        if tools_legacy.is_apple_os(self.settings.os):
+        if is_apple_os(self):
             self.cpp_info.frameworks.append("CoreFoundation")
 
         if self.options.build_tools:

@@ -81,7 +81,7 @@ class HarfbuzzConan(ConanFile):
             if self.settings.compiler == "gcc" and scm.Version(self.settings.compiler.version) < "7":
                 raise ConanInvalidConfiguration("New versions of harfbuzz require at least gcc 7")
 
-        if self.options["glib"].shared and microsoft.is_msvc_static_runtime(self):
+        if self.options.with_glib and self.options["glib"].shared and microsoft.is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(
                 "Linking shared glib with the MSVC static runtime is not supported"
             )
