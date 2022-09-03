@@ -187,7 +187,6 @@ class SDLConan(ConanFile):
             tc.variables["CMAKE_OSX_ARCHITECTURES"] = {
                 "armv8": "arm64",
             }.get(str(self.settings.arch), str(self.settings.arch))
-        cmake_required_includes = []  # List of directories used by CheckIncludeFile (https://cmake.org/cmake/help/latest/module/CheckIncludeFile.html)
         cmake_extra_ldflags = []
         if self.settings.os != "Windows" and not self.options.shared:
             tc.variables["SDL_STATIC_PIC"] = self.options.fPIC
@@ -224,7 +223,6 @@ class SDLConan(ConanFile):
                 tc.variables["NAS"] = self.options.nas
                 if self.options.nas:
                     cmake_extra_ldflags += ["-lXau"]  # FIXME: SDL sources doesn't take into account transitive dependencies
-                    cmake_required_includes += [os.path.join(self.dependencies["nas"].package_folder, str(it)) for it in self.dependencies["nas"].cpp_info.includedirs]
                     tc.variables["NAS_SHARED"] = self.options["nas"].shared
                 tc.variables["VIDEO_X11"] = self.options.x11
                 if self.options.x11:
@@ -290,7 +288,6 @@ class SDLConan(ConanFile):
                 tc.variables["SDL_NAS"] = self.options.nas
                 if self.options.nas:
                     cmake_extra_ldflags += ["-lXau"]  # FIXME: SDL sources doesn't take into account transitive dependencies
-                    cmake_required_includes += [os.path.join(self.dependencies["nas"].package_folder, str(it)) for it in self.dependencies["nas"].cpp_info.includedirs]
                     tc.variables["SDL_NAS_SHARED"] = self.options["nas"].shared
                 tc.variables["SDL_X11"] = self.options.x11
                 if self.options.x11:
@@ -333,7 +330,8 @@ class SDLConan(ConanFile):
 
         # Add extra information collected from the deps
         tc.variables["EXTRA_LDFLAGS"] = " ".join(cmake_extra_ldflags)
-        tc.variables["CMAKE_REQUIRED_INCLUDES"] = ";".join(cmake_required_includes)
+        include_paths = [os.path.join(dependency.package_folder, includedir) for _, dependency in self.dependencies.host.items() for includedir in dependency.cpp_info.includedirs]
+        tc.variables["CMAKE_REQUIRED_INCLUDES"] = ";".join(include_paths)
 
         # picked up from CMakeLists wrapper during conan v2 migration but don't know why it's needed
         if (self.settings.os != "Windows" or not is_apple_os(self)) and \
@@ -344,13 +342,6 @@ class SDLConan(ConanFile):
 
         env = VirtualBuildEnv(self)
         env.generate()
-
-        env = Environment()
-        lib_paths = [os.path.join(dependency.package_folder, libdir) for _, dependency in self.dependencies.host.items() for libdir in dependency.cpp_info.libdirs]
-        for lib_path in lib_paths:
-            env.prepend_path("LIBRARY_PATH", lib_path)
-        envvars = env.vars(self)
-        envvars.save_script("conanbuild_sdl_deps_library_path")
 
         if self.settings.os == "Linux":
             deps = PkgConfigDeps(self)
