@@ -18,7 +18,7 @@ class InjaConan(ConanFile):
     no_copy_source = True
 
     def requirements(self):
-        self.requires("nlohmann_json/3.9.1")
+        self.requires("nlohmann_json/3.11.2")
 
     def package_id(self):
         self.info.clear()
