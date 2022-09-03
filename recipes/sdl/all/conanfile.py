@@ -223,7 +223,7 @@ class SDLConan(ConanFile):
                 tc.variables["NAS"] = self.options.nas
                 if self.options.nas:
                     cmake_extra_ldflags += ["-lXau"]  # FIXME: SDL sources doesn't take into account transitive dependencies
-                    tc.variables["NAS_SHARED"] = self.options["nas"].shared
+                    tc.variables["NAS_SHARED"] = self.dependencies["nas"].options.shared
                 tc.variables["VIDEO_X11"] = self.options.x11
                 if self.options.x11:
                     tc.variables["HAVE_XEXT_H"] = True
@@ -251,8 +251,8 @@ class SDLConan(ConanFile):
                 tc.variables["VIDEO_WAYLAND"] = self.options.wayland
                 if self.options.wayland:
                     # FIXME: Otherwise 2.0.16 links with system wayland (from egl/system requirement)
-                    cmake_extra_ldflags += ["-L{}".format(os.path.join(self.dependencies["wayland"].package_folder, it)) for it in self.dependencies["wayland"].cpp_info.libdirs]
-                    tc.variables["WAYLAND_SHARED"] = self.options["wayland"].shared
+                    cmake_extra_ldflags += ["-L{}".format(os.path.join(self.dependencies.host["wayland"].package_folder, it)) for it in self.dependencies.host["wayland"].cpp_info.libdirs]
+                    tc.variables["WAYLAND_SHARED"] = self.dependencies.host["wayland"].options.shared
                     tc.variables["WAYLAND_SCANNER_1_15_FOUND"] = 1  # FIXME: Check actual build-requires version
 
                 tc.variables["VIDEO_DIRECTFB"] = self.options.directfb
@@ -288,7 +288,7 @@ class SDLConan(ConanFile):
                 tc.variables["SDL_NAS"] = self.options.nas
                 if self.options.nas:
                     cmake_extra_ldflags += ["-lXau"]  # FIXME: SDL sources doesn't take into account transitive dependencies
-                    tc.variables["SDL_NAS_SHARED"] = self.options["nas"].shared
+                    tc.variables["SDL_NAS_SHARED"] = self.dependencies["nas"].options.shared
                 tc.variables["SDL_X11"] = self.options.x11
                 if self.options.x11:
                     tc.variables["HAVE_XEXT_H"] = True
@@ -316,8 +316,8 @@ class SDLConan(ConanFile):
                 tc.variables["SDL_WAYLAND"] = self.options.wayland
                 if self.options.wayland:
                     # FIXME: Otherwise 2.0.16 links with system wayland (from egl/system requirement)
-                    cmake_extra_ldflags += ["-L{}".format(os.path.join(self.dependencies["wayland"].package_folder, it)) for it in self.dependencies["wayland"].cpp_info.libdirs]
-                    tc.variables["SDL_WAYLAND_SHARED"] = self.options["wayland"].shared
+                    cmake_extra_ldflags += ["-L{}".format(os.path.join(self.dependencies.host["wayland"].package_folder, it)) for it in self.dependencies.host["wayland"].cpp_info.libdirs]
+                    tc.variables["SDL_WAYLAND_SHARED"] = self.dependencies.host["wayland"].options.shared
 
                 tc.variables["SDL_DIRECTFB"] = self.options.directfb
                 tc.variables["SDL_RPI"] = self.options.video_rpi
