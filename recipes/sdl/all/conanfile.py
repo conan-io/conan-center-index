@@ -379,8 +379,8 @@ class SDLConan(ConanFile):
         cmake.build()
 
     def package(self):
-        license = "LICENSE.txt" if self.version >= "2.0.16" else "COPYING.txt"
-        copy(self, license, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        license_file = "LICENSE.txt" if self.version >= "2.0.16" else "COPYING.txt"
+        copy(self, license_file, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rm(self, "sdl2-config", os.path.join(self.package_folder, "bin"))
