@@ -1,12 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.files import apply_conandata_patches, get, replace_in_file, rm, rmdir
-from conan.tools.microsoft import is_msvc
 from conan.tools.build import cross_building
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rm, rmdir
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-from conans import CMake, tools
-import functools
 import os
 
 required_conan_version = ">=1.51.3"
@@ -80,20 +81,9 @@ class SDLConan(ConanFile):
         "libunwind": True,
     }
 
-    generators = ["cmake", "pkg_config"]
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -148,27 +138,27 @@ class SDLConan(ConanFile):
             if self.options.libunwind:
                 self.requires("libunwind/1.6.2")
 
-    def validate(self):
-        if self.settings.os == "Macos" and not self.options.iconv:
-            raise ConanInvalidConfiguration("On macOS iconv can't be disabled")
-
-        # SDL>=2.0.18 requires xcode 12 or higher because it uses CoreHaptics.
-        if Version(self.version) >= "2.0.18" and is_apple_os(self) and Version(self.settings.compiler.version) < "12":
-            raise ConanInvalidConfiguration("{}/{} requires xcode 12 or higher".format(self.name, self.version))
-
-        if self.settings.os == "Linux":
-            if self.options.sndio:
-                raise ConanInvalidConfiguration("Package for 'sndio' is not available (yet)")
-            if self.options.jack:
-                raise ConanInvalidConfiguration("Package for 'jack' is not available (yet)")
-            if self.options.esd:
-                raise ConanInvalidConfiguration("Package for 'esd' is not available (yet)")
-            if self.options.directfb:
-                raise ConanInvalidConfiguration("Package for 'directfb' is not available (yet)")
-
     def package_id(self):
         if Version(self.version) < "2.0.22":
             del self.info.options.sdl2main
+
+    def validate(self):
+        if self.info.settings.os == "Macos" and not self.info.options.iconv:
+            raise ConanInvalidConfiguration("On macOS iconv can't be disabled")
+
+        # SDL>=2.0.18 requires xcode 12 or higher because it uses CoreHaptics.
+        if Version(self.version) >= "2.0.18" and is_apple_os(self) and Version(self.info.settings.compiler.version) < "12":
+            raise ConanInvalidConfiguration(f"{self.name}/{self.version} requires xcode 12 or higher")
+
+        if self.info.settings.os == "Linux":
+            if self.info.options.sndio:
+                raise ConanInvalidConfiguration("Package for 'sndio' is not available (yet)")
+            if self.info.options.jack:
+                raise ConanInvalidConfiguration("Package for 'jack' is not available (yet)")
+            if self.info.options.esd:
+                raise ConanInvalidConfiguration("Package for 'esd' is not available (yet)")
+            if self.info.options.directfb:
+                raise ConanInvalidConfiguration("Package for 'directfb' is not available (yet)")
 
     def build_requirements(self):
         if self.settings.os == "Macos" and cross_building(self):
@@ -177,205 +167,230 @@ class SDLConan(ConanFile):
             # set. This could be because you are using a Mac OS X version less than 10.5
             # or because CMake's platform configuration is corrupt.
             # FIXME: Remove once CMake on macOS/M1 CI runners is upgraded.
-            self.build_requires("cmake/3.22.0")
+            self.tool_requires("cmake/3.22.0")
         if self.settings.os == "Linux":
-            self.build_requires("pkgconf/1.7.4")
+            self.tool_requires("pkgconf/1.7.4")
         if hasattr(self, "settings_build") and self.options.get_safe("wayland"):
-            self.build_requires("wayland/1.20.0")  # Provides wayland-scanner
+            self.tool_requires("wayland/1.21.0")  # Provides wayland-scanner
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True,
-            destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
-        replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                        'check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)',
-                        '# check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)')
-
-        # Ensure to find wayland-scanner from wayland recipe in build requirements (or requirements if 1 profile)
-        if self.options.get_safe("wayland") and Version(self.version) >= "2.0.18":
-            wayland_bin_path = " ".join("\"{}\"".format(path) for path in self.deps_env_info["wayland"].PATH)
-            replace_in_file(self,
-                os.path.join(self._source_subfolder, "cmake", "sdlchecks.cmake"),
-                "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED)",
-                "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED PATHS {} NO_DEFAULT_PATH)".format(wayland_bin_path),
-            )
-
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["SDL2_DISABLE_INSTALL"] = False  # SDL2_* options will get renamed to SDL_ options in the next SDL release
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["SDL2_DISABLE_INSTALL"] = False  # SDL2_* options will get renamed to SDL_ options in the next SDL release
         if is_apple_os(self):
-            cmake.definitions["CMAKE_OSX_ARCHITECTURES"] = {
+            tc.variables["CMAKE_OSX_ARCHITECTURES"] = {
                 "armv8": "arm64",
             }.get(str(self.settings.arch), str(self.settings.arch))
         cmake_required_includes = []  # List of directories used by CheckIncludeFile (https://cmake.org/cmake/help/latest/module/CheckIncludeFile.html)
         cmake_extra_ldflags = []
-        # FIXME: self.install_folder not defined? Neccessary?
-        cmake.definitions["CONAN_INSTALL_FOLDER"] = self.install_folder
         if self.settings.os != "Windows" and not self.options.shared:
-            cmake.definitions["SDL_STATIC_PIC"] = self.options.fPIC
+            tc.variables["SDL_STATIC_PIC"] = self.options.fPIC
         if is_msvc(self) and not self.options.shared:
-            cmake.definitions["HAVE_LIBC"] = True
-        cmake.definitions["SDL_SHARED"] = self.options.shared
-        cmake.definitions["SDL_STATIC"] = not self.options.shared
+            tc.variables["HAVE_LIBC"] = True
+        tc.variables["SDL_SHARED"] = self.options.shared
+        tc.variables["SDL_STATIC"] = not self.options.shared
 
         if Version(self.version) < "2.0.18":
-            cmake.definitions["VIDEO_OPENGL"] = self.options.opengl
-            cmake.definitions["VIDEO_OPENGLES"] = self.options.opengles
-            cmake.definitions["VIDEO_VULKAN"] = self.options.vulkan
+            tc.variables["VIDEO_OPENGL"] = self.options.opengl
+            tc.variables["VIDEO_OPENGLES"] = self.options.opengles
+            tc.variables["VIDEO_VULKAN"] = self.options.vulkan
             if self.settings.os == "Linux":
                 # See https://github.com/bincrafters/community/issues/696
-                cmake.definitions["SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS"] = 1
+                tc.variables["SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS"] = 1
 
-                cmake.definitions["ALSA"] = self.options.alsa
+                tc.variables["ALSA"] = self.options.alsa
                 if self.options.alsa:
-                    cmake.definitions["ALSA_SHARED"] = self.deps_cpp_info["libalsa"].shared
-                    cmake.definitions["HAVE_ASOUNDLIB_H"] = True
-                    cmake.definitions["HAVE_LIBASOUND"] = True
-                cmake.definitions["JACK"] = self.options.jack
+                    tc.variables["ALSA_SHARED"] = self.dependencies["libalsa"].options.shared
+                    tc.variables["HAVE_ASOUNDLIB_H"] = True
+                    tc.variables["HAVE_LIBASOUND"] = True
+                tc.variables["JACK"] = self.options.jack
                 if self.options.jack:
-                    cmake.definitions["JACK_SHARED"] = self.deps_cpp_info["jack"].shared
-                cmake.definitions["ESD"] = self.options.esd
+                    tc.variables["JACK_SHARED"] = self.dependencies["jack"].options.shared
+                tc.variables["ESD"] = self.options.esd
                 if self.options.esd:
-                    cmake.definitions["ESD_SHARED"] = self.deps_cpp_info["esd"].shared
-                cmake.definitions["PULSEAUDIO"] = self.options.pulse
+                    tc.variables["ESD_SHARED"] = self.dependencies["esd"].options.shared
+                tc.variables["PULSEAUDIO"] = self.options.pulse
                 if self.options.pulse:
-                    cmake.definitions["PULSEAUDIO_SHARED"] = self.deps_cpp_info["pulseaudio"].shared
-                cmake.definitions["SNDIO"] = self.options.sndio
+                    tc.variables["PULSEAUDIO_SHARED"] = self.dependencies["pulseaudio"].options.shared
+                tc.variables["SNDIO"] = self.options.sndio
                 if self.options.sndio:
-                    cmake.definitions["SNDIO_SHARED"] = self.deps_cpp_info["sndio"].shared
-                cmake.definitions["NAS"] = self.options.nas
+                    tc.variables["SNDIO_SHARED"] = self.dependencies["sndio"].options.shared
+                tc.variables["NAS"] = self.options.nas
                 if self.options.nas:
                     cmake_extra_ldflags += ["-lXau"]  # FIXME: SDL sources doesn't take into account transitive dependencies
-                    cmake_required_includes += [os.path.join(self.deps_cpp_info["nas"].rootpath, str(it)) for it in self.deps_cpp_info["nas"].includedirs]
-                    cmake.definitions["NAS_SHARED"] = self.options["nas"].shared
-                cmake.definitions["VIDEO_X11"] = self.options.x11
+                    cmake_required_includes += [os.path.join(self.dependencies["nas"].package_folder, str(it)) for it in self.dependencies["nas"].cpp_info.includedirs]
+                    tc.variables["NAS_SHARED"] = self.options["nas"].shared
+                tc.variables["VIDEO_X11"] = self.options.x11
                 if self.options.x11:
-                    cmake.definitions["HAVE_XEXT_H"] = True
-                cmake.definitions["VIDEO_X11_XCURSOR"] = self.options.xcursor
+                    tc.variables["HAVE_XEXT_H"] = True
+                tc.variables["VIDEO_X11_XCURSOR"] = self.options.xcursor
                 if self.options.xcursor:
-                    cmake.definitions["HAVE_XCURSOR_H"] = True
-                cmake.definitions["VIDEO_X11_XINERAMA"] = self.options.xinerama
+                    tc.variables["HAVE_XCURSOR_H"] = True
+                tc.variables["VIDEO_X11_XINERAMA"] = self.options.xinerama
                 if self.options.xinerama:
-                    cmake.definitions["HAVE_XINERAMA_H"] = True
-                cmake.definitions["VIDEO_X11_XINPUT"] = self.options.xinput
+                    tc.variables["HAVE_XINERAMA_H"] = True
+                tc.variables["VIDEO_X11_XINPUT"] = self.options.xinput
                 if self.options.xinput:
-                    cmake.definitions["HAVE_XINPUT_H"] = True
-                cmake.definitions["VIDEO_X11_XRANDR"] = self.options.xrandr
+                    tc.variables["HAVE_XINPUT_H"] = True
+                tc.variables["VIDEO_X11_XRANDR"] = self.options.xrandr
                 if self.options.xrandr:
-                    cmake.definitions["HAVE_XRANDR_H"] = True
-                cmake.definitions["VIDEO_X11_XSCRNSAVER"] = self.options.xscrnsaver
+                    tc.variables["HAVE_XRANDR_H"] = True
+                tc.variables["VIDEO_X11_XSCRNSAVER"] = self.options.xscrnsaver
                 if self.options.xscrnsaver:
-                    cmake.definitions["HAVE_XSS_H"] = True
-                cmake.definitions["VIDEO_X11_XSHAPE"] = self.options.xshape
+                    tc.variables["HAVE_XSS_H"] = True
+                tc.variables["VIDEO_X11_XSHAPE"] = self.options.xshape
                 if self.options.xshape:
-                    cmake.definitions["HAVE_XSHAPE_H"] = True
-                cmake.definitions["VIDEO_X11_XVM"] = self.options.xvm
+                    tc.variables["HAVE_XSHAPE_H"] = True
+                tc.variables["VIDEO_X11_XVM"] = self.options.xvm
                 if self.options.xvm:
-                    cmake.definitions["HAVE_XF86VM_H"] = True
-                cmake.definitions["VIDEO_WAYLAND"] = self.options.wayland
+                    tc.variables["HAVE_XF86VM_H"] = True
+                tc.variables["VIDEO_WAYLAND"] = self.options.wayland
                 if self.options.wayland:
                     # FIXME: Otherwise 2.0.16 links with system wayland (from egl/system requirement)
-                    cmake_extra_ldflags += ["-L{}".format(os.path.join(self.deps_cpp_info["wayland"].rootpath, it)) for it in self.deps_cpp_info["wayland"].libdirs]
-                    cmake.definitions["WAYLAND_SHARED"] = self.options["wayland"].shared
-                    cmake.definitions["WAYLAND_SCANNER_1_15_FOUND"] = 1  # FIXME: Check actual build-requires version
+                    cmake_extra_ldflags += ["-L{}".format(os.path.join(self.dependencies["wayland"].package_folder, it)) for it in self.dependencies["wayland"].cpp_info.libdirs]
+                    tc.variables["WAYLAND_SHARED"] = self.options["wayland"].shared
+                    tc.variables["WAYLAND_SCANNER_1_15_FOUND"] = 1  # FIXME: Check actual build-requires version
 
-                cmake.definitions["VIDEO_DIRECTFB"] = self.options.directfb
-                cmake.definitions["VIDEO_RPI"] = self.options.video_rpi
-                cmake.definitions["HAVE_LIBUNWIND_H"] = self.options.libunwind
+                tc.variables["VIDEO_DIRECTFB"] = self.options.directfb
+                tc.variables["VIDEO_RPI"] = self.options.video_rpi
+                tc.variables["HAVE_LIBUNWIND_H"] = self.options.libunwind
             elif self.settings.os == "Windows":
-                cmake.definitions["DIRECTX"] = self.options.directx
+                tc.variables["DIRECTX"] = self.options.directx
         else:
-            cmake.definitions["SDL_OPENGL"] = self.options.opengl
-            cmake.definitions["SDL_OPENGLES"] = self.options.opengles
-            cmake.definitions["SDL_VULKAN"] = self.options.vulkan
+            tc.variables["SDL_OPENGL"] = self.options.opengl
+            tc.variables["SDL_OPENGLES"] = self.options.opengles
+            tc.variables["SDL_VULKAN"] = self.options.vulkan
             if self.settings.os == "Linux":
                 # See https://github.com/bincrafters/community/issues/696
-                cmake.definitions["SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS"] = 1
+                tc.variables["SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS"] = 1
 
-                cmake.definitions["SDL_ALSA"] = self.options.alsa
+                tc.variables["SDL_ALSA"] = self.options.alsa
                 if self.options.alsa:
-                    cmake.definitions["SDL_ALSA_SHARED"] = self.deps_cpp_info["libalsa"].shared
-                    cmake.definitions["HAVE_ASOUNDLIB_H"] = True
-                    cmake.definitions["HAVE_LIBASOUND"] = True
-                cmake.definitions["SDL_JACK"] = self.options.jack
+                    tc.variables["SDL_ALSA_SHARED"] = self.dependencies["libalsa"].options.shared
+                    tc.variables["HAVE_ASOUNDLIB_H"] = True
+                    tc.variables["HAVE_LIBASOUND"] = True
+                tc.variables["SDL_JACK"] = self.options.jack
                 if self.options.jack:
-                    cmake.definitions["SDL_JACK_SHARED"] = self.deps_cpp_info["jack"].shared
-                cmake.definitions["SDL_ESD"] = self.options.esd
+                    tc.variables["SDL_JACK_SHARED"] = self.dependencies["jack"].options.shared
+                tc.variables["SDL_ESD"] = self.options.esd
                 if self.options.esd:
-                    cmake.definitions["SDL_ESD_SHARED"] = self.deps_cpp_info["esd"].shared
-                cmake.definitions["SDL_PULSEAUDIO"] = self.options.pulse
+                    tc.variables["SDL_ESD_SHARED"] = self.dependencies["esd"].options.shared
+                tc.variables["SDL_PULSEAUDIO"] = self.options.pulse
                 if self.options.pulse:
-                    cmake.definitions["SDL_PULSEAUDIO_SHARED"] = self.deps_cpp_info["pulseaudio"].shared
-                cmake.definitions["SDL_SNDIO"] = self.options.sndio
+                    tc.variables["SDL_PULSEAUDIO_SHARED"] = self.dependencies["pulseaudio"].options.shared
+                tc.variables["SDL_SNDIO"] = self.options.sndio
                 if self.options.sndio:
-                    cmake.definitions["SDL_SNDIO_SHARED"] = self.deps_cpp_info["sndio"].shared
-                cmake.definitions["SDL_NAS"] = self.options.nas
+                    tc.variables["SDL_SNDIO_SHARED"] = self.dependencies["sndio"].options.shared
+                tc.variables["SDL_NAS"] = self.options.nas
                 if self.options.nas:
                     cmake_extra_ldflags += ["-lXau"]  # FIXME: SDL sources doesn't take into account transitive dependencies
-                    cmake_required_includes += [os.path.join(self.deps_cpp_info["nas"].rootpath, str(it)) for it in self.deps_cpp_info["nas"].includedirs]
-                    cmake.definitions["SDL_NAS_SHARED"] = self.options["nas"].shared
-                cmake.definitions["SDL_X11"] = self.options.x11
+                    cmake_required_includes += [os.path.join(self.dependencies["nas"].package_folder, str(it)) for it in self.dependencies["nas"].cpp_info.includedirs]
+                    tc.variables["SDL_NAS_SHARED"] = self.options["nas"].shared
+                tc.variables["SDL_X11"] = self.options.x11
                 if self.options.x11:
-                    cmake.definitions["HAVE_XEXT_H"] = True
-                cmake.definitions["SDL_X11_XCURSOR"] = self.options.xcursor
+                    tc.variables["HAVE_XEXT_H"] = True
+                tc.variables["SDL_X11_XCURSOR"] = self.options.xcursor
                 if self.options.xcursor:
-                    cmake.definitions["HAVE_XCURSOR_H"] = True
-                cmake.definitions["SDL_X11_XINERAMA"] = self.options.xinerama
+                    tc.variables["HAVE_XCURSOR_H"] = True
+                tc.variables["SDL_X11_XINERAMA"] = self.options.xinerama
                 if self.options.xinerama:
-                    cmake.definitions["HAVE_XINERAMA_H"] = True
-                cmake.definitions["SDL_X11_XINPUT"] = self.options.xinput
+                    tc.variables["HAVE_XINERAMA_H"] = True
+                tc.variables["SDL_X11_XINPUT"] = self.options.xinput
                 if self.options.xinput:
-                    cmake.definitions["HAVE_XINPUT_H"] = True
-                cmake.definitions["SDL_X11_XRANDR"] = self.options.xrandr
+                    tc.variables["HAVE_XINPUT_H"] = True
+                tc.variables["SDL_X11_XRANDR"] = self.options.xrandr
                 if self.options.xrandr:
-                    cmake.definitions["HAVE_XRANDR_H"] = True
-                cmake.definitions["SDL_X11_XSCRNSAVER"] = self.options.xscrnsaver
+                    tc.variables["HAVE_XRANDR_H"] = True
+                tc.variables["SDL_X11_XSCRNSAVER"] = self.options.xscrnsaver
                 if self.options.xscrnsaver:
-                    cmake.definitions["HAVE_XSS_H"] = True
-                cmake.definitions["SDL_X11_XSHAPE"] = self.options.xshape
+                    tc.variables["HAVE_XSS_H"] = True
+                tc.variables["SDL_X11_XSHAPE"] = self.options.xshape
                 if self.options.xshape:
-                    cmake.definitions["HAVE_XSHAPE_H"] = True
-                cmake.definitions["SDL_X11_XVM"] = self.options.xvm
+                    tc.variables["HAVE_XSHAPE_H"] = True
+                tc.variables["SDL_X11_XVM"] = self.options.xvm
                 if self.options.xvm:
-                    cmake.definitions["HAVE_XF86VM_H"] = True
-                cmake.definitions["SDL_WAYLAND"] = self.options.wayland
+                    tc.variables["HAVE_XF86VM_H"] = True
+                tc.variables["SDL_WAYLAND"] = self.options.wayland
                 if self.options.wayland:
                     # FIXME: Otherwise 2.0.16 links with system wayland (from egl/system requirement)
-                    cmake_extra_ldflags += ["-L{}".format(os.path.join(self.deps_cpp_info["wayland"].rootpath, it)) for it in self.deps_cpp_info["wayland"].libdirs]
-                    cmake.definitions["SDL_WAYLAND_SHARED"] = self.options["wayland"].shared
+                    cmake_extra_ldflags += ["-L{}".format(os.path.join(self.dependencies["wayland"].package_folder, it)) for it in self.dependencies["wayland"].cpp_info.libdirs]
+                    tc.variables["SDL_WAYLAND_SHARED"] = self.options["wayland"].shared
 
-                cmake.definitions["SDL_DIRECTFB"] = self.options.directfb
-                cmake.definitions["SDL_RPI"] = self.options.video_rpi
-                cmake.definitions["HAVE_LIBUNWIND_H"] = self.options.libunwind
+                tc.variables["SDL_DIRECTFB"] = self.options.directfb
+                tc.variables["SDL_RPI"] = self.options.video_rpi
+                tc.variables["HAVE_LIBUNWIND_H"] = self.options.libunwind
             elif self.settings.os == "Windows":
-                cmake.definitions["SDL_DIRECTX"] = self.options.directx
+                tc.variables["SDL_DIRECTX"] = self.options.directx
 
         if Version(self.version) >= "2.0.22":
-            cmake.definitions["SDL2_DISABLE_SDL2MAIN"] = not self.options.sdl2main
+            tc.variables["SDL2_DISABLE_SDL2MAIN"] = not self.options.sdl2main
 
         # Add extra information collected from the deps
-        cmake.definitions["EXTRA_LDFLAGS"] = " ".join(cmake_extra_ldflags)
-        cmake.definitions["CMAKE_REQUIRED_INCLUDES"] = ";".join(cmake_required_includes)
-        cmake.configure(build_dir=self._build_subfolder)
-        return cmake
+        tc.variables["EXTRA_LDFLAGS"] = " ".join(cmake_extra_ldflags)
+        tc.variables["CMAKE_REQUIRED_INCLUDES"] = ";".join(cmake_required_includes)
+
+        # picked up from CMakeLists wrapper during conan v2 migration but don't know why it's needed
+        if (self.settings.os != "Windows" or not is_apple_os(self)) and \
+           self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
+            tc.preprocessor_definitions["GBM_BO_USE_CURSOR"] = 2
+
+        tc.generate()
+
+        env = VirtualBuildEnv(self)
+        env.generate()
+
+        env = Environment()
+        lib_paths = [os.path.join(dependency.package_folder, libdir) for _, dependency in self.dependencies.host.items() for libdir in dependency.cpp_info.libdirs]
+        for lib_path in lib_paths:
+            env.prepend_path("LIBRARY_PATH", lib_path)
+        envvars = env.vars(self)
+        envvars.save_script("conanbuild_sdl_deps_library_path")
+
+        if self.settings.os == "Linux":
+            deps = PkgConfigDeps(self)
+            deps.generate()
+
+            # TODO: to remove in conan 1.53.0 (https://github.com/conan-io/conan/issues/11962)?
+            env = Environment()
+            env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
+            envvars = env.vars(self)
+            envvars.save_script("conanbuild_pkg_config_deps")
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)',
+                        '# check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)')
+
+        # TODO: to remove in conan v2 when 1 profile removed
+        # Ensure to find wayland-scanner from wayland recipe in requirements if 1 profile
+        if self.options.get_safe("wayland") and Version(self.version) >= "2.0.18" and not hasattr(self, "settings_build"):
+            wayland_bindirs = self.dependencies["wayland"].cpp_info.bindirs
+            wayland_root = self.dependencies["wayland"].package_folder
+            wayland_bin_paths = " ".join(f"\"{os.path.join(wayland_root, bindir)}\"" for bindir in wayland_bindirs)
+            replace_in_file(self,
+                os.path.join(self.source_folder, "cmake", "sdlchecks.cmake"),
+                "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED)",
+                f"find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED PATHS {wayland_bin_paths} NO_DEFAULT_PATH)",
+            )
 
     def build(self):
         self._patch_sources()
-        lib_paths = [lib for dep in self.deps_cpp_info.deps for lib in self.deps_cpp_info[dep].lib_paths]
-        with tools.environment_append({"LIBRARY_PATH": os.pathsep.join(lib_paths)}):
-            cmake = self._configure_cmake()
-            cmake.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        if self.version >= "2.0.16":
-            self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        else:
-            self.copy(pattern="COPYING.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        license = "LICENSE.txt" if self.version >= "2.0.16" else "COPYING.txt"
+        copy(self, license, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
         rm(self, "sdl2-config", os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))

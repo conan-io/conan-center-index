@@ -1,27 +1,38 @@
-from conans import ConanFile, CMake
-from conan.tools.build import cross_building
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package_multi"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if self.settings.os == "Linux":
+            tc.variables["WITH_X11"] = self.dependencies["sdl"].options.x11
+            tc.variables["WITH_ALSA"] = self.dependencies["sdl"].options.alsa
+            tc.variables["WITH_PULSE"] = self.dependencies["sdl"].options.pulse
+            tc.variables["WITH_ESD"] = self.dependencies["sdl"].options.esd
+            tc.variables["WITH_ARTS"] = self.dependencies["sdl"].options.arts
+            tc.variables["WITH_DIRECTFB"] = self.dependencies["sdl"].options.directfb
+        if self.settings.os == "Windows":
+            tc.variables["WITH_DIRECTX"] = self.dependencies["sdl"].options.directx
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)
-        if self.settings.os == "Linux":
-            cmake.definitions["WITH_X11"] = self.options["sdl"].x11
-            cmake.definitions["WITH_ALSA"] = self.options["sdl"].alsa
-            cmake.definitions["WITH_PULSE"] = self.options["sdl"].pulse
-            cmake.definitions["WITH_ESD"] = self.options["sdl"].esd
-            cmake.definitions["WITH_ARTS"] = self.options["sdl"].arts
-            cmake.definitions["WITH_DIRECTFB"] = self.options["sdl"].directfb
-        if self.settings.os == "Windows":
-            cmake.definitions["WITH_DIRECTX"] = self.options["sdl"].directx
         cmake.configure()
         cmake.build()
 
     def test(self):
-        if not cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+        if can_run(self):
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run(bin_path, env="conanrun")

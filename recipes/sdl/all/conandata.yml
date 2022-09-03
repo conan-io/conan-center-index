@@ -17,14 +17,9 @@ sources:
 patches:
   "2.0.20":
     - patch_file: "patches/0004-2.0.20-ndk.patch"
-      base_path: "source_subfolder"
   "2.0.16":
     - patch_file: "patches/0003-2.0.16-wayland-scanner-buildrequires.patch"
-      base_path: "source_subfolder"
   "2.0.14":
     - patch_file: "patches/0001-fix-cmake-ios-tvos.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-mingw-improvements.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-2.0.14-wayland-scanner-buildrequires.patch"
-      base_path: "source_subfolder"
