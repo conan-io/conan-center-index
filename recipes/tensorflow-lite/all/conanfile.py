@@ -93,14 +93,14 @@ class TensorflowLiteConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["TFLITE_ENABLE_RUY"] = self.options.with_ruy,
-        tc.variables["TFLITE_ENABLE_NNAPI"] = self.options.get_safe("with_nnapi", False),
-        tc.variables["TFLITE_ENABLE_XNNPACK"] = self.options.with_xnnpack,
+        tc.variables["TFLITE_ENABLE_RUY"] = self.options.with_ruy
+        tc.variables["TFLITE_ENABLE_NNAPI"] = self.options.get_safe("with_nnapi", False)
+        tc.variables["TFLITE_ENABLE_XNNPACK"] = self.options.with_xnnpack
         tc.variables["TFLITE_ENABLE_MMAP"] = self.options.get_safe("with_mmap", False)
-        tc.variables["TFLITE_ENABLE_GPU"] = False,
-        tc.variables["TFLITE_ENABLE_INSTALL"] = True,
+        tc.variables["TFLITE_ENABLE_GPU"] = False
+        tc.variables["TFLITE_ENABLE_INSTALL"] = True
 
-        tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True,
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         if self.settings.arch == "armv8":
             # Not defined by Conan for Apple Silicon. See https://github.com/conan-io/conan/pull/8026
             tc.cache_variables["CMAKE_SYSTEM_PROCESSOR"] = "arm64"
