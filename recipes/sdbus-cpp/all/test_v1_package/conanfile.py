@@ -1,6 +1,9 @@
 import os
 
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.build import can_run
+
+from conans import CMake
 
 
 class SdbusCppTestConan(ConanFile):
@@ -13,6 +16,6 @@ class SdbusCppTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if can_run(self):
             bin_path = os.path.join("bin", "example")
             self.run(bin_path, run_environment=True)

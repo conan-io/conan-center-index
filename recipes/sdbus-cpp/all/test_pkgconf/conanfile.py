@@ -12,7 +12,7 @@ class SdbusCppTestConan(ConanFile):
     test_type = "explicit"
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.4")
+        self.tool_requires("pkgconf/1.7.4")
 
     def requirements(self):
         self.requires(self.tested_reference_str)
