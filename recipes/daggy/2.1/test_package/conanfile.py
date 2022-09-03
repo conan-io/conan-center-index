@@ -8,6 +8,22 @@ class DaggyTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_paths", "cmake_find_package"
 
+    settings = "os", "compiler", "build_type", "arch"
+    options = {
+        "with_ssh2": [True, False],
+        "with_yaml": [True, False],
+        "with_console": [True, False],
+        "shared": [True, False],
+        "fPIC": [True, False]
+    }
+    default_options = {
+        "with_ssh2": True,
+        "with_yaml": True,
+        "with_console": False,
+        "shared": False,
+        "fPIC": True
+    }
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
