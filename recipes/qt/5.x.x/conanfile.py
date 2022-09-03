@@ -929,8 +929,12 @@ Examples = bin/datadir/examples""")
         libsuffix = ""
         if not self.options.multiconfiguration:
             if self.settings.build_type == "Debug":
-                if self.settings.os == "Windows" and self._is_msvc:
-                    libsuffix = "d"
+                if self.settings.os == "Windows":
+                    if Version(self.version) >= Version("5.14.0"):
+                        if self._is_msvc:
+                            libsuffix = "d"
+                    else:
+                        libsuffix = "d"
                 elif is_apple_os(self):
                     libsuffix = "_debug"
 
