@@ -1,5 +1,4 @@
-from conans import ConanFile, CMake, tools, errors
-from conans.errors import ConanInvalidConfiguration
+from conans import ConanFile, CMake, tools
 import os
 
 required_conan_version = ">=1.43.0"
@@ -29,7 +28,6 @@ class DaggyConan(ConanFile):
         "fPIC": True
     }
     generators = "cmake", "cmake_paths", "cmake_find_package"
-    tool_requires = "cmake/3.23.1"
     _cmake = None
 
     @property
@@ -56,7 +54,7 @@ class DaggyConan(ConanFile):
         self.options["qt"].shared = True
     
     def configure(self):
-          if self.options.shared:
+        if self.options.shared:
             del self.options.fPIC
 
     @property
@@ -85,6 +83,9 @@ class DaggyConan(ConanFile):
 
         if not self.options["qt"].shared: 
             raise ConanInvalidConfiguration("Shared Qt lib is required.") 
+
+    def build_requirenments(self):
+        self.tool_requires("cmake/3.23.1")
 
     def requirements(self):
         self.requires("qt/6.3.1")
