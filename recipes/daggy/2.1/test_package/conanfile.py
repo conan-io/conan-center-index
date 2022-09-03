@@ -16,13 +16,6 @@ class DaggyTestConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False]
     }
-    default_options = {
-        "with_ssh2": True,
-        "with_yaml": True,
-        "with_console": False,
-        "shared": False,
-        "fPIC": True
-    }
 
     def build(self):
         cmake = CMake(self)
