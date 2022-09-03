@@ -1,0 +1,58 @@
+diff --git a/libs/locale/build/Jamfile.v2 b/libs/locale/build/Jamfile.v2
+index 450ec87..c134075 100644
+--- a/libs/locale/build/Jamfile.v2
++++ b/libs/locale/build/Jamfile.v2
+@@ -20,6 +20,7 @@ project /boost/locale
+ # Features
+ 
+ feature.feature boost.locale.iconv : on off : optional propagated ;
++feature.feature boost.locale.iconv.lib : libc libiconv : optional propagated ;
+ feature.feature boost.locale.icu : on off :  optional propagated ;
+ feature.feature boost.locale.posix : on off : optional propagated ;
+ feature.feature boost.locale.std : on off : optional propagated ;
+@@ -230,11 +231,34 @@ rule configure-full ( properties * : flags-only )
+         if [ configure.builds has_iconv : $(properties) : "iconv (libc)" ]
+         {
+             found-iconv = true ;
++            if <boost.locale.iconv.lib>libiconv in $(properties)
++            {
++               if [ configure.builds has_external_iconv : $(properties) : "iconv (separate)" ]
++               {
++                   result += <library>iconv ;
++               }
++               else
++               {
++                   EXIT "- Boost.Locale found iconv (libc) instead of iconv (separate) library to be built." ;
++               }
++			}
++        }
++        else if <boost.locale.iconv.lib>libc in $(properties)
++        {
++            EXIT "- Boost.Locale failed to find iconv (libc) library to be built." ;
+         } else if [ configure.builds has_external_iconv : $(properties) : "iconv (separate)" ]
+         {
+             found-iconv = true ;
+             result += <library>iconv ;
+         }
++        else if <boost.locale.iconv.lib>libiconv in $(properties)
++        {
++            EXIT "- Boost.Locale failed to find iconv (separate) library to be built." ;
++        }
++    }
++    if ! $(found-iconv)
++    {
++        EXIT "- Boost.Locale failed to find iconv library to be built." ;
+     }
+     if $(found-iconv)
+     {
+@@ -273,6 +297,10 @@ rule configure-full ( properties * : flags-only )
+                       <library>/boost/thread//boost_thread
+                       ;
+         }
++        else
++        {
++            EXIT "- Boost.Locale failed to find ICU library to be built." ;
++        }
+     }
+ 
+     if ! $(found-iconv) && ! $(found-icu) && ! <target-os>windows in $(properties) && ! <target-os>cygwin in $(properties)
