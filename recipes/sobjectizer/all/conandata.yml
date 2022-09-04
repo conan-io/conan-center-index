@@ -24,3 +24,6 @@ sources:
   "5.7.4.1":
     url: "https://github.com/Stiffstream/sobjectizer/archive/v.5.7.4.1.tar.gz"
     sha256: "9f5fb9d0be46d427be17f1c47cfa3d332dfe40877d1f9fafd38bcc05c46ff013"
+  "5.7.4.2":
+    url: "https://github.com/Stiffstream/sobjectizer/archive/v.5.7.4.2.tar.gz"
+    sha256: "defaec29e135a21b1b279b1db8eb56993099a7368baae93e7ea1f3f79909f3d8"
