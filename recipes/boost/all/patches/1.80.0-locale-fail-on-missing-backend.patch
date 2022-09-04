@@ -16,7 +16,7 @@ index 450ec87..ece28bf 100644
              found-iconv = true ;
 -        } else if [ configure.builds has_external_iconv : $(properties) : "iconv (separate)" ]
 +            if <boost.locale.iconv.lib>libiconv in $(properties)
-+			{
++            {
 +                if [ configure.builds has_external_iconv : $(properties) : "iconv (separate)" ]
 +                {
 +                    result += <library>iconv ;
