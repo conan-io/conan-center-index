@@ -14,13 +14,9 @@ sources:
 patches:
   "3.3.0":
     - patch_file: "patches/0001-3.3.0-fix-install.patch"
-      base_path: "source_subfolder"
   "3.1.2":
     - patch_file: "patches/0001-3.1.1-fix-install.patch"
-      base_path: "source_subfolder"
   "3.1.1":
     - patch_file: "patches/0001-3.1.1-fix-install.patch"
-      base_path: "source_subfolder"
   "2.0.1":
     - patch_file: "patches/0001-2.0.1-fix-install.patch"
-      base_path: "source_subfolder"
