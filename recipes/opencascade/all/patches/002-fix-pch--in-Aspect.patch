@@ -1,0 +1,22 @@
+fix PCH issue
+
+--- a/src/Aspect/Aspect_DisplayConnection.cxx
++++ b/src/Aspect/Aspect_DisplayConnection.cxx
+@@ -36,7 +36,7 @@ Aspect_DisplayConnection::Aspect_DisplayConnection()
+   myIsOwnDisplay = false;
+   OSD_Environment anEnv ("DISPLAY");
+   myDisplayName = anEnv.Value();
+-  Init (NULL);
++  Init ((Display*)NULL);
+ #endif
+ }
+ 
+@@ -70,7 +70,7 @@ Aspect_DisplayConnection::Aspect_DisplayConnection (const TCollection_AsciiStrin
+   myIsOwnDisplay (false)
+ {
+   myDisplayName = theDisplayName;
+-  Init (NULL);
++  Init ((Display* )NULL);
+ }
+ 
+ // =======================================================================

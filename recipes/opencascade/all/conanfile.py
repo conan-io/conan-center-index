@@ -31,7 +31,13 @@ class OpenCascadeConan(ConanFile):
         "with_tk": [True, False],
         "with_tbb": [True, False],
         "with_opengl": [True, False],
-        "extended_debug_messages": [True, False],
+        "with_tcl": [True, False],
+        "with_x": [True, False],
+        "build_draw": [True, False],
+        "build_visualization": [True, False],
+        "build_application": [True, False],
+        "use_pch": [True, False],
+        "extended_debug_messages": [True, False]
     }
     default_options = {
         "shared": False,
@@ -42,9 +48,15 @@ class OpenCascadeConan(ConanFile):
         "with_rapidjson": False,
         "with_draco": False,
         "with_tk": True,
+        "with_tcl": True,
         "with_tbb": False,
         "with_opengl": True,
-        "extended_debug_messages": False,
+        "with_x": True,
+        "build_draw": True,
+        "build_visualization": True,
+        "build_application": True,
+        "use_pch": True,
+        "extended_debug_messages": True,
     }
 
     short_paths = True
@@ -92,14 +104,15 @@ class OpenCascadeConan(ConanFile):
 
     def requirements(self):
         self.requires("tcl/8.6.11")
+        self.requires("freetype/2.11.1")
         if self._link_tk:
             self.requires("tk/8.6.10")
-        self.requires("freetype/2.11.1")
         if self._link_opengl:
             self.requires("opengl/system")
         if self._is_linux:
             self.requires("fontconfig/2.13.93")
-            self.requires("xorg/system")
+            if self.options.with_x:
+                self.requires("xorg/system")
         # TODO: add vtk support?
         if self.options.with_ffmpeg:
             self.requires("ffmpeg/5.0")
@@ -309,7 +322,7 @@ class OpenCascadeConan(ConanFile):
         cmake.definitions["BUILD_RELEASE_DISABLE_EXCEPTIONS"] = True
         if self.settings.build_type == "Debug":
             cmake.definitions["BUILD_WITH_DEBUG"] = self.options.extended_debug_messages
-        cmake.definitions["BUILD_USE_PCH"] = False
+        cmake.definitions["BUILD_USE_PCH"] = self.options.use_pch
         cmake.definitions["INSTALL_SAMPLES"] = False
 
         cmake.definitions["INSTALL_DIR_LAYOUT"] = "Unix"
@@ -331,6 +344,10 @@ class OpenCascadeConan(ConanFile):
             cmake.definitions["USE_D3D"] = False
         cmake.definitions["BUILD_ENABLE_FPE_SIGNAL_HANDLER"] = False
         cmake.definitions["BUILD_DOC_Overview"] = False
+        # build options
+        cmake.definitions["BUILD_MODULE_Visualization"] = self.options.build_visualization
+        cmake.definitions["BUILD_MODULE_Draw"] = self.options.build_draw
+        cmake.definitions["BUILD_MODULE_ApplicationFramework"] = self.options.build_application
 
         cmake.definitions["USE_FREEIMAGE"] = self.options.with_freeimage
         cmake.definitions["USE_OPENVR"] = self.options.with_openvr
@@ -405,9 +422,9 @@ class OpenCascadeConan(ConanFile):
         csf_to_conan_dependencies = {
             # Mandatory dependencies
             "CSF_FREETYPE": {"externals": ["freetype::freetype"]},
-            "CSF_TclLibs": {"externals": ["tcl::tcl"]},
+            "CSF_TclLibs": {"externals": ["tcl::tcl"] if self.options.with_tcl else []},
             "CSF_fontconfig": {"externals": ["fontconfig::fontconfig"] if self._is_linux else []},
-            "CSF_XwLibs": {"externals": ["xorg::xorg"] if self._is_linux else []},
+            "CSF_XwLibs": {"externals": ["xorg::xorg"] if self._is_linux and self.options.with_x else []},
             # Optional dependencies
             "CSF_OpenGlLibs": {"externals": ["opengl::opengl"] if self._link_opengl else []},
             "CSF_TclTkLibs": {"externals": ["tk::tk"] if self._link_tk else []},

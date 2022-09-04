@@ -1,4 +1,7 @@
 sources:
+  "7.6.3":
+    url: "https://github.com/Open-Cascade-SAS/OCCT/archive/refs/tags/V7_6_3.tar.gz"
+    sha256: "3f95808e2c5060c5b5001770b5e42c7d9a849b23d925272bc70a5a2377413aa9"
   "7.6.2":
     url: "https://github.com/Open-Cascade-SAS/OCCT/archive/refs/tags/V7_6_2.tar.gz"
     sha256: "dea04077d71507c666aaa7ccaeacc73ab580d6572d7f75e90a1984c4c0302a7a"
@@ -12,3 +15,7 @@ patches:
   "7.5.0":
     - patch_file: "patches/0001-undefined-ref-ncollection-lerp.patch"
       base_path: "source_subfolder"
+  "7.6.3":
+    - patch_file: "patches/002-fix-pch--in-Aspect.patch"
+      base_path: "source_subfolder"
+
