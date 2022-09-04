@@ -1,0 +1,16 @@
+diff --git a/include/LightGBM/utils/common.h b/include/LightGBM/utils/common.h
+index af981062..097f20d4 100644
+--- a/include/LightGBM/utils/common.h
++++ b/include/LightGBM/utils/common.h
+@@ -33,9 +33,9 @@
+ 
+ #if (!((defined(sun) || defined(__sun)) && (defined(__SVR4) || defined(__svr4__))))
+ #define FMT_HEADER_ONLY
+-#include "../../../external_libs/fmt/include/fmt/format.h"
++#include <fmt/format.h>
+ #endif
+-#include "../../../external_libs/fast_double_parser/include/fast_double_parser.h"
++#include <fast_double_parser.h>
+ 
+ #ifdef _MSC_VER
+ #include <intrin.h>

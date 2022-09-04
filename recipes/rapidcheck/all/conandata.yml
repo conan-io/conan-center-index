@@ -1,4 +1,7 @@
 sources:
+  "cci.20220514":
+    url: "https://github.com/emil-e/rapidcheck/archive/8fafda42e732164db58003e542196e94a28481f9.zip"
+    sha256: "63853f74026678b5cfed5f18f5d8cbd4eccb2f48bb89a8f8cb1cd1cc69f22db8"
   "cci.20210702":
     url: "https://github.com/emil-e/rapidcheck/archive/33d15a858e3125f5af61a655f390f1cbc2f272ba.zip"
     sha256: "521c9b163f0018ea6379513e0c674d520b9da66fdb8df73a7a98b04ea2358e69"
@@ -9,8 +12,11 @@ sources:
     url: "https://github.com/emil-e/rapidcheck/archive/258d907da00a0855f92c963d8f76eef115531716.zip"
     sha256: "87bfbdceaa09e7aaaf70b2efd0078e93323dd8abdad48c57e9f23bfd84174a75"
 patches:
+  "cci.20220514":
+    - patch_file: "patches/0001-gtest-catch-integration-20220514.patch"
+      base_path: "source_subfolder"
   "cci.20210702":
-    - patch_file: "patches/0001-gtest-catch-integration.patch"
+    - patch_file: "patches/0001-gtest-catch-integration-20210702.patch"
       base_path: "source_subfolder"
   "cci.20210107":
     - patch_file: "patches/0001-gtest-catch-integration-20210107.patch"

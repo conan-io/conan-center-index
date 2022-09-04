@@ -1,0 +1,39 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cb8fb1f..66f76ec 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -14,17 +14,17 @@ include(cmake/simdutf-flags.cmake)
+ 
+ set(SIMDUTF_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+ 
+-enable_testing()
++#enable_testing()
+ add_subdirectory(src)
+-add_subdirectory(tests)
++# add_subdirectory(tests)
+ 
+ 
+ 
+-if(CMAKE_CXX_COMPILER_ID MATCHES GNU AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
+-  message(STATUS "The benchmark tool requires GCC 8.0 or better.")
+-else()
+-  add_subdirectory(benchmarks)
+-endif()
++#if(CMAKE_CXX_COMPILER_ID MATCHES GNU AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
++#  message(STATUS "The benchmark tool requires GCC 8.0 or better.")
++#else()
++#  add_subdirectory(benchmarks)
++#endif()
+ 
+ 
+ # ---- Install rules ----
+diff --git a/cmake/simdutf-flags.cmake b/cmake/simdutf-flags.cmake
+index 9263a7f..39f5a8c 100644
+--- a/cmake/simdutf-flags.cmake
++++ b/cmake/simdutf-flags.cmake
+@@ -16,4 +16,4 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmake")
+ set(CMAKE_CXX_STANDARD 11)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS OFF)
+-set(CMAKE_MACOSX_RPATH OFF)
++set(CMAKE_MACOSX_RPATH ON)

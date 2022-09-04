@@ -6,13 +6,13 @@ required_conan_version = ">=1.33.0"
 
 class WasmedgeConan(ConanFile):
     name = "wasmedge"
-    homepage = "https://github.com/WasmEdge/WasmEdge/"
-    license = "Apache-2.0"
-    url = "https://github.com/conan-io/conan-center-index"
     description = ("WasmEdge is a lightweight, high-performance, and extensible WebAssembly runtime"
                 "for cloud native, edge, and decentralized applications."
                 "It powers serverless apps, embedded functions, microservices, smart contracts, and IoT devices.")
     topics = ("webassembly", "wasm", "wasi", "emscripten")
+    license = "Apache-2.0"
+    homepage = "https://github.com/WasmEdge/WasmEdge/"
+    url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler",
 
     @property
@@ -48,6 +48,7 @@ class WasmedgeConan(ConanFile):
 
     def package(self):
         self.copy("*.h", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
+        self.copy("*.inc", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
 
         srclibdir = os.path.join(self._source_subfolder, "lib64" if self.settings.os == "Linux" else "lib")
         srcbindir = os.path.join(self._source_subfolder, "bin")

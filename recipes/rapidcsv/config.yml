@@ -1,3 +1,7 @@
 versions:
+  "8.64":
+    folder: "all"
+  "8.62":
+    folder: "all"
   "8.53":
     folder: "all"

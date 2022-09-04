@@ -1,9 +1,12 @@
-import glob
+from conan import ConanFile
+from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, replace_in_file, rmdir
+from conan.tools.scm import Version
 import os
-import shutil
-from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.51.3"
 
 
 class FlatbuffersConan(ConanFile):
@@ -11,133 +14,156 @@ class FlatbuffersConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://google.github.io/flatbuffers"
-    topics = ("conan", "flatbuffers", "serialization", "rpc", "json-parser")
+    topics = ("flatbuffers", "serialization", "rpc", "json-parser")
     description = "Memory Efficient Serialization Library"
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "header_only": [True, False],
-               "flatc": [True, False],
-               "flatbuffers": [True, False],
-               "options_from_context": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True, "header_only": False,
-                       "flatc": True,
-                       "flatbuffers": True,
-                       "options_from_context": True}
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
 
-    _cmake = None
-    _header_only = False
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "header_only": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "header_only": False,
+    }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-    
+    def _has_flatc(self):
+        # don't build flatc when it makes little sense or not supported
+        return self.settings.os not in ["Android", "iOS", "watchOS", "tvOS", "Neutrino"]
+
+    def export_sources(self):
+        copy(self, os.path.join("cmake", "FlatcTargets.cmake"), self.recipe_folder, self.export_sources_folder)
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
     def configure(self):
-        # Detect if host or build context
-        if self.options.options_from_context:
-            settings_target = getattr(self, 'settings_target', None)
-            self.options.flatc = settings_target is not None
-            self.options.flatbuffers = settings_target is None
-        del self.options.options_from_context
-
-        if not self.options.flatbuffers:
-            del self.options.header_only
-            self._header_only = False
-        else:
-            self._header_only = self.options.header_only
-
-        if (self.options.shared and self.options.flatbuffers) or self._header_only or (not self.options.flatbuffers and self.options.flatc):
+        if self.options.shared or self.options.header_only:
             del self.options.fPIC
-            
-        if self._header_only and not self.options.flatc:
+        if self.options.header_only:
             del self.options.shared
 
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
-
     def package_id(self):
-        if self._header_only and not self.options.flatc:
-            self.info.header_only()
+        if self.options.header_only and not self._has_flatc:
+            self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["FLATBUFFERS_BUILD_TESTS"] = False
-        self._cmake.definitions["FLATBUFFERS_BUILD_SHAREDLIB"] = self.options.flatbuffers and self.options.shared
-        self._cmake.definitions["FLATBUFFERS_BUILD_FLATLIB"] = self.options.flatbuffers and not self.options.shared
-        self._cmake.definitions["FLATBUFFERS_BUILD_FLATC"] = self.options.flatc
-        self._cmake.definitions["FLATBUFFERS_BUILD_FLATHASH"] = False
-        self._cmake.definitions["FLATBUFFERS_STATIC_FLATC"] = False
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["FLATBUFFERS_BUILD_TESTS"] = False
+        tc.variables["FLATBUFFERS_INSTALL"] = True
+        tc.variables["FLATBUFFERS_BUILD_FLATLIB"] = not self.options.header_only and not self.options.shared
+        tc.variables["FLATBUFFERS_BUILD_FLATC"] = self._has_flatc
+        tc.variables["FLATBUFFERS_STATIC_FLATC"] = False
+        tc.variables["FLATBUFFERS_BUILD_FLATHASH"] = False
+        tc.variables["FLATBUFFERS_BUILD_SHAREDLIB"] = not self.options.header_only and self.options.shared
+        # Honor conan profile
+        tc.variables["FLATBUFFERS_LIBCXX_WITH_CLANG"] = False
+        # Mimic upstream CMake/Version.cmake removed in _patch_sources()
+        version = Version(self.version)
+        tc.variables["VERSION_MAJOR"] = version.major
+        tc.variables["VERSION_MINOR"] = version.minor
+        tc.variables["VERSION_PATCH"] = version.patch
+        # For msvc shared
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        # Relocatable shared libs on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        # Fix iOS/tvOS/watchOS
+        if is_apple_os(self):
+            tc.variables["CMAKE_MACOSX_BUNDLE"] = False
+        # Inject at least C++11 standard (would be more elegant to rely on cxx_std_11 compile feature upstream)
+        if not valid_min_cppstd(self, 11):
+            tc.variables["CMAKE_CXX_STANDARD"] = 11
+        tc.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        # Prefer manual injection of current version in build(), otherwise it tries to call git
+        replace_in_file(self, cmakelists, "include(CMake/Version.cmake)", "")
+        # No warnings as errors
+        replace_in_file(self, cmakelists, "/WX", "")
+        replace_in_file(self, cmakelists, "-Werror ", "")
+        # Install dll to bin folder
+        replace_in_file(self, cmakelists,
+                              "RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}",
+                              "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}")
 
     def build(self):
         self._patch_sources()
-        if (self.options.flatbuffers and not self._header_only) or self.options.flatc:
-            cmake = self._configure_cmake()
-            cmake.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        copy(self, "FlatcTargets.cmake",
+                   src=os.path.join(self.source_folder, os.pardir, "cmake"),
+                   dst=os.path.join(self.package_folder, self._module_path))
+        copy(self, "BuildFlatBuffers.cmake",
+                   src=os.path.join(self.source_folder, "CMake"),
+                   dst=os.path.join(self.package_folder, self._module_path))
 
-        # Run cmake if there is anything to build
-        if (self.options.flatbuffers and not self._header_only) or self.options.flatc:
-            cmake = self._configure_cmake()
-            cmake.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-
-        if self.options.flatbuffers:
-            self.copy(pattern="BuildFlatBuffers.cmake", dst="bin/cmake", src=os.path.join(self._source_subfolder, "CMake"))
-
-            if self._header_only:
-                header_dir = os.path.join(self._source_subfolder, "include", "flatbuffers")
-                dst_dir = os.path.join("include", "flatbuffers")
-                self.copy("*.h", dst=dst_dir, src=header_dir)
-
-            if not self._header_only:
-                if self.settings.os == "Windows" and self.options.shared:
-                    tools.mkdir(os.path.join(self.package_folder, "bin"))
-                    for dll_path in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
-                        shutil.move(dll_path, os.path.join(self.package_folder, "bin", os.path.basename(dll_path)))
-        elif self.options.flatc:
-            tools.rmdir(os.path.join(self.package_folder, "include"))
+    @property
+    def _module_path(self):
+        return os.path.join("lib", "cmake")
 
     def package_info(self):
-        if self.options.flatbuffers:
-            self.cpp_info.filenames["cmake_find_package"] = "Flatbuffers"
-            self.cpp_info.filenames["cmake_find_package_multi"] = "Flatbuffers"
-            self.cpp_info.names["cmake_find_package"] = "flatbuffers"
-            self.cpp_info.names["cmake_find_package_multi"] = "flatbuffers"
-            self.cpp_info.names["pkg_config"] = "flatbuffers"
-            if not self._header_only:
-                cmake_target = "flatbuffers_shared" if self.options.shared else "flatbuffers"
-                self.cpp_info.components["libflatbuffers"].names["cmake_find_package"] = cmake_target
-                self.cpp_info.components["libflatbuffers"].names["cmake_find_package_multi"] = cmake_target
-                self.cpp_info.components["libflatbuffers"].libs = tools.collect_libs(self)
-                self.cpp_info.components["libflatbuffers"].builddirs.append("bin/cmake")
-                self.cpp_info.components["libflatbuffers"].build_modules.append("bin/cmake/BuildFlatBuffers.cmake")
-                if self.settings.os == "Linux":
-                    self.cpp_info.components["libflatbuffers"].system_libs.append("m")
-            else:
-                self.cpp_info.builddirs.append("bin/cmake")
-                self.cpp_info.build_modules.append("bin/cmake/BuildFlatBuffers.cmake")
-        if self.options.flatc:
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_module_file_name", "FlatBuffers")
+        self.cpp_info.set_property("cmake_file_name", "Flatbuffers")
+        cmake_target = "flatbuffers"
+        if not self.options.header_only and self.options.shared:
+            cmake_target += "_shared"
+        self.cpp_info.set_property("cmake_target_name", f"flatbuffers::{cmake_target}")
+        self.cpp_info.set_property("pkg_config_name", "flatbuffers")
+
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
+        if not self.options.header_only:
+            self.cpp_info.components["libflatbuffers"].libs = collect_libs(self)
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["libflatbuffers"].system_libs.append("m")
+
+        # Provide flatbuffers::flatc target and CMake functions from BuildFlatBuffers.cmake
+        build_modules = [
+            os.path.join(self._module_path, "FlatcTargets.cmake"),
+            os.path.join(self._module_path, "BuildFlatBuffers.cmake"),
+        ]
+        self.cpp_info.set_property("cmake_build_modules", build_modules)
+        if self._has_flatc:
             bindir = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bindir))
+            self.output.info(f"Appending PATH environment variable: {bindir}")
             self.env_info.PATH.append(bindir)
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "FlatBuffers"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Flatbuffers"
+        self.cpp_info.names["cmake_find_package"] = "flatbuffers"
+        self.cpp_info.names["cmake_find_package_multi"] = "flatbuffers"
+        self.cpp_info.components["libflatbuffers"].names["cmake_find_package"] = cmake_target
+        self.cpp_info.components["libflatbuffers"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.components["libflatbuffers"].build_modules["cmake_find_package"] = build_modules
+        self.cpp_info.components["libflatbuffers"].build_modules["cmake_find_package_multi"] = build_modules
+        self.cpp_info.components["libflatbuffers"].set_property("cmake_file_name", f"flatbuffers::{cmake_target}")
+        self.cpp_info.components["libflatbuffers"].set_property("pkg_config_name", "flatbuffers")

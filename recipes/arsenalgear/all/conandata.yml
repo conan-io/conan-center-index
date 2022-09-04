@@ -1,0 +1,4 @@
+sources:
+  "1.2.2":
+    url: "https://github.com/JustWhit3/arsenalgear-cpp/archive/refs/tags/v1.2.2.tar.gz"
+    sha256: "556155d0be0942bcdd5df02fcda258579915e76b5a70e7220de6ef38c8ca7779"

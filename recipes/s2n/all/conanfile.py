@@ -42,7 +42,7 @@ class S2n(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("openssl/1.1.1m")
+        self.requires("openssl/1.1.1q")
 
     def validate(self):
         if self.settings.os == "Windows":

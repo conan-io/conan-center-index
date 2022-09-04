@@ -1,23 +1,31 @@
-from conans import ConanFile, tools, CMake
+from conan.tools.microsoft import msvc_runtime_flag
+from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
+import functools
 import os
 
+required_conan_version = ">=1.43.0"
 
-class LibpqxxRecipe(ConanFile):
+
+class LibpqxxConan(ConanFile):
     name = "libpqxx"
-    settings = "os", "compiler", "build_type", "arch"
     description = "The official C++ client API for PostgreSQL"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jtv/libpqxx"
     license = "BSD-3-Clause"
-    topics = ("conan", "libpqxx", "postgres", "postgresql", "database", "db")
-    generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    topics = ("libpqxx", "postgres", "postgresql", "database", "db")
 
-    _cmake = None
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    generators = "cmake", "cmake_find_package"
 
     @property
     def _source_subfolder(self):
@@ -31,6 +39,11 @@ class LibpqxxRecipe(ConanFile):
     def _mac_os_minimum_required_version(self):
         return "10.15"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -39,11 +52,19 @@ class LibpqxxRecipe(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def validate(self):
-        compiler = str(self.settings.compiler)
-        compiler_version = Version(self.settings.compiler.version.value)
+    def requirements(self):
+        self.requires("libpq/14.2")
 
-        lib_version = Version(self.version)
+    def validate(self):
+        if self.options.shared and msvc_runtime_flag(self) == "MTd":
+            raise ConanInvalidConfiguration(
+                "{} recipes does not support build shared library with MTd runtime."
+                .format(self.name,))
+
+        compiler = str(self.settings.compiler)
+        compiler_version = tools.Version(self.settings.compiler.version)
+
+        lib_version = tools.Version(self.version)
         lib_version_7_6_0_or_later = lib_version >= "7.6.0"
         minimum_compiler_version = {
             "Visual Studio": "16" if lib_version_7_6_0_or_later else "15",
@@ -64,39 +85,30 @@ class LibpqxxRecipe(ConanFile):
 
         if self.settings.os == "Macos":
             os_version = self.settings.get_safe("os.version")
-            if os_version and Version(os_version) < self._mac_os_minimum_required_version:
+            if os_version and tools.Version(os_version) < self._mac_os_minimum_required_version:
                 raise ConanInvalidConfiguration(
                     "Macos Mojave (10.14) and earlier cannot to be built because C++ standard library too old.")
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, minimum_cpp_standard)
 
-    def requirements(self):
-        self.requires("libpq/12.2")
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["BUILD_DOC"] = False
-            self._cmake.definitions["BUILD_TEST"] = False
-            # Set `-mmacosx-version-min` to enable C++17 standard library support.
-            self._cmake.definitions['CMAKE_OSX_DEPLOYMENT_TARGET'] = self._mac_os_minimum_required_version
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
-    def _patch_files(self):
-        if self.version in self.conan_data["patches"]:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
+        cmake = CMake(self)
+        cmake.definitions["BUILD_DOC"] = False
+        cmake.definitions["BUILD_TEST"] = False
+        # Set `-mmacosx-version-min` to enable C++17 standard library support.
+        cmake.definitions["CMAKE_OSX_DEPLOYMENT_TARGET"] = self._mac_os_minimum_required_version
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
-        self._patch_files()
-
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -111,7 +123,16 @@ class LibpqxxRecipe(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "libpqxx")
+        self.cpp_info.set_property("cmake_target_name", "libpqxx::pqxx")
+        self.cpp_info.set_property("pkg_config_name", "libpqxx")
+
+        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["pqxx"].libs = ["pqxx"]
-        self.cpp_info.components["pqxx"].requires = ["libpq::libpq"]
         if self.settings.os == "Windows":
             self.cpp_info.components["pqxx"].system_libs = ["wsock32", "ws2_32"]
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.components["pqxx"].set_property("cmake_target_name", "libpqxx::pqxx")
+        self.cpp_info.components["pqxx"].set_property("pkg_config_name", "libpqxx")
+        self.cpp_info.components["pqxx"].requires = ["libpq::libpq"]

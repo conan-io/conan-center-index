@@ -1,0 +1,4 @@
+sources:
+  "1.15":
+    url: "https://github.com/mattreecebentley/plf_indiesort/archive/b28d376cda4b3c06201a04e9a1698f8b98687ec3.tar.gz"
+    sha256: "607afcec499c9a1ed097f0cdc0c9b4ea3af6b3db675d3b873c9e4e5827a5bc0e"

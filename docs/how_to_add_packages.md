@@ -31,12 +31,13 @@ When pull requests are merged, the CI will upload the generated packages to the 
 
 ## Request access
 
-:one: The first step in adding packages to ConanCenter is requesting access. To enroll in ConanCenter repository, please write a comment
+:one: The first step to add packages to ConanCenter is requesting access. To enroll in ConanCenter repository, please write a comment
 requesting access in this GitHub [issue](https://github.com/conan-io/conan-center-index/issues/4). Feel free to introduce yourself and
 your motivation to join ConanCenter.
 
-All requests are reviewed and approved every week, please be patient, the process is not automated and it won't be. This
-process helps conan-center-index against spam and malicious code.
+This process helps conan-center-index against spam and malicious code. The process is not not automated on purpose and the requests are generally approved on a weekly basis.
+
+> :warning: The requests are reviewed manually, checking the GitHub profile activity of the requester to avoid a misuse of the service. In case of detecting a misuse or inappropriate behavior, the requester will be dropped from the authorized users list and at last instance even banned from the repository.
 
 ## Submitting a Package
 
@@ -87,7 +88,7 @@ This is the canonical structure of one of these folders, where the same `conanfi
 ```
 
 If it becomes too complex to maintain the logic for all the versions in a single `conanfile.py`, it is possible to split the folder `all` into
-two or more folders, dedicated to different versions, each one with its own `conanfile.py` recipe. In any case, those folders should replicate the 
+two or more folders, dedicated to different versions, each one with its own `conanfile.py` recipe. In any case, those folders should replicate the
 same structure.
 
 ### `config.yml`
@@ -112,33 +113,26 @@ versions:
 This file lists **all the sources that are needed to build the package**: source code, license files,... any file that will be used by the recipe
 should be listed here. The file is organized into two sections, `sources` and `patches`, each one of them contains the files that are required
 for each version of the library. All the files that are downloaded from the internet should include a checksum, so we can validate that
-they are not changed:
+they are not changed.
 
-```yml
-sources:
-  "1.1.0":
-    url: "https://www.url.org/source/mylib-1.0.0.tar.gz"
-    sha256: "8c48baf3babe0d505d16cfc0cf272589c66d3624264098213db0fb00034728e9"
-  "1.1.1":
-    url: "https://www.url.org/source/mylib-1.0.1.tar.gz"
-    sha256: "15b6393c20030aab02c8e2fe0243cb1d1d18062f6c095d67bca91871dc7f324a"
-patches:
-  "1.1.1":
-    - patch_file: "patches/1.1.1-001-simpler-cmakelists.patch"
-      base_path: "source_subfolder"
-```
+A detailed breakdown of all the fields can be found in [conandata_yml_format.md](conandata_yml_format.md). We strongly encourage adding the [patch fields](conandata_yml_format.md#patches-fields) to help track where patches come from and what issue they solve.
 
 Inside the `conanfile.py` recipe, this data is available in a `self.conan_data` attribute that can be used as follows:
 
 ```py
 def source(self):
-     tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+    files.get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+     
+def export_sources(self):
+    for patch in self.conan_data.get("patches", {}).get(self.version, []):
+        files.copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
 def build(self):
-    for patch in self.conan_data.get("patches", {}).get(self.version, []):
-        tools.patch(**patch)
+    files.apply_conandata_patches(self)
     [...]
 ```
+
+More details can be found in the [reviewing preference](reviewing.md) documentation
 
 ### The _recipe folder_: `conanfile.py`
 
@@ -156,7 +150,7 @@ Also, **every `conanfile.py` should be accompanied by one or several folder to t
 ### The test package folders: `test_package` and `test_<something>`
 
 All the packages in this repository need to be tested before they join ConanCenter. A `test_package` folder with its corresponding `conanfile.py` and
-a minimal project to test the package is strictly required. You can read about it in the 
+a minimal project to test the package is strictly required. You can read about it in the
 [Conan documentation](https://docs.conan.io/en/latest/creating_packages/getting_started.html#the-test-package-folder).
 
 Sometimes it is useful to test the package using different build systems (CMake, Autotools,...). Instead of adding complex logic to one
@@ -188,6 +182,10 @@ project files as simple as possible, without the need of extra logic to handle d
 The CI will explore all the folders and run the tests for the ones matching `test_*/conanfile.py` pattern. You can find the output of all
 of them together in the testing logs.
 
+> **Note.-** If, for any reason, it is useful to write a test that should only be checked using Conan v1, you can do so by using the pattern
+> `test_v1_*/conanfile.py` for the folder. Please, have a look to [linter notes](v2_linter.md) to know how to prevent the linter from
+> checking these files.
+
 > Remember that the `test_<package>` recipes should **test the package configuration that has just been generated** for the _host_ context, otherwise
 > it will fail in crossbuilding scenarios.
 
@@ -196,7 +194,7 @@ of them together in the testing logs.
 
 The [recipes](https://github.com/conan-io/conan-center-index/tree/master/recipes) available in CCI can be used as good examples, you can use them as the base for your recipe. However it is important to note Conan features change over time and our best practices evolve so some minor details may be out of date due to the vast number of recipes.
 
-### Header Only 
+### Header Only
 
 If you are looking for header-only projects, you can take a look on [rapidjson](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidjson/all/conanfile.py), [rapidxml](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidxml/all/conanfile.py), and [nuklear](https://github.com/conan-io/conan-center-index/blob/master/recipes/nuklear/all/conanfile.py). Also, Conan Docs has a section about [how to package header-only libraries](https://docs.conan.io/en/latest/howtos/header_only.html).
 
@@ -222,8 +220,8 @@ For cases where a project only offers source files, but not a build script, you 
 
 ### System Packages
 
-> :information_source: For exceptional cases where only system packages can be used and a regular Conan package may result in an incompatible and fragile package, a separated system package may be created. See the [FAQs](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#can-i-install-packages-from-the-system-package-manager) for more.
- 
+> :information_source: For exceptional cases where only system packages can be used and a regular Conan package may result in an incompatible and fragile package, a separated system package may be created. See the [FAQs](faqs.md#can-i-install-packages-from-the-system-package-manager) for more.
+
 The [SystemPackageTool](https://docs.conan.io/en/latest/reference/conanfile/methods.html#systempackagetool) can easily manage a system package manager (e.g. apt,
 pacman, brew, choco) and install packages which are missing on Conan Center but available for most distributions. It is key to correctly fill in the `cpp_info` for the consumers of a system package to have access to whatever was installed.
 
@@ -231,7 +229,7 @@ As example there are [glu](https://github.com/conan-io/conan-center-index/blob/m
 
 ### Verifying Dependency Version
 
-Some project requirements need to respect a version constraint. This can be enforced in a recipe by accessing the [`deps_cpp_info`](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#deps-cpp-info) attribute. 
+Some project requirements need to respect a version constraint. This can be enforced in a recipe by accessing the [`deps_cpp_info`](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#deps-cpp-info) attribute.
 An exaple of this can be found in the [spdlog recipe](https://github.com/conan-io/conan-center-index/blob/9618f31c4d9b4da5d06f905befe9691cf105a1fc/recipes/spdlog/all/conanfile.py#L92-L94).
 
 ```py

@@ -1,12 +1,13 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.files import rename
 import os
 
 
 class PfrConan(ConanFile):
     name = "pfr"
     description = "std::tuple like methods for user defined types without any macro or boilerplate code"
-    topics = ("conan", "boost", "pfr", "reflection", "magic_get")
+    topics = ("boost", "pfr", "reflection", "magic_get")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/boostorg/pfr"
     license = "BSL-1.0"
@@ -26,7 +27,8 @@ class PfrConan(ConanFile):
         return {
             "apple-clang": "9.4",
             "clang": "3.8",
-            "gcc": "5.5"
+            "gcc": "5.5",
+            "Visual Studio": "14",
         }
 
     def configure(self):
@@ -51,7 +53,7 @@ class PfrConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version][0])
         extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        rename(self, extracted_dir, self._source_subfolder)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

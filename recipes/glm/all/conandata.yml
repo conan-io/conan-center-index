@@ -1,13 +1,19 @@
 sources:
-  "0.9.9.5":
-    url: "https://github.com/g-truc/glm/archive/0.9.9.5.tar.gz"
-    sha256: "5e33b6131cea6a904339734b015110d4342b7dc02d995164fdb86332d28a5aa4"
-  "0.9.9.6":
-    url: "https://github.com/g-truc/glm/archive/0.9.9.6.tar.gz"
-    sha256: "30b05f31f5d8528caa9fc8fe8132e5a0444d55b1c39db53fe4db8857654afafc"
-  "0.9.9.7":
-    url: "https://github.com/g-truc/glm/archive/0.9.9.7.tar.gz"
-    sha256: "2ec9e33a80b548892af64fbd84a947f93f0e725423b1b7bec600f808057a8239"
+  "cci.20220420":
+    url: "https://github.com/g-truc/glm/archive/cc98465e3508535ba8c7f6208df934c156a018dc.zip"
+    sha256: "06d48e336857777d2d1f7da9ccd59e4b9d79720dbd70886d48837d19cda997bb"
   "0.9.9.8":
     url: "https://github.com/g-truc/glm/archive/0.9.9.8.tar.gz"
     sha256: "7d508ab72cb5d43227a3711420f06ff99b0a0cb63ee2f93631b162bfe1fe9592"
+  "0.9.9.7":
+    url: "https://github.com/g-truc/glm/archive/0.9.9.7.tar.gz"
+    sha256: "2ec9e33a80b548892af64fbd84a947f93f0e725423b1b7bec600f808057a8239"
+  "0.9.9.6":
+    url: "https://github.com/g-truc/glm/archive/0.9.9.6.tar.gz"
+    sha256: "30b05f31f5d8528caa9fc8fe8132e5a0444d55b1c39db53fe4db8857654afafc"
+  "0.9.9.5":
+    url: "https://github.com/g-truc/glm/archive/0.9.9.5.tar.gz"
+    sha256: "5e33b6131cea6a904339734b015110d4342b7dc02d995164fdb86332d28a5aa4"
+  "0.9.5.4":
+    url: "https://github.com/g-truc/glm/archive/refs/tags/0.9.5.4.tar.gz"
+    sha256: "39c7ee0db54289f78350c7629ea2531664d71c6a494bbb86db48a86536de9ff2"

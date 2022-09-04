@@ -1,0 +1,330 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -488,7 +488,12 @@ ELSE()
+   ENDIF()
+ 
+   IF ( NOT ASSIMP_BUILD_ZLIB )
+-    FIND_PACKAGE(ZLIB)
++    if(ASSIMP_BUILD_ASSBIN_IMPORTER OR ASSIMP_BUILD_ASSBIN_EXPORTER OR ASSIMP_BUILD_ASSXML_EXPORTER OR
++       ASSIMP_BUILD_BLEND_IMPORTER OR ASSIMP_BUILD_FBX_IMPORTER OR ASSIMP_BUILD_Q3BSP_IMPORTER OR
++       ASSIMP_BUILD_X_IMPORTER OR ASSIMP_BUILD_XGL_IMPORTER)
++        find_package(ZLIB REQUIRED)
++    endif()
++    set(ZLIB_FOUND TRUE)
+   ENDIF()
+ 
+   IF( NOT ZLIB_FOUND )
+@@ -521,12 +526,14 @@ ENDIF()
+ 
+ IF( NOT IOS )
+   IF( NOT ASSIMP_BUILD_MINIZIP )
+-    use_pkgconfig(UNZIP minizip)
++    find_package(minizip REQUIRED CONFIG)
++    set(UNZIP_FOUND TRUE)
+   ENDIF()
+ ELSE ()
+   IF( NOT BUILD_SHARED_LIBS )
+     IF( NOT ASSIMP_BUILD_MINIZIP )
+-      use_pkgconfig(UNZIP minizip)
++      find_package(minizip REQUIRED CONFIG)
++      set(UNZIP_FOUND TRUE)
+     ENDIF()
+   ENDIF ()
+ ENDIF ()
+--- a/code/AssetLib/3MF/D3MFExporter.cpp
++++ b/code/AssetLib/3MF/D3MFExporter.cpp
+@@ -57,7 +57,7 @@
+ #ifdef ASSIMP_USE_HUNTER
+ #include <zip/zip.h>
+ #else
+-#include <contrib/zip/src/zip.h>
++#include <zip/zip.h>
+ #endif
+ 
+ namespace Assimp {
+--- a/code/AssetLib/Blender/BlenderTessellator.h
++++ b/code/AssetLib/Blender/BlenderTessellator.h
+@@ -147,7 +147,7 @@
+ #ifdef ASSIMP_USE_HUNTER
+ #  include <poly2tri/poly2tri.h>
+ #else
+-#  include "../contrib/poly2tri/poly2tri/poly2tri.h"
++#  include <poly2tri/poly2tri.h>
+ #endif
+ 
+ namespace Assimp
+--- a/code/AssetLib/IFC/IFCGeometry.cpp
++++ b/code/AssetLib/IFC/IFCGeometry.cpp
+@@ -53,8 +53,8 @@
+ #  include <poly2tri/poly2tri.h>
+ #  include <polyclipping/clipper.hpp>
+ #else
+-#  include "../contrib/poly2tri/poly2tri/poly2tri.h"
+-#  include "../contrib/clipper/clipper.hpp"
++#  include <poly2tri/poly2tri.h>
++#  include <polyclipping/clipper.hpp>
+ #endif
+ 
+ #include <memory>
+--- a/code/AssetLib/IFC/IFCOpenings.cpp
++++ b/code/AssetLib/IFC/IFCOpenings.cpp
+@@ -53,8 +53,8 @@
+ #  include <poly2tri/poly2tri.h>
+ #  include <polyclipping/clipper.hpp>
+ #else
+-#  include "../contrib/poly2tri/poly2tri/poly2tri.h"
+-#  include "../contrib/clipper/clipper.hpp"
++#  include <poly2tri/poly2tri.h>
++#  include <polyclipping/clipper.hpp>
+ #endif
+ 
+ #include <iterator>
+--- a/code/AssetLib/M3D/M3DWrapper.h
++++ b/code/AssetLib/M3D/M3DWrapper.h
+@@ -59,7 +59,7 @@
+ 
+ // Share stb_image's PNG loader with other importers/exporters instead of bringing our own copy.
+ #define STBI_ONLY_PNG
+-#include <stb/stb_image.h>
++#include <stb_image.h>
+ 
+ #include "m3d.h"
+ 
+--- a/code/AssetLib/MMD/MMDPmxParser.cpp
++++ b/code/AssetLib/MMD/MMDPmxParser.cpp
+@@ -45,7 +45,7 @@
+ #ifdef ASSIMP_USE_HUNTER
+ #  include <utf8.h>
+ #else
+-#  include "../contrib/utf8cpp/source/utf8.h"
++#  include <utf8.h>
+ #endif
+ #include <assimp/Exceptional.h>
+ 
+--- a/code/AssetLib/SIB/SIBImporter.cpp
++++ b/code/AssetLib/SIB/SIBImporter.cpp
+@@ -59,7 +59,7 @@
+ #ifdef ASSIMP_USE_HUNTER
+ #include <utf8.h>
+ #else
+-#include "../contrib/utf8cpp/source/utf8.h"
++#include <utf8.h>
+ #endif
+ #include <assimp/importerdesc.h>
+ #include <assimp/scene.h>
+--- a/code/AssetLib/STEPParser/STEPFileEncoding.cpp
++++ b/code/AssetLib/STEPParser/STEPFileEncoding.cpp
+@@ -48,7 +48,7 @@
+ #ifdef ASSIMP_USE_HUNTER
+ #  include <utf8.h>
+ #else
+-#  include <contrib/utf8cpp/source/utf8.h>
++#  include <utf8.h>
+ #endif
+ 
+ #include <memory>
+--- a/code/CMakeLists.txt
++++ b/code/CMakeLists.txt
+@@ -899,6 +899,7 @@ IF(ASSIMP_HUNTER_ENABLED)
+   hunter_add_package(pugixml)
+   find_package(pugixml CONFIG REQUIRED)
+ ELSE()
++  find_package(pugixml REQUIRED CONFIG)
+   SET( Pugixml_SRCS
+     ../contrib/pugixml/src/pugiconfig.hpp
+     ../contrib/pugixml/src/pugixml.hpp
+@@ -912,6 +913,7 @@ IF(ASSIMP_HUNTER_ENABLED)
+   hunter_add_package(utf8)
+   find_package(utf8cpp CONFIG REQUIRED)
+ ELSE()
++  find_package(utf8cpp REQUIRED CONFIG)
+   # utf8 is header-only, so Assimp doesn't need to do anything.
+ ENDIF()
+ 
+@@ -920,6 +922,9 @@ IF(ASSIMP_HUNTER_ENABLED)
+   hunter_add_package(polyclipping)
+   find_package(polyclipping CONFIG REQUIRED)
+ ELSE()
++  if(ASSIMP_BUILD_IFC_IMPORTER)
++    find_package(clipper REQUIRED CONFIG)
++  endif()
+   SET( Clipper_SRCS
+     ../contrib/clipper/clipper.hpp
+     ../contrib/clipper/clipper.cpp
+@@ -932,6 +937,9 @@ IF(ASSIMP_HUNTER_ENABLED)
+   hunter_add_package(poly2tri)
+   find_package(poly2tri CONFIG REQUIRED)
+ ELSE()
++  if(ASSIMP_BUILD_BLEND_IMPORTER OR ASSIMP_BUILD_IFC_IMPORTER)
++    find_package(poly2tri REQUIRED CONFIG)
++  endif()
+   SET( Poly2Tri_SRCS
+     ../contrib/poly2tri/poly2tri/common/shapes.cc
+     ../contrib/poly2tri/poly2tri/common/shapes.h
+@@ -971,6 +979,7 @@ IF(3MF IN_LIST ASSIMP_EXPORTERS_LIST)
+     hunter_add_package(zip)
+     find_package(zip CONFIG REQUIRED)
+   ELSE()
++    find_package(zip REQUIRED CONFIG)
+     SET( ziplib_SRCS
+       ../contrib/zip/src/miniz.h
+       ../contrib/zip/src/zip.c
+@@ -993,6 +1002,9 @@ IF(ASSIMP_HUNTER_ENABLED)
+   hunter_add_package(openddlparser)
+   find_package(openddlparser CONFIG REQUIRED)
+ ELSE()
++  if(ASSIMP_BUILD_OPENGEX_IMPORTER)
++    find_package(openddlparser REQUIRED CONFIG)
++  endif()
+   SET ( openddl_parser_SRCS
+     ../contrib/openddlparser/code/OpenDDLParser.cpp
+     ../contrib/openddlparser/code/DDLNode.cpp
+@@ -1067,7 +1079,9 @@ IF(ASSIMP_HUNTER_ENABLED)
+   hunter_add_package(RapidJSON)
+   find_package(RapidJSON CONFIG REQUIRED)
+ ELSE()
+-  INCLUDE_DIRECTORIES("../contrib/rapidjson/include")
++  if(ASSIMP_BUILD_GLTF_IMPORTER OR ASSIMP_BUILD_GLTF_EXPORTER)
++    find_package(rapidjson REQUIRED CONFIG)
++  endif()
+   ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1)
+   option( ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR "Suppress rapidjson warning on MSVC (NOTE: breaks android build)" ON )
+   if(ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR)
+@@ -1080,10 +1094,12 @@ IF(ASSIMP_HUNTER_ENABLED)
+   hunter_add_package(stb)
+   find_package(stb CONFIG REQUIRED)
+ ELSE()
++  if(ASSIMP_BUILD_M3D_IMPORTER OR ASSIMP_BUILD_M3D_EXPORTER OR ASSIMP_BUILD_PBRT_EXPORTER)
++    find_package(stb REQUIRED CONFIG)
++  endif()
+   SET( stb_SRCS
+     ../contrib/stb/stb_image.h
+   )
+-  INCLUDE_DIRECTORIES("../contrib")
+   SOURCE_GROUP( Contrib\\stb FILES ${stb_SRCS})
+ ENDIF()
+ 
+@@ -1138,14 +1154,7 @@ SET( assimp_src
+   ${ASSIMP_EXPORTER_SRCS}
+ 
+   # Third-party libraries
+-  ${unzip_compile_SRCS}
+-  ${Poly2Tri_SRCS}
+-  ${Clipper_SRCS}
+-  ${openddl_parser_SRCS}
+   ${open3dgc_SRCS}
+-  ${ziplib_SRCS}
+-  ${Pugixml_SRCS}
+-  ${stb_SRCS}
+   # Necessary to show the headers in the project when using the VC++ generator:
+ 
+   ${PUBLIC_HEADERS}
+@@ -1156,7 +1165,7 @@ ADD_DEFINITIONS( -DOPENDDLPARSER_BUILD )
+ IF(NOT ASSIMP_HUNTER_ENABLED)
+   INCLUDE_DIRECTORIES(
+       ${IRRXML_INCLUDE_DIR}
+-      ../contrib/openddlparser/include
++      ../contrib # for Open3DGC
+   )
+ ENDIF()
+ 
+@@ -1165,8 +1174,8 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+   INCLUDE_DIRECTORIES(${C4D_INCLUDES})
+ ENDIF ()
+ 
+-IF (ASSIMP_BUILD_DRACO)
+-  INCLUDE_DIRECTORIES(${draco_INCLUDE_DIRS})
++if(ASSIMP_BUILD_GLTF_IMPORTER OR ASSIMP_BUILD_GLTF_EXPORTER)
++  find_package(draco REQUIRED CONFIG)
+   ADD_DEFINITIONS( -DASSIMP_ENABLE_DRACO )
+ ENDIF()
+ 
+@@ -1177,9 +1186,7 @@ TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
+ 
+ # enable warnings as errors ########################################
+ IF (MSVC)
+-  TARGET_COMPILE_OPTIONS(assimp PRIVATE /WX)
+ ELSE()
+-  TARGET_COMPILE_OPTIONS(assimp PRIVATE -Werror)
+ ENDIF()
+ 
+ # adds C_FLAGS required to compile zip.c on old GCC 4.x compiler
+@@ -1212,9 +1219,32 @@ IF(ASSIMP_HUNTER_ENABLED)
+     target_link_libraries(assimp PUBLIC ${draco_LIBRARIES})
+   endif()
+ ELSE()
+-  TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES})
+-  if (ASSIMP_BUILD_DRACO)
+-    target_link_libraries(assimp ${draco_LIBRARIES})
++  target_link_libraries(assimp pugixml::pugixml utf8cpp)
++  if(ASSIMP_BUILD_ASSBIN_IMPORTER OR ASSIMP_BUILD_ASSBIN_EXPORTER OR ASSIMP_BUILD_ASSXML_EXPORTER OR
++    ASSIMP_BUILD_BLEND_IMPORTER OR ASSIMP_BUILD_FBX_IMPORTER OR ASSIMP_BUILD_Q3BSP_IMPORTER OR
++    ASSIMP_BUILD_X_IMPORTER OR ASSIMP_BUILD_XGL_IMPORTER)
++    target_link_libraries(assimp ZLIB::ZLIB)
++  endif()
++  if(ASSIMP_BUILD_IFC_IMPORTER)
++    target_link_libraries(assimp clipper::clipper)
++  endif()
++  if(ASSIMP_BUILD_BLEND_IMPORTER OR ASSIMP_BUILD_IFC_IMPORTER)
++    target_link_libraries(assimp poly2tri::poly2tri)
++  endif()
++  if(ASSIMP_BUILD_3MF_EXPORTER)
++    target_link_libraries(assimp zip::zip)
++  endif()
++  if(ASSIMP_BUILD_OPENGEX_IMPORTER)
++    target_link_libraries(assimp openddlparser::openddlparser)
++  endif()
++  if(ASSIMP_BUILD_GLTF_IMPORTER OR ASSIMP_BUILD_GLTF_EXPORTER)
++    target_link_libraries(assimp rapidjson::rapidjson)
++  endif()
++  if(ASSIMP_BUILD_M3D_IMPORTER OR ASSIMP_BUILD_M3D_EXPORTER OR ASSIMP_BUILD_PBRT_EXPORTER)
++    target_link_libraries(assimp stb::stb)
++  endif()
++  if(ASSIMP_BUILD_GLTF_IMPORTER OR ASSIMP_BUILD_GLTF_EXPORTER)
++    target_link_libraries(assimp draco::draco)
+   endif()
+ ENDIF()
+ 
+@@ -1302,8 +1332,7 @@ ENDIF()
+ # assimp can #include "unzip.h"
+ IF(NOT ASSIMP_HUNTER_ENABLED)
+   if (UNZIP_FOUND)
+-    INCLUDE_DIRECTORIES(${UNZIP_INCLUDE_DIRS})
+-    TARGET_LINK_LIBRARIES(assimp ${UNZIP_LIBRARIES})
++    target_link_libraries(assimp minizip::minizip)
+   else ()
+     INCLUDE_DIRECTORIES("../")
+   endif ()
+--- a/code/Common/Assimp.cpp
++++ b/code/Common/Assimp.cpp
+@@ -1290,7 +1290,7 @@
+ #   endif
+ 
+ #   define STB_IMAGE_IMPLEMENTATION
+-#   include "stb/stb_image.h"
++#   include "stb_image.h"
+ 
+ #   if _MSC_VER
+ #       pragma warning(pop)
+--- a/code/Common/BaseImporter.cpp
++++ b/code/Common/BaseImporter.cpp
+@@ -332,7 +332,7 @@
+ #ifdef ASSIMP_USE_HUNTER
+ #include <utf8.h>
+ #else
+-#include "../contrib/utf8cpp/source/utf8.h"
++#include <utf8.h>
+ #endif
+ 
+ // ------------------------------------------------------------------------------------------------
+--- a/code/Pbrt/PbrtExporter.cpp
++++ b/code/Pbrt/PbrtExporter.cpp
+@@ -83,7 +83,7 @@
+ #include <sstream>
+ #include <string>
+ 
+-#include "stb/stb_image.h"
++#include "stb_image.h"
+ 
+ using namespace Assimp;
+ 

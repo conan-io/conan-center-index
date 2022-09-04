@@ -17,11 +17,9 @@ versions:
 #    folder: all
   "1.48.9":
     folder: all
-  "1.49.0":
-    folder: all
-  "1.49.1":
-    folder: all
-  "1.49.2":
-    folder: all
   "1.49.3":
+    folder: all
+  "1.50.7":
+    folder: all
+  "1.50.8":
     folder: all

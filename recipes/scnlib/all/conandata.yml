@@ -1,4 +1,7 @@
 sources:
+  "1.1.2":
+    url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v1.1.2.tar.gz"
+    sha256: "5ed3ec742302c7304bf188bde9c4012a65dc8124ff4e1a69b598480d664250e6"
   "1.0":
     url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v1.0.tar.gz"
     sha256: "5b8333e522206c2a74e57a9c9544c4fe4e7858cfe93e216905b463eaf91af5fe"
@@ -6,6 +9,11 @@ sources:
     url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v0.4.tar.gz"
     sha256: "f23e66b00c9d38671b39b83c082a5b2db1cf05b3e3eff7b4a769487d9ed9d366"
 patches:
+  "1.1.2":
+    - patch_file: "patches/1.1.2-0001-install-dll-windows.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.1.2-0002-remove-header-only-target.patch"
+      base_path: "source_subfolder"
   "1.0":
     - patch_file: "patches/1.0-0001-install-dll-windows.patch"
       base_path: "source_subfolder"

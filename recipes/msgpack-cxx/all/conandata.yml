@@ -1,4 +1,7 @@
 sources:
+  "4.1.1":
+    url: "https://github.com/msgpack/msgpack-c/archive/cpp-4.1.1.tar.gz"
+    sha256: "221cc539e77f5ca02f4f0bbb1edafa9ca8c08de7ba8072d7baf2139930d99182"
   "4.1.0":
     url: "https://github.com/msgpack/msgpack-c/archive/cpp-4.1.0.tar.gz"
     sha256: "634762502a192026bd5db773f9e18d900ad04cfc312b52faee350a5c76e5ccfb"

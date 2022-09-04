@@ -3,3 +3,5 @@ versions:
     folder: all
   "21.11":
     folder: all
+  "22.05":
+    folder: all

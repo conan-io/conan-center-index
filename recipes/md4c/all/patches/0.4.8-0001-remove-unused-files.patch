@@ -1,0 +1,29 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 57e353f..ed62385 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -56,4 +56,3 @@ endif()
+ include(GNUInstallDirs)
+ 
+ add_subdirectory(src)
+-add_subdirectory(md2html)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 66f2f50..891abb9 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -40,7 +40,6 @@ install(
+     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+ )
+-install(FILES ${CMAKE_BINARY_DIR}/src/md4c.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+ 
+ install(
+     TARGETS md4c-html
+@@ -50,7 +49,6 @@ install(
+     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+ )
+-install(FILES ${CMAKE_BINARY_DIR}/src/md4c-html.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+ 
+ install(EXPORT md4cConfig DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/md4c/ NAMESPACE md4c::)
+ 

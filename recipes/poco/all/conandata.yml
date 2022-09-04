@@ -1,4 +1,19 @@
 sources:
+  "1.12.2":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.12.2-release.tar.gz"
+    sha256: "30442ccb097a0074133f699213a59d6f8c77db5b2c98a7c1ad9c5eeb3a2b06f3"
+  "1.12.1":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.12.1-release.tar.gz"
+    sha256: "debc6d5d5eb946bb14e47cffc33db4fffb4f11765f34f8db04e71e866d1af8f9"
+  "1.12.0":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.12.0-release.tar.gz"
+    sha256: "33b5acd5a09a9466c2710f6f2e3bd2492dd3372b655ea83f62520ac8fc213631"
+  "1.11.3":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.11.3-release.tar.gz"
+    sha256: "fb5e8e70c7dbc8f3b59ec8560140a267b4eaf06ee519dc21f312d0eb195cba37"
+  "1.11.2":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.11.2-release.tar.gz"
+    sha256: "9774651a02e4cfa79fc43b7db617e45d353ede00b7be8afd0e74e6afb23d3793"
   "1.11.1":
     url: "https://github.com/pocoproject/poco/archive/poco-1.11.1-release.tar.gz"
     sha256: "2412a5819a239ff2ee58f81033bcc39c40460d7a8b330013a687c8c0bd2b4ac0"
@@ -21,34 +36,59 @@ sources:
     url: "https://github.com/pocoproject/poco/archive/poco-1.8.1-release.tar.gz"
     sha256: "43cc469c01d1f799efc51e2bfde6ffdf467b98a8a0901e6b33db86958619b3af"
 patches:
+  "1.12.2":
+    - patch_file: patches/1.12.2.patch
+      base_path: src
+    - patch_file: patches/0002-mysql-include.patch
+      base_path: src
+  "1.12.1":
+    - patch_file: patches/1.12.1.patch
+      base_path: src
+    - patch_file: patches/0002-mysql-include.patch
+      base_path: src
+  "1.12.0":
+    - patch_file: patches/1.12.0.patch
+      base_path: src
+    - patch_file: patches/0002-mysql-include.patch
+      base_path: src
+  "1.11.3":
+    - patch_file: patches/1.11.3.patch
+      base_path: src
+    - patch_file: patches/0002-mysql-include.patch
+      base_path: src
+  "1.11.2":
+    - patch_file: patches/1.11.2.patch
+      base_path: src
+    - patch_file: patches/0002-mysql-include.patch
+      base_path: src
   "1.11.1":
     - patch_file: patches/1.11.1.patch
-      base_path: source_subfolder
+      base_path: src
     - patch_file: patches/0002-mysql-include.patch
-      base_path: source_subfolder
+      base_path: src
   "1.11.0":
     - patch_file: patches/1.11.0.patch
-      base_path: source_subfolder
+      base_path: src
     - patch_file: patches/0002-mysql-include.patch
-      base_path: source_subfolder
+      base_path: src
   "1.10.1":
     - patch_file: patches/1.10.1.patch
-      base_path: source_subfolder
+      base_path: src
   "1.10.0":
     - patch_file: patches/1.10.0.patch
-      base_path: source_subfolder
+      base_path: src
     - patch_file: patches/1.10.0-set-missing-cmake-variable.patch
-      base_path: source_subfolder
+      base_path: src
   "1.9.4":
     - patch_file: patches/1.9.2.patch
-      base_path: source_subfolder
+      base_path: src
     - patch_file: patches/1.9.2-2.patch
-      base_path: source_subfolder
+      base_path: src
   "1.9.3":
     - patch_file: patches/1.9.2.patch
-      base_path: source_subfolder
+      base_path: src
     - patch_file: patches/1.9.2-2.patch
-      base_path: source_subfolder
+      base_path: src
   "1.8.1":
     - patch_file: patches/1.8.1.patch
-      base_path: source_subfolder
+      base_path: src

@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 29b8bfe..547c88f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -115,7 +115,6 @@ if(hiredis_FOUND)
+     list(APPEND REDIS_PLUS_PLUS_HIREDIS_LIBS hiredis::hiredis)
+ 
+     if(REDIS_PLUS_PLUS_USE_TLS)
+-        find_package(hiredis_ssl REQUIRED)
+         list(APPEND REDIS_PLUS_PLUS_HIREDIS_LIBS hiredis::hiredis_ssl)
+     endif()
+ else()

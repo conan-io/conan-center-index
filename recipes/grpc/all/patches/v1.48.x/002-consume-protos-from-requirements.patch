@@ -1,0 +1,327 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7d23aa5..457188b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -451,7 +451,7 @@ function(protobuf_generate_grpc_cpp_with_import_path_correction FILE_LOCATION IM
+   endif()
+ 
+   # Sets the include path for ProtoBuf files
+-  set(_protobuf_include_path -I . -I ${_gRPC_PROTOBUF_WELLKNOWN_INCLUDE_DIR})
++  set(_protobuf_include_path -I . -I ${_gRPC_PROTOBUF_WELLKNOWN_INCLUDE_DIR} -I ${googleapis_RES_DIRS} -I ${grpc-proto_RES_DIRS})
+   # The absolute path of the expected place for the input proto file
+   # For example, health proto has package name grpc.health.v1, it's expected to be:
+   #   ${_gRPC_PROTO_SRCS_DIR}/grpc/health/v1/health.proto
+@@ -476,8 +476,8 @@ function(protobuf_generate_grpc_cpp_with_import_path_correction FILE_LOCATION IM
+   # path. For example, health proto has package name grpc.health.v1, the bash
+   # equivalent would be:
+   #   cp src/proto/grpc/health/v1/health.proto ${_gRPC_PROTO_SRCS_DIR}/grpc/health/v1
+-  file(MAKE_DIRECTORY ${_gRPC_PROTO_SRCS_DIR}/${REL_DIR})
+-  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${FILE_LOCATION} DESTINATION ${_gRPC_PROTO_SRCS_DIR}/${REL_DIR})
++  # file(MAKE_DIRECTORY ${_gRPC_PROTO_SRCS_DIR}/${REL_DIR})
++  # file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${FILE_LOCATION} DESTINATION ${_gRPC_PROTO_SRCS_DIR}/${REL_DIR})
+ 
+   #if cross-compiling, find host plugin
+   if(CMAKE_CROSSCOMPILING)
+@@ -490,18 +490,15 @@ function(protobuf_generate_grpc_cpp_with_import_path_correction FILE_LOCATION IM
+     OUTPUT "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.cc"
+            "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.h"
+            "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}_mock.grpc.pb.h"
+-           "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.cc"
+-           "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.h"
+     COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}
+     ARGS --grpc_out=generate_mock_code=true:${_gRPC_PROTO_GENS_DIR}
+-         --cpp_out=${_gRPC_PROTO_GENS_DIR}
+          --plugin=protoc-gen-grpc=${_gRPC_CPP_PLUGIN}
+          ${_protobuf_include_path}
+-         ${REL_FIL}
+-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${FILE_LOCATION} ${ABS_FIL} ${_gRPC_PROTOBUF_PROTOC} grpc_cpp_plugin
++         ${FILE_LOCATION}
++    DEPENDS ${_gRPC_PROTOBUF_PROTOC} grpc_cpp_plugin
+     WORKING_DIRECTORY ${_gRPC_PROTO_SRCS_DIR}
+-    COMMENT "Running gRPC C++ protocol buffer compiler for ${IMPORT_PATH}"
+-    VERBATIM)
++    COMMENT "Running gRPC C++ protocol buffer compiler for ${FILE_LOCATION}"
++    )
+ endfunction()
+ 
+ # These options allow users to enable or disable the building of the various
+@@ -554,199 +551,28 @@ add_custom_target(tools
+   DEPENDS tools_c tools_cxx)
+ 
+ protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/channelz/channelz.proto src/proto/grpc/channelz/channelz.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/core/stats.proto src/proto/grpc/core/stats.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/health/v1/health.proto src/proto/grpc/health/v1/health.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/lb/v1/load_balancer.proto src/proto/grpc/lb/v1/load_balancer.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/lookup/v1/rls.proto src/proto/grpc/lookup/v1/rls.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/lookup/v1/rls_config.proto src/proto/grpc/lookup/v1/rls_config.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/reflection/v1alpha/reflection.proto src/proto/grpc/reflection/v1alpha/reflection.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/status/status.proto src/proto/grpc/status/status.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/benchmark_service.proto src/proto/grpc/testing/benchmark_service.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/control.proto src/proto/grpc/testing/control.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/duplicate/echo_duplicate.proto src/proto/grpc/testing/duplicate/echo_duplicate.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/echo.proto src/proto/grpc/testing/echo.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/echo_messages.proto src/proto/grpc/testing/echo_messages.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/empty.proto src/proto/grpc/testing/empty.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/istio_echo.proto src/proto/grpc/testing/istio_echo.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/messages.proto src/proto/grpc/testing/messages.proto
++  grpc/channelz/v1/channelz.proto grpc/channelz/v1/channelz.proto
+ )
+ protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/payloads.proto src/proto/grpc/testing/payloads.proto
++  grpc/core/stats.proto grpc/core/stats.proto
+ )
+ protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/report_qps_scenario_service.proto src/proto/grpc/testing/report_qps_scenario_service.proto
++  grpc/health/v1/health.proto grpc/health/v1/health.proto
+ )
+ protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/simple_messages.proto src/proto/grpc/testing/simple_messages.proto
++  grpc/lb/v1/load_balancer.proto grpc/lb/v1/load_balancer.proto
+ )
+ protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/stats.proto src/proto/grpc/testing/stats.proto
++  grpc/lookup/v1/rls.proto grpc/lookup/v1/rls.proto
+ )
+ protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/test.proto src/proto/grpc/testing/test.proto
++  grpc/lookup/v1/rls_config.proto grpc/lookup/v1/rls_config.proto
+ )
+ protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/worker_service.proto src/proto/grpc/testing/worker_service.proto
++  grpc/reflection/v1alpha/reflection.proto grpc/reflection/v1alpha/reflection.proto
+ )
+ protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/ads_for_test.proto src/proto/grpc/testing/xds/ads_for_test.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/cds_for_test.proto src/proto/grpc/testing/xds/cds_for_test.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/eds_for_test.proto src/proto/grpc/testing/xds/eds_for_test.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/lds_rds_for_test.proto src/proto/grpc/testing/xds/lds_rds_for_test.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/lrs_for_test.proto src/proto/grpc/testing/xds/lrs_for_test.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/address.proto src/proto/grpc/testing/xds/v3/address.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/ads.proto src/proto/grpc/testing/xds/v3/ads.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/aggregate_cluster.proto src/proto/grpc/testing/xds/v3/aggregate_cluster.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/base.proto src/proto/grpc/testing/xds/v3/base.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/cluster.proto src/proto/grpc/testing/xds/v3/cluster.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/config_dump.proto src/proto/grpc/testing/xds/v3/config_dump.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/config_source.proto src/proto/grpc/testing/xds/v3/config_source.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/csds.proto src/proto/grpc/testing/xds/v3/csds.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/discovery.proto src/proto/grpc/testing/xds/v3/discovery.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/endpoint.proto src/proto/grpc/testing/xds/v3/endpoint.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/expr.proto src/proto/grpc/testing/xds/v3/expr.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/extension.proto src/proto/grpc/testing/xds/v3/extension.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/fault.proto src/proto/grpc/testing/xds/v3/fault.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/fault_common.proto src/proto/grpc/testing/xds/v3/fault_common.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/http_connection_manager.proto src/proto/grpc/testing/xds/v3/http_connection_manager.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/http_filter_rbac.proto src/proto/grpc/testing/xds/v3/http_filter_rbac.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/listener.proto src/proto/grpc/testing/xds/v3/listener.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/load_report.proto src/proto/grpc/testing/xds/v3/load_report.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/lrs.proto src/proto/grpc/testing/xds/v3/lrs.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/metadata.proto src/proto/grpc/testing/xds/v3/metadata.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/orca_load_report.proto src/proto/grpc/testing/xds/v3/orca_load_report.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/orca_service.proto src/proto/grpc/testing/xds/v3/orca_service.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/outlier_detection.proto src/proto/grpc/testing/xds/v3/outlier_detection.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/path.proto src/proto/grpc/testing/xds/v3/path.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/percent.proto src/proto/grpc/testing/xds/v3/percent.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/protocol.proto src/proto/grpc/testing/xds/v3/protocol.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/range.proto src/proto/grpc/testing/xds/v3/range.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/rbac.proto src/proto/grpc/testing/xds/v3/rbac.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/regex.proto src/proto/grpc/testing/xds/v3/regex.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/ring_hash.proto src/proto/grpc/testing/xds/v3/ring_hash.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/round_robin.proto src/proto/grpc/testing/xds/v3/round_robin.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/route.proto src/proto/grpc/testing/xds/v3/route.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/router.proto src/proto/grpc/testing/xds/v3/router.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/string.proto src/proto/grpc/testing/xds/v3/string.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/tls.proto src/proto/grpc/testing/xds/v3/tls.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/typed_struct.proto src/proto/grpc/testing/xds/v3/typed_struct.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/udpa_typed_struct.proto src/proto/grpc/testing/xds/v3/udpa_typed_struct.proto
+-)
+-protobuf_generate_grpc_cpp_with_import_path_correction(
+-  src/proto/grpc/testing/xds/v3/wrr_locality.proto src/proto/grpc/testing/xds/v3/wrr_locality.proto
++  src/proto/grpc/status/status.proto grpc/status/status.proto
+ )
+ protobuf_generate_grpc_cpp_with_import_path_correction(
+   test/core/event_engine/fuzzing_event_engine/fuzzing_event_engine.proto test/core/event_engine/fuzzing_event_engine/fuzzing_event_engine.proto
+@@ -3497,10 +3323,8 @@ endif()
+ 
+ if(gRPC_BUILD_CODEGEN)
+ add_library(grpc++_reflection
+-  ${_gRPC_PROTO_GENS_DIR}/src/proto/grpc/reflection/v1alpha/reflection.pb.cc
+-  ${_gRPC_PROTO_GENS_DIR}/src/proto/grpc/reflection/v1alpha/reflection.grpc.pb.cc
+-  ${_gRPC_PROTO_GENS_DIR}/src/proto/grpc/reflection/v1alpha/reflection.pb.h
+-  ${_gRPC_PROTO_GENS_DIR}/src/proto/grpc/reflection/v1alpha/reflection.grpc.pb.h
++  ${_gRPC_PROTO_GENS_DIR}/grpc/reflection/v1alpha/reflection.grpc.pb.cc
++  ${_gRPC_PROTO_GENS_DIR}/grpc/reflection/v1alpha/reflection.grpc.pb.h
+   src/cpp/ext/proto_server_reflection.cc
+   src/cpp/ext/proto_server_reflection_plugin.cc
+ )
+@@ -3539,6 +3363,7 @@ target_link_libraries(grpc++_reflection
+   ${_gRPC_PROTOBUF_LIBRARIES}
+   ${_gRPC_ALLTARGETS_LIBRARIES}
+   grpc++
++  grpc-proto::grpc-proto
+ )
+ 
+ foreach(_hdr
+@@ -4096,10 +3921,8 @@ endif()
+ # See https://github.com/grpc/grpc/issues/19473
+ if(gRPC_BUILD_CODEGEN AND NOT gRPC_USE_PROTO_LITE)
+ add_library(grpcpp_channelz
+-  ${_gRPC_PROTO_GENS_DIR}/src/proto/grpc/channelz/channelz.pb.cc
+-  ${_gRPC_PROTO_GENS_DIR}/src/proto/grpc/channelz/channelz.grpc.pb.cc
+-  ${_gRPC_PROTO_GENS_DIR}/src/proto/grpc/channelz/channelz.pb.h
+-  ${_gRPC_PROTO_GENS_DIR}/src/proto/grpc/channelz/channelz.grpc.pb.h
++  ${_gRPC_PROTO_GENS_DIR}/grpc/channelz/v1/channelz.grpc.pb.cc
++  ${_gRPC_PROTO_GENS_DIR}/grpc/channelz/v1/channelz.grpc.pb.h
+   src/cpp/server/channelz/channelz_service.cc
+   src/cpp/server/channelz/channelz_service_plugin.cc
+ )
+@@ -4138,6 +3961,7 @@ target_link_libraries(grpcpp_channelz
+   ${_gRPC_PROTOBUF_LIBRARIES}
+   ${_gRPC_ALLTARGETS_LIBRARIES}
+   grpc++
++  grpc-proto::grpc-proto
+ )
+ 
+ foreach(_hdr
+diff --git a/src/cpp/ext/proto_server_reflection.h b/src/cpp/ext/proto_server_reflection.h
+index a9b5db0..528e75b 100644
+--- a/src/cpp/ext/proto_server_reflection.h
++++ b/src/cpp/ext/proto_server_reflection.h
+@@ -29,8 +29,8 @@
+ #include <grpcpp/support/status.h>
+ #include <grpcpp/support/sync_stream.h>
+ 
+-#include "src/proto/grpc/reflection/v1alpha/reflection.grpc.pb.h"
+-#include "src/proto/grpc/reflection/v1alpha/reflection.pb.h"
++#include "grpc/reflection/v1alpha/reflection.grpc.pb.h"
++#include "grpc/reflection/v1alpha/reflection.pb.h"
+ 
+ namespace grpc {
+ 
+diff --git a/src/cpp/server/channelz/channelz_service.h b/src/cpp/server/channelz/channelz_service.h
+index 91936da..a84c57a 100644
+--- a/src/cpp/server/channelz/channelz_service.h
++++ b/src/cpp/server/channelz/channelz_service.h
+@@ -24,8 +24,8 @@
+ #include <grpcpp/grpcpp.h>
+ #include <grpcpp/support/status.h>
+ 
+-#include "src/proto/grpc/channelz/channelz.grpc.pb.h"
+-#include "src/proto/grpc/channelz/channelz.pb.h"
++#include "grpc/channelz/v1/channelz.grpc.pb.h"
++#include "grpc/channelz/v1/channelz.pb.h"
+ 
+ namespace grpc {
+ 

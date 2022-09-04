@@ -1,16 +1,20 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.8)
 project(test_package)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(tinyspline REQUIRED CONFIG)
 
-if(TINYSPLINE_API_0_3)
-  add_definitions(-DTINYSPLINE_API_0_3)
+if(tinyspline_VERSION VERSION_GREATER_EQUAL "0.3.0")
+    add_definitions(-DTINYSPLINE_API_0_3)
 endif()
+
 add_executable(${PROJECT_NAME}_c test_package.c)
-target_link_libraries(${PROJECT_NAME}_c ${CONAN_LIBS})
+target_link_libraries(${PROJECT_NAME}_c PRIVATE tinyspline::tinyspline)
 
 if(TINYSPLINE_CXX)
-  add_executable(${PROJECT_NAME}_cpp test_package.cpp)
-  target_link_libraries(${PROJECT_NAME}_cpp ${CONAN_LIBS})
+    # FIXME: we should have to call find_package(tinysplinecxx REQUIRED CONFIG)
+    add_executable(${PROJECT_NAME}_cpp test_package.cpp)
+    target_link_libraries(${PROJECT_NAME}_cpp PRIVATE tinysplinecxx::tinysplinecxx)
+    if(tinyspline_VERSION VERSION_GREATER_EQUAL "0.4.0")
+        target_compile_features(${PROJECT_NAME}_cpp PRIVATE cxx_std_11)
+    endif()
 endif()

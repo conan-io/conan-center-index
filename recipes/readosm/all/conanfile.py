@@ -53,8 +53,8 @@ class ReadosmConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("expat/2.4.6")
-        self.requires("zlib/1.2.11")
+        self.requires("expat/2.4.8")
+        self.requires("zlib/1.2.12")
 
     def build_requirements(self):
         if not self._is_msvc:

@@ -1,0 +1,21 @@
+Fix 'dumb_stringstream' was not declared (https://github.com/jtv/libpqxx/commit/0e81d36f522093d7215b3792f1c62dcd06a34ad1)
+diff --git a/src/strconv.cxx b/src/strconv.cxx
+index 13b0b9ab..c0b7510d 100644
+--- a/src/strconv.cxx
++++ b/src/strconv.cxx
+@@ -591,6 +591,7 @@ template char *
+ float_traits<long double>::into_buf(char *, char *, long double const &);
+ 
+ 
++#if !defined(PQXX_HAVE_CHARCONV_FLOAT)
+ template<typename F>
+ inline std::string to_dumb_stringstream(dumb_stringstream<F> &s, F value)
+ {
+@@ -598,6 +599,7 @@ inline std::string to_dumb_stringstream(dumb_stringstream<F> &s, F value)
+   s << value;
+   return s.str();
+ }
++#endif
+ 
+ 
+ /// Floating-point implementations for @c pqxx::to_string().

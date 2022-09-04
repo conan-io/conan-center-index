@@ -10,3 +10,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/003-cmake-install-standard-locations.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/004-cmake-install-typo.patch"
+      base_path: "source_subfolder"

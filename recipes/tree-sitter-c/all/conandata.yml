@@ -1,4 +1,7 @@
 sources:
+  "0.20.2":
+    url: "https://github.com/tree-sitter/tree-sitter-c/archive/v0.20.2.tar.gz"
+    sha256: "af66fde03feb0df4faf03750102a0d265b007e5d957057b6b293c13116a70af2"
   "0.20.1":
     url: "https://github.com/tree-sitter/tree-sitter-c/archive/refs/tags/v0.20.1.tar.gz"
     sha256: "ffcc2ef0eded59ad1acec9aec4f9b0c7dd209fc1a85d85f8b0e81298e3dddcc2"

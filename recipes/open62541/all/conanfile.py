@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.files import rename, get
 import glob
 import os
 import yaml
@@ -21,8 +22,8 @@ class Open62541Conan(ConanFile):
                   "All platform-specific functionality is implemented via exchangeable " \
                   "plugins. Plugin implementations are provided for the major operating systems."
     topics = (
-        "OPC UA", "open62541", "sdk", "server/client", "c", "iec-62541",
-        "industrial automation", "tsn", "time sensetive networks", "publish-subscirbe", "pubsub"
+        "opc ua", "open62541", "sdk", "server/client", "c", "iec-62541",
+        "industrial automation", "tsn", "time sensitive networks", "publish-subscirbe", "pubsub"
     )
 
     settings = "os", "compiler", "build_type", "arch"
@@ -74,6 +75,7 @@ class Open62541Conan(ConanFile):
         # False: UA_ENABLE_ENCRYPTION=Off
         # openssl: UA_ENABLE_ENCRYPTION=On and UA_ENABLE_ENCRYPTION_OPENSSL=On
         # mbedtls: UA_ENABLE_ENCRYPTION=On
+        # changed in 1.3.1 - UA_ENABLE_ENCRYPTION can be OFF, OPENSSL, MBEDTLS
         "encryption": [False, "openssl", "mbedtls"],
         # False: UA_ENABLE_JSON_ENCODING=Off
         # True: UA_ENABLE_JSON_ENCODING=On
@@ -83,6 +85,9 @@ class Open62541Conan(ConanFile):
         # Ethernet: UA_ENABLE_PUBSUB=On and UA_ENABLE_PUBSUB_ETH_UADP=On
         # Ethernet_XDP: UA_ENABLE_PUBSUB=On and UA_ENABLE_PUBSUB_ETH_UADP_XDP=On
         "pub_sub": [False, "Simple", "Ethernet", "Ethernet_XDP"],
+        # False: UA_ENABLE_PUBSUB_ENCRYPTION=Off
+        # True: UA_ENABLE_PUBSUB_ENCRYPTION=On
+        "pub_sub_encryption": [True, False],
         # False: UA_ENABLE_DA=Off
         # True: UA_ENABLE_DA=On
         "data_access": [True, False],
@@ -120,6 +125,7 @@ class Open62541Conan(ConanFile):
         "encryption": False,
         "json_support": False,
         "pub_sub": False,
+        "pub_sub_encryption": False,
         "data_access": True,
         "compiled_nodeset_descriptions": True,
         "namespace_zero": "FULL",
@@ -135,6 +141,8 @@ class Open62541Conan(ConanFile):
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
+    short_paths = True
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -142,6 +150,8 @@ class Open62541Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) >= "1.3.1":
+            del self.options.embedded_profile
 
     def configure(self):
         if self.options.shared:
@@ -166,7 +176,7 @@ class Open62541Conan(ConanFile):
         if self.options.encryption == "mbedtls":
             self.requires("mbedtls/2.25.0")
         elif self.options.encryption == "openssl":
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1o")
         if self.options.web_socket:
             self.requires("libwebsockets/4.2.0")
         if self.options.discovery == "With Multicast" or "multicast" in str(self.options.discovery):
@@ -220,13 +230,13 @@ class Open62541Conan(ConanFile):
                     "When web_socket is enabled, libwebsockets:with_ssl must have the value of open62541:encryption")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
         submodule_filename = os.path.join(
             self.recipe_folder, 'submoduledata.yml')
         with open(submodule_filename, 'r') as submodule_stream:
-            submodules_data = yaml.load(submodule_stream)
+            submodules_data = yaml.safe_load(submodule_stream)
             for path, submodule in submodules_data["submodules"][self.version].items():
                 filename = os.path.basename(submodule["url"])
                 archive_name = submodule["archive_pattern"].format(
@@ -237,10 +247,10 @@ class Open62541Conan(ConanFile):
                     "sha256": submodule["sha256"]
                 }
 
-                tools.get(**submodule_data)
+                get(self, **submodule_data)
                 submodule_source = os.path.join(self._source_subfolder, path)
                 tools.rmdir(submodule_source)
-                tools.rename(archive_name, submodule_source)
+                rename(self, archive_name, submodule_source)
 
     def _get_log_level(self):
         return {
@@ -297,12 +307,21 @@ class Open62541Conan(ConanFile):
             self._cmake.definitions["UA_ENABLE_DISCOVERY_SEMAPHORE"] = \
                 self.options.discovery_semaphore or "semaphore" in str(self.options.discovery)
         self._cmake.definitions["UA_ENABLE_QUERY"] = self.options.query
-        self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = self.options.encryption != False
-        if self.options.encryption != False:
+        if tools.Version(self.version) >= "1.3.1":
             if self.options.encryption == "openssl":
-                self._cmake.definitions["UA_ENABLE_ENCRYPTION_OPENSSL"] = True
+                self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = "OPENSSL"
+            elif self.options.encryption == "mbedtls":
+                self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = "MBEDTLS"
+            else:
+                self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = "OFF"
+        else:
+            self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = self.options.encryption != False
+            if self.options.encryption != False:
+                if self.options.encryption == "openssl":
+                    self._cmake.definitions["UA_ENABLE_ENCRYPTION_OPENSSL"] = True
         self._cmake.definitions["UA_ENABLE_JSON_ENCODING"] = self.options.json_support
         self._cmake.definitions["UA_ENABLE_PUBSUB"] = self.options.pub_sub != False
+        self._cmake.definitions["UA_ENABLE_PUBSUB_ENCRYPTION"] = self.options.pub_sub_encryption != False
         if self.options.pub_sub != False:
             if self.settings.os == "Linux" and self.options.pub_sub == "Ethernet":
                 self._cmake.definitions["UA_ENABLE_PUBSUB_ETH_UADP"] = True
@@ -314,7 +333,8 @@ class Open62541Conan(ConanFile):
             self._cmake.definitions["UA_NAMESPACE_ZERO"] = "FULL"
         else:
             self._cmake.definitions["UA_NAMESPACE_ZERO"] = self.options.namespace_zero
-        self._cmake.definitions["UA_ENABLE_MICRO_EMB_DEV_PROFILE"] = self.options.embedded_profile
+        if tools.Version(self.version) < "1.3.1":
+            self._cmake.definitions["UA_ENABLE_MICRO_EMB_DEV_PROFILE"] = self.options.embedded_profile
         self._cmake.definitions["UA_ENABLE_TYPENAMES"] = self.options.typenames
         self._cmake.definitions["UA_ENABLE_STATUSCODE_DESCRIPTIONS"] = self.options.readable_statuscodes
         self._cmake.definitions["UA_ENABLE_HARDENING"] = self.options.hardening
@@ -325,9 +345,14 @@ class Open62541Conan(ConanFile):
         self._cmake.configure(source_dir=self._source_subfolder)
         return self._cmake
 
-    def build(self):
+    def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        if tools.Version(self.version) >= "1.3.1":
+            os.unlink(os.path.join(self._source_subfolder, "tools", "cmake", "FindPython3.cmake"))
+
+    def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -374,7 +399,7 @@ class Open62541Conan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs = [
             "include",
-            os.path.join("include", "plugin")
+            os.path.join("include", "open62541", "plugin")
         ]
 
         # required for creating custom servers from ua-nodeset
@@ -385,8 +410,10 @@ class Open62541Conan(ConanFile):
             self.cpp_info.defines.append("UA_ENABLE_AMALGAMATION")
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
-            self.cpp_info.includedirs.append(os.path.join("include", "win32"))
+            self.cpp_info.includedirs.append(os.path.join("include", "open62541", "win32"))
         else:
-            self.cpp_info.includedirs.append(os.path.join("include", "posix"))
+            self.cpp_info.includedirs.append(os.path.join("include", "open62541", "posix"))
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.system_libs.extend(["pthread", "m", "rt"])
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules = [self._module_file_rel_path]

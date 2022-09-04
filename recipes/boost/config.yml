@@ -1,21 +1,21 @@
 versions:
-    1.69.0:
-      folder: all
     1.70.0:
-      folder: all
+        folder: all
     1.71.0:
-      folder: all
+        folder: all
     1.72.0:
-      folder: all
+        folder: all
     1.73.0:
-      folder: all
+        folder: all
     1.74.0:
-      folder: all
+        folder: all
     1.75.0:
-      folder: all
+        folder: all
     1.76.0:
-      folder: all
+        folder: all
     1.77.0:
-      folder: all
+        folder: all
     1.78.0:
-      folder: all
+        folder: all
+    1.79.0:
+        folder: all

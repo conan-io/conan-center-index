@@ -71,7 +71,7 @@ class LibZipConan(ConanFile):
             self.options.crypto = crypto_value
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
 
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
@@ -83,9 +83,9 @@ class LibZipConan(ConanFile):
             self.requires("zstd/1.5.2")
 
         if self.options.crypto == "openssl":
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1q")
         elif self.options.crypto == "mbedtls":
-            self.requires("mbedtls/2.25")
+            self.requires("mbedtls/3.2.1")
 
     def validate(self):
         if self.options.crypto == "win32" and self.settings.os != "Windows":

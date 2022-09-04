@@ -347,16 +347,16 @@ class AwsSdkCppConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("aws-c-common/0.6.15")
+        self.requires("aws-c-common/0.6.19")
         if self._use_aws_crt_cpp:
-            self.requires("aws-c-cal/0.5.12")
-            self.requires("aws-c-http/0.6.10")
-            self.requires("aws-c-io/0.10.13")
-            self.requires("aws-crt-cpp/0.17.12")
+            self.requires("aws-c-cal/0.5.13")
+            self.requires("aws-c-http/0.6.13")
+            self.requires("aws-c-io/0.10.20")
+            self.requires("aws-crt-cpp/0.17.23")
         else:
-            self.requires("aws-c-event-stream/0.1.5")
+            self.requires("aws-c-event-stream/0.2.7")
         if self.settings.os != "Windows":
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1n")
             self.requires("libcurl/7.80.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.get_safe("text-to-speech"):
@@ -369,6 +369,14 @@ class AwsSdkCppConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Doesn't support gcc5 / shared. "
                 "See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744"
+            )
+        if (tools.Version(self.version) < "1.9.234"
+            and self.settings.compiler == "gcc"
+            and tools.Version(self.settings.compiler.version) >= "11.0"
+            and self.settings.build_type == "Release"):
+            raise ConanInvalidConfiguration(
+                "Versions prior to 1.9.234 don't support release builds on >= gcc 11 "
+                "See https://github.com/aws/aws-sdk-cpp/issues/1505"
             )
         if self._use_aws_crt_cpp:
             if self._is_msvc and "MT" in msvc_runtime_flag(self):

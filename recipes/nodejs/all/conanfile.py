@@ -45,6 +45,7 @@ class NodejsConan(ConanFile):
         self.copy(pattern="npx", src=self._source_subfolder, dst="bin")
 
     def package_info(self):
+        self.cpp_info.includedirs = []
         bin_dir = os.path.join(self.package_folder, "bin")
         self.output.info('Appending PATH environment variable: {}'.format(bin_dir))
         self.env_info.PATH.append(bin_dir)

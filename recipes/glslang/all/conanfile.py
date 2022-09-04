@@ -148,9 +148,9 @@ class GlslangConan(ConanFile):
         self._cmake.definitions["ENABLE_EMSCRIPTEN_ENVIRONMENT_NODE"] = False
         self._cmake.definitions["ENABLE_HLSL"] = self.options.hlsl
         if glslang_version < "7.0.0" or glslang_version >= "8.13.3743":
-            self._cmake.definitions["ENABLE_RTTI"] = False
+            self._cmake.definitions["ENABLE_RTTI"] = True
         self._cmake.definitions["ENABLE_OPT"] = self.options.enable_optimizer
-        self._cmake.definitions["ENABLE_PCH"] = True
+        self._cmake.definitions["ENABLE_PCH"] = False
         self._cmake.definitions["ENABLE_CTEST"] = False
         self._cmake.definitions["USE_CCACHE"] = False
         if (glslang_version < "7.0.0" or glslang_version >= "11.6.0") and self.settings.os == "Windows":

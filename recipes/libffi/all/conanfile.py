@@ -87,13 +87,17 @@ class LibffiConan(ConanFile):
     @contextlib.contextmanager
     def _build_context(self):
         extra_env_vars = {}
-        if self._is_msvc:
+        if tools.os_info.is_windows and (self._is_msvc or self.settings.compiler == "clang") :
             msvcc = tools.unix_path(os.path.join(self.source_folder, self._source_subfolder, "msvcc.sh"))
             msvcc_args = []
-            if self.settings.arch == "x86_64":
-                msvcc_args.append("-m64")
-            elif self.settings.arch == "x86":
-                msvcc_args.append("-m32")
+            if self._is_msvc:
+                if self.settings.arch == "x86_64":
+                    msvcc_args.append("-m64")
+                elif self.settings.arch == "x86":
+                    msvcc_args.append("-m32")
+            elif self.settings.compiler == "clang":
+                msvcc_args.append("-clang-cl")
+
             if msvcc_args:
                 msvcc = "{} {}".format(msvcc, " ".join(msvcc_args))
             extra_env_vars.update(tools.vcvars_dict(self.settings))
@@ -178,3 +182,4 @@ class LibffiConan(ConanFile):
         self.cpp_info.libs = ["{}ffi".format("lib" if self._is_msvc else "")]
         if not self.options.shared:
             self.cpp_info.defines = ["FFI_BUILDING"]
+

@@ -1,11 +1,23 @@
 sources:
-  "0.11.1":
-    url: "https://github.com/google/highway/archive/0.11.1.tar.gz"
-    sha256: "4c4bb9501c02b27a0944afde8923aaab554384690d37e5b2a7f97553426ea641"
+  "1.0.0":
+    url: "https://github.com/google/highway/archive/1.0.0.tar.gz"
+    sha256: "ab4f5f864932268356f9f6aa86f612fa4430a7db3c8de0391076750197e876b8"
+  "0.17.0":
+    url: "https://github.com/google/highway/archive/0.17.0.tar.gz"
+    sha256: "25158fd5c090b70ecea47fc246c860d150f07f801d2434e1e51ec14a6c15822c"
+  "0.16.0":
+    url: "https://github.com/google/highway/archive/0.16.0.tar.gz"
+    sha256: "746c9578446be6c5286e8846c5f0d4118c0c1f04219c401abadcb8a5f2051893"
   "0.12.2":
     url: "https://github.com/google/highway/archive/0.12.2.tar.gz"
     sha256: "e1d47ce510429fdcf31f41697ca74fb0dcd59d933196e531a86d51751a56f4cc"
-patches:
   "0.11.1":
-    - patch_file: "patches/0001-remove-contrib.patch"
+    url: "https://github.com/google/highway/archive/0.11.1.tar.gz"
+    sha256: "4c4bb9501c02b27a0944afde8923aaab554384690d37e5b2a7f97553426ea641"
+patches:
+  "0.16.0":
+    - patch_file: "patches/0.16.0-0001-fix-sys-random-h.patch"
+      base_path: "source_subfolder"
+  "0.11.1":
+    - patch_file: "patches/0.11.1-0001-remove-contrib.patch"
       base_path: "source_subfolder"

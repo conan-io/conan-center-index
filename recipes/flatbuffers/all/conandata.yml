@@ -1,29 +1,22 @@
 sources:
-  1.11.0:
-    url: "https://github.com/google/flatbuffers/archive/v1.11.0.tar.gz"
-    sha256: "3f4a286642094f45b1b77228656fbd7ea123964f19502f9ecfd29933fd23a50b"
-  1.12.0:
-    url: "https://github.com/google/flatbuffers/archive/v1.12.0.tar.gz"
-    sha256: "62f2223fb9181d1d6338451375628975775f7522185266cd5296571ac152bc45"
-  2.0.0:
+  "2.0.5":
+    url: "https://github.com/google/flatbuffers/archive/refs/tags/v2.0.5.tar.gz"
+    sha256: "b01e97c988c429e164c5c7df9e87c80007ca87f593c0d73733ba536ddcbc8f98"
+  "2.0.0":
     url: "https://github.com/google/flatbuffers/archive/v2.0.0.tar.gz"
     sha256: "9ddb9031798f4f8754d00fca2f1a68ecf9d0f83dfac7239af1311e4fd9a565c4"
+  "1.12.0":
+    url: "https://github.com/google/flatbuffers/archive/v1.12.0.tar.gz"
+    sha256: "62f2223fb9181d1d6338451375628975775f7522185266cd5296571ac152bc45"
+  "1.11.0":
+    url: "https://github.com/google/flatbuffers/archive/v1.11.0.tar.gz"
+    sha256: "3f4a286642094f45b1b77228656fbd7ea123964f19502f9ecfd29933fd23a50b"
 patches:
-  1.11.0:
-    - patch_file: "patches/0001-buildflatbuffers-cmake.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.11.0/fix-copy-ctor.patch"
-      base_path: "source_subfolder"
-      # patch_type: portability
-      # patch_source: https://github.com/google/flatbuffers/pull/5650
-      # patch_description: Fix build with Clang
-  1.12.0:
-    - patch_file: "patches/0001-buildflatbuffers-cmake.patch"
-      base_path: "source_subfolder"
-  2.0.0:
-    - patch_file: "patches/0001-buildflatbuffers-cmake.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-versionflatbuffers-cmake.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0003-werrorflatbuffers-cmake.patch"
-      base_path: "source_subfolder"
+  "2.0.5":
+    - patch_file: "patches/0002-apple-no-universal-build.patch"
+    - patch_file: "patches/0003-no-flatc-execution-build-time.patch"
+  "1.11.0":
+    - patch_file: "patches/0001-fix-copy-ctor.patch"
+      patch_description: "Fix build with Clang"
+      patch_type: "portability"
+      patch_source: "https://github.com/google/flatbuffers/pull/5650"

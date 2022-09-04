@@ -1,11 +1,13 @@
 versions:
-  "2.6.0":
+  "2.12.1":
     folder: "all"
-  "2.8.0":
-    folder: "all"
-  "2.9.0":
+  "2.11.0":
     folder: "all"
   "2.10.0":
     folder: "all"
-  "2.11.0":
+  "2.9.0":
+    folder: "all"
+  "2.8.0":
+    folder: "all"
+  "2.6.0":
     folder: "all"

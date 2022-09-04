@@ -25,6 +25,8 @@ class SystemcConan(ConanFile):
         "enable_assertions": [True, False],
         "enable_immediate_self_notifications": [True, False],
         "enable_pthreads": [True, False],
+        "enable_phase_callbacks": [True, False],
+        "enable_phase_callbacks_tracing": [True, False],
     }
     default_options = {
         "shared": False,
@@ -35,6 +37,8 @@ class SystemcConan(ConanFile):
         "enable_assertions": True,
         "enable_immediate_self_notifications": False,
         "enable_pthreads": False,
+        "enable_phase_callbacks": False,
+        "enable_phase_callbacks_tracing": False,
     }
 
     generators = "cmake"
@@ -87,6 +91,10 @@ class SystemcConan(ConanFile):
             self.options.enable_immediate_self_notifications
         cmake.definitions["ENABLE_PTHREADS"] = \
             self.options.get_safe("enable_pthreads", False)
+        cmake.definitions["ENABLE_PHASE_CALLBACKS"] = \
+            self.options.get_safe("enable_phase_callbacks", False)
+        cmake.definitions["ENABLE_PHASE_CALLBACKS_TRACING"] = \
+            self.options.get_safe("enable_phase_callbacks_tracing", False)
         cmake.configure()
         return cmake
 

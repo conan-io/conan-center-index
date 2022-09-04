@@ -1,8 +1,11 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools import files
+from conan.errors import ConanInvalidConfiguration
+from conans import AutoToolsBuildEnvironment, CMake, tools
 import os
 import shutil
 
+required_conan_version = ">=1.33.0"
 
 class LibelfConan(ConanFile):
     name = "libelf"
@@ -10,7 +13,7 @@ class LibelfConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://directory.fsf.org/wiki/Libelf"
     license = "LGPL-2.0"
-    topics = ("conan", "elf", "fsf", "libelf", "object-file")
+    topics = ("elf", "fsf", "libelf", "object-file")
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
@@ -37,18 +40,19 @@ class LibelfConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.options.shared and self.settings.os not in ["Linux", "Windows"]:
-            raise ConanInvalidConfiguration("libelf can not be built as shared library on non linux or windows platforms")
+
+    def validate(self):
+        if self.options.shared and self.settings.os not in ["Linux", "FreeBSD", "Windows"]:
+            raise ConanInvalidConfiguration("libelf can not be built as shared library on non linux/FreeBSD/windows platforms")
 
     def build_requirements(self):
         if self.settings.os != "Windows":
-            self.build_requires("autoconf/2.69")
-            self.build_requires("gnu-config/cci.20201022")
+            self.build_requires("autoconf/2.71")
+            self.build_requires("gnu-config/cci.20210814")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -68,7 +72,7 @@ class LibelfConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        with tools.chdir(self._source_subfolder):
+        with files.chdir(self, self._source_subfolder):
             self.run("autoreconf -fiv", run_environment=True)
         args = ["--enable-shared={}".format("yes" if self.options.shared else "no")]
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
@@ -82,9 +86,9 @@ class LibelfConan(ConanFile):
     def _package_autotools(self):
         autotools = self._configure_autotools()
         autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "locale"))
-        if self.settings.os == "Linux" and self.options.shared:
+        files.rmdir(self, os.path.join(self.package_folder, "share"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "locale"))
+        if self.settings.os in ["Linux", "FreeBSD"] and self.options.shared:
             os.remove(os.path.join(self.package_folder, "lib", "libelf.a"))
 
     @property
@@ -99,7 +103,7 @@ class LibelfConan(ConanFile):
         if self.settings.os == "Windows":
             self._build_cmake()
         else:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "Makefile.in"),
+            files.replace_in_file(self, os.path.join(self._source_subfolder, "lib", "Makefile.in"),
                                   "$(LINK_SHLIB)",
                                   "$(LINK_SHLIB) $(LDFLAGS)")
             # libelf sources contains really outdated 'config.sub' and
@@ -116,7 +120,9 @@ class LibelfConan(ConanFile):
             self._package_cmake()
         else:
             self._package_autotools()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.set_property("pkg_config_name", "libelf")
+        self.cpp_info.includedirs = [os.path.join("include", "libelf"), "include"]

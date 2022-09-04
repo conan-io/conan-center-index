@@ -1,0 +1,13 @@
+sources:
+  "4.1.0":
+    url: "https://github.com/JustWhit3/osmanip/archive/refs/tags/v4.1.0.tar.gz"
+    sha256: "9830316fea29300aeebadb0cd6cddd6f291a8fa04c397bca9666d045815d1d53"
+  "4.0.0":
+    url: "https://github.com/JustWhit3/osmanip/archive/refs/tags/v4.0.0.tar.gz"
+    sha256: "c6848e1d9b15eb409af88efeee7cd1ce87374ea7ac87424f5d2cf30104f098a0"
+
+patches:
+  "4.0.0":
+    # This patch is for function renaming on arsenalgear/1.2.2.
+    - patch_file: "patches/0001-replace-runtime_error_func.patch"
+      base_path: "source_subfolder"

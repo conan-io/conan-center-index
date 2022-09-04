@@ -1,14 +1,23 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, replace_in_file, rmdir
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
+from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
 
 
-class Assimp(ConanFile):
+class AssimpConan(ConanFile):
     name = "assimp"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/assimp/assimp"
-    description = "A library to import and export various 3d-model-formats including scene-post-processing to generate missing render data."
+    description = (
+        "A library to import and export various 3d-model-formats including "
+        "scene-post-processing to generate missing render data."
+    )
     topics = ("assimp", "3d", "game development", "3mf", "collada")
     license = "BSD-3-Clause"
     settings = "os", "compiler", "build_type", "arch"
@@ -86,29 +95,24 @@ class Assimp(ConanFile):
         "with_x_exporter": ("ASSIMP_BUILD_X_EXPORTER", "5.0.0"),
         "with_x3d": ("ASSIMP_BUILD_X3D_IMPORTER", "5.0.0"),
         "with_x3d_exporter": ("ASSIMP_BUILD_X3D_EXPORTER", "5.0.0"),
-        "with_xgl": ("ASSIMP_BUILD_XGL_IMPORTER", "5.0.0")
+        "with_xgl": ("ASSIMP_BUILD_XGL_IMPORTER", "5.0.0"),
+        "with_m3d": ("ASSIMP_BUILD_M3D_IMPORTER", "5.1.0"),
+        "with_m3d_exporter": ("ASSIMP_BUILD_M3D_EXPORTER", "5.1.0"),
+        "with_iqm": ("ASSIMP_BUILD_IQM_IMPORTER", "5.2.0"),
     }
     options.update(dict.fromkeys(_format_option_map, [True, False]))
     default_options.update(dict.fromkeys(_format_option_map, True))
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
         for option, (_, min_version) in self._format_option_map.items():
-            if tools.Version(self.version) < tools.Version(min_version):
+            if Version(self.version) < Version(min_version):
                 delattr(self.options, option)
 
     def configure(self):
@@ -129,9 +133,20 @@ class Assimp(ConanFile):
 
     @property
     def _depends_on_draco(self):
-        if tools.Version(self.version) < "5.1.0":
+        if Version(self.version) < "5.1.0":
             return False
         return self.options.with_gltf or self.options.with_gltf_exporter
+
+    @property
+    def _depends_on_clipper(self):
+        return self.options.with_ifc
+
+    @property
+    def _depends_on_stb(self):
+        if Version(self.version) < "5.1.0":
+            return False
+        return self.options.with_m3d or self.options.with_m3d_exporter or \
+            self.options.with_pbrt_exporter
 
     @property
     def _depends_on_zlib(self):
@@ -139,37 +154,83 @@ class Assimp(ConanFile):
             self.options.with_assxml_exporter or self.options.with_blend or self.options.with_fbx or \
             self.options.with_q3bsp or self.options.with_x or self.options.with_xgl
 
+    @property
+    def _depends_on_openddlparser(self):
+        if Version(self.version) < "5.1.0":
+            return False
+        return self.options.with_opengex
+
     def requirements(self):
         # TODO: unvendor others libs:
-        # - clipper (required by IFC importer): can't be unvendored because CCI
-        #   has 6.4.2, not API compatible with 4.8.8 vendored in assimp
         # - Open3DGC
-        # - openddlparser
-        if tools.Version(self.version) < "5.1.0":
+        self.requires("minizip/1.2.12")
+        self.requires("utfcpp/3.2.1")
+        if Version(self.version) < "5.1.0":
             self.requires("irrxml/1.2")
         else:
-            self.requires("pugixml/1.11")
-
-        self.requires("minizip/1.2.11")
-        self.requires("utfcpp/3.1.2")
+            self.requires("pugixml/1.12.1")
         if self._depends_on_kuba_zip:
-            self.requires("kuba-zip/0.1.31")
+            self.requires("kuba-zip/0.2.4")
         if self._depends_on_poly2tri:
             self.requires("poly2tri/cci.20130502")
         if self._depends_on_rapidjson:
-            self.requires("rapidjson/cci.20200410")
+            self.requires("rapidjson/cci.20211112")
         if self._depends_on_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self._depends_on_draco:
-            self.requires("draco/1.4.3")
+            self.requires("draco/1.5.3")
+        if self._depends_on_clipper:
+            self.requires("clipper/4.10.0")  # Only 4.x supported
+        if self._depends_on_stb:
+            self.requires("stb/cci.20210910")
+        if self._depends_on_openddlparser:
+            self.requires("openddl-parser/0.5.0")
+
+    def validate(self):
+        if self._depends_on_clipper and Version(self.dependencies["clipper"].ref.version).major != "4":
+            raise ConanInvalidConfiguration("Only 'clipper/4.x' is supported")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if Version(self.version) >= "5.1.0":
+            tc.variables["ASSIMP_HUNTER_ENABLED"] = False
+            tc.variables["ASSIMP_IGNORE_GIT_HASH"] = True
+            tc.variables["ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR"] = False
+        else:
+            tc.variables["HUNTER_ENABLED"] = False
+            tc.variables["IGNORE_GIT_HASH"] = True
+            tc.variables["SYSTEM_IRRXML"] = True
+        tc.variables["ASSIMP_ANDROID_JNIIOSYSTEM"] = False
+        tc.variables["ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT"] = False
+        tc.variables["ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT"] = False
+        tc.variables["ASSIMP_BUILD_ASSIMP_TOOLS"] = False
+        tc.variables["ASSIMP_BUILD_SAMPLES"] = False
+        tc.variables["ASSIMP_BUILD_TESTS"] = False
+        tc.variables["ASSIMP_DOUBLE_PRECISION"] = self.options.double_precision
+        tc.variables["ASSIMP_INSTALL_PDB"] = False
+        tc.variables["ASSIMP_NO_EXPORT"] = False
+        tc.variables["ASSIMP_BUILD_MINIZIP"] = False
+        for option, (definition, _) in self._format_option_map.items():
+            value = self.options.get_safe(option)
+            if value is not None:
+                tc.variables[definition] = value
+        if self.settings.os == "Windows":
+            tc.preprocessor_definitions["NOMINMAX"] = 1
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW" # to avoid warnings
+        tc.generate()
+
+        cd = CMakeDeps(self)
+        cd.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
         # Don't force several compiler and linker flags
         replace_mapping = [
@@ -184,72 +245,65 @@ class Assimp(ConanFile):
         ]
 
         for before, after in replace_mapping:
-            tools.replace_in_file(os.path.join(
-                self._source_subfolder, "CMakeLists.txt"), before, after, strict=False)
+            replace_in_file(self, os.path.join(
+                self.source_folder, "CMakeLists.txt"), before, after, strict=False)
         # Take care to not use these vendored libs
-        vendors = ["poly2tri", "rapidjson", "unzip", "utf8cpp", "zip"]
-        if tools.Version(self.version) < "5.1.0":
+        vendors = ["poly2tri", "rapidjson", "utf8cpp", "zip", "unzip", "stb", "zlib", "clipper"]
+        if Version(self.version) < "5.1.0":
             vendors.append("irrXML")
         else:
-            vendors.extend(["pugixml", "draco"])
+            vendors.extend(["pugixml", "draco", "openddlparser"])
         for vendor in vendors:
-            tools.rmdir(os.path.join(self._source_subfolder, "contrib", vendor))
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        if tools.Version(self.version) >= "5.1.0":
-            self._cmake.definitions["ASSIMP_HUNTER_ENABLED"] = False
-            self._cmake.definitions["ASSIMP_IGNORE_GIT_HASH"] = True
-            self._cmake.definitions["ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR"] = False
-        else:
-            self._cmake.definitions["HUNTER_ENABLED"] = False
-            self._cmake.definitions["IGNORE_GIT_HASH"] = True
-            self._cmake.definitions["SYSTEM_IRRXML"] = True
-
-        self._cmake.definitions["ASSIMP_ANDROID_JNIIOSYSTEM"] = False
-        self._cmake.definitions["ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT"] = False
-        self._cmake.definitions["ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT"] = False
-        self._cmake.definitions["ASSIMP_BUILD_ASSIMP_TOOLS"] = False
-        self._cmake.definitions["ASSIMP_BUILD_SAMPLES"] = False
-        self._cmake.definitions["ASSIMP_BUILD_TESTS"] = False
-        self._cmake.definitions["ASSIMP_DOUBLE_PRECISION"] = self.options.double_precision
-        self._cmake.definitions["ASSIMP_INSTALL_PDB"] = False
-        self._cmake.definitions["ASSIMP_NO_EXPORT"] = False
-
-        for option, (definition, _) in self._format_option_map.items():
-            value = self.options.get_safe(option)
-            if value is not None:
-                self._cmake.definitions[definition] = value
-
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+            rmdir(self, os.path.join(self.source_folder, "contrib", vendor))
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses",
-                  src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "assimp"
-        self.cpp_info.names["cmake_find_package_multi"] = "assimp"
-        self.cpp_info.names["pkg_config"] = "assimp"
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
+        self.cpp_info.set_property("cmake_file_name", "assimp")
+        self.cpp_info.set_property("cmake_target_name", "assimp::assimp")
+        self.cpp_info.set_property("pkg_config_name", "assimp")
+        self.cpp_info.libs = collect_libs(self)
+        if is_msvc(self) and self.options.shared:
             self.cpp_info.defines.append("ASSIMP_DLL")
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["rt", "m", "pthread"]
         if not self.options.shared:
-            stdcpp_library = tools.stdcpp_library(self)
+            stdcpp_library = tools_legacy.stdcpp_library(self)
             if stdcpp_library:
                 self.cpp_info.system_libs.append(stdcpp_library)
+
+        # FIXME: shouldn't be necessary.
+        # It's a workaround to support conan v1 generators
+        self.cpp_info.requires.append("minizip::minizip")
+        self.cpp_info.requires.append("utfcpp::utfcpp")
+        if Version(self.version) < "5.1.0":
+            self.cpp_info.requires.append("irrxml::irrxml")
+        else:
+            self.cpp_info.requires.append("pugixml::pugixml")
+        if self._depends_on_kuba_zip:
+            self.cpp_info.requires.append("kuba-zip::kuba-zip")
+        if self._depends_on_poly2tri:
+            self.cpp_info.requires.append("poly2tri::poly2tri")
+        if self._depends_on_rapidjson:
+            self.cpp_info.requires.append("rapidjson::rapidjson")
+        if self._depends_on_zlib:
+            self.cpp_info.requires.append("zlib::zlib")
+        if self._depends_on_draco:
+            self.cpp_info.requires.append("draco::draco")
+        if self._depends_on_clipper:
+            self.cpp_info.requires.append("clipper::clipper")
+        if self._depends_on_stb:
+            self.cpp_info.requires.append("stb::stb")
+        if self._depends_on_openddlparser:
+            self.cpp_info.requires.append("openddl-parser::openddl-parser")

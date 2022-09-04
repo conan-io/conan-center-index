@@ -1,0 +1,10 @@
+--- a/core/src/histogram.cc
++++ b/core/src/histogram.cc
+@@ -3,6 +3,7 @@
+ #include <algorithm>
+ #include <cassert>
+ #include <iterator>
++#include <limits>
+ #include <numeric>
+ #include <ostream>
+ 

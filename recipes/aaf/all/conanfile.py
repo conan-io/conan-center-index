@@ -1,3 +1,4 @@
+from conan.tools.files import apply_conandata_patches
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -15,13 +16,9 @@ class AafConan(ConanFile):
     generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
         "structured_storage": [True, False],
     }
     default_options = {
-        "shared": False,
-        "fPIC": True,
         "structured_storage": False,
     }
 
@@ -32,14 +29,6 @@ class AafConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
 
     def requirements(self):
         self.requires("expat/2.4.1")
@@ -55,8 +44,7 @@ class AafConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
         cmake = CMake(self)
 

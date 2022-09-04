@@ -1,23 +1,28 @@
 sources:
+  "1.8.0":
+    url: "https://github.com/yhirose/cpp-peglib/archive/refs/tags/v1.8.0.tar.gz"
+    sha256: "63dc755afb5072ba58468fa39d1037ebadc1206c489b0493d635147524cf5379"
+  "1.6.1":
+    url: "https://github.com/yhirose/cpp-peglib/archive/v1.6.1.tar.gz"
+    sha256: "e1777ea79323c4cfe98587edc50e33df0c42bdb8648b7c5cc679dbf85f4f4768"
+  "1.6.0":
+    url: "https://github.com/yhirose/cpp-peglib/archive/v1.6.0.tar.gz"
+    sha256: "2b09d711fd02bad24089bc5a6f51ef4c307d86e0adb6f9938e0549a12c102ac4"
+  "1.5.0":
+    url: "https://github.com/yhirose/cpp-peglib/archive/refs/tags/v1.5.0.tar.gz"
+    sha256: "45a02b749556af6ab0abf78c4c1d1afe02f17705b1c51f5820e957616f453b33"
+  "1.4.2":
+    url: "https://github.com/yhirose/cpp-peglib/archive/refs/tags/v1.4.2.tar.gz"
+    sha256: "28a09c1bee50608733a989cd5b62368a767a66f9e1a39654c0342e9698c479ca"
+  "1.4.1":
+    url: "https://github.com/yhirose/cpp-peglib/archive/refs/tags/v1.4.1.tar.gz"
+    sha256: "3784039727f8317cd5e202c5a2d142584bf48a311910643298dc4ba9083424e7"
+  "1.3.10":
+    url: "https://github.com/yhirose/cpp-peglib/archive/refs/tags/v1.3.10.tar.gz"
+    sha256: "9c79abd8a304d163d176918b74d7ab272e6ab1405af2dd699b6b7ae1b5605b09"
   "1.3.9":
     url: "https://github.com/yhirose/cpp-peglib/archive/refs/tags/v1.3.9.tar.gz"
     sha256: "0d14fcbf7ed4409699fff70867c5776a2219e38547de5bf0bf689ba0d58c0d7f"
   "1.3.8":
-    url: "https://github.com/yhirose/cpp-peglib/archive/v1.3.8.tar.gz"
+    url: "https://github.com/yhirose/cpp-peglib/archive/refs/tags/v1.3.8.tar.gz"
     sha256: "6d266806825ec491f1e3d1eb8a2163114f328a691f7c9fbce7bb3edf2f42074c"
-  "1.3.7":
-    url: "https://github.com/yhirose/cpp-peglib/archive/v1.3.7.tar.gz"
-    sha256: "3f68843d442e5013ff927cadc6ae2e2364305fbf30dee287c798b094642124f8"
-  "1.3.5":
-    url: "https://github.com/yhirose/cpp-peglib/archive/v1.3.5.tar.gz"
-    sha256: "10e4bd70dff77bc3038382d1fce41f9f48629e8cd81e432dd27e232ba852b2e1"
-  "1.3.3":
-    url: "https://github.com/yhirose/cpp-peglib/archive/v1.3.3.tar.gz"
-    sha256: "939968fafe593ee64d46b803c5fb49b87835102db085a066311f3d47c09a67b9"
-  "1.3.1":
-    url: "https://github.com/yhirose/cpp-peglib/archive/v1.3.1.tar.gz"
-    sha256: "9ab528afd95ad2dcecfa86b0e46952b142be09958fc8a6a605fcd3ea4f812c5f"
-patches:
-  "1.3.7":
-    - patch_file: patches/fix-token_to_number_.patch
-      base_path: source_subfolder

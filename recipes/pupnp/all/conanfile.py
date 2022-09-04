@@ -104,11 +104,12 @@ class PupnpConan(ConanFile):
                         "device",
                         "largefile",
                         "tools",
-                        "blocking-tcp",
                         "debug"
                     ),
                 )
             )
+
+            args.append("--%s-blocking_tcp_connections" % ("enable" if getattr(self.options, "blocking-tcp") else "disable"))
 
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)

@@ -1,9 +1,13 @@
 versions:
-  "0.9.9.5":
+  "cci.20220420":
     folder: all
-  "0.9.9.6":
+  "0.9.9.8":
     folder: all
   "0.9.9.7":
     folder: all
-  "0.9.9.8":
+  "0.9.9.6":
+    folder: all
+  "0.9.9.5":
+    folder: all
+  "0.9.5.4":
     folder: all

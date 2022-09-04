@@ -1,4 +1,7 @@
 sources:
+  "3.24":
+    url: "https://github.com/dcleblanc/SafeInt/archive/3.24.tar.gz"
+    sha256: "af6c7222a8420f6f87e198dc94791c28da75fe7241b605342c333fd03fd9dea6"
   "3.0.26":
     url: "https://github.com/dcleblanc/SafeInt/archive/refs/tags/3.0.26.tar.gz"
     sha256: "62fef99873ad975ddd8356923b3d51ed316209c1a05ac85814219373a13ae4d5"

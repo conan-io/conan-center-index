@@ -1,14 +1,18 @@
 sources:
-  "0.2.0":
-    url: "https://github.com/msteinbeck/tinyspline/archive/0.2.0.tar.gz"
-    sha256: "7e0776abfc2ab7e485ec5cdac0ad37774aa9362f81303ceb5584e983582a38d2"
+  "0.5.0":
+    url: "https://github.com/msteinbeck/tinyspline/archive/v0.5.0.tar.gz"
+    sha256: "cf7a6de40a5456b6791bc043d978b134c54e0404129a05846b803ccd45db366b"
+  "0.4.0":
+    url: "https://github.com/msteinbeck/tinyspline/archive/refs/tags/v0.4.0.tar.gz"
+    sha256: "819db7f8b09c68b701b54232f08d35210599353703934c61e03555c3c059a0db"
   "0.3.0":
     url: "https://github.com/msteinbeck/tinyspline/archive/v0.3.0.tar.gz"
     sha256: "3e89ec449799b00c66a5f3d26b9960d74a1e238132093424ba35c793a3bd3cd7"
-patches:
   "0.2.0":
-    - patch_file: "patches/0.2.0-0001-fix-cmake.patch"
-      base_path: "source_subfolder"
+    url: "https://github.com/msteinbeck/tinyspline/archive/0.2.0.tar.gz"
+    sha256: "7e0776abfc2ab7e485ec5cdac0ad37774aa9362f81303ceb5584e983582a38d2"
+patches:
   "0.3.0":
     - patch_file: "patches/0.3.0-0001-fix-cmake.patch"
-      base_path: "source_subfolder"
+  "0.2.0":
+    - patch_file: "patches/0.2.0-0001-fix-cmake.patch"

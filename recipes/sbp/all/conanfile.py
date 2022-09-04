@@ -38,11 +38,8 @@ class SbpConan(ConanFile):
     def source(self):
         data = self.conan_data["sources"][self.version]
 
-        source = {"url": data["url"]["source"], "sha256": data["sha256"]["source"]}
-        tools.get(**source, strip_root=True, destination=self._source_subfolder)
-
-        cmake = {"url": data["url"]["cmake"], "sha256": data["sha256"]["cmake"]}
-        tools.get(**cmake, strip_root=True, destination=os.path.join(self._source_subfolder, "c", "cmake", "common"))
+        tools.get(**data["source"], strip_root=True, destination=self._source_subfolder)
+        tools.get(**data["cmake"], strip_root=True, destination=os.path.join(self._source_subfolder, "c", "cmake", "common"))
 
     def _configure_cmake(self):
         if self._cmake:

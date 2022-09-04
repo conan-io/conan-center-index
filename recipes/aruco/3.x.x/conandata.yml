@@ -1,4 +1,4 @@
 sources:
-  3.1.12:
-    url: https://downloads.sourceforge.net/project/aruco/3.1.12/aruco-3.1.12.zip
-    sha256: 70b9ec8aa8eac6fe3f622201747a3e32c77bbb5f015e28a95c1c7c91f8ee8a09
+  "3.1.12":
+    url: "https://downloads.sourceforge.net/project/aruco/3.1.12/aruco-3.1.12.zip"
+    sha256: "70b9ec8aa8eac6fe3f622201747a3e32c77bbb5f015e28a95c1c7c91f8ee8a09"

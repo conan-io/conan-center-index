@@ -49,7 +49,7 @@ class tngConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

@@ -69,37 +69,13 @@ class BackwardCppConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        if self.settings.os in ["Linux", "Android"] and \
-           self._has_stack_details("dwarf"):
-            self.requires("libdwarf/20191104")
-
-    def system_requirements(self):
-        required_package = None
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "Android"]:
+            if self._has_stack_details("dwarf"):
+                self.requires("libdwarf/20191104")
             if self._has_stack_details("dw"):
-                if tools.os_info.linux_distro in ["ubuntu", "debian"]:
-                    required_package = "libdw-dev"
-                elif tools.os_info.linux_distro in ["fedora", "centos"]:
-                    required_package = "elfutils-libs"
-                elif tools.os_info.linux_distro == "opensuse":
-                    required_package = "libdw-devel"
-                elif tools.os_info.linux_distro == "arch":
-                    required_package = "libelf"
-
+                self.requires("elfutils/0.186")
             if self._has_stack_details("bfd"):
-                if tools.os_info.linux_distro in ["ubuntu", "debian"]:
-                    required_package = "binutils-dev"
-                elif tools.os_info.linux_distro in ["fedora", "centos", "opensuse"]:
-                    required_package = "binutils-devel"
-                elif tools.os_info.linux_distro == "arch":
-                    required_package = "binutils"
-                elif tools.os_info.is_freebsd:
-                    required_package = "libbfd"
-
-        if required_package != None:
-            installer = tools.SystemPackageTool()
-            if not installer.installed(required_package):
-                raise ConanInvalidConfiguration("backward-cpp requires {}.".format(required_package))
+                self.requires("binutils/2.38")
 
     def validate(self):
         if self.settings.os not in self._supported_os:
@@ -165,10 +141,6 @@ class BackwardCppConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl"])
-            if self._has_stack_details("dw"):
-                self.cpp_info.system_libs.extend(["dw"])
-            if self._has_stack_details("bfd"):
-                self.cpp_info.system_libs.extend(["bfd"])
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["psapi", "dbghelp"])
 

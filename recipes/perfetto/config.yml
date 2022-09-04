@@ -11,3 +11,11 @@ versions:
     folder: all
   "24.2":
     folder: all
+  "25.0":
+    folder: all
+  "26.1":
+    folder: all
+  "27.0":
+    folder: all
+  "27.1":
+    folder: all

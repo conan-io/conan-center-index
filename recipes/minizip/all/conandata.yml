@@ -1,8 +1,16 @@
 sources:
+  "1.2.12":
+    url: "https://github.com/madler/zlib/archive/refs/tags/v1.2.12.tar.gz"
+    sha256: "d8688496ea40fb61787500e863cc63c9afcbc524468cedeb478068924eb54932"
   "1.2.11":
-    sha256: 629380c90a77b964d896ed37163f5c3a34f6e6d897311f1df2a7016355c45eff
-    url: https://github.com/madler/zlib/archive/v1.2.11.tar.gz
+    url: "https://github.com/madler/zlib/archive/v1.2.11.tar.gz"
+    sha256: "629380c90a77b964d896ed37163f5c3a34f6e6d897311f1df2a7016355c45eff"
 patches:
+  "1.2.12":
+    - patch_file: "patches/minizip.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/ioapi.patch"
+      base_path: "source_subfolder"
   "1.2.11":
     - patch_file: "patches/minizip.patch"
       base_path: "source_subfolder"

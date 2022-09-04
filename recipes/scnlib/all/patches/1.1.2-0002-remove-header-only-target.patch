@@ -1,0 +1,18 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b42736e..87cb1f7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -110,12 +110,10 @@ function(generate_header_only_target target_name)
+ endfunction()
+ 
+ generate_library_target(scn)
+-generate_header_only_target(scn-header-only)
+ 
+ set(SCN_EXPORT_TARGETS_LIST
+-        scn scn-header-only)
++        scn)
+ add_library(scn::scn ALIAS scn)
+-add_library(scn::scn-header-only ALIAS scn-header-only)
+ 
+ set_property(TARGET scn PROPERTY SOVERSION 0)
+ 

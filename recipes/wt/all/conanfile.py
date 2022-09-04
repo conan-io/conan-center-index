@@ -100,23 +100,23 @@ class WtConan(ConanFile):
 
     def requirements(self):
         if tools.Version(self.version) >= "4.6.0":
-            self.requires("boost/1.78.0")
+            self.requires("boost/1.79.0")
         else:
             self.requires("boost/1.76.0")
         if self.options.connector_http:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1q")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.37.2")
+            self.requires("sqlite3/3.39.1")
         if self.options.get_safe("with_mysql"):
-            self.requires("libmysqlclient/8.0.17")
+            self.requires("libmysqlclient/8.0.29")
         if self.options.get_safe("with_postgres"):
-            self.requires("libpq/13.4")
+            self.requires("libpq/14.2")
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
             self.requires("odbc/2.3.9")
         if self.options.get_safe("with_unwind"):
-            self.requires("libunwind/1.5.0")
+            self.requires("libunwind/1.6.2")
 
     def validate(self):
         miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)

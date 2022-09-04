@@ -1,7 +1,8 @@
 from conans import ConanFile, CMake, tools
+import functools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class PodofoConan(ConanFile):
@@ -37,7 +38,6 @@ class PodofoConan(ConanFile):
     }
 
     generators = "cmake", "cmake_find_package"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -69,12 +69,12 @@ class PodofoConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("freetype/2.11.1")
-        self.requires("zlib/1.2.11")
+        self.requires("freetype/2.12.1")
+        self.requires("zlib/1.2.12")
         if self.settings.os != "Windows":
             self.requires("fontconfig/2.13.93")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1q")
         if self.options.with_libidn:
             self.requires("libidn/1.36")
         if self.options.with_jpeg:
@@ -94,29 +94,30 @@ class PodofoConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        self._cmake.definitions["PODOFO_BUILD_LIB_ONLY"] = True
-        self._cmake.definitions["PODOFO_BUILD_SHARED"] = self.options.shared
-        self._cmake.definitions["PODOFO_BUILD_STATIC"] = not self.options.shared
+        cmake = CMake(self)
+        cmake.definitions["PODOFO_BUILD_LIB_ONLY"] = True
+        cmake.definitions["PODOFO_BUILD_SHARED"] = self.options.shared
+        cmake.definitions["PODOFO_BUILD_STATIC"] = not self.options.shared
         if not self.options.threadsafe:
-            self._cmake.definitions["PODOFO_NO_MULTITHREAD"] = True
+            cmake.definitions["PODOFO_NO_MULTITHREAD"] = True
         if not tools.valid_min_cppstd(self, 11) and tools.Version(self.version) >= "0.9.7":
-            self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
+            cmake.definitions["CMAKE_CXX_STANDARD"] = 11
+
+        # To install relocatable shared lib on Macos
+        cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
 
         # Custom CMake options injected in our patch, required to ensure reproducible builds
-        self._cmake.definitions["PODOFO_WITH_OPENSSL"] = self.options.with_openssl
-        self._cmake.definitions["PODOFO_WITH_LIBIDN"] = self.options.with_libidn
-        self._cmake.definitions["PODOFO_WITH_LIBJPEG"] = self.options.with_jpeg
-        self._cmake.definitions["PODOFO_WITH_TIFF"] = self.options.with_tiff
-        self._cmake.definitions["PODOFO_WITH_PNG"] = self.options.with_png
-        self._cmake.definitions["PODOFO_WITH_UNISTRING"] = self.options.with_unistring
+        cmake.definitions["PODOFO_WITH_OPENSSL"] = self.options.with_openssl
+        cmake.definitions["PODOFO_WITH_LIBIDN"] = self.options.with_libidn
+        cmake.definitions["PODOFO_WITH_LIBJPEG"] = self.options.with_jpeg
+        cmake.definitions["PODOFO_WITH_TIFF"] = self.options.with_tiff
+        cmake.definitions["PODOFO_WITH_PNG"] = self.options.with_png
+        cmake.definitions["PODOFO_WITH_UNISTRING"] = self.options.with_unistring
 
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -131,8 +132,10 @@ class PodofoConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.set_property("pkg_config_name", "libpodofo-{}".format(tools.Version(self.version).major))
-        self.cpp_info.names["pkg_config"] = "libpodofo-{}".format(tools.Version(self.version).major)
+        podofo_version = tools.Version(self.version)
+        pkg_config_name = f"libpodofo-{podofo_version.major}" if podofo_version < "0.9.7" else "libpodofo"
+        self.cpp_info.set_property("pkg_config_name", pkg_config_name)
+        self.cpp_info.names["pkg_config"] = pkg_config_name
         self.cpp_info.libs = ["podofo"]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("USING_SHARED_PODOFO")

@@ -1,0 +1,8 @@
+sources:
+  "3.8.2":
+    url: "https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System/archive/refs/tags/3.8.2.tar.gz"
+    sha256: "e56811228fb4d5f5703c31cd83cb39ab2d5a849f581719d383db72f9322ec7f2"
+patches:
+  "3.8.2":
+    - patch_file: "patches/fix-cmake-license-install.patch"
+      base_path: "source_subfolder"

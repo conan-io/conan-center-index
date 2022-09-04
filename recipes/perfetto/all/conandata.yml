@@ -17,6 +17,18 @@ sources:
   "24.2":
     url: https://github.com/google/perfetto/archive/refs/tags/v24.2.tar.gz
     sha256: b296d0a939e694fd2e73ed6c6418b774b5ef6809ddf60988989416e5cbf90b41
+  "25.0":
+    url: https://github.com/google/perfetto/archive/refs/tags/v25.0.tar.gz
+    sha256: 73a4b895df9222ddb231b8d903099d6da08cd079f27983f540e89156fa88ba67
+  "26.1":
+    url: https://github.com/google/perfetto/archive/refs/tags/v26.1.tar.gz
+    sha256: cce387e82e2a137fce2eba927f80f20407764b77637a1a92b9b24065a500ce6d
+  "27.0":
+    url: https://github.com/google/perfetto/archive/refs/tags/v27.0.tar.gz
+    sha256: c22750dd21419cf58132d55d634b88d9947bd0c7244dd98854b0248c7637a98c
+  "27.1":
+    url: https://github.com/google/perfetto/archive/refs/tags/v27.1.tar.gz
+    sha256: 9edbafd6e2d9feaced4c0153e2f48dbb1da38429c5b1b17dfee70a91fd3101b2
 
 patches:
   "20.1":
@@ -30,4 +42,7 @@ patches:
       base_path: "source_subfolder"
   "22.1":
     - patch_file: "patches/v22.x/0001-Fix-perfetto-logging-when-PERFETTO_DISABLE_LOG-activ.patch"
+      base_path: "source_subfolder"
+  "25.0":
+    - patch_file: "patches/v25.0/0001-MSVC-Fix-narrowing-conversion-error.patch"
       base_path: "source_subfolder"

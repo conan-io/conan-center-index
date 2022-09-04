@@ -53,7 +53,10 @@ class UvwConan(ConanFile):
 
     def requirements(self):
         libuv_version = self._required_EXACT_libuv_version
-        self.requires("libuv/{}.{}.0".format(libuv_version.major, libuv_version.minor))
+        revision = 0
+        if libuv_version.major == "1" and libuv_version.minor == "44":
+            revision = 1
+        self.requires("libuv/{}.{}.{}".format(libuv_version.major, libuv_version.minor, revision))
 
     def package_id(self):
         self.info.header_only()

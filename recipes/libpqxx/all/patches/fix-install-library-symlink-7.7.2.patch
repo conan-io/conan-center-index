@@ -1,0 +1,14 @@
+Fix install library symlink error 7.7.2 (https://github.com/jtv/libpqxx/pull/552)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 6eafd7b3..1d697ab7 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -58,7 +58,7 @@ macro(library_target_setup tgt)
+             VERBATIM
+             COMMAND_EXPAND_LISTS
+         )
+-        install(FILES $<TARGET_FILE_DIR:${tgt}>/${library_prefix}${name}${library_suffix}
++        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${library_prefix}${name}${library_suffix}
+             DESTINATION ${CMAKE_INSTALL_LIBDIR}
+         )
+     endif()

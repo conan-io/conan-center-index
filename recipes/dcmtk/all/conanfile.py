@@ -84,11 +84,11 @@ class DCMTKConan(ConanFile):
         if self.options.charset_conversion == "libiconv":
             self.requires("libiconv/1.16")
         elif self.options.charset_conversion == "icu":
-            self.requires("icu/70.1")
+            self.requires("icu/71.1")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.9.12")
+            self.requires("libxml2/2.9.13")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.with_openssl:
             if self.settings.os == "Windows":
                 # FIXME: CMake configuration fails to detect Openssl 1.1 on Windows.
@@ -146,7 +146,7 @@ class DCMTKConan(ConanFile):
         if self.options.with_zlib:
             cmake.definitions["WITH_ZLIBINC"] = self.deps_cpp_info["zlib"].rootpath
 
-        cmake.definitions["DCMTK_ENABLE_STL"] = True
+        cmake.definitions["DCMTK_ENABLE_STL"] = "ON"
         cmake.definitions["DCMTK_ENABLE_CXX11"] = True
 
         cmake.definitions["DCMTK_ENABLE_MANPAGE"] = False

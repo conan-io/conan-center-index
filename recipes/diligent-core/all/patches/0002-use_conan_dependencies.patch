@@ -1,36 +1,8 @@
-diff --git a/Graphics/GraphicsEngineVulkan/CMakeLists.txt b/Graphics/GraphicsEngineVulkan/CMakeLists.txt
-index 387b3b019..e760513de 100644
---- a/Graphics/GraphicsEngineVulkan/CMakeLists.txt
-+++ b/Graphics/GraphicsEngineVulkan/CMakeLists.txt
-@@ -170,7 +170,7 @@ set(PRIVATE_DEPENDENCIES
- if (${DILIGENT_NO_HLSL})
-     message("HLSL support is disabled. Vulkan backend will not be able to consume SPIRV bytecode generated from HLSL.")
- else()
--    list(APPEND PRIVATE_DEPENDENCIES SPIRV-Tools-opt)
-+    list(APPEND PRIVATE_DEPENDENCIES spirv-tools::SPIRV-Tools-opt)
- endif()
- 
- # Use DirectX shader compiler for SPIRV.
 diff --git a/Graphics/ShaderTools/CMakeLists.txt b/Graphics/ShaderTools/CMakeLists.txt
-index 00e634263..a7519f23e 100644
+index 00e63426..ad9041d9 100644
 --- a/Graphics/ShaderTools/CMakeLists.txt
 +++ b/Graphics/ShaderTools/CMakeLists.txt
-@@ -133,26 +133,26 @@ endif()
- if(ENABLE_SPIRV)
-     target_link_libraries(Diligent-ShaderTools
-     PRIVATE
--        spirv-cross-core
-+        CONAN_PKG::spirv-cross
-     )
- 
-     if (${USE_SPIRV_TOOLS})
-         target_link_libraries(Diligent-ShaderTools
-         PRIVATE
--            SPIRV-Tools-opt
-+            spirv-tools::SPIRV-Tools-opt
-         )
-     endif()
- 
+@@ -146,13 +146,13 @@ if(ENABLE_SPIRV)
      if (${USE_GLSLANG})
          target_link_libraries(Diligent-ShaderTools
          PRIVATE
@@ -48,7 +20,7 @@ index 00e634263..a7519f23e 100644
      endif()
  endif()
 diff --git a/ThirdParty/CMakeLists.txt b/ThirdParty/CMakeLists.txt
-index e329495f4..f2adeccdd 100644
+index e329495f..d61520cd 100644
 --- a/ThirdParty/CMakeLists.txt
 +++ b/ThirdParty/CMakeLists.txt
 @@ -23,9 +23,6 @@ if(VULKAN_SUPPORTED OR METAL_SUPPORTED)
@@ -119,7 +91,7 @@ index e329495f4..f2adeccdd 100644
 -            target_compile_options(${TARGET} PRIVATE "$<$<CONFIG:DEBUG>:/Ob1>")
 -        endforeach()
 -    endif()
-+    list(APPEND THIRD_PARTY_LIBS spirv-tools::SPIRV-Tools-opt CONAN_PKG::spirv-cross glslang::SPIRV glslang::glslang glslang::MachineIndependent glslang::GenericCodeGen glslang::OSDependent glslang::OGLCompiler glslang::HLSL)
++    list(APPEND THIRD_PARTY_LIBS SPIRV-Tools-opt spirv-cross-msl spirv-cross-glsl glslang::SPIRV glslang::glslang glslang::MachineIndependent glslang::GenericCodeGen glslang::OSDependent glslang::OGLCompiler glslang::HLSL)
  
      # Make sure that symbols do not leak out when third-party
      # libs are linked into shared libraries

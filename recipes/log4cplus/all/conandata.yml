@@ -5,3 +5,9 @@ sources:
   "2.0.5":
     url: "https://github.com/log4cplus/log4cplus/releases/download/REL_2_0_5/log4cplus-2.0.5.tar.bz2"
     sha256: "b38dbfc68ef6d771e4de7de0be3544bc51bd3f7d5b75c5f6500d10e23203eb15"
+  "2.0.6":
+    url: "https://github.com/log4cplus/log4cplus/releases/download/REL_2_0_6/log4cplus-2.0.6.tar.bz2"
+    sha256: "1a963afd0f883d62de946b18927d238051fd47936e415eabeffe2b1397f16eca"
+  "2.0.7":
+    url: "https://github.com/log4cplus/log4cplus/releases/download/REL_2_0_7/log4cplus-2.0.7.tar.bz2"
+    sha256: "8fadbafee2ba4e558a0f78842613c9fb239c775d83f23340d091084c0e1b12ab"        

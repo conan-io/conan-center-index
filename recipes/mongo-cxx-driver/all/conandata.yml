@@ -1,4 +1,7 @@
 sources:
+  "3.6.7":
+    url: "https://github.com/mongodb/mongo-cxx-driver/archive/debian/3.6.7-1.tar.gz"
+    sha256: "62a0a16e4a35289e1692f60cf07a7f6957485446b7bc1d82306b731ad6763fb9"
   "3.6.6":
     url: "https://github.com/mongodb/mongo-cxx-driver/archive/r3.6.6.tar.gz"
     sha256: "f989c371800458ae45ef69f6d9566e010f9420435a01bf5eb14db77fc024662e"
@@ -9,6 +12,13 @@ sources:
     url: https://github.com/mongodb/mongo-cxx-driver/archive/r3.6.1.tar.gz
     sha256: c6d1b307f7b074d178c4a815d8739195fb4d7870701064bdad6f1f2360ae0af9
 patches:
+  "3.6.7":
+    - patch_file: "patches/dirs_and_tests.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/link_conan_boost.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/poly_use_std_define.patch"
+      base_path: "source_subfolder"
   "3.6.6":
     - patch_file: "patches/dirs_and_tests.patch"
       base_path: "source_subfolder"

@@ -1,15 +1,21 @@
 sources:
+  "1.3.15":
+    url: "https://github.com/aws/s2n-tls/archive/v1.3.15.tar.gz"
+    sha256: "e3fc3405bb56334cbec90c35cbdf0e8a0f53199749a3f4b8fddb8d8a41e6db8b"
+  "1.3.9":
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.3.9.tar.gz"
+    sha256: "09f03600d45cac99b8495f9c7aa5f70a83b5c02867a3018a1ba9975d53184658"
   "1.2.0":
-    url: "https://github.com/awslabs/s2n/archive/v1.2.0.tar.gz"
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.2.0.tar.gz"
     sha256: "90c1b5f4ac2c46774c8f100cac4f2a951715ae0bf2661799b9aaa891e6fb1f30"
   "1.1.1":
-    url: "https://github.com/awslabs/s2n/archive/v1.1.1.tar.gz"
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.1.1.tar.gz"
     sha256: "a17ef1e55b0a6c3d422b8b857bcfd26af7d2f8b33628a540854a6c17b8bed4d8"
   "1.1.0":
-    url: "https://github.com/awslabs/s2n/archive/v1.1.0.tar.gz"
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.1.0.tar.gz"
     sha256: "e094fd1f2044cfaeedb534ef1d7e4fd8745d8c07a247ce383cd8a6a5288e195c"
   "1.0.11":
-    url: "https://github.com/awslabs/s2n/archive/v1.0.11.tar.gz"
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.0.11.tar.gz"
     sha256: "dbe886cf8cd6658cce571cdaba81e9a93d8c914fd1eba0d3233fec64ed53224b"
 patches:
   "1.1.0":

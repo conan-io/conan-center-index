@@ -1,10 +1,4 @@
 sources:
-  1.69.0:
-    url: [
-      "https://boostorg.jfrog.io/artifactory/main/release/1.69.0/source/boost_1_69_0.tar.bz2",
-      "https://sourceforge.net/projects/boost/files/boost/1.69.0/boost_1_69_0.tar.bz2",
-    ]
-    sha256: "8f32d4617390d1c2d16f26a27ab60d97807b35440d45891fa340fc2648b04406"
   1.70.0:
     url: [
       "https://boostorg.jfrog.io/artifactory/main/release/1.70.0/source/boost_1_70_0.tar.bz2",
@@ -58,42 +52,13 @@ sources:
       "https://sourceforge.net/projects/boost/files/boost/1.78.0/boost_1_78_0.tar.bz2"
     ]
     sha256: "8681f175d4bdb26c52222665793eef08490d7758529330f98d3b29dd0735bccc"
+  1.79.0:
+    url: [
+      "https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.bz2",
+      "https://sourceforge.net/projects/boost/files/boost/1.79.0/boost_1_79_0.tar.bz2"
+    ]
+    sha256: "475d589d51a7f8b3ba2ba4eda022b170e562ca3b760ee922c146b6c65856ef39"
 patches:
-  1.69.0:
-    - patch_file: "patches/boost_build_asmflags.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/python_base_prefix.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/static_object_init.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/support_msvc_2019.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/boost_mpi_check.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-chrono-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-contract-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-coroutine-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-filesystem-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-locale-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-log-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-random-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-thread-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-timer-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-type_erasure-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.70.0-boost_build-with-newer-b2.patch"
-      base_path: "source_subfolder"
   1.70.0:
     - patch_file: "patches/0001-beast-fix-moved-from-executor.patch"
       base_path: "source_subfolder"
@@ -259,3 +224,21 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/1.78.0-b2-fix-install.patch"
       base_path: "source_subfolder"
+  1.79.0:
+    - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/boost_1_77_mpi_check.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.69.0-locale-no-system.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.77.0-fiber-mingw.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.79.0-0001-json-array-erase-relocate.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.79.0-smart_ptr_cw_ppc_msync.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.79.0-geometry_no_rtti.patch"
+      base_path: "source_subfolder"
+      patch_type: "portability"
+      url: "https://github.com/boostorg/geometry/commit/b354162798749b3aaa539755e7b9be49d2b9a9c4.patch"
+      patch_source: "https://github.com/boostorg/geometry/discussions/1041"

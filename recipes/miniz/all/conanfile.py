@@ -1,7 +1,10 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
 
 
 class MinizConan(ConanFile):
@@ -10,24 +13,23 @@ class MinizConan(ConanFile):
                   "implements the zlib (RFC 1950) and Deflate (RFC 1951) " \
                   "compressed data format specification standards"
     license = "MIT"
-    topics = ("conan", "miniz", "compression", "lossless")
+    topics = ("miniz", "compression", "lossless")
     homepage = "https://github.com/richgel999/miniz"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt", "patches/*"
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -36,42 +38,50 @@ class MinizConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        if tools.Version(self.version) >= "2.2.0":
-            self._cmake.definitions["BUILD_EXAMPLES"] = False
-            self._cmake.definitions["BUILD_FUZZERS"] = False
-            self._cmake.definitions["AMALGAMATE_SOURCES"] = False
-            self._cmake.definitions["BUILD_HEADER_ONLY"] = False
-            self._cmake.definitions["INSTALL_PROJECT"] = True
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if Version(self.version) >= "2.2.0":
+            tc.variables["BUILD_EXAMPLES"] = False
+            tc.variables["BUILD_FUZZERS"] = False
+            tc.variables["AMALGAMATE_SOURCES"] = False
+            tc.variables["BUILD_HEADER_ONLY"] = False
+            tc.variables["INSTALL_PROJECT"] = True
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "miniz"
-        self.cpp_info.names["cmake_find_package_multi"] = "miniz"
-        self.cpp_info.names["pkg_config"] = "miniz"
+        self.cpp_info.set_property("cmake_file_name", "miniz")
+        self.cpp_info.set_property("cmake_target_name", "miniz::miniz")
+        self.cpp_info.set_property("pkg_config_name", "miniz")
         self.cpp_info.libs = ["miniz"]
-        self.cpp_info.includedirs = ["include", os.path.join("include", "miniz")]
+        self.cpp_info.includedirs.append(os.path.join("include", "miniz"))

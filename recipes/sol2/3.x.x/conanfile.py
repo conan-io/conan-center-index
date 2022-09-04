@@ -2,15 +2,16 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
 
 class Sol2Conan(ConanFile):
     name = "sol2"
+    description = "a C++ <-> Lua API wrapper with advanced features and top notch performance"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ThePhD/sol2"
-    description = "C++17 Lua bindings"
-    topics = ("conan", "lua", "c++", "bindings")
-    settings = "compiler"
-    license = "MIT"
+    topics = ("lua", "c++", "bindings")
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
@@ -21,12 +22,12 @@ class Sol2Conan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "7",
-            "Visual Studio": "15.7",
+            "Visual Studio": "15.7" if tools.Version(self.version) < "3.3.0" else "16",
             "clang": "6",
             "apple-clang": "10",
         }
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
 
@@ -46,15 +47,17 @@ class Sol2Conan(ConanFile):
                                                     self.settings.compiler.version))
 
     def requirements(self):
-        self.requires("lua/5.3.5")
+        if tools.Version(self.version) < "3.2.0":
+            self.requires("lua/5.3.5")
+        else:
+            self.requires("lua/5.4.4")
 
     def package_id(self):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")

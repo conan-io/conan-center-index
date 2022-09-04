@@ -48,7 +48,7 @@ class DiligentToolsConan(ConanFile):
             del self.options.fPIC
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def validate(self):
@@ -58,8 +58,18 @@ class DiligentToolsConan(ConanFile):
             raise ConanInvalidConfiguration("Can't build diligent tools as shared lib")
 
     def requirements(self):
-        self.requires("diligent-core/2.5.1")
-        self.requires("imgui/1.87")
+        if self.version == "cci.20211009":
+            self.requires("diligent-core/2.5.1")
+            self.requires("imgui/1.87")
+        else:
+            self.requires("diligent-core/{}".format(self.version))
+            self.requires('taywee-args/6.3.0')
+            self.requires("imgui/1.85")
+
+        self.requires("libjpeg/9d")
+        self.requires("libpng/1.6.37")
+        self.requires("libtiff/4.3.0")
+        self.requires("zlib/1.2.12")
 
     @property
     def _diligent_platform(self):
@@ -87,6 +97,8 @@ class DiligentToolsConan(ConanFile):
         self._cmake.definitions["DILIGENT_BUILD_SAMPLES"] = False
         self._cmake.definitions["DILIGENT_NO_FORMAT_VALIDATION"] = True
         self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
+        self._cmake.definitions["DILIGENT_BUILD_TOOLS_TESTS"] = False
+        self._cmake.definitions["DILIGENT_BUILD_TOOLS_INCLUDE_TEST"] = False
 
         self._cmake.definitions[self._diligent_platform] = True
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -98,8 +110,6 @@ class DiligentToolsConan(ConanFile):
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
-        cmake.install()
         self.copy("*.hpp", src=self._source_subfolder, dst="include/DiligentTools", keep_path=True)        
         self.copy(pattern="*.dll", src=self._build_subfolder, dst="bin", keep_path=False)
         self.copy(pattern="*.dylib", src=self._build_subfolder, dst="lib", keep_path=False)

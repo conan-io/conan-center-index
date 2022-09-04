@@ -1,7 +1,9 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conan.tools.files import apply_conandata_patches
+from conans import CMake
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.47.0"
 
 
 class CbloscConan(ConanFile):
@@ -70,23 +72,19 @@ class CbloscConan(ConanFile):
         if self.options.with_snappy:
             self.requires("snappy/1.1.9")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
+        tools.files.rmdir(self, os.path.join(self._source_subfolder, "cmake"))
         cmake = self._configure_cmake()
         cmake.build()
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        # Remove folder containing custom FindLib.cmake files
-        tools.rmdir(os.path.join(self._source_subfolder, "cmake"))
 
     def _configure_cmake(self):
         if self._cmake:
@@ -96,7 +94,7 @@ class CbloscConan(ConanFile):
         self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["BUILD_TESTS"] = False
-        if tools.Version(self.version) >= "1.20.0":
+        if tools.scm.Version(self.version) >= "1.20.0":
             self._cmake.definitions["BUILD_FUZZERS"] = False
         self._cmake.definitions["BUILD_BENCHMARKS"] = False
         simd_intrinsics = self.options.get_safe("simd_intrinsics", False)
@@ -108,7 +106,7 @@ class CbloscConan(ConanFile):
         self._cmake.definitions["DEACTIVATE_ZSTD"] = not self.options.with_zstd
         self._cmake.definitions["DEACTIVATE_SYMBOLS_CHECK"] = True
         self._cmake.definitions["PREFER_EXTERNAL_LZ4"] = True
-        if tools.Version(self.version) < "1.19.0":
+        if tools.scm.Version(self.version) < "1.19.0":
             self._cmake.definitions["PREFER_EXTERNAL_SNAPPY"] = True
         self._cmake.definitions["PREFER_EXTERNAL_ZLIB"] = True
         self._cmake.definitions["PREFER_EXTERNAL_ZSTD"] = True
@@ -123,7 +121,7 @@ class CbloscConan(ConanFile):
             self.copy(license_file, dst="licenses", src=os.path.join(self._source_subfolder, "LICENSES"))
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "blosc")

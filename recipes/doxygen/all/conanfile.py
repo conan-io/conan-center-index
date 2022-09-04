@@ -1,8 +1,11 @@
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.scm import Version
+from conan import tools
+from conans import CMake
+from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.2"
 
 
 class DoxygenConan(ConanFile):
@@ -41,7 +44,7 @@ class DoxygenConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def _minimum_compiler_version(self):
-        if tools.Version(self.version) <= "1.9.1":
+        if Version(self.version) <= "1.9.1":
             return {
                 "gcc": 5,
             }.get(str(self.settings.compiler))
@@ -54,8 +57,8 @@ class DoxygenConan(ConanFile):
         del self.settings.compiler.cppstd
     def requirements(self):
         if self.options.enable_search:
-            self.requires("xapian-core/1.4.18")
-            self.requires("zlib/1.2.11")
+            self.requires("xapian-core/1.4.19")
+            self.requires("zlib/1.2.12")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -67,13 +70,12 @@ class DoxygenConan(ConanFile):
     def validate(self):
         minimum_compiler_version = self._minimum_compiler_version()
         if minimum_compiler_version is not None:
-            if tools.Version(self.settings.compiler.version) < minimum_compiler_version:
-                raise ConanInvalidConfiguration("Compiler version too old. At least {} is required.".format(minimum_compiler_version))
+            if Version(self.settings.compiler.version) < minimum_compiler_version:
+                raise ConanInvalidConfiguration(f"Compiler version too old. At least {minimum_compiler_version} is required.")
         if (self.settings.compiler == "Visual Studio" and
-                tools.Version(self.settings.compiler.version.value) <= 14 and
-                tools.Version(self.version) == "1.8.18"):
-            raise ConanInvalidConfiguration("Doxygen version {} broken with VS {}.".format(self.version,
-                                                                                           self.settings.compiler.version))
+                Version(self.settings.compiler.version) <= "14" and
+                Version(self.version) == "1.8.18"):
+            raise ConanInvalidConfiguration(f"Doxygen version {self.version} broken with VS {self.settings.compiler.version}.")
 
     def package_id(self):
         del self.info.settings.compiler
@@ -86,7 +88,7 @@ class DoxygenConan(ConanFile):
         self.compatible_packages.append(compatible_pkg)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
@@ -106,7 +108,7 @@ class DoxygenConan(ConanFile):
         if os.path.isfile("Findbison.cmake"):
             os.unlink("Findbison.cmake")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self, **patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -117,6 +119,7 @@ class DoxygenConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libdirs = []
+        self.cpp_info.includedirs = []
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)

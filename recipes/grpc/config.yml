@@ -1,23 +1,7 @@
 versions:
-  "1.44.0":
+  "1.48.0":
     folder: "all"
-  "1.43.0":
+  "1.47.1":
     folder: "all"
-  "1.42.0":
-    folder: "all"
-  "1.41.1":
-    folder: "all"
-  "1.41.0":
-    folder: "all"
-  "1.40.0":
-    folder: "all"
-  "1.39.1":
-    folder: "all"
-  "1.38.1":
-    folder: "all"
-  "1.38.0":
-    folder: "all"
-  "1.37.1":
-    folder: "all"
-  "1.37.0":
+  "1.46.3":
     folder: "all"

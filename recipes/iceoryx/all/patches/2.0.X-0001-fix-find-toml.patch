@@ -1,0 +1,12 @@
+diff --git a/iceoryx_posh/CMakeLists.txt b/iceoryx_posh/CMakeLists.txt
+index 8f28ac07b..c07b16b88 100644
+--- a/iceoryx_posh/CMakeLists.txt
++++ b/iceoryx_posh/CMakeLists.txt
+@@ -350,7 +350,6 @@ if(TOML_CONFIG)
+         iceoryx_posh::iceoryx_posh
+         iceoryx_hoofs::iceoryx_hoofs
+         iceoryx_posh::iceoryx_posh_roudi
+-        cpptoml
+         ${ICEORYX_SANITIZER_FLAGS}
+     )
+ 

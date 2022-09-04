@@ -71,38 +71,63 @@ sources:
   "7.7.0":
     url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.7.0.tar.gz"
     sha256: "2d99de960aa3016915bc69326b369fcee04425e57fbe9dad48dd3fa6203879fb"
+  "7.7.2":
+    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.7.2.tar.gz"
+    sha256: "4b7a0b67cbd75d1c31e1e8a07c942ffbe9eec4e32c29b15d71cc225dc737e243"
+  "7.7.3":
+    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.7.3.tar.gz"
+    sha256: "11e147bbe2d3024d68d29b38eab5d75899dbb6131e421a2dbf9f88bac9bf4b0d"
+  "7.7.4":
+    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.7.4.tar.gz"
+    sha256: "65b0a06fffd565a19edacedada1dcfa0c1ecd782cead0ee067b19e2464875c36"
 patches:
   "7.0.1":
     - patch_file: "patches/0001-cmake-fix-module.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/fix-missing-limits-include.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/fix-not-declared-dumb_stringstream-7.0.1_to_7.0.5.patch"
+      base_path: "source_subfolder"
   "7.0.2":
     - patch_file: "patches/0001-cmake-fix-module.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/fix-missing-limits-include.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-not-declared-dumb_stringstream-7.0.1_to_7.0.5.patch"
       base_path: "source_subfolder"
   "7.0.3":
     - patch_file: "patches/0001-cmake-fix-module.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/fix-missing-limits-include.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/fix-not-declared-dumb_stringstream-7.0.1_to_7.0.5.patch"
+      base_path: "source_subfolder"
   "7.0.4":
     - patch_file: "patches/0001-cmake-fix-module.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/fix-missing-limits-include.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/fix-not-declared-dumb_stringstream-7.0.1_to_7.0.5.patch"
+      base_path: "source_subfolder"
   "7.0.5":
     - patch_file: "patches/0001-cmake-fix-module.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-not-declared-dumb_stringstream-7.0.1_to_7.0.5.patch"
       base_path: "source_subfolder"
   "7.0.6":
     - patch_file: "patches/0001-cmake-fix-module.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/fix-not-declared-dumb_stringstream-7.0.6_to_7.0.7.patch"
+      base_path: "source_subfolder"
   "7.0.7":
     - patch_file: "patches/0001-cmake-fix-module.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/fix-not-declared-dumb_stringstream-7.0.6_to_7.0.7.patch"
+      base_path: "source_subfolder"
   "7.1.1":
     - patch_file: "patches/0001-cmake-fix-module.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-not-declared-dumb_stringstream-7.1.1.patch"
       base_path: "source_subfolder"
   "7.1.2":
     - patch_file: "patches/0001-cmake-fix-module.patch"
@@ -154,13 +179,28 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/fix-inline-constexpr-local-variable-problem-7.6.0.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/fix-remove-unlikely-annotation-before-return-7.6.0_to_7.6.1.patch"
+      base_path: "source_subfolder"
   "7.6.1":
     - patch_file: "patches/0001-cmake-fix-module.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/fix-inline-constexpr-local-variable-problem-7.6.0.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/fix-remove-unlikely-annotation-before-return-7.6.0_to_7.6.1.patch"
+      base_path: "source_subfolder"
   "7.7.0":
     - patch_file: "patches/0001-cmake-fix-module.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/fix-clang-compilation-7.7.0.patch"
+      base_path: "source_subfolder"
+  "7.7.2":
+    - patch_file: "patches/0001-cmake-fix-module.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-install-library-symlink-7.7.2.patch"
+      base_path: "source_subfolder"
+  "7.7.3":
+    - patch_file: "patches/0001-cmake-fix-module.patch"
+      base_path: "source_subfolder"
+  "7.7.4":
+    - patch_file: "patches/0001-cmake-fix-module.patch"
       base_path: "source_subfolder"

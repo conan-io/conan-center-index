@@ -23,6 +23,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0005-gnulib-limit-search-range-of-_setmaxstdio.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0006-dont-link-bison-against-libreadline.patch"
+      base_path: "source_subfolder"
   "3.5.3":
     - patch_file: "patches/0001-create_pipe-uses-O_TEXT-not-O_BINARY-mode.patch"
       base_path: "source_subfolder"
