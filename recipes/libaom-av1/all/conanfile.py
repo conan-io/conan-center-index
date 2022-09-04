@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir
@@ -33,16 +32,6 @@ class LibaomAv1Conan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "15",
-            "msvc": "191",
-            "gcc": "5",
-            "clang": "5",
-            "apple-clang": "6",
-        }
-
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
             copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
@@ -64,16 +53,6 @@ class LibaomAv1Conan(ConanFile):
             del self.settings.compiler.cppstd
         except Exception:
             pass
-
-    def validate(self):
-        # Check compiler version
-        compiler = str(self.info.settings.compiler)
-        compiler_version = Version(self.info.settings.compiler.version)
-        minimum_version = self._compilers_minimum_version.get(compiler, False)
-        if minimum_version and compiler_version < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.name} {self.version} requires a {compiler} version >= {compiler_version}",
-            )
 
     def build_requirements(self):
         if self.options.get_safe("assembly", False):
@@ -102,6 +81,8 @@ class LibaomAv1Conan(ConanFile):
         tc.variables["CONFIG_LIBYUV"] = 0
         # webm is not yet packaged
         tc.variables["CONFIG_WEBM_IO"] = 0
+        # Requires C99 or higher
+        tc.variables["CMAKE_C_STANDARD"] = "99"
         tc.generate()
         env = VirtualBuildEnv(self)
         env.generate()
