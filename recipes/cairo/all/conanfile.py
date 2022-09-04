@@ -88,15 +88,15 @@ class CairoConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_freetype", True):
-            self.requires("freetype/2.11.0")
+            self.requires("freetype/2.12.1")
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.settings.os == "Linux":
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system")
         if self.options.get_safe("with_glib", True):
-            self.requires("glib/2.70.0")
-        self.requires("zlib/1.2.11")
+            self.requires("glib/2.73.3")
+        self.requires("zlib/1.2.12")
         self.requires("pixman/0.40.0")
         self.requires("libpng/1.6.37")
 
@@ -104,7 +104,7 @@ class CairoConan(ConanFile):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.tool_requires("msys2/cci.latest")
         if not microsoft.is_msvc(self):
-            self.tool_requires("libtool/2.4.6")
+            self.tool_requires("libtool/2.4.7")
             self.tool_requires("pkgconf/1.7.4")
             self.tool_requires("gtk-doc-stub/cci.20181216")
 
