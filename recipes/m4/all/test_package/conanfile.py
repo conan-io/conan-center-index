@@ -25,7 +25,7 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not cross_building(self, skip_x64_x86=True):
-            self.run(f"m4 --version", run_environment=True, env="conanbuild")
+            self.run("m4 --version", run_environment=True, env="conanbuild")
             self.run(f"m4 -R {path.join(self.source_folder, 'frozen.m4f')} {path.join(self.source_folder, 'test.m4')}", run_environment=True, env="conanbuild")
 
             output = StringIO()
