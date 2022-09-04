@@ -1,7 +1,9 @@
 from conan.tools.files import rename
 from conan.tools.microsoft import is_msvc
 from conan.tools.cmake import CMake
-from conan import ConanFile, tools
+from conan.tools.scm import Version
+from conan import ConanFile
+from conans import tools
 from conan.errors import ConanInvalidConfiguration
 import functools
 import json
@@ -73,7 +75,7 @@ class OpenCascadeConan(ConanFile):
 
     @property
     def _link_tk(self):
-        if tools.Version(self.version) >= "7.6.0":
+        if Version(self.version) >= "7.6.0":
             return self.options.with_tk
         else:
             return True
