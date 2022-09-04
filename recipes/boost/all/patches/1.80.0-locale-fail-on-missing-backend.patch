@@ -1,5 +1,5 @@
 diff --git a/libs/locale/build/Jamfile.v2 b/libs/locale/build/Jamfile.v2
-index 450ec87..c134075 100644
+index 450ec87..0ffe5bc 100644
 --- a/libs/locale/build/Jamfile.v2
 +++ b/libs/locale/build/Jamfile.v2
 @@ -20,6 +20,7 @@ project /boost/locale
@@ -24,7 +24,7 @@ index 450ec87..c134075 100644
 +               {
 +                   EXIT "- Boost.Locale found iconv (libc) instead of iconv (separate) library to be built." ;
 +               }
-+			}
++			       }
 +        }
 +        else if <boost.locale.iconv.lib>libc in $(properties)
 +        {
@@ -38,10 +38,10 @@ index 450ec87..c134075 100644
 +        {
 +            EXIT "- Boost.Locale failed to find iconv (separate) library to be built." ;
 +        }
-+    }
-+    if ! $(found-iconv)
-+    {
-+        EXIT "- Boost.Locale failed to find iconv library to be built." ;
++        if ! $(found-iconv)
++        {
++            EXIT "- Boost.Locale failed to find iconv library to be built." ;
++        }
      }
      if $(found-iconv)
      {
