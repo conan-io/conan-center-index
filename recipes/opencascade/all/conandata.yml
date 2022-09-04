@@ -18,4 +18,3 @@ patches:
   "7.6.3":
     - patch_file: "patches/002-fix-pch--in-Aspect.patch"
       base_path: "source_subfolder"
-
