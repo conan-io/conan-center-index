@@ -1,7 +1,8 @@
 from conan.tools.files import rename
 from conan.tools.microsoft import is_msvc
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake
+from conan import ConanFile, tools
+from conan.errors import ConanInvalidConfiguration
 import functools
 import json
 import os
