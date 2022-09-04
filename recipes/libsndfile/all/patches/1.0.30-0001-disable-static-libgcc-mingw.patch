@@ -1,5 +1,3 @@
-diff --git a/cmake/SndFileChecks.cmake b/cmake/SndFileChecks.cmake
-index 3528c325..f9e43c91 100644
 --- a/cmake/SndFileChecks.cmake
 +++ b/cmake/SndFileChecks.cmake
 @@ -213,7 +213,7 @@ if (MSVC)
@@ -11,12 +9,3 @@ index 3528c325..f9e43c91 100644
  	if (CMAKE_C_COMPILER_ID STREQUAL GNU)
  		set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static-libgcc")
  		set (CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_C_FLAGS} -static-libgcc -s")
-@@ -232,7 +232,7 @@ if (MINGW)
- 	endif ()
- endif ()
- 
--if (DEFINED ENABLE_STATIC_RUNTIME)
-+if (FALSE)
- 	if (MSVC)
- 		if (CMAKE_VERSION VERSION_LESS 3.15)
- 			if (ENABLE_STATIC_RUNTIME)
