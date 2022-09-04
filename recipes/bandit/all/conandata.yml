@@ -1,0 +1,7 @@
+sources:
+  "cci.20210618":
+    url: "https://github.com/banditcpp/bandit/archive/77f50861c09d794af9ae5f65111b330d9b721054.tar.gz"
+    sha256: "4fe2eeb623e16a09b56f7a4e3d8fde864a5a4a67226cb514945fa7e9a1ae216a"
+patches:
+  "cci.20210618":
+    - patch_file: "patches/0001-change-snowhouse-path.patch"
