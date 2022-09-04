@@ -1,13 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.47.0"
 
 
 class LibaomAv1Conan(ConanFile):
@@ -57,10 +56,16 @@ class LibaomAv1Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
         # Check compiler version
         compiler = str(self.info.settings.compiler)
         compiler_version = Version(self.info.settings.compiler.version)
@@ -118,5 +123,3 @@ class LibaomAv1Conan(ConanFile):
         self.cpp_info.libs = ["aom"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["pthread", "m"]
-
-        self.cpp_info.names["pkg_config"] = "aom"
