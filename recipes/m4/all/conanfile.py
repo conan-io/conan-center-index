@@ -34,7 +34,7 @@ class M4Conan(ConanFile):
             self.tool_requires("msys2/cci.latest")
 
     def package_id(self):
-        self.info.clear()
+        del self.info.settings.compiler
 
     def layout(self):
         basic_layout(self, src_folder="source")
@@ -93,7 +93,6 @@ class M4Conan(ConanFile):
         return autotool
 
     def build(self):
-        # self.run(f"chmod +x {unix_path(self, path.join(self.generators_folder, 'help2man', 'help2man'))}", run_environment=True, win_bash=True)
         self.run(f"chmod +x {unix_path(self, path.join(self.generators_folder, 'help2man', 'help2man'))}", run_environment=True)
 
         apply_conandata_patches(self)
