@@ -392,9 +392,6 @@ class SDLConan(ConanFile):
 
         postfix = "d" if self.settings.os != "Android" and self.settings.build_type == "Debug" else ""
 
-        if self.version >= "2.0.24" and self.settings.os == "Windows":
-            postfix += "-static"
-
         # SDL2
         lib_postfix = postfix
         if self.version >= "2.0.24" and is_msvc(self) and not self.options.shared:
