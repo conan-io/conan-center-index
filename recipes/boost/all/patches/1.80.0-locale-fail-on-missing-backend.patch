@@ -1,5 +1,5 @@
 diff --git a/libs/locale/build/Jamfile.v2 b/libs/locale/build/Jamfile.v2
-index 450ec87..32f483b 100644
+index 450ec87..ece28bf 100644
 --- a/libs/locale/build/Jamfile.v2
 +++ b/libs/locale/build/Jamfile.v2
 @@ -20,6 +20,7 @@ project /boost/locale
@@ -10,44 +10,48 @@ index 450ec87..32f483b 100644
  feature.feature boost.locale.icu : on off :  optional propagated ;
  feature.feature boost.locale.posix : on off : optional propagated ;
  feature.feature boost.locale.std : on off : optional propagated ;
-@@ -230,11 +231,35 @@ rule configure-full ( properties * : flags-only )
+@@ -230,10 +231,37 @@ rule configure-full ( properties * : flags-only )
          if [ configure.builds has_iconv : $(properties) : "iconv (libc)" ]
          {
              found-iconv = true ;
 -        } else if [ configure.builds has_external_iconv : $(properties) : "iconv (separate)" ]
 +            if <boost.locale.iconv.lib>libiconv in $(properties)
-+            {
-+               if [ configure.builds has_external_iconv : $(properties) : "iconv (separate)" ]
-+               {
-+                   result += <library>iconv ;
-+               }
-+               else
-+               {
-+                   EXIT "- Boost.Locale found iconv (libc) instead of iconv (separate) library to be built." ;
-+               }
++			{
++                if [ configure.builds has_external_iconv : $(properties) : "iconv (separate)" ]
++                {
++                    result += <library>iconv ;
++                }
++                else
++                {
++                    EXIT "- Boost.Locale found iconv (libc) instead of iconv (separate) library to be built." ;
++                }
 +            }
 +        }
 +        else if <boost.locale.iconv.lib>libc in $(properties)
-+        {
+         {
+-            found-iconv = true ;
+-            result += <library>iconv ;
 +            EXIT "- Boost.Locale failed to find iconv (libc) library to be built." ;
 +        }
-+        else if [ configure.builds has_external_iconv : $(properties) : "iconv (separate)" ]
-         {
-             found-iconv = true ;
-             result += <library>iconv ;
-         }
-+        else if <boost.locale.iconv.lib>libiconv in $(properties)
++        else
 +        {
-+            EXIT "- Boost.Locale failed to find iconv (separate) library to be built." ;
++            if [ configure.builds has_external_iconv : $(properties) : "iconv (separate)" ]
++            {
++                found-iconv = true ;
++                result += <library>iconv ;
++            }
++            else if <boost.locale.iconv.lib>libiconv in $(properties)
++            {
++                EXIT "- Boost.Locale failed to find iconv (separate) library to be built." ;
++            }
 +        }
 +        if ! $(found-iconv)
 +        {
 +            EXIT "- Boost.Locale failed to find iconv library to be built." ;
-+        }
+         }
      }
      if $(found-iconv)
-     {
-@@ -273,6 +298,10 @@ rule configure-full ( properties * : flags-only )
+@@ -273,6 +301,10 @@ rule configure-full ( properties * : flags-only )
                        <library>/boost/thread//boost_thread
                        ;
          }
