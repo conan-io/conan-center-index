@@ -11,10 +11,7 @@ sources:
 patches:
   "1.12.0":
     - patch_file: "patches/0001-cmake_1.11.0.patch"
-      base_path: "source_subfolder"
   "1.11.0":
     - patch_file: "patches/0001-cmake_1.11.0.patch"
-      base_path: "source_subfolder"
   "1.9.1":
     - patch_file: "patches/0001-cmake-1.9.1.patch"
-      base_path: "source_subfolder"
