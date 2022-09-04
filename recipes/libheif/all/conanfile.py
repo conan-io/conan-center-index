@@ -54,9 +54,9 @@ class LibheifConan(ConanFile):
         if self.options.with_x265:
             self.requires("libx265/3.4")
         if self.options.with_libaomav1:
-            self.requires("libaom-av1/3.1.2")
+            self.requires("libaom-av1/3.3.0")
         if self.options.get_safe("with_dav1d"):
-            self.requires("dav1d/0.9.1")
+            self.requires("dav1d/1.0.0")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
