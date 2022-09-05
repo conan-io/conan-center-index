@@ -102,14 +102,13 @@ class MoldConan(ConanFile):
         else:
             # Error out if ZLIB is not found, we want to be predictable
             files.replace_in_file(self, "source_subfolder/CMakeLists.txt", "find_package(ZLIB QUIET)", "find_package(ZLIB REQUIRED)")
-            # Since we introduce a conan wrapper, CMAKE_SOURCE_DIR points a dir above. mold_SOURD_DIR is an equivalent to the vanilla behavior
+            # Since we introduce a conan wrapper, CMAKE_SOURCE_DIR points to a dir above. mold_SOURD_DIR is an equivalent to the intended behavior
             files.replace_in_file(self, "source_subfolder/CMakeLists.txt", "${CMAKE_SOURCE_DIR}/update-git-hash.py", "${mold_SOURCE_DIR}/update-git-hash.py")
-            # This is a bug upstream. You can't assing definitions to a target you don't build.
+            # This is a bug upstream. You can't assing definitions to a target you don't build. It has been addressed on main but not released.
             files.replace_in_file(self, "source_subfolder/CMakeLists.txt", "target_compile_definitions(mimalloc INTERFACE USE_SYSTEM_MIMALLOC)", "target_compile_definitions(mold PRIVATE USE_SYSTEM_MIMALLOC)")
             # Use conan's xxhash
-            files.replace_in_file(self, "source_subfolder/CMakeLists.txt", "target_link_libraries(mold PRIVATE ${CMAKE_DL_LIBS})", "find_package(xxHash REQUIRED)\ntarget_link_libraries(mold PRIVATE ${CMAKE_DL_LIBS} xxHash::xxhash)")
+            files.replace_in_file(self, "source_subfolder/CMakeLists.txt", "target_link_libraries(mold PRIVATE ${CMAKE_DL_LIBS})", "target_link_libraries(mold PRIVATE ${CMAKE_DL_LIBS})\nfind_package(xxHash REQUIRED)\ntarget_link_libraries(xxHash::xxhash)")
             files.replace_in_file(self, "source_subfolder/mold.h", '#include "third-party/xxhash/xxhash.h"', '#include "xxhash.h"')
-
 
             cmake = self._configure_cmake()
             cmake.build()
