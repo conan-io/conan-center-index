@@ -823,9 +823,7 @@ class OpenSSLConan(ConanFile):
     @staticmethod
     def _create_cmake_module_variables(module_file):
         content = textwrap.dedent("""\
-            if(DEFINED OpenSSL_FOUND)
-                set(OPENSSL_FOUND ${OpenSSL_FOUND})
-            endif()
+            set(OPENSSL_FOUND TRUE)
             if(DEFINED OpenSSL_INCLUDE_DIR)
                 set(OPENSSL_INCLUDE_DIR ${OpenSSL_INCLUDE_DIR})
             endif()
