@@ -1,8 +1,7 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, get
-from conan.tools.files.files import rmdir
+from conan.tools.files import apply_conandata_patches, get, files
 from conan.tools.microsoft import is_msvc
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conans import CMake
 import functools
 import os
@@ -716,9 +715,9 @@ class GdalConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        rmdir(self, os.path.join(self.package_folder, "share"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        files.rmdir(self, os.path.join(self.package_folder, "share"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
 
