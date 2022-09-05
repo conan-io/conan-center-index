@@ -76,14 +76,14 @@ class AutoconfConan(ConanFile):
     def _set_env(self, var_name, var_path):
         self.output.info(f"Setting {var_name} to {var_path}")
         self.buildenv_info.define_path(var_name, var_path)
-        setattr(self.env_info, var_name, unix_path(self, var_path))
+        setattr(self.env_info, var_name, var_path)
 
     def package_info(self):
         # KB-H013 we're packaging an application, hence the nested bin
         bin_dir = path.join(self.package_folder, "bin", "bin")
         self.output.info(f"Appending PATH env var with : {bin_dir}")
         self.buildenv_info.prepend_path("PATH", bin_dir)
-        self.env_info.PATH.append(unix_path(self, bin_dir))
+        self.env_info.PATH.append(bin_dir)
 
         for var in [("AC_MACRODIR", self._autoconf_datarootdir),
                     ("AUTOCONF", path.join(bin_dir, "autoconf")),
