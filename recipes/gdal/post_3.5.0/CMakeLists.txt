@@ -92,6 +92,13 @@ if (${GDAL_USE_HDF5})
     set(HDF5_C_LIBRARIES HDF5::C)
 endif()
 
+if (${GDAL_CONAN_PACKAGE_FOR_MYSQL} STREQUAL "libmysqlclient")
+    find_package(mysql REQUIRED)
+endif()
+if (${GDAL_CONAN_PACKAGE_FOR_MYSQL} STREQUAL "mariadb-connector-c")
+    find_package(mariadb-connector-c REQUIRED)
+endif()
+
 if (${GDAL_USE_ZLIB})
     find_package(ZLIB)
 endif()

@@ -56,6 +56,7 @@ class GdalConan(ConanFile):
         "with_libtiff": [True, False],
         "with_lz4": [True, False],
         "with_mongocxx": [True, False],
+        "with_mysql": [None, "libmysqlclient", "mariadb-connector-c"],
         "with_netcdf": [True, False],
         "with_odbc": [True, False],
         "with_openjpeg": [True, False],
@@ -105,6 +106,7 @@ class GdalConan(ConanFile):
         "with_libtiff": True,
         "with_lz4": False,
         "with_mongocxx": False,
+        "with_mysql": None,
         "with_netcdf": False,
         "with_odbc": False,
         "with_openjpeg": False,
@@ -224,6 +226,11 @@ class GdalConan(ConanFile):
 
         if self.options.with_mongocxx:
             self.requires("mongo-cxx-driver/3.6.6")
+
+        if self.options.with_mysql == "libmysqlclient":
+            self.requires("libmysqlclient/8.0.29")
+        elif self.options.with_mysql == "mariadb-connector-c":
+            self.requires("mariadb-connector-c/3.1.12")
 
         if self.options.with_netcdf:
             self.requires("netcdf/4.8.1")
@@ -539,6 +546,15 @@ class GdalConan(ConanFile):
         else:
             cmake.definitions["MONGOCXX_FOUND"] = False
 
+        if self.options.with_mysql == "libmysqlclient" or self.options.with_mysql == "mariadb-connector-c":
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_MYSQL"] = str(self.options.with_mysql)
+            cmake.definitions["TARGET_FOR_MYSQL"] = \
+                    "mariadb-connector-c::mariadb-connector-c" \
+                    if self.options.with_mysql == "mariadb-connector-c" \
+                    else "libmysqlclient::libmysqlclient"
+        else:
+            cmake.definitions["MYSQL_FOUND"] = False
+
         cmake.definitions["GDAL_USE_NETCDF"] = self.options.with_netcdf
         if self.options.with_netcdf:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_NETCDF"] = "netcdf"
@@ -801,6 +817,11 @@ class GdalConan(ConanFile):
 
         if self.options.with_mongocxx:
             self.cpp_info.requires.extend(['mongo-cxx-driver::mongo-cxx-driver'])
+
+        if self.options.with_mysql == "libmysqlclient":
+            self.cpp_info.requires.extend(['libmysqlclient::libmysqlclient'])
+        elif self.options.with_mysql == "mariadb-connector-c":
+            self.cpp_info.requires.extend(['mariadb-connector-c::mariadb-connector-c'])
 
         if self.options.with_netcdf:
             self.cpp_info.requires.extend(['netcdf::netcdf'])
