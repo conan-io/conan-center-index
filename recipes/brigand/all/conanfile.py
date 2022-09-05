@@ -23,7 +23,7 @@ class BrigandConan(ConanFile):
         "with_boost": True,
     }
 
-    no_copy_sources = True
+    no_copy_source = True
 
     def requirements(self):
         if self.options.with_boost:
@@ -61,4 +61,4 @@ class BrigandConan(ConanFile):
         if self.options.with_boost:
             self.cpp_info.requires = ["boost::headers"]
         else:
-            self.cpp_info.defines("BRIGAND_NO_BOOST_SUPPORT")
+            self.cpp_info.defines.append("BRIGAND_NO_BOOST_SUPPORT")
