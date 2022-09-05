@@ -1,7 +1,14 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-import os
+from functools import lru_cache
+from os import environ, path
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.files import get, apply_conandata_patches, rmdir, copy, replace_in_file
+from conan.tools.gnu import Autotools
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import unix_path
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.50.0"
 
 
 class AutomakeConan(ConanFile):
@@ -12,19 +19,10 @@ class AutomakeConan(ConanFile):
     topics = ("conan", "automake", "configure", "build")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
     settings = "os", "arch", "compiler", "build_type"
+    generators = "AutotoolsDeps", "AutotoolsToolchain", "VirtualBuildEnv"
+    win_bash = True
 
     exports_sources = "patches/*"
-
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return os.path.join(self.source_folder, "source_subfolder")
-
-    @property
-    def _version_major_minor(self):
-        [major, minor, _] = self.version.split(".", 2)
-        return '{}.{}'.format(major, minor)
 
     @property
     def _settings_build(self):
@@ -34,107 +32,91 @@ class AutomakeConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
-    def requirements(self):
-        self.requires("autoconf/2.71")
-        # automake requires perl-Thread-Queue package
-
     def build_requirements(self):
         if hasattr(self, "settings_build"):
-            self.build_requires("autoconf/2.71")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+            self.tool_requires("autoconf/2.71")
+        if self._settings_build.os == "Windows" and not environ.get("CONAN_BASH_PATH"):
+            self.tool_requires("msys2/cci.latest")
 
     def package_id(self):
         del self.info.settings.arch
         del self.info.settings.compiler
         del self.info.settings.build_type
 
+    def layout(self):
+        basic_layout(self, src_folder="source")
+        self.cpp.package.includedirs = []  # KB-H071: It is a tool that doesn't contain headers, removing the include directory.
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _datarootdir(self):
-        return os.path.join(self.package_folder, "res")
+        return path.join(self.package_folder, "bin", "share")
 
     @property
     def _automake_libdir(self):
-        return os.path.join(self._datarootdir, "automake-{}".format(self._version_major_minor))
+        version = Version(self.version)
+        return path.join(self._datarootdir, f"automake-{version.major}.{version.minor}")
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        conf_args = [
-            "--datarootdir={}".format(tools.unix_path(self._datarootdir)),
-            "--prefix={}".format(tools.unix_path(self.package_folder)),
-        ]
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
-
-    def _patch_files(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-        if self.settings.os == "Windows":
-            # tracing using m4 on Windows returns Windows paths => use cygpath to convert to unix paths
-            tools.replace_in_file(os.path.join(self._source_subfolder, "bin", "aclocal.in"),
-                                               "          $map_traced_defs{$arg1} = $file;",
-                                               "          $file = `cygpath -u $file`;\n"
-                                               "          $file =~ s/^\\s+|\\s+$//g;\n"
-                                               "          $map_traced_defs{$arg1} = $file;")
+    @lru_cache(1)
+    def _autotools(self):
+        autotool = Autotools(self)
+        autotool.configure()
+        autotool.make()
+        return autotool
 
     def build(self):
-        self._patch_files()
-        autotools = self._configure_autotools()
-        autotools.make()
+        apply_conandata_patches(self)
+        if self.settings.os == "Windows":
+            # tracing using m4 on Windows returns Windows paths => use cygpath to convert to unix paths
+            replace_in_file(self, path.join(self.source_path, "bin", "aclocal.in"),
+                            "          $map_traced_defs{$arg1} = $file;",
+                            "          $file = `cygpath -u $file`;\n"
+                            "          $file =~ s/^\\s+|\\s+$//g;\n"
+                            "          $map_traced_defs{$arg1} = $file;")
+
+        _ = self._autotools()
 
     def package(self):
-        self.copy("COPYING*", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
-        autotools.install()
-        tools.rmdir(os.path.join(self._datarootdir, "info"))
-        tools.rmdir(os.path.join(self._datarootdir, "man"))
-        tools.rmdir(os.path.join(self._datarootdir, "doc"))
+        autotools = self._autotools()
+        # KB-H013 we're packaging an application, place everything under bin
+        autotools.install(args=[f"DESTDIR={unix_path(self, path.join(self.package_folder, 'bin'))}"])
 
-        if self.settings.os == "Windows":
-            binpath = os.path.join(self.package_folder, "bin")
-            for filename in os.listdir(binpath):
-                fullpath = os.path.join(binpath, filename)
-                if not os.path.isfile(fullpath):
-                    continue
-                os.rename(fullpath, fullpath + ".exe")
+        copy(self, "COPYING*", src=self.source_folder, dst=path.join(self.package_folder, "licenses"))
+        rmdir(self, path.join(self._datarootdir, "info"))
+        rmdir(self, path.join(self._datarootdir, "man"))
+        rmdir(self, path.join(self._datarootdir, "doc"))
+
+    def _set_env(self, var_name, var_path):
+        self.output.info(f"Setting {var_name} to {var_path}")
+        self.buildenv_info.define_path(var_name, var_path)
+        setattr(self.env_info, var_name, unix_path(self, var_path))
 
     def package_info(self):
-        self.cpp_info.libdirs = []
-        self.cpp_info.includedirs = []
+        # KB-H013 we're packaging an application, hence the nested bin
+        bin_dir = path.join(self.package_folder, "bin", "bin")
+        self.output.info(f"Appending PATH environment variable:: {bin_dir}")
+        self.buildenv_info.prepend_path("PATH", bin_dir)
+        self.env_info.PATH.append(bin_dir)
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable:: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        for var in [("ACLOCAL", path.join(self.package_folder, "bin", "aclocal")),
+                    ("AUTOMAKE_DATADIR", self._datarootdir),
+                    ("AUTOMAKE_LIBDIR", self._automake_libdir),
+                    ("AUTOMAKE_PERLLIBDIR", self._automake_libdir),
+                    ("AUTOMAKE", path.join(self.package_folder, "bin", "automake"))]:
+            self._set_env(*var)
 
-        bin_ext = ".exe" if self.settings.os == "Windows" else ""
+        compile_bin = path.join(self._automake_libdir, "compile")
+        self.output.info(f"Define path to `compile` binary in user_info as: {compile_bin}")
+        self.user_info.compile = compile_bin
+        compile_conf_key = "user.automake:compile"
+        self.output.info(f"Defining path to `compile` binary in configuration as `{compile_conf_key}` with value: {compile_bin}")
+        self.conf_info.define(compile_conf_key, compile_bin)
 
-        aclocal = tools.unix_path(os.path.join(self.package_folder, "bin", "aclocal" + bin_ext))
-        self.output.info("Appending ACLOCAL environment variable with: {}".format(aclocal))
-        self.env_info.ACLOCAL.append(aclocal)
-
-        automake_datadir = tools.unix_path(self._datarootdir)
-        self.output.info("Setting AUTOMAKE_DATADIR to {}".format(automake_datadir))
-        self.env_info.AUTOMAKE_DATADIR = automake_datadir
-
-        automake_libdir = tools.unix_path(self._automake_libdir)
-        self.output.info("Setting AUTOMAKE_LIBDIR to {}".format(automake_libdir))
-        self.env_info.AUTOMAKE_LIBDIR = automake_libdir
-
-        automake_perllibdir = tools.unix_path(self._automake_libdir)
-        self.output.info("Setting AUTOMAKE_PERLLIBDIR to {}".format(automake_perllibdir))
-        self.env_info.AUTOMAKE_PERLLIBDIR = automake_perllibdir
-
-        automake = tools.unix_path(os.path.join(self.package_folder, "bin", "automake" + bin_ext))
-        self.output.info("Setting AUTOMAKE to {}".format(automake))
-        self.env_info.AUTOMAKE = automake
-
-        self.output.info("Append M4 include directories to AUTOMAKE_CONAN_INCLUDES environment variable")
-
-        self.user_info.compile = os.path.join(self._automake_libdir, "compile")
-        self.user_info.ar_lib = os.path.join(self._automake_libdir, "ar-lib")
+        ar_lib_bin = path.join(self._automake_libdir, "ar-lib")
+        self.output.info(f"Define path to `ar_lib` binary in user_info as: {ar_lib_bin}")
+        self.user_info.ar_lib = ar_lib_bin
+        ar_lib_conf_key = "user.automake:ar-lib"
+        self.output.info(f"Defining path to `ar-lib` binary in configuration as `{ar_lib_conf_key}` with value: {ar_lib_bin}")
+        self.conf_info.define(ar_lib_conf_key, ar_lib_bin)
