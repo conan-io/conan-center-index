@@ -11,4 +11,5 @@ sources:
 patches:
   "0.5.0":
     - patch_file: "patches/0001-fix-msvc-snprintf.patch"
-      base_path: "source_subfolder"
+      patch_description: "Use stdio.h instead of cstdio.h for snprintf"
+      patch_type: "conan"

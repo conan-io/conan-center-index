@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.files import apply_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.build import cross_building
 from conan.tools.scm import Version
 from conans import CMake, tools
 import functools
@@ -170,6 +171,13 @@ class SDLConan(ConanFile):
             del self.info.options.sdl2main
 
     def build_requirements(self):
+        if self.settings.os == "Macos" and cross_building(self):
+            # Workaround for CMake bug with error message:
+            # Attempting to use @rpath without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being
+            # set. This could be because you are using a Mac OS X version less than 10.5
+            # or because CMake's platform configuration is corrupt.
+            # FIXME: Remove once CMake on macOS/M1 CI runners is upgraded.
+            self.build_requires("cmake/3.22.0")
         if self.settings.os == "Linux":
             self.build_requires("pkgconf/1.7.4")
         if hasattr(self, "settings_build") and self.options.get_safe("wayland"):
@@ -198,6 +206,11 @@ class SDLConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions["SDL2_DISABLE_INSTALL"] = False  # SDL2_* options will get renamed to SDL_ options in the next SDL release
+        if is_apple_os(self):
+            cmake.definitions["CMAKE_OSX_ARCHITECTURES"] = {
+                "armv8": "arm64",
+            }.get(str(self.settings.arch), str(self.settings.arch))
         cmake_required_includes = []  # List of directories used by CheckIncludeFile (https://cmake.org/cmake/help/latest/module/CheckIncludeFile.html)
         cmake_extra_ldflags = []
         # FIXME: self.install_folder not defined? Neccessary?
@@ -380,6 +393,10 @@ class SDLConan(ConanFile):
         postfix = "d" if self.settings.os != "Android" and self.settings.build_type == "Debug" else ""
 
         # SDL2
+        lib_postfix = postfix
+        if self.version >= "2.0.24" and is_msvc(self) and not self.options.shared:
+            lib_postfix = "-static" + postfix
+
         self.cpp_info.components["libsdl2"].set_property("cmake_target_name", "SDL2::SDL2")
         if not self.options.shared:
             self.cpp_info.components["libsdl2"].set_property("cmake_target_aliases", ["SDL2::SDL2-static"])
@@ -390,7 +407,7 @@ class SDLConan(ConanFile):
         self.cpp_info.components["libsdl2"].names["cmake_find_package_multi"] = sdl2_cmake_target
 
         self.cpp_info.components["libsdl2"].includedirs.append(os.path.join("include", "SDL2"))
-        self.cpp_info.components["libsdl2"].libs = ["SDL2" + postfix]
+        self.cpp_info.components["libsdl2"].libs = ["SDL2" + lib_postfix]
         if self.options.get_safe("iconv", False):
             self.cpp_info.components["libsdl2"].requires.append("libiconv::libiconv")
         if self.settings.os == "Linux":
