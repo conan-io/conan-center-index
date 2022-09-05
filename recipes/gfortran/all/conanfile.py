@@ -2,8 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get, load, save, download
 import os
+import glob
 
-required_conan_version = ">=1.46.0"
+
+required_conan_version = ">=1.32.0"
+
 
 class GFortranConan(ConanFile):
     name = "gfortran"
