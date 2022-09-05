@@ -65,7 +65,7 @@ class XkbcommonConan(ConanFile):
             raise ConanInvalidConfiguration("This library is only compatible with Linux or FreeBSD")
 
     def build_requirements(self):
-        self.tool_requires("meson/0.63.0")
+        self.tool_requires("meson/0.63.1")
         self.tool_requires("bison/3.7.6")
         self.tool_requires("pkgconf/1.7.4")
         if self.options.get_safe("with_wayland"):
