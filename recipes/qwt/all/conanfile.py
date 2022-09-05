@@ -1,7 +1,9 @@
 import os
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.files import get, load, save
+from conans import tools
 
-required_conan_version = ">=1.40.1" # For https://github.com/conan-io/conan/pull/9568
+required_conan_version = ">=1.50.0"
 
 class QwtConan(ConanFile):
     name = "qwt"
@@ -45,6 +47,7 @@ class QwtConan(ConanFile):
     def build_requirements(self):
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             self.build_requires("jom/1.1.3")
+        self.tool_requires("qt/5.15.5")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -55,15 +58,15 @@ class QwtConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("qt/5.15.2")
+        self.requires("qt/5.15.5")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _patch_qwt_config_files(self):
         # qwtconfig.pri
         qwtconfig_path = os.path.join(self.source_folder, self._source_subfolder, "qwtconfig.pri")
-        qwtconfig = tools.load(qwtconfig_path)
+        qwtconfig = load(self, qwtconfig_path)
 
         qwtconfig = "CONFIG += conan_basic_setup\ninclude(../conanbuildinfo.pri)\n" + qwtconfig
         qwtconfig += "QWT_CONFIG {}= QwtDll\n".format("+" if self.options.shared else "-")
@@ -73,11 +76,11 @@ class QwtConan(ConanFile):
         qwtconfig += "QWT_CONFIG {}= QwtOpenGL\n".format("+" if self.options.opengl else "-")
         qwtconfig += "QWT_CONFIG {}= QwtMathML\n".format("+" if self.options.mathml else "-")
         qwtconfig += "QWT_CONFIG {}= QwtDesigner\n".format("+" if self.options.designer else "-")
-        tools.save(qwtconfig_path, qwtconfig)
+        save(self, qwtconfig_path, qwtconfig)
 
         # qwtbuild.pri
         qwtbuild_path = os.path.join(self.source_folder, self._source_subfolder, "qwtbuild.pri")
-        qwtbuild = tools.load(qwtbuild_path)
+        qwtbuild = load(self, qwtbuild_path)
         # set build type
         qwtbuild += "CONFIG -= debug_and_release\n"
         qwtbuild += "CONFIG -= build_all\n"
@@ -85,18 +88,18 @@ class QwtConan(ConanFile):
         qwtbuild += "CONFIG += {}\n".format("debug" if self.settings.build_type == "Debug" else "release")
         if self.settings.build_type == "RelWithDebInfo":
             qwtbuild += "CONFIG += force_debug_info\n"
-        tools.save(qwtbuild_path, qwtbuild)
+        save(self, qwtbuild_path, qwtbuild)
 
     def build(self):
         self._patch_qwt_config_files()
 
         if self.settings.compiler == "Visual Studio":
             vcvars = tools.vcvars_command(self.settings)
-            self.run("{} && qmake {}".format(vcvars, self._source_subfolder), run_environment=True)
-            self.run("{} && jom".format(vcvars))
+            self.run(f"{vcvars} && qmake {self._source_subfolder}", run_environment=True)
+            self.run(f"{vcvars} && jom")
         else:
-            self.run("qmake {}".format(self._source_subfolder), run_environment=True)
-            self.run("make -j {}".format(tools.cpu_count()))
+            self.run(f"qmake {self._source_subfolder}", run_environment=True)
+            self.run(f"make -j {tools.cpu_count()}")
 
     def package(self):
         self.copy("COPYING", src=os.path.join(self._source_subfolder), dst="licenses")
