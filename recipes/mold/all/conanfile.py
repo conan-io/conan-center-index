@@ -120,6 +120,7 @@ class MoldConan(ConanFile):
         else:
             cmake = self._configure_cmake()
             cmake.install()
+            files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_id(self):
         del self.info.settings.compiler
