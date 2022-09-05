@@ -1,5 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from io import StringIO
 import os
 import re
@@ -259,7 +259,15 @@ class CPythonConan(ConanFile):
         if tools.cross_building(self) and not tools.cross_building(self, skip_x64_x86=True):
             # Building from x86_64 to x86 is not a "real" cross build, so set build == host
             build = tools.get_gnu_triplet(str(self.settings.os), str(self.settings.arch), str(self.settings.compiler))
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder, build=build)
+
+        try:
+            self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder, build=build)
+        except ConanException as e:
+            autotools_config_log = os.path.join(self.build_folder, "config.log")
+            if os.path.exists(autotools_config_log):
+                self.output.info(tools.load(autotools_config_log))
+            raise ConanException(e)
+
         return self._autotools
 
     def _patch_sources(self):
