@@ -287,6 +287,10 @@ class AndroidNDKConan(ConanFile):
 
         toolchain = os.path.join(self.package_folder, "build", "cmake", "android.toolchain.cmake")
 
+        #CMakeToolchain automatically adds the standard Android toolchain file that ships with the NDK
+        #when `tools.android:ndk_path` is provided, so there's no need to add it as a `user_toolchain`
+        self.conf_info.define("tools.android:ndk_path", self.package_folder)
+
         self.buildenv_info.define_path("CC", self._define_tool_var("CC", "clang"))
         self.buildenv_info.define_path("CXX", self._define_tool_var("CXX", "clang++"))
 
@@ -318,7 +322,6 @@ class AndroidNDKConan(ConanFile):
         libcxx_str = str(self.settings_target.compiler.libcxx)
         self.buildenv_info.define("ANDROID_STL", libcxx_str if libcxx_str.startswith("c++_") else "c++_shared")
 
-        self.conf_info.define("tools.android:ndk_path", self.package_folder)
 
         # TODO: conan v1 stuff to remove later
         self.env_info.PATH.append(self.package_folder)
