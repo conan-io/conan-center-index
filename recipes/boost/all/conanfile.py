@@ -1,7 +1,6 @@
 from conan.tools.apple import is_apple_os
 from conan.tools.build import build_jobs, check_min_cppstd, cross_building
-from conan.tools.files import chdir, get, mkdir, rename, replace_in_file, rm, rmdir, save
-from conan.tools.files.patches import apply_conandata_patches
+from conan.tools.files import apply_conandata_patches, chdir, get, mkdir, rename, replace_in_file, rm, rmdir, save
 from conan.tools.microsoft import msvc_runtime_flag
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
