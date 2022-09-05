@@ -43,7 +43,7 @@ class QwtConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-    
+
     def build_requirements(self):
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             self.build_requires("jom/1.1.3")
@@ -76,6 +76,11 @@ class QwtConan(ConanFile):
         qwtconfig += "QWT_CONFIG {}= QwtOpenGL\n".format("+" if self.options.opengl else "-")
         qwtconfig += "QWT_CONFIG {}= QwtMathML\n".format("+" if self.options.mathml else "-")
         qwtconfig += "QWT_CONFIG {}= QwtDesigner\n".format("+" if self.options.designer else "-")
+
+        qwtconfig += "QWT_CONFIG -= QwtExamples\n"
+        qwtconfig += "QWT_CONFIG -= QwtPlayground\n"
+        qwtconfig += "QWT_CONFIG -= QwtTests\n"
+
         save(self, qwtconfig_path, qwtconfig)
 
         # qwtbuild.pri
