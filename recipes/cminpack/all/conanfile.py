@@ -91,6 +91,7 @@ class CMinpackConan(ConanFile):
         self.cpp_info.components["cminpack-double"].set_property("cmake_target_name", "cminpack::cminpack")
         self.cpp_info.components["cminpack-double"].names["cmake_find_package"] = "cminpack"
         self.cpp_info.components["cminpack-double"].names["cmake_find_package_multi"] = "cminpack"
+        self.cpp_info.components["cminpack-double"].names["pkg_config"] = "cminpack"
         
         # the single precision version
         self.cpp_info.components['cminpack-single'].libs = ['cminpacks' + self._library_postfix()]
@@ -99,6 +100,8 @@ class CMinpackConan(ConanFile):
         self.cpp_info.components["cminpack-single"].set_property("cmake_target_name", "cminpack::cminpacks")
         self.cpp_info.components["cminpack-single"].names["cmake_find_package"] = "cminpacks"
         self.cpp_info.components["cminpack-single"].names["cmake_find_package_multi"] = "cminpacks"
+        self.cpp_info.components["cminpack-single"].names["pkg_config"] = "cminpacks"
+
 
         if self.settings.os != "Windows":
             self.cpp_info.components['cminpack-double'].system_libs.append("m")
