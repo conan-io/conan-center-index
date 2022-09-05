@@ -124,9 +124,9 @@ class MongoCxxConan(ConanFile):
         tc.variables["BSONCXX_POLY_USE_STD"] = self.options.polyfill == "std"
         tc.variables["BSONCXX_POLY_USE_STD_EXPERIMENTAL"] = self.options.polyfill == "experimental"
         tc.variables["BSONCXX_POLY_USE_BOOST"] = self.options.polyfill == "boost"
-        tc.variables["BUILD_VERSION"] = self.version
-        tc.variables["BSONCXX_LINK_WITH_STATIC_MONGOC"] = not self.dependencies["mongo-c-driver"].options.shared
-        tc.variables["MONGOCXX_LINK_WITH_STATIC_MONGOC"] = not self.dependencies["mongo-c-driver"].options.shared
+        tc.cache_variables["BUILD_VERSION"] = self.version
+        tc.cache_variables["BSONCXX_LINK_WITH_STATIC_MONGOC"] = "OFF" if self.dependencies["mongo-c-driver"].options.shared else "ON"
+        tc.cache_variables["MONGOCXX_LINK_WITH_STATIC_MONGOC"] = "OFF" if self.dependencies["mongo-c-driver"].options.shared else "ON"
         tc.variables["MONGOCXX_ENABLE_SSL"] = self.options.with_ssl
         if not valid_min_cppstd(self, self._minimal_std_version):
             tc.variables["CMAKE_CXX_STANDARD"] = self._minimal_std_version
