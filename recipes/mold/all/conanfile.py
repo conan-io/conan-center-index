@@ -3,7 +3,6 @@ from conan.tools.scm import Version
 from conan.tools import files
 from conan.errors import ConanInvalidConfiguration
 from conans import AutoToolsBuildEnvironment, CMake
-from conan.tools.files import get
 
 import os
 import functools
@@ -88,8 +87,7 @@ class MoldConan(ConanFile):
         self.requires("openssl/1.1.1q")
         self.requires("onetbb/2021.3.0")
         self.requires("mimalloc/2.0.6")
-        if Version(self.version) < "1.4.0":
-            self.requires("xxhash/0.8.1")
+        self.requires("xxhash/0.8.1")
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version],
@@ -103,11 +101,16 @@ class MoldConan(ConanFile):
                 autotools.make(target="mold", args=['SYSTEM_TBB=1', 'SYSTEM_MIMALLOC=1'])
         else:
             # Error out if ZLIB is not found, we want to be predictable
-            tools.replace_in_file("source_subfolder/CMakeLists.txt", "find_package(ZLIB QUIET)", "find_package(ZLIB REQUIRED)")
+            files.replace_in_file(self, "source_subfolder/CMakeLists.txt", "find_package(ZLIB QUIET)", "find_package(ZLIB REQUIRED)")
             # Since we introduce a conan wrapper, CMAKE_SOURCE_DIR points a dir above. mold_SOURD_DIR is an equivalent to the vanilla behavior
-            tools.replace_in_file("source_subfolder/CMakeLists.txt", "${CMAKE_SOURCE_DIR}/update-git-hash.py", "${mold_SOURCE_DIR}/update-git-hash.py")
+            files.replace_in_file(self, "source_subfolder/CMakeLists.txt", "${CMAKE_SOURCE_DIR}/update-git-hash.py", "${mold_SOURCE_DIR}/update-git-hash.py")
             # This is a bug upstream. You can't assing definitions to a target you don't build.
-            tools.replace_in_file("source_subfolder/CMakeLists.txt", "target_compile_definitions(mimalloc INTERFACE USE_SYSTEM_MIMALLOC)", "target_compile_definitions(mold PRIVATE USE_SYSTEM_MIMALLOC)")
+            files.replace_in_file(self, "source_subfolder/CMakeLists.txt", "target_compile_definitions(mimalloc INTERFACE USE_SYSTEM_MIMALLOC)", "target_compile_definitions(mold PRIVATE USE_SYSTEM_MIMALLOC)")
+            # Use conan's xxhash
+            files.replace_in_file(self, "source_subfolder/CMakeLists.txt", "target_link_libraries(mold PRIVATE ${CMAKE_DL_LIBS})", "find_package(xxHash REQUIRED)\ntarget_link_libraries(mold PRIVATE ${CMAKE_DL_LIBS} xxHash::xxhash)")
+            files.replace_in_file(self, "source_subfolder/mold.h", '#include "third-party/xxhash/xxhash.h"', '#include "xxhash.h"')
+
+
             cmake = self._configure_cmake()
             cmake.build()
 
