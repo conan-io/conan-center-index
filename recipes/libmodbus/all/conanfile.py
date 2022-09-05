@@ -90,7 +90,11 @@ class LibmodbusConan(ConanFile):
 
         # inject tools_require env vars in build context
         ms = VirtualBuildEnv(self)
+        ms.generate()
+
+        """ TODO: how to replace tools.vcvars?
         if self.settings.compiler == "Visual Studio":
+            # 
             ms.define("CC", "cl -nologo")
             ms.define("CXX", "cl -nologo")
             ms.define("LD", "link -nologo")
@@ -98,11 +102,7 @@ class LibmodbusConan(ConanFile):
             ms.define("RANLIB", ":")
             ms.define("STRING", ":")
             ms.define("NM", "dumpbin -symbols")
-        ms.generate()
-
-        if self.settings.compiler == "Visual Studio":
-            ms = VCVars(self)
-            ms.generate()
+        """
 
     def _patch_sources(self):
         apply_conandata_patches(self)
