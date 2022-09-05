@@ -1,11 +1,10 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, get, patch, replace_in_file, rename, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path, VCVars
-from conan.tools.scm import Version
 import os
 
 
@@ -54,7 +53,7 @@ class LibmodbusConan(ConanFile):
             self.tool_requires("automake/1.16.3")
         # see https://github.com/conan-io/conan/issues/11969
         bash_path = os.getenv("CONAN_BASH_PATH") or self.conf.get("tools.microsoft.bash:path")
-        if self.settings.os == "Windows" and not conan_bash_path:
+        if self.settings.os == "Windows" and not bash_path:
             self.tool_requires("msys2/cci.latest")
 
     def source(self):
