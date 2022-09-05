@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, get
 from conan.tools.files.files import rmdir
 from conan.tools.microsoft import is_msvc
+from conans.errors import ConanInvalidConfiguration
 from conans import CMake
 import functools
 import os
@@ -34,6 +35,7 @@ class GdalConan(ConanFile):
         "with_arrow": [True, False],
         "with_blosc": [True, False],
         "with_cfitsio": [True, False],
+        "with_crypto": [True, False],
         "with_cryptopp": [True, False],
         "with_curl": [True, False],
         "with_dds": [True, False],
@@ -49,7 +51,7 @@ class GdalConan(ConanFile):
         "with_kea": [True, False],
         "with_libdeflate": [True, False],
         "with_libiconv": [True, False],
-        "with_libjpeg": [True, False],
+        "with_jpeg": [None, "libjpeg", "libjpeg-turbo"],
         "with_libkml": [True, False],
         "with_libtiff": [True, False],
         "with_lz4": [True, False],
@@ -82,6 +84,7 @@ class GdalConan(ConanFile):
         "with_arrow": False,
         "with_blosc": False,
         "with_cfitsio": False,
+        "with_crypto": False, # deprecated, replaced by with_openssl
         "with_cryptopp": False,
         "with_curl": False,
         "with_dds": False,
@@ -97,7 +100,7 @@ class GdalConan(ConanFile):
         "with_kea": False,
         "with_libdeflate": True,
         "with_libiconv": True,
-        "with_libjpeg": False,
+        "with_jpeg": "libjpeg",
         "with_libkml": False,
         "with_libtiff": True,
         "with_lz4": False,
@@ -196,6 +199,11 @@ class GdalConan(ConanFile):
         if self.options.with_heif:
             self.requires("libheif/1.12.0")
 
+        if self.options.with_jpeg == "libjpeg":
+            self.requires("libjpeg/9d")
+        elif self.options.with_jpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.1.2")
+
         if self.options.with_kea:
             self.requires("kealib/1.4.14")
 
@@ -204,9 +212,6 @@ class GdalConan(ConanFile):
 
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
-
-        if self.options.with_libjpeg:
-            self.requires("libjpeg/9d")
 
         if self.options.with_libkml:
             self.requires("libkml/1.3.0")
@@ -274,6 +279,30 @@ class GdalConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
 
+    def validate(self):
+        if self.options.get_safe("with_crypto"):
+            raise ConanInvalidConfiguration("with_crypto option has been replaced by with_openssl")
+
+        if self.options.get_safe("with_pcre") and self.options.get_safe("with_pcre2"):
+            raise ConanInvalidConfiguration("Enable either pcre or pcre2, not both")
+
+        if self.options.get_safe("with_sqlite3") and not self.options["sqlite3"].enable_column_metadata:
+            raise ConanInvalidConfiguration("gdql requires sqlite3:enable_column_metadata=True")
+
+        if self.options.get_safe("with_libtiff") and self.options["libtiff"].jpeg != self.options.get_safe("with_jpeg"):
+            msg = "libtiff:jpeg and gdal:with_jpeg must be set to the same value, either libjpeg or libjpeg-turbo."
+            # For some reason, the ConanInvalidConfiguration message is not shown, only
+            #     ERROR: At least two recipes provides the same functionality:
+            #      - 'libjpeg' provided by 'libjpeg-turbo/2.1.2', 'libjpeg/9d'
+            # So we print the error message manually.
+            self.output.error(msg)
+            raise ConanInvalidConfiguration(msg)
+
+        if self.options.get_safe("with_poppler") and self.options["poppler"].with_libjpeg != self.options.get_safe("with_jpeg"):
+            msg = "poppler:with_libjpeg and gdal:with_jpeg must be set to the same value, either libjpeg or libjpeg-turbo."
+            self.output.error(msg)
+            raise ConanInvalidConfiguration(msg)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
                 destination=self._source_subfolder, strip_root=True)
@@ -304,7 +333,7 @@ class GdalConan(ConanFile):
         cmake.definitions["GDAL_USE_SHAPELIB_INTERNAL"] = True
 
         cmake.definitions["BUILD_APPS"] = self.options.tools
-        del cmake.definitions["CMAKE_MODULE_PATH"]
+        #del cmake.definitions["CMAKE_MODULE_PATH"]
 
         cmake.definitions["SQLite3_HAS_COLUMN_METADATA"] = \
             self.options["sqlite3"].enable_column_metadata
@@ -317,258 +346,340 @@ class GdalConan(ConanFile):
 
         cmake.definitions["GDAL_USE_GEOTIFF"] = True
         cmake.definitions["GDAL_CONAN_PACKAGE_FOR_GEOTIFF"] = "libgeotiff"
+        cmake.definitions["TARGET_FOR_GEOTIFF"] = "GeoTIFF::GeoTIFF"
 
         cmake.definitions["GDAL_USE_ARMADILLO"] = self.options.with_armadillo
         if self.options.with_armadillo:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_ARMADILLO"] = "armadillo"
+            cmake.definitions["TARGET_FOR_ARMADILLO"] = \
+                    self.dependencies["armadillo"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["Armadillo_FOUND"] = False
 
         cmake.definitions["GDAL_USE_ARROW"] = self.options.with_arrow
         if self.options.with_arrow:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_ARROW"] = "arrow"
+            cmake.definitions["TARGET_FOR_ARROW"] = \
+                    self.dependencies["arrow"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["Arrow_FOUND"] = False
 
         cmake.definitions["GDAL_USE_BLOSC"] = self.options.with_blosc
         if self.options.with_blosc:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_BLOSC"] = "c-blosc"
+            cmake.definitions["TARGET_FOR_BLOSC"] = \
+                    self.dependencies["c-blosc"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["Blosc_FOUND"] = False
 
         cmake.definitions["GDAL_USE_CFITSIO"] = self.options.with_cfitsio
         if self.options.with_cfitsio:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_CFITSIO"] = "cfitsio"
+            cmake.definitions["TARGET_FOR_CFITSIO"] = \
+                    self.dependencies["cfitsio"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["CFITSIO_FOUND"] = False
 
         cmake.definitions["GDAL_USE_CRYPTOPP"] = self.options.with_cryptopp
         if self.options.with_cryptopp:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_CRYPTOPP"] = "cryptopp"
+            cmake.definitions["TARGET_FOR_CRYPTOPP"] = \
+                    self.dependencies["cryptopp"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["CryptoPP_FOUND"] = False
 
         cmake.definitions["GDAL_USE_CURL"] = self.options.with_curl
         if self.options.with_curl:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_CURL"] = "libcurl"
+            cmake.definitions["TARGET_FOR_CURL"] = \
+                    self.dependencies["libcurl"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["CURL_FOUND"] = False
 
         cmake.definitions["GDAL_USE_CRNLIB"] = self.options.with_dds
         if self.options.with_dds:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_CRNLIB"] = "crunch"
+            cmake.definitions["TARGET_FOR_CRNLIB"] = \
+                    self.dependencies["crunch"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["Crnlib_FOUND"] = False
 
         cmake.definitions["GDAL_USE_EXPAT"] = self.options.with_expat
         if self.options.with_expat:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_EXPAT"] = "expat"
+            cmake.definitions["TARGET_FOR_EXPAT"] = "EXPAT::EXPAT"
         else:
             cmake.definitions["EXPAT_FOUND"] = False
 
         cmake.definitions["GDAL_USE_OPENEXR"] = self.options.with_exr
         if self.options.with_exr:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_OPENEXR"] = "openexr"
+            cmake.definitions["TARGET_FOR_OPENEXR"] = \
+                    self.dependencies["openexr"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["OpenEXR_FOUND"] = False
 
         cmake.definitions["GDAL_USE_FREEXL"] = self.options.with_freexl
         if self.options.with_freexl:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_FREEXL"] = "freexl"
+            cmake.definitions["TARGET_FOR_FREEXL"] = "freexl::freexl"
         else:
             cmake.definitions["FreeXL_FOUND"] = False
 
         cmake.definitions["GDAL_USE_GEOS"] = self.options.with_geos
         if self.options.with_geos:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_GEOS"] = "geos"
+            cmake.definitions["TARGET_FOR_GEOS"] = \
+                    self.dependencies["geos"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["GEOS_FOUND"] = False
 
         cmake.definitions["GDAL_USE_GIF"] = self.options.with_gif
         if self.options.with_gif:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_GIF"] = "giflib"
+            cmake.definitions["TARGET_FOR_GIF"] = \
+                    self.dependencies["giflib"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["GIF_FOUND"] = False
 
         cmake.definitions["GDAL_USE_GTA"] = self.options.with_gta
         if self.options.with_gta:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_GTA"] = "libgta"
+            cmake.definitions["TARGET_FOR_GTA"] = \
+                    self.dependencies["libgta"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["GTA_FOUND"] = False
 
         cmake.definitions["GDAL_USE_HDF4"] = self.options.with_hdf4
         if self.options.with_hdf4:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_HDF4"] = "hdf4"
+            cmake.definitions["TARGET_FOR_HDF4"] = \
+                    self.dependencies["hdf4"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["HDF4_FOUND"] = False
 
         cmake.definitions["GDAL_USE_HDF5"] = self.options.with_hdf5
         if self.options.with_hdf5:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_HDF5"] = "hdf5"
-            cmake.definitions["HDF5_C_LIBRARIES"] = "HDF5::C"
-            cmake.definitions["HDF5_BUILD_SHARED_LIBS"] = self.options["hdf5"].shared
+            cmake.definitions["TARGET_FOR_HDF5"] = \
+                    self.dependencies["hdf5"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["HDF5_FOUND"] = False
 
         cmake.definitions["GDAL_USE_HEIF"] = self.options.with_heif
         if self.options.with_heif:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_HEIF"] = "libheif"
+            cmake.definitions["TARGET_FOR_HEIF"] = \
+                    self.dependencies["libheif"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["HEIF_FOUND"] = False
 
         cmake.definitions["GDAL_USE_KEA"] = self.options.with_kea
         if self.options.with_kea:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_KEA"] = "kealib"
+            cmake.definitions["TARGET_FOR_KEA"] = \
+                    self.dependencies["kealib"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["KEA_FOUND"] = False
 
         cmake.definitions["GDAL_USE_DEFLATE"] = self.options.with_libdeflate
         if self.options.with_libdeflate:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_DEFLATE"] = "libdeflate"
+            cmake.definitions["TARGET_FOR_DEFLATE"] = \
+                    self.dependencies["libdeflate"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["Deflate_FOUND"] = False
 
         cmake.definitions["GDAL_USE_ICONV"] = self.options.with_libiconv
         if self.options.with_libiconv:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_ICONV"] = "libiconv"
+            cmake.definitions["TARGET_FOR_ICONV"] = \
+                    self.dependencies["libiconv"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["Iconv_FOUND"] = False
 
-        cmake.definitions["GDAL_USE_JPEG"] = self.options.with_libjpeg
-        if self.options.with_libjpeg:
-            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_JPEG"] = "libjpeg"
+        if self.options.with_jpeg == "libjpeg" or self.options.with_jpeg == "libjpeg-turbo":
+            print(f'self.options.with_jpeg: {self.options.with_jpeg}')
+            cmake.definitions["GDAL_USE_JPEG"] = True
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_JPEG"] = self.options.with_jpeg
+            cmake.definitions["TARGET_FOR_JPEG"] = \
+                    "JPEG::JPEG" if self.options.with_jpeg == "libjpeg" else "libjpeg-turbo::libjpeg-turbo"
         else:
             cmake.definitions["JPEG_FOUND"] = False
 
         cmake.definitions["GDAL_USE_LIBKML"] = self.options.with_libkml
         if self.options.with_libkml:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_LIBKML"] = "libkml"
+            cmake.definitions["TARGET_FOR_LIBKML"] = \
+                    self.dependencies["libkml"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["LibKML_FOUND"] = False
 
         cmake.definitions["GDAL_USE_TIFF"] = self.options.with_libtiff
         if self.options.with_libtiff:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_TIFF"] = "libtiff"
+            cmake.definitions["TARGET_FOR_TIFF"] = \
+                    self.dependencies["libtiff"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["TIFF_FOUND"] = False
 
         cmake.definitions["GDAL_USE_LZ4"] = self.options.with_lz4
         if self.options.with_lz4:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_LZ4"] = "lz4"
+            cmake.definitions["TARGET_FOR_LZ4"] = \
+                    self.dependencies["lz4"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["LZ4_FOUND"] = False
 
         cmake.definitions["GDAL_USE_MONGOCXX"] = self.options.with_mongocxx
         if self.options.with_mongocxx:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_MONGOCXX"] = "mongo-cxx-driver"
+            cmake.definitions["TARGET_FOR_MONGOCXX"] = \
+                    self.dependencies["mongo-cxx-driver"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["MONGOCXX_FOUND"] = False
 
         cmake.definitions["GDAL_USE_NETCDF"] = self.options.with_netcdf
         if self.options.with_netcdf:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_NETCDF"] = "netcdf"
+            cmake.definitions["TARGET_FOR_NETCDF"] = \
+                    self.dependencies["netcdf"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["NetCDF_FOUND"] = False
 
         cmake.definitions["GDAL_USE_ODBC"] = self.options.with_odbc
         if self.options.with_odbc:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_ODBC"] = "odbc"
+            cmake.definitions["TARGET_FOR_ODBC"] = \
+                    self.dependencies["odbc"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["ODBC_FOUND"] = False
 
         cmake.definitions["GDAL_USE_OPENJPEG"] = self.options.with_openjpeg
         if self.options.with_openjpeg:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_OPENJPEG"] = "openjpeg"
+            cmake.definitions["TARGET_FOR_OPENJPEG"] = \
+                    self.dependencies["openjpeg"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["OPENJPEG_FOUND"] = False
 
         cmake.definitions["GDAL_USE_OPENSSL"] = self.options.with_openssl
         if self.options.with_openssl:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_OPENSSL"] = "openssl"
+            cmake.definitions["TARGET_FOR_OPENSSL"] = \
+                    self.dependencies["openssl"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["OpenSSL_FOUND"] = False
 
         cmake.definitions["GDAL_USE_PCRE"] = self.options.with_pcre
         if self.options.with_pcre:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_PCRE"] = "pcre"
+            cmake.definitions["TARGET_FOR_PCRE"] = \
+                    self.dependencies["pcre"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["PCRE_FOUND"] = False
 
         cmake.definitions["GDAL_USE_PDFIUM"] = self.options.with_pcre2
         if self.options.with_pcre2:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_PDFIUM"] = "pcre2"
+            cmake.definitions["TARGET_FOR_PDFIUM"] = \
+                    self.dependencies["pcre2"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["PDFIUM_FOUND"] = False
 
         cmake.definitions["GDAL_USE_POSTGRESQL"] = self.options.with_pg
         if self.options.with_pg:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_POSTGRESQL"] = "libpq"
+            cmake.definitions["TARGET_FOR_POSTGRESQL"] = \
+                    self.dependencies["libpq"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["PostgreSQL_FOUND"] = False
 
         cmake.definitions["GDAL_USE_PNG"] = self.options.with_png
         if self.options.with_png:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_PNG"] = "libpng"
+            cmake.definitions["TARGET_FOR_PNG"] = \
+                    self.dependencies["libpng"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["PNG_FOUND"] = False
 
         cmake.definitions["GDAL_USE_PODOFO"] = self.options.with_podofo
         if self.options.with_podofo:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_PODOFO"] = "podofo"
+            cmake.definitions["TARGET_FOR_PODOFO"] = \
+                    self.dependencies["podofo"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["Podofo_FOUND"] = False
 
         cmake.definitions["GDAL_USE_POPPLER"] = self.options.with_poppler
         if self.options.with_poppler:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_POPPLER"] = "poppler"
+            cmake.definitions["TARGET_FOR_POPPLER"] = \
+                    self.dependencies["poppler"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["Poppler_FOUND"] = False
 
         cmake.definitions["GDAL_USE_PROJ"] = self.options.with_proj
         if self.options.with_proj:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_PROJ"] = "proj"
+            cmake.definitions["TARGET_FOR_PROJ"] = \
+                    self.dependencies["proj"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["PROJ_FOUND"] = False
 
         cmake.definitions["GDAL_USE_QHULL"] = self.options.with_qhull
         if self.options.with_qhull:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_QHULL"] = "qhull"
+            cmake.definitions["TARGET_FOR_QHULL"] = \
+                    self.dependencies["qhull"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["QHULL_FOUND"] = False
 
         cmake.definitions["GDAL_USE_SQLITE3"] = self.options.with_sqlite3
         if self.options.with_sqlite3:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_SQLITE3"] = "sqlite3"
+            cmake.definitions["TARGET_FOR_SQLITE3"] = \
+                    self.dependencies["sqlite3"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["SQLite3_FOUND"] = False
 
         cmake.definitions["GDAL_USE_WEBP"] = self.options.with_webp
         if self.options.with_webp:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_WEBP"] = "libwebp"
+            cmake.definitions["TARGET_FOR_WEBP"] = \
+                    self.dependencies["libwebp"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["WebP_FOUND"] = False
 
         cmake.definitions["GDAL_USE_XERCESC"] = self.options.with_xerces
         if self.options.with_xerces:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_XERCESC"] = "xerces-c"
+            cmake.definitions["TARGET_FOR_XERCESC"] = \
+                    self.dependencies["xerces-c"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["XercesC_FOUND"] = False
 
         cmake.definitions["GDAL_USE_LIBXML2"] = self.options.with_xml2
         if self.options.with_xml2:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_LIBXML2"] = "libxml2"
+            cmake.definitions["TARGET_FOR_LIBXML2"] = \
+                    self.dependencies["libxml2"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["LibXml2_FOUND"] = False
 
         cmake.definitions["GDAL_USE_ZLIB"] = self.options.with_zlib
         if self.options.with_zlib:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_ZLIB"] = "zlib"
+            cmake.definitions["TARGET_FOR_ZLIB"] = \
+                    self.dependencies["zlib"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["ZLIB_FOUND"] = False
 
         cmake.definitions["GDAL_USE_ZSTD"] = self.options.with_zstd
         if self.options.with_zstd:
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_ZSTD"] = "zstd"
+            cmake.definitions["TARGET_FOR_ZSTD"] = \
+                    self.dependencies["zstd"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["ZSTD_FOUND"] = False
 
@@ -674,8 +785,10 @@ class GdalConan(ConanFile):
         if self.options.with_libiconv:
             self.cpp_info.requires.extend(['libiconv::libiconv'])
 
-        if self.options.with_libjpeg:
+        if self.options.with_jpeg == "libjpeg":
             self.cpp_info.requires.extend(['libjpeg::libjpeg'])
+        elif self.options.with_jpeg == "libjpeg-turbo":
+            self.cpp_info.requires.extend(['libjpeg-turbo::jpeg'])
 
         if self.options.with_libkml:
             self.cpp_info.requires.extend(['libkml::kmldom', 'libkml::kmlengine'])

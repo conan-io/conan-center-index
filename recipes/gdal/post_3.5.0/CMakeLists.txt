@@ -56,6 +56,11 @@ if (${GDAL_USE_OPENEXR})
     target_include_directories(OpenEXR::OpenEXR INTERFACE ${OpenEXR_INCLUDE_DIR})
 endif()
 
+if (${GDAL_USE_FREEXL})
+    find_package(freexl REQUIRED)
+    add_library(FREEXL::freexl ALIAS freexl::freexl)
+endif()
+
 if (${GDAL_USE_OPENJPEG})
     add_library(OPENJPEG::OpenJPEG ALIAS OpenJPEG::OpenJPEG)
 endif()
@@ -84,10 +89,17 @@ endif()
 
 if (${GDAL_USE_HDF5})
     find_package(HDF5)
+    set(HDF5_C_LIBRARIES HDF5::C)
 endif()
 
 if (${GDAL_USE_ZLIB})
     find_package(ZLIB)
 endif()
+
+if (${GDAL_CONAN_PACKAGE_FOR_JPEG} STREQUAL "libjpeg-turbo")
+    find_package(libjpeg-turbo REQUIRED)
+    add_library(JPEG::JPEG ALIAS ${TARGET_FOR_JPEG})
+endif()
+
 
 add_subdirectory("source_subfolder")
