@@ -1,6 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.files import get, load, save
+from conan.tools.build import cross_building
 from conans import tools
 
 required_conan_version = ">=1.50.0"
@@ -59,6 +60,10 @@ class QwtConan(ConanFile):
 
     def requirements(self):
         self.requires("qt/5.15.5")
+
+    def validate(self):
+        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Qwt recipe does not support cross-compilation yet")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
