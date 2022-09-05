@@ -1,8 +1,9 @@
-from conan.tools.files import rename
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conans.errors import ConanInvalidConfiguration
+from conan.tools.files import get, rename, rmdir
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
+from conans import AutoToolsBuildEnvironment, tools
 import contextlib
 import fnmatch
 import functools
@@ -149,8 +150,8 @@ class OpenSSLConan(ConanFile):
         return self._is_clangcl or is_msvc(self)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     @property
     def _target(self):
@@ -664,7 +665,7 @@ class OpenSSLConan(ConanFile):
             else:
                 self.copy("fips.so", src=provdir,dst="lib/ossl-modules")
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path)
