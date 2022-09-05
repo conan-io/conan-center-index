@@ -16,6 +16,7 @@ class GFortranConan(ConanFile):
     license = "GPL-3.0-or-later"
     settings = "os", "arch"
     no_copy_source = True
+    short_paths = True
 
     @property
     def _source_subfolder(self):
@@ -35,14 +36,14 @@ class GFortranConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version][str(self.settings.os)]["x86_64"],
                   destination=self._source_subfolder, strip_root=True)
 
-
+    @property
     def _extract_license(self):
         info = load(self, os.path.join(self.source_folder, "source_subfolder_Linux", "share", "info", "gfortran.info"))
         license_contents = info[info.find("Version 3"):info.find("END OF TERMS", 1)]
         save(self, "LICENSE", license_contents)
 
     def package(self):
-        self._extract_license()
+        self._extract_license()short_paths = True
         self.copy("LICENSE", dst="licenses")
         self.copy("gfortran*", dst="bin", src=os.path.join(self._source_subfolder, "bin"))
         self.copy("gfortran", dst="bin", src=os.path.join(self._source_subfolder, "local", "bin"))
