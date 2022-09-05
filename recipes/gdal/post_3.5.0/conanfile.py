@@ -318,7 +318,7 @@ class GdalConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
 
-        if "fPIC" in self.options and self.options.fPIC:
+        if self.options.get_safe("fPIC", True):
             cmake.definitions[
                 "GDAL_OBJECT_LIBRARIES_POSITION_INDEPENDENT_CODE"] = True
 
