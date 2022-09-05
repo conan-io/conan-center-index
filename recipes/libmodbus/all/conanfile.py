@@ -49,7 +49,7 @@ class LibmodbusConan(ConanFile):
             pass
 
     def build_requirements(self):
-        if self.settings.compiler == "Visual Studio":
+        if self.settings.os == "Macos" or self.settings.compiler == "Visual Studio":
             self.tool_requires("automake/1.16.3")
         # see https://github.com/conan-io/conan/issues/11969
         bash_path = os.getenv("CONAN_BASH_PATH") or self.conf.get("tools.microsoft.bash:path")
