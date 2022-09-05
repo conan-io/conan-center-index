@@ -35,7 +35,7 @@ class GFortranConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version][str(self.settings.os)]["x86_64"],
-                  destination=self.source_folder, strip_root=True)
+                  destination=self._source_subfolder, strip_root=True)
 
 
     def _extract_license(self):
