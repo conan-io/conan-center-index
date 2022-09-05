@@ -139,16 +139,16 @@ class MongoCDriverConan(ConanFile):
         tc.cache_variables["ENABLE_SNAPPY"] = "ON" if self.options.with_snappy else "OFF"
         tc.cache_variables["ENABLE_ZLIB"] = "SYSTEM" if self.options.with_zlib else "OFF"
         tc.cache_variables["ENABLE_ZSTD"] = "ON" if self.options.with_zstd else "OFF"
-        tc.cache_variables["ENABLE_MAN_PAGES"] = False
-        tc.cache_variables["ENABLE_HTML_DOCS"] = False
-        tc.cache_variables["ENABLE_EXTRA_ALIGNMENT"] = True
-        tc.cache_variables["ENABLE_RDTSCP"] = False
-        tc.cache_variables["ENABLE_APPLE_FRAMEWORK"] = False
+        tc.cache_variables["ENABLE_MAN_PAGES"] = "OFF"
+        tc.cache_variables["ENABLE_HTML_DOCS"] = "OFF"
+        tc.cache_variables["ENABLE_EXTRA_ALIGNMENT"] = "ON"
+        tc.cache_variables["ENABLE_RDTSCP"] = "OFF"
+        tc.cache_variables["ENABLE_APPLE_FRAMEWORK"] = "OFF"
         tc.cache_variables["ENABLE_ICU"] = "ON" if self.options.with_icu else "OFF"
-        tc.cache_variables["ENABLE_UNINSTALL"] = False
+        tc.cache_variables["ENABLE_UNINSTALL"] = "OFF"
         tc.cache_variables["ENABLE_CLIENT_SIDE_ENCRYPTION"] = "OFF"  # libmongocrypt recipe not yet in CCI
         tc.cache_variables["ENABLE_MONGODB_AWS_AUTH"] = "AUTO"
-        tc.cache_variables["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
+        tc.cache_variables["ENABLE_PIC"] = "ON" if self.options.get_safe("fPIC", True) else "OFF"
         # Avoid to install vc runtime stuff
         tc.variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = "TRUE"
         if self.options.with_ssl == "openssl":
