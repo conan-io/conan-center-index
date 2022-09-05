@@ -43,7 +43,7 @@ class GFortranConan(ConanFile):
         save(self, "LICENSE", license_contents)
 
     def package(self):
-        self._extract_license()short_paths = True
+        self._extract_license()
         self.copy("LICENSE", dst="licenses")
         self.copy("gfortran*", dst="bin", src=os.path.join(self._source_subfolder, "bin"))
         self.copy("gfortran", dst="bin", src=os.path.join(self._source_subfolder, "local", "bin"))
