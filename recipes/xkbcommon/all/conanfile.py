@@ -83,7 +83,6 @@ class XkbcommonConan(ConanFile):
         tc.project_options["libexecdir"] = "bin"
         tc.project_options["libdir"] = "lib"
         tc.project_options["datadir"] = "res"
-        tc.project_options["mandir"] = "res/man"
 
         tc.project_options["enable-docs"] = False
         tc.project_options["enable-wayland"] = self.options.get_safe("with_wayland", False)
@@ -116,6 +115,7 @@ class XkbcommonConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
