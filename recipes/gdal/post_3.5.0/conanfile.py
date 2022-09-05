@@ -340,7 +340,6 @@ class GdalConan(ConanFile):
         cmake.definitions["GDAL_USE_SHAPELIB_INTERNAL"] = True
 
         cmake.definitions["BUILD_APPS"] = self.options.tools
-        #del cmake.definitions["CMAKE_MODULE_PATH"]
 
         cmake.definitions["SQLite3_HAS_COLUMN_METADATA"] = \
             self.options["sqlite3"].enable_column_metadata
