@@ -5,4 +5,3 @@ sources:
 patches:
   "3.1.6":
     - patch_file: "patches/0001-msvc-fixes.patch"
-      base_path: "source_subfolder"
