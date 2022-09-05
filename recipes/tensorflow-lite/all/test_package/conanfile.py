@@ -20,7 +20,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not build.cross_building(self):
+        if build.can_run(self):
             model_path = os.path.join(self.source_folder, "model.tflite")
             command = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(" ".join([command, model_path]), env="conanrun")
