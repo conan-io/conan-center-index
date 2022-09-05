@@ -8,5 +8,9 @@ sources:
 patches:
   "0.9.7":
     - patch_file: "patches/0001-fix-cmake-0.9.7.patch"
+      patch_description: "Link to conan libs and allow to build the tools without the tests and the examples"
+      patch_type: "conan"
   "0.9.6":
     - patch_file: "patches/0001-fix-cmake-0.9.6.patch"
+      patch_description: "Link to conan libs and allow to build the tools without the tests and the examples"
+      patch_type: "conan"
