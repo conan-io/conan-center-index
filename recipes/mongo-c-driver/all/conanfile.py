@@ -152,7 +152,7 @@ class MongoCDriverConan(ConanFile):
         # Avoid to install vc runtime stuff
         tc.variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = "TRUE"
         if self.options.with_ssl == "openssl":
-            tc.variables["OPENSSL_ROOT_DIR"] = self.dependencies["openssl"].package_folder
+            tc.variables["OPENSSL_ROOT_DIR"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
         if Version(self.version) >= "1.20.0":
             tc.variables["MONGO_USE_CCACHE"] = False
         if is_msvc(self):
