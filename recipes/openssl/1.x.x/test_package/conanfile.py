@@ -3,6 +3,8 @@ from conan.tools.scm import Version
 from conan.tools.build import cross_building
 import os
 
+required_conan_version = ">=1.50.2"  # Because of changes in scm.Version class
+
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
@@ -26,7 +28,7 @@ class TestPackageConan(ConanFile):
             if self.settings.os == "Android":
                 cmake.definitions["CONAN_LIBCXX"] = ""
             openssl_version = Version(self.deps_cpp_info["openssl"].version)
-            if openssl_version >= "1.1.0":
+            if openssl_version.major == "1" and openssl_version.minor == "1":
                 cmake.definitions["OPENSSL_WITH_ZLIB"] = False
             else:
                 cmake.definitions["OPENSSL_WITH_ZLIB"] = not self.options["openssl"].no_zlib
