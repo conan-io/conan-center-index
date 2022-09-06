@@ -61,8 +61,6 @@ class PackageConan(ConanFile):
         # download source package and extract to source folder
         get(**self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
-        # apply patches in source() only when is header only
-        apply_conandata_patches(self)
 
     def validate(self):
         # validate the minimum cpp standard supported
@@ -79,9 +77,10 @@ class PackageConan(ConanFile):
         # src_folder must use the same source folder name the project
         basic_layout(self, src_folder="src")
 
-    # not mandatory, but will suppress warning message about missing build() method
+    # not mandatory when there is no patch, but will suppress warning message about missing build() method
     def build(self):
-        pass
+        # apply patches in source_folder
+        apply_conandata_patches(self)
 
     # copy all files to the package folder
     def package(self):
