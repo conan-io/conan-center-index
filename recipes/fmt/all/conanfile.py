@@ -105,6 +105,7 @@ class FmtConan(ConanFile):
         self.cpp_info.set_property(f"cmake_target_name", f"fmt::{target}")
         self.cpp_info.set_property("pkg_config_name",  "fmt")
 
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         if self.options.with_fmt_alias:
             self.cpp_info.components["_fmt"].defines.append("FMT_STRING_ALIAS=1")
 
