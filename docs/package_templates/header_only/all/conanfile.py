@@ -56,7 +56,7 @@ class PackageConan(ConanFile):
     def validate(self):
         # compiler subsettings are not available when building with self.info.clear()
         if self.info.settings.get_safe("compiler.cppstd"):
-            # validate the minimum cpp standard supported when installing the package
+            # validate the minimum cpp standard supported when installing the package. For C++ projects only
             check_min_cppstd(self, self._minimum_cpp_standard)
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
         if minimum_version and Version(self.info.settings.get_safe("compiler.version")) < minimum_version:

@@ -60,7 +60,7 @@ class PackageConan(ConanFile):
     def validate(self):
         # in case it does not work in another configuration, it should validated here too
         if not is_msvc(self):
-            raise ConanInvalidConfiguration(f"{self.name} can be built only by Visual Studio and msvc.")
+            raise ConanInvalidConfiguration(f"{self.ref} can be built only by Visual Studio and msvc.")
 
     # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
