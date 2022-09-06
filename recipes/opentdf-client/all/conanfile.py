@@ -61,8 +61,15 @@ class OpenTDFConan(ConanFile):
         else:
             if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(f'{self.name} requires {self.settings.compiler} {self.settings.compiler.version} but found {min_version}')
+        # Disallow MT and MTd
         if is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(f'{self.name} can not be built with MT or MTd at this time')
+        # Display warning if libiconv sneaks in somewhere
+        try:
+            if self.dependencies["libiconv"] and not self.options.allow_libiconv:
+                self.output.warn(f"libiconv has been found in dependencies tree along the option {self.name}:allow_libiconv=False")
+        except KeyError:
+            pass
 
     def requirements(self):
         self.requires("openssl/1.1.1q")
