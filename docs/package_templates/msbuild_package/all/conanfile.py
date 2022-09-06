@@ -51,8 +51,16 @@ class PackageConan(ConanFile):
         except Exception:
             pass
 
+    def layout(self):
+        vs_layout(self, src_folder="src") # src_folder must use the same source folder name the project
+
     def requirements(self):
         self.requires("dependency/0.8.1") # prefer self.requires method instead of requires attribute
+
+    def validate(self):
+        # in case it does not work in another configuration, it should validated here too
+        if not is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.name} can be built only by Visual Studio and msvc.")
 
     # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
@@ -61,14 +69,6 @@ class PackageConan(ConanFile):
     def source(self):
         get(**self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
-
-    def validate(self):
-        # in case it does not work in another configuration, it should validated here too
-        if not is_msvc(self):
-            raise ConanInvalidConfiguration(f"{self.name} can be built only by Visual Studio and msvc.")
-
-    def layout(self):
-        vs_layout(self, src_folder="src") # src_folder must use the same source folder name the project
 
     def generate(self):
         tc = MSBuildToolchain(self)
