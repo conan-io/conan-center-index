@@ -1,14 +1,13 @@
 import os
 
 from conan import ConanFile
-from conan import tools
+from conan.tools.files import copy, get
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
+from conan.tools.build import check_min_cppstd
 
-from conans.tools import check_min_cppstd
-
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 class DacapClipConan(ConanFile):
     name = "dacap-clip"
@@ -29,12 +28,8 @@ class DacapClipConan(ConanFile):
         "with_png": True,
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def export_sources(self):
-        tools.files.copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -42,21 +37,15 @@ class DacapClipConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_png
 
     def layout(self):
-        cmake_layout(self)
-
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
-        if is_msvc(self) and self.settings.build_type == "Debug" and self.options.shared == True:
-            raise ConanInvalidConfiguration("{} doesn't support MSVC debug shared build (now).".format(self.name))
-
-    def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.get_safe("with_png", False):
@@ -64,11 +53,22 @@ class DacapClipConan(ConanFile):
         if self.settings.os == "Linux":
             self.requires("xorg/system")
 
+    def validate(self):
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
+        if is_msvc(self) and self.info.settings.build_type == "Debug" and self.info.options.shared == True:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support MSVC debug shared build (now).")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
+
     def generate(self):
         toolchain = CMakeToolchain(self)
         toolchain.variables["CLIP_EXAMPLES"] = False
         toolchain.variables["CLIP_TESTS"] = False
         toolchain.variables["CLIP_X11_WITH_PNG"] = self.options.get_safe("with_png", False)
+        if is_msvc(self):
+            toolchain.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
         toolchain.generate()
 
         deps = CMakeDeps(self)
@@ -80,9 +80,13 @@ class DacapClipConan(ConanFile):
         cmake.build()
 
     def package(self):
-        tools.files.copy(self, "LICENSE.txt", os.path.join(self.source_folder, self._source_subfolder), os.path.join(self.package_folder, "licenses"))
-        cmake = CMake(self)
-        cmake.install()
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "clip.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
+        copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
+        copy(self, "*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
+        copy(self, "*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
+        copy(self, "*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
+        copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = ["clip"]
@@ -103,3 +107,7 @@ class DacapClipConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "clip")
         self.cpp_info.set_property("cmake_target_name", "clip::clip")
+
+        # TODO: Remove on Conan 2.0
+        self.cpp_info.names["cmake_find_package"] = "clip"
+        self.cpp_info.names["cmake_find_package_multi"] = "clip"
