@@ -1,8 +1,8 @@
-import os
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import get
+from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.33.00"
 
 
 class ArchicadApidevkitConan (ConanFile):
@@ -21,7 +21,7 @@ class ArchicadApidevkitConan (ConanFile):
 
     @property
     def _acdevkit_arch(self):
-         return str(self.settings.arch)
+        return str(self.settings.arch)
 
     def validate(self):
         if (not (self.version in self.conan_data["sources"]) or
@@ -30,8 +30,7 @@ class ArchicadApidevkitConan (ConanFile):
                 "Binaries for this combination of architecture/version/os not available")
 
     def build(self):
-        tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)]
-                  [self._acdevkit_arch], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][self._acdevkit_arch], destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("*", symlinks=True)
