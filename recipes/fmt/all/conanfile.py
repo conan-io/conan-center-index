@@ -5,8 +5,7 @@ from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, apply_conandata_patches, copy, rmdir
 
-
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.3"
 
 
 class FmtConan(ConanFile):
@@ -16,8 +15,6 @@ class FmtConan(ConanFile):
     topics = ("fmt", "format", "iostream", "printf")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    exports_sources = "patches/*"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "header_only": [True, False],
@@ -38,6 +35,10 @@ class FmtConan(ConanFile):
     def _has_with_os_api_option(self):
         return Version(str(self.version)) >= "7.0.0"
 
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            files.copy(self, patch["patch_file"], src=self.recipe_folder, dst=self.export_sources_folder)
+
     def generate(self):
         if not self.options.header_only:
             tc = CMakeToolchain(self)
@@ -50,7 +51,8 @@ class FmtConan(ConanFile):
             tc.generate()
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        if not self.options.header_only:
+            cmake_layout(self, src_folder="src")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -75,7 +77,8 @@ class FmtConan(ConanFile):
             del self.info.options.with_fmt_alias
 
     def source(self):
-        get(self, **self.conan_data["sources"][str(self.version)], strip_root=True)
+        get(self, **self.conan_data["sources"][str(self.version)],
+            destination=self.source_folder, strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)
@@ -97,37 +100,30 @@ class FmtConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "fmt"
-        self.cpp_info.names["cmake_find_package_multi"] = "fmt"
-        self.cpp_info.names["pkg_config"] = "fmt"
-
         target = "fmt-header-only" if self.options.header_only else "fmt"
-        self.cpp_info.set_property("cmake_target_name", "fmt::{}".format(target))
+        self.cpp_info.set_property("cmake_file_name", "fmt")
+        self.cpp_info.set_property(f"cmake_target_name", f"fmt::{target}")
+        self.cpp_info.set_property("pkg_config_name",  "fmt")
 
-        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["_fmt"].includedirs.extend(["include"])
+        if self.options.with_fmt_alias:
+            self.cpp_info.components["_fmt"].defines.append("FMT_STRING_ALIAS=1")
+
         if self.options.header_only:
             self.cpp_info.components["_fmt"].defines.append("FMT_HEADER_ONLY=1")
-            if self.options.with_fmt_alias:
-                self.cpp_info.components["_fmt"].defines.append("FMT_STRING_ALIAS=1")
         else:
             postfix = "d" if self.settings.build_type == "Debug" else ""
             libname = "fmt" + postfix
             self.cpp_info.components["_fmt"].libs = [libname]
             if self.settings.os == "Linux":
                 self.cpp_info.components["_fmt"].system_libs.extend(["m"])
-            # FIXME: remove when Conan 1.50 is used in c3i and update the Conan required version
-            # from that version components don't have empty libdirs by default
-            self.cpp_info.components["_fmt"].libdirs.extend(["lib"])
-            self.cpp_info.components["_fmt"].bindirs.extend(["bin"])
-            if self.options.with_fmt_alias:
-                self.cpp_info.components["_fmt"].defines.append("FMT_STRING_ALIAS=1")
             if self.options.shared:
                 self.cpp_info.components["_fmt"].defines.append("FMT_SHARED")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "fmt"
+        self.cpp_info.names["cmake_find_package_multi"] = "fmt"
+        self.cpp_info.names["pkg_config"] = "fmt"
         self.cpp_info.components["_fmt"].names["cmake_find_package"] = target
         self.cpp_info.components["_fmt"].names["cmake_find_package_multi"] = target
-        self.cpp_info.components["_fmt"].set_property("cmake_target_name", "fmt::{}".format(target))
-        # FIXME: Remove as soon as Conan client provide a hotfix. See conan-io/conan-center-index#12149
-        self.cpp_info.components["_fmt"].builddirs = [""]
+        self.cpp_info.components["_fmt"].set_property("cmake_target_name", f"fmt::{target}")
+        self.cpp_info.components["_fmt"].includedirs.extend(["include"])
