@@ -3,9 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get,load, save
 import os
 
-
 required_conan_version = ">=1.46.0"
-
 
 class GFortranConan(ConanFile):
     name = "gfortran"
@@ -23,11 +21,6 @@ class GFortranConan(ConanFile):
         return os.path.join(self.source_folder, "source_subfolder_{}".format(str(self.settings.os)))
 
     def validate(self):
-        # TODO: remove the next 2 if condition below
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Test: just debugging Macos build atm")
-        if self.settings.os == "Linux":
-            raise ConanInvalidConfiguration("Test: just debugging Macos build atm")
         if self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("No binaries available for the architecture '{}'.".format(self.settings.arch))
         if str(self.settings.os) not in ("Windows", "Linux", "Macos"):
@@ -43,11 +36,6 @@ class GFortranConan(ConanFile):
 
     def _extract_license(self):
         if self.settings.os == "Macos":
-            print("=================================================")
-            print(os.listdir(self.source_folder))
-            print(os.listdir(os.path.join(self.source_folder, "source_subfolder_Macos")))
-            print(os.listdir(os.path.join(self.source_folder, "source_subfolder_Macos", "local")))
-            print("=================================================")
             license_path_prefix = os.path.join(self.source_folder, "source_subfolder_Macos", "local", "share", "info")
         else:
             license_path_prefix = os.path.join(self.source_folder, f"source_subfolder_{self.settings.os}", "share", "info")
