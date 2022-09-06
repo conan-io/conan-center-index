@@ -68,16 +68,11 @@ class PackageConan(ConanFile):
         except Exception:
             pass
 
+    def layout(self):
+        cmake_layout(self, src_folder="src") # src_folder must use the same source folder name the project
+
     def requirements(self):
         self.requires("dependency/0.8.1") # prefer self.requires method instead of requires attribute
-
-    # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
-    def build_requirements(self):
-        self.tool_requires("tool/x.y.z")
-
-    def source(self):
-        get(**self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
 
     def validate(self):
         # validate the minimum cpp standard supported
@@ -90,8 +85,13 @@ class PackageConan(ConanFile):
         if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.name} can not be built as shared on Visual Studio and msvc.")
 
-    def layout(self):
-        cmake_layout(self, src_folder="src") # src_folder must use the same source folder name the project
+    # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
+    def build_requirements(self):
+        self.tool_requires("tool/x.y.z")
+
+    def source(self):
+        get(**self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
     def generate(self):
         # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
