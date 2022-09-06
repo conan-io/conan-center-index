@@ -1,8 +1,10 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools import files
+from conan.errors import ConanInvalidConfiguration
+from conans import AutoToolsBuildEnvironment, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
 
 
 class LibuuidConan(ConanFile):
@@ -38,10 +40,10 @@ class LibuuidConan(ConanFile):
             raise ConanInvalidConfiguration("libuuid is not supported on Windows")
 
     def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
+        self.build_requires("libtool/2.4.7")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
@@ -59,9 +61,8 @@ class LibuuidConan(ConanFile):
         return self._autotools
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        with tools.chdir(self._source_subfolder):
+        files.apply_conandata_patches(self)
+        with files.chdir(self, self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True)
         autotools = self._configure_autotools()
         autotools.make()
@@ -70,8 +71,8 @@ class LibuuidConan(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         autotools.install()
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "uuid"

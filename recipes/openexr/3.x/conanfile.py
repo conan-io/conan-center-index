@@ -1,7 +1,11 @@
-from conans import ConanFile, CMake, tools
-import os, functools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.scm import Version
+import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
 
 
 class OpenEXRConan(ConanFile):
@@ -23,20 +27,9 @@ class OpenEXRConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake", "cmake_find_package"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,34 +46,38 @@ class OpenEXRConan(ConanFile):
         self.requires("imath/3.1.5")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["OPENEXR_INSTALL_EXAMPLES"] = False
-        cmake.definitions["DOCS"] = False
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["OPENEXR_INSTALL_EXAMPLES"] = False
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["DOCS"] = False
+        tc.generate()
+        cd = CMakeDeps(self)
+        cd.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.md", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     @staticmethod
     def _conan_comp(name):
@@ -101,8 +98,10 @@ class OpenEXRConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "OpenEXR"
         self.cpp_info.names["pkg_config"] = "OpenEXR"
 
-        openexr_version = tools.Version(self.version)
-        lib_suffix = "-{}_{}".format(openexr_version.major, openexr_version.minor)
+        lib_suffix = ""
+        if not self.options.shared or self.settings.os == "Windows":
+            openexr_version = Version(self.version)
+            lib_suffix += f"-{openexr_version.major}_{openexr_version.minor}"
         if self.settings.build_type == "Debug":
             lib_suffix += "_d"
 
@@ -120,12 +119,12 @@ class OpenEXRConan(ConanFile):
 
         # OpenEXR::Iex
         Iex = self._add_component("Iex")
-        Iex.libs = ["Iex{}".format(lib_suffix)]
+        Iex.libs = [f"Iex{lib_suffix}"]
         Iex.requires = [self._conan_comp("IexConfig")]
 
         # OpenEXR::IlmThread
         IlmThread = self._add_component("IlmThread")
-        IlmThread.libs = ["IlmThread{}".format(lib_suffix)]
+        IlmThread.libs = [f"IlmThread{lib_suffix}"]
         IlmThread.requires = [
             self._conan_comp("IlmThreadConfig"), self._conan_comp("Iex"),
         ]
@@ -134,12 +133,12 @@ class OpenEXRConan(ConanFile):
 
         # OpenEXR::OpenEXRCore
         OpenEXRCore = self._add_component("OpenEXRCore")
-        OpenEXRCore.libs = ["OpenEXRCore{}".format(lib_suffix)]
+        OpenEXRCore.libs = [f"OpenEXRCore{lib_suffix}"]
         OpenEXRCore.requires = [self._conan_comp("OpenEXRConfig"), "zlib::zlib"]
 
         # OpenEXR::OpenEXR
         OpenEXR = self._add_component("OpenEXR")
-        OpenEXR.libs = ["OpenEXR{}".format(lib_suffix)]
+        OpenEXR.libs = [f"OpenEXR{lib_suffix}"]
         OpenEXR.requires = [
             self._conan_comp("OpenEXRCore"), self._conan_comp("IlmThread"),
             self._conan_comp("Iex"), "imath::imath",
@@ -147,7 +146,7 @@ class OpenEXRConan(ConanFile):
 
         # OpenEXR::OpenEXRUtil
         OpenEXRUtil = self._add_component("OpenEXRUtil")
-        OpenEXRUtil.libs = ["OpenEXRUtil{}".format(lib_suffix)]
+        OpenEXRUtil.libs = [f"OpenEXRUtil{lib_suffix}"]
         OpenEXRUtil.requires = [self._conan_comp("OpenEXR")]
 
         # Add tools directory to PATH

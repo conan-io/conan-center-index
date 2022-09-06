@@ -1,5 +1,6 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-import os
+from conan import ConanFile
+from conan.tools import files
+from conans import AutoToolsBuildEnvironment
 import functools
 
 required_conan_version = ">=1.33.0"
@@ -20,19 +21,19 @@ class libxftConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-    
+
     def requirements(self):
         self.requires("xorg/system")
         self.requires("freetype/2.12.1")
         self.requires("fontconfig/2.13.93")
-    
+
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.4")
         self.build_requires("xorg-macros/1.19.3")
-        self.build_requires("libtool/2.4.6")
-    
+        self.build_requires("libtool/2.4.7")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def configure(self):
@@ -53,19 +54,19 @@ class libxftConan(ConanFile):
         return autotools
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
+        with files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.make()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        with tools.chdir(self._source_subfolder):
+        with files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install(args=["-j1"])
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        files.rm(self, "*.la", f"{self.package_folder}/lib", recursive=True)
+        files.rmdir(self, f"{self.package_folder}/lib/pkgconfig")
+        files.rmdir(self, f"{self.package_folder}/share")
 
     def package_info(self):
         self.cpp_info.names['pkg_config'] = "Xft"

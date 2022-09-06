@@ -1,8 +1,10 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
 import os
-import functools
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.47.0"
+
 
 class YyjsonConan(ConanFile):
     name = "yyjson"
@@ -11,6 +13,7 @@ class YyjsonConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ibireme/yyjson"
     topics = ("yyjson", "json", "serialization", "deserialization")
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -20,14 +23,6 @@ class YyjsonConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -36,33 +31,40 @@ class YyjsonConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "yyjson")
+        self.cpp_info.set_property("cmake_target_name", "yyjson::yyjson")
         self.cpp_info.libs = ["yyjson"]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("YYJSON_IMPORTS")
-
-        self.cpp_info.set_property("cmake_file_name", "yyjson")
-        self.cpp_info.set_property("cmake_target_name", "yyjson::yyjson")

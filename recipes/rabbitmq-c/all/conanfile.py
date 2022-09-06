@@ -1,7 +1,9 @@
-from conans import CMake, ConanFile, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.46.0"
 
 
 class RabbitmqcConan(ConanFile):
@@ -24,14 +26,6 @@ class RabbitmqcConan(ConanFile):
         "ssl": False,
     }
 
-    generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt"]
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -39,48 +33,59 @@ class RabbitmqcConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
     def requirements(self):
         if self.options.ssl:
             self.requires("openssl/1.1.1q")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
-    def _configure_cmake(self):
-        if self._cmake is None:
-            self._cmake = CMake(self)
-            self._cmake.definitions["BUILD_EXAMPLES"] = False
-            self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-            self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
-            self._cmake.definitions["BUILD_TESTS"] = False
-            self._cmake.definitions["BUILD_TOOLS"] = False
-            self._cmake.definitions["BUILD_TOOLS_DOCS"] = False
-            self._cmake.definitions["ENABLE_SSL_SUPPORT"] = self.options.ssl
-            self._cmake.definitions["BUILD_API_DOCS"] = False
-            self._cmake.definitions["RUN_SYSTEM_TESTS"] = False
-            self._cmake.configure()
-        return self._cmake
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_TOOLS"] = False
+        tc.variables["BUILD_TOOLS_DOCS"] = False
+        tc.variables["ENABLE_SSL_SUPPORT"] = self.options.ssl
+        tc.variables["BUILD_API_DOCS"] = False
+        tc.variables["RUN_SYSTEM_TESTS"] = False
+        tc.generate()
+
+        if self.options.ssl:
+            deps = CMakeDeps(self)
+            deps.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE-MIT", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE-MIT", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         rabbitmq_target = "rabbitmq" if self.options.shared else "rabbitmq-static"
         self.cpp_info.set_property("cmake_file_name", "rabbitmq-c")
-        self.cpp_info.set_property("cmake_target_name", "rabbitmq::{}".format(rabbitmq_target))
+        self.cpp_info.set_property("cmake_target_name", f"rabbitmq::{rabbitmq_target}")
         self.cpp_info.set_property("pkg_config_name", "librabbitmq")
 
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
@@ -104,7 +109,7 @@ class RabbitmqcConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "librabbitmq"
         self.cpp_info.components["rabbitmq"].names["cmake_find_package"] = rabbitmq_target
         self.cpp_info.components["rabbitmq"].names["cmake_find_package_multi"] = rabbitmq_target
-        self.cpp_info.components["rabbitmq"].set_property("cmake_target_name", "rabbitmq::{}".format(rabbitmq_target))
+        self.cpp_info.components["rabbitmq"].set_property("cmake_target_name", f"rabbitmq::{rabbitmq_target}")
         self.cpp_info.components["rabbitmq"].set_property("pkg_config_name", "librabbitmq")
         if self.options.ssl:
             self.cpp_info.components["rabbitmq"].requires.append("openssl::openssl")

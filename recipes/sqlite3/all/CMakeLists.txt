@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.7)
-project(sqlite3 C)
-
-include(conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
+project(sqlite3 LANGUAGES C)
 
 # Add some options from https://sqlite.org/compile.html
 option(SQLITE3_BUILD_EXECUTABLE "Build sqlite command line utility for accessing SQLite databases")
@@ -40,14 +37,19 @@ set(MAX_BLOB_SIZE CACHE STRING "Set the maximum number of bytes in a string or B
 option(DISABLE_DEFAULT_VFS "Disable default VFS implementation")
 option(ENABLE_DBPAGE_VTAB "The SQLITE_DBPAGE extension implements an eponymous-only virtual table that provides direct access to the underlying database file by interacting with the pager. SQLITE_DBPAGE is capable of both reading and writing any page of the database. Because interaction is through the pager layer, all changes are transactional.")
 
-add_library(${PROJECT_NAME} source_subfolder/sqlite3.c)
+add_library(${PROJECT_NAME} ${SQLITE3_SRC_DIR}/sqlite3.c)
 set_target_properties(${PROJECT_NAME} PROPERTIES C_VISIBILITY_PRESET hidden)
 if(BUILD_SHARED_LIBS)
-    target_compile_definitions(${PROJECT_NAME}
-        PRIVATE $<$<BOOL:${WIN32}>:"SQLITE_API=__declspec(dllexport)">
-        INTERFACE $<$<BOOL:${WIN32}>:"SQLITE_API=__declspec(dllimport)">
-        PUBLIC $<$<NOT:$<BOOL:${WIN32}>>:"SQLITE_API=__attribute__((visibility(\"default\")))">
-    )
+    if(WIN32)
+        target_compile_definitions(${PROJECT_NAME}
+            PRIVATE "SQLITE_API=__declspec(dllexport)"
+            INTERFACE "SQLITE_API=__declspec(dllimport)"
+        )
+    else()
+        target_compile_definitions(${PROJECT_NAME}
+            PUBLIC "SQLITE_API=__attribute__((visibility(\"default\")))"
+        )
+    endif()
 endif()
 if(ENABLE_JSON1)
     target_compile_definitions(${PROJECT_NAME} PRIVATE SQLITE_ENABLE_JSON1)
@@ -160,11 +162,11 @@ install(TARGETS ${PROJECT_NAME}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(DIRECTORY source_subfolder/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+install(DIRECTORY ${SQLITE3_SRC_DIR}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         FILES_MATCHING PATTERN "*.h")
 
 if(SQLITE3_BUILD_EXECUTABLE)
-    add_executable(sqlite3-bin source_subfolder/shell.c)
+    add_executable(sqlite3-bin ${SQLITE3_SRC_DIR}/shell.c)
     target_link_libraries(sqlite3-bin PRIVATE ${PROJECT_NAME})
     if(ENABLE_DBPAGE_VTAB)
         target_compile_definitions(sqlite3-bin PRIVATE SQLITE_ENABLE_DBPAGE_VTAB)
@@ -175,8 +177,5 @@ if(SQLITE3_BUILD_EXECUTABLE)
     if(NOT HAVE_SYSTEM)
         target_compile_definitions(sqlite3-bin PRIVATE SQLITE_NOHAVE_SYSTEM)
     endif()
-    install(TARGETS sqlite3-bin
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
-    )
+    install(TARGETS sqlite3-bin DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()

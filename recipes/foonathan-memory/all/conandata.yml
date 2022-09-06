@@ -1,11 +1,10 @@
 sources:
-  "0.7.0":
-    url: "https://github.com/foonathan/memory/archive/refs/tags/v0.7.tar.gz"
-    sha256: "01A7CC5A5EBDDBD71BEC69C89562A4A2ECD7C29334C0A29D38D83E7F7F66EB53"
   "0.7.1":
     url: "https://github.com/foonathan/memory/archive/refs/tags/v0.7-1.tar.gz"
-    sha256: "19EB61C5CBA6CCC40B8EE741350FD29402A46641BA752C30B7079528D87DBC79"
+    sha256: "19eb61c5cba6ccc40b8ee741350fd29402a46641ba752c30b7079528d87dbc79"
+  "0.7.0":
+    url: "https://github.com/foonathan/memory/archive/refs/tags/v0.7.tar.gz"
+    sha256: "01a7cc5a5ebddbd71bec69c89562a4a2ecd7c29334c0a29d38d83e7f7f66eb53"
 patches:
   "0.7.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0.7.0-0001-fix-virtualAllocFromApp.patch"
+    - patch_file: "patches/0.7.0-0001-fix-virtualAllocFromApp.patch"
