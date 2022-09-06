@@ -37,7 +37,7 @@ class FmtConan(ConanFile):
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            files.copy(self, patch["patch_file"], src=self.recipe_folder, dst=self.export_sources_folder)
+            copy(self, patch["patch_file"], src=self.recipe_folder, dst=self.export_sources_folder)
 
     def generate(self):
         if not self.options.header_only:
