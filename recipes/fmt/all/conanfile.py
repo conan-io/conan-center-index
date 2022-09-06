@@ -102,7 +102,7 @@ class FmtConan(ConanFile):
     def package_info(self):
         target = "fmt-header-only" if self.options.header_only else "fmt"
         self.cpp_info.set_property("cmake_file_name", "fmt")
-        self.cpp_info.set_property(f"cmake_target_name", f"fmt::{target}")
+        self.cpp_info.set_property("cmake_target_name", f"fmt::{target}")
         self.cpp_info.set_property("pkg_config_name",  "fmt")
 
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
