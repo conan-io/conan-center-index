@@ -1,8 +1,12 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.files import copy, get, rm
+from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class AsioGrpcConan(ConanFile):
@@ -38,10 +42,10 @@ class AsioGrpcConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._min_cppstd)
+            check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
+            if Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd}, which your compiler does not support.")
         else:
             self.output.warn(f"{self.name} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
@@ -49,38 +53,41 @@ class AsioGrpcConan(ConanFile):
     def configure(self):
         if self.options.use_boost_container == "auto":
             libcxx = self.settings.compiler.get_safe("libcxx")
-            compiler_version = tools.Version(self.settings.compiler.version)
+            compiler_version = Version(self.settings.compiler.version)
             self.options.use_boost_container = libcxx and str(libcxx) == "libc++" or \
                 (self.settings.compiler == "gcc" and compiler_version < "9")  or \
                 (self.settings.compiler == "clang" and compiler_version < "12" and libcxx and str(libcxx) == "libstdc++")
 
     def requirements(self):
-        self.requires("grpc/1.47.1")
+        self.requires("grpc/1.48.0")
         if self.options.use_boost_container or self.options.backend == "boost":
             self.requires("boost/1.79.0")
         if self.options.backend == "asio":
-            self.requires("asio/1.23.0")
+            self.requires("asio/1.24.0")
         if self.options.backend == "unifex":
             self.requires("libunifex/cci.20220430")
 
     def package_id(self):
-        self.info.header_only()
-        self.info.options.use_boost_container = self.options.use_boost_container
+        self.info.clear()
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses")
-        cmake = CMake(self)
-        cmake.definitions["ASIO_GRPC_USE_BOOST_CONTAINER"] = self.options.use_boost_container
-        cmake.configure()
-        cmake.install()
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib", "cmake", "asio-grpc"), "asio-grpc*")
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*", src=os.path.join(self.source_folder, "src", "agrpc"), dst=os.path.join(self.package_folder, "include", "agrpc"))
+        copy(self, "AsioGrpcProtobufGenerator.cmake", 
+                    src=os.path.join(self.source_folder, "cmake"), 
+                    dst=os.path.join(self.package_folder, "lib", "cmake", "asio-grpc"))
 
     def package_info(self):
-        self.cpp_info.builddirs = [os.path.join("lib", "cmake", "asio-grpc")]
-        build_modules = [os.path.join(self.cpp_info.builddirs[0], "AsioGrpcProtobufGenerator.cmake")]
+        build_modules = [os.path.join("lib", "cmake", "asio-grpc", "AsioGrpcProtobufGenerator.cmake")]
         
         self.cpp_info.requires = ["grpc::grpc++_unsecure"]
         if self.options.backend == "boost":
@@ -94,6 +101,7 @@ class AsioGrpcConan(ConanFile):
             self.cpp_info.requires.append("libunifex::unifex")
 
         if self.options.use_boost_container:
+            self.cpp_info.defines.append("AGRPC_USE_BOOST_CONTAINER")
             self.cpp_info.requires.append("boost::container")
 
         self.cpp_info.set_property("cmake_file_name", "asio-grpc")
