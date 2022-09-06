@@ -1,20 +1,20 @@
 sources:
   "25":
     Macos:
-        "x86_64":
-            url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/210709.v2021Release.3006.FULL.FIN.MAC64.DevKitAPI.tar.gz"
-            sha256: "d692a59bdec7847ef4632e2c6741be064822a91eda2735dcff768985eaf4ec1e"
+      "x86_64":
+          url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/210709.v2021Release.3006.FULL.FIN.MAC64.DevKitAPI.tar.gz"
+          sha256: "d692a59bdec7847ef4632e2c6741be064822a91eda2735dcff768985eaf4ec1e"
     Windows:
-        "x86_64":
-            url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/210519.v2021Release.3002.FULL.FIN.WIN64.DevKitAPI.zip"
-            sha256: "e7da392408f6150c58f3cba5d4f05118f1eaed4519fdb76895e13aed9ceede97"
+      "x86_64":
+          url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/210519.v2021Release.3002.FULL.FIN.WIN64.DevKitAPI.zip"
+          sha256: "e7da392408f6150c58f3cba5d4f05118f1eaed4519fdb76895e13aed9ceede97"
 
   "26":
     Macos:
-        "x86_64":
-            url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/220529.v2022Release.3000.FULL.FIN.MAC64.DevKitAPI.tar.gz"
-            sha256: "326643eb79619166b6cb8f2858be3b24c1c3e3dd6749d20d2960baa0690f8e9c"
+      "x86_64":
+          url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/220529.v2022Release.3000.FULL.FIN.MAC64.DevKitAPI.tar.gz"
+          sha256: "326643eb79619166b6cb8f2858be3b24c1c3e3dd6749d20d2960baa0690f8e9c"
     Windows:
-        "x86_64":
-            url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/220529.v2022Release.3000.FULL.FIN.WIN64.DevKitAPI.zip"
-            sha256: "32b86cfbf66dd915f53944af0b34cab7f4eedd034d622a523fd4f01bdf3e3e26"
+      "x86_64":
+          url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/220529.v2022Release.3000.FULL.FIN.WIN64.DevKitAPI.zip"
+          sha256: "32b86cfbf66dd915f53944af0b34cab7f4eedd034d622a523fd4f01bdf3e3e26"
