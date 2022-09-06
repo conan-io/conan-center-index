@@ -20,14 +20,14 @@ class PackageConan(ConanFile):
         del self.info.settings.compiler
         del self.info.settings.build_type
 
-    # do not cache as source, instead, use build folder
-    def source(self):
-        pass
-
     # in case some configuration is not supported
     def validate(self):
         if self.info.settings.os == "Windows":
             self.info.warn(f"{self.ref} is not well tested on Windows.")
+
+    # do not cache as source, instead, use build folder
+    def source(self):
+        pass
 
     # download the source here, than copy to package folder
     def build(self):
