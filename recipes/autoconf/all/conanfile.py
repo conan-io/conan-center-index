@@ -38,9 +38,6 @@ class AutoconfConan(ConanFile):
     def package_id(self):
         self.info.clear()
 
-    def requirements(self):
-        self.requires("m4/1.4.19")
-
     def build_requirements(self):
         if hasattr(self, "settings_build"):
             self.tool_requires("m4/1.4.19")
