@@ -15,7 +15,7 @@ class LibmodbusConan(ConanFile):
     name = "libmodbus"
     description = "libmodbus is a free software library to send/receive data according to the Modbus protocol"
     homepage = "https://libmodbus.org/"
-    topics = ("libmodbus", "modbus", "protocol", "industry", "automation")
+    topics = ("modbus", "protocol", "industry", "automation")
     license = "LGPL-2.1"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = "patches/**"
