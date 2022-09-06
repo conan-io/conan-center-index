@@ -1,5 +1,5 @@
 diff --git a/libs/locale/build/Jamfile.v2 b/libs/locale/build/Jamfile.v2
-index 450ec87..ece28bf 100644
+index 3c517c884..0f521dbcf 100644
 --- a/libs/locale/build/Jamfile.v2
 +++ b/libs/locale/build/Jamfile.v2
 @@ -20,6 +20,7 @@ project /boost/locale
@@ -10,7 +10,27 @@ index 450ec87..ece28bf 100644
  feature.feature boost.locale.icu : on off :  optional propagated ;
  feature.feature boost.locale.posix : on off : optional propagated ;
  feature.feature boost.locale.std : on off : optional propagated ;
-@@ -230,10 +231,37 @@ rule configure-full ( properties * : flags-only )
+@@ -29,7 +30,8 @@ feature.feature boost.locale.winapi : on off : optional propagated ;
+ 
+ ## iconv
+ 
+-exe has_iconv : $(TOP)/build/has_iconv.cpp ;
++obj has_iconv_libc_obj : $(TOP)/build/has_iconv.cpp ;
++exe has_iconv : has_iconv_libc_obj ;
+ explicit has_iconv ;
+ 
+ ICONV_PATH = [ modules.peek : ICONV_PATH ] ;
+@@ -43,7 +45,8 @@ lib iconv
+ 
+ explicit iconv ;
+ 
+-exe has_external_iconv : $(TOP)/build/has_iconv.cpp iconv ;
++obj has_iconv_libc_ext : $(TOP)/build/has_iconv.cpp iconv ;
++exe has_external_iconv : has_iconv_libc_ext iconv ;
+ explicit has_external_iconv ;
+ 
+ exe accepts_shared_option   : $(TOP)/build/option.cpp
+@@ -230,10 +233,37 @@ rule configure-full ( properties * : flags-only )
          if [ configure.builds has_iconv : $(properties) : "iconv (libc)" ]
          {
              found-iconv = true ;
@@ -51,7 +71,7 @@ index 450ec87..ece28bf 100644
          }
      }
      if $(found-iconv)
-@@ -273,6 +301,10 @@ rule configure-full ( properties * : flags-only )
+@@ -273,6 +303,10 @@ rule configure-full ( properties * : flags-only )
                        <library>/boost/thread//boost_thread
                        ;
          }
