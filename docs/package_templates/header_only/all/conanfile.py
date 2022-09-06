@@ -49,10 +49,6 @@ class PackageConan(ConanFile):
         # prefer self.requires method instead of requires attribute
         self.requires("dependency/0.8.1")
 
-    # Only in case the project is header-only
-    def package_id(self):
-        self.info.clear()
-
     # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
         self.tool_requires("tool/x.y.z")
