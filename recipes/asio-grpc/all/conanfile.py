@@ -1,9 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm
-from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.50.0"
@@ -69,22 +69,28 @@ class AsioGrpcConan(ConanFile):
 
     def package_id(self):
         self.info.clear()
+        self.info.options.use_boost_container = self.options.use_boost_container
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["ASIO_GRPC_USE_BOOST_CONTAINER"] = self.options.use_boost_container
+        tc.generate()
+
     def build(self):
-        pass
+        cmake = CMake(self)
+        cmake.configure()
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "*", src=os.path.join(self.source_folder, "src", "agrpc"), dst=os.path.join(self.package_folder, "include", "agrpc"))
-        copy(self, "AsioGrpcProtobufGenerator.cmake", 
-                    src=os.path.join(self.source_folder, "cmake"), 
-                    dst=os.path.join(self.package_folder, "lib", "cmake", "asio-grpc"))
+        cmake = CMake(self)
+        cmake.install()
+        rm(self, "asio-grpc*", os.path.join(self.package_folder, "lib", "cmake", "asio-grpc"))
 
     def package_info(self):
         build_modules = [os.path.join("lib", "cmake", "asio-grpc", "AsioGrpcProtobufGenerator.cmake")]
@@ -101,7 +107,6 @@ class AsioGrpcConan(ConanFile):
             self.cpp_info.requires.append("libunifex::unifex")
 
         if self.options.use_boost_container:
-            self.cpp_info.defines.append("AGRPC_USE_BOOST_CONTAINER")
             self.cpp_info.requires.append("boost::container")
 
         self.cpp_info.set_property("cmake_file_name", "asio-grpc")
