@@ -1,7 +1,7 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -31,14 +31,10 @@ if(NOT MSVC)
-   add_definitions(-Wno-error=deprecated-declarations)
+@@ -35,14 +35,10 @@ if(NOT MSVC)
+   endif ()
  endif()
  
 -set(CMAKE_CXX_STANDARD 11)
@@ -15,7 +15,7 @@
  
  # Create the compile command database for clang by default
  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-@@ -55,17 +51,17 @@ LIST (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
+@@ -59,17 +55,17 @@ LIST (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
  
  option(WITH_LIBDE265 "Build libde265 decoder" ON)
  if (WITH_LIBDE265)
@@ -36,9 +36,9 @@
  endif()
  
  option(WITH_RAV1E "Build rav1e encoder" ON)
-@@ -75,9 +71,10 @@ endif ()
+@@ -79,9 +75,10 @@ endif ()
  
- option(WITH_DAV1D "Build dav1e decoder" ON)
+ option(WITH_DAV1D "Build dav1d decoder" ON)
  if (WITH_DAV1D)
 -    find_package(Dav1d)
 +    find_package(dav1d REQUIRED CONFIG)
@@ -48,7 +48,7 @@
  if (LIBDE265_FOUND)
      message("HEIF decoder, libde265: found")
  else ()
-@@ -113,6 +110,7 @@ if (DAV1D_FOUND)
+@@ -117,6 +114,7 @@ if (DAV1D_FOUND)
  else ()
      message("AVIF decoder, dav1d: not found")
  endif ()
@@ -56,14 +56,15 @@
  
  
  # Create libheif pkgconfig file
-@@ -165,4 +163,3 @@ if(WITH_EXAMPLES)
+@@ -169,5 +167,3 @@ if(WITH_EXAMPLES)
      add_subdirectory (examples)
  endif()
  add_subdirectory (libheif)
 -add_subdirectory (gdk-pixbuf)
+-add_subdirectory (gnome)
 --- a/libheif/CMakeLists.txt
 +++ b/libheif/CMakeLists.txt
-@@ -59,63 +59,48 @@ target_compile_definitions(heif
+@@ -60,59 +60,44 @@ target_compile_definitions(heif
                                 LIBHEIF_EXPORTS
                                 HAVE_VISIBILITY)
  
@@ -85,8 +86,6 @@
 -    include_directories(SYSTEM ${LIBDE265_INCLUDE_DIR})
 -    target_link_libraries(heif PRIVATE ${LIBDE265_LIBRARIES} ${LIBDE265_LINKDIR})
 +    target_link_libraries(heif PRIVATE libde265)
- 
-     install(FILES heif_decoder_libde265.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
  endif()
  
 -if(X265_FOUND)
@@ -106,8 +105,6 @@
 -    include_directories(SYSTEM ${X265_INCLUDE_DIR})
 -    target_link_libraries(heif PRIVATE ${X265_LIBRARIES} ${X265_LINKDIR})
 +    target_link_libraries(heif PRIVATE libx265::libx265)
- 
-     install(FILES heif_encoder_x265.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
  endif()
  
 -if(AOM_ENCODER_FOUND OR AOM_DECODER_FOUND)
@@ -136,7 +133,7 @@
    target_compile_definitions(heif PRIVATE HAVE_AOM_DECODER=1)
    target_sources(heif PRIVATE
      heif_decoder_aom.cc
-@@ -140,21 +125,15 @@ if(RAV1E_FOUND)
+@@ -137,21 +122,15 @@ if(RAV1E_FOUND)
      target_link_libraries(heif PRIVATE ${RAV1E_LIBRARIES} ${RAV1E_LINKDIR})
  endif()
  

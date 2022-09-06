@@ -38,7 +38,7 @@
  option(WITH_RAV1E "Build rav1e encoder" ON)
 @@ -75,9 +71,10 @@ endif ()
  
- option(WITH_DAV1D "Build dav1e decoder" ON)
+ option(WITH_DAV1D "Build dav1d decoder" ON)
  if (WITH_DAV1D)
 -    find_package(Dav1d)
 +    find_package(dav1d REQUIRED CONFIG)
