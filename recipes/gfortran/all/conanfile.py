@@ -43,8 +43,10 @@ class GFortranConan(ConanFile):
 
     def _extract_license(self):
         if self.settings.os == "Macos":
+            print("=================================================")
             os.listdir(self.source_folder)
             os.listdir(os.path.join(self.source_folder, "source_subfolder_Macos"))
+            print("=================================================")
             license_path_prefix = os.path.join(self.source_folder, "source_subfolder_Macos", "usr", "local", "share", "info")
         else:
             license_path_prefix = os.path.join(self.source_folder, f"source_subfolder_{self.settings.os}", "share", "info")
