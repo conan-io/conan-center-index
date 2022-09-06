@@ -69,8 +69,6 @@ class LibmodbusConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def generate(self):
-        # --fpic is automatically managed when 'fPIC' option is declared
-        # --enable/disable-shared is automatically managed when 'shared' option is declared
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--without-documentation")
         tc.configure_args.append("--disable-tests")
