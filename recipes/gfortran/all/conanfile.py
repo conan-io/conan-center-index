@@ -46,8 +46,9 @@ class GFortranConan(ConanFile):
             print("=================================================")
             print(os.listdir(self.source_folder))
             print(os.listdir(os.path.join(self.source_folder, "source_subfolder_Macos")))
+            print(os.listdir(os.path.join(self.source_folder, "source_subfolder_Macos", "local")))
             print("=================================================")
-            license_path_prefix = os.path.join(self.source_folder, "source_subfolder_Macos", "usr", "local", "share", "info")
+            license_path_prefix = os.path.join(self.source_folder, "source_subfolder_Macos", "local", "share", "info")
         else:
             license_path_prefix = os.path.join(self.source_folder, f"source_subfolder_{self.settings.os}", "share", "info")
         info = load(self, os.path.join(license_path_prefix, "gfortran.info"))
