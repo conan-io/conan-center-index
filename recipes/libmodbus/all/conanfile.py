@@ -4,7 +4,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import unix_path, VCVars
+from conan.tools.microsoft import is_msvc
 import os
 
 
