@@ -55,10 +55,20 @@ class PackageConan(ConanFile):
         except Exception:
             pass
 
+    def layout(self):
+        basic_layout(self, src_folder="src") # src_folder must use the same source folder name the project
+
     def requirements(self):
         self.requires("dependency/0.8.1") # prefer self.requires method instead of requires attribute
         if self.options.with_foobar:
             self.requires("foobar/0.1.0")
+
+    def validate(self):
+        # validate the minimum cpp standard supported
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
+        if self.info.settings.os not in ["Linux", "FreeBSD", "MacOS"]:
+            raise ConanInvalidConfiguration(f"{self.name} is not supported on {self.info.settings.os}.")
 
     # if another tool than the compiler or autotools is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
@@ -68,16 +78,6 @@ class PackageConan(ConanFile):
     def source(self):
         get(**self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
-
-    def validate(self):
-        # validate the minimum cpp standard supported
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
-        if self.info.settings.os not in ["Linux", "FreeBSD", "MacOS"]:
-            raise ConanInvalidConfiguration(f"{self.name} is not supported on {self.info.settings.os}.")
-
-    def layout(self):
-        basic_layout(self, src_folder="src") # src_folder must use the same source folder name the project
 
     def generate(self):
         # autotools usually uses 'yes' and 'no' to enable/disable options
