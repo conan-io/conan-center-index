@@ -18,7 +18,7 @@ class PackageConan(ConanFile):
     homepage = "https://github.com/project/package"
     topics = ("topic1", "topic2", "topic3", "header-only") # no "conan"  and project name in topics, keep 'header-only'
     settings = "os", "arch", "compiler", "build_type" # even for header only
-    no_copy_source = True # do not copy sources to build folder for header only projects
+    no_copy_source = True # do not copy sources to build folder for header only projects, unless, need to apply patches
 
     @property
     def _minimum_cpp_standard(self):
@@ -41,13 +41,28 @@ class PackageConan(ConanFile):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
             copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
-    # same package ID for any package
-    def package_id(self):
-        self.info.clear()
+    def layout(self):
+        # src_folder must use the same source folder name the project
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         # prefer self.requires method instead of requires attribute
         self.requires("dependency/0.8.1")
+
+    # same package ID for any package
+    def package_id(self):
+        self.info.clear()
+
+    def validate(self):
+        # validate the minimum cpp standard supported
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
+        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
+        # in case it does not work in another configuration, it should validated here too
+        if self.info.settings.os == "Windows":
+            raise ConanInvalidConfiguration(f"{self.ref} can not be used on Windows.")
 
     # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
@@ -58,24 +73,9 @@ class PackageConan(ConanFile):
         get(**self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
-    def validate(self):
-        # validate the minimum cpp standard supported
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.name} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
-        # in case it does not work in another configuration, it should validated here too
-        if self.info.settings.os == "Windows":
-            raise ConanInvalidConfiguration(f"{self.ref} can not be used on Windows.")
-
-    def layout(self):
-        # src_folder must use the same source folder name the project
-        basic_layout(self, src_folder="src")
-
     # not mandatory when there is no patch, but will suppress warning message about missing build() method
     def build(self):
-        # apply patches in source_folder
+        # apply patches in source_folder. The attribute no_copy_source should not be used when applying patches
         apply_conandata_patches(self)
 
     # copy all files to the package folder
