@@ -29,7 +29,7 @@ class SdbusCppConan(ConanFile):
         "fPIC": True,
         "with_code_gen": False,
     }
-    generators = "PkgConfigDeps"
+    generators = "PkgConfigDeps", "VirtualBuildEnv"
 
     @property
     def _minimum_cpp_standard(self):
@@ -54,6 +54,9 @@ class SdbusCppConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("libsystemd/251.4")
+
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
@@ -72,9 +75,6 @@ class SdbusCppConan(ConanFile):
         self.tool_requires("pkgconf/1.7.4")
         if self.options.with_code_gen:
             self.tool_requires("expat/2.4.8")
-
-    def requirements(self):
-        self.requires("libsystemd/251.4")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -111,23 +111,11 @@ class SdbusCppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "sdbus-c++")
+        self.cpp_info.set_property("cmake_target_name", "SDBusCpp::sdbus-c++")
+        self.cpp_info.set_property("pkg_config_name", "sdbus-c++")
+        # TODO: back to root cpp_info in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["sdbus-c++"].libs = ["sdbus-c++"]
-        self.cpp_info.components["sdbus-c++"].requires.append(
-            "libsystemd::libsystemd")
-        self.cpp_info.components["sdbus-c++"].set_property(
-            "cmake_target_name", "SDBusCpp::sdbus-c++")
-        self.cpp_info.components["sdbus-c++"].set_property(
-            "pkg_config_name", "sdbus-c++")
-        self.cpp_info.components["sdbus-c++"].system_libs = [
-            "pthread", "m"]
-
-        if self.options.with_code_gen:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH env var with : {}".format(bin_path))
-            self.buildenv_info.prepend_path("PATH", bin_path)
-
-            # TODO: Remove in Conan 2.0 where Environment class will be required.
-            self.env_info.PATH.append(bin_path)
+        self.cpp_info.components["sdbus-c++"].system_libs = ["pthread", "m"]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "SDBusCpp"
@@ -137,3 +125,13 @@ class SdbusCppConan(ConanFile):
         self.cpp_info.components["sdbus-c++"].names["cmake_find_package"] = "sdbus-c++"
         self.cpp_info.components["sdbus-c++"].names["cmake_find_package_multi"] = "sdbus-c++"
         self.cpp_info.components["sdbus-c++"].names["pkg_config"] = "sdbus-c++"
+        self.cpp_info.components["sdbus-c++"].set_property(
+            "cmake_target_name", "SDBusCpp::sdbus-c++")
+        self.cpp_info.components["sdbus-c++"].set_property(
+            "pkg_config_name", "sdbus-c++")
+        self.cpp_info.components["sdbus-c++"].requires.append(
+            "libsystemd::libsystemd")
+        if self.options.with_code_gen:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info(f"Appending PATH env var with : {bin_path}")
+            self.env_info.PATH.append(bin_path)
