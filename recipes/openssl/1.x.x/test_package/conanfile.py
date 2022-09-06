@@ -3,7 +3,7 @@ from conan.tools.scm import Version
 from conan.tools.build import cross_building
 import os
 
-required_conan_version = ">=1.50.2"  # Because of changes in scm.Version class
+required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
 
 
 class TestPackageConan(ConanFile):
