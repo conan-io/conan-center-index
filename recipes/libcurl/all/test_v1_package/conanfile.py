@@ -15,10 +15,7 @@ class TestPackageConan(ConanFile):
 
     @property
     def _test_executable(self):
-        if self.settings.os == "Windows":
-            return os.path.join("bin", "test_package.exe")
-        else:
-            return os.path.join("bin", "test_package")
+        return os.path.join(self.cpp.build.bindirs[0], "test_package")
 
     def test(self):
         if not tools.cross_building(self):

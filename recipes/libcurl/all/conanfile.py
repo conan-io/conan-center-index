@@ -6,11 +6,10 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, download, get, load, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
-from conan.tools.microsoft import is_msvc
-from conan.tools.microsoft.subsystems import unix_path
+from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 # TODO: Migrate
-from conans.tools import get_env, os_info
+from conans.tools import get_env
 
 import os
 import re
@@ -122,12 +121,12 @@ class LibcurlConan(ConanFile):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     @property
-    def _is_win_x_android(self):
-        return self.settings.os == "Android" and os_info.is_windows
-
-    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _is_win_x_android(self):
+        return self.settings.os == "Android" and self._settings_build.os == "Windows"
 
     @property
     def _is_using_cmake_build(self):
@@ -201,10 +200,10 @@ class LibcurlConan(ConanFile):
     def build_requirements(self):
         if self._is_using_cmake_build:
             if self._is_win_x_android:
-                self.build_requires("ninja/1.11.0")
+                self.tool_requires("ninja/1.11.0")
         else:
-            self.build_requires("libtool/2.4.6")
-            self.build_requires("pkgconf/1.7.4")
+            self.tool_requires("libtool/2.4.6")
+            self.tool_requires("pkgconf/1.7.4")
             if self._settings_build.os == "Windows" and not get_env("CONAN_BASH_PATH") and self.conf.get("tools.microsoft.bash:path"):
                 self.tool_requires("msys2/cci.latest")
 
