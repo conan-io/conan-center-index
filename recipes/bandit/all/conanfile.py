@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, copy, get
+from conan.tools.layout import basic_layout
 import os
 
 required_conan_version = ">=1.51.3"
@@ -25,6 +26,9 @@ class BanditConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
+    def layout(self):
+        basic_layout(self)
+
     def build(self):
         apply_conandata_patches(self)
 
@@ -33,4 +37,4 @@ class BanditConan(ConanFile):
         copy(self, pattern="*", dst=os.path.join(self.package_folder, "include", "bandit"), src=os.path.join(self.source_folder, "bandit"))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
