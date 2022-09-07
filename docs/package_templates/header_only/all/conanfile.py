@@ -71,7 +71,7 @@ class PackageConan(ConanFile):
 
     def source(self):
         # download source package and extract to source folder
-        get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
     # not mandatory when there is no patch, but will suppress warning message about missing build() method
