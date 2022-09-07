@@ -76,7 +76,7 @@ class PackageConan(ConanFile):
         self.tool_requires("pkgconf/x.y.z")
 
     def source(self):
-        get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
 
     def generate(self):
