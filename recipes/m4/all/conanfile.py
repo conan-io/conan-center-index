@@ -110,13 +110,13 @@ class M4Conan(ConanFile):
         bin_dir = path.join(self.package_folder, "bin", "bin")
         self.output.info(f"Appending PATH env var with : {bin_dir}")
         self.buildenv_info.prepend_path("PATH", bin_dir)
-        self.env_info.PATH.append(bin_dir)
+        self.env_info.PATH.append(unix_path(self, bin_dir))
 
         # M4 environment variable is used by a lot of scripts as a way to override a hard-coded embedded m4 path
         m4_bin = path.join(bin_dir, "m4")
         self.output.info(f"Setting M4 environment variable: {m4_bin}")
         self.buildenv_info.define_path("M4", m4_bin)
-        self.env_info.M4 = m4_bin
+        self.env_info.M4 = unix_path(self, m4_bin)
 
         m4_bin_conf_key = "user.m4:bin"
         self.output.info(f"Defining path to M4 binary in configuration as `{m4_bin_conf_key}` with value: {m4_bin}")
