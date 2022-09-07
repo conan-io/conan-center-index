@@ -9,17 +9,6 @@
  endif()
  
  endmacro()
---- CMakeLists.txt
-+++ CMakeLists.txt
-@@ -211,7 +211,7 @@
- 
- find_package(OpenSSL)
- if(OPENSSL_FOUND)
--    include_directories("${OPENSSL_INCLUDE_DIR}")
-+    include_directories("${OpenSSL_INCLUDE_DIR}")
-     if(EXISTS ${PROJECT_SOURCE_DIR}/NetSSL_OpenSSL AND ENABLE_NETSSL)
-     add_subdirectory(NetSSL_OpenSSL)
-     list(APPEND Poco_COMPONENTS "NetSSL_OpenSSL")
 --- Crypto/CMakeLists.txt
 +++ Crypto/CMakeLists.txt
 @@ -24,7 +24,7 @@
@@ -27,7 +16,7 @@
      )
  
 -target_link_libraries( "${LIBNAME}" Foundation ${OPENSSL_LIBRARIES} )
-+target_link_libraries( "${LIBNAME}" Foundation OpenSSL::OpenSSL )
++target_link_libraries( "${LIBNAME}" Foundation OpenSSL::SSL OpenSSL::Crypto)
  target_include_directories( "${LIBNAME}"
      PUBLIC
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

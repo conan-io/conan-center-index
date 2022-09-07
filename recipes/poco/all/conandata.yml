@@ -38,57 +38,34 @@ sources:
 patches:
   "1.12.2":
     - patch_file: patches/1.12.2.patch
-      base_path: src
     - patch_file: patches/0002-mysql-include.patch
-      base_path: src
   "1.12.1":
     - patch_file: patches/1.12.1.patch
-      base_path: src
     - patch_file: patches/0002-mysql-include.patch
-      base_path: src
   "1.12.0":
     - patch_file: patches/1.12.0.patch
-      base_path: src
     - patch_file: patches/0002-mysql-include.patch
-      base_path: src
   "1.11.3":
     - patch_file: patches/1.11.3.patch
-      base_path: src
     - patch_file: patches/0002-mysql-include.patch
-      base_path: src
   "1.11.2":
     - patch_file: patches/1.11.2.patch
-      base_path: src
     - patch_file: patches/0002-mysql-include.patch
-      base_path: src
   "1.11.1":
     - patch_file: patches/1.11.1.patch
-      base_path: src
     - patch_file: patches/0002-mysql-include.patch
-      base_path: src
   "1.11.0":
     - patch_file: patches/1.11.0.patch
-      base_path: src
     - patch_file: patches/0002-mysql-include.patch
-      base_path: src
   "1.10.1":
     - patch_file: patches/1.10.1.patch
-      base_path: src
   "1.10.0":
     - patch_file: patches/1.10.0.patch
-      base_path: src
     - patch_file: patches/1.10.0-set-missing-cmake-variable.patch
-      base_path: src
   "1.9.4":
     - patch_file: patches/1.9.2.patch
-      base_path: src
     - patch_file: patches/1.9.2-2.patch
-      base_path: src
   "1.9.3":
     - patch_file: patches/1.9.2.patch
-      base_path: src
-    - patch_file: patches/1.9.2-2.patch
-      base_path: src
   "1.8.1":
     - patch_file: patches/1.8.1.patch
-      base_path: src
