@@ -18,8 +18,6 @@ class TomlPlusPlusConan(ConanFile):
     homepage = "https://github.com/marzer/tomlplusplus"
     license = "MIT"
     settings = ("compiler", "arch", "os", "build_type")
-    options = {"multiple_headers": [True, False, "deprecated"]}
-    default_options = {"multiple_headers": "deprecated"}
     no_copy_source = True
 
     @property
@@ -40,9 +38,6 @@ class TomlPlusPlusConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.info.options.get_safe("multiple_headers") != "deprecated":
-            self.output.warn(f"The {self.ref} option 'multiple_headers' has been deprecated. Both formats are in the same package.")
-
         if self.info.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
