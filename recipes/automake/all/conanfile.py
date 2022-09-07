@@ -90,8 +90,11 @@ class AutomakeConan(ConanFile):
 
     def _set_env(self, var_name, var_path):
         self.output.info(f"Setting {var_name} to {var_path}")
-        self.buildenv_info.define_path(var_name, var_path)
-        setattr(self.env_info, var_name, var_path)
+        if path.isfile(var_path):
+            self.buildenv_info.define(var_name, var_path)
+        else:
+            self.buildenv_info.define_path(var_name, var_path)
+        setattr(self.env_info, var_name,  self, var_path)
 
     def package_info(self):
         # KB-H013 we're packaging an application, hence the nested bin
