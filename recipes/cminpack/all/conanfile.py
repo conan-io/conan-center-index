@@ -84,7 +84,7 @@ class CMinpackConan(ConanFile):
 
     def package_info(self):
         minpack_include_dir = os.path.join("include", "cminpack-1")
-        
+        self.cpp_info.set_property("cmake_target_name", "cminpack")
         # the double precision version
         self.cpp_info.components['cminpack-double'].libs = ['cminpack' + self._library_postfix()]
         self.cpp_info.components['cminpack-double'].includedirs.append(minpack_include_dir)
