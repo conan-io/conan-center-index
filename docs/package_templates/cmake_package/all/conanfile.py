@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import msvc_runtime_flag, is_msvc
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.files import apply_conandata_patches, get, copy, rm, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -18,8 +18,8 @@ class PackageConan(ConanFile):
     license = "" # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/project/package"
-    topics = ("topic1", "topic2", "topic3") # no "conan"  and project name in topics
-    settings = "os", "arch", "compiler", "build_type" # even for header only
+    topics = ("topic1", "topic2", "topic3") # no "conan" and project name in topics
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -28,16 +28,6 @@ class PackageConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    # don't use self.settings_build
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    # don't use self.user_info_build
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
 
     @property
     def _minimum_cpp_standard(self):
@@ -78,34 +68,30 @@ class PackageConan(ConanFile):
         except Exception:
             pass
 
+    def layout(self):
+        cmake_layout(self, src_folder="src") # src_folder must use the same source folder name the project
+
     def requirements(self):
         self.requires("dependency/0.8.1") # prefer self.requires method instead of requires attribute
 
-    # Only in case the project is header-only
-    def package_id(self):
-        self.info.clear()
+    def validate(self):
+        # validate the minimum cpp standard supported. For C++ projects only
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
+        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
+        # in case it does not work in another configuration, it should validated here too
+        if is_msvc(self) and self.info.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
         self.tool_requires("tool/x.y.z")
 
     def source(self):
-        get(**self.conan_data["sources"][self.version],
-                  destination=self.source_subfolder, strip_root=True)
-
-    def validate(self):
-        # validate the minimum cpp standard supported
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.name} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
-        # in case it does not work in another configuration, it should validated here too
-        if is_msvc(self) and self.info.options.shared:
-            raise ConanInvalidConfiguration(f"{self.name} can not be built as shared on Visual Studio and msvc.")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src") # src_folder must use the same source folder name the project
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
     def generate(self):
         # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
@@ -114,7 +100,10 @@ class PackageConan(ConanFile):
         tc.cache_variables["PACKAGE_CUSTOM_DEFINITION"] = True
         if is_msvc(self):
             # don't use self.settings.compiler.runtime
-            tc.cache_variables.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in msvc_runtime_flag(self)
+            tc.cache_variables.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+        # deps_cpp_info, deps_env_info and deps_user_info are no longer used
+        if self.dependencies["dependency"].options.foobar:
+            tc.cache_variables["DEPENDENCY_LIBPATH"] = self.dependencies["dependency"].cpp_info.libdirs
         tc.generate()
         # In case there are dependencies listed on requirements, CMakeDeps should be used
         tc = CMakeDeps(self)
@@ -126,10 +115,10 @@ class PackageConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         # remove bundled xxhash
-        rm(self, "whateer.*", os.path.join(self._source_subfolder, "lib"))
+        rm(self, "whateer.*", os.path.join(self.source_folder, "lib"))
         replace_in_file(
             self,
-            os.path.join(self._cmakelists_subfolder, "CMakeLists.txt"),
+            os.path.join(self.source_folder, "CMakeLists.txt"),
             "...",
             "",
         )
@@ -140,7 +129,7 @@ class PackageConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_subfolder)
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
 
