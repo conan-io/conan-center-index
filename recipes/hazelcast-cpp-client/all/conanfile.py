@@ -1,11 +1,12 @@
 from conan import ConanFile
-from conan import tools
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.scm import Version
-from conans.tools import check_min_cppstd
+from conan.tools import files
+from conan.tools.build import check_min_cppstd
+
 import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.50.0"
 
 class HazelcastCppClient(ConanFile):
     name = "hazelcast-cpp-client"
@@ -28,7 +29,7 @@ class HazelcastCppClient(ConanFile):
 
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.files.copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+            files.copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -51,7 +52,7 @@ class HazelcastCppClient(ConanFile):
             check_min_cppstd(self, 11)
 
     def source(self):
-        tools.files.get(self,
+        files.get(self,
             **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
@@ -69,7 +70,7 @@ class HazelcastCppClient(ConanFile):
         deps.generate()
 
     def build(self):
-        tools.files.apply_conandata_patches(self)
+        files.apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -78,24 +79,13 @@ class HazelcastCppClient(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        cmake_name = "hazelcastcxx" if Version(self.version) <= "4.0.0" else "hazelcast-cpp-client"
+        self.cpp_info.set_property("cmake_file_name", "hazelcast-cpp-client")
+        self.cpp_info.set_property("cmake_target_name", "hazelcast-cpp-client::hazelcast-cpp-client")
 
-        self.cpp_info.set_property("cmake_file_name", cmake_name)
-        self.cpp_info.set_property("cmake_target_name", cmake_name + "::" + cmake_name)
-
-        if Version(self.version) <= "4.0.0":
-            library_name = "hazelcastcxx"
-            if self.options.with_openssl:
-                library_name += "_ssl"
-            if not self.options.shared:
-                library_name += "_static"
-        else:
-            library_name = "hazelcast-cpp-client"
-
-        self.cpp_info.libs = [library_name]
+        self.cpp_info.libs = ["hazelcast-cpp-client"]
         self.cpp_info.defines = ["BOOST_THREAD_VERSION=5"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
