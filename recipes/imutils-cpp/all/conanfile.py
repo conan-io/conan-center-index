@@ -1,10 +1,12 @@
-import os
-
 from conan import ConanFile
-from conan import tools
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
+from conan.tools import files
+from conan.tools import scm
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches
 from conan.tools.build import check_min_cppstd
+
+import os
 
 required_conan_version = ">=1.50.0"
 
@@ -25,9 +27,23 @@ class ImutilsCppConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _minimum_cpp_standard(self):
+        return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "Visual Studio": "15.7",
+            "msvc": "19.14",
+            "clang": "7",
+            "apple-clang": "10",
+        }
+
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.files.copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+            files.copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -46,11 +62,14 @@ class ImutilsCppConan(ConanFile):
         self.requires("openssl/1.1.1q")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
+        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+        if minimum_version and scm.Version(self.info.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
 
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         toolchain = CMakeToolchain(self)
@@ -66,11 +85,11 @@ class ImutilsCppConan(ConanFile):
         cmake.build()
 
     def package(self):
-        tools.files.copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        files.copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["imutils_cpp"]
