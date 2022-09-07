@@ -33,7 +33,6 @@ class AutotoolsWinBash(Autotools):
         else:
             super(AutotoolsWinBash, self).configure(build_script_folder=build_script_folder, args=args)
 
-
     def make(self, target=None, args=None):
         # Workaround for conan-io/conan#11975
         if self._conanfile._settings_build.os == "Windows" and not environ.get("CONAN_BASH_PATH"):
