@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools import files
+from conan.tools.files import apply_conandata_patches
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.apple import is_apple_os
 
@@ -53,11 +54,11 @@ class LibxlsConan(ConanFile):
         cmake_layout(self, src_folder='src')
 
     def requirements(self):
-        if self.settings.os != "Macos":
+        if not is_apple_os(self):
             self.requires("libiconv/1.17")
 
     def validate(self):
-        if is_msvc_static_runtime(self) and self.options.shared(self):
+        if is_msvc_static_runtime(self) and self.options.shared == True:
             raise ConanInvalidConfiguration(f"{self.name} does not support shared and static runtime together.")
 
     def source(self):
@@ -81,7 +82,7 @@ class LibxlsConan(ConanFile):
         deps.generate()
 
     def build(self):
-        files.apply_conandata_patches(self)
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
