@@ -6,6 +6,8 @@ versions:
     folder: "3.x.x"
   3.0.3:
     folder: "3.x.x"
+  3.0.2:
+    folder: "3.x.x"
 
   # 1.1.1x releases
   1.1.1q:
@@ -19,4 +21,6 @@ versions:
     folder: "1.x.x"
   # 1.0.2x releases
   1.0.2u:
+    folder: "1.x.x"
+  1.0.2t:
     folder: "1.x.x"
