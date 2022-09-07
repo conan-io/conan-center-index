@@ -76,7 +76,7 @@ class PackageConan(ConanFile):
 
     # not mandatory when there is no patch, but will suppress warning message about missing build() method
     def build(self):
-        # apply patches in source_folder. The attribute no_copy_source should not be used when applying patches
+        # The attribute no_copy_source should not be used when applying patches in build
         apply_conandata_patches(self)
 
     # copy all files to the package folder
