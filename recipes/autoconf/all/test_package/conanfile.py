@@ -85,4 +85,13 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not cross_building(self):
             ext = ".exe" if self.settings.os == "Windows" else ""
-            self.run(path.join(self.build_folder, f"test_package{ext}"),  run_environment=True, win_bash=self.settings.os == "Windows")
+
+            # Workaround for conan-io/conan#11975
+            from conans.client.subsystems import subsystem_path
+            if self._settings_build.os == "Windows" and not environ.get("CONAN_BASH_PATH"):
+                subsystem = "msys"
+            else:
+                subsystem = None
+            test_cmd = subsystem_path(subsystem, path.join(self.build_folder, f"test_package{ext}"))
+
+            self.run(test_cmd,  run_environment=True, win_bash=self.settings.os == "Windows")
