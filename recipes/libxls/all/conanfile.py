@@ -1,7 +1,9 @@
 from conan import ConanFile
-from conan import tools
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.files import apply_conandata_patches
+from conan.tools import files
+from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.apple import is_apple_os
 
 import os
 
@@ -27,9 +29,9 @@ class LibxlsConan(ConanFile):
     }
 
     def export_sources(self):
-        tools.files.copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        files.copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
         for p in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.files.copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+            files.copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -38,8 +40,14 @@ class LibxlsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
     def layout(self):
         cmake_layout(self, src_folder='src')
@@ -48,8 +56,12 @@ class LibxlsConan(ConanFile):
         if self.settings.os != "Macos":
             self.requires("libiconv/1.17")
 
+    def validate(self):
+        if is_msvc_static_runtime(self) and self.options.shared(self):
+            raise ConanInvalidConfiguration(f"{self.name} does not support shared and static runtime together.")
+
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        files.get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
         config_h_content = """
 #define HAVE_ICONV 1
 #define ICONV_CONST
@@ -58,7 +70,7 @@ class LibxlsConan(ConanFile):
         if self.settings.os == "Macos":
             config_h_content += "#define HAVE_XLOCALE_H 1\n"
 
-        tools.files.save(self, os.path.join(self.source_folder, "include", "config.h"), config_h_content)
+        files.save(self, os.path.join(self.source_folder, "include", "config.h"), config_h_content)
 
     def generate(self):
         toolchain = CMakeToolchain(self)
@@ -69,13 +81,13 @@ class LibxlsConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
+        files.apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        tools.files.copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        files.copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
@@ -93,5 +105,5 @@ class LibxlsConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "libxls"
         self.cpp_info.names["cmake_find_package_multi"] = "libxls"
 
-        if self.settings.os != "Macos":
+        if not is_apple_os(self):
             self.cpp_info.requires.append("libiconv::libiconv")
