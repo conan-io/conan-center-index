@@ -8,3 +8,6 @@ sources:
   3.0.3:
     url: https://www.openssl.org/source/openssl-3.0.3.tar.gz
     sha256: ee0078adcef1de5f003c62c80cc96527721609c6f3bb42b7795df31f8b558c0b
+  3.0.2:
+    url: https://www.openssl.org/source/openssl-3.0.2.tar.gz
+    sha256: ee0078adcef1de5f003c62c80cc96527721609c6f3bb42b7795df31f8b558c0b
