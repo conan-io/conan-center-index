@@ -15,6 +15,10 @@ class PackageConan(ConanFile):
     topics = ("topic1", "topic2", "topic3", "pre-built") # no "conan"  and project name in topics
     settings = "os", "arch", "compiler", "build_type" # even for pre-built executables
 
+    # not needed but supress warning message from conan commands
+    def layout(self):
+        pass
+
     # specific compiler and build type, usually are not distributed by vendors
     def package_id(self):
         del self.info.settings.compiler
