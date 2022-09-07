@@ -51,8 +51,7 @@ class FmtConan(ConanFile):
             tc.generate()
 
     def layout(self):
-        if not self.options.header_only:
-            cmake_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -127,4 +126,3 @@ class FmtConan(ConanFile):
         self.cpp_info.components["_fmt"].names["cmake_find_package"] = target
         self.cpp_info.components["_fmt"].names["cmake_find_package_multi"] = target
         self.cpp_info.components["_fmt"].set_property("cmake_target_name", f"fmt::{target}")
-        self.cpp_info.components["_fmt"].includedirs.extend(["include"])
