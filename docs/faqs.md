@@ -331,7 +331,7 @@ features that will be broken unless you also upgrade Conan client (and sometimes
 need to modify your project if the recipe changes the binaries, flags,... it provides).
 
 To isolate from these changes there are different strategies you can follow. 
-Keep reading in the [consuming recipes section](consuming_recipes.md).
+Keep reading in the [consuming recipes section](consuming_recipes.md#isolate-your-project-from-upstream-changes).
 
 ## Why are version ranges not allowed?
 
