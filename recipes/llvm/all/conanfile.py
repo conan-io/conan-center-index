@@ -168,7 +168,8 @@ class Llvm(ConanFile):
     def build_requirements(self):
         # Older cmake versions may have issues generating the graphviz output used
         # to model the components
-        self.build_requires("cmake/[>3.21.3 <4.0.0]")
+        self.build_requires("cmake/[>=3.21.3 <4.0.0]")
+        self.build_requires("ninja/[>=1.10.0 <2.0.0]")
 
     def configure(self):
         if self.options.shared:
