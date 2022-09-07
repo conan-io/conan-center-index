@@ -1,0 +1,4 @@
+sources:
+  "3.0.0":
+    url: "https://github.com/idealvin/coost/archive/refs/tags/v3.0.0.tar.gz"
+    sha256: "f962201201cd77aaf45f33d72bd012231a31d4310d30e9bb580ffb1e94c8148d"
