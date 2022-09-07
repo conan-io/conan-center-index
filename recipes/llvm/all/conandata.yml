@@ -26,6 +26,9 @@ sources:
   "14.0.6":
     url: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-14.0.6.tar.gz
     sha256: 98f15f842700bdb7220a166c8d2739a03a72e775b67031205078f39dd756a055
+  "15.0.0":
+    url: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-15.0.0.tar.gz
+    sha256: 36d83cd84e1caf2bcfda1669c029e2b949adb9860cff01e7d3246ac2348b11ae
 
 patches:
   "13.0.0":
@@ -55,3 +58,6 @@ patches:
   "14.0.6":
     - base_path: "source"
       patch_file: "patches/14/calculate_job_pools.patch"
+  "15.0.0":
+    - base_path: "source"
+      patch_file: "patches/15/calculate_job_pools.patch"
