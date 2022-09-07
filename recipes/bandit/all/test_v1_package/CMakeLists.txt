@@ -5,7 +5,7 @@ project(test_package CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(package REQUIRED CONFIG)
+find_package(bandit REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE bandit::bandit)
