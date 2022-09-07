@@ -11,7 +11,7 @@ class JsonCppTestConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-        self.requires("picojson/cci.20210117")
+        self.requires("picojson/1.3.0")
 
     def layout(self):
         cmake_layout(self)

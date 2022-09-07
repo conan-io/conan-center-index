@@ -8,7 +8,7 @@ class TestPackageV1Conan(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
 
     def requirements(self):
-        self.requires("picojson/cci.20210117")
+        self.requires("picojson/1.3.0")
 
     def build(self):
         cmake = CMake(self)

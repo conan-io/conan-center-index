@@ -27,18 +27,17 @@ class JwtCppConan(ConanFile):
     def requirements(self):
         self.requires("openssl/1.1.1q")
         if not self._supports_generic_json:
-            self.requires("picojson/cci.20210117")
+            self.requires("picojson/1.3.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
-        apply_conandata_patches(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def build(self):
-        pass
+        apply_conandata_patches(self)
 
     def package(self):
         header_dir = os.path.join(self.source_folder, "include", "jwt-cpp")
