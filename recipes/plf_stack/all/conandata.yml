@@ -1,0 +1,4 @@
+sources:
+  "1.60":
+    url: "https://github.com/mattreecebentley/plf_stack/archive/775456d32a0919bc2a6df9ab9b2b5e96b76c6c24.tar.gz"
+    sha256: "ac09619bef8aa1c946ccf8bebbf623187627b7bb31ad85c60384ad450f0dd0fa"
