@@ -1,89 +1,96 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conan.tools.microsoft import is_msvc
-from contextlib import contextmanager
-import os
 import shutil
 
-required_conan_version = ">=1.45.0"
+from os import environ, path
+
+from conan import ConanFile
+from conan.tools.gnu import Autotools
+from conan.tools.build import cross_building
+
+
+class AutotoolsWinBash(Autotools):
+    def configure(self, build_script_folder=None, args=None):
+        # Workaround for conan-io/conan#11975
+        if self._conanfile._settings_build.os == "Windows" and not environ.get("CONAN_BASH_PATH"):
+            from conans.tools import args_to_string
+            from conans.client.subsystems import subsystem_path
+            script_folder = path.join(self._conanfile.source_folder, build_script_folder) \
+                if build_script_folder else self._conanfile.source_folder
+
+            configure_args = []
+            configure_args.extend(args or [])
+
+            self._configure_args = "{} {}".format(self._configure_args, args_to_string(configure_args))
+
+            configure_cmd = "{}/configure".format(script_folder)
+            if self._conanfile._settings_build.os == "Windows" and not environ.get("CONAN_BASH_PATH"):
+                subsystem = "msys"
+            else:
+                subsystem = None
+            configure_cmd = subsystem_path(subsystem, configure_cmd)
+            cmd = '"{}" {}'.format(configure_cmd, self._configure_args)
+            self._conanfile.output.info("Calling:\n > %s" % cmd)
+            self._conanfile.run('"{}" {}'.format(subsystem_path(subsystem, path.join(self._conanfile.build_folder, "configure")), self._configure_args), run_environment=True, win_bash=True)
+        else:
+            super(AutotoolsWinBash, self).configure(build_script_folder=build_script_folder, args=args)
+
+    def make(self, target=None, args=None):
+        # Workaround for conan-io/conan#11975
+        if self._conanfile._settings_build.os == "Windows" and not environ.get("CONAN_BASH_PATH"):
+            from conan.tools.build import build_jobs
+            make_program = self._conanfile.conf.get("tools.gnu:make_program",
+                                                    default="mingw32-make" if self._use_win_mingw() else "make")
+            str_args = self._make_args
+            str_extra_args = " ".join(args) if args is not None else ""
+            jobs = ""
+            if "-j" not in str_args and "nmake" not in make_program.lower():
+                njobs = build_jobs(self._conanfile)
+                if njobs:
+                    jobs = "-j{}".format(njobs)
+            command = " ".join(filter(None, [make_program, target, str_args, str_extra_args, jobs]))
+            self._conanfile.run(command, run_environment=True, win_bash=True)
+        else:
+            super(AutotoolsWinBash, self).make(target=target, args=args)
+
+
+required_conan_version = ">=1.50.0"
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = "configure.ac", "Makefile.am", "test_package_1.c", "test_package.cpp"
     # DON'T COPY extra.m4 TO BUILD FOLDER!!!
+    generators = "AutotoolsDeps", "AutotoolsToolchain", "VirtualBuildEnv"
+    win_bash = True
     test_type = "explicit"
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    def requirements(self):
-        self.requires(self.tested_reference_str)
-
     def build_requirements(self):
-        self.build_requires(self.tested_reference_str)
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-
-    @contextmanager
-    def _build_context(self):
-        if is_msvc(self):
-            with tools.vcvars(self):
-                with tools.environment_append({"CC": "cl -nologo", "CXX": "cl -nologo",}):
-                    yield
-        else:
-            yield
-
-    _default_cc = {
-        "gcc": "gcc",
-        "clang": "clang",
-        "Visual Studio": "cl -nologo",
-        "apple-clang": "clang",
-    }
-
-    @property
-    def _system_cc(self):
-        system_cc = os.environ.get("CC", None)
-        if not system_cc:
-            system_cc = self._default_cc.get(str(self.settings.compiler))
-        return system_cc
-
-    @property
-    def _user_info(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
-    def _build_scripts(self):
-        """Test compile script of automake"""
-        compile_script = self._user_info["automake"].compile
-        ar_script = self._user_info["automake"].ar_lib
-        assert os.path.isfile(ar_script)
-        assert os.path.isfile(compile_script)
-
-        if self._system_cc:
-            with tools.vcvars(self) if is_msvc(self) else tools.no_op():
-                self.run("{} {} test_package_1.c -o script_test".format(tools.unix_path(compile_script), self._system_cc), win_bash=tools.os_info.is_windows)
-
-    def _build_autotools(self):
-        """Test autoreconf + configure + make"""
-        with tools.environment_append({"AUTOMAKE_CONAN_INCLUDES": [tools.unix_path(self.source_folder)]}):
-            self.run("{} -fiv".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
-        self.run("{} --help".format(os.path.join(self.build_folder, "configure").replace("\\", "/")), win_bash=tools.os_info.is_windows)
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        with self._build_context():
-            autotools.configure()
-            autotools.make()
+        self.tool_requires(self.tested_reference_str)
+        if self._settings_build.os == "Windows" and not environ.get("CONAN_BASH_PATH"):
+            self.tool_requires("msys2/cci.latest")
 
     def build(self):
         for src in self.exports_sources:
-            shutil.copy(os.path.join(self.source_folder, src), self.build_folder)
+            shutil.copy(path.join(self.source_folder, src), self.build_folder)
 
-        self._build_scripts()
-        self._build_autotools()
+        # Workaround for conan-io/conan#11975
+        autotools = AutotoolsWinBash(self)
+        autotools.configure()
+        autotools.make()
 
     def test(self):
-        if self._system_cc:
-            if not tools.cross_building(self):
-                self.run(os.path.join(".", "script_test"), run_environment=True)
+        if not cross_building(self):
+            ext = ".exe" if self.settings.os == "Windows" else ""
 
-        if not tools.cross_building(self):
-            self.run(os.path.join(".", "test_package"), run_environment=True)
+            # Workaround for conan-io/conan#11975
+            from conans.client.subsystems import subsystem_path
+            if self._settings_build.os == "Windows" and not environ.get("CONAN_BASH_PATH"):
+                subsystem = "msys"
+            else:
+                subsystem = None
+            test_cmd = subsystem_path(subsystem, path.join(self.build_folder, f"test_package{ext}"))
+
+            self.run(test_cmd,  run_environment=True, win_bash=self.settings.os == "Windows")
