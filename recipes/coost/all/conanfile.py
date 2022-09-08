@@ -47,6 +47,8 @@ class CoostConan(ConanFile):
             self.requires("libcurl/7.80.0")
         if self.options.with_libcurl or self.options.with_openssl:
             self.requires("openssl/1.1.1q")
+        if self.settings.os == "Linux":
+            self.requires("libbacktrace/cci.20210118")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
