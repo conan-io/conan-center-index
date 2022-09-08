@@ -183,7 +183,7 @@ Regardless of why, if the recipe detects a problem where binaries might not be g
 incorrect packages which do not work as intented. Use `ConanInvalidConfiguration` which is specially support in ConanCenter.
 
 ```py
-raise ConanInvalidConfiguration(f"The project {self.name}/{self.version} requires liba.enable_feature=True.")
+raise ConanInvalidConfiguration(f"The project {self.ref} requires liba.enable_feature=True.")
 ```
 
 You should not be using the `self.output.warn` and it is not enough to alter consumers or stop the build service.
