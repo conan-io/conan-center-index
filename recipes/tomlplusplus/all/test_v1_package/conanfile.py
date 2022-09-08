@@ -22,7 +22,8 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not cross_building(self):
             bin_path = os.path.join("bin", "test_package")
-            self.run(f"{bin_path} ../../../test_package/configuration.toml", run_environment=True)
+            conf_path = os.path.join(self.recipe_folder, "..", "test_package", "configuration.toml")
+            self.run(f"{bin_path} {conf_path}", run_environment=True)
             if not hasattr(self, "single_header_only"):
                 bin_path = os.path.join("bin", "test_package_multi")
-                self.run(f"{bin_path} ../../../test_package/configuration.toml", run_environment=True)
+                self.run(f"{bin_path} {conf_path}", run_environment=True)
