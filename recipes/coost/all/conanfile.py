@@ -37,24 +37,27 @@ class CoostConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
 
     def requirements(self):
         if self.options.with_libcurl:
             self.requires("libcurl/7.80.0")
         if self.options.with_libcurl or self.options.with_openssl:
             self.requires("openssl/1.1.1q")
-    
+
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
         if self.info.options.with_libcurl:
             if not self.info.options.with_openssl:
-                raise ConanInvalidConfiguration(f"{self.name} requires with_openssl=True when using with_libcurl=True")
+                raise ConanInvalidConfiguration(f"{self.ref} requires with_openssl=True when using with_libcurl=True")
             if self.dependencies["libcurl"].options.with_ssl != "openssl":
-                raise ConanInvalidConfiguration(f"{self.name} requires libcurl:with_ssl='openssl' to be enabled")
+                raise ConanInvalidConfiguration(f"{self.ref} requires libcurl:with_ssl='openssl' to be enabled")
             if not self.dependencies["libcurl"].options.with_zlib:
-                raise ConanInvalidConfiguration(f"{self.name} requires libcurl:with_zlib=True to be enabled")
+                raise ConanInvalidConfiguration(f"{self.ref} requires libcurl:with_zlib=True to be enabled")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
