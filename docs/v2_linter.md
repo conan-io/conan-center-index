@@ -83,7 +83,7 @@ It is possible to run the linter locally the same way it is being run [using Git
  * Ensure you have required tools installed: `conan` and `pylint` (better to uses fixed versions)
 
    ```
-   pip install conan pylint
+   pip install conan~=1.0 pylint==2.14
    ```
 
  * Set environment variable `PYTHONPATH` to the root of the repository
