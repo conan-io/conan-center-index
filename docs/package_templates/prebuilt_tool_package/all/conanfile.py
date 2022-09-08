@@ -1,5 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import get, copy
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 
 
@@ -26,8 +28,8 @@ class PackageConan(ConanFile):
 
     # in case some configuration is not supported
     def validate(self):
-        if self.info.settings.os == "Windows":
-            self.info.warn(f"{self.ref} is not well tested on Windows.")
+        if self.info.settings.os == "Macos" and Version(self.info.settings.os.version) < 11:
+            raise ConanInvalidConfiguration(f"{self.ref} requires OSX >=11.")
 
     # do not cache as source, instead, use build folder
     def source(self):
@@ -40,6 +42,7 @@ class PackageConan(ConanFile):
 
     # copy all needed files to the package folder
     def package(self):
+        # a license file is always mandatory
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, pattern="*.exe", dst=os.path.join(self.package_folder, "bin"), src=self.source_folder)
         copy(self, pattern="foo", dst=os.path.join(self.package_folder, "bin"), src=self.source_folder)
@@ -56,6 +59,5 @@ class PackageConan(ConanFile):
         self.buildenv_info.append("PATH", bin_folder)
         # In case need to find packaged tools at runtime
         self.runenv_info.append("PATH", bin_folder)
-
         # TODO: Legacy, to be removed on Conan 2.0
         self.env_info.PATH.append(bin_folder)
