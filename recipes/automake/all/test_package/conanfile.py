@@ -1,10 +1,24 @@
 import shutil
-
 from os import environ, path
 
 from conan import ConanFile
-from conan.tools.gnu import Autotools
 from conan.tools.build import cross_building
+from conan.tools.files import chdir
+from conan.tools.gnu import Autotools
+from conan.tools.microsoft import is_msvc
+from conans.client.build import join_arguments
+from conans.client.subsystems import subsystem_path
+from conans.tools import vcvars, no_op, args_to_string
+
+
+def _subsystem(conanfile):
+    if conanfile._settings_build.os == "Windows" and not environ.get("CONAN_BASH_PATH"):
+        return "msys2"
+    return None
+
+
+def _env_activate_sh_path(conanfile):
+    return subsystem_path(_subsystem(conanfile), path.join(conanfile.build_folder, "conanbuild.sh"))
 
 
 class AutotoolsWinBash(Autotools):
@@ -22,14 +36,13 @@ class AutotoolsWinBash(Autotools):
             self._configure_args = "{} {}".format(self._configure_args, args_to_string(configure_args))
 
             configure_cmd = "{}/configure".format(script_folder)
-            if self._conanfile._settings_build.os == "Windows" and not environ.get("CONAN_BASH_PATH"):
-                subsystem = "msys"
-            else:
-                subsystem = None
-            configure_cmd = subsystem_path(subsystem, configure_cmd)
+            configure_cmd = subsystem_path(_subsystem(self._conanfile), configure_cmd)
             cmd = '"{}" {}'.format(configure_cmd, self._configure_args)
             self._conanfile.output.info("Calling:\n > %s" % cmd)
-            self._conanfile.run('"{}" {}'.format(subsystem_path(subsystem, path.join(self._conanfile.build_folder, "configure")), self._configure_args), run_environment=True, win_bash=True)
+            with vcvars(self._conanfile) if is_msvc(self._conanfile) else no_op():
+                self._conanfile.run(
+                    '. "{}" && "{}" {}'.format(_env_activate_sh_path(self._conanfile), subsystem_path(_subsystem(self._conanfile), path.join(self._conanfile.build_folder, "configure")),
+                                               self._configure_args), run_environment=True, win_bash=True)
         else:
             super(AutotoolsWinBash, self).configure(build_script_folder=build_script_folder, args=args)
 
@@ -47,9 +60,21 @@ class AutotoolsWinBash(Autotools):
                 if njobs:
                     jobs = "-j{}".format(njobs)
             command = " ".join(filter(None, [make_program, target, str_args, str_extra_args, jobs]))
-            self._conanfile.run(command, run_environment=True, win_bash=True)
+            with vcvars(self._conanfile) if is_msvc(self._conanfile) else no_op():
+                self._conanfile.run(f". {_env_activate_sh_path(self._conanfile)} && {command}", run_environment=True, win_bash=True)
         else:
             super(AutotoolsWinBash, self).make(target=target, args=args)
+
+    def autoreconf(self, args=None):
+        # Workaround for conan-io/conan#11975
+        if self._conanfile._settings_build.os == "Windows" and not environ.get("CONAN_BASH_PATH"):
+            args = args or []
+            command = join_arguments(["autoreconf", self._autoreconf_args, args_to_string(args)])
+            with chdir(self, self._conanfile.build_folder):
+                with vcvars(self._conanfile) if is_msvc(self._conanfile) else no_op():
+                    self._conanfile.run(f". {_env_activate_sh_path(self._conanfile)} && {command}", run_environment=True, win_bash=True)
+        else:
+            super(AutotoolsWinBash, self).autoreconf(args=args)
 
 
 required_conan_version = ">=1.50.0"
@@ -57,7 +82,7 @@ required_conan_version = ">=1.50.0"
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = "configure.ac", "Makefile.am", "test_package_1.c", "test_package.cpp"
+    exports_sources = "configure.ac", "Makefile.am", "test_package_1.c", "test_package.cpp", "extra.m4"
     # DON'T COPY extra.m4 TO BUILD FOLDER!!!
     generators = "AutotoolsDeps", "AutotoolsToolchain", "VirtualBuildEnv"
     win_bash = True
@@ -68,16 +93,19 @@ class TestPackageConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
         if self._settings_build.os == "Windows" and not environ.get("CONAN_BASH_PATH"):
             self.tool_requires("msys2/cci.latest")
+        self.tool_requires(self.tested_reference_str)
 
     def build(self):
         for src in self.exports_sources:
             shutil.copy(path.join(self.source_folder, src), self.build_folder)
 
+        # self.run(f". {_env_activate_sh_path(self)} && autoreconf --verbose", run_environment=True, win_bash=self._settings_build.os == "Windows")
+
         # Workaround for conan-io/conan#11975
         autotools = AutotoolsWinBash(self)
+        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
@@ -87,10 +115,6 @@ class TestPackageConan(ConanFile):
 
             # Workaround for conan-io/conan#11975
             from conans.client.subsystems import subsystem_path
-            if self._settings_build.os == "Windows" and not environ.get("CONAN_BASH_PATH"):
-                subsystem = "msys"
-            else:
-                subsystem = None
-            test_cmd = subsystem_path(subsystem, path.join(self.build_folder, f"test_package{ext}"))
+            test_cmd = subsystem_path(_subsystem(self), path.join(self.build_folder, f"test_package{ext}"))
 
-            self.run(test_cmd,  run_environment=True, win_bash=self.settings.os == "Windows")
+            self.run(test_cmd, run_environment=True, win_bash=self.settings.os == "Windows")
