@@ -20,8 +20,8 @@ class OpenTDFConan(ConanFile):
     license = "BSD-3-Clause-Clear"
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"fPIC": [True, False], "allow_libiconv": [True, False]}
-    default_options = {"fPIC": True, "allow_libiconv": True}
+    options = {"fPIC": [True, False]}
+    default_options = {"fPIC": True}
 
     @property
     def _source_subfolder(self):
@@ -64,12 +64,6 @@ class OpenTDFConan(ConanFile):
         # Disallow MT and MTd
         if is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(f'{self.name} can not be built with MT or MTd at this time')
-        # Display warning if libiconv sneaks in somewhere
-        try:
-            if self.dependencies["libiconv"] and not self.options.allow_libiconv:
-                self.output.warn(f"libiconv has been found in dependencies tree along the option {self.name}:allow_libiconv=False")
-        except KeyError:
-            pass
 
     def requirements(self):
         self.requires("openssl/1.1.1q")
@@ -85,17 +79,6 @@ class OpenTDFConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def configure(self):
-        if not self.options.allow_libiconv:
-            self.output.info(f'{self.name} attempting to disable libiconv in libxml2 and boost')
-            self.options["libxml2"].iconv = False
-            self.options["libxml2"].icu = False
-            self.options["boost"].i18n_backend_iconv = "off"
-            self.options["boost"].i18n_backend_icu = False
-            self.options["boost"].without_locale = True
-        else:
-            self.output.info(f'{self.name} building with stock libxml2 and boost')
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
