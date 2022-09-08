@@ -14,13 +14,9 @@ sources:
 patches:
   "1.9.7":
     - patch_file: "patches/targets-outputname-collision-1.9.5.patch"
-      base_path: "source_subfolder"
   "1.9.6":
     - patch_file: "patches/targets-outputname-collision-1.9.5.patch"
-      base_path: "source_subfolder"
   "1.9.5":
     - patch_file: "patches/targets-outputname-collision-1.9.5.patch"
-      base_path: "source_subfolder"
   "1.9.3":
     - patch_file: "patches/targets-outputname-collision-1.9.3.patch"
-      base_path: "source_subfolder"

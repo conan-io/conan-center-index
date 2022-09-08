@@ -10,13 +10,6 @@ index 349c8d6..a49ad04 100644
  
  #ifdef _WINDOWS
  #include <direct.h>
-@@ -77,4 +78,4 @@ namespace virtru {
-         }
-         return str;
-     }
--}
-\ No newline at end of file
-+}
 diff --git a/src/lib/src/tdf_impl.cpp b/src/lib/src/tdf_impl.cpp
 index 6a6ce9b..21a8f30 100644
 --- a/src/lib/src/tdf_impl.cpp

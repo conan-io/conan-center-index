@@ -5,6 +5,4 @@ sources:
 patches:
   "0.1.4":
     - patch_file: "patches/cmake-min-version.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/directory-name.patch"
-      base_path: "source_subfolder"
