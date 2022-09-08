@@ -2,6 +2,9 @@ from conan import ConanFile
 from conan.tools.scm import Version
 from conan.tools.files import get, chdir, replace_in_file, copy, rmdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.layout import basic_layout
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.env import Environment
 from conans import tools, VisualStudioBuildEnvironment, AutoToolsBuildEnvironment
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -19,46 +22,46 @@ class LuajitConan(ConanFile):
     description = "LuaJIT is a Just-In-Time Compiler (JIT) for the Lua programming language."
     topics = ("lua", "jit")
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True}
-    _env_build = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def _configure_autotools(self):
-        if not self._env_build:
-            self._env_build = AutoToolsBuildEnvironment(self)
-        return self._env_build
+    def configure(self):
+        if self.options.shared:
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
         if Version(self.version) < "2.1.0-beta1" and self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration(f"{self.ref} is not supported by Mac M1. Please, try any version >=2.1")
 
-    def build(self):
-        if is_msvc(self):
-            with chdir(self, os.path.join(self._source_subfolder, 'src')):
-                env_build = VisualStudioBuildEnvironment(self)
-                with tools.environment_append(env_build.vars), tools.vcvars(self):
-                    variant = '' if self.options.shared else 'static'
-                    self.run("msvcbuild.bat %s" % variant)
-        else:
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.generate()
+        env = Environment()
+        env.define("foo", "var")
+
+    def _patch_sources(self):
+        if not is_msvc(self):
             buildmode = 'shared' if self.options.shared else 'static'
             makefile = os.path.join(self._source_subfolder, 'src', 'Makefile')
             replace_in_file(self, makefile,
@@ -79,6 +82,16 @@ class LuajitConan(ConanFile):
                 replace_in_file(self, makefile,
                                       'TARGET_O= $(LUAJIT_A)',
                                       'TARGET_O= $(LUAJIT_SO)')
+
+    def build(self):
+        if is_msvc(self):
+            with chdir(self, os.path.join(self._source_subfolder, 'src')):
+                env_build = VisualStudioBuildEnvironment(self)
+                with tools.environment_append(env_build.vars), tools.vcvars(self):
+                    variant = '' if self.options.shared else 'static'
+                    self.run("msvcbuild.bat %s" % variant)
+        else:
+            self._patch_sources()
             env = dict()
             if self.settings.os == "Macos":
                 # Per https://luajit.org/install.html: If MACOSX_DEPLOYMENT_TARGET
@@ -95,7 +108,7 @@ class LuajitConan(ConanFile):
                 env_build.make(args=[f"PREFIX={self.package_folder}", f"CC={compiler}"])
 
     def package(self):
-        copy(self, "COPYRIGHT", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, self._source_subfolder))
+        copy(self, "COPYRIGHT", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         if is_msvc(self):
             ljs = os.path.join(self.build_folder, self._source_subfolder, "src")
             inc = os.path.join(self.package_folder, "include", "luajit-2.0")
@@ -118,6 +131,5 @@ class LuajitConan(ConanFile):
         self.cpp_info.libs = ["lua51" if is_msvc(self) else "luajit-5.1"]
         luaversion = Version(self.version)
         self.cpp_info.includedirs = [os.path.join("include", f"luajit-{luaversion.major}.{luaversion.minor}")]
-        self.output.info(f"***** INCLUDE DIRS: {self.cpp_info.includedirs}")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "dl"])
