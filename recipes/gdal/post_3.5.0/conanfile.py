@@ -731,7 +731,11 @@ class GdalConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package"] = "GDAL"
         self.cpp_info.filenames["cmake_find_package_multi"] = "GDAL"
 
-        self.cpp_info.libs = ["gdal"]
+        libname = "gdal"
+        if self.settings.os == "Windows":
+            if self.settings.build_type == "Debug":
+                libname += "d"
+        self.cpp_info.libs = [ libname ]
 
         self.cpp_info.requires.extend(['json-c::json-c'])
         self.cpp_info.requires.extend(['libgeotiff::libgeotiff'])
