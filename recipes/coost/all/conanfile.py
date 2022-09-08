@@ -94,6 +94,8 @@ class CoostConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "coost::co")
         # TODO: back to global scope in conan v2 once legacy generators removed
         self.cpp_info.components["co"].libs = ["co"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["co"].system_libs = ["pthread", "dl"]
 
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.components["co"].set_property("cmake_target_name", "coost::co")
