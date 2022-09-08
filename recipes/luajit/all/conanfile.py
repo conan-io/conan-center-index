@@ -58,7 +58,9 @@ class LuajitConan(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.generate()
         env = Environment()
-        env.define("foo", "var")
+        if self.info.settings.os == "Macos":
+            env = Environment()
+            env.define("MACOSX_DEPLOYMENT_TARGET", self._macosx_deployment_target)
 
     def _patch_sources(self):
         if not is_msvc(self):
@@ -83,6 +85,16 @@ class LuajitConan(ConanFile):
                                       'TARGET_O= $(LUAJIT_A)',
                                       'TARGET_O= $(LUAJIT_SO)')
 
+    @property
+    def _macosx_deployment_target(self):
+        # Per https://luajit.org/install.html: If MACOSX_DEPLOYMENT_TARGET
+        # is not set then it's forced to 10.4, which breaks compile on Mojave.
+        version = self.settings.get_safe("os.version")
+        if not version and platform.system() == "Darwin":
+            macversion = Version(platform.mac_ver()[0])
+            version = f"{macversion.major}.{macversion.minor}"
+        return version
+
     def build(self):
         if is_msvc(self):
             with chdir(self, os.path.join(self._source_subfolder, 'src')):
@@ -94,12 +106,6 @@ class LuajitConan(ConanFile):
             self._patch_sources()
             env = dict()
             if self.settings.os == "Macos":
-                # Per https://luajit.org/install.html: If MACOSX_DEPLOYMENT_TARGET
-                # is not set then it's forced to 10.4, which breaks compile on Mojave.
-                version = self.settings.get_safe("os.version")
-                if not version and platform.system() == "Darwin":
-                    macversion = Version(platform.mac_ver()[0])
-                    version = f"{macversion.major}.{macversion.minor}"
                 env["MACOSX_DEPLOYMENT_TARGET"] = version
             with chdir(self, self._source_subfolder), tools.environment_append(env):
                 env_build = self._configure_autotools()
