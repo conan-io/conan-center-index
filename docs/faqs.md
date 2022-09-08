@@ -236,8 +236,7 @@ There are different motivations
 ## Why not add an option to build unit tests
 
 - Adding a testing option will change the package ID, but will not provide different packaged binaries
-- Use the configuration [skip_test](packaging_policy.md#options) to define the testing behavior.
-
+- Use the configuration [skip_test](packaging_policy.md#options-to-avoid) to define the testing behavior.
 
 ## What is the policy for supported python versions?
 
