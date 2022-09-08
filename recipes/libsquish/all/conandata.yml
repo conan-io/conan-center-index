@@ -4,7 +4,5 @@ sources:
     sha256: "628796eeba608866183a61d080d46967c9dda6723bc0a3ec52324c85d2147269"
 patches:
   "1.15":
-    - patch_file: "patches/export-symbols.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/fix-cmake-simd-openmp-install.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-fix-cmake-simd-openmp-install.patch"
+    - patch_file: "patches/0002-export-symbols.patch"

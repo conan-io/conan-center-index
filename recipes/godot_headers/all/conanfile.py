@@ -1,5 +1,9 @@
-import glob
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+import os
+
+required_conan_version = ">=1.50.0"
 
 
 class GodotHeadersConan(ConanFile):
@@ -9,20 +13,28 @@ class GodotHeadersConan(ConanFile):
     homepage = "https://github.com/godotengine/godot_headers"
     description = "Godot Native interface headers"
     topics = ("game-engine", "game-development")
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def package_id(self):
+        self.info.clear()
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        tools.rename(glob.glob("godot-headers-*")[0], self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
-        self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
-        self.copy("*.h", dst="include", src=self._source_subfolder)
-        self.copy("api.json", dst="res", src=self._source_subfolder)
+        copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
+        copy(self, "api.json", src=self.source_folder, dst=os.path.join(self.package_folder, "res"))
 
-    def package_id(self):
-        self.info.header_only()
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []

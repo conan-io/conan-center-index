@@ -1,94 +1,111 @@
+from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.microsoft import is_msvc
 import os
 
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-from conans.tools import rmdir
-from conan.tools.microsoft import is_msvc
-
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
 
 
-class Recipe(ConanFile):
+class SerdConan(ConanFile):
     name = "serd"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://drobilla.net/software/serd.html"
     description = "A lightweight C library for RDF syntax"
     topics = "linked-data", "semantic-web", "rdf", "turtle", "trig", "ntriples", "nquads"
-    settings = "build_type", "compiler", "os", "arch"
+    license = "ISC"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
     }
-    license = "ISC"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version]["serd"],
-                  destination=self.folders.base_source,
-                  strip_root=True)
-        # serd comes with its own modification of the waf build system
-        # It seems to be used only by serd and will be replaced in future versions with meson.
-        # So it makes no sense to create a separate conan package for the build system.
-        tools.get(**self.conan_data["sources"][self.version]["autowaf"],
-                  destination=os.path.join(self.folders.base_source, "waflib"),
-                  strip_root=True)
 
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
-    def validate(self):
-        if tools.cross_building(self):
-            raise ConanInvalidConfiguration("Cross compiling is not supported by serd's build system Waf.")
+    def build_requirements(self):
+        self.tool_requires("meson/0.63.1")
+        self.tool_requires("pkgconf/1.7.4")
 
-        if is_msvc(self):
-            raise ConanInvalidConfiguration("Don't know how to setup WAF for VS.")
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = MesonToolchain(self)
+        tc.project_options["docs"] = "disabled"
+        tc.project_options["tests"] = "disabled"
+        tc.project_options["tools"] = "disabled"
+        # TODO: fixed in conan 1.51.0?
+        tc.project_options["bindir"] = "bin"
+        tc.project_options["libdir"] = "lib"
+        tc.generate()
+
+        env = VirtualBuildEnv(self)
+        env.generate(scope="build")
 
     def build(self):
-        args = ["--no-utils", " --prefix={}".format(self.folders.package_folder)]
-        if not self.options.shared:
-            args += ["--static", "--no-shared"]
-        args = " ".join(arg for arg in args)
-
-        cflags = []
-        if self.options.get_safe("fPIC"):
-            cflags += ["-fPIC"]
-        if self.settings.build_type in ["Debug", "RelWithDebInfo"]:
-            cflags += ["-g"]
-        if self.settings.build_type in ["Release", "RelWithDebInfo"]:
-            cflags += ["-O3"]
-        if self.settings.build_type in ["Release", "MinSizeRel"]:
-            cflags += ["-DNDEBUG"]
-        if self.settings.build_type == "MinSizeRel":
-            cflags += ["-Os"]
-        cflags = " ".join(cflag for cflag in cflags)
-
-        self.run(f'CFLAGS="{cflags}" ./waf configure {args}', run_environment=True)
-        self.run('./waf build', run_environment=True)
+        meson = Meson(self)
+        meson.configure()
+        meson.build()
 
     def package(self):
-        self.run('./waf install', run_environment=True)
-        rmdir(os.path.join(self.package_folder, "share"))
-        rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        self.copy("COPYING", src=self.folders.base_source, dst="licenses")
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        meson = Meson(self)
+        meson.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        fix_apple_shared_install_name(self)
+        fix_msvc_libname(self)
 
     def package_info(self):
-        libname = f"{self.name}-0"
+        self.cpp_info.set_property("pkg_config_name", "serd-0")
+        libname = "serd"
+        if not (is_msvc(self) and self.options.shared):
+            libname += "-0"
         self.cpp_info.libs = [libname]
-        self.cpp_info.includedirs = [os.path.join("include", libname)]
-        self.cpp_info.set_property("pkg_config_name", libname)
-        
-        # TODO: to remove in conan v2 once pkg_config generators removed
-        self.cpp_info.names["pkg_config"] = libname
-
+        self.cpp_info.includedirs = [os.path.join("include", "serd-0")]
+        if self.settings.os == "Windows" and not self.options.shared:
+            self.cpp_info.defines.append("SERD_STATIC")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+
+def fix_msvc_libname(conanfile, remove_lib_prefix=True):
+    """remove lib prefix & change extension to .lib"""
+    from conan.tools.files import rename
+    import glob
+    if not is_msvc(conanfile):
+        return
+    libdirs = getattr(conanfile.cpp.package, "libdirs")
+    for libdir in libdirs:
+        for ext in [".dll.a", ".dll.lib", ".a"]:
+            full_folder = os.path.join(conanfile.package_folder, libdir)
+            for filepath in glob.glob(os.path.join(full_folder, f"*{ext}")):
+                libname = os.path.basename(filepath)[0:-len(ext)]
+                if remove_lib_prefix and libname[0:3] == "lib":
+                    libname = libname[3:]
+                rename(conanfile, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))

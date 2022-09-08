@@ -1,9 +1,14 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, replace_in_file, rmdir, save
+from conan.tools.scm import Version
+from conans import tools as tools_legacy
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
 
 
 class OpenEXRConan(ConanFile):
@@ -25,18 +30,6 @@ class OpenEXRConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -49,65 +42,70 @@ class OpenEXRConan(ConanFile):
         self.requires("zlib/1.2.12")
 
     def validate(self):
-        if tools.Version(self.version) < "2.5.0" and hasattr(self, "settings_build") and tools.cross_building(self):
+        if Version(self.version) < "2.5.0" and hasattr(self, "settings_build") and cross_building(self):
             # cross-build supported since https://github.com/AcademySoftwareFoundation/openexr/pull/606
             raise ConanInvalidConfiguration("Cross-build not supported before openexr 2.5.0")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["OPENEXR_BUILD_BOTH_STATIC_SHARED"] = False
-        self._cmake.definitions["ILMBASE_BUILD_BOTH_STATIC_SHARED"] = False
-        self._cmake.definitions["PYILMBASE_ENABLE"] = False
-        if tools.Version(self.version) < "2.5.0":
-            self._cmake.definitions["OPENEXR_VIEWERS_ENABLE"] = False
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["OPENEXR_BUILD_BOTH_STATIC_SHARED"] = False
+        tc.variables["ILMBASE_BUILD_BOTH_STATIC_SHARED"] = False
+        tc.variables["PYILMBASE_ENABLE"] = False
+        if Version(self.version) < "2.5.0":
+            tc.variables["OPENEXR_VIEWERS_ENABLE"] = False
         else:
-            self._cmake.definitions["INSTALL_OPENEXR_EXAMPLES"] = False
-            self._cmake.definitions["INSTALL_OPENEXR_DOCS"] = False
-        self._cmake.definitions["OPENEXR_BUILD_UTILS"] = False
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["CMAKE_SKIP_INSTALL_RPATH"] = True
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+            tc.variables["INSTALL_OPENEXR_EXAMPLES"] = False
+            tc.variables["INSTALL_OPENEXR_DOCS"] = False
+        tc.variables["OPENEXR_BUILD_UTILS"] = False
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["CMAKE_SKIP_INSTALL_RPATH"] = True
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
+        cd = CMakeDeps(self)
+        cd.generate()
 
     def _patch_sources(self):
-        pkg_version = tools.Version(self.version)
+        pkg_version = Version(self.version)
         if pkg_version < "2.5.2" and self.settings.os == "Windows":
             # This fixes symlink creation on Windows.
             # OpenEXR's build system no longer creates symlinks on windows, starting with commit
             # 7f9e1b410de92de244329b614cf551b30bc30421 (included in 2.5.2).
             for lib in ("OpenEXR", "IlmBase"):
-                tools.replace_in_file(os.path.join(self._source_subfolder,  lib, "config", "LibraryDefine.cmake"),
+                replace_in_file(self, os.path.join(self.source_folder,  lib, "config", "LibraryDefine.cmake"),
                                       "${CMAKE_COMMAND} -E chdir ${CMAKE_INSTALL_FULL_LIBDIR}",
                                       "${CMAKE_COMMAND} -E chdir ${CMAKE_INSTALL_FULL_BINDIR}")
 
         # Add  "_d" suffix to lib file names.
         if pkg_version < "2.5.7" and self.settings.build_type == "Debug":
             for lib in ("OpenEXR", "IlmBase"):
-                tools.replace_in_file(os.path.join(self._source_subfolder,  lib, "config", "LibraryDefine.cmake"),
+                replace_in_file(self, os.path.join(self.source_folder,  lib, "config", "LibraryDefine.cmake"),
                                       "set(verlibname ${CMAKE_SHARED_LIBRARY_PREFIX}${libname}${@LIB@_LIB_SUFFIX}${CMAKE_SHARED_LIBRARY_SUFFIX})".replace("@LIB@", lib.upper()),
                                       "set(verlibname ${CMAKE_SHARED_LIBRARY_PREFIX}${libname}${@LIB@_LIB_SUFFIX}_d${CMAKE_SHARED_LIBRARY_SUFFIX})".replace("@LIB@", lib.upper()))
-                tools.replace_in_file(os.path.join(self._source_subfolder,  lib, "config", "LibraryDefine.cmake"),
+                replace_in_file(self, os.path.join(self.source_folder,  lib, "config", "LibraryDefine.cmake"),
                                       "set(baselibname ${CMAKE_SHARED_LIBRARY_PREFIX}${libname}${CMAKE_SHARED_LIBRARY_SUFFIX})",
                                       "set(baselibname ${CMAKE_SHARED_LIBRARY_PREFIX}${libname}_d${CMAKE_SHARED_LIBRARY_SUFFIX})")
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.md", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
@@ -122,29 +120,30 @@ class OpenEXRConan(ConanFile):
             }
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+            """)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         # FIXME: we should generate 2 CMake config files: OpenEXRConfig.cmake and IlmBaseConfig.cmake
         #        waiting an implementation of https://github.com/conan-io/conan/issues/9000
         self.cpp_info.set_property("cmake_file_name", "OpenEXR")
 
-        openexr_version = tools.Version(self.version)
-        lib_suffix = "-{}_{}".format(openexr_version.major, openexr_version.minor)
+        lib_suffix = ""
+        if not self.options.shared or self.settings.os == "Windows":
+            openexr_version = Version(self.version)
+            lib_suffix += f"-{openexr_version.major}_{openexr_version.minor}"
         if self.settings.build_type == "Debug":
             lib_suffix += "_d"
 
@@ -158,7 +157,7 @@ class OpenEXRConan(ConanFile):
         self.cpp_info.components["openexr_ilmimf"].set_property("cmake_target_name", "OpenEXR::IlmImf")
         self.cpp_info.components["openexr_ilmimf"].set_property("pkg_config_name", "OpenEXR")
         self.cpp_info.components["openexr_ilmimf"].includedirs.append(include_dir)
-        self.cpp_info.components["openexr_ilmimf"].libs = ["IlmImf{}".format(lib_suffix)]
+        self.cpp_info.components["openexr_ilmimf"].libs = [f"IlmImf{lib_suffix}"]
         self.cpp_info.components["openexr_ilmimf"].requires = [
             "openexr_ilmimfconfig", "ilmbase_iex", "ilmbase_half",
             "ilmbase_imath", "ilmbase_ilmthread", "zlib::zlib",
@@ -167,7 +166,7 @@ class OpenEXRConan(ConanFile):
         # IlmImfUtil
         self.cpp_info.components["openexr_ilmimfutil"].set_property("cmake_target_name", "OpenEXR::IlmImfUtil")
         self.cpp_info.components["openexr_ilmimfutil"].includedirs.append(include_dir)
-        self.cpp_info.components["openexr_ilmimfutil"].libs = ["IlmImfUtil{}".format(lib_suffix)]
+        self.cpp_info.components["openexr_ilmimfutil"].libs = [f"IlmImfUtil{lib_suffix}"]
         self.cpp_info.components["openexr_ilmimfutil"].requires = ["openexr_ilmimfconfig", "openexr_ilmimf"]
 
         # IlmBaseConfig
@@ -177,31 +176,31 @@ class OpenEXRConan(ConanFile):
         # Half
         self.cpp_info.components["ilmbase_half"].set_property("cmake_target_name", "IlmBase::Half")
         self.cpp_info.components["ilmbase_half"].includedirs.append(include_dir)
-        self.cpp_info.components["ilmbase_half"].libs = ["Half{}".format(lib_suffix)]
+        self.cpp_info.components["ilmbase_half"].libs = [f"Half{lib_suffix}"]
         self.cpp_info.components["ilmbase_half"].requires = ["ilmbase_ilmbaseconfig"]
 
         # Iex
-        self.cpp_info.components["ilmbase_half"].set_property("cmake_target_name", "IlmBase::Iex")
+        self.cpp_info.components["ilmbase_iex"].set_property("cmake_target_name", "IlmBase::Iex")
         self.cpp_info.components["ilmbase_iex"].includedirs.append(include_dir)
-        self.cpp_info.components["ilmbase_iex"].libs = ["Iex{}".format(lib_suffix)]
+        self.cpp_info.components["ilmbase_iex"].libs = [f"Iex{lib_suffix}"]
         self.cpp_info.components["ilmbase_iex"].requires = ["ilmbase_ilmbaseconfig"]
 
         # IexMath
         self.cpp_info.components["ilmbase_iexmath"].set_property("cmake_target_name", "IlmBase::IexMath")
         self.cpp_info.components["ilmbase_iexmath"].includedirs.append(include_dir)
-        self.cpp_info.components["ilmbase_iexmath"].libs = ["IexMath{}".format(lib_suffix)]
+        self.cpp_info.components["ilmbase_iexmath"].libs = [f"IexMath{lib_suffix}"]
         self.cpp_info.components["ilmbase_iexmath"].requires = ["ilmbase_ilmbaseconfig", "ilmbase_iex"]
 
         # IMath
         self.cpp_info.components["ilmbase_imath"].set_property("cmake_target_name", "IlmBase::IMath")
         self.cpp_info.components["ilmbase_imath"].includedirs.append(include_dir)
-        self.cpp_info.components["ilmbase_imath"].libs = ["Imath{}".format(lib_suffix)]
+        self.cpp_info.components["ilmbase_imath"].libs = [f"Imath{lib_suffix}"]
         self.cpp_info.components["ilmbase_imath"].requires = ["ilmbase_ilmbaseconfig", "ilmbase_half", "ilmbase_iexmath"]
 
         # IlmThread
         self.cpp_info.components["ilmbase_ilmthread"].set_property("cmake_target_name", "IlmBase::IlmThread")
         self.cpp_info.components["ilmbase_ilmthread"].includedirs.append(include_dir)
-        self.cpp_info.components["ilmbase_ilmthread"].libs = ["IlmThread{}".format(lib_suffix)]
+        self.cpp_info.components["ilmbase_ilmthread"].libs = [f"IlmThread{lib_suffix}"]
         self.cpp_info.components["ilmbase_ilmthread"].requires = ["ilmbase_ilmbaseconfig", "ilmbase_iex"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["ilmbase_ilmthread"].system_libs.append("pthread")
@@ -217,10 +216,11 @@ class OpenEXRConan(ConanFile):
             self.cpp_info.components["openexr_ilmimfconfig"].defines.append("OPENEXR_DLL")
             self.cpp_info.components["ilmbase_ilmbaseconfig"].defines.append("OPENEXR_DLL")
 
-        stdlib = tools.stdcpp_library(self)
-        if not self.options.shared and stdlib:
-            self.cpp_info.components["openexr_ilmimfconfig"].system_libs.append(stdlib)
-            self.cpp_info.components["ilmbase_ilmbaseconfig"].system_libs.append(stdlib)
+        if not self.options.shared:
+            libcxx = tools_legacy.stdcpp_library(self)
+            if libcxx:
+                self.cpp_info.components["openexr_ilmimfconfig"].system_libs.append(libcxx)
+                self.cpp_info.components["ilmbase_ilmbaseconfig"].system_libs.append(libcxx)
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "OpenEXR"

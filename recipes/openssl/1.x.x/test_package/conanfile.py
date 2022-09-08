@@ -1,4 +1,6 @@
-from conans import CMake, tools, ConanFile
+from conans import CMake, ConanFile
+from conan.tools.scm import Version
+from conan.tools.build import cross_building
 import os
 
 
@@ -23,7 +25,7 @@ class TestPackageConan(ConanFile):
             cmake = CMake(self)
             if self.settings.os == "Android":
                 cmake.definitions["CONAN_LIBCXX"] = ""
-            openssl_version = tools.Version(self.deps_cpp_info["openssl"].version)
+            openssl_version = Version(self.deps_cpp_info["openssl"].version)
             if openssl_version.major == "1" and openssl_version.minor == "1":
                 cmake.definitions["OPENSSL_WITH_ZLIB"] = False
             else:
@@ -32,7 +34,7 @@ class TestPackageConan(ConanFile):
             cmake.build()
 
     def test(self):
-        if not self._skip_test and not tools.cross_building(self):
+        if not self._skip_test and not cross_building(self):
             bin_path = os.path.join("bin", "digest")
             self.run(bin_path, run_environment=True)
         assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE"))

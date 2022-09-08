@@ -1,6 +1,16 @@
 # Preparing recipes for Conan 2.0
 
-<!-- toc --><!-- endToc -->
+<!-- toc -->
+## Contents
+
+  * [New cpp_info set_property model](#new-cpp_info-set_property-model)
+    * [CMakeDeps](#cmakedeps)
+    * [Update required_conan_version to ">=1.43.0"](#update-required_conan_version-to-1430)
+    * [Translating .names information to cmake_target_name, cmake_module_target_name and cmake_file_name](#translating-names-information-to-cmake_target_name-cmake_module_target_name-and-cmake_file_name)
+    * [Translating .filenames information to cmake_file_name, cmake_module_file_name and cmake_find_mode](#translating-filenames-information-to-cmake_file_name-cmake_module_file_name-and-cmake_find_mode)
+    * [Understanding some workarounds with the .names attribute model in recipes](#understanding-some-workarounds-with-the-names-attribute-model-in-recipes)
+    * [Translating .build_modules to cmake_build_modules](#translating-build_modules-to-cmake_build_modules)
+    * [PkgConfigDeps](#pkgconfigdeps)<!-- endToc -->
 
 > ⚠️  Refer to [road to Conan v2](v2_roadmap.md) to know the steps that
 > will be taken in ConanCenter and this repository to start running
@@ -38,7 +48,7 @@ We will cover some cases of porting all the information set with the current mod
 new one. To read more about the properties available for each generator and how the
 properties model work, please check the [Conan documentation](https://docs.conan.io/en/latest/conan_v2.html#editables-don-t-use-external-templates-any-more-new-layout-model).
 
-> ⚠️ **Note**: Please, remember that the **new** ``set_property`` and the **current** attributes
+> **Note**: Please, remember that the **new** ``set_property`` and the **current** attributes
 > model are *completely independent since Conan 1.43*. Setting ``set_property`` in recipes will
 > not affect current CMake 1.X generators (``cmake``, ``cmake_multi``, ``cmake_find_package`` and
 > ``cmake_find_package_multi``) at all.
@@ -188,7 +198,7 @@ class ExpatConan(ConanFile):
         ...
 ```
 
-> ⚠️ **Note**: There are more cases in which you probably want to set the
+> *Note**: There are more cases in which you probably want to set the
 > ``cmake_find_mode`` property to ``both``. For example, for the libraries which [find
 > modules files are included in the CMake
 > distribution](https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules).
@@ -345,7 +355,6 @@ class TensorflowLiteConan(ConanFile):
         ...
 ```
 
-
 ### Translating .build_modules to cmake_build_modules
 
 Previously we saw that some recipes use a build module with an alias to set an arbitrary target name.
@@ -378,8 +387,6 @@ class PyBind11Conan(ConanFile):
         ...
 
 ```
-
-
 
 ### PkgConfigDeps
 

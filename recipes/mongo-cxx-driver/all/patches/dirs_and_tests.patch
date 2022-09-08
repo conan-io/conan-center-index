@@ -61,7 +61,7 @@ index 7c79f45..0fcb305 100644
  
  # Attempt to find libbson by new package name (without lib).
 -find_package(bson-${LIBBSON_REQUIRED_ABI_VERSION} ${LIBBSON_REQUIRED_VERSION} QUIET)
-+find_package(bson-${LIBBSON_REQUIRED_ABI_VERSION} ${LIBBSON_REQUIRED_VERSION} REQUIRED)
++find_package(bson-${LIBBSON_REQUIRED_ABI_VERSION} REQUIRED)
 +set(bson-${LIBBSON_REQUIRED_ABI_VERSION}_FOUND TRUE)
  
  if(bson-${LIBBSON_REQUIRED_ABI_VERSION}_FOUND)

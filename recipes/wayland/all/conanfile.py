@@ -1,19 +1,21 @@
-import os
-
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.files import get, mkdir, replace_in_file, rmdir, save
-from conan.tools.gnu.pkgconfigdeps.pc_files_creator import get_pc_files_and_content
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
+import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.50.0"
+
 
 class WaylandConan(ConanFile):
     name = "wayland"
-    description = "Wayland is a project to define a protocol for a compositor to talk to its clients as well as a library implementation of the protocol"
+    description = (
+        "Wayland is a project to define a protocol for a compositor to talk to "
+        "its clients as well as a library implementation of the protocol"
+    )
     topics = ("protocol", "compositor", "display")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://wayland.freedesktop.org"
@@ -35,15 +37,17 @@ class WaylandConan(ConanFile):
 
     generators = "PkgConfigDeps", "VirtualBuildEnv", "VirtualRunEnv"
 
-    def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Wayland can be built on Linux only")
-
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
+        try:
+           del self.settings.compiler.libcxx
+        except Exception:
+           pass
+        try:
+           del self.settings.compiler.cppstd
+        except Exception:
+           pass
 
     def requirements(self):
         if self.options.enable_libraries:
@@ -52,21 +56,21 @@ class WaylandConan(ConanFile):
             self.requires("libxml2/2.9.14")
         self.requires("expat/2.4.8")
 
+    def validate(self):
+        if self.info.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Wayland can be built on Linux only")
+
     def build_requirements(self):
-        self.tool_requires("meson/0.63.0")
+        self.tool_requires("meson/0.63.1")
         self.tool_requires("pkgconf/1.7.4")
         if cross_building(self):
-            self.tool_requires(f"wayland/{self.version}")
+            self.tool_requires(self.ref)
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
-                        "subdir('tests')", "#subdir('tests')")
 
     def generate(self):
         tc = MesonToolchain(self)
@@ -77,15 +81,19 @@ class WaylandConan(ConanFile):
         tc.project_options["documentation"] = False
         if Version(self.version) >= "1.18.91":
             tc.project_options["scanner"] = True
-
-            # Generate PC files for the tool_requires wayland package to ensure wayland-scanner is found for build machine.
-            if cross_building(self):
-                native_generators_folder = os.path.join(self.generators_folder, "native")
-                mkdir(self, native_generators_folder)
-                for pc_name, pc_content in get_pc_files_and_content(self, self.dependencies.build["wayland"]).items():
-                    save(self, os.path.join(native_generators_folder, pc_name), pc_content)
-                tc.project_options["build.pkg_config_path"] = native_generators_folder
         tc.generate()
+
+    def _patch_sources(self):
+        replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
+                        "subdir('tests')", "#subdir('tests')")
+
+        if cross_building(self):
+            replace_in_file(self, f"{self.source_folder}/src/meson.build",
+                            "scanner_dep = dependency('wayland-scanner', native: true, version: meson.project_version())",
+                                "# scanner_dep = dependency('wayland-scanner', native: true, version: meson.project_version())")
+            replace_in_file(self, f"{self.source_folder}/src/meson.build",
+                            "wayland_scanner_for_build = find_program(scanner_dep.get_variable(pkgconfig: 'wayland_scanner'))",
+                                "wayland_scanner_for_build = find_program('wayland-scanner')")
 
     def build(self):
         self._patch_sources()
@@ -94,7 +102,7 @@ class WaylandConan(ConanFile):
         meson.build()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self.source_folder)
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
         pkg_config_dir = os.path.join(self.package_folder, "lib", "pkgconfig")
@@ -125,6 +133,9 @@ class WaylandConan(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
         self.buildenv_info.prepend_path("PATH", bindir)
         self.runenv_info.prepend_path("PATH", bindir)
+        # TODO: Remove in Conan 2.0 where Environment class will be required.
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.env_info.PATH.append(bindir)
 
         if self.options.enable_libraries:
             self.cpp_info.components["wayland-server"].libs = ["wayland-server"]
@@ -136,10 +147,6 @@ class WaylandConan(ConanFile):
             if self.version >= Version("1.21.0") and self.settings.os == "Linux":
                 self.cpp_info.components["wayland-server"].system_libs += ["rt"]
             self.cpp_info.components["wayland-server"].set_property("component_version", self.version)
-
-            # todo Remove in Conan version 1.50.0 where these are set by default for the PkgConfigDeps generator.
-            self.cpp_info.components["wayland-server"].includedirs = ["include"]
-            self.cpp_info.components["wayland-server"].libdirs = ["lib"]
 
             pkgconfig_variables = {
                 'datarootdir': '${prefix}/res',
@@ -159,10 +166,6 @@ class WaylandConan(ConanFile):
                 self.cpp_info.components["wayland-client"].system_libs += ["rt"]
             self.cpp_info.components["wayland-client"].set_property("component_version", self.version)
 
-            # todo Remove in Conan version 1.50.0 where these are set by default for the PkgConfigDeps generator.
-            self.cpp_info.components["wayland-client"].includedirs = ["include"]
-            self.cpp_info.components["wayland-client"].libdirs = ["lib"]
-            
             pkgconfig_variables = {
                 'datarootdir': '${prefix}/res',
                 'pkgdatadir': '${datarootdir}/wayland',
@@ -177,24 +180,16 @@ class WaylandConan(ConanFile):
             self.cpp_info.components["wayland-cursor"].requires = ["wayland-client"]
             self.cpp_info.components["wayland-cursor"].set_property("component_version", self.version)
 
-            # todo Remove in Conan version 1.50.0 where these are set by default for the PkgConfigDeps generator.
-            self.cpp_info.components["wayland-cursor"].includedirs = ["include"]
-            self.cpp_info.components["wayland-cursor"].libdirs = ["lib"]
-
             self.cpp_info.components["wayland-egl"].libs = ["wayland-egl"]
             self.cpp_info.components["wayland-egl"].set_property("pkg_config_name", "wayland-egl")
             self.cpp_info.components["wayland-egl"].names["pkg_config"] = "wayland-egl"
             self.cpp_info.components["wayland-egl"].requires = ["wayland-client"]
             self.cpp_info.components["wayland-egl"].set_property("component_version", "18.1.0")
 
-            # todo Remove in Conan version 1.50.0 where these are set by default for the PkgConfigDeps generator.
-            self.cpp_info.components["wayland-egl"].includedirs = ["include"]
-            self.cpp_info.components["wayland-egl"].libdirs = ["lib"]
-
             self.cpp_info.components["wayland-egl-backend"].names["pkg_config"] = "wayland-egl-backend"
             self.cpp_info.components["wayland-egl-backend"].set_property("pkg_config_name", "wayland-egl-backend")
             self.cpp_info.components["wayland-egl-backend"].set_property("component_version", "3")
 
-            # todo Remove in Conan version 1.50.0 where these are set by default for the PkgConfigDeps generator.
-            self.cpp_info.components["wayland-egl-backend"].includedirs = ["include"]
-            self.cpp_info.components["wayland-egl-backend"].libdirs = ["lib"]
+            bindir = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bindir))
+            self.env_info.PATH.append(bindir)

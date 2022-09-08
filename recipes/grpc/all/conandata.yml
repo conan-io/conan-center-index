@@ -1,32 +1,26 @@
 sources:
+  "1.48.0":
+    url: "https://github.com/grpc/grpc/archive/v1.48.0.tar.gz"
+    sha256: "9b1f348b15a7637f5191e4e673194549384f2eccf01fcef7cc1515864d71b424"
   "1.47.1":
     url: "https://github.com/grpc/grpc/archive/v1.47.1.tar.gz"
     sha256: "ba7c36989ad8a52c813adeebb0c65869283448f496dbb2868c75f69941dec6a9"
-  "1.47.0":
-    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.47.0.tar.gz"
-    sha256: "271bdc890bf329a8de5b65819f0f9590a5381402429bca37625b63546ed19e54"
   "1.46.3":
     url: "https://github.com/grpc/grpc/archive/refs/tags/v1.46.3.tar.gz"
     sha256: "d6cbf22cb5007af71b61c6be316a79397469c58c82a942552a62e708bce60964"
-  "1.45.2":
-    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.45.2.tar.gz"
-    sha256: "e18b16f7976aab9a36c14c38180f042bb0fd196b75c9fd6a20a2b5f934876ad6"
-  "1.44.0":
-    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.44.0.tar.gz"
-    sha256: "8c05641b9f91cbc92f51cc4a5b3a226788d7a63f20af4ca7aaca50d92cc94a0d"
 patches:
+  "1.48.0":
+    - patch_file: "patches/v1.48.x/001-disable-cppstd-override.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/v1.48.x/002-consume-protos-from-requirements.patch"
+      base_path: "source_subfolder"
   "1.47.1":
     - patch_file: "patches/v1.47.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
-  "1.47.0":
-    - patch_file: "patches/v1.47.x/001-disable-cppstd-override.patch"
+    - patch_file: "patches/v1.47.x/002-consume-protos-from-requirements.patch"
       base_path: "source_subfolder"
   "1.46.3":
-    - patch_file: "patches/v1.44.x/001-disable-cppstd-override.patch"
+    - patch_file: "patches/v1.46.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
-  "1.45.2":
-    - patch_file: "patches/v1.44.x/001-disable-cppstd-override.patch"
-      base_path: "source_subfolder"
-  "1.44.0":
-    - patch_file: "patches/v1.44.x/001-disable-cppstd-override.patch"
+    - patch_file: "patches/v1.46.x/002-consume-protos-from-requirements.patch"
       base_path: "source_subfolder"

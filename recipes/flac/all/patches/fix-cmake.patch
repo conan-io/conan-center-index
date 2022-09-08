@@ -5,7 +5,7 @@
  
  if(WITH_OGG)
 -    find_package(OGG REQUIRED)
-+    find_package(Ogg REQUIRED)
++    find_package(Ogg REQUIRED CONFIG)
  endif()
  
  if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")

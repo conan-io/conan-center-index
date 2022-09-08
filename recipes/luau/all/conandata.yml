@@ -1,9 +1,49 @@
 sources:
+  "0.541":
+    url: "https://github.com/Roblox/luau/archive/0.541.tar.gz"
+    sha256: "02d50b8c0396a353ed641a61959851d6858607d535ed7373478b8fbc2a508eba"
+  "0.540":
+    url: "https://github.com/Roblox/luau/archive/0.540.tar.gz"
+    sha256: "84b3e52b3b0ccf4d5bc0e0c04055f3a9b2f045c1281e203a858335a6fe76b0ff"
+  "0.539":
+    url: "https://github.com/Roblox/luau/archive/0.539.tar.gz"
+    sha256: "d0a33bbafc88d6d89f23e43229e523b117cd761f1fdbd86977800b5725cc647f"
+  "0.538":
+    url: "https://github.com/Roblox/luau/archive/0.538.tar.gz"
+    sha256: "8a1240e02a7daacf1e5cff249040a3298c013157fc496c66adce6dcb21cc30be"
+  "0.537":
+    url: "https://github.com/Roblox/luau/archive/0.537.tar.gz"
+    sha256: "24122d3192083b2133de47d8039fb744b8007c6667fc1b6f254a2a8d72e15d53"
   "0.536":
     url: "https://github.com/Roblox/luau/archive/refs/tags/0.536.tar.gz"
     sha256: "e6de36e83e9c537d92bcc94852ab498e3c15a310fd2c4cc4e21c616d8ae1a84f"
 
 patches:
+  "0.541":
+    - patch_file: "patches/0.536-0001-fix-cmake.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0.536-0002-rename-lerp.patch"
+      base_path: "source_subfolder"
+  "0.540":
+    - patch_file: "patches/0.536-0001-fix-cmake.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0.536-0002-rename-lerp.patch"
+      base_path: "source_subfolder"
+  "0.539":
+    - patch_file: "patches/0.536-0001-fix-cmake.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0.536-0002-rename-lerp.patch"
+      base_path: "source_subfolder"
+  "0.538":
+    - patch_file: "patches/0.536-0001-fix-cmake.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0.536-0002-rename-lerp.patch"
+      base_path: "source_subfolder"
+  "0.537":
+    - patch_file: "patches/0.536-0001-fix-cmake.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0.536-0002-rename-lerp.patch"
+      base_path: "source_subfolder"
   "0.536":
     - patch_file: "patches/0.536-0001-fix-cmake.patch"
       base_path: "source_subfolder"

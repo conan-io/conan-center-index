@@ -1,16 +1,4 @@
 sources:
-  "3.15.7":
-    sha256: 71999d8a14c9b51708847371250a61533439a7331eb7702ac105cfb3cb1be54b
-    url: https://cmake.org/files/v3.15/cmake-3.15.7.tar.gz
-  "3.16.9":
-    sha256: 1708361827a5a0de37d55f5c9698004c035abb1de6120a376d5d59a81630191f
-    url: https://cmake.org/files/v3.16/cmake-3.16.9.tar.gz
-  "3.17.5":
-    sha256: 8c3083d98fd93c1228d5e4e40dbff2dd88f4f7b73b9fa24a2938627b8bc28f1a
-    url: https://cmake.org/files/v3.17/cmake-3.17.5.tar.gz
-  "3.18.6":
-    sha256: 124f571ab70332da97a173cb794dfa09a5b20ccbb80a08e56570a500f47b6600
-    url: https://github.com/Kitware/CMake/releases/download/v3.18.6/cmake-3.18.6.tar.gz
   "3.19.8":
     sha256: 09b4fa4837aae55c75fb170f6a6e2b44818deba48335d1969deddfbb34e30369
     url: https://github.com/Kitware/CMake/releases/download/v3.19.8/cmake-3.19.8.tar.gz
@@ -23,12 +11,12 @@ sources:
   "3.22.5":
     sha256: d3987c3f7759fa0a401c5fcd5076be44a19613bfaa8baee1b5d1835750dc5375
     url: https://github.com/Kitware/CMake/releases/download/v3.22.5/cmake-3.22.5.tar.gz
-  "3.23.0":
-    sha256: 5ab0a12f702f44013be7e19534cd9094d65cc9fe7b2cd0f8c9e5318e0fe4ac82
-    url: https://github.com/Kitware/CMake/releases/download/v3.23.0/cmake-3.23.0.tar.gz
-  "3.23.1":
-    sha256: 33fd10a8ec687a4d0d5b42473f10459bb92b3ae7def2b745dc10b192760869f3
-    url: https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1.tar.gz
-  "3.23.2":
-    sha256: f316b40053466f9a416adf981efda41b160ca859e97f6a484b447ea299ff26aa
-    url: https://github.com/Kitware/CMake/releases/download/v3.23.2/cmake-3.23.2.tar.gz
+  "3.23.3":
+    url: "https://github.com/Kitware/CMake/archive/v3.23.3.tar.gz"
+    sha256: "013f688b7da463dcd1e7afde769081af21cb24365aefc246761cfb2e04cd2872"
+  "3.24.0":
+    url: "https://github.com/Kitware/CMake/archive/v3.24.0.tar.gz"
+    sha256: "d71f48192a0747c0bd46e8f2128773adf3d650d3900a9b03bd2ee5058619bafd"
+  "3.24.1":
+    url: "https://github.com/Kitware/CMake/archive/v3.24.1.tar.gz"
+    sha256: "fe7fd2eb0ecee1c0ad829bca77ac7b516fdb7a982e862fc47ef8df54e714dbc3"

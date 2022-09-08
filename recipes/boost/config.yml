@@ -1,6 +1,4 @@
 versions:
-    1.69.0:
-        folder: all
     1.70.0:
         folder: all
     1.71.0:
