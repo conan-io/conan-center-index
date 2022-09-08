@@ -15,4 +15,4 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             # self.run checks the command exit code
             # the tool must be available on PATH
-            self.run("tool --path", env="conanrun")
+            self.run("tool --version", env="conanrun")
