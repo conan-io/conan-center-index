@@ -3,8 +3,9 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools import files
 from conan.tools.files import apply_conandata_patches
-from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.apple import is_apple_os
+from conan.tools.scm import Version
 
 import os
 
@@ -83,6 +84,16 @@ class LibxlsConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        if is_msvc(self) and Version(self.settings.compiler.version).major < 16:
+            files.replace_in_file(self,
+                os.path.join(self.source_folder, "include", "libxls", "locale.h"),
+                "restrict",
+                "__restrict")
+            files.replace_in_file(self,
+                os.path.join(self.source_folder, "src", "locale.c"),
+                "restrict",
+                "__restrict")
+
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
