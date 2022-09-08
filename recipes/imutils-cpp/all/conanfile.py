@@ -73,6 +73,7 @@ class ImutilsCppConan(ConanFile):
 
     def generate(self):
         toolchain = CMakeToolchain(self)
+        toolchain.cache_variables["CMAKE_CXX_STANDARD"] = self._minimum_cpp_standard
         toolchain.generate()
 
         deps = CMakeDeps(self)
