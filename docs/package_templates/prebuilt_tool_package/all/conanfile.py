@@ -12,7 +12,7 @@ class PackageConan(ConanFile):
     license = "" # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/project/package"
-    topics = ("topic1", "topic2", "topic3", "pre-built") # no "conan"  and project name in topics
+    topics = ("topic1", "topic2", "topic3", "pre-built") # no "conan"  and project name in topics. Use "pre-built" for tooling packages
     settings = "os", "arch", "compiler", "build_type" # even for pre-built executables
 
     # not needed but supress warning message from conan commands
