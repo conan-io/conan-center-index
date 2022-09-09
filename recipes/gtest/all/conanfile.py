@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rm, rmdir
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag, check_min_vs
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, is_msvc_static_runtime, check_min_vs
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.50.0"
@@ -86,13 +86,13 @@ class GTestConan(ConanFile):
         del self.info.options.no_main
 
     def validate(self):
-        if self.options.shared and (is_msvc(self) or self._is_clang_cl) and "MT" in msvc_runtime_flag(self):
+        if is_msvc_static_runtime(self) and self.info.options.shared(self):
             raise ConanInvalidConfiguration(
                 "gtest:shared=True with compiler=\"Visual Studio\" is not "
                 "compatible with compiler.runtime=MT/MTd"
             )
 
-        if self.settings.compiler.get_safe("cppstd"):
+        if self.info.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
 
         def loose_lt_semver(v1, v2):
@@ -101,10 +101,11 @@ class GTestConan(ConanFile):
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if min_version and loose_lt_semver(str(self.settings.compiler.version), min_version):
+        compiler = self.info.settings.compiler
+        min_version = self._minimum_compilers_version.get(str(compiler))
+        if min_version and loose_lt_semver(str(compiler.version), min_version):
             raise ConanInvalidConfiguration(
-                f"{self.name} requires {self.settings.compiler} {min_version}. The current compiler is {self.settings.compiler} {self.settings.compiler.version}."
+                f"{self.ref} requires {compiler} {min_version}. The current compiler is {compiler} {compiler.version}."
             )
 
     def layout(self):
