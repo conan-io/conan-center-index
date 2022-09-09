@@ -74,7 +74,7 @@ class TensorflowLiteConan(ConanFile):
         self.requires("vulkan-headers/1.3.221")
         if self.settings.arch in ("x86", "x86_64"):
             self.requires("intel-neon2sse/cci.20210225")
-        if self.options.with_ruy or True: # Upstream always calls find_package
+        if self.options.with_ruy or True: # FIXME: Upstream always calls find_package
             self.requires("ruy/cci.20220628")
         if self.options.with_xnnpack:
             self.requires("xnnpack/cci.20220621")
