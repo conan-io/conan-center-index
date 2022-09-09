@@ -177,6 +177,17 @@ No. Some projects provide more than a simple library, but also applications. For
 When a non standard open-source license is used, we have decided to use `LicenseRef-` as a prefix, followed by the name of the file which contains a custom license.
 See [the reviewing guidlines](reviewing.md#license-attribute) for more details.
 
+## How do I flag a problem to a recipe consumer?
+
+Regardless of why, if the recipe detects a problem where binaries might not be generated correctly, an exception must be raised. This to prevent the publishing
+incorrect packages which do not work as intented. Use `ConanInvalidConfiguration` which is specially support in ConanCenter.
+
+```py
+raise ConanInvalidConfiguration(f"The project {self.ref} requires liba.enable_feature=True.")
+```
+
+You should not be using the `self.output.warn` and it is not enough to alter consumers or stop the build service.
+
 ## Why is a `build.check_min_cppstd` call not enough?
 
 Very often C++ projects require a minimum standard version, such as 14 or 17, in order to compile. Conan offers tools which enable checking the relevant setting is enabled and above this support for a certain version is present. Otherwise, it uses the compiler's default.
