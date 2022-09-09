@@ -27,6 +27,10 @@ class CryptoPPConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
             copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
@@ -65,6 +69,8 @@ class CryptoPPConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_DOCUMENTATION"] = False
         tc.variables["USE_INTERMEDIATE_OBJECTS_TARGET"] = False
+        if self._is_msvc:
+            tc.variables["DISABLE_ASM"] = str(self.settings.arch).startswith("arm")
         if self.settings.os == "Android":
             tc.variables["CRYPTOPP_NATIVE_ARCH"] = True
         if self.settings.os == "Macos" and self.settings.arch == "armv8" and Version(self.version) <= "8.4.0":
