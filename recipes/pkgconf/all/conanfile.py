@@ -59,7 +59,7 @@ class PkgConfConan(ConanFile):
             del self.info.settings.compiler
 
     def build_requirements(self):
-        self.tool_requires("meson/0.63.1")
+        self.tool_requires("meson/0.63.2")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -133,22 +133,20 @@ class PkgConfConan(ConanFile):
             self.cpp_info.includedirs = []
             self.cpp_info.libdirs = []
 
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH env var: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
-
         exesuffix = ".exe" if self.settings.os == "Windows" else ""
-        pkg_config = os.path.join(bindir, "pkgconf" + exesuffix).replace("\\", "/")
-        self.output.info("Setting PKG_CONFIG env var: {}".format(pkg_config))
+        pkg_config = os.path.join(self.package_folder, "bin", f"pkgconf{exesuffix}").replace("\\", "/")
+        self.conf_info.define("tools.gnu:pkg_config", pkg_config)
         self.buildenv_info.define_path("PKG_CONFIG", pkg_config)
-        self.env_info.PKG_CONFIG = pkg_config # remove in conan v2?
 
         automake_extra_includes = unix_path(self, os.path.join(self.package_folder , "bin", "aclocal").replace("\\", "/"))
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES env var: {}".format(automake_extra_includes))
         self.buildenv_info.prepend_path("AUTOMAKE_CONAN_INCLUDES", automake_extra_includes)
-        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(automake_extra_includes) # remove in conan v2?
 
         # TODO: to remove in conan v2 once pkg_config generator removed
+        bindir = os.path.join(self.package_folder, "bin")
+        self.env_info.PATH.append(bindir)
+        self.env_info.PKG_CONFIG = pkg_config
+        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(automake_extra_includes)
         if self.options.enable_lib:
             self.cpp_info.names["pkg_config"] = "libpkgconf"
 
