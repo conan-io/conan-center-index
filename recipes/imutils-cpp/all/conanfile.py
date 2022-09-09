@@ -100,3 +100,7 @@ class ImutilsCppConan(ConanFile):
 
         self.cpp_info.requires.append("opencv::opencv")
         self.cpp_info.requires.append("libcurl::libcurl")
+
+        # TODO: Remove after Conan 2.0
+        self.cpp_info.names["cmake_find_package"] = "imutils_cpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "imutils_cpp"
