@@ -1,6 +1,6 @@
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 import functools
 import os
 
@@ -51,6 +51,8 @@ class TclConan(ConanFile):
         self.requires("zlib/1.2.12")
 
     def validate(self):
+        if is_msvc(self) and self.options.shared != ("MD" in msvc_runtime_flag(self)):
+            raise ConanInvalidConfiguration(f"compiler.runtime = {self.settings.get_safe('compiler.runtime')} while tcl:shared = {self.options.shared}")
         if self.settings.os not in ("FreeBSD", "Linux", "Macos", "Windows"):
             raise ConanInvalidConfiguration("Unsupported os")
 
@@ -230,6 +232,8 @@ class TclConan(ConanFile):
         self.output.info("Setting TCL_LIBRARY environment variable to {}".format(tcl_library))
         self.env_info.TCL_LIBRARY = tcl_library
         self.runenv_info.define_path("TCL_LIBRARY", tcl_library)
+        self.conf_info.define("user.tcl.build:library", tcl_library)
+        self.user_info.tcl_library = tcl_library
 
         tcl_root = self.package_folder
         self.output.info("Setting TCL_ROOT environment variable to {}".format(tcl_root))
@@ -242,7 +246,8 @@ class TclConan(ConanFile):
         self.env_info.TCLSH = tclsh
         self.runenv_info.define_path("TCLSH", tclsh)
         self.user_info.tclsh = tclsh
-        self.conf_info.define("tools.tcl:tclsh", tclsh)
+        self.conf_info.define("user.tcl.build:sh", tclsh)
+        self.user_info.tclsh = tclsh
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Adding PATH environment variable: {}".format(bindir))
