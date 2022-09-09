@@ -3,7 +3,7 @@
 
 using namespace boost;
 
-enum error_t
+enum custom_error_t
 {
   err1,
   err2,
@@ -25,7 +25,7 @@ leaf::result<int> g(int a, int b)
   int sum = a + b;
   if (sum == 20)
   {
-    return leaf::new_error(error_t::err2);
+    return leaf::new_error(custom_error_t::err2);
   }
   return sum;
 }
@@ -40,12 +40,12 @@ int main()
 
         return g(v1, v2);
       },
-      [](leaf::match<error_t, error_t::err1, error_t::err3>) -> leaf::result<int>
+      [](leaf::match<custom_error_t, custom_error_t::err1, custom_error_t::err3>) -> leaf::result<int>
       {
         exit(1);
         return -1;
       },
-      [](error_t e) -> leaf::result<int>
+      [](custom_error_t e) -> leaf::result<int>
       {
         printf("Error value [%d] handled\n", static_cast<int>(e));
         return 17;
