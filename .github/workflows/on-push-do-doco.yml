@@ -1,5 +1,7 @@
 name: docs_markdown_toc
 on:
+  workflow_dispatch:
+    inputs: {}
   push:
     branches:
       - master

@@ -1,0 +1,4 @@
+sources:
+  "1.0.1":
+    sha256: 2860cb85febf37220f75cef5b499148bafc9f5541fe1298e11b0c169bb3f31ac
+    url: https://github.com/BowenFu/matchit.cpp/archive/v1.0.1.tar.gz

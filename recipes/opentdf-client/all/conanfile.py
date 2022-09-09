@@ -1,10 +1,10 @@
+from conans import CMake
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conans import CMake, tools
 from conan.tools.files import get, copy, patch
-# TODO: Replace by from conan.tools.build import check_min_cppstd after 1.50
-from conans.tools import check_min_cppstd
+from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc_static_runtime
 import functools
 import os
 
@@ -38,7 +38,7 @@ class OpenTDFConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "17",
+            "Visual Studio": "17" if Version(self.version) < "1.1.5" else "16",
             "msvc": "19.22",
             "gcc": "7.5.0",
             "clang": "12",
@@ -60,6 +60,8 @@ class OpenTDFConan(ConanFile):
             if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(f"{self.name} requires C++{self._minimum_cpp_standard} support."
                                                  "The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
+        if is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration("this package can not be built with MT or MTd at this time")
 
     def requirements(self):
         self.requires("openssl/1.1.1q")

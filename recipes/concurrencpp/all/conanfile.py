@@ -1,10 +1,13 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 from conan.tools.microsoft import is_msvc
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.50.0"
 
 
 class ConcurrencppConan(ConanFile):
@@ -14,7 +17,7 @@ class ConcurrencppConan(ConanFile):
     topics = ("scheduler", "coroutines", "concurrency", "tasks", "executors", "timers", "await", "multithreading")
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -24,20 +27,9 @@ class ConcurrencppConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -49,52 +41,57 @@ class ConcurrencppConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
-        return {"Visual Studio": "16", "msvc": "192", "clang": "11"}
+        return {
+            "Visual Studio": "16",
+            "msvc": "192",
+            "clang": "11",
+        }
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "20")
-        if self.options.shared and is_msvc(self):
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, "20")
+        if self.info.options.shared and is_msvc(self):
             # see https://github.com/David-Haim/concurrencpp/issues/75
             raise ConanInvalidConfiguration("concurrencpp does not support shared builds with Visual Studio")
-        if self.settings.compiler == "gcc":
+        if self.info.settings.compiler == "gcc":
             raise ConanInvalidConfiguration("gcc is not supported by concurrencpp")
 
         minimum_version = self._minimum_compilers_version.get(
-            str(self.settings.compiler), False
+            str(self.info.settings.compiler), False
         )
         if not minimum_version:
             self.output.warn(
                 "concurrencpp requires C++20. Your compiler is unknown. Assuming it supports C++20."
             )
-        elif tools.Version(self.settings.compiler.version) < minimum_version:
+        elif Version(self.info.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 "concurrencpp requires clang >= 11 or Visual Studio >= 16.8.2 as a compiler!"
             )
-        if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libc++":
+        if self.info.settings.compiler == "clang" and self.info.settings.compiler.libcxx != "libc++":
             raise ConanInvalidConfiguration("libc++ required")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
-    def package(self):        
-        cmake = self._configure_cmake()
+    def package(self):
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "concurrencpp")
