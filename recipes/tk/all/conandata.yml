@@ -1,4 +1,7 @@
 sources:
+  "8.6.11":
+    url: "https://prdownloads.sourceforge.net/tcl/tk8.6.11-src.tar.gz"
+    sha256: "5228a8187a7f70fa0791ef0f975270f068ba9557f57456f51eb02d9d4ea31282"
   "8.6.10":
     url: "https://prdownloads.sourceforge.net/tcl/tk8.6.10-src.tar.gz"
     sha256: "63df418a859d0a463347f95ded5cd88a3dd3aaa1ceecaeee362194bc30f3e386"
