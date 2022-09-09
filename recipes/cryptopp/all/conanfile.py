@@ -128,9 +128,6 @@ class CryptoPPConan(ConanFile):
 
     def package(self):
         copy(self, "License.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        if Version(self.version) >= "8.7.0":
-            copy(self, "LICENSE", src=os.path.join(self.source_folder, "cryptopp-cmake"),
-                dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         if Version(self.version) < "8.7.0":
