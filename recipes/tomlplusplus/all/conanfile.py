@@ -53,7 +53,7 @@ class TomlPlusPlusConan(ConanFile):
             raise ConanInvalidConfiguration(f"The compiler {compiler} is supported in version >= 2.3.0")
 
         if is_msvc(self) and Version(self.version) == "2.1.0":
-                raise ConanInvalidConfiguration(f"The current compiler {compiler} is unable to build version 2.1.0")
+            raise ConanInvalidConfiguration(f"The current compiler {compiler} is unable to build version 2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
