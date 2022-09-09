@@ -57,6 +57,7 @@ class TclConan(ConanFile):
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not is_msvc(self) and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
+        self.tool_requires("automake/1.16.5")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -228,15 +229,20 @@ class TclConan(ConanFile):
         tcl_library = os.path.join(self.package_folder, "lib", "{}{}".format(self.name, ".".join(self.version.split(".")[:2])))
         self.output.info("Setting TCL_LIBRARY environment variable to {}".format(tcl_library))
         self.env_info.TCL_LIBRARY = tcl_library
+        self.runenv_info.define_path("TCL_LIBRARY", tcl_library)
 
         tcl_root = self.package_folder
         self.output.info("Setting TCL_ROOT environment variable to {}".format(tcl_root))
         self.env_info.TCL_ROOT = tcl_root
+        self.runenv_info.define_path("TCL_ROOT", tcl_root)
 
         tclsh_list = list(filter(lambda fn: fn.startswith("tclsh"), os.listdir(os.path.join(self.package_folder, "bin"))))
         tclsh = os.path.join(self.package_folder, "bin", tclsh_list[0])
         self.output.info("Setting TCLSH environment variable to {}".format(tclsh))
         self.env_info.TCLSH = tclsh
+        self.runenv_info.define_path("TCLSH", tclsh)
+        self.user_info.tclsh = tclsh
+        self.conf_info.define("tools.tcl:tclsh", tclsh)
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Adding PATH environment variable: {}".format(bindir))
