@@ -101,8 +101,6 @@ class TestPackageConan(ConanFile):
         for src in self.exports_sources:
             shutil.copy(path.join(self.source_folder, src), self.build_folder)
 
-        # self.run(f". {_env_activate_sh_path(self)} && autoreconf --verbose", run_environment=True, win_bash=self._settings_build.os == "Windows")
-
         # Workaround for conan-io/conan#11975
         autotools = AutotoolsWinBash(self)
         autotools.autoreconf()

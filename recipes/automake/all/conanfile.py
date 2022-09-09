@@ -1,10 +1,10 @@
 from functools import lru_cache
-from os import environ, path
+from os import environ, path, listdir
 
 from conan import ConanFile
 from conan.errors import ConanException
 from conan.tools.build import build_jobs
-from conan.tools.files import get, apply_conandata_patches, copy, rmdir, replace_in_file
+from conan.tools.files import get, apply_conandata_patches, rmdir, copy, replace_in_file, rename
 from conan.tools.gnu import Autotools
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path
@@ -173,6 +173,14 @@ class AutomakeConan(ConanFile):
         # KB-H013 we're packaging an application, place everything under bin
         autotools.install(args=[f"DESTDIR={unix_path(self, path.join(self.package_folder, 'bin'))}"])
 
+        if self._settings_build.os == "Windows":
+            bin_dir = path.join(self.package_folder, "bin", "bin")
+            for filename in listdir(bin_dir):
+                fullpath = path.join(bin_dir, filename)
+                if not path.isfile(fullpath):
+                    continue
+                rename(self, fullpath, f"{fullpath}.exe")
+
         copy(self, "COPYING*", src=self.source_folder, dst=path.join(self.package_folder, "licenses"))
         rmdir(self, path.join(self._datarootdir, "info"))
         rmdir(self, path.join(self._datarootdir, "man"))
@@ -192,23 +200,24 @@ class AutomakeConan(ConanFile):
         self.runenv_info.prepend_path("PATH", bin_dir)
         self.env_info.PATH.append(bin_dir)
 
-        for var in [("ACLOCAL", path.join(bin_dir, "aclocal")),
+        bin_ext = ".exe" if self.settings.os == "Windows" else ""
+        for var in [("ACLOCAL", path.join(bin_dir, f"aclocal{bin_ext}")),
                     ("AUTOMAKE_DATADIR", self._datarootdir),
                     ("AUTOMAKE_LIBDIR", self._automake_libdir),
                     ("AUTOMAKE_PERLLIBDIR", self._automake_libdir),
-                    ("AUTOMAKE", path.join(bin_dir, "automake"))]:
+                    ("AUTOMAKE", path.join(bin_dir, f"automake{bin_ext}"))]:
             self._set_env(*var)
 
         compile_bin = path.join(self._automake_libdir, "compile")
         self.output.info(f"Define path to `compile` binary in user_info as: {compile_bin}")
         self.user_info.compile = compile_bin
-        compile_conf_key = "user.automake:compile"
+        compile_conf_key = "tools.automake:compile"
         self.output.info(f"Defining path to `compile` binary in configuration as `{compile_conf_key}` with value: {compile_bin}")
         self.conf_info.define(compile_conf_key, compile_bin)
 
         ar_lib_bin = path.join(self._automake_libdir, "ar-lib")
         self.output.info(f"Define path to `ar_lib` binary in user_info as: {ar_lib_bin}")
         self.user_info.ar_lib = ar_lib_bin
-        ar_lib_conf_key = "user.automake:ar-lib"
+        ar_lib_conf_key = "tools.automake:ar-lib"
         self.output.info(f"Defining path to `ar-lib` binary in configuration as `{ar_lib_conf_key}` with value: {ar_lib_bin}")
         self.conf_info.define(ar_lib_conf_key, ar_lib_bin)
