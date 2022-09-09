@@ -140,7 +140,6 @@ class XkbcommonConan(ConanFile):
 
         if Version(self.version) >= "1.0.0":
             bindir = os.path.join(self.package_folder, "bin")
-            self.buildenv_info.prepend_path("PATH", bindir)
             self.output.info(f"Appending PATH environment variable: {bindir}")
             self.env_info.PATH.append(bindir)
 
