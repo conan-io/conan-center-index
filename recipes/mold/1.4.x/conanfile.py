@@ -2,6 +2,8 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
 
 class MoldConan(ConanFile):
     name = "mold"
@@ -18,6 +20,18 @@ class MoldConan(ConanFile):
     default_options = {
         "with_mimalloc": False,
     }
+
+    def validate(self):
+        if self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration('Mold is a build tool, specify mold:build_type=Release in your build profile, see https://github.com/conan-io/conan-center-index/pull/11536#issuecomment-1195607330')
+        if self.settings.compiler in ["gcc", "clang", "intel-cc"] and self.settings.compiler.libcxx != "libstdc++11":
+            raise ConanInvalidConfiguration('Mold can only be built with libstdc++11; specify mold:compiler.libcxx=libstdc++11 in your build profile')
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "10":
+            raise ConanInvalidConfiguration("GCC version 10 or higher required")
+        if (self.settings.compiler == "clang" or self.settings.compiler == "apple-clang") and Version(self.settings.compiler.version) < "12":
+            raise ConanInvalidConfiguration("Clang version 12 or higher required")
+        if self.settings.compiler == "apple-clang" and "armv8" == self.settings.arch :
+            raise ConanInvalidConfiguration(f'{self.name} is still not supported by Mac M1.')
 
     def layout(self):
         cmake_layout(self, src_folder="src")
