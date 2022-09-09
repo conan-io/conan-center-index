@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake
+from conan.tools.build import cross_building
 import os
 import subprocess
 import re
@@ -30,7 +31,7 @@ class TestPackageConan(ConanFile):
             return os.path.join("bin", "test_package")
 
     def test(self):
-        if not tools.cross_building(self):
+        if not cross_building(self):
             self.run(self._test_executable, run_environment=True)
         else:
             # We will dump information for the generated executable
