@@ -783,6 +783,10 @@ class VtkConan(ConanFile):
                     "VTK::utf8":     "utfcpp::utfcpp",
                     "VTK::zlib":     "zlib::zlib",
                     "VTK::doubleconversion": "double-conversion::double-conversion",
+
+                    # VTK::QtOpenGL doesn't currently exist in VTK, I have added this.
+                    # Note that the component name is qt::qtOpenGL, different to CMake's target name
+                    "VTK::QtOpenGL": "qt::qtOpenGL",
                     }
 
             if self.options.group_enable_Rendering:
@@ -793,6 +797,16 @@ class VtkConan(ConanFile):
             # new way - parse the modules.json file and generate a list of components
             modfile = load(os.path.join(self.package_folder,"modules.json"))
             vtkmods = json.loads(modfile)
+
+            # VTK::QtOpenGL doesn't currently exist in VTK, I have added this.
+            vtkmods["modules"]["VTK::QtOpenGL"] = {
+                    "library_name": "EXTERNAL_LIB",
+                    "depends": [],
+                    "private_depends": [],
+                    }
+
+            # GUISupportQt requires Qt6::QtOpenGL as a dependency
+            vtkmods["modules"]["VTK::GUISupportQt"]["depends"].append("VTK::QtOpenGL")
 
             self.output.info("All module keys: {}".format(vtkmods["modules"].keys()))
 
