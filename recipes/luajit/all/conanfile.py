@@ -90,6 +90,8 @@ class LuajitConan(ConanFile):
                 replace_in_file(self, makefile,
                                       'TARGET_O= $(LUAJIT_A)',
                                       'TARGET_O= $(LUAJIT_SO)')
+            if "clang" in str(self.settings.compiler):
+                replace_in_file(self, makefile, 'CC= $(DEFAULT_CC)', 'CC= clang')
 
     @property
     def _macosx_deployment_target(self):
