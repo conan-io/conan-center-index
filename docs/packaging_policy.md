@@ -117,7 +117,7 @@ ConanCenter supports many combinations, these are outline in the [supported conf
 * `shared` (with values `True` or `False`). The CI inspects the recipe looking for this option. The **default should be `shared=False`** and will
    generate all the configurations with values `shared=True` and `shared=False`.
 
-   > **Note**: The CI applies `shared=True` only to the package being built, while every other requirement will.
+   > **Note**: The CI applies `shared=True` only to the package being built, while every other requirement will. It's important to keep this in mind when trying to consume shared packages from ConanCenter.
    > It's important to keep this in mind when trying to consume shared packages from ConanCenter
    > as their requirements were linked inside the shared library. See [FAQs](faqs.md#how-to-consume-a-graph-of-shared-libraries) for more information.
 
