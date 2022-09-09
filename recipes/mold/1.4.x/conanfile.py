@@ -12,6 +12,12 @@ class MoldConan(ConanFile):
     topics = ("mold", "ld", "linkage", "compilation")
 
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "with_mimalloc": [True, False],
+    }
+    default_options = {
+        "with_mimalloc": False,
+    }
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -21,7 +27,8 @@ class MoldConan(ConanFile):
         self.requires("openssl/1.1.1q")
         self.requires("xxhash/0.8.1")
         self.requires("onetbb/2021.3.0")
-        self.requires("mimalloc/2.0.6")
+        if self.options.with_mimalloc:
+            self.requires("mimalloc/2.0.6")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -29,6 +36,7 @@ class MoldConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["MOLD_USE_MIMALLOC"] = self.options.with_mimalloc
         tc.generate()
 
     def build(self):
