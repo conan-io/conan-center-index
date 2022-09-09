@@ -29,6 +29,13 @@ sources:
       - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/5.15/5.15.5/single/qt-everywhere-opensource-src-5.15.5.tar.xz"
       - "https://ftp.fau.de/qtproject/archive/qt/5.15/5.15.5/single/qt-everywhere-opensource-src-5.15.5.tar.xz"
     sha256: "5a97827bdf9fd515f43bc7651defaf64fecb7a55e051c79b8f80510d0e990f06"
+  "5.15.6":
+    url:
+      - "https://download.qt.io/archive/qt/5.15/5.15.6/single/qt-everywhere-opensource-src-5.15.6.tar.xz"
+      - "https://qt-mirror.dannhauer.de/archive/qt/5.15/5.15.6/single/qt-everywhere-opensource-src-5.15.6.tar.xz"
+      - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/5.15/5.15.6/single/qt-everywhere-opensource-src-5.15.6.tar.xz"
+      - "https://ftp.fau.de/qtproject/archive/qt/5.15/5.15.6/single/qt-everywhere-opensource-src-5.15.6.tar.xz"
+    sha256: "ebc77d27934b70b25b3dc34fbec7c4471eb451848e891c42b32409ea30fe309f"
 patches:
   "5.15.2":
     - patch_file: "patches/aa2a39dea5.diff"
@@ -110,6 +117,29 @@ patches:
     - patch_file: "patches/0001-Find-fontconfig-using-pkg-config.patch"
       base_path: "qt5/qtwebengine/src/3rdparty"
   "5.15.5":
+    - patch_file: "patches/aa2a39dea5.diff"
+      base_path: "qt5/qtbase"
+    - patch_file: "patches/c72097e.diff"
+      base_path: "qt5/qtwebengine"
+    - patch_file: "patches/fix-macdeployqt.diff"
+      base_path: "qt5/qttools"
+    - patch_file: "patches/dece6f5.diff"
+      base_path: "qt5/qtbase"
+    - patch_file: "patches/QTBUG-98813.patch"
+      base_path: "qt5/qtwebengine/src/3rdparty"
+    - patch_file: "patches/d3396fb6fc.patch"
+      base_path: "qt5/qtwebengine/src/3rdparty"
+    - patch_file: "patches/107ed30ec5.patch"
+      base_path: "qt5/qtwebengine/src/3rdparty"
+    - patch_file: "patches/chromium-v8-missing-constexpr.patch"
+      base_path: "qt5/qtwebengine/src/3rdparty/chromium/v8"
+    - patch_file: "patches/chromium-skia-missing-iterator-include.patch"
+      base_path: "qt5/qtwebengine/src/3rdparty"
+    - patch_file: "patches/skia-cd397f3.diff"
+      base_path: "qt5/qtwebengine/src/3rdparty/chromium/third_party/skia"
+    - patch_file: "patches/0001-Find-fontconfig-using-pkg-config.patch"
+      base_path: "qt5/qtwebengine/src/3rdparty"
+  "5.15.6":
     - patch_file: "patches/aa2a39dea5.diff"
       base_path: "qt5/qtbase"
     - patch_file: "patches/c72097e.diff"
