@@ -39,8 +39,10 @@ class TestPackageConan(ConanFile):
     def build(self):
         copy(self, "libexample1.pc", src=self.source_folder, dst=self.generators_folder)
         autotools = Autotools(self)
+        self.win_bash = True
         autotools.autoreconf()
         autotools.configure()
+        self.win_bash = False
 
         if self.options["pkgconf"].enable_lib:
             cmake = CMake(self)
