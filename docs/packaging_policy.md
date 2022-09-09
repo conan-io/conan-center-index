@@ -131,7 +131,10 @@ ConanCenter supports many combinations, these are outline in the [supported conf
 
    def configure(self):
       if self.options.shared:
-         del self.options.fPIC
+         try:
+             del self.options.fPIC
+         except Exception:
+             pass
    ```
 
 * `header_only` (with values `True` or `False`). The **default should be `header_only=False`**. If the CI detects this option, it will generate all the
