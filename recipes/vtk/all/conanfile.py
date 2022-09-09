@@ -681,7 +681,12 @@ class VtkConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
+<<<<<<< HEAD
         # VTK installs the licenses under the share/licenses/VTK directory, move it
+=======
+        # VTK installs the licenses under the res/licenses/VTK directory, move it
+        # TODO hack due to Conan 1.50.0 bug #11597 ... change "None" to "res" when fixed.
+>>>>>>> vtk - fixes for copying modules.json into the right spot
         rename( os.path.join(self.package_folder,"share","licenses","VTK"),
                 os.path.join(self.package_folder,"licenses"))
 
@@ -698,7 +703,15 @@ class VtkConan(ConanFile):
 
         # make a copy of the modules.json, we use that in package_info
         # TODO where should this file live?  perhaps just in the base package folder?
+<<<<<<< HEAD
         self.copy("modules.json", src=self.build_folder, dst=self.package_folder, keep_path=False)
+=======
+        self.copy("modules.json",
+                dst=self.package_folder, # dst=os.path.join(self.package_folder), # ,"lib","conan"))
+                src=self.build_folder,   # src=os.path.join(self.build_folder,"modules.json"),
+                keep_path=False
+                )
+>>>>>>> vtk - fixes for copying modules.json into the right spot
 
         # create a cmake file with our special variables
         content = textwrap.dedent("""\
