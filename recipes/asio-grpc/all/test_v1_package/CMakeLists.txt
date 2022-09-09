@@ -6,7 +6,7 @@ conan_basic_setup(TARGETS)
 
 find_package(asio-grpc REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
+add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE asio-grpc::asio-grpc)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
@@ -30,5 +30,5 @@ else()
     OUT_DIR
     "${CMAKE_CURRENT_BINARY_DIR}/generated"
     PROTOS
-    "${CMAKE_CURRENT_LIST_DIR}/test.proto")
+    "${CMAKE_CURRENT_LIST_DIR}/../test_package/test.proto")
 endif()
