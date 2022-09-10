@@ -1,51 +1,46 @@
-from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-import contextlib
 import os
-import shutil
 
-required_conan_version = ">=1.36"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get, rm, rmdir, apply_conandata_patches
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
+
+required_conan_version = ">=1.51.3"
 
 
-class LibffiConan(ConanFile):
+class PackageConan(ConanFile):
     name = "libffi"
     description = "A portable, high level programming interface to various calling conventions"
-    topics = ("libffi", "runtime", "foreign-function-interface", "runtime-library")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sourceware.org/libffi/"
-    license = "MIT"
-
+    topics = ("libffi", "runtime", "foreign-function-interface", "runtime-library")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
+        "shared": False
+        ,
         "fPIC": True,
     }
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     @property
     def _settings_build(self):
+        # TODO: Remove for Conan v2
         return getattr(self, "settings_build", self.settings)
 
     @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
+    def win_bash(self):
+        return self._settings_build.os == "Windows"
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,44 +48,61 @@ class LibffiConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+
+    def layout(self):
+        basic_layout(self, src_folder="libffi")
+
+    def validate(self):
+        if self.info.settings.os not in ["Linux", "FreeBSD", "MacOS", "Windows"]:
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.info.settings.os}.")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-        self.build_requires("gnu-config/cci.20201022")
+        if self.win_bash and not os.environ.get("CONAN_BASH_PATH"):
+            self.tool_requires("msys2/cci.latest")
+        self.tool_requires("automake/1.16.5")
+        self.tool_requires("libtool/2.4.7")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        # Generate rpath friendly shared lib on macOS
-        configure_path = os.path.join(self._source_subfolder, "configure")
-        tools.replace_in_file(configure_path, "-install_name \\$rpath/", "-install_name @rpath/")
+    def generate(self):
+        yes_no = lambda v: "yes" if v else "no"
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.extend([
+            f"--enable-debug={yes_no(self.settings.build_type == 'Debug')}",
+            "--enable-builddir=no",
+            "--enable-docs=no",
+        ])
 
-        if tools.Version(self.version) < "3.3":
-            if self.settings.compiler == "clang" and tools.Version(str(self.settings.compiler.version)) >= 7.0:
-                # https://android.googlesource.com/platform/external/libffi/+/ca22c3cb49a8cca299828c5ffad6fcfa76fdfa77
-                sysv_s_src = os.path.join(self._source_subfolder, "src", "arm", "sysv.S")
-                tools.replace_in_file(sysv_s_src, "fldmiad", "vldmia")
-                tools.replace_in_file(sysv_s_src, "fstmiad", "vstmia")
-                tools.replace_in_file(sysv_s_src, "fstmfdd\tsp!,", "vpush")
+        if is_msvc(self):
+            build = "{}-{}-{}".format(
+                "x86_64" if self._settings_build.arch == "x86_64" else "i686",
+                "pc" if self._settings_build.arch == "x86" else "win64",
+                "mingw64")
+            host = "{}-{}-{}".format(
+                "x86_64" if self.settings.arch == "x86_64" else "i686",
+                "pc" if self.settings.arch == "x86" else "win64",
+                "mingw64")
+            tc.configure_args.append(f"--build={build}")
+            tc.configure_args.append(f"--host={host}")
 
-                # https://android.googlesource.com/platform/external/libffi/+/7748bd0e4a8f7d7c67b2867a3afdd92420e95a9f
-                tools.replace_in_file(sysv_s_src, "stmeqia", "stmiaeq")
-
-    @contextlib.contextmanager
-    def _build_context(self):
-        extra_env_vars = {}
-        if tools.os_info.is_windows and (self._is_msvc or self.settings.compiler == "clang") :
-            msvcc = tools.unix_path(os.path.join(self.source_folder, self._source_subfolder, "msvcc.sh"))
+        if is_msvc(self) or self.settings.compiler == "clang":
+            msvcc = unix_path(self, os.path.join(self.source_folder, "msvcc.sh"))
             msvcc_args = []
-            if self._is_msvc:
+            if is_msvc(self):
                 if self.settings.arch == "x86_64":
                     msvcc_args.append("-m64")
                 elif self.settings.arch == "x86":
@@ -99,87 +111,65 @@ class LibffiConan(ConanFile):
                 msvcc_args.append("-clang-cl")
 
             if msvcc_args:
-                msvcc = "{} {}".format(msvcc, " ".join(msvcc_args))
-            extra_env_vars.update(tools.vcvars_dict(self.settings))
-            extra_env_vars.update({
-                "INSTALL": tools.unix_path(os.path.join(self.source_folder, self._source_subfolder, "install-sh")),
-                "LIBTOOL": tools.unix_path(os.path.join(self.source_folder, self._source_subfolder, "ltmain.sh")),
-                "CC": msvcc,
-                "CXX": msvcc,
-                "LD": "link",
-                "CPP": "cl -nologo -EP",
-                "CXXCPP": "cl -nologo -EP",
-            })
-        with tools.environment_append(extra_env_vars):
-            yield
+                msvcc_args = " ".join(msvcc_args)
+                msvcc = f"{msvcc} {msvcc_args}"
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        yes_no = lambda v: "yes" if v else "no"
-        config_args = [
-            "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-        ]
-        self._autotools.defines.append("FFI_BUILDING")
-        if self.options.shared:
-            self._autotools.defines.append("FFI_BUILDING_DLL")
-        if self._is_msvc:
+        if is_msvc(self):
             if "MT" in msvc_runtime_flag(self):
-                self._autotools.defines.append("USE_STATIC_RTL")
+                tc.extra_defines.append("USE_STATIC_RTL")
             if "d" in msvc_runtime_flag(self):
-                self._autotools.defines.append("USE_DEBUG_RTL")
-        build = None
-        host = None
-        if self._is_msvc:
-            build = "{}-{}-{}".format(
-                "x86_64" if self._settings_build.arch == "x86_64" else "i686",
-                "pc" if self._settings_build.arch == "x86" else "w64",
-                "cygwin")
-            host = "{}-{}-{}".format(
-                "x86_64" if self.settings.arch == "x86_64" else "i686",
-                "pc" if self.settings.arch == "x86" else "w64",
-                "cygwin")
+                tc.extra_defines.append("d")
+
+        if self.options.shared:
+            tc.extra_defines.append("FFI_BUILDING_DLL")
         else:
-            if self._autotools.host and "x86-" in self._autotools.host:
-                self._autotools.host = self._autotools.host.replace("x86", "i686")
-        self._autotools.configure(args=config_args, configure_dir=self._source_subfolder, build=build, host=host)
-        return self._autotools
+            tc.extra_defines.append("FFI_BUILDING")
+
+        if self.settings.build_type == "Debug":
+            tc.extra_defines.append("FFI_DEBUG")
+
+        env = tc.environment()
+        if is_msvc(self) or self.settings.compiler == "clang":
+            env.define("LD", "link")
+            env.define_path("CXX", msvcc)
+            env.define_path("CC", msvcc)
+            env.define("CXXCPP", "cl -nologo -EP")
+            env.define("CPP", "cl -nologo -EP")
+            env.define("AR", unix_path(self, self.conf.get('tools.automake:ar-lib')))
+            env.define("LD", "link")
+            env.define("LIBTOOL", unix_path(self, os.path.join(self.source_folder, 'ltmain.sh')))
+            env.define("INSTALL", unix_path(self, os.path.join(self.source_folder, "install-sh")))
+            env.define("NM", "dumpbin -symbols")
+            env.define("OBJDUMP", ":")
+            env.define("RANLIB", ":")
+            env.define("STRIP", ":")
+
+        tc.generate(env)
+
+        ms = VirtualBuildEnv(self)
+        ms.generate(scope="build")
 
     def build(self):
-        self._patch_sources()
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "config.guess"))
+        apply_conandata_patches(self)
 
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make()
-            if tools.get_env("CONAN_RUN_TESTS", False):
-                autotools.make(target="check")
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        if self._is_msvc:
-            if self.options.shared:
-                self.copy("libffi.dll", src=".libs", dst="bin")
-            self.copy("libffi.lib", src=".libs", dst="lib")
-            self.copy("*.h", src="include", dst="include")
-        else:
-            with self._build_context():
-                autotools = self._configure_autotools()
-                autotools.install()
+        autotools = Autotools(self)
+        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])  # Need to specify the `DESTDIR` as a Unix path, aware of the subsystem
 
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "share"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        copy(self, pattern="*.dll", dst=os.path.join(self.package_folder, "bin"), src=os.path.join(self.package_folder, "lib"))
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+
+        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.libs = ["{}ffi".format("lib" if is_msvc(self) else "")]
         self.cpp_info.set_property("pkg_config_name", "libffi")
-        self.cpp_info.libs = ["{}ffi".format("lib" if self._is_msvc else "")]
         if not self.options.shared:
             self.cpp_info.defines = ["FFI_BUILDING"]
-
