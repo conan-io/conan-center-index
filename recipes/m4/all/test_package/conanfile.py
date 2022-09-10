@@ -37,5 +37,5 @@ class TestPackageConan(ConanFile):
 
             # FIXME: The output from the run on Windows isn't used (see run method in conan_file.py) Once that is fixed we can actually
             #  assert the output on Windows again.
-            if self.settings.os != " Windows":
+            if self.settings.os != "Windows":
                 assert "Harry, Jr. met Sally" in output.readline()
