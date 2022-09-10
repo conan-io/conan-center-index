@@ -20,18 +20,22 @@ class CycloneDDSConan(ConanFile):
         "fPIC": [True, False],
         "ssl": [True, False],
         "shm" : [True, False],
-        "bison" : [True, False]
+        "security" : [True, False]
     }
     default_options = {
         "shared": True,
         "fPIC": True,
         "ssl": True,
         "shm": True,
-        "bison": False
+        "security": False
     }
 
     generators = ["cmake", "cmake_find_package_multi"]
     _cmake = None
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     @property
     def _source_subfolder(self):
@@ -55,32 +59,30 @@ class CycloneDDSConan(ConanFile):
             self.requires("iceoryx/2.0.0")
         if self.options.ssl: 
             self.requires("openssl/1.1.1q")
-        if self.options.bison:
-            raise ConanInvalidConfiguration("option 'bison' not implemented yet.")
-
+        
     def validate(self):
         compiler = self.settings.compiler
         version = tools.Version(self.settings.compiler.version)
 
-        if not self.options.shared:
-            # see https://github.com/eclipse-cyclonedds/cyclonedds/issues/317
-            raise ConanInvalidConfiguration("Currently Cyclone DDS cannot be build statically...")
+        if ((self.options.security == True ) and (self.options.shared == False)):
+            raise ConanInvalidConfiguration("Cyclone DDS currently do not support static build and security on")
+
         if compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
 
         if compiler == "Visual Studio":
             if version < "16":
-                raise ConanInvalidConfiguration("Iceoryx is just supported for Visual Studio 2019 and higher.")
+                raise ConanInvalidConfiguration("Cyclone DDS is just supported for Visual Studio 2019 and higher.")
             if self.options.shared:
                 raise ConanInvalidConfiguration(
-                    'Using Iceoryx with Visual Studio currently just possible with "shared=False"')
+                    'Using Cyclone DDS with Visual Studio currently just possible with "shared=False"')
         elif compiler == "gcc":
             if version < "6":
-                raise ConanInvalidConfiguration("Using Iceoryx with gcc requires gcc 6 or higher.")
+                raise ConanInvalidConfiguration("Using Cyclone DDS with gcc requires gcc 6 or higher.")
             if version < "9" and compiler.get_safe("libcxx") == "libstdc++":
                 raise ConanInvalidConfiguration("gcc < 9 with libstdc++ not supported")
             if version == "6":
-                self.output.warn("Iceoryx package is compiled with gcc 6, it is recommended to use 7 or higher")
+                self.output.warn("Cyclone DDS package is compiled with gcc 6, it is recommended to use 7 or higher")
                 self.output.warn("GCC 6 will build with warnings.")
         elif compiler == "clang":
             if compiler.get_safe("libcxx") == "libstdc++":
@@ -100,10 +102,30 @@ class CycloneDDSConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+ 
+        self._cmake.definitions["BUILD_IDLC"] = False
+        self._cmake.definitions["BUILD_DDSPERF"] = False
+        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
+        self._cmake.definitions["BUILD_IDLC_TESTING"] = False
+        # ToDo : check how to build static + security 
+        self._cmake.definitions["ENABLE_SECURITY"] = self.options.security
+        self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["ENABLE_SSL"] = self.options.ssl
         self._cmake.definitions["ENABLE_SHM"] = self.options.shm       
         self._cmake.configure()
         return self._cmake
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
 
     def build(self):
         self._patch_sources()
@@ -115,4 +137,20 @@ class CycloneDDSConan(ConanFile):
         cmake.install()
         
     def package_info(self):
-        pass 
+        self._create_cmake_module_alias_targets(
+                os.path.join(self.package_folder, self._module_file_rel_path),
+                { "CycloneDDS::ddsc" : "cyclone-dds::ddsc"})
+        self.cpp_info.set_property("cmake_file_name", "CycloneDDS")
+        self.cpp_info.components["ddsc"].set_property("cmake_target_name", "CycloneDDS::ddsc")
+        self.cpp_info.components["ddsc"].libs = ["ddsc"]
+        requires = []
+        if self.options.shm:
+            requires.append("iceoryx::iceoryx_binding_c")
+        if self.options.ssl:
+            requires.append("openssl::openssl")
+        self.cpp_info.components["ddsc"].requires = requires
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.components["ddsc"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["ddsc"].build_modules["cmake_find_package_multi"] = [
+            self._module_file_rel_path
+        ]
