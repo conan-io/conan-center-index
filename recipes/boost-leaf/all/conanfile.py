@@ -75,7 +75,15 @@ class BoostLEAFConan(ConanFile):
              "include"), src=os.path.join(self.source_folder, "include"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "boost-leaf")
         self.cpp_info.set_property("cmake_target_name", "boost::leaf")
+
+        self.cpp_info.names["cmake_find_package"] = "boost"
+        self.cpp_info.names["cmake_find_package_multi"] = "boost"
+        self.cpp_info.filenames["cmake_find_package"] = "boost-leaf"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "boost-leaf"
+        self.cpp_info.components["leaf"].names["cmake_find_package"] = "leaf"
+        self.cpp_info.components["leaf"].names["cmake_find_package_multi"] = "leaf"
 
         self.cpp_info.bindirs = []
         self.cpp_info.frameworkdirs = []
