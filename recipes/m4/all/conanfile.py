@@ -40,7 +40,7 @@ class M4Conan(ConanFile):
         basic_layout(self, src_folder="m4")
 
     def build_requirements(self):
-        if self.win_bash and not os.environ.get("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
             self.tool_requires("msys2/cci.latest")
 
     def source(self):
@@ -91,7 +91,7 @@ class M4Conan(ConanFile):
         ms.generate(scope="build")
 
     def build(self):
-        self.run(f"chmod +x {unix_path(self, self.generators_path.joinpath('help2man', 'help2man'))}")  #ensure that help2man can run
+        self.run(f"chmod +x {unix_path(self, self.generators_path.joinpath('help2man', 'help2man'))}")  # ensure that help2man can run
         apply_conandata_patches(self)
 
         autotools = Autotools(self)
