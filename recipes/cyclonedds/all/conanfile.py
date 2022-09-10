@@ -12,7 +12,7 @@ class CycloneDDSConan(ConanFile):
     homepage = "https://cyclonedds.io/"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Eclipse Cyclone DDS - An implementation of the OMG Data Distribution Service (DDS) specification "
-    topics = ("DDS", "IPC", "ROS", "Middleware")
+    topics = ("dds", "ipc", "ros", "middleware")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -23,7 +23,7 @@ class CycloneDDSConan(ConanFile):
         "security" : [True, False]
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
         "ssl": True,
         "shm": True,
@@ -32,6 +32,7 @@ class CycloneDDSConan(ConanFile):
 
     generators = ["cmake", "cmake_find_package_multi"]
     _cmake = None
+    short_paths = True
 
     @property
     def _module_file_rel_path(self):
@@ -53,6 +54,8 @@ class CycloneDDSConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def requirements(self):
         if self.options.shm:
@@ -135,6 +138,10 @@ class CycloneDDSConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib","pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib","cmake","CycloneDDS"))
         
     def package_info(self):
         self._create_cmake_module_alias_targets(

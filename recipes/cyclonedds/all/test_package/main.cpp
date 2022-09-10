@@ -16,6 +16,6 @@ int main() {
   participant = dds_create_participant (DDS_DOMAIN_DEFAULT, NULL, NULL);
   if (participant < 0)
     DDS_FATAL("dds_create_participant: %s\n", dds_strretcode(-participant));
-    
+
   return EXIT_SUCCESS;
 }
