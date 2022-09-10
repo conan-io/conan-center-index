@@ -91,6 +91,7 @@ class M4Conan(ConanFile):
         ms.generate(scope="build")
 
     def build(self):
+        self.run(f"chmod +x {self.generators_path.joinpath('help2man', 'help2man')}")  #ensure that help2man can run
         apply_conandata_patches(self)
 
         autotools = Autotools(self)
