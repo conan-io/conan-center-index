@@ -20,13 +20,9 @@ sources:
 patches:
   "2.4":
     - patch_file: "patches/0001-v2.3-add-missing-include.patch"
-      base_path: "source_subfolder"
   "2.3":
     - patch_file: "patches/0001-v2.3-add-missing-include.patch"
-      base_path: "source_subfolder"
   "2.2":
     - patch_file: "patches/0001-v2.2-add-missing-include.patch"
-      base_path: "source_subfolder"
   "2.1":
     - patch_file: "patches/0001-v2.1-add-missing-include.patch"
-      base_path: "source_subfolder"

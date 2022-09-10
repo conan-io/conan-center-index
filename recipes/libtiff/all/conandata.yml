@@ -1,4 +1,7 @@
 sources:
+  "4.4.0":
+    url: "http://download.osgeo.org/libtiff/tiff-4.4.0.tar.gz"
+    sha256: "917223b37538959aca3b790d2d73aa6e626b688e02dcda272aec24c2f498abed"
   "4.3.0":
     url: "http://download.osgeo.org/libtiff/tiff-4.3.0.tar.gz"
     sha256: "0e46e5acb087ce7d1ac53cf4f56a09b221537fc86dfc5daaad1c2e89e1b37ac8"
@@ -15,6 +18,9 @@ sources:
     url: "http://download.osgeo.org/libtiff/tiff-4.0.8.tar.gz"
     sha256: "59d7a5a8ccd92059913f246877db95a2918e6c04fb9d43fd74e5c3390dac2910"
 patches:
+  "4.4.0":
+    - patch_file: "patches/4.4.0-0001-cmake-add-libjpeg-turbo.patch"
+      base_path: "source_subfolder"
   "4.3.0":
     - patch_file: "patches/4.3.0-0001-cmake-add-libjpeg-turbo.patch"
       base_path: "source_subfolder"

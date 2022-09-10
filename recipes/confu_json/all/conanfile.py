@@ -1,11 +1,9 @@
-from conans import ConanFile, tools
-from conans.tools import check_min_cppstd
-from conans.errors import ConanInvalidConfiguration, ConanException
-import os
-from conans.tools import Version
+from conan import ConanFile, tools
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.33.0"
-
+required_conan_version = ">=1.50.0"
 
 class ConfuJson(ConanFile):
     name = "confu_json"
@@ -28,17 +26,23 @@ class ConfuJson(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "15",
+            "Visual Studio": "17",
             "gcc": "10",
             "clang": "10",
         }
 
-    def validate(self):
+
+       
+    def configure(self):
+        if is_msvc(self) and Version(self.version) < "0.0.9":
+            raise ConanInvalidConfiguration(
+                "Visual Studio is not supported in versions before confu_json/0.0.9")
         if self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration(
-                "apple-clang is not supported because of missing concept support")
+                "apple-clang is not supported. Pull request welcome")
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+            tools.build.check_min_cppstd(self, self._minimum_cpp_standard)
+
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
         if not min_version:
@@ -46,7 +50,7 @@ class ConfuJson(ConanFile):
                              "compiler support.".format(
                                  self.name, self.settings.compiler))
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(
                     "{} requires C++{} support. "
                     "The current compiler {} {} does not support it.".format(
@@ -55,12 +59,12 @@ class ConfuJson(ConanFile):
                         self.settings.compiler.version))
 
     def requirements(self):
-        self.requires("boost/1.76.0")
-        self.requires("magic_enum/0.7.2")
+        self.requires("boost/1.79.0")
+        self.requires("magic_enum/0.8.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        tools.files.get(self, **self.conan_data["sources"][self.version],
+        destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("*.h*", dst="include/confu_json",

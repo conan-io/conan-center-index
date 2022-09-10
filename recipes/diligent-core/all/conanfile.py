@@ -1,6 +1,7 @@
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 import os
+from conan.tools.build import cross_building
 
 required_conan_version = ">=1.33.0"
 
@@ -91,17 +92,18 @@ class DiligentCoreConan(ConanFile):
     def requirements(self):
         self.requires("opengl/system")
 
-        self.requires("spirv-cross/1.3.211.0")
-        self.requires("spirv-tools/1.3.211.0")
+        self.requires("spirv-cross/1.3.216.0")
+        self.requires("spirv-tools/1.3.216.0")
         if self.options.with_glslang:
-            self.requires("glslang/1.3.211.0")
-        self.requires("vulkan-headers/1.3.211.0")
-        self.requires("volk/1.3.204")
+            self.requires("glslang/1.3.216.0")
+        self.requires("vulkan-headers/1.3.216.0")
+        self.requires("vulkan-validationlayers/1.3.216.0")
+        self.requires("volk/1.3.216.0")
         self.requires("xxhash/0.8.1")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
-            if not tools.cross_building(self, skip_x64_x86=True):
+            if not cross_building(self, skip_x64_x86=True):
                 self.requires("xkbcommon/1.4.1")
 
     def _diligent_platform(self):
@@ -131,6 +133,8 @@ class DiligentCoreConan(ConanFile):
         self._cmake.definitions["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
         self._cmake.definitions["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options["spirv-cross"].namespace
         self._cmake.definitions["BUILD_SHARED_LIBS"] = False
+        self._cmake.definitions["DILIGENT_CLANG_COMPILE_OPTIONS"] = ""
+        self._cmake.definitions["DILIGENT_MSVC_COMPILE_OPTIONS"] = ""
 
         self._cmake.definitions["ENABLE_RTTI"] = True
         self._cmake.definitions["ENABLE_EXCEPTIONS"] = True

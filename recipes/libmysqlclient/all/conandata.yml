@@ -1,6 +1,8 @@
 sources:
   "8.0.29":
-    url: "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.29.tar.gz"
+    url:
+      - "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.29.tar.gz"
+      - "https://mirrors.huaweicloud.com/mysql/Downloads/MySQL-8.0/mysql-8.0.29.tar.gz"
     sha256: "512170fa6f78a694d6f18d197e999d2716ee68dc541d7644dd922a3663407266"
   "8.0.25":
     url: "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.25.tar.gz"

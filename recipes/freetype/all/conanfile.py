@@ -1,10 +1,12 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools import files, scm
+from conans import CMake, tools
 import os
 import re
 import shutil
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.2"
 
 
 class FreetypeConan(ConanFile):
@@ -49,7 +51,7 @@ class FreetypeConan(ConanFile):
 
     @property
     def _has_with_brotli_option(self):
-        return tools.Version(self.version) >= "2.10.2"
+        return scm.Version(self.version) >= "2.10.2"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -74,14 +76,14 @@ class FreetypeConan(ConanFile):
             self.requires("brotli/1.0.9")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         # Do not accidentally enable dependencies we have disabled
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        find_harfbuzz = "find_package(HarfBuzz {})".format("1.3.0" if tools.Version(self.version) < "2.10.2" else "${HARFBUZZ_MIN_VERSION}")
-        if_harfbuzz_found = "if ({})".format("HARFBUZZ_FOUND" if tools.Version(self.version) < "2.11.0" else "HarfBuzz_FOUND")
+        find_harfbuzz = "find_package(HarfBuzz {})".format("1.3.0" if scm.Version(self.version) < "2.10.2" else "${HARFBUZZ_MIN_VERSION}")
+        if_harfbuzz_found = "if ({})".format("HARFBUZZ_FOUND" if scm.Version(self.version) < "2.11.0" else "HarfBuzz_FOUND")
         tools.replace_in_file(cmakelists, find_harfbuzz, "")
         tools.replace_in_file(cmakelists, if_harfbuzz_found, "if(0)")
         if not self.options.with_png:
@@ -136,7 +138,7 @@ class FreetypeConan(ConanFile):
         freetype_config = os.path.join(self.package_folder, "bin", "freetype-config")
         shutil.copy(freetype_config_in, freetype_config)
         libs = "-lfreetyped" if self.settings.build_type == "Debug" else "-lfreetype"
-        staticlibs = "-lm %s" % libs if self.settings.os == "Linux" else libs
+        staticlibs = f"-lm {libs}" if self.settings.os == "Linux" else libs
         tools.replace_in_file(freetype_config, r"%PKG_CONFIG%", r"/bin/false")  # never use pkg-config
         tools.replace_in_file(freetype_config, r"%prefix%", r"$conan_prefix")
         tools.replace_in_file(freetype_config, r"%exec_prefix%", r"$conan_exec_prefix")
@@ -176,8 +178,8 @@ class FreetypeConan(ConanFile):
         self.copy("GPLv2.TXT", src=os.path.join(self._source_subfolder, "docs"), dst="licenses")
         self.copy("LICENSE.TXT", src=os.path.join(self._source_subfolder, "docs"), dst="licenses")
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_vars_rel_path)
         )
@@ -223,12 +225,12 @@ class FreetypeConan(ConanFile):
     @property
     def _module_vars_rel_path(self):
         return os.path.join(self._module_subfolder,
-                            "conan-official-{}-variables.cmake".format(self.name))
+                            f"conan-official-{self.name}-variables.cmake")
 
     @property
     def _module_target_rel_path(self):
         return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+                            f"conan-official-{self.name}-targets.cmake")
 
     @staticmethod
     def _chmod_plus_x(filename):

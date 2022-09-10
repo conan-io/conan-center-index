@@ -1,8 +1,12 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.50.0"
 
 
 class PulseAudioConan(ConanFile):
@@ -13,7 +17,6 @@ class PulseAudioConan(ConanFile):
     homepage = "http://pulseaudio.org/"
     license = "LGPL-2.1"
 
-    generators = "pkg_config"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,12 +39,6 @@ class PulseAudioConan(ConanFile):
         "with_dbus": False,
     }
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -49,20 +46,26 @@ class PulseAudioConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
         if not self.options.with_dbus:
             del self.options.with_fftw
 
     def requirements(self):
         self.requires("libiconv/1.17")
         self.requires("libsndfile/1.0.31")
-        self.requires("libcap/2.62")
-        self.requires("libtool/2.4.6")
+        self.requires("libcap/2.65")
+        self.requires("libtool/2.4.7")
         if self.options.with_alsa:
-            self.requires("libalsa/1.2.7")
+            self.requires("libalsa/1.2.7.2")
         if self.options.with_glib:
-            self.requires("glib/2.73.1")
+            self.requires("glib/2.73.3")
         if self.options.get_safe("with_fftw"):
             self.requires("fftw/3.3.9")
         if self.options.with_x11:
@@ -73,63 +76,71 @@ class PulseAudioConan(ConanFile):
             self.requires("dbus/1.12.20")
 
     def validate(self):
-        if self.settings.os != "Linux":
+        if self.info.settings.os != "Linux":
             raise ConanInvalidConfiguration("pulseaudio supports only linux currently")
 
-        if self.options.get_safe("with_fftw") and self.options["fftw"].precision != "single":
-            raise ConanInvalidConfiguration("Pulse audio cannot use fftw %s precision."
-                                            "Either set option fftw:precision=single"
-                                            "or pulseaudio:with_fftw=False"
-                                            % self.options["fftw"].precision)
+        if self.options.get_safe("with_fftw"):
+            fftw_precision = self.dependencies["fftw"].options.precision
+            if fftw_precision != "single":
+                raise ConanInvalidConfiguration(
+                    f"Pulse audio cannot use fftw {fftw_precision} precision. "
+                    "Either set option fftw:precision=single or pulseaudio:with_fftw=False"
+                )
 
     def build_requirements(self):
-        self.build_requires("gettext/0.21")
-        self.build_requires("libtool/2.4.6")
-        self.build_requires("pkgconf/1.7.4")
+        self.tool_requires("gettext/0.21")
+        self.tool_requires("libtool/2.4.7")
+        self.tool_requires("pkgconf/1.7.4")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_autotools(self):
-        if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self)
-            args=[]
-
-            for lib in ["alsa", "x11", "openssl", "dbus"]:
-                args.append("--%s-%s" % ("enable" if getattr(self.options, "with_" + lib) else "disable", lib))
-            args.append("--%s-glib2" % ("enable" if self.options.with_glib else "disable"))
-            args.append("--%s-fftw" % ("with" if self.options.get_safe("with_fftw") else "without"))
-            if self.options.shared:
-                args.extend(["--enable-shared=yes", "--enable-static=no"])
-            else:
-                args.extend(["--enable-shared=no", "--enable-static=yes"])
-            args.append("--with-udev-rules-dir=%s" % os.path.join(self.package_folder, "bin", "udev", "rules.d"))
-            args.append("--with-systemduserunitdir=%s" % os.path.join(self.build_folder, "ignore"))
-            self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        yes_no = lambda v: "yes" if v else "no"
+        tc.configure_args.extend([
+            f"--enable-shared={yes_no(self.options.shared)}",
+            f"--enable-static={yes_no(not self.options.shared)}",
+            f"--enable-glib2={yes_no(self.options.with_glib)}",
+            f"--with-fftw={yes_no(self.options.get_safe('with_fftw'))}",
+            f"--with-udev-rules-dir={os.path.join(self.package_folder, 'bin', 'udev', 'rules.d')}",
+            f"--with-systemduserunitdir={os.path.join(self.build_folder, 'ignore')}",
+        ])
+        for lib in ["alsa", "x11", "openssl", "dbus"]:
+            tc.configure_args.append(f"--enable-{lib}={yes_no(getattr(self.options, 'with_' + lib))}")
+        # TODO: to remove when automatically handled by AutotoolsToolchain
+        tc.configure_args.append("--libexecdir=${prefix}/bin")
+        tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
+        pkg = PkgConfigDeps(self)
+        pkg.generate()
+        env = VirtualBuildEnv(self)
+        env.generate()
 
     def build(self):
-        with tools.run_environment(self):
-            autotools = self._configure_autotools()
-            autotools.make()
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        with tools.run_environment(self):
-            autotools = self._configure_autotools()
-            autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "etc"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(self.package_folder, "*.la")
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        autotools.install()
+        rmdir(self, os.path.join(self.package_folder, "etc"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
 
     def package_info(self):
-        self.cpp_info.components["pulse"].names["pkg_config"] = "libpulse"
-        self.cpp_info.components["pulse"].libs = ["pulse"]
-        if not self.options.shared:
-            self.cpp_info.components["pulse"].libs.append("pulsecommon-%s" % self.version)
-        self.cpp_info.components["pulse"].libdirs = ["lib", os.path.join("lib", "pulseaudio")]
+        self.cpp_info.components["pulse"].set_property("pkg_config_name", "libpulse")
+        self.cpp_info.components["pulse"].libs = ["pulse", f"pulsecommon-{self.version}"]
+        self.cpp_info.components["pulse"].libdirs.append(os.path.join("lib", "pulseaudio"))
         self.cpp_info.components["pulse"].requires = ["libiconv::libiconv", "libsndfile::libsndfile", "libcap::libcap", "libtool::libtool"]
         if self.options.with_alsa:
             self.cpp_info.components["pulse"].requires.append("libalsa::libalsa")
@@ -142,13 +153,13 @@ class PulseAudioConan(ConanFile):
         if self.options.with_dbus:
             self.cpp_info.components["pulse"].requires.append("dbus::dbus")
 
-        self.cpp_info.components["pulse-simple"].names["pkg_config"] = "libpulse-simple"
+        self.cpp_info.components["pulse-simple"].set_property("pkg_config_name", "libpulse-simple")
         self.cpp_info.components["pulse-simple"].libs = ["pulse-simple"]
         self.cpp_info.components["pulse-simple"].defines.append("_REENTRANT")
         self.cpp_info.components["pulse-simple"].requires = ["pulse"]
 
         if self.options.with_glib:
-            self.cpp_info.components["pulse-mainloop-glib"].names["pkg_config"] = "libpulse-mainloop-glib"
+            self.cpp_info.components["pulse-mainloop-glib"].set_property("pkg_config_name", "libpulse-mainloop-glib")
             self.cpp_info.components["pulse-mainloop-glib"].libs = ["pulse-mainloop-glib"]
             self.cpp_info.components["pulse-mainloop-glib"].defines.append("_REENTRANT")
             self.cpp_info.components["pulse-mainloop-glib"].requires = ["pulse", "glib::glib-2.0"]

@@ -1,7 +1,9 @@
-from conan.tools.files import rename
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
+from conan.tools.files import get, rename, rmdir
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conans import AutoToolsBuildEnvironment, tools
 import contextlib
 import fnmatch
 import functools
@@ -55,6 +57,7 @@ class OpenSSLConan(ConanFile):
         "no_md2": [True, False],
         "no_md4": [True, False],
         "no_mdc2": [True, False],
+        "no_module": [True, False],
         "no_ocsp": [True, False],
         "no_pinshared": [True, False],
         "no_rc2": [True, False],
@@ -147,8 +150,8 @@ class OpenSSLConan(ConanFile):
         return self._is_clangcl or is_msvc(self)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     @property
     def _target(self):
@@ -612,7 +615,7 @@ class OpenSSLConan(ConanFile):
     def _win_bash(self):
         return self._settings_build.os == "Windows" and \
                not self._use_nmake and \
-            (self._is_mingw or tools.cross_building(self, skip_x64_x86=True))
+            (self._is_mingw or cross_building(self, skip_x64_x86=True))
 
     @property
     def _make_program(self):
@@ -662,7 +665,7 @@ class OpenSSLConan(ConanFile):
             else:
                 self.copy("fips.so", src=provdir,dst="lib/ossl-modules")
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path)
@@ -671,9 +674,7 @@ class OpenSSLConan(ConanFile):
     @staticmethod
     def _create_cmake_module_variables(module_file):
         content = textwrap.dedent("""\
-            if(DEFINED OpenSSL_FOUND)
-                set(OPENSSL_FOUND ${OpenSSL_FOUND})
-            endif()
+            set(OPENSSL_FOUND TRUE)
             if(DEFINED OpenSSL_INCLUDE_DIR)
                 set(OPENSSL_INCLUDE_DIR ${OpenSSL_INCLUDE_DIR})
             endif()

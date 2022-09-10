@@ -1,4 +1,4 @@
-from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -77,10 +77,6 @@ class GtsamConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -118,8 +114,12 @@ class GtsamConan(ConanFile):
         if self.options.with_TBB and not self.options["onetbb"].tbbmalloc:
             raise ConanInvalidConfiguration("gtsam with tbb requires onetbb:tbbmalloc=True")
 
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 15:
+        if is_msvc(self) and tools.Version(self.settings.compiler.version) < 15:
             raise ConanInvalidConfiguration ("GTSAM requires MSVC >= 15")
+
+        if is_msvc(self) and tools.Version(self.version) >= '4.1' \
+                and self.options.shared:
+            raise ConanInvalidConfiguration("GTSAM does not support shared builds on MSVC. see https://github.com/borglab/gtsam/issues/1087")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -128,7 +128,7 @@ class GtsamConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        if self._is_msvc:
+        if is_msvc(self):
             tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "GtsamBuildTypes.cmake"),
                                   "/MD ",
                                   "/{} ".format(msvc_runtime_flag(self)))
@@ -217,7 +217,7 @@ class GtsamConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "GTSAM")
 
-        prefix = "lib" if self._is_msvc and not self.options.shared else ""
+        prefix = "lib" if is_msvc(self) and not self.options.shared else ""
 
         self.cpp_info.components["libgtsam"].set_property("cmake_target_name", "gtsam")
         self.cpp_info.components["libgtsam"].libs = ["{}gtsam".format(prefix)]

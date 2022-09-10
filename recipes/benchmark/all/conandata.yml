@@ -1,19 +1,4 @@
 sources:
-  "1.5.0":
-    sha256: 3c6a165b6ecc948967a1ead710d4a181d7b0fbcaa183ef7ea84604994966221a
-    url: https://github.com/google/benchmark/archive/v1.5.0.tar.gz
-  "1.5.1":
-    sha256: 23082937d1663a53b90cb5b61df4bcc312f6dee7018da78ba00dd6bd669dfef2
-    url: https://github.com/google/benchmark/archive/v1.5.1.tar.gz
-  "1.5.2":
-    sha256: dccbdab796baa1043f04982147e67bb6e118fe610da2c65f88912d73987e700c
-    url: https://github.com/google/benchmark/archive/v1.5.2.tar.gz
-  "1.5.3":
-    sha256: e4fbb85eec69e6668ad397ec71a3a3ab165903abe98a8327db920b94508f720e
-    url: https://github.com/google/benchmark/archive/v1.5.3.tar.gz
-  "1.5.5":
-    url: "https://github.com/google/benchmark/archive/v1.5.5.tar.gz"
-    sha256: "3bff5f237c317ddfd8d5a9b96b3eede7c0802e799db520d38ce756a2a46a18a0"
   "1.5.6":
     url: "https://github.com/google/benchmark/archive/v1.5.6.tar.gz"
     sha256: "789f85b4810d13ff803834ea75999e41b326405d83d6a538baf01499eda96102"
@@ -23,3 +8,6 @@ sources:
   "1.6.1":
     url: "https://github.com/google/benchmark/archive/v1.6.1.tar.gz"
     sha256: "6132883bc8c9b0df5375b16ab520fac1a85dc9e4cf5be59480448ece74b278d4"
+  "1.6.2":
+    url: "https://github.com/google/benchmark/archive/v1.6.2.tar.gz"
+    sha256: "a9f77e6188c1cd4ebedfa7538bf5176d6acc72ead6f456919e5f464ef2f06158"

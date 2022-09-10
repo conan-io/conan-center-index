@@ -1,9 +1,13 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools, CMake
 import os
-import shutil
 import textwrap
 
-required_conan_version = ">=1.43.0"
+from conan import ConanFile
+from conan.tools.files import apply_conandata_patches, copy, get, mkdir, rename, rmdir, save, rm
+from conans import CMake
+# TODO: Update to conan.tools.apple after 1.51.3
+from conans.tools import is_apple_os
+
+required_conan_version = ">=1.50.0"
 
 
 class DbusConan(ConanFile):
@@ -30,8 +34,7 @@ class DbusConan(ConanFile):
         "with_selinux": False,
     }
 
-    generators = "pkg_config", "cmake", "cmake_find_package"
-    _autotools = None
+    generators = "cmake", "cmake_find_package", "VirtualBuildEnv", "VirtualRunEnv"
     _cmake = None
 
     @property
@@ -58,40 +61,14 @@ class DbusConan(ConanFile):
             self.requires("selinux/3.3")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
+    
+    def export_sources(self):
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, self._source_subfolder))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-
-    def _configure_autotools(self):
-        if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self)
-
-            args = []
-            args.append("--disable-tests")
-            args.append("--disable-doxygen-docs")
-            args.append("--disable-xml-docs")
-
-            args.append("--with-x=%s" % ("yes" if self.options.get_safe("with_x11", False) else "no"))
-            args.append("--%s-x11-autolaunch" % ("enable" if self.options.get_safe("with_x11", False) else "disable"))
-            args.append("--disable-asserts")
-            args.append("--disable-checks")
-
-            args.append("--with-systemdsystemunitdir=%s" % os.path.join(self.package_folder, "lib", "systemd", "system"))
-            args.append("--with-systemduserunitdir=%s" % os.path.join(self.package_folder, "lib", "systemd", "user"))
-
-            if not self.options.with_selinux:
-                args.append("--disable-selinux")
-
-            if str(self.options.system_socket) != "":
-                args.append("--with-system-socket=%s" % self.options.system_socket)
-            if str(self.options.system_pid_file) != "":
-                args.append("--with-system-pid-file=%s" % self.options.system_pid_file)
-
-            args.append("--disable-launchd")
-            args.append("--disable-systemd")
-
-            self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if not self._cmake:
@@ -103,44 +80,37 @@ class DbusConan(ConanFile):
 
             self._cmake.definitions["DBUS_BUILD_X11"] = self.options.get_safe("with_x11", False)
             self._cmake.definitions["DBUS_WITH_GLIB"] = self.options.with_glib
-            self._cmake.definitions["DBUS_DISABLE_ASSERT"] = False
+            self._cmake.definitions["DBUS_DISABLE_ASSERT"] = is_apple_os(self.settings.os)
             self._cmake.definitions["DBUS_DISABLE_CHECKS"] = False
 
-            path_to_cmake_lists = os.path.join(self._source_subfolder, "cmake")
+            # Conan does not provide an EXPAT_LIBRARIES CMake variable for the Expat library.
+            # Define EXPAT_LIBRARIES to be the expat::expat target provided by Conan to fix linking.
+            self._cmake.definitions["EXPAT_LIBRARIES"] = "expat::expat"
 
-            self._cmake.configure(source_folder=path_to_cmake_lists,
+            self._cmake.configure(source_folder=self._source_subfolder,
                                   build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "CMakeLists.txt"),
-                              "project(dbus)",
-                              "project(dbus)\ninclude(../../conanbuildinfo.cmake)\nconan_basic_setup()")
-        if self.settings.os == "Windows":
-            cmake = self._configure_cmake()
-            cmake.build()
-        else:
-            autotools = self._configure_autotools()
-            autotools.make()
+        apply_conandata_patches(self)
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses",
                   src=self._source_subfolder)
-        if self.settings.os == "Windows":
-            cmake = self._configure_cmake()
-            cmake.install()
-        else:
-            autotools = self._configure_autotools()
-            autotools.install()
+        cmake = self._configure_cmake()
+        cmake.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "share", "doc"))
+        rmdir(self, os.path.join(self.package_folder, "share", "doc"))
+        mkdir(self, os.path.join(self.package_folder, "res"))
         for i in ["var", "share", "etc"]:
-            shutil.move(os.path.join(self.package_folder, i), os.path.join(self.package_folder, "res", i))
+            rename(self, os.path.join(self.package_folder, i), os.path.join(self.package_folder, "res", i))
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "systemd"))
-        tools.remove_files_by_mask(self.package_folder, "*.la")
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "systemd"))
+        rm(self, "*.la", self.package_folder)
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
@@ -148,8 +118,7 @@ class DbusConan(ConanFile):
             {"dbus-1": "dbus-1::dbus-1"}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent("""\
@@ -158,7 +127,7 @@ class DbusConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
@@ -173,6 +142,12 @@ class DbusConan(ConanFile):
             os.path.join("lib", "dbus-1.0", "include"),
         ])
         self.cpp_info.libs = ["dbus-1"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("rt")
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["iphlpapi", "ws2_32"])
+        else:
+            self.cpp_info.system_libs.append("pthread")
 
         # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
         self.cpp_info.filenames["cmake_find_package"] = "DBus1"

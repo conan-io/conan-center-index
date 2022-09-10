@@ -1,11 +1,13 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.50.0"
 
 
 class YamlCppConan(ConanFile):
@@ -26,16 +28,9 @@ class YamlCppConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -46,46 +41,46 @@ class YamlCppConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "11")
-        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration("Visual Studio build for {} shared library with MT runtime is not supported".format(self.name))
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, "11")
+        if self.info.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration(
+                f"Visual Studio build for {self.name} shared library with MT runtime is not supported"
+            )
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["YAML_CPP_BUILD_TESTS"] = False
-        cmake.definitions["YAML_CPP_BUILD_CONTRIB"] = True
-        cmake.definitions["YAML_CPP_BUILD_TOOLS"] = False
-        cmake.definitions["YAML_CPP_INSTALL"] = True
-        cmake.definitions["YAML_BUILD_SHARED_LIBS"] = self.options.shared
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["YAML_CPP_BUILD_TESTS"] = False
+        tc.variables["YAML_CPP_BUILD_CONTRIB"] = True
+        tc.variables["YAML_CPP_BUILD_TOOLS"] = False
+        tc.variables["YAML_CPP_INSTALL"] = True
+        tc.variables["YAML_BUILD_SHARED_LIBS"] = self.options.shared
         if is_msvc(self):
-            cmake.definitions["YAML_MSVC_SHARED_RT"] = not is_msvc_static_runtime(self)
-
-        cmake.configure()
-        return cmake
+            tc.variables["YAML_MSVC_SHARED_RT"] = not is_msvc_static_runtime(self)
+            tc.preprocessor_definitions["_NOEXCEPT"] = "noexcept"
+        tc.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "CMake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "CMake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
@@ -93,27 +88,26 @@ class YamlCppConan(ConanFile):
             {"yaml-cpp": "yaml-cpp::yaml-cpp"}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+            """)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "yaml-cpp")
         self.cpp_info.set_property("cmake_target_name", "yaml-cpp")
         self.cpp_info.set_property("pkg_config_name", "yaml-cpp")
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.append("m")
         if is_msvc(self):

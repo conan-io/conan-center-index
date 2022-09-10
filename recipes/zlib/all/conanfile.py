@@ -1,9 +1,11 @@
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, load, replace_in_file, save
 from conan.tools.microsoft import is_msvc
-from conans import ConanFile, tools, CMake
-import functools
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.46.0"
 
 
 class ZlibConan(ConanFile):
@@ -25,24 +27,13 @@ class ZlibConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     @property
     def _is_clang_cl(self):
         return self.settings.os == "Windows" and self.settings.compiler == "clang"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -51,55 +42,60 @@ class ZlibConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+           del self.settings.compiler.libcxx
+        except Exception:
+           pass
+        try:
+           del self.settings.compiler.cppstd
+        except Exception:
+           pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["SKIP_INSTALL_ALL"] = False
+        tc.variables["SKIP_INSTALL_LIBRARIES"] = False
+        tc.variables["SKIP_INSTALL_HEADERS"] = False
+        tc.variables["SKIP_INSTALL_FILES"] = True
+        tc.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
-        with tools.chdir(self._source_subfolder):
-            is_apple_clang12 = self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12.0"
-            if not is_apple_clang12:
-                for filename in ['zconf.h', 'zconf.h.cmakein', 'zconf.h.in']:
-                    tools.replace_in_file(filename,
-                                          '#ifdef HAVE_UNISTD_H    '
-                                          '/* may be set to #if 1 by ./configure */',
-                                          '#if defined(HAVE_UNISTD_H) && (1-HAVE_UNISTD_H-1 != 0)')
-                    tools.replace_in_file(filename,
-                                          '#ifdef HAVE_STDARG_H    '
-                                          '/* may be set to #if 1 by ./configure */',
-                                          '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
-
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["SKIP_INSTALL_ALL"] = False
-        cmake.definitions["SKIP_INSTALL_LIBRARIES"] = False
-        cmake.definitions["SKIP_INSTALL_HEADERS"] = False
-        cmake.definitions["SKIP_INSTALL_FILES"] = True
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        is_apple_clang12 = self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "12.0"
+        if not is_apple_clang12:
+            for filename in ['zconf.h', 'zconf.h.cmakein', 'zconf.h.in']:
+                filepath = os.path.join(self.source_folder, filename)
+                replace_in_file(self, filepath,
+                                      '#ifdef HAVE_UNISTD_H    '
+                                      '/* may be set to #if 1 by ./configure */',
+                                      '#if defined(HAVE_UNISTD_H) && (1-HAVE_UNISTD_H-1 != 0)')
+                replace_in_file(self, filepath,
+                                      '#ifdef HAVE_STDARG_H    '
+                                      '/* may be set to #if 1 by ./configure */',
+                                      '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def _extract_license(self):
-        with tools.chdir(os.path.join(self.source_folder, self._source_subfolder)):
-            tmp = tools.load("zlib.h")
-            license_contents = tmp[2:tmp.find("*/", 1)]
-            tools.save("LICENSE", license_contents)
+        tmp = load(self, os.path.join(self.source_folder, "zlib.h"))
+        license_contents = tmp[2:tmp.find("*/", 1)]
+        return license_contents
 
     def package(self):
-        self._extract_license()
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):

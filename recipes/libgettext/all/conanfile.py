@@ -62,7 +62,7 @@ class GetTextConan(ConanFile):
             self.options.threads = { "Solaris": "solaris", "Windows": "windows" }.get(str(self.settings.os), "posix")
 
     def requirements(self):
-        self.requires("libiconv/1.16")
+        self.requires("libiconv/1.17")
 
     @property
     def _settings_build(self):
@@ -76,7 +76,7 @@ class GetTextConan(ConanFile):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         if self._is_msvc or self._is_clang_cl:
-            self.build_requires("automake/1.16.4")
+            self.build_requires("automake/1.16.5")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

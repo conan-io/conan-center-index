@@ -2,7 +2,29 @@ sources:
   "4.8.8":
     url: "https://github.com/Z3Prover/z3/archive/z3-4.8.8.tar.gz"
     sha256: "6962facdcdea287c5eeb1583debe33ee23043144d0e5308344e6a8ee4503bcff"
+  "4.10.2":
+    url: "https://github.com/Z3Prover/z3/archive/z3-4.10.2.tar.gz"
+    sha256: "889fd035b833775c8cd2eb4723eb011bf916a3e9bf08ce66b31c548acee7a321"
+
 patches:
   "4.8.8":
-    - patch_file: "patches/0001-cmake-use-conan-mpir.patch"
+    - patch_file: "patches/0001-cmake-use-conan-mpir-4.8.8.patch"
+      patch_description: "Support building with MPIR"
+      patch_type: "conan"
+      base_path: "source_subfolder"
+
+    - patch_file: "patches/0002-python-interp-3-4.8.8.patch"
+      patch_description: "Fix finding the Python interpreter"
+      patch_type: "backport"
+      base_path: "source_subfolder"
+
+  "4.10.2":
+    - patch_file: "patches/0001-cmake-use-conan-mpir-4.10.2.patch"
+      patch_description: "Support building with MPIR"
+      patch_type: "conan"
+      base_path: "source_subfolder"
+
+    - patch_file: "patches/0003-cmake-try-compile-flags-4.10.2.patch"
+      patch_description: "Fix flag transmission to CMake try_compile"
+      patch_type: "portability"
       base_path: "source_subfolder"
