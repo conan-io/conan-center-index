@@ -8,7 +8,7 @@ from conan.tools.microsoft import is_msvc_static_runtime
 import functools
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.51.3"
 
 
 class OpenTDFConan(ConanFile):
@@ -38,8 +38,8 @@ class OpenTDFConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "17" if Version(self.version) < "1.1.5" else "16",
-            "msvc": "19.22",
+            "Visual Studio": "17" if Version(self.version) < "1.1.5" else "15",
+            "msvc": "193" if Version(self.version) < "1.1.5" else "191",
             "gcc": "7.5.0",
             "clang": "12",
             "apple-clang": "12.0.0",
@@ -51,17 +51,19 @@ class OpenTDFConan(ConanFile):
             self.copy(data["patch_file"])
 
     def validate(self):
+        # check minimum cpp standard supported by compiler
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
+        # check minimum version of compiler
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
-            self.output.warn(f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
+            self.output.warn(f'{self.name} recipe lacks information about the {self.settings.compiler} compiler support.')
         else:
             if Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration(f"{self.name} requires C++{self._minimum_cpp_standard} support."
-                                                 "The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
+                raise ConanInvalidConfiguration(f'{self.name} requires {self.settings.compiler} {self.settings.compiler.version} but found {min_version}')
+        # Disallow MT and MTd
         if is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration("this package can not be built with MT or MTd at this time")
+            raise ConanInvalidConfiguration(f'{self.name} can not be built with MT or MTd at this time')
 
     def requirements(self):
         self.requires("openssl/1.1.1q")

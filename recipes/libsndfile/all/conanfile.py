@@ -1,8 +1,11 @@
-from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class LibsndfileConan(ConanFile):
@@ -34,21 +37,9 @@ class LibsndfileConan(ConanFile):
         "with_external_libs": True,
     }
 
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,60 +52,63 @@ class LibsndfileConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_alsa"):
-            self.requires("libalsa/1.2.5.1")
+            self.requires("libalsa/1.2.7.2")
         if self.options.with_external_libs:
             self.requires("ogg/1.3.5")
             self.requires("vorbis/1.3.7")
             self.requires("flac/1.3.3")
             self.requires("opus/1.3.1")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_Sndio"] = True  # FIXME: missing sndio cci recipe (check whether it is really required)
-        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_Speex"] = True  # FIXME: missing sndio cci recipe (check whether it is really required)
-        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_SQLite3"] = True  # only used for regtest
-        self._cmake.definitions["ENABLE_EXTERNAL_LIBS"] = self.options.with_external_libs
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Sndio"] = True  # FIXME: missing sndio cci recipe (check whether it is really required)
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Speex"] = True  # FIXME: missing sndio cci recipe (check whether it is really required)
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_SQLite3"] = True  # only used for regtest
+        tc.variables["ENABLE_EXTERNAL_LIBS"] = self.options.with_external_libs
         if not self.options.with_external_libs:
-            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_Ogg"] = True
-            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_Vorbis"] = True
-            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_FLAC"] = True
-            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_Opus"] = True
+            tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Ogg"] = True
+            tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Vorbis"] = True
+            tc.variables["CMAKE_DISABLE_FIND_PACKAGE_FLAC"] = True
+            tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Opus"] = True
         if not self.options.get_safe("with_alsa", False):
-            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ALSA"] = True
-        self._cmake.definitions["BUILD_PROGRAMS"] = self.options.programs
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["ENABLE_CPACK"] = False
-        self._cmake.definitions["ENABLE_EXPERIMENTAL"] = self.options.experimental
-        if self._is_msvc:
-            self._cmake.definitions["ENABLE_STATIC_RUNTIME"] = "MT" in msvc_runtime_flag(self)
-        self._cmake.definitions["BUILD_REGTEST"] = False
-        self._cmake.configure()
-        return self._cmake
+            tc.variables["CMAKE_DISABLE_FIND_PACKAGE_ALSA"] = True
+        tc.variables["BUILD_PROGRAMS"] = self.options.programs
+        tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["ENABLE_CPACK"] = False
+        tc.variables["ENABLE_EXPERIMENTAL"] = self.options.experimental
+        if is_msvc(self) and Version(self.version) < "1.0.30":
+            tc.variables["ENABLE_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+        tc.variables["BUILD_REGTEST"] = False
+        # Fix iOS/tvOS/watchOS
+        tc.variables["CMAKE_MACOSX_BUNDLE"] = False
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "RUNTIME DESTINATION			${CMAKE_INSTALL_BINDIR}",
-                              "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}")
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "SndFile")

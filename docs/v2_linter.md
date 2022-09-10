@@ -1,13 +1,7 @@
 # Linter to help migration to Conan v2
 
 <!-- toc -->
-## Contents
-
-- [Linter to help migration to Conan v2](#linter-to-help-migration-to-conan-v2)
-  - [Contents](#contents)
-  - [Import ConanFile from `conan`](#import-conanfile-from-conan)
-  - [Import tools from `conan`](#import-tools-from-conan)
-  - [Disable linter for a specific conanfile](#disable-linter-for-a-specific-conanfile)
+<!-- endToc -->
 
 On our [path to Conan v2](v2_roadmap.md) we are leveraging on custom Pylint rules. This
 linter will run for every pull-request that is submitted to the repository and will
@@ -78,3 +72,33 @@ all the checks of the linter, it can be skipped from `pylint` adding the followi
 from conans import ConanFile, CMake, tools
 ...
 ```
+
+---
+
+## Running the linter locally
+
+It is possible to run the linter locally the same way it is being run [using Github actions](../.github/workflows/linter-conan-v2.yml):
+
+ * (Recommended) Use a dedicated Python virtualenv.
+ * Ensure you have required tools installed: `conan` and `pylint` (better to uses fixed versions)
+
+   ```
+   pip install conan~=1.0 pylint==2.14
+   ```
+
+ * Set environment variable `PYTHONPATH` to the root of the repository
+
+   ```
+   export PYTHONPATH=your/path/conan-center-index
+   ```
+
+  * Now you just need to execute the `pylint` commands:
+
+    ```
+    # Lint a recipe:
+    pylint --rcfile=linter/pylintrc_recipe recipes/boost/all/conanfile.py
+
+    # Lint the test_package
+    pylint --rcfile=linter/pylintrc_testpackage recipes/boost/all/test_package/conanfile.py
+    ```
+
