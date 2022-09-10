@@ -29,13 +29,12 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            self.run("m4 --version")
-            self.run(f"m4 -R {os.path.join(self.source_folder, 'frozen.m4f')} {os.path.join(self.source_folder, 'test.m4')}")
-
-            output = StringIO()
+            self.run("m4 --version", run_environment=True)
             self.run(f"m4 -P {self._m4_input_path}")
 
-            # FIXME: The output from the run on Windows isn't used (see run method in conan_file.py) Once that is fixed we can actually
-            #  assert the output on Windows again.
-            if self.settings.os != "Windows":
-                assert "Harry, Jr. met Sally" in output.getvalue()
+            self.run(f"m4 -R {os.path.join(self.source_folder, 'frozen.m4f')} {os.path.join(self.source_folder, 'test.m4')}", run_environment=True)
+
+            output = StringIO()
+            self.run(f"m4 -P {self._m4_input_path}", output=output)
+
+            assert "Harry, Jr. met Sally" in output.getvalue()
