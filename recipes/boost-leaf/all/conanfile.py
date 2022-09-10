@@ -31,11 +31,11 @@ class BoostLEAFConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "11",
+            "gcc": "4.8",
             "Visual Studio": "17",
-            "msvc": "193",
-            "clang": "13",
-            "apple-clang": "13.1.6"
+            "msvc": "141",
+            "clang": "3.9",
+            "apple-clang": "10.0.0"
         }
 
     def requirements(self):
