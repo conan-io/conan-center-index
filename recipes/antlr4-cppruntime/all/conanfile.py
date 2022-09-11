@@ -57,19 +57,22 @@ class Antlr4CppRuntimeConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
+        antlr_version = tools.Version(self.version)
         self.requires("utfcpp/3.2.1")
-        if self.settings.os in ("FreeBSD", "Linux"):
+        # As of 4.11, antlr4-cppruntime no longer requires libuuid.
+        # Reference: [C++] Remove libuuid dependency (https://github.com/antlr/antlr4/pull/3787)
+        if self.settings.os in ("FreeBSD", "Linux") and antlr_version < "4.11":
             self.requires("libuuid/1.0.3")
 
     def validate(self):
-        if str(self.settings.arch).startswith("arm"):
-            raise ConanInvalidConfiguration("arm architectures are not supported")
-            # Need to deal with missing libuuid on Arm.
-            # So far ANTLR delivers macOS binary package.
-
         compiler = self.settings.compiler
         compiler_version = tools.Version(self.settings.compiler.version)
         antlr_version = tools.Version(self.version)
+
+        if str(self.settings.arch).startswith("arm") and antlr_version < "4.11":
+            raise ConanInvalidConfiguration("arm architectures are not supported due to libuuid; please upgrade to antlr 4.11 or later.")
+            # Need to deal with missing libuuid on Arm.
+            # So far ANTLR delivers macOS binary package.
 
         if compiler == "Visual Studio" and compiler_version < "16":
             raise ConanInvalidConfiguration("library claims C2668 'Ambiguous call to overloaded function'")

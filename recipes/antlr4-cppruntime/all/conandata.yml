@@ -8,7 +8,7 @@ sources:
   "4.10.1":
     url: "https://github.com/antlr/antlr4/archive/refs/tags/4.10.1.tar.gz"
     sha256: "a320568b738e42735946bebc5d9d333170e14a251c5734e8b852ad1502efa8a2"
-  "4.11.0":
+  "4.11":
     url: "https://github.com/antlr/antlr4/archive/refs/tags/4.11.0.tar.gz"
     sha256: "317f4e745badd8b5272191c3a4fd34a183a242aef269c68a9b23a382590dd142"
   "4.11.1":
