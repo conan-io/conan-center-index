@@ -1,8 +1,9 @@
 import os
-from conans import ConanFile, CMake
-from conan import tools
+from conan import ConanFile
+from conans import CMake
+from conan.tools import build
 
-class IceoryxTestConan(ConanFile):
+class CycloneDDSTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = ["cmake", "cmake_find_package_multi"]
 
@@ -12,6 +13,6 @@ class IceoryxTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.build.cross_building(self):
+        if not build.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)

@@ -9,7 +9,7 @@ required_conan_version = ">=1.43.0"
 
 
 class CycloneDDSConan(ConanFile):
-    name = "cyclone-dds"
+    name = "cyclonedds"
     license = "EPL-2.0"
     homepage = "https://cyclonedds.io/"
     url = "https://github.com/conan-io/conan-center-index"
