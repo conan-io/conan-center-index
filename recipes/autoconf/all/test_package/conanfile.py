@@ -39,7 +39,7 @@ class TestPackageConan(ConanFile):
         self.run(f"autoconf --verbose")
 
         autotools = Autotools(self)
-        autotools.configure()
+        autotools.configure(build_script_folder=self.build_folder)
         autotools.make()
 
     def test(self):
