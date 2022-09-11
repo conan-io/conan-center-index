@@ -8,10 +8,6 @@ AC_CONFIG_SRCDIR([test_package.cpp])
 
 AC_CANONICAL_HOST
 
-# Test includes of extra including directories using conan
-#AUTOMAKE_TEST_PACKAGE_PREREQ([1.0])
-#AUTOMAKE_TEST_PACKAGE_HELLO([argument1], [argument2], [...], [last argument])
-
 AC_CONFIG_HEADER([config.h])
 
 # Check for CC and CXX compiler

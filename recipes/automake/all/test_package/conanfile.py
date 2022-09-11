@@ -11,8 +11,7 @@ required_conan_version = ">=1.50.0"
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = "configure.ac", "Makefile.am", "test_package_1.c", "test_package.cpp", "extra.m4"
-    # DON'T COPY extra.m4 TO BUILD FOLDER!!!
+    exports_sources = "configure.ac", "Makefile.am", "test_package_1.c", "test_package.cpp"
     generators = "AutotoolsDeps", "AutotoolsToolchain", "VirtualBuildEnv"
     test_type = "explicit"
 
