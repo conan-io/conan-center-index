@@ -99,25 +99,29 @@ class LZ4Conan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
+        if Version(self.version) >= "1.9.4":
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
 
-        # TODO: to remove in conan v2 once legacy generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {"lz4": "LZ4::lz4" if self.options.shared else "LZ4::lz4_static"}
-        )
+        if Version(self.version) >= "1.9.4":
+            # TODO: to remove in conan v2 once legacy generators removed
+            self._create_cmake_module_alias_targets(
+                os.path.join(self.package_folder, self._module_file_rel_path),
+                {"lz4": "LZ4::lz4" if self.options.shared else "LZ4::lz4_static"}
+            )
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "liblz4")
-        self.cpp_info.set_property("cmake_file_name", "LZ4")
-        self.cpp_info.set_property("cmake_target_name", "LZ4::lz4" if self.options.shared else "LZ4::lz4_static")
+        if Version(self.version) >= "1.9.4":
+            self.cpp_info.set_property("cmake_file_name", "LZ4")
+            self.cpp_info.set_property("cmake_target_name", "LZ4::lz4" if self.options.shared else "LZ4::lz4_static")
         self.cpp_info.libs = ["lz4"]
         if is_msvc(self) and self.options.shared:
             self.cpp_info.defines.append("LZ4_DLL_IMPORT=1")
         self.cpp_info.names["pkg_config"] = "liblz4"
 
-        # TODO: to remove in conan v2 once legacy generators removed
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        if Version(self.version) >= "1.9.4":
+            # TODO: to remove in conan v2 once legacy generators removed
+            self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+            self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
