@@ -1,8 +1,5 @@
 
 sources:
-  "1.0":
-    url: https://npcap.com/dist/npcap-sdk-1.0.zip
-    sha256: defc9ec03f4cb7a6ac1b74df18c41b566dc00ba04426c2a530d72ab57458e4e7
   "1.01":
     url: https://npcap.com/dist/npcap-sdk-1.01.zip
     sha256: 9e4587ddef6fe430c949931baf6c3a61470a06face14c604fa657d0072c03e9b

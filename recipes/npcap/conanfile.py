@@ -1,5 +1,6 @@
 from os.path import join
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.files import get, download, copy
 
 
 class NpcapConan(ConanFile):
@@ -20,23 +21,23 @@ class NpcapConan(ConanFile):
         return "source_subfolder"
 
     def build(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
-        tools.download(filename="LICENSE", url=[
+        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder)
+        download(self, filename="LICENSE", url=[
             f"https://raw.githubusercontent.com/nmap/npcap/v{self.version}/LICENSE",
             "https://raw.githubusercontent.com/nmap/npcap/master/LICENSE"
         ])
 
     def package(self):
 
-        self.copy("LICENSE", dst="licenses")
-        self.copy("*.h", dst="include", src=join(self._source_subfolder, "Include"))
+        copy(self, "LICENSE", dst="licenses")
+        copy(self, "*.h", dst="include", src=join(self._source_subfolder, "Include"))
 
         if self.settings.arch == "x86_64":
-            self.copy("*.lib", dst="lib", src=join(self._source_subfolder, "Lib", "x64"))
+            copy(self, "*.lib", dst="lib", src=join(self._source_subfolder, "Lib", "x64"))
         elif self.settings.arch == "armv8":
-            self.copy("*.lib", dst="lib", src=join(self._source_subfolder, "Lib", "ARM64"))
+            copy(self, "*.lib", dst="lib", src=join(self._source_subfolder, "Lib", "ARM64"))
         else:
-            self.copy("*.lib", dst="lib", src=join(self._source_subfolder, "Lib"))
+            copy(self, "*.lib", dst="lib", src=join(self._source_subfolder, "Lib"))
 
     def package_info(self):
         self.cpp_info.libs = self.collect_libs()
