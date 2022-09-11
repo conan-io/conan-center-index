@@ -42,7 +42,6 @@ class AutoconfConan(ConanFile):
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
             self.tool_requires("msys2/cci.latest")
-        self.tool_requires("m4/1.4.19")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

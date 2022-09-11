@@ -1,5 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, unix_path
 import contextlib
 import os
 import shutil
@@ -33,7 +33,7 @@ class TestPackageConan(ConanFile):
     def build(self):
         for src in self.exports_sources:
             shutil.copy(os.path.join(self.source_folder, src), self.build_folder)
-        self.run("{} --verbose".format(os.environ["AUTOCONF"]),
+        self.run("autoconf --verbose",
                  win_bash=tools.os_info.is_windows, run_environment=True)
         self.run("{} --help".format(os.path.join(self.build_folder, "configure").replace("\\", "/")),
                  win_bash=tools.os_info.is_windows, run_environment=True)
