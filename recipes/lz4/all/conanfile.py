@@ -101,8 +101,8 @@ class LZ4Conan(ConanFile):
         cmake.install()
         if Version(self.version) >= "1.9.4":
             rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-            rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
         if Version(self.version) >= "1.9.4":
             # TODO: to remove in conan v2 once legacy generators removed
