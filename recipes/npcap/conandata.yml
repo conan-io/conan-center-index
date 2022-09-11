@@ -1,0 +1,38 @@
+
+sources:
+  "1.0":
+    url: https://npcap.com/dist/npcap-sdk-1.0.zip
+    sha256: defc9ec03f4cb7a6ac1b74df18c41b566dc00ba04426c2a530d72ab57458e4e7
+  "1.01":
+    url: https://npcap.com/dist/npcap-sdk-1.01.zip
+    sha256: 9e4587ddef6fe430c949931baf6c3a61470a06face14c604fa657d0072c03e9b
+  "1.02":
+    url: https://npcap.com/dist/npcap-sdk-1.02.zip
+    sha256: c94f42ad37c207d8c1765347496ab7a622a96024035e689437c9dfdb174892b3
+  "1.03":
+    url:  https://npcap.com/dist/npcap-sdk-1.03.zip
+    sha256:  8198b4aba1c7f8a42efa9ebffdd56d880f452d07be940496215596064e393786
+  "1.04":
+    url:  https://npcap.com/dist/npcap-sdk-1.04.zip
+    sha256:  963973ade130eb9f57af37d15b4fb046a12a0012a2234fe8e2253699dbfc52b0
+  "1.05":
+    url:  https://npcap.com/dist/npcap-sdk-1.05.zip
+    sha256:  b77506a32194a92eef80221125ca8254603c5cc8b8cedab31794878281aa04b5
+  "1.06":
+    url:  https://npcap.com/dist/npcap-sdk-1.06.zip
+    sha256:  1c6c597c577cee4f143573b675aee448b1b87594c605d6afbc87e483e2f1a6ea
+  "1.07":
+    url:  https://npcap.com/dist/npcap-sdk-1.07.zip
+    sha256:  b98b5364be8073778ab489bc8b047875cc7a532ca1c186b4fd2f54c28e0ecef5
+  "1.10":
+    url:  https://npcap.com/dist/npcap-sdk-1.10.zip
+    sha256:  701829a5771f544318eb46c95a692ad9ae1d37fcb440faf085d49f8cedbf604f
+  "1.11":
+    url:  https://npcap.com/dist/npcap-sdk-1.11.zip
+    sha256:  014ce08e92df187a7202c337a53671f6f3d0a7079f9dae436212c9a501f150b8
+  "1.12":
+    url:  https://npcap.com/dist/npcap-sdk-1.12.zip
+    sha256:  24c4862723f61d28048a24e10eb31d2269b2152a5762410dd1caffc041871337
+  "1.13":
+    url:  https://npcap.com/dist/npcap-sdk-1.13.zip
+    sha256:  dad1f2bf1b02b787be08ca4862f99e39a876c1f274bac4ac0cedc9bbc58f94fd
