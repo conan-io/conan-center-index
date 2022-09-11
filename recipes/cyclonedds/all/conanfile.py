@@ -39,7 +39,7 @@ class CycloneDDSConan(ConanFile):
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     @property
     def _source_subfolder(self):
@@ -71,7 +71,7 @@ class CycloneDDSConan(ConanFile):
         version = scm.Version(self.settings.compiler.version)
 
         if ((self.options.security is True ) and (self.options.shared is False)):
-            raise ConanInvalidConfiguration("Cyclone DDS currently do not support",
+            raise ConanInvalidConfiguration("Cyclone DDS currently do not support"\
                                             "static build and security on")
 
         if compiler.get_safe("cppstd"):
@@ -79,20 +79,20 @@ class CycloneDDSConan(ConanFile):
 
         if compiler == "Visual Studio":
             if version < "16":
-                raise ConanInvalidConfiguration("Cyclone DDS is just supported",
+                raise ConanInvalidConfiguration("Cyclone DDS is just supported"\
                                                 "for Visual Studio 2019 and higher.")
             if self.options.shared:
                 raise ConanInvalidConfiguration(
-                    'Using Cyclone DDS with Visual Studio currently just possible',
+                    'Using Cyclone DDS with Visual Studio currently just possible'\
                     'with "shared=False"')
         elif compiler == "gcc":
             if version < "6":
-                raise ConanInvalidConfiguration("Using Cyclone DDS with gcc requires",
+                raise ConanInvalidConfiguration("Using Cyclone DDS with gcc requires"\
                                                 " gcc 6 or higher.")
             if version < "9" and compiler.get_safe("libcxx") == "libstdc++":
                 raise ConanInvalidConfiguration("gcc < 9 with libstdc++ not supported")
             if version == "6":
-                self.output.warn("Cyclone DDS package is compiled with gcc 6, it is",
+                self.output.warn("Cyclone DDS package is compiled with gcc 6, it is"\
                                  " recommended to use 7 or higher")
                 self.output.warn("GCC 6 will build with warnings.")
         elif compiler == "clang":
@@ -100,7 +100,7 @@ class CycloneDDSConan(ConanFile):
                 raise ConanInvalidConfiguration("clang with libstdc++ not supported")
             if version == "7.0" and compiler.get_safe("libcxx") == "libc++" and \
                self.options.shared and self.settings.build_type == "Debug":
-                raise ConanInvalidConfiguration("shared Debug with clang 7.0 and",
+                raise ConanInvalidConfiguration("shared Debug with clang 7.0 and"\
                                                 " libc++ not supported")
 
     def source(self):
