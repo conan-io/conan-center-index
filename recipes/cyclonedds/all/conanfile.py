@@ -1,7 +1,9 @@
 import os
 import textwrap
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools
+from conans import CMake
+from conan.errors import ConanInvalidConfiguration
+from conan.tools import scm, files
 
 required_conan_version = ">=1.43.0"
 
@@ -11,7 +13,7 @@ class CycloneDDSConan(ConanFile):
     license = "EPL-2.0"
     homepage = "https://cyclonedds.io/"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "Eclipse Cyclone DDS - An implementation", \
+    description = "Eclipse Cyclone DDS - An implementation"\
                   " of the OMG Data Distribution Service (DDS) specification"
     topics = ("dds", "ipc", "ros", "middleware")
 
@@ -66,14 +68,14 @@ class CycloneDDSConan(ConanFile):
 
     def validate(self):
         compiler = self.settings.compiler
-        version = tools.Version(self.settings.compiler.version)
+        version = tools.scm.Version(self.settings.compiler.version)
 
         if ((self.options.security is True ) and (self.options.shared is False)):
             raise ConanInvalidConfiguration("Cyclone DDS currently do not support",
                                             "static build and security on")
 
         if compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 14)
+            tools.build.check_min_cppstd(self, 14)
 
         if compiler == "Visual Studio":
             if version < "16":
@@ -102,12 +104,12 @@ class CycloneDDSConan(ConanFile):
                                                 " libc++ not supported")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True,
+        tools.files.get(self,**self.conan_data["sources"][self.version], strip_root=True,
                  destination=self._source_subfolder)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(self,**patch)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -126,8 +128,7 @@ class CycloneDDSConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent("""\
@@ -136,7 +137,7 @@ class CycloneDDSConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     def build(self):
         self._patch_sources()
@@ -147,9 +148,9 @@ class CycloneDDSConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib","pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib","cmake","CycloneDDS"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib","pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib","cmake","CycloneDDS"))
 
     def package_info(self):
         self._create_cmake_module_alias_targets(
