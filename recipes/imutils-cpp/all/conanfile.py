@@ -34,7 +34,7 @@ class ImutilsCppConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "8",
+            "gcc": "9",
             "Visual Studio": "15.7",
             "msvc": "19.14",
             "clang": "7",
