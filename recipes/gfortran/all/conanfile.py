@@ -31,6 +31,7 @@ class GFortranConan(ConanFile):
             self.build_requires("7zip/19.00")
 
     def source(self):
+        #does not work for windows ?
         get(self, **self.conan_data["sources"][self.version][str(self.settings.os)]["x86_64"],
                   destination=self._source_subfolder, strip_root=True)
 
