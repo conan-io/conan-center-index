@@ -42,6 +42,7 @@ class AutoconfConan(ConanFile):
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
             self.tool_requires("msys2/cci.latest")
+        self.tool_requires("m4/1.4.19")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -54,9 +55,6 @@ class AutoconfConan(ConanFile):
         ])
 
         if self.settings.os == "Windows":
-            tc.configure_args.extend([
-                "--program-suffix=.exe",
-            ])
             if is_msvc(self):
                 build = "{}-{}-{}".format(
                     "x86_64" if self._settings_build.arch == "x86_64" else "i686",
@@ -70,18 +68,7 @@ class AutoconfConan(ConanFile):
                 tc.configure_args.append(f"--host={host}")
 
         env = tc.environment()
-        if is_msvc(self):
-            env.define_path("CXX", "cl -nologo")
-            env.define_path("CC", "cl -nologo")
-            env.define("CXXCPP", "cl -nologo -EP")
-            env.define("CPP", "cl -nologo -EP")
-            env.define("LD", "link -nologo")
-            # env.define("INSTALL", unix_path(self, str(self.source_path.joinpath('build-aux', 'install-sh'))))
-            env.define("NM", "dumpbin -symbols")
-            env.define("OBJDUMP", ":")
-            env.define("RANLIB", ":")
-            env.define("STRIP", ":")
-            tc.generate(env)
+        env.define("INSTALL", unix_path(self, str(self.source_path.joinpath('build-aux', 'install-sh'))))
         tc.generate(env)
 
         deps = AutotoolsDeps(self)
@@ -103,7 +90,7 @@ class AutoconfConan(ConanFile):
 
         copy(self, "COPYING*", src=self.source_folder, dst=self.package_path.joinpath("licenses"))
         rmdir(self, self.package_path.joinpath("res", "info"))
-        rmdir(self, self.package_path.joinpath("res" "man"))
+        rmdir(self, self.package_path.joinpath("res", "man"))
 
     def package_info(self):
         self.cpp_info.libdirs = []
@@ -117,50 +104,42 @@ class AutoconfConan(ConanFile):
         self.output.info(f"Defining AC_MACRODIR environment variable: {dataroot_path}")
         self.env_info.AC_MACRODIR = str(dataroot_path)
         self.buildenv_info.define_path("AC_MACRODIR", str(dataroot_path))
-        self.runenv_info.define_path("AC_MACRODIR", str(dataroot_path))
 
         self.output.info(f"Defining AUTOM4TE_PERLLIBDIR environment variable: {dataroot_path}")
         self.env_info.AUTOM4TE_PERLLIBDIR = str(dataroot_path)
         self.buildenv_info.define_path("AUTOM4TE_PERLLIBDIR", str(dataroot_path))
-        self.runenv_info.define_path("AUTOM4TE_PERLLIBDIR", str(dataroot_path))
 
-        ext = ".exe" if self.settings.os == "Windows" else ""
-
-        autoconf_bin = bin_path.joinpath(f"autoconf{ext}")
+        autoconf_bin = bin_path.joinpath("autoconf")
         self.output.info(f"Defining AUTOCONF environment variable: {autoconf_bin}")
         self.env_info.AUTOCONF = str(autoconf_bin)
         self.buildenv_info.define_path("AUTOCONF", str(autoconf_bin))
-        self.runenv_info.define_path("AUTOCONF", str(autoconf_bin))
 
         autoconf_bin_conf_key = "tools.autoconf:autoconf"
         self.output.info(f"Defining path to autoconf binary in configuration as `{autoconf_bin_conf_key}` with value: {autoconf_bin}")
         self.conf_info.define(autoconf_bin_conf_key, str(autoconf_bin))
 
-        autoreconf_bin = bin_path.joinpath(f"autoreconf{ext}")
+        autoreconf_bin = bin_path.joinpath("autoreconf")
         self.output.info(f"Defining AUTORECONF environment variable: {autoreconf_bin}")
         self.env_info.AUTORECONF = str(autoreconf_bin)
         self.buildenv_info.define_path("AUTORECONF", str(autoreconf_bin))
-        self.runenv_info.define_path("AUTORECONF", str(autoreconf_bin))
 
         autoreconf_bin_conf_key = "tools.autoconf:autoreconf"
         self.output.info(f"Defining path to autoreconf binary in configuration as `{autoreconf_bin_conf_key}` with value: {autoreconf_bin}")
         self.conf_info.define(autoreconf_bin_conf_key, str(autoreconf_bin))
 
-        autoheader_bin = bin_path.joinpath(f"autoheader{ext}")
+        autoheader_bin = bin_path.joinpath("autoheader")
         self.output.info(f"Defining AUTOHEADER environment variable: {autoheader_bin}")
         self.env_info.AUTOHEADER = str(autoheader_bin)
         self.buildenv_info.define_path("AUTOHEADER", str(autoheader_bin))
-        self.runenv_info.define_path("AUTOHEADER", str(autoheader_bin))
 
         autoheader_bin_conf_key = "tools.autoconf:autoheader"
         self.output.info(f"Defining path to autoheader binary in configuration as `{autoheader_bin_conf_key}` with value: {autoheader_bin}")
         self.conf_info.define(autoheader_bin_conf_key, str(autoheader_bin))
 
-        autom4te_bin = bin_path.joinpath(f"autom4te{ext}")
+        autom4te_bin = bin_path.joinpath("autom4te")
         self.output.info(f"Defining AUTOM4TE environment variable: {autom4te_bin}")
         self.env_info.AUTOM4TE = str(autom4te_bin)
         self.buildenv_info.define_path("AUTOM4TE", str(autom4te_bin))
-        self.runenv_info.define_path("AUTOM4TE", str(autom4te_bin))
 
         autom4te_bin_conf_key = "tools.autoconf:autom4te"
         self.output.info(f"Defining path to autom4te binary in configuration as `{autom4te_bin_conf_key}` with value: {autom4te_bin}")
