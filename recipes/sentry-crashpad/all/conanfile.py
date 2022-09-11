@@ -1,13 +1,14 @@
-import os
-
 from conan import ConanFile
-from conan.tools.scm import Version
+from conan.tools.apple.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, apply_conandata_patches, copy, rmdir, rm, replace_in_file
-from conan.tools.apple.apple import is_apple_os
+from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.43.0"
+import os
+
+required_conan_version = ">=1.51.3"
 
 
 class SentryCrashpadConan(ConanFile):
@@ -81,14 +82,13 @@ class SentryCrashpadConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             # Set as required in crashpad CMake file.
             # See https://github.com/getsentry/crashpad/blob/71bcaad4cf30294b8de1bfa02064ab629437163b/CMakeLists.txt#L67
-            tools.check_min_cppstd(self, 14)
+            check_min_cppstd(self, 14)
 
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn("Compiler is unknown. Assuming it supports C++14.")
         elif Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration("Build requires support for C++14. Minimum version for {} is {}"
-                .format(str(self.settings.compiler), minimum_version))
+            raise ConanInvalidConfiguration(f"Build requires support for C++14. Minimum version for {self.settings.compiler} is {minimum_version}")
         if Version(self.version) < "0.4.7" and self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
 
@@ -106,7 +106,7 @@ class SentryCrashpadConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", self.build_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
@@ -122,7 +122,7 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["crashpad_mini_chromium"].libs = ["mini_chromium"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["crashpad_mini_chromium"].system_libs.append("pthread")
-        elif is_apple_os(self.settings.os):
+        elif is_apple_os(self):
             self.cpp_info.components["crashpad_mini_chromium"].frameworks = ["CoreFoundation", "Foundation", "Security"]
             if self.settings.os == "Macos":
                 self.cpp_info.components["crashpad_mini_chromium"].frameworks.extend(["ApplicationServices", "IOKit"])
@@ -133,7 +133,7 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["crashpad_compat"].set_property("cmake_target_name", "crashpad::compat")
         self.cpp_info.components["crashpad_compat"].includedirs.append(os.path.join("include", "crashpad"))
         # On Apple crashpad_compat is an interface library
-        if not is_apple_os(self.settings.os):
+        if not is_apple_os(self):
             self.cpp_info.components["crashpad_compat"].libs = ["crashpad_compat"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["crashpad_compat"].system_libs.append("dl")
@@ -196,7 +196,7 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["crashpad_tools"].libs = ["crashpad_tools"]
 
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
