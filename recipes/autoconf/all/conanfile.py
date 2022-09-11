@@ -58,11 +58,11 @@ class AutoconfConan(ConanFile):
                 build = "{}-{}-{}".format(
                     "x86_64" if self._settings_build.arch == "x86_64" else "i686",
                     "pc" if self._settings_build.arch == "x86" else "win64",
-                    "mingw64")
+                    "mingw32")
                 host = "{}-{}-{}".format(
                     "x86_64" if self.settings.arch == "x86_64" else "i686",
                     "pc" if self.settings.arch == "x86" else "win64",
-                    "mingw64")
+                    "mingw32")
                 tc.configure_args.append(f"--build={build}")
                 tc.configure_args.append(f"--host={host}")
 
