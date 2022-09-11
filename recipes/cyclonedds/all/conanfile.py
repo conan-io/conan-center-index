@@ -155,7 +155,7 @@ class CycloneDDSConan(ConanFile):
     def package_info(self):
         self._create_cmake_module_alias_targets(
                 os.path.join(self.package_folder, self._module_file_rel_path),
-                { "CycloneDDS::ddsc" : "cyclone-dds::ddsc"})
+                { "CycloneDDS::ddsc" : "cyclonedds::ddsc"})
         self.cpp_info.set_property("cmake_file_name", "CycloneDDS")
         self.cpp_info.components["ddsc"].set_property("cmake_target_name", "CycloneDDS::ddsc")
         self.cpp_info.components["ddsc"].libs = ["ddsc"]

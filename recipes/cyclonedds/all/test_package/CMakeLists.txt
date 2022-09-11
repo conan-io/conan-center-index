@@ -12,7 +12,7 @@ endif()
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(cyclone-dds REQUIRED CONFIG)
+find_package(cyclonedds REQUIRED CONFIG)
 
 add_executable(test_package main.cpp)
 target_link_libraries(test_package CycloneDDS::ddsc
