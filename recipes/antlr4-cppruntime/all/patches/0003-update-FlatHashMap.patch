@@ -12,4 +12,3 @@
 +            typename Allocator = std::allocator<std::pair<const Key, Value>>>
    using FlatHashMap = std::unordered_map<Key, Value, Hash, Equal, Allocator>;
  #endif
- 
