@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 2.8.12)
 project(test_package)
 
-find_package(libtool REQUIRED)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
 
 include(GenerateExportHeader)
 
@@ -13,7 +14,7 @@ target_include_directories(liba
 set_property(TARGET liba PROPERTY PREFIX "")
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} PRIVATE libtool::ltdl)
+target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
 target_include_directories(test_package
     PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>"
 )

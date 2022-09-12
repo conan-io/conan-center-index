@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.1)
 project(static_dependency C)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

@@ -2,7 +2,7 @@ import re
 
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir, rm, rename, load, save
+from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir, rm, rename, load, save, collect_libs
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -165,7 +165,7 @@ class LibtoolConan(ConanFile):
                 contents, nb2 = re.subn("^: \\$\\{{{}=\"[^$\"]*\"\\}}".format(key), ": ${{{}=\"{}\"}}".format(key, repl), contents, flags=re.MULTILINE)
                 if nb1 + nb2 == 0:
                     raise ConanException("Failed to find {} in {}".format(key, repl))
-            save(self, str(file))
+            save(self, str(file), contents)
 
         if is_msvc(self) and self.options.shared:
             rename(self, self.package_path.joinpath("lib", "ltdl.dll.lib"), self.package_path.joinpath("lib", "ltdl.lib"))
@@ -177,7 +177,11 @@ class LibtoolConan(ConanFile):
         replace_in_file(self, libtool_m4, "lt_cv_deplibs_check_method='file_magic file format (pei*-i386(.*architecture: i386)?|pe-arm-wince|pe-x86-64)'", method_pass_all)
 
     def package_info(self):
-        self.cpp_info.libs = ["ltdl"]
+        self.cpp_info.libs = collect_libs(self, self.package_path.joinpath("lib"))
+
+        self.cpp_info.set_property("cmake_file_name", "libtool")
+        self.cpp_info.set_property("cmake_target_name", "libtool::ltdl")
+        self.cpp_info.set_property("cmake_find_mode", "both")
 
         if self.options.shared:
             if self.settings.os == "Windows":
