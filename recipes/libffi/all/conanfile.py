@@ -95,22 +95,18 @@ class PackageConan(ConanFile):
             tc.configure_args.append(f"--build={build}")
             tc.configure_args.append(f"--host={host}")
 
-        if is_msvc(self) or self.settings.compiler == "clang":
+        if is_msvc(self):
             msvcc = unix_path(self, str(self.source_path.joinpath("msvcc.sh")))
             msvcc_args = []
-            if is_msvc(self):
-                if self.settings.arch == "x86_64":
-                    msvcc_args.append("-m64")
-                elif self.settings.arch == "x86":
-                    msvcc_args.append("-m32")
-            elif self.settings.compiler == "clang":
-                msvcc_args.append("-clang-cl")
+            if self.settings.arch == "x86_64":
+                msvcc_args.append("-m64")
+            elif self.settings.arch == "x86":
+                msvcc_args.append("-m32")
 
             if msvcc_args:
                 msvcc_args = " ".join(msvcc_args)
                 msvcc = f"{msvcc} {msvcc_args}"
 
-        if is_msvc(self):
             if "MT" in msvc_runtime_flag(self):
                 tc.extra_defines.append("USE_STATIC_RTL")
             if "d" in msvc_runtime_flag(self):
@@ -125,7 +121,7 @@ class PackageConan(ConanFile):
             tc.extra_defines.append("FFI_DEBUG")
 
         env = tc.environment()
-        if is_msvc(self) or self.settings.compiler == "clang":
+        if is_msvc(self):
             env.define("LD", "link")
             env.define_path("CXX", msvcc)
             env.define_path("CC", msvcc)
