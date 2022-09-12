@@ -1,19 +1,19 @@
 sources:
-  "cci.3.2-20200130":
-    url: "https://github.com/godotengine/godot-headers/archive/ddf67cc7b8274c5fb77a71c828bab2991f1ee12a.zip"
-    sha256: "d62b1a2ae5b19ba1d116de754efb22c66a4425f31a4887b59249d9c0f073cc48"
-  "3.2.3":
-    url: "https://github.com/godotengine/godot-headers/archive/refs/tags/godot-3.2.3-stable.zip"
-    sha256: "91815415a134ec061e1126a78d773bb13b28417f6dff34e02d54a38bf1b7e27d"
-  "3.3.2":
-    url: "https://github.com/godotengine/godot-headers/archive/refs/tags/godot-3.3.2-stable.zip"
-    sha256: "0297aa9d0eb4374ecb82eb844f588343c6efbc39028473b96de12ca703aa1834"
-  "3.3.4":
-    url: "https://github.com/godotengine/godot-headers/archive/godot-3.3.4-stable.tar.gz"
-    sha256: "14cff754199cc48dcf29b326ad4758c0bc71613acea9942de780815903a0d5a5"
-  "3.4":
-    url: "https://github.com/godotengine/godot-headers/archive/refs/tags/godot-3.4-stable.zip"
-    sha256: "584c8fedb9c521e0f21b37aed60a7bf76f417a196bb79205cf41b4e79a866237"
   "3.4.4":
     url: "https://github.com/godotengine/godot-headers/archive/godot-3.4.4-stable.tar.gz"
     sha256: "bb0eac00a4d5b800a4ca2555d11b4a35981bdb730b630e9bd31a0649fa1d6fd7"
+  "3.4":
+    url: "https://github.com/godotengine/godot-headers/archive/refs/tags/godot-3.4-stable.zip"
+    sha256: "584c8fedb9c521e0f21b37aed60a7bf76f417a196bb79205cf41b4e79a866237"
+  "3.3.4":
+    url: "https://github.com/godotengine/godot-headers/archive/godot-3.3.4-stable.tar.gz"
+    sha256: "14cff754199cc48dcf29b326ad4758c0bc71613acea9942de780815903a0d5a5"
+  "3.3.2":
+    url: "https://github.com/godotengine/godot-headers/archive/refs/tags/godot-3.3.2-stable.zip"
+    sha256: "0297aa9d0eb4374ecb82eb844f588343c6efbc39028473b96de12ca703aa1834"
+  "3.2.3":
+    url: "https://github.com/godotengine/godot-headers/archive/refs/tags/godot-3.2.3-stable.zip"
+    sha256: "91815415a134ec061e1126a78d773bb13b28417f6dff34e02d54a38bf1b7e27d"
+  "cci.3.2-20200130":
+    url: "https://github.com/godotengine/godot-headers/archive/ddf67cc7b8274c5fb77a71c828bab2991f1ee12a.zip"
+    sha256: "d62b1a2ae5b19ba1d116de754efb22c66a4425f31a4887b59249d9c0f073cc48"

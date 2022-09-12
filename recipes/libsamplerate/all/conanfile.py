@@ -1,7 +1,12 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.apple import is_apple_os
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.51.3"
 
 
 class LibsamplerateConan(ConanFile):
@@ -25,14 +30,6 @@ class LibsamplerateConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -40,38 +37,55 @@ class LibsamplerateConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["LIBSAMPLERATE_EXAMPLES"] = False
-        self._cmake.definitions["LIBSAMPLERATE_INSTALL"] = True
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.configure()
-        return self._cmake
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
     def build_requirements(self):
-        if tools.is_apple_os(self.settings.os) and self.options.shared and tools.Version(self.version) >= "0.2.2":
-            self.build_requires("cmake/3.21.3")
+        if is_apple_os(self) and self.options.shared and Version(self.version) >= "0.2.2":
+            # At least CMake 3.17 (see https://github.com/libsndfile/libsamplerate/blob/0.2.2/src/CMakeLists.txt#L110-L119)
+            self.tool_requires("cmake/3.24.0")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["LIBSAMPLERATE_EXAMPLES"] = False
+        tc.variables["LIBSAMPLERATE_INSTALL"] = True
+        tc.variables["BUILD_TESTING"] = False
+        tc.generate()
+
+        env = VirtualBuildEnv(self)
+        env.generate()
+
+    def _patch_sources(self):
+        # Disable upstream logic about msvc runtime policy, called before conan toolchain resolution
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "cmake_policy(SET CMP0091 OLD)", "")
 
     def build(self):
-        cmake = self._configure_cmake()
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "SampleRate")

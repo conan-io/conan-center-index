@@ -8,6 +8,4 @@ sources:
 patches:
   "0.7.0":
     - patch_file: "patches/0001-install-0.7.0.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-libcxx-and-gcc.patch"
-      base_path: "source_subfolder"

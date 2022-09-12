@@ -5,8 +5,5 @@ sources:
 patches:
   "cci.20190615":
     - patch_file: "patches/001_linux64_compilation_fixes.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/002_fix_clang_inline.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/003_fix_missing_cast.patch"
-      base_path: "source_subfolder"

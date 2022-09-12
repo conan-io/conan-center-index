@@ -17,4 +17,3 @@ sources:
 patches:
   "0.2.5":
     - patch_file: "patches/missing-includes.patch"
-      base_path: "source_subfolder"
