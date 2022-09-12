@@ -1,4 +1,7 @@
 sources:
+  "0.15":
+    url: "https://github.com/NixOS/patchelf/archive/0.15.0.tar.gz"
+    sha256: "5d1eda9bad4439bb9c0a87fcba198d7c0d372f361e77de41d68d6308062e5000"
   "0.13":
     url: "https://github.com/NixOS/patchelf/archive/0.13.tar.gz"
     sha256: "60c6aeadb673de9cc1838b630c81f61e31c501de324ef7f1e8094a2431197d09"
