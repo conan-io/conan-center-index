@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, rm, save, apply_conandata_patches
+from conan.tools.files import get, save, apply_conandata_patches
 from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
@@ -145,8 +145,6 @@ class TensorflowLiteConan(ConanFile):
         self.copy("*.dylib*", dst="lib", src=os.path.join(self.build_folder))
         self.copy("*.lib", dst="lib", src=os.path.join(self.build_folder), keep_path=False)
         self.copy("*.dll*", dst="lib", src=os.path.join(self.build_folder), keep_path=False)
-        if self.settings.build_type == "Debug":
-            rm(self, "*.pdb", self.package_folder)
         self._create_cmake_module_alias_target(self, os.path.join(self.package_folder, self._module_file))
 
     def package_info(self):
