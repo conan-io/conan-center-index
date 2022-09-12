@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake
+from conan.tools.build import cross_building
 import os
 
 
@@ -12,7 +13,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            model_path = os.path.join(self.source_folder, os.pardir, "test_package", "model.tflite")
+        if not cross_building(self):
+            model_path = os.path.join(self.recipe_folder, os.pardir, "test_package", "model.tflite")
             command = os.path.join("bin", "test_package")
-            self.run(" ".join([command, model_path]), run_environment=True)
+            self.run(f"{command} {model_path}", run_environment=True)
