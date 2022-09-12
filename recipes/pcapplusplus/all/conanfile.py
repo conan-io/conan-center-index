@@ -1,7 +1,8 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conan import ConanFile, tools
 from conan.tools.microsoft import MSBuild, is_msvc
 from conan.tools.microsoft.visual import vs_ide_version
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
+from conans import AutoToolsBuildEnvironment
 import os
 
 required_conan_version = ">=1.33.0"
@@ -35,12 +36,15 @@ class PcapplusplusConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+      if self.settings.os == "Windows":
+        # We don't want libpcap itself, we want Npcap/Winpcap port of Libpcap
+        self.options["libpcap"].shared = True
+
     def requirements(self):
+        self.requires("libpcap/1.9.1")
         if self.settings.os == "Windows":
-            self.requires("npcap/1.70")
             self.requires("pthreads4w/3.0.0")
-        else:
-            self.requires("libpcap/1.9.1")
 
     def _get_vs_version(self):
         if not is_msvc(self):
@@ -93,7 +97,7 @@ class PcapplusplusConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             config_args = [
                 "configure-windows-visual-studio.bat",
-                "--pcap-sdk", self.deps_cpp_info["npcap"].rootpath,
+                "--pcap-sdk", self.deps_cpp_info["libpcap"].rootpath,
                 "--pthreads-home", self.deps_cpp_info["pthreads4w"].rootpath,
                 "--vs-version", vs_version,
             ]
