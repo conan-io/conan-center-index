@@ -1,0 +1,18 @@
+--- mk/vs/PcapPlusPlusPropertySheet.props.template
++++ mk/vs/PcapPlusPlusPropertySheet.props.template
+@@ -23,12 +23,11 @@
+   <!-- pthreads-win32 project variables -->
+   <ItemDefinitionGroup>
+     <ClCompile>
+-      <AdditionalIncludeDirectories>$(PThreadWin32Home)\Pre-built.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories>$(PThreadWin32Home)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+       <PreprocessorDefinitions>HAVE_STRUCT_TIMESPEC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+     </ClCompile>
+     <Link>
+-      <AdditionalLibraryDirectories Condition="'$(Platform)'=='Win32'">$(PThreadWin32Home)\Pre-built.2\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+-      <AdditionalLibraryDirectories Condition="'$(Platform)'=='x64'">$(PThreadWin32Home)\Pre-built.2\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
++      <AdditionalLibraryDirectories>$(PThreadWin32Home)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+-      <AdditionalDependencies>pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <AdditionalDependencies>pthreadVC3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+     </Link>
+   </ItemDefinitionGroup>

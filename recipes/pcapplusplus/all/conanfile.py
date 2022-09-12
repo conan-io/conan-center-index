@@ -1,4 +1,6 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
+from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conan.tools.microsoft import MSBuild, is_msvc
+from conan.tools.microsoft.visual import vs_ide_version
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -35,34 +37,23 @@ class PcapplusplusConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Windows":
-            # We don't expose npcap API
-            self.requires("npcap/[>=1.0]")
+            self.requires("npcap/1.70")
+            self.requires("pthreads4w/3.0.0")
         else:
             self.requires("libpcap/1.9.1")
 
     def _get_vs_version(self):
-        compiler = self.settings.get_safe("compiler")
-        vs_mapping = dict()
-        if compiler == "Visual Studio":
-            vs_mapping = {
-                "14": "vs2015",
-                "15": "vs2017",
-                "16": "vs2019",
-                "17": "vs2022",
-            }
-        elif compiler == "msvs":
-            vs_mapping = {
-                "190": "vs2015",
-                "191": "vs2017",
-                "192": "vs2019",
-                "193": "vs2022",
-            }
-        vs_version = vs_mapping.get(self.settings.compiler.version, None)
-        if vs_version == "vs2022":
+        if not is_msvc(self):
+            return None
+        vs_mapping = {
+            "14": "vs2015",
+            "15": "vs2017",
+            "16": "vs2019",
             # configure-windows-visual-studio.bat does not know vs2022
-            # we use vs2019 and Visual Studio will auto upgrade
-            vs_version = "vs2019"
-        return vs_version
+            # we use vs2019 and change PlatformToolset later
+            "17": "vs2019",
+        }
+        return vs_mapping.get(vs_ide_version(self), None)
 
     def validate(self):
         if self.settings.os == "Windows" and self._get_vs_version() is None:
@@ -73,12 +64,6 @@ class PcapplusplusConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-
-        if self.settings.os == "Windows":
-            # pthreads-win32 dependency will be removed in the next release of PcapPlusPlus
-            # see https://github.com/seladb/PcapPlusPlus/pull/884
-            tools.ftp_download(ip="sourceware.org", filename="pub/pthreads-win32/pthreads-w32-2-9-1-release.zip")
-            tools.unzip("pthreads-w32-2-9-1-release.zip", os.path.join(self._source_subfolder, "pthreads"))
 
     @property
     def _configure_sh_script(self):
@@ -97,25 +82,29 @@ class PcapplusplusConan(ConanFile):
             tools.patch(**patch)
 
     def build(self):
+        self._patch_sources()
         if self.settings.os == "Windows":
             self._build_windows()
         else:
             self._build_posix()
 
     def _build_windows(self):
+        vs_version = self._get_vs_version()
         with tools.chdir(self._source_subfolder):
             config_args = [
                 "configure-windows-visual-studio.bat",
                 "--pcap-sdk", self.deps_cpp_info["npcap"].rootpath,
-                "--pthreads-home", os.path.abspath("pthreads"),
-                "--vs-version", self._get_vs_version(),
+                "--pthreads-home", self.deps_cpp_info["pthreads4w"].rootpath,
+                "--vs-version", vs_version,
             ]
             self.run(" ".join(config_args), run_environment=True)
             msbuild = MSBuild(self)
-            msbuild.build("mk/vs2019/PcapPlusPlus.sln")
+            cmd = msbuild.command(f"mk/{vs_version}/PcapPlusPlus.sln", [
+                'Common++', 'Packet++', 'Pcap++'
+            ])
+            self.run(cmd + " /p:PlatformToolset=" + tools.msvs_toolset(self))
 
     def _build_posix(self):
-        self._patch_sources()
         with tools.chdir(self._source_subfolder):
             config_args = [
                 "./{}".format(self._configure_sh_script),

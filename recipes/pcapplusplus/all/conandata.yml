@@ -12,9 +12,15 @@ patches:
   "21.05":
     - patch_file: "patches/0001-Pass-CXXFLAGS-CPPFLAGS-when-compiling-3rd-party-sour.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0003-Use-pthreads4w.patch"
+      base_path: "source_subfolder"
   "21.11":
     - patch_file: "patches/0001-Pass-CXXFLAGS-CPPFLAGS-when-compiling-3rd-party-sour.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0003-Use-pthreads4w.patch"
+      base_path: "source_subfolder"
   "22.05":
     - patch_file: "patches/0002-Pass-CXXFLAGS-CPPFLAGS-when-compiling-3rd-party-sour.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-Use-pthreads4w.patch"
       base_path: "source_subfolder"
