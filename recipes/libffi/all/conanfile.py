@@ -4,6 +4,7 @@ from conan.tools.files import copy, get, rm, rmdir, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 
 required_conan_version = ">=1.51.3"
 
@@ -153,6 +154,9 @@ class PackageConan(ConanFile):
     def package(self):
         autotools = Autotools(self)
         autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])  # Need to specify the `DESTDIR` as a Unix path, aware of the subsystem
+
+        if is_apple_os(self):
+            fix_apple_shared_install_name(self)
 
         copy(self, pattern="*.dll", dst=self.package_path.joinpath("bin"), src=self.package_path.joinpath("lib"))
         copy(self, pattern="LICENSE", dst=self.package_path.joinpath("licenses"), src=self.source_folder)
