@@ -96,7 +96,7 @@ class PackageConan(ConanFile):
             tc.configure_args.append(f"--host={host}")
 
         if is_msvc(self) or self.settings.compiler == "clang":
-            msvcc = unix_path(self, self.source_path.joinpath("msvcc.sh"))
+            msvcc = unix_path(self, str(self.source_path.joinpath("msvcc.sh")))
             msvcc_args = []
             if is_msvc(self):
                 if self.settings.arch == "x86_64":
@@ -133,8 +133,8 @@ class PackageConan(ConanFile):
             env.define("CPP", "cl -nologo -EP")
             env.define("AR", f"{unix_path(self, self.conf.get('tools.automake:ar-lib'))} lib")
             env.define("LD", "link")
-            env.define("LIBTOOL", unix_path(self, self.source_path.joinpath("ltmain.sh")))
-            env.define("INSTALL", unix_path(self, self.source_path.joinpath("install-sh")))
+            env.define("LIBTOOL", unix_path(self, str(self.source_path.joinpath("ltmain.sh"))))
+            env.define("INSTALL", unix_path(self, str(self.source_path.joinpath("install-sh"))))
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
