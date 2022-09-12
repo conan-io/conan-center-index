@@ -1,7 +1,7 @@
 from conan import ConanFile
-from conans import CMake
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
-from conan.tools.files import apply_conandata_patches, get, save, rmdir
+from conan.tools.files import apply_conandata_patches, get, save, rmdir, copy, load
 from conan.errors import ConanException
 import os
 
@@ -12,12 +12,10 @@ class BdwGcConan(ConanFile):
     name = "bdwgc"
     homepage = "https://www.hboehm.info/gc/"
     description = "The Boehm-Demers-Weiser conservative C/C++ Garbage Collector (libgc, bdwgc, boehm-gc)"
-    topics = ("conan", "gc", "garbage", "collector")
+    topics = ("gc", "garbage", "collector")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake"
 
     _autotools_options_defaults = (
         ("cplusplus",                   False,),
@@ -51,6 +49,7 @@ class BdwGcConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
     }
+
     default_options = {
         "shared": False,
         "fPIC": True,
@@ -59,11 +58,9 @@ class BdwGcConan(ConanFile):
         options[option] = [True, False]
         default_options[option] = default
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -71,12 +68,24 @@ class BdwGcConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         if Version(self.version) < "8.2.0":
             del self.options.throw_bad_alloc_library
         if not self.options.cplusplus:
-            del self.settings.compiler.libcxx
-            del self.settings.compiler.cppstd
+            try:
+                del self.settings.compiler.libcxx
+            except Exception:
+                pass
+            try:
+                del self.settings.compiler.cppstd
+            except Exception:
+                pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.settings.os == "Windows":
@@ -84,33 +93,34 @@ class BdwGcConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+                  destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
+    def generate(self):
+        tc = CMakeToolchain(self)
         for option, _ in self._autotools_options_defaults:
             if option == "cord":
-                self._cmake.definitions["build_cord"] = self.options.get_safe(option)
+                tc.variables["build_cord"] = self.options.get_safe(option)
+            elif option == "cplusplus":
+                tc.cache_variables["enable_cplusplus"] = str(self.options.get_safe(option))
             else:
-                self._cmake.definitions["enable_{}".format(option)] = self.options.get_safe(option)
-        self._cmake.definitions["disable_gc_debug"] = not self.options.gc_debug
-        self._cmake.definitions["disable_handle_fork"] = not self.options.handle_fork
-        self._cmake.definitions["install_headers"] = True
-        self._cmake.definitions["build_tests"] = False
-        self._cmake.verbose = True
-        self._cmake.parallel = False
-        self._cmake.configure()
-        return self._cmake
+                tc.variables["enable_{}".format(option)] = self.options.get_safe(option)
+        tc.variables["disable_gc_debug"] = not self.options.gc_debug
+        tc.variables["disable_handle_fork"] = not self.options.handle_fork
+        tc.variables["install_headers"] = True
+        tc.variables["build_tests"] = False
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def _extract_copyright(self):
-        readme_md = open(os.path.join(self._source_subfolder, "README.md")).read()
+        readme_md = load(self, os.path.join(self.source_folder, "README.md"))
         copyright_header = "## Copyright & Warranty\n"
         index = readme_md.find(copyright_header)
         if index == -1:
@@ -119,30 +129,42 @@ class BdwGcConan(ConanFile):
 
     def package(self):
         save(self, os.path.join(self.package_folder, "licenses", "COPYRIGHT"), self._extract_copyright())
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
-    @property
-    def _libs(self):
-        libs = []
-        if self.options.cplusplus and self.options.get_safe("throw_bad_alloc_library"):
-            libs.append("gctba")
-        if self.options.cplusplus:
-            libs.append("gccpp")
-        if self.options.cord:
-            libs.append("cord")
-        libs.append("gc")
-        return libs
-
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "bdw-gc"
-        self.cpp_info.libs = self._libs
-        self.cpp_info.defines = ["GC_DLL" if self.options.shared else "GC_NOT_DLL"]
-        if not self.options.shared:
-            if self.settings.os == "Linux":
-                self.cpp_info.system_libs = ["pthread", "dl"]
+        self.cpp_info.set_property("cmake_file_name", "BDWgc")
+        self.cpp_info.set_property("cmake_target_name", "BDWgc::BDWgc")
+
+        # TODO: Remove on Conan 2.0
+        self.cpp_info.names["cmake_find_package"] = "BDWgc"
+        self.cpp_info.names["cmake_find_package_multi"] = "BDWgc"
+
+        self.cpp_info.components["gc"].set_property("cmake_target_name", "BDWgc::gc")
+        self.cpp_info.components["gc"].set_property("pkg_config_name", "bdw-gc")
+        self.cpp_info.components["gc"].libs = ["gc"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["gc"].system_libs = ["pthread", "dl"]
+        self.cpp_info.components["gc"].defines = ["GC_DLL" if self.options.shared else "GC_NOT_DLL"]
         if self.options.gc_debug:
-            self.cpp_info.defines.append("GC_DEBUG")
+            self.cpp_info.components["gc"].defines.append("GC_DEBUG")
+        if self.settings.os == "Windows":
+            self.cpp_info.components["gc"].requires = ["libatomic_ops::libatomic_ops"]
+
+        if self.options.cplusplus and self.options.get_safe("throw_bad_alloc_library"):
+            self.cpp_info.components["gctba"].set_property("cmake_target_name", "BDWgc::gctba")
+            self.cpp_info.components["gctba"].libs = ["gctba"]
+            self.cpp_info.components["gctba"].requires = ["gc"]
+
+        if self.options.cplusplus:
+            self.cpp_info.components["gccpp"].set_property("cmake_target_name", "BDWgc::gccpp")
+            self.cpp_info.components["gccpp"].libs = ["gccpp"]
+            self.cpp_info.components["gccpp"].requires = ["gc"]
+
+        if self.options.cord:
+            self.cpp_info.components["cord"].set_property("cmake_target_name", "BDWgc::cord")
+            self.cpp_info.components["cord"].libs = ["cord"]
+            self.cpp_info.components["cord"].requires = ["gc"]
