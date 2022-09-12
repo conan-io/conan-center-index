@@ -1,10 +1,11 @@
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm, rmdir, apply_conandata_patches
+from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
-from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.51.3"
 
@@ -144,8 +145,22 @@ class PackageConan(ConanFile):
         ms = VirtualBuildEnv(self)
         ms.generate(scope="build")
 
-    def build(self):
+    def _patch_source(self):
         apply_conandata_patches(self)
+
+        if Version(self.version) < "3.3":
+            if self.settings.compiler == "clang" and Version(str(self.settings.compiler.version)) >= 7.0:
+                # https://android.googlesource.com/platform/external/libffi/+/ca22c3cb49a8cca299828c5ffad6fcfa76fdfa77
+                sysv_s_src = self.source_path.joinpath("src", "arm", "sysv.S")
+                replace_in_file(self, sysv_s_src, "fldmiad", "vldmia")
+                replace_in_file(self, sysv_s_src, "fstmiad", "vstmia")
+                replace_in_file(self, sysv_s_src, "fstmfdd\tsp!,", "vpush")
+
+                # https://android.googlesource.com/platform/external/libffi/+/7748bd0e4a8f7d7c67b2867a3afdd92420e95a9f
+                replace_in_file(self, sysv_s_src, "stmeqia", "stmiaeq")
+
+    def build(self):
+        self._patch_source()
 
         autotools = Autotools(self)
         autotools.configure()
