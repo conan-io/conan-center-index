@@ -152,7 +152,7 @@ class VulkanValidationLayersConan(ConanFile):
             rm(self, lib_dir, "libVkLayer_khronos_validation.dll.a")
             # move dll and json manifest files in bin folder
             bin_dir = os.path.join(self.package_folder, "bin")
-            mkdir(bin_dir)
+            mkdir(self, bin_dir)
             for ext in ("*.dll", "*.json"):
                 for bin_file in glob.glob(os.path.join(lib_dir, ext)):
                     shutil.move(bin_file, os.path.join(bin_dir, os.path.basename(bin_file)))
