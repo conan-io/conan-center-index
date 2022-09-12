@@ -114,8 +114,8 @@ class VulkanValidationLayersConan(ConanFile):
         cmake.build()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(**patch)
+        for data in self.conan_data.get("patches", {}).get(self.version, []):
+            patch(**data)
         replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "FindVulkanHeaders.cmake"),
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
