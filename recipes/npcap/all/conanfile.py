@@ -16,16 +16,22 @@ class NpcapConan(ConanFile):
         "build_type": None,
     }
 
+    # not needed but supress warning message from conan commands
+    def layout(self):
+        pass
+
+    def package_id(self):
+        del self.info.settings.compiler
+        del self.info.settings.build_type
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     def build(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder)
-        download(self, filename="LICENSE", url=[
-            f"https://raw.githubusercontent.com/nmap/npcap/v{self.version}/LICENSE",
-            "https://raw.githubusercontent.com/nmap/npcap/master/LICENSE"
-        ])
+        source = self.conan_data["sources"][self.version]
+        get(self, **source['sdk'], destination=self._source_subfolder)
+        download(self, filename="LICENSE", **source['license'])
 
     def package(self):
 
