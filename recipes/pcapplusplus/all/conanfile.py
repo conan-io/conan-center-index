@@ -120,7 +120,7 @@ class PcapplusplusConan(ConanFile):
 
             autotools = AutoToolsBuildEnvironment(self)
             autotools.cxx_flags.extend(["-D{}".format(d) for d in autotools.defines])
-            with files.environment_append(autotools.vars):
+            with tools.environment_append(autotools.vars):
                 self.run(" ".join(config_args), run_environment=True)
                 autotools.make(target="libs")
 
