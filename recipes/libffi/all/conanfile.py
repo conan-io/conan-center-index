@@ -1,10 +1,7 @@
-import os
-
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir, apply_conandata_patches
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
 
@@ -65,7 +62,7 @@ class PackageConan(ConanFile):
         basic_layout(self, src_folder="libffi")
 
     def build_requirements(self):
-        if self.win_bash and not os.environ.get("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
             self.tool_requires("msys2/cci.latest")
         self.tool_requires("automake/1.16.5")
         self.tool_requires("libtool/2.4.7")
@@ -79,6 +76,7 @@ class PackageConan(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
             f"--enable-debug={yes_no(self.settings.build_type == 'Debug')}",
+            "--datarootdir=${prefix}/res",
             "--enable-builddir=no",
             "--enable-docs=no",
         ])
@@ -96,7 +94,7 @@ class PackageConan(ConanFile):
             tc.configure_args.append(f"--host={host}")
 
         if is_msvc(self) or self.settings.compiler == "clang":
-            msvcc = unix_path(self, os.path.join(self.source_folder, "msvcc.sh"))
+            msvcc = unix_path(self, self.source_path.joinpath("msvcc.sh"))
             msvcc_args = []
             if is_msvc(self):
                 if self.settings.arch == "x86_64":
@@ -131,10 +129,10 @@ class PackageConan(ConanFile):
             env.define_path("CC", msvcc)
             env.define("CXXCPP", "cl -nologo -EP")
             env.define("CPP", "cl -nologo -EP")
-            env.define("AR", unix_path(self, self.conf.get('tools.automake:ar-lib')))
+            env.define("AR", f"{unix_path(self, self.conf.get('tools.automake:ar-lib'))} lib")
             env.define("LD", "link")
-            env.define("LIBTOOL", unix_path(self, os.path.join(self.source_folder, 'ltmain.sh')))
-            env.define("INSTALL", unix_path(self, os.path.join(self.source_folder, "install-sh")))
+            env.define("LIBTOOL", unix_path(self, self.source_path.joinpath("ltmain.sh")))
+            env.define("INSTALL", unix_path(self, self.source_path.joinpath("install-sh")))
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
@@ -156,13 +154,12 @@ class PackageConan(ConanFile):
         autotools = Autotools(self)
         autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])  # Need to specify the `DESTDIR` as a Unix path, aware of the subsystem
 
-        copy(self, pattern="*.dll", dst=os.path.join(self.package_folder, "bin"), src=os.path.join(self.package_folder, "lib"))
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="*.dll", dst=self.package_path.joinpath("bin"), src=self.package_path.joinpath("lib"))
+        copy(self, pattern="LICENSE", dst=self.package_path.joinpath("licenses"), src=self.source_folder)
 
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.la", self.package_path.joinpath("lib"), recursive=True)
+        rmdir(self, self.package_path.joinpath("lib", "pkgconfig"))
+        rmdir(self, self.package_path.joinpath("share"))
 
     def package_info(self):
         self.cpp_info.libs = ["{}ffi".format("lib" if is_msvc(self) else "")]
