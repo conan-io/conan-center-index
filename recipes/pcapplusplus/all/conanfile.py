@@ -101,9 +101,8 @@ class PcapplusplusConan(ConanFile):
             ]
             self.run(" ".join(config_args), run_environment=True)
             msbuild = MSBuild(self)
-            cmd = msbuild.command(f"mk/{vs_version}/PcapPlusPlus.sln", [
-                'Common++', 'Packet++', 'Pcap++'
-            ])
+            targets =  ['Common++', 'Packet++', 'Pcap++']
+            cmd = msbuild.command(f"mk/{vs_version}/PcapPlusPlus.sln", targets)
             self.run(cmd + " /p:PlatformToolset=" + tools.msvs_toolset(self))
 
     def _build_posix(self):
