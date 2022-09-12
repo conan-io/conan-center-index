@@ -3,8 +3,7 @@ from conan.tools import files
 from conan.tools.microsoft import MSBuild, is_msvc
 from conan.tools.microsoft.visual import vs_ide_version
 from conan.errors import ConanInvalidConfiguration
-from conans import AutoToolsBuildEnvironment
-from conans.tools import msvs_toolset
+from conans import AutoToolsBuildEnvironment, tools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -105,18 +104,18 @@ class PcapplusplusConan(ConanFile):
             cmd = msbuild.command(f"mk/{vs_version}/PcapPlusPlus.sln", [
                 'Common++', 'Packet++', 'Pcap++'
             ])
-            self.run(cmd + " /p:PlatformToolset=" + msvs_toolset(self))
+            self.run(cmd + " /p:PlatformToolset=" + tools.msvs_toolset(self))
 
     def _build_posix(self):
-        with files.chdir(self._source_subfolder):
+        with files.chdir(self, self._source_subfolder):
             config_args = [
                 "./{}".format(self._configure_sh_script),
-                "--libpcap-include-dir", files.unix_path(self.deps_cpp_info["libpcap"].include_paths[0]),
-                "--libpcap-lib-dir", files.unix_path(self.deps_cpp_info["libpcap"].lib_paths[0]),
+                "--libpcap-include-dir", tools.unix_path(self.deps_cpp_info["libpcap"].include_paths[0]),
+                "--libpcap-lib-dir", tools.unix_path(self.deps_cpp_info["libpcap"].lib_paths[0]),
             ]
             if self.options.immediate_mode:
                 config_args.append("--use-immediate-mode")
-            if files.is_apple_os(self.settings.os) and "arm" in self.settings.arch:
+            if tools.is_apple_os(self.settings.os) and "arm" in self.settings.arch:
                 config_args.append("--arm64")
 
             autotools = AutoToolsBuildEnvironment(self)
