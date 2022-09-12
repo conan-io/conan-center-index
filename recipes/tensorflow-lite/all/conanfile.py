@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, save, copy, export_conandata_patches, apply_conandata_patches
 from conan.errors import ConanInvalidConfiguration
@@ -93,6 +93,9 @@ class TensorflowLiteConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
+
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
         apply_conandata_patches(self)
