@@ -3,7 +3,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get, apply_conandata_patches
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
-from conans.tools import check_min_cppstd
+from conan.tools.build import check_min_cppstd
 import functools
 
 required_conan_version = ">=1.50.0"
