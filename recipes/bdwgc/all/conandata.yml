@@ -11,7 +11,5 @@ sources:
 patches:
   "8.0.4":
     - patch_file: "patches/update-cmake-8_0_4.patch"
-      base_path: "source_subfolder"
   "8.0.6":
     - patch_file: "patches/update-cmake-8_0_6.patch"
-      base_path: "source_subfolder"
