@@ -64,7 +64,7 @@ class TensorflowLiteConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("abseil/20211102.0")
+        self.requires("abseil/20220623.0")
         self.requires("eigen/3.4.0")
         self.requires("farmhash/cci.20190513")
         self.requires("fft/cci.20061228")
