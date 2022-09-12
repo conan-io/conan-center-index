@@ -50,15 +50,15 @@ class PackageConan(ConanFile):
         if self.options.shared:
             try:
                 del self.options.fPIC
-            except Exception:
+            except ValueError:
                 pass
         try:
             del self.settings.compiler.libcxx
-        except Exception:
+        except ValueError:
             pass
         try:
             del self.settings.compiler.cppstd
-        except Exception:
+        except ValueError:
             pass
 
     def layout(self):
