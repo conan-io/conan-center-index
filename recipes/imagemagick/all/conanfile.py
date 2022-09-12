@@ -99,7 +99,11 @@ class ImageMagicConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-
+    
+    def build_requirements(self):
+        if not self._is_msvc:
+            self.build_requires("pkgconf/1.7.4")
+            
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
