@@ -42,9 +42,9 @@ class TensorflowLiteConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "5",
-            "Visual Studio": "14",
-            "clang": "3.4",
+            "gcc": "8",
+            "Visual Studio": "15.8",
+            "clang": "5",
             "apple-clang": "5.1",
         }
 
@@ -85,13 +85,13 @@ class TensorflowLiteConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 17 if Version(self.version) >= "2.9.1" else 14)
+            check_min_cppstd(self, 17)
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if not minimum_version:
-            self.output.warn(f"{self.name} requires C++14. Your compiler is unknown. Assuming it supports C++14.")
+            self.output.warn(f"{self.name} requires C++14. Your compiler is unknown. Assuming it supports C++17.")
         elif Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.name} requires C++14, which your compiler does not support.")
+            raise ConanInvalidConfiguration(f"{self.name} requires C++17, which your compiler does not support.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
