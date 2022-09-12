@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get, replace_in_file, rename, patch, rm
+from conan.tools.files import copy, get, replace_in_file, rename, patch, rm, mkdir
 from conan.tools.scm import Version
 from conans import CMake
 import functools
@@ -152,7 +152,7 @@ class VulkanValidationLayersConan(ConanFile):
             rm(self, lib_dir, "libVkLayer_khronos_validation.dll.a")
             # move dll and json manifest files in bin folder
             bin_dir = os.path.join(self.package_folder, "bin")
-            tools.mkdir(bin_dir)
+            mkdir(bin_dir)
             for ext in ("*.dll", "*.json"):
                 for bin_file in glob.glob(os.path.join(lib_dir, ext)):
                     shutil.move(bin_file, os.path.join(bin_dir, os.path.basename(bin_file)))
