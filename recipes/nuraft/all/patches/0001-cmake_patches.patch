@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 87685ff..4ecec33 100644
+index 87685ff..9e25aac 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -24,43 +24,8 @@ if (CODE_COVERAGE GREATER 0)
+@@ -24,43 +24,18 @@ if (CODE_COVERAGE GREATER 0)
      message(STATUS "---- CODE COVERAGE DETECTION MODE ----")
  endif()
  
@@ -14,12 +14,16 @@ index 87685ff..4ecec33 100644
 -    message(STATUS "Boost include path: " ${BOOST_INCLUDE_PATH})
 -    message(STATUS "Boost library path: " ${BOOST_LIBRARY_PATH})
 -
--    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_BOOST_ASIO")
++find_package(OpenSSL CONFIG REQUIRED)
++find_package(Boost CONFIG)
++if (Boost_FOUND)
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_BOOST_ASIO")
 -
 -    set(ASIO_INCLUDE_DIR ${BOOST_INCLUDE_PATH})
 -    set(LIBBOOST_SYSTEM "${BOOST_LIBRARY_PATH}/libboost_system.a")
 -
--else ()
++    set(ASIO_DEP boost::boost)
+ else ()
 -    # If not, ASIO standalone mode.
 -    FIND_PATH(ASIO_INCLUDE_DIR
 -              NAME asio.hpp
@@ -29,7 +33,8 @@ index 87685ff..4ecec33 100644
 -                    /usr/local/include
 -                    /usr/include)
 -
--    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DASIO_STANDALONE")
++    find_package(Asio CONFIG REQUIRED)
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DASIO_STANDALONE")
 -
 -endif ()
 -
@@ -37,7 +42,8 @@ index 87685ff..4ecec33 100644
 -    message(FATAL_ERROR "Can't find ASIO header files")
 -else ()
 -    message(STATUS "ASIO include path: " ${ASIO_INCLUDE_DIR})
--endif ()
++    set(ASIO_DEP asio::asio)
+ endif ()
 -
 -
  # === Includes ===
@@ -46,7 +52,7 @@ index 87685ff..4ecec33 100644
  include_directories(BEFORE ${PROJECT_SOURCE_DIR}/include)
  include_directories(BEFORE ${PROJECT_SOURCE_DIR}/include/libnuraft)
  include_directories(BEFORE ${PROJECT_SOURCE_DIR}/examples)
-@@ -213,6 +178,7 @@ if (NOT (DISABLE_SSL GREATER 0))
+@@ -213,6 +188,7 @@ if (NOT (DISABLE_SSL GREATER 0))
      )
  endif ()
  
@@ -54,15 +60,15 @@ index 87685ff..4ecec33 100644
  # === Source files ===
  set(RAFT_CORE
      ${ROOT_SRC}/asio_service.cxx
-@@ -242,6 +208,7 @@ set(RAFT_CORE
+@@ -242,6 +218,7 @@ set(RAFT_CORE
      ${ROOT_SRC}/stat_mgr.cxx
      )
  add_library(RAFT_CORE_OBJ OBJECT ${RAFT_CORE})
-+target_link_libraries(RAFT_CORE_OBJ Boost::Boost OpenSSL::OpenSSL)
++target_link_libraries(RAFT_CORE_OBJ ${ASIO_DEP} openssl::openssl)
  
  set(STATIC_LIB_SRC
      $<TARGET_OBJECTS:RAFT_CORE_OBJ>)
-@@ -249,54 +216,11 @@ set(STATIC_LIB_SRC
+@@ -249,54 +226,11 @@ set(STATIC_LIB_SRC
  # === Executables ===
  set(LIBRARY_NAME "nuraft")
  
@@ -85,8 +91,8 @@ index 87685ff..4ecec33 100644
 -# === Examples ===
 -add_subdirectory("${PROJECT_SOURCE_DIR}/examples")
 +add_library(nuraft ${STATIC_LIB_SRC})
-+target_link_libraries(nuraft Boost::Boost OpenSSL::OpenSSL)
-
++target_link_libraries(nuraft ${ASIO_DEP} openssl::openssl)
+ 
  
  # === Tests ===
 -add_subdirectory("${PROJECT_SOURCE_DIR}/tests")

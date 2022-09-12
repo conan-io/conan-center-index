@@ -2,38 +2,31 @@ diff --git a/src/asio_service.cxx b/src/asio_service.cxx
 index ceb4f70..4623667 100644
 --- a/src/asio_service.cxx
 +++ b/src/asio_service.cxx
-@@ -38,7 +38,7 @@ limitations under the License.
+@@ -38,7 +38,11 @@ limitations under the License.
  #include "strfmt.hxx"
  #include "tracer.hxx"
  
 -#include "asio.hpp"
++#ifdef USE_BOOST_ASIO
 +#include <boost/asio.hpp>
++#else
++#include <asio.hpp>
++#endif
  
  #include <atomic>
  #include <ctime>
-@@ -49,11 +49,11 @@ limitations under the License.
- #include <thread>
- #include <regex>
- 
- #ifdef USE_BOOST_ASIO
-     using namespace boost;
-     #define ERROR_CODE system::error_code
- #else
--    #define ERROR_CODE asio::error_code
-+    #define ERROR_CODE boost::asio::error_code
- #endif
- 
- //#define SSL_LIBRARY_NOT_FOUND (1)
-@@ -62,9 +63,9 @@ limitations under the License.
+@@ -62,9 +63,13 @@ limitations under the License.
      using ssl_socket = mock_ssl_socket;
      using ssl_context = mock_ssl_context;
  #else
 -    #include "asio/ssl.hpp"
--    using ssl_socket = asio::ssl::stream<asio::ip::tcp::socket&>;
--    using ssl_context = asio::ssl::context;
++#ifdef USE_BOOST_ASIO
 +    #include <boost/asio/ssl.hpp>
-+    using ssl_socket = boost::asio::ssl::stream<boost::asio::ip::tcp::socket&>;
-+    using ssl_context = boost::asio::ssl::context;
++#else
++    #include <asio/ssl.hpp>
++#endif
+     using ssl_socket = asio::ssl::stream<asio::ip::tcp::socket&>;
+     using ssl_context = asio::ssl::context;
  #endif
  
  // Note: both req & resp header structures have been modified by Jung-Sang Ahn.

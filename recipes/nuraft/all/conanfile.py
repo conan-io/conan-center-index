@@ -2,7 +2,7 @@ from os.path import join
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get, apply_conandata_patches
-from conans import CMake
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conans.tools import check_min_cppstd
 import functools
 
@@ -19,27 +19,29 @@ class NuRaftConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
 
     options = {
+        "asio": ["boost", "standalone"],
         "shared": ['True', 'False'],
         "fPIC": ['True', 'False'],
     }
     default_options = {
+        "asio": "boost",
         "shared": False,
         "fPIC": True,
     }
-
-    generators = "cmake", "cmake_find_package"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
         for p in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(p["patch_file"])
 
     def requirements(self):
-        self.requires("boost/1.79.0")
+        if self.options.asio == "boost":
+            self.requires("boost/1.79.0")
+        else:
+            self.requires("asio/1.22.1")
         self.requires("openssl/1.1.1q")
 
     def validate(self):
@@ -55,23 +57,24 @@ class NuRaftConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+        cmake = CMakeDeps(self)
+        cmake.generate()
 
     def build(self):
         apply_conandata_patches(self)
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
-        copy(self, "LICENSE", join(self.source_folder, self._source_subfolder), join(self.package_folder, "licenses/"), keep_path=False)
+        copy(self, "LICENSE", self.source_folder, join(self.package_folder, "licenses/"), keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["nuraft"]
