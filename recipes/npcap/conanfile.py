@@ -8,13 +8,9 @@ class NpcapConan(ConanFile):
     description = "Windows port of the libpcap library"
     homepage = "https://npcap.com/"
     url = "https://github.com/conan-io/conan-center-index"
-    license = "https://github.com/nmap/npcap/blob/master/LICENSE"
-    topics = ("npcap", "pcap")
-    settings = {
-        "os": ["Windows"],
-        "arch": ["x86", "x86_64", "armv8"],
-        "build_type": None,
-    }
+    license = ""LicenseRef-NPCAP"
+    topics = ("pcap", "windows", "packet-capture")
+    settings = "os", "arch", "build_type", "compiler"
 
     @property
     def _source_subfolder(self):
