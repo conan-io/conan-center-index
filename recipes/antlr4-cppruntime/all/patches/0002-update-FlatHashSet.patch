@@ -12,3 +12,4 @@
 +            typename Allocator = std::allocator<Key>>
    using FlatHashSet = std::unordered_set<Key, Hash, Equal, Allocator>;
  #endif
+
