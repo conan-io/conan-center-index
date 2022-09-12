@@ -64,10 +64,6 @@ class PackageConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="libffi")
 
-    def validate(self):
-        if self.info.settings.os not in ["Linux", "FreeBSD", "MacOS", "Windows"]:
-            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.info.settings.os}.")
-
     def build_requirements(self):
         if self.win_bash and not os.environ.get("CONAN_BASH_PATH"):
             self.tool_requires("msys2/cci.latest")
