@@ -4,7 +4,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.files import rm, get, rmdir, rename, patch, collect_libs
-from conan.tools.apple.apple import is_apple_os
+from conan.tools.apple import is_apple_os
 import os
 
 required_conan_version = ">=1.33.0"
@@ -168,7 +168,7 @@ class DiligentCoreConan(ConanFile):
             self.copy(pattern="*.dylib", dst="lib", keep_path=False)
             self.copy(pattern="*.so", dst="lib", keep_path=False)
             self.copy(pattern="*.dll", dst="bin", keep_path=False)
-            rm(os.path.join(self.package_folder, "lib"), "*.a")
+            rm(self, os.path.join(self.package_folder, "lib"), "*.a")
             if self.settings.os != "Windows":
                 rm(self, os.path.join(self.package_folder, "lib"), "*.lib")
         else:
