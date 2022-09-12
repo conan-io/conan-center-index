@@ -1,4 +1,4 @@
-from conans import ConanFile, tools
+from conan import ConanFile, tools
 import os
 
 
@@ -23,9 +23,10 @@ class Libpfm4Conan(ConanFile):
     def source(self):
         from pprint import pprint
         pprint(self.conan_data)
-        tools.get(**self.conan_data['sources'][self.version],
-                  strip_root=True,
-                  destination=self._source_subfolder)
+        tools.files.get(self,
+                        **self.conan_data['sources'][self.version],
+                        strip_root=True,
+                        destination=self._source_subfolder)
 
     def config_options(self):
         del self.settings.compiler.cppstd
@@ -34,7 +35,7 @@ class Libpfm4Conan(ConanFile):
             del self.options.fPIC
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self.run('make')
 
     def package(self):
@@ -50,10 +51,10 @@ class Libpfm4Conan(ConanFile):
                                    for k, v in make_params.items())
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         self.copy("include/perfmon/err.h", dst=".", src=self._source_subfolder)
-        with tools.chdir(self._source_subfolder):
+        with tools.files.chdir(self, self._source_subfolder):
             self.run('make install {}'.format(make_params_str))
-        tools.rmdir(os.path.join(self.package_folder, "usr"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "usr"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.files.collect_libs(self)
         self.cpp_info.includedirs = ["include"]
