@@ -28,10 +28,6 @@ class NuRaftConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(p["patch_file"])
