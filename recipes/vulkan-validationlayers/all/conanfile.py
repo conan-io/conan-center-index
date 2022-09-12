@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get, replace_in_file, rename, patch
+from conan.tools.files import copy, get, replace_in_file, rename, patch, rm
 from conan.tools.scm import Version
 from conans import CMake
 import functools
@@ -148,8 +148,8 @@ class VulkanValidationLayersConan(ConanFile):
         if self.settings.os == "Windows":
             # import lib is useless, validation layers are loaded at runtime
             lib_dir = os.path.join(self.package_folder, "lib")
-            tools.remove_files_by_mask(lib_dir, "VkLayer_khronos_validation.lib")
-            tools.remove_files_by_mask(lib_dir, "libVkLayer_khronos_validation.dll.a")
+            rm(self, lib_dir, "VkLayer_khronos_validation.lib")
+            rm(self, lib_dir, "libVkLayer_khronos_validation.dll.a")
             # move dll and json manifest files in bin folder
             bin_dir = os.path.join(self.package_folder, "bin")
             tools.mkdir(bin_dir)
