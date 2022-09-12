@@ -1,8 +1,10 @@
-from conan import ConanFile, tools
+from conan import ConanFile
+from conan.tools import files
 from conan.tools.microsoft import MSBuild, is_msvc
 from conan.tools.microsoft.visual import vs_ide_version
 from conan.errors import ConanInvalidConfiguration
 from conans import AutoToolsBuildEnvironment
+from conans.tools import msvs_toolset
 import os
 
 required_conan_version = ">=1.33.0"
@@ -36,15 +38,12 @@ class PcapplusplusConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-      if self.settings.os == "Windows":
-        # We don't want libpcap itself, we want Npcap/Winpcap port of Libpcap
-        self.options["libpcap"].shared = True
-
     def requirements(self):
-        self.requires("libpcap/1.9.1")
         if self.settings.os == "Windows":
             self.requires("pthreads4w/3.0.0")
+            self.requires("npcap/1.70")
+        else:
+            self.requires("libpcap/1.9.1")
 
     def _get_vs_version(self):
         if not is_msvc(self):
@@ -66,7 +65,7 @@ class PcapplusplusConan(ConanFile):
             raise ConanInvalidConfiguration("%s is not supported" % self.settings.os)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     @property
@@ -80,10 +79,10 @@ class PcapplusplusConan(ConanFile):
 
     def _patch_sources(self):
         if not self.options.get_safe("fPIC") and self.settings.os != "Windows":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "PcapPlusPlus.mk.common"),
+            files.replace_in_file(self, os.path.join(self._source_subfolder, "PcapPlusPlus.mk.common"),
                                   "-fPIC", "")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            files.patch(self, **patch)
 
     def build(self):
         self._patch_sources()
@@ -94,10 +93,10 @@ class PcapplusplusConan(ConanFile):
 
     def _build_windows(self):
         vs_version = self._get_vs_version()
-        with tools.chdir(self._source_subfolder):
+        with files.chdir(self, self._source_subfolder):
             config_args = [
                 "configure-windows-visual-studio.bat",
-                "--pcap-sdk", self.deps_cpp_info["libpcap"].rootpath,
+                "--pcap-sdk", self.deps_cpp_info["npcap"].rootpath,
                 "--pthreads-home", self.deps_cpp_info["pthreads4w"].rootpath,
                 "--vs-version", vs_version,
             ]
@@ -106,23 +105,23 @@ class PcapplusplusConan(ConanFile):
             cmd = msbuild.command(f"mk/{vs_version}/PcapPlusPlus.sln", [
                 'Common++', 'Packet++', 'Pcap++'
             ])
-            self.run(cmd + " /p:PlatformToolset=" + tools.msvs_toolset(self))
+            self.run(cmd + " /p:PlatformToolset=" + msvs_toolset(self))
 
     def _build_posix(self):
-        with tools.chdir(self._source_subfolder):
+        with files.chdir(self._source_subfolder):
             config_args = [
                 "./{}".format(self._configure_sh_script),
-                "--libpcap-include-dir", tools.unix_path(self.deps_cpp_info["libpcap"].include_paths[0]),
-                "--libpcap-lib-dir", tools.unix_path(self.deps_cpp_info["libpcap"].lib_paths[0]),
+                "--libpcap-include-dir", files.unix_path(self.deps_cpp_info["libpcap"].include_paths[0]),
+                "--libpcap-lib-dir", files.unix_path(self.deps_cpp_info["libpcap"].lib_paths[0]),
             ]
             if self.options.immediate_mode:
                 config_args.append("--use-immediate-mode")
-            if tools.is_apple_os(self.settings.os) and "arm" in self.settings.arch:
+            if files.is_apple_os(self.settings.os) and "arm" in self.settings.arch:
                 config_args.append("--arm64")
 
             autotools = AutoToolsBuildEnvironment(self)
             autotools.cxx_flags.extend(["-D{}".format(d) for d in autotools.defines])
-            with tools.environment_append(autotools.vars):
+            with files.environment_append(autotools.vars):
                 self.run(" ".join(config_args), run_environment=True)
                 autotools.make(target="libs")
 
