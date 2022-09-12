@@ -2,9 +2,9 @@ from conan import ConanFile
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, save, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, save, copy, export_conandata_patches, apply_conandata_patches
 from conan.errors import ConanInvalidConfiguration
-import os
+from os.path import join
 import textwrap
 
 required_conan_version = ">=1.52.0"
@@ -97,7 +97,7 @@ class TensorflowLiteConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join("tensorflow", "lite"))
+        cmake.configure(build_script_folder=join("tensorflow", "lite"))
         cmake.build()
 
     def generate(self):
@@ -133,17 +133,17 @@ class TensorflowLiteConan(ConanFile):
 
     @property
     def _module_file(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
+        return join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self.source_folder)
-        self.copy("*.h", dst=os.path.join("include", "tensorflow", "lite"), src=os.path.join(self.source_folder, "tensorflow", "lite"))
-        self.copy("*.a", dst="lib", src=os.path.join(self.build_folder))
-        self.copy("*.so*", dst="lib", src=os.path.join(self.build_folder))
-        self.copy("*.dylib*", dst="lib", src=os.path.join(self.build_folder))
-        self.copy("*.lib", dst="lib", src=os.path.join(self.build_folder), keep_path=False)
-        self.copy("*.dll*", dst="lib", src=os.path.join(self.build_folder), keep_path=False)
-        self._create_cmake_module_alias_target(self, os.path.join(self.package_folder, self._module_file))
+        copy(self, "LICENSE", self.source_folder, join(self.package_folder, "licenses"))
+        copy(self, "*.h", join(self.source_folder, "tensorflow", "lite"), join(self.package_folder, "include", "tensorflow", "lite"))
+        copy(self, "*.a", self.build_folder, join(self.package_folder, "lib"))
+        copy(self, "*.so*", self.build_folder, join(self.package_folder, "lib"))
+        copy(self, "*.dylib*", self.build_folder, join(self.package_folder, "lib"))
+        copy(self, "*.lib", self.build_folder, join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.dll*", self.build_folder, join(self.package_folder, "lib"), keep_path=False)
+        self._create_cmake_module_alias_target(self, join(self.package_folder, self._module_file))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "tensorflowlite")
