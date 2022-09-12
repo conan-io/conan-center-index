@@ -1,10 +1,9 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package C)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+cmake_minimum_required(VERSION 3.8)
+
+project(test_package C)
 
 find_package(npcap REQUIRED CONFIG)
 
-add_executable(test_package test_package.c)
-target_link_libraries(test_package CONAN_PKG::npcap)
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(${PROJECT_NAME} PRIVATE npcap::npcap)
