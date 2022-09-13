@@ -114,7 +114,7 @@ class LZ4Conan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "liblz4")
         if Version(self.version) >= "1.9.4":
-            self.cpp_info.set_property("cmake_file_name", "LZ4")
+            self.cpp_info.set_property("cmake_file_name", "lz4")
             self.cpp_info.set_property("cmake_target_name", "LZ4::lz4" if self.options.shared else "LZ4::lz4_static")
         self.cpp_info.libs = ["lz4"]
         if is_msvc(self) and self.options.shared:
