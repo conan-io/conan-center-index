@@ -7,7 +7,7 @@ from conan.tools.layout import basic_layout
 
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.50.0"
 
 class DawHeaderLibrariesConan(ConanFile):
     name = "daw_header_libraries"
