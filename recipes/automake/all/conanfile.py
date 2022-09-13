@@ -161,21 +161,21 @@ class AutomakeConan(ConanFile):
 
         compile_bin = automake_dataroot_path.joinpath("compile")
         self.output.info(f"Define path to `compile` binary in user_info as: {compile_bin}")
-        self.user_info.compile = compile_bin
+        self.user_info.compile = str(compile_bin)
         compile_conf_key = "tools.automake:compile"
         self.output.info(f"Defining path to `compile` binary in configuration as `{compile_conf_key}` with value: {compile_bin}")
-        self.conf_info.define(compile_conf_key, compile_bin)
+        self.conf_info.define(compile_conf_key, str(compile_bin))
 
         ar_lib_bin = automake_dataroot_path.joinpath("ar-lib")
         self.output.info(f"Define path to ar_lib binary in user_info as: {ar_lib_bin}")
-        self.user_info.ar_lib = ar_lib_bin
+        self.user_info.ar_lib = str(ar_lib_bin)
         ar_lib_conf_key = "tools.automake:ar-lib"
         self.output.info(f"Defining path to ar-lib binary in configuration as `{ar_lib_conf_key}` with value: {ar_lib_bin}")
-        self.conf_info.define(ar_lib_conf_key, ar_lib_bin)
+        self.conf_info.define(ar_lib_conf_key, str(ar_lib_bin))
 
         install_sh_bin = automake_dataroot_path.joinpath("install-sh")
         self.output.info(f"Define path to install_sh binary in user_info as: {install_sh_bin}")
-        self.user_info.install_sh = install_sh_bin
+        self.user_info.install_sh = str(install_sh_bin)
         install_sh_conf_key = "tools.automake:install-sh"
         self.output.info(f"Defining path to install_sh binary in configuration as `{install_sh_conf_key}` with value: {install_sh_bin}")
-        self.conf_info.define(install_sh_conf_key, install_sh_bin)
+        self.conf_info.define(install_sh_conf_key, str(install_sh_bin))
