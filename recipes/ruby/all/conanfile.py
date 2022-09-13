@@ -110,6 +110,7 @@ class RubyConan(ConanFile):
 
         if self.options.with_gmp:
             self.requires("gmp/6.2.1")
+
     def validate(self):
         if is_msvc(self) and is_msvc_static_runtime(self):
             # see https://github.com/conan-io/conan-center-index/pull/8644#issuecomment-1068974098
@@ -149,10 +150,17 @@ class RubyConan(ConanFile):
         if self.options.with_enable_load_relative:
             tc.configure_args.append('--enable-load-relative')
 
+        # Ruby doesn't respect the --with-gmp-dir for eg. After removal of libgmp-dev on conanio/gcc10 build failed
+        opt_dirs = []
         for name, dep_cpp_info in self.deps_cpp_info.dependencies:
             if name in ['zlib', 'openssl', 'libffi', 'libyaml', 'readline', 'gmp']:
                 root_path = unix_path(self, dep_cpp_info.rootpath)
-                tc.configure_args.append(f'--with-{name}-dir={root_path}')
+                # tc.configure_args.append(f'--with-{name}-dir={root_path}')
+                opt_dirs.append(root_path)
+        if opt_dirs:
+            sep = ';' if self.settings.os == "Windows" else ":"
+
+            tc.configure_args.append(f"--with-opt-dir={sep.join(opt_dirs)}")
 
         if cross_building(self) and is_apple_os(self):
             apple_arch = to_apple_arch(self.settings.arch)
