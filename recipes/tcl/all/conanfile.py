@@ -259,18 +259,15 @@ class TclConan(ConanFile):
         tcl_library = self.package_path.joinpath("lib", f"{self.name}{version.major}.{version.minor}")
         self.output.info(f"Setting TCL_LIBRARY environment variable to {tcl_library}")
         self.env_info.TCL_LIBRARY = str(tcl_library)
-        self.buildenv_info.define_path("TCL_LIBRARY", str(tcl_library))
+        self.runenv_info.define_path("TCL_LIBRARY", str(tcl_library))
         self.output.info(f"Setting configuration `user.tcl.build:tcl_library` to {tcl_library}")
         self.conf_info.define("user.tcl.build:tcl_library", str(tcl_library))
         self.user_info.tcl_library = str(tcl_library)
 
-        tclstub_library = self.package_path.joinpath("lib", f"{self.name}stub{version.major}.{version.minor}")
-        self.output.info(f"Setting TCLSTUB_LIBRARY environment variable to {tclstub_library}")
-        self.env_info.TCLSTUB_LIBRARY = str(tclstub_library)
-        self.buildenv_info.define_path("TCLSTUB_LIBRARY", str(tclstub_library))
-        self.output.info(f"Setting configuration `user.tcl.build:tclstub_library` to {tcl_library}")
-        self.conf_info.define("user.tcl.build:tclstub_library", str(tclstub_library))
-        self.user_info.tclstub_library = str(tclstub_library)
+        for tcl_lib in self.cpp_info.libs:
+            lib_path = self.package_path.joinpath("lib", tcl_lib)
+            self.output.info(f"Setting configuration `user.tcl.build:{tcl_lib}` to {lib_path}")
+            self.conf_info.define(f"user.tcl.build:{lib_path}", str(lib_path))
 
         tcl_root = self.package_folder
         self.output.info("Setting TCL_ROOT environment variable to {}".format(tcl_root))
