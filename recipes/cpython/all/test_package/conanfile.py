@@ -121,7 +121,7 @@ class TestPackageConan(ConanFile):
                     env.update(**AutoToolsBuildEnvironment(self).vars)
                     with legacy_tools.environment_append(env):
                         setup_args = [
-                            "{}/setup.py".format(self.source_folder),
+                            f"{self.source_folder}/setup.py",
                             # "conan",
                             # "--install-folder", self.build_folder,
                             "build",

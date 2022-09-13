@@ -1,4 +1,5 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
+from conans import AutoToolsBuildEnvironment, MSBuild, tools
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.scm import Version
 from conan.tools.files import get, load, replace_in_file, rmdir, rename, mkdir, apply_conandata_patches, rm, unzip
@@ -270,7 +271,7 @@ class CPythonConan(ConanFile):
             autotools_config_log = os.path.join(self.build_folder, "config.log")
             if os.path.exists(autotools_config_log):
                 self.output.info(load(self, autotools_config_log))
-            raise ConanException(e)
+            raise e
 
         return self._autotools
 
@@ -334,7 +335,7 @@ class CPythonConan(ConanFile):
         rename(self, os.path.join(self._source_subfolder, "PCbuild", "pcbuild.proj"),
                      os.path.join(self._source_subfolder, "PCbuild", "pcbuild.proj.bak"))
         with tools.vcvars(self.settings):
-            self.run("devenv \"{}\" /upgrade".format(project_file), run_environment=True)
+            self.run(f"devenv \"{project_file}\" /upgrade", run_environment=True)
         rename(self, os.path.join(self._source_subfolder, "PCbuild", "pcbuild.sln.bak"),
                      os.path.join(self._source_subfolder, "PCbuild", "pcbuild.sln"))
         rename(self, os.path.join(self._source_subfolder, "PCbuild", "pcbuild.proj.bak"),
@@ -493,8 +494,8 @@ class CPythonConan(ConanFile):
             layout_args.append("--include-tcltk")
         if self.settings.build_type == "Debug":
             layout_args.append("-d")
-        python_args = " ".join("\"{}\"".format(a) for a in layout_args)
-        self.run("{} {}".format(python_built, python_args), run_environment=True)
+        python_args = " ".join(f"\"{a}\"" for a in layout_args)
+        self.run(f"{python_built} {python_args}", run_environment=True)
 
         rmdir(self, os.path.join(self.package_folder, "bin", "tcl"))
 
@@ -625,13 +626,13 @@ class CPythonConan(ConanFile):
                 lib_ext = ""
         else:
             lib_ext = self._abi_suffix + (".dll.a" if self.options.shared and self.settings.os == "Windows" else "")
-        return "python{}{}".format(self._version_suffix, lib_ext)
+        return f"python{self._version_suffix}{lib_ext}"
 
     def _fix_install_name(self):
         if is_apple_os(self) and self.options.shared:
             buffer = StringIO()
             python = os.path.join(self.package_folder, "bin", "python")
-            self.run('otool -L "%s"' % python, output=buffer)
+            self.run(f'otool -L "{python}"', output=buffer)
             lines = buffer.getvalue().strip().split('\n')[1:]
             for line in lines:
                 library = line.split()[0]
@@ -729,7 +730,7 @@ class CPythonConan(ConanFile):
             pythonhome = self.package_folder
         else:
             version = Version(self._version_number_only)
-            pythonhome = os.path.join(self.package_folder, "lib", "python{}.{}".format(version.major, version.minor))
+            pythonhome = os.path.join(self.package_folder, "lib", f"python{version.major}.{version.minor}")
         self.user_info.pythonhome = pythonhome
 
         pythonhome_required = self.settings.compiler == "Visual Studio" or is_apple_os(self)
