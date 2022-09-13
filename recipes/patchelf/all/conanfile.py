@@ -1,13 +1,13 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, chdir, rmdir
 from conan.tools.scm import Version
-from conans import AutoToolsBuildEnvironment
 from conan.errors import ConanInvalidConfiguration
-import conans
+from conans import AutoToolsBuildEnvironment, tools as legacy_tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.51.3"
 
 class PatchElfConan(ConanFile):
     name = "patchelf"
@@ -21,6 +21,17 @@ class PatchElfConan(ConanFile):
     _autotools = None
 
     @property
+    def _minimum_cpp_standard(self):
+        return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "8",
+            "clang": "8",
+        }
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -28,13 +39,15 @@ class PatchElfConan(ConanFile):
         self.build_requires("libtool/2.4.6")
 
     def validate(self):
-        if not is_apple_os(self) and self.settings.os not in ("FreeBSD", "Linux"):
+        if not is_apple_os(self) and self.info.settings.os not in ("FreeBSD", "Linux"):
             raise ConanInvalidConfiguration("PatchELF is only available for GNU-like operating systems (e.g. Linux)")
 
-        if Version(self.version) >= "0.15" \
-                and str(self.settings.compiler) in ("gcc" "clang") \
-                and Version(self.settings.compiler.version) <= "8":
-            raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
+        if Version(self.version) >= "0.15":
+            if self.info.settings.compiler.cppstd:
+                check_min_cppstd(self, self._minimum_cpp_standard)
+            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -48,7 +61,7 @@ class PatchElfConan(ConanFile):
 
     def build(self):
         with chdir(self, self._source_subfolder):
-            self.run("{} -fiv --warnings=all".format(conans.tools.get_env("AUTORECONF")), run_environment=True)
+            self.run("{} -fiv --warnings=all".format(legacy_tools.get_env("AUTORECONF")), run_environment=True)
         autotools = self._configure_autotools()
         autotools.make()
 
@@ -57,9 +70,6 @@ class PatchElfConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
-
-    def package_id(self):
-        del self.info.settings.compiler
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
