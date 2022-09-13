@@ -41,7 +41,7 @@ class DawHeaderLibrariesConan(ConanFile):
 
         minimum_version = self._compiler_required_cpp17.get(str(self.info.settings.compiler), False)
         if minimum_version and Version(self.info.settings.get_safe("compiler.version")) < minimum_version:
-            raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++17, which your compiler does not support.")
         else:
             self.output.warn("{0} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
 
