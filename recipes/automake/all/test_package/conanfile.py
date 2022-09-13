@@ -29,7 +29,6 @@ class TestPackageConan(ConanFile):
         self.folders.build = "build"
         self.folders.generators = "build/conan"
 
-
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
             self.tool_requires("msys2/cci.latest")  # The conf `tools.microsoft.bash:path` and `tools.microsoft.bash:subsystem` aren't injected for test_package
@@ -43,7 +42,7 @@ class TestPackageConan(ConanFile):
             shutil.copy(self.source_path.joinpath(src), self.build_folder)
 
         autotools = Autotools(self)
-        self.run("autoreconf -fiv", cwd = self.build_path)  # Workaround for since the method `autoreconf()` will always run from source
+        self.run("autoreconf -fiv", cwd=self.build_path, env="conanbuild")  # Workaround for since the method `autoreconf()` will always run from source
         autotools.configure(build_script_folder=self.build_path)
         autotools.make()
 
@@ -55,4 +54,4 @@ class TestPackageConan(ConanFile):
             ext = ".exe" if self.settings.os == "Windows" else ""
             test_cmd = unix_path(self, self.build_path.joinpath(f"test_package{ext}"))
 
-            self.run(test_cmd, run_environment=True)
+            self.run(test_cmd, run_environment=True, env="conanbuild")
