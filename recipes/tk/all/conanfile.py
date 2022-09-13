@@ -79,6 +79,7 @@ class TkConan(ConanFile):
             self.tool_requires("msys2/cci.latest")
         if not is_msvc(self):
             self.tool_requires("automake/1.16.5")
+        self.tool_requires("tcl/{}".format(self.version))
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -207,7 +208,7 @@ class TkConan(ConanFile):
             tclimplib = self.conf.get("user.tcl.build:tcl")
             tclstublib = self.conf.get("user.tcl.build:tclstub")
             tcldir = self.deps_cpp_info["tcl"].rootpath
-            self.run(f'nmake -nologo -f "{self._get_configure_dir().joinpath("makefile.vc")}" INSTALLDIR="{self.package_path}" TCLDIR="{tcldir}" TCLIMPLIB="{tclimplib}" TCLSTUBLIB="{tclstublib}" OPTS={opts_arg} {str(self.settings.build_type).lower()}',
+            self.run(f'nmake -nologo -f "{self._get_configure_dir().joinpath("makefile.vc")}" INSTALLDIR="{self.package_path}" TCLDIR="{tcldir}" TCLIMPLIB={tclimplib}.lib TCLSTUBLIB={tclstublib}.lib OPTS={opts_arg} {str(self.settings.build_type).lower()}',
                      cwd=self._get_configure_dir())
         else:
             autotools = Autotools(self)
