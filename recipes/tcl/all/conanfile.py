@@ -204,6 +204,7 @@ class TclConan(ConanFile):
 
             rmdir(self, self.package_path.joinpath("lib", "pkgconfig"))
             rmdir(self, self.package_path.joinpath("share"))
+            rmdir(self, self.package_path.joinpath("man"))
             rmdir(self, self.package_path.joinpath("info"))
 
             package_path = self.package_folder if self.settings.os != "Windows" else unix_path(self, self.package_folder)
