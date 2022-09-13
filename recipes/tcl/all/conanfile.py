@@ -98,7 +98,8 @@ class TclConan(ConanFile):
             yes_no = lambda v: "yes" if v else "no"
 
             # The default Autotools configuration flags are not used by Tcl
-            tc.configure_args = [
+            tc.configure_args = tc._default_configure_install_flags() + [
+                "--datadir=${prefix}/res",
                 "--enable-threads",
                 "--enable-shared={}".format(yes_no(self.options.shared)),
                 "--enable-symbols={}".format(yes_no(self.settings.build_type == "Debug")),
@@ -128,8 +129,9 @@ class TclConan(ConanFile):
                 env.define("CPPFLAGS", cppflags)
             deps.generate()
         else:
-            vcvars = VCVars(self)
-            vcvars.generate(scope="build")
+            if self._settings_build.os == "Windows":
+                vcvars = VCVars(self)
+                vcvars.generate(scope="build")
 
             deps = AutotoolsDeps(self)
             deps.generate(scope="build")
@@ -205,20 +207,22 @@ class TclConan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])  # Need to specify the `DESTDIR` as a Unix path, aware of the subsystem
-            autotools.make(target="install-private-headers")
+            autotools.make(target="install-private-headers", args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
 
             rmdir(self, self.package_path.joinpath("lib", "pkgconfig"))
-            rmdir(self, self.package_path.joinpath("res", "man"))
+            rmdir(self, self.package_path.joinpath("man"))
+            rmdir(self, self.package_path.joinpath("info"))
 
             package_path = self.package_folder if self.settings.os != "Windows" else unix_path(self, self.package_folder)
             build_folder = self.build_folder if self.settings.os != "Windows" else unix_path(self, self.build_folder)
             tcl_config_sh_path = self.package_path.joinpath("lib", "tclConfig.sh")
 
-            replace_in_file(self, tcl_config_sh_path, package_path, "${TCL_ROOT}")
-            replace_in_file(self, tcl_config_sh_path, build_folder, "${TCL_BUILD_ROOT}")
+            replace_in_file(self, tcl_config_sh_path, package_path, "${TCL_ROOT}", strict=False)
+            replace_in_file(self, tcl_config_sh_path, build_folder, "${TCL_BUILD_ROOT}", strict=False)
+            replace_in_file(self, tcl_config_sh_path, "//", "${TCL_ROOT}/", strict=False)
 
-            replace_in_file(self, tcl_config_sh_path, "\nTCL_BUILD_", "\n#TCL_BUILD_")
-            replace_in_file(self, tcl_config_sh_path, "\nTCL_SRC_DIR", "\n#TCL_SRC_DIR")
+            replace_in_file(self, tcl_config_sh_path, "\nTCL_BUILD_", "\n#TCL_BUILD_", strict=False)
+            replace_in_file(self, tcl_config_sh_path, "\nTCL_SRC_DIR", "\n#TCL_SRC_DIR", strict=False)
 
     def package_info(self):
         libs = []
@@ -270,7 +274,7 @@ class TclConan(ConanFile):
         self.env_info.TCL_ROOT = tcl_root
         self.runenv_info.define_path("TCL_ROOT", tcl_root)
 
-        tclsh = list(self.package_path.joinpath("bin").glob(f"**/tclsh{version.major}{version.minor}*"))[0]
+        tclsh = list(self.package_path.joinpath("bin").glob(f"**/tclsh*"))[0]
         self.output.info(f"Setting TCLSH environment variable to {tclsh}")
         self.env_info.TCLSH = str(tclsh)
         self.runenv_info.define_path("TCLSH", str(tclsh))

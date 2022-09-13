@@ -16,7 +16,7 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            self.run("test_package", run_environment=True, env="conanrun")
+            self.run("./test_package", run_environment=True, env="conanrun")
             tclsh = self.deps_user_info['tcl'].tclsh
             assert(os.path.exists(tclsh))
             self.run("{} {}".format(tclsh, os.path.join(self.source_folder, "hello.tcl")), run_environment=True, env="conanrun")
