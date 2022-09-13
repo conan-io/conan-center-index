@@ -265,7 +265,7 @@ class TclConan(ConanFile):
         self.user_info.tcl_library = str(tcl_library)
 
         for tcl_lib in self.cpp_info.libs:
-            lib_path = self.package_path.joinpath("lib", tcl_lib)
+            lib_path = self.package_path.joinpath("lib", f"{tcl_lib}.lib")
             conf_key = str(tcl_lib).split(str(version.major))[0]
             self.output.info(f"Setting configuration `user.tcl.build:{conf_key}` to {lib_path}")
             self.conf_info.define(f"user.tcl.build:{conf_key}", str(lib_path))
