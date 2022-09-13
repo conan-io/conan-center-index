@@ -265,10 +265,9 @@ class TclConan(ConanFile):
         self.user_info.tcl_library = str(tcl_library)
 
         for tcl_lib in self.cpp_info.libs:
-            lib_path = self.package_path.joinpath("lib", tcl_lib)
             conf_key = str(tcl_lib).split(str(version.major))[0]
-            self.output.info(f"Setting configuration `user.tcl.build:{conf_key}` to {lib_path}")
-            self.conf_info.define(f"user.tcl.build:{conf_key}", str(lib_path))
+            self.output.info(f"Setting configuration `user.tcl.build:{conf_key}` to {tcl_lib}")
+            self.conf_info.define(f"user.tcl.build:{conf_key}", str(tcl_lib))
 
         tcl_root = self.package_folder
         self.output.info("Setting TCL_ROOT environment variable to {}".format(tcl_root))
