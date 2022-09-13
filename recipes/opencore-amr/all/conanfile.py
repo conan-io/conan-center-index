@@ -1,5 +1,7 @@
-from conan import ConanFile, tools
+from conan import ConanFile
+from conan.tools import files
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 from conans import AutoToolsBuildEnvironment
 from conans.tools import environment_append, get_env, os_info, vcvars, unix_path
 from contextlib import contextmanager
@@ -50,8 +52,8 @@ class OpencoreAmrConan(ConanFile):
             self.build_requires("automake/1.16.5")
 
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version],
-                        destination=self._source_subfolder, strip_root=True)
+        files.get(self, **self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @contextmanager
     def _build_context(self):
@@ -81,7 +83,7 @@ class OpencoreAmrConan(ConanFile):
         ]
         if is_msvc(self):
             self._autotools.cxx_flags.append("-EHsc")
-            if tools.scm.Version(self.settings.compiler.version) >= "12":
+            if Version(self.settings.compiler.version) >= "12":
                 self._autotools.flags.append("-FS")
         self._autotools.configure(
             args=args, configure_dir=self._source_subfolder)
@@ -95,12 +97,13 @@ class OpencoreAmrConan(ConanFile):
     def package(self):
         self._autotools.install()
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
-        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
+        files.rmdir(self, os.path.join(
+            self.package_folder, "lib", "pkgconfig"))
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             for lib in ("opencore-amrwb", "opencore-amrnb"):
-                tools.files.rename(self, os.path.join(self.package_folder, "lib", "{}.dll.lib".format(lib)),
-                                   os.path.join(self.package_folder, "lib", "{}.lib".format(lib)))
+                files.rename(self, os.path.join(self.package_folder, "lib", "{}.dll.lib".format(lib)),
+                             os.path.join(self.package_folder, "lib", "{}.lib".format(lib)))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "opencore-amr")
