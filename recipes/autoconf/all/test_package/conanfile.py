@@ -36,7 +36,7 @@ class TestPackageConan(ConanFile):
         for src in self.exports_sources:
             shutil.copy(path.join(self.source_folder, src), self.build_folder)
 
-        self.run(f"autoconf --verbose")
+        self.run(f"autoconf --verbose", env="conanbuild")
 
         autotools = Autotools(self)
         autotools.configure(build_script_folder=self.build_folder)
@@ -50,4 +50,4 @@ class TestPackageConan(ConanFile):
             ext = ".exe" if self.settings.os == "Windows" else ""
             test_cmd = unix_path(self, path.join(self.build_folder, f"test_package{ext}"))
 
-            self.run(test_cmd, run_environment=True)
+            self.run(test_cmd, env="conanbuild")
