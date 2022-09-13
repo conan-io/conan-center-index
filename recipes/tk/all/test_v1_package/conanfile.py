@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 
 
-class TclTestConan(ConanFile):
+class TkTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
