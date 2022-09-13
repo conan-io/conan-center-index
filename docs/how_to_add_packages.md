@@ -45,7 +45,7 @@ This process helps conan-center-index against spam and malicious code. The proce
 
 The specific steps to add new packages are:
 * Fork the [conan-center-index](https://github.com/conan-io/conan-center-index) git repository, and then clone it locally.
-* Create a new folder with the Conan package recipe (`conanfile.py`) in the correct folder.
+* Copy a template from [package_templates](package_templates) folder in the correct folder, which fits your project. Read their [documentation](package_templates/README.md) to find more information.
 * Make sure you are using the latest [Conan client](https://conan.io/downloads) version, as recipes might evolve introducing features of the newer Conan releases.
 * Commit and Push to GitHub then submit a pull request.
 * Our automated build service will build 100+ different configurations, and provide messages that indicate if there were any issues found during the pull request on GitHub.
@@ -84,7 +84,10 @@ This is the canonical structure of one of these folders, where the same `conanfi
 |           +-- test_package/
 |               +-- conanfile.py
 |               +-- CMakeLists.txt
-|               +-- main.cpp
+|               +-- test_package.cpp
+|           +-- test_v1_package/
+|               +-- conanfile.py
+|               +-- CMakeLists.txt
 ```
 
 If it becomes too complex to maintain the logic for all the versions in a single `conanfile.py`, it is possible to split the folder `all` into
@@ -110,22 +113,22 @@ versions:
 
 ### `conandata.yml`
 
-This file lists **all the sources that are needed to build the package**: source code, license files,... any file that will be used by the recipe
+This file lists **all the sources that are needed to build the package**: source code, patch files, license files,... any file that will be used by the recipe
 should be listed here. The file is organized into two sections, `sources` and `patches`, each one of them contains the files that are required
 for each version of the library. All the files that are downloaded from the internet should include a checksum, so we can validate that
 they are not changed.
 
-A detailed breakdown of all the fields can be found in [conandata_yml_format.md](conandata_yml_format.md). We strongly encourage adding the [patch fields](conandata_yml_format.md#patches-fields) to help track where patches come from and what issue they solve.
+A detailed breakdown of all the fields can be found in [conandata_yml_format.md](conandata_yml_format.md). We **strongly** encourage adding the [patch fields](conandata_yml_format.md#patches-fields) to help track where patches come from and what issue they solve.
 
 Inside the `conanfile.py` recipe, this data is available in a `self.conan_data` attribute that can be used as follows:
 
 ```py
-def source(self):
-    files.get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-     
 def export_sources(self):
     for patch in self.conan_data.get("patches", {}).get(self.version, []):
         files.copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+
+def source(self):
+    files.get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
 def build(self):
     files.apply_conandata_patches(self)
@@ -141,9 +144,8 @@ as we said before there can be one single recipe suitable for all the versions i
 different versions in different folders. For mainteinance reasons, we prefer to have only one recipe, but sometimes the extra effort doesn't worth
 it and it makes sense to split and duplicate it, there is no common rule for it.
 
-Together with the recipe, there can be other files that are needed to build the library: patches, other files related to build systems (many recipes
-include a `CMakeLists.txt` to run some Conan logic before using the one from the library),... all these files will usually be listed in the
-`exports_sources` attribute and used during the build process.
+Together with the recipe, there can be other files that are needed to build the library: patches, other files related to build systems,
+... all these files will usually be listed in the `exports_sources` attribute and used during the build process.
 
 Also, **every `conanfile.py` should be accompanied by one or several folder to test the generated packages** as we will see below.
 
@@ -151,6 +153,8 @@ Also, **every `conanfile.py` should be accompanied by one or several folder to t
 
 All the packages in this repository need to be tested before they join ConanCenter. A `test_package` folder with its corresponding `conanfile.py` and
 a minimal project to test the package is strictly required. You can read about it in the
+
+# FIXME: This link no longet exist and there is no dedicated section about test package in docs.
 [Conan documentation](https://docs.conan.io/en/latest/creating_packages/getting_started.html#the-test-package-folder).
 
 Sometimes it is useful to test the package using different build systems (CMake, Autotools,...). Instead of adding complex logic to one
@@ -196,15 +200,18 @@ The [recipes](https://github.com/conan-io/conan-center-index/tree/master/recipes
 
 ### Header Only
 
-If you are looking for header-only projects, you can take a look on [rapidjson](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidjson/all/conanfile.py), [rapidxml](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidxml/all/conanfile.py), and [nuklear](https://github.com/conan-io/conan-center-index/blob/master/recipes/nuklear/all/conanfile.py). Also, Conan Docs has a section about [how to package header-only libraries](https://docs.conan.io/en/latest/howtos/header_only.html).
+If you are looking for header-only projects, you can take a look on [header-only template](package_templates/header_only).
+Also, Conan Docs has a section about [how to package header-only libraries](https://docs.conan.io/en/latest/howtos/header_only.html).
 
 ### CMake
 
-For C/C++ projects which use CMake for building, you can take a look on [szip](https://github.com/conan-io/conan-center-index/blob/master/recipes/szip/all/conanfile.py) and [recastnavigation](https://github.com/conan-io/conan-center-index/blob/master/recipes/recastnavigation/all/conanfile.py).
+For C/C++ projects which use CMake for building, you can take a look on [cmake package template](package_templates/cmake_package).
 
 #### Components
 
 Another common use case for CMake based projects, both header only and compiled, is _modeling components_ to match the `find_package` and export the correct targets from Conan's generators. A basic examples of this is [cpu_features](https://github.com/conan-io/conan-center-index/blob/master/recipes/cpu_features/all/conanfile.py), a moderate/intermediate example is [cpprestsdk](https://github.com/conan-io/conan-center-index/blob/master/recipes/cpprestsdk/all/conanfile.py), and a very complex example is [OpenCV](https://github.com/conan-io/conan-center-index/blob/master/recipes/opencv/4.x/conanfile.py).
+
+Note that Conan is migrating toward the version 2.0 and many repices are outdated when related to components feature. To understand who to migrate components read [properties migration](https://docs.conan.io/en/latest/migrating_to_2.0/properties.html#properties-migration).
 
 ### Autotools
 
@@ -225,32 +232,35 @@ For cases where a project only offers source files, but not a build script, you 
 The [SystemPackageTool](https://docs.conan.io/en/latest/reference/conanfile/methods.html#systempackagetool) can easily manage a system package manager (e.g. apt,
 pacman, brew, choco) and install packages which are missing on Conan Center but available for most distributions. It is key to correctly fill in the `cpp_info` for the consumers of a system package to have access to whatever was installed.
 
-As example there are [glu](https://github.com/conan-io/conan-center-index/blob/master/recipes/glu/all/conanfile.py) and [OpenGL](https://github.com/conan-io/conan-center-index/blob/master/recipes/opengl/all/conanfile.py). Also, it will require an exception rule for [conan-center hook](https://github.com/conan-io/hooks#conan-center), a [pull request](https://github.com/conan-io/hooks/pulls) should be open to allow it over the KB-H032.
+As example there is [xorg](https://github.com/conan-io/conan-center-index/blob/master/recipes/xorg/all/conanfile.py). Also, it will require an exception rule for [conan-center hook](https://github.com/conan-io/hooks#conan-center), a [pull request](https://github.com/conan-io/hooks/pulls) should be open to allow it over the KB-H032.
 
 ### Verifying Dependency Version
 
-Some project requirements need to respect a version constraint. This can be enforced in a recipe by accessing the [`deps_cpp_info`](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#deps-cpp-info) attribute.
-An exaple of this can be found in the [spdlog recipe](https://github.com/conan-io/conan-center-index/blob/9618f31c4d9b4da5d06f905befe9691cf105a1fc/recipes/spdlog/all/conanfile.py#L92-L94).
+Some project requirements need to respect a version constraint. This can be enforced in a recipe by accessing the [`dependencies`](https://docs.conan.io/en/latest/reference/conanfile/dependencies.html) attribute.
+An example of this can be found in the [fcl recipe](https://github.com/conan-io/conan-center-index/blob/1b6b496fe9a9be4714f8a0db45274c29b0314fe3/recipes/fcl/all/conanfile.py#L80).
 
 ```py
-if tools.Version(self.deps_cpp_info["liba"].version) < "7":
-    raise ConanInvalidConfiguration(f"The project {self.name}/{self.version} requires liba > 7.x")
+def generate(self):
+    foobar = self.dependencies["foobar"]
+    tc = CMakeToolchain(self)
+    tc.variables["FOOBAR_VERSION"] = foobar.ref.version
 ```
-
-In Conan version 1.x this needs to be done in the `build` method, in future release is should be done in the `validate` method.
 
 ### Verifying Dependency Options
 
 Certain projects are dependant on the configuration (a.k.a options) of a dependency. This can be enforced in a recipe by accessing the [`options`](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#options) attribute.
-An example of this can be found in the [kealib recipe](https://github.com/conan-io/conan-center-index/blob/9618f31c4d9b4da5d06f905befe9691cf105a1fc/recipes/kealib/all/conanfile.py#L44-L46).
+An example of this can be found in the [sdl_image recipe](https://github.com/conan-io/conan-center-index/blob/1b6b496fe9a9be4714f8a0db45274c29b0314fe3/recipes/sdl_image/all/conanfile.py#L93).
 
 ```py
     def validate(self):
-        if not self.options["liba"].enable_feature:
-            raise ConanInvalidConfiguration(f"The project {self.name}/{self.version} requires liba.enable_feature=True.")
+        foobar = self.dependencies["foobar"]
+        if not foobar.options.enable_feature:
+            raise ConanInvalidConfiguration(f"The project {self.ref} requires foobar:enable_feature=True.")
 ```
 
 ## Test the recipe locally
+
+### Hooks
 
 The system will use the [conan-center hook](https://github.com/conan-io/hooks) to perform some quality checks. You can install the hook running:
 
@@ -267,11 +277,11 @@ All hook checks will print a similar message:
 [HOOK - conan-center.py] post_package(): ERROR: [PACKAGE LICENSE] No package licenses found
 ```
 
-Call `conan create . lib/1.0@` in the folder of the recipe using the profile you want to test. For instance:
+Call `conan create . lib/1.0@ -pr:b=default -pr:h=default` in the folder of the recipe using the profile you want to test. For instance:
 
 ```sh
 cd conan-center-index/recipes/boost/all
-conan create conanfile.py boost/1.77.0@
+conan create conanfile.py boost/1.77.0@ -pr:b=default -pr:h=default
 ```
 
 ### Updating conan hooks on your machine
@@ -281,6 +291,11 @@ The hooks are updated from time to time, so it's worth keeping your own copy of 
 ```sh
 conan config install
 ```
+
+### Linters
+
+Some linters are always executed by Github actions to validate parts of your recipe, for instance, if it uses migrated Conan tools imports.
+To understand how to run linters locally, read [V2 linter](v2_linter.md) documentation.
 
 ## Debugging failed builds
 
