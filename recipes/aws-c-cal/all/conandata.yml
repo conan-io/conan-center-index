@@ -1,4 +1,7 @@
 sources:
+  "0.5.19":
+    url: "https://github.com/awslabs/aws-c-cal/archive/refs/tags/v0.5.19.tar.gz"
+    sha256: "23452ab7960c480f1ec0a96ac55bde32d7d27c4a664baeadc248923b19c12086"
   "0.5.17":
     url: "https://github.com/awslabs/aws-c-cal/archive/v0.5.17.tar.gz"
     sha256: "40297da04443d4ee2988d1c5fb0dc4a156d0e4cfaf80e6a1df1867452566d540"
@@ -12,6 +15,11 @@ sources:
     url: "https://github.com/awslabs/aws-c-cal/archive/v0.5.11.tar.gz"
     sha256: "ef46e121b2231a0b19afce8af4b32d77501df4d470e926990918456636cd83c0"
 patches:
+  "0.5.19":
+    - patch_file: "patches/0002-apple-corefoundation-0.5.13.patch"
+      patch_description: "Link to CoreFoundation on Apple"
+      patch_type: "backport"
+      patch_source: "https://github.com/awslabs/aws-c-cal/pull/126"
   "0.5.17":
     - patch_file: "patches/0002-apple-corefoundation-0.5.13.patch"
       patch_description: "Link to CoreFoundation on Apple"
