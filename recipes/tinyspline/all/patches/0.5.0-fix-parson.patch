@@ -1,0 +1,168 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -7,6 +7,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+ option(TINYSPLINE_BUILD_EXAMPLES "Build TinySpline examples." ON)
+ option(TINYSPLINE_BUILD_TESTS "Build TinySpline tests." ON)
+ option(TINYSPLINE_BUILD_DOCS "Build TinySpline documentation." ON)
++option(TINYSPLINE_JSON_SUPPORT "Build TinySpline with JSON support." ON)
+ 
+ if(NOT DEFINED TINYSPLINE_OUTPUT_DIRECTORY)
+   set(TINYSPLINE_OUTPUT_DIRECTORY
+--- src/CMakeLists.txt
++++ src/CMakeLists.txt
+@@ -884,7 +884,6 @@ set(TINYSPLINE_CXX_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+ # TINYSPLINE_C_SOURCE_FILES
+ list(APPEND TINYSPLINE_C_SOURCE_FILES
+      "${CMAKE_CURRENT_SOURCE_DIR}/tinyspline.c"
+-     "${CMAKE_CURRENT_SOURCE_DIR}/parson.c"
+ )
+ 
+ # TINYSPLINE_CXX_SOURCE_FILES
+@@ -912,6 +911,9 @@ list(JOIN TINYSPLINE_C_INSTALL_CMAKE_CONFIG_DIR "/"
+ 
+ add_library(tinyspline ${TINYSPLINE_C_SOURCE_FILES})
+ target_compile_definitions(tinyspline PUBLIC ${TINYSPLINE_C_DEFINITIONS})
++if (NOT TINYSPLINE_JSON_SUPPORT)
++  target_compile_definitions(tinyspline PRIVATE NO_JSON)
++endif()
+ set_target_properties(
+   tinyspline
+   PROPERTIES OUTPUT_NAME "${TINYSPLINE_C_LIBRARY_OUTPUT_NAME}"
+@@ -1006,6 +1008,9 @@ if(TINYSPLINE_ENABLE_CXX)
+     endif()
+     add_library(${target} ${TINYSPLINE_CXX_SOURCE_FILES})
+     target_compile_definitions(${target} PUBLIC ${TINYSPLINE_CXX_DEFINITIONS})
++    if (NOT TINYSPLINE_JSON_SUPPORT)
++      target_compile_definitions(${target} PRIVATE NO_JSON)
++    endif()
+     set_target_properties(
+       ${target}
+       PROPERTIES OUTPUT_NAME ${name}
+--- src/tinyspline.c
++++ src/tinyspline.c
+@@ -1,6 +1,9 @@
+ #define TINYSPLINE_EXPORT
+ #include "tinyspline.h"
+-#include "parson.h" /* serialization */
++
++#ifndef NO_JSON
++# include "parson.c" /* serialization */
++#endif
+ 
+ #include <stdlib.h> /* malloc, free */
+ #include <math.h>   /* fabs, sqrt, acos */
+@@ -2611,6 +2614,7 @@ ts_bspline_morph(const tsBSpline *origin,
+ 
+ 
+ 
++#ifndef NO_JSON
+ /*! @name Serialization and Persistence
+  *
+  * @{
+@@ -2845,12 +2849,14 @@ ts_int_bspline_parse_json(const JSON_Value *spline_value,
+ 		ts_bspline_free(spline);
+ 	TS_END_TRY_RETURN(err)
+ }
++#endif
+ 
+ tsError
+ ts_bspline_to_json(const tsBSpline *spline,
+                    char **json,
+                    tsStatus *status)
+ {
++#ifndef NO_JSON
+ 	tsError err;
+ 	JSON_Value *value = NULL;
+ 	*json = NULL;
+@@ -2860,6 +2866,12 @@ ts_bspline_to_json(const tsBSpline *spline,
+ 	if (!*json)
+ 		TS_RETURN_0(status, TS_MALLOC, "out of memory")
+ 	TS_RETURN_SUCCESS(status)
++#else
++	(void)spline;
++	(void)json;
++	(void)status;
++	return TS_NOT_SUPPORTED;
++#endif
+ }
+ 
+ tsError
+@@ -2867,6 +2879,7 @@ ts_bspline_parse_json(const char *json,
+                       tsBSpline *spline,
+                       tsStatus *status)
+ {
++#ifndef NO_JSON
+ 	tsError err;
+ 	JSON_Value *value = NULL;
+ 	ts_int_bspline_init(spline);
+@@ -2882,6 +2895,12 @@ ts_bspline_parse_json(const char *json,
+ 		if (value)
+ 			json_value_free(value);
+ 	TS_END_TRY_RETURN(err)
++#else
++	(void)spline;
++	(void)json;
++	(void)status;
++	return TS_NOT_SUPPORTED;
++#endif
+ }
+ 
+ tsError
+@@ -2889,6 +2908,7 @@ ts_bspline_save(const tsBSpline *spline,
+                 const char *path,
+                 tsStatus *status)
+ {
++#ifndef NO_JSON
+ 	tsError err;
+ 	JSON_Status json_status;
+ 	JSON_Value *value = NULL;
+@@ -2898,6 +2918,12 @@ ts_bspline_save(const tsBSpline *spline,
+ 	if (json_status != JSONSuccess)
+ 		TS_RETURN_0(status, TS_IO_ERROR, "unexpected io error")
+ 	TS_RETURN_SUCCESS(status)
++#else
++	(void)spline;
++	(void)path;
++	(void)status;
++	return TS_NOT_SUPPORTED;
++#endif
+ }
+ 
+ tsError
+@@ -2905,6 +2931,7 @@ ts_bspline_load(const char *path,
+                 tsBSpline *spline,
+                 tsStatus *status)
+ {
++#ifndef NO_JSON
+ 	tsError err;
+ 	FILE *file = NULL;
+ 	JSON_Value *value = NULL;
+@@ -2930,6 +2957,12 @@ ts_bspline_load(const char *path,
+ 	TS_CATCH(err)
+ 		ts_bspline_free(spline);
+ 	TS_END_TRY_RETURN(err)
++#else
++	(void)path;
++	(void)spline;
++	(void)status;
++	return TS_NOT_SUPPORTED;
++#endif
+ }
+ /*! @} */
+ 
+diff --git a/src/tinyspline.h b/src/tinyspline.h
+index 44c94ea..da1542b 100644
+--- a/src/tinyspline.h
++++ b/src/tinyspline.h
+@@ -465,7 +465,10 @@ typedef enum
+ 	TS_NO_RESULT = -14,
+ 
+ 	/** Unexpected number of points. */
+-	TS_NUM_POINTS = -15
++	TS_NUM_POINTS = -15,
++
++	/** Unsupported operation. */
++	TS_NOT_SUPPORTED = -16
+ } tsError;
+ 
+ /**

@@ -25,12 +25,14 @@ class TinysplineConan(ConanFile):
         "fPIC": [True, False],
         "cxx": [True, False],
         "floating_point_precision": ["double", "single"],
+        "json": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "cxx": True,
         "floating_point_precision": "double",
+        "json": True,
     }
 
     def export_sources(self):
@@ -100,6 +102,8 @@ class TinysplineConan(ConanFile):
             tc.variables["TINYSPLINE_ENABLE_R"] = False
             tc.variables["TINYSPLINE_ENABLE_RUBY"] = False
             tc.variables["TINYSPLINE_ENABLE_ALL_INTERFACES"] = False
+        if Version(self.version) >= "0.5.0":
+            tc.variables["TINYSPLINE_JSON_SUPPORT"] = self.options.json
         tc.generate()
 
     def build(self):

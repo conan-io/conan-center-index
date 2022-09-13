@@ -12,6 +12,8 @@ sources:
     url: "https://github.com/msteinbeck/tinyspline/archive/0.2.0.tar.gz"
     sha256: "7e0776abfc2ab7e485ec5cdac0ad37774aa9362f81303ceb5584e983582a38d2"
 patches:
+  "0.5.0":
+    - patch_file: "patches/0.5.0-fix-parson.patch"
   "0.3.0":
     - patch_file: "patches/0.3.0-0001-fix-cmake.patch"
   "0.2.0":
