@@ -133,6 +133,7 @@ class TestPackageConan(ConanFile):
                         self.run("{} {}".format(self.deps_user_info["cpython"].python, " ".join("\"{}\"".format(a) for a in setup_args)), run_environment=True)
 
     def _test_module(self, module, should_work):
+        exception = None
         try:
             self.run("{} {}/test_package.py -b {} -t {} ".format(
                 self.deps_user_info["cpython"].python, self.source_folder, self.build_folder, module), run_environment=True)
@@ -194,5 +195,5 @@ class TestPackageConan(ConanFile):
                         self._test_module("spam", True)
 
             # MSVC builds need PYTHONHOME set.
-            with legacy_tools.environment_append({"PYTHONHOME": self.deps_user_info["cpython"].pythonhome}) if self.deps_user_info["cpython"].module_requires_pythonhome == "True" else tools.no_op():
+            with legacy_tools.environment_append({"PYTHONHOME": self.deps_user_info["cpython"].pythonhome}) if self.deps_user_info["cpython"].module_requires_pythonhome == "True" else legacy_tools.no_op():
                 self.run(os.path.join("bin", "test_package"), run_environment=True)
