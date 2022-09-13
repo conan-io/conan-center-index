@@ -1,6 +1,6 @@
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -38,7 +38,7 @@ CMAKE_POLICY(SET CMP0033 NEW) # https://cmake.org/cmake/help/v3.0/policy/CMP0033
+--- a/CMakeLists.txt	2021-01-05 17:56:54.000000000 +0100
++++ b/CMakeLists.txt	2022-09-02 09:31:40.383547800 +0200
+@@ -38,7 +38,7 @@
  endif()
  
  # Load modules from our source tree too
@@ -9,7 +9,7 @@
  
  
  # Builds must use this CMakeLists.txt, not the one in src/ or somewhere else.
-@@ -322,73 +322,69 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
+@@ -322,73 +322,55 @@
  ENDIF(CMAKE_COMPILER_IS_GNUCXX)
  
  FIND_PACKAGE(ZLIB REQUIRED)
@@ -27,45 +27,32 @@
 -ELSE(LIBCRYPTO_FOUND)
 -	MESSAGE("OpenSSL's libCrypto not found. Encryption support will be disabled")
 -ENDIF(LIBCRYPTO_FOUND)
-+	LINK_LIBRARIES(OpenSSL::OpenSSL)
+-
+-FIND_PACKAGE(LIBIDN)
+-
+-IF(LIBIDN_FOUND)
+-  MESSAGE("Found libidn headers in ${LIBIDN_INCLUDE_DIR}, library at ${LIBIDN_LIBRARIES}")
+-ENDIF(LIBIDN_FOUND)
++	LINK_LIBRARIES(OpenSSL::SSL OpenSSL::Crypto)
 +  INCLUDE(CheckCSourceCompiles)
 +
 +  SET(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
 +  SET(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
-+
-+  CHECK_C_SOURCE_COMPILES("#include <openssl/opensslv.h>
-+			#ifndef OPENSSL_VERSION_NUMBER
-+			#error No OPENSSL_VERSION_NUMBER defined
-+			#endif
-+			#if OPENSSL_VERSION_NUMBER < 0x10100000L
-+			#error This is not OpenSSL 1.1 or higher
-+			#endif
-+			int main(void) { return 0; }" PODOFO_HAVE_OPENSSL_1_1)
- 
--FIND_PACKAGE(LIBIDN)
-+  CHECK_C_SOURCE_COMPILES("#include <openssl/opensslconf.h>
-+			#ifndef OPENSSL_NO_RC4
-+			#error No OPENSSL_NO_RC4 defined
-+			#endif
-+			int main(void) { return 0; }" PODOFO_HAVE_OPENSSL_NO_RC4)
  
 -IF(LIBIDN_FOUND)
--  MESSAGE("Found libidn headers in ${LIBIDN_INCLUDE_DIR}, library at ${LIBIDN_LIBRARIES}")
--ENDIF(LIBIDN_FOUND)
 +  UNSET(CMAKE_REQUIRED_INCLUDES)
 +  UNSET(CMAKE_REQUIRED_LIBRARIES)
 +ENDIF()
 +
 +if(PODOFO_WITH_LIBIDN)
- 
--IF(LIBIDN_FOUND)
++  FIND_PACKAGE(LIBIDN)
  	SET(PODOFO_HAVE_LIBIDN TRUE)
 -	INCLUDE_DIRECTORIES(${LIBIDN_INCLUDE_DIR})
 -	MESSAGE("Libidn found. AES-256 Encryption support will be enabled")
 -ELSE(LIBIDN_FOUND)
 -	MESSAGE("Libidn not found. AES-256 Encryption support will be disabled")
 -ENDIF(LIBIDN_FOUND)
-+	LINK_LIBRARIES(CONAN_PKG::libidn)
++	LINK_LIBRARIES(libidn::libidn)
 +ENDIF()
  
 -FIND_PACKAGE(LIBJPEG)
@@ -122,12 +109,13 @@
 -  MESSAGE("LibUnistring not found. Unistring support will be disabled")
 -  SET(UNISTRING_LIBRARY "")
 -ENDIF(UNISTRING_FOUND)
-+  LINK_LIBRARIES(CONAN_PKG::libunistring)
++  FIND_PACKAGE(libunistring REQUIRED)
++  LINK_LIBRARIES(libunistring::libunistring)
 +ENDIF()
  
  
  IF(NOT PODOFO_BUILD_LIB_ONLY)
-@@ -405,11 +401,11 @@ ENDIF(CppUnit_FOUND)
+@@ -405,11 +387,11 @@
  
  ENDIF(NOT PODOFO_BUILD_LIB_ONLY)
  
@@ -136,13 +124,13 @@
 -FIND_PACKAGE(FREETYPE REQUIRED)
 -MESSAGE("Found freetype library at ${FREETYPE_LIBRARIES}, headers ${FREETYPE_INCLUDE_DIR}")
 +FIND_PACKAGE(Freetype REQUIRED)
-+LINK_LIBRARIES(Freetype::Freetype)
++LINK_LIBRARIES(freetype)
  
 +if(0)
  FIND_PACKAGE(LIBSTLPORT)
  SET(stlport_libraries_if_use_stlport)
  IF(USE_STLPORT)
-@@ -424,16 +420,13 @@ IF(USE_STLPORT)
+@@ -424,16 +406,13 @@
  		MESSAGE(FATAL_ERROR "STLPort use requested, but STLPort not found.")
  	ENDIF(LIBSTLPORT_FOUND)
  ENDIF(USE_STLPORT)
@@ -162,3 +150,34 @@
  ELSE(WANT_FONTCONFIG)
  	# Might as well look for it anyway. This also sets the appropriate
  	# variables to empty values.
+@@ -525,6 +504,7 @@
+   INCLUDE_DIRECTORIES(${FONTCONFIG_INCLUDE_DIR})
+ ENDIF(FONTCONFIG_FOUND AND WANT_FONTCONFIG)
+ 
++LINK_DIRECTORIES(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+ IF(WIN32 OR PODOFO_BUILD_STATIC)
+   SET(PODOFO_LIB
+       podofo
+@@ -555,10 +535,18 @@
+ 
+ ADD_SUBDIRECTORY(src/podofo)
+ IF(NOT PODOFO_BUILD_LIB_ONLY)
+-ADD_SUBDIRECTORY(test)
+-ADD_SUBDIRECTORY(tools)
+-ADD_SUBDIRECTORY(examples)
+-ADD_SUBDIRECTORY(man)
++IF(PODOFO_BUILD_TEST)
++    ADD_SUBDIRECTORY(test)
++ENDIF(PODOFO_BUILD_TEST)
++IF(PODOFO_BUILD_TOOLS)
++    ADD_SUBDIRECTORY(tools)
++ENDIF(PODOFO_BUILD_TOOLS)
++IF(PODOFO_BUILD_EXAMPLES)
++    ADD_SUBDIRECTORY(examples)
++ENDIF(PODOFO_BUILD_EXAMPLES)
++IF(PODOFO_BUILD_MAN)
++    ADD_SUBDIRECTORY(man)
++ENDIF(PODOFO_BUILD_MAN)
+ ENDIF(NOT PODOFO_BUILD_LIB_ONLY)
+ 
+ # Generate our configure file
