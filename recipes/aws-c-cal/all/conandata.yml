@@ -13,8 +13,6 @@ sources:
     sha256: "ef46e121b2231a0b19afce8af4b32d77501df4d470e926990918456636cd83c0"
 patches:
   "0.5.12":
-    - patch_file: "patches/0001-use-openssl-cmake-imported-target.cmake"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-use-openssl-cmake-imported-target.patch"
   "0.5.11":
-    - patch_file: "patches/0001-use-openssl-cmake-imported-target.cmake"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-use-openssl-cmake-imported-target.patch"
