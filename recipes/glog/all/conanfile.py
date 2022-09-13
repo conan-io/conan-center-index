@@ -1,5 +1,6 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
 from conan.tools.scm import Version
 import os
@@ -59,7 +60,7 @@ class GlogConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "0.6.0":
-            self.build_requires("cmake/3.22.3")
+            self.tool_requires("cmake/3.22.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -83,6 +84,12 @@ class GlogConan(ConanFile):
         tc.variables["WITH_GTEST"] = False
         tc.generate()
 
+        tc = CMakeDeps(self)
+        tc.generate()
+
+        tc = VirtualBuildEnv(self)
+        tc.generate(scope="build")
+
     def _patch_sources(self):
         apply_conandata_patches(self)
         # do not force PIC
@@ -98,7 +105,7 @@ class GlogConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
