@@ -50,7 +50,7 @@ Here are a few choices:
 - [Cache recipes in your own ArtifactoryCE](https://docs.conan.io/en/latest/uploading_packages/using_artifactory.html) - recommended for production environments
 
 Using your own ArtifactoryCE instance is easy. You can [deploy it on-premise](https://conan.io/downloads.html) or use a 
-[cloud provided solution](https://jfrog.com/start-free/?isConan=true) for **free**. Your project should 
+[cloud provided solution](https://jfrog.com/community/start-free) for **free**. Your project should 
 [use only this remote](https://docs.conan.io/en/latest/reference/commands/misc/remote.html?highlight=add%20new) and new recipe
 revisions are only pushed to your Artifactory after they have been validated in your project.
 
