@@ -71,4 +71,7 @@ reviewers:
     request_reviews: true
   - user: "franramirez688"
     type: "team"
+    request_reviews: true
+  - user: "paulocoutinhox"
+    type: "community"
     request_reviews: false

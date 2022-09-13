@@ -4,7 +4,7 @@ from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
@@ -15,7 +15,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["FMT_HEADER_ONLY"] = self.dependencies["fmt"].options.header_only
+        tc.variables["FMT_HEADER_ONLY"] = self.dependencies[self.tested_reference_str].options.header_only
         tc.generate()
 
     def layout(self):

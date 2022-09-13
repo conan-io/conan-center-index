@@ -68,7 +68,7 @@
 -    include_directories(SYSTEM "${OPENSSL_INCLUDE_DIR}")
 -    list(APPEND SYSLIBS "${OPENSSL_LIBRARIES}")
 +    #include_directories(SYSTEM "${OPENSSL_INCLUDE_DIR}")
-+    list(APPEND SYSLIBS OpenSSL::OpenSSL)
++    list(APPEND SYSLIBS OpenSSL::SSL OpenSSL::Crypto)
  endif()
  
  
@@ -88,7 +88,7 @@
 -    include_directories(SYSTEM "${OPENSSL_INCLUDE_DIR}")
 -    list(APPEND SYSLIBS "${OPENSSL_LIBRARIES}")
 +    #include_directories(SYSTEM "${OPENSSL_INCLUDE_DIR}")
-+    list(APPEND SYSLIBS OpenSSL::OpenSSL)
++    list(APPEND SYSLIBS OpenSSL::SSL OpenSSL::Crypto)
  endif()
  
  if(UNIX)

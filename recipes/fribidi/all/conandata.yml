@@ -11,4 +11,3 @@ sources:
 patches:
   "1.0.9":
     - patch_file: "patches/1.0.9-0001-meson-no-tests-bin.patch"
-      base_path: "source_subfolder"
