@@ -1,13 +1,15 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake
 from conan.tools.build import can_run
+from conan.tools.cmake import CMake
 
-import os
 
-
-class TestPackageConan(ConanFile):
+class TclTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeToolchain", "CMakeDeps"
+    test_type = "explicit"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def build(self):
         cmake = CMake(self)
@@ -17,6 +19,3 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             self.run("./test_package", run_environment=True, env="conanrun")
-            tclsh = self.deps_user_info['tcl'].tclsh
-            assert(os.path.exists(tclsh))
-            self.run("{} {}".format(tclsh, os.path.join(self.source_folder, "hello.tcl")), run_environment=True, env="conanrun")
