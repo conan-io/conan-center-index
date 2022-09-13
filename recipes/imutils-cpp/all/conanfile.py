@@ -37,8 +37,8 @@ class ImutilsCppConan(ConanFile):
             "gcc": "8",
             "Visual Studio": "15.7",
             "msvc": "19.14",
-            "clang": "7",
-            "apple-clang": "10",
+            "clang": "8",
+            "apple-clang": "10.14",
         }
 
     def export_sources(self):
