@@ -101,7 +101,7 @@ class AwsCCal(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.components["aws-c-cal-lib"].system_libs.append("ncrypt")
         elif is_apple_os(self):
-            self.cpp_info.components["aws-c-cal-lib"].frameworks.append("Security")
+            self.cpp_info.components["aws-c-cal-lib"].frameworks.extend(["CoreFoundation", "Security"])
         elif self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["aws-c-cal-lib"].system_libs.append("dl")
 

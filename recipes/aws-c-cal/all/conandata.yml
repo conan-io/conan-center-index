@@ -12,7 +12,25 @@ sources:
     url: "https://github.com/awslabs/aws-c-cal/archive/v0.5.11.tar.gz"
     sha256: "ef46e121b2231a0b19afce8af4b32d77501df4d470e926990918456636cd83c0"
 patches:
+  "0.5.17":
+    - patch_file: "patches/0002-apple-corefoundation-0.5.13.patch"
+      patch_description: "Link to CoreFoundation on Apple"
+      patch_type: "backport"
+      patch_source: "https://github.com/awslabs/aws-c-cal/pull/126"
+  "0.5.13":
+    - patch_file: "patches/0002-apple-corefoundation-0.5.13.patch"
+      patch_description: "Link to CoreFoundation on Apple"
+      patch_type: "backport"
+      patch_source: "https://github.com/awslabs/aws-c-cal/pull/126"
   "0.5.12":
     - patch_file: "patches/0001-use-openssl-cmake-imported-target.patch"
+    - patch_file: "patches/0002-apple-corefoundation-0.5.11.patch"
+      patch_description: "Link to CoreFoundation on Apple"
+      patch_type: "backport"
+      patch_source: "https://github.com/awslabs/aws-c-cal/pull/126"
   "0.5.11":
     - patch_file: "patches/0001-use-openssl-cmake-imported-target.patch"
+    - patch_file: "patches/0002-apple-corefoundation-0.5.11.patch"
+      patch_description: "Link to CoreFoundation on Apple"
+      patch_type: "backport"
+      patch_source: "https://github.com/awslabs/aws-c-cal/pull/126"
