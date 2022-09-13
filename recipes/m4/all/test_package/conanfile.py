@@ -29,12 +29,12 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            self.run("m4 --version", run_environment=True)
-            self.run(f"m4 -P {self._m4_input_path}")
+            self.run("m4 --version", env="conanbuild")
+            self.run(f"m4 -P {self._m4_input_path}", env="conanbuild")
 
-            self.run(f"m4 -R {os.path.join(self.source_folder, 'frozen.m4f')} {os.path.join(self.source_folder, 'test.m4')}", run_environment=True)
+            self.run(f"m4 -R {os.path.join(self.source_folder, 'frozen.m4f')} {os.path.join(self.source_folder, 'test.m4')}", env="conanbuild")
 
             output = StringIO()
-            self.run(f"m4 -P {self._m4_input_path}", output=output)
+            self.run(f"m4 -P {self._m4_input_path}", output=output, env="conanbuild")
 
             assert "Harry, Jr. met Sally" in output.getvalue()
