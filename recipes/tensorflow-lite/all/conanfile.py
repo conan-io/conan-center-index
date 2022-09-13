@@ -2,12 +2,12 @@ from conan import ConanFile
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, save, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, save, copy, apply_conandata_patches
 from conan.errors import ConanInvalidConfiguration
 from os.path import join
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.51.3"
 
 
 class TensorflowLiteConan(ConanFile):
@@ -49,7 +49,8 @@ class TensorflowLiteConan(ConanFile):
         }
 
     def export_sources(self):
-        export_conandata_patches(self)
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
