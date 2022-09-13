@@ -73,7 +73,7 @@ class TestPackageConan(ConanFile):
         return self.settings.compiler != "Visual Studio" or self.options["cpython"].shared
 
     def build(self):
-        if not can_run(self):
+        if can_run(self):
             command = "{} --version".format(self.deps_user_info["cpython"].python)
             buffer = StringIO()
             self.run(command, output=buffer, ignore_errors=True, run_environment=True)
