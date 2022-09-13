@@ -105,28 +105,16 @@ class TclConan(ConanFile):
                 "--enable-symbols={}".format(yes_no(self.settings.build_type == "Debug")),
                 "--enable-64bit={}".format(yes_no(self.settings.arch == "x86_64")),
             ]
-
-            if is_msvc(self):
-                build = "{}-{}-{}".format(
-                    "x86_64" if self._settings_build.arch == "x86_64" else "i686",
-                    "pc" if self._settings_build.arch == "x86" else "win64",
-                    "mingw32")
-                host = "{}-{}-{}".format(
-                    "x86_64" if self.settings.arch == "x86_64" else "i686",
-                    "pc" if self.settings.arch == "x86" else "win64",
-                    "mingw32")
-                tc.configure_args.append(f"--build={build}")
-                tc.configure_args.append(f"--host={host}")
             tc.generate()
 
             deps = AutotoolsDeps(self)
-            env = deps.environment
-            if is_msvc(self):
+            if self._settings_build.os == "Windows":
+                deps_env = deps.environment
                 # Workaround for: https://github.com/conan-io/conan/issues/11922
-                ldflags = [f"-L{unix_path(self, lib[9:])} " if lib.startswith("/LIBPATH:") else f"{lib} " for lib in env.vars(self)["LDFLAGS"].split(" ")]
-                cppflags = [f"-I{unix_path(self, lib[2:])} " if lib.startswith("/I") else f"{lib} " for lib in env.vars(self)["CPPFLAGS"].split(" ")]
-                env.define("LDFLAGS", ldflags)
-                env.define("CPPFLAGS", cppflags)
+                ldflags = [f"-L{unix_path(self, lib[9:])} " if lib.startswith("/LIBPATH:") else f"{lib} " for lib in deps_env.vars(self)["LDFLAGS"].split(" ")]
+                cppflags = [f"-I{unix_path(self, lib[2:])} " if lib.startswith("/I") else f"{lib} " for lib in deps_env.vars(self)["CPPFLAGS"].split(" ")]
+                deps_env.define("LDFLAGS", ldflags)
+                deps_env.define("CPPFLAGS", cppflags)
             deps.generate()
         else:
             if self._settings_build.os == "Windows":
@@ -136,8 +124,13 @@ class TclConan(ConanFile):
             deps = AutotoolsDeps(self)
             deps.generate(scope="build")
 
-        ms = VirtualBuildEnv(self)
-        ms.generate(scope="build")
+        vb = VirtualBuildEnv(self)
+        if not is_msvc(self):
+            pkg_env = vb.environment()
+            pkg_env.define("PKG_CFG_ARGS", " ".join(tc.configure_args))
+            pkg_vars = pkg_env.vars(self, scope="build")
+            pkg_vars.save_script("pkg_vars")
+        vb.generate(scope="build")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -210,7 +203,7 @@ class TclConan(ConanFile):
             autotools.make(target="install-private-headers", args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
 
             rmdir(self, self.package_path.joinpath("lib", "pkgconfig"))
-            rmdir(self, self.package_path.joinpath("man"))
+            rmdir(self, self.package_path.joinpath("share"))
             rmdir(self, self.package_path.joinpath("info"))
 
             package_path = self.package_folder if self.settings.os != "Windows" else unix_path(self, self.package_folder)
