@@ -23,7 +23,7 @@ class DawHeaderLibrariesConan(ConanFile):
     def _compiler_required_cpp17(self):
         return {
             "Visual Studio": "16",
-            "msvc": "14.4",
+            "msvc": "192",
             "gcc": "8",
             "clang": "7",
             "apple-clang": "12.0",
