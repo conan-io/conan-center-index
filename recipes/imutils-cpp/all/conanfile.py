@@ -34,7 +34,7 @@ class ImutilsCppConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "8",
+            "gcc": "9",
             "Visual Studio": "15.7",
             "msvc": "19.14",
             "clang": "8",
@@ -73,6 +73,7 @@ class ImutilsCppConan(ConanFile):
 
     def generate(self):
         toolchain = CMakeToolchain(self)
+        toolchain.cache_variables["CMAKE_CXX_STANDARD"] = self._minimum_cpp_standard
         toolchain.generate()
 
         deps = CMakeDeps(self)
@@ -99,3 +100,7 @@ class ImutilsCppConan(ConanFile):
 
         self.cpp_info.requires.append("opencv::opencv")
         self.cpp_info.requires.append("libcurl::libcurl")
+
+        # TODO: Remove after Conan 2.0
+        self.cpp_info.names["cmake_find_package"] = "imutils_cpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "imutils_cpp"
