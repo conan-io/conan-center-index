@@ -1,5 +1,6 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, CMake, tools, RunEnvironment
 from conans.errors import ConanException
+from conan.tools.build import cross_building
 from io import StringIO
 import os
 import re
@@ -100,7 +101,7 @@ class TestPackageConan(ConanFile):
             cmake.configure()
         cmake.build()
 
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not cross_building(self, skip_x64_x86=True):
             if self._supports_modules:
                 with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
                     modsrcfolder = "py2" if tools.Version(self.deps_cpp_info["cpython"].version).major < "3" else "py3"
@@ -150,7 +151,7 @@ class TestPackageConan(ConanFile):
             return False
 
     def test(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not cross_building(self, skip_x64_x86=True):
             self.run("{} -c \"print('hello world')\"".format(self.deps_user_info["cpython"].python), run_environment=True)
 
             buffer = StringIO()
