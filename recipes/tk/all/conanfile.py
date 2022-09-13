@@ -230,7 +230,6 @@ class TkConan(ConanFile):
             rmdir(self, self.package_path.joinpath("info"))
 
             package_path = self.package_folder if self.settings.os != "Windows" else unix_path(self, self.package_folder)
-            build_folder = self.build_folder if self.settings.os != "Windows" else unix_path(self, self.build_folder)
             tcl_config_sh_path = self.package_path.joinpath("lib", "tkConfig.sh")
 
             replace_in_file(self, tcl_config_sh_path, package_path, "${TK_ROOT}", strict=False)
