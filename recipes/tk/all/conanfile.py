@@ -1,10 +1,10 @@
 from pathlib import Path
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import collect_libs, copy, get, replace_in_file, rmdir
+from conan.tools.files import collect_libs, copy, get, replace_in_file, rmdir, load
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, VCVars
@@ -216,7 +216,13 @@ class TkConan(ConanFile):
         else:
             autotools = Autotools(self)
             self.run("autoreconf -ifv", cwd=self._get_configure_dir())
-            autotools.configure(build_script_folder=self._get_configure_dir())
+            try:
+                autotools.configure(build_script_folder=self._get_configure_dir())
+            except ConanException as e:
+                autotools_config_log = self.build_path.joinpath("config.log")
+                if autotools_config_log.exists():
+                    self.output.info(load(autotools_config_log))
+                raise ConanException(e)
             autotools.make()
 
     def package(self):
