@@ -5,6 +5,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.files import apply_conandata_patches, rmdir, copy, save, replace_in_file, get, rm
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.apple import is_apple_os
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.scm import Version
 
 import os
@@ -64,6 +65,11 @@ class LibxlsConan(ConanFile):
         if is_msvc_static_runtime(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared and static runtime together.")
 
+    def build_requirements(self):
+        if self.settings.os == "Windows":
+            self.tool_requires("msys2/cci.latest")
+            self.win_bash = True
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
@@ -72,6 +78,9 @@ class LibxlsConan(ConanFile):
         toolchain.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
+        if self.settings.os == "Windows":
+            tc = VirtualBuildEnv(self)
+            tc.generate()
 
     def _patch_sources(self):
         config_h_content = """
