@@ -74,7 +74,7 @@ class SAILConan(ConanFile):
         cmake_layout(self)
 
     def source(self):
-        get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
             strip_root=True, destination=self.source_folder)
 
     def generate(self):
