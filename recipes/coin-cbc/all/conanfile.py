@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import rename, get, apply_conandata_patches, rmdir
+from conan.tools.files import rename, get, apply_conandata_patches, rmdir, mkdir
 from conan.tools.build import cross_building
 from conan.tools.scm import Version
 from conans import AutoToolsBuildEnvironment, tools
