@@ -262,9 +262,8 @@ class CPythonConan(ConanFile):
             self._autotools.link_flags.append("-lpthread")
 
         env_build_vars = self._autotools.vars
-        if is_apple_os(self) and not os.environ.get("MACOSX_DEPLOYMENT_TARGET"):
-            macos_version = Version(self.settings.get_safe("os.version", platform.mac_ver()[0]))
-            env_build_vars["MACOSX_DEPLOYMENT_TARGET"] = f"{macos_version.major}.{macos_version.minor}"
+        if is_apple_os(self):
+            env_build_vars["SYSTEM_VERSION_COMPAT"] = "1"
 
         build = None
         if cross_building(self) and not cross_building(self, skip_x64_x86=True):
