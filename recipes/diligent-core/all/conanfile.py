@@ -7,7 +7,7 @@ from conan.tools.files import rm, get, rmdir, rename, patch, collect_libs
 from conan.tools.apple import is_apple_os
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
 
 
 class DiligentCoreConan(ConanFile):
@@ -91,7 +91,7 @@ class DiligentCoreConan(ConanFile):
             patch(self, **data)
 
     def build_requirements(self):
-        self.build_requires("cmake/3.24.0")
+        self.tool_requires("cmake/3.24.0")
 
     def requirements(self):
         self.requires("opengl/system")
