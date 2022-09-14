@@ -238,10 +238,10 @@ Some project requirements need to respect a version constraint. This can be enfo
 An example of this can be found in the [fcl recipe](https://github.com/conan-io/conan-center-index/blob/1b6b496fe9a9be4714f8a0db45274c29b0314fe3/recipes/fcl/all/conanfile.py#L80).
 
 ```py
-def generate(self):
+def validate(self):
     foobar = self.dependencies["foobar"]
-    tc = CMakeToolchain(self)
-    tc.variables["FOOBAR_VERSION"] = foobar.ref.version
+    if self.info.options.shared and Version(foobar.ref.version) < "1.2":
+        raise ConanInvalidConfiguration(f"{self.ref} requires 'foobar' >=1.2 to be built as shared.")
 ```
 
 ### Verifying Dependency Options
