@@ -20,6 +20,7 @@ class MoldConan(ConanFile):
     default_options = {
         "with_mimalloc": False,
     }
+    generators = "cmake_find_package"
 
     def validate(self):
         if self.settings.build_type == "Debug":
@@ -37,7 +38,7 @@ class MoldConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.22.3")
+        self.tool_requires("cmake/3.24.1")
 
     def requirements(self):
         self.requires("zlib/1.2.12")
