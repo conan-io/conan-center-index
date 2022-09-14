@@ -42,7 +42,7 @@ class TclConan(ConanFile):
             copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def configure(self):
-        if self.settings.os == "Windows":
+        if self.settings.os == "Windows" or self.options.shared:
             try:
                 del self.options.fPIC
             except ValueError:
