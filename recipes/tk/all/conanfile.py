@@ -215,7 +215,6 @@ class TkConan(ConanFile):
             self.run(f"{self._nmake} OPTS={opts_arg} {str(self.settings.build_type).lower()}", cwd=self._get_configure_dir())
         else:
             autotools = Autotools(self)
-            self.run("autoreconf -ifv", cwd=self._get_configure_dir())
             try:
                 autotools.configure(build_script_folder=self._get_configure_dir())
             except ConanException as e:
