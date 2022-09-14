@@ -24,7 +24,7 @@ class Libpfm4Conan(ConanFile):
         tools.files.get(self,
                         **self.conan_data['sources'][self.version],
                         strip_root=True,
-                        destination=self._source_subfolder)
+                        destination=self.source_folder)
 
     def config_options(self):
         del self.settings.compiler.cppstd
