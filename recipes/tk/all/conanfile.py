@@ -43,8 +43,12 @@ class TkConan(ConanFile):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
             copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
-        if self.settings.os == "Windows" or self.options.shared:
+        if self.options.shared:
             try:
                 del self.options.fPIC
             except ValueError:
