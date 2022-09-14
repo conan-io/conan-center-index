@@ -138,8 +138,15 @@ class CprConan(ConanFile):
         if is_msvc(self) and self.options.shared and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
-        if tools.Version(self.version) == "1.9.0" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "6":
+        if tools.Version(self.version) >= "1.9.0" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration("{}/{} doesn't support gcc < 6".format(self.name, self.version))
+
+        if self.settings.compiler.get_safe("cppstd"):
+            # see https://github.com/libcpr/cpr/issues/796#issuecomment-1195056626
+            if tools.Version(self.version) <= "1.9.0":
+                tools.check_min_cppstd(self, 11)
+            else:
+                tools.check_min_cppstd(self, 17)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
