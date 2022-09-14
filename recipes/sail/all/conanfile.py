@@ -1,5 +1,6 @@
-from conan.tools.files import rename
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake
+from conan.tools.files import get, patch, rename, rmdir
 import functools
 import os
 
@@ -51,8 +52,8 @@ class SAILConan(ConanFile):
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for patch_file in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch_file["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -82,8 +83,8 @@ class SAILConan(ConanFile):
             self.requires("libwebp/1.2.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(**self.conan_data["sources"][self.version],
+            strip_root=True, destination=self._source_subfolder)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -117,8 +118,8 @@ class SAILConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        for patch_file in self.conan_data.get("patches", {}).get(self.version, []):
+            patch(**patch_file)
 
         cmake = self._configure_cmake()
         cmake.build()
@@ -130,8 +131,8 @@ class SAILConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         # Remove CMake and pkg-config rules
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         # Move icons
         rename(self, os.path.join(self.package_folder, "share"),
                      os.path.join(self.package_folder, "res"))
