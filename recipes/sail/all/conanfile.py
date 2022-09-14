@@ -37,10 +37,8 @@ class SAILConan(ConanFile):
         "with_tiff": True,
         "with_webp": True,
     }
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
         for patch_file in self.conan_data.get("patches", {}).get(self.version, []):
             copy(self, patch_file["patch_file"], self.recipe_folder, self.export_sources_folder)
 

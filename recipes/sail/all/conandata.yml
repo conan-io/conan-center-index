@@ -8,7 +8,5 @@ sources:
 patches:
   "0.9.0-rc1":
     - patch_file: "patches/0.9.0-rc1-avif-find-package.patch"
-      base_path: "src"
   "0.9.0-pre23":
     - patch_file: "patches/0.9.0-pre23-avif-find-package.patch"
-      base_path: "src"
