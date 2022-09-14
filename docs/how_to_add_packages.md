@@ -45,7 +45,7 @@ This process helps conan-center-index against spam and malicious code. The proce
 
 The specific steps to add new packages are:
 * Fork the [conan-center-index](https://github.com/conan-io/conan-center-index) git repository, and then clone it locally.
-* Copy a template from [package_templates](package_templates) folder in the correct folder, which fits your project. Read their [documentation](package_templates/README.md) to find more information.
+* Copy a template from [package_templates](package_templates) folder in the recipes/ folder and rename it to the project name (it should be lower-case). Read templates [documentation](package_templates/README.md) to find more information.
 * Make sure you are using the latest [Conan client](https://conan.io/downloads) version, as recipes might evolve introducing features of the newer Conan releases.
 * Commit and Push to GitHub then submit a pull request.
 * Our automated build service will build 100+ different configurations, and provide messages that indicate if there were any issues found during the pull request on GitHub.
@@ -211,11 +211,9 @@ For C/C++ projects which use CMake for building, you can take a look on [cmake p
 
 Another common use case for CMake based projects, both header only and compiled, is _modeling components_ to match the `find_package` and export the correct targets from Conan's generators. A basic examples of this is [cpu_features](https://github.com/conan-io/conan-center-index/blob/master/recipes/cpu_features/all/conanfile.py), a moderate/intermediate example is [cpprestsdk](https://github.com/conan-io/conan-center-index/blob/master/recipes/cpprestsdk/all/conanfile.py), and a very complex example is [OpenCV](https://github.com/conan-io/conan-center-index/blob/master/recipes/opencv/4.x/conanfile.py).
 
-Note that Conan is migrating toward the version 2.0 and many repices are outdated when related to components feature. To understand who to migrate components read [properties migration](https://docs.conan.io/en/latest/migrating_to_2.0/properties.html#properties-migration).
-
 ### Autotools
 
-However, if you need to use autotools for building, you can take a look on [mpc](https://github.com/conan-io/conan-center-index/blob/master/recipes/mpc/all/conanfile.py), [libatomic_ops](https://github.com/conan-io/conan-center-index/blob/master/recipes/libatomic_ops/all/conanfile.py), [libev](https://github.com/conan-io/conan-center-index/blob/master/recipes/libev/all/conanfile.py).
+However, if you need to use autotools for building, you can take a look on [libalsa](https://github.com/conan-io/conan-center-index/blob/master/recipes/libalsa/all/conanfile.py), [kmod](https://github.com/conan-io/conan-center-index/blob/master/recipes/kmod/all/conanfile.py), [libcap](https://github.com/conan-io/conan-center-index/blob/master/recipes/libcap/all/conanfile.py).
 
 #### Components
 
