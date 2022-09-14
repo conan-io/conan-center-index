@@ -21,8 +21,6 @@ class Libpfm4Conan(ConanFile):
     _source_subfolder = 'sources'  # Required to build at least 2.12.1
 
     def source(self):
-        from pprint import pprint
-        pprint(self.conan_data)
         tools.files.get(self,
                         **self.conan_data['sources'][self.version],
                         strip_root=True,
