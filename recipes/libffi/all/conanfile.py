@@ -127,7 +127,8 @@ class PackageConan(ConanFile):
             env.define_path("CC", msvcc)
             env.define("CXXCPP", "cl -nologo -EP")
             env.define("CPP", "cl -nologo -EP")
-            env.define("AR", f"{unix_path(self, self.conf.get('tools.automake:ar-lib'))} lib")
+            # env.define("AR", f"{unix_path(self, self.conf.get('tools.automake:ar-lib'))} lib") FIXME: Use the conf once https://github.com/conan-io/conan-center-index/pull/12898 is merged
+            env.define("AR", f"{unix_path(self, self.deps_user_info['automake'].ar_lib)} lib")
             env.define("LD", "link")
             env.define("LIBTOOL", unix_path(self, str(self.source_path.joinpath("ltmain.sh"))))
             env.define("INSTALL", unix_path(self, str(self.source_path.joinpath("install-sh"))))
