@@ -1,0 +1,15 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1101,4 +1101,12 @@
+ endif ()
+ 
++find_package(cryptopp REQUIRED)
++if (BUILD_STATIC)
++  target_link_libraries(cryptopp-pem-static cryptopp::cryptopp)
++endif ()
++if (BUILD_SHARED)
++  target_link_libraries(cryptopp-pem-shared cryptopp::cryptopp)
++endif ()
++
+ #============================================================================
+ # Tests

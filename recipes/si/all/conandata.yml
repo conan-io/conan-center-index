@@ -1,34 +1,10 @@
 sources:
-  1.7.5:
-    url: https://github.com/bernedom/SI/archive/1.7.5.tar.gz
-    sha256: c1898f544e91e66492e872b973f0a1254ef3be53268c534b5df1614f6eecf024
   1.7.6:
     url: https://github.com/bernedom/SI/archive/1.7.6.tar.gz
     sha256: 88041156890c34f7ca92f3ae385b19189583aa5c59ac470bfe2db6df5d5c954b
-  2.0.0:
-    url: https://github.com/bernedom/SI/archive/2.0.0.tar.gz
-    sha256: 162c75f268eb8dab533f2c70b786a83888b7b7b26c48a502b1375e01d5ca2bf9
-  2.0.1:
-    url: https://github.com/bernedom/SI/archive/2.0.1.tar.gz
-    sha256: cf0de17b85429dcd7771c34b7cbb6055179c2e93f9109041045095fd7350be86
-  2.0.2:
-    url: https://github.com/bernedom/SI/archive/2.0.2.tar.gz
-    sha256: 449a47a1b56a69e549d7e03c2ad22510eb0361372a408b2bbbd0635f55f98293
-  2.0.3:
-    url: https://github.com/bernedom/SI/archive/2.0.3.tar.gz
-    sha256: 283e45bee35175356d1c8622d27121a31cd917931eb98798dbc8f131d5bb41e5
   2.0.4:
     url: https://github.com/bernedom/SI/archive/2.0.4.tar.gz
     sha256: 459936b913e887325e6ad69e9d64389b80f49e700aa8e5308df2bd77b8c74a0e
-  2.1.0:
-    url: https://github.com/bernedom/SI/archive/2.1.0.tar.gz
-    sha256: 59acc2cc226bbec30705a45e8359d3e8afa592d95d8249d7830a7d42d1021eb5
-  2.1.1:
-    url: https://github.com/bernedom/SI/archive/2.1.1.tar.gz
-    sha256: 18656d4cbb41684f56ba9f7de5dc68e70e55a5f24d0f838ceebaee9a5a7f0b25
-  2.1.2:
-    url: https://github.com/bernedom/SI/archive/2.1.2.tar.gz
-    sha256: cecc18bbbd0904ba9f07916a740a2ac1c876d65082958cda7ca94b523396151a
   2.1.3:
     url: https://github.com/bernedom/SI/archive/2.1.3.tar.gz
     sha256: c4728155bd8878fecc5c71c006e01cb193e6084d1604f79edc71ee723027534b
@@ -43,4 +19,7 @@ sources:
     sha256: 84e13b52520808d9a55a073b1bb98376be03dc3b09ddee862a1418ef543e9f2d
   2.4.1:
     url: https://github.com/bernedom/SI/archive/2.4.1.tar.gz
-    sha256: 6bfdbebb549da1b2db93b55c1c7f8228a0cdc6144a815319918237ca8601ad3a    
+    sha256: 6bfdbebb549da1b2db93b55c1c7f8228a0cdc6144a815319918237ca8601ad3a
+  2.5.0:
+    url: https://github.com/bernedom/SI/archive/2.5.0.tar.gz
+    sha256: dc00eb8cfaa32e19c83595b238726188d2b857f8999dae08fe3001d0107ba276

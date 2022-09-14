@@ -1,0 +1,53 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8f2b7e8b4..9cc8ece16 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -39,7 +39,7 @@ set(PNGLIB_VERSION ${PNGLIB_MAJOR}.${PNGLIB_MINOR}.${PNGLIB_RELEASE})
+ 
+ # needed packages
+ find_package(ZLIB REQUIRED)
+-include_directories(${ZLIB_INCLUDE_DIR})
++include_directories(${ZLIB_INCLUDE_DIRS})
+ 
+ if(NOT WIN32)
+   find_library(M_LIBRARY
+@@ -155,12 +155,6 @@ if(MSVC)
+   add_definitions(-DPNG_NO_MODULEDEF -D_CRT_SECURE_NO_DEPRECATE)
+ endif(MSVC)
+ 
+-if(PNG_SHARED OR  NOT MSVC)
+-  #if building msvc static this has NOT to be defined
+-  add_definitions(-DZLIB_DLL)
+-endif()
+-
+-
+ if(PNG_CONSOLE_IO_SUPPORTED)
+   add_definitions(-DPNG_CONSOLE_IO_SUPPORTED)
+ endif()
+@@ -182,7 +176,7 @@ if(NOT M_LIBRARY AND NOT WIN32)
+ endif()
+ 
+ # NOW BUILD OUR TARGET
+-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${ZLIB_INCLUDE_DIR})
++include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${ZLIB_INCLUDE_DIRS})
+ 
+ if(PNG_SHARED)
+   add_library(${PNG_LIB_NAME} SHARED ${libpng_sources})
+@@ -191,7 +185,7 @@ if(PNG_SHARED)
+     set_target_properties(${PNG_LIB_NAME} PROPERTIES PREFIX "lib")
+     set_target_properties(${PNG_LIB_NAME} PROPERTIES IMPORT_PREFIX "lib")
+   endif()
+-  target_link_libraries(${PNG_LIB_NAME} ${ZLIB_LIBRARY} ${M_LIBRARY})
++  target_link_libraries(${PNG_LIB_NAME} ${ZLIB_LIBRARIES} ${M_LIBRARY})
+ endif()
+ 
+ if(PNG_STATIC)
+@@ -202,7 +196,7 @@ if(PNG_STATIC)
+     # msvc does not append 'lib' - do it here to have consistent name
+     set_target_properties(${PNG_LIB_NAME_STATIC} PROPERTIES PREFIX "lib")
+   endif()
+-  target_link_libraries(${PNG_LIB_NAME_STATIC} ${ZLIB_LIBRARY} ${M_LIBRARY})
++  target_link_libraries(${PNG_LIB_NAME_STATIC} ${ZLIB_LIBRARIES} ${M_LIBRARY})
+ endif()
+ 
+ 

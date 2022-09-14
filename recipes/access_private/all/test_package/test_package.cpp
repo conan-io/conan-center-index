@@ -1,4 +1,4 @@
-#include <access_private/access_private.hpp>
+#include <access_private.hpp>
 
 class A {
     int m_i = 3;

@@ -1,0 +1,13 @@
+diff --git a/Imgui/src/ImGuiImplMacOS.mm b/Imgui/src/ImGuiImplMacOS.mm
+index 3b5c217..6cdabdb 100644
+--- a/Imgui/src/ImGuiImplMacOS.mm
++++ b/Imgui/src/ImGuiImplMacOS.mm
+@@ -23,7 +23,7 @@
+ 
+ #include "imgui.h"
+ #include "ImGuiImplMacOS.hpp"
+-#include "backends/imgui_impl_osx.h"
++#include "../res/bindings/imgui_impl_osx.h"
+ #import <Cocoa/Cocoa.h>
+ 
+ namespace Diligent

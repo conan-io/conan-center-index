@@ -41,3 +41,5 @@ patches:
   "71.1":
     - patch_file: "patches/0001-69.1-fix-mingw.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0001-71.1-fix-undef-strict-ansi.patch"
+      base_path: "source_subfolder"

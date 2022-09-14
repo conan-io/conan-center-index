@@ -1,0 +1,21 @@
+diff --git a/NvCloth/include/NvCloth/Callbacks.h b/NvCloth/include/NvCloth/Callbacks.h
+index f5b54a9..7fff890 100644
+--- a/NvCloth/include/NvCloth/Callbacks.h
++++ b/NvCloth/include/NvCloth/Callbacks.h
+@@ -85,6 +85,7 @@ namespace physx
+ #endif
+ 
+ /* Base class to handle assert failures */
++/*
+ class PxAssertHandler
+ {
+ public:
+@@ -93,7 +94,7 @@ public:
+ 	}
+ 	virtual void operator()(const char* exp, const char* file, int line, bool& ignore) = 0;
+ };
+-
++*/
+ #if !PX_DOXYGEN
+ } // namespace physx
+ #endif

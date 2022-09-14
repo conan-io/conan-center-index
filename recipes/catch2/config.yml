@@ -1,33 +1,7 @@
 versions:
-  2.9.2:
+  "2.11.3":
     folder: 2.x.x
-  2.11.0:
-    folder: 2.x.x
-  2.11.1:
-    folder: 2.x.x
-  2.11.3:
-    folder: 2.x.x
-  2.12.0:
-    folder: 2.x.x
-  2.12.1:
-    folder: 2.x.x
-  2.12.2:
-    folder: 2.x.x
-  2.12.3:
-    folder: 2.x.x
-  2.12.4:
-    folder: 2.x.x
-  2.13.0:
-    folder: 2.x.x
-  2.13.1:
-    folder: 2.x.x
-  2.13.2:
-    folder: 2.x.x
-  2.13.3:
-    folder: 2.x.x
-  2.13.4:
-    folder: 2.x.x
-  2.13.6:
+  "2.12.4":
     folder: 2.x.x
   "2.13.7":
     folder: 2.x.x
@@ -35,3 +9,7 @@ versions:
     folder: 2.x.x
   "2.13.9":
     folder: 2.x.x
+  "3.0.1":
+    folder: 3.x.x
+  "3.1.0":
+    folder: 3.x.x

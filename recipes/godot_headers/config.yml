@@ -1,11 +1,13 @@
 versions:
-  "cci.3.2-20200130":
+  "3.4.4":
     folder: all
-  "3.2.3":
-    folder: all
-  "3.3.2":
+  "3.4":
     folder: all
   "3.3.4":
     folder: all
-  "3.4":
+  "3.3.2":
+    folder: all
+  "3.2.3":
+    folder: all
+  "cci.3.2-20200130":
     folder: all

@@ -1,6 +1,9 @@
 sources:
+  "1.12":
+    url: "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.12.tar.gz"
+    sha256: "ba89fb167a5ab6bbdfa6ee3b1a71636e8140fa8471cce8a311697584948e4d06"
   "1.10":
-    url: "https://github.com/ebiggers/libdeflate/archive/v1.10.tar.gz"
+    url: "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.10.tar.gz"
     sha256: "5c1f75c285cd87202226f4de49985dcb75732f527eefba2b3ddd70a8865f2533"
   "1.9":
     url: "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.9.tar.gz"
@@ -9,5 +12,21 @@ sources:
     url: "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.8.tar.gz"
     sha256: "50711ad4e9d3862f8dfb11b97eb53631a86ee3ce49c0e68ec2b6d059a9662f61"
   "1.7":
-    url: "https://github.com/ebiggers/libdeflate/archive/v1.7.tar.gz"
+    url: "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.7.tar.gz"
     sha256: "a5e6a0a9ab69f40f0f59332106532ca76918977a974e7004977a9498e3f11350"
+patches:
+  "1.12":
+    - patch_file: "patches/1.12-0001-fix-makefiles.patch"
+      base_path: "source_subfolder"
+  "1.10":
+    - patch_file: "patches/1.9-0001-fix-makefiles.patch"
+      base_path: "source_subfolder"
+  "1.9":
+    - patch_file: "patches/1.9-0001-fix-makefiles.patch"
+      base_path: "source_subfolder"
+  "1.8":
+    - patch_file: "patches/1.7-0001-fix-makefiles.patch"
+      base_path: "source_subfolder"
+  "1.7":
+    - patch_file: "patches/1.7-0001-fix-makefiles.patch"
+      base_path: "source_subfolder"

@@ -1,0 +1,22 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 69f3c19..ca9c530 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -29,7 +29,7 @@ set(pkg_config_names_private "")
+ ########################################################################
+ # options
+ ########################################################################
+-if (NOT CMAKE_BUILD_TYPE)
++if (0)
+     if (EXISTS "${SOURCE_DIR}/.git")
+         set (CMAKE_BUILD_TYPE Debug)
+     else ()
+@@ -50,7 +50,7 @@ if (NOT CMAKE_BUILD_TYPE)
+         endif ()
+     endif ()
+ endif ()
+-if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
++if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+     OPTION (ENABLE_DRAFTS "Build and install draft classes and methods" ON)
+ else ()
+     OPTION (ENABLE_DRAFTS "Build and install draft classes and methods" OFF)

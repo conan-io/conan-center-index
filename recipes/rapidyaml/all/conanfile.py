@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import functools
 
 required_conan_version = ">=1.43.0"
 
@@ -8,9 +9,9 @@ class RapidYAMLConan(ConanFile):
     name = "rapidyaml"
     description = "a library to parse and emit YAML, and do it fast."
     topics = ("yaml", "parser", "emitter")
+    license = "MIT",
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/biojppm/rapidyaml"
-    license = "MIT",
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -31,8 +32,6 @@ class RapidYAMLConan(ConanFile):
         "gcc": "6",
         "clang": "4",
     }
-
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -71,15 +70,14 @@ class RapidYAMLConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["RYML_DEFAULT_CALLBACKS"] = self.options.with_default_callbacks
+        cmake = CMake(self)
+        cmake.definitions["RYML_DEFAULT_CALLBACKS"] = self.options.with_default_callbacks
         if tools.Version(self.version) >= "0.4.0":
-            self._cmake.definitions["RYML_WITH_TAB_TOKENS"] = self.options.with_tab_tokens
-        self._cmake.configure()
-        return self._cmake
+            cmake.definitions["RYML_WITH_TAB_TOKENS"] = self.options.with_tab_tokens
+        cmake.configure()
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

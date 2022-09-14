@@ -5,6 +5,7 @@ sources:
       - "https://qt-mirror.dannhauer.de/archive/qt/6.0/6.0.4/single/qt-everywhere-src-6.0.4.tar.xz"
       - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/6.0/6.0.4/single/qt-everywhere-src-6.0.4.tar.xz"
       - "https://ftp.fau.de/qtproject/archive/qt/6.0/6.0.4/single/qt-everywhere-src-6.0.4.tar.xz"
+      - "https://mirrors.ustc.edu.cn/qtproject/archive/qt/6.0/6.0.4/single/qt-everywhere-src-6.0.4.tar.xz"
     sha256: "677db6472420f9046b16f7c0d0aa15c4f11f344462a6374feb860625c12fc72b"
   "6.1.3":
     url:
@@ -12,6 +13,7 @@ sources:
       - "https://qt-mirror.dannhauer.de/archive/qt/6.1/6.1.3/single/qt-everywhere-src-6.1.3.tar.xz"
       - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/6.1/6.1.3/single/qt-everywhere-src-6.1.3.tar.xz"
       - "https://ftp.fau.de/qtproject/archive/qt/6.1/6.1.3/single/qt-everywhere-src-6.1.3.tar.xz"
+      - "https://mirrors.ustc.edu.cn/qtproject/archive/qt/6.1/6.1.3/single/qt-everywhere-src-6.1.3.tar.xz"
     sha256: "552342a81fa76967656b0301233b4b586d36967fad5cd110765347aebe07413c"
   "6.2.4":
     url:
@@ -19,6 +21,7 @@ sources:
       - "https://qt-mirror.dannhauer.de/archive/qt/6.2/6.2.4/single/qt-everywhere-src-6.2.4.tar.xz"
       - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/6.2/6.2.4/single/qt-everywhere-src-6.2.4.tar.xz"
       - "https://ftp.fau.de/qtproject/archive/qt/6.2/6.2.4/single/qt-everywhere-src-6.2.4.tar.xz"
+      - "https://mirrors.ustc.edu.cn/qtproject/archive/qt/6.2/6.2.4/single/qt-everywhere-src-6.2.4.tar.xz"
     sha256: "cfe41905b6bde3712c65b102ea3d46fc80a44c9d1487669f14e4a6ee82ebb8fd"
   "6.3.0":
     url:
@@ -26,7 +29,16 @@ sources:
       - "https://qt-mirror.dannhauer.de/archive/qt/6.3/6.3.0/single/qt-everywhere-src-6.3.0.tar.xz"
       - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/6.3/6.3.0/single/qt-everywhere-src-6.3.0.tar.xz"
       - "https://ftp.fau.de/qtproject/archive/qt/6.3/6.3.0/single/qt-everywhere-src-6.3.0.tar.xz"
+      - "https://mirrors.ustc.edu.cn/qtproject/archive/qt/6.3/6.3.0/single/qt-everywhere-src-6.3.0.tar.xz"
     sha256: "cd2789cade3e865690f3c18df58ffbff8af74cc5f01faae50634c12eb52dd85b"
+  "6.3.1":
+    url:
+      - "https://download.qt.io/archive/qt/6.3/6.3.1/single/qt-everywhere-src-6.3.1.tar.xz"
+      - "https://qt-mirror.dannhauer.de/archive/qt/6.3/6.3.1/single/qt-everywhere-src-6.3.1.tar.xz"
+      - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/6.3/6.3.1/single/qt-everywhere-src-6.3.1.tar.xz"
+      - "https://ftp.fau.de/qtproject/archive/qt/6.3/6.3.1/single/qt-everywhere-src-6.3.1.tar.xz"
+      - "https://mirrors.ustc.edu.cn/qtproject/archive/qt/6.3/6.3.1/single/qt-everywhere-src-6.3.1.tar.xz"
+    sha256: "51114e789485fdb6b35d112dfd7c7abb38326325ac51221b6341564a1c3cc726"
 patches:
   "6.0.4":
     - base_path: "qt6/qtbase/cmake"
@@ -57,4 +69,9 @@ patches:
     - patch_file: "patches/c72097e.diff"
       base_path: "qt6/qtwebengine"
     - patch_file: "patches/CVE-2022-1096-qtwebengine-6.3.diff"
+      base_path: "qt6/qtwebengine"
+  "6.3.1":
+    - base_path: "qt6/qtbase/cmake"
+      patch_file: "patches/qt6-pri-helpers-fix.diff"
+    - patch_file: "patches/c72097e.diff"
       base_path: "qt6/qtwebengine"

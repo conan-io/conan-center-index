@@ -146,7 +146,7 @@ class DCMTKConan(ConanFile):
         if self.options.with_zlib:
             cmake.definitions["WITH_ZLIBINC"] = self.deps_cpp_info["zlib"].rootpath
 
-        cmake.definitions["DCMTK_ENABLE_STL"] = True
+        cmake.definitions["DCMTK_ENABLE_STL"] = "ON"
         cmake.definitions["DCMTK_ENABLE_CXX11"] = True
 
         cmake.definitions["DCMTK_ENABLE_MANPAGE"] = False

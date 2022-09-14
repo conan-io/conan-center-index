@@ -5,16 +5,14 @@ import shutil
 
 required_conan_version = ">=1.33.0"
 
-
 class WasmerConan(ConanFile):
     name = "wasmer"
-    homepage = "https://github.com/wasmerio/wasmer/"
     license = "Apache-2.0"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "The leading WebAssembly Runtime supporting WASI and Emscripten"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/wasmerio/wasmer/"
     topics = ("webassembly", "wasm", "wasi", "emscripten")
     settings = "os", "arch", "compiler"
-
     options = {
         "shared": [True, False],
     }
@@ -44,6 +42,9 @@ class WasmerConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Shared Windows build of wasmer are non-working atm (no import libraries are available)")
 
+        if self.settings.os == "Linux" and self.options.shared and tools.Version(self.version) >= "2.3.0":
+            raise ConanInvalidConfiguration("Shared Linux build of wasmer are not working. It requires glibc >= 2.25")
+
         if self.settings.compiler == "Visual Studio":
             if not self.options.shared and self.settings.compiler.runtime != "MT":
                 raise ConanInvalidConfiguration("wasmer is only available with compiler.runtime=MT")
@@ -52,7 +53,7 @@ class WasmerConan(ConanFile):
         del self.info.settings.compiler.version
         self.info.settings.compiler = self._compiler_alias
 
-    def build(self):
+    def source(self):
         tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)][self._compiler_alias],
                   destination=self.source_folder)
 
@@ -78,5 +79,7 @@ class WasmerConan(ConanFile):
         if not self.options.shared:
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs = ["pthread", "dl", "m"]
+                if tools.Version(self.version) >= "2.3.0":
+                    self.cpp_info.system_libs.append("rt")
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["bcrypt", "userenv", "ws2_32"]

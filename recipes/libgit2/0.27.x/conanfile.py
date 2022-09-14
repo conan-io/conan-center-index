@@ -68,9 +68,9 @@ class LibGit2Conan(ConanFile):
         if self.options.with_libssh2:
             self.requires("libssh2/1.10.0")
         if self.settings.os != "Windows":
-            self.requires("libcurl/7.80.0")
+            self.requires("libcurl/7.83.1")
         if self._need_openssl:
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1o")
 
     def validate(self):
         if self.options.with_https == "security":

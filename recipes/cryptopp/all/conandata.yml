@@ -1,36 +1,34 @@
 sources:
   "8.6.0":
-    url:
-      "source": "https://github.com/weidai11/cryptopp/archive/CRYPTOPP_8_6_0.tar.gz"
-      "cmake": "https://github.com/noloader/cryptopp-cmake/archive/CRYPTOPP_8_6_0.tar.gz"
-    sha256:
-      "source": "9304625f4767a13e0a5f26d0f019d78cf9375604a33e5391c3bf2e81399dfeb8"
-      "cmake": "970b20d55dbf9d6335485e72c9f8967d878bf64bbd3de6aa28436beb6799c493"
+    source:
+      url: "https://github.com/weidai11/cryptopp/archive/CRYPTOPP_8_6_0.tar.gz"
+      sha256: "9304625f4767a13e0a5f26d0f019d78cf9375604a33e5391c3bf2e81399dfeb8"
+    cmake:
+      url: "https://github.com/noloader/cryptopp-cmake/archive/CRYPTOPP_8_6_0.tar.gz"
+      sha256: "970b20d55dbf9d6335485e72c9f8967d878bf64bbd3de6aa28436beb6799c493"
   "8.5.0":
-    url:
-      "source": "https://github.com/weidai11/cryptopp/archive/CRYPTOPP_8_5_0.tar.gz"
-      "cmake": "https://github.com/noloader/cryptopp-cmake/archive/CRYPTOPP_8_5_0.tar.gz"
-    sha256:
-      "source": "8f64cf09cf4f61d5d74bca53574b8cc9959186cc0f072a2e6597e4999d6ad5db"
-      "cmake": "10685209405e676993873fcf638ade5f8f99d7949afa6b2045289ce9cc6d90ac"
+    source:
+      url: "https://github.com/weidai11/cryptopp/archive/CRYPTOPP_8_5_0.tar.gz"
+      sha256: "8f64cf09cf4f61d5d74bca53574b8cc9959186cc0f072a2e6597e4999d6ad5db"
+    cmake:
+      url: "https://github.com/noloader/cryptopp-cmake/archive/CRYPTOPP_8_5_0.tar.gz"
+      sha256: "10685209405e676993873fcf638ade5f8f99d7949afa6b2045289ce9cc6d90ac"
   "8.4.0":
-    url:
-      "source": "https://github.com/weidai11/cryptopp/archive/CRYPTOPP_8_4_0.tar.gz"
-      "cmake": "https://github.com/noloader/cryptopp-cmake/archive/CRYPTOPP_8_4_0.tar.gz"
-    sha256:
-      "source": "6687dfc1e33b084aeab48c35a8550b239ee5f73a099a3b6a0918d70b8a89e654"
-      "cmake": "b850070141f6724fce640e4e2cfde433ec5b2d99d4386d29ba9255167bc4b4f0"
+    source:
+      url: "https://github.com/weidai11/cryptopp/archive/CRYPTOPP_8_4_0.tar.gz"
+      sha256: "6687dfc1e33b084aeab48c35a8550b239ee5f73a099a3b6a0918d70b8a89e654"
+    cmake:
+      url: "https://github.com/noloader/cryptopp-cmake/archive/CRYPTOPP_8_4_0.tar.gz"
+      sha256: "b850070141f6724fce640e4e2cfde433ec5b2d99d4386d29ba9255167bc4b4f0"
   "8.2.0":
-    url:
-      "source": "https://github.com/weidai11/cryptopp/archive/CRYPTOPP_8_2_0.tar.gz"
-      "cmake": "https://github.com/noloader/cryptopp-cmake/archive/CRYPTOPP_8_2_0.tar.gz"
-    sha256:
-      "source": "e3bcd48a62739ad179ad8064b523346abb53767bcbefc01fe37303412292343e"
-      "cmake": "f41f6a32b1177c094c3ef97423916713c902d0ac26cbee30ec70b1e8ab0e6fba"
+    source:
+      url: "https://github.com/weidai11/cryptopp/archive/CRYPTOPP_8_2_0.tar.gz"
+      sha256: "e3bcd48a62739ad179ad8064b523346abb53767bcbefc01fe37303412292343e"
+    cmake:
+      url: "https://github.com/noloader/cryptopp-cmake/archive/CRYPTOPP_8_2_0.tar.gz"
+      sha256: "f41f6a32b1177c094c3ef97423916713c902d0ac26cbee30ec70b1e8ab0e6fba"
 patches:
   "8.6.0":
-    - patch_file: "patches/fix-cmake-8.6.0.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-fix-cmake-8.6.0.patch"
   "8.2.0":
-    - patch_file: "patches/fix-cmake.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-fix-cmake-8.2.0.patch"

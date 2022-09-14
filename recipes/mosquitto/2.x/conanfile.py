@@ -1,8 +1,11 @@
 import os
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.files import get, replace_in_file, rmdir, rm
+from conan.tools.scm import Version
+from conans import CMake
 
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.47.0"
 
 
 class Mosquitto(ConanFile):
@@ -64,14 +67,14 @@ class Mosquitto(ConanFile):
 
     def requirements(self):
         if self.options.ssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1q")
         if self.options.get_safe("cjson"):
             self.requires("cjson/1.7.14")
         if self.options.get_safe("websockets"):
             self.requires("libwebsockets/4.2.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
@@ -82,7 +85,7 @@ class Mosquitto(ConanFile):
         self._cmake.definitions["WITH_PIC"] = self.options.get_safe("fPIC", False)
         self._cmake.definitions["WITH_TLS"] = self.options.ssl
         self._cmake.definitions["WITH_CLIENTS"] = self.options.clients
-        if tools.Version(self.version) < "2.0.6":
+        if Version(self.version) < "2.0.6":
             self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_cJSON"] = not self.options.get_safe("cjson")
         else:
             self._cmake.definitions["WITH_CJSON"] = self.options.get_safe("cjson")
@@ -99,22 +102,22 @@ class Mosquitto(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "client", "CMakeLists.txt"), "static)", "static ${CONAN_LIBS})")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "client", "CMakeLists.txt"), "quitto)", "quitto ${CONAN_LIBS})")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "apps", "mosquitto_ctrl", "CMakeLists.txt"), "static)", "static ${CONAN_LIBS})")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "apps", "mosquitto_ctrl", "CMakeLists.txt"), "quitto)", "quitto ${CONAN_LIBS})")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "apps", "mosquitto_passwd", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "apps", "mosquitto_ctrl", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"), "MOSQ_LIBS", "CONAN_LIBS")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "include", "mosquitto.h"), "__declspec(dllimport)", "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "cpp", "mosquittopp.h"), "__declspec(dllimport)", "")
+        replace_in_file(self, os.path.join(self._source_subfolder, "client", "CMakeLists.txt"), "static)", "static ${CONAN_LIBS})")
+        replace_in_file(self, os.path.join(self._source_subfolder, "client", "CMakeLists.txt"), "quitto)", "quitto ${CONAN_LIBS})")
+        replace_in_file(self, os.path.join(self._source_subfolder, "apps", "mosquitto_ctrl", "CMakeLists.txt"), "static)", "static ${CONAN_LIBS})")
+        replace_in_file(self, os.path.join(self._source_subfolder, "apps", "mosquitto_ctrl", "CMakeLists.txt"), "quitto)", "quitto ${CONAN_LIBS})")
+        replace_in_file(self, os.path.join(self._source_subfolder, "apps", "mosquitto_passwd", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
+        replace_in_file(self, os.path.join(self._source_subfolder, "apps", "mosquitto_ctrl", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
+        replace_in_file(self, os.path.join(self._source_subfolder, "src", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
+        replace_in_file(self, os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
+        replace_in_file(self, os.path.join(self._source_subfolder, "src", "CMakeLists.txt"), "MOSQ_LIBS", "CONAN_LIBS")
+        replace_in_file(self, os.path.join(self._source_subfolder, "include", "mosquitto.h"), "__declspec(dllimport)", "")
+        replace_in_file(self, os.path.join(self._source_subfolder, "lib", "cpp", "mosquittopp.h"), "__declspec(dllimport)", "")
         # dynlibs for apple mobile want code signatures and that will not work here
         # this would actually be the right patch for static builds also, but this would have other side effects, so
         if(self.settings.os in ["iOS", "watchOS", "tvOS"]):
-            tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"), "SHARED", "")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "cpp", "CMakeLists.txt"), "SHARED", "")
+            replace_in_file(self, os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"), "SHARED", "")
+            replace_in_file(self, os.path.join(self._source_subfolder, "lib", "cpp", "CMakeLists.txt"), "SHARED", "")
 
     def build(self):
         self._patch_sources()
@@ -127,12 +130,12 @@ class Mosquitto(ConanFile):
         self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "res"), "*.example")
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.example", os.path.join(self.package_folder, "res"))
         if not self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so*")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dylib")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.dll")
+            rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
         elif self.options.shared and self.settings.compiler == "Visual Studio":
             self.copy("mosquitto.lib", src=os.path.join(self._build_subfolder, "lib"), dst="lib")
             if self.options.build_cpp:

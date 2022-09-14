@@ -1,0 +1,13 @@
+diff --git a/googletest/cmake/internal_utils.cmake b/googletest/cmake/internal_utils.cmake
+index 8d8d60a..6ea023a 100644
+--- a/googletest/cmake/internal_utils.cmake
++++ b/googletest/cmake/internal_utils.cmake
+@@ -157,7 +157,7 @@ function(cxx_library_with_type name type cxx_flags)
+   # Generate debug library name with a postfix.
+   set_target_properties(${name}
+     PROPERTIES
+-    DEBUG_POSTFIX "d")
++    DEBUG_POSTFIX "${CUSTOM_DEBUG_POSTFIX}")
+   # Set the output directory for build artifacts
+   set_target_properties(${name}
+     PROPERTIES

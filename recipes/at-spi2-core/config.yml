@@ -9,3 +9,9 @@ versions:
     folder: all
   "2.44.0":
     folder: all
+  "2.44.1":
+    folder: all
+  "2.45.1":
+    folder: new
+  "2.45.90":
+    folder: new

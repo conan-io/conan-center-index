@@ -1,4 +1,43 @@
 sources:
+  "r25":
+    "Windows":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r25-windows.zip"
+        sha256: "bdb25e75647532f979844f549a33eaf75c54a2cb4367f349be187ae9bfee9234"
+    "Linux":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r25-linux.zip"
+        sha256: "cd661aeda5d9b7cfb6e64bd80737c274d7c1c0d026df2f85be3bf3327b25e545"
+    "Macos":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r25-darwin.zip"
+        sha256: "2373424b91bba4cdd15e4c82e05f77a44ba3617aa3329843958ea3d0e25e62d0"
+  "r24":
+    "Windows":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r24-windows.zip"
+        sha256: "b2a9fab1481c3c21df0b78608747dde0747b50890134a62a81c983a5250066d6"
+    "Linux":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r24-linux.zip"
+        sha256: "caac638f060347c9aae994e718ba00bb18413498d8e0ad4e12e1482964032997"
+    "Macos":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r24-darwin.zip"
+        sha256: "162a7000515be07489f2ed70d6d3a117d236150f83f3fcb601c163349429ba23"
+  "r23c":
+    "Windows":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r23c-windows.zip"
+        sha256: "48a0a7b38fb1c69cae6d17b70e03aab8d6138e65a30f8d3faebeb0dc09bf6940"
+    "Linux":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r23c-linux.zip"
+        sha256: "6ce94604b77d28113ecd588d425363624a5228d9662450c48d2e4053f8039242"
+    "Macos":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r23c-darwin.zip"
+        sha256: "baf793127741eda36f2eabe69cdec23a70c814deb3c75df8744af35aed21e59d"
   "r23b":
     "Windows":
       "x86_64":
@@ -77,16 +116,3 @@ sources:
       "x86_64":
         url: "https://dl.google.com/android/repository/android-ndk-r21d-darwin-x86_64.zip"
         sha256: "5851115c6fc4cce26bc320295b52da240665d7ff89bda2f5d5af1887582f5c48"
-  "r24":
-    "Windows":
-      "x86_64":
-        url: "https://dl.google.com/android/repository/android-ndk-r24-windows.zip"
-        sha256: "b2a9fab1481c3c21df0b78608747dde0747b50890134a62a81c983a5250066d6"
-    "Linux":
-      "x86_64":
-        url: "https://dl.google.com/android/repository/android-ndk-r24-linux.zip"
-        sha256: "caac638f060347c9aae994e718ba00bb18413498d8e0ad4e12e1482964032997"
-    "Macos":
-      "x86_64":
-        url: "https://dl.google.com/android/repository/android-ndk-r24-darwin.zip"
-        sha256: "162a7000515be07489f2ed70d6d3a117d236150f83f3fcb601c163349429ba23"

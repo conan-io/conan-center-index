@@ -70,3 +70,4 @@ class UncrustifyConan(ConanFile):
         binpath = os.path.join(self.package_folder, "bin")
         self.output.info(f"Adding to PATH: {binpath}")
         self.env_info.PATH.append(binpath)
+        self.cpp_info.includedirs = []
