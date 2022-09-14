@@ -20,7 +20,7 @@ class RapidjsonConan(ConanFile):
         basic_layout(self)
 
     def source(self):
-       get(self, **self.conan_data["sources"][self.version], strip_root=True,
+        get(self, **self.conan_data["sources"][self.version], strip_root=True,
                     destination=self.source_folder)
 
     def package(self):
