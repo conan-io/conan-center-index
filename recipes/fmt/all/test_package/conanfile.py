@@ -9,6 +9,7 @@ required_conan_version = ">=1.50.0"
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps", "VirtualRunEnv"
+    test_type = "explicit"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
