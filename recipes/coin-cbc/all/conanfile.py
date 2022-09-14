@@ -147,8 +147,8 @@ class CoinCbcConan(ConanFile):
             os.unlink(f"{self.package_folder}/lib/lib{l}.la")
             if self.settings.compiler == "Visual Studio":
                 rename(self,
-                       f"{self.package_folder}/lib/lib{l}.a"),
-                       f"{self.package_folder}/lib/{l}.lib"))
+                       f"{self.package_folder}/lib/lib{l}.a",
+                       f"{self.package_folder}/lib/{l}.lib")
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
