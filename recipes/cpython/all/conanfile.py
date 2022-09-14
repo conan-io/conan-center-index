@@ -647,6 +647,8 @@ class CPythonConan(ConanFile):
                     self.run("install_name_tool -change {} {} {}".format(library, new, python))
 
     def package_info(self):
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
         # FIXME: conan components Python::Interpreter component, need a target type
         # self.cpp_info.names["cmake_find_package"] = "Python"
         # self.cpp_info.names["cmake_find_package_multi"] = "Python"
