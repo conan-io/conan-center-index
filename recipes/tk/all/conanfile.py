@@ -221,7 +221,7 @@ class TkConan(ConanFile):
             except ConanException as e:
                 autotools_config_log = self.build_path.joinpath("config.log")
                 if autotools_config_log.exists():
-                    self.output.info(load(autotools_config_log))
+                    self.output.info(load(self, autotools_config_log))
                 raise ConanException(e)
             autotools.make()
 
