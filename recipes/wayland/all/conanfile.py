@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -35,7 +36,7 @@ class WaylandConan(ConanFile):
         "enable_dtd_validation": True,
     }
 
-    generators = "PkgConfigDeps", "VirtualBuildEnv", "VirtualRunEnv"
+    generators = "PkgConfigDeps"
 
     def configure(self):
         if self.options.shared:
@@ -82,6 +83,12 @@ class WaylandConan(ConanFile):
         if Version(self.version) >= "1.18.91":
             tc.project_options["scanner"] = True
         tc.generate()
+
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
 
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
