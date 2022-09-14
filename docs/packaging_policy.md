@@ -126,7 +126,7 @@ ConanCenter supports many combinations, these are outline in the [supported conf
 
    ```python
    def config_options(self):
-   if self.settings.os == "Windows":
+       if self.settings.os == "Windows":
       del self.options.fPIC
 
    def configure(self):
