@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, get, rename, rmdir
+from conan.tools.files import apply_conandata_patches, copy, get, rename, rmdir
 import os
 
 required_conan_version = ">=1.51.0"
@@ -40,9 +40,9 @@ class SAILConan(ConanFile):
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
         for patch_file in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch_file["patch_file"])
+            copy(self, patch_file["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -71,7 +71,7 @@ class SAILConan(ConanFile):
             self.requires("libwebp/1.2.3")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -113,11 +113,13 @@ class SAILConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.txt",       src=self.source_folder, dst="licenses")
-        self.copy("LICENSE.INIH.txt",  src=self.source_folder, dst="licenses")
-        self.copy("LICENSE.MUNIT.txt", src=self.source_folder, dst="licenses")
+        copy(self, "LICENSE.txt",       self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.INIH.txt",  self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.MUNIT.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
+
         cmake = CMake(self)
         cmake.install()
+
         # Remove CMake and pkg-config rules
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
