@@ -44,11 +44,12 @@ class PatchElfConan(ConanFile):
         if not is_apple_os(self) and self.info.settings.os not in ("FreeBSD", "Linux"):
             raise ConanInvalidConfiguration("PatchELF is only available for GNU-like operating systems (e.g. Linux)")
 
+    def validate_build(self):
         if Version(self.version) >= "0.15":
-            if self.info.settings.get_safe("compiler.cppstd"):
+            if self.settings.get_safe("compiler.cppstd"):
                 check_min_cppstd(self, self._minimum_cpp_standard)
-            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.get_safe("compiler")), False)
-            if minimum_version and Version(self.info.settings.get_safe("compiler.version")) < minimum_version:
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.get_safe("compiler")), False)
+            if minimum_version and Version(self.settings.get_safe("compiler.version")) < minimum_version:
                 raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
 
     def source(self):
