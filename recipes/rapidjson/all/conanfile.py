@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.files import get, copy
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.50.0"
 
 
 class RapidjsonConan(ConanFile):
@@ -12,6 +12,7 @@ class RapidjsonConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://rapidjson.org"
     license = "MIT"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     def source(self):
@@ -27,7 +28,7 @@ class RapidjsonConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "RapidJSON")
-        self.cpp_info.set_property("cmake_target_name", "RapidJSON::RapidJSON")
+        self.cpp_info.set_property("cmake_target_name", "rapidjson")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "RapidJSON"
