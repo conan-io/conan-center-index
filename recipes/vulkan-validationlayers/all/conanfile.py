@@ -10,7 +10,7 @@ import os
 import shutil
 import yaml
 
-required_conan_version = ">=1.35.0"
+required_conan_version = ">=1.50.0"
 
 
 class VulkanValidationLayersConan(ConanFile):
