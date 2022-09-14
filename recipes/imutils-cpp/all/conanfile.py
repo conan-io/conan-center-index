@@ -37,7 +37,7 @@ class ImutilsCppConan(ConanFile):
             "gcc": "9",
             "Visual Studio": "15.7",
             "msvc": "19.14",
-            "clang": "8",
+            "clang": "12",
             "apple-clang": "10.14",
         }
 
