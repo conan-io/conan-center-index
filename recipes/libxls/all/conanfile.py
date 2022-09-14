@@ -64,10 +64,6 @@ class LibxlsConan(ConanFile):
         if is_msvc_static_runtime(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared and static runtime together.")
 
-    def build_requirements(self):
-        if self.settings.os == "Windows":
-            self.tool_requires("autoconf/2.71")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
@@ -100,7 +96,6 @@ class LibxlsConan(ConanFile):
     def build(self):
         self._patch_sources()
         autotools = Autotools(self)
-        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
