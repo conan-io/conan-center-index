@@ -1,0 +1,37 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b2450e1..3f52516 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -72,7 +72,6 @@ set(C4CORE_SRC_FILES
+ if(C4CORE_WITH_FASTFLOAT)
+     list(APPEND C4CORE_SRC_FILES
+         c4/ext/fast_float.hpp
+-        c4/ext/fast_float_all.h
+         )
+ endif()
+ set(C4CORE_AMALGAMATED ${C4CORE_SRC_DIR}/../src_singleheader/c4/c4core_all.hpp)
+@@ -92,7 +91,10 @@ c4_add_library(c4core
+     SOURCES ${C4CORE_SRC_FILES}
+ )
+ 
+-if(NOT C4CORE_WITH_FASTFLOAT)
++if(C4CORE_WITH_FASTFLOAT)
++    find_package(FastFloat REQUIRED CONFIG)
++    target_link_libraries(c4core PUBLIC "FastFloat::fast_float")
++else()
+     target_compile_definitions(c4core PUBLIC -DC4CORE_NO_FAST_FLOAT)
+ endif()
+ 
+diff --git a/src/c4/ext/fast_float.hpp b/src/c4/ext/fast_float.hpp
+index 9e75b5e..64aa2a4 100644
+--- a/src/c4/ext/fast_float.hpp
++++ b/src/c4/ext/fast_float.hpp
+@@ -15,7 +15,7 @@
+ #   pragma GCC diagnostic ignored "-Wuseless-cast"
+ #endif
+ 
+-#include "c4/ext/fast_float_all.h"
++#include "fast_float/fast_float.h"
+ 
+ #ifdef _MSC_VER
+ #   pragma warning(pop)

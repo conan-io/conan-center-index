@@ -8,3 +8,14 @@ sources:
   "0.1.8":
     url: "https://github.com/biojppm/c4core/releases/download/v0.1.8/c4core-0.1.8-src.tgz"
     sha256: "95c0663192c6bff7a098b50afcb05d22a34dd0fd8e6be2e1b61edad2b9675fde"
+
+patches:
+  "1.0.10":
+    - patch_file: "0.1.10-0001-make-fast_float-external.patch"
+      patch_description: "use cci's fast_float recipe"
+  "1.0.9":
+    - patch_file: "0.1.8-0001-make-fast_float-external.patch"
+      patch_description: "use cci's fast_float recipe"
+  "1.0.8":
+    - patch_file: "0.1.8-0001-make-fast_float-external.patch"
+      patch_description: "use cci's fast_float recipe"

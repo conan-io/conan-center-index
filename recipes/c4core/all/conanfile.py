@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, rm, rmdir, replace_in_file
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file, apply_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -25,11 +25,17 @@ class C4CoreConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_fast_float": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_fast_float": True,
     }
+
+    def export_sources(self):
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,7 +49,8 @@ class C4CoreConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fast_float/3.5.1")
+        if self.options.with_fast_float:
+            self.requires("fast_float/3.5.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -60,22 +67,20 @@ class C4CoreConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["C4CORE_WITH_FASTFLOAT"] = bool(self.options.with_fast_float)
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
 
     def build(self):
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "c4/ext/fast_float_all.h", "")
-        replace_in_file(self, os.path.join(self.source_folder, "src", "c4", "ext", "fast_float.hpp"),
-            '#include "c4/ext/fast_float_all.h"',
-            '#include "fast_float/fast_float.h"')
-
+        apply_conandata_patches(self)
         cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="LICENSE*", dst="licenses", src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "cmake"))
@@ -84,6 +89,8 @@ class C4CoreConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["c4core"]
+        if not self.options.with_fast_float:
+            self.cpp_info.defines.append("C4CORE_NO_FAST_FLOAT")
 
         self.cpp_info.set_property("cmake_file_name", "c4core")
         self.cpp_info.set_property("cmake_target_name", "c4core::c4core")
