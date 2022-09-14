@@ -1,11 +1,9 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, get, files
-from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
 from conans import CMake
 import functools
 import os
-import re
 
 class GdalConan(ConanFile):
     name = "gdal"
@@ -145,7 +143,10 @@ class GdalConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except:
+                pass
 
     def requirements(self):
         self.requires("json-c/0.15")
