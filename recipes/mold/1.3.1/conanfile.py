@@ -64,9 +64,6 @@ class MoldConan(ConanFile):
         files.replace_in_file(self, "source_subfolder/Makefile", "MOLD_LDFLAGS += -lmimalloc", "MOLD_LDFLAGS += -L{} -lmimalloc".format(
             self.deps_cpp_info["mimalloc"].lib_paths[0]))
 
-    def build_requirements(self):
-        self.build_requires("cmake/3.24.1")
-
     def requirements(self):
         self.requires("zlib/1.2.12")
         self.requires("openssl/1.1.1q")
