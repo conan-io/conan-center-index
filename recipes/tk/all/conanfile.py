@@ -44,7 +44,7 @@ class TkConan(ConanFile):
             copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def configure(self):
-        if self.options.shared:
+        if self.settings.oc:
             try:
                 del self.options.fPIC
             except ValueError:
