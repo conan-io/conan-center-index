@@ -68,7 +68,7 @@ class DacapClipConan(ConanFile):
         toolchain.variables["CLIP_TESTS"] = False
         toolchain.variables["CLIP_X11_WITH_PNG"] = self.options.get_safe("with_png", False)
         if is_msvc(self):
-            toolchain.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
+            toolchain.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = bool(self.options.shared)
         toolchain.generate()
 
         deps = CMakeDeps(self)
