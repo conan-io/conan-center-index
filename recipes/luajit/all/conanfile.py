@@ -65,7 +65,7 @@ class LuajitConan(ConanFile):
             if self.info.settings.os == "Macos":
                 env = Environment()
                 env.define("MACOSX_DEPLOYMENT_TARGET", self._macosx_deployment_target)
-                env.define("SYSTEM_VERSION_COMPAT", 1)
+                env.define("SYSTEM_VERSION_COMPAT", "1")
                 envvars = env.vars(self, scope="build")
                 envvars.save_script("conanbuildenv_macosx_deploy_target")
 
