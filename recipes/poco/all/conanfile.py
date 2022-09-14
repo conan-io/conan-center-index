@@ -167,6 +167,14 @@ class PocoConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
+    def _dep_include_paths(self, dep):
+        dep_info = self.dependencies[dep]
+        return [os.path.join(dep_info.package_folder, dir).replace("\\", "/") for dir in dep_info.cpp_info.includedirs]
+
+    def _dep_lib_paths(self, dep):
+        dep_info = self.dependencies[dep]
+        return [os.path.join(dep_info.package_folder, dir).replace("\\", "/") for dir in dep_info.cpp_info.libdirs]
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_BUILD_TYPE"] = self.settings.build_type
@@ -180,21 +188,21 @@ class PocoConan(ConanFile):
         if is_msvc(self):
             tc.variables["POCO_MT"] = is_msvc_static_runtime(self)
         if self.options.get_safe("enable_data_postgresql", False):
-            tc.variables["PostgreSQL_ROOT_DIR"] = self.deps_cpp_info["libpq"].rootpath
-            tc.variables["PostgreSQL_ROOT_INCLUDE_DIRS"] = ";".join(self.deps_cpp_info["libpq"].include_paths)
-            tc.variables["PostgreSQL_ROOT_LIBRARY_DIRS"] = ";".join(self.deps_cpp_info["libpq"].lib_paths)
+            tc.variables["PostgreSQL_ROOT_DIR"] = self.dependencies["libpq"].package_folder.replace("\\", "/")
+            tc.variables["PostgreSQL_ROOT_INCLUDE_DIRS"] = ";".join(self._dep_include_paths("libpq"))
+            tc.variables["PostgreSQL_ROOT_LIBRARY_DIRS"] = ";".join(self._dep_lib_paths["libpq"])
         if self.options.get_safe("enable_data_mysql", False):
-            tc.variables["MYSQL_ROOT_DIR"] = self.deps_cpp_info["libmysqlclient"].rootpath
-            tc.variables["MYSQL_ROOT_INCLUDE_DIRS"] = ";".join(self.deps_cpp_info["libmysqlclient"].include_paths)
-            tc.variables["MYSQL_INCLUDE_DIR"] = ";".join(self.deps_cpp_info["libmysqlclient"].include_paths)
-            tc.variables["MYSQL_ROOT_LIBRARY_DIRS"] = ";".join(self.deps_cpp_info["libmysqlclient"].lib_paths)
+            tc.variables["MYSQL_ROOT_DIR"] = self.dependencies["libmysqlclient"].package_folder.replace("\\", "/")
+            tc.variables["MYSQL_ROOT_INCLUDE_DIRS"] = ";".join(self._dep_include_paths("libmysqlclient"))
+            tc.variables["MYSQL_INCLUDE_DIR"] = ";".join(self._dep_include_paths("libmysqlclient"))
+            tc.variables["MYSQL_ROOT_LIBRARY_DIRS"] = ";".join(self._dep_lib_paths("libmysqlclient"))
         if self.options.enable_apacheconnector:
-            tc.variables["APR_ROOT_DIR"] = self.deps_cpp_info["apr"].rootpath
-            tc.variables["APR_ROOT_INCLUDE_DIRS"] = ";".join(self.deps_cpp_info["apr"].include_paths)
-            tc.variables["APR_ROOT_LIBRARY_DIRS"] = ";".join(self.deps_cpp_info["apr"].lib_paths)
-            tc.variables["APRUTIL_ROOT_DIR"] = self.deps_cpp_info["apr-util"].rootpath
-            tc.variables["APRUTIL_ROOT_INCLUDE_DIRS"] = ";".join(self.deps_cpp_info["apr-util"].include_paths)
-            tc.variables["APRUTIL_ROOT_LIBRARY_DIRS"] = ";".join(self.deps_cpp_info["apr-util"].lib_paths)
+            tc.variables["APR_ROOT_DIR"] = self.dependencies["apr"].package_folder.replace("\\", "/")
+            tc.variables["APR_ROOT_INCLUDE_DIRS"] = ";".join(self._dep_include_paths("apr"))
+            tc.variables["APR_ROOT_LIBRARY_DIRS"] = ";".join(self._dep_lib_paths("apr"))
+            tc.variables["APRUTIL_ROOT_DIR"] = self.dependencies["apr-util"].package_folder.replace("\\", "/")
+            tc.variables["APRUTIL_ROOT_INCLUDE_DIRS"] = ";".join(self._dep_include_paths("apr-util"))
+            tc.variables["APRUTIL_ROOT_LIBRARY_DIRS"] = ";".join(self._dep_lib_paths("apr-util"))
         # Disable fork
         if not self.options.get_safe("enable_fork", True):
             tc.variables["POCO_NO_FORK_EXEC"] = True
