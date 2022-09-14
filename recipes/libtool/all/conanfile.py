@@ -51,7 +51,11 @@ class LibtoolConan(ConanFile):
                 pass
 
     def configure(self):
-        if self.settings.os == "Windows":
+        if self.options.shared:
+            try:
+                del self.options.fPIC
+            except ValueError:
+                pass
             try:
                 del self.options.fPIC
             except ValueError:
