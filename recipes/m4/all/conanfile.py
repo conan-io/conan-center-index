@@ -65,17 +65,29 @@ class M4Conan(ConanFile):
             # https://docs.microsoft.com/en-us/cpp/c-runtime-library/format-specification-syntax-printf-and-wprintf-functions
             # Because the %n format is inherently insecure, it is disabled by default. If %n is encountered in a format string,
             # the invalid parameter handler is invoked, as described in Parameter Validation. To enable %n support, see _set_printf_count_output.
-            tc.configure_args.extend(["gl_cv_func_printf_directive_n=no", "gl_cv_func_snprintf_directive_n=no", "gl_cv_func_snprintf_directive_n=no"])
+            tc.configure_args.extend([
+                "gl_cv_func_printf_directive_n=no",
+                "gl_cv_func_snprintf_directive_n=no",
+            ])
+            if self.settings.os == "Windows":
+                tc.configure_args.extend([
+                    "ac_cv_func__set_invalid_parameter_handler=yes",
+                ])
 
             tc.extra_cxxflags.append("-FS")
+            tc.extra_cflags.append("-FS")
             if self.settings.build_type in ("Debug", "RelWithDebInfo"):
                 tc.ldflags.append("-PDB")
 
         elif self.settings.compiler == "clang" and Version(self.version) < "1.4.19":
-            tc.cxxflags.extend(["-rtlib=compiler-rt", "-Wno-unused-command-line-argument"])
-
-        if self.settings.os == "Windows":
-            tc.configure_args.extend(["ac_cv_func__set_invalid_parameter_handler=yes"])
+            tc.extra_cxxflags.extend([
+                "-rtlib=compiler-rt",
+                "-Wno-unused-command-line-argument",
+            ])
+            tc.extra_cflags.extend([
+                "-rtlib=compiler-rt",
+                "-Wno-unused-command-line-argument",
+            ])
 
         env = tc.environment()
         if is_msvc(self):
