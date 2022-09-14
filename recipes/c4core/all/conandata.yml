@@ -1,4 +1,7 @@
 sources:
+  "0.1.10":
+    url: "https://github.com/biojppm/c4core/releases/download/v0.1.10/c4core-0.1.10-src.tgz"
+    sha256: "e8ab4dedd0e20f86af7c69527cfbe8bc1cf72c84b7fbc0cfd420656f28ae20b2"
   "0.1.9":
     url: "https://github.com/biojppm/c4core/releases/download/v0.1.9/c4core-0.1.9-src.tgz"
     sha256: "818d82456b640d88527fe517e1fef88fe45d8fffb414492eddf54480ee222449"
