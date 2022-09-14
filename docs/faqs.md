@@ -15,14 +15,15 @@ This section gathers the most common questions from the community related to pac
   * [What version should packages use for libraries without official releases?](#what-version-should-packages-use-for-libraries-without-official-releases)
   * [Is the Jenkins orchestration library publicly available?](#is-the-jenkins-orchestration-library-publicly-available)
   * [Why not x86 binaries?](#why-not-x86-binaries)
-      * [But if there are no packages available, what will the x86 validation look like?](#but-if-there-are-no-packages-available-what-will-the-x86-validation-look-like)
+    * [But if there are no packages available, what will the x86 validation look like?](#but-if-there-are-no-packages-available-what-will-the-x86-validation-look-like)
   * [Why PDB files are not allowed?](#why-pdb-files-are-not-allowed)
-      * [Why is there no option for PDB, as there is for fPIC?](#why-is-there-no-option-for-pdb-as-there-is-for-fpic)
+    * [Why is there no option for PDB, as there is for fPIC?](#why-is-there-no-option-for-pdb-as-there-is-for-fpic)
   * [Can I remove an option from a recipe?](#can-i-remove-an-option-from-a-recipe)
   * [Can I split a project into an installer and library package?](#can-i-split-a-project-into-an-installer-and-library-package)
   * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
   * [What license should I use for a custom project specific license?](#what-license-should-i-use-for-a-custom-project-specific-license)
-  * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-a-toolscheck_min_cppstd-call-not-enough)
+  * [How do I flag a problem to a recipe consumer?](#how-do-i-flag-a-problem-to-a-recipe-consumer)
+  * [Why is a `build.check_min_cppstd` call not enough?](#why-is-a-buildcheck_min_cppstd-call-not-enough)
   * [What is the policy for adding older versions of a package?](#what-is-the-policy-for-adding-older-versions-of-a-package)
   * [What is the policy for removing older versions of a package?](#what-is-the-policy-for-removing-older-versions-of-a-package)
   * [Can I install packages from the system package manager?](#can-i-install-packages-from-the-system-package-manager)
@@ -177,6 +178,17 @@ No. Some projects provide more than a simple library, but also applications. For
 When a non standard open-source license is used, we have decided to use `LicenseRef-` as a prefix, followed by the name of the file which contains a custom license.
 See [the reviewing guidlines](reviewing.md#license-attribute) for more details.
 
+## How do I flag a problem to a recipe consumer?
+
+Regardless of why, if the recipe detects a problem where binaries might not be generated correctly, an exception must be raised. This to prevent the publishing
+incorrect packages which do not work as intented. Use `ConanInvalidConfiguration` which is specially support in ConanCenter.
+
+```py
+raise ConanInvalidConfiguration(f"The project {self.ref} requires liba.enable_feature=True.")
+```
+
+You should not be using the `self.output.warn` and it is not enough to alter consumers or stop the build service.
+
 ## Why is a `build.check_min_cppstd` call not enough?
 
 Very often C++ projects require a minimum standard version, such as 14 or 17, in order to compile. Conan offers tools which enable checking the relevant setting is enabled and above this support for a certain version is present. Otherwise, it uses the compiler's default.
@@ -329,21 +341,8 @@ You should expect that latest revision of recipes can introduce breaking changes
 features that will be broken unless you also upgrade Conan client (and sometimes you will
 need to modify your project if the recipe changes the binaries, flags,... it provides).
 
-To isolate from this changes there are different strategies you can follow:
-
-The minimum solution involves small changes to your Conan client configuration by
-
-* **Pin the version of every reference you consume in your project** using either:
-  * [recipe revision (RREV)](https://docs.conan.io/en/latest/versioning/revisions.html): `foo/1.0@#RREV` instead of `foo/1.0` in your conanfile.
-  * [lockfiles](https://docs.conan.io/en/latest/versioning/lockfiles/introduction.html) (please, be aware there are some [knowns bugs](https://github.com/conan-io/conan/issues?q=is%3Aissue+lockfile) related to lockfiles that are not being fixed in Conan v1.x).
-
-For larger projects and teams it is recommended to add some infrastructure to ensure stability by
-
- * **Cache recipes in your own Artifactory**: your project should use only this remote and
-   new recipe revisions are only pushed to your Artifactory after they have been validated
-   in your project.
-
-Keep reading in the [consuming recipes section](consuming_recipes.md).
+To isolate from these changes there are different strategies you can follow. 
+Keep reading in the [consuming recipes section](consuming_recipes.md#isolate-your-project-from-upstream-changes).
 
 ## Why are version ranges not allowed?
 
