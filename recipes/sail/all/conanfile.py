@@ -72,7 +72,7 @@ class SAILConan(ConanFile):
         if self.options.with_tiff:
             self.requires("libtiff/4.3.0")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.2")
+            self.requires("libwebp/1.2.3")
 
     def layout(self):
         cmake_layout(self)
