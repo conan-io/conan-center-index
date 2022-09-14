@@ -130,6 +130,7 @@ class M4Conan(ConanFile):
         self.output.info(f"Define M4 with {m4_bin}")
         self.env_info.M4.append(str(m4_bin))
         self.buildenv_info.define_path("M4", str(m4_bin))
+        self.runenv_info.define_path("M4", str(m4_bin))
 
         m4_bin_conf_key = "tools.m4:bin"
         self.output.info(f"Defining path to M4 binary in configuration as `{m4_bin_conf_key}` with value: {m4_bin}")
