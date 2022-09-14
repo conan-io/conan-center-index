@@ -97,7 +97,7 @@ class OpencoreAmrConan(ConanFile):
     def package(self):
         self._autotools.install()
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
+        files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         files.rmdir(self, os.path.join(
             self.package_folder, "lib", "pkgconfig"))
         if self.settings.compiler == "Visual Studio" and self.options.shared:
