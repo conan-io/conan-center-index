@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, patch, rename, rmdir
+from conan.tools.files import apply_conandata_patches, copy, get, patch, rename, rmdir
 import functools
 import os
 
@@ -110,8 +110,7 @@ class SAILConan(ConanFile):
         tc.generate()
 
     def build(self):
-        for patch_file in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(**patch_file)
+        apply_conandata_patches(self)
 
         cmake = CMake(self)
         cmake.configure()
