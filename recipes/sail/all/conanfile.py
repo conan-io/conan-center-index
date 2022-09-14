@@ -20,8 +20,7 @@ class SAILConan(ConanFile):
         "with_avif": [True, False],
         "with_gif": [True, False],
         "with_jpeg2000": [True, False],
-        "with_jpeg": [True, False],
-        "with_libjpeg_turbo": [True, False],
+        "with_jpeg": ["libjpeg", "libjpeg-turbo", False],
         "with_png": [True, False],
         "with_tiff": [True, False],
         "with_webp": [True, False],
@@ -33,8 +32,7 @@ class SAILConan(ConanFile):
         "with_avif": True,
         "with_gif": True,
         "with_jpeg2000": True,
-        "with_jpeg": True,
-        "with_libjpeg_turbo": True,
+        "with_jpeg": "libjpeg",
         "with_png": True,
         "with_tiff": True,
         "with_webp": True,
@@ -61,11 +59,10 @@ class SAILConan(ConanFile):
             self.requires("giflib/5.2.1")
         if self.options.with_jpeg2000:
             self.requires("jasper/2.0.33")
-        if self.options.with_jpeg:
-            if self.options.with_libjpeg_turbo:
-                self.requires("libjpeg-turbo/2.1.2")
-            else:
-                self.requires("libjpeg/9d")
+        if self.options.with_jpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.1.2")
+        elif self.options.with_jpeg == "libjpeg":
+            self.requires("libjpeg/9d")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_tiff:
@@ -155,10 +152,7 @@ class SAILConan(ConanFile):
         if self.options.with_jpeg2000:
             self.cpp_info.components["sail-codecs"].requires.append("jasper::jasper")
         if self.options.with_jpeg:
-            if self.options.with_libjpeg_turbo:
-                self.cpp_info.components["sail-codecs"].requires.append("libjpeg-turbo::libjpeg-turbo")
-            else:
-                self.cpp_info.components["sail-codecs"].requires.append("libjpeg::libjpeg")
+            self.cpp_info.components["sail-codecs"].requires.append("{0}::{0}".format(self.options.with_jpeg))
         if self.options.with_png:
             self.cpp_info.components["sail-codecs"].requires.append("libpng::libpng")
         if self.options.with_tiff:
