@@ -9,6 +9,7 @@ from io import StringIO
 import os
 import re
 import textwrap
+import platform
 
 required_conan_version = ">=1.51.3"
 
@@ -260,13 +261,18 @@ class CPythonConan(ConanFile):
             # Building _testembed fails due to missing pthread/rt symbols
             self._autotools.link_flags.append("-lpthread")
 
+        env_build_vars = self._autotools.vars
+        if is_apple_os(self) and not os.environ.get("MACOSX_DEPLOYMENT_TARGET"):
+            macos_version = Version(self.settings.get_safe("os.version", platform.mac_ver()[0]))
+            env_build_vars["MACOSX_DEPLOYMENT_TARGET"] = f"{macos_version.major}.{macos_version.minor}"
+
         build = None
         if cross_building(self) and not cross_building(self, skip_x64_x86=True):
             # Building from x86_64 to x86 is not a "real" cross build, so set build == host
             build = tools.get_gnu_triplet(str(self.settings.os), str(self.settings.arch), str(self.settings.compiler))
 
         try:
-            self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder, build=build)
+            self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder, build=build, vars=env_build_vars)
         except ConanException as e:
             autotools_config_log = os.path.join(self.build_folder, "config.log")
             if os.path.exists(autotools_config_log):
