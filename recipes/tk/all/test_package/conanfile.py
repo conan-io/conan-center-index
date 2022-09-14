@@ -18,4 +18,4 @@ class TkTestConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            self.run(self.build_path.joinpath("test_package"), run_environment=True, env="conanrun")
+            self.run(str(self.build_path.joinpath("test_package")), run_environment=True, env="conanrun")
