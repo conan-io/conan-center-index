@@ -15,32 +15,32 @@ struct ex_logger : ::nuraft::logger {
 };
 
 class echo_state_machine : public nuraft::state_machine {
-  ulong last_commit_idx_;
+  nuraft::ulong last_commit_idx_;
 
  public:
   echo_state_machine() : last_commit_idx_(0) {}
 
-  nuraft::ptr<nuraft::buffer> commit(const ulong log_idx,
+  nuraft::ptr<nuraft::buffer> commit(const nuraft::ulong log_idx,
                                      nuraft::buffer&) override {
     last_commit_idx_ = log_idx;
     return nullptr;
   }
-  nuraft::ptr<nuraft::buffer> pre_commit(const ulong,
+  nuraft::ptr<nuraft::buffer> pre_commit(const nuraft::ulong,
                                          nuraft::buffer&) override {
     return nullptr;
   }
-  void rollback(const ulong, nuraft::buffer&) override {}
-  void save_snapshot_data(nuraft::snapshot&, const ulong,
+  void rollback(const nuraft::ulong, nuraft::buffer&) override {}
+  void save_snapshot_data(nuraft::snapshot&, const nuraft::ulong,
                           nuraft::buffer&) override {}
   bool apply_snapshot(nuraft::snapshot&) override { return true; }
-  int read_snapshot_data(nuraft::snapshot&, const ulong,
+  int read_snapshot_data(nuraft::snapshot&, const nuraft::ulong,
                          nuraft::buffer&) override {
     return 0;
   }
   nuraft::ptr<nuraft::snapshot> last_snapshot() override { return nullptr; }
   void create_snapshot(nuraft::snapshot&,
                        nuraft::async_result<bool>::handler_type&) override {}
-  ulong last_commit_index() override { return last_commit_idx_; }
+  nuraft::ulong last_commit_index() override { return last_commit_idx_; }
 };
 
 int main(int argc, char** argv) {

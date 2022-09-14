@@ -1,10 +1,17 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 87685ff..764b71d 100644
+index 87685ff..efbc7fb 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -26,41 +26,23 @@ endif()
+@@ -1,5 +1,6 @@
+ cmake_minimum_required(VERSION 3.5)
+ project(NuRaft VERSION 1.0.0 LANGUAGES CXX)
++set (CMAKE_CXX_STANDARD 11)
  
-
+ # === Build type (default: RelWithDebInfo, O2) ===========
+ if (NOT CMAKE_BUILD_TYPE)
+@@ -26,41 +27,23 @@ endif()
+ 
+ 
  # === Find ASIO ===
 -if (BOOST_INCLUDE_PATH AND BOOST_LIBRARY_PATH)
 +find_package(OpenSSL CONFIG REQUIRED)
@@ -42,15 +49,36 @@ index 87685ff..764b71d 100644
 -    message(STATUS "ASIO include path: " ${ASIO_INCLUDE_DIR})
 +    set(ASIO_DEP asio::asio)
  endif ()
-
-
+ 
+ 
  # === Includes ===
  include_directories(BEFORE ./)
 -include_directories(BEFORE ${ASIO_INCLUDE_DIR})
  include_directories(BEFORE ${PROJECT_SOURCE_DIR}/include)
  include_directories(BEFORE ${PROJECT_SOURCE_DIR}/include/libnuraft)
  include_directories(BEFORE ${PROJECT_SOURCE_DIR}/examples)
-@@ -242,6 +224,7 @@ set(RAFT_CORE
+@@ -81,20 +64,9 @@ endif()
+ if (NOT WIN32)
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-pessimizing-move")
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+-    if (APPLE)
+-        include_directories(BEFORE /usr/local/opt/openssl/include)
+-        link_directories(/usr/local/opt/openssl/lib)
+-    else()
+-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+-    endif ()
+-
+ else ()
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd5045 /wd4571 /wd4774 /wd4820 /wd5039 /wd4626 /wd4625 /wd5026 /wd5027 /wd4623 /wd4996 /wd4530 /wd4267 /wd4244 /W3")
+     message(STATUS "---- WIN32 ----")
+-    set(DISABLE_SSL 1)
+ endif ()
+ 
+ # === Disable SSL ===
+@@ -242,6 +214,7 @@ set(RAFT_CORE
      ${ROOT_SRC}/stat_mgr.cxx
      )
  add_library(RAFT_CORE_OBJ OBJECT ${RAFT_CORE})
@@ -58,7 +86,7 @@ index 87685ff..764b71d 100644
  
  set(STATIC_LIB_SRC
      $<TARGET_OBJECTS:RAFT_CORE_OBJ>)
-@@ -249,54 +232,11 @@ set(STATIC_LIB_SRC
+@@ -249,54 +222,11 @@ set(STATIC_LIB_SRC
  # === Executables ===
  set(LIBRARY_NAME "nuraft")
  
