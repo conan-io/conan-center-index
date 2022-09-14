@@ -156,7 +156,10 @@ class SAILConan(ConanFile):
         if self.options.with_jpeg2000:
             self.cpp_info.components["sail-codecs"].requires.append("jasper::jasper")
         if self.options.with_jpeg:
-            self.cpp_info.components["sail-codecs"].requires.append("libjpeg::libjpeg")
+            if self.options.with_libjpeg_turbo:
+                self.cpp_info.components["sail-codecs"].requires.append("libjpeg-turbo::libjpeg-turbo")
+            else:
+                self.cpp_info.components["sail-codecs"].requires.append("libjpeg::libjpeg")
         if self.options.with_png:
             self.cpp_info.components["sail-codecs"].requires.append("libpng::libpng")
         if self.options.with_tiff:
