@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conans import CMake
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.scm import Version
@@ -7,7 +7,7 @@ from conan.tools.files import rm, get, rmdir, rename, collect_libs, patches
 from conan.tools.apple import is_apple_os
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.0"
 
 
 class DiligentCoreConan(ConanFile):
@@ -28,7 +28,7 @@ class DiligentCoreConan(ConanFile):
         "fPIC": True,
         "with_glslang": True
     }
-    generators = "cmake_find_package", "cmake", "cmake_find_package_multi"
+    generators = "cmake_find_package", "cmake_find_package_multi"
     _cmake = None
     exports_sources = ["CMakeLists.txt", "patches/**"]
     short_paths = True
@@ -78,6 +78,28 @@ class DiligentCoreConan(ConanFile):
             else:
                 self.info.settings.compiler.runtime = "MT/MTd"
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["DILIGENT_BUILD_SAMPLES"] = False
+        tc.variables["DILIGENT_NO_FORMAT_VALIDATION"] = True
+        tc.variables["DILIGENT_BUILD_TESTS"] = False
+        tc.variables["DILIGENT_NO_DXC"] = True
+        tc.variables["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
+        tc.variables["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options["spirv-cross"].namespace
+        tc.variables["BUILD_SHARED_LIBS"] = False
+        tc.variables["DILIGENT_CLANG_COMPILE_OPTIONS"] = ""
+        tc.variables["DILIGENT_MSVC_COMPILE_OPTIONS"] = ""
+        tc.variables["ENABLE_RTTI"] = True
+        tc.variables["ENABLE_EXCEPTIONS"] = True
+        tc.variables[self._diligent_platform()] = True
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def layout(self):
+        cmake_layout(self)
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -126,34 +148,14 @@ class DiligentCoreConan(ConanFile):
         elif self.settings.os == "watchOS":
             return "PLATFORM_TVOS"
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["DILIGENT_BUILD_SAMPLES"] = False
-        self._cmake.definitions["DILIGENT_NO_FORMAT_VALIDATION"] = True
-        self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
-        self._cmake.definitions["DILIGENT_NO_DXC"] = True
-        self._cmake.definitions["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
-        self._cmake.definitions["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options["spirv-cross"].namespace
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = False
-        self._cmake.definitions["DILIGENT_CLANG_COMPILE_OPTIONS"] = ""
-        self._cmake.definitions["DILIGENT_MSVC_COMPILE_OPTIONS"] = ""
-
-        self._cmake.definitions["ENABLE_RTTI"] = True
-        self._cmake.definitions["ENABLE_EXCEPTIONS"] = True
-
-        self._cmake.definitions[self._diligent_platform()] = True
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
         rename(self, src=os.path.join(self.package_folder, "include", "source_subfolder"),
         dst=os.path.join(self.package_folder, "include", "DiligentCore"))
