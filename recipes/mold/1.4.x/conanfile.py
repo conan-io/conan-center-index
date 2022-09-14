@@ -37,7 +37,7 @@ class MoldConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.build_requires("cmake/3.22.3")
+        self.tools_requires("cmake/3.22.3")
 
     def requirements(self):
         self.requires("zlib/1.2.12")
@@ -54,7 +54,7 @@ class MoldConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["MOLD_USE_MIMALLOC"] = self.options.with_mimalloc
-        tc.variables["SYSTEM_MIMALLOC"] = True
+        tc.variables["MOLD_USE_SYSTEM_MIMALLOC"] = True
         tc.generate()
 
     def build(self):
