@@ -62,7 +62,7 @@ class WaylandConan(ConanFile):
             raise ConanInvalidConfiguration("Wayland can be built on Linux only")
 
     def build_requirements(self):
-        self.tool_requires("meson/0.63.1")
+        self.tool_requires("meson/0.63.2")
         self.tool_requires("pkgconf/1.7.4")
         if cross_building(self):
             self.tool_requires(self.ref)
