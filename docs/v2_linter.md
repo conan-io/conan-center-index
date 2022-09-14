@@ -1,7 +1,12 @@
 # Linter to help migration to Conan v2
 
 <!-- toc -->
-<!-- endToc -->
+## Contents
+
+  * [Import ConanFile from `conan`](#import-conanfile-from-conan)
+  * [Import tools from `conan`](#import-tools-from-conan)
+  * [Disable linter for a specific conanfile](#disable-linter-for-a-specific-conanfile)
+  * [Running the linter locally](#running-the-linter-locally)<!-- endToc -->
 
 On our [path to Conan v2](v2_roadmap.md) we are leveraging on custom Pylint rules. This
 linter will run for every pull-request that is submitted to the repository and will

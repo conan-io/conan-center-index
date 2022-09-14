@@ -8,9 +8,7 @@ to be possible. There are usually waves of new features, patches and fixes that 
 ## Contents
 
   * [Breaking changes](#breaking-changes)
-  * [Isolate your project from upstream changes](#isolate-your-project-from-upstream-changes)
-    * [Use your own Artifactory instance](#use-your-own-artifactory-instance)
-    * [Use recipe revisions and lockfiles](#use-recipe-revisions-and-lockfiles)<!-- endToc -->
+  * [Isolate your project from upstream changes](#isolate-your-project-from-upstream-changes)<!-- endToc -->
 
 ## Breaking changes
 
