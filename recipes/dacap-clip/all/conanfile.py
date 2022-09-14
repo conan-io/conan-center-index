@@ -82,11 +82,11 @@ class DacapClipConan(ConanFile):
     def package(self):
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "clip.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
-        copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
-        copy(self, "*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
-        copy(self, "*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
-        copy(self, "*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
-        copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"))
+        copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["clip"]
