@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rmdir, apply_conandata_patches
+from conan.tools.files import copy, get, rmdir, apply_conandata_patches, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path, is_msvc
@@ -42,6 +42,7 @@ class AutoconfConan(ConanFile):
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
             self.tool_requires("msys2/cci.latest")
+        self.tool_requires("m4/1.4.19")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -78,6 +79,7 @@ class AutoconfConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        replace_in_file(self, self.source_path.joinpath("Makefile.in"), "M4 = /usr/bin/env m4", "#M4 = /usr/bin/env m4")
 
         autotools = Autotools(self)
         autotools.configure()
