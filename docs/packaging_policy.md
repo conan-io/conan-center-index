@@ -140,6 +140,14 @@ Usage of each option should follow the rules:
              pass
    ```
 
+   Starting with Conan 1.53 this can be simplified to
+
+   ```py
+   def configure(self):
+      if self.options.shared:
+         self.options.rm_safe("fPIC")
+   ```
+
 * `header_only` (with values `True` or `False`). The **default should be `header_only=False`**. If the CI detects this option, it will generate all the
    configurations for the value `header_only=False` and add one more configuration with `header_only=True`. **Only one package**
    will be generated for `header_only=True`, so it is crucial that the package is actually a _header only_ library, with header files only (no libraries or executables inside).
