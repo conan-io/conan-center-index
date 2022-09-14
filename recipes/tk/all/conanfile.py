@@ -185,6 +185,15 @@ class TkConan(ConanFile):
         # See conan-io/conan-center-index#4811 conan-io/conan-center-index#4094
         replace_in_file(self, win_rules_vc, "OPTIMIZATIONS  = $(OPTIMIZATIONS) -GL", "# OPTIMIZATIONS  = $(OPTIMIZATIONS) -GL")
 
+    @property
+    def _nmake(self):
+        # https://core.tcl.tk/tk/tktview?name=3d34589aa0
+        # https://wiki.tcl-lang.org/page/Building+with+Visual+Studio+2017
+        tclimplib = self.conf.get("user.tcl.build:tcl")
+        tclstublib = self.conf.get("user.tcl.build:tclstub")
+        tcldir = self.deps_cpp_info["tcl"].rootpath
+        return f'nmake -nologo -f "{self._get_configure_dir().joinpath("makefile.vc")}" INSTALLDIR="{self.package_path}" TCLDIR="{tcldir}" TCLIMPLIB={tclimplib} TCLSTUBLIB={tclstublib}'
+
     def build(self):
         self._patch_sources()
 
@@ -203,13 +212,7 @@ class TkConan(ConanFile):
                 opts.append("unchecked")
             opts_arg = ",".join(opts)
 
-            # https://core.tcl.tk/tk/tktview?name=3d34589aa0
-            # https://wiki.tcl-lang.org/page/Building+with+Visual+Studio+2017
-            tclimplib = self.conf.get("user.tcl.build:tcl")
-            tclstublib = self.conf.get("user.tcl.build:tclstub")
-            tcldir = self.deps_cpp_info["tcl"].rootpath
-            self.run(f'nmake -nologo -f "{self._get_configure_dir().joinpath("makefile.vc")}" INSTALLDIR="{self.package_path}" TCLDIR="{tcldir}" TCLIMPLIB={tclimplib} TCLSTUBLIB={tclstublib} OPTS={opts_arg} {str(self.settings.build_type).lower()}',
-                     cwd=self._get_configure_dir())
+            self.run(f"{self._nmake} OPTS={opts_arg} {str(self.settings.build_type).lower()}", cwd=self._get_configure_dir())
         else:
             autotools = Autotools(self)
             self.run("autoreconf -ifv", cwd=self._get_configure_dir())
@@ -220,7 +223,7 @@ class TkConan(ConanFile):
         copy(self, "license.terms", src=self.source_folder, dst=self.package_path.joinpath("licenses"))
 
         if is_msvc(self):
-            self.run(f'nmake -nologo -f "{self._get_configure_dir().joinpath("makefile.vc")}" INSTALLDIR="{self.package_path}" install-binaries install-libraries', cwd=self._get_configure_dir())
+            self.run(f"{self._nmake} install-binaries install-libraries", cwd=self._get_configure_dir())
         else:
             autotools = Autotools(self)
             autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])  # Need to specify the `DESTDIR` as a Unix path, aware of the subsystem
