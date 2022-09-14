@@ -1,10 +1,10 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake
-from conan.tools.files import get, patch, rename, rmdir
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, patch, rename, rmdir
 import functools
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.51.0"
 
 class SAILConan(ConanFile):
     name = "sail"
@@ -42,14 +42,6 @@ class SAILConan(ConanFile):
     }
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
-    @property
-    def _source_subfolder(self):
-        return "src"
-
-    @property
-    def _build_subfolder(self):
-        return "build"
-
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch_file in self.conan_data.get("patches", {}).get(self.version, []):
@@ -82,12 +74,14 @@ class SAILConan(ConanFile):
         if self.options.with_webp:
             self.requires("libwebp/1.2.2")
 
+    def layout(self):
+        cmake_layout(self)
+
     def source(self):
         get(**self.conan_data["sources"][self.version],
-            strip_root=True, destination=self._source_subfolder)
+            strip_root=True, destination=self.source_folder)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
+    def generate(self):
         enable_codecs = []
 
         if self.options.with_avif:
@@ -105,30 +99,29 @@ class SAILConan(ConanFile):
         if self.options.with_webp:
             enable_codecs.append("webp")
 
-        cmake = CMake(self)
-        cmake.definitions["SAIL_BUILD_APPS"] = False
-        cmake.definitions["SAIL_BUILD_EXAMPLES"] = False
-        cmake.definitions["SAIL_BUILD_TESTS"] = False
-        cmake.definitions["SAIL_COMBINE_CODECS"] = True
-        cmake.definitions["SAIL_ENABLE_CODECS"] = ";".join(enable_codecs)
-        cmake.definitions["SAIL_INSTALL_PDB"] = False
-        cmake.definitions["SAIL_THREAD_SAFE"] = self.options.thread_safe
-        cmake.configure(build_folder=self._build_subfolder)
-
-        return cmake
+        tc = CMakeToolchain(self)
+        tc.variables["SAIL_BUILD_APPS"] = False
+        tc.variables["SAIL_BUILD_EXAMPLES"] = False
+        tc.variables["SAIL_BUILD_TESTS"] = False
+        tc.variables["SAIL_COMBINE_CODECS"] = True
+        tc.variables["SAIL_ENABLE_CODECS"] = ";".join(enable_codecs)
+        tc.variables["SAIL_INSTALL_PDB"] = False
+        tc.variables["SAIL_THREAD_SAFE"] = self.options.thread_safe
+        tc.generate()
 
     def build(self):
         for patch_file in self.conan_data.get("patches", {}).get(self.version, []):
             patch(**patch_file)
 
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.txt",       src=self._source_subfolder, dst="licenses")
-        self.copy("LICENSE.INIH.txt",  src=self._source_subfolder, dst="licenses")
-        self.copy("LICENSE.MUNIT.txt", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        self.copy("LICENSE.txt",       src=self.source_folder, dst="licenses")
+        self.copy("LICENSE.INIH.txt",  src=self.source_folder, dst="licenses")
+        self.copy("LICENSE.MUNIT.txt", src=self.source_folder, dst="licenses")
+        cmake = CMake(self)
         cmake.install()
         # Remove CMake and pkg-config rules
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
