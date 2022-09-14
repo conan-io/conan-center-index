@@ -55,6 +55,7 @@ class MoldConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["MOLD_USE_MIMALLOC"] = self.options.with_mimalloc
         tc.variables["MOLD_USE_SYSTEM_MIMALLOC"] = True
+        tc.variables["MOLD_USE_SYSTEM_TBB"] = True
         tc.generate()
 
     def build(self):
