@@ -92,8 +92,15 @@ class PackageConan(ConanFile):
                 "x86_64" if self.settings.arch == "x86_64" else "i686",
                 "pc" if self.settings.arch == "x86" else "win64",
                 "mingw64")
-            tc.configure_args.append(f"--build={build}")
-            tc.configure_args.append(f"--host={host}")
+            tc.configure_args.extend([
+                f"--build={build}",
+                f"--host={host}",
+            ])
+
+        if self._settings_build.compiler == "apple-clang":
+            tc.configure_args.extend([
+                "--disable-multi-os-directory",
+            ])
 
         if is_msvc(self):
             msvcc = unix_path(self, str(self.source_path.joinpath("msvcc.sh")))
