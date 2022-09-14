@@ -112,7 +112,10 @@ in this direction. However, there are a couple of options that have a special me
 
 ### Predeinfed Options and Known Defaults
 
-ConanCenter supports many combinations, these are outline in the [supported configurations](supported_platforms_and_configurations.md) document for each platform. 
+ConanCenter supports many combinations, these are outline in the [supported configurations](supported_platforms_and_configurations.md) document for each platform.
+By default, `shared=False` is compiled with `fPIC=True`. If support, `header_only=False` is the default.
+
+Usage of each option should follow the rules:
 
 * `shared` (with values `True` or `False`). The CI inspects the recipe looking for this option. The **default should be `shared=False`** and will
    generate all the configurations with values `shared=True` and `shared=False`.
