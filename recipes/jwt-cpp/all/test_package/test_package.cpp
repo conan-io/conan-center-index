@@ -1,4 +1,13 @@
 #include <jwt-cpp/jwt.h>
+
+#ifdef JSON_TRAITS_NEEDED
+  #ifndef HAS_DEFAULT_TRAITS
+    #include "traits/defaults.h"
+  #else
+    #include <jwt-cpp/traits/kazuho-picojson/defaults.h>
+  #endif
+#endif
+
 #include <iostream>
 
 int main() {
