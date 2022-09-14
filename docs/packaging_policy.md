@@ -110,7 +110,7 @@ for each combination. There are some particular cases for this general rule:
 Recipes can list any number of options with any meaning, and defaults are up to the recipe itself. The CI cannot enforce anything
 in this direction. However, there are a couple of options that have a special meaning for the CI.
 
-### Predeinfed Options and Known Defaults
+### Predefined Options and Known Defaults
 
 ConanCenter supports many combinations, these are outline in the [supported configurations](supported_platforms_and_configurations.md) document for each platform.
 By default, `shared=False` is compiled with `fPIC=True`. If support, `header_only=False` is the default.
@@ -125,7 +125,7 @@ Usage of each option should follow the rules:
    > as their requirements were linked inside the shared library. See [FAQs](faqs.md#how-to-consume-a-graph-of-shared-libraries) for more information.
 
 * `fPIC` (with values `True` or `False`). The **default should be `fPIC=True`** and will generate all the configurations with values `fPIC=True` and `fPIC=False`.
-  This option does not make sense on all the support configurations so it should be be removed.
+  This option does not make sense on all the support configurations so it should be removed.
 
    ```python
    def config_options(self):
@@ -169,7 +169,7 @@ Usage of each option should follow the rules:
 
 ### Recommended feature options names
 
-It's often needed to add options to toggle specific library features on/off. Regardless of the default, there is a strong preference for using positive naming for options. In order to avoid the fragmentation, we recommend to use the following naming conventions for such options:
+It's often needed to add options to toggle specific library features on/off. Regardless of the default, there is a strong preference for using positive naming for options. In order to avoid fragmentation, we recommend using the following naming conventions for such options:
 
 - enable_<feature> / disable_<feature>
 - with_<dependency> / without_<dependency>
