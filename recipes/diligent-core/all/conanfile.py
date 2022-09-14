@@ -168,22 +168,22 @@ class DiligentCoreConan(ConanFile):
             self.copy(pattern="*.dylib", dst="lib", keep_path=False)
             self.copy(pattern="*.so", dst="lib", keep_path=False)
             self.copy(pattern="*.dll", dst="bin", keep_path=False)
-            rm(self, os.path.join(self.package_folder, "lib"), "*.a")
+            rm(self, os.path.join(self.package_folder, "lib"), "*.a", recursive=True)
             if self.settings.os != "Windows":
-                rm(self, os.path.join(self.package_folder, "lib"), "*.lib")
+                rm(self, os.path.join(self.package_folder, "lib"), "*.lib", recursive=True)
         else:
             self.copy(pattern="*.a", dst="lib", keep_path=False)
             self.copy(pattern="*.lib", dst="lib", keep_path=False)
-            rm(self, os.path.join(self.package_folder, "lib"), "*.dylib")
-            rm(self, os.path.join(self.package_folder, "lib"), "*.so")
-            rm(self, os.path.join(self.package_folder, "lib"), "*.dll")
+            rm(self, os.path.join(self.package_folder, "lib"), "*.dylib", recursive=True)
+            rm(self, os.path.join(self.package_folder, "lib"), "*.so", recursive=True)
+            rm(self, os.path.join(self.package_folder, "lib"), "*.dll", recursive=True)
 
         self.copy(pattern="*.fxh", dst="res", keep_path=False)
 
         self.copy("File2String*", src=os.path.join(self._build_subfolder, "bin"), dst="bin", keep_path=False)
-        rm(self, self.package_folder, "*.pdb")
+        rm(self, self.package_folder, "*.pdb", recursive=True)
         # MinGw creates many invalid files, called objects.a, remove them here:
-        rm(self, self.package_folder, "objects.a")
+        rm(self, self.package_folder, "objects.a", recursive=True)
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
