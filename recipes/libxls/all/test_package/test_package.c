@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "libxls/xls.h"
+#include "xls.h"
 
 int main() {
     struct xlsWorkBook*  wb;
