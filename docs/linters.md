@@ -18,7 +18,7 @@ Of course, if wanto to run any linter locally, before pushing your code, read [R
 
 This rcfile lists plugins and rules to be executed over all recipes (not test package) and validate them:
 
-* W9006 - conan-import-conanfile: ConanFile should be imported from conan
+- W9006 - conan-import-conanfile: ConanFile should be imported from conan
 
 ```python
 from conans import ConanFile
@@ -30,7 +30,7 @@ Should be replaced by:
 from conan import Conanfile
 ```
 
-* E9004 - conan-package-name: Conan package names must be lower-case
+- E9004 - conan-package-name: Conan package names must be lower-case
 
 The package name is always lower-case, even when the upstream uses another format
 
@@ -39,7 +39,7 @@ def FoobarConanfile(ConanFile):
     name = "foobar"
 ```
 
-* E9005 - conan-missing-name: Every conan recipe must contain the attribute name
+- E9005 - conan-missing-name: Every conan recipe must contain the attribute name
 
 The attribute `name` is always expected. On the other hand, `version` should not be listed.
 
@@ -48,7 +48,7 @@ def BazConanfile(ConanFile):
     name = "baz"
 ```
 
-* E9008 - conan-import-errors: Deprecated imports should be replaced by new imports. Read [v2_linter](v2_linter.md)
+#### E9008 - conan-import-errors: Deprecated imports should be replaced by new imports. Read [v2_linter](v2_linter.md)
 
 Regular imports from `conans.tools` are now updated:
 
