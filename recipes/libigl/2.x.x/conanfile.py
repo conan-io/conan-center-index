@@ -7,7 +7,7 @@ required_conan_version = ">=1.33.0"
 class LibiglConan(ConanFile):
     name = "libigl"
     description = ("Simple C++ geometry processing library")
-    topics = ("conan", "libigl", "geometry", "matrices", "algorithms")
+    topics = ("libigl", "geometry", "matrices", "algorithms")
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     homepage = "https://libigl.github.io/"
