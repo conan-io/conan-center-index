@@ -35,15 +35,15 @@ class TestPackageConan(ConanFile):
             output = subprocess.check_output(["file", self._test_executable]).decode()
 
             if self.settings.os == "Macos" and self.settings.arch == "armv8":
-                assert "Mach-O 64-bit executable arm64" in output, "Not found in output: {}".format(output)
+                assert "Mach-O 64-bit executable arm64" in output, f"Not found in output: {output}"
 
             elif self.settings.os == "Linux":
                 if self.settings.arch == "armv8_32":
-                    assert re.search(r"Machine:\s+ARM", output), "Not found in output: {}".format(output)
+                    assert re.search(r"Machine:\s+ARM", output), f"Not found in output: {output}"
                 elif "armv8" in self.settings.arch:
-                    assert re.search(r"Machine:\s+AArch64", output), "Not found in output: {}".format(output)
+                    assert re.search(r"Machine:\s+AArch64", output), f"Not found in output: {output}"
                 elif "arm" in self.settings.arch:
-                    assert re.search(r"Machine:\s+ARM", output), "Not found in output: {}".format(output)
+                    assert re.search(r"Machine:\s+ARM", output), f"Not found in output: {output}"
 
             elif self.settings.os == "Windows": # FIXME: It satisfies not only MinGW
-                assert re.search(r"PE32.*executable.*Windows", output), "Not found in output: {}".format(output)
+                assert re.search(r"PE32.*executable.*Windows", output), f"Not found in output: {output}"

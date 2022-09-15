@@ -260,7 +260,7 @@ class LibcurlConan(ConanFile):
 
     def _patch_misc_files(self):
         if self.options.with_largemaxwritesize:
-            replace_in_file(self, os.path.join(self._source_subfolder, "include", "curl", "curl.h"),
+            replace_in_file(self, os.path.join(self.source_folder, "include", "curl", "curl.h"),
                                   "define CURL_MAX_WRITE_SIZE 16384",
                                   "define CURL_MAX_WRITE_SIZE 10485760")
 
@@ -268,7 +268,7 @@ class LibcurlConan(ConanFile):
         # for additional info, see this comment https://github.com/conan-io/conan-center-index/pull/1008#discussion_r386122685
         if self.settings.compiler == "apple-clang" and self.settings.compiler.version == "9.1":
             if self.options.with_ssl == "darwinssl":
-                replace_in_file(self, os.path.join(self._source_subfolder, "lib", "vtls", "sectransp.c"),
+                replace_in_file(self, os.path.join(self.source_folder, "lib", "vtls", "sectransp.c"),
                                       "#define CURL_BUILD_MAC_10_13 MAC_OS_X_VERSION_MAX_ALLOWED >= 101300",
                                       "#define CURL_BUILD_MAC_10_13 0")
 
@@ -290,10 +290,10 @@ class LibcurlConan(ConanFile):
                 zlib_name = self.deps_cpp_info["zlib"].libs[0]
                 replace_in_file(self, configure_ac,
                                       "AC_CHECK_LIB(z,",
-                                      "AC_CHECK_LIB({},".format(zlib_name))
+                                      f"AC_CHECK_LIB({zlib_name}")
                 replace_in_file(self, configure_ac,
                                       "-lz ",
-                                      "-l{} ".format(zlib_name))
+                                      f"-l{zlib_name}")
 
             if self.options.shared:
                 # patch for shared mingw build
@@ -356,71 +356,78 @@ class LibcurlConan(ConanFile):
     get_target_property(_lib "${_libname}" LOCATION)""",
             )
 
+    def _yes_no(self, value):
+        return "yes" if value else "no"
+
     def _generate_with_autotools(self):
-        yes_no = lambda v: "yes" if v else "no"
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
-            "--with-libidn2={}".format(yes_no(self.options.with_libidn)),
-            "--with-librtmp={}".format(yes_no(self.options.with_librtmp)),
-            "--with-libpsl={}".format(yes_no(self.options.with_libpsl)),
-            "--with-schannel={}".format(yes_no(self.options.with_ssl == "schannel")),
-            "--with-secure-transport={}".format(yes_no(self.options.with_ssl == "darwinssl")),
-            "--with-brotli={}".format(yes_no(self.options.with_brotli)),
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--enable-dict={}".format(yes_no(self.options.with_dict)),
-            "--enable-file={}".format(yes_no(self.options.with_file)),
-            "--enable-ftp={}".format(yes_no(self.options.with_ftp)),
-            "--enable-gopher={}".format(yes_no(self.options.with_gopher)),
-            "--enable-http={}".format(yes_no(self.options.with_http)),
-            "--enable-imap={}".format(yes_no(self.options.with_imap)),
-            "--enable-ldap={}".format(yes_no(self.options.with_ldap)),
-            "--enable-mqtt={}".format(yes_no(self.options.with_mqtt)),
-            "--enable-pop3={}".format(yes_no(self.options.with_pop3)),
-            "--enable-rtsp={}".format(yes_no(self.options.with_rtsp)),
-            "--enable-smb={}".format(yes_no(self.options.with_smb)),
-            "--enable-smtp={}".format(yes_no(self.options.with_smtp)),
-            "--enable-telnet={}".format(yes_no(self.options.with_telnet)),
-            "--enable-tftp={}".format(yes_no(self.options.with_tftp)),
-            "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
-            "--enable-ares={}".format(yes_no(self.options.with_c_ares)),
-            "--enable-threaded-resolver={}".format(yes_no(self.options.with_threaded_resolver)),
-            "--enable-cookies={}".format(yes_no(self.options.with_cookies)),
-            "--enable-ipv6={}".format(yes_no(self.options.with_ipv6)),
-            "--enable-manual={}".format(yes_no(self.options.with_docs)),
-            "--enable-verbose={}".format(yes_no(self.options.with_verbose_debug)),
-            "--enable-symbol-hiding={}".format(yes_no(self.options.with_symbol_hiding)),
-            "--enable-unix-sockets={}".format(yes_no(self.options.with_unix_sockets)),
+            f"--with-libidn2={self._yes_no(self.options.with_libidn)}",
+            f"--with-librtmp={self._yes_no(self.options.with_librtmp)}",
+            f"--with-libpsl={self._yes_no(self.options.with_libpsl)}",
+            f"--with-schannel={self._yes_no(self.options.with_ssl == 'schannel')}",
+            f"--with-secure-transport={self._yes_no(self.options.with_ssl == 'darwinssl')}",
+            f"--with-brotli={self._yes_no(self.options.with_brotli)}",
+            f"--enable-shared={self._yes_no(self.options.shared)}",
+            f"--enable-static={self._yes_no(not self.options.shared)}",
+            f"--enable-dict={self._yes_no(self.options.with_dict)}",
+            f"--enable-file={self._yes_no(self.options.with_file)}",
+            f"--enable-ftp={self._yes_no(self.options.with_ftp)}",
+            f"--enable-gopher={self._yes_no(self.options.with_gopher)}",
+            f"--enable-http={self._yes_no(self.options.with_http)}",
+            f"--enable-imap={self._yes_no(self.options.with_imap)}",
+            f"--enable-ldap={self._yes_no(self.options.with_ldap)}",
+            f"--enable-mqtt={self._yes_no(self.options.with_mqtt)}",
+            f"--enable-pop3={self._yes_no(self.options.with_pop3)}",
+            f"--enable-rtsp={self._yes_no(self.options.with_rtsp)}",
+            f"--enable-smb={self._yes_no(self.options.with_smb)}",
+            f"--enable-smtp={self._yes_no(self.options.with_smtp)}",
+            f"--enable-telnet={self._yes_no(self.options.with_telnet)}",
+            f"--enable-tftp={self._yes_no(self.options.with_tftp)}",
+            f"--enable-debug={self._yes_no(self.settings.build_type == 'Debug')}",
+            f"--enable-ares={self._yes_no(self.options.with_c_ares)}",
+            f"--enable-threaded-resolver={self._yes_no(self.options.with_threaded_resolver)}",
+            f"--enable-cookies={self._yes_no(self.options.with_cookies)}",
+            f"--enable-ipv6={self._yes_no(self.options.with_ipv6)}",
+            f"--enable-manual={self._yes_no(self.options.with_docs)}",
+            f"--enable-verbose={self._yes_no(self.options.with_verbose_debug)}",
+            f"--enable-symbol-hiding={self._yes_no(self.options.with_symbol_hiding)}",
+            f"--enable-unix-sockets={self._yes_no(self.options.with_unix_sockets)}",
         ])
         if self.options.with_ssl == "openssl":
-            tc.configure_args.append("--with-ssl={}".format(unix_path(self, self.deps_cpp_info["openssl"].rootpath)))
+            path = unix_path(self, self.deps_cpp_info["openssl"].rootpath)
+            tc.configure_args.append(f"--with-ssl={path}")
         else:
             tc.configure_args.append("--without-ssl")
         if self.options.with_ssl == "wolfssl":
-            tc.configure_args.append("--with-wolfssl={}".format(unix_path(self, self.deps_cpp_info["wolfssl"].rootpath)))
+            path = unix_path(self, self.deps_cpp_info["wolfssl"].rootpath)
+            tc.configure_args.append(f"--with-wolfssl={path}")
         else:
             tc.configure_args.append("--without-wolfssl")
 
         if self.options.with_libssh2:
-            tc.configure_args.append("--with-libssh2={}".format(unix_path(self, self.deps_cpp_info["libssh2"].rootpath)))
+            path = unix_path(self, self.deps_cpp_info["libssh2"].rootpath)
+            tc.configure_args.append(f"--with-libssh2={path}")
         else:
             tc.configure_args.append("--without-libssh2")
 
         if self.options.with_nghttp2:
-            tc.configure_args.append("--with-nghttp2={}".format(unix_path(self, self.deps_cpp_info["libnghttp2"].rootpath)))
+            path = unix_path(self, self.deps_cpp_info["libnghttp2"].rootpath)
+            tc.configure_args.append(f"--with-nghttp2={path}")
         else:
             tc.configure_args.append("--without-nghttp2")
 
         if self.options.with_zlib:
-            tc.configure_args.append("--with-zlib={}".format(unix_path(self, self.deps_cpp_info["zlib"].rootpath)))
+            path = unix_path(self, self.deps_cpp_info["zlib"].rootpath)
+            tc.configure_args.append(f"--with-zlib={path}")
         else:
             tc.configure_args.append("--without-zlib")
 
         if self._has_zstd_option:
-            tc.configure_args.append("--with-zstd={}".format(yes_no(self.options.with_zstd)))
+            tc.configure_args.append(f"--with-zstd={self._yes_no(self.options.with_zstd)}")
 
         if self._has_metalink_option:
-            tc.configure_args.append("--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)))
+            tc.configure_args.append(f"--with-libmetalink={self._yes_no(self.options.with_libmetalink)}")
 
         if not self.options.with_proxy:
             tc.configure_args.append("--disable-proxy")
@@ -441,12 +448,12 @@ class LibcurlConan(ConanFile):
         if not self.options.with_ntlm_wb:
             tc.configure_args.append("--disable-ntlm-wb")
 
-        if self.options.with_ca_bundle == False:
+        if self.options.with_ca_bundle is False:
             tc.configure_args.append("--without-ca-bundle")
         elif self.options.with_ca_bundle:
             tc.configure_args.append("--with-ca-bundle=" + str(self.options.with_ca_bundle))
 
-        if self.options.with_ca_path == False:
+        if self.options.with_ca_path is False:
             tc.configure_args.append('--without-ca-path')
         elif self.options.with_ca_path:
             tc.configure_args.append("--with-ca-path=" + str(self.options.with_ca_path))
@@ -454,7 +461,7 @@ class LibcurlConan(ConanFile):
         # Cross building flags
         if cross_building(self):
             if self.settings.os == "Linux" and "arm" in self.settings.arch:
-                tc.configure_args.append("--host={}".format(self._get_linux_arm_host()))
+                tc.configure_args.append(f"--host={self._get_linux_arm_host()}")
             elif self.settings.os == "iOS":
                 tc.configure_args.append("--enable-threaded-resolver")
                 tc.configure_args.append("--disable-verbose")
@@ -562,12 +569,12 @@ class LibcurlConan(ConanFile):
                 tc.variables["CURL_DISABLE_NTLM"] = True
         tc.variables["NTLM_WB_ENABLED"] = self.options.with_ntlm_wb
 
-        if self.options.with_ca_bundle == False:
+        if self.options.with_ca_bundle is False:
             tc.variables['CURL_CA_BUNDLE'] = 'none'
         elif self.options.with_ca_bundle:
             tc.variables['CURL_CA_BUNDLE'] = self.options.with_ca_bundle
 
-        if self.options.with_ca_path == False:
+        if self.options.with_ca_path is False:
             tc.variables['CURL_CA_PATH'] = 'none'
         elif self.options.with_ca_path:
             tc.variables['CURL_CA_PATH'] = self.options.with_ca_path
