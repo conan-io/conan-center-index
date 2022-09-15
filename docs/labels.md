@@ -55,7 +55,7 @@ Usually it is some _random_ internal error and it won't happen next time the CI 
 The CI will re-start your build automatically, the Github check `continuous-integration/jenkins/pr-merge`
 will be changed to the status `Pending — This commit is being built` to signalize as running.
 
-> **Note**: Manually restarting a new build, by closing/opening the PR, will be add to the end of the CI build queue.
+> **Note**: Manually restarting a new build, by closing/opening the PR, will be added to the end of the CI build queue.
 
 ## User-approval pending
 
