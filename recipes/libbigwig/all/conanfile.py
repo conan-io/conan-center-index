@@ -42,6 +42,11 @@ class LibBigWigConan(ConanFile):
         except Exception:
             pass
 
+        if self.options.with_curl:
+            self.options["libcurl"].with_imap = False
+            self.options["libcurl"].with_pop3 = False
+            self.options["libcurl"].with_smtp = False
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -69,7 +74,7 @@ class LibBigWigConan(ConanFile):
         tc.variables["ENABLE_TESTING"] = False
         tc.variables["WITH_CURL"] = self.options.with_curl
         tc.variables["WITH_ZLIBNG"] = self.options.with_zlibng
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW" # honor BUILD_SHARED_LIBS
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"  # honor BUILD_SHARED_LIBS
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
