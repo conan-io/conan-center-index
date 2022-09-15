@@ -6,6 +6,7 @@ from conan.tools.files import apply_conandata_patches, copy, get, replace_in_fil
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.scm import Version
 import os
 
 
@@ -75,7 +76,7 @@ class LibmodbusConan(ConanFile):
         tc.configure_args.append("--disable-tests")
 
         # the following MSVC specific part has been ported from conan v1 following https://github.com/conan-io/conan-center-index/pull/12916
-        if is_msvc(self) and Version(self._settings_build.compiler.version) >= "12":
+        if is_msvc(self) and Version(self.settings.compiler.version) >= "12":
             tc.extra_cxxflags.append("-FS")
     
         env = tc.environment()
