@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <limits>
 
 #include "mapbox/eternal.hpp"
 
