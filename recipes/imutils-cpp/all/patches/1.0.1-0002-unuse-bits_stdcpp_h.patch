@@ -34,3 +34,16 @@ index 380be73..d0bc7f5 100644
  #include "../include/imutils/paths.h"
  
  namespace fs = std::filesystem;
+diff --git a/src/text.cpp b/src/text.cpp
+index 73bec10..6336964 100644
+--- a/src/text.cpp
++++ b/src/text.cpp
+@@ -1,5 +1,7 @@
+ #include "string"
+-#include "bits/stdc++.h"
++#include <map>
++#include <vector>
++#include <sstream>
+ #include "opencv2/core.hpp"
+ #include "opencv2/imgproc.hpp"
+ 
