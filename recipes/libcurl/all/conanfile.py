@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, download, get, load, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.microsoft import is_msvc, unix_path
@@ -223,7 +223,10 @@ class LibcurlConan(ConanFile):
         else:
             self._generate_with_autotools()
         ms = VirtualBuildEnv(self)
-        ms.generate(scope="build")
+        ms.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
 
     # TODO: remove imports once rpath of shared libs of libcurl dependencies fixed on macOS
     def imports(self):
