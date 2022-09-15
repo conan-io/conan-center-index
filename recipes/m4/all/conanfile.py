@@ -128,7 +128,7 @@ class M4Conan(ConanFile):
         ext = ".exe" if self.settings.os == "Windows" else ""
         m4_bin = bin_path.joinpath(f"m4{ext}")
         self.output.info(f"Define M4 with {m4_bin}")
-        self.env_info.M4.append(str(m4_bin))
+        self.env_info.M4 = str(m4_bin)
         self.buildenv_info.define_path("M4", str(m4_bin))
         self.runenv_info.define_path("M4", str(m4_bin))
 
