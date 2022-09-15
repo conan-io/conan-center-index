@@ -25,23 +25,25 @@ index a49165d14a..91d6170067 100644
  set_property(TARGET appslib PROPERTY POSITION_INDEPENDENT_CODE ${GDAL_OBJECT_LIBRARIES_POSITION_INDEPENDENT_CODE})
  if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
 diff --git a/cmake/helpers/CheckDependentLibraries.cmake b/cmake/helpers/CheckDependentLibraries.cmake
-index 7fa3b565c7..8df61c5293 100644
+index 7fa3b565c7..77a610f223 100644
 --- a/cmake/helpers/CheckDependentLibraries.cmake
 +++ b/cmake/helpers/CheckDependentLibraries.cmake
-@@ -11,7 +11,7 @@ Detect GDAL dependencies and set variable HAVE_*
+@@ -11,7 +11,10 @@ Detect GDAL dependencies and set variable HAVE_*
  include(CheckFunctionExists)
  include(CMakeDependentOption)
  include(FeatureSummary)
 -include(DefineFindPackage2)
++
++# Conan recipes should rely on config files from generators so let's just disble GDAL's
 +include(ConanFindPackage)
++
  include(CheckSymbolExists)
  
  option(
-@@ -110,49 +110,6 @@ macro (gdal_check_package name purpose)
-   set(_find_dependency "")
+@@ -111,47 +114,7 @@ macro (gdal_check_package name purpose)
    set(_find_dependency_args "")
    find_package2(${name} QUIET OUT_DEPENDENCY _find_dependency)
--  if (NOT DEFINED ${key}_FOUND)
+   if (NOT DEFINED ${key}_FOUND)
 -    set(_find_package_args)
 -    if (_GCP_VERSION)
 -      list(APPEND _find_package_args ${_GCP_VERSION})
@@ -83,11 +85,11 @@ index 7fa3b565c7..8df61c5293 100644
 -        string(REPLACE ";" " " _find_dependency_args "${name} ${_find_package_args}")
 -      endif()
 -    endif ()
--  endif ()
++      message(FATAL_ERROR "Conan recipes should rely on config files from generators so let's just disble GDAL's")
+   endif ()
    if (${key}_FOUND OR ${name}_FOUND)
      set(HAVE_${key} ON)
-   else ()
-@@ -321,14 +278,15 @@ if (GDAL_USE_CRYPTOPP)
+@@ -321,14 +284,15 @@ if (GDAL_USE_CRYPTOPP)
  endif ()
  
  # First check with CMake config files (starting at version 8, due to issues with earlier ones), and then fallback to the FindPROJ module.
@@ -108,7 +110,7 @@ index 7fa3b565c7..8df61c5293 100644
    string(APPEND GDAL_IMPORT_DEPENDENCIES "find_dependency(PROJ 6.0)\n")
  endif ()
  
-@@ -379,15 +337,10 @@ gdal_check_package(JSONC "json-c library (external)" CAN_DISABLE
+@@ -379,15 +343,10 @@ gdal_check_package(JSONC "json-c library (external)" CAN_DISABLE
    TARGETS json-c::json-c JSONC::JSONC
  )
  gdal_internal_library(JSONC REQUIRED)
@@ -128,7 +130,7 @@ index 7fa3b565c7..8df61c5293 100644
  
  gdal_check_package(OpenCAD "libopencad (external, used by OpenCAD driver)" CAN_DISABLE)
  gdal_internal_library(OPENCAD)
-@@ -482,7 +435,7 @@ if (GDAL_USE_RASTERLITE2)
+@@ -482,7 +441,7 @@ if (GDAL_USE_RASTERLITE2)
  endif ()
  cmake_dependent_option(GDAL_USE_RASTERLITE2 "Set ON to use Rasterlite2" ON HAVE_RASTERLITE2 OFF)
  

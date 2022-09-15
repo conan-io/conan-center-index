@@ -32,7 +32,7 @@ class GdalConan(ConanFile):
         "with_arrow": [True, False],
         "with_blosc": [True, False],
         "with_cfitsio": [True, False],
-        "with_crypto": [True, False],
+        # with_cypto option has been renamed with_openssl in version 3.5.1
         "with_cryptopp": [True, False],
         "with_curl": [True, False],
         "with_dds": [True, False],
@@ -82,7 +82,6 @@ class GdalConan(ConanFile):
         "with_arrow": False,
         "with_blosc": False,
         "with_cfitsio": False,
-        "with_crypto": False, # deprecated, replaced by with_openssl
         "with_cryptopp": False,
         "with_curl": False,
         "with_dds": False,
@@ -287,9 +286,6 @@ class GdalConan(ConanFile):
             self.requires("zstd/1.5.2")
 
     def validate(self):
-        if self.options.get_safe("with_crypto"):
-            raise ConanInvalidConfiguration("with_crypto option has been replaced by with_openssl")
-
         if self.options.get_safe("with_pcre") and self.options.get_safe("with_pcre2"):
             raise ConanInvalidConfiguration("Enable either pcre or pcre2, not both")
 
