@@ -52,7 +52,9 @@ any further activity.
 Label [`Unexpected Error`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22Unexpected+Error%22)
 is assigned by the CI when the process finishes abnormally. It tries to signal all the pull requests that failed, but
 didn't provide any meaningful message to the user. Usually it is some _random_ internal error and it won't happen next
-time the CI runs, don't hesitate to trigger a new build in this situation.
+time the CI runs. The CI will re-start your build automatically, the Github check `continuous-integration/jenkins/pr-merge` will changed to the
+status `Pending — This commit is being built` to signalize as running. In case you restart it manually, by closing/opening the PR, your
+build will be restarted too, but it will be the last in the CI build queue.
 
 ## User-approval pending
 
