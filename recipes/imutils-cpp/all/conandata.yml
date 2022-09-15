@@ -6,3 +6,4 @@ patches:
   "1.0.1":
     - patch_file: "patches/1.0.1-0001-fix-cmake.patch"
     - patch_file: "patches/1.0.1-0002-unuse-bits_stdcpp_h.patch"
+    - patch_file: "patches/1.0.1-0003-fix-path-cast.patch"
