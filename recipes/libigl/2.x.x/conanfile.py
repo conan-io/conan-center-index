@@ -52,8 +52,8 @@ class LibiglConan(ConanFile):
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
         if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime and not self.options.header_only:
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
-        if "arm" in self.settings.arch or "x86" is self.settings.arch:
-            raise ConanInvalidConfiguration("Not available for arm. Requested arch: {}".format(self.settings.arch))
+        if ("arm" in self.settings.arch or "x86" is self.settings.arch) and (Version(self.version) < "2.4.0" or not is_apple_os(self)):
+            raise ConanInvalidConfiguration("Not available for arm. Requested arch: {}, os: {}".format(self.settings.arch, self.settings.os))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -73,29 +73,50 @@ class LibiglConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self, parallel=False)
-            self._cmake.definitions["LIBIGL_EXPORT_TARGETS"] = True
-            self._cmake.definitions["LIBIGL_USE_STATIC_LIBRARY"] = not self.options.header_only
 
-            # All these dependencies are needed to build the examples or the tests
+            self._cmake.definitions["LIBIGL_USE_STATIC_LIBRARY"] = not self.options.header_only
             self._cmake.definitions["LIBIGL_BUILD_TUTORIALS"] = "OFF"
             self._cmake.definitions["LIBIGL_BUILD_TESTS"] = "OFF"
-            self._cmake.definitions["LIBIGL_BUILD_PYTHON"] = "OFF"
 
-            self._cmake.definitions["LIBIGL_WITH_CGAL"] = False
-            self._cmake.definitions["LIBIGL_WITH_COMISO"] = False
-            self._cmake.definitions["LIBIGL_WITH_CORK"] = False
-            self._cmake.definitions["LIBIGL_WITH_EMBREE"] = False
-            self._cmake.definitions["LIBIGL_WITH_MATLAB"] = False
-            self._cmake.definitions["LIBIGL_WITH_MOSEK"] = False
-            self._cmake.definitions["LIBIGL_WITH_OPENGL"] = False
-            self._cmake.definitions["LIBIGL_WITH_OPENGL_GLFW"] = False
-            self._cmake.definitions["LIBIGL_WITH_OPENGL_GLFW_IMGUI"] = False
-            self._cmake.definitions["LIBIGL_WITH_PNG"] = False
-            self._cmake.definitions["LIBIGL_WITH_TETGEN"] = False
-            self._cmake.definitions["LIBIGL_WITH_TRIANGLE"] = False
-            self._cmake.definitions["LIBIGL_WITH_XML"] = False
-            self._cmake.definitions["LIBIGL_WITH_PYTHON"] = "OFF"
-            self._cmake.definitions["LIBIGL_WITH_PREDICATES"] = False
+            if tools.Version(self.version) < "2.4.0":
+                self._cmake.definitions["LIBIGL_EXPORT_TARGETS"] = True
+
+                # All these dependencies are needed to build the examples or the tests
+                self._cmake.definitions["LIBIGL_BUILD_PYTHON"] = "OFF"
+
+                self._cmake.definitions["LIBIGL_WITH_CGAL"] = False
+                self._cmake.definitions["LIBIGL_WITH_COMISO"] = False
+                self._cmake.definitions["LIBIGL_WITH_CORK"] = False
+                self._cmake.definitions["LIBIGL_WITH_EMBREE"] = False
+                self._cmake.definitions["LIBIGL_WITH_MATLAB"] = False
+                self._cmake.definitions["LIBIGL_WITH_MOSEK"] = False
+                self._cmake.definitions["LIBIGL_WITH_OPENGL"] = False
+                self._cmake.definitions["LIBIGL_WITH_OPENGL_GLFW"] = False
+                self._cmake.definitions["LIBIGL_WITH_OPENGL_GLFW_IMGUI"] = False
+                self._cmake.definitions["LIBIGL_WITH_PNG"] = False
+                self._cmake.definitions["LIBIGL_WITH_TETGEN"] = False
+                self._cmake.definitions["LIBIGL_WITH_TRIANGLE"] = False
+                self._cmake.definitions["LIBIGL_WITH_XML"] = False
+                self._cmake.definitions["LIBIGL_WITH_PYTHON"] = "OFF"
+                self._cmake.definitions["LIBIGL_WITH_PREDICATES"] = False
+
+            else:
+                self._cmake.definitions["LIBIGL_INSTALL"] = True
+
+                self._cmake.definitions["LIBIGL_COPYLEFT_CGAL"] = False
+                self._cmake.definitions["LIBIGL_COPYLEFT_COMISO"] = False
+                self._cmake.definitions["LIBIGL_EMBREE"] = False
+                self._cmake.definitions["LIBIGL_RESTRICTED_MATLAB"] = False
+                self._cmake.definitions["LIBIGL_RESTRICTED_MOSEK"] = False
+                self._cmake.definitions["LIBIGL_OPENGL"] = False
+                self._cmake.definitions["LIBIGL_GLFW"] = False
+                self._cmake.definitions["LIBIGL_IMGUI"] = False
+                self._cmake.definitions["LIBIGL_PNG"] = False
+                self._cmake.definitions["LIBIGL_COPYLEFT_TETGEN"] = False
+                self._cmake.definitions["LIBIGL_RESTRICTED_TRIANGLE"] = False
+                self._cmake.definitions["LIBIGL_WITH_XML"] = False
+                self._cmake.definitions["LIBIGL_PREDICATES"] = False
+
         return self._cmake
 
     def build(self):

@@ -2,7 +2,13 @@ sources:
   "2.3.0":
     sha256: 5124443c2657023394039fe56fb240d4f7a867723ee4ebba053eaeb881ed7455
     url: https://github.com/libigl/libigl/archive/refs/tags/v2.3.0.zip
+  "2.4.0":
+    sha256: b20d80c9a3fa7d0c6bc3adee58e44f0cdb1cbb49228df6d67f9ddbfc08ee1403
+    url: https://github.com/libigl/libigl/archive/refs/tags/v2.4.0.zip
 patches:
   "2.3.0":
     - patch_file: "patches/0001-correct-fpic.patch"
+      base_path: "source_subfolder"
+  "2.4.0":
+    - patch_file: "patches/0002-cmake-version-policy.patch"
       base_path: "source_subfolder"

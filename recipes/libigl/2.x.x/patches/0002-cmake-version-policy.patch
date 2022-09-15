@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 232bc03c..1f3ea8b7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -35,6 +35,8 @@ if(HUNTER_ENABLED)
+ endif()
+ 
+ ################################################################################
++cmake_policy(SET CMP0048 NEW)
++
+ project(libigl VERSION 2.4.0)
+ 
+ # CMake module path
