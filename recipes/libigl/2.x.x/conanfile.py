@@ -2,6 +2,7 @@ import os
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.33.0"
 
 class LibiglConan(ConanFile):
     name = "libigl"
