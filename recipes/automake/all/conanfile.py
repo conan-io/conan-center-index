@@ -23,15 +23,12 @@ class AutomakeConan(ConanFile):
         # TODO: Remove for Conan v2
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def win_bash(self):
-        return self._settings_build.os == "Windows"
-
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
             copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def configure(self):
+        self.win_bash = self._settings_build.os == "Windows"
         try:
             del self.settings.compiler.libcxx  # for plain C projects only
         except ValueError:
