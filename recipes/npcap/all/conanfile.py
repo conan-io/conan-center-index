@@ -1,6 +1,6 @@
 from os.path import join
 from conan import ConanFile
-from conan.tools.files import get, download, copy
+from conan.tools.files import get, download, copy, collect_libs
 from conan.errors import ConanInvalidConfiguration
 
 
@@ -47,4 +47,7 @@ class NpcapConan(ConanFile):
             copy(self, "*.lib", dst=join(self.package_folder, "lib"), src=join(self.source_folder, "Lib"))
 
     def package_info(self):
-        self.cpp_info.libs = self.collect_libs()
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.bindirs = []
+        self.cpp_info.resdirs = []
+        self.cpp_info.libs = collect_libs(self)
