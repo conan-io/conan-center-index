@@ -114,9 +114,6 @@ class LibmodbusConan(ConanFile):
     def build(self):
         self._patch_sources()
         autotools = Autotools(self)
-         # run autoreconf to generate configure file
-        autotools.autoreconf()
-        # ./configure + toolchain file
         autotools.configure()
         autotools.make()
 
