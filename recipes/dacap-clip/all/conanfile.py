@@ -5,9 +5,10 @@ from conan.tools.files import copy, get
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.3"
 
 class DacapClipConan(ConanFile):
     name = "dacap-clip"
@@ -97,8 +98,8 @@ class DacapClipConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.requires.append("xorg::xcb")
             self.cpp_info.system_libs.append("pthread")
-        elif self.settings.os == "Macos":
-            self.cpp_info.frameworks = ['Cocoa', 'Carbon', 'CoreFoundation']
+        elif is_apple_os(self):
+            self.cpp_info.frameworks = ['Cocoa', 'Carbon', 'CoreFoundation', 'Foundation', 'AppKit']
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend([
                 "shlwapi",
