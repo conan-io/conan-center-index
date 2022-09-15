@@ -1,8 +1,10 @@
-from conans import ConanFile, tools, CMake
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.47.0"
 
 
 class SDLImageConan(ConanFile):
@@ -54,15 +56,6 @@ class SDLImageConan(ConanFile):
     }
 
     exports_sources = "CMakeLists.txt"
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -73,68 +66,104 @@ class SDLImageConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+        if self.options.shared:
+            # sdl static into sdl_image shared is not allowed
+            self.options["sdl"].shared = True
 
     def requirements(self):
         self.requires("sdl/2.0.20")
         if self.options.with_libtiff:
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.4.0")
         if self.options.with_libjpeg:
             self.requires("libjpeg/9d")
         if self.options.with_libpng:
             self.requires("libpng/1.6.37")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.2.2")
+            self.requires("libwebp/1.2.4")
+
+    def validate(self):
+        if self.info.options.shared and not self.dependencies["sdl"].options.shared:
+            raise ConanInvalidConfiguration("sdl_image shared requires sdl shared")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BMP"] = self.options.bmp
-        cmake.definitions["GIF"] = self.options.gif
-        cmake.definitions["IMAGEIO"] = self.options.get_safe("imageio")
-        cmake.definitions["JPG"] = self.options.with_libjpeg
-        cmake.definitions["LBM"] = self.options.lbm
-        cmake.definitions["PCX"] = self.options.pcx
-        cmake.definitions["PNG"] = self.options.with_libpng
-        cmake.definitions["PNM"] = self.options.pnm
-        cmake.definitions["SVG"] = self.options.svg
-        cmake.definitions["TGA"] = self.options.tga
-        cmake.definitions["TIF"] = self.options.with_libtiff
-        cmake.definitions["WEBP"] = self.options.with_libwebp
-        cmake.definitions["XCF"] = self.options.xcf
-        cmake.definitions["XPM"] = self.options.xpm
-        cmake.definitions["XV"] = self.options.xv
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["SDL_IMAGE_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["BMP"] = self.options.bmp
+        tc.variables["GIF"] = self.options.gif
+        tc.variables["IMAGEIO"] = self.options.get_safe("imageio")
+        tc.variables["JPG"] = self.options.with_libjpeg
+        tc.variables["LBM"] = self.options.lbm
+        tc.variables["PCX"] = self.options.pcx
+        tc.variables["PNG"] = self.options.with_libpng
+        tc.variables["PNM"] = self.options.pnm
+        tc.variables["SVG"] = self.options.svg
+        tc.variables["TGA"] = self.options.tga
+        tc.variables["TIF"] = self.options.with_libtiff
+        tc.variables["WEBP"] = self.options.with_libwebp
+        tc.variables["XCF"] = self.options.xcf
+        tc.variables["XPM"] = self.options.xpm
+        tc.variables["XV"] = self.options.xv
         # TODO: https://github.com/bincrafters/community/pull/1317#pullrequestreview-584847138
-        cmake.definitions["TIF_DYNAMIC"] = self.options["libtiff"].shared if self.options.with_libtiff else False
-        cmake.definitions["JPG_DYNAMIC"] = self.options["libjpeg"].shared if self.options.with_libjpeg else False
-        cmake.definitions["PNG_DYNAMIC"] = self.options["libpng"].shared if self.options.with_libpng else False
-        cmake.definitions["WEBP_DYNAMIC"] = self.options["libwebp"].shared if self.options.with_libwebp else False
-        cmake.definitions["SDL_IS_SHARED"] = self.options["sdl"].shared
-
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        tc.variables["TIF_DYNAMIC"] = self.dependencies["libtiff"].options.shared if self.options.with_libtiff else False
+        tc.variables["JPG_DYNAMIC"] = self.dependencies["libjpeg"].options.shared if self.options.with_libjpeg else False
+        tc.variables["PNG_DYNAMIC"] = self.dependencies["libpng"].options.shared if self.options.with_libpng else False
+        tc.variables["WEBP_DYNAMIC"] = self.dependencies["libwebp"].options.shared if self.options.with_libwebp else False
+        tc.variables["SDL_IS_SHARED"] = self.dependencies["sdl"].options.shared
+        tc.generate()
+        cd = CMakeDeps(self)
+        cd.generate()
 
     def build(self):
-        tools.rmdir(os.path.join(self._source_subfolder, "external"))
-        cmake = self._configure_cmake()
+        rmdir(self, os.path.join(self.source_folder, "external"))
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy(pattern="COPYING.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "COPYING.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "SDL2_image")
+        self.cpp_info.set_property("cmake_target_name", "SDL2_image::SDL2_image")
+        if not self.options.shared:
+            self.cpp_info.set_property("cmake_target_aliases", ["SDL2_image::SDL2_image-static"])
         self.cpp_info.set_property("pkg_config_name", "SDL2_image")
-        self.cpp_info.libs = ["SDL2_image"]
-        self.cpp_info.includedirs.append(os.path.join("include", "SDL2"))
-        # TODO: Add components in a sane way. SDL2_image might be incorrect, as the current dev version uses SDL2::image
-        # The current dev version is the first version with official CMake support
+        # TODO: back to global scope in conan v2 once legacy generators removed
+        self.cpp_info.components["_sdl_image"].libs = ["SDL2_image"]
+        self.cpp_info.components["_sdl_image"].includedirs.append(os.path.join("include", "SDL2"))
+
+        # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.names["cmake_find_package"] = "SDL2_image"
         self.cpp_info.names["cmake_find_package_multi"] = "SDL2_image"
         self.cpp_info.names["pkg_config"] = "SDL2_image"
+        target_name = "SDL2_image" if self.options.shared else "SDL2_image-static"
+        self.cpp_info.components["_sdl_image"].names["cmake_find_package"] = target_name
+        self.cpp_info.components["_sdl_image"].names["cmake_find_package_multi"] = target_name
+        self.cpp_info.components["_sdl_image"].set_property("cmake_target_name", "SDL2_image::SDL2_image")
+        self.cpp_info.components["_sdl_image"].set_property("pkg_config_name", "SDL2_image")
+        self.cpp_info.components["_sdl_image"].requires = ["sdl::sdl"]
+        if self.options.with_libtiff:
+            self.cpp_info.components["_sdl_image"].requires.append("libtiff::libtiff")
+        if self.options.with_libjpeg:
+            self.cpp_info.components["_sdl_image"].requires.append("libjpeg::libjpeg")
+        if self.options.with_libpng:
+            self.cpp_info.components["_sdl_image"].requires.append("libpng::libpng")
+        if self.options.with_libwebp:
+            self.cpp_info.components["_sdl_image"].requires.append("libwebp::libwebp")

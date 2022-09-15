@@ -1,10 +1,7 @@
 cmake_minimum_required(VERSION 3.4)
-project(mujs C)
+project(mujs LANGUAGES C)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
-
-file(GLOB MUJS_SRC source_subfolder/js*.c source_subfolder/utf*.c source_subfolder/regexp.c)
+file(GLOB MUJS_SRC ${MUJS_SRC_DIR}/js*.c ${MUJS_SRC_DIR}/utf*.c ${MUJS_SRC_DIR}/regexp.c)
 
 add_library(${PROJECT_NAME} ${MUJS_SRC})
 set_property(TARGET ${PROJECT_NAME} PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
@@ -14,9 +11,10 @@ if(M_LIB)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${M_LIB})
 endif()
 
+include(GNUInstallDirs)
 install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(FILES source_subfolder/mujs.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES ${MUJS_SRC_DIR}/mujs.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

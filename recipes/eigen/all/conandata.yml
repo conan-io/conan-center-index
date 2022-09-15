@@ -14,4 +14,3 @@ sources:
 patches:
   "3.3.8":
     - patch_file: "patches/0001-assert-exception-upstream-issue-2011.patch"
-      base_path: "source_subfolder"
