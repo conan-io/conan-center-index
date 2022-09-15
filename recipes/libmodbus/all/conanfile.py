@@ -4,7 +4,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, unix_path
 import os
 
 
@@ -72,16 +72,29 @@ class LibmodbusConan(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--without-documentation")
         tc.configure_args.append("--disable-tests")
-        # TODO: how to port this?
-        """
-        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12":
-            if self.settings.build_type in ("Debug", "RelWithDebInfo"):
-                autotools.flags.append("-FS")
-        """
-        tc.generate()
+
+        # the following MSVC specific part has been ported from conan v1 following https://github.com/conan-io/conan-center-index/pull/12916
+        if is_msvc(self) and Version(self._settings_build.compiler.version) >= "12":
+            tc.extra_cxxflags.append("-FS")
+    
+        env = tc.environment()
+
+        if is_msvc(self):
+            ar_lib = unix_path(self, self.conf.get("tools.automake:ar-lib"))
+            env.define("CC", "cl -nologo")
+            env.define("CXX", "cl -nologo")
+            env.define("LD", "link -nologo")
+            env.define("AR", f"{ar_lib} lib")
+            env.define("RANLIB", ":")
+            env.define("STRING", ":")
+            env.define("NM", "dumpbin -symbols")
+
+        tc.generate(env)
+
         # generate dependencies for pkg-config
         tc = PkgConfigDeps(self)
         tc.generate()
+
         # generate dependencies for autotools
         tc = AutotoolsDeps(self)
         tc.generate()
@@ -89,18 +102,6 @@ class LibmodbusConan(ConanFile):
         # inject tools_require env vars in build context
         ms = VirtualBuildEnv(self)
         ms.generate()
-
-        """ TODO: how to replace tools.vcvars?
-        if self.settings.compiler == "Visual Studio":
-            # 
-            ms.define("CC", "cl -nologo")
-            ms.define("CXX", "cl -nologo")
-            ms.define("LD", "link -nologo")
-            ms.define("AR", "{} \"lib -nologo -verbose\"".format(unix_path(self.deps_user_info["automake"].ar_lib)))
-            ms.define("RANLIB", ":")
-            ms.define("STRING", ":")
-            ms.define("NM", "dumpbin -symbols")
-        """
 
     def _patch_sources(self):
         apply_conandata_patches(self)
