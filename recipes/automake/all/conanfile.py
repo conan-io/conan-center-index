@@ -18,21 +18,6 @@ class AutomakeConan(ConanFile):
     topics = ("conan", "automake", "configure", "build")
     settings = "os", "arch", "compiler", "build_type"
 
-    # Workaround for https://github.com/conan-io/conan/issues/11980
-    def init(self):
-        if self._settings_build.os == "Windows" and Version(required_conan_version) < "1.53":
-            from conan.tools.env import environment
-            from conan.tools.microsoft.subsystems import deduce_subsystem
-
-            _old_environment_wrap_command = environment.environment_wrap_command
-
-            def environment_wrap_command(env_filenames, env_folder, cmd, subsystem=None, accepted_extensions=None):
-                if not subsystem:
-                    subsystem = deduce_subsystem(self, scope="build")
-                return _old_environment_wrap_command(env_filenames, env_folder, cmd, subsystem, accepted_extensions)
-
-            environment.environment_wrap_command = environment_wrap_command
-
     @property
     def _settings_build(self):
         # TODO: Remove for Conan v2
@@ -104,8 +89,8 @@ class AutomakeConan(ConanFile):
         deps = AutotoolsDeps(self)
         deps.generate()
 
-        vb = VirtualBuildEnv(self)
-        vb.generate(scope="build")
+        ms = VirtualBuildEnv(self)
+        ms.generate(scope="build")
 
     def build(self):
         apply_conandata_patches(self)
