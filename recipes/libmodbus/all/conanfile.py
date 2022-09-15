@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rename, rm, rmdir
@@ -121,7 +122,11 @@ class LibmodbusConan(ConanFile):
     def package(self):
         copy(self, pattern="COPYING*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         autotools = Autotools(self)
-        autotools.install()
+        # see https://github.com/conan-io/conan/issues/12006
+        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+
+        if is_apple_os(self):
+            fix_apple_shared_install_name(self)
 
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
