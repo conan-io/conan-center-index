@@ -30,7 +30,7 @@ class NuRaftConan(ConanFile):
 
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(p["patch_file"])
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def requirements(self):
         if self.options.asio == "boost":
@@ -69,7 +69,7 @@ class NuRaftConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        copy(self, "LICENSE", self.source_folder, join(self.package_folder, "licenses/"), keep_path=False)
+        copy(self, "LICENSE", self.source_folder, join(self.package_folder, "licenses"), keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["nuraft"]
