@@ -1,6 +1,11 @@
 import os
-from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, rm, rmdir, patch
+from conan.tools.scm import Version
+from conan.tools.apple import is_apple_os
+from conans import CMake
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
@@ -42,13 +47,13 @@ class LibiglConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
         if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime and not self.options.header_only:
@@ -65,11 +70,11 @@ class LibiglConan(ConanFile):
             del self.options.fPIC
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        for current_patch in self.conan_data.get("patches", {}).get(self.version, []):
+            patch(self, **current_patch)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if not self._cmake:
@@ -79,7 +84,7 @@ class LibiglConan(ConanFile):
             self._cmake.definitions["LIBIGL_BUILD_TUTORIALS"] = "OFF"
             self._cmake.definitions["LIBIGL_BUILD_TESTS"] = "OFF"
 
-            if tools.Version(self.version) < "2.4.0":
+            if Version(self.version) < "2.4.0":
                 self._cmake.definitions["LIBIGL_EXPORT_TARGETS"] = True
 
                 # All these dependencies are needed to build the examples or the tests
@@ -132,11 +137,11 @@ class LibiglConan(ConanFile):
         self.copy("LICENSE.GPL", dst="licenses", src=self._source_subfolder)
         self.copy("LICENSE.MPL2", dst="licenses", src=self._source_subfolder)
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         if not self.options.header_only:
-            tools.remove_files_by_mask(self.package_folder, "*.c")
-            tools.remove_files_by_mask(self.package_folder, "*.cpp")
+            rm(self, "*.c", self.package_folder, recursive=True)
+            rm(self, "*.cpp", self.package_folder, recursive=True)
 
     def package_id(self):
         if self.options.header_only:
