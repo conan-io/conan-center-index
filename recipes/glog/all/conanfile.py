@@ -97,6 +97,10 @@ class GlogConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                   "set_target_properties (glog PROPERTIES POSITION_INDEPENDENT_CODE ON)",
                                   "")
+        # INFO: avoid "CONAN_LIB::gflags_gflags_nothreads_RELEASE" but the target was not found.
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+        "determine_gflags_namespace",
+        "# determine_gflags_namespace")
 
     def build(self):
         self._patch_sources()
