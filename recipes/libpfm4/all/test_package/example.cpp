@@ -154,7 +154,7 @@ main(int argc, const char **argv)
 		printf("IDX            : %d\n", e.idx);
 		printf("Codes          :");
 		for(j=0; j < e.count; j++)
-			printf(" 0x%"PRIx64, e.codes[j]);
+			printf(" 0x%" PRIx64, e.codes[j]);
 		putchar('\n');
 
 		free(fqstr);
