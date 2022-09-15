@@ -2,19 +2,15 @@ sources:
   "1.6.37":
     url: "https://github.com/glennrp/libpng/archive/v1.6.37.tar.gz"
     sha256: "ca74a0dace179a8422187671aee97dd3892b53e168627145271cad5b5ac81307"
-  "1.5.2":
-    url: "https://github.com/glennrp/libpng/archive/v1.5.2.tar.gz"
-    sha256: "6b27e93ff12993fc76c6c7bee4f4be49eac71984af55f0dee45ab2b70fa090e7"
+  "1.5.30":
+    url: "https://github.com/glennrp/libpng/archive/v1.5.30.tar.gz"
+    sha256: "738e2eb31abc1140f2d6c914f0f69748b49f2ae7ffc05e7a073abafc08f37441"
 patches:
   "1.6.37":
-    - patch_file: "patches/CMakeLists-zlib.patch"
-      base_path: "source_subfolder"
-  "1.5.2":
-    - patch_file: "patches/CMakeLists-symlink.patch"
-      patch_description: "Fix symlink macro call for Linux debug builds. Previously it was attempting to symlink libpng to libpng15 that did not exist in debug builds."
-      patch_type: "portability"
-      base_path: "source_subfolder"
-    - patch_file: "patches/CMakeLists-ext-zlib.patch"
+    - patch_file: "patches/0001-1.6.37-cmakefile-zlib.patch"
       patch_description: "Update ZLib include and library paths for conan to provide lib. Remove Zlib dll definition."
       patch_type: "backport"
-      base_path: "source_subfolder"
+  "1.5.30":
+    - patch_file: "patches/0001-1.5.30-cmakefile-zlib.patch"
+      patch_description: "Update ZLib include and library paths for conan to provide lib. Remove Zlib dll definition."
+      patch_type: "backport"
