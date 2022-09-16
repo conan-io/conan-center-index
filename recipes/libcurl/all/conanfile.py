@@ -210,7 +210,8 @@ class LibcurlConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        if self._is_using_cmake_build:
+            cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
