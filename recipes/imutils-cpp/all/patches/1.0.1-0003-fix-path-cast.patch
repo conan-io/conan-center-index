@@ -1,8 +1,8 @@
 diff --git a/src/paths.cpp b/src/paths.cpp
-index d0bc7f5..59aa70e 100644
+index d0bc7f5..d39ffb6 100644
 --- a/src/paths.cpp
 +++ b/src/paths.cpp
-@@ -19,7 +19,7 @@ std::vector<std::string> Path::listFiles(std::string basePath, std::vector<std::
+@@ -19,14 +19,14 @@ std::vector<std::string> Path::listFiles(std::string basePath, std::vector<std::
      std::vector<std::string> filesDirs;
      for (const auto &dirEntry: fs::recursive_directory_iterator(basePath)) {
          std::filesystem::path file = dirEntry.path();
@@ -11,3 +11,12 @@ index d0bc7f5..59aa70e 100644
              continue;
          }
          if (validExts.empty()) {
+-            filesDirs.push_back(dirEntry.path());
++            filesDirs.push_back(dirEntry.path().string());
+         } else {
+             if (std::find(validExts.begin(), validExts.end(), file.extension()) != validExts.end()){
+-                filesDirs.push_back(dirEntry.path());
++                filesDirs.push_back(dirEntry.path().string());
+ 
+             }
+ 
