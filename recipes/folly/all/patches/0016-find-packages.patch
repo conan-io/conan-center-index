@@ -1,5 +1,5 @@
 diff --git a/CMake/folly-deps.cmake b/CMake/folly-deps.cmake
-index 9c9d9ea60..a82c1c87e 100644
+index 9c9d9ea60..e78611542 100644
 --- a/CMake/folly-deps.cmake
 +++ b/CMake/folly-deps.cmake
 @@ -48,25 +48,25 @@ find_package(Boost 1.51.0 MODULE
@@ -19,8 +19,8 @@ index 9c9d9ea60..a82c1c87e 100644
 -  set(FOLLY_LIBGFLAGS_LIBRARY ${LIBGFLAGS_LIBRARY})
 -  set(FOLLY_LIBGFLAGS_INCLUDE ${LIBGFLAGS_INCLUDE_DIR})
 +find_package(gflags MODULE)
-+set(FOLLY_HAVE_LIBGFLAGS ${GFLAGS_FOUND})
-+if(GFLAGS_FOUND)
++set(FOLLY_HAVE_LIBGFLAGS ${gflags_FOUND})
++if(gflags_FOUND)
 +  list(APPEND FOLLY_LINK_LIBRARIES ${gflags_LIBRARIES})
 +  list(APPEND FOLLY_INCLUDE_DIRECTORIES ${gflags_INCLUDE_DIRS})
 +  set(FOLLY_LIBGFLAGS_LIBRARY ${gflags_LIBRARIES})
