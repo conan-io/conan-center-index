@@ -47,10 +47,13 @@ class OpenTelemetryCppConan(ConanFile):
         self.requires("nlohmann_json/3.10.5")
         self.requires("openssl/1.1.1o")
         self.requires("opentelemetry-proto/0.18.0")
-        self.requires("protobuf/3.21.1")
         self.requires("thrift/0.15.0")
         if tools.Version(self.version) >= "1.3.0":
             self.requires("boost/1.79.0")
+        if tools.Version(self.version) >= "1.5.0":
+            self.requires("protobuf/3.21.4")
+        else:
+            self.requires("protobuf/3.21.1")
 
     def validate(self):
         if self.settings.arch != "x86_64":
@@ -62,6 +65,9 @@ class OpenTelemetryCppConan(ConanFile):
 
         if self.settings.os != "Linux" and self.options.shared:
             raise ConanInvalidConfiguration("Building shared libraries is only supported on Linux")
+
+        if tools.Version(self.version) >= "1.5.0":
+            tools.check_min_cppstd(self, "17")
 
     @staticmethod
     def _create_cmake_module_variables(module_file):

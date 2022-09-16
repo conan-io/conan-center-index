@@ -1,0 +1,122 @@
+From b4d8245d65e47eea2d2c2ecbeea813b6475cffcf Mon Sep 17 00:00:00 2001
+From: WenTao Ou <owentou@tencent.com>
+Date: Wed, 3 Aug 2022 12:26:24 +0800
+Subject: [PATCH] Fix several compiling/linking errors (#1539)
+
+Signed-off-by: owentou <owentou@tencent.com>
+---
+ .../exporters/elasticsearch/es_log_exporter.h |  4 ++--
+ .../elasticsearch/src/es_log_exporter.cc      |  5 +++--
+ .../exporters/otlp/otlp_http_client.h         |  2 +-
+ .../otlp/src/otlp_grpc_metric_exporter.cc     | 19 +++++++++++++++++++
+ exporters/prometheus/src/collector.cc         |  3 ++-
+ 5 files changed, 27 insertions(+), 6 deletions(-)
+
+diff --git a/exporters/elasticsearch/include/opentelemetry/exporters/elasticsearch/es_log_exporter.h b/exporters/elasticsearch/include/opentelemetry/exporters/elasticsearch/es_log_exporter.h
+index ea58807e..9b75c04e 100644
+--- a/exporters/elasticsearch/include/opentelemetry/exporters/elasticsearch/es_log_exporter.h
++++ b/exporters/elasticsearch/include/opentelemetry/exporters/elasticsearch/es_log_exporter.h
+@@ -6,7 +6,7 @@
+ 
+ #  include "nlohmann/json.hpp"
+ #  include "opentelemetry/common/spin_lock_mutex.h"
+-#  include "opentelemetry/ext/http/client/curl/http_client_curl.h"
++#  include "opentelemetry/ext/http/client/http_client_factory.h"
+ #  include "opentelemetry/nostd/type_traits.h"
+ #  include "opentelemetry/sdk/logs/exporter.h"
+ #  include "opentelemetry/sdk/logs/log_record.h"
+@@ -104,7 +104,7 @@ class ElasticsearchLogExporter final : public opentelemetry::sdk::logs::LogExpor
+   ElasticsearchExporterOptions options_;
+ 
+   // Object that stores the HTTP sessions that have been created
+-  std::unique_ptr<ext::http::client::HttpClient> http_client_;
++  std::shared_ptr<ext::http::client::HttpClient> http_client_;
+   mutable opentelemetry::common::SpinLockMutex lock_;
+   bool isShutdown() const noexcept;
+ };
+diff --git a/exporters/elasticsearch/src/es_log_exporter.cc b/exporters/elasticsearch/src/es_log_exporter.cc
+index 3c21e0e2..f9a681de 100644
+--- a/exporters/elasticsearch/src/es_log_exporter.cc
++++ b/exporters/elasticsearch/src/es_log_exporter.cc
+@@ -5,6 +5,7 @@
+ 
+ #  include <sstream>  // std::stringstream
+ 
++#  include <condition_variable>
+ #  include <mutex>
+ #  include "opentelemetry/exporters/elasticsearch/es_log_exporter.h"
+ #  include "opentelemetry/exporters/elasticsearch/es_log_recordable.h"
+@@ -225,11 +226,11 @@ class AsyncResponseHandler : public http_client::EventHandler
+ 
+ ElasticsearchLogExporter::ElasticsearchLogExporter()
+     : options_{ElasticsearchExporterOptions()},
+-      http_client_{new ext::http::client::curl::HttpClient()}
++      http_client_{ext::http::client::HttpClientFactory::Create()}
+ {}
+ 
+ ElasticsearchLogExporter::ElasticsearchLogExporter(const ElasticsearchExporterOptions &options)
+-    : options_{options}, http_client_{new ext::http::client::curl::HttpClient()}
++    : options_{options}, http_client_{ext::http::client::HttpClientFactory::Create()}
+ {}
+ 
+ std::unique_ptr<sdklogs::Recordable> ElasticsearchLogExporter::MakeRecordable() noexcept
+diff --git a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_client.h b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_client.h
+index 70aa5ddb..e5102c6c 100644
+--- a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_client.h
++++ b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_client.h
+@@ -186,7 +186,7 @@ class OtlpHttpClient
+       event_handle.swap(input_handle);
+     }
+ 
+-    inline explicit HttpSessionData(HttpSessionData &&other)
++    inline HttpSessionData(HttpSessionData &&other)
+     {
+       session.swap(other.session);
+       event_handle.swap(other.event_handle);
+diff --git a/exporters/otlp/src/otlp_grpc_metric_exporter.cc b/exporters/otlp/src/otlp_grpc_metric_exporter.cc
+index dfda8695..486d61df 100644
+--- a/exporters/otlp/src/otlp_grpc_metric_exporter.cc
++++ b/exporters/otlp/src/otlp_grpc_metric_exporter.cc
+@@ -143,6 +143,25 @@ opentelemetry::sdk::common::ExportResult OtlpGrpcMetricExporter::Export(
+   return opentelemetry::sdk::common::ExportResult::kSuccess;
+ }
+ 
++bool OtlpGrpcMetricExporter::ForceFlush(std::chrono::microseconds timeout) noexcept
++{
++  // TODO: OTLP gRPC exporter does not support concurrency exporting now.
++  return true;
++}
++
++bool OtlpGrpcMetricExporter::Shutdown(std::chrono::microseconds timeout) noexcept
++{
++  const std::lock_guard<opentelemetry::common::SpinLockMutex> locked(lock_);
++  is_shutdown_ = true;
++  return true;
++}
++
++bool OtlpGrpcMetricExporter::isShutdown() const noexcept
++{
++  const std::lock_guard<opentelemetry::common::SpinLockMutex> locked(lock_);
++  return is_shutdown_;
++}
++
+ }  // namespace otlp
+ }  // namespace exporter
+ OPENTELEMETRY_END_NAMESPACE
+diff --git a/exporters/prometheus/src/collector.cc b/exporters/prometheus/src/collector.cc
+index 03793a8e..834e04dc 100644
+--- a/exporters/prometheus/src/collector.cc
++++ b/exporters/prometheus/src/collector.cc
+@@ -58,7 +58,8 @@ void PrometheusCollector::AddMetricData(const sdk::metrics::ResourceMetrics &dat
+   collection_lock_.lock();
+   if (metrics_to_collect_.size() + 1 <= max_collection_size_)
+   {
+-    metrics_to_collect_.emplace_back(new sdk::metrics::ResourceMetrics{data});
++    // We can not use initializer lists here due to broken variadic capture on GCC 4.8.5
++    metrics_to_collect_.emplace_back(new sdk::metrics::ResourceMetrics(data));
+   }
+   collection_lock_.unlock();
+ }
+-- 
+2.37.3
+
