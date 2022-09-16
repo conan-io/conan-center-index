@@ -79,6 +79,8 @@ class Md4cConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["md4c", "md4c-html",]
@@ -87,3 +89,12 @@ class Md4cConan(ConanFile):
             self.cpp_info.defines.append("MD4C_USE_UTF16")
         elif self.options.encoding == "ascii":
             self.cpp_info.defines.append("MD4C_USE_ASCII")
+
+        self.cpp_info.set_property("cmake_file_name", "md4c")
+        self.cpp_info.set_property("cmake_target_name", "md4c::md4c")
+        self.cpp_info.set_property("pkg_config_name", "md4c")
+
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
