@@ -77,6 +77,7 @@ class CycloneDDSConan(ConanFile):
             self.requires("iceoryx/2.0.0")
         if self.options.ssl:
             self.requires("openssl/1.1.1q")
+        self.tool_requires("cmake/3.16.2")
 
     def validate(self):
         compiler = self.settings.compiler
@@ -179,6 +180,9 @@ class CycloneDDSConan(ConanFile):
         self.cpp_info.components["ddsc"].requires = requires
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["ddsc"].system_libs = ["pthread"]
+            libcxx = tools.stdcpp_library(self)
+            if libcxx and not self.options.shared:
+                self.cpp_info.components["ddsc"].system_libs.append(libcxx)
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["ddsc"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["ddsc"].build_modules["cmake_find_package_multi"] = [
