@@ -1341,7 +1341,7 @@ Examples = bin/datadir/examples""")
         if self.options.get_safe("qtwinextras"):
             _create_module("WinExtras")
 
-        if self.options.qtmacextras:
+        if self.options.get_safe("qtmacextras"):
             _create_module("MacExtras")
 
         if self.options.qtxmlpatterns:
