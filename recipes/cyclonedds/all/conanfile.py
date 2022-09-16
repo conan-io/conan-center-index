@@ -28,8 +28,8 @@ class CycloneDDSConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "ssl": True,
-        "shm": True,
+        "ssl": False,
+        "shm": False,
         "security": False
     }
 
