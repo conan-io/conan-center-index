@@ -42,6 +42,8 @@ class LibBigWigConan(ConanFile):
         except Exception:
             pass
 
+        # Workaround weird gsasl link error
+        # See: https://github.com/conan-io/conan-center-index/pull/12195#issuecomment-1214193211
         if self.options.with_curl:
             self.options["libcurl"].with_imap = False
             self.options["libcurl"].with_pop3 = False
