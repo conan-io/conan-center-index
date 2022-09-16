@@ -97,6 +97,9 @@ class LibBigWigConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "BigWig")
         self.cpp_info.set_property("cmake_target_name", "BigWig::BigWig")
 
+        if not self.options.with_curl:
+            self.cpp_info.defines = ["NOCURL"]
+
         # TODO: Remove in Conan 2.0
         self.cpp_info.names["cmake_find_package"] = "BigWig"
         self.cpp_info.names["cmake_find_package_multi"] = "BigWig"
