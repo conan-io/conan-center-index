@@ -26,16 +26,11 @@ sources:
 patches:
   "1.1.8":
     - patch_file: "patches/0002-allow-c++11-std-1.1.8.patch"
-      base_path: "source_subfolder"
   "1.1.6":
     - patch_file: "patches/0002-allow-c++11-std-1.1.6.patch"
-      base_path: "source_subfolder"
   "1.1.5":
     - patch_file: "patches/0002-allow-c++11-std-1.1.5.patch"
-      base_path: "source_subfolder"
   "1.1.1":
     - patch_file: "patches/0001-fix-spirv-cross-includes-1.1.x.patch"
-      base_path: "source_subfolder"
   "1.1.0":
     - patch_file: "patches/0001-fix-spirv-cross-includes-1.1.x.patch"
-      base_path: "source_subfolder"

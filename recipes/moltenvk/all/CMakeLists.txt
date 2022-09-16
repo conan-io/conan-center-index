@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 project(MoltenVK)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup(TARGETS KEEP_RPATHS)
-
 if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR
         CMAKE_SYSTEM_NAME STREQUAL "iOS" OR
         CMAKE_SYSTEM_NAME STREQUAL "tvOS"))
@@ -13,11 +10,12 @@ endif()
 option(MVK_WITH_SPIRV_TOOLS "Build MoltenVK without the MVK_EXCLUDE_SPIRV_TOOLS build setting" ON)
 option(MVK_BUILD_SHADERCONVERTER_TOOL "Build MoltenVKShaderConverter" ON)
 
-set(MVK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
-set(MVK_COMMON_DIR ${MVK_DIR}/common)
-set(MVK_SC_DIR ${MVK_DIR}/MoltenVKShaderConverter)
-set(MVK_LIB_DIR ${MVK_DIR}/MoltenVK)
+set(MVK_COMMON_DIR ${MVK_SRC_DIR}/common)
+set(MVK_SC_DIR ${MVK_SRC_DIR}/MoltenVKShaderConverter)
+set(MVK_LIB_DIR ${MVK_SRC_DIR}/MoltenVK)
 set(MVK_INSTALL_TARGETS "")
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 # PIC required for objects targets linked into shared MoltenVK
 if(BUILD_SHARED_LIBS)
@@ -25,6 +23,8 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 find_package(cereal REQUIRED CONFIG)
+find_package(glslang REQUIRED glslang SPIRV CONFIG)
+find_package(spirv-cross REQUIRED CONFIG)
 find_package(VulkanHeaders REQUIRED CONFIG)
 if(MVK_WITH_SPIRV_TOOLS)
     find_package(SPIRV-Tools REQUIRED CONFIG)
@@ -108,12 +108,15 @@ target_include_directories(MoltenVKShaderConverter
 )
 target_link_libraries(MoltenVKShaderConverter
     PRIVATE
-        CONAN_PKG::glslang
+        glslang::glslang
+        glslang::SPIRV
         MoltenVKCommon
         $<$<BOOL:${MVK_WITH_SPIRV_TOOLS}>:SPIRV-Tools>
         ${FOUNDATION_FRAMEWORK}
     PUBLIC
-        CONAN_PKG::spirv-cross
+        spirv-cross-core
+        spirv-cross-msl
+        spirv-cross-reflect
 )
 target_compile_definitions(MoltenVKShaderConverter PRIVATE
     $<$<NOT:$<BOOL:${MVK_WITH_SPIRV_TOOLS}>>:MVK_EXCLUDE_SPIRV_TOOLS>
@@ -180,7 +183,6 @@ target_include_directories(MoltenVK PRIVATE
 target_link_libraries(MoltenVK
     PRIVATE
         cereal
-        CONAN_PKG::spirv-cross
         MoltenVKCommon
         MoltenVKShaderConverter
         ${FOUNDATION_FRAMEWORK}
@@ -190,7 +192,6 @@ target_link_libraries(MoltenVK
         $<$<NOT:$<PLATFORM_ID:Darwin>>:${UIKIT_FRAMEWORK}>
     PUBLIC
         Vulkan::Headers
-        $<$<VERSION_LESS:${MVK_VERSION},1.1.0>:CONAN_PKG::vulkan-portability>
         ${METAL_FRAMEWORK}
         ${IOSURFACE_FRAMEWORK}
         ${COREGRAPHICS_FRAMEWORK}
@@ -212,7 +213,7 @@ list(APPEND MVK_INSTALL_TARGETS MoltenVK)
 #  - if moltenvk >= 1.0.44: moltenvk commit hash in mvkRevString variable (but we still
 #    use spirv-cross commit hash, since MoltenVK hash is not available in this context,
 #    and hash value is no really important)
-set(MVK_REV_FILE ${MVK_DIR}/ExternalRevisions/SPIRV-Cross_repo_revision)
+set(MVK_REV_FILE ${MVK_SRC_DIR}/ExternalRevisions/SPIRV-Cross_repo_revision)
 set(MVK_REV_HEADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/mvk_hash_generated)
 if(MVK_VERSION VERSION_LESS "1.0.44")
     set(MVK_REV_HEADER ${MVK_REV_HEADER_DIR}/SPIRV-Cross/mvkSpirvCrossRevisionDerived.h)

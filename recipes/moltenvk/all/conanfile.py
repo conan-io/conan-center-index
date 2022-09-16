@@ -1,10 +1,14 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanException, ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get
+from conan.tools.scm import Version
 import functools
 import os
 import yaml
 
-required_conan_version = ">=1.35.0"
+required_conan_version = ">=1.51.1"
 
 
 class MoltenVKConan(ConanFile):
@@ -33,12 +37,6 @@ class MoltenVKConan(ConanFile):
         "tools": True,
     }
 
-    generators = "cmake", "cmake_find_package_multi"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     @property
     def _dependencies_filename(self):
         return f"dependencies-{self.version}.yml"
@@ -54,19 +52,22 @@ class MoltenVKConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11 if tools.Version(self.version) < "1.1.9" else 17
+        return 11 if Version(self.version) < "1.1.9" else 17
 
     def export(self):
-        self.copy(self._dependencies_filename, src="dependencies", dst="dependencies")
+        copy(self, f"dependencies/{self._dependencies_filename}", self.recipe_folder, self.export_folder)
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("cereal/1.3.1")
@@ -84,45 +85,54 @@ class MoltenVKConan(ConanFile):
     def package_id(self):
         # MoltenVK >=1.O.42 requires at least XCode 12.0 (11.4 actually) at build
         # time but can be consumed by older compiler versions if shared
-        if tools.Version(self.version) >= "1.0.42" and self.options.shared:
-            if tools.Version(self.settings.compiler.version) < "12.0":
+        if Version(self.version) >= "1.0.42" and self.options.shared:
+            if Version(self.settings.compiler.version) < "12.0":
                 compatible_pkg = self.info.clone()
                 compatible_pkg.settings.compiler.version = "12.0"
                 self.compatible_packages.append(compatible_pkg)
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._min_cppstd)
-        if self.settings.os not in ["Macos", "iOS", "tvOS"]:
-            raise ConanInvalidConfiguration("MoltenVK only supported on MacOS, iOS and tvOS")
-        if self.settings.compiler != "apple-clang":
-            raise ConanInvalidConfiguration("MoltenVK requires apple-clang")
-        if tools.Version(self.version) >= "1.0.42":
-            if tools.Version(self.settings.compiler.version) < "12.0":
-                raise ConanInvalidConfiguration("MoltenVK {} requires XCode 12.0 or higher at build time".format(self.version))
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        if self.info.settings.os not in ["Macos", "iOS", "tvOS"]:
+            raise ConanInvalidConfiguration(f"{self.ref} only supported on MacOS, iOS and tvOS")
+        if self.info.settings.compiler != "apple-clang":
+            raise ConanInvalidConfiguration(f"{self.ref} requires apple-clang")
+        if Version(self.version) >= "1.0.42" and not self.info.options.shared:
+            if Version(self.info.settings.compiler.version) < "12.0":
+                raise ConanInvalidConfiguration(f"{self.ref} static requires XCode 12.0 or higher at build & consume time")
+
+    def validate_build(self):
+        if Version(self.version) >= "1.0.42":
+            if Version(self.settings.compiler.version) < "12.0":
+                raise ConanInvalidConfiguration(f"{self.ref} requires XCode 12.0 or higher at build time")
+        spirv_cross = self.dependencies["spirv-cross"]
+        if spirv_cross.options.shared or not spirv_cross.options.msl or not spirv_cross.options.reflect:
+            raise ConanInvalidConfiguration(f"{self.ref} requires spirv-cross static with msl & reflect enabled")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["MVK_VERSION"] = self.version
-        cmake.definitions["MVK_WITH_SPIRV_TOOLS"] = self.options.with_spirv_tools
-        cmake.definitions["MVK_BUILD_SHADERCONVERTER_TOOL"] = self.options.tools
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["MVK_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["MVK_VERSION"] = self.version
+        tc.variables["MVK_WITH_SPIRV_TOOLS"] = self.options.with_spirv_tools
+        tc.variables["MVK_BUILD_SHADERCONVERTER_TOOL"] = self.options.tools
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
@@ -135,12 +145,12 @@ class MoltenVKConan(ConanFile):
 
         if self.options.shared:
             moltenvk_icd_path = os.path.join(self.package_folder, "lib", "MoltenVK_icd.json")
-            self.output.info("Prepending to VK_ICD_FILENAMES runtime environment variable: {}".format(moltenvk_icd_path))
+            self.output.info(f"Prepending to VK_ICD_FILENAMES runtime environment variable: {moltenvk_icd_path}")
             self.runenv_info.prepend_path("VK_ICD_FILENAMES", moltenvk_icd_path)
             # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
             self.env_info.VK_ICD_FILENAMES.append(moltenvk_icd_path)
 
         if self.options.tools:
             bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.output.info(f"Appending PATH environment variable: {bin_path}")
             self.env_info.PATH.append(bin_path)
