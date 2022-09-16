@@ -93,10 +93,6 @@ class CycloneDDSConan(ConanFile):
             if version < "16":
                 raise ConanInvalidConfiguration("Cyclone DDS is just supported"\
                                                 "for Visual Studio 2019 and higher.")
-            if self.options.shared:
-                raise ConanInvalidConfiguration(
-                    'Using Cyclone DDS with Visual Studio currently just possible'\
-                    'with "shared=False"')
         elif compiler == "gcc":
             if version < "6":
                 raise ConanInvalidConfiguration("Using Cyclone DDS with gcc requires"\
@@ -181,6 +177,8 @@ class CycloneDDSConan(ConanFile):
         if self.options.ssl:
             requires.append("openssl::openssl")
         self.cpp_info.components["ddsc"].requires = requires
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["ddsc"].system_libs = ["pthread"]
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["ddsc"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["ddsc"].build_modules["cmake_find_package_multi"] = [
