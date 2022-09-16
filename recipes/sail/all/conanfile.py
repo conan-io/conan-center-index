@@ -29,7 +29,7 @@ class SAILConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "thread_safe": True,
-        "with_avif": True,
+        "with_avif": False,
         "with_gif": True,
         "with_jpeg2000": True,
         "with_jpeg": "libjpeg",
