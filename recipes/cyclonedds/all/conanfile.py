@@ -36,7 +36,6 @@ class CycloneDDSConan(ConanFile):
     generators = ["cmake", "cmake_find_package_multi"]
     _cmake = None
     short_paths = True
-    tool_requires = ["cmake/3.16.2"]
 
     @property
     def _module_file_rel_path(self):
@@ -78,6 +77,9 @@ class CycloneDDSConan(ConanFile):
             self.requires("iceoryx/2.0.0")
         if self.options.ssl:
             self.requires("openssl/1.1.1q")
+    
+    def build_requirements(self):
+        self.tool_requires("cmake/3.16.2")
 
     def validate(self):
         compiler = self.settings.compiler
