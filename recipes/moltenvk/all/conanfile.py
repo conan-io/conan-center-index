@@ -31,7 +31,7 @@ class MoltenVKConan(ConanFile):
         "tools": [True, False],
     }
     default_options = {
-        "shared": False,
+        "shared": True,
         "fPIC": True,
         "with_spirv_tools": True,
         "tools": True,
