@@ -24,3 +24,10 @@ elseif ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID STREQUA
     endif()
   endforeach()
 endif()
+
+## TODO: workaround for arm compilation issue : https://github.com/xtensor-stack/xsimd/issues/735
+IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
+  target_compile_options(${PROJECT_NAME}
+    PRIVATE -flax-vector-conversions
+    PRIVATE -fsigned-char)
+endif()
