@@ -166,7 +166,7 @@ class CycloneDDSConan(ConanFile):
         if self.settings.os == "Windows":
             for MS_runtime_file in self._MS_runtime_files:
                 if os.path.exists(os.path.join(self.package_folder,MS_runtime_file)):
-                    files.rm(self,os.path.join(self.package_folder,MS_runtime_file))
+                    files.rm(self, MS_runtime_file, self.package_folder)
 
     def package_info(self):
         self._create_cmake_module_alias_targets(
