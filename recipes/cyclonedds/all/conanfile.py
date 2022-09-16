@@ -45,6 +45,18 @@ class CycloneDDSConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _MS_runtime_files(self):
+        return ["./bin/concrt140.dll",
+                "./bin/msvcp140.dll",
+                "./bin/msvcp140_1.dll",
+                "./bin/msvcp140_2.dll",
+                "./bin/msvcp140_atomic_wait.dll",
+                "./bin/msvcp140_codecvt_ids.dll",
+                "./bin/vcruntime140.dll",
+                "./bin/vcruntime140_1.dll"
+                ]
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -151,6 +163,10 @@ class CycloneDDSConan(ConanFile):
         files.rmdir(self, os.path.join(self.package_folder, "share"))
         files.rmdir(self, os.path.join(self.package_folder, "lib","pkgconfig"))
         files.rmdir(self, os.path.join(self.package_folder, "lib","cmake","CycloneDDS"))
+        if self.settings.os == "Windows":
+            for MS_runtime_file in self._MS_runtime_files:
+                if os.path.exists(os.path.join(self.package_folder,MS_runtime_file)):
+                    files.rm(self,os.path.join(self.package_folder,MS_runtime_file))
 
     def package_info(self):
         self._create_cmake_module_alias_targets(
