@@ -26,7 +26,7 @@ class LibBigWigConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_curl": True,
+        "with_curl": False,
         "with_zlibng": False
     }
 
