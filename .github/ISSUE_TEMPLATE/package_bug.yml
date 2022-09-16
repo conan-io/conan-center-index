@@ -32,12 +32,12 @@ body:
 - type: textarea
   attributes:
     label:  Steps to reproduce
-    description: Include if Applicable
+    description: Which commands did you run? e.g. `conan install -r conancenter foobar/0.1.0@ -pr:b=default -pr:h=default`
 
 - type: textarea
   attributes:
     label:  Logs
-    description: Include/Attach if Applicable
+    description: Include/Attach the entire command output here.
     value: |
       <details><summary>Click to expand log</summary>
 
