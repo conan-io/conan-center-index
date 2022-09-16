@@ -1,12 +1,16 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanException, ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get, replace_in_file, rename, patch, rm, mkdir
+from conan.tools.scm import Version
+from conans import CMake
 import functools
 import glob
 import os
 import shutil
 import yaml
 
-required_conan_version = ">=1.35.0"
+required_conan_version = ">=1.50.0"
 
 
 class VulkanValidationLayersConan(ConanFile):
@@ -78,13 +82,13 @@ class VulkanValidationLayersConan(ConanFile):
         # TODO: set private=True, once the issue is resolved https://github.com/conan-io/conan/issues/9390
         self.requires(self._require("spirv-tools"), private=not hasattr(self, "settings_build"))
         self.requires(self._require("vulkan-headers"))
-        # TODO: use tools.Version comparison once https://github.com/conan-io/conan/issues/10000 is fixed
+        # TODO: use Version comparison once https://github.com/conan-io/conan/issues/10000 is fixed
         if self._greater_equal_semver(self.version, "1.2.173"):
             self.requires("robin-hood-hashing/3.11.5")
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
         if self.options.get_safe("with_wsi_wayland"):
-            self.requires("wayland/1.20.0")
+            self.requires("wayland/1.21.0")
 
     def _require(self, recipe_name):
         if recipe_name not in self._dependencies_versions:
@@ -93,16 +97,16 @@ class VulkanValidationLayersConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            check_min_cppstd(self, 11)
 
         if self.options["spirv-tools"].shared:
             raise ConanInvalidConfiguration("vulkan-validationlayers can't depend on shared spirv-tools")
 
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("gcc < 5 is not supported")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         self._patch_sources()
@@ -110,9 +114,9 @@ class VulkanValidationLayersConan(ConanFile):
         cmake.build()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "FindVulkanHeaders.cmake"),
+        for data in self.conan_data.get("patches", {}).get(self.version, []):
+            patch(self, **data)
+        replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "FindVulkanHeaders.cmake"),
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
         # FIXME: two CMake module/config files should be generated (SPIRV-ToolsConfig.cmake and SPIRV-Tools-optConfig.cmake),
@@ -144,18 +148,18 @@ class VulkanValidationLayersConan(ConanFile):
         if self.settings.os == "Windows":
             # import lib is useless, validation layers are loaded at runtime
             lib_dir = os.path.join(self.package_folder, "lib")
-            tools.remove_files_by_mask(lib_dir, "VkLayer_khronos_validation.lib")
-            tools.remove_files_by_mask(lib_dir, "libVkLayer_khronos_validation.dll.a")
+            rm(self, lib_dir, "VkLayer_khronos_validation.lib")
+            rm(self, lib_dir, "libVkLayer_khronos_validation.dll.a")
             # move dll and json manifest files in bin folder
             bin_dir = os.path.join(self.package_folder, "bin")
-            tools.mkdir(bin_dir)
+            mkdir(self, bin_dir)
             for ext in ("*.dll", "*.json"):
                 for bin_file in glob.glob(os.path.join(lib_dir, ext)):
                     shutil.move(bin_file, os.path.join(bin_dir, os.path.basename(bin_file)))
         else:
             # Move json files to res, but keep in mind to preserve relative
             # path between module library and manifest json file
-            tools.rename(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
+            rename(self, os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
 
     def package_info(self):
         self.cpp_info.libs = ["VkLayer_utils"]
