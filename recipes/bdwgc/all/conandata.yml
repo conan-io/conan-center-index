@@ -13,3 +13,5 @@ patches:
     - patch_file: "patches/update-cmake-8_0_4.patch"
   "8.0.6":
     - patch_file: "patches/update-cmake-8_0_6.patch"
+  "8.2.2":
+    - patch_file: "patches/update-cmake-8_2_2.patch"
