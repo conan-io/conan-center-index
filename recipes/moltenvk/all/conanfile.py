@@ -70,7 +70,7 @@ class MoltenVKConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cereal/1.3.1")
+        self.requires("cereal/1.3.2")
         self.requires(self._require("glslang"))
         self.requires(self._require("spirv-cross"))
         self.requires(self._require("vulkan-headers"))
