@@ -7,5 +7,5 @@ conan_basic_setup(TARGETS)
 
 find_package(md4c CONFIG REQUIRED)
 
-add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
+add_executable(${PROJECT_NAME} ../test_package/test_package.c)
 target_link_libraries(${PROJECT_NAME} PRIVATE md4c::md4c)
