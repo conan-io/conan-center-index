@@ -93,9 +93,9 @@ class CycloneDDSConan(ConanFile):
             build.check_min_cppstd(self, 14)
 
         if compiler == "Visual Studio":
-            if version < "16":
-                raise ConanInvalidConfiguration("Cyclone DDS is just supported"\
-                                                "for Visual Studio 2019 and higher.")
+            # ToDo : determine windows error and find solution (at test_package)
+            raise ConanInvalidConfiguration("Cyclone DDS is not (yet) supported"\
+                                                "for Visual Studio compiler.")
         elif compiler == "gcc":
             if version < "6":
                 raise ConanInvalidConfiguration("Using Cyclone DDS with gcc requires"\
