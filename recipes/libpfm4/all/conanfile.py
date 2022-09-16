@@ -1,5 +1,7 @@
 from conan import ConanFile
-from conan.tools.files import get, chdir, rmdir, collect_libs
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.files import get, rmdir, copy, replace_in_file
 import os
 
 
@@ -8,51 +10,80 @@ class Libpfm4Conan(ConanFile):
     license = "MIT"
     homepage = "https://github.com/wcohen/libpfm4"
     url = "https://github.com/conan-io/conan-center-index"
-    description = (
-        "a helper library to program the performance monitoring events")
+    description = ("A helper library to program the performance monitoring events")
     topics = ("perf", "pmu", "benchmark", "microbenchmark")
-
-    # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    # Sources are located in the same place as this recipe, copy them to the recipe
-    exports_sources = "src/*"
-
-    def source(self):
-        get(self,
-                  **self.conan_data['sources'][self.version],
-                  strip_root=True,
-                  destination=self.source_folder)
-
     def config_options(self):
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+
+    def layout(self):
+        basic_layout(self)
+
+    def source(self):
+        get(self, **self.conan_data['sources'][self.version],
+                  strip_root=True,
+                  destination=self.source_folder)
+
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.generate()
+
+    def _patch_sources(self):
+        if not self.options.shared:
+            # honor fPIC option
+            replace_in_file(self, os.path.join(self.source_folder, "rules.mk"), "-fPIC", "")
+            replace_in_file(self, os.path.join(self.source_folder, "rules.mk"), "-DPIC", "")
+
     def build(self):
-        with chdir(self, self.source_folder):
-            self.run('make')
+        self._patch_sources()
+        args = [
+            'DBG=',
+            'CONFIG_PFMLIB_SHARED={}'.format("y" if self.options.shared else "n"),
+            f'-C {self.source_folder}'
+        ]
+        autotools = Autotools(self)
+        autotools.make(args=args)
 
     def package(self):
-        make_params = {
-            'DESTDIR': self.package_folder + os.sep,
-            'INCDIR': 'include' + os.sep,
-            'LIBDIR': 'lib' + os.sep,
-        }
+        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        args = [
+            'DBG=',
+            'LDCONFIG=true',
+            'CONFIG_PFMLIB_SHARED={}'.format("y" if self.options.shared else "n"),
+            f'DESTDIR={self.package_folder}{os.sep}',
+            f'INCDIR=include{os.sep}',
+            f'LIBDIR=lib{os.sep}',
+            f'-C {self.source_folder}'
+        ]
         # due to bug, Mac install phase fails with config shared
         if self.settings.os == 'Macos':
-            make_params['CONFIG_PFMLIB_SHARED'] = 'n'
-        make_params_str = ' '.join('{}={}'.format(k, v)
-                                   for k, v in make_params.items())
-        self.copy("COPYING", dst="licenses", src=self.source_folder)
-        self.copy("include/perfmon/err.h", dst=".", src=self.source_folder)
-        with chdir(self, self.source_folder):
-            self.run('make install {}'.format(make_params_str))
+            args.append('CONFIG_PFMLIB_SHARED=n')
+
+        copy(self, "err.h", dst=os.path.join(self.package_folder, "include", "perfmon"), src=os.path.join(self.source_folder, "include", "perfmon"))
+        autotools = Autotools(self)
+        autotools.install(args=args)
         rmdir(self, os.path.join(self.package_folder, "usr"))
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
-        self.cpp_info.includedirs = ["include"]
+        self.cpp_info.libs = ["pfm"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.system_libs = ["pthread", "m"]
