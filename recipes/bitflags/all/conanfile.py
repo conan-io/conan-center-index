@@ -31,12 +31,15 @@ class BitFlags(ConanFile):
     def layout(self):
         basic_layout(self)
 
+    def package_id(self):
+        self.info.clear()
+
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
         try:
             if Version(self.settings.compiler.version) < self._minimum_compilers_version[str(self.settings.compiler)]:
-                raise ConanInvalidConfiguration(f"{self.name} requires a compiler that supports C++{self._minimum_cpp_standard}. {self.settings.compiler}, {self.settings.compiler.version}")
+                raise ConanInvalidConfiguration(f"{self.ref} requires a compiler that supports C++{self._minimum_cpp_standard}.)
         except KeyError:
             self.output.warn("Unknown compiler encountered. Assuming it supports C++11.")
 
@@ -48,13 +51,9 @@ class BitFlags(ConanFile):
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, pattern="*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
 
-    def package_id(self):
-        self.info.clear()
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "bitflags")
         self.cpp_info.set_property("cmake_target_name", "bitflags::bitflags")
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "bitflags"
-        self.cpp_info.names["cmake_find_package_multi"] = "bitflags"
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
