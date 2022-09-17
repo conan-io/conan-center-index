@@ -151,7 +151,7 @@ class MoltenVKConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["MoltenVK"]
-        self.cpp_info.frameworks = ["Metal", "Foundation", "QuartzCore", "IOSurface", "CoreGraphics"]
+        self.cpp_info.frameworks = ["Metal", "Foundation", "CoreFoundation", "QuartzCore", "IOSurface", "CoreGraphics"]
         if self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(["AppKit", "IOKit"])
         elif self.settings.os in ["iOS", "tvOS"]:
