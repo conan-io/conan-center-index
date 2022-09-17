@@ -9,6 +9,9 @@ endif()
 
 option(MVK_WITH_SPIRV_TOOLS "Build MoltenVK without the MVK_EXCLUDE_SPIRV_TOOLS build setting" ON)
 option(MVK_BUILD_SHADERCONVERTER_TOOL "Build MoltenVKShaderConverter" ON)
+if(MVK_VERSION VERSION_GREATER_EQUAL "1.1.7" AND BUILD_SHARED_LIBS)
+    option(MVK_HIDE_VULKAN_SYMBOLS "Hide Vulkan symbols" OFF)
+endif()
 
 set(MVK_COMMON_DIR ${MVK_SRC_DIR}/common)
 set(MVK_SC_DIR ${MVK_SRC_DIR}/MoltenVKShaderConverter)
@@ -204,6 +207,9 @@ if(BUILD_SHARED_LIBS)
         OBJCXX_VISIBILITY_PRESET hidden
         VISIBILITY_INLINES_HIDDEN ON
     )
+    if(MVK_VERSION VERSION_GREATER_EQUAL "1.1.7" AND MVK_HIDE_VULKAN_SYMBOLS)
+        target_compile_definitions(MoltenVK PRIVATE MVK_HIDE_VULKAN_SYMBOLS)
+    endif()
 endif()
 list(APPEND MVK_INSTALL_TARGETS MoltenVK)
 

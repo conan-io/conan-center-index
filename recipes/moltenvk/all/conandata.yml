@@ -27,8 +27,27 @@ sources:
     url: "https://github.com/KhronosGroup/MoltenVK/archive/v1.1.0.tar.gz"
     sha256: "0538fa1c23ddae495c7f82ccd0db90790a90b7017a258ca7575fbae8021f3058"
 patches:
+  "1.1.11":
+    - patch_file: "patches/0003-vulkan-alias-private-extern-1.1.11.patch"
+      patch_description: "Fix vulkan alias symbols when vulkan symbols are hidden"
+      patch_type: "backport"
+      patch_source: "https://github.com/KhronosGroup/MoltenVK/pull/1718"
+  "1.1.10":
+    - patch_file: "patches/0003-vulkan-alias-private-extern-1.1.8.patch"
+      patch_description: "Fix vulkan alias symbols when vulkan symbols are hidden"
+      patch_type: "backport"
+      patch_source: "https://github.com/KhronosGroup/MoltenVK/pull/1718"
+  "1.1.9":
+    - patch_file: "patches/0003-vulkan-alias-private-extern-1.1.8.patch"
+      patch_description: "Fix vulkan alias symbols when vulkan symbols are hidden"
+      patch_type: "backport"
+      patch_source: "https://github.com/KhronosGroup/MoltenVK/pull/1718"
   "1.1.8":
     - patch_file: "patches/0002-allow-c++11-std-1.1.8.patch"
+    - patch_file: "patches/0003-vulkan-alias-private-extern-1.1.8.patch"
+      patch_description: "Fix vulkan alias symbols when vulkan symbols are hidden"
+      patch_type: "backport"
+      patch_source: "https://github.com/KhronosGroup/MoltenVK/pull/1718"
   "1.1.6":
     - patch_file: "patches/0002-allow-c++11-std-1.1.6.patch"
   "1.1.5":

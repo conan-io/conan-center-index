@@ -27,12 +27,14 @@ class MoltenVKConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "hide_vulkan_symbols": [True, False],
         "with_spirv_tools": [True, False],
         "tools": [True, False],
     }
     default_options = {
         "shared": True,
         "fPIC": True,
+        "hide_vulkan_symbols": False,
         "with_spirv_tools": True,
         "tools": True,
     }
@@ -54,6 +56,10 @@ class MoltenVKConan(ConanFile):
     def _min_cppstd(self):
         return 11 if Version(self.version) < "1.1.9" else 17
 
+    @property
+    def _has_hide_vulkan_symbols_option(self):
+        return Version(self.version) >= "1.1.7"
+
     def export(self):
         copy(self, f"dependencies/{self._dependencies_filename}", self.recipe_folder, self.export_folder)
 
@@ -62,9 +68,15 @@ class MoltenVKConan(ConanFile):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
             copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
+    def config_options(self):
+        if not self._has_hide_vulkan_symbols_option:
+            del self.options.hide_vulkan_symbols
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        elif self._has_hide_vulkan_symbols_option:
+            del self.options.hide_vulkan_symbols
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -120,6 +132,8 @@ class MoltenVKConan(ConanFile):
         tc.variables["MVK_VERSION"] = self.version
         tc.variables["MVK_WITH_SPIRV_TOOLS"] = self.options.with_spirv_tools
         tc.variables["MVK_BUILD_SHADERCONVERTER_TOOL"] = self.options.tools
+        if self._has_hide_vulkan_symbols_option and self.options.shared:
+            tc.variables["MVK_HIDE_VULKAN_SYMBOLS"] = self.options.hide_vulkan_symbols
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
