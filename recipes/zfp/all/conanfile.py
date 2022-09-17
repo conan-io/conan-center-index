@@ -120,7 +120,7 @@ class ZfpConan(ConanFile):
             self.cpp_info.components["_zfp"].exelinkflags = openmp_flags
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["_zfp"].system_libs.append("m")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["_zfp"].names["cmake_find_package"] = "zfp"
