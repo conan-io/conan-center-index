@@ -26,7 +26,6 @@ class BdwGcConan(ConanFile):
         ("handle_fork",                 True,),
         ("thread_local_alloc",          True,),
         ("threads_discovery",           True,),
-        ("parallel_mark",               True,),
         ("gcj_support",                 True,),
         ("java_finalization",           True,),
         ("sigrt_signals",               False,),
@@ -40,7 +39,6 @@ class BdwGcConan(ConanFile):
         ("munmap",                      True,),
         ("dynamic_loading",             True,),
         ("register_main_static_data",   True,),
-        ("gc_assertions",               False,),
         ("checksums",                   False,),
         ("single_obj_compilation",      False,),
     )
