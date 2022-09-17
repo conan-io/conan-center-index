@@ -1,7 +1,11 @@
+import os
+
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
-import os
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.50.0"
 
@@ -16,8 +20,25 @@ class BitFlags(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
+    @property
+    def _minimum_compilers_version(self):
+        return {"apple-clang": "5", "clang": "5", "gcc": "7", "Visual Studio": "14"}
+
+    @property
+    def _minimum_cpp_standard(self):
+        return 11
+
     def layout(self):
         basic_layout(self)
+
+    def validate(self):
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._minimum_cpp_standard)
+        try:
+            if Version(self.settings.compiler.version) < self._minimum_compilers_version[str(self.settings.compiler)]:
+                raise ConanInvalidConfiguration(f"{self.name} requires a compiler that supports C++{self._minimum_cpp_standard}. {self.settings.compiler}, {self.settings.compiler.version}")
+        except KeyError:
+            self.output.warn("Unknown compiler encountered. Assuming it supports C++11.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True,
