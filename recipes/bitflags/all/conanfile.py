@@ -39,7 +39,7 @@ class BitFlags(ConanFile):
             check_min_cppstd(self, self._minimum_cpp_standard)
         try:
             if Version(self.settings.compiler.version) < self._minimum_compilers_version[str(self.settings.compiler)]:
-                raise ConanInvalidConfiguration(f"{self.ref} requires a compiler that supports C++{self._minimum_cpp_standard}.)
+                raise ConanInvalidConfiguration(f"{self.ref} requires a compiler that supports C++{self._minimum_cpp_standard}.")
         except KeyError:
             self.output.warn("Unknown compiler encountered. Assuming it supports C++11.")
 
