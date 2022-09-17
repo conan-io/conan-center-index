@@ -9,5 +9,5 @@ patches:
   "1.1.5":
     - patch_file: "patches/1.1.5-0002-export-symbols.patch"
   "1.1.4":
-    - patch_file: "patches/0001-make-restrict-alias.patch"
-    - patch_file: "patches/0002-export-symbols.patch"
+    - patch_file: "patches/1.1.4-0001-make-restrict-alias.patch"
+    - patch_file: "patches/1.1.4-0002-export-symbols.patch"
