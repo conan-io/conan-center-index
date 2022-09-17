@@ -1,12 +1,12 @@
 import os
 import textwrap
 from conan import ConanFile
-from conans import CMake
 from conan.errors import ConanInvalidConfiguration
 from conan.tools import files, build, scm
+from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps
+from conan.tools.layout import cmake_layout
 
 required_conan_version = ">=1.43.0"
-
 
 class CycloneDDSConan(ConanFile):
     name = "cyclonedds"
@@ -33,8 +33,6 @@ class CycloneDDSConan(ConanFile):
         "security": False
     }
 
-    generators = ["cmake", "cmake_find_package_multi"]
-    _cmake = None
     short_paths = True
 
     @property
@@ -44,21 +42,19 @@ class CycloneDDSConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _MS_runtime_files(self):
-        return ["concrt140.dll",
-                "msvcp140.dll",
-                "msvcp140_1.dll",
-                "msvcp140_2.dll",
-                "msvcp140_atomic_wait.dll",
-                "msvcp140_codecvt_ids.dll",
-                "vcruntime140.dll",
-                "vcruntime140_1.dll"
-                ]
+    
+    def _create_cmake_module_alias_targets(self, module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        files.save(self, module_file, content)
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
@@ -118,54 +114,43 @@ class CycloneDDSConan(ConanFile):
         files.get(self,**self.conan_data["sources"][self.version], strip_root=True,
                  destination=self._source_subfolder)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            files.patch(self,**patch)
+    def layout(self):
+        cmake_layout(self)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
+    def generate(self):
 
-        self._cmake.definitions["BUILD_IDLC"] = False
-        self._cmake.definitions["BUILD_DDSPERF"] = False
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-        self._cmake.definitions["BUILD_IDLC_TESTING"] = False
-        # ToDo : check how to build static + security
-        self._cmake.definitions["ENABLE_SECURITY"] = self.options.security
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
-        self._cmake.definitions["ENABLE_SSL"] = self.options.ssl
-        self._cmake.definitions["ENABLE_SHM"] = self.options.shm
-        self._cmake.configure()
-        return self._cmake
+        tc = CMakeToolchain(self)
+        # ToDo : determine how to do in conan : 
+        # - idlc is a code generator that is used as tool (and so not cross compiled)
+        # - other tools like ddsperf is cross compiled for target
+        # - maybe separate package like cyclonedds_idlc 
+        tc.variables["BUILD_IDLC"]            = False
+        tc.variables["BUILD_IDLC_TESTING"]    = False
+        tc.variables["BUILD_DDSPERF"]         = False
+        tc.variables["BUILD_IDLC_TESTING"]    = False
+        # variables which effects build
+        tc.variables["BUILD_SHARED_LIBS"]     = self.options.shared
+        tc.variables["ENABLE_SSL"]            = self.options.ssl 
+        tc.variables["ENABLE_SHM"]            = self.options.shm
+        tc.variables["ENABLE_SECURITY"]       = self.options.security
+        tc.generate()
 
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """.format(alias=alias, aliased=aliased))
-        files.save(self, module_file, content)
+        cd = CMakeDeps(self)
+        cd.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        files.apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=self._source_subfolder)
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         files.rmdir(self, os.path.join(self.package_folder, "share"))
         files.rmdir(self, os.path.join(self.package_folder, "lib","pkgconfig"))
         files.rmdir(self, os.path.join(self.package_folder, "lib","cmake","CycloneDDS"))
-        if self.settings.os == "Windows":
-            for MS_runtime_file in self._MS_runtime_files:
-                if os.path.exists(os.path.join(self.package_folder,"bin",MS_runtime_file)):
-                    files.rm(self, MS_runtime_file, os.path.join(self.package_folder,"bin"))
 
     def package_info(self):
         self._create_cmake_module_alias_targets(
