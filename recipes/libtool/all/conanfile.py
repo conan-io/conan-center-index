@@ -115,7 +115,7 @@ class LibtoolConan(ConanFile):
             env.define("LD", "link")
             env.define("CXXCPP", "cl -nologo -EP")
             env.define("CPP", "cl -nologo -EP")
-            env.define("AR", f"{unix_path(self, self.conf.get('tools.automake:ar-lib'))} lib")
+            env.define("AR", f"{unix_path(self, self.deps_user_info['automake'].ar_lib)} lib")
             env.define("LD", "link")
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
