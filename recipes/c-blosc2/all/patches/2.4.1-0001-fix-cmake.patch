@@ -1,8 +1,18 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 866c7f6..f6f62ba 100644
+index 866c7f6..038b848 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -144,26 +144,17 @@ if(BUILD_LITE)
+@@ -68,7 +68,8 @@ if(NOT WIN32)
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
+ endif()
+ 
+-cmake_minimum_required(VERSION 3.16.3)
++## TODO: dirty fix.
++cmake_minimum_required(VERSION 3.15)
+ if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER 3.4)
+   cmake_policy(SET CMP0063 NEW)
+ endif()
+@@ -144,26 +145,17 @@ if(BUILD_LITE)
  endif()
  
  if(PREFER_EXTERNAL_LZ4)
@@ -32,7 +42,7 @@ index 866c7f6..f6f62ba 100644
          message(STATUS "Using ZLIB-NG internal sources for ZLIB support.")
          set(HAVE_ZLIB_NG TRUE)
          add_definitions(-DZLIB_COMPAT)
-@@ -184,7 +175,7 @@ endif()
+@@ -184,7 +176,7 @@ endif()
  
  if(NOT DEACTIVATE_ZSTD)
      if(PREFER_EXTERNAL_ZSTD)
