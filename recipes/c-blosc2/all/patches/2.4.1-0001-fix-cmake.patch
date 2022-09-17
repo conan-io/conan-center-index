@@ -1,0 +1,43 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 866c7f6..f6f62ba 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -144,26 +144,17 @@ if(BUILD_LITE)
+ endif()
+ 
+ if(PREFER_EXTERNAL_LZ4)
+-    find_package(LZ4)
++    find_package(lz44)
+ else()
+     message(STATUS "Using LZ4 internal sources.")
+ endif()
+ 
+ if(NOT DEACTIVATE_ZLIB)
+     if(PREFER_EXTERNAL_ZLIB)
+-        find_package(ZLIB_NG)
+-        if (ZLIB_NG_FOUND)
+-            set(HAVE_ZLIB_NG TRUE)
+-        else()
+-            find_package(ZLIB)
+-        endif()
+-
+-        if(NOT (ZLIB_NG_FOUND OR ZLIB_FOUND))
+-            message(STATUS "No ZLIB found.  Using ZLIB-NG internal sources.")
+-        endif()
++        find_package(ZLIB REQUIRED)
+     endif()
+ 
+-    if (NOT (ZLIB_NG_FOUND OR ZLIB_FOUND))
++    if (0)
+         message(STATUS "Using ZLIB-NG internal sources for ZLIB support.")
+         set(HAVE_ZLIB_NG TRUE)
+         add_definitions(-DZLIB_COMPAT)
+@@ -184,7 +175,7 @@ endif()
+ 
+ if(NOT DEACTIVATE_ZSTD)
+     if(PREFER_EXTERNAL_ZSTD)
+-        find_package(ZSTD)
++        find_package(zstd)
+         if(NOT ZSTD_FOUND)
+           message(STATUS "No ZSTD library found.  Using internal sources.")
+         endif()
