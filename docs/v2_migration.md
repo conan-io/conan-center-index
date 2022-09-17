@@ -26,10 +26,26 @@ changes and improvements, you can read about them in the
 This document is a practical guide, offering extended information particular to Conan
 Center Index recipes to get them ready to upgrade to Conan 2.0.
 
-## Using Layout with New Generators
+## Using Layout
 
-All recipes should use a layout, when doing this there is no need to manually define `self._subfolder_[...]` in a recipe.
+All recipes always use a layout.
+
+### With New Generators
+
+When doing this there is no need to manually define `self._subfolder_[...]` in a recipe.
 Simply use `self.source_folder` and `self.build_folder` instead of [subfolder properties](reviewing.md#subfolder-properties)
+
+### With Multiple Build Helpers
+
+When different build tools are use, at least one layout needs to be set
+
+```python
+    def layout(self):
+        if self._use_cmake():
+            cmake_layout(self)
+        else: # using autotools
+            basic_layout(self)
+```
 
 ## New cpp_info set_property model
 
