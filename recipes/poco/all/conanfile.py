@@ -243,18 +243,19 @@ class PocoConan(ConanFile):
                 mysql_target_name,
             )
         # libpq
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            "find_package(PostgreSQL REQUIRED)",
-            "find_package(PostgreSQL REQUIRED)\nset(POSTGRESQL_FOUND TRUE)",
-        )
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "Data", "PostgreSQL", "CMakeLists.txt"),
-            "PostgreSQL::client",
-            "PostgreSQL::PostgreSQL",
-        )
+        if self.options.get_safe("enable_data_postgresql"):
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "CMakeLists.txt"),
+                "find_package(PostgreSQL REQUIRED)",
+                "find_package(PostgreSQL REQUIRED)\nset(POSTGRESQL_FOUND TRUE)",
+            )
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "Data", "PostgreSQL", "CMakeLists.txt"),
+                "PostgreSQL::client",
+                "PostgreSQL::PostgreSQL",
+            )
         # Ensure to use FindEXPAT.cmake instead of expat-config.cmake
         # (side effect of CMAKE_FIND_PACKAGE_PREFER_CONFIG ON, see https://github.com/conan-io/conan/issues/10387)
         replace_in_file(
