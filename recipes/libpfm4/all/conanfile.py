@@ -9,7 +9,7 @@ import os
 class Libpfm4Conan(ConanFile):
     name = "libpfm4"
     license = "MIT"
-    homepage = "https://github.com/wcohen/libpfm4"
+    homepage = "http://perfmon2.sourceforge.net"
     url = "https://github.com/conan-io/conan-center-index"
     description = ("A helper library to program the performance monitoring events")
     topics = ("perf", "pmu", "benchmark", "microbenchmark")
