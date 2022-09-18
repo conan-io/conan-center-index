@@ -56,7 +56,7 @@ index 866c7f6..d68513a 100644
          endif()
      else()
 diff --git a/blosc/CMakeLists.txt b/blosc/CMakeLists.txt
-index 441bab6..3c4dfaf 100644
+index 441bab6..f17e467 100644
 --- a/blosc/CMakeLists.txt
 +++ b/blosc/CMakeLists.txt
 @@ -10,16 +10,16 @@ set(CMAKE_C_VISIBILITY_PRESET hidden)
@@ -102,7 +102,7 @@ index 441bab6..3c4dfaf 100644
  else()
      file(GLOB LZ4_FILES ${LZ4_LOCAL_DIR}/*.c)
      set(SOURCES ${SOURCES} ${LZ4_FILES})
-@@ -99,8 +99,8 @@ else()
+@@ -99,10 +99,10 @@ else()
  endif()
  
  if(NOT DEACTIVATE_ZLIB)
@@ -111,8 +111,11 @@ index 441bab6..3c4dfaf 100644
 +    if(zlib-ng_FOUND)
 +        set(LIBS ${LIBS} ${zlib-ng_LIBRARIES})
      elseif(ZLIB_FOUND)
-         set(LIBS ${LIBS} ${ZLIB_LIBRARY})
+-        set(LIBS ${LIBS} ${ZLIB_LIBRARY})
++        set(LIBS ${LIBS} ${ZLIB_LIBRARIES})
      else()
+         set(ZLIB_LOCAL_DIR ${INTERNAL_LIBS}/${ZLIB_NG_DIR})
+         file(GLOB ZLIB_FILES ${ZLIB_LOCAL_DIR}/*.c)
 @@ -112,8 +112,8 @@ if(NOT DEACTIVATE_ZLIB)
  endif()
  
