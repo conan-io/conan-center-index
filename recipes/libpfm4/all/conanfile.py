@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, rmdir, copy, replace_in_file
+from conan.errors import ConanInvalidConfiguration
 import os
 
 
@@ -23,6 +24,7 @@ class Libpfm4Conan(ConanFile):
             raise ConanInvalidConfiguration("This library is Linux only")
 
     def config_options(self):
+        # and currently does not compile on modern Mac OS X && Windows
         if self.settings.os == "Windows":
             del self.options.fPIC
 
