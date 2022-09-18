@@ -64,6 +64,9 @@ class OpenALConan(ConanFile):
         if not self._openal_cxx_backend:
             del self.settings.compiler.libcxx
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         if self.settings.os == "Linux":
             self.requires("libalsa/1.2.7.2")
@@ -78,17 +81,14 @@ class OpenALConan(ConanFile):
             minimum_version = self._minimum_compilers_version.get(str(compiler), False)
             if minimum_version and Version(compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(
-                    f"{self.name} {self.version} requires C++{self._min_cppstd}, which your compiler does not support.",
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
                 )
 
             if compiler == "clang" and Version(compiler.version) < "9" and \
                compiler.get_safe("libcxx") in ("libstdc++", "libstdc++11"):
                 raise ConanInvalidConfiguration(
-                    f"{self.name} {self.version} cannot be built with {compiler} {compiler.version} and stdlibc++(11) c++ runtime",
+                    f"{self.ref} cannot be built with {compiler} {compiler.version} and stdlibc++(11) c++ runtime",
                 )
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
