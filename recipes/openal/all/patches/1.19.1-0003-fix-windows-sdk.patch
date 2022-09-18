@@ -26,7 +26,7 @@
 +        if(ALSOFT_BACKEND_DSOUND)
 +            set(HAVE_DSOUND 1)
 +            set(BACKENDS "${BACKENDS} DirectSound,")
-+            set(ALC_OBJS ${ALC_OBJS} alc/backends/dsound.cpp alc/backends/dsound.h)
++            set(ALC_OBJS ${ALC_OBJS} Alc/backends/dsound.c)
 +
 +            if(NOT HAVE_DSOUND_H)
 +                set(INC_PATHS ${INC_PATHS} ${DSOUND_INCLUDE_DIR})
