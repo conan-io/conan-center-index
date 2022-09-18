@@ -16,6 +16,12 @@ class Libpfm4Conan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    def validate(self):
+        # The library doesn't really make much sense without perf_events API
+        # and currently does not compile on modern Mac OS X && Windows
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("This library is Linux only")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
