@@ -21,7 +21,7 @@ class CBlosc2Conan(ConanFile):
         "fPIC": [True, False],
         "simd_intrinsics": [None, "sse2", "avx2"],
         "with_lz4": [True, False],
-        "with_zlib": [None, "zlib", "zlib-ng"],
+        "with_zlib": [None, "zlib", "zlib-ng", "zlib-ng-compat"],
         "with_zstd": [True, False],
         "with_plugins": [True, False],
     }
@@ -61,8 +61,10 @@ class CBlosc2Conan(ConanFile):
             pass
 
         # c-blosc2 uses zlib-ng with zlib compat options.
-        if self.options.with_zlib == "zlib-ng":
-            self.dependencies["zlib-ng"].zlib_compat = True
+        if self.options.with_zlib == "zlib-ng-compat":
+            self.options["zlib-ng"].zlib_compat = True
+        elif self.options.with_zlib == "zlib-ng":
+            self.options["zlib-ng"].zlib_compat = False
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -70,7 +72,7 @@ class CBlosc2Conan(ConanFile):
     def requirements(self):
         if self.options.with_lz4:
             self.requires("lz4/1.9.3")
-        if self.options.with_zlib == "zlib-ng":
+        if self.options.with_zlib in ["zlib-ng", "zlib-ng-compat"]:
             self.requires("zlib-ng/2.0.6")
         elif self.options.with_zlib == "zlib":
             self.requires("zlib/1.2.12")
@@ -94,12 +96,14 @@ class CBlosc2Conan(ConanFile):
         simd_intrinsics = self.options.get_safe("simd_intrinsics", False)
         tc.cache_variables["DEACTIVATE_AVX2"] = simd_intrinsics != "avx2"
         tc.cache_variables["DEACTIVATE_LZ4"] = not bool(self.options.with_lz4)
-        tc.cache_variables["PREFER_EXTERNAL_LZ4"] = bool(self.options.with_lz4)
+        tc.cache_variables["PREFER_EXTERNAL_LZ4"] = True
         tc.cache_variables["DEACTIVATE_ZLIB"] = self.options.with_zlib == None
-        tc.cache_variables["PREFER_EXTERNAL_ZLIB"] = self.options.with_zlib != None
+        tc.cache_variables["PREFER_EXTERNAL_ZLIB"] = True
         tc.cache_variables["DEACTIVATE_ZSTD"] = not bool(self.options.with_zstd)
-        tc.cache_variables["PREFER_EXTERNAL_ZSTD"] = bool(self.options.with_zstd)
+        tc.cache_variables["PREFER_EXTERNAL_ZSTD"] = True
         tc.cache_variables["BUILD_PLUGINS"] = bool(self.options.with_plugins)
+        if self.options.with_zlib == "zlib-ng-compat":
+            tc.preprocessor_definitions["ZLIB_COMPAT"] = "1"
         tc.generate()
 
         deps = CMakeDeps(self)
