@@ -28,11 +28,11 @@ class TestPackageConan(ConanFile):
     def _with_prometheus(self):
         return "enable_prometheus" in self.dependencies["poco"].options and self.dependencies["poco"].options.enable_prometheus
 
-    def requirements(self):
-        self.requires(self.tested_reference_str)
-
     def layout(self):
         cmake_layout(self)
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def generate(self):
         tc = CMakeToolchain(self)
