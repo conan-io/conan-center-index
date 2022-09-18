@@ -23,7 +23,7 @@ index aba18c8..bb463d0 100644
  
  if(ARROW_MIMALLOC)
 diff --git a/cpp/cmake_modules/ThirdpartyToolchain.cmake b/cpp/cmake_modules/ThirdpartyToolchain.cmake
-index f070323..2e2a03b 100644
+index f070323..89e5646 100644
 --- a/cpp/cmake_modules/ThirdpartyToolchain.cmake
 +++ b/cpp/cmake_modules/ThirdpartyToolchain.cmake
 @@ -974,6 +974,7 @@ else()
@@ -124,7 +124,19 @@ index f070323..2e2a03b 100644
  endif()
  
  # ----------------------------------------------------------------------
-@@ -1718,6 +1756,7 @@ if(ARROW_JEMALLOC)
+@@ -1432,9 +1457,9 @@ if(ARROW_WITH_THRIFT)
+                        thrift)
+   endif()
+   # TODO: Don't use global includes but rather target_include_directories
+-  include_directories(SYSTEM ${THRIFT_INCLUDE_DIR})
++  include_directories(SYSTEM ${Thrift_INCLUDE_DIR})
+ 
+-  string(REPLACE "." ";" VERSION_LIST ${THRIFT_VERSION})
++  string(REPLACE "." ";" VERSION_LIST ${Thrift_VERSION})
+   list(GET VERSION_LIST 0 THRIFT_VERSION_MAJOR)
+   list(GET VERSION_LIST 1 THRIFT_VERSION_MINOR)
+   list(GET VERSION_LIST 2 THRIFT_VERSION_PATCH)
+@@ -1718,6 +1743,7 @@ if(ARROW_JEMALLOC)
    # installations.
    # find_package(jemalloc)
  
@@ -132,7 +144,7 @@ index f070323..2e2a03b 100644
    set(ARROW_JEMALLOC_USE_SHARED OFF)
    set(JEMALLOC_PREFIX
        "${CMAKE_CURRENT_BINARY_DIR}/jemalloc_ep-prefix/src/jemalloc_ep/dist/")
-@@ -1778,6 +1817,9 @@ if(ARROW_JEMALLOC)
+@@ -1778,6 +1804,9 @@ if(ARROW_JEMALLOC)
                                     INTERFACE_INCLUDE_DIRECTORIES
                                     "${CMAKE_CURRENT_BINARY_DIR}/jemalloc_ep-prefix/src")
    add_dependencies(jemalloc::jemalloc jemalloc_ep)
@@ -142,7 +154,7 @@ index f070323..2e2a03b 100644
  
    list(APPEND ARROW_BUNDLED_STATIC_LIBS jemalloc::jemalloc)
  endif()
-@@ -1786,6 +1828,7 @@ endif()
+@@ -1786,6 +1815,7 @@ endif()
  # mimalloc - Cross-platform high-performance allocator, from Microsoft
  
  if(ARROW_MIMALLOC)
@@ -150,7 +162,7 @@ index f070323..2e2a03b 100644
    message(STATUS "Building (vendored) mimalloc from source")
    # We only use a vendored mimalloc as we want to control its build options.
  
-@@ -1834,6 +1877,10 @@ if(ARROW_MIMALLOC)
+@@ -1834,6 +1864,10 @@ if(ARROW_MIMALLOC)
    endif()
    add_dependencies(mimalloc::mimalloc mimalloc_ep)
    add_dependencies(toolchain mimalloc_ep)
@@ -161,7 +173,7 @@ index f070323..2e2a03b 100644
  
    list(APPEND ARROW_BUNDLED_STATIC_LIBS mimalloc::mimalloc)
  endif()
-@@ -2119,6 +2166,7 @@ macro(build_rapidjson)
+@@ -2119,6 +2153,7 @@ macro(build_rapidjson)
  endmacro()
  
  if(ARROW_WITH_RAPIDJSON)
@@ -169,7 +181,7 @@ index f070323..2e2a03b 100644
    set(ARROW_RAPIDJSON_REQUIRED_VERSION "1.1.0")
    resolve_dependency(RapidJSON
                       HAVE_ALT
-@@ -2131,6 +2179,10 @@ if(ARROW_WITH_RAPIDJSON)
+@@ -2131,6 +2166,10 @@ if(ARROW_WITH_RAPIDJSON)
    if(RapidJSON_INCLUDE_DIR)
      set(RAPIDJSON_INCLUDE_DIR "${RapidJSON_INCLUDE_DIR}")
    endif()
@@ -180,7 +192,7 @@ index f070323..2e2a03b 100644
  
    # TODO: Don't use global includes but rather target_include_directories
    include_directories(SYSTEM ${RAPIDJSON_INCLUDE_DIR})
-@@ -2158,8 +2210,14 @@ endmacro()
+@@ -2158,8 +2197,14 @@ endmacro()
  
  if((NOT ARROW_SIMD_LEVEL STREQUAL "NONE") OR (NOT ARROW_RUNTIME_SIMD_LEVEL STREQUAL "NONE"
                                               ))
@@ -195,7 +207,7 @@ index f070323..2e2a03b 100644
    # TODO: Don't use global includes but rather target_include_directories
    include_directories(SYSTEM ${XSIMD_INCLUDE_DIR})
  endif()
-@@ -2202,11 +2260,15 @@ macro(build_zlib)
+@@ -2202,11 +2247,15 @@ macro(build_zlib)
  endmacro()
  
  if(ARROW_WITH_ZLIB)
@@ -211,7 +223,7 @@ index f070323..2e2a03b 100644
  endif()
  
  macro(build_lz4)
-@@ -2260,11 +2322,15 @@ macro(build_lz4)
+@@ -2260,11 +2309,15 @@ macro(build_lz4)
  endmacro()
  
  if(ARROW_WITH_LZ4)
@@ -227,7 +239,7 @@ index f070323..2e2a03b 100644
  endif()
  
  macro(build_zstd)
-@@ -2325,6 +2391,7 @@ macro(build_zstd)
+@@ -2325,6 +2378,7 @@ macro(build_zstd)
  endmacro()
  
  if(ARROW_WITH_ZSTD)
@@ -235,7 +247,7 @@ index f070323..2e2a03b 100644
    # ARROW-13384: ZSTD_minCLevel was added in v1.4.0, required by ARROW-13091
    resolve_dependency(zstd
                       PC_PACKAGE_NAMES
-@@ -2352,6 +2419,9 @@ if(ARROW_WITH_ZSTD)
+@@ -2352,6 +2406,9 @@ if(ARROW_WITH_ZSTD)
    get_target_property(ZSTD_INCLUDE_DIR ${ARROW_ZSTD_LIBZSTD}
                        INTERFACE_INCLUDE_DIRECTORIES)
    include_directories(SYSTEM ${ZSTD_INCLUDE_DIR})
@@ -245,7 +257,7 @@ index f070323..2e2a03b 100644
  endif()
  
  # ----------------------------------------------------------------------
-@@ -2391,6 +2461,7 @@ macro(build_re2)
+@@ -2391,6 +2448,7 @@ macro(build_re2)
  endmacro()
  
  if(ARROW_WITH_RE2)
@@ -253,7 +265,7 @@ index f070323..2e2a03b 100644
    # Don't specify "PC_PACKAGE_NAMES re2" here because re2.pc may
    # include -std=c++11. It's not compatible with C source and C++
    # source not uses C++ 11.
-@@ -2411,6 +2482,9 @@ if(ARROW_WITH_RE2)
+@@ -2411,6 +2469,9 @@ if(ARROW_WITH_RE2)
    # TODO: Don't use global includes but rather target_include_directories
    get_target_property(RE2_INCLUDE_DIR re2::re2 INTERFACE_INCLUDE_DIRECTORIES)
    include_directories(SYSTEM ${RE2_INCLUDE_DIR})
@@ -263,7 +275,7 @@ index f070323..2e2a03b 100644
  endif()
  
  macro(build_bzip2)
-@@ -2462,6 +2536,7 @@ macro(build_bzip2)
+@@ -2462,6 +2523,7 @@ macro(build_bzip2)
  endmacro()
  
  if(ARROW_WITH_BZ2)
@@ -271,7 +283,7 @@ index f070323..2e2a03b 100644
    resolve_dependency(BZip2)
    if(${BZip2_SOURCE} STREQUAL "SYSTEM")
      string(APPEND ARROW_PC_LIBS_PRIVATE " ${BZIP2_LIBRARIES}")
-@@ -2474,6 +2549,9 @@ if(ARROW_WITH_BZ2)
+@@ -2474,6 +2536,9 @@ if(ARROW_WITH_BZ2)
                                       INTERFACE_INCLUDE_DIRECTORIES "${BZIP2_INCLUDE_DIR}")
    endif()
    include_directories(SYSTEM "${BZIP2_INCLUDE_DIR}")
@@ -281,7 +293,7 @@ index f070323..2e2a03b 100644
  endif()
  
  macro(build_utf8proc)
-@@ -2517,6 +2595,7 @@ macro(build_utf8proc)
+@@ -2517,6 +2582,7 @@ macro(build_utf8proc)
  endmacro()
  
  if(ARROW_WITH_UTF8PROC)
@@ -289,7 +301,7 @@ index f070323..2e2a03b 100644
    resolve_dependency(utf8proc
                       REQUIRED_VERSION
                       "2.2.0"
-@@ -2538,6 +2617,10 @@ if(ARROW_WITH_UTF8PROC)
+@@ -2538,6 +2604,10 @@ if(ARROW_WITH_UTF8PROC)
    get_target_property(UTF8PROC_INCLUDE_DIR utf8proc::utf8proc
                        INTERFACE_INCLUDE_DIRECTORIES)
    include_directories(SYSTEM ${UTF8PROC_INCLUDE_DIR})
@@ -300,7 +312,7 @@ index f070323..2e2a03b 100644
  endif()
  
  macro(build_cares)
-@@ -3702,6 +3785,7 @@ macro(build_grpc)
+@@ -3702,6 +3772,7 @@ macro(build_grpc)
  endmacro()
  
  if(ARROW_WITH_GRPC)
@@ -308,7 +320,7 @@ index f070323..2e2a03b 100644
    set(ARROW_GRPC_REQUIRED_VERSION "1.17.0")
    if(NOT Protobuf_SOURCE STREQUAL gRPC_SOURCE)
      # ARROW-15495: Protobuf/gRPC must come from the same source
-@@ -3735,6 +3819,9 @@ if(ARROW_WITH_GRPC)
+@@ -3735,6 +3806,9 @@ if(ARROW_WITH_GRPC)
        message(FATAL_ERROR "Cannot find grpc++ headers in ${GRPC_INCLUDE_DIR}")
      endif()
    endif()
@@ -318,7 +330,7 @@ index f070323..2e2a03b 100644
  endif()
  
  # ----------------------------------------------------------------------
-@@ -3937,10 +4024,14 @@ macro(build_google_cloud_cpp_storage)
+@@ -3937,10 +4011,14 @@ macro(build_google_cloud_cpp_storage)
  endmacro()
  
  if(ARROW_WITH_GOOGLE_CLOUD_CPP)
@@ -333,7 +345,7 @@ index f070323..2e2a03b 100644
    get_target_property(absl_base_INCLUDE_DIR absl::base INTERFACE_INCLUDE_DIRECTORIES)
    include_directories(SYSTEM ${absl_base_INCLUDE_DIR})
    message(STATUS "Found google-cloud-cpp::storage headers: ${google_cloud_cpp_storage_INCLUDE_DIR}"
-@@ -4261,6 +4352,7 @@ macro(build_opentelemetry)
+@@ -4261,6 +4339,7 @@ macro(build_opentelemetry)
  endmacro()
  
  if(ARROW_WITH_OPENTELEMETRY)
@@ -341,7 +353,7 @@ index f070323..2e2a03b 100644
    # cURL is required whether we build from source or use an existing installation
    # (OTel's cmake files do not call find_curl for you)
    find_curl()
-@@ -4269,7 +4361,10 @@ if(ARROW_WITH_OPENTELEMETRY)
+@@ -4269,7 +4348,10 @@ if(ARROW_WITH_OPENTELEMETRY)
    get_target_property(OPENTELEMETRY_INCLUDE_DIR opentelemetry-cpp::api
                        INTERFACE_INCLUDE_DIRECTORIES)
    include_directories(SYSTEM ${OPENTELEMETRY_INCLUDE_DIR})
