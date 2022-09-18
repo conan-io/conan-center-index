@@ -1,5 +1,5 @@
---- cmake/PocoMacros.cmake
-+++ cmake/PocoMacros.cmake
+--- a/cmake/PocoMacros.cmake
++++ b/cmake/PocoMacros.cmake
 @@ -40,7 +40,7 @@ if(WIN32)
        endforeach()
      endif (X64)
@@ -18,19 +18,28 @@
  endif()
  
  endmacro()
---- Foundation/CMakeLists.txt
-+++ Foundation/CMakeLists.txt
-@@ -101,7 +101,7 @@
+--- a/Foundation/CMakeLists.txt
++++ b/Foundation/CMakeLists.txt
+@@ -35,7 +35,7 @@ POCO_MESSAGES( SRCS Logging src/pocomsg.mc)
+ # If POCO_UNBUNDLED is enabled we try to find the required packages
+ # The configuration will fail if the packages are not found
+ if (POCO_UNBUNDLED)
+-	find_package(PCRE REQUIRED)
++	find_package(pcre REQUIRED CONFIG)
+ 	find_package(ZLIB REQUIRED)
+ 
+ 	#HACK: Unicode.cpp requires functions from these files. The can't be taken from the library
+@@ -101,7 +101,7 @@ set_target_properties(Foundation
  	)
  
  if (POCO_UNBUNDLED)
 -    target_link_libraries(Foundation PUBLIC Pcre::Pcre ZLIB::ZLIB)
-+    target_link_libraries(Foundation PUBLIC pcre::pcre ZLIB::ZLIB)
++    target_link_libraries(Foundation PUBLIC pcre::libpcre ZLIB::ZLIB)
      target_compile_definitions(Foundation PUBLIC POCO_UNBUNDLED)
  endif (POCO_UNBUNDLED)
  
---- NetSSL_Win/CMakeLists.txt
-+++ NetSSL_Win/CMakeLists.txt
+--- a/NetSSL_Win/CMakeLists.txt
++++ b/NetSSL_Win/CMakeLists.txt
 @@ -21,7 +21,7 @@
      DEFINE_SYMBOL NetSSL_Win_EXPORTS
      )

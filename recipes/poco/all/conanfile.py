@@ -86,16 +86,16 @@ class PocoConan(ConanFile):
             del self.options.enable_fork
         else:
             del self.options.enable_netssl_win
-        if Version(self.version) < "1.9":
+        if Version(self.version) < "1.9.0":
             del self.options.enable_encodings
-        if Version(self.version) < "1.10":
+        if Version(self.version) < "1.10.0":
             del self.options.enable_data_mysql
             del self.options.enable_data_postgresql
             del self.options.enable_jwt
-        if Version(self.version) < "1.11":
+        if Version(self.version) < "1.11.0":
             del self.options.enable_activerecord
             del self.options.enable_activerecord_compiler
-        if Version(self.version) < "1.12":
+        if Version(self.version) < "1.12.0":
             del self.options.enable_prometheus
 
     def configure(self):
@@ -109,7 +109,7 @@ class PocoConan(ConanFile):
         if not self.options.enable_json:
             util_dependencies = self._poco_component_tree["Util"].dependencies
             self._poco_component_tree["Util"] = self._poco_component_tree["Util"]._replace(dependencies = [x for x in util_dependencies if x != "JSON"])
-        if Version(self.version) >= "1.12":
+        if Version(self.version) >= "1.12.0":
             foundation_external_dependencies = self._poco_component_tree["Foundation"].external_dependencies
             self._poco_component_tree["Foundation"] = self._poco_component_tree["Foundation"]._replace(external_dependencies = list(map(lambda x: 'pcre2::pcre2' if x == 'pcre::pcre' else x, foundation_external_dependencies)))
 
@@ -117,7 +117,7 @@ class PocoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) < "1.12":
+        if Version(self.version) < "1.12.0":
             self.requires("pcre/8.45")
         else:
             self.requires("pcre2/10.40")
