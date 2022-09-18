@@ -17,7 +17,7 @@ index 866c7f6..038b848 100644
  
  if(PREFER_EXTERNAL_LZ4)
 -    find_package(LZ4)
-+    find_package(lz44)
++    find_package(lz4)
  else()
      message(STATUS "Using LZ4 internal sources.")
  endif()
