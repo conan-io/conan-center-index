@@ -56,7 +56,7 @@ index 866c7f6..d68513a 100644
          endif()
      else()
 diff --git a/blosc/CMakeLists.txt b/blosc/CMakeLists.txt
-index 441bab6..ea5508e 100644
+index 441bab6..3c4dfaf 100644
 --- a/blosc/CMakeLists.txt
 +++ b/blosc/CMakeLists.txt
 @@ -10,16 +10,16 @@ set(CMAKE_C_VISIBILITY_PRESET hidden)
@@ -91,30 +91,36 @@ index 441bab6..ea5508e 100644
      else()
          set(ZSTD_LOCAL_DIR ${INTERNAL_LIBS}/zstd-1.5.2)
          set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${ZSTD_LOCAL_DIR}
-@@ -91,7 +91,7 @@ else()
+@@ -90,8 +90,8 @@ else()
+     endif()
  endif()
  
- if(LZ4_FOUND)
+-if(LZ4_FOUND)
 -    set(LIBS ${LIBS} ${LZ4_LIBRARY})
-+    set(LIBS ${LIBS} ${lz4_LIBRARY})
++if(lz4_FOUND)
++    set(LIBS ${LIBS} ${lz4_LIBRARIES})
  else()
      file(GLOB LZ4_FILES ${LZ4_LOCAL_DIR}/*.c)
      set(SOURCES ${SOURCES} ${LZ4_FILES})
-@@ -100,7 +100,7 @@ endif()
+@@ -99,8 +99,8 @@ else()
+ endif()
  
  if(NOT DEACTIVATE_ZLIB)
-     if(ZLIB_NG_FOUND)
+-    if(ZLIB_NG_FOUND)
 -        set(LIBS ${LIBS} ${ZLIB_NG_LIBRARY})
-+        set(LIBS ${LIBS} ${zlib-ng_LIBRARY})
++    if(zlib-ng_FOUND)
++        set(LIBS ${LIBS} ${zlib-ng_LIBRARIES})
      elseif(ZLIB_FOUND)
          set(LIBS ${LIBS} ${ZLIB_LIBRARY})
      else()
-@@ -113,7 +113,7 @@ endif()
+@@ -112,8 +112,8 @@ if(NOT DEACTIVATE_ZLIB)
+ endif()
  
  if(NOT DEACTIVATE_ZSTD)
-     if(ZSTD_FOUND)
+-    if(ZSTD_FOUND)
 -        set(LIBS ${LIBS} ${ZSTD_LIBRARY})
-+        set(LIBS ${LIBS} ${zstd_LIBRARY})
++    if(zstd_FOUND)
++        set(LIBS ${LIBS} ${zstd_LIBRARIES})
      else()
          # Enable assembly code only when not using MSVC *and* x86 is there
          if((NOT MSVC) AND COMPILER_SUPPORT_SSE2)   # if SSE2 is here, this is an x86 platform

@@ -96,7 +96,7 @@ index 7f3eac6..de390cd 100644
 -if(LZ4_FOUND)
 -    set(LIBS ${LIBS} ${LZ4_LIBRARY})
 +if(lz4_FOUND)
-+    set(LIBS ${LIBS} ${lz4_LIBRARY})
++    set(LIBS ${LIBS} ${lz4_LIBRARIES})
  else()
      file(GLOB LZ4_FILES ${LZ4_LOCAL_DIR}/*.c)
      set(SOURCES ${SOURCES} ${LZ4_FILES})
@@ -107,7 +107,7 @@ index 7f3eac6..de390cd 100644
 -    if(ZLIB_NG_FOUND)
 -        set(LIBS ${LIBS} ${ZLIB_NG_LIBRARY})
 +    if(zlib-ng_FOUND)
-+        set(LIBS ${LIBS} ${zlib-ng_LIBRARY})
++        set(LIBS ${LIBS} ${zlib-ng_LIBRARIES})
      elseif(ZLIB_FOUND)
          set(LIBS ${LIBS} ${ZLIB_LIBRARY})
      else()
@@ -118,7 +118,7 @@ index 7f3eac6..de390cd 100644
 -    if(ZSTD_FOUND)
 -        set(LIBS ${LIBS} ${ZSTD_LIBRARY})
 +    if(zstd_FOUND)
-+        set(LIBS ${LIBS} ${zstd_LIBRARY})
++        set(LIBS ${LIBS} ${zstd_LIBRARIES})
      else()
          # Enable assembly code only when not using MSVC *and* x86 is there
          if((NOT MSVC) AND COMPILER_SUPPORT_SSE2)   # if SSE2 is here, this is an x86 platform
