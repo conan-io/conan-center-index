@@ -118,18 +118,18 @@ class ArrowConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) < "2.0.0":
+        if Version(self.version) < "2.0.0":
             del self.options.simd_level
             del self.options.runtime_simd_level
-        elif tools.Version(self.version) < "6.0.0":
+        elif Version(self.version) < "6.0.0":
             self.options.simd_level = "sse4_2"
-        if tools.Version(self.version) < "6.0.0":
+        if Version(self.version) < "6.0.0":
             del self.options.with_gcs
-        if tools.Version(self.version) < "7.0.0":
+        if Version(self.version) < "7.0.0":
             del self.options.skyhook
             del self.options.with_flight_sql
             del self.options.with_opentelemetry
-        if tools.Version(self.version) < "8.0.0":
+        if Version(self.version) < "8.0.0":
             del self.options.substrait
 
     def configure(self):
@@ -140,7 +140,7 @@ class ArrowConan(ConanFile):
                 pass
 
     def validate(self):
-        if self.settings.compiler == "clang" and self.settings.compiler.version <= tools.Version("3.9"):
+        if self.info.settings.compiler == "clang" and self.info.settings.compiler.version <= Version("3.9"):
             raise ConanInvalidConfiguration("This recipe does not support this compiler version")
 
         if self.options.shared:
@@ -288,11 +288,11 @@ class ArrowConan(ConanFile):
         if self._with_thrift():
             self.requires("thrift/0.16.0")
         if self._with_protobuf():
-            self.requires("protobuf/3.21.1")
+            self.requires("protobuf/3.21.4")
         if self._with_jemalloc():
             self.requires("jemalloc/5.2.1")
         if self._with_boost():
-            self.requires("boost/1.79.0")
+            self.requires("boost/1.80.0")
         if self._with_gflags():
             self.requires("gflags/2.2.2")
         if self._with_glog():
@@ -300,7 +300,7 @@ class ArrowConan(ConanFile):
         if self.options.get_safe("with_gcs"):
             self.requires("google-cloud-cpp/1.40.1")
         if self._with_grpc():
-            self.requires("grpc/1.47.0")
+            self.requires("grpc/1.48.0")
         if self.options.with_json:
             self.requires("rapidjson/1.1.0")
         if self._with_llvm():
@@ -320,7 +320,7 @@ class ArrowConan(ConanFile):
         if self.options.with_bz2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lz4:
-            self.requires("lz4/1.9.3")
+            self.requires("lz4/1.9.4")
         if self.options.with_snappy:
             self.requires("snappy/1.1.9")
         if Version(self.version) >= "6.0.0" and \
@@ -332,7 +332,7 @@ class ArrowConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
         if self._with_re2():
-            self.requires("re2/20220201")
+            self.requires("re2/20220601")
         if self._with_utf8proc():
             self.requires("utf8proc/2.7.0")
         if self.options.with_backtrace:
@@ -345,19 +345,18 @@ class ArrowConan(ConanFile):
     def generate(self):
         # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
         tc = CMakeToolchain(self)
-
-        if cross_building(self.settings):
+        if cross_building(self):
             cmake_system_processor = {
                 "armv8": "aarch64",
                 "armv8.3": "aarch64",
             }.get(str(self.settings.arch), str(self.settings.arch))
             tc.cache_variables["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             tc.cache_variables["ARROW_USE_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
         tc.cache_variables["ARROW_DEPENDENCY_SOURCE"] = "SYSTEM"
         tc.cache_variables["ARROW_GANDIVA"] = bool(self.options.gandiva)
         tc.cache_variables["ARROW_PARQUET"] = self._parquet()
-        tc.cache_variables["ARROW_SUBSTRAIT"] = self.options.get_safe("substrait", False)
+        tc.cache_variables["ARROW_SUBSTRAIT"] = bool(self.options.get_safe("substrait", False))
         tc.cache_variables["ARROW_PLASMA"] = bool(self.options.plasma)
         tc.cache_variables["ARROW_DATASET"] = self._dataset_modules()
         tc.cache_variables["ARROW_FILESYSTEM"] = bool(self.options.filesystem_layer)
@@ -368,15 +367,14 @@ class ArrowConan(ConanFile):
         tc.cache_variables["ARROW_BUILD_STATIC"] = not bool(self.options.shared)
         tc.cache_variables["ARROW_NO_DEPRECATED_API"] = not bool(self.options.deprecated)
         tc.cache_variables["ARROW_FLIGHT"] = self._with_flight_rpc()
-        tc.cache_variables["ARROW_FLIGHT_SQL"] = self.options.get_safe("with_flight_sql", False)
+        tc.cache_variables["ARROW_FLIGHT_SQL"] = bool(self.options.get_safe("with_flight_sql", False))
         tc.cache_variables["ARROW_HIVESERVER2"] = bool(self.options.with_hiveserver2)
         tc.cache_variables["ARROW_COMPUTE"] = self._compute()
         tc.cache_variables["ARROW_CSV"] = bool(self.options.with_csv)
         tc.cache_variables["ARROW_CUDA"] = bool(self.options.with_cuda)
         tc.cache_variables["ARROW_JEMALLOC"] = self._with_jemalloc()
         tc.cache_variables["ARROW_JSON"] = bool(self.options.with_json)
-        tc.cache_variables["ARROW_GCS"] = self.options.get_safe("with_gcs", False)
-
+        tc.cache_variables["ARROW_GCS"] = bool(self.options.get_safe("with_gcs", False))
         tc.cache_variables["BOOST_SOURCE"] = "SYSTEM"
         tc.cache_variables["Protobuf_SOURCE"] = "SYSTEM"
         if self._with_protobuf():
@@ -388,7 +386,7 @@ class ArrowConan(ConanFile):
         tc.cache_variables["ARROW_USE_GLOG"] = self._with_glog()
         tc.cache_variables["GLOG_SOURCE"] = "SYSTEM"
         tc.cache_variables["ARROW_WITH_BACKTRACE"] = bool(self.options.with_backtrace)
-        tc.cache_variables["ARROW_WITH_BROTLI"] = self.options.with_brotli
+        tc.cache_variables["ARROW_WITH_BROTLI"] = bool(self.options.with_brotli)
         tc.cache_variables["Brotli_SOURCE"] = "SYSTEM"
         if self.options.with_brotli:
             tc.cache_variables["ARROW_BROTLI_USE_SHARED"] = bool(self.options["brotli"].shared)
@@ -402,15 +400,14 @@ class ArrowConan(ConanFile):
         tc.cache_variables["ARROW_WITH_LZ4"] = bool(self.options.with_lz4)
         tc.cache_variables["Lz4_SOURCE"] = "SYSTEM"
         if self.options.with_lz4:
-            tc.cache_variables["ARROW_LZ4_USE_SHARED"] = self.options["lz4"].shared
+            tc.cache_variables["ARROW_LZ4_USE_SHARED"] = bool(self.options["lz4"].shared)
         tc.cache_variables["ARROW_WITH_SNAPPY"] = bool(self.options.with_snappy)
         tc.cache_variables["Snappy_SOURCE"] = "SYSTEM"
         if self.options.with_snappy:
-            tc.cache_variables["ARROW_SNAPPY_USE_SHARED"] = self.options["snappy"].shared
+            tc.cache_variables["ARROW_SNAPPY_USE_SHARED"] = bool(self.options["snappy"].shared)
         tc.cache_variables["ARROW_WITH_ZLIB"] = bool(self.options.with_zlib)
         tc.cache_variables["RE2_SOURCE"] = "SYSTEM"
         tc.cache_variables["ZLIB_SOURCE"] = "SYSTEM"
-
         tc.cache_variables["ARROW_WITH_ZSTD"] = bool(self.options.with_zstd)
         if Version(self.version) >= "2.0":
             tc.cache_variables["zstd_SOURCE"] = "SYSTEM"
@@ -434,7 +431,6 @@ class ArrowConan(ConanFile):
             tc.cache_variables["ARROW_BOOST_USE_SHARED"] = bool(self.options["boost"].shared)
         tc.cache_variables["ARROW_S3"] = bool(self.options.with_s3)
         tc.cache_variables["AWSSDK_SOURCE"] = "SYSTEM"
-
         tc.cache_variables["ARROW_BUILD_UTILITIES"] = bool(self.options.cli)
         tc.cache_variables["ARROW_BUILD_INTEGRATION"] = False
         tc.cache_variables["ARROW_INSTALL_NAME_RPATH"] = False
@@ -448,11 +444,11 @@ class ArrowConan(ConanFile):
         if self._with_utf8proc():
             tc.cache_variables["ARROW_UTF8PROC_USE_SHARED"] = bool(self.options["utf8proc"].shared)
         tc.cache_variables["BUILD_WARNING_LEVEL"] = "PRODUCTION"
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             tc.cache_variables["ARROW_USE_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
-
         if self._with_llvm():
             tc.cache_variables["LLVM_DIR"] = self.deps_cpp_info["llvm-core"].rootpath.replace("\\", "/")
+        tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
@@ -460,7 +456,7 @@ class ArrowConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         if Version(self.version) >= "7.0.0":
-            for filename in glob.glob(os.path.join(self._source_subfolder, "cpp", "cmake_modules", "Find*.cmake")):
+            for filename in glob.glob(os.path.join(self.source_folder, "cpp", "cmake_modules", "Find*.cmake")):
                 if os.path.basename(filename) not in [
                     "FindArrow.cmake",
                     "FindArrowCUDA.cmake",
@@ -481,7 +477,7 @@ class ArrowConan(ConanFile):
     def build(self):
         self._patch_sources()
         cmake =CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, "cpp"))
         cmake.build()
 
     def package(self):
@@ -577,7 +573,7 @@ class ArrowConan(ConanFile):
             if self.options.gandiva:
                 # FIXME: only filesystem component is used
                 self.cpp_info.components["libgandiva"].requires.append("boost::boost")
-            if self._parquet() and self.settings.compiler == "gcc" and self.settings.compiler.version < tools.Version("4.9"):
+            if self._parquet() and self.settings.compiler == "gcc" and self.settings.compiler.version < Version("4.9"):
                 self.cpp_info.components["libparquet"].requires.append("boost::boost")
             if Version(self.version) >= "2.0":
                 # FIXME: only headers components is used
