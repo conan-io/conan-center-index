@@ -35,3 +35,6 @@ sources:
   "1.50.8":
     url: "https://download.gnome.org/sources/pango/1.50/pango-1.50.8.tar.xz"
     sha256: "cf626f59dd146c023174c4034920e9667f1d25ac2c1569516d63136c311255fa"
+  "1.50.10":
+    url: "https://download.gnome.org/sources/pango/1.50/pango-1.50.10.tar.xz"
+    sha256: "7e5d2f1e40854d24a9a2c4d093bafe75dcdbeccdf1de43e4437332eabed64966"
