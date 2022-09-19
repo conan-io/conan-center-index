@@ -7,7 +7,7 @@ body:
   attributes:
     value: |
       Please don't forget to update the issue title.
-      Missing profile or a short log will make impossible to investigate your case,
+      Missing profile or a short log will make extremely difficult to investigate your case or provide any help,
       please, include all applicable information with details to help us reproduce your problem.
 
 - type: textarea
