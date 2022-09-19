@@ -547,7 +547,7 @@ class CPythonConan(ConanFile):
                  run_environment=True)
 
     def package(self):
-        copy(self, "LICENSE*", src=self.source_folder, dst="licenses")
+        copy(self, "LICENSE*", src=self.source_path.joinpath("licenses"), dst=self.package_path.joinpath("licenses"))
         if is_msvc(self):
             if self._is_py2 or not self.options.shared:
                 self._msvc_package_copy()
