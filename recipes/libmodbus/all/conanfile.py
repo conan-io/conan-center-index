@@ -49,6 +49,8 @@ class LibmodbusConan(ConanFile):
             del self.settings.compiler.cppstd # for plain C projects only
         except Exception:
             pass
+        if self.settings.os == "Windows":
+            self.win_bash = True
 
     def build_requirements(self):
         if is_msvc(self):
