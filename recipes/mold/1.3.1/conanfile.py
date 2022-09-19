@@ -86,9 +86,6 @@ class MoldConan(ConanFile):
         copy(self, "LICENSE", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "mold", src=self._source_subfolder, dst="bin", keep_path=False)
 
-    def package_id(self):
-        del self.info.settings.compiler
-
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
         mold_location = os.path.join(bindir, "bindir")
