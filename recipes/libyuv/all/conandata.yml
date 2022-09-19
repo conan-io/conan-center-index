@@ -1,7 +1,13 @@
 sources:
+  "1841":
+    url: "https://chromium.googlesource.com/libyuv/libyuv/+archive/f71c83552d373f0ff41833b17e2880632d8561d7.tar.gz"
   "1768":
     url: "https://chromium.googlesource.com/libyuv/libyuv/+archive/dfaf7534e0e536f7e5ef8ddd7326797bd09b8622.tar.gz"
 patches:
+  "1841":
+    - patch_file: "patches/0001-fix-cmake-1841.patch"
+      patch_description: "Fix CMake to be more robust & predictable"
+      patch_type: "compatibility"
   "1768":
     - patch_file: "patches/0001-fix-cmake-1768.patch"
       patch_description: "Fix CMake to be more robust & predictable"
