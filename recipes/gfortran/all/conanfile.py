@@ -40,9 +40,9 @@ class GFortranConan(ConanFile):
 
     def _extract_license(self):
         if self.settings.os == "Macos":
-            license_path_prefix = os.path.join(self.source_folder, "source_subfolder_Macos", "local", "share", "info")
+            license_path_prefix = os.path.join(self.source_folder, "local", "share", "info")
         else:
-            license_path_prefix = os.path.join(self.source_folder, f"source_subfolder_{self.settings.os}", "share", "info")
+            license_path_prefix = os.path.join(self.source_folder, "share", "info")
         info = load(self, os.path.join(license_path_prefix, "gfortran.info"))
         license_contents = info[info.find("Version 3"):info.find("END OF TERMS", 1)]
         save(self, "LICENSE", license_contents)
