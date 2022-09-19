@@ -1,3 +1,4 @@
+# pylint: skip-file
 from conan.tools.files import rename
 from conans import ConanFile, CMake, tools
 import functools
@@ -55,6 +56,11 @@ class SAILConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    # Probably will not be needed in Conan 2.x
+    def validate(self):
+        if self.options.with_avif and tools.cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building is not implemented due to dependencies (dav1d)")
 
     def configure(self):
         if self.options.shared:
