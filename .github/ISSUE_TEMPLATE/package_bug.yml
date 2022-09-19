@@ -3,7 +3,7 @@ description: 'Report a bug, something does not work as it supposed to'
 title: '[package] <LIBRARY-NAME>/<LIBRARY-VERSION>: SHORT DESCRIPTION'
 labels: bug
 body:
-- type: markdown
+- type: textarea
   attributes:
     label: Description
     description: What is not working
