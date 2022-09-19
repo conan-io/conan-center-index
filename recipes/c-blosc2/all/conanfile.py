@@ -97,7 +97,7 @@ class CBlosc2Conan(ConanFile):
         tc.cache_variables["DEACTIVATE_AVX2"] = simd_intrinsics != "avx2"
         tc.cache_variables["DEACTIVATE_LZ4"] = not bool(self.options.with_lz4)
         tc.cache_variables["PREFER_EXTERNAL_LZ4"] = True
-        tc.cache_variables["DEACTIVATE_ZLIB"] = self.options.with_zlib == None
+        tc.cache_variables["DEACTIVATE_ZLIB"] = self.options.with_zlib is None
         tc.cache_variables["PREFER_EXTERNAL_ZLIB"] = True
         tc.cache_variables["DEACTIVATE_ZSTD"] = not bool(self.options.with_zstd)
         tc.cache_variables["PREFER_EXTERNAL_ZSTD"] = True
