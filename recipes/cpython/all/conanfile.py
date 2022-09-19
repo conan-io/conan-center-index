@@ -496,13 +496,14 @@ class CPythonConan(ConanFile):
             "--include-pip",
             "--include-venv",
             "--include-dev",
+            "--include-stable"
         ]
         if self.options.get_safe("with_tkinter", False):
             layout_args.append("--include-tcltk")
         if self.settings.build_type == "Debug":
             layout_args.append("-d")
         python_args = " ".join(f"\"{a}\"" for a in layout_args)
-        self.run(f"{python_built} {python_args}", run_environment=True)
+        self.run(f"{python_built} {python_args}", run_environment=True, env="conanrun")
 
         rmdir(self, os.path.join(self.package_folder, "bin", "tcl"))
 
@@ -513,12 +514,16 @@ class CPythonConan(ConanFile):
             file.unlink()
 
     def _msvc_package_copy(self):
+        py_version = Version(self.version)
         build_path = self._msvc_artifacts_path
         infix = "_d" if self.settings.build_type == "Debug" else ""
         copy(self, "*.exe", src=build_path, dst=self.package_path.joinpath(self._msvc_install_subprefix))
         copy(self, "*.dll", src=build_path, dst=self.package_path.joinpath(self._msvc_install_subprefix))
         copy(self, "*.pyd", src=build_path, dst=self.package_path.joinpath(self._msvc_install_subprefix, "DLLs"))
-        copy(self, "python{}{}.lib".format(self._version_suffix, infix), src=build_path, dst=self.package_path.joinpath(self._msvc_install_subprefix, "libs"))
+        copy(self, f"python{self._version_suffix}{infix}.dll", src=build_path, dst=self.package_path.joinpath(self._msvc_install_subprefix))
+        copy(self, f"python{py_version.major}{infix}.dll", src=build_path, dst=self.package_path.joinpath(self._msvc_install_subprefix))  # Limited Python ABI
+        copy(self, f"python{self._version_suffix}{infix}.lib", src=build_path, dst=self.package_path.joinpath(self._msvc_install_subprefix, "libs"))
+        copy(self, f"python{py_version.major}{infix}.lib", src=build_path, dst=self.package_path.joinpath(self._msvc_install_subprefix, "libs"))  # Limited Python ABI
         copy(self, "*", src=self.source_path.joinpath("Include"), dst=self.package_path.joinpath(self._msvc_install_subprefix, "include"))
         copy(self, "pyconfig.h", src=self.source_path.joinpath("PC"), dst=self.package_path.joinpath(self._msvc_install_subprefix, "include"))
         copy(self, "*.py", src=self.source_path.joinpath("lib"), dst=self.package_path.joinpath(self._msvc_install_subprefix, "Lib"))
