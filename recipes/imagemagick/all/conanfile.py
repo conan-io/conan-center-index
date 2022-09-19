@@ -106,7 +106,7 @@ class ImageMagicConan(ConanFile):
             
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.with_bzlib:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
@@ -136,7 +136,7 @@ class ImageMagicConan(ConanFile):
         if self.options.with_xml2:
             self.requires("libxml2/2.9.10")
         if self.options.with_freetype:
-            self.requires("freetype/2.10.4")
+            self.requires("freetype/2.12.1")
         if self.options.with_djvu:
             # FIXME: missing djvu recipe
             self.output.warn(
