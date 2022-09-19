@@ -1,4 +1,6 @@
-from conans import ConanFile, CMake, tools
+from conans import CMake
+from conan import ConanFile
+from conan.tools.files import get, replace_in_file, apply_conandata_patches, rmdir
 import functools
 import os
 
@@ -32,18 +34,17 @@ class CppcheckConan(ConanFile):
         return "build_subfolder"
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "${CMAKE_SOURCE_DIR}",
                               "${PROJECT_SOURCE_DIR}")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "tools", "CMakeLists.txt"),
+        replace_in_file(self, os.path.join(self._source_subfolder, "tools", "CMakeLists.txt"),
                               "${CMAKE_SOURCE_DIR}",
                               "${PROJECT_SOURCE_DIR}")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "tools", "CMakeLists.txt"),
+        replace_in_file(self, os.path.join(self._source_subfolder, "tools", "CMakeLists.txt"),
                               "${CMAKE_BINARY_DIR}",
                               "${PROJECT_BINARY_DIR}")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cli", "CMakeLists.txt"),
+        replace_in_file(self, os.path.join(self._source_subfolder, "cli", "CMakeLists.txt"),
                               "RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}",
                               "DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}")
 
@@ -59,7 +60,7 @@ class CppcheckConan(ConanFile):
             self.requires("pcre/8.45")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     @functools.lru_cache(1)
@@ -83,7 +84,7 @@ class CppcheckConan(ConanFile):
         self.copy("cppcheck-htmlreport", dst=os.path.join("bin"), src=os.path.join(self._source_subfolder,"htmlreport"))
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.includedirs = []
