@@ -16,7 +16,6 @@ class CppcheckConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"with_z3": [True, False], "have_rules": [True, False]}
     default_options = {"with_z3": True, "have_rules": True}
-    exports_sources = ["CMakeLists.txt", "patches/**"]
 
     @property
     def _source_subfolder(self):
@@ -41,6 +40,11 @@ class CppcheckConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "cli", "CMakeLists.txt"),
                               "RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}",
                               "DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}")
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def requirements(self):
         if self.options.with_z3:
