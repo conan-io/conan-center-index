@@ -1,4 +1,7 @@
 sources:
+  "4.1.1":
+    url: "https://github.com/mozilla/mozjpeg/archive/v4.1.1.tar.gz"
+    sha256: "66b1b8d6b55d263f35f27f55acaaa3234df2a401232de99b6d099e2bb0a9d196"
   "4.0.0":
     url: "https://github.com/mozilla/mozjpeg/archive/v4.0.0.tar.gz"
     sha256: "961e14e73d06a015e9b23b8af416f010187cc0bec95f6e3b0fcb28cc7e2cbdd4"
@@ -6,9 +9,9 @@ sources:
     url: "https://github.com/mozilla/mozjpeg/archive/v3.3.1.tar.gz"
     sha256: "aebbea60ea038a84a2d1ed3de38fdbca34027e2e54ee2b7d08a97578be72599d"
 patches:
+  "4.1.1":
+    - patch_file: "patches/4.1.1-0001-cmake-fixes.patch"
   "4.0.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/4.0.0-0001-cmake-fixes.patch"
+    - patch_file: "patches/4.0.0-0001-cmake-fixes.patch"
   "3.3.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/3.3.1-0001-cmake-fixes.patch"
+    - patch_file: "patches/3.3.1-0001-cmake-fixes.patch"
