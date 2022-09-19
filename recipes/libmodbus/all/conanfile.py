@@ -84,7 +84,7 @@ class LibmodbusConan(ConanFile):
         env = tc.environment()
 
         if is_msvc(self):
-            ar_lib = unix_path(self, self.conf.get("tools.automake:ar-lib"))
+            ar_lib = unix_path(self, self.deps_user_info['automake'].ar_lib)
             env.define("CC", "cl -nologo")
             env.define("CXX", "cl -nologo")
             env.define("LD", "link -nologo")
