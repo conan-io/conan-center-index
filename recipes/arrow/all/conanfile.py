@@ -351,6 +351,8 @@ class ArrowConan(ConanFile):
                 "armv8.3": "aarch64",
             }.get(str(self.settings.arch), str(self.settings.arch))
             tc.cache_variables["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
+            if cmake_system_processor == "aarch64":
+                tc.cache_variables["ARROW_CPU_FLAG"] = "armv8"
         if is_msvc(self):
             tc.cache_variables["ARROW_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
         tc.cache_variables["ARROW_DEPENDENCY_SOURCE"] = "SYSTEM"
