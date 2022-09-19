@@ -1,9 +1,10 @@
 from conan import ConanFile
 from conan.tools import files
-from conan.tools.microsoft import MSBuild, is_msvc
-from conan.tools.microsoft.visual import vs_ide_version
+from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
 from conans import AutoToolsBuildEnvironment, tools
+# It has to be this one, the one from conan.tools.microsoft does not pass toolset
+from conans.client.build.msbuild import MSBuild
 import os
 
 required_conan_version = ">=1.33.0"
@@ -44,21 +45,8 @@ class PcapplusplusConan(ConanFile):
         else:
             self.requires("libpcap/1.9.1")
 
-    def _get_vs_version(self):
-        if not is_msvc(self):
-            return None
-        vs_mapping = {
-            "14": "vs2015",
-            "15": "vs2017",
-            "16": "vs2019",
-            # configure-windows-visual-studio.bat does not know vs2022
-            # we use vs2019 and change PlatformToolset later
-            "17": "vs2019",
-        }
-        return vs_mapping.get(vs_ide_version(self), None)
-
     def validate(self):
-        if self.settings.os == "Windows" and self._get_vs_version() is None:
+        if self.settings.os == "Windows" and not is_msvc(self):
             raise ConanInvalidConfiguration("Can not build on Windows: only msvc compiler is supported.")
         if self.settings.os not in ("FreeBSD", "Linux", "Macos", "Windows"):
             raise ConanInvalidConfiguration("%s is not supported" % self.settings.os)
@@ -91,19 +79,17 @@ class PcapplusplusConan(ConanFile):
             self._build_posix()
 
     def _build_windows(self):
-        vs_version = self._get_vs_version()
         with files.chdir(self, self._source_subfolder):
             config_args = [
                 "configure-windows-visual-studio.bat",
                 "--pcap-sdk", self.deps_cpp_info["npcap"].rootpath,
                 "--pthreads-home", self.deps_cpp_info["pthreads4w"].rootpath,
-                "--vs-version", vs_version,
+                "--vs-version", "vs2015",
             ]
             self.run(" ".join(config_args), run_environment=True)
             msbuild = MSBuild(self)
             targets =  ['Common++', 'Packet++', 'Pcap++']
-            cmd = msbuild.command(f"mk/{vs_version}/PcapPlusPlus.sln", targets)
-            self.run(cmd + " /p:PlatformToolset=" + tools.msvs_toolset(self))
+            msbuild.build("mk/vs2015/PcapPlusPlus.sln", targets=targets)
 
     def _build_posix(self):
         with files.chdir(self, self._source_subfolder):
@@ -136,4 +122,4 @@ class PcapplusplusConan(ConanFile):
         if self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(["CoreFoundation", "Security", "SystemConfiguration"])
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["wsock32", "ws2_32"]
+            self.cpp_info.system_libs = ["ws2_32"]
