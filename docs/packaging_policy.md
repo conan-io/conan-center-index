@@ -128,16 +128,16 @@ Usage of each option should follow the rules:
   This option does not make sense on all the support configurations so it should be removed.
 
    ```python
-   def config_options(self):
-       if self.settings.os == "Windows":
-      del self.options.fPIC
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
-   def configure(self):
-      if self.options.shared:
-         try:
-             del self.options.fPIC
-         except Exception:
-             pass
+    def configure(self):
+        if self.options.shared:
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
    ```
 
    Starting with Conan 1.53 this can be simplified to
