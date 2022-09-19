@@ -20,7 +20,6 @@ class MoldConan(ConanFile):
     default_options = {
         "with_mimalloc": False,
     }
-    generators = "cmake_find_package"
 
     def validate(self):
         if self.settings.build_type == "Debug":
