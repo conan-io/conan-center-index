@@ -72,7 +72,7 @@ class PangoConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.4")
-        self.build_requires("meson/0.62.1")
+        self.build_requires("meson/0.63.2")
 
     def requirements(self):
         if self.options.with_freetype:
@@ -86,8 +86,8 @@ class PangoConan(ConanFile):
             self.requires("xorg/system")    # for xorg::xrender
         if self.options.with_cairo:
             self.requires("cairo/1.17.4")
-        self.requires("harfbuzz/4.3.0")
-        self.requires("glib/2.73.0")
+        self.requires("harfbuzz/5.1.0")
+        self.requires("glib/2.73.3")
         self.requires("fribidi/1.0.12")
 
     def source(self):
