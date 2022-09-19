@@ -87,7 +87,7 @@ class XsimdConan(ConanFile):
         ## TODO: workaround for arm compilation issue : https://github.com/xtensor-stack/xsimd/issues/735
         if Version(self.version) >= "9.0.0" and \
             is_apple_os(self) and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
-            set.cpp_info.cxxflags.extend(["-flax-vector-conversions", "-fsigned-char",])
+            self.cpp_info.cxxflags.extend(["-flax-vector-conversions", "-fsigned-char",])
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
