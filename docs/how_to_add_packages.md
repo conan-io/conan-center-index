@@ -145,7 +145,7 @@ different versions in different folders. For mainteinance reasons, we prefer to 
 it and it makes sense to split and duplicate it, there is no common rule for it.
 
 Together with the recipe, there can be other files that are needed to build the library: patches, other files related to build systems,
-... all these files will usually be listed in the `exports_sources` attribute and used during the build process.
+... all these files will usually be listed in `exports_sources`  and used during the build process.
 
 Also, **every `conanfile.py` should be accompanied by one or several folder to test the generated packages** as we will see below.
 
