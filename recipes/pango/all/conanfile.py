@@ -1,11 +1,10 @@
 import os
-import shutil
 import glob
 
 from conans import tools, Meson, VisualStudioBuildEnvironment
 from conan import ConanFile
 from conan.tools.scm import Version
-from conan.tools.files import get, replace_in_file, chdir, rmdir, rm
+from conan.tools.files import get, replace_in_file, chdir, rmdir, rm, rename
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
 
@@ -98,7 +97,7 @@ class PangoConan(ConanFile):
                   strip_root=True, destination=self._source_subfolder)
 
     def _configure_meson(self):
-        defs = dict()
+        defs = {}
         defs["introspection"] = "disabled"
 
         defs["libthai"] = "enabled" if self.options.with_libthai else "disabled"
@@ -130,8 +129,8 @@ class PangoConan(ConanFile):
             with chdir(self, os.path.join(self.package_folder, "lib")):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
-                    self.output.info("rename %s into %s" % (filename_old, filename_new))
-                    shutil.move(filename_old, filename_new)
+                    self.output.info(f"rename {filename_old} into {filename_new}")
+                    rename(self, filename_old, filename_new)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
@@ -200,7 +199,9 @@ class PangoConan(ConanFile):
         self.env_info.PATH.append(os.path.join(self.package_folder, 'bin'))
 
     def package_id(self):
-        self.info.requires["glib"].full_package_mode()
-        self.info.requires["harfbuzz"].full_package_mode()
-        if self.options.with_cairo:
+        if not self.options["glib"].shared:
+            self.info.requires["glib"].full_package_mode()
+        if not self.options["harfbuzz"].shared:
+            self.info.requires["harfbuzz"].full_package_mode()
+        if self.options.with_cairo and not self.options["cairo"].shared:
             self.info.requires["cairo"].full_package_mode()
