@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, get, copy, rm, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -352,7 +352,7 @@ class ArrowConan(ConanFile):
             }.get(str(self.settings.arch), str(self.settings.arch))
             tc.cache_variables["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
         if is_msvc(self):
-            tc.cache_variables["ARROW_USE_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
+            tc.cache_variables["ARROW_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
         tc.cache_variables["ARROW_DEPENDENCY_SOURCE"] = "SYSTEM"
         tc.cache_variables["ARROW_GANDIVA"] = bool(self.options.gandiva)
         tc.cache_variables["ARROW_PARQUET"] = self._parquet()
