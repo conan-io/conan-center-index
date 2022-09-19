@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
 #if XSIMD_VERSION_MAJOR < 8
   xs::batch<double, 4> a(1.5, 2.5, 3.5, 4.5);
   xs::batch<double, 4> b(2.5, 3.5, 4.5, 5.5);
-#elif XSIMD_VERSION_MAJOR < 9 ||  XSIMD_WITH_NEON64 || XSIMD_WITH_NEON
+#elif XSIMD_VERSION_MAJOR < 9
   xs::batch<double> a({1.5, 2.5, 3.5, 4.5});
   xs::batch<double> b({2.5, 3.5, 4.5, 5.5});
 #else
