@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, rmdir
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 
@@ -69,6 +69,10 @@ class MoldConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")

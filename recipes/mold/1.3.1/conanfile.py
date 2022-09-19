@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.scm import Version
 from conan.tools import files
+from conan.tools.files import copy
 from conan.errors import ConanInvalidConfiguration
 from conans import AutoToolsBuildEnvironment
 import os
@@ -82,8 +83,8 @@ class MoldConan(ConanFile):
             autotools.make(target="mold", args=['SYSTEM_TBB=1', 'SYSTEM_MIMALLOC=1'])
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy("mold", src=self._source_subfolder, dst="bin", keep_path=False)
+        copy(self, "LICENSE", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "mold", src=self._source_subfolder, dst="bin", keep_path=False)
 
     def package_id(self):
         del self.info.settings.compiler
