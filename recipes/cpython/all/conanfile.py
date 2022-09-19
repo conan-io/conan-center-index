@@ -12,6 +12,7 @@ from conan.tools.files import get, load, replace_in_file, rmdir, rename, mkdir, 
 from conan.tools.gnu import AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps, Autotools
 from conan.tools.layout import basic_layout, vs_layout
 from conan.tools.microsoft import MSBuild, is_msvc, msvc_runtime_flag, MSBuildDeps, MSBuildToolchain, VCVars
+from conan.tools.microsoft.visual import msvc_version_to_toolset_version
 from conan.tools.scm import Version
 from conans.tools import get_gnu_triplet
 
@@ -73,6 +74,7 @@ class CPythonConan(ConanFile):
         # options that don't change package id
         "env_vars": True,
     }
+    short_paths = True  # Due to the long path names on Windows for the site-packages
 
     @property
     def _supports_modules(self):
@@ -390,7 +392,13 @@ class CPythonConan(ConanFile):
             self.output.info("Patching runtime")
             replace_in_file(self, self.source_path.joinpath("PCbuild", "pyproject.props"), "MultiThreadedDLL", runtime_library)
             replace_in_file(self, self.source_path.joinpath("PCbuild", "pyproject.props"), "MultiThreadedDebugDLL", runtime_library)
-            replace_in_file(self, self.source_path.joinpath("PCbuild", "Directory.Build.props"), "</Project>", "  <PropertyGroup>\n    <IncludeExternals>true</IncludeExternals>\n  </PropertyGroup>\n</Project>", runtime_library)
+
+            replace_in_file(self, self.source_path.joinpath("PCbuild", "Directory.Build.props"), "</Project>",
+                            textwrap.dedent(f"""  <PropertyGroup>
+                                                    <IncludeExternals>true</IncludeExternals>
+                                                    <PlatformToolset>{msvc_version_to_toolset_version(self.settings.compiler.version)}</PlatformToolset>
+                                                  </PropertyGroup>
+                                                </Project>"""), runtime_library)
 
         # Remove vendored packages
         rmdir(self, self.source_path.joinpath("Modules", "_decimal", "libmpdec"))
@@ -421,23 +429,6 @@ class CPythonConan(ConanFile):
             replace_in_file(self, self.source_path.joinpath("PCbuild", "pythonw.vcxproj"),
                                   "<ItemDefinitionGroup>", "<ItemDefinitionGroup><ClCompile><PreprocessorDefinitions>Py_NO_ENABLE_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile>")
 
-    def _upgrade_single_project_file(self, project_file):
-        """
-        `devenv /upgrade <project.vcxproj>` will upgrade *ALL* projects referenced by the project.
-        By temporarily moving the solution project, only one project is upgraded
-        This is needed for static cpython or for disabled optional dependencies (e.g. tkinter=False)
-        Restore it afterwards because it is needed to build some targets.
-        """
-        rename(self, self.source_path.joinpath("PCbuild", "pcbuild.sln"),
-                     self.source_path.joinpath("PCbuild", "pcbuild.sln.bak"))
-        rename(self, self.source_path.joinpath("PCbuild", "pcbuild.proj"),
-                     self.source_path.joinpath("PCbuild", "pcbuild.proj.bak"))
-        self.run(f'devenv "{project_file}" /upgrade', run_environment=True)
-        rename(self, self.source_path.joinpath("PCbuild", "pcbuild.sln.bak"),
-                     self.source_path.joinpath("PCbuild", "pcbuild.sln"))
-        rename(self, self.source_path.joinpath("PCbuild", "pcbuild.proj.bak"),
-                     self.source_path.joinpath("PCbuild", "pcbuild.proj"))
-
     def build(self):
         self._validate_final()
         self._patch_sources()
@@ -448,7 +439,6 @@ class CPythonConan(ConanFile):
             for project_i, project in enumerate(projects, 1):
                 self.output.info(f"[{project_i}/{len(projects)}] Building project '{project}'...")
                 project_file = self.source_path.joinpath("PCbuild", project + ".vcxproj")
-                self._upgrade_single_project_file(project_file)
                 msbuild = MSBuild(self)
                 msbuild.build(sln=project_file)
         else:
@@ -714,7 +704,7 @@ class CPythonConan(ConanFile):
             self.cpp_info.components["_hidden"].includedirs = []
 
         if self.options.env_vars:
-            bindir = self.package_path.join("bin")
+            bindir = self.package_path.joinpath("bin")
             self.output.info("Appending PATH environment variable: {}".format(bindir))
             self.env_info.PATH.append(bindir)
 
