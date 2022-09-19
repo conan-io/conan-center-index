@@ -80,20 +80,16 @@ class CycloneDDSConan(ConanFile):
         if self.options.enable_security and not self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} currently do not support"\
                                             "static build and security on")
-
-        if compiler.get_safe("cppstd"):
-            build.check_min_cppstd(self, 14)
-
         if is_msvc(self):
             # TODO : determine windows error and find solution (at test_package)
             raise ConanInvalidConfiguration(f"{self.ref} is not (yet) supported"\
                                                 "for Visual Studio compiler.")
         if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
+            build.check_min_cppstd(self, 14)
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
         if minimum_version and scm.Version(self.info.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++"\
-                f"{self._minimum_cpp_standard}, which your compiler does not support.")
+                f"14, which your compiler does not support.")
 
     def source(self):
         files.get(self,**self.conan_data["sources"][self.version], strip_root=True,
