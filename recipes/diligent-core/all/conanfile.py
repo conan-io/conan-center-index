@@ -3,8 +3,8 @@ from conans import CMake
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.files import rm, get, rmdir, rename, patch, collect_libs
-from conan.tools.files.patches import patch, apply_conandata_patches
+from conan.tools.files import rm, get, rmdir, rename, collect_libs
+from conan.tools.files.patches import apply_conandata_patches
 from conan.tools.apple import is_apple_os
 import os
 
