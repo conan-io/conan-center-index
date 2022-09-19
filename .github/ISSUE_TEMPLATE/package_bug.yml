@@ -4,16 +4,20 @@ title: '[package] <LIBRARY-NAME>/<LIBRARY-VERSION>: SHORT DESCRIPTION'
 labels: bug
 body:
 - type: markdown
+  label: Description
+  description: What is not working
   attributes:
     value: |
       Please don't forget to update the issue title.
       Missing profile or a short log will make extremely difficult to investigate your case or provide any help,
       please, include all applicable information with details to help us reproduce your problem.
+  validations:
+    required: true
 
 - type: textarea
   attributes:
     label: Package and Environment Details
-    description: include every applicable attribute)
+    description: (include every applicable attribute)
     value: |
      * Package Name/Version: **zlib/1.2.8**
      * Operating System+version: **Linux Ubuntu 18.04**
