@@ -148,6 +148,6 @@ class CycloneDDSConan(ConanFile):
             requires.append("iceoryx::iceoryx_binding_c")
         if self.options.with_ssl:
             requires.append("openssl::openssl")
-        self.cpp_info.components["ddsc"].requires = requires
+        self.cpp_info.components["CycloneDDS"].requires = requires
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["ddsc"].system_libs = ["pthread"]
+            self.cpp_info.components["CycloneDDS"].system_libs = ["pthread"]
