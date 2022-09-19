@@ -29,11 +29,15 @@ body:
   attributes:
     label: Conan profile
     description: output of `conan profile show default` or `conan profile show <profile>` if custom profile is in use
+  validations:
+    required: true
 
 - type: textarea
   attributes:
     label:  Steps to reproduce
     description: Which commands did you run? e.g. `conan install -r conancenter foobar/0.1.0@ -pr:b=default -pr:h=default`
+  validations:
+    required: true
 
 - type: textarea
   attributes:
@@ -47,3 +51,5 @@ body:
       ```
 
       </details>
+  validations:
+    required: true
