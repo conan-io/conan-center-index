@@ -2,10 +2,10 @@ import functools
 import os
 import textwrap
 
+# pylint: skip-file
 from conans import ConanFile, CMake, tools
 
 required_conan_version = ">=1.43.0"
-
 
 class LibAVIFConan(ConanFile):
     name = "libavif"
