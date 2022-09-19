@@ -1,6 +1,7 @@
 # pylint: skip-file
 from conan.tools.files import rename
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 
