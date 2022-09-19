@@ -5,7 +5,8 @@ if(NOT TARGET @target_name@)
             PATHS ENV PATH
             NO_DEFAULT_PATH
         )
-    else()
+    endif()
+    if(NOT @find_program_variable@)
         find_program(@find_program_variable@
             NAMES @executable_name@
             PATHS "${CMAKE_CURRENT_LIST_DIR}/@relative_path@bin/"
