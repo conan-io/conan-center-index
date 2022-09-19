@@ -1,10 +1,13 @@
 sources:
+  "0.5.0":
+    url: "https://github.com/aklomp/base64/archive/v0.5.0.tar.gz"
+    sha256: "b21be58a90d31302ba86056db7ef77a481393b9359c505be5337d7d54e8a0559"
   "0.4.0":
-    sha256: 1fce54059c504b2604c22c20cd930444a71b3340fc81334c037da63976d92002
-    url: https://github.com/aklomp/base64/archive/v0.4.0.tar.gz
+    url: "https://github.com/aklomp/base64/archive/v0.4.0.tar.gz"
+    sha256: "1fce54059c504b2604c22c20cd930444a71b3340fc81334c037da63976d92002"
 patches:
+  "0.5.0":
+    - patch_file: "patches/0.5.0-0001-make.patch"
   "0.4.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/make.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/cmake.patch"
+    - patch_file: "patches/0.4.0-0001-make.patch"
+    - patch_file: "patches/0.4.0-0002-cmake.patch"
