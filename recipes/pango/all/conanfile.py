@@ -2,11 +2,14 @@ import os
 import shutil
 import glob
 
-from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conans import tools, Meson, VisualStudioBuildEnvironment
+from conan import ConanFile
+from conan.tools.scm import Version
+from conan.tools.files import get, replace_in_file, chdir, rmdir, rm
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.51.3"
 
 class PangoConan(ConanFile):
     name = "pango"
@@ -30,7 +33,7 @@ class PangoConan(ConanFile):
         return "build_subfolder"
 
     def validate(self):
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("this recipe does not support GCC before version 5. contributions are welcome")
         if self.options.with_xft and not self.settings.os in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("Xft can only be used on Linux and FreeBSD")
@@ -91,7 +94,7 @@ class PangoConan(ConanFile):
         self.requires("fribidi/1.0.12")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
     def _configure_meson(self):
@@ -110,10 +113,10 @@ class PangoConan(ConanFile):
 
     def build(self):
         meson_build = os.path.join(self._source_subfolder, "meson.build")
-        tools.replace_in_file(meson_build, "subdir('tests')", "")
-        tools.replace_in_file(meson_build, "subdir('tools')", "")
-        tools.replace_in_file(meson_build, "subdir('utils')", "")
-        tools.replace_in_file(meson_build, "subdir('examples')", "")
+        replace_in_file(self, meson_build, "subdir('tests')", "")
+        replace_in_file(self, meson_build, "subdir('tools')", "")
+        replace_in_file(self, meson_build, "subdir('utils')", "")
+        replace_in_file(self, meson_build, "subdir('examples')", "")
         with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if is_msvc(self) else tools.no_op():
             meson = self._configure_meson()
             meson.build()
@@ -124,13 +127,13 @@ class PangoConan(ConanFile):
             meson = self._configure_meson()
             meson.install()
         if is_msvc(self):
-            with tools.chdir(os.path.join(self.package_folder, "lib")):
+            with chdir(self, os.path.join(self.package_folder, "lib")):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
                     self.output.info("rename %s into %s" % (filename_old, filename_new))
                     shutil.move(filename_old, filename_new)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(self.package_folder, "*.pdb")
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.components['pango_'].libs = ['pango-1.0']
