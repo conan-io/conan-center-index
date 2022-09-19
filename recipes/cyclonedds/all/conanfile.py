@@ -3,8 +3,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools import files, build, scm
 from conan.tools.microsoft import is_msvc
-from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps
-from conan.tools.layout import cmake_layout
+from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
 
 required_conan_version = ">=1.51.3"
 
