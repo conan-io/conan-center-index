@@ -80,7 +80,6 @@ class LibmodbusConan(ConanFile):
         # the following MSVC specific part has been ported from conan v1 following https://github.com/conan-io/conan-center-index/pull/12916
         if is_msvc(self) and Version(self.settings.compiler.version) >= "12":
             tc.extra_cflags.append("-FS")
-            tc.extra_cxxflags.append("-FS")
     
         env = tc.environment()
 
@@ -89,7 +88,7 @@ class LibmodbusConan(ConanFile):
             env.define("CC", "cl -nologo")
             env.define("CXX", "cl -nologo")
             env.define("LD", "link -nologo")
-            env.define("AR", f"{ar_lib} lib")
+            env.define("AR", f"{ar_lib} lib -nologo -verbose")
             env.define("RANLIB", ":")
             env.define("STRING", ":")
             env.define("NM", "dumpbin -symbols")
