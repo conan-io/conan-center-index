@@ -22,12 +22,12 @@ body:
      * Conan version: **conan 1.18.0**
      * Python version: **Python 3.7.4**
     placeholder: |
-     cat /etc/lsb-release | grep
-     gcc --version
-     docker info
-     cmake --version
-     conan -v
-     python3 --version
+      cat /etc/lsb-release | grep
+      gcc --version
+      docker info
+      cmake --version
+      conan -v
+      python3 --version
   validations:
     required: true
 
@@ -36,19 +36,19 @@ body:
     label: Conan profile
     description: output of `conan profile show default` or `conan profile show <profile>` if custom profile is in use
     pleceholder: |
-     [settings]
-     os=Macos
-     os_build=Macos
-     arch=armv8
-     arch_build=armv8
-     compiler=apple-clang
-     compiler.version=14
-     compiler.libcxx=libc++
-     build_type=Release
-     [options]
-     [conf]
-     [build_requires]
-     [env]
+      [settings]
+      os=Macos
+      os_build=Macos
+      arch=armv8
+      arch_build=armv8
+      compiler=apple-clang
+      compiler.version=14
+      compiler.libcxx=libc++
+      build_type=Release
+      [options]
+      [conf]
+      [build_requires]
+      [env]
   validations:
     required: true
 
