@@ -14,8 +14,14 @@ class CppcheckConan(ConanFile):
     license = "GPL-3.0-or-later"
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"with_z3": [True, False], "have_rules": [True, False]}
-    default_options = {"with_z3": True, "have_rules": True}
+    options = {
+        "with_z3": [True, False],
+        "have_rules": [True, False]
+        }
+    default_options = {
+        "with_z3": True,
+        "have_rules": True
+        }
 
     @property
     def _source_subfolder(self):
