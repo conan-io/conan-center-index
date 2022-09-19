@@ -9,9 +9,10 @@ from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
+
 class LibiglConan(ConanFile):
     name = "libigl"
-    description = ("Simple C++ geometry processing library")
+    description = "Simple C++ geometry processing library"
     topics = ("libigl", "geometry", "matrices", "algorithms")
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/**"]
@@ -21,7 +22,7 @@ class LibiglConan(ConanFile):
     options = {"header_only": [True, False], "fPIC": [True, False]}
     default_options = {"header_only": True, "fPIC": True}
     generators = "cmake", "cmake_find_package"
-    requires = ("eigen/3.4.0")
+    requires = "eigen/3.3.7"
     build_requires = ["cmake/3.24.1"]
     _cmake = None
 
@@ -51,16 +52,37 @@ class LibiglConan(ConanFile):
             check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
-                self.name, self.settings.compiler))
+            self.output.warn(
+                "{} recipe lacks information about the {} compiler support.".format(
+                    self.name, self.settings.compiler
+                )
+            )
         else:
             if Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
-        if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime and not self.options.header_only:
-            raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
-        if ("arm" in self.settings.arch or "x86" is self.settings.arch) and (Version(self.version) < "2.4.0" or not is_apple_os(self)):
-            raise ConanInvalidConfiguration("Not available for arm. Requested arch: {}, os: {}".format(self.settings.arch, self.settings.os))
+                raise ConanInvalidConfiguration(
+                    "{} requires C++{} support. The current compiler {} {} does not support it.".format(
+                        self.name,
+                        self._minimum_cpp_standard,
+                        self.settings.compiler,
+                        self.settings.compiler.version,
+                    )
+                )
+        if (
+            self.settings.compiler == "Visual Studio"
+            and "MT" in self.settings.compiler.runtime
+            and not self.options.header_only
+        ):
+            raise ConanInvalidConfiguration(
+                "Visual Studio build with MT runtime is not supported"
+            )
+        if ("arm" in self.settings.arch or "x86" is self.settings.arch) and (
+            Version(self.version) < "2.4.0" or not is_apple_os(self)
+        ):
+            raise ConanInvalidConfiguration(
+                "Not available for arm. Requested arch: {}, os: {}".format(
+                    self.settings.arch, self.settings.os
+                )
+            )
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -75,13 +97,20 @@ class LibiglConan(ConanFile):
             patch(self, **current_patch)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(
+            self,
+            **self.conan_data["sources"][self.version],
+            strip_root=True,
+            destination=self._source_subfolder
+        )
 
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self, parallel=False)
 
-            self._cmake.definitions["LIBIGL_USE_STATIC_LIBRARY"] = not self.options.header_only
+            self._cmake.definitions[
+                "LIBIGL_USE_STATIC_LIBRARY"
+            ] = not self.options.header_only
             self._cmake.definitions["LIBIGL_BUILD_TUTORIALS"] = "OFF"
             self._cmake.definitions["LIBIGL_BUILD_TESTS"] = "OFF"
 
@@ -155,7 +184,9 @@ class LibiglConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "igl"
 
         self.cpp_info.components["igl_common"].names["cmake_find_package"] = "common"
-        self.cpp_info.components["igl_common"].names["cmake_find_package_multi"] = "common"
+        self.cpp_info.components["igl_common"].names[
+            "cmake_find_package_multi"
+        ] = "common"
         self.cpp_info.components["igl_common"].libs = []
         self.cpp_info.components["igl_common"].requires = ["eigen::eigen"]
         if self.settings.os == "Linux":
