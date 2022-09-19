@@ -11,8 +11,8 @@ body:
       Please don't forget to update the issue title.
       Missing profile or a short log will make extremely difficult to investigate your case or provide any help,
       please, include all applicable information with details to help us reproduce your problem.
-    validations:
-      required: true
+  validations:
+    required: true
 
 - type: textarea
   attributes:
