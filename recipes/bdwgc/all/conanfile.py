@@ -105,6 +105,7 @@ class BdwGcConan(ConanFile):
         tc.variables["disable_gc_debug"] = not self.options.gc_debug
         tc.variables["disable_handle_fork"] = not self.options.handle_fork
         tc.variables["install_headers"] = True
+        tc.variables["enable_docs"] = False
         tc.variables["build_tests"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
