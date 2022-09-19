@@ -2,10 +2,10 @@ import functools
 import os
 import textwrap
 
-# pylint: skip-file
 from conans import ConanFile, CMake, tools
 
 required_conan_version = ">=1.43.0"
+
 
 class LibAVIFConan(ConanFile):
     name = "libavif"
@@ -43,10 +43,10 @@ class LibAVIFConan(ConanFile):
         return self.options.with_decoder == "dav1d"
 
     def requirements(self):
-        self.requires("libaom-av1/3.1.2")
+        self.requires("libaom-av1/3.4.0")
         self.requires("libyuv/cci.20201106")
         if self._has_dav1d:
-            self.requires("dav1d/0.9.1")
+            self.requires("dav1d/1.0.0")
 
     @property
     def _source_subfolder(self):
