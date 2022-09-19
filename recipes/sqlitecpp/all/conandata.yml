@@ -13,8 +13,13 @@ sources:
     sha256: "16bf963619786652a60533bcdc71a0412cad1ce132cd09ce43344af6ed7463d9"
 patches:
   "2.5.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.5.0/0001-conan.patch"
+    - patch_file: "patches/2.5.0-0001-cmake-sqlite3.patch"
+      patch_description: "Fix Sqlite3 CMake target"
+      patch_type: "conan"
   "2.4.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.4.0/0001-mingw.patch"
+    - patch_file: "patches/2.4.0-0001-cmake-sqlite3.patch"
+      patch_description: "Fix Sqlite3 CMake target"
+      patch_type: "conan"
+    - patch_file: "patches/2.4.0-0002-mingw-flags.patch"
+      patch_description: "Fix Mingw compiler flags"
+      patch_type: "conan"
