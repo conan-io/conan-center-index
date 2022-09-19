@@ -57,7 +57,7 @@ class SAILConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    # Probably will not be needed in Conan 2.x
+    # TODO Probably will not be needed in Conan 2.x https://github.com/conan-io/conan-center-index/issues/13001
     def validate(self):
         if self.options.with_avif and tools.cross_building(self):
             raise ConanInvalidConfiguration("Cross-building is not implemented due to dependencies (dav1d)")
