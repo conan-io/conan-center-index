@@ -4,5 +4,4 @@ sources:
     sha256: "BC84E137E0C8A055B8CD97FBEAFEC94E36DE1B0C2E88800896A82384FD867AE5"
 patches:
   "0.10.2":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0.10.2-0001-fix-find-iceoryx.patch"
+    - patch_file: "patches/0.10.2-0001-fix-find-iceoryx.patch"
