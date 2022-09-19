@@ -3,8 +3,7 @@ from conans import CMake
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.files import rm, get, rmdir, rename, collect_libs
-from conan.tools.files.patches import apply_conandata_patches
+from conan.tools.files import rm, get, rmdir, rename, collect_libs, patches
 from conan.tools.apple import is_apple_os
 import os
 
@@ -88,7 +87,7 @@ class DiligentCoreConan(ConanFile):
             del self.options.fPIC
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
+        patches.apply_conandata_patches(self)
 
     def build_requirements(self):
         self.tool_requires("cmake/3.24.0")
