@@ -6,6 +6,7 @@ from conan.tools.build import can_run
 from conan.tools.scm import Version
 from conan.tools.apple import is_apple_os
 from conan.tools.files import mkdir
+from conan.tools.microsoft import is_msvc
 from io import StringIO
 import os
 import re
@@ -64,13 +65,13 @@ class TestPackageConan(ConanFile):
 
     @property
     def _cmake_try_FindPythonX(self):
-        if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug":
+        if is_msvc(self) and self.settings.build_type == "Debug":
             return False
         return True
 
     @property
     def _supports_modules(self):
-        return self.settings.compiler != "Visual Studio" or self.options["cpython"].shared
+        return not is_msvc(self) or self.options["cpython"].shared
 
     def build(self):
         if can_run(self):
@@ -98,7 +99,7 @@ class TestPackageConan(ConanFile):
         cmake.definitions["Python{}_FIND_IMPLEMENTATIONS".format(py_major)] = "CPython"
         cmake.definitions["Python{}_FIND_STRATEGY".format(py_major)] = "LOCATION"
 
-        if self.settings.compiler != "Visual Studio":
+        if is_msvc(self):
             if Version(self._py_version) < Version("3.8"):
                 cmake.definitions["Python{}_FIND_ABI".format(py_major)] = self._cmake_abi.cmake_arg
 
@@ -108,7 +109,7 @@ class TestPackageConan(ConanFile):
 
         if can_run(self):
             if self._supports_modules:
-                with legacy_tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else legacy_tools.no_op():
+                with legacy_tools.vcvars(self.settings) if is_msvc(self) else legacy_tools.no_op():
                     modsrcfolder = "py2" if Version(self.deps_cpp_info["cpython"].version).major < "3" else "py3"
                     mkdir(self, os.path.join(self.build_folder, modsrcfolder))
                     for fn in os.listdir(os.path.join(self.source_folder, modsrcfolder)):
