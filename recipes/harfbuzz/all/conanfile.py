@@ -158,7 +158,7 @@ class HarfbuzzConan(ConanFile):
             if self.options.with_directwrite:
                 self.cpp_info.system_libs.append("dwrite")
         if tools.is_apple_os(self.settings.os):
-            self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText"])
+            self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText", "ApplicationServices"])
         if not self.options.shared:
             libcxx = tools.stdcpp_library(self)
             if libcxx:
