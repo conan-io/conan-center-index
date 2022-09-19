@@ -88,7 +88,7 @@ class LibmodbusConan(ConanFile):
             env.define("CC", "cl -nologo")
             env.define("CXX", "cl -nologo")
             env.define("LD", "link -nologo")
-            env.define("AR", f"{ar_lib} lib -nologo -verbose")
+            env.define("AR", f"{ar_lib} \"lib -nologo -verbose\"")
             env.define("RANLIB", ":")
             env.define("STRING", ":")
             env.define("NM", "dumpbin -symbols")
