@@ -10,7 +10,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, load, replace_in_file, rmdir, rename, mkdir, apply_conandata_patches, rm, unzip, \
     copy, save
 from conan.tools.gnu import AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps, Autotools
-from conan.tools.layout import basic_layout
+from conan.tools.layout import basic_layout, vs_layout
 from conan.tools.microsoft import MSBuild, is_msvc, msvc_runtime_flag, MSBuildDeps, MSBuildToolchain, VCVars
 from conan.tools.scm import Version
 from conans.tools import get_gnu_triplet
@@ -209,8 +209,11 @@ class CPythonConan(ConanFile):
             pass
 
     def layout(self):
-        basic_layout(self, src_folder="cpython")  # src_folder must use the same source folder name the project
-        self.folders.generators = "conan"
+        if is_msvc(self):
+            vs_layout(self)
+            self.folders.generators = "PCbuild"
+        else:
+            basic_layout(self, src_folder="cpython")  # src_folder must use the same source folder name the project
 
     def requirements(self):
         self.requires("zlib/1.2.11")
@@ -299,7 +302,6 @@ class CPythonConan(ConanFile):
             deps.generate()
 
             tc = MSBuildToolchain(self)
-            tc.configuration
             tc.generate()
 
             vc = VCVars(self)
@@ -388,6 +390,7 @@ class CPythonConan(ConanFile):
             self.output.info("Patching runtime")
             replace_in_file(self, self.source_path.joinpath("PCbuild", "pyproject.props"), "MultiThreadedDLL", runtime_library)
             replace_in_file(self, self.source_path.joinpath("PCbuild", "pyproject.props"), "MultiThreadedDebugDLL", runtime_library)
+            replace_in_file(self, self.source_path.joinpath("PCbuild", "Directory.Build.props"), "</Project>", "  <PropertyGroup>\n    <IncludeExternals>true</IncludeExternals>\n  </PropertyGroup>\n</Project>", runtime_library)
 
         # Remove vendored packages
         rmdir(self, self.source_path.joinpath("Modules", "_decimal", "libmpdec"))
@@ -448,7 +451,6 @@ class CPythonConan(ConanFile):
                 self._upgrade_single_project_file(project_file)
                 msbuild = MSBuild(self)
                 msbuild.build(sln=project_file)
-                # FIXME: Need to build with:  /p:IncludeExternals="true"
         else:
             autotools = Autotools(self)
             autotools.autoreconf()

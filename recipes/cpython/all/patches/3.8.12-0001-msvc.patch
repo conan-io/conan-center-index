@@ -26,7 +26,7 @@
      <Keyword>Win32Proj</Keyword>
    </PropertyGroup>
 -  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="../../conan_bzip2.props" />
++  <Import Project="python.props" /><Import Project="conan_bzip2.props" />
    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
    <PropertyGroup Label="Configuration">
      <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -59,7 +59,7 @@
      <Keyword>Win32Proj</Keyword>
    </PropertyGroup>
 -  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="../../conan_libffi.props" />
++  <Import Project="python.props" /><Import Project="conan_libffi.props" />
    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
    <PropertyGroup Label="Configuration">
      <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -88,7 +88,7 @@
      <Keyword>Win32Proj</Keyword>
    </PropertyGroup>
 -  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="../../conan_mpdecimal.props" />
++  <Import Project="python.props" /><Import Project="conan_mpdecimal.props" />
    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
    <PropertyGroup Label="Configuration">
      <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -145,7 +145,7 @@
      <Keyword>Win32Proj</Keyword>
    </PropertyGroup>
 -  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="../../conan_xz_utils.props" />
++  <Import Project="python.props" /><Import Project="conan_xz_utils.props" />
    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
    <PropertyGroup Label="Configuration">
      <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -182,7 +182,7 @@
      <Keyword>Win32Proj</Keyword>
    </PropertyGroup>
 -  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="../../conan_sqlite3.props" />
++  <Import Project="python.props" /><Import Project="conan_sqlite3.props" />
    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
    <PropertyGroup Label="Configuration">
      <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -206,7 +206,7 @@
      <RootNamespace>pythoncore</RootNamespace>
    </PropertyGroup>
 -  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="../../conan_zlib.props" />
++  <Import Project="python.props" /><Import Project="conan_zlib.props" />
    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
    <PropertyGroup Label="Configuration">
      <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -253,7 +253,7 @@
      <Keyword>Win32Proj</Keyword>
    </PropertyGroup>
 -  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="../../conan_openssl.props" />
++  <Import Project="python.props" /><Import Project="conan_openssl.props" />
    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
    <PropertyGroup Label="Configuration">
      <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -273,7 +273,7 @@
      <Keyword>Win32Proj</Keyword>
    </PropertyGroup>
 -  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="../../conan_openssl.props" />
++  <Import Project="python.props" /><Import Project="conan_openssl.props" />
    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
    <PropertyGroup Label="Configuration">
      <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -305,7 +305,7 @@
      <Keyword>Win32Proj</Keyword>
    </PropertyGroup>
 -  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="../../conan_expat.props" />
++  <Import Project="python.props" /><Import Project="conan_expat.props" />
    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
    <PropertyGroup Label="Configuration">
      <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -349,7 +349,7 @@
      <RootNamespace>pyexpat</RootNamespace>
    </PropertyGroup>
 -  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="../../conan_expat.props" />
++  <Import Project="python.props" /><Import Project="conan_expat.props" />
    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
    <PropertyGroup Label="Configuration">
      <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -384,7 +384,7 @@
      <CharacterSet>NotSet</CharacterSet>
    </PropertyGroup>
 -  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" /><Import Project="../../conan_tk.props" />
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" /><Import Project="conan_tk.props" />
    <PropertyGroup>
      <TargetExt>.pyd</TargetExt>
    </PropertyGroup>
