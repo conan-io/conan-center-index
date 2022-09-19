@@ -42,13 +42,6 @@ class LibBigWigConan(ConanFile):
         except Exception:
             pass
 
-        # Workaround weird gsasl link error
-        # See: https://github.com/conan-io/conan-center-index/pull/12195#issuecomment-1214193211
-        if self.options.with_curl:
-            self.options["libcurl"].with_imap = False
-            self.options["libcurl"].with_pop3 = False
-            self.options["libcurl"].with_smtp = False
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -63,10 +56,16 @@ class LibBigWigConan(ConanFile):
     def validate(self):
         if self.info.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on Windows.")
+
         if self.info.options.with_zlibng:
             zlib_ng = self.dependencies["zlib-ng"]
             if not zlib_ng.options.zlib_compat:
                 raise ConanInvalidConfiguration(f"{self.ref} requires the dependency option zlib-ng:zlib_compat=True")
+
+        if self.options.with_curl:
+            libcurl = self.dependencies["libcurl"]
+            if libcurl.options.with_imap or libcurl.options.with_pop3 or libcurl.options.with_smtp:
+                raise ConanInvalidConfiguration(f"{self.ref} requires libcurl using the follow options: -o libcurl:with_imap=False -o libcurl:with_pop3=False -o libcurl:with_smtp=False")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
