@@ -21,7 +21,7 @@ class LibiglConan(ConanFile):
     options = {"header_only": [True, False], "fPIC": [True, False]}
     default_options = {"header_only": True, "fPIC": True}
     generators = "cmake", "cmake_find_package"
-    requires = ("eigen/3.3.9")
+    requires = ("eigen/3.4.0")
     build_requires = ["cmake/3.24.1"]
     _cmake = None
 
