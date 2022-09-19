@@ -59,9 +59,9 @@ class SAILConan(ConanFile):
             del self.options.fPIC
 
     # TODO Probably will not be needed in Conan 2.x https://github.com/conan-io/conan-center-index/issues/13001
-    def validate(self):
-        if self.options.with_avif and tools.cross_building(self):
-            raise ConanInvalidConfiguration("Cross-building is not implemented due to dependencies (dav1d)")
+    #def validate(self):
+    #    if self.options.with_avif and tools.cross_building(self):
+    #        raise ConanInvalidConfiguration("Cross-building is not implemented due to dependencies (dav1d)")
 
     def configure(self):
         if self.options.shared:
