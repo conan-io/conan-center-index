@@ -110,7 +110,7 @@
 -  INCLUDE_DIRECTORIES( "../contrib/rapidjson/include" )
 -  INCLUDE_DIRECTORIES( "../contrib" )
 +  if(ASSIMP_BUILD_GLTF_IMPORTER OR ASSIMP_BUILD_GLTF_EXPORTER)
-+    find_package(rapidjson REQUIRED CONFIG)
++    find_package(RapidJSON REQUIRED CONFIG)
 +  endif()
  ENDIF(HUNTER_ENABLED)
  
@@ -158,7 +158,7 @@
 +    target_link_libraries(assimp zip::zip)
 +  endif()
 +  if(ASSIMP_BUILD_GLTF_IMPORTER OR ASSIMP_BUILD_GLTF_EXPORTER)
-+    target_link_libraries(assimp rapidjson::rapidjson)
++    target_link_libraries(assimp rapidjson)
 +  endif()
  ENDIF(HUNTER_ENABLED)
  
