@@ -1,11 +1,10 @@
-# pylint: skip-file
 from conan.tools.files import rename
+from conan.errors import ConanInvalidConfiguration
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.51.3"
 
 class SAILConan(ConanFile):
     name = "sail"
