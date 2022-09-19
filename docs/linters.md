@@ -31,7 +31,7 @@ This rcfile lists plugins and rules to be executed over all recipes in test pack
 Here is the list of current warning and errors provided by pylint, when using CCI configuration.
 
 
-#### W9006 - conan-import-conanfile: ConanFile should be imported from conan
+#### E9006 - conan-import-conanfile: ConanFile should be imported from conan
 
 ```python
 from conans import ConanFile
