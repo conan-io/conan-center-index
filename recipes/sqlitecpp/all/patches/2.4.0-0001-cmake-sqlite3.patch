@@ -1,0 +1,23 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c32724b..096818a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -206,7 +206,7 @@ install(EXPORT ${PROJECT_NAME}Config DESTINATION lib/cmake/${PROJECT_NAME})
+ 
+ ## Build provided copy of SQLite3 C library ##
+ 
+-# TODO 
++# TODO
+ #find_package(sqlite3)
+ #if(sqlite3_VERSION VERSION_LESS "3.19")
+ #    set_target_properties(SQLiteCpp PROPERTIES COMPILE_FLAGS "-DSQLITECPP_HAS_MEM_STRUCT")
+@@ -230,6 +230,9 @@ if (SQLITECPP_INTERNAL_SQLITE)
+     add_subdirectory(sqlite3)
+     target_include_directories(sqlite3 PUBLIC "${PROJECT_SOURCE_DIR}/sqlite3")
+     target_include_directories(SQLiteCpp PRIVATE "${PROJECT_SOURCE_DIR}/sqlite3")
++else (SQLITECPP_INTERNAL_SQLITE)
++    find_package(SQLite3 REQUIRED)
++    target_link_libraries(SQLiteCpp PRIVATE SQLite::SQLite3)
+ endif (SQLITECPP_INTERNAL_SQLITE)
+ 
+ # Optional additional targets:

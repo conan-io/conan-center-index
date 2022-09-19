@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index c32724b..efdb43b 100644
+index 096818a..9e40f9f 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -47,7 +47,12 @@ else (MSVC)
@@ -16,12 +16,3 @@ index c32724b..efdb43b 100644
      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++0x-compat") # C++ only
      if (CMAKE_COMPILER_IS_GNUCXX)
          # GCC flags
-@@ -230,6 +235,8 @@ if (SQLITECPP_INTERNAL_SQLITE)
-     add_subdirectory(sqlite3)
-     target_include_directories(sqlite3 PUBLIC "${PROJECT_SOURCE_DIR}/sqlite3")
-     target_include_directories(SQLiteCpp PRIVATE "${PROJECT_SOURCE_DIR}/sqlite3")
-+else (SQLITECPP_INTERNAL_SQLITE)
-+    target_link_libraries(SQLiteCpp PUBLIC CONAN_PKG::sqlite3)
- endif (SQLITECPP_INTERNAL_SQLITE)
- 
- # Optional additional targets:
