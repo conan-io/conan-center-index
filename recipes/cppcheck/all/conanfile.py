@@ -9,7 +9,7 @@ class CppcheckConan(ConanFile):
     name = "cppcheck"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/danmar/cppcheck"
-    topics = ("Cpp Check", "static analyzer")
+    topics = ("cpp check", "static analyzer")
     description = "Cppcheck is an analysis tool for C/C++ code."
     license = "GPL-3.0-or-later"
     generators = "cmake"
