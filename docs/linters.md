@@ -11,7 +11,9 @@ validate CCI conditions. Also, pylint uses [rcfile](https://pylint.pycqa.org/en/
 Also, the Github [code review](https://github.com/features/code-review) is integrated with the pylint output,
 parsed by [recipe_linter.json](../linter/recipe_linter.json), then presented to all users on the tab `Files changed`.
 
-Of course, if wanto to run any linter locally, before pushing your code, read [Running the linter locally](v2_linter.md#running-the-linter-locally).
+### Running Linters
+
+Of course, you should run any linter locally, before pushing your code, read [Running the linter locally](v2_linter.md#running-the-linter-locally) for instructions.
 
 
 ### Pylint configuration files
