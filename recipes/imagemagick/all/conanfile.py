@@ -55,7 +55,7 @@ class ImageMagicConan(ConanFile):
         "with_jbig": True,
         "with_jpeg": "libjpeg",
         "with_openjp2": True,
-        "with_pango": True,
+        "with_pango": False,
         "with_png": True,
         "with_tiff": True,
         "with_webp": False,
