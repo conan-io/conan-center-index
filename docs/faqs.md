@@ -34,7 +34,8 @@ This section gathers the most common questions from the community related to pac
   * [How to protect my project from breaking changes in recipes?](#how-to-protect-my-project-from-breaking-changes-in-recipes)
   * [Why are version ranges not allowed?](#why-are-version-ranges-not-allowed)
   * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)
-  * [How to watch only specific recipes?](#how-to-watch-only-specific-recipes)<!-- endToc -->
+  * [How to watch only specific recipes?](#how-to-watch-only-specific-recipes)
+  * [Is it possible to disable Pylint?](#is-it-possible-to-disable-pylint)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
