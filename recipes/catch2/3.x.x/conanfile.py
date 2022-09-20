@@ -3,6 +3,9 @@ import functools
 from conan import ConanFile, tools
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.files import get, patch, rmdir
 
 required_conan_version = ">=1.51.3"
 
@@ -58,10 +61,10 @@ class Catch2Conan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "14")
+            check_min_cppstd(self, "14")
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
+            if Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("{}/{}: Unsupported compiler: {}-{} "
                                                 "(https://github.com/p-ranav/structopt#compiler-compatibility)."
                                                 .format(self.name, self.version, self.settings.compiler, self.settings.compiler.version))
@@ -69,7 +72,7 @@ class Catch2Conan(ConanFile):
             self.output.warn("{}/{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name, self.version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -84,8 +87,8 @@ class Catch2Conan(ConanFile):
         return cmake
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        for x in self.conan_data.get("patches", {}).get(self.version, []):
+            patch(**x)
 
     def build(self):
         self._patch_sources()
@@ -96,8 +99,8 @@ class Catch2Conan(ConanFile):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(os.path.join(self.package_folder, "share"))
         for cmake_file in ["ParseAndAddCatchTests.cmake", "Catch.cmake", "CatchAddTests.cmake"]:
             self.copy(
                 cmake_file,
