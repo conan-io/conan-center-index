@@ -2,7 +2,7 @@ import os
 import functools
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake
+from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.files import get, patch, rmdir
@@ -27,7 +27,7 @@ class Catch2Conan(ConanFile):
         "with_prefix": False,
         "default_reporter": None,
     }
-    generators = "cmake"
+    # generators = "cmake"
 
     @property
     def _source_subfolder(self):
@@ -43,8 +43,8 @@ class Catch2Conan(ConanFile):
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for x in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(x["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -90,15 +90,33 @@ class Catch2Conan(ConanFile):
         for x in self.conan_data.get("patches", {}).get(self.version, []):
             patch(**x)
 
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.preprocessor_definitions["BUILD_TESTING"] = "OFF"
+        tc.preprocessor_definitions["CATCH_INSTALL_DOCS"] = "OFF"
+        tc.preprocessor_definitions["CATCH_INSTALL_HELPERS"] = "ON"
+        tc.preprocessor_definitions["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
+        if self.options.default_reporter:
+            tc.preprocessor_definitions["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
+        tc.generate()
+
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        # cmake = self._configure_cmake()
+        # cmake.build()
+
+        cmake = CMake(self)
+        cmake.configure(build_folder=self._build_subfolder)
         cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+
+        # cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
+
         rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(os.path.join(self.package_folder, "share"))
         for cmake_file in ["ParseAndAddCatchTests.cmake", "Catch.cmake", "CatchAddTests.cmake"]:
