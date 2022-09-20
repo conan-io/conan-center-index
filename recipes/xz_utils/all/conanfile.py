@@ -122,22 +122,12 @@ class XZUtils(ConanFile):
         if Version(self.version) == "5.2.4":
             # Relax Windows SDK restriction
             # Workaround is required only for 5.2.4 because since 5.2.5 WindowsTargetPlatformVersion is dropped from vcproj file
-            #
-            # emulate VS2019+ meaning of WindowsTargetPlatformVersion == "10.0"
-            # undocumented method, but officially recommended workaround by microsoft at at
             # https://developercommunity.visualstudio.com/content/problem/140294/windowstargetplatformversion-makes-it-impossible-t.html
             windows_target_platform_version_old = "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>"
-            if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler) == "15") or \
-               (self.settings.compiler == "msvc" and Version(self.settings.compiler) == "191"):
-                windows_target_platform_version_new = "<WindowsTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</WindowsTargetPlatformVersion>"
-            else:
-                windows_target_platform_version_new = "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>"
             replace_in_file(self, os.path.join(self.source_folder, "windows", "vs2017", "liblzma.vcxproj"),
-                                  windows_target_platform_version_old,
-                                  windows_target_platform_version_new)
+                                  windows_target_platform_version_old, "")
             replace_in_file(self, os.path.join(self.source_folder, "windows", "vs2017", "liblzma_dll.vcxproj"),
-                                  windows_target_platform_version_old,
-                                  windows_target_platform_version_new)
+                                  windows_target_platform_version_old, "")
 
         # windows\INSTALL-MSVC.txt
         if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler) >= "15") or \
