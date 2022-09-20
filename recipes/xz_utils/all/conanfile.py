@@ -176,7 +176,11 @@ class XZUtils(ConanFile):
             copy(self, "*.h", src=inc_dir, dst=os.path.join(self.package_folder, "include"), keep_path=True)
             arch = {"x86": "Win32", "x86_64": "x64"}.get(str(self.settings.arch))
             target = "liblzma_dll" if self.options.shared else "liblzma"
-            msvc_version = "vs2017" if Version(self.settings.compiler.version) >= "15" else "vs2013"
+            if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler) >= "15") or \
+               (self.settings.compiler == "msvc" and Version(self.settings.compiler) >= "191"):
+                msvc_version = "vs2017"
+            else:
+                msvc_version = "vs2013"
             bin_dir = os.path.join(self.source_folder, "windows", msvc_version,
                                    self._effective_msbuild_type, arch, target)
             copy(self, "*.lib", src=bin_dir, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
