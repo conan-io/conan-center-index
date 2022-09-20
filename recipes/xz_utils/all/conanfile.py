@@ -99,7 +99,7 @@ class XZUtils(ConanFile):
             msvc_version = "vs2017"
         else:
             msvc_version = "vs2013"
-        with chdir(os.path.join(self.source_folder, "windows", msvc_version)):
+        with chdir(self, os.path.join(self.source_folder, "windows", msvc_version)):
             target = "liblzma_dll" if self.options.shared else "liblzma"
             msbuild = MSBuild(self)
             msbuild.build_type = self._effective_msbuild_type
