@@ -28,7 +28,7 @@ class MDSpanConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "15.1",
+            "msvc": "1911",
             "gcc": "5",
             "clang": "3.4",
             "apple-clang": "5.1"
