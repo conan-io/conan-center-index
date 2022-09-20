@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.files import get, patch, rmdir
+from conan.tools.files import copy, get, patch, rmdir
 
 required_conan_version = ">=1.51.3"
 
@@ -29,13 +29,13 @@ class Catch2Conan(ConanFile):
     }
     # generators = "cmake"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    # @property
+    # def _source_subfolder(self):
+    #     return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    # @property
+    # def _build_subfolder(self):
+    #     return "build_subfolder"
 
     @property
     def _default_reporter_str(self):
@@ -72,7 +72,7 @@ class Catch2Conan(ConanFile):
             self.output.warn("{}/{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name, self.version))
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     # @functools.lru_cache(1)
     # def _configure_cmake(self):
@@ -93,12 +93,12 @@ class Catch2Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.preprocessor_definitions["BUILD_TESTING"] = "OFF"
-        tc.preprocessor_definitions["CATCH_INSTALL_DOCS"] = "OFF"
-        tc.preprocessor_definitions["CATCH_INSTALL_HELPERS"] = "ON"
-        tc.preprocessor_definitions["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
+        tc.variables["BUILD_TESTING"] = "OFF"
+        tc.variables["CATCH_INSTALL_DOCS"] = "OFF"
+        tc.variables["CATCH_INSTALL_HELPERS"] = "ON"
+        tc.variables["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
         if self.options.default_reporter:
-            tc.preprocessor_definitions["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
+            tc.variables["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
         tc.generate()
 
     def build(self):
@@ -107,11 +107,11 @@ class Catch2Conan(ConanFile):
         # cmake.build()
 
         cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
         # cmake = self._configure_cmake()
         cmake = CMake(self)
@@ -122,7 +122,7 @@ class Catch2Conan(ConanFile):
         for cmake_file in ["ParseAndAddCatchTests.cmake", "Catch.cmake", "CatchAddTests.cmake"]:
             self.copy(
                 cmake_file,
-                src=os.path.join(self._source_subfolder, "extras"),
+                src=os.path.join(self.source_folder, "extras"),
                 dst=os.path.join("lib", "cmake", "Catch2"),
             )
 
