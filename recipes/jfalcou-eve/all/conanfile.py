@@ -1,6 +1,6 @@
-from conan import ConanFile, tools
-from conan.tools.scm import Version
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools import files, build
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
@@ -9,9 +9,9 @@ class JfalcouEveConan(ConanFile):
     description = ("Expressive Velocity Engine - reimplementation of the old "
                    "Boost.SIMD on C++20"
                    )
-    homepage = "https://github.com/jfalcou/eve"
+    homepage = "https://jfalcou.github.io/eve/"
     topics = ("c++", "simd")
-    license = "MIT"
+    license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
 
@@ -35,7 +35,7 @@ class JfalcouEveConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self._min_cppstd)
+            build.check_min_cppstd(self, self._min_cppstd)
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("EVE does not support MSVC yet (https://github.com/jfalcou/eve/issues/1022).")
         if self.settings.compiler == "apple-clang":
@@ -57,7 +57,7 @@ class JfalcouEveConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True,
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True,
                 destination=self._source_subfolder)
 
     def package(self):
