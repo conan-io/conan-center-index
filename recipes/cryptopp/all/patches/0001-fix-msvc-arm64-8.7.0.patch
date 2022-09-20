@@ -1,9 +1,11 @@
 --- a/arm_simd.h
 +++ b/arm_simd.h
-@@ -307,28 +307,30 @@ inline uint64x2_t PMULL_HIGH(const uint64x2_t a, const uint64x2_t b)
+@@ -307,28 +307,32 @@ inline uint64x2_t PMULL_HIGH(const uint64x2_t a, const uint64x2_t b)
  #endif
  }
  
++// This function will be removed in the next version of Crypto++:
++// https://github.com/weidai11/cryptopp/commit/31fa3384160071793bc428a32383938551b3652c
 +#if !defined(_MSC_VER) || defined(_M_ARM)
  /// \brief Vector extraction
  /// \param a the first value
