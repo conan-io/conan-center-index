@@ -93,9 +93,9 @@ class Catch2Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_TESTING"] = "OFF"
-        tc.variables["CATCH_INSTALL_DOCS"] = "OFF"
-        tc.variables["CATCH_INSTALL_HELPERS"] = "ON"
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["CATCH_INSTALL_DOCS"] = False
+        tc.variables["CATCH_INSTALL_HELPERS"] = True
         tc.variables["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
         if self.options.default_reporter:
             tc.variables["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
