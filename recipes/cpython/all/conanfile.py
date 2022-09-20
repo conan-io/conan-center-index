@@ -7,7 +7,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, load, replace_in_file, rmdir, rename, mkdir, apply_conandata_patches, rm, unzip, \
+from conan.tools.files import get, load, replace_in_file, rmdir, mkdir, apply_conandata_patches, rm, unzip, \
     copy, save
 from conan.tools.gnu import AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps, Autotools
 from conan.tools.layout import basic_layout, vs_layout
@@ -425,18 +425,12 @@ class CPythonConan(ConanFile):
 
         # Enable static MSVC cpython
         if not self.options.shared:
-            replace_in_file(self, self.source_path.joinpath("PCbuild", "pythoncore.vcxproj"),
-                                  "<PreprocessorDefinitions>","<PreprocessorDefinitions>Py_NO_BUILD_SHARED;")
-            replace_in_file(self,self.source_path.joinpath("PCbuild", "pythoncore.vcxproj"),
-                                  "Py_ENABLE_SHARED", "Py_NO_ENABLE_SHARED")
-            replace_in_file(self, self.source_path.joinpath("PCbuild", "pythoncore.vcxproj"),
-                                  "DynamicLibrary", "StaticLibrary")
-
+            replace_in_file(self, self.source_path.joinpath("PCbuild", "pythoncore.vcxproj"), "<PreprocessorDefinitions>","<PreprocessorDefinitions>Py_NO_BUILD_SHARED;")
+            replace_in_file(self,self.source_path.joinpath("PCbuild", "pythoncore.vcxproj"), "Py_ENABLE_SHARED", "Py_NO_ENABLE_SHARED")
+            replace_in_file(self, self.source_path.joinpath("PCbuild", "pythoncore.vcxproj"), "DynamicLibrary", "StaticLibrary")
             replace_in_file(self, self.source_path.joinpath("PCbuild", "python.vcxproj"),
                                   "<Link>", "<Link><AdditionalDependencies>shlwapi.lib;ws2_32.lib;pathcch.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>")
-            replace_in_file(self, self.source_path.joinpath("PCbuild", "python.vcxproj"),
-                                  "<PreprocessorDefinitions>", "<PreprocessorDefinitions>Py_NO_ENABLE_SHARED;")
-
+            replace_in_file(self, self.source_path.joinpath("PCbuild", "python.vcxproj"), "<PreprocessorDefinitions>", "<PreprocessorDefinitions>Py_NO_ENABLE_SHARED;")
             replace_in_file(self, self.source_path.joinpath("PCbuild", "pythonw.vcxproj"),
                                   "<Link>", "<Link><AdditionalDependencies>shlwapi.lib;ws2_32.lib;pathcch.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>")
             replace_in_file(self, self.source_path.joinpath("PCbuild", "pythonw.vcxproj"),
@@ -708,15 +702,15 @@ class CPythonConan(ConanFile):
                 self.cpp_info.components["_hidden"].requires.append("bzip2::bzip2")
             if self.options.get_safe("with_gdbm", False):
                 self.cpp_info.components["_hidden"].requires.append("gdbm::gdbm")
-            if self.options.with_sqlite3:
+            if self.options.get_safe("with_sqlite3", False):
                 self.cpp_info.components["_hidden"].requires.append("sqlite3::sqlite3")
             if self.options.get_safe("with_curses", False):
                 self.cpp_info.components["_hidden"].requires.append("ncurses::ncurses")
-            if self.options.get_safe("with_bsddb"):
+            if self.options.get_safe("with_bsddb", False):
                 self.cpp_info.components["_hidden"].requires.append("libdb::libdb")
-            if self.options.get_safe("with_lzma"):
+            if self.options.get_safe("with_lzma", False):
                 self.cpp_info.components["_hidden"].requires.append("xz_utils::xz_utils")
-            if self.options.get_safe("with_tkinter"):
+            if self.options.get_safe("with_tkinter", False):
                 self.cpp_info.components["_hidden"].requires.append("tk::tk")
             self.cpp_info.components["_hidden"].libdirs = []
             self.cpp_info.components["_hidden"].includedirs = []
