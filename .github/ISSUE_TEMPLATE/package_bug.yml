@@ -8,7 +8,8 @@ body:
     label: Description
     description: What is not working? What were you expecting? Are there any workarounds?
     value: |
-      Please don't forget to update the issue title.
+      _Please don't forget to update the issue title._
+      
       Missing profile or a short log will make extremely difficult to investigate your case or provide any help,
       please, include all applicable information with details to help us reproduce your problem.
   validations:
