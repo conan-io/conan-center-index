@@ -117,8 +117,8 @@ class Catch2Conan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         for cmake_file in ["ParseAndAddCatchTests.cmake", "Catch.cmake", "CatchAddTests.cmake"]:
             self.copy(
                 cmake_file,
