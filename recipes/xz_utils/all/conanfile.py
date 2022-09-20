@@ -1,7 +1,8 @@
 from conan import ConanFile
+from conan.errors import ConanException
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import chdir, collect_libs, copy, get, rename, replace_in_file, rm, rmdir, save
+from conan.tools.files import collect_libs, copy, get, rename, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, MSBuild, MSBuildToolchain, unix_path
@@ -9,7 +10,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
+required_conan_version = ">=1.52.0"
 
 
 class XZUtils(ConanFile):
@@ -84,6 +85,39 @@ class XZUtils(ConanFile):
             env = VirtualBuildEnv(self)
             env.generate()
 
+    def _fix_msvc_platform_toolset(self, vcxproj_file, old_toolset):
+        platform_toolset = {
+            "Visual Studio": {
+                "8": "v80",
+                "9": "v90",
+                "10": "v100",
+                "11": "v110",
+                "12": "v120",
+                "14": "v140",
+                "15": "v141",
+                "16": "v142",
+                "17": "v143",
+            },
+            "msvc": {
+                "170": "v110",
+                "180": "v120",
+                "190": "v140",
+                "191": "v141",
+                "192": "v142",
+                "193": "v143",
+            }
+        }.get(str(self.settings.compiler), {}).get(str(self.settings.compiler.version))
+        if not platform_toolset:
+            raise ConanException(
+                f"Unkown platform toolset for {self.settings.compiler} {self.settings.compiler.version}",
+            )
+        replace_in_file(
+            self,
+            vcxproj_file,
+            f"<PlatformToolset>{old_toolset}</PlatformToolset>",
+            f"<PlatformToolset>{platform_toolset}</PlatformToolset>",
+        )
+
     def _build_msvc(self):
         if Version(self.version) == "5.2.4":
             # Relax Windows SDK restriction
@@ -109,14 +143,21 @@ class XZUtils(ConanFile):
         if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler) >= "15") or \
            (self.settings.compiler == "msvc" and Version(self.settings.compiler) >= "191"):
             msvc_version = "vs2017"
+            old_toolset = "v141"
         else:
             msvc_version = "vs2013"
-        with chdir(self, os.path.join(self.source_folder, "windows", msvc_version)):
-            target = "liblzma_dll" if self.options.shared else "liblzma"
-            msbuild = MSBuild(self)
-            msbuild.build_type = self._effective_msbuild_type
-            msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
-            msbuild.build("xz_win.sln", targets=[target])
+            old_toolset = "v120"
+        build_script_folder = os.path.join(self.source_folder, "windows", msvc_version)
+
+        # TODO: replace by some conan helper function (https://github.com/conan-io/conan/issues/12155)?
+        self._fix_msvc_platform_toolset(os.path.join(build_script_folder, "liblzma.vcxproj"), old_toolset)
+        self._fix_msvc_platform_toolset(os.path.join(build_script_folder, "liblzma_dll.vcxproj"), old_toolset)
+
+        target = "liblzma_dll" if self.options.shared else "liblzma"
+        msbuild = MSBuild(self)
+        msbuild.build_type = self._effective_msbuild_type
+        msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
+        msbuild.build(os.path.join(build_script_folder, "xz_win.sln"), targets=[target])
 
     def build(self):
         if is_msvc(self):
