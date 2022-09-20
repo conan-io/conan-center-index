@@ -109,6 +109,19 @@ class CPythonConan(ConanFile):
         return archs
 
     @property
+    def _ms_toolset_version(self):
+        if self.settings.get_safe("compiler") == "Visual Studio":
+            return msvc_version_to_toolset_version({"17": "193",
+                                                    "16": "192",
+                                                    "15": "191",
+                                                    "14": "190",
+                                                    "12": "180",
+                                                    "11": "170"}.get(self.settings.get_safe("compiler.version")))
+        elif self.settings.get_safe("compiler") == "msvc":
+            return msvc_version_to_toolset_version(self.settings.compiler.version)
+        return None
+
+    @property
     def _with_libffi(self):
         # cpython 3.7.x on MSVC uses an ancient libffi 2.00-beta (which is not available at cci, and is API/ABI incompatible with current 3.2+)
         return self._supports_modules and (is_msvc(self) or Version(self.version) >= "3.8")
@@ -396,7 +409,7 @@ class CPythonConan(ConanFile):
             replace_in_file(self, self.source_path.joinpath("PCbuild", "Directory.Build.props"), "</Project>",
                             textwrap.dedent(f"""  <PropertyGroup>
                                                     <IncludeExternals>true</IncludeExternals>
-                                                    <PlatformToolset>{msvc_version_to_toolset_version(self.settings.compiler.version)}</PlatformToolset>
+                                                    <PlatformToolset>{self._ms_toolset_version}</PlatformToolset>
                                                   </PropertyGroup>
                                                 </Project>"""), runtime_library)
 
