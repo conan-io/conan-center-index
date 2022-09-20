@@ -1,11 +1,16 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
+from conan import ConanFile
+from conans import AutoToolsBuildEnvironment, MSBuild
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
+from conans import tools as tools_legacy
+from conan.tools.files import apply_conandata_patches, get, replace_in_file
+from conan.tools.files import apply_conandata_patches,  get, rename, replace_in_file, rmdir, save
+
 import os
 import shutil
 import string
 
-required_conan_version = ">=1.33.0"
-
+required_conan_version = ">=1.52.0"
 
 class JemallocConan(ConanFile):
     name = "jemalloc"
@@ -49,9 +54,9 @@ class JemallocConan(ConanFile):
 
     _autotools = None
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    # @property
+    # def _source_subfolder(self):
+    #     return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -68,7 +73,7 @@ class JemallocConan(ConanFile):
         if self.options.enable_cxx and \
                 self.settings.compiler.get_safe("libcxx") == "libc++" and \
                 self.settings.compiler == "clang" and \
-                tools.Version(self.settings.compiler.version) < "10":
+                Version(self.settings.compiler.version) < "10":
             raise ConanInvalidConfiguration("clang and libc++ version {} (< 10) is missing a mutex implementation".format(self.settings.compiler.version))
         if self.settings.compiler == "Visual Studio" and \
                 self.options.shared and \
@@ -81,7 +86,7 @@ class JemallocConan(ConanFile):
             raise ConanInvalidConfiguration("Only Release and Debug build_types are supported")
         if self.settings.compiler == "Visual Studio" and self.settings.arch not in ("x86_64", "x86"):
             raise ConanInvalidConfiguration("Unsupported arch")
-        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) <= "3.9":
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) <= "3.9":
             raise ConanInvalidConfiguration("Unsupported compiler version")
         if self.settings.os == "Macos" and self.settings.arch not in ("x86_64", "x86"):
             raise ConanInvalidConfiguration("Unsupported arch")
@@ -91,12 +96,11 @@ class JemallocConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not tools_legacy.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     @property
     def _autotools_args(self):
@@ -124,8 +128,8 @@ class JemallocConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.configure(args=self._autotools_args, configure_dir=self._source_subfolder)
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools_legacy.os_info.is_windows)
+        self._autotools.configure(args=self._autotools_args, configure_dir=self.source_folder)
         return self._autotools
 
     @property
@@ -136,12 +140,13 @@ class JemallocConan(ConanFile):
         return build_type
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         if self.settings.os == "Windows":
-            makefile_in = os.path.join(self._source_subfolder, "Makefile.in")
-            tools.replace_in_file(makefile_in,
+            makefile_in = os.path.join(self.source_folder, "Makefile.in")
+            replace_in_file(self, makefile_in,
                                   "DSO_LDFLAGS = @DSO_LDFLAGS@",
                                   "DSO_LDFLAGS = @DSO_LDFLAGS@ -Wl,--out-implib,lib/libjemalloc.a")
-            tools.replace_in_file(makefile_in,
+            replace_in_file(self, makefile_in,
                                   "\t$(INSTALL) -d $(LIBDIR)\n"
                                   "\t$(INSTALL) -m 755 $(objroot)lib/$(LIBJEMALLOC).$(SOREV) $(LIBDIR)",
                                   "\t$(INSTALL) -d $(BINDIR)\n"
@@ -149,20 +154,20 @@ class JemallocConan(ConanFile):
                                   "\t$(INSTALL) -m 755 $(objroot)lib/$(LIBJEMALLOC).$(SOREV) $(BINDIR)\n"
                                   "\t$(INSTALL) -m 644 $(objroot)lib/libjemalloc.a $(LIBDIR)")
 
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        # for x in self.conan_data.get("patches", {}).get(self.version, []):
+        #     patch(self, **x)
 
     def build(self):
         self._patch_sources()
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-                with tools.environment_append({"CC": "cl", "CXX": "cl"}) if self.settings.compiler == "Visual Studio" else tools.no_op():
-                    with tools.chdir(self._source_subfolder):
+            with tools_legacy.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools_legacy.no_op():
+                with tools_legacy.environment_append({"CC": "cl", "CXX": "cl"}) if self.settings.compiler == "Visual Studio" else tools_legacy.no_op():
+                    with tools_legacy.chdir(self.source_folder):
                         # Do not use AutoToolsBuildEnvironment because we want to run configure as ./configure
-                        self.run("./configure {}".format(" ".join(self._autotools_args)), win_bash=tools.os_info.is_windows)
+                        self.run("./configure {}".format(" ".join(self._autotools_args)), win_bash=tools_legacy.os_info.is_windows)
             msbuild = MSBuild(self)
             # Do not use the 2015 solution: unresolved external symbols: test_hooks_libc_hook and test_hooks_arena_new_hook
-            sln_file = os.path.join(self._source_subfolder, "msvc", "jemalloc_vc2017.sln")
+            sln_file = os.path.join(self.source_folder, "msvc", "jemalloc_vc2017.sln")
             msbuild.build(sln_file, targets=["jemalloc"], build_type=self._msvc_build_type)
         else:
             autotools = self._configure_autotools()
@@ -176,7 +181,7 @@ class JemallocConan(ConanFile):
                 if self.settings.build_type == "Debug":
                     libname += "d"
             else:
-                toolset = tools.msvs_toolset(self.settings)
+                toolset = tools_legacy.msvs_toolset(self.settings)
                 toolset_number = "".join(c for c in toolset if c in string.digits)
                 libname += "-vc{}-{}".format(toolset_number, self._msvc_build_type)
         else:
@@ -189,16 +194,16 @@ class JemallocConan(ConanFile):
         return libname
 
     def package(self):
-        self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
+        self.copy(pattern="COPYING", src=self.source_folder, dst="licenses")
         if self.settings.compiler == "Visual Studio":
             arch_subdir = {
                 "x86_64": "x64",
                 "x86": "x86",
             }[str(self.settings.arch)]
-            self.copy("*.lib", src=os.path.join(self._source_subfolder, "msvc", arch_subdir, self._msvc_build_type), dst=os.path.join(self.package_folder, "lib"))
-            self.copy("*.dll", src=os.path.join(self._source_subfolder, "msvc", arch_subdir, self._msvc_build_type), dst=os.path.join(self.package_folder, "bin"))
-            self.copy("jemalloc.h", src=os.path.join(self._source_subfolder, "include", "jemalloc"), dst=os.path.join(self.package_folder, "include", "jemalloc"), keep_path=True)
-            shutil.copytree(os.path.join(self._source_subfolder, "include", "msvc_compat"),
+            self.copy("*.lib", src=os.path.join(self.source_folder, "msvc", arch_subdir, self._msvc_build_type), dst=os.path.join(self.package_folder, "lib"))
+            self.copy("*.dll", src=os.path.join(self.source_folder, "msvc", arch_subdir, self._msvc_build_type), dst=os.path.join(self.package_folder, "bin"))
+            self.copy("jemalloc.h", src=os.path.join(self.source_folder, "include", "jemalloc"), dst=os.path.join(self.package_folder, "include", "jemalloc"), keep_path=True)
+            shutil.copytree(os.path.join(self.source_folder, "include", "msvc_compat"),
                             os.path.join(self.package_folder, "include", "msvc_compat"))
         else:
             autotools = self._configure_autotools()
@@ -206,7 +211,7 @@ class JemallocConan(ConanFile):
             autotools.make(target="install_lib_shared" if self.options.shared else "install_lib_static")
             autotools.make(target="install_include")
             if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-                tools.rename(os.path.join(self.package_folder, "lib", "{}.lib".format(self._library_name)),
+                tools_legacy.rename(os.path.join(self.package_folder, "lib", "{}.lib".format(self._library_name)),
                              os.path.join(self.package_folder, "lib", "lib{}.a".format(self._library_name)))
                 if not self.options.shared:
                     os.unlink(os.path.join(self.package_folder, "lib", "jemalloc.lib"))
