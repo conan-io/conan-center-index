@@ -46,7 +46,7 @@ class SQLiteCppConan(ConanFile):
                 pass
 
     def requirements(self):
-        self.requires("sqlite3/3.39.2")
+        self.requires("sqlite3/3.39.3")
 
     def validate(self):
         if Version(self.version) >= "3.0.0" and self.settings.compiler.get_safe("cppstd"):
@@ -68,7 +68,7 @@ class SQLiteCppConan(ConanFile):
                  self.settings.compiler.libcxx == "libc++" and \
                  Version(self.version) < "3":
             replace_in_file(self,
-                os.path.join(self._source_subfolder, "include", "SQLiteCpp", "Utils.h"),
+                os.path.join(self.source_folder, "include", "SQLiteCpp", "Utils.h"),
                 "const nullptr_t nullptr = {};",
                 "")
 
