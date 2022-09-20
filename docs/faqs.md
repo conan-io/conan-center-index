@@ -342,7 +342,7 @@ You should expect that latest revision of recipes can introduce breaking changes
 features that will be broken unless you also upgrade Conan client (and sometimes you will
 need to modify your project if the recipe changes the binaries, flags,... it provides).
 
-To isolate from these changes there are different strategies you can follow. 
+To isolate from these changes there are different strategies you can follow.
 Keep reading in the [consuming recipes section](consuming_recipes.md#isolate-your-project-from-upstream-changes).
 
 ## Why are version ranges not allowed?
@@ -393,3 +393,8 @@ The [Code Owners](https://docs.github.com/en/repositories/managing-your-reposito
 write permission for any listed user in the file `.github/CODEOWNERS`, which makes it impossible to be accepted by Conan. However, that file is still important as it can be re-used in
 a future Github Action to parse and communicate users. Meanwhile, there is the project https://app.github-file-watcher.com/, which is able to notify users, but only after
 merging to the master branch. Feel free to contribute to a new Github Action that implements a file watcher feature.
+
+## Is it possible to disable Pylint?
+
+No. The [pylint](v2_linter.md) has an important role of keeping any recipe prepared for [Conan v2 migration](v2_migration.md). In case you are having
+difficult to understand [linter errors](linters.md), please, comment on your pull request about, then the community will help you.
