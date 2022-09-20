@@ -8,7 +8,7 @@ import os
 import textwrap
 
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.51.1"
 
 
 class SQLiteCppConan(ConanFile):
@@ -49,9 +49,9 @@ class SQLiteCppConan(ConanFile):
         self.requires("sqlite3/3.39.3")
 
     def validate(self):
-        if Version(self.version) >= "3.0.0" and self.settings.compiler.get_safe("cppstd"):
+        if Version(self.version) >= "3.0.0" and self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-        if self.settings.os == "Windows" and self.options.shared:
+        if self.info.settings.os == "Windows" and self.info.options.shared:
             raise ConanInvalidConfiguration("SQLiteCpp can not be built as shared lib on Windows")
 
     def layout(self):
@@ -93,7 +93,7 @@ class SQLiteCppConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE.txt", dst="licenses", src=self.source_folder)
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
@@ -101,26 +101,24 @@ class SQLiteCppConan(ConanFile):
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
-            self,
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"SQLiteCpp": "SQLiteCpp::SQLiteCpp"}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(conanfile, module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
-        save(conanfile, module_file, content)
+            """)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "SQLiteCpp")
