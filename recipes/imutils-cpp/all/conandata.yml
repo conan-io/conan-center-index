@@ -5,5 +5,11 @@ sources:
 patches:
   "1.0.1":
     - patch_file: "patches/1.0.1-0001-fix-cmake.patch"
+      patch_description: "Fix artifacts installation, find package and compiler flags"
+      patch_type: "conan"
     - patch_file: "patches/1.0.1-0002-unuse-bits_stdcpp_h.patch"
+      patch_description: "Remove bits/stdc++ from header files"
+      patch_type: "conan"
     - patch_file: "patches/1.0.1-0003-fix-path-cast.patch"
+      patch_description: "Fix bad type casting"
+      patch_type: "conan"

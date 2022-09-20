@@ -36,7 +36,7 @@ class ImutilsCppConan(ConanFile):
         return {
             "gcc": "9",
             "Visual Studio": "15.7",
-            "msvc": "19.14",
+            "msvc": "191",
             "clang": "12",
             "apple-clang": "10.14",
         }
@@ -73,7 +73,6 @@ class ImutilsCppConan(ConanFile):
 
     def generate(self):
         toolchain = CMakeToolchain(self)
-        toolchain.cache_variables["CMAKE_CXX_STANDARD"] = self._minimum_cpp_standard
         toolchain.generate()
 
         deps = CMakeDeps(self)
@@ -89,8 +88,6 @@ class ImutilsCppConan(ConanFile):
         files.copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["imutils_cpp"]
