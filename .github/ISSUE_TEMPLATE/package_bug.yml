@@ -6,7 +6,7 @@ body:
 - type: textarea
   attributes:
     label: Description
-    description: What is not working
+    description: What is not working? What were you expecting? Are there any workarounds?
     value: |
       Please don't forget to update the issue title.
       Missing profile or a short log will make extremely difficult to investigate your case or provide any help,
