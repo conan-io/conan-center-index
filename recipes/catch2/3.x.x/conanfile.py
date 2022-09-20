@@ -74,17 +74,17 @@ class Catch2Conan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TESTING"] = "OFF"
-        cmake.definitions["CATCH_INSTALL_DOCS"] = "OFF"
-        cmake.definitions["CATCH_INSTALL_HELPERS"] = "ON"
-        cmake.definitions["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
-        if self.options.default_reporter:
-            cmake.definitions["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+    # @functools.lru_cache(1)
+    # def _configure_cmake(self):
+    #     cmake = CMake(self)
+    #     cmake.definitions["BUILD_TESTING"] = "OFF"
+    #     cmake.definitions["CATCH_INSTALL_DOCS"] = "OFF"
+    #     cmake.definitions["CATCH_INSTALL_HELPERS"] = "ON"
+    #     cmake.definitions["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
+    #     if self.options.default_reporter:
+    #         cmake.definitions["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
+    #     cmake.configure(build_folder=self._build_subfolder)
+    #     return cmake
 
     def _patch_sources(self):
         for x in self.conan_data.get("patches", {}).get(self.version, []):
