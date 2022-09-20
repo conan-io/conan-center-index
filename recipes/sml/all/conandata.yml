@@ -8,4 +8,3 @@ sources:
 patches:
   "1.1.4":
     - patch_file: "patches/0001-fix-clang12-error.patch"
-      base_path: "source_subfolder"
