@@ -1,5 +1,7 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools
+from conan.tools import files
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.33.0"
@@ -51,7 +53,7 @@ class MDSpanConan(ConanFile):
                              "compiler support.".format(
                                  self.name, self.settings.compiler))
         else:
-            compiler_version = tools.Version(self.settings.compiler.version)
+            compiler_version = Version(self.settings.compiler.version)
             is_msvc = self._is_msvc(self.settings.compiler)
 
             if compiler_version < min_version:
@@ -66,14 +68,14 @@ class MDSpanConan(ConanFile):
                     "Unsupported MSVC version {} due to upstream bug. The supported MSVC versions are > 15.0 and < 16.6 or >= 17.0."
                     "See upstream issue https://github.com/kokkos/mdspan/issues/26 for details.".format(
                         compiler_version))
-            if is_msvc and tools.Version(self.version) < "0.4.0" and compiler_version < "17.0":
+            if is_msvc and Version(self.version) < "0.4.0" and compiler_version < "17.0":
                 raise ConanInvalidConfiguration(
                     "Old mdspan versions ( < 0.4.0) doesn't build properly on MSVC version {} due to conflicting upstream and STL type_traits (and another issues)."
                     "See upstream issue https://github.com/kokkos/mdspan/issues/22 for details.".format(compiler_version))
 
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
