@@ -4,7 +4,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, collect_libs, copy, get, rename, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, MSBuild, MSBuildToolchain
+from conan.tools.microsoft import is_msvc, MSBuild, MSBuildToolchain, unix_path
 from conan.tools.scm import Version
 import os
 import textwrap
@@ -146,7 +146,8 @@ class XZUtils(ConanFile):
         else:
             autotools = Autotools(self)
             self.win_bash = True
-            autotools.install()
+            # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
+            autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
             self.win_bash = None
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "share"))
