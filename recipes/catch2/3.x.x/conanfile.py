@@ -91,7 +91,7 @@ class Catch2Conan(ConanFile):
 
     def _patch_sources(self):
         for x in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(**x)
+            patch(self, **x)
 
 
     def generate(self):
