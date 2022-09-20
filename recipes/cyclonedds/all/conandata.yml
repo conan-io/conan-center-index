@@ -5,3 +5,5 @@ sources:
 patches:
   "0.10.2":
     - patch_file: "patches/0.10.2-0001-fix-find-iceoryx.patch"
+      patch_description: "Fix cmake find for iceoryx package"
+      patch_type: "conan"
