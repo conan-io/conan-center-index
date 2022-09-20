@@ -4,7 +4,7 @@ from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
 from conans import AutoToolsBuildEnvironment, tools
 # It has to be this one, the one from conan.tools.microsoft does not pass toolset
-from conans.client.build.msbuild import MSBuild
+from conans import MSBuild
 import os
 
 required_conan_version = ">=1.33.0"
