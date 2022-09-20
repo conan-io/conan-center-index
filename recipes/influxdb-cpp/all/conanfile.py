@@ -1,6 +1,7 @@
 import os
 
-from conan import ConanFile, tools
+from conan import ConanFile
+from conan.tools.files import get
 import glob
 
 
@@ -17,7 +18,7 @@ class InfluxDBCppConan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version])
+        get(self, **self.conan_data["sources"][self.version])
         extracted_dir = glob.glob("influxdb-cpp-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
