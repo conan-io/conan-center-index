@@ -79,9 +79,6 @@ class CycloneDDSConan(ConanFile):
         self.tool_requires("cmake/3.16.2")
 
     def validate(self):
-        compiler = self.info.settings.compiler
-        version = scm.Version(self.info.settings.compiler.version)
-
         if self.options.enable_security and not self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} currently do not support"\
                                             "static build and security on")
