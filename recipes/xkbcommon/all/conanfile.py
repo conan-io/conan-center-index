@@ -34,7 +34,7 @@ class XkbcommonConan(ConanFile):
         "xkbregistry": True,
     }
 
-    generators = "PkgConfigDeps", "VirtualBuildEnv", "VirtualRunEnv"
+    generators = "PkgConfigDeps", "VirtualBuildEnv"
 
     @property
     def _has_xkbregistry_option(self):
@@ -68,7 +68,7 @@ class XkbcommonConan(ConanFile):
         self.tool_requires("meson/0.63.1")
         self.tool_requires("bison/3.7.6")
         self.tool_requires("pkgconf/1.7.4")
-        if self.options.get_safe("with_wayland"):
+        if hasattr(self, "settings_build") and self.options.get_safe("with_wayland"):
             self.tool_requires("wayland/1.21.0")
 
     def layout(self):
@@ -124,26 +124,14 @@ class XkbcommonConan(ConanFile):
         self.cpp_info.components["libxkbcommon"].requires = ["xorg::xkeyboard-config"]
         self.cpp_info.components["libxkbcommon"].resdirs = ["res"]
 
-        # todo Remove in Conan version 1.50.0 where these are set by default for the PkgConfigDeps generator.
-        self.cpp_info.components["libxkbcommon"].includedirs = ["include"]
-        self.cpp_info.components["libxkbcommon"].libdirs = ["lib"]
-
         if self.options.with_x11:
             self.cpp_info.components["libxkbcommon-x11"].set_property("pkg_config_name", "xkbcommon-x11")
             self.cpp_info.components["libxkbcommon-x11"].libs = ["xkbcommon-x11"]
             self.cpp_info.components["libxkbcommon-x11"].requires = ["libxkbcommon", "xorg::xcb", "xorg::xcb-xkb"]
-
-            # todo Remove in Conan version 1.50.0 where these are set by default for the PkgConfigDeps generator.
-            self.cpp_info.components["libxkbcommon-x11"].includedirs = ["include"]
-            self.cpp_info.components["libxkbcommon-x11"].libdirs = ["lib"]
         if self.options.get_safe("xkbregistry"):
             self.cpp_info.components["libxkbregistry"].set_property("pkg_config_name", "xkbregistry")
             self.cpp_info.components["libxkbregistry"].libs = ["xkbregistry"]
             self.cpp_info.components["libxkbregistry"].requires = ["libxml2::libxml2"]
-
-            # todo Remove in Conan version 1.50.0 where these are set by default for the PkgConfigDeps generator.
-            self.cpp_info.components["libxkbregistry"].includedirs = ["include"]
-            self.cpp_info.components["libxkbregistry"].libdirs = ["lib"]
         if self.options.get_safe("with_wayland", False):
             # FIXME: This generates just executable, but I need to use the requirements to pass Conan checks
             self.cpp_info.components["xkbcli-interactive-wayland"].libs = []
@@ -152,8 +140,6 @@ class XkbcommonConan(ConanFile):
 
         if Version(self.version) >= "1.0.0":
             bindir = os.path.join(self.package_folder, "bin")
-            self.buildenv_info.prepend_path("PATH", bindir)
-            self.runenv_info.prepend_path("PATH", bindir)
             self.output.info(f"Appending PATH environment variable: {bindir}")
             self.env_info.PATH.append(bindir)
 

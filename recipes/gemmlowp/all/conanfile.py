@@ -1,7 +1,11 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.51.1"
 
 
 class GemmlowpConan(ConanFile):
@@ -22,25 +26,9 @@ class GemmlowpConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -50,33 +38,33 @@ class GemmlowpConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"] = False
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, {}):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, "contrib"))
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "gemmlowp")
@@ -85,7 +73,7 @@ class GemmlowpConan(ConanFile):
         self.cpp_info.components["eight_bit_int_gemm"].set_property("cmake_target_name", "gemmlowp::eight_bit_int_gemm")
         self.cpp_info.components["eight_bit_int_gemm"].includedirs.append(os.path.join("include", "gemmlowp"))
         self.cpp_info.components["eight_bit_int_gemm"].libs = ["eight_bit_int_gemm"]
-        if self._is_msvc:
+        if is_msvc(self):
             self.cpp_info.components["eight_bit_int_gemm"].defines = ["NOMINMAX"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["eight_bit_int_gemm"].system_libs.extend(["pthread"])

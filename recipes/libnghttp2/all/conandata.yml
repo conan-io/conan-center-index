@@ -1,4 +1,7 @@
 sources:
+  "1.49.0":
+    url: "https://github.com/nghttp2/nghttp2/archive/v1.49.0.tar.gz"
+    sha256: "744f38f8d6e400a424bf62df449c91e3ffacbae11b5fab99e44a480f5c735ab9"
   "1.48.0":
     url: "https://github.com/nghttp2/nghttp2/archive/v1.48.0.tar.gz"
     sha256: "946a8fa490548b67fc6074553cb225279cc6404bae96cf74551f2ad4453be637"
@@ -24,6 +27,11 @@ sources:
     url: "https://github.com/nghttp2/nghttp2/releases/download/v1.39.2/nghttp2-1.39.2.tar.bz2"
     sha256: "92a23e4522328c8565028ee0c7270e74add7990614fd1148f2a79d873bc2a1d0"
 patches:
+  "1.49.0":
+    - patch_file: "patches/fix-findJemalloc.cmake"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-findLibevent.cmake"
+      base_path: "source_subfolder"
   "1.48.0":
     - patch_file: "patches/fix-findJemalloc.cmake"
       base_path: "source_subfolder"

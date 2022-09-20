@@ -1,4 +1,7 @@
 sources:
+  "3.2.0":
+    url: "https://github.com/SRombauts/SQLiteCpp/archive/3.2.0.tar.gz"
+    sha256: "57f91ed44ef205fe97b8c6586002fe6031cd02771d1c5d8415d9c515ad1532d1"
   "3.1.1":
     url: "https://github.com/SRombauts/SQLiteCpp/archive/3.1.1.tar.gz"
     sha256: "b00b1efad985dd415c3b62b01252cae20d9f2c32dcac435ddd8a105e9d4ddcde"
@@ -10,8 +13,13 @@ sources:
     sha256: "16bf963619786652a60533bcdc71a0412cad1ce132cd09ce43344af6ed7463d9"
 patches:
   "2.5.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.5.0/0001-conan.patch"
+    - patch_file: "patches/2.5.0-0001-cmake-sqlite3.patch"
+      patch_description: "Fix Sqlite3 CMake target"
+      patch_type: "conan"
   "2.4.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.4.0/0001-mingw.patch"
+    - patch_file: "patches/2.4.0-0001-cmake-sqlite3.patch"
+      patch_description: "Fix Sqlite3 CMake target"
+      patch_type: "conan"
+    - patch_file: "patches/2.4.0-0002-mingw-flags.patch"
+      patch_description: "Fix Mingw compiler flags"
+      patch_type: "conan"
