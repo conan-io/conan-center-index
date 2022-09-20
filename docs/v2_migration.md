@@ -3,6 +3,7 @@
 <!-- toc -->
 ## Contents
 
+  * [Using Layout with New Generators](#using-layout-with-new-generators)
   * [New cpp_info set_property model](#new-cpp_info-set_property-model)
     * [CMakeDeps](#cmakedeps)
     * [Update required_conan_version to ">=1.43.0"](#update-required_conan_version-to-1430)
