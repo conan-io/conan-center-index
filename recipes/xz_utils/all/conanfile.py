@@ -5,7 +5,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import collect_libs, copy, get, rename, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, MSBuild, MSBuildToolchain, unix_path
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, MSBuild, MSBuildToolchain, unix_path
 from conan.tools.scm import Version
 import os
 import textwrap
@@ -42,7 +42,11 @@ class XZUtils(ConanFile):
     @property
     def _effective_msbuild_type(self):
         # treat "RelWithDebInfo" and "MinSizeRel" as "Release"
-        return "Debug" if self.settings.build_type == "Debug" else "Release"
+        # there is no DebugMT configuration in upstream vcxproj, we patch Debug configuration afterwards
+        return "{}{}".format(
+            "Debug" if self.settings.build_type == "Debug" else "Release",
+            "MT" if is_msvc_static_runtime(self) and self.settings.build_type != "Debug" else "",
+        )
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -129,6 +133,10 @@ class XZUtils(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "windows", "vs2017", "liblzma_dll.vcxproj"),
                                   windows_target_platform_version_old, "")
 
+        # TODO: Find a way to inject conantoolchain.props content from MSBuildToolchain
+        # For the moment all the logic below is a big trick & doesn't honor custom cflags, cxxflags & ldflags from profile
+        # and arch different than x86 & x86_64
+
         # windows\INSTALL-MSVC.txt
         if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler) >= "15") or \
            (self.settings.compiler == "msvc" and Version(self.settings.compiler) >= "191"):
@@ -140,8 +148,15 @@ class XZUtils(ConanFile):
         build_script_folder = os.path.join(self.source_folder, "windows", msvc_version)
 
         # TODO: replace by some conan helper function (https://github.com/conan-io/conan/issues/12155)?
-        self._fix_msvc_platform_toolset(os.path.join(build_script_folder, "liblzma.vcxproj"), old_toolset)
-        self._fix_msvc_platform_toolset(os.path.join(build_script_folder, "liblzma_dll.vcxproj"), old_toolset)
+        liblzma_vcxproj = os.path.join(build_script_folder, "liblzma.vcxproj")
+        liblzma_dll_vcxproj = os.path.join(build_script_folder, "liblzma_dll.vcxproj")
+        self._fix_msvc_platform_toolset(liblzma_vcxproj, old_toolset)
+        self._fix_msvc_platform_toolset(liblzma_dll_vcxproj, old_toolset)
+
+        # Patch Debug configuration if runtime is MT since there is no DebugMT configuration in upstream vcxproj
+        if self.settings.build_type == "Debug" and is_msvc_static_runtime(self):
+            replace_in_file(self, liblzma_vcxproj, "MultiThreadedDebugDLL", "MultiThreadedDebug")
+            replace_in_file(self, liblzma_dll_vcxproj, "MultiThreadedDebugDLL", "MultiThreadedDebug")
 
         target = "liblzma_dll" if self.options.shared else "liblzma"
         msbuild = MSBuild(self)
