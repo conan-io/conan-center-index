@@ -110,7 +110,7 @@ class Catch2Conan(ConanFile):
         # cmake.build()
 
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        cmake.configure()
         cmake.build()
 
     def package(self):
