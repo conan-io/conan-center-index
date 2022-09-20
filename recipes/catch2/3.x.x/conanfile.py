@@ -5,9 +5,10 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.files import copy, get, patch, rmdir
+from conan.tools.files import apply_conandata_patches, copy, get, patch, rmdir
+from conan.tools.files import
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.0"
 
 class Catch2Conan(ConanFile):
     name = "catch2"
@@ -41,10 +42,10 @@ class Catch2Conan(ConanFile):
     def _default_reporter_str(self):
         return '"{}"'.format(str(self.options.default_reporter).strip('"'))
 
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for x in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(x["patch_file"])
+    # def export_sources(self):
+    #     self.copy("CMakeLists.txt")
+    #     for x in self.conan_data.get("patches", {}).get(self.version, []):
+    #         self.copy(x["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -102,10 +103,11 @@ class Catch2Conan(ConanFile):
         tc.generate()
 
     def build(self):
-        self._patch_sources()
+        # self._patch_sources()
         # cmake = self._configure_cmake()
         # cmake.build()
 
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
