@@ -34,7 +34,10 @@ class CycloneDDSConan(ConanFile):
 
     short_paths = True
 
-    # in case the project requires C++14/17/20/... the minimum compiler version should be listed
+    @property
+    def _license_folder(self):
+        return os.path.join(self.package_folder,"licenses")
+
     @property
     def _compilers_minimum_version(self):
         return {
@@ -45,7 +48,7 @@ class CycloneDDSConan(ConanFile):
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+            files.copy(self,patch["patch_file"],self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,7 +56,10 @@ class CycloneDDSConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         try:
             del self.settings.compiler.libcxx
         except Exception:
@@ -87,8 +93,8 @@ class CycloneDDSConan(ConanFile):
             build.check_min_cppstd(self, 14)
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
         if minimum_version and scm.Version(self.info.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++"\
-                f"14, which your compiler does not support.")
+            raise ConanInvalidConfiguration(f"{self.ref} is just tested with minimal version "\
+                f"{minimum_version} of compiler {self.info.settings.compiler}.")
 
     def source(self):
         files.get(self,**self.conan_data["sources"][self.version], strip_root=True,
@@ -126,7 +132,7 @@ class CycloneDDSConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE", src=self.source_folder, dst="licenses")
+        files.copy(self, "LICENSE", self.source_folder, self._license_folder)
         files.rmdir(self, os.path.join(self.package_folder, "share"))
         files.rmdir(self, os.path.join(self.package_folder, "lib","pkgconfig"))
         files.rmdir(self, os.path.join(self.package_folder, "lib","cmake"))
