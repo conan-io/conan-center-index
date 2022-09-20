@@ -1,7 +1,12 @@
-from conans import ConanFile, tools
-from conans.tools import Version
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rename, replace_in_file, rmdir, save
+from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
+
 import os
+
+required_conan_version = ">=1.52.0"
 
 class Stlab(ConanFile):
     name = 'stlab'
@@ -11,7 +16,7 @@ class Stlab(ConanFile):
     license = 'BSL-1.0'
     topics = 'conan', 'c++', 'concurrency', 'futures', 'channels'
 
-    settings = "arch", "os", "compiler", "build_type", 
+    settings = "arch", "os", "compiler", "build_type",
 
     options = {
         "boost_optional": [True, False],
@@ -34,7 +39,7 @@ class Stlab(ConanFile):
         return self.options.boost_optional or self.options.boost_variant
 
     def _requires_libdispatch(self):
-        # On macOS it is not necessary to use the libdispatch conan package, because the library is 
+        # On macOS it is not necessary to use the libdispatch conan package, because the library is
         # included in the OS.
         return self.options.task_system == "libdispatch" and self.settings.os != "Macos"
 
@@ -46,7 +51,8 @@ class Stlab(ConanFile):
             self.requires("libdispatch/5.3.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        get(self, **self.conan_data["sources"][self.version])
+
         extracted_dir = "libraries-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
@@ -63,7 +69,7 @@ class Stlab(ConanFile):
         self.options.boost_variant = True
 
     def _default_task_system(self):
-        if self.settings.os == "Macos": 
+        if self.settings.os == "Macos":
             return "libdispatch"
 
         if self.settings.os == "Windows":
@@ -104,7 +110,7 @@ class Stlab(ConanFile):
         if Version(self.settings.compiler.version) >= "12": return
         if self.options.boost_optional and self.options.boost_variant: return
         #
-        # On Apple we have to force the usage of boost.variant, because Apple's implementation of C++17 
+        # On Apple we have to force the usage of boost.variant, because Apple's implementation of C++17
         # is not complete.
         #
         msg = "Apple-Clang versions less than 12 do not correctly support std::optional or std::variant, so we will use boost::optional and boost::variant instead. "
@@ -119,7 +125,7 @@ class Stlab(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, '17')
+            check_min_cppstd(self, 17)
 
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9":
             raise ConanInvalidConfiguration("Need GCC >= 9")
