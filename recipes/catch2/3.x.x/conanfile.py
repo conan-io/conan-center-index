@@ -2,7 +2,7 @@ import os
 import functools
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, copy, get, patch, rmdir
@@ -60,6 +60,9 @@ class Catch2Conan(ConanFile):
             "apple-clang": "10",
         }
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, "14")
@@ -89,7 +92,7 @@ class Catch2Conan(ConanFile):
 
     def _patch_sources(self):
         for x in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(**x)
+            patch(self, **x)
 
 
     def generate(self):
@@ -109,7 +112,7 @@ class Catch2Conan(ConanFile):
 
         apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        cmake.configure()
         cmake.build()
 
     def package(self):
