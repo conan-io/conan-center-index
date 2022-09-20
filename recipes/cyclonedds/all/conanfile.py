@@ -35,6 +35,14 @@ class CycloneDDSConan(ConanFile):
     short_paths = True
 
     @property
+    def _bin_package_folder(self):
+        return os.path.join(self.package_folder,"bin")
+
+    @property
+    def _tmp_folder(self):
+        return os.path.join(self.package_folder,"tmp")        
+
+    @property
     def _license_folder(self):
         return os.path.join(self.package_folder,"licenses")
 
@@ -42,6 +50,7 @@ class CycloneDDSConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "7",
+            "Visual Studio": "16.0",
             "clang": "7",
             "apple-clang": "10",
         }
@@ -76,16 +85,12 @@ class CycloneDDSConan(ConanFile):
             self.requires("openssl/1.1.1q")
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.16.2")
+        self.tool_requires("cmake/3.21.7")
 
     def validate(self):
         if self.options.enable_security and not self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} currently do not support"\
                                             "static build and security on")
-        if is_msvc(self):
-            # TODO : determine windows error and find solution (at test_package)
-            raise ConanInvalidConfiguration(f"{self.ref} is not (yet) supported"\
-                                                "for Visual Studio compiler.")
         if self.info.settings.compiler.cppstd:
             build.check_min_cppstd(self, 14)
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
@@ -133,6 +138,18 @@ class CycloneDDSConan(ConanFile):
         files.rmdir(self, os.path.join(self.package_folder, "share"))
         files.rmdir(self, os.path.join(self.package_folder, "lib","pkgconfig"))
         files.rmdir(self, os.path.join(self.package_folder, "lib","cmake"))
+        
+        # cyclonedds copies multiple windows dlls to bin folder
+        # these must be removed and just keep ddsc.dll  
+        if self.settings.os == "Windows":
+            if self.options.shared:
+                files.mkdir(self, self._tmp_folder)
+                files.copy(self, "ddsc.dll", self._bin_package_folder, self._tmp_folder)
+            files.rmdir(self, self._bin_package_folder)
+            if self.options.shared:
+                files.mkdir(self,self._bin_package_folder)
+                files.copy(self,"ddsc.dll",self._tmp_folder,self._bin_package_folder)
+                files.rmdir(self, self._tmp_folder)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "cyclonedds")
@@ -153,3 +170,10 @@ class CycloneDDSConan(ConanFile):
         self.cpp_info.components["CycloneDDS"].requires = requires
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["CycloneDDS"].system_libs = ["pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["CycloneDDS"].system_libs = [
+                    "Ws2_32",
+                    "Dbghelp",
+                    "Bcrypt",
+                    "Iphlpapi"
+            ]
