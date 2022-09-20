@@ -71,8 +71,21 @@ class XZUtils(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
-    def _apply_patches(self):
-        if Version(self.version) == "5.2.4" and is_msvc(self):
+    def generate(self):
+        if is_msvc(self):
+            tc = MSBuildToolchain(self)
+            tc.generate()
+        else:
+            tc = AutotoolsToolchain(self)
+            tc.configure_args.append("--disable-doc")
+            if self.settings.build_type == "Debug":
+                tc.configure_args.append("--enable-debug")
+            tc.generate()
+            env = VirtualBuildEnv(self)
+            env.generate()
+
+    def _build_msvc(self):
+        if Version(self.version) == "5.2.4":
             # Relax Windows SDK restriction
             # Workaround is required only for 5.2.4 because since 5.2.5 WindowsTargetPlatformVersion is dropped from vcproj file
             #
@@ -92,7 +105,6 @@ class XZUtils(ConanFile):
                                   windows_target_platform_version_old,
                                   windows_target_platform_version_new)
 
-    def _build_msvc(self):
         # windows\INSTALL-MSVC.txt
         if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler) >= "15") or \
            (self.settings.compiler == "msvc" and Version(self.settings.compiler) >= "191"):
@@ -106,21 +118,7 @@ class XZUtils(ConanFile):
             msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
             msbuild.build("xz_win.sln", targets=[target])
 
-    def generate(self):
-        if is_msvc(self):
-            tc = MSBuildToolchain(self)
-            tc.generate()
-        else:
-            tc = AutotoolsToolchain(self)
-            tc.configure_args.append("--disable-doc")
-            if self.settings.build_type == "Debug":
-                tc.configure_args.append("--enable-debug")
-            tc.generate()
-            env = VirtualBuildEnv(self)
-            env.generate()
-
     def build(self):
-        self._apply_patches()
         if is_msvc(self):
             self._build_msvc()
         else:
