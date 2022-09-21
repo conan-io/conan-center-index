@@ -1,3 +1,5 @@
+# Versions from LIBYUV_VERSION definition in include/libyuv/version.h
+# Pay attention to package commits incrementing this definition
 sources:
   "1841":
     url: "https://chromium.googlesource.com/libyuv/libyuv/+archive/f71c83552d373f0ff41833b17e2880632d8561d7.tar.gz"
