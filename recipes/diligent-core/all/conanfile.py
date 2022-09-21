@@ -180,7 +180,7 @@ class DiligentCoreConan(ConanFile):
         self.copy(pattern="*.fxh", dst="res", keep_path=False)
 
         self.copy("File2String*", src=os.path.join(self._build_subfolder, "bin"), dst="bin", keep_path=False)
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"), recursive=True)
+        rm(self, "*.pdb", self.package_folder, recursive=True)
         # MinGw creates many invalid files, called objects.a, remove them here:
         rm(self, "objects.a", self.package_folder, recursive=True)
 
