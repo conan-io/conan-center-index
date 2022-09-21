@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools import files, build
+from conan.tools.cmake import CMake
 from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
@@ -11,7 +12,7 @@ class JfalcouEveConan(ConanFile):
                    )
     homepage = "https://jfalcou.github.io/eve/"
     topics = ("c++", "simd")
-    license = "BSL-1.0"
+    license = ("BSL-1.0")
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
 
@@ -32,6 +33,12 @@ class JfalcouEveConan(ConanFile):
                 "clang": "13",
                 "apple-clang": "13",
                 }
+
+    def configure(self):
+        ll = self.version.strip("v")
+        lv = [int(v) for v in ll.split(".")]
+        info = lv[1:2]
+        self.license = "BSL-1.0" if (info[0]>=2022 and info[1]>=9) else "MIT"
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
