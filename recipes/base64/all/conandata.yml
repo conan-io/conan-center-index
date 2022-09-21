@@ -8,6 +8,12 @@ sources:
 patches:
   "0.5.0":
     - patch_file: "patches/0.5.0-0001-make.patch"
+      patch_description: "add library taget"
+      patch_type: "conan"
   "0.4.0":
     - patch_file: "patches/0.4.0-0001-make.patch"
+      patch_description: "add library taget"
+      patch_type: "conan"
     - patch_file: "patches/0.4.0-0002-cmake.patch"
+      patch_description: "provide CMakeLists.txt for MSVC"
+      patch_type: "conan"
