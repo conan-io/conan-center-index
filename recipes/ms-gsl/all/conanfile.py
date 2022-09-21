@@ -19,7 +19,7 @@ class MicrosoftGslConan(ConanFile):
     license = "MIT"
     topics = ("gsl", "guidelines", "core", "span")
     no_copy_source = True
-    settings = "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "on_contract_violation": ["terminate", "throw", "unenforced"]
     }

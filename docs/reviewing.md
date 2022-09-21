@@ -36,6 +36,9 @@ If possible, try to avoid mixing single quotes (`'`) and double quotes (`"`) in 
 
 When extracting sources or performing out-of-source builds, it is preferable to use a _subfolder_ attribute, `_source_subfolder` and `_build_subfolder` respectively.
 
+> **Note**: These are only required when using the legacy generator such as `cmake`. For the new generators like `CMakeToolchain` see
+> the [2.0 Migration Guide](v2_migration.md#using-layout-with-new-generators) for more information.
+
 For example doing this with property attributes for these variables:
 
 ```py
@@ -179,39 +182,12 @@ target_link_libraries(${PROJECT_NAME} package::package)
 We encourage contributors to check that not only the _global_ target works properly, but also the ones for the components. It can be
 done creating and linking different libraries and/or executables.
 
-## Recommended feature options names
-
-It's often needed to add options to toggle specific library features on/off. Regardless of the default, there is a strong preference for using positive naming for options. In order to avoid the fragmentation, we recommend to use the following naming conventions for such options:
-
-- enable_<feature> / disable_<feature>
-- with_<dependency> / without_<dependency>
-- use_<feature>
-
-the actual recipe code then may look like:
-
-```py
-    options = {"use_tzdb": [True, False]}
-    default_options = {"use_tzdb": True}
-```
-
-```py
-    options = {"enable_locales": [True, False]}
-    default_options = {"enable_locales": True}
-```
-
-```py
-    options = {"with_zlib": [True, False]}
-    default_options = {"with_zlib": True}
-```
-
-having the same naming conventions for the options may help consumers, e.g. they will be able to specify options with wildcards: `-o *:with_threads=True`, therefore, `with_threads` options will be enabled for all packages in the graph that support it.
-
 ## Supported Versions
 
 In this repository we are building a subset of all the versions for a given library. This set of version changes over time as new versions
-are released and old ones stop to be used. 
+are released and old ones stop to be used.
 
-We always welcome latest releases as soon as they are available, and from time to time we remove old versions mainly due to technical reasons: 
+We always welcome latest releases as soon as they are available, and from time to time we remove old versions mainly due to technical reasons:
 the more versions we have, the more resources that are needed in the CI and the more time it takes to build each pull-request (also, the
 more chances of failing because of unexpected errors).
 
