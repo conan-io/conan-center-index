@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conans import AutoToolsBuildEnvironment, MSBuild
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 from conans import tools as tools_legacy
 from conan.tools.files import apply_conandata_patches, get, replace_in_file
