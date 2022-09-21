@@ -1,6 +1,7 @@
 import os
 import re
 import textwrap
+import sys
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -15,6 +16,7 @@ from conan.tools.microsoft import MSBuild, is_msvc, msvc_runtime_flag, MSBuildDe
 from conan.tools.microsoft.visual import msvc_version_to_toolset_version
 from conan.tools.scm import Version
 from conans.tools import get_gnu_triplet
+from jinja2 import Template
 
 required_conan_version = ">=1.51.3"
 
@@ -116,7 +118,7 @@ class CPythonConan(ConanFile):
                                                     "15": "191",
                                                     "14": "190",
                                                     "12": "180",
-                                                    "11": "170"}.get(self.settings.get_safe("compiler.version")))
+                                                    "11": "170"}[self.settings.get_safe("compiler.version")])
         elif self.settings.get_safe("compiler") == "msvc":
             return msvc_version_to_toolset_version(self.settings.compiler.version)
         return None
@@ -304,7 +306,7 @@ class CPythonConan(ConanFile):
                     raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
 
         if self._with_libffi:
-            if Version(self.deps_cpp_info["libffi"].version) >= "3.3" and self.settings.compiler == "Visual Studio" and "d" in str(self.settings.compiler.runtime):
+            if Version(self.deps_cpp_info["libffi"].version) >= "3.3" and is_msvc(self) and "d" in msvc_runtime_flag(self):
                 raise ConanInvalidConfiguration("libffi versions >= 3.3 cause 'read access violations' when using a debug runtime (MTd/MDd)")
 
     def source(self):
@@ -406,6 +408,7 @@ class CPythonConan(ConanFile):
             replace_in_file(self, self.source_path.joinpath("PCbuild", "pyproject.props"), "MultiThreadedDLL", runtime_library)
             replace_in_file(self, self.source_path.joinpath("PCbuild", "pyproject.props"), "MultiThreadedDebugDLL", runtime_library)
 
+            # FIXME: use MSBuildtoolchain.properties once Conan 1.53 is available https://github.com/conan-io/conan/pull/12147
             replace_in_file(self, self.source_path.joinpath("PCbuild", "Directory.Build.props"), "</Project>",
                             textwrap.dedent(f"""  <PropertyGroup>
                                                     <IncludeExternals>true</IncludeExternals>
@@ -455,6 +458,20 @@ class CPythonConan(ConanFile):
             autotools.make()
 
     @property
+    def _msvc_arch_path(self):
+        build_subdir_lut = {
+            "x86_64": "amd64",
+            "x86": "win32",
+        }
+        if Version(self.version) >= "3.8":
+            build_subdir_lut.update({
+                "armv7": "arm32",
+                "armv8_32": "arm32",
+                "armv8": "arm64",
+            })
+        return build_subdir_lut[str(self.settings.arch)]
+
+    @property
     def _msvc_artifacts_path(self):
         build_subdir_lut = {
             "x86_64": "amd64",
@@ -466,137 +483,32 @@ class CPythonConan(ConanFile):
                 "armv8_32": "arm32",
                 "armv8": "arm64",
             })
-        return self.source_path.joinpath("PCbuild", build_subdir_lut[str(self.settings.arch)])
+        return self.source_path.joinpath("PCbuild", self._msvc_arch_path)
 
     @property
-    def _msvc_install_subprefix(self):
-        return "bin"
+    def _install_path(self):
+        return self.package_path.joinpath("bin") if is_msvc(self) else self.package_path
 
-    def _copy_essential_dlls(self):
-        if is_msvc(self):
-            # Until MSVC builds support cross building, copy dll's of essential (shared) dependencies to python binary location.
-            # These dll's are required when running the layout tool using the newly built python executable.
-            dest_path = self.build_path.joinpath(self._msvc_artifacts_path)
-            if self._with_libffi:
-                for bin_path in self.deps_cpp_info["libffi"].bin_paths:
-                    copy(self, "*.dll", src=bin_path, dst=dest_path)
-            for bin_path in self.deps_cpp_info["expat"].bin_paths:
-                copy(self, "*.dll", src=bin_path, dst=dest_path)
-            for bin_path in self.deps_cpp_info["zlib"].bin_paths:
-                copy(self, "*.dll", src=bin_path, dst=dest_path)
+    @property
+    def _lib_path(self):
+        return self._install_path.joinpath("libs") if is_msvc(self) else self._install_path.joinpath("lib")
 
-    def _msvc_package_layout(self):
-        self._copy_essential_dlls()
-        install_prefix = self.package_path.joinpath(self._msvc_install_subprefix)
-        mkdir(self, install_prefix)
-        build_path = self._msvc_artifacts_path
-        infix = "_d" if self.settings.build_type == "Debug" else ""
-        # FIXME: if cross building, use a build python executable here
-        python_built = build_path.joinpath("python{}.exe".format(infix))
-        layout_args = [
-            self.source_path.joinpath("PC", "layout", "main.py"),
-            "-v",
-            "-s", self.source_path,
-            "-b", build_path,
-            "--copy", install_prefix,
-            "-p",
-            "--include-pip",
-            "--include-venv",
-            "--include-dev",
-            "--include-stable"
-        ]
-        if self.options.get_safe("with_tkinter", False):
-            layout_args.append("--include-tcltk")
-        if self.settings.build_type == "Debug":
-            layout_args.append("-d")
-        python_args = " ".join(f"\"{a}\"" for a in layout_args)
-        self.run(f"{python_built} {python_args}", run_environment=True, env="conanrun")
+    @property
+    def _include_path(self):
+        return self._install_path.joinpath("include") if is_msvc(self) else self._install_path.joinpath("include", f"python{self._version_suffix}{self._abi_suffix}")
 
-        rmdir(self, os.path.join(self.package_folder, "bin", "tcl"))
+    @property
+    def _modules_path(self):
+        return self._install_path.joinpath("Lib") if is_msvc(self) else self._install_path.joinpath("lib")
 
-        for file in install_prefix.glob("**/vcruntime.*"):
-            file.unlink()
-        install_prefix.joinpath("LICENSE.txt").unlink(missing_ok=True)
-        for file in install_prefix.joinpath("libs").glob("**/python.*"):
-            file.unlink()
-
-    def _msvc_package_copy(self):
-        py_version = Version(self.version)
-        build_path = self._msvc_artifacts_path
-        infix = "_d" if self.settings.build_type == "Debug" else ""
-        copy(self, "*.exe", src=build_path, dst=self.package_path.joinpath(self._msvc_install_subprefix))
-        copy(self, "*.dll", src=build_path, dst=self.package_path.joinpath(self._msvc_install_subprefix))
-        copy(self, "*.pyd", src=build_path, dst=self.package_path.joinpath(self._msvc_install_subprefix, "DLLs"))
-        copy(self, f"python{self._version_suffix}{infix}.dll", src=build_path, dst=self.package_path.joinpath(self._msvc_install_subprefix))
-        copy(self, f"python{py_version.major}{infix}.dll", src=build_path, dst=self.package_path.joinpath(self._msvc_install_subprefix))  # Limited Python ABI
-        copy(self, f"python{self._version_suffix}{infix}.lib", src=build_path, dst=self.package_path.joinpath(self._msvc_install_subprefix, "libs"))
-        copy(self, f"python{py_version.major}{infix}.lib", src=build_path, dst=self.package_path.joinpath(self._msvc_install_subprefix, "libs"))  # Limited Python ABI
-        copy(self, "*", src=self.source_path.joinpath("Include"), dst=self.package_path.joinpath(self._msvc_install_subprefix, "include"))
-        copy(self, "pyconfig.h", src=self.source_path.joinpath("PC"), dst=self.package_path.joinpath(self._msvc_install_subprefix, "include"))
-        copy(self, "*.py", src=self.source_path.joinpath("lib"), dst=self.package_path.joinpath(self._msvc_install_subprefix, "Lib"))
-        rmdir(self, self.package_path.joinpath(self._msvc_install_subprefix, "Lib", "test"))
-
-        packages = {}
-        get_name_version = lambda fn: fn.split(".", 2)[:2]
-        whldir = self.source_path.joinpath("Lib", "ensurepip", "_bundled")
-        for fn in whldir.glob("**/*.whl"):
-            name, version = get_name_version(fn)
-            add = True
-            if name in packages:
-                pname, pversion = get_name_version(packages[name])
-                add = Version(version) > Version(pversion)
-            if add:
-                packages[name] = fn
-        for fname in packages.values():
-            unzip(self, filename=os.path.join(whldir, fname), destination=self.package_path.joinpath("bin", "Lib", "site-packages"))
-
-        self.run(f"{build_path.joinpath(self._cpython_interpreter_name)} -c \"import compileall; compileall.compile_dir('{self.package_path.joinpath(self._msvc_install_subprefix, 'Lib')}')\"",
-                 run_environment=True)
-
-    def package(self):
-        copy(self, "LICENSE*", src=self.source_path.joinpath("licenses"), dst=self.package_path.joinpath("licenses"))
-        if is_msvc(self):
-            if self._is_py2 or not self.options.shared:
-                self._msvc_package_copy()
-            else:
-                self._msvc_package_layout()
-            rm(self, "vcruntime*", os.path.join(self.package_folder, "bin"))
-        else:
-            autotools = Autotools(self)
-            autotools.install()
-            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-            rmdir(self, os.path.join(self.package_folder, "share"))
-
-            # Rewrite shebangs of python scripts
-            for file in self.package_path.joinpath("bin").glob("**/*"):
-                if not file.is_file() or file.is_symlink():
-                    continue
-                text = load(self, file)
-                firstline = text.splitlines()[0]
-                if not (firstline.startswith(b"#!") and b"/python" in firstline and b"/bin/sh" not in firstline):
-                    continue
-                self.output.info("Rewriting shebang of {}".format(file))
-                content = textwrap.dedent(f"""\
-                        #!/bin/sh
-                        ''':'
-                        __file__="$0"
-                        while [ -L "$__file__" ]; do
-                            __file__="$(dirname "$__file__")/$(readlink "$__file__")"
-                        done
-                        exec "$(dirname "$__file__")/python{self._version_suffix}" "$0" "$@"
-                        '''
-                        """)
-                save(self, file, content)
-
-            if not self._cpython_symlink.exists():
-                self._cpython_symlink.symlink_to(self._cpython_interpreter_path)
-        if is_apple_os(self):
-            fix_apple_shared_install_name(self)
+    @property
+    def _site_packages_path(self):
+        return self._modules_path.joinpath("site-packages")
 
     @property
     def _cpython_symlink(self):
         ext = ".exe" if self.settings.os == "Windows" else ""
-        symlink = self.package_path.joinpath("bin", f"python{ext}")
+        symlink = self._install_path.joinpath(f"python{ext}")
         return symlink
 
     @property
@@ -639,20 +551,177 @@ class CPythonConan(ConanFile):
             lib_ext = self._abi_suffix + (".dll.a" if self.options.shared and self.settings.os == "Windows" else "")
         return f"python{self._version_suffix}{lib_ext}"
 
-    def package_info(self):
-        # FIXME: conan components Python::Interpreter component, need a target type
-        # self.cpp_info.names["cmake_find_package"] = "Python"
-        # self.cpp_info.names["cmake_find_package_multi"] = "Python"
-        # FIXME: conan components need to generate multiple .pc files (python2, python-27)
+    @property
+    def _cmake_build_module_path(self):
+        return self.package_path.joinpath("res", "cmake", "python_variables.cmake")
 
+    def _copy_essential_dlls(self):
+            # Until MSVC builds support cross building, copy dll's of essential (shared) dependencies to python binary location.
+            # These dll's are required when running the layout tool using the newly built python executable.
+        if self._with_libffi:
+            for bin_path in self.deps_cpp_info["libffi"].bin_paths:
+                copy(self, "*.dll", src=bin_path, dst=self._msvc_artifacts_path)
+        for bin_path in self.deps_cpp_info["expat"].bin_paths:
+            copy(self, "*.dll", src=bin_path, dst=self._msvc_artifacts_path)
+        for bin_path in self.deps_cpp_info["zlib"].bin_paths:
+            copy(self, "*.dll", src=bin_path, dst=self._msvc_artifacts_path)
+
+    def _msvc_package_layout(self):
+        self._copy_essential_dlls()
+        mkdir(self, self._install_path)
+        python_built = self._msvc_artifacts_path.joinpath(self._cpython_interpreter_name) if not cross_building(self) else sys.executable
+        layout_args = [
+            self.source_path.joinpath("PC", "layout", "main.py"),
+            "-v",
+            "-s", self.source_path,
+            "-b", self._msvc_artifacts_path,
+            "--copy", self._install_path,
+            "-p",
+            "--include-pip",
+            "--include-venv",
+            "--include-dev",
+            "--include-stable"
+        ]
+        if self.options.get_safe("with_tkinter", False):
+            layout_args.append("--include-tcltk")
+        if self.settings.build_type == "Debug":
+            layout_args.append("-d")
+        python_args = " ".join(f"\"{a}\"" for a in layout_args)
+        self.run(f"{python_built} {python_args}", run_environment=True, env="conanrun")
+
+        rmdir(self, self._install_path.joinpath("tcl"))
+        rm(self, "python.*", self._lib_path, recursive=True)
+        rm(self, "LICENSE.txt", self._install_path, recursive=True)
+        rm(self, "vcruntime*", self._install_path, recursive=True)
+
+    def _msvc_package_copy(self):
         py_version = Version(self.version)
-        # python component: "Build a C extension for Python"
+        infix = "_d" if self.settings.build_type == "Debug" else ""
+        copy(self, "*.exe", src=self._msvc_artifacts_path, dst=self._install_path)
+        copy(self, "*.dll", src=self._msvc_artifacts_path, dst=self._install_path)
+        copy(self, "*.pyd", src=self._msvc_artifacts_path, dst=self._install_path.joinpath("DLLs"))
+        copy(self, f"python{self._version_suffix}{infix}.dll", src=self._msvc_artifacts_path, dst=self._install_path)
+        copy(self, f"python{py_version.major}{infix}.dll", src=self._msvc_artifacts_path, dst=self._install_path)  # Limited Python ABI
+        copy(self, f"python{self._version_suffix}{infix}.lib", src=self._msvc_artifacts_path, dst=self._lib_path)
+        copy(self, f"python{py_version.major}{infix}.lib", src=self._msvc_artifacts_path, dst=self._lib_path)  # Limited Python ABI
+        copy(self, "*", src=self.source_path.joinpath("Include"), dst=self._include_path)
+        copy(self, "pyconfig.h", src=self.source_path.joinpath("PC"), dst=self._include_path)
+        copy(self, "*.py", src=self.source_path.joinpath("lib"), dst=self._modules_path)
+        rmdir(self, self._modules_path.joinpath("test"))
+
+        packages = {}
+        get_name_version = lambda fn: fn.split(".", 2)[:2]
+        whldir = self.source_path.joinpath("Lib", "ensurepip", "_bundled")
+        for fn in whldir.glob("**/*.whl"):
+            name, version = get_name_version(fn)
+            add = True
+            if name in packages:
+                pname, pversion = get_name_version(packages[name])
+                add = Version(version) > Version(pversion)
+            if add:
+                packages[name] = fn
+        for fname in packages.values():
+            unzip(self, filename=fname, destination=self._site_packages_path)
+
+        self.run(f"{self._msvc_artifacts_path.joinpath(self._cpython_interpreter_name)} -c \"import compileall; compileall.compile_dir('{self._modules_path}')\"",
+                 run_environment=True)
+
+    @property
+    def _cmake_variables(self):
+        content = Template("""{% for k, v in kwargs.items()  %}set({{ k }} {{ v }})\n{% endfor %}""")
+        py_version = Version(self.version)
+
+        suffix = "{}{}{}".format(
+            "d" if self.settings.build_type == "Debug" else "",
+            "m" if self.options.get_safe("pymalloc", False) else "",
+            "u" if self.options.get_safe("unicode", False) else "",
+        )
+        cmake_arg = ";".join("ON" if a else "OFF" for a in (self.settings.build_type == "Debug", self.options.get_safe("pymalloc", False), self.options.get_safe("unicode", False)))
+        return content.render(kwargs={"BUILD_MODULE": "ON" if self._supports_modules else "OFF",
+                                        "PY_VERSION_MAJOR": py_version.major,
+                                        "PY_VERSION_MAJOR_MINOR": f"{py_version.major}.{py_version.minor}",
+                                        "PY_FULL_VERSION": self.version,
+                                        "PY_VERSION_SUFFIX": suffix,
+                                        "PYTHON_EXECUTABLE": str(self._cpython_interpreter_path),
+                                        f"Python{py_version.major}_EXECUTABLE": str(self._cpython_interpreter_path),
+                                        "Python_EXECUTABLE": str(self._cpython_interpreter_path),
+                                        f"Python{py_version.major}_ROOT_DIR": str(self.package_folder),
+                                        "Python_ROOT_DIR": str(self.package_folder),
+                                        f"Python{py_version.major}_USE_STATIC_LIBS": "OFF" if self.options.shared else "ON",
+                                        "Python_USE_STATIC_LIBS": "OFF" if self.options.shared else "ON",
+                                        f"Python{py_version.major}_FIND_FRAMEWORK": "NEVER",
+                                        "Python_FIND_FRAMEWORK": "NEVER",
+                                        f"Python{py_version.major}_FIND_REGISTRY": "NEVER",
+                                        "Python_FIND_REGISTRY": "NEVER",
+                                        f"Python{py_version.major}_FIND_IMPLEMENTATIONS": "CPython",
+                                        "Python_FIND_IMPLEMENTATIONS": "CPython",
+                                        f"Python{py_version.major}_FIND_STRATEGY": "LOCATION",
+                                        "Python_FIND_STRATEGY": "LOCATION",
+                                        f"Python{py_version.major}_FIND_ABI": cmake_arg,
+                                        "Python_FIND_ABI": cmake_arg,
+                                        f"Python{py_version.major}_LIBRARY": str(self._lib_path),
+                                        "Python_LIBRARY": str(self._lib_path),
+                                        f"Python{py_version.major}_INCLUDE_DIR": str(self._include_path),
+                                        "Python_INCLUDE_DIR": str(self._include_path),
+                                        })
+
+    def package(self):
+        copy(self, "LICENSE*", src=self.source_path, dst=self.package_path.joinpath("licenses"))
+        save(self, self._cmake_build_module_path, self._cmake_variables)
+
         if is_msvc(self):
-            self.cpp_info.components["python"].includedirs = [os.path.join(self._msvc_install_subprefix, "include")]
-            libdir = os.path.join(self._msvc_install_subprefix, "libs")
+            if self._is_py2 or not self.options.shared:
+                self._msvc_package_copy()
+            else:
+                self._msvc_package_layout()
         else:
-            self.cpp_info.components["python"].includedirs.append(os.path.join("include", "python{}{}".format(self._version_suffix, self._abi_suffix)))
-            libdir = "lib"
+            autotools = Autotools(self)
+            autotools.install()
+            rmdir(self, self._lib_path.joinpath("pkgconfig"))
+            rmdir(self, self._lib_path.joinpath("share"))
+
+            # Rewrite shebangs of python scripts
+            for file in self.package_path.joinpath("bin").glob("**/*"):
+                if not file.is_file() or file.is_symlink():
+                    continue
+                text = load(self, file)
+                firstline = text.splitlines()[0]
+                if not (firstline.startswith(b"#!") and b"/python" in firstline and b"/bin/sh" not in firstline):
+                    continue
+                self.output.info("Rewriting shebang of {}".format(file))
+                content = textwrap.dedent(f"""\
+                        #!/bin/sh
+                        ''':'
+                        __file__="$0"
+                        while [ -L "$__file__" ]; do
+                            __file__="$(dirname "$__file__")/$(readlink "$__file__")"
+                        done
+                        exec "$(dirname "$__file__")/python{self._version_suffix}" "$0" "$@"
+                        '''
+                        """)
+                save(self, file, content)
+
+            if not self._cpython_symlink.exists():
+                self._cpython_symlink.symlink_to(self._cpython_interpreter_path)
+        if is_apple_os(self):
+            fix_apple_shared_install_name(self)
+
+    def package_info(self):
+        py_version = Version(self.version)
+
+        self.cpp_info.components["python"].set_property("cmake_target_name", "Python::Python")
+        self.cpp_info.components["python"].set_property("cmake_file_name", "Python")
+
+        self.cpp_info.components["python"].includedirs = [str(self._include_path)]
+        self.cpp_info.components["python"].libdirs = [str(self._lib_path)]
+        self.cpp_info.components["python"].libs = [self._lib_name]
+        self.cpp_info.components["python"].builddirs = [str(self._cmake_build_module_path.parent)]
+
+        self.cpp_info.components["python"].set_property("cmake_build_modules", [str(self._cmake_build_module_path)])
+        self.cpp_info.components["python"].names["cmake_build_modules"] = [str(self._cmake_build_module_path)]
+        self.cpp_info.components["python"].set_property("pkg_config", f"python-{py_version.major}.{py_version.minor}")
+        self.cpp_info.components["python"].names["pkg_config"] = f"python-{py_version.major}.{py_version.minor}"
+
         if self.options.shared:
             self.cpp_info.components["python"].defines.append("Py_ENABLE_SHARED")
         else:
@@ -664,29 +733,30 @@ class CPythonConan(ConanFile):
         self.cpp_info.components["python"].requires = ["zlib::zlib"]
         if self.settings.os != "Windows":
             self.cpp_info.components["python"].requires.append("libxcrypt::libxcrypt")
-        self.cpp_info.components["python"].names["pkg_config"] = "python-{}.{}".format(py_version.major, py_version.minor)
-        self.cpp_info.components["python"].libdirs = []
 
-        self.cpp_info.components["_python_copy"].names["pkg_config"] = "python{}".format(py_version.major)
+        self.cpp_info.components["_python_copy"].set_property("pkg_config", f"python{py_version.major}")
+        self.cpp_info.components["_python_copy"].names["pkg_config"] = f"python{py_version.major}"
         self.cpp_info.components["_python_copy"].requires = ["python"]
         self.cpp_info.components["_python_copy"].libdirs = []
         self.cpp_info.components["_python_copy"].includedirs = []
 
         # embed component: "Embed Python into an application"
         self.cpp_info.components["embed"].libs = [self._lib_name]
-        self.cpp_info.components["embed"].libdirs = [libdir]
+        self.cpp_info.components["embed"].libdirs = [str(self._lib_path)]
         self.cpp_info.components["embed"].includedirs = []
-        self.cpp_info.components["embed"].names["pkg_config"] = "python-{}.{}-embed".format(py_version.major, py_version.minor)
+        self.cpp_info.components["embed"].set_property("pkg_config", f"python-{py_version.major}.{py_version.minor}-embed")
+        self.cpp_info.components["embed"].names["pkg_config"] = f"python-{py_version.major}.{py_version.minor}-embed"
         self.cpp_info.components["embed"].requires = ["python"]
 
         self.cpp_info.components["_embed_copy"].requires = ["embed"]
-        self.cpp_info.components["_embed_copy"].names["pkg_config"] = ["python{}-embed".format(py_version.major)]
+        self.cpp_info.components["_embed_copy"].set_property("pkg_config", f"python{py_version.major}-embed")
+        self.cpp_info.components["_embed_copy"].names["pkg_config"] = f"python{py_version.major}-embed"
         self.cpp_info.components["_embed_copy"].libdirs = []
         self.cpp_info.components["_embed_copy"].includedirs = []
 
         if self._supports_modules:
             # hidden components: the C extensions of python are built as dynamically loaded shared libraries.
-            # C extensions or applications with an embedded Python should not need to link to them..
+            # C extensions or applications with an embedded Python should not need to link to them...
             self.cpp_info.components["_hidden"].requires = [
                 "openssl::openssl",
                 "expat::expat",
@@ -716,38 +786,51 @@ class CPythonConan(ConanFile):
             self.cpp_info.components["_hidden"].includedirs = []
 
         if self.options.env_vars:
-            bindir = self.package_path.joinpath("bin")
-            self.output.info("Appending PATH environment variable: {}".format(bindir))
-            self.env_info.PATH.append(bindir)
+            self.output.info(f"Appending PATH environment variable: {self._install_path}")
+            self.env_info.PATH.append(str(self._install_path))
 
-        python = self._cpython_interpreter_path
-        self.user_info.python = python
+        self.output.info(f"Setting userinfo: `python` to: {self._cpython_interpreter_path}")
+        self.user_info.python = str(self._cpython_interpreter_path)
+        self.output.info(f"Setting conf: `tools.cpython:python` to: {self._cpython_interpreter_path}")
+        self.conf_info.define("tools.cpython:python", str(self._cpython_interpreter_path))
         if self.options.env_vars:
-            self.output.info("Setting PYTHON environment variable: {}".format(python))
-            self.env_info.PYTHON = python
+            self.output.info(f"Setting PYTHON environment variable: {self._cpython_interpreter_path}")
+            self.env_info.PYTHON = str(self._cpython_interpreter_path)
+            self.buildenv_info.define_path("PYTHON", str(self._cpython_interpreter_path))
+            self.runenv_info.define_path("PYTHON", str(self._cpython_interpreter_path))
 
         if is_msvc(self):
-            pythonhome = os.path.join(self.package_folder, "bin")
+            pythonhome = self._install_path
         elif is_apple_os(self):
-            pythonhome = self.package_folder
+            pythonhome = self.package_path
         else:
             version = Version(self.version)
-            pythonhome = os.path.join(self.package_folder, "lib", f"python{version.major}.{version.minor}")
-        self.user_info.pythonhome = pythonhome
+            pythonhome = self._lib_path.joinpath(f"python{version.major}.{version.minor}")
+        self.output.info(f"Setting userinfo: `pythonhome` to: {pythonhome}")
+        self.user_info.pythonhome = str(pythonhome)
+        self.output.info(f"Setting conf: `tools.cpython:pythonhome` to: {pythonhome}")
+        self.conf_info.define("tools.cpython:pythonhome", str(pythonhome))
+
+        if is_msvc(self) and self.options.env_vars:
+            self.output.info(f"Setting PYTHONHOME environment variable: {pythonhome}")
+            self.env_info.PYTHONHOME = str(pythonhome)
+            self.buildenv_info.define_path("PYTHONHOME", str(pythonhome))
+            self.runenv_info.define_path("PYTHONHOME", str(pythonhome))
 
         pythonhome_required = is_msvc(self) or is_apple_os(self)
+        self.output.info(f"Setting userinfo: `module_requires_pythonhome` to: {pythonhome_required}")
         self.user_info.module_requires_pythonhome = pythonhome_required
+        self.output.info(f"Setting conf: `tools.cpython:module_requires_pythonhome` to: {pythonhome_required}")
+        self.conf_info.define("tools.cpython:module_requires_pythonhome", pythonhome_required)
 
-        if is_msvc(self):
-            if self.options.env_vars:
-                self.output.info("Setting PYTHONHOME environment variable: {}".format(pythonhome))
-                self.env_info.PYTHONHOME = pythonhome
-
-        if self._is_py2:
-            python_root = ""
-        else:
-            python_root = self.package_folder
-            if self.options.env_vars:
-                self.output.info("Setting PYTHON_ROOT environment variable: {}".format(python_root))
-                self.env_info.PYTHON_ROOT = python_root
+        python_root = "" if self._is_py2 else self.package_folder
+        self.output.info(f"Setting userinfo: `python_root` to: {python_root}")
         self.user_info.python_root = python_root
+        self.output.info(f"Setting conf: `tools.cpython:python_root` to: {python_root}")
+        self.conf_info.define("tools.cpython:python_root", python_root)
+
+        if self.options.env_vars:
+            self.output.info(f"Setting PYTHON_ROOT environment variable: {python_root}")
+            self.env_info.PYTHON_ROOT = python_root
+            self.buildenv_info.define_path("PYTHON_ROOT", python_root)
+            self.runenv_info.define_path("PYTHON_ROOT", python_root)
