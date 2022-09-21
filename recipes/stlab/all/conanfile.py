@@ -33,7 +33,7 @@ class Stlab(ConanFile):
     }
 
     no_copy_source = True
-    _source_subfolder = 'source_subfolder'
+    # _source_subfolder = 'source_subfolder'
 
     def _use_boost(self):
         return self.options.boost_optional or self.options.boost_variant
@@ -54,7 +54,7 @@ class Stlab(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
         extracted_dir = "libraries-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        os.rename(extracted_dir, self.source_folder)
 
     def _fix_boost_components(self):
         if self.settings.os != "Macos": return
@@ -150,7 +150,7 @@ class Stlab(ConanFile):
 
     def package(self):
         self.copy("*LICENSE", dst="licenses", keep_path=False)
-        self.copy("stlab/*", src=self._source_subfolder, dst='include/')
+        self.copy("stlab/*", src=self.source_folder, dst='include/')
 
     def package_id(self):
         self.info.header_only()
