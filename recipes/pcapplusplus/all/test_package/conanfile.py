@@ -1,4 +1,6 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.build import can_run
+from conans import CMake, tools
 import os
 import shutil
 
@@ -11,11 +13,11 @@ class PcapplusplusTestConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-        if not tools.cross_building(self):
+        if can_run(self):
             self.requires("libpcap/1.10.1")
 
     def configure(self):
-        if not tools.cross_building(self):
+        if can_run(self):
             self.options["libpcap"].shared = True
 
     def build(self):
@@ -24,7 +26,7 @@ class PcapplusplusTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if can_run(self):
             # Use libpcap DLL as a replacement for npcap DLL
             # It will not provide all the functions
             # but it will cover enough to check that what we compiled is correct
@@ -34,4 +36,4 @@ class PcapplusplusTestConan(ConanFile):
             )
             bin_path = os.path.join("bin", "test_package")
             pcap_file_path = os.path.join(self.source_folder, "1_packet.pcap")
-            self.run("{0} {1}".format(bin_path, pcap_file_path), run_environment=True)
+            self.run(f"{bin_path} {pcap_file_path}", run_environment=True)
