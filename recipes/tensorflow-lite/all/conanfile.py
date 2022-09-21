@@ -82,25 +82,6 @@ class TensorflowLiteConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/3.24.0")
 
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 17)
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn(f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-        elif Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.name} requires C++17, which your compiler does not support.")
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def build(self):
-        apply_conandata_patches(self)
-        cmake = CMake(self)
-        cmake.configure(build_script_folder=join("tensorflow", "lite"))
-        cmake.build()
-
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables.update({
@@ -119,6 +100,25 @@ class TensorflowLiteConan(ConanFile):
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 17)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn(f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+        elif Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.name} requires C++17, which your compiler does not support.")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build(self):
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=join("tensorflow", "lite"))
+        cmake.build()
 
     @staticmethod
     def _create_cmake_module_alias_target(self, module_file):
