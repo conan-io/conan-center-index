@@ -10,7 +10,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE LibLZMA::LibLZMA)
 # are properly defined in conan generators
 set(_custom_vars
     LIBLZMA_FOUND
-    LibLZMA_INCLUDE_DIRS
+    LIBLZMA_INCLUDE_DIRS
     LIBLZMA_LIBRARIES
     LIBLZMA_VERSION_MAJOR
     LIBLZMA_VERSION_MINOR
