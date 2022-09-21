@@ -15,5 +15,5 @@ class TestPackageV1Conan(ConanFile):
     def test(self):
         if not cross_building(self):
             bin_path = os.path.join("bin", "test_package")
-            img_name = os.path.join(self.source_folder, "testimg.jpg")
+            img_name = os.path.join(self.source_folder, os.pardir, "test_package", "testimg.jpg")
             self.run(f"{bin_path} {img_name}", run_environment=True)
