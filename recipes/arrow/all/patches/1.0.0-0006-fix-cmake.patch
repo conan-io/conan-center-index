@@ -43,7 +43,7 @@ index eb10ebe..9c81017 100644
  
      file(APPEND ${ar_script_path}.in "SAVE\nEND\n")
 diff --git a/cpp/cmake_modules/ThirdpartyToolchain.cmake b/cpp/cmake_modules/ThirdpartyToolchain.cmake
-index 807e2b9..e1a2ec5 100644
+index 807e2b9..7378476 100644
 --- a/cpp/cmake_modules/ThirdpartyToolchain.cmake
 +++ b/cpp/cmake_modules/ThirdpartyToolchain.cmake
 @@ -154,16 +154,16 @@ macro(build_dependency DEPENDENCY_NAME)
@@ -72,6 +72,15 @@ index 807e2b9..e1a2ec5 100644
  endmacro()
  
  macro(resolve_dependency_with_version DEPENDENCY_NAME REQUIRED_VERSION)
+@@ -785,7 +785,7 @@ if(ARROW_BOOST_REQUIRED)
+   elseif(BOOST_SOURCE STREQUAL "BUNDLED")
+     build_boost()
+   elseif(BOOST_SOURCE STREQUAL "SYSTEM")
+-    find_package(BoostAlt ${ARROW_BOOST_REQUIRED_VERSION} REQUIRED)
++    find_package(Boost ${ARROW_BOOST_REQUIRED_VERSION} REQUIRED)
+   endif()
+ 
+   if(TARGET Boost::system)
 @@ -936,11 +936,11 @@ macro(build_brotli)
  endmacro()
  

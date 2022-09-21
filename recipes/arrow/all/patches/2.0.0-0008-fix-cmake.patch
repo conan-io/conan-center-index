@@ -50,7 +50,7 @@ index 515e6af..7488161 100644
  
  # ----------------------------------------------------------------------
 diff --git a/cpp/cmake_modules/ThirdpartyToolchain.cmake b/cpp/cmake_modules/ThirdpartyToolchain.cmake
-index cc37a3c..2c3aa9f 100644
+index cc37a3c..8654a24 100644
 --- a/cpp/cmake_modules/ThirdpartyToolchain.cmake
 +++ b/cpp/cmake_modules/ThirdpartyToolchain.cmake
 @@ -171,6 +171,7 @@ macro(provide_find_module DEPENDENCY_NAME)
@@ -76,6 +76,15 @@ index cc37a3c..2c3aa9f 100644
  endmacro()
  
  # ----------------------------------------------------------------------
+@@ -846,7 +855,7 @@ if(ARROW_BOOST_REQUIRED)
+   elseif(BOOST_SOURCE STREQUAL "BUNDLED")
+     build_boost()
+   elseif(BOOST_SOURCE STREQUAL "SYSTEM")
+-    find_package(BoostAlt ${ARROW_BOOST_REQUIRED_VERSION} REQUIRED)
++    find_package(Boost ${ARROW_BOOST_REQUIRED_VERSION} REQUIRED)
+   endif()
+ 
+   if(TARGET Boost::system)
 @@ -973,11 +982,11 @@ macro(build_brotli)
  endmacro()
  
