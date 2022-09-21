@@ -276,3 +276,8 @@ patches:
       patch_type: "official"
       patch_source: "https://github.com/boostorg/filesystem/issues/250"
       base_path: "source_subfolder"
+    - patch_file: "patches/1.80.0-0005-disable-deprecated-code.patch"
+      patch_description: "Disables deprecated code in Boost which does not compile on Clang-15"
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/container_hash/issues/24"
+      base_path: "source_subfolder"
