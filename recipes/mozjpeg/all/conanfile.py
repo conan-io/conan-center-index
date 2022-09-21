@@ -107,21 +107,19 @@ class MozjpegConan(ConanFile):
                 "armv8.3": "aarch64",
             }.get(str(self.settings.arch), str(self.settings.arch))
             tc.cache_variables["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
-        tc.cache_variables["ENABLE_TESTING"] = False
-        tc.cache_variables["ENABLE_STATIC"] = not bool(self.options.shared)
-        tc.cache_variables["ENABLE_SHARED"] = bool(self.options.shared)
-        tc.cache_variables["REQUIRE_SIMD"] = bool(self.options.get_safe("SIMD", False))
-        tc.cache_variables["WITH_SIMD"] = bool(self.options.get_safe("SIMD", False))
-        tc.cache_variables["WITH_ARITH_ENC"] = bool(self.options.arithmetic_encoder)
-        tc.cache_variables["WITH_ARITH_DEC"] = bool(self.options.arithmetic_decoder)
-        tc.cache_variables["WITH_JPEG7"] = bool(self.options.libjpeg7_compatibility)
-        tc.cache_variables["WITH_JPEG8"] = bool(self.options.libjpeg8_compatibility)
-        tc.cache_variables["WITH_MEM_SRCDST"] = bool(self.options.mem_src_dst)
-        tc.cache_variables["WITH_TURBOJPEG"] = bool(self.options.turbojpeg)
-        tc.cache_variables["WITH_JAVA"] = bool(self.options.java)
-        tc.cache_variables["WITH_12BIT"] = bool(self.options.enable12bit)
-        tc.cache_variables["CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT"] = False
-        tc.cache_variables["PNG_SUPPORTED"] = False  # PNG and zlib are only required for executables (and static libraries)
+        tc.variables["ENABLE_TESTING"] = False
+        tc.variables["REQUIRE_SIMD"] = bool(self.options.get_safe("SIMD", False))
+        tc.variables["WITH_SIMD"] = bool(self.options.get_safe("SIMD", False))
+        tc.variables["WITH_ARITH_ENC"] = bool(self.options.arithmetic_encoder)
+        tc.variables["WITH_ARITH_DEC"] = bool(self.options.arithmetic_decoder)
+        tc.variables["WITH_JPEG7"] = bool(self.options.libjpeg7_compatibility)
+        tc.variables["WITH_JPEG8"] = bool(self.options.libjpeg8_compatibility)
+        tc.variables["WITH_MEM_SRCDST"] = bool(self.options.mem_src_dst)
+        tc.variables["WITH_TURBOJPEG"] = bool(self.options.turbojpeg)
+        tc.variables["WITH_JAVA"] = bool(self.options.java)
+        tc.variables["WITH_12BIT"] = bool(self.options.enable12bit)
+        tc.variables["CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT"] = False
+        tc.variables["PNG_SUPPORTED"] = False  # PNG and zlib are only required for executables (and static libraries)
         if is_msvc(self):
             tc.cache_variables["WITH_CRT_DLL"] = is_msvc_static_runtime(self)
         tc.generate()

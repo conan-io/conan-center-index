@@ -34,7 +34,7 @@ index 743a243..b5d41a1 100644
      install(TARGETS turbojpeg-static ARCHIVE DESTINATION lib)
      if(NOT ENABLE_SHARED)
 -      install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/tjbench-static.exe
-+      install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tjbench-static.exe
++      install(PROGRAMS ${CMAKE_INSTALL_BINDIR}/tjbench-static.exe
          DESTINATION bin RENAME tjbench.exe)
      endif()
    endif()
@@ -46,13 +46,13 @@ index 743a243..b5d41a1 100644
    install(TARGETS jpeg-static ARCHIVE DESTINATION lib)
    if(NOT ENABLE_SHARED)
 -    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/cjpeg-static.exe
-+    install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/cjpeg-static.exe
++    install(PROGRAMS ${CMAKE_INSTALL_BINDIR}/cjpeg-static.exe
        DESTINATION bin RENAME cjpeg.exe)
 -    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/djpeg-static.exe
-+    install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/djpeg-static.exe
++    install(PROGRAMS ${CMAKE_INSTALL_BINDIR}/djpeg-static.exe
        DESTINATION bin RENAME djpeg.exe)
 -    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/jpegtran-static.exe
-+    install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/jpegtran-static.exe
++    install(PROGRAMS ${CMAKE_INSTALL_BINDIR}/jpegtran-static.exe
        DESTINATION bin RENAME jpegtran.exe)
    endif()
  endif()
