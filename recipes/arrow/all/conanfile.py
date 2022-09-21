@@ -93,7 +93,7 @@ class ArrowConan(ConanFile):
         "with_gcs": False,
         "with_gflags": "auto",
         "with_jemalloc": "auto",
-        "with_mimalloc": "auto",
+        "with_mimalloc": False,
         "with_glog": "auto",
         "with_grpc": "auto",
         "with_hiveserver2": False,
