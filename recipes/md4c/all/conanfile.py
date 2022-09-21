@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 
 import os
 
@@ -62,7 +62,9 @@ class Md4cConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if self.options.encoding == "utf-16":
+        if self.options.encoding == "utf-8":
+            tc.preprocessor_definitions["MD4C_USE_UTF8"] = "1"
+        elif self.options.encoding == "utf-16":
             tc.preprocessor_definitions["MD4C_USE_UTF16"] = "1"
         elif self.options.encoding == "ascii":
             tc.preprocessor_definitions["MD4C_USE_ASCII"] = "1"
@@ -70,8 +72,18 @@ class Md4cConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # Honor encoding option
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "src", "CMakeLists.txt"),
+            "COMPILE_FLAGS \"-DMD4C_USE_UTF8\"",
+            "",
+        )
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -90,10 +102,8 @@ class Md4cConan(ConanFile):
         self.cpp_info.components["_md4c"].set_property("cmake_target_name", "md4c::md4c")
         self.cpp_info.components["_md4c"].set_property("pkg_config_name", "md4c")
         self.cpp_info.components["_md4c"].libs = ["md4c"]
-        if self.options.encoding == "utf-16":
+        if self.settings.os == "Windows" and self.options.encoding == "utf-16":
             self.cpp_info.components["_md4c"].defines.append("MD4C_USE_UTF16")
-        elif self.options.encoding == "ascii":
-            self.cpp_info.components["_md4c"].defines.append("MD4C_USE_ASCII")
 
         self.cpp_info.components["md4c_html"].set_property("cmake_target_name", "md4c::md4c-html")
         self.cpp_info.components["md4c_html"].set_property("pkg_config_name", "md4c-html")
