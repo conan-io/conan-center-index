@@ -13,9 +13,12 @@ patches:
   "1.0.10":
     - patch_file: "0.1.10-0001-make-fast_float-external.patch"
       patch_description: "use cci's fast_float recipe"
+      patch_type: "conan"
   "1.0.9":
     - patch_file: "0.1.8-0001-make-fast_float-external.patch"
       patch_description: "use cci's fast_float recipe"
+      patch_type: "conan"
   "1.0.8":
     - patch_file: "0.1.8-0001-make-fast_float-external.patch"
       patch_description: "use cci's fast_float recipe"
+      patch_type: "conan"
