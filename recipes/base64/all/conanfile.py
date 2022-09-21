@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.env import Environment
-from conan.tools.files import copy, get, apply_conandata_patches, chdir
+from conan.tools.files import copy, get, apply_conandata_patches, chdir, export_conandata_patches
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -8,7 +8,7 @@ from conan.tools.microsoft import is_msvc
 
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.0"
 
 class Base64Conan(ConanFile):
     name = "base64"
@@ -26,8 +26,7 @@ class Base64Conan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == 'Windows':
