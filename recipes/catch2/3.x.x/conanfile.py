@@ -27,24 +27,10 @@ class Catch2Conan(ConanFile):
         "with_prefix": False,
         "default_reporter": None,
     }
-    # generators = "cmake"
-
-    # @property
-    # def _source_subfolder(self):
-    #     return "source_subfolder"
-
-    # @property
-    # def _build_subfolder(self):
-    #     return "build_subfolder"
 
     @property
     def _default_reporter_str(self):
         return '"{}"'.format(str(self.options.default_reporter).strip('"'))
-
-    # def export_sources(self):
-    #     self.copy("CMakeLists.txt")
-    #     for x in self.conan_data.get("patches", {}).get(self.version, []):
-    #         self.copy(x["patch_file"])
 
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
@@ -81,23 +67,6 @@ class Catch2Conan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    # @functools.lru_cache(1)
-    # def _configure_cmake(self):
-    #     cmake = CMake(self)
-    #     cmake.definitions["BUILD_TESTING"] = "OFF"
-    #     cmake.definitions["CATCH_INSTALL_DOCS"] = "OFF"
-    #     cmake.definitions["CATCH_INSTALL_HELPERS"] = "ON"
-    #     cmake.definitions["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
-    #     if self.options.default_reporter:
-    #         cmake.definitions["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
-    #     cmake.configure(build_folder=self._build_subfolder)
-    #     return cmake
-
-    # def _patch_sources(self):
-    #     for x in self.conan_data.get("patches", {}).get(self.version, []):
-    #         patch(self, **x)
-
-
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
@@ -109,10 +78,6 @@ class Catch2Conan(ConanFile):
         tc.generate()
 
     def build(self):
-        # self._patch_sources()
-        # cmake = self._configure_cmake()
-        # cmake.build()
-
         apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
@@ -121,7 +86,6 @@ class Catch2Conan(ConanFile):
     def package(self):
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
-        # cmake = self._configure_cmake()
         cmake = CMake(self)
         cmake.install()
 
