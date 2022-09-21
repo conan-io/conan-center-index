@@ -26,7 +26,9 @@ When pull requests are merged, the CI will upload the generated packages to the 
     * [Verifying Dependency Version](#verifying-dependency-version)
     * [Verifying Dependency Options](#verifying-dependency-options)
   * [Test the recipe locally](#test-the-recipe-locally)
+    * [Hooks](#hooks)
     * [Updating conan hooks on your machine](#updating-conan-hooks-on-your-machine)
+    * [Linters](#linters)
   * [Debugging failed builds](#debugging-failed-builds)<!-- endToc -->
 
 ## Request access
