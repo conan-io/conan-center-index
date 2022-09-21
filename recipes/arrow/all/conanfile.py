@@ -48,6 +48,7 @@ class ArrowConan(ConanFile):
         "with_grpc": ["auto", True, False],
         "with_hiveserver2": [True, False],
         "with_jemalloc": ["auto", True, False],
+        "with_mimalloc": ["auto", True, False],
         "with_json": [True, False],
         "with_llvm": ["auto", True, False],
         "with_openssl": ["auto", True, False],
@@ -92,6 +93,7 @@ class ArrowConan(ConanFile):
         "with_gcs": False,
         "with_gflags": "auto",
         "with_jemalloc": "auto",
+        "with_mimalloc": "auto",
         "with_glog": "auto",
         "with_grpc": "auto",
         "with_hiveserver2": False,
@@ -291,6 +293,8 @@ class ArrowConan(ConanFile):
             self.requires("protobuf/3.21.4")
         if self._with_jemalloc():
             self.requires("jemalloc/5.2.1")
+        if self.options.with_mimalloc:
+            self.requires("mimalloc/1.7.6")
         if self._with_boost():
             self.requires("boost/1.80.0")
         if self._with_gflags():
@@ -375,6 +379,7 @@ class ArrowConan(ConanFile):
         tc.cache_variables["ARROW_CSV"] = bool(self.options.with_csv)
         tc.cache_variables["ARROW_CUDA"] = bool(self.options.with_cuda)
         tc.cache_variables["ARROW_JEMALLOC"] = self._with_jemalloc()
+        tc.cache_variables["ARROW_MIMALLOC"] = bool(self.options.with_mimalloc)
         tc.cache_variables["ARROW_JSON"] = bool(self.options.with_json)
         tc.cache_variables["ARROW_GCS"] = bool(self.options.get_safe("with_gcs", False))
         tc.cache_variables["BOOST_SOURCE"] = "SYSTEM"
@@ -384,7 +389,7 @@ class ArrowConan(ConanFile):
         tc.cache_variables["gRPC_SOURCE"] = "SYSTEM"
         if self._with_grpc():
             tc.cache_variables["ARROW_GRPC_USE_SHARED"] = bool(self.options["grpc"].shared)
-        tc.cache_variables["ARROW_HDFS"] = bool(self.options.hdfs_bridgs)
+
         tc.cache_variables["ARROW_USE_GLOG"] = self._with_glog()
         tc.cache_variables["GLOG_SOURCE"] = "SYSTEM"
         tc.cache_variables["ARROW_WITH_BACKTRACE"] = bool(self.options.with_backtrace)
@@ -442,6 +447,7 @@ class ArrowConan(ConanFile):
         tc.cache_variables["ARROW_BUILD_BENCHMARKS"] = False
         tc.cache_variables["LLVM_SOURCE"] = "SYSTEM"
         tc.cache_variables["ARROW_WITH_UTF8PROC"] = self._with_utf8proc()
+        tc.cache_variables["ARROW_BOOST_REQUIRED"] = self._with_boost()
         tc.cache_variables["utf8proc_SOURCE"] = "SYSTEM"
         if self._with_utf8proc():
             tc.cache_variables["ARROW_UTF8PROC_USE_SHARED"] = bool(self.options["utf8proc"].shared)
@@ -499,7 +505,6 @@ class ArrowConan(ConanFile):
             return "{}".format(name)
 
     def package_id(self):
-        self.info.options.with_jemalloc = self._with_jemalloc()
         self.info.options.with_gflags = self._with_gflags()
         self.info.options.with_protobuf = self._with_protobuf()
         self.info.options.with_re2 = self._with_re2()
@@ -588,6 +593,8 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("glog::glog")
         if self._with_jemalloc():
             self.cpp_info.components["libarrow"].requires.append("jemalloc::jemalloc")
+        if self.options.with_mimalloc:
+            self.cpp_info.components["libarrow"].requires.append("mimalloc::mimalloc")
         if self._with_re2():
             self.cpp_info.components["libgandiva"].requires.append("re2::re2")
         if self._with_llvm():
@@ -628,6 +635,10 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("zlib::zlib")
         if self.options.with_zstd:
             self.cpp_info.components["libarrow"].requires.append("zstd::zstd")
+        if self._with_boost():
+            self.cpp_info.components["libarrow"].requires.append("boost::boost")
+        if self._with_grpc():
+            self.cpp_info.components["libarrow"].requires.append("grpc::grpc")
         if self._with_flight_rpc():
-            self.cpp_info.components["libarrow_flight"].requires.append("grpc::grpc")
             self.cpp_info.components["libarrow_flight"].requires.append("protobuf::protobuf")
+

@@ -1,0 +1,22 @@
+diff --git a/cpp/src/arrow/vendored/datetime/date.h b/cpp/src/arrow/vendored/datetime/date.h
+index 02a4909..2b168d2 100644
+--- a/cpp/src/arrow/vendored/datetime/date.h
++++ b/cpp/src/arrow/vendored/datetime/date.h
+@@ -5152,7 +5152,7 @@ to_stream(std::basic_ostream<CharT, Traits>& os, const CharT* fmt,
+                     if (modified == CharT{})
+ #endif
+                     {
+-                        auto h = *fmt == CharT{'I'} ? make12(hms.hours()) : hms.hours();
++                        auto h = *fmt == CharT{'I'} ? arrow_vendored::date::make12(hms.hours()) : hms.hours();
+                         if (h < hours{10})
+                             os << CharT{'0'};
+                         os << h.count();
+@@ -5366,7 +5366,7 @@ to_stream(std::basic_ostream<CharT, Traits>& os, const CharT* fmt,
+                     save_ostream<CharT, Traits> _(os);
+                     os.fill('0');
+                     os.width(2);
+-                    os << make12(tod.hours()).count() << CharT{':'};
++                    os << arrow_vendored::date::make12(tod.hours()).count() << CharT{':'};
+                     os.width(2);
+                     os << tod.minutes().count() << CharT{':'};
+                     os.width(2);
