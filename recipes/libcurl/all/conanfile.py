@@ -188,6 +188,9 @@ class LibcurlConan(ConanFile):
         if self.options.with_c_ares:
             self.requires("c-ares/1.18.1")
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def validate(self):
         if self.options.with_ssl == "schannel" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("schannel only suppported on Windows.")
