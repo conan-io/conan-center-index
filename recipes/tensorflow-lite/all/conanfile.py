@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, save, copy, apply_conandata_patches
 from conan.errors import ConanInvalidConfiguration
@@ -81,6 +81,12 @@ class TensorflowLiteConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/3.24.0")
+
+    def layout(self):
+        cmake_layout(self)
+        # TODO: once https://github.com/conan-io/conan/pull/11889 is available
+        self.folders.build = f"build_folder/{self.settings.build_type}"  # conflict with upstream files
+        self.folders.generators = "build_folder/generators"  # conflict with upstream files
 
     def generate(self):
         tc = CMakeToolchain(self)
