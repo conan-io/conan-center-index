@@ -4,6 +4,7 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import copy, get, rmdir
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
+from conan.tools.env import VirtualBuildEnv
 
 class MoldConan(ConanFile):
     name = "mold"
