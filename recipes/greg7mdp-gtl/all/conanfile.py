@@ -28,15 +28,11 @@ class Greg7mdpGtlConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "16",
-            "msvc": "1920",
+            "msvc": "192",
             "gcc": "8",
             "clang": "10",
             "apple-clang": "10",
         }
-
-    def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def layout(self):
         basic_layout(self, src_folder="src")
