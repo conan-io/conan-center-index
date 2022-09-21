@@ -127,6 +127,10 @@ As stated earlier, any increase in the number of configurations will result in a
 
 We often receive new fixes and improvements to the recipes already available for x86_64, including help for other architectures like x86 and ARM. In addition, we also receive new cases of bugs, for recipes that do not work on a certain platform, but that are necessary for use, which is important to understand where we should put more effort. So we believe that the best way to maintain and add support for other architectures is through the community.
 
+## Do static libraries tend to be compiled as PIC by default?
+
+Yes! You can learn more about default options in [Packing Policy](packing_policy.md#options).
+
 ## Why PDB files are not allowed?
 
 The project initially decided not to support the PDB files primarily due to the size of the final package, which could add an exaggerated size and not even used by users. In addition, PDB files need the source code to perform the debugging and even follow the path in which it was created and not the one used by the user, which makes it difficult to use when compared to the regular development flow with the IDE.
@@ -249,8 +253,7 @@ There are different motivations
 ## Why not add an option to build unit tests
 
 - Adding a testing option will change the package ID, but will not provide different packaged binaries
-- Use the configuration [skip_test](packaging_policy.md#options) to define the testing behavior.
-
+- Use the configuration [skip_test](packaging_policy.md#options-to-avoid) to define the testing behavior.
 
 ## What is the policy for supported python versions?
 
