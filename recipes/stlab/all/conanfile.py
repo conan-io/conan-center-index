@@ -32,7 +32,7 @@ class Stlab(ConanFile):
         "task_system": "auto",
     }
 
-    no_copy_source = True
+    # no_copy_source = True
     # _source_subfolder = 'source_subfolder'
 
     def _use_boost(self):
