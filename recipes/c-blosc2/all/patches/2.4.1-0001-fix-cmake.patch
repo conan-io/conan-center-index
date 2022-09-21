@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index bd8cb34..9c4cfe0 100644
+index 866c7f6..d68513a 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -68,7 +68,8 @@ if(NOT WIN32)
@@ -44,17 +44,19 @@ index bd8cb34..9c4cfe0 100644
          message(STATUS "Using ZLIB-NG internal sources for ZLIB support.")
          set(HAVE_ZLIB_NG TRUE)
          add_definitions(-DZLIB_COMPAT)
-@@ -184,7 +185,7 @@ endif()
+@@ -184,8 +185,8 @@ endif()
  
  if(NOT DEACTIVATE_ZSTD)
      if(PREFER_EXTERNAL_ZSTD)
 -        find_package(ZSTD)
+-        if(NOT ZSTD_FOUND)
 +        find_package(zstd)
-         if(NOT ZSTD_FOUND)
++        if(NOT zstd_FOUND)
            message(STATUS "No ZSTD library found.  Using internal sources.")
          endif()
+     else()
 diff --git a/blosc/CMakeLists.txt b/blosc/CMakeLists.txt
-index 7f3eac6..c7afecd 100644
+index 441bab6..f17e467 100644
 --- a/blosc/CMakeLists.txt
 +++ b/blosc/CMakeLists.txt
 @@ -10,16 +10,16 @@ set(CMAKE_C_VISIBILITY_PRESET hidden)
@@ -66,7 +68,7 @@ index 7f3eac6..c7afecd 100644
 +if(lz4_FOUND)
 +    set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${lz4_INCLUDE_DIR})
  else()
-     set(LZ4_LOCAL_DIR ${INTERNAL_LIBS}/lz4-1.9.3)
+     set(LZ4_LOCAL_DIR ${INTERNAL_LIBS}/lz4-1.9.4)
      set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${LZ4_LOCAL_DIR})
  endif()
  
