@@ -313,30 +313,3 @@ index 85e8db6..cd70c63 100644
                   ${GANDIVA_INTERNALS_TEST_ARGUMENTS})
  
  if(ARROW_GANDIVA_JAVA)
-diff --git a/cpp/src/gandiva/precompiled/CMakeLists.txt b/cpp/src/gandiva/precompiled/CMakeLists.txt
-index b74b8fb..f29a7eb 100644
---- a/cpp/src/gandiva/precompiled/CMakeLists.txt
-+++ b/cpp/src/gandiva/precompiled/CMakeLists.txt
-@@ -46,6 +46,14 @@ else()
-   set(PLATFORM_CLANG_OPTIONS -std=c++11)
- endif()
- 
-+
-+message(STATUS "*** dump start cmake variables ***")
-+get_cmake_property(_variableNames VARIABLES)
-+foreach(_variableName ${_variableNames})
-+    message(STATUS "${_variableName}=${${_variableName}}")
-+endforeach()
-+message(STATUS "*** dump end ***")
-+
- # Create bitcode for each of the source files.
- foreach(SRC_FILE ${PRECOMPILED_SRCS})
-   get_filename_component(SRC_BASE ${SRC_FILE} NAME_WE)
-@@ -77,6 +85,7 @@ foreach(SRC_FILE ${PRECOMPILED_SRCS})
-            ${ARROW_GANDIVA_PC_CXX_FLAGS}
-            -I${CMAKE_SOURCE_DIR}/src
-            -I${ARROW_BINARY_DIR}/src)
-+  message(STATUS "@@@@@@@@@@@@@@@@@@@@@@@ ${PRECOMPILE_COMMAND}")
-   add_custom_command(OUTPUT ${BC_FILE} COMMAND ${PRECOMPILE_COMMAND} DEPENDS ${SRC_FILE})
-   list(APPEND BC_FILES ${BC_FILE})
- endforeach()
