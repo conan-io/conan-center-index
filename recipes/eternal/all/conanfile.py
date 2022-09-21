@@ -28,7 +28,7 @@ class EternalConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15",
-            "msvc": "1910",
+            "msvc": "191",
             "gcc": "5",
             "clang": "4",
             "apple-clang": "10",
