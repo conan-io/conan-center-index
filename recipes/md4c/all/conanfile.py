@@ -7,6 +7,7 @@ import os
 
 required_conan_version = ">=1.50.0"
 
+
 class Md4cConan(ConanFile):
     name = "md4c"
     description = "C Markdown parser. Fast. SAX-like interface. Compliant to CommonMark specification."
@@ -63,9 +64,9 @@ class Md4cConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         if self.options.encoding == "utf-16":
-            tc.cache_variables["CONAN_C_FLAGS"] = "-DMD4C_USE_UTF16"
+            tc.preprocessor_definitions["MD4C_USE_UTF16"] = "1"
         elif self.options.encoding == "ascii":
-            tc.cache_variables["CONAN_C_FLAGS"] = "-DMD4C_USE_ASCII"
+            tc.preprocessor_definitions["MD4C_USE_ASCII"] = "1"
         tc.generate()
 
     def build(self):
