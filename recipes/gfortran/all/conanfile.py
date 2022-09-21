@@ -31,13 +31,11 @@ class GFortranConan(ConanFile):
             self.build_requires("7zip/19.00")
 
     def source(self):
-        if self.settings.os != "Windows":
-            get(self, **self.conan_data["sources"][self.version][str(self.settings.os)]["x86_64"],
-                  destination=self._source_subfolder, strip_root=True)
+        #does not work for windows ?
+        pass
     
     def build(self):
-        if self.settings.os == "Windows":
-            get(self, **self.conan_data["sources"][self.version][str(self.settings.os)]["x86_64"],
+        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)]["x86_64"],
                   destination=self.source_folder, strip_root=True)
 
     def _extract_license(self):
