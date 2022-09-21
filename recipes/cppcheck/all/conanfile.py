@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
 import os
 
@@ -29,7 +29,7 @@ class CppcheckConan(ConanFile):
 
     def requirements(self):
         if self.options.with_z3:
-            self.requires("z3/4.8.8")
+            self.requires("z3/4.10.2")
         if self.options.have_rules:
             self.requires("pcre/8.45")
 
@@ -47,6 +47,8 @@ class CppcheckConan(ConanFile):
         tc.variables["USE_MATCHCOMPILER"] = "Auto"
         tc.variables["ENABLE_OSS_FUZZ"] = False
         tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
         self._patch_sources()
@@ -55,9 +57,9 @@ class CppcheckConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self.source_folder)
-        self.copy("*", dst=os.path.join("bin","cfg"), src=os.path.join(self.source_folder,"cfg"))
-        self.copy("cppcheck-htmlreport", dst=os.path.join("bin"), src=os.path.join(self.source_folder,"htmlreport"))
+        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "*", dst=os.path.join(self.package_folder, "bin","cfg"), src=os.path.join(self.source_folder,"cfg"))
+        copy(self, "cppcheck-htmlreport", dst=os.path.join(self.package.folder, "bin"), src=os.path.join(self.source_folder,"htmlreport"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
