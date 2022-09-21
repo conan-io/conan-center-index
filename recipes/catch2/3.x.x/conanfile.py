@@ -46,6 +46,10 @@ class Catch2Conan(ConanFile):
     #     for x in self.conan_data.get("patches", {}).get(self.version, []):
     #         self.copy(x["patch_file"])
 
+    def export_sources(self):
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -89,9 +93,9 @@ class Catch2Conan(ConanFile):
     #     cmake.configure(build_folder=self._build_subfolder)
     #     return cmake
 
-    def _patch_sources(self):
-        for x in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(self, **x)
+    # def _patch_sources(self):
+    #     for x in self.conan_data.get("patches", {}).get(self.version, []):
+    #         patch(self, **x)
 
 
     def generate(self):
