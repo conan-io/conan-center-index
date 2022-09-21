@@ -146,10 +146,10 @@ class TensorflowLiteConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, join(self.package_folder, "licenses"))
         copy(self, "*.h", join(self.source_folder, "tensorflow", "lite"), join(self.package_folder, "include", "tensorflow", "lite"))
         copy(self, "*.a", self.build_folder, join(self.package_folder, "lib"))
-        copy(self, "*.so*", self.build_folder, join(self.package_folder, "lib"))
-        copy(self, "*.dylib*", self.build_folder, join(self.package_folder, "lib"))
+        copy(self, "*.so", self.build_folder, join(self.package_folder, "lib"))
+        copy(self, "*.dylib", self.build_folder, join(self.package_folder, "lib"))
         copy(self, "*.lib", self.build_folder, join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*.dll*", self.build_folder, join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.dll", self.build_folder, join(self.package_folder, "bin"), keep_path=False)
         self._create_cmake_module_alias_target(self, join(self.package_folder, self._module_file))
 
     def package_info(self):
