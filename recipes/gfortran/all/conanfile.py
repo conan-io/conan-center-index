@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get,load, save
+from conan.tools.files import copy, get, load, save, download
 import os
 
 required_conan_version = ">=1.46.0"
@@ -12,13 +12,9 @@ class GFortranConan(ConanFile):
     homepage = "https://gcc.gnu.org/fortran"
     topics = ("gnu", "gcc", "fortran", "compiler")
     license = "GPL-3.0-or-later"
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
     short_paths = True
-
-    @property
-    def _source_subfolder(self):
-        return os.path.join(self.source_folder, "source_subfolder_{}".format(str(self.settings.os)))
 
     def validate(self):
         if self.settings.arch != "x86_64":
@@ -28,33 +24,52 @@ class GFortranConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os == "Windows":
-            self.build_requires("7zip/19.00")
+            self.tool_requires("7zip/19.00")
 
-    def source(self):
-        #does not work for windows ?
-        pass
-    
     def build(self):
-        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)]["x86_64"],
-                  destination=self.source_folder, strip_root=True)
+        if self.settings.os == "Windows":
+            filename =  os.path.join(self.build_folder, "GCC-10.2.0-crt-8.0.0-with-ada-20201019.7z")
+            download(self, **self.conan_data["sources"][self.version][str(self.settings.os)]["x86_64"], filename=filename)
+            self.run(f"7z x {filename}")
+        else:
+            get(self, **self.conan_data["sources"][self.version][str(self.settings.os)]["x86_64"],
+                    destination=self.build_folder, strip_root=True)
+
+    @property
+    def _archive_contents_path(self):
+        if self.settings.os == "Macos":
+            return os.path.join(self.build_folder, "local")
+        elif self.settings.os == "Windows":
+            return os.path.join(self.build_folder, "mingw64")
+        else:
+            return os.path.join(self.build_folder)
+
+    @property
+    def _license_path(self):
+        return os.path.join(self._archive_contents_path, "share", "info")
+
+    @property
+    def _library_source_path(self):
+        return os.path.join(self._archive_contents_path, {
+            "Linux":  "lib64",
+            "Macos": "lib",
+            "Windows": os.path.join("lib", "gcc", "x86_64-w64-mingw32", "10.2.0")
+        }[str(self.settings.os)])
 
     def _extract_license(self):
-        if self.settings.os == "Macos":
-            license_path_prefix = os.path.join(self.source_folder, "local", "share", "info")
-        else:
-            license_path_prefix = os.path.join(self.source_folder, "share", "info")
-        info = load(self, os.path.join(license_path_prefix, "gfortran.info"))
+        info = load(self, os.path.join(self._license_path, "gfortran.info"))
         license_contents = info[info.find("Version 3"):info.find("END OF TERMS", 1)]
-        save(self, "LICENSE", license_contents)
+        save(self, os.path.join(self.build_folder, "LICENSE"), license_contents)
+
+    def package_id(self):
+        del self.info.settings.compiler
+        del self.info.settings.build_type # The binaries are not specific
 
     def package(self):
         self._extract_license()
-        self.copy("LICENSE", dst="licenses")
-        self.copy("gfortran*", dst="bin", src=os.path.join(self._source_subfolder, "bin"))
-        self.copy("gfortran", dst="bin", src=os.path.join(self._source_subfolder, "local", "bin"))
-        self.copy("libgfortran.a", dst="lib", src=os.path.join(self._source_subfolder, "lib64"))
-        self.copy("libgfortran.a", dst="lib", src=os.path.join(self._source_subfolder, "local", "lib"))
-        self.copy("libgfortran.a", dst="lib", src=os.path.join(self._source_subfolder, "lib", "gcc", "x86_64-w64-mingw32", "10.2.0"))
+        copy(self, "LICENSE", src=self.build_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "gfortran*", src=os.path.join(self._archive_contents_path, "bin"), dst=os.path.join(self.package_folder, "bin"))
+        copy(self, "libgfortran.a", src=self._library_source_path, dst=os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
