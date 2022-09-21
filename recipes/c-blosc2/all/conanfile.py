@@ -1,10 +1,12 @@
-from conans import ConanFile, CMake, tools
-from conan.tools.microsoft import is_msvc
+from conan import ConanFile
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
+from conan.tools.files import apply_conandata_patches, get, copy, rm, rmdir
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+
 import os
-import functools
 import glob
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.51.3"
 
 class CBlosc2Conan(ConanFile):
     name = "c-blosc2"
@@ -19,7 +21,7 @@ class CBlosc2Conan(ConanFile):
         "fPIC": [True, False],
         "simd_intrinsics": [None, "sse2", "avx2"],
         "with_lz4": [True, False],
-        "with_zlib": [None, "zlib", "zlib-ng"],
+        "with_zlib": [None, "zlib", "zlib-ng", "zlib-ng-compat"],
         "with_zstd": [True, False],
         "with_plugins": [True, False],
     }
@@ -32,20 +34,10 @@ class CBlosc2Conan(ConanFile):
         "with_zstd": True,
         "with_plugins": True,
     }
-    generators = "cmake", "cmake_find_package_multi"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -55,17 +47,32 @@ class CBlosc2Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+
         # c-blosc2 uses zlib-ng with zlib compat options.
-        if self.options.with_zlib == "zlib-ng":
+        if self.options.with_zlib == "zlib-ng-compat":
             self.options["zlib-ng"].zlib_compat = True
+        elif self.options.with_zlib == "zlib-ng":
+            self.options["zlib-ng"].zlib_compat = False
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_lz4:
             self.requires("lz4/1.9.3")
-        if self.options.with_zlib == "zlib-ng":
+        if self.options.with_zlib in ["zlib-ng", "zlib-ng-compat"]:
             self.requires("zlib-ng/2.0.6")
         elif self.options.with_zlib == "zlib":
             self.requires("zlib/1.2.12")
@@ -73,60 +80,66 @@ class CBlosc2Conan(ConanFile):
             self.requires("zstd/1.5.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BLOSC_IS_SUBPROJECT"] = False
-        cmake.definitions["BLOSC_INSTALL"] = True
-        cmake.definitions["BUILD_STATIC"] = not self.options.shared
-        cmake.definitions["BUILD_SHARED"] = self.options.shared
-        cmake.definitions["BUILD_TESTS"] = False
-        cmake.definitions["BUILD_FUZZERS"] = False
-        cmake.definitions["BUILD_BENCHMARKS"] = False
-        cmake.definitions["BUILD_EXAMPLES"] = False
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["BLOSC_IS_SUBPROJECT"] = False
+        tc.cache_variables["BLOSC_INSTALL"] = True
+        tc.cache_variables["BUILD_STATIC"] = not bool(self.options.shared)
+        tc.cache_variables["BUILD_SHARED"] = bool(self.options.shared)
+        tc.cache_variables["BUILD_TESTS"] = False
+        tc.cache_variables["BUILD_FUZZERS"] = False
+        tc.cache_variables["BUILD_BENCHMARKS"] = False
+        tc.cache_variables["BUILD_EXAMPLES"] = False
         simd_intrinsics = self.options.get_safe("simd_intrinsics", False)
-        cmake.definitions["DEACTIVATE_AVX2"] = simd_intrinsics != "avx2"
-        cmake.definitions["DEACTIVATE_LZ4"] = not self.options.with_lz4
-        cmake.definitions["PREFER_EXTERNAL_LZ4"] = self.options.with_lz4
-        cmake.definitions["DEACTIVATE_ZLIB"] = self.options.with_zlib == None
-        cmake.definitions["PREFER_EXTERNAL_ZLIB"] = self.options.with_zlib != None
-        cmake.definitions["DEACTIVATE_ZSTD"] = not self.options.with_zstd
-        cmake.definitions["PREFER_EXTERNAL_ZSTD"] = self.options.with_zstd
-        cmake.definitions["BUILD_PLUGINS"] = self.options.with_plugins
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        tc.cache_variables["DEACTIVATE_AVX2"] = simd_intrinsics != "avx2"
+        tc.cache_variables["DEACTIVATE_LZ4"] = not bool(self.options.with_lz4)
+        tc.cache_variables["PREFER_EXTERNAL_LZ4"] = True
+        tc.cache_variables["DEACTIVATE_ZLIB"] = self.options.with_zlib is None
+        tc.cache_variables["PREFER_EXTERNAL_ZLIB"] = True
+        tc.cache_variables["DEACTIVATE_ZSTD"] = not bool(self.options.with_zstd)
+        tc.cache_variables["PREFER_EXTERNAL_ZSTD"] = True
+        tc.cache_variables["BUILD_PLUGINS"] = bool(self.options.with_plugins)
+        if self.options.with_zlib == "zlib-ng-compat":
+            tc.preprocessor_definitions["ZLIB_COMPAT"] = "1"
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
-        for filename in glob.glob(os.path.join(self._source_subfolder, "cmake", "Find*.cmake")):
+        for filename in glob.glob(os.path.join(self.source_folder, "cmake", "Find*.cmake")):
             if os.path.basename(filename) not in [
                 "FindSIMD.cmake",
             ]:
-                os.remove(filename)
+                rm(self, os.path.basename(filename), os.path.join(self.source_folder, "cmake"))
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
         licenses = ["BLOSC.txt", "BITSHUFFLE.txt", "FASTLZ.txt", "LZ4.txt", "ZLIB.txt", "STDINT.txt"]
         for license_file in licenses:
-            self.copy(license_file, dst="licenses", src=os.path.join(self._source_subfolder, "LICENSES"))
-        cmake = self._configure_cmake()
+            copy(self, pattern=license_file, dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, "LICENSES"))
+
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         # Remove MS runtime files
         for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), dll_pattern_to_remove)
+            rm(self, pattern=dll_pattern_to_remove, folder=os.path.join(self.package_folder, "bin"), recursive=True)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "blosc2")
+
         prefix = "lib" if is_msvc(self) and not self.options.shared else ""
         self.cpp_info.libs = ["{}blosc2".format(prefix)]
         if self.settings.os in ["Linux", "FreeBSD"]:

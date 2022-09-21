@@ -1,5 +1,9 @@
 # Preparing recipes for Conan 2.0
 
+Refer to [road to Conan v2](v2_roadmap.md) to know the steps that
+will be taken in ConanCenter and this repository to start running
+Conan v2 in pull requests.
+
 <!-- toc -->
 ## Contents
 
@@ -13,11 +17,7 @@
     * [Translating .build_modules to cmake_build_modules](#translating-build_modules-to-cmake_build_modules)
     * [PkgConfigDeps](#pkgconfigdeps)<!-- endToc -->
 
-> ⚠️  Refer to [road to Conan v2](v2_roadmap.md) to know the steps that
-> will be taken in ConanCenter and this repository to start running
-> Conan v2 in pull requests.
-
-> ⚠️  Read about the [linter in pull requests](v2_linter.md).
+> **Note**: Read about the [linter in pull requests](v2_linter.md) to learn how this is being enforced.
 
 It's time to start thinking seriously about Conan v2 and prepare recipes
 for the incoming changes. Conan v2 comes with many
@@ -27,10 +27,30 @@ changes and improvements, you can read about them in the
 This document is a practical guide, offering extended information particular to Conan
 Center Index recipes to get them ready to upgrade to Conan 2.0.
 
-## Using Layout with New Generators
+## Using Layout
 
-All recipes should use a layout, when doing this there is no need to manually define `self._subfolder_[...]` in a recipe.
+All recipes should use a layout. Without one, more manual configuration of folders (e.g. source, build, etc)
+and package structure will be required.
+
+### With New Generators
+
+When doing this there is no need to manually define `self._subfolder_[...]` in a recipe.
 Simply use `self.source_folder` and `self.build_folder` instead of [subfolder properties](reviewing.md#subfolder-properties)
+
+### With Multiple Build Helpers
+
+When different build tools are use, at least one layout needs to be set.
+
+```python
+    def layout(self):
+        if self._use_cmake():
+            cmake_layout(self)
+        else: # using autotools
+            basic_layout(self)
+```
+
+The `src_folder` must be the same when using different layouts and should
+not depend on settings or options.
 
 ## New cpp_info set_property model
 

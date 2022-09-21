@@ -182,33 +182,6 @@ target_link_libraries(${PROJECT_NAME} package::package)
 We encourage contributors to check that not only the _global_ target works properly, but also the ones for the components. It can be
 done creating and linking different libraries and/or executables.
 
-## Recommended feature options names
-
-It's often needed to add options to toggle specific library features on/off. Regardless of the default, there is a strong preference for using positive naming for options. In order to avoid the fragmentation, we recommend to use the following naming conventions for such options:
-
-- enable_<feature> / disable_<feature>
-- with_<dependency> / without_<dependency>
-- use_<feature>
-
-the actual recipe code then may look like:
-
-```py
-    options = {"use_tzdb": [True, False]}
-    default_options = {"use_tzdb": True}
-```
-
-```py
-    options = {"enable_locales": [True, False]}
-    default_options = {"enable_locales": True}
-```
-
-```py
-    options = {"with_zlib": [True, False]}
-    default_options = {"with_zlib": True}
-```
-
-having the same naming conventions for the options may help consumers, e.g. they will be able to specify options with wildcards: `-o *:with_threads=True`, therefore, `with_threads` options will be enabled for all packages in the graph that support it.
-
 ## Supported Versions
 
 In this repository we are building a subset of all the versions for a given library. This set of version changes over time as new versions
