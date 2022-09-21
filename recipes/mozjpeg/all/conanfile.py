@@ -142,8 +142,6 @@ class MozjpegConan(ConanFile):
         toolchain.configure_args.append("--with-turbojpeg={}".format(yes_no(self.options.turbojpeg)))
         toolchain.configure_args.append("--with-java={}".format(yes_no(self.options.java)))
         toolchain.configure_args.append("--with-12bit={}".format(yes_no(self.options.enable12bit)))
-        toolchain.configure_args.append("--enable-shared={}".format(yes_no(self.options.shared)))
-        toolchain.configure_args.append("--enable-static={}".format(yes_no(not self.options.shared)))
         toolchain.generate()
 
         deps = AutotoolsDeps(self)
@@ -183,6 +181,9 @@ class MozjpegConan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        copy(self, pattern="*.a", dst=os.path.join(self.package_folder, "lib"), src=os.path.join(self.package_folder, "lib64"))
+        rmdir(self, os.path.join(self.package_folder, "lib64"))
         # remove binaries and pdb files
         for bin_pattern_to_remove in ["cjpeg*", "djpeg*", "jpegtran*", "tjbench*", "wrjpgcom*", "rdjpgcom*", "*.pdb"]:
             rm(self, pattern=bin_pattern_to_remove, folder=os.path.join(self.package_folder, "bin"))
