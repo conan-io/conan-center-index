@@ -59,7 +59,7 @@ class CppcheckConan(ConanFile):
     def package(self):
         copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, "*", dst=os.path.join(self.package_folder, "bin","cfg"), src=os.path.join(self.source_folder,"cfg"))
-        copy(self, "cppcheck-htmlreport", dst=os.path.join(self.package.folder, "bin"), src=os.path.join(self.source_folder,"htmlreport"))
+        copy(self, "cppcheck-htmlreport", dst=os.path.join(self.package_folder, "bin"), src=os.path.join(self.source_folder,"htmlreport"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
