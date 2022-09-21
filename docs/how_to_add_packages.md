@@ -93,7 +93,7 @@ same structure.
 
 ### `config.yml`
 
-This file lists the versions and the folders where they are located (if there are more than a single `all` folder):
+This file lists the versions and the folders where they are located:
 
 ```yml
 versions:

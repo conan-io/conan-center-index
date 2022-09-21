@@ -23,3 +23,5 @@ class TestPackageConan(ConanFile):
         if not cross_building(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package_cpp")
+            self.run(bin_path, env="conanrun")

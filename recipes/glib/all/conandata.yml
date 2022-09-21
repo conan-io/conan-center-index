@@ -26,6 +26,9 @@ sources:
   "2.73.3":
     url: "https://download.gnome.org/sources/glib/2.73/glib-2.73.3.tar.xz"
     sha256: "df1a2b841667d6b48b2ef6969ebda4328243829f6e45866726f806f90f64eead"
+  "2.74.0":
+    url: "https://download.gnome.org/sources/glib/2.74/glib-2.74.0.tar.xz"
+    sha256: "3652c7f072d7b031a6b5edd623f77ebc5dcd2ae698598abcc89ff39ca75add30"
 patches:
   "2.73.1":
     - patch_file: "patches/f2ea67ae441bc6059b43a1051dd0b750fe5f6301.patch"

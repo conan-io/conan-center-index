@@ -4,6 +4,8 @@ project(PackageTest CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
+find_package(qwt REQUIRED)
+
 add_executable(example example.cpp)
 # Must compile with "-fPIC" since Qt was built with -reduce-relocations.
 target_compile_options(example PRIVATE -fPIC)
