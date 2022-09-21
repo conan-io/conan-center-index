@@ -10,8 +10,8 @@ import os
 required_conan_version = ">=1.51.3"
 
 
-class PackageConan(ConanFile):
-    name = "grep7mdp-gtl"
+class Greg7mdpGtlConan(ConanFile):
+    name = "greg7mdp-gtl"
     description = "Greg's Template Library of useful classes."
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
