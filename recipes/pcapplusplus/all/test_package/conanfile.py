@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conans import CMake, tools
+from conans import CMake
 import os
 import shutil
 
