@@ -3,6 +3,7 @@
 <!-- toc -->
 ## Contents
 
+  * [Using Layout with New Generators](#using-layout-with-new-generators)
   * [New cpp_info set_property model](#new-cpp_info-set_property-model)
     * [CMakeDeps](#cmakedeps)
     * [Update required_conan_version to ">=1.43.0"](#update-required_conan_version-to-1430)
@@ -25,6 +26,11 @@ changes and improvements, you can read about them in the
 
 This document is a practical guide, offering extended information particular to Conan
 Center Index recipes to get them ready to upgrade to Conan 2.0.
+
+## Using Layout with New Generators
+
+All recipes should use a layout, when doing this there is no need to manually define `self._subfolder_[...]` in a recipe.
+Simply use `self.source_folder` and `self.build_folder` instead of [subfolder properties](reviewing.md#subfolder-properties)
 
 ## New cpp_info set_property model
 

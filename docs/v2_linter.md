@@ -1,7 +1,11 @@
 # Linter to help migration to Conan v2
 
 <!-- toc -->
-<!-- endToc -->
+## Contents
+
+  * [Import ConanFile from `conan`](#import-conanfile-from-conan)
+  * [Import tools from `conan`](#import-tools-from-conan)
+  * [Running the linter locally](#running-the-linter-locally)<!-- endToc -->
 
 On our [path to Conan v2](v2_roadmap.md) we are leveraging on custom Pylint rules. This
 linter will run for every pull-request that is submitted to the repository and will
@@ -60,19 +64,6 @@ Here is a list of different imports and their new equivalent (note that the inte
 | conans.errors.ConanInvalidConfiguration | [conan.errors.ConanInvalidConfiguration](https://docs.conan.io/en/latest/migrating_to_2.0/recipes.html#migrating-the-recipes) | 1.47.0 |
 | conans.errors.ConanException | [conan.errors.ConanException](https://docs.conan.io/en/latest/migrating_to_2.0/recipes.html#migrating-the-recipes) | 1.47.0 |
 
-## Disable linter for a specific conanfile
-
-If for some reason a conanfile of a recipe or a test_package is not yet prepared to pass
-all the checks of the linter, it can be skipped from `pylint` adding the following comment to the file:
-
-**`conanfile.py`**
-
-```python
-# pylint: skip-file
-from conans import ConanFile, CMake, tools
-...
-```
-
 ---
 
 ## Running the linter locally
@@ -101,4 +92,3 @@ It is possible to run the linter locally the same way it is being run [using Git
     # Lint the test_package
     pylint --rcfile=linter/pylintrc_testpackage recipes/boost/all/test_package/conanfile.py
     ```
-
