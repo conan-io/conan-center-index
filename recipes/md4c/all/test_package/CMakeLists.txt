@@ -1,10 +1,8 @@
-cmake_minimum_required(VERSION 3.1)
-project(PackageTest C)
+cmake_minimum_required(VERSION 3.8)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+project(test_package C)
 
 find_package(md4c CONFIG REQUIRED)
 
-add_executable(test_package test_package.c)
-target_link_libraries(test_package md4c::md4c)
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(test_package PRIVATE md4c::md4c)
