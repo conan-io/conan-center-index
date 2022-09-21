@@ -1,8 +1,13 @@
 sources:
+  "1.1.5":
+    url: "https://github.com/kspalaiologos/bzip3/releases/download/1.1.5/bzip3-1.1.5.tar.bz2"
+    sha256: "2f5012b0004b6c23d5f606deed9191fdce44849234edbcf26e0316bf7856d114"
   "1.1.4":
     url: "https://github.com/kspalaiologos/bzip3/releases/download/1.1.4/bzip3-1.1.4.tar.bz2"
     sha256: "e23a06ae17fc36192e79d0151950b3bbd4e26381af50ba4b4fd7a2d9797e498f"
 patches:
+  "1.1.5":
+    - patch_file: "patches/1.1.5-0002-export-symbols.patch"
   "1.1.4":
-    - patch_file: "patches/0001-make-restrict-alias.patch"
-    - patch_file: "patches/0002-export-symbols.patch"
+    - patch_file: "patches/1.1.4-0001-make-restrict-alias.patch"
+    - patch_file: "patches/1.1.4-0002-export-symbols.patch"
