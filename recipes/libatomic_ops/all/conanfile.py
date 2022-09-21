@@ -1,12 +1,11 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-import contextlib
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 import os
-import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
 
-
-class Libatomic_opsConan(ConanFile):
+class Atomic_opsConan(ConanFile):
     name = "libatomic_ops"
     homepage = "https://github.com/ivmai/libatomic_ops"
     description = "The atomic_ops project (Atomic memory update operations portable implementation)"
@@ -14,6 +13,11 @@ class Libatomic_opsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "GPL-2.0-or-later"
     settings = "os", "compiler", "build_type", "arch"
+
+    _cmake_options_defaults = (
+        ("assertions",          False,),
+        ("atomic_intrinsics",   True,),
+    )
 
     options = {
         "shared": [True, False],
@@ -23,88 +27,83 @@ class Libatomic_opsConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    _autotools = None
+    for option, default in _cmake_options_defaults:
+        options[option] = [True, False]
+        default_options[option] = default
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    def export_sources(self):
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
 
-    def build_requirements(self):
-        self.build_requires("gnu-config/cci.20201022")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if self.settings.compiler == "Visual Studio":
-            self._autotools.flags.append("-FS")
-        yes_no = lambda v: "yes" if v else "no"
-        conf_args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-        ]
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
-
-    @contextlib.contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                with tools.environment_append({"CC": "cl -nologo", "CXX": "cl -nologo",
-                                               "LD": "link"}):
-                    yield
-        else:
-            yield
-
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", None) or self.deps_user_info
+    def generate(self):
+        tc = CMakeToolchain(self)
+        for option, _ in self._cmake_options_defaults:
+            tc.variables["enable_{}".format(option)] = self.options.get_safe(option)
+        tc.variables["install_headers"] = True
+        tc.variables["build_tests"] = False
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "config.guess"))
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
-
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            for lib in ["atomic_ops_gpl", "atomic_ops"]:
-                tools.rename(os.path.join(self.package_folder, "lib", "{}.dll.lib".format(lib)),
-                             os.path.join(self.package_folder, "lib", "{}.lib".format(lib)))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "atomic_ops"
-        self.cpp_info.libs = ["atomic_ops_gpl", "atomic_ops"]
+        self.cpp_info.set_property("cmake_file_name", "Atomic_ops")
+        self.cpp_info.set_property("cmake_target_name", "Atomic_ops::atomic_ops_gpl") # workaround to not define an unofficial target
+
+        # TODO: Remove on Conan 2.0
+        self.cpp_info.names["cmake_find_package"] = "Atomic_ops"
+        self.cpp_info.names["cmake_find_package_multi"] = "Atomic_ops"
+
+        self.cpp_info.components["atomic_ops"].set_property("cmake_target_name", "Atomic_ops::atomic_ops")
+        self.cpp_info.components["atomic_ops"].set_property("pkg_config_name", "atomic_ops")
+        self.cpp_info.components["atomic_ops"].libs = ["atomic_ops"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["atomic_ops"].system_libs = ["pthread"]
+
+        self.cpp_info.components["atomic_ops_gpl"].set_property("cmake_target_name", "Atomic_ops::atomic_ops_gpl")
+        self.cpp_info.components["atomic_ops_gpl"].libs = ["atomic_ops_gpl"]
+        self.cpp_info.components["atomic_ops_gpl"].requires = ["atomic_ops"]
