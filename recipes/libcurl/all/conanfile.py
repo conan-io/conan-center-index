@@ -212,6 +212,8 @@ class LibcurlConan(ConanFile):
     def layout(self):
         if self._is_using_cmake_build:
             cmake_layout(self, src_folder="src")
+        else:
+            basic_layout(self, source_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
