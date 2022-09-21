@@ -62,7 +62,7 @@ class LibsystemdConan(ConanFile):
         self.tool_requires("pkgconf/1.7.4")
 
     def requirements(self):
-        self.requires("libcap/2.62")
+        self.requires("libcap/2.65")
         self.requires("libmount/2.36.2")
         if self.options.with_selinux:
             self.requires("libselinux/3.3")

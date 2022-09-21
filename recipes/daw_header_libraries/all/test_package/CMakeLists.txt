@@ -1,8 +1,6 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package CXX)
+cmake_minimum_required(VERSION 3.8)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+project(test_package CXX)
 
 find_package(daw-header-libraries CONFIG REQUIRED)
 

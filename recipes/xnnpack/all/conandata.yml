@@ -11,3 +11,6 @@ sources:
   "cci.20220621":
     url: "https://github.com/google/XNNPACK/archive/b725ca1a40b53d8087d1be0c53cb49fa05e2f1bc.tar.gz"
     sha256: "a745c629dea5fc76e5a545e412a408fde1a523b71027f07d1b0670ec9ae54819"
+  "cci.20220801":
+    url: "https://github.com/google/XNNPACK/archive/8e3d3359f9bec608e09fac1f7054a2a14b1bd73c.tar.gz"
+    sha256: "c82327543249bd333034bbaa0300ed1fc9c7060fa73673a285042e3f042540e0"

@@ -1,9 +1,11 @@
-from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.47.0"
 
 
 class LibaomAv1Conan(ConanFile):
@@ -26,24 +28,13 @@ class LibaomAv1Conan(ConanFile):
         "assembly": False,
     }
 
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,72 +45,62 @@ class LibaomAv1Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
     def build_requirements(self):
         if self.options.get_safe("assembly", False):
-            self.build_requires("nasm/2.15.05")
+            self.tool_requires("nasm/2.15.05")
         if self._settings_build.os == "Windows":
-            self.build_requires("strawberryperl/5.30.0.1")
+            self.tool_requires("strawberryperl/5.30.0.1")
 
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
-        # Check compiler version
-        compiler = str(self.settings.compiler)
-        compiler_version = tools.Version(self.settings.compiler.version.value)
-
-        minimal_version = {
-            "Visual Studio": "15",
-            "gcc": "5",
-            "clang": "5",
-            "apple-clang": "6"
-        }
-        if compiler not in minimal_version:
-            self.output.warn(
-                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
-        elif compiler_version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration("{} requires a {} version >= {}".format(self.name, compiler, compiler_version))
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder,
-                  strip_root=tools.Version(self.version) >= "3.3.0")
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=Version(self.version) >= "3.3.0")
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["ENABLE_EXAMPLES"] = False
-        cmake.definitions["ENABLE_TESTS"] = False
-        cmake.definitions["ENABLE_DOCS"] = False
-        cmake.definitions["ENABLE_TOOLS"] = False
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["ENABLE_EXAMPLES"] = False
+        tc.variables["ENABLE_TESTS"] = False
+        tc.variables["ENABLE_DOCS"] = False
+        tc.variables["ENABLE_TOOLS"] = False
         if not self.options.get_safe("assembly", False):
             # make non-assembly build
-            cmake.definitions["AOM_TARGET_CPU"] = "generic"
+            tc.variables["AOM_TARGET_CPU"] = "generic"
         # libyuv is used for examples, tests and non-essential 'dump_obu' tool so it is disabled
         # required to be 1/0 instead of False
-        cmake.definitions["CONFIG_LIBYUV"] = 0
+        tc.variables["CONFIG_LIBYUV"] = 0
         # webm is not yet packaged
-        cmake.definitions["CONFIG_WEBM_IO"] = 0
-        # required out-of-source build
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        tc.variables["CONFIG_WEBM_IO"] = 0
+        # Requires C99 or higher
+        tc.variables["CMAKE_C_STANDARD"] = "99"
+        tc.generate()
+        env = VirtualBuildEnv(self)
+        env.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "aom")
         self.cpp_info.libs = ["aom"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["pthread", "m"]
-
-        self.cpp_info.names["pkg_config"] = "aom"
