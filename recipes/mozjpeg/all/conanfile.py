@@ -123,7 +123,7 @@ class MozjpegConan(ConanFile):
         tc.cache_variables["CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT"] = False
         tc.cache_variables["PNG_SUPPORTED"] = False  # PNG and zlib are only required for executables (and static libraries)
         if is_msvc(self):
-            tc.cache_variables["WITH_CRT_DLL"] = is_msvc_static_runtime()
+            tc.cache_variables["WITH_CRT_DLL"] = is_msvc_static_runtime(self)
         tc.generate()
 
         tc = CMakeDeps(self)
