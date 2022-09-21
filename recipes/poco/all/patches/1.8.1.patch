@@ -1,5 +1,5 @@
---- cmake/PocoMacros.cmake
-+++ cmake/PocoMacros.cmake
+--- a/cmake/PocoMacros.cmake
++++ b/cmake/PocoMacros.cmake
 @@ -265,7 +265,7 @@
  
  if (MSVC)
@@ -9,30 +9,19 @@
  endif()
    
  endmacro()
---- CMakeLists.txt
-+++ CMakeLists.txt
-@@ -204,7 +204,7 @@
- 
- find_package(OpenSSL)
- if(OPENSSL_FOUND)
--    include_directories("${OPENSSL_INCLUDE_DIR}")
-+    #include_directories("${OPENSSL_INCLUDE_DIR}")
-     if(EXISTS ${PROJECT_SOURCE_DIR}/NetSSL_OpenSSL AND ENABLE_NETSSL)
-     add_subdirectory(NetSSL_OpenSSL)
-     list(APPEND Poco_COMPONENTS "NetSSL_OpenSSL")
---- Crypto/CMakeLists.txt
-+++ Crypto/CMakeLists.txt
+--- a/Crypto/CMakeLists.txt
++++ b/Crypto/CMakeLists.txt
 @@ -20,7 +20,7 @@
      DEFINE_SYMBOL Crypto_EXPORTS
      )
  
 -target_link_libraries( "${LIBNAME}" Foundation ${OPENSSL_LIBRARIES} )
-+target_link_libraries( "${LIBNAME}" Foundation OpenSSL::OpenSSL )
++target_link_libraries( "${LIBNAME}" Foundation OpenSSL::SSL OpenSSL::Crypto)
  target_include_directories( "${LIBNAME}"
      PUBLIC
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
---- Data/SQLite/CMakeLists.txt
-+++ Data/SQLite/CMakeLists.txt
+--- a/Data/SQLite/CMakeLists.txt
++++ b/Data/SQLite/CMakeLists.txt
 @@ -10,9 +10,9 @@
  POCO_HEADERS_AUTO( SQLITE_SRCS ${HDRS_G})
  
@@ -46,8 +35,30 @@
  else()
      # sqlite3
      POCO_SOURCES( SQLITE_SRCS sqlite3
---- NetSSL_Win/CMakeLists.txt
-+++ NetSSL_Win/CMakeLists.txt
+--- a/Foundation/CMakeLists.txt
++++ b/Foundation/CMakeLists.txt
+@@ -32,9 +32,8 @@ POCO_MESSAGES( SRCS Logging src/pocomsg.mc)
+ # If POCO_UNBUNDLED is enabled we try to find the required packages
+ # The configuration will fail if the packages are not found
+ if (POCO_UNBUNDLED)
+-	find_package(PCRE REQUIRED)
+-	set(SYSLIBS ${SYSLIBS} ${PCRE_LIBRARIES})
+-	include_directories(${PCRE_INCLUDE_DIRS})
++	find_package(pcre REQUIRED CONFIG)
++	set(SYSLIBS ${SYSLIBS} pcre::libpcre)
+ 
+ 	#HACK: Unicode.cpp requires functions from these files. The can't be taken from the library
+ 	POCO_SOURCES( SRCS RegExp
+@@ -106,7 +105,6 @@ if(ANDROID)
+ endif(ANDROID)
+ 
+ # TODO: Why is this here?
+-add_definitions( -DPCRE_STATIC)
+ 
+ # For SetAffinity
+ if(UNIX AND NOT APPLE)
+--- a/NetSSL_Win/CMakeLists.txt
++++ b/NetSSL_Win/CMakeLists.txt
 @@ -18,7 +18,7 @@
      DEFINE_SYMBOL NetSSL_Win_EXPORTS
      )

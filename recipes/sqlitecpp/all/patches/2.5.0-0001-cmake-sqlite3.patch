@@ -1,0 +1,25 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f7e0fbd..146ab01 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -184,7 +184,7 @@ endif (SQLITE_ENABLE_ASSERT_HANDLER)
+ option(SQLITE_HAS_CODEC "Enable database encryption API. Not available in the public release of SQLite." OFF)
+ if (SQLITE_HAS_CODEC)
+     # Enable database encryption API. Requires implementations of sqlite3_key & sqlite3_key_v2.
+-    # Eg. SQLCipher (libsqlcipher-dev) is an SQLite extension that provides 256 bit AES encryption of database files. 
++    # Eg. SQLCipher (libsqlcipher-dev) is an SQLite extension that provides 256 bit AES encryption of database files.
+     target_compile_definitions(SQLiteCpp PUBLIC SQLITE_HAS_CODEC)
+ endif (SQLITE_HAS_CODEC)
+ 
+@@ -247,10 +247,7 @@ if (SQLITECPP_INTERNAL_SQLITE)
+     target_include_directories(SQLiteCpp PRIVATE "${PROJECT_SOURCE_DIR}/sqlite3")
+ else (SQLITECPP_INTERNAL_SQLITE)
+     find_package (SQLite3 REQUIRED)
+-    if (SQLITE3_FOUND)
+-        include_directories(${SQLITE3_INCLUDE_DIRS})
+-        target_link_libraries (SQLiteCpp ${SQLITE3_LIBRARIES})
+-    endif (SQLITE3_FOUND)
++    target_link_libraries(SQLiteCpp PRIVATE SQLite::SQLite3)
+ endif (SQLITECPP_INTERNAL_SQLITE)
+ 
+ # Optional additional targets:
