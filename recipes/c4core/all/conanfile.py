@@ -68,7 +68,7 @@ class C4CoreConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["C4CORE_WITH_FASTFLOAT"] = bool(self.options.with_fast_float)
+        tc.variables["C4CORE_WITH_FASTFLOAT"] = bool(self.options.with_fast_float)
         tc.generate()
 
         deps = CMakeDeps(self)
