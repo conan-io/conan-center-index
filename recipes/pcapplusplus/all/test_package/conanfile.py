@@ -13,11 +13,11 @@ class PcapplusplusTestConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-        if can_run(self):
+        if can_run(self) and self.settings.os == "Windows":
             self.requires("libpcap/1.10.1")
 
     def configure(self):
-        if can_run(self):
+        if can_run(self) and self.settings.os == "Windows":
             self.options["libpcap"].shared = True
 
     def build(self):
@@ -27,13 +27,14 @@ class PcapplusplusTestConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            # Use libpcap DLL as a replacement for npcap DLL
-            # It will not provide all the functions
-            # but it will cover enough to check that what we compiled is correct
-            shutil.copy(
-                os.path.join(self.deps_cpp_info['libpcap'].bin_paths[0], "pcap.dll"),
-                os.path.join("bin", "wpcap.dll")
-            )
+            if self.settings.os == "Windows":
+                # Use libpcap DLL as a replacement for npcap DLL
+                # It will not provide all the functions
+                # but it will cover enough to check that what we compiled is correct
+                shutil.copy(
+                    os.path.join(self.deps_cpp_info['libpcap'].bin_paths[0], "pcap.dll"),
+                    os.path.join("bin", "wpcap.dll")
+                )
             bin_path = os.path.join("bin", "test_package")
             pcap_file_path = os.path.join(self.source_folder, "1_packet.pcap")
             self.run(f"{bin_path} {pcap_file_path}", run_environment=True)
