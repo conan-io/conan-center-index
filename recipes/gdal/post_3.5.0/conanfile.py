@@ -33,6 +33,7 @@ class GdalConan(ConanFile):
         "with_blosc": [True, False],
         "with_cfitsio": [True, False],
         # with_cypto option has been renamed with_openssl in version 3.5.1
+        "with_crypto": [True, False, "deprecated"],
         "with_cryptopp": [True, False],
         "with_curl": [True, False],
         "with_dds": [True, False],
@@ -82,6 +83,7 @@ class GdalConan(ConanFile):
         "with_arrow": False,
         "with_blosc": False,
         "with_cfitsio": False,
+        "with_crypto": "deprecated",
         "with_cryptopp": False,
         "with_curl": False,
         "with_dds": False,
@@ -141,6 +143,9 @@ class GdalConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.with_crypto != "deprecated":
+            self.output.error("with_crypto option is deprecated, use with_openssl instead.")
+
         if self.options.shared:
             try:
                 del self.options.fPIC
@@ -284,6 +289,9 @@ class GdalConan(ConanFile):
 
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
+
+    def package_id(self):
+        del self.info.options.with_crypto
 
     def validate(self):
         if self.options.get_safe("with_pcre") and self.options.get_safe("with_pcre2"):
