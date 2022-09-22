@@ -21,6 +21,10 @@ if perfectly valid in Conan v1, the recipe might fail here because it is not v2-
 
 Here you can find some examples of the extra rules we are adding:
 
+## Running the linter locally
+
+Check the [Developing Recipes](developing_recipes_locally.md#running-the-python-linters) for details.
+
 ## Import ConanFile from `conan`
 
 The module `conans` is deprecated in Conan v2. Now all the imports should be done from
@@ -65,30 +69,3 @@ Here is a list of different imports and their new equivalent (note that the inte
 | conans.errors.ConanException | [conan.errors.ConanException](https://docs.conan.io/en/latest/migrating_to_2.0/recipes.html#migrating-the-recipes) | 1.47.0 |
 
 ---
-
-## Running the linter locally
-
-It is possible to run the linter locally the same way it is being run [using Github actions](../.github/workflows/linter-conan-v2.yml):
-
- * (Recommended) Use a dedicated Python virtualenv.
- * Ensure you have required tools installed: `conan` and `pylint` (better to uses fixed versions)
-
-   ```
-   pip install conan~=1.0 pylint==2.14
-   ```
-
- * Set environment variable `PYTHONPATH` to the root of the repository
-
-   ```
-   export PYTHONPATH=your/path/conan-center-index
-   ```
-
-  * Now you just need to execute the `pylint` commands:
-
-    ```
-    # Lint a recipe:
-    pylint --rcfile=linter/pylintrc_recipe recipes/boost/all/conanfile.py
-
-    # Lint the test_package
-    pylint --rcfile=linter/pylintrc_testpackage recipes/boost/all/test_package/conanfile.py
-    ```

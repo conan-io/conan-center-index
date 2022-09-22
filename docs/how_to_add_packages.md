@@ -1,8 +1,11 @@
 # Adding Packages to ConanCenter
 
-The [conan-center-index](https://github.com/conan-io/conan-center-index) (this repository) contains recipes for the remote [JFrog ConanCenter](https://conan.io/center/).
-This remote is added by default to a clean installation of the Conan client. Recipes are contributed by opening pull requests as explained in the sections below.
-When pull requests are merged, the CI will upload the generated packages to the [conancenter](https://conan.io/center/) remote.
+ConanCenter aims to provide the best quality packages for any open source project.
+Any C/C++ project can be made available by contributing a "recipe".
+
+Getting started is easy. Try building an existing package with our [developing recipes](../developing_recipes_locally.md) tutorial.
+To deepen you understanding, start with the [How to provide a good recipe](#how-to-provide-a-good-recipe) section.
+You can follow the three steps (:one: :two: :three:) described below! :tada:
 
 <!-- toc -->
 ## Contents
@@ -27,9 +30,7 @@ When pull requests are merged, the CI will upload the generated packages to the 
     * [Verifying Dependency Options](#verifying-dependency-options)
   * [Test the recipe locally](#test-the-recipe-locally)
     * [Hooks](#hooks)
-    * [Updating conan hooks on your machine](#updating-conan-hooks-on-your-machine)
-    * [Linters](#linters)
-  * [Debugging failed builds](#debugging-failed-builds)<!-- endToc -->
+    * [Linters](#linters)<!-- endToc -->
 
 ## Request access
 
@@ -154,10 +155,9 @@ Also, **every `conanfile.py` should be accompanied by one or several folder to t
 ### The test package folders: `test_package` and `test_<something>`
 
 All the packages in this repository need to be tested before they join ConanCenter. A `test_package` folder with its corresponding `conanfile.py` and
-a minimal project to test the package is strictly required. You can read about it in the
+a minimal project to test the package is strictly required. You can read about it in the [Conan documentation](https://docs.conan.io/en/latest/creating_packages/getting_started.html#the-test-package-folder).
 
-# FIXME: This link no longet exist and there is no dedicated section about test package in docs.
-[Conan documentation](https://docs.conan.io/en/latest/creating_packages/getting_started.html#the-test-package-folder).
+> **Warning** FIXME: This link no longer exist and there is no dedicated section about test package in docs.
 
 Sometimes it is useful to test the package using different build systems (CMake, Autotools,...). Instead of adding complex logic to one
 `test_package/conanfile.py` file, it is better to add another `test_<something>/conanfile.py` file with a minimal example for that build system. That
@@ -262,46 +262,17 @@ An example of this can be found in the [sdl_image recipe](https://github.com/con
 
 ### Hooks
 
-The system will use the [conan-center hook](https://github.com/conan-io/hooks) to perform some quality checks. You can install the hook running:
+The system will use the [conan-center hook](https://github.com/conan-io/hooks) to perform some quality checks. These are required for the
+the CI to merge any pull request.
 
-```sh
-conan config install https://github.com/conan-io/hooks.git -sf hooks -tf hooks
-conan config set hooks.conan-center
-```
+Follow the [Developing Recipes Locally](developing_recipes_locally.md#installing-the-conancenter-hooks) for instructions.
 
-The hook will show error messages but the `conan create` won’t fail unless you export the environment variable `CONAN_HOOK_ERROR_LEVEL=40`.
-All hook checks will print a similar message:
-
-```
-[HOOK - conan-center.py] post_source(): [LIBCXX MANAGEMENT (KB-H011)] OK
-[HOOK - conan-center.py] post_package(): ERROR: [PACKAGE LICENSE] No package licenses found
-```
-
-Call `conan create . lib/1.0@ -pr:b=default -pr:h=default` in the folder of the recipe using the profile you want to test. For instance:
-
-```sh
-cd conan-center-index/recipes/boost/all
-conan create conanfile.py boost/1.77.0@ -pr:b=default -pr:h=default
-```
-
-### Updating conan hooks on your machine
-
-The hooks are updated from time to time, so it's worth keeping your own copy of the hooks updated regularly. To do this:
-
-```sh
-conan config install
-```
+Go to the [Error Knowledge Base](error_knowledge_base.md) page to know more about Conan Center hook errors.
+Some common errors related to Conan can be found on [troubleshooting](https://docs.conan.io/en/latest/faq/troubleshooting.html) section.
 
 ### Linters
 
 Linters are always executed by Github actions to validate parts of your recipe, for instance, if it uses migrated Conan tools imports.
-All executed linters are documented in [linters.md](linters.md).
-To understand how to run linters locally, read [V2 linter](v2_linter.md) documentation.
+All executed linters are documented in [v2_linters.md](v2_linters.md).
 
-## Debugging failed builds
-
-Go to the [Error Knowledge Base](error_knowledge_base.md) page to know more about Conan Center hook errors.
-
-Some common errors related to Conan can be found on [troubleshooting](https://docs.conan.io/en/latest/faq/troubleshooting.html) section.
-
-To test with the same enviroment, the [build images](supported_platforms_and_configurations.md#build-images) are available.
+Check the [Developing Recipes](developing_recipes_locally.md#running-the-python-linters) for details.

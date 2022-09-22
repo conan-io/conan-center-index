@@ -51,13 +51,8 @@ If you struggle to fix build errors yourself, you may want to ask for help from 
 ### Unexpected error
 
 Sometimes, build fails with `Unexpected error` message. This indicates an infrastructure problem, and usually it's unrelated to the changes within PR itself.
-Keep in mind conan-center-index is still *under development*, and there can be some instabilities. Especially, as we're using lots of external services,
-which might be inaccessible (GitHub API, docker hub, etc.) and may result in intermittent failures.
-So, what to do once `Unexpected error` was encountered? You may consider re-running the build by closing your pull request, waiting 15 seconds, and then re-opening it again.
 
-Sometimes it's necessary to restart the build several times.
-If an `Unexpected error` persists, tag [@jgsogo](https://github.com/jgsogo) and [@danimtb](https://github.com/danimtb) asking for the help with CI.
-Alternatively, just [open a new issue](https://github.com/conan-io/conan-center-index/issues/new/choose).
+To learn more, checkout the [label definition](labels.md#unexpected-error).
 
 ## Avoiding conflicts
 
