@@ -91,9 +91,7 @@ class LibMysqlClientCConan(ConanFile):
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration("{} {} requires {} {} or newer".format(
-                self.name, self.version, self.settings.compiler, minimum_version,
-            ))
+            raise ConanInvalidConfiguration(f"{self.name} {self.version} requires {self.settings.compiler} {minimum_version} or newer")
 
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross compilation not yet supported by the recipe. contributions are welcome.")
@@ -110,12 +108,12 @@ class LibMysqlClientCConan(ConanFile):
         # https://github.com/mysql/mysql-server/blob/mysql-8.0.17/cmake/libutils.cmake#L333-L335
         if Version(self.version) >= "8.0.17" and self.settings.compiler == "apple-clang" and \
            self.options.shared:
-            raise ConanInvalidConfiguration("{}/{} doesn't support shared library".format( self.name, self.version))
+            raise ConanInvalidConfiguration(f"{self.name}/{self.version} doesn't support shared library")
 
         # mysql < 8.0.29 uses `requires` in source code. It is the reserved keyword in C++20.
         # https://github.com/mysql/mysql-server/blob/mysql-8.0.0/include/mysql/components/services/dynamic_loader.h#L270
         if self.settings.compiler.get_safe("cppstd") == "20" and Version(self.version) < "8.0.29":
-            raise ConanInvalidConfiguration("{}/{} doesn't support C++20".format(self.name, self.version))
+            raise ConanInvalidConfiguration(f"{self.name}/{self.version} doesn't support C++20")
 
     def build_requirements(self):
         if Version(self.version) >= "8.0.25" and is_apple_os(self):
@@ -136,11 +134,11 @@ class LibMysqlClientCConan(ConanFile):
             libs_to_remove.append("lz4")
         for lib in libs_to_remove:
             replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                "MYSQL_CHECK_%s()\n" % lib.upper(),
+                f"MYSQL_CHECK_{lib.upper()}()\n",
                 "",
                 strict=False)
             replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                "INCLUDE(%s)\n" % lib,
+                f"INCLUDE({lib})\n",
                 "",
                 strict=False)
             replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
@@ -152,12 +150,12 @@ class LibMysqlClientCConan(ConanFile):
                 f"SET({lib.upper()}_WARN_GIVEN)",
                 f"# SET({lib.upper()}_WARN_GIVEN)",
                 strict=False)
-                
+
         rmdir(self, os.path.join(self._source_subfolder, "extra"))
         for folder in ["client", "man", "mysql-test", "libbinlogstandalone"]:
             rmdir(self, os.path.join(self._source_subfolder, folder))
             replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                "ADD_SUBDIRECTORY(%s)\n" % folder,
+                f"ADD_SUBDIRECTORY({folder})\n",
                 "",
                 strict=False)
         rmdir(self, os.path.join(self._source_subfolder, "storage", "ndb"))
@@ -179,13 +177,18 @@ class LibMysqlClientCConan(ConanFile):
             "NAMES crypto",
             "NAMES crypto %s" % self.deps_cpp_info["openssl"].components["crypto"].libs[0])
 
+        replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
+            "IF(NOT OPENSSL_APPLINK_C)\n",
+            "IF(FALSE AND NOT OPENSSL_APPLINK_C)\n",
+            strict=False)
+
         # Do not copy shared libs of dependencies to package folder
         deps_shared = ["SSL"]
         if Version(self.version) > "8.0.17":
             deps_shared.extend(["KERBEROS", "SASL", "LDAP", "PROTOBUF", "CURL"])
         for dep in deps_shared:
             replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                  "MYSQL_CHECK_{}_DLLS()".format(dep),
+                                  f"MYSQL_CHECK_{dep}_DLLS()",
                                   "")
 
         sources_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
