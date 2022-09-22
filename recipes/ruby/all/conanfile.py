@@ -155,7 +155,7 @@ class RubyConan(ConanFile):
         for name, dep_cpp_info in self.deps_cpp_info.dependencies:
             if name in ['zlib', 'openssl', 'libffi', 'libyaml', 'readline', 'gmp']:
                 root_path = unix_path(self, dep_cpp_info.rootpath)
-                # tc.configure_args.append(f'--with-{name}-dir={root_path}')
+                tc.configure_args.append(f'--with-{name}-dir={root_path}')
                 opt_dirs.append(root_path)
         if opt_dirs:
             sep = ';' if self.settings.os == "Windows" else ":"
