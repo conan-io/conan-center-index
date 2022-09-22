@@ -75,8 +75,8 @@ class Antlr4CppRuntimeConan(ConanFile):
             # Need to deal with missing libuuid on Arm.
             # So far ANTLR delivers macOS binary package.
 
-        if (self.info.settings.compiler == "Visual Studio" and self.info.settings.compiler.version < "16") or \
-           (self.info.settings.compiler == "msvc" and self.info.settings.compiler.version < "1920"):
+        if (self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) < "16") or \
+           (self.info.settings.compiler == "msvc" and Version(self.info.settings.compiler.version) < "1920"):
             raise ConanInvalidConfiguration("library claims C2668 'Ambiguous call to overloaded function'")
             # Compilation of this library on version 15 claims C2668 Error.
             # This could be Bogus error or malformed Antl4 libary.
