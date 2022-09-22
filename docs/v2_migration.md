@@ -7,7 +7,9 @@ Conan v2 in pull requests.
 <!-- toc -->
 ## Contents
 
-  * [Using Layout with New Generators](#using-layout-with-new-generators)
+  * [Using Layout](#using-layout)
+    * [With New Generators](#with-new-generators)
+    * [With Multiple Build Helpers](#with-multiple-build-helpers)
   * [New cpp_info set_property model](#new-cpp_info-set_property-model)
     * [CMakeDeps](#cmakedeps)
     * [Update required_conan_version to ">=1.43.0"](#update-required_conan_version-to-1430)
