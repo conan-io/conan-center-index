@@ -6,5 +6,14 @@ sources:
     sha256: "04de91e7e6763039bc11940095cd9c7f880baba82196a7765f727ac05a993c95"
     url: "https://github.com/nigels-com/glew/releases/download/glew-2.1.0/glew-2.1.0.tgz"
 patches:
+  "2.2.0":
+    - patch_file: "patches/0001-fix-cmake-2.2.0.patch"
+      patch_description: "Fix CMake: cmake_minimum_required() before project()"
+      patch_type: conan
   "2.1.0":
-    - patch_file: "patches/vs16-release-fix.patch"
+    - patch_file: "patches/0001-fix-cmake-2.1.0.patch"
+      patch_description: "Fix CMake: cmake_minimum_required() before project()"
+      patch_type: conan
+    - patch_file: "patches/0002-vs16-release-fix.patch"
+      patch_type: "backport"
+      patch_source: "https://github.com/nigels-com/glew/commit/4bbe8aa2ab70a6eb847ee5751735422d0ba623cd"
