@@ -82,10 +82,7 @@ class TensorflowLiteConan(ConanFile):
         self.tool_requires("cmake/3.24.0")
 
     def layout(self):
-        cmake_layout(self)
-        # TODO: once https://github.com/conan-io/conan/pull/11889 is available
-        self.folders.build = f"build_folder/{self.settings.build_type}"  # conflict with upstream files
-        self.folders.generators = "build_folder/generators"  # conflict with upstream files
+        cmake_layout(self, build_folder=f"build_folder/{self.settings.build_type}")
 
     def generate(self):
         tc = CMakeToolchain(self)
