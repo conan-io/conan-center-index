@@ -68,7 +68,7 @@ class DbusConan(ConanFile):
             if self.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < 7:
                 raise ConanInvalidConfiguration("dbus requires at least gcc 7.")
             if self.settings.os == "Windows":
-                raise ConanInvalidConfiguration("dbus 1.14.0 does not support windows. contributions are welcome
+                raise ConanInvalidConfiguration("dbus 1.14.0 does not support windows. contributions are welcome")
 
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
