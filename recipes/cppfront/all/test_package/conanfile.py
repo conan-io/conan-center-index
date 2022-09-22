@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.layout import basic_layout
 from conans import tools as tools_legacy
+from conan.tools.build import cross_building
 import os
 
 from conan.errors import ConanException
@@ -47,7 +48,7 @@ class TestPackageConan(ConanFile):
         self.output.info(f"************************* self._cppfront_input_path: {self._cppfront_input_path}")
 
 
-        if not tools_legacy.cross_building(self, skip_x64_x86=True):
+        if not cross_building(self, skip_x64_x86=True):
             # self.run("f{cppfront_bin} --version", run_environment=True)
             # self.run("f{cppfront_bin} {self._cppfront_input_path}")
             self.run("{} {}".format(cppfront_bin, self._cppfront_input_path))
