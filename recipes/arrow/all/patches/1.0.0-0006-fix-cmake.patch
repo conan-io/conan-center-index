@@ -43,7 +43,7 @@ index eb10ebe..9c81017 100644
  
      file(APPEND ${ar_script_path}.in "SAVE\nEND\n")
 diff --git a/cpp/cmake_modules/ThirdpartyToolchain.cmake b/cpp/cmake_modules/ThirdpartyToolchain.cmake
-index 807e2b9..7378476 100644
+index 807e2b9..6fe3558 100644
 --- a/cpp/cmake_modules/ThirdpartyToolchain.cmake
 +++ b/cpp/cmake_modules/ThirdpartyToolchain.cmake
 @@ -154,16 +154,16 @@ macro(build_dependency DEPENDENCY_NAME)
@@ -72,7 +72,15 @@ index 807e2b9..7378476 100644
  endmacro()
  
  macro(resolve_dependency_with_version DEPENDENCY_NAME REQUIRED_VERSION)
-@@ -785,7 +785,7 @@ if(ARROW_BOOST_REQUIRED)
+@@ -765,6 +765,7 @@ endif()
+ # - Tests need Boost at runtime.
+ # - S3FS and Flight benchmarks need Boost at runtime.
+ if(ARROW_BUILD_INTEGRATION
++   OR ARROW_BOOST_REQUIRED
+    OR ARROW_BUILD_TESTS
+    OR ARROW_GANDIVA
+    OR (ARROW_FLIGHT AND ARROW_BUILD_BENCHMARKS)
+@@ -785,7 +786,7 @@ if(ARROW_BOOST_REQUIRED)
    elseif(BOOST_SOURCE STREQUAL "BUNDLED")
      build_boost()
    elseif(BOOST_SOURCE STREQUAL "SYSTEM")
@@ -81,7 +89,7 @@ index 807e2b9..7378476 100644
    endif()
  
    if(TARGET Boost::system)
-@@ -936,11 +936,11 @@ macro(build_brotli)
+@@ -936,11 +937,11 @@ macro(build_brotli)
  endmacro()
  
  if(ARROW_WITH_BROTLI)
@@ -96,7 +104,7 @@ index 807e2b9..7378476 100644
  endif()
  
  if(PARQUET_REQUIRE_ENCRYPTION AND NOT ARROW_PARQUET)
-@@ -1146,9 +1146,10 @@ if(ARROW_NEED_GFLAGS)
+@@ -1146,9 +1147,10 @@ if(ARROW_NEED_GFLAGS)
      endif()
    endif()
    # TODO: Don't use global includes but rather target_include_directories
@@ -109,7 +117,7 @@ index 807e2b9..7378476 100644
      if(TARGET gflags-shared)
        set(GFLAGS_LIBRARIES gflags-shared)
      elseif(TARGET gflags_shared)
-@@ -1237,12 +1238,13 @@ endmacro()
+@@ -1237,12 +1239,13 @@ endmacro()
  if(ARROW_WITH_THRIFT)
    # We already may have looked for Thrift earlier, when considering whether
    # to build Boost, so don't look again if already found.
@@ -125,7 +133,7 @@ index 807e2b9..7378476 100644
  endif()
  
  # ----------------------------------------------------------------------
-@@ -1407,6 +1409,7 @@ endif()
+@@ -1407,6 +1410,7 @@ endif()
  # jemalloc - Unix-only high-performance allocator
  
  if(ARROW_JEMALLOC)
@@ -133,7 +141,7 @@ index 807e2b9..7378476 100644
    message(STATUS "Building (vendored) jemalloc from source")
    # We only use a vendored jemalloc as we want to control its version.
    # Also our build of jemalloc is specially prefixed so that it will not
-@@ -1465,12 +1468,18 @@ if(ARROW_JEMALLOC)
+@@ -1465,12 +1469,18 @@ if(ARROW_JEMALLOC)
    add_dependencies(jemalloc::jemalloc jemalloc_ep)
  
    list(APPEND ARROW_BUNDLED_STATIC_LIBS jemalloc::jemalloc)
@@ -152,7 +160,7 @@ index 807e2b9..7378476 100644
    message(STATUS "Building (vendored) mimalloc from source")
    # We only use a vendored mimalloc as we want to control its build options.
  
-@@ -1518,6 +1527,11 @@ if(ARROW_MIMALLOC)
+@@ -1518,6 +1528,11 @@ if(ARROW_MIMALLOC)
    add_dependencies(toolchain mimalloc_ep)
  
    list(APPEND ARROW_BUNDLED_STATIC_LIBS mimalloc::mimalloc)
@@ -164,7 +172,7 @@ index 807e2b9..7378476 100644
  endif()
  
  # ----------------------------------------------------------------------
-@@ -1918,11 +1932,16 @@ macro(build_lz4)
+@@ -1918,11 +1933,16 @@ macro(build_lz4)
  endmacro()
  
  if(ARROW_WITH_LZ4)
@@ -184,7 +192,7 @@ index 807e2b9..7378476 100644
  endif()
  
  macro(build_zstd)
-@@ -2037,10 +2056,10 @@ macro(build_re2)
+@@ -2037,10 +2057,10 @@ macro(build_re2)
  endmacro()
  
  if(ARROW_GANDIVA)
@@ -197,7 +205,7 @@ index 807e2b9..7378476 100644
    include_directories(SYSTEM ${RE2_INCLUDE_DIR})
  endif()
  
-@@ -2480,17 +2499,24 @@ if(ARROW_WITH_GRPC)
+@@ -2480,17 +2500,24 @@ if(ARROW_WITH_GRPC)
    endif()
  
    # TODO: Don't use global includes but rather target_include_directories
