@@ -629,7 +629,7 @@ class CPythonConan(ConanFile):
     @property
     def _cmake_variables(self):
         content = textwrap.dedent("""\
-        function (PYTHON{{ py_major_version }}_ADD_LIBRARY prefix name)
+        function (PYTHON{{ py_major_version }}_ADD_LIBRARY name)
            cmake_parse_arguments (PARSE_ARGV 1 PYTHON_ADD_LIBRARY "STATIC;SHARED;MODULE;WITH_SOABI" "" "")
            if (PYTHON_ADD_LIBRARY_STATIC)
                set (type STATIC)
