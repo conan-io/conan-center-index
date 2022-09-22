@@ -1,4 +1,7 @@
 sources:
+  "3.83":
+    url: "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_83_RTM/src/nss-3.83.tar.gz"
+    sha256: "ab23ea67f964090b8b73c80a674082571c36e5f4eba92057ac648c9c1def0128"
   "3.77":
     url: "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_77_RTM/src/nss-3.77.tar.gz"
     sha256: "825edf5a2fd35b788a23ff80face591f82919ae3ad2b8f77d424a450d618dedd"
