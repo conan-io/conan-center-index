@@ -100,7 +100,7 @@ class PackageConan(ConanFile):
         tc.cache_variables["PACKAGE_CUSTOM_DEFINITION"] = True
         if is_msvc(self):
             # don't use self.settings.compiler.runtime
-            tc.cache_variables.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+            tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         # deps_cpp_info, deps_env_info and deps_user_info are no longer used
         if self.dependencies["dependency"].options.foobar:
             tc.cache_variables["DEPENDENCY_LIBPATH"] = self.dependencies["dependency"].cpp_info.libdirs
@@ -126,6 +126,7 @@ class PackageConan(ConanFile):
     def build(self):
         self._patch_sources() # It can be apply_conandata_patches(self) only in case no more patches are needed
         cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
@@ -137,8 +138,8 @@ class PackageConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.pdb", self, os.path.join(self.package_folder, "lib"))
-        rm(self, "*.la", self, os.path.join(self.package_folder, "lib"))
+        rm(self, "*.la",  os.path.join(self.package_folder, "lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):

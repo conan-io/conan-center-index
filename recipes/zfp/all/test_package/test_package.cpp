@@ -1,6 +1,12 @@
 #include <iostream>
 
-#include "zfparray2.h"
+#include "zfp.h"
+
+#if ZFP_VERSION_MAJOR < 1
+#  include "zfparray2.h"
+#else
+#  include "zfp/array2.hpp"
+#endif
 
 template <class array2d>
 inline double total(const array2d& u)

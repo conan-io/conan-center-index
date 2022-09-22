@@ -35,6 +35,7 @@ int main(){
     data[i] = i;
   }
 
+#if !defined(BLOSC2_VERSION_MAJOR)
   /* Register the filter with the library */
   printf("Blosc version info: %s (%s)\n",
 	 BLOSC_VERSION_STRING, BLOSC_VERSION_DATE);
@@ -66,6 +67,40 @@ int main(){
 
   /* After using it, destroy the Blosc environment */
   blosc_destroy();
+#else
+  /* Register the filter with the library */
+  printf("Blosc version info: %s (%s)\n",
+	 BLOSC2_VERSION_STRING, BLOSC2_VERSION_DATE);
+
+  /* Initialize the Blosc compressor */
+  blosc2_init();
+
+  /* Compress with clevel=5 and shuffle active  */
+  csize = blosc2_compress(5, 1, sizeof(float), data, isize, data_out, osize);
+  if (csize == 0) {
+    printf("Buffer is uncompressible.  Giving up.\n");
+    return 1;
+  }
+  else if (csize < 0) {
+    printf("Compression error.  Error code: %d\n", csize);
+    return csize;
+  }
+
+  printf("Compression: %d -> %d (%.1fx)\n", isize, csize, (1.*isize) / csize);
+
+  /* Decompress  */
+  dsize = blosc2_decompress(data_out, osize, data_dest, dsize);
+  if (dsize < 0) {
+    printf("Decompression error.  Error code: %d\n", dsize);
+    return dsize;
+  }
+
+  printf("Decompression succesful!\n");
+
+  /* After using it, destroy the Blosc environment */
+  blosc2_destroy();
+#endif
+
 
   for(i=0;i<SIZE;i++){
     if(data[i] != data_dest[i]) {
