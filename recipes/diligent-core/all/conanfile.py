@@ -94,7 +94,7 @@ class DiligentCoreConan(ConanFile):
 
     def requirements(self):
         self.requires("opengl/system")
-        self.requires("wayland/1.21.0", override=True)
+        self.requires("wayland/1.21.0")
 
         self.requires("spirv-cross/1.3.216.0")
         self.requires("spirv-tools/1.3.216.0")
