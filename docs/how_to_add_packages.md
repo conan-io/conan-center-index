@@ -154,8 +154,7 @@ Also, **every `conanfile.py` should be accompanied by one or several folder to t
 All the packages in this repository need to be tested before they join ConanCenter. A `test_package` folder with its corresponding `conanfile.py` and
 a minimal project to test the package is strictly required. You can read about it in the
 
-# FIXME: This link no longet exist and there is no dedicated section about test package in docs.
-[Conan documentation](https://docs.conan.io/en/latest/creating_packages/getting_started.html#the-test-package-folder).
+[Conan documentation](https://docs.conan.io/en/latest/creating_packages/getting_started.html).
 
 Sometimes it is useful to test the package using different build systems (CMake, Autotools,...). Instead of adding complex logic to one
 `test_package/conanfile.py` file, it is better to add another `test_<something>/conanfile.py` file with a minimal example for that build system. That
