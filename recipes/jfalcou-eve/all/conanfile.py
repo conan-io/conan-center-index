@@ -39,7 +39,7 @@ class JfalcouEveConan(ConanFile):
 
     def configure(self):
         version = Version(self.version.strip("v"))
-        if version.major <= 2022 and version.minor < 9:
+        if version.major < 2022 or (version.major == 2022 and version.minor < 9):
             self.license = "MIT"
 
     def layout(self):
@@ -59,10 +59,10 @@ class JfalcouEveConan(ConanFile):
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
         if not minimum_version:
             self.output.warn(f"{self.ref} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
-        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
+        elif lazy_lt_semver(str(self.info.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
 
     def package_id(self):
