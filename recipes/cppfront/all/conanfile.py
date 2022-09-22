@@ -6,6 +6,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, copy, get, patch, rmdir
+from conan.tools import build
 
 import os
 import textwrap
@@ -20,26 +21,19 @@ class CppfrontConan(ConanFile):
     homepage = "https://github.com/hsutter/cppfront"
     license = "CC-BY-NC-ND-4.0"
     settings = "os", "arch", "compiler", "build_type"
-    # no_copy_source = True
 
-    # generators = "cmake"
-
-    # @property
-    # def _settings_build(self):
-    #     return getattr(self, "settings_build", self.settings)
-
-    # def requirements(self):
-    #     self.requires("ninja/1.11.0")
-
-    # def package_id(self):
-    #     self.info.clear()
+    @property
+    def _compilers_minimum_version(self):
+        return {"gcc": "11",
+                "Visual Studio": "16.9",
+                "clang": "13",
+                "apple-clang": "13",
+                }
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def export_sources(self):
-        # self.copy("CMakeLists.txt")
-        # copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
         copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def source(self):
@@ -49,6 +43,45 @@ class CppfrontConan(ConanFile):
     #     tc = CMakeToolchain(self)
     #     # tc.variables["BUILD_TESTING"] = False
     #     tc.generate()
+
+    # def validate(self):
+    #     if self.info.settings.compiler.cppstd:
+    #         check_min_cppstd(self, "20")
+
+    #     minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+    #     compiler_version = Version(self.info.settings.compiler.version)
+    #     if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+    #         raise ConanInvalidConfiguration(
+    #             "{} requires C++17, which your compiler does not support.".format(self.name)
+    #         )
+
+    #     if self.info.settings.compiler == "clang" and (compiler_version >= "10" and compiler_version < "12"):
+    #         raise ConanInvalidConfiguration(
+    #             "AA+ cannot handle clang 10 and 11 due to filesystem being under experimental namespace"
+    #         )
+
+    def validate(self):
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, "20")
+
+        # if self.settings.compiler == "Visual Studio":
+        #     raise ConanInvalidConfiguration("CppFront does not support MSVC yet (https://github.com/jfalcou/eve/issues/1022).")
+        # if self.settings.compiler == "apple-clang":
+        #     raise ConanInvalidConfiguration("CppFront does not support apple Clang due to an incomplete libcpp.")
+
+        def lazy_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("{} {} requires C++20. Your compiler is unknown. Assuming it supports C++20.".format(self.name, self.version))
+        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration("{} {} requires C++20, which your compiler does not support.".format(self.name, self.version))
+
+
 
     def generate(self):
         tc = CMakeToolchain(self)
