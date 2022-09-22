@@ -48,7 +48,7 @@ class BisonConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler == "Visual Studio" and self.version == "3.8.2":
-            raise ConanInvalidConfiguration("bison/3.8.2 is not yet ready for Windows, use previous version or open a pull request on https://github.com/conan-io/conan-center-index/pulls")
+            raise ConanInvalidConfiguration("bison/3.8.2 is not yet ready for Visual Studio, use previous version or open a pull request on https://github.com/conan-io/conan-center-index/pulls")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
