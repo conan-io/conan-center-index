@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, get, chdir, rename, rm
+from conan.tools.build import cross_building
 from conans import tools
 import os, glob
 
@@ -150,7 +151,7 @@ class NSSConan(ConanFile):
         args.append("SQLITE_INCLUDE_DIR=%s" % self.deps_cpp_info["sqlite3"].include_paths[0])
         args.append("SQLITE_LIB_DIR=%s" % self.deps_cpp_info["sqlite3"].lib_paths[0])
         args.append("NSDISTMODE=copy")
-        if tools.cross_building(self):
+        if cross_building(self):
             args.append("CROSS_COMPILE=1")
         return args
 
