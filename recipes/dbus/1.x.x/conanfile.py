@@ -62,12 +62,14 @@ class DbusConan(ConanFile):
             self.requires("selinux/3.3")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
-    
+
     def validate(self):
         if Version(self.version) >= "1.14.0":
             if self.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < 7:
                 raise ConanInvalidConfiguration("dbus requires at least gcc 7.")
-    
+            if self.settings.os == "Windows":
+                raise ConanInvalidConfiguration("dbus 1.14.0 does not support windows. contributions are welcome
+
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
             copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
@@ -137,7 +139,7 @@ class DbusConan(ConanFile):
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "DBus1")
