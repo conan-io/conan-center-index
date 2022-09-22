@@ -1,11 +1,16 @@
+from conan import ConanFile
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rm, rmdir, save
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.52.0"
 
 
 class Antlr4CppRuntimeConan(ConanFile):
@@ -15,6 +20,7 @@ class Antlr4CppRuntimeConan(ConanFile):
     topics = ("antlr", "parser", "runtime")
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-3-Clause"
+    settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -23,30 +29,24 @@ class Antlr4CppRuntimeConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "pkg_config"
     short_paths = True
 
-    compiler_required_cpp17 = {
+    @property
+    def _minimum_cpp_standard(self):
+        return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
             "Visual Studio": "16",
+            "msvc": "1923",
             "gcc": "7",
             "clang": "5",
             "apple-clang": "9.1"
-    }
-
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+        }
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,105 +54,104 @@ class Antlr4CppRuntimeConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        antlr_version = tools.Version(self.version)
         self.requires("utfcpp/3.2.1")
         # As of 4.11, antlr4-cppruntime no longer requires libuuid.
         # Reference: [C++] Remove libuuid dependency (https://github.com/antlr/antlr4/pull/3787)
-        if self.settings.os in ("FreeBSD", "Linux") and antlr_version < "4.11":
+        if self.settings.os in ("FreeBSD", "Linux") and Version(self.version) < "4.11":
             self.requires("libuuid/1.0.3")
 
     def validate(self):
-        compiler = self.settings.compiler
-        compiler_version = tools.Version(self.settings.compiler.version)
-        antlr_version = tools.Version(self.version)
-
-        if str(self.settings.arch).startswith("arm") and antlr_version < "4.11":
+        if str(self.info.settings.arch).startswith("arm") and Version(self.version) < "4.11":
             raise ConanInvalidConfiguration("arm architectures are not supported due to libuuid; please upgrade to antlr 4.11 or later.")
             # Need to deal with missing libuuid on Arm.
             # So far ANTLR delivers macOS binary package.
 
-        if compiler == "Visual Studio" and compiler_version < "16":
+        if (self.info.settings.compiler == "Visual Studio" and self.info.settings.compiler.version < "16") or \
+           (self.info.settings.compiler == "msvc" and self.info.settings.compiler.version < "1920"):
             raise ConanInvalidConfiguration("library claims C2668 'Ambiguous call to overloaded function'")
             # Compilation of this library on version 15 claims C2668 Error.
             # This could be Bogus error or malformed Antl4 libary.
             # Version 16 compiles this code correctly.
 
-        if antlr_version >= "4.10":
+        if Version(self.version) >= "4.10":
             # Antlr4 for 4.9.3 does not require C++17 - C++11 is enough.
             # for newest version we need C++17 compatible compiler here
 
-            if self.settings.get_safe("compiler.cppstd"):
-                tools.check_min_cppstd(self, "17")
+            if self.info.settings.compiler.cppstd:
+                check_min_cppstd(self, self._minimum_cpp_standard)
+            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
 
-            minimum_version = self.compiler_required_cpp17.get(str(self.settings.compiler), False)
-            if minimum_version:
-                if compiler_version < minimum_version:
-                    raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
-            else:
-                self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
-
-        if is_msvc(self) and antlr_version == "4.10":
-            raise ConanInvalidConfiguration("{} Antlr4 4.10 version is broken on msvc - Use 4.10.1 or above.".format(self.name))
+            if is_msvc(self) and Version(self.version) == "4.10":
+                raise ConanInvalidConfiguration(f"{self.ref} is broken on msvc - Use 4.10.1 or above.")
 
     def build_requirements(self):
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.build_requires("pkgconf/1.7.4")
+            self.tool_requires("pkgconf/1.7.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["ANTLR4_INSTALL"] = True
-        cmake.definitions["WITH_LIBCXX"] = self.settings.compiler.get_safe("libcxx") == "libc++"
-        cmake.definitions["ANTLR_BUILD_CPP_TESTS"] = False
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["ANTLR4_INSTALL"] = True
+        tc.variables["WITH_LIBCXX"] = self.settings.compiler.get_safe("libcxx") == "libc++"
+        tc.variables["ANTLR_BUILD_CPP_TESTS"] = False
         if is_msvc(self):
-            cmake.definitions["WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
-        cmake.definitions["WITH_DEMO"] = False
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+            tc.variables["WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
+        tc.variables["WITH_DEMO"] = False
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
+        tc = PkgConfigDeps(self)
+        tc.generate()
+        tc = VirtualBuildEnv(self)
+        tc.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder="runtime/Cpp")
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.txt", src=os.path.join(self.source_folder), dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
         if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime-static.*")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime.a")
+            rm(self, "*antlr4-runtime-static.*", os.path.join(self.package_folder, "lib"))
+            rm(self, "*antlr4-runtime.a", os.path.join(self.package_folder, "lib"))
         else:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.dll")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "antlr4-runtime.lib")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime.so*")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime.dll*")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime.*dylib")
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+            rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
+            rm(self, "antlr4-runtime.lib", os.path.join(self.package_folder, "lib"))
+            rm(self, "*antlr4-runtime.so*", os.path.join(self.package_folder, "lib"))
+            rm(self, "*antlr4-runtime.dll*", os.path.join(self.package_folder, "lib"))
+            rm(self, "*antlr4-runtime.*dylib", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
         # FIXME: this also removes lib/cmake/antlr4-generator
         # This cmake config script is needed to provide the cmake function `antlr4_generate`
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generatores removed
         self._create_cmake_module_alias_targets(
+            self,
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"antlr4_shared" if self.options.shared else "antlr4_static": "antlr4-cppruntime::antlr4-cppruntime"}
         )
 
     @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(conanfile, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent(f"""\
@@ -161,7 +160,7 @@ class Antlr4CppRuntimeConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """)
-        tools.save(module_file, content)
+        save(conanfile, module_file, content)
 
     @property
     def _module_file_rel_path(self):
