@@ -5,7 +5,7 @@ from conans import AutoToolsBuildEnvironment, tools
 import contextlib
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.47.0"
 
 
 class BisonConan(ConanFile):
@@ -54,7 +54,7 @@ class BisonConan(ConanFile):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.(")
+            self.build_requires("automake/1.16.5")
         if self.settings.os != "Windows":
             self.build_requires("flex/2.6.4")
 
