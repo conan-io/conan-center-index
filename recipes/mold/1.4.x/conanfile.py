@@ -39,6 +39,9 @@ class MoldConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def build_requirements(self):
         self.tool_requires("cmake/3.24.1")
 
@@ -88,6 +91,9 @@ class MoldConan(ConanFile):
         self.env_info.LD = mold_location
         self.buildenv_info.prepend_path("MOLD_ROOT", bindir)
         self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.resdirs = []
 
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
