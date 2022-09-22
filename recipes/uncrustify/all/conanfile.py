@@ -1,10 +1,12 @@
-from conans import ConanFile, CMake, tools
-from conan.tools.files import rename
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, mkdir, rename, rmdir
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
-import functools
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.47.0"
 
 
 class UncrustifyConan(ConanFile):
@@ -15,41 +17,40 @@ class UncrustifyConan(ConanFile):
     homepage = "https://github.com/uncrustify/uncrustify"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = "CMakeLists.txt"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def package_id(self):
+        del self.info.settings.compiler
 
     def validate(self):
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
-            raise ConanInvalidConfiguration(f"{self.name} requires GCC >=8")
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
+            raise ConanInvalidConfiguration(f"{self.ref} requires GCC >=7")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["NoGitVersionString"] = True
+        tc.variables["BUILD_TESTING"] = False
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
-        if self.settings.os == "Windows":
-            tools.mkdir(os.path.join(self.package_folder, "bin"))
+        if is_msvc(self):
+            mkdir(self, os.path.join(self.package_folder, "bin"))
             rename(self, os.path.join(self.package_folder, "uncrustify.exe"),
                          os.path.join(self.package_folder, "bin", "uncrustify.exe"))
             os.remove(os.path.join(self.package_folder, "AUTHORS"))
@@ -58,16 +59,15 @@ class UncrustifyConan(ConanFile):
             os.remove(os.path.join(self.package_folder, "ChangeLog"))
             os.remove(os.path.join(self.package_folder, "HELP"))
             os.remove(os.path.join(self.package_folder, "README.md"))
-            tools.rmdir(os.path.join(self.package_folder, "cfg"))
-            tools.rmdir(os.path.join(self.package_folder, "doc"))
-
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-
-    def package_id(self):
-        del self.info.settings.compiler
+            rmdir(self, os.path.join(self.package_folder, "cfg"))
+            rmdir(self, os.path.join(self.package_folder, "doc"))
 
     def package_info(self):
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
+
+        # TODO: to remove in conan v2
         binpath = os.path.join(self.package_folder, "bin")
         self.output.info(f"Adding to PATH: {binpath}")
         self.env_info.PATH.append(binpath)
-        self.cpp_info.includedirs = []
