@@ -10,14 +10,12 @@ from conan.tools.files import apply_conandata_patches, copy, get, patch, rmdir
 import os
 import textwrap
 
-
-
 required_conan_version = ">=1.52.0"
 
 class CppfrontConan(ConanFile):
     name = "cppfront"
     description = "Cppfront is a experimental compiler from a potential C++ 'syntax 2' (Cpp2) to today's 'syntax 1' (Cpp1)"
-    topics = ("cppfront", "c++2", "build-system")
+    topics = ("cppfront", "cpp2")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/hsutter/cppfront"
     license = "CC-BY-NC-ND-4.0"
