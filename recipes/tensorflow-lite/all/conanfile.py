@@ -114,7 +114,7 @@ class TensorflowLiteConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} requires C++17, which your compiler does not support.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
 
     def build(self):
         apply_conandata_patches(self)
