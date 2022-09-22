@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
@@ -47,9 +48,9 @@ class BenchmarkConan(ConanFile):
 
     def validate(self):
         if self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) <= 12:
-            raise ConanInvalidConfiguration("f{self.ref} does not support Visual Studio <= 12")
-        if self.info.settings.os == "Windows" and self.info.options.shared:
-            raise ConanInvalidConfiguration("Windows shared builds are not supported right now, see issue #639")
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Visual Studio <= 12")
+        if Version(self.version) < "1.7.0" and is_msvc(self) and self.info.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support msvc shared builds")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
