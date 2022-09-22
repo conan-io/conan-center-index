@@ -1,4 +1,7 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, apply_conandata_patches, replace_in_file
+from conanS import AutoToolsBuildEnvironment, tools
 import contextlib
 import os
 
@@ -43,16 +46,20 @@ class BisonConan(ConanFile):
     def requirements(self):
         self.requires("m4/1.4.19")
 
+    def validate(self):
+        if self.settings.compiler == "Visual Studio" and self.version == "3.8.2":
+            raise ConanInvalidConfiguration("bison/3.8.2 is not yet ready for Windows, use previous version or open a pull request on https://github.com/conan-io/conan-center-index/pulls")
+
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.4")
+            self.build_requires("automake/1.16.(")
         if self.settings.os != "Windows":
             self.build_requires("flex/2.6.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     @contextlib.contextmanager
@@ -105,31 +112,30 @@ class BisonConan(ConanFile):
         return self._autotools
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
         if self.settings.os == "Windows":
             # replace embedded unix paths by windows paths
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+            replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.in"),
                                   "echo '#define BINDIR \"$(bindir)\"';",
                                   "echo '#define BINDIR \"$(shell cygpath -m \"$(bindir)\")\"';")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+            replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.in"),
                                   "echo '#define PKGDATADIR \"$(pkgdatadir)\"';",
                                   "echo '#define PKGDATADIR \"$(shell cygpath -m \"$(pkgdatadir)\")\"';")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+            replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.in"),
                                   "echo '#define DATADIR \"$(datadir)\"';",
                                   "echo '#define DATADIR \"$(shell cygpath -m \"$(datadir)\")\"';")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+            replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.in"),
                                   "echo '#define DATAROOTDIR \"$(datarootdir)\"';",
                                   "echo '#define DATAROOTDIR \"$(shell cygpath -m \"$(datarootdir)\")\"';")
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+        replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.in"),
                               "dist_man_MANS = $(top_srcdir)/doc/bison.1",
                               "dist_man_MANS =")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "yacc.in"),
+        replace_in_file(self, os.path.join(self._source_subfolder, "src", "yacc.in"),
                               "@prefix@",
                               "${}_ROOT".format(self.name.upper()))
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "yacc.in"),
+        replace_in_file(self, os.path.join(self._source_subfolder, "src", "yacc.in"),
                               "@bindir@",
                               "${}_ROOT/bin".format(self.name.upper()))
 
