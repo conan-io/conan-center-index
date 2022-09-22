@@ -126,7 +126,7 @@ class TensorflowLiteConan(ConanFile):
         cmake.build()
 
     @staticmethod
-    def _create_cmake_module_alias_target(self, module_file):
+    def _create_cmake_module_alias_target(conanfile, module_file):
         aliased = "tensorflowlite::tensorflowlite"
         alias = "tensorflow::tensorflowlite"
         content = textwrap.dedent(f"""\
@@ -135,7 +135,7 @@ class TensorflowLiteConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """)
-        save(self, module_file, content)
+        save(conanfile, module_file, content)
 
     @property
     def _module_file(self):
