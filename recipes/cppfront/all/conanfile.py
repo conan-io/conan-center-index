@@ -39,35 +39,9 @@ class CppfrontConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    # def generate(self):
-    #     tc = CMakeToolchain(self)
-    #     # tc.variables["BUILD_TESTING"] = False
-    #     tc.generate()
-
-    # def validate(self):
-    #     if self.info.settings.compiler.cppstd:
-    #         check_min_cppstd(self, "20")
-
-    #     minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-    #     compiler_version = Version(self.info.settings.compiler.version)
-    #     if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-    #         raise ConanInvalidConfiguration(
-    #             "{} requires C++17, which your compiler does not support.".format(self.name)
-    #         )
-
-    #     if self.info.settings.compiler == "clang" and (compiler_version >= "10" and compiler_version < "12"):
-    #         raise ConanInvalidConfiguration(
-    #             "AA+ cannot handle clang 10 and 11 due to filesystem being under experimental namespace"
-    #         )
-
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, "20")
-
-        # if self.settings.compiler == "Visual Studio":
-        #     raise ConanInvalidConfiguration("CppFront does not support MSVC yet (https://github.com/jfalcou/eve/issues/1022).")
-        # if self.settings.compiler == "apple-clang":
-        #     raise ConanInvalidConfiguration("CppFront does not support apple Clang due to an incomplete libcpp.")
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -81,14 +55,11 @@ class CppfrontConan(ConanFile):
         elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration("{} {} requires C++20, which your compiler does not support.".format(self.name, self.version))
 
-
-
     def generate(self):
         tc = CMakeToolchain(self)
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
-
 
     def build(self):
         # apply_conandata_patches(self)
@@ -98,22 +69,12 @@ class CppfrontConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "*", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"))
+        copy(self, "cppfront*", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"))
+        copy(self, pattern="*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
         rmdir(self, os.path.join(self.package_folder, "bin", "test cases"))
 
         cmake = CMake(self)
         cmake.install()
-
-        # # create wrapper scripts
-        # save(self, os.path.join(self.package_folder, "bin", "meson.cmd"), textwrap.dedent("""\
-        #     @echo off
-        #     CALL python %~dp0/meson.py %*
-        # """))
-        # save(self, os.path.join(self.package_folder, "bin", "meson"), textwrap.dedent("""\
-        #     #!/usr/bin/env bash
-        #     meson_dir=$(dirname "$0")
-        #     exec "$meson_dir/meson.py" "$@"
-        # """))
 
     @staticmethod
     def _chmod_plus_x(filename):
@@ -125,18 +86,28 @@ class CppfrontConan(ConanFile):
         self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
 
-        # self._chmod_plus_x(os.path.join(bin_path, "cppfront"))
-        # self.cpp_info.builddirs = [os.path.join("bin", "cppfrontbuild", "cmake", "data")]
-
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
         cppfront_bin = os.path.join(self.package_folder, "bin", "cppfront{}".format(bin_ext)).replace("\\", "/")
 
-        # M4 environment variable is used by a lot of scripts as a way to override a hard-coded embedded m4 path
-        self.output.info("Setting M4 environment variable: {}".format(cppfront_bin))
+        # CppFront environment variable is used by a lot of scripts as a way to override a hard-coded embedded m4 path
+        self.output.info("Setting CppFront environment variable: {}".format(cppfront_bin))
         self.env_info.cppfront = cppfront_bin
 
         self.cpp_info.frameworkdirs = []
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
+
+        target = "cppfront"
+        self.cpp_info.set_property("cmake_file_name", "cppfront")
+        self.cpp_info.set_property("cmake_target_name", f"cppfront::{target}")
+        self.cpp_info.set_property("pkg_config_name",  "cppfront")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "cppfront"
+        self.cpp_info.names["cmake_find_package_multi"] = "cppfront"
+        self.cpp_info.names["pkg_config"] = "cppfront"
+        self.cpp_info.components["_cppfront"].names["cmake_find_package"] = target
+        self.cpp_info.components["_cppfront"].names["cmake_find_package_multi"] = target
+        self.cpp_info.components["_cppfront"].set_property("cmake_target_name", f"cppfront::{target}")
 
