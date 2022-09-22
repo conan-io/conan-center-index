@@ -104,13 +104,13 @@ class TensorflowLiteConan(ConanFile):
         deps.generate()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
+        if self.info.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, 17)
 
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
         if not minimum_version:
             self.output.warn(f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-        elif Version(self.settings.compiler.version) < minimum_version:
+        elif Version(self.info.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.name} requires C++17, which your compiler does not support.")
 
     def source(self):
