@@ -628,7 +628,39 @@ class CPythonConan(ConanFile):
 
     @property
     def _cmake_variables(self):
-        content = Template("""{% for k, v in kwargs.items()  %}set({{ k }} {{ v }})\n{% endfor %}""")
+        content = textwrap.dedent("""\
+        function (PYTHON{{ py_major_version }}_ADD_LIBRARY prefix name)
+           cmake_parse_arguments (PARSE_ARGV 1 PYTHON_ADD_LIBRARY "STATIC;SHARED;MODULE;WITH_SOABI" "" "")
+           if (PYTHON_ADD_LIBRARY_STATIC)
+               set (type STATIC)
+           elseif (PYTHON_ADD_LIBRARY_SHARED)
+               set (type SHARED)
+           else()
+               set (type MODULE)
+           endif()
+           add_library (${name} ${type} ${PYTHON_ADD_LIBRARY_UNPARSED_ARGUMENTS})
+           get_property (type TARGET ${name} PROPERTY TYPE)
+           if (type STREQUAL "MODULE_LIBRARY")
+               target_link_libraries (${name} PRIVATE Python::Python)
+               set_property (TARGET ${name} PROPERTY PREFIX "")
+               if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+                   set_property (TARGET ${name} PROPERTY SUFFIX ".pyd")
+               endif()
+               if (PYTHON_ADD_LIBRARY_WITH_SOABI AND PYTHON_SOABI)
+                   get_property (suffix TARGET ${name} PROPERTY SUFFIX)
+                   if (NOT suffix)
+                       set (suffix "${CMAKE_SHARED_MODULE_SUFFIX}")
+                   endif()
+                   set_property (TARGET ${name} PROPERTY SUFFIX ".${${PYTHON_SOABI}${suffix}")
+               endif()
+           else()
+               if (PYTHON_ADD_LIBRARY_WITH_SOABI)
+                   message (AUTHOR_WARNING "FindPython: Option `WITH_SOABI` is only supported for `MODULE` library type.")
+               endif()
+                   target_link_libraries (${name} PRIVATE Python::Python)
+           endif()
+        endfunction()
+        {% for k, v in kwargs.items()  %}set({{ k }} {{ v }})\n{% endfor %}""")
         py_version = Version(self.version)
 
         suffix = "{}{}{}".format(
@@ -637,33 +669,34 @@ class CPythonConan(ConanFile):
             "u" if self.options.get_safe("unicode", False) else "",
         )
         cmake_arg = ";".join("ON" if a else "OFF" for a in (self.settings.build_type == "Debug", self.options.get_safe("pymalloc", False), self.options.get_safe("unicode", False)))
-        return content.render(kwargs={"BUILD_MODULE": "ON" if self._supports_modules else "OFF",
-                                        "PY_VERSION_MAJOR": py_version.major,
-                                        "PY_VERSION_MAJOR_MINOR": f"{py_version.major}.{py_version.minor}",
-                                        "PY_FULL_VERSION": self.version,
-                                        "PY_VERSION_SUFFIX": suffix,
-                                        "PYTHON_EXECUTABLE": str(self._cpython_interpreter_path),
-                                        f"Python{py_version.major}_EXECUTABLE": str(self._cpython_interpreter_path),
-                                        "Python_EXECUTABLE": str(self._cpython_interpreter_path),
-                                        f"Python{py_version.major}_ROOT_DIR": str(self.package_folder),
-                                        "Python_ROOT_DIR": str(self.package_folder),
-                                        f"Python{py_version.major}_USE_STATIC_LIBS": "OFF" if self.options.shared else "ON",
-                                        "Python_USE_STATIC_LIBS": "OFF" if self.options.shared else "ON",
-                                        f"Python{py_version.major}_FIND_FRAMEWORK": "NEVER",
-                                        "Python_FIND_FRAMEWORK": "NEVER",
-                                        f"Python{py_version.major}_FIND_REGISTRY": "NEVER",
-                                        "Python_FIND_REGISTRY": "NEVER",
-                                        f"Python{py_version.major}_FIND_IMPLEMENTATIONS": "CPython",
-                                        "Python_FIND_IMPLEMENTATIONS": "CPython",
-                                        f"Python{py_version.major}_FIND_STRATEGY": "LOCATION",
-                                        "Python_FIND_STRATEGY": "LOCATION",
-                                        f"Python{py_version.major}_FIND_ABI": cmake_arg,
-                                        "Python_FIND_ABI": cmake_arg,
-                                        f"Python{py_version.major}_LIBRARY": str(self._lib_path),
-                                        "Python_LIBRARY": str(self._lib_path),
-                                        f"Python{py_version.major}_INCLUDE_DIR": str(self._include_path),
-                                        "Python_INCLUDE_DIR": str(self._include_path),
-                                        })
+        return Template(content).render(py_major_version = py_version.major,
+                                        kwargs = {"PYTHON_SOABI": "",  # TODO: Add SOABI string https://github.com/Kitware/CMake/blob/cca1b333be76d33fde5c74e51042fc849f8930b7/Modules/FindPython.cmake#L137
+                                                  "PY_VERSION_MAJOR": py_version.major,
+                                                  "PY_VERSION_MAJOR_MINOR": f"{py_version.major}.{py_version.minor}",
+                                                  "PY_FULL_VERSION": self.version,
+                                                  "PY_VERSION_SUFFIX": suffix,
+                                                  "PYTHON_EXECUTABLE": str(self._cpython_interpreter_path),
+                                                  f"Python{py_version.major}_EXECUTABLE": str(self._cpython_interpreter_path),
+                                                  "Python_EXECUTABLE": str(self._cpython_interpreter_path),
+                                                  f"Python{py_version.major}_ROOT_DIR": str(self.package_folder),
+                                                  "Python_ROOT_DIR": str(self.package_folder),
+                                                  f"Python{py_version.major}_USE_STATIC_LIBS": "OFF" if self.options.shared else "ON",
+                                                  "Python_USE_STATIC_LIBS": "OFF" if self.options.shared else "ON",
+                                                  f"Python{py_version.major}_FIND_FRAMEWORK": "NEVER",
+                                                  "Python_FIND_FRAMEWORK": "NEVER",
+                                                  f"Python{py_version.major}_FIND_REGISTRY": "NEVER",
+                                                  "Python_FIND_REGISTRY": "NEVER",
+                                                  f"Python{py_version.major}_FIND_IMPLEMENTATIONS": "CPython",
+                                                  "Python_FIND_IMPLEMENTATIONS": "CPython",
+                                                  f"Python{py_version.major}_FIND_STRATEGY": "LOCATION",
+                                                  "Python_FIND_STRATEGY": "LOCATION",
+                                                  f"Python{py_version.major}_FIND_ABI": cmake_arg,
+                                                  "Python_FIND_ABI": cmake_arg,
+                                                  f"Python{py_version.major}_LIBRARY": str(self._lib_path),
+                                                  "Python_LIBRARY": str(self._lib_path),
+                                                  f"Python{py_version.major}_INCLUDE_DIR": str(self._include_path),
+                                                  "Python_INCLUDE_DIR": str(self._include_path),
+                                                  })
 
     def package(self):
         copy(self, "LICENSE*", src=self.source_path, dst=self.package_path.joinpath("licenses"))
@@ -713,6 +746,8 @@ class CPythonConan(ConanFile):
         py_version = Version(self.version)
 
         self.cpp_info.set_property("cmake_file_name", "Python")
+        self.cpp_info.names["cmake_build_modules"] = [str(self._cmake_build_module_path)]
+        self.cpp_info.set_property("cmake_build_modules", [str(self._cmake_build_module_path)])
 
         self.cpp_info.components["python"].includedirs = [str(self._include_path)]
         self.cpp_info.components["python"].libdirs = [str(self._lib_path)]
@@ -720,9 +755,6 @@ class CPythonConan(ConanFile):
         self.cpp_info.components["python"].builddirs = [str(self._cmake_build_module_path.parent)]
 
         self.cpp_info.components["python"].set_property("cmake_target_aliases", ["Python::Python"])
-        self.cpp_info.components["python"].set_property("cmake_build_modules", [str(self._cmake_build_module_path)])
-        self.cpp_info.components["python"].names["cmake_build_modules"] = [str(self._cmake_build_module_path)]
-
         self.cpp_info.components["python"].set_property("pkg_config", f"python-{py_version.major}.{py_version.minor}")
         self.cpp_info.components["python"].names["pkg_config"] = f"python-{py_version.major}.{py_version.minor}"
 
