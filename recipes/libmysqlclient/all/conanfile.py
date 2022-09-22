@@ -1,8 +1,11 @@
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
-from conan.tools.files import rename
+from conan.tools.files import rename, get, apply_conandata_patches, replace_in_file, rmdir, rm
 from conan.tools.build import cross_building
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
+from conan.tools.apple import is_apple_os
+from conans import CMake, tools
 import functools
 import os
 
@@ -40,17 +43,17 @@ class LibMysqlClientCConan(ConanFile):
 
     @property
     def _with_zstd(self):
-        return tools.Version(self.version) > "8.0.17"
+        return Version(self.version) > "8.0.17"
 
     @property
     def _with_lz4(self):
-        return tools.Version(self.version) > "8.0.17"
+        return Version(self.version) > "8.0.17"
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "16" if tools.Version(self.version) > "8.0.17" else "15",
-            "gcc": "7" if tools.Version(self.version) >= "8.0.27" else "5.3",
+            "Visual Studio": "16" if Version(self.version) > "8.0.17" else "15",
+            "gcc": "7" if Version(self.version) >= "8.0.27" else "5.3",
             "clang": "6",
         }
 
@@ -100,79 +103,88 @@ class LibMysqlClientCConan(ConanFile):
         #             error: expected unqualified-id MYSQL_VERSION_MAJOR=8
         #             error: no member named 'ptrdiff_t' in the global namespace
         if self.version == "8.0.17" and self.settings.compiler == "apple-clang" and \
-           tools.Version(self.settings.compiler.version) >= "12.0":
+           Version(self.settings.compiler.version) >= "12.0":
             raise ConanInvalidConfiguration("libmysqlclient 8.0.17 doesn't support apple-clang >= 12.0")
 
         # mysql>=8.0.17 doesn't support shared library on MacOS.
         # https://github.com/mysql/mysql-server/blob/mysql-8.0.17/cmake/libutils.cmake#L333-L335
-        if tools.Version(self.version) >= "8.0.17" and self.settings.compiler == "apple-clang" and \
+        if Version(self.version) >= "8.0.17" and self.settings.compiler == "apple-clang" and \
            self.options.shared:
             raise ConanInvalidConfiguration("{}/{} doesn't support shared library".format( self.name, self.version))
 
         # mysql < 8.0.29 uses `requires` in source code. It is the reserved keyword in C++20.
         # https://github.com/mysql/mysql-server/blob/mysql-8.0.0/include/mysql/components/services/dynamic_loader.h#L270
-        if self.settings.compiler.get_safe("cppstd") == "20" and tools.Version(self.version) < "8.0.29":
+        if self.settings.compiler.get_safe("cppstd") == "20" and Version(self.version) < "8.0.29":
             raise ConanInvalidConfiguration("{}/{} doesn't support C++20".format(self.name, self.version))
 
     def build_requirements(self):
-        if tools.Version(self.version) >= "8.0.25" and tools.is_apple_os(self.settings.os):
+        if Version(self.version) >= "8.0.25" and is_apple_os(self):
             # CMake 3.18 or higher is required if Apple, but CI of CCI may run CMake 3.15
             self.build_requires("cmake/3.22.5")
         if self.settings.os == "FreeBSD":
             self.build_requires("pkgconf/1.7.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
     def _patch_files(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
         libs_to_remove = ["icu", "libevent", "re2", "rapidjson", "protobuf", "libedit"]
         if not self._with_lz4:
             libs_to_remove.append("lz4")
         for lib in libs_to_remove:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 "MYSQL_CHECK_%s()\n" % lib.upper(),
                 "",
                 strict=False)
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 "INCLUDE(%s)\n" % lib,
                 "",
                 strict=False)
-        tools.rmdir(os.path.join(self._source_subfolder, "extra"))
+            replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                f"WARN_MISSING_SYSTEM_{lib.upper()}({lib.upper()}_WARN_GIVEN)",
+                f"# WARN_MISSING_SYSTEM_{lib.upper()}({lib.upper()}_WARN_GIVEN)",
+                strict=False)
+
+            replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                f"SET({lib.upper()}_WARN_GIVEN)",
+                f"# SET({lib.upper()}_WARN_GIVEN)",
+                strict=False)
+                
+        rmdir(self, os.path.join(self._source_subfolder, "extra"))
         for folder in ["client", "man", "mysql-test", "libbinlogstandalone"]:
-            tools.rmdir(os.path.join(self._source_subfolder, folder))
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            rmdir(self, os.path.join(self._source_subfolder, folder))
+            replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 "ADD_SUBDIRECTORY(%s)\n" % folder,
                 "",
                 strict=False)
-        tools.rmdir(os.path.join(self._source_subfolder, "storage", "ndb"))
+        rmdir(self, os.path.join(self._source_subfolder, "storage", "ndb"))
         for t in ["INCLUDE(cmake/boost.cmake)\n", "MYSQL_CHECK_EDITLINE()\n"]:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 t,
                 "",
                 strict=False)
         if self._with_zstd:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "zstd.cmake"),
+            replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "zstd.cmake"),
                 "NAMES zstd",
                 "NAMES zstd %s" % self.deps_cpp_info["zstd"].libs[0])
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
+        replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
             "NAMES ssl",
             "NAMES ssl %s" % self.deps_cpp_info["openssl"].components["ssl"].libs[0])
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
+        replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
             "NAMES crypto",
             "NAMES crypto %s" % self.deps_cpp_info["openssl"].components["crypto"].libs[0])
 
         # Do not copy shared libs of dependencies to package folder
         deps_shared = ["SSL"]
-        if tools.Version(self.version) > "8.0.17":
+        if Version(self.version) > "8.0.17":
             deps_shared.extend(["KERBEROS", "SASL", "LDAP", "PROTOBUF", "CURL"])
         for dep in deps_shared:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                   "MYSQL_CHECK_{}_DLLS()".format(dep),
                                   "")
 
@@ -181,10 +193,10 @@ class LibMysqlClientCConan(ConanFile):
         rename(self, sources_cmake, sources_cmake_orig)
         rename(self, "CMakeLists.txt", sources_cmake)
         if self.settings.os == "Macos":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "libmysql", "CMakeLists.txt"),
-                "COMMAND %s" % ("$<TARGET_FILE:libmysql_api_test>" if tools.Version(self.version) < "8.0.25" else "libmysql_api_test"),
+            replace_in_file(self, os.path.join(self._source_subfolder, "libmysql", "CMakeLists.txt"),
+                "COMMAND %s" % ("$<TARGET_FILE:libmysql_api_test>" if Version(self.version) < "8.0.25" else "libmysql_api_test"),
                 "COMMAND DYLD_LIBRARY_PATH=%s %s" %(os.path.join(self.build_folder, "library_output_directory"), os.path.join(self.build_folder, "runtime_output_directory", "libmysql_api_test")))
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "install_macros.cmake"),
+        replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "install_macros.cmake"),
             "  INSTALL_DEBUG_SYMBOLS(",
             "  # INSTALL_DEBUG_SYMBOLS(")
 
@@ -229,18 +241,18 @@ class LibMysqlClientCConan(ConanFile):
         os.mkdir(os.path.join(self.package_folder, "licenses"))
         rename(self, os.path.join(self.package_folder, "LICENSE"), os.path.join(self.package_folder, "licenses", "LICENSE"))
         os.remove(os.path.join(self.package_folder, "README"))
-        tools.remove_files_by_mask(self.package_folder, "*.pdb")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "docs"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "docs"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.os == "Windows" and self.options.shared:
             self.copy("*.dll", "bin", keep_path=False)
         if self.options.shared:
-            tools.remove_files_by_mask(self.package_folder, "*.a")
+            rm(self, "*.a", self.package_folder, recursive=True)
         else:
-            tools.remove_files_by_mask(self.package_folder, "*.dll")
-            tools.remove_files_by_mask(self.package_folder, "*.dylib")
-            tools.remove_files_by_mask(self.package_folder, "*.so*")
+            rm(self, "*.dll", self.package_folder, recursive=True)
+            rm(self, "*.dylib", self.package_folder, recursive=True)
+            rm(self, "*.so*", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "mysqlclient")
@@ -253,10 +265,10 @@ class LibMysqlClientCConan(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.append("m")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            if tools.Version(self.version) >= "8.0.25":
+            if Version(self.version) >= "8.0.25":
                 self.cpp_info.system_libs.append("resolv")
         if self.settings.os == "Windows":
-            if tools.Version(self.version) >= "8.0.25":
+            if Version(self.version) >= "8.0.25":
                 self.cpp_info.system_libs.append("dnsapi")
             self.cpp_info.system_libs.append("secur32")
 
