@@ -93,6 +93,44 @@ def test_spam():
 
     spam.system(cmd)
 
+@add_test
+def test_spam2():
+    import platform
+
+    print("About to import spam")
+    sys.stdout.flush()
+    import spam2
+
+    if "This is an example spam doc." not in spam.__doc__:
+        raise Exception("spam.__doc__ does not contain the expected text")
+
+    cmd = {
+        "Windows": "dir",
+    }.get(platform.system(), "ls")
+    print("About to run spam2.system(\"{}\")".format(cmd))
+    sys.stdout.flush()
+
+    spam2.system(cmd)
+
+
+@add_test
+def test_spam3():
+    import platform
+
+    print("About to import spam")
+    sys.stdout.flush()
+    import spam3
+
+    if "This is an example spam doc." not in spam.__doc__:
+        raise Exception("spam.__doc__ does not contain the expected text")
+
+    cmd = {
+        "Windows": "dir",
+    }.get(platform.system(), "ls")
+    print("About to run spam3.system(\"{}\")".format(cmd))
+    sys.stdout.flush()
+
+    spam3.system(cmd)
 
 @add_test
 def test_bz2():

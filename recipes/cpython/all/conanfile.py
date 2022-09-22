@@ -824,6 +824,8 @@ class CPythonConan(ConanFile):
         if self.options.env_vars:
             self.output.info(f"Appending PATH environment variable: {self._install_path}")
             self.env_info.PATH.append(str(self._install_path))
+            self.runenv_info.define_path("PATH", str(self._install_path))
+            self.buildenv_info.define_path("PATH", str(self._install_path))
 
         self.output.info(f"Setting userinfo: `python` to: {self._cpython_interpreter_path}")
         self.user_info.python = str(self._cpython_interpreter_path)
