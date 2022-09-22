@@ -93,6 +93,8 @@ class BenchmarkConan(ConanFile):
 
         self.cpp_info.components["_benchmark"].set_property("cmake_target_name", "benchmark::benchmark")
         self.cpp_info.components["_benchmark"].libs = ["benchmark"]
+        if Version(self.version) >= "1.7.0" and not self.options.shared:
+            self.cpp_info.components["_benchmark"].defines.append("BENCHMARK_STATIC_DEFINE")
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["_benchmark"].system_libs.extend(["pthread", "rt"])
         elif self.settings.os == "Windows":
