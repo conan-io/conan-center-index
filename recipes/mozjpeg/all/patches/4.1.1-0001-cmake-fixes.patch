@@ -32,16 +32,3 @@ index 8d295c6..b30dacb 100644
  
  install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/README.ijg
    ${CMAKE_CURRENT_SOURCE_DIR}/README.md ${CMAKE_CURRENT_SOURCE_DIR}/example.txt
-diff --git a/sharedlib/CMakeLists.txt b/sharedlib/CMakeLists.txt
-index f13b958..c3981a7 100644
---- a/sharedlib/CMakeLists.txt
-+++ b/sharedlib/CMakeLists.txt
-@@ -63,7 +63,7 @@ if(MSVC)
-   set_target_properties(jpeg PROPERTIES
-     RUNTIME_OUTPUT_NAME jpeg${SO_MAJOR_VERSION})
-   # The jsimd_*.c file is built using /MT, so this prevents a linker warning.
--  set_target_properties(jpeg PROPERTIES LINK_FLAGS "/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:LIBCMTD")
-+  #set_target_properties(jpeg PROPERTIES LINK_FLAGS "/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:LIBCMTD")
- elseif(MINGW)
-   set_target_properties(jpeg PROPERTIES SUFFIX -${SO_MAJOR_VERSION}.dll)
- endif()
