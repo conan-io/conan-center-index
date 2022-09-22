@@ -106,6 +106,8 @@ class MozjpegConan(ConanFile):
                 "armv8.3": "aarch64",
             }.get(str(self.settings.arch), str(self.settings.arch))
             tc.cache_variables["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
+        tc.variables["ENABLE_SHARED"] = self.options.shared
+        tc.variables["ENABLE_STATIC"] = not self.options.shared
         tc.variables["ENABLE_TESTING"] = False
         tc.variables["REQUIRE_SIMD"] = bool(self.options.get_safe("SIMD", False))
         tc.variables["WITH_SIMD"] = bool(self.options.get_safe("SIMD", False))
