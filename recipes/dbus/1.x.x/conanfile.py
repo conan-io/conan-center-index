@@ -8,7 +8,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.scm import Version
 from conans import CMake
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.3"
 
 
 class DbusConan(ConanFile):
