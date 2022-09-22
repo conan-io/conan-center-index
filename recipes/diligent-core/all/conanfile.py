@@ -7,7 +7,7 @@ from conan.tools.files import rm, get, rmdir, rename, collect_libs, patches
 from conan.tools.apple import is_apple_os
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.3"
 
 
 class DiligentCoreConan(ConanFile):
