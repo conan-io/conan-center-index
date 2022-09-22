@@ -330,7 +330,8 @@ class CPythonConan(ConanFile):
             # --enable/disable-shared is automatically managed when 'shared' option is declared
             tc = AutotoolsToolchain(self)
             yes_no = lambda v: "yes" if v else "no"
-            tc.configure_args.extend([
+            tc.configure_args = [
+                f"--prefix={self._install_path}",
                 f"--enable-shared={yes_no(self.options.get_safe('shared', False))}",
                 f"--with-doc-strings={yes_no(self.options.get_safe('docstrings', False))}",
                 f"--with-pymalloc={yes_no(self.options.get_safe('pymalloc', False))}",
@@ -339,7 +340,7 @@ class CPythonConan(ConanFile):
                 f"--enable-optimizations={yes_no(self.options.get_safe('optimizations', False))}",
                 f"--with-lto={yes_no(self.options.get_safe('lto', False))}",
                 f"--with-pydebug={yes_no(self.settings.build_type == 'Debug')}",
-            ])
+            ]
 
             if self._is_py2:
                 tc.configure_args.extend([
@@ -453,7 +454,6 @@ class CPythonConan(ConanFile):
                 msbuild.build(sln=project_file)
         else:
             autotools = Autotools(self)
-            autotools.autoreconf()
             autotools.configure()
             autotools.make()
 
@@ -676,17 +676,20 @@ class CPythonConan(ConanFile):
                 self._msvc_package_layout()
         else:
             autotools = Autotools(self)
-            autotools.install()
+            autotools.install(args=[])
             rmdir(self, self._lib_path.joinpath("pkgconfig"))
-            rmdir(self, self._lib_path.joinpath("share"))
+            rmdir(self, self._install_path.joinpath("share"))
 
             # Rewrite shebangs of python scripts
             for file in self.package_path.joinpath("bin").glob("**/*"):
                 if not file.is_file() or file.is_symlink():
                     continue
-                text = load(self, file)
+                try:
+                    text = load(self, file)
+                except UnicodeDecodeError:
+                    continue
                 firstline = text.splitlines()[0]
-                if not (firstline.startswith(b"#!") and b"/python" in firstline and b"/bin/sh" not in firstline):
+                if not (firstline.startswith("#!") and "/python" in firstline and "/bin/sh" not in firstline):
                     continue
                 self.output.info("Rewriting shebang of {}".format(file))
                 content = textwrap.dedent(f"""\
@@ -709,16 +712,17 @@ class CPythonConan(ConanFile):
     def package_info(self):
         py_version = Version(self.version)
 
-        self.cpp_info.components["python"].set_property("cmake_target_name", "Python::Python")
-        self.cpp_info.components["python"].set_property("cmake_file_name", "Python")
+        self.cpp_info.set_property("cmake_file_name", "Python")
 
         self.cpp_info.components["python"].includedirs = [str(self._include_path)]
         self.cpp_info.components["python"].libdirs = [str(self._lib_path)]
         self.cpp_info.components["python"].libs = [self._lib_name]
         self.cpp_info.components["python"].builddirs = [str(self._cmake_build_module_path.parent)]
 
+        self.cpp_info.components["python"].set_property("cmake_target_aliases", ["Python::Python"])
         self.cpp_info.components["python"].set_property("cmake_build_modules", [str(self._cmake_build_module_path)])
         self.cpp_info.components["python"].names["cmake_build_modules"] = [str(self._cmake_build_module_path)]
+
         self.cpp_info.components["python"].set_property("pkg_config", f"python-{py_version.major}.{py_version.minor}")
         self.cpp_info.components["python"].names["pkg_config"] = f"python-{py_version.major}.{py_version.minor}"
 
@@ -727,7 +731,7 @@ class CPythonConan(ConanFile):
         else:
             self.cpp_info.components["python"].defines.append("Py_NO_ENABLE_SHARED")
             if self.settings.os == "Linux":
-                self.cpp_info.components["python"].system_libs.extend(["dl", "m", "pthread", "util"])
+                self.cpp_info.components["python"].system_libs.extend(["dl", "m", "pthread", "util", "nsl"])
             elif self.settings.os == "Windows":
                 self.cpp_info.components["python"].system_libs.extend(["pathcch", "shlwapi", "version", "ws2_32"])
         self.cpp_info.components["python"].requires = ["zlib::zlib"]
