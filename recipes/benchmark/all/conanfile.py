@@ -1,9 +1,12 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.47.0"
 
 
 class BenchmarkConan(ConanFile):
@@ -13,10 +16,8 @@ class BenchmarkConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index/"
     homepage = "https://github.com/google/benchmark"
     license = "Apache-2.0"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
 
-    settings = "arch", "build_type", "compiler", "os"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -30,71 +31,78 @@ class BenchmarkConan(ConanFile):
         "enable_exceptions": True,
     }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version.value) <= 12:
-            raise ConanInvalidConfiguration("{} {} does not support Visual Studio <= 12".format(self.name, self.version))
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        if self.settings.os == "Windows" and self.options.shared:
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) <= 12:
+            raise ConanInvalidConfiguration("f{self.ref} does not support Visual Studio <= 12")
+        if self.info.settings.os == "Windows" and self.info.options.shared:
             raise ConanInvalidConfiguration("Windows shared builds are not supported right now, see issue #639")
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-        self._cmake.definitions["BENCHMARK_ENABLE_TESTING"] = "OFF"
-        self._cmake.definitions["BENCHMARK_ENABLE_GTEST_TESTS"] = "OFF"
-        self._cmake.definitions["BENCHMARK_ENABLE_LTO"] = "ON" if self.options.enable_lto else "OFF"
-        self._cmake.definitions["BENCHMARK_ENABLE_EXCEPTIONS"] = "ON" if self.options.enable_exceptions else "OFF"
-
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BENCHMARK_ENABLE_TESTING"] = "OFF"
+        tc.variables["BENCHMARK_ENABLE_GTEST_TESTS"] = "OFF"
+        tc.variables["BENCHMARK_ENABLE_LTO"] = self.options.enable_lto
+        tc.variables["BENCHMARK_ENABLE_EXCEPTIONS"] = self.options.enable_exceptions
+        if Version(self.version) >= "1.6.1":
+            tc.variables["BENCHMARK_ENABLE_WERROR"] = False
+            tc.variables["BENCHMARK_FORCE_WERROR"] = False
         if self.settings.os != "Windows":
             if cross_building(self):
-                self._cmake.definitions["HAVE_STD_REGEX"] = False
-                self._cmake.definitions["HAVE_POSIX_REGEX"] = False
-                self._cmake.definitions["HAVE_STEADY_CLOCK"] = False
-            self._cmake.definitions["BENCHMARK_USE_LIBCXX"] = "ON" if self.settings.compiler.get_safe("libcxx") == "libc++" else "OFF"
+                tc.variables["HAVE_STD_REGEX"] = False
+                tc.variables["HAVE_POSIX_REGEX"] = False
+                tc.variables["HAVE_STEADY_CLOCK"] = False
+            tc.variables["BENCHMARK_USE_LIBCXX"] = self.settings.compiler.get_safe("libcxx") == "libc++"
         else:
-            self._cmake.definitions["BENCHMARK_USE_LIBCXX"] = "OFF"
-
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+            tc.variables["BENCHMARK_USE_LIBCXX"] = False
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["benchmark", "benchmark_main"]
+        self.cpp_info.set_property("cmake_file_name", "benchmark")
+        self.cpp_info.set_property("pkg_config_name", "benchmark")
+
+        self.cpp_info.components["_benchmark"].set_property("cmake_target_name", "benchmark::benchmark")
+        self.cpp_info.components["_benchmark"].libs = ["benchmark"]
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.system_libs.extend(["pthread", "rt"])
+            self.cpp_info.components["_benchmark"].system_libs.extend(["pthread", "rt"])
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("shlwapi")
+            self.cpp_info.components["_benchmark"].system_libs.append("shlwapi")
         elif self.settings.os == "SunOS":
-            self.cpp_info.system_libs.append("kstat")
+            self.cpp_info.components["_benchmark"].system_libs.append("kstat")
+
+        self.cpp_info.components["benchmark_main"].set_property("cmake_target_name", "benchmark::benchmark_main")
+        self.cpp_info.components["benchmark_main"].libs = ["benchmark_main"]
+        self.cpp_info.components["benchmark_main"].requires = ["_benchmark"]
+
+        # workaround to have all components in CMakeDeps of downstream recipes
+        self.cpp_info.set_property("cmake_target_name", "benchmark::benchmark_main")

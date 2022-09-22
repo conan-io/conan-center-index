@@ -1,9 +1,9 @@
 versions:
-  "1.5.6":
-    folder: all
-  "1.6.0":
+  "1.6.2":
     folder: all
   "1.6.1":
     folder: all
-  "1.6.2":
+  "1.6.0":
+    folder: all
+  "1.5.6":
     folder: all
