@@ -16,6 +16,7 @@ This section gathers the most common questions from the community related to pac
   * [Is the Jenkins orchestration library publicly available?](#is-the-jenkins-orchestration-library-publicly-available)
   * [Why not x86 binaries?](#why-not-x86-binaries)
     * [But if there are no packages available, what will the x86 validation look like?](#but-if-there-are-no-packages-available-what-will-the-x86-validation-look-like)
+  * [Do static libraries tend to be compiled as PIC by default?](#do-static-libraries-tend-to-be-compiled-as-pic-by-default)
   * [Why PDB files are not allowed?](#why-pdb-files-are-not-allowed)
     * [Why is there no option for PDB, as there is for fPIC?](#why-is-there-no-option-for-pdb-as-there-is-for-fpic)
   * [Can I remove an option from a recipe?](#can-i-remove-an-option-from-a-recipe)

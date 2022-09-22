@@ -19,7 +19,6 @@ The following policies are preferred during the review, but not mandatory:
   * [Test Package](#test-package)
     * [Minimalistic Source Code](#minimalistic-source-code)
     * [CMake targets](#cmake-targets)
-  * [Recommended feature options names](#recommended-feature-options-names)
   * [Supported Versions](#supported-versions)
     * [Removing old versions](#removing-old-versions)
     * [Adding old versions](#adding-old-versions)<!-- endToc -->
