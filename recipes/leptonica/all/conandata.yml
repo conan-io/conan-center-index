@@ -17,4 +17,3 @@ sources:
 patches:
   "1.78.0":
     - patch_file: "patches/fix-find-modules-variables.patch"
-      base_path: "source_subfolder"
