@@ -1,9 +1,9 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 0000000..7ac770b
+index 0000000..bc20331
 --- /dev/null
 +++ b/CMakeLists.txt
-@@ -0,0 +1,316 @@
+@@ -0,0 +1,336 @@
 +#
 +# Copyright (c) 2021-2022 Ivan Maidanski
 +##
@@ -39,11 +39,20 @@ index 0000000..7ac770b
 +
 +project(libatomic_ops C)
 +
++if (POLICY CMP0057)
++  # Required for CheckLinkerFlag, at least.
++  cmake_policy(SET CMP0057 NEW)
++endif()
++
 +include(CheckCCompilerFlag)
 +include(CheckFunctionExists)
 +include(CMakePackageConfigHelpers)
 +include(CTest)
 +include(GNUInstallDirs)
++
++if (NOT (${CMAKE_VERSION} VERSION_LESS "3.18.0"))
++  include(CheckLinkerFlag)
++endif()
 +
 +# Customize the build by passing "-D<option_name>=ON|OFF" in the command line.
 +option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
@@ -166,12 +175,23 @@ index 0000000..7ac770b
 +        INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 +
 +if (BUILD_SHARED_LIBS)
-+  check_c_compiler_flag(-Wl,--no-undefined HAVE_FLAG_WL_NO_UNDEFINED)
++  if (${CMAKE_VERSION} VERSION_LESS "3.18.0")
++    set(WL_NO_UNDEFINED_OPT "-Wl,--no-undefined")
++    check_c_compiler_flag(${WL_NO_UNDEFINED_OPT} HAVE_FLAG_WL_NO_UNDEFINED)
++  else()
++    set(WL_NO_UNDEFINED_OPT "LINKER:--no-undefined")
++    check_linker_flag(C "${WL_NO_UNDEFINED_OPT}" HAVE_FLAG_WL_NO_UNDEFINED)
++  endif()
 +  if (HAVE_FLAG_WL_NO_UNDEFINED)
 +    # Declare that the libraries do not refer to external symbols.
-+    target_link_libraries(atomic_ops PRIVATE -Wl,--no-undefined)
-+    target_link_libraries(atomic_ops_gpl PRIVATE -Wl,--no-undefined)
-+  endif()
++    if (${CMAKE_VERSION} VERSION_LESS "3.13.0")
++      target_link_libraries(atomic_ops PRIVATE ${WL_NO_UNDEFINED_OPT})
++      target_link_libraries(atomic_ops_gpl PRIVATE ${WL_NO_UNDEFINED_OPT})
++    else()
++      target_link_options(atomic_ops PRIVATE ${WL_NO_UNDEFINED_OPT})
++      target_link_options(atomic_ops_gpl PRIVATE ${WL_NO_UNDEFINED_OPT})
++    endif()
++  endif(HAVE_FLAG_WL_NO_UNDEFINED)
 +  set_property(TARGET atomic_ops PROPERTY VERSION ${AO_VERSION_PROP})
 +  set_property(TARGET atomic_ops PROPERTY SOVERSION ${AO_SOVERSION})
 +endif(BUILD_SHARED_LIBS)
