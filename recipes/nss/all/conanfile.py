@@ -1,8 +1,12 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.scm import Version
+from conan.tools.files import apply_conandata_patches, get, chdir, rename, rm
+from conans import tools
 import os, glob
 
+required_conan_version = ">=1.51.3"
 
 class NSSConan(ConanFile):
     name = "nss"
@@ -57,10 +61,13 @@ class NSSConan(ConanFile):
             raise ConanInvalidConfiguration("NSS cannot link to static sqlite. Please use option sqlite3:shared=True")
         if self.settings.arch in ["armv8", "armv8.3"] and self.settings.os in ["Macos"]:
             raise ConanInvalidConfiguration("Macos ARM64 builds not yet supported. Contributions are welcome.")
+        if Version(self.version) >= "3.83":
+            if self.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < 11:
+                raise ConanInvalidConfiguration("nss requires at least gcc 11.")
 
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     @property
     def _make_args(self):
@@ -149,15 +156,14 @@ class NSSConan(ConanFile):
 
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        with tools.chdir(os.path.join(self._source_subfolder, "nss")):
+        apply_conandata_patches(self)
+        with chdir(self, os.path.join(self._source_subfolder, "nss")):
             with tools.vcvars(self) if self.settings.compiler == "Visual Studio" else tools.no_op():
                 self.run("make %s" % " ".join(self._make_args), run_environment=True)
 
     def package(self):
         self.copy("COPYING", src = os.path.join(self._source_subfolder, "nss"), dst = "licenses")
-        with tools.chdir(os.path.join(self._source_subfolder, "nss")):
+        with chdir(self, os.path.join(self._source_subfolder, "nss")):
             self.run("make install %s" % " ".join(self._make_args))
         self.copy("*",
                   src=os.path.join(self._source_subfolder, "dist", "public", "nss"),
@@ -171,13 +177,13 @@ class NSSConan(ConanFile):
             self.copy("*", src = f)
 
         for dll_file in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
-            tools.rename(dll_file, os.path.join(self.package_folder, "bin", os.path.basename(dll_file)))
+            rename(self, dll_file, os.path.join(self.package_folder, "bin", os.path.basename(dll_file)))
 
         if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
         else:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.dll")
+            rm(self, "*.so", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
 
 
 
