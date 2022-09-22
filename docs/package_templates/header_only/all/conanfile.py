@@ -1,13 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, get, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 import os
 
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.3"
 
 
 class PackageConan(ConanFile):
@@ -38,8 +38,7 @@ class PackageConan(ConanFile):
     # no exports_sources attribute, but export_sources(self) method instead
     # this allows finer grain exportation of patches per version
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def layout(self):
         # src_folder must use the same source folder name the project
