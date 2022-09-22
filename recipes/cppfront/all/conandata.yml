@@ -1,4 +1,4 @@
 sources:
   "master":
-    url: "https://github.com/fpelliccioni/cppfront/archive/refs/heads/main.zip"
-    sha256: "d11830b783f24097f2cf083bcf7d7d73128d9a4468379985ea909fc1c7c1f1aa"
+    url: "https://github.com/fpelliccioni/cppfront/archive/refs/heads/fix/utility.zip"
+    sha256: "2aa9915af564c32c8cd210928419bd011e34517e9ea08da560cd1bca446a96f3"
