@@ -1,37 +1,10 @@
 sources:
+  "1.10.0":
+    url: "https://github.com/gabime/spdlog/archive/v1.10.0.tar.gz"
+    sha256: "697f91700237dbae2326b90469be32b876b2b44888302afbc7aceb68bcfe8224"
   "1.9.2":
     url: "https://github.com/gabime/spdlog/archive/v1.9.2.tar.gz"
     sha256: "6fff9215f5cb81760be4cc16d033526d1080427d236e86d70bb02994f85e3d38"
-  "1.9.1":
-    url: "https://github.com/gabime/spdlog/archive/v1.9.1.tar.gz"
-    sha256: "9a452cfa24408baccc9b2bc2d421d68172a7630c99e9504a14754be840d31a62"
-  "1.9.0":
-    url: "https://github.com/gabime/spdlog/archive/v1.9.0.tar.gz"
-    sha256: "9ad181d75aaedbf47c8881e7b947a47cac3d306997e39de24dba60db633e70a7"
   "1.8.5":
     url: "https://github.com/gabime/spdlog/archive/v1.8.5.tar.gz"
     sha256: "944d0bd7c763ac721398dca2bb0f3b5ed16f67cef36810ede5061f35a543b4b8"
-  "1.8.2":
-    url: "https://github.com/gabime/spdlog/archive/v1.8.2.tar.gz"
-    sha256: "e20e6bd8f57e866eaf25a5417f0a38a116e537f1a77ac7b5409ca2b180cec0d5"
-  "1.8.1":
-    url: "https://github.com/gabime/spdlog/archive/v1.8.1.tar.gz"
-    sha256: "5197b3147cfcfaa67dd564db7b878e4a4b3d9f3443801722b3915cdeced656cb"
-  "1.8.0":
-    url: "https://github.com/gabime/spdlog/archive/v1.8.0.tar.gz"
-    sha256: "1e68e9b40cf63bb022a4b18cdc1c9d88eb5d97e4fd64fa981950a9cacf57a4bf"
-  "1.7.0":
-    url: "https://github.com/gabime/spdlog/archive/v1.7.0.tar.gz"
-    sha256: "f0114a4d3c88be9e696762f37a7c379619443ce9d668546c61b21d41affe5b62"
-  "1.6.1":
-    url: "https://github.com/gabime/spdlog/archive/v1.6.1.tar.gz"
-    sha256: "378a040d91f787aec96d269b0c39189f58a6b852e4cbf9150ccfacbe85ebbbfc"
-  "1.6.0":
-    url: "https://github.com/gabime/spdlog/archive/v1.6.0.tar.gz"
-    sha256: "0421667c9f2fc78e6548d44f7bc5921be0f03e612df384294c16cedb93d967f8"
-  "1.5.0":
-    url: "https://github.com/gabime/spdlog/archive/v1.5.0.tar.gz"
-    sha256: "b38e0bbef7faac2b82fed550a0c19b0d4e7f6737d5321d4fd8f216b80f8aee8a"
-  "1.4.2":
-    url: "https://github.com/gabime/spdlog/archive/v1.4.2.tar.gz"
-    sha256: "821c85b120ad15d87ca2bc44185fa9091409777c756029125a02f81354072157"

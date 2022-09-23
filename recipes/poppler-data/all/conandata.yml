@@ -1,14 +1,23 @@
 sources:
+  "0.4.11":
+    url: "https://poppler.freedesktop.org/poppler-data-0.4.11.tar.gz"
+    sha256: "2cec05cd1bb03af98a8b06a1e22f6e6e1a65b1e2f3816cb3069bb0874825f08c"
   "0.4.9":
     url: "https://poppler.freedesktop.org/poppler-data-0.4.9.tar.gz"
     sha256: "1f9c7e7de9ecd0db6ab287349e31bf815ca108a5a175cf906a90163bdbe32012"
   "0.4.10":
     url: "https://poppler.freedesktop.org/poppler-data-0.4.10.tar.gz"
     sha256: "6e2fcef66ec8c44625f94292ccf8af9f1d918b410d5aa69c274ce67387967b30"
-patches:
   "0.4.9":
+    url: "https://poppler.freedesktop.org/poppler-data-0.4.9.tar.gz"
+    sha256: "1f9c7e7de9ecd0db6ab287349e31bf815ca108a5a175cf906a90163bdbe32012"
+patches:
+  "0.4.11":
     - base_path: "source_subfolder"
       patch_file: "patches/0001-cmake-use-GNUInstallDirs.patch"
   "0.4.10":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-cmake-use-GNUInstallDirs.patch"
+  "0.4.9":
     - base_path: "source_subfolder"
       patch_file: "patches/0001-cmake-use-GNUInstallDirs.patch"

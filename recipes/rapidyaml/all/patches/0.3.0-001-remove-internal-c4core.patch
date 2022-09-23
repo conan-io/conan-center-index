@@ -1,25 +1,18 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index a75251a..48e35c8 100644
+index a75251a..a55654e 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -15,10 +15,9 @@ option(RYML_BUILD_API "Enable API generation (python, etc)" OFF)
- option(RYML_DBG "Enable (very verbose) ryml debug prints." OFF)
+@@ -4,7 +4,7 @@ project(ryml
+     DESCRIPTION "Rapid YAML parsing and emitting"
+     HOMEPAGE_URL "https://github.com/biojppm/rapidyaml"
+     LANGUAGES CXX)
+-c4_project(VERSION 0.3.0 STANDALONE
++c4_project(VERSION 0.3.0
+     AUTHOR "Joao Paulo Magalhaes <dev@jpmag.me>")
  
  
--#-------------------------------------------------------
-+find_package(c4core REQUIRED CONFIG)
- 
--c4_require_subproject(c4core INCORPORATE
--    SUBDIRECTORY ${RYML_EXT_DIR}/c4core)
-+#-------------------------------------------------------
- 
- c4_add_library(ryml
-     SOURCES
-@@ -50,10 +49,10 @@ c4_add_library(ryml
-         ryml.natvis
-     SOURCE_ROOT ${RYML_SRC_DIR}
+@@ -52,8 +52,7 @@ c4_add_library(ryml
      INC_DIRS
-+        $<BUILD_INTERFACE:${C4CORE_INCLUDE_DIR}>
          $<BUILD_INTERFACE:${RYML_SRC_DIR}>
          $<INSTALL_INTERFACE:include>
 -    LIBS c4core

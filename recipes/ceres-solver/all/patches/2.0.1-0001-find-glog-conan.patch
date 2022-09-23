@@ -1,0 +1,40 @@
+diff --git a/cmake/FindGlog.cmake b/cmake/FindGlog.cmake
+index 1a7b6c09..d4bd7f08 100644
+--- a/cmake/FindGlog.cmake
++++ b/cmake/FindGlog.cmake
+@@ -261,12 +261,12 @@ if (NOT GLOG_FOUND)
+ 
+   # Search user-installed locations first, so that we prefer user installs
+   # to system installs where both exist.
+-  list(APPEND GLOG_CHECK_INCLUDE_DIRS
+-    /usr/local/include
+-    /usr/local/homebrew/include # Mac OS X
+-    /opt/local/var/macports/software # Mac OS X.
+-    /opt/local/include
+-    /usr/include)
++  list(APPEND GLOG_CHECK_INCLUDE_DIRS ${CMAKE_INCLUDE_PATH})
++    #/usr/local/include
++    #/usr/local/homebrew/include # Mac OS X
++    #/opt/local/var/macports/software # Mac OS X.
++    #/opt/local/include
++    #/usr/include)
+   # Windows (for C:/Program Files prefix).
+   list(APPEND GLOG_CHECK_PATH_SUFFIXES
+     glog/include
+@@ -276,11 +276,11 @@ if (NOT GLOG_FOUND)
+     google-glog/include # CMake installs with project name prefix.
+     google-glog/Include)
+ 
+-  list(APPEND GLOG_CHECK_LIBRARY_DIRS
+-    /usr/local/lib
+-    /usr/local/homebrew/lib # Mac OS X.
+-    /opt/local/lib
+-    /usr/lib)
++  list(APPEND GLOG_CHECK_LIBRARY_DIRS ${CMAKE_LIB_PATH})
++    #/usr/local/lib
++    #/usr/local/homebrew/lib # Mac OS X.
++    #/opt/local/lib
++    #/usr/lib)
+   # Windows (for C:/Program Files prefix).
+   list(APPEND GLOG_CHECK_LIBRARY_SUFFIXES
+     glog/lib

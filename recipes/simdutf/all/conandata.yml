@@ -1,0 +1,10 @@
+sources:
+  "1.0.1":
+    url: "https://github.com/simdutf/simdutf/archive/refs/tags/v1.0.1.tar.gz"
+    sha256: "e7832ba58fb95fe00de76dbbb2f17d844a7ad02a6f5e3e9e5ce9520e820049a0"
+patches:
+  "1.0.1":
+    - patch_file: "patches/1.0.1-0001-fix-cmake.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.0.1-0002-remove-static.patch"
+      base_path: "source_subfolder"

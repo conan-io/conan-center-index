@@ -20,10 +20,7 @@ class So5extraConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        if tools.Version(self.version) >= "1.5.0":
-            self.requires("sobjectizer/5.7.3")
-        else:
-            self.requires("sobjectizer/5.7.2.3")
+        self.requires("sobjectizer/5.7.4")
 
     def validate(self):
         minimal_cpp_standard = "17"

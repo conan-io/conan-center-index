@@ -1,4 +1,10 @@
 sources:
+  "56":
+    url: "https://github.com/benhoyt/inih/archive/r56.tar.gz"
+    sha256: "4f2ba6bd122d30281a8c7a4d5723b7af90b56aa828c0e88256d7fceda03a491a"
+  "55":
+    url: "https://github.com/benhoyt/inih/archive/r55.tar.gz"
+    sha256: "ba55f8ae2a8caf0653f30f48567241e14ea916acfc13481f502d8a9c8f507f68"
   "52":
     url: "https://github.com/benhoyt/inih/archive/r52.tar.gz"
     sha256: "439cff9ce9a8afc52d08772ac3e93b3cecd79c7707f871fb4534fb3a48201880"

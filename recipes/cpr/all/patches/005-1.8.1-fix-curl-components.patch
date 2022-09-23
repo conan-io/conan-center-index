@@ -1,0 +1,55 @@
+diff --git a/a/CMakeLists.txt b/b/CMakeLists.txt
+index 6df3663..9317f97 100644
+--- a/a/CMakeLists.txt
++++ b/b/CMakeLists.txt
+@@ -156,6 +156,8 @@ endif()
+ 
+ # Curl configuration
+ if(CPR_FORCE_USE_SYSTEM_CURL)
++    find_package(CURL REQUIRED)
++    if(0)
+     if(CPR_ENABLE_SSL)
+         find_package(CURL COMPONENTS HTTP HTTPS)
+         if(CURL_FOUND)
+@@ -180,6 +182,7 @@ if(CPR_FORCE_USE_SYSTEM_CURL)
+             message(FATAL_ERROR "Curl not found on this system. To use the build in version set CPR_FORCE_USE_SYSTEM_CURL to OFF.")
+         endif()
+     endif()
++    endif()
+ else()
+     message(STATUS "Configuring build in curl...")
+ 
+@@ -251,7 +254,7 @@ else()
+     if(BUILD_CURL_EXE)
+         set_property(TARGET curl PROPERTY FOLDER "external")
+     endif()
+-        
++
+     set_property(TARGET libcurl PROPERTY FOLDER "external")
+ endif()
+ 
+@@ -279,13 +282,13 @@ if(CPR_BUILD_TESTS)
+         FetchContent_MakeAvailable(googletest)
+ 
+         restore_variable(DESTINATION CMAKE_CXX_CLANG_TIDY BACKUP CMAKE_CXX_CLANG_TIDY_BKP)
+-        
++
+         add_library(gtest_int INTERFACE)
+         target_link_libraries(gtest_int INTERFACE gtest)
+         target_include_directories(gtest_int INTERFACE ${googletest_SOURCE_DIR}/include)
+ 
+         add_library(GTest::GTest ALIAS gtest_int)
+-       
++
+         # Group under the "tests/gtest" project folder in IDEs such as Visual Studio.
+     set_property(TARGET gtest PROPERTY FOLDER "tests/gtest")
+     set_property(TARGET gtest_main PROPERTY FOLDER "tests/gtest")
+@@ -314,7 +317,7 @@ if(CPR_BUILD_TESTS)
+     # Disable linting for mongoose
+     clear_variable(DESTINATION CMAKE_CXX_CLANG_TIDY BACKUP CMAKE_CXX_CLANG_TIDY_BKP)
+ 
+-    FetchContent_Declare(mongoose 
++    FetchContent_Declare(mongoose
+                          URL                    https://github.com/cesanta/mongoose/archive/6.18.tar.gz
+                          URL_HASH               SHA256=f5c10346abc9c72f7cac7885d853ca064fb09aad57580433941a8fd7a3543769 # the hash for 6.18.tar.gz
+                          USES_TERMINAL_DOWNLOAD TRUE)   # <---- This is needed only for Ninja to show download progress

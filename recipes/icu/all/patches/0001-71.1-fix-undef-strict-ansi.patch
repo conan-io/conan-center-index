@@ -1,0 +1,18 @@
+Waiting on a fix for: https://unicode-org.atlassian.net/browse/ICU-22002
+
+--- source/io/ufile.cpp	2022-04-08 06:41:55.000000000 +0800
++++ source/io/ufile.cpp	2022-06-10 13:00:05.354655951 +0800
+@@ -21,13 +21,6 @@
+ */
+ 
+ #include "unicode/platform.h"
+-#if defined(__GNUC__) && !defined(__clang__) && defined(__STRICT_ANSI__)
+-// g++, fileno isn't defined                  if     __STRICT_ANSI__ is defined.
+-// clang fails to compile the <string> header unless __STRICT_ANSI__ is defined.
+-// __GNUC__ is set by both gcc and clang.
+-#undef __STRICT_ANSI__
+-#endif
+-
+ #include "locmap.h"
+ #include "unicode/ustdio.h"
+ 

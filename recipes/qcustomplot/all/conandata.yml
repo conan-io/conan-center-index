@@ -2,7 +2,9 @@ sources:
   "2.1.0":
     url: "https://www.qcustomplot.com/release/2.1.0fixed/QCustomPlot-source.tar.gz"
     sha256: "357b78be0f52b2d01c17ec3e2e1271255761810af7e8a9476cef51fccf1a0f44"
+  "1.3.2":
+    url: "https://www.qcustomplot.com/release/1.3.2/QCustomPlot.tar.gz"
+    sha256: "ea2ed5712c2020b25f40eacabd0926ef71a7f07e2a3771c32d53ace1f47123eb"
 patches:
   "2.1.0":
     - patch_file: "patches/0001-fix-for-qt6.2.patch"
-      base_path: "source_subfolder"

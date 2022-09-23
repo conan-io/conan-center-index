@@ -1,4 +1,13 @@
 sources:
+  "1.3.224.0":
+    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/sdk-1.3.224.0.tar.gz"
+    sha256: "428b83f2710c07123cf2ec21934389f893aa0b570d1fe4aba6e38718c9a6ea69"
+  "1.3.216.0":
+    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/sdk-1.3.216.0.tar.gz"
+    sha256: "b4b9abeb59deda20c41808ac4cd5f9faf6f0a9daa51a8c82e13ca47c045e982f"
+  "1.3.211.0":
+    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/sdk-1.3.211.0.tar.gz"
+    sha256: "5466e628c92c30aeb45547b9d836dcf7b6249afb94de9dea4ac4449a82202b50"
   "1.3.204.0":
     url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/sdk-1.3.204.0.tar.gz"
     sha256: "86787c26b86e35406020356c9d5e312c65edbd039d0eca5579b21d0ab9795758"
@@ -23,29 +32,18 @@ sources:
 patches:
   "2021.4":
     - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2021.3.patch"
-      base_path: "source_subfolder"
   "2021.3":
     - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2021.3.patch"
-      base_path: "source_subfolder"
   "2021.2":
     - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2021.2.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-allow-more-platforms-2020.3.patch"
-      base_path: "source_subfolder"
   "2020.5":
     - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2020.5.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-allow-more-platforms-2020.3.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-support-SPV_KHR_fragment_shading_rate.patch"
-      base_path: "source_subfolder"
   "2020.3":
     - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2020.3.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-allow-more-platforms-2020.3.patch"
-      base_path: "source_subfolder"
   "2019.2":
     - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2019.2.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-allow-more-platforms-2019.2.patch"
-      base_path: "source_subfolder"

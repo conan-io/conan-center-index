@@ -1,4 +1,7 @@
 sources:
+  "1.11.0":
+    url: "https://github.com/onnx/onnx/archive/refs/tags/v1.11.0.tar.gz"
+    sha256: "a20f2d9df805b16ac75ab4da0a230d3d1c304127d719e5c66a4e6df514e7f6c0"
   "1.10.2":
     url: "https://github.com/onnx/onnx/archive/refs/tags/v1.10.2.tar.gz"
     sha256: "520b3aa34272cc215e2eb41385f58adf01750d88858d4722563edca8410c5dc9"
@@ -9,16 +12,13 @@ sources:
     url: "https://github.com/onnx/onnx/archive/v1.8.1.tar.gz"
     sha256: "0054c7eeed97e8ee43921c3f944b0450782a081d910a14b3b6e662bc87065192"
 patches:
+  "1.11.0":
+    - patch_file: "patches/0001-fix-concurrent-proto3-remove-1.11.0.patch"
   "1.10.2":
     - patch_file: "patches/0001-fix-concurrent-proto3-remove-1.9.0.patch"
-      base_path: "source_subfolder"
   "1.9.0":
     - patch_file: "patches/0001-fix-concurrent-proto3-remove-1.9.0.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-msvc-no-warnings-as-errors-1.9.0.patch"
-      base_path: "source_subfolder"
   "1.8.1":
     - patch_file: "patches/0001-fix-concurrent-proto3-remove-1.8.1.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-msvc-no-warnings-as-errors-1.8.1.patch"
-      base_path: "source_subfolder"

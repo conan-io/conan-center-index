@@ -1,0 +1,8 @@
+sources:
+  "0.9.0-pre23":
+    url: "https://github.com/smoked-herring/sail/archive/v0.9.0-pre23.tar.gz"
+    sha256: "6c5314561fda3d388b4653e7424cdf2ae2c65767e79203576804ca41fc930a6b"
+patches:
+  "0.9.0-pre23":
+    - patch_file: "patches/0.9.0-pre23-avif-find-package.patch"
+      base_path: "src"

@@ -1,8 +1,10 @@
---- a/CMakeLists_old.txt
+--- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -2,8 +2,6 @@ PROJECT (AstronomicalAlgorithms)
+@@ -1,9 +1,7 @@
++cmake_minimum_required(VERSION 3.8)
+ PROJECT (AstronomicalAlgorithms)
  
- cmake_minimum_required(VERSION 3.8)
+-cmake_minimum_required(VERSION 3.8)
  
 -SET(CMAKE_CXX_STANDARD 17)
 -SET(CMAKE_CXX_STANDARD_REQUIRED ON)

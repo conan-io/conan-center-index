@@ -1,6 +1,5 @@
 # Errors from the conan-center hook (KB-Hxxx)
 
-
 #### **<a name="KB-H001">#KB-H001</a>: "DEPRECATED GLOBAL CPPSTD"**
 
 `Conan > 1.15` deprecated the usage of the global ``cppstd`` setting in favor of ``compiler.cppstd`` to [manage C++ standard](https://docs.conan.io/en/latest/howtos/manage_cpp_standard.html). As a subsetting of the compiler, it shouldn't be declared in the `conanfile.py`.
@@ -11,7 +10,8 @@ The package names in conan-center have to be [lowercase](https://github.com/cona
 
 #### **<a name="KB-H003">#KB-H003</a>: "RECIPE METADATA"**
 
-The recipe has to declare the following attributes: 
+The recipe has to declare the following attributes:
+
 - [url](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#url)
 - [license](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#license)
 - [description](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#description)
@@ -61,11 +61,9 @@ class SomeRecipe(ConanFile):
 
 Here we use [configure()](https://docs.conan.io/en/latest/reference/conanfile/methods.html#configure-config-options) method, because user options are loaded after [config_options()](https://docs.conan.io/en/latest/reference/conanfile/methods.html#configure-config-options) only.
 
-
 #### **<a name="KB-H008">#KB-H008</a>: "VERSION RANGES"**
 
 It is not allowed to use [version ranges](https://docs.conan.io/en/latest/versioning/version_ranges.html) for the recipes in Conan center, where the dependency graph should be deterministic.
-
 
 #### **<a name="KB-H009">#KB-H009</a>: "RECIPE FOLDER SIZE"**
 
@@ -130,13 +128,13 @@ In order to make sure that the package will be consumed with any build-system, c
 
 The consumers of the package will be able to consume the packages using a specific [generators](https://docs.conan.io/en/latest/using_packages/conanfile_txt.html#generators) for the build system they use.
 
-See also: [Why are CMake find/config files and pkg-config files not packaged?](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged).
+See also: [Why are CMake find/config files and pkg-config files not packaged?](faqs.md#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged).
 
 #### **<a name="KB-H017">#KB-H017</a>: "PDB FILES NOT ALLOWED"**
 
 Because of the big size of the [PDB](https://github.com/Microsoft/microsoft-pdb) files (Program Databse, a debug information format) and the issues using them changing the original folders, the PDB files are not allowed to be packaged.
 
-See also: [Why PDB files are not allowed?](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#why-pdb-files-are-not-allowed).
+See also: [Why PDB files are not allowed?](faqs.md#why-pdb-files-are-not-allowed).
 
 #### **<a name="KB-H018">#KB-H018</a>: "LIBTOOL FILES PRESENCE"**
 
@@ -151,7 +149,7 @@ It is only allowed to put build files in `builddirs` because the generators migh
 
 For the same reasons explained at [KB-H016](#KB-H016) it is not allowed to package `*.pc` files.
 
-See also: [Why are CMake find/config files and pkg-config files not packaged?](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged).
+See also: [Why are CMake find/config files and pkg-config files not packaged?](faqs.md#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged).
 
 #### **<a name="KB-H021">#KB-H021</a>: "MS RUNTIME FILES"**
 
@@ -257,29 +255,8 @@ class TestConan(ConanFile):
 
 #### **<a name="KB-H030">#KB-H030</a>: "CONANDATA.YML FORMAT"**
 
-The structure of the [conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html) file should follow this schema:
-
-```yml
-sources:
-  "1.69.0":
-    url: "url1.69.0"
-    sha256: "sha1.69.0"
-  "1.70.0":
-    url: "url1.70.0"
-    sha256: "sha1.70.0"
-patches:
-  "1.70.0":
-    - patch_file: "001-1.70.0.patch"
-      base_path: "source_subfolder/1.70.0"
-    - url: "https://fake_url.com/custom.patch"
-      sha256: "sha_custom"
-      base_path: "source_subfolder"
-  "1.71.0":
-    - patch_file: "001-1.71.0.patch"
-      base_path: "source_subfolder/1.71.0"
-```
-
-See also: [The conandata.yml](https://github.com/conan-io/conan-center-index/blob/master/docs/how_to_add_packages.md#the-conandatayml).
+The structure of the [conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html) file should follow the schema
+defined in [Adding Packages - `Conandata.yml` Format](conandata_yml_format.md).
 
 #### **<a name="KB-H031">#KB-H031</a>: "CONANDATA.YML REDUCE"**
 
@@ -290,7 +267,7 @@ Any additional field in the YAML file will raise an error.
 
 [System requirements](https://docs.conan.io/en/latest/reference/conanfile/methods.html#systempackagetool) can be used as an option when a Conan package is not available ,the same package can be installed by system package manager. However, it can cause reproducibility problems, since the package may vary according the distribution or OS. Conan is not able to track its metadata, so that, installing system packages by recipe is not allowed.
 
-See also: [Can I install packages from the system package manager?](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#can-i-install-packages-from-the-system-package-manager).
+See also: [Can I install packages from the system package manager?](faqs.md#can-i-install-packages-from-the-system-package-manager).
 
 #### **<a name="KB-H034">#KB-H034</a>: "TEST PACKAGE - NO IMPORTS()"**
 
@@ -343,11 +320,12 @@ The attribue [default_options](https://docs.conan.io/en/latest/reference/conanfi
 
 #### **<a name="KB-H052">#KB-H052</a>: "CONFIG.YML HAS NEW VERSION"**
 
-It's important to have new library version defined in both [config.yml](https://github.com/conan-io/conan-center-index/blob/master/docs/how_to_add_packages.md#the-version-folders) and [conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html), otherwise newly added version will not be checked and built by CI and will not be available for download.
+It's important to have new library version defined in both [config.yml](how_to_add_packages.md#the-version-folders) and [conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html), otherwise newly added version will not be checked and built by CI and will not be available for download.
 
 #### **<a name="KB-H053">#KB-H053</a>: "PRIVATE IMPORTS"**
 
-The recipe imports private Conan API, this is strongly discouraged - private imports are subjects to breaking changes. Avoid usage of private APIs, request to publically expose needed methods, if necessary.
+The recipe imports private Conan API, this is strongly discouraged - private imports are subjects to breaking changes. Avoid usage of private APIs,
+request to publicly expose needed methods, if necessary.
 
 #### **<a name="KB-H054">#KB-H054</a>: "LIBRARY DOES NOT EXIST"**
 
@@ -360,8 +338,9 @@ The duality creates a heterogeneous way of solving dependencies, making it diffi
 
 #### **<a name="KB-H056">#KB-H056</a>: "LICENSE PUBLIC DOMAIN"**
 
-[Public Domain](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) is not a license by itself, but consists of all the creative work to which no exclusive intellectual property rights apply.
-If a project is under Public Domain and there is no license listed, the [Unlicense](https://spdx.org/licenses/Unlicense) should be used.
+[Public Domain](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) is not a license by itself, but consists of all the creative work to which
+no exclusive intellectual property rights apply. If a project is under Public Domain and there is no license listed, the
+[Unlicense](https://spdx.org/licenses/Unlicense) should be used as described in the [FAQ](faqs.md#what-license-should-i-use-for-public-domain).
 
 #### **<a name="KB-H057">#KB-H057</a>: "TOOLS RENAME"**
 
@@ -403,6 +382,7 @@ It may happen due to the usage of new features within recipe (such as `strip_roo
 The policy of Conan Center Index to support only the latest version of the Conan Client, so it's safe to put the version Conan Center Index currently runs into the recipe.
 Otherwise, it's not an easy task on its own to determine the minimal version that has to be specified: checking the Conan Client [Changelog](https://docs.conan.io/en/latest/changelog.html), one has to know in which Conan Client releases all the attributes, methods, build helpers, etc. used by the recipe were first introduced, and then select the most recent of them.
 Consider adding the following code:
+
 ```python
 required_conan_version = ">=1.43.0"  # use the version that Conan Center Index runs
 
@@ -411,13 +391,14 @@ class SomeRecipe(ConanFile):
 
 ```
 
-See also: [Submitting a Package](https://github.com/conan-io/conan-center-index/blob/master/docs/how_to_add_packages.md#submitting-a-package).
+See also: [Submitting a Package](how_to_add_packages.md#submitting-a-package).
 
 #### **<a name="KB-H066">#KB-H066</a>: "SHORT_PATHS USAGE"**
 
 The recipe missess [short_paths](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#short-paths) attribute.
 It may happen due to the very long paths within source, build or package directories during the package creating.
 Consider adding the following code:
+
 ```python
 class SomeRecipe(ConanFile):
     ...
@@ -425,13 +406,67 @@ class SomeRecipe(ConanFile):
     short_paths = True
 ```
 
-See also: (Maximum Path Length Limitation)[https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=cmd].
+See also: [Maximum Path Length Limitation](https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=cmd).
 
-# Deprecated errors
+#### **<a name="KB-H068">#KB-H068</a>: "TEST_TYPE MANAGEMENT"**
+
+In Conan 2.0, see [migration guide](https://docs.conan.io/en/latest/migrating_to_2.0/recipes.html#changes-in-the-test-package-recipe),
+the `test_package/conanfile.py` needs to declare the requirement being tested explicitly. To be prepared you
+have to set the attribute `test_type="explicit"` (this will be ignored in 2.0) to make Conan activate the explicit
+mode, then declaring the requirement using the `self.tested_reference_str` that contains the reference being tested.
+
+#### **<a name="KB-H069">#KB-H069</a>: "TEST PACKAGE - NO DEFAULT OPTIONS"**
+
+This is to ensure the exact package that is built and uploaded is tested against. When `options` of `default_options` are modified in a
+`test_package` it can possibly result in the graph being modified. The objective is to enforce quality of the packages and to avoid confusing
+"missing packages" errors.
+
+#### **<a name="KB-H070">#KB-H070</a>: "MANDATORY SETTINGS"**
+
+> :information_source: This rule was put in place as it was deemed safe for evaluation however there is room for improvement
+
+ConanCenter operates is profiles with a predefined list of settings, all of these much be present in the recipe to ensure `package_id`s are
+computed correctly. Some libraries, for instance header-only, do not require all the settings and those should be deleted from the `package_id`.
+This approach ensure consistency and reduces the learning curve.
+
+Recipes should include:
+
+```python
+class SomeRecipe(ConanFile):
+    ...
+
+    settings = "os", "compiler", "build_type", "arch"
+```
+
+- For header-only recipes ([example](https://github.com/conan-io/conan-center-index/blob/3a773e2d69ada3bd931252c43a48daf636ddfe87/recipes/eigen/all/conanfile.py#L35-L36)):
+
+    ```python
+        def package_id(self):
+            self.info.header_only()
+    ```
+
+There is the case when the package is header-only, but the options affects the generated artifact, (e.g. kanguru, pagmo2 ...), so you need to use `self.info.settings.clear()` instead.
+
+- For "tool" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/cmake/3.x.x/conanfile.py#L104-L105)) which only provide binaries, see [our packing policy](packaging_policy.md#settings) for more, should do as follows:
+
+    ```python
+        def package_id(self):
+            del self.info.settings.compiler
+    ```
+
+#### **<a name="KB-H071">#KB-H071</a>: "INCLUDE PATH DOES NOT EXIST"**
+
+It's erroneous to leave the default `include` directory when it's not present. Consider adding:
+
+```python
+def package_info(self):
+    self.cpp_info.includedirs = []
+```
+
+## Deprecated errors
 
 The following errors from the hooks are deprecated and no longer reported:
 
-#### **<a name="KB-H047">#KB-H047</a>: "NO ASCII CHARACTERS"**
+### **<a name="KB-H047">#KB-H047</a>: "NO ASCII CHARACTERS"**
 
 According to PEP [263](https://www.python.org/dev/peps/pep-0263/), Unicode literals should only appear in Python code if the encoding is declared on one of the first two lines of the source file. Without such a declaration, any Unicode literal will cause a syntax error for Python 2 interpreters.
-

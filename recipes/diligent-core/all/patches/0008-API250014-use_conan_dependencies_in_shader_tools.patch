@@ -1,36 +1,8 @@
-diff --git a/Graphics/GraphicsEngineVulkan/CMakeLists.txt b/Graphics/GraphicsEngineVulkan/CMakeLists.txt
-index e4772d5ea..34451f2dd 100644
---- a/Graphics/GraphicsEngineVulkan/CMakeLists.txt
-+++ b/Graphics/GraphicsEngineVulkan/CMakeLists.txt
-@@ -179,7 +179,7 @@ set(PRIVATE_DEPENDENCIES
- if (${DILIGENT_NO_HLSL})
-     message("HLSL support is disabled. Vulkan backend will not be able to consume SPIRV bytecode generated from HLSL.")
- else()
--    list(APPEND PRIVATE_DEPENDENCIES SPIRV-Tools-opt)
-+    list(APPEND PRIVATE_DEPENDENCIES CONAN_PKG::spirv-tools)
- endif()
- 
- # Use DirectX shader compiler for SPIRV.
 diff --git a/Graphics/ShaderTools/CMakeLists.txt b/Graphics/ShaderTools/CMakeLists.txt
-index dc47ac4b2..993fe97ab 100644
+index dc47ac4b..83630de3 100644
 --- a/Graphics/ShaderTools/CMakeLists.txt
 +++ b/Graphics/ShaderTools/CMakeLists.txt
-@@ -134,26 +134,26 @@ endif()
- if(ENABLE_SPIRV)
-     target_link_libraries(Diligent-ShaderTools
-     PRIVATE
--        spirv-cross-core
-+        CONAN_PKG::spirv-cross
-     )
- 
-     if (${USE_SPIRV_TOOLS})
-         target_link_libraries(Diligent-ShaderTools
-         PRIVATE
--            SPIRV-Tools-opt
-+            CONAN_PKG::spirv-tools
-         )
-     endif()
- 
+@@ -147,13 +147,13 @@ if(ENABLE_SPIRV)
      if (${USE_GLSLANG})
          target_link_libraries(Diligent-ShaderTools
          PRIVATE

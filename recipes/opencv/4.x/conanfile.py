@@ -47,6 +47,7 @@ class OpenCVConan(ConanFile):
         "neon": [True, False],
         "dnn": [True, False],
         "dnn_cuda": [True, False],
+        "cuda_arch_bin": "ANY",
         "cpu_baseline": "ANY",
         "cpu_dispatch": "ANY",
         "nonfree": [True, False],
@@ -82,6 +83,7 @@ class OpenCVConan(ConanFile):
         "neon": True,
         "dnn": True,
         "dnn_cuda": False,
+        "cuda_arch_bin": None,
         "cpu_baseline": None,
         "cpu_dispatch": None,
         "nonfree": False,
@@ -163,6 +165,7 @@ class OpenCVConan(ConanFile):
             del self.options.with_cudnn
             del self.options.with_cufft
             del self.options.dnn_cuda
+            del self.options.cuda_arch_bin
         if bool(self.options.with_jpeg):
             if self.options.get_safe("with_jpeg2000") == "jasper":
                 self.options["jasper"].with_libjpeg = self.options.with_jpeg
@@ -173,7 +176,7 @@ class OpenCVConan(ConanFile):
             self.options.with_openexr = False  # disabled because this forces linkage to libc++_shared.so
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
@@ -217,7 +220,7 @@ class OpenCVConan(ConanFile):
         if self.options.shared and self._is_msvc and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration("Visual Studio with static runtime is not supported for shared library.")
         if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "4":
-            raise ConanInvalidConfiguration("Clang 3.x can build OpenCV 4.x due an internal bug.")
+            raise ConanInvalidConfiguration("Clang 3.x can't build OpenCV 4.x due to an internal bug.")
         if self.options.with_cuda and not self.options.contrib:
             raise ConanInvalidConfiguration("contrib must be enabled for cuda")
         if self.options.get_safe("dnn_cuda", False) and \
@@ -350,6 +353,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["BUILD_WEBP"] = False
         self._cmake.definitions["BUILD_TBB"] = False
         self._cmake.definitions["OPENCV_FORCE_3RDPARTY_BUILD"] = False
+        self._cmake.definitions["OPENCV_PYTHON_SKIP_DETECTION"] = True
         self._cmake.definitions["BUILD_opencv_python2"] = False
         self._cmake.definitions["BUILD_opencv_python3"] = False
         self._cmake.definitions["BUILD_opencv_python_bindings_g"] = False
@@ -474,11 +478,14 @@ class OpenCVConan(ConanFile):
         if self.options.with_cuda:
             # This allows compilation on older GCC/NVCC, otherwise build errors.
             self._cmake.definitions["CUDA_NVCC_FLAGS"] = "--expt-relaxed-constexpr"
+            if self.options.cuda_arch_bin:
+                self._cmake.definitions["CUDA_ARCH_BIN"] = self.options.cuda_arch_bin
         self._cmake.definitions["WITH_CUBLAS"] = self.options.get_safe("with_cublas", False)
         self._cmake.definitions["WITH_CUFFT"] = self.options.get_safe("with_cufft", False)
         self._cmake.definitions["WITH_CUDNN"] = self.options.get_safe("with_cudnn", False)
 
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
+        self._cmake.definitions["ENABLE_CCACHE"] = False
 
         if self._is_msvc:
             self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = "MT" in msvc_runtime_flag(self)
@@ -497,8 +504,7 @@ class OpenCVConan(ConanFile):
                 "armv8": "aarch64",
                 "armv8.3": "aarch64",
             }.get(str(self.settings.arch), str(self.settings.arch))
-            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
-
+            self._cmake.definitions["CONAN_OPENCV_SYSTEM_PROCESSOR"] = cmake_system_processor
             # Workaround for cross-build to at least iOS/tvOS/watchOS,
             # when dependencies are found with find_path() and find_library()
             self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_INCLUDE"] = "BOTH"
@@ -631,7 +637,6 @@ class OpenCVConan(ConanFile):
                 + eigen() + ffmpeg() + ipp())},
             {"target": "opencv_calib3d",    "lib": "calib3d",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d"]+ eigen() + ipp()},
             {"target": "opencv_highgui",    "lib": "highgui",    "requires": ["opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_videoio"] + freetype() + eigen() + gtk() + ipp()},
-            {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen() + quirc() + ipp()},
             {"target": "opencv_stitching",  "lib": "stitching",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + xfeatures2d() + eigen() + ipp()},
             {"target": "opencv_video",      "lib": "video",      "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen() + ipp()},
         ]
@@ -642,7 +647,9 @@ class OpenCVConan(ConanFile):
 
         if self.options.dnn:
             opencv_components.extend([
-                {"target": "opencv_dnn", "lib": "dnn", "requires": ["opencv_core", "opencv_imgproc"] + protobuf() + ipp()}
+                {"target": "opencv_dnn", "lib": "dnn", "requires": ["opencv_core", "opencv_imgproc"] + protobuf() + ipp()},
+                {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen() + quirc() + ipp()},
+
             ])
         if self.options.contrib:
             opencv_components.extend([
@@ -664,18 +671,21 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_videostab",           "lib": "videostab",           "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_photo", "opencv_features2d", "opencv_imgcodecs", "opencv_videoio", "opencv_calib3d", "opencv_video"] + eigen() + ipp()},
                 {"target": "opencv_xfeatures2d",         "lib": "xfeatures2d",         "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_features2d", "opencv_calib3d", "opencv_shape", ] + eigen() + ipp()},
                 {"target": "opencv_ximgproc",            "lib": "ximgproc",            "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_video"] + eigen() + ipp()},
-                {"target": "opencv_xobjdetect",          "lib": "xobjdetect",          "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_objdetect"] + eigen() + ipp()},
                 {"target": "opencv_aruco",               "lib": "aruco",               "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d"] + eigen() + ipp()},
                 {"target": "opencv_bgsegm",              "lib": "bgsegm",              "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d", "opencv_video"] + eigen() + ipp()},
                 {"target": "opencv_bioinspired",         "lib": "bioinspired",         "requires": ["opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_videoio", "opencv_highgui"] + eigen() + ipp()},
                 {"target": "opencv_ccalib",              "lib": "ccalib",              "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_imgcodecs", "opencv_videoio", "opencv_calib3d", "opencv_highgui"] + eigen() + ipp()},
-                {"target": "opencv_dpm",                 "lib": "dpm",                 "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_imgcodecs", "opencv_videoio", "opencv_calib3d", "opencv_highgui", "opencv_objdetect"] + eigen() + ipp()},
-                {"target": "opencv_face",                "lib": "face",                "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_photo", "opencv_features2d", "opencv_calib3d", "opencv_objdetect"] + eigen() + ipp()},
                 {"target": "opencv_optflow",             "lib": "optflow",             "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_video", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_video", "opencv_ximgproc"] + eigen() + ipp()},
                 {"target": "opencv_superres",            "lib": "superres",            "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_imgcodecs", "opencv_videoio", "opencv_calib3d", "opencv_video", "opencv_ximgproc", "opencv_optflow"] + eigen() + ipp()},
                 {"target": "opencv_tracking",            "lib": "tracking",            "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_plot", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_datasets", "opencv_video"] + eigen() + ipp()},
                 {"target": "opencv_stereo",              "lib": "stereo",              "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_plot", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_datasets", "opencv_video", "opencv_tracking"] + eigen() + ipp()},
             ])
+            if self.options.dnn:
+                opencv_components.extend([
+                    {"target": "opencv_xobjdetect",          "lib": "xobjdetect",          "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_objdetect"] + eigen() + ipp()},
+                    {"target": "opencv_dpm",                 "lib": "dpm",                 "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_imgcodecs", "opencv_videoio", "opencv_calib3d", "opencv_highgui", "opencv_objdetect"] + eigen() + ipp()},
+                    {"target": "opencv_face",                "lib": "face",                "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_photo", "opencv_features2d", "opencv_calib3d", "opencv_objdetect"] + eigen() + ipp()}
+                ])
             if self.version >= "4.3.0":
                 opencv_components.extend([
                     {"target": "opencv_intensity_transform", "lib": "intensity_transform", "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
@@ -765,7 +775,7 @@ class OpenCVConan(ConanFile):
                             self.cpp_info.components[conan_component].libdirs.append("lib")
                             self.cpp_info.components[conan_component].libs += tools.collect_libs(self)
 
-                if self.settings.os in ["iOS", "Macos", "Linux"]:
+                if self.settings.os in ["iOS", "Macos", "Linux", "Neutrino"]:
                     if not self.options.shared:
                         if conan_component == "opencv_core":
                             libs = list(filter(lambda x: not x.startswith("opencv"), tools.collect_libs(self)))

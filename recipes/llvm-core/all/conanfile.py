@@ -47,7 +47,8 @@ class LLVMCoreConan(ConanFile):
         ],
         'with_ffi': [True, False],
         'with_zlib': [True, False],
-        'with_xml2': [True, False]
+        'with_xml2': [True, False],
+        'use_llvm_cmake_files': [True, False],
     }
     default_options = {
         'shared': False,
@@ -65,7 +66,8 @@ class LLVMCoreConan(ConanFile):
         'use_sanitizer': 'None',
         'with_ffi': False,
         'with_zlib': True,
-        'with_xml2': True
+        'with_xml2': True,
+        'use_llvm_cmake_files': False,
     }
 
     # Older cmake versions may have issues generating the graphviz output used
@@ -197,9 +199,12 @@ class LLVMCoreConan(ConanFile):
         if self.options.with_ffi:
             self.requires('libffi/3.3')
         if self.options.get_safe('with_zlib', False):
-            self.requires('zlib/1.2.11')
+            self.requires('zlib/1.2.12')
         if self.options.get_safe('with_xml2', False):
             self.requires('libxml2/2.9.10')
+
+    def package_id(self):
+        del self.info.options.use_llvm_cmake_files
 
     def validate(self):
         if self.options.shared:  # Shared builds disabled just due to the CI
@@ -322,8 +327,20 @@ class LLVMCoreConan(ConanFile):
                 old_alias_targets
             )
 
-        tools.rmdir(os.path.join(self.package_folder, 'bin'))
         tools.rmdir(os.path.join(self.package_folder, 'share'))
+
+        tools.remove_files_by_mask(self.package_folder, "LLVMExports*.cmake")
+        tools.rename(os.path.join(self.package_folder, self._module_subfolder, 'LLVM-Config.cmake'),
+                     os.path.join(self.package_folder, self._module_subfolder, 'LLVM-ConfigInternal.cmake'))
+        tools.rename(os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfig.cmake'),
+                     os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfigInternal.cmake'))
+
+        tools.replace_in_file(os.path.join(self.package_folder, self._module_subfolder, 'AddLLVM.cmake'),
+                              "include(LLVM-Config)",
+                              "include(LLVM-ConfigInternal)")
+        tools.replace_in_file(os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfigInternal.cmake'),
+                              "LLVM-Config.cmake",
+                              "LLVM-ConfigInternal.cmake")
 
         for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
             tools.remove_files_by_mask(self.package_folder, mask)
@@ -396,6 +413,14 @@ class LLVMCoreConan(ConanFile):
                 self._alias_module_file_rel_path,
                 self._old_alias_module_file_rel_path,
             ])
+
+            if self.options.use_llvm_cmake_files:
+                self.cpp_info.components[component].build_modules["cmake_find_package"].append(
+                    os.path.join(self._module_subfolder, "LLVMConfigInternal.cmake")
+                )
+                self.cpp_info.components[component].build_modules["cmake_find_package_multi"].append(
+                    os.path.join(self._module_subfolder, "LLVMConfigInternal.cmake")
+                )
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "LLVM"

@@ -5,4 +5,4 @@ sources:
 patches:
   "2.4.13.7":
     - patch_file: "patches/0001-jasper.patch"
-      base_path: "source_subfolder"
+      base_path: "src"

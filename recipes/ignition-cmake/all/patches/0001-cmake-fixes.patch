@@ -1,3 +1,18 @@
+--- cmake/IgnCMake.cmake
++++ cmake/IgnCMake.cmake
+@@ -36,3 +36,10 @@ include(IgnPkgConfig)
+ #============================================================================
+ include(CMakePackageConfigHelpers)
+ include(CMakeParseArguments)
++
++set(IGNITION_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}")
++set(PACKAGE_PREFIX_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../..")
++set(IGNITION_CMAKE_DOXYGEN_DIR "${PACKAGE_PREFIX_DIR}/lib/ignition/ignition-cmake2/doxygen")
++set(IGNITION_CMAKE_CODECHECK_DIR "${PACKAGE_PREFIX_DIR}/lib/ignition/ignition-cmake2/codecheck")
++set(IGNITION_CMAKE_BENCHMARK_DIR "${PACKAGE_PREFIX_DIR}/lib/ignition/ignition-cmake2/benchmark")
++set(IGNITION_CMAKE_TOOLS_DIR "${PACKAGE_PREFIX_DIR}/lib/ignition/ignition-cmake2/tools")
+\ No newline at end of file
+
 --- cmake/IgnSetCompilerFlags.cmake
 +++ cmake/IgnSetCompilerFlags.cmake
 @@ -77,9 +77,9 @@ macro(ign_setup_unix)
@@ -32,7 +47,7 @@
      # Note: INTERFACE libraries do not need the export header
      set(binary_include_dir
 -      "${CMAKE_BINARY_DIR}/include/${include_dir}")
-+        "${PROJECT_BINARY_DIR}/include/${include_dir}")
++      "${PROJECT_BINARY_DIR}/include/${include_dir}")
  
      set(implementation_file_name "${binary_include_dir}/detail/Export.hh")
  

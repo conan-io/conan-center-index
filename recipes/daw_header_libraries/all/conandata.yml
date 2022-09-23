@@ -1,13 +1,28 @@
 sources:
-  "2.23.0":
-    url: "https://github.com/beached/header_libraries/archive/v2.23.0.tar.gz"
-    sha256: "5619830ff745319615736036bfd3437577d6a8438ea9f34023208599fdf2cdda"
-  "2.15.1":
-    url: "https://github.com/beached/header_libraries/archive/v2.15.1.tar.gz"
-    sha256: "3ddfc484448a762fcf13c6143b0fcff643cbd98dabc639e043bcf493235fc54d"
-  "2.5.3":
-    url: "https://github.com/beached/header_libraries/archive/refs/tags/v2.5.3.tar.gz"
-    sha256: "0fd08b31947e5f0da45c875bbb44d178d4250225e2623fb845cd458605390233"
+  "2.68.3":
+    url: "https://github.com/beached/header_libraries/archive/v2.68.3.tar.gz"
+    sha256: "9bb7d25d161b89ad4a0ac857c28734c061cf53f6e80212c7fe70b8e0fd14789f"
+  "2.68.1":
+    url: "https://github.com/beached/header_libraries/archive/v2.68.1.tar.gz"
+    sha256: "51bdb042959373729009f91449c492f58bb63262146463a767f17d3de6fb2687"
+  "2.65.1":
+    url: "https://github.com/beached/header_libraries/archive/v2.65.1.tar.gz"
+    sha256: "fd52024bb361d1ac8011cd03def39b4d6aea35015f26163f3865ca65df91ca57"
+  "2.65.0":
+    url: "https://github.com/beached/header_libraries/archive/v2.65.0.tar.gz"
+    sha256: "9059d12bcacf2895ffa98cfa59d32914247e9cd601945ba6d574348babf7fdb4"
+  "2.64.2":
+    url: "https://github.com/beached/header_libraries/archive/v2.64.2.tar.gz"
+    sha256: "886cabc542714e3959d8d00799c0becbf00437278844b3ef399c99acab2e23fa"
+  "2.53.3":
+    url: "https://github.com/beached/header_libraries/archive/v2.53.3.tar.gz"
+    sha256: "04c83338d21e40f1973fa7ba42cbc9a71c314fdebfabc8d612e330b7c7043d77"
+  "2.50.0":
+    url: "https://github.com/beached/header_libraries/archive/v2.50.0.tar.gz"
+    sha256: "c0e0b3c0b10f8894bf61f4fb01eeb9b2093301faa0f96740e519ecb951de9acd"
+  "2.46.0":
+    url: "https://github.com/beached/header_libraries/archive/v2.46.0.tar.gz"
+    sha256: "fa3069a038c347a623af0e35a853aa561dc8616051baf708cd0ac17eb1032741"
   "1.29.7":
     url: "https://github.com/beached/header_libraries/archive/refs/tags/v1.29.7.tar.gz"
     sha256: "524c34f3f5d2af498e7bcaff7802b914ba42acde29f7e3ecce41a035db0bf5bd"

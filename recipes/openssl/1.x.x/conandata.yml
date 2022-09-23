@@ -1,27 +1,9 @@
 sources:
-  1.0.2s:
-    sha256: cabd5c9492825ce5bd23f3c3aeed6a97f8142f606d893df216411f07d1abab96
-    url: [
-      "https://www.openssl.org/source/openssl-1.0.2s.tar.gz",
-      "https://www.openssl.org/source/old/openssl-1.0.2s.tar.gz"
-    ]
-  1.0.2t:
-    sha256: 14cb464efe7ac6b54799b34456bd69558a749a4931ecfd9cf9f71d7881cac7bc
-    url: [
-      "https://www.openssl.org/source/openssl-1.0.2t.tar.gz",
-      "https://www.openssl.org/source/old/openssl-1.0.2t.tar.gz"
-    ]
   1.0.2u:
     sha256: ecd0c6ffb493dd06707d38b14bb4d8c2288bb7033735606569d8f90f89669d16
     url: [
       "https://www.openssl.org/source/openssl-1.0.2u.tar.gz",
       "https://www.openssl.org/source/old/openssl-1.0.2u.tar.gz"
-    ]
-  1.1.0k:
-    sha256: efa4965f4f773574d6cbda1cf874dbbe455ab1c0d4f906115f867d30444470b1
-    url: [
-      "https://www.openssl.org/source/openssl-1.1.0k.tar.gz",
-      "https://www.openssl.org/source/old/openssl-1.1.0k.tar.gz"
     ]
   1.1.0l:
     sha256: 74a2f756c64fd7386a29184dc0344f4831192d61dc2481a93a4c5dd727f41148
@@ -29,109 +11,34 @@ sources:
       "https://www.openssl.org/source/openssl-1.1.0l.tar.gz",
       "https://www.openssl.org/source/old/openssl-1.1.0l.tar.gz"
     ]
-  1.1.1c:
-    sha256: f6fb3079ad15076154eda9413fed42877d668e7069d9b87396d0804fdb3f4c90
+  1.1.1o:
+    sha256: 9384a2b0570dd80358841464677115df785edb941c71211f75076d72fe6b438f
     url: [
-      "https://www.openssl.org/source/openssl-1.1.1c.tar.gz",
-      "https://www.openssl.org/source/old/openssl-1.1.1c.tar.gz"
+      "https://www.openssl.org/source/openssl-1.1.1o.tar.gz",
+      "https://www.openssl.org/source/old/openssl-1.1.1o.tar.gz"
     ]
-  1.1.1d:
-    sha256: 1e3a91bc1f9dfce01af26026f856e064eab4c8ee0a8f457b5ae30b40b8b711f2
+  1.1.1p:
+    sha256: bf61b62aaa66c7c7639942a94de4c9ae8280c08f17d4eac2e44644d9fc8ace6f
     url: [
-      "https://www.openssl.org/source/openssl-1.1.1d.tar.gz",
-      "https://www.openssl.org/source/old/openssl-1.1.1d.tar.gz"
+      "https://www.openssl.org/source/openssl-1.1.1p.tar.gz",
+      "https://www.openssl.org/source/old/openssl-1.1.1p.tar.gz"
     ]
-  1.1.1e:
-    sha256: 694f61ac11cb51c9bf73f54e771ff6022b0327a43bbdfa1b2f19de1662a6dcbe
+  1.1.1q:
+    sha256: d7939ce614029cdff0b6c20f0e2e5703158a489a72b2507b8bd51bf8c8fd10ca
     url: [
-      "https://www.openssl.org/source/openssl-1.1.1e.tar.gz",
-      "https://www.openssl.org/source/old/openssl-1.1.1e.tar.gz"
-    ]
-  1.1.1f:
-    sha256: 186c6bfe6ecfba7a5b48c47f8a1673d0f3b0e5ba2e25602dd23b629975da3f35
-    url: [
-      "https://www.openssl.org/source/openssl-1.1.1f.tar.gz",
-      "https://www.openssl.org/source/old/openssl-1.1.1f.tar.gz"
-    ]
-  1.1.1g:
-    sha256: ddb04774f1e32f0c49751e21b67216ac87852ceb056b75209af2443400636d46
-    url: [
-      "https://www.openssl.org/source/openssl-1.1.1g.tar.gz",
-      "https://www.openssl.org/source/old/openssl-1.1.1g.tar.gz"
-    ]
-  1.1.1h:
-    sha256: 5c9ca8774bd7b03e5784f26ae9e9e6d749c9da2438545077e6b3d755a06595d9
-    url: [
-      "https://www.openssl.org/source/openssl-1.1.1h.tar.gz",
-      "https://www.openssl.org/source/old/openssl-1.1.1h.tar.gz"
-    ]
-  1.1.1i:
-    sha256: e8be6a35fe41d10603c3cc635e93289ed00bf34b79671a3a4de64fcee00d5242
-    url: [
-      "https://www.openssl.org/source/openssl-1.1.1i.tar.gz",
-      "https://www.openssl.org/source/old/openssl-1.1.1i.tar.gz"
-    ]
-  1.1.1j:
-    sha256: aaf2fcb575cdf6491b98ab4829abf78a3dec8402b8b81efc8f23c00d443981bf
-    url: [
-      "https://www.openssl.org/source/openssl-1.1.1j.tar.gz",
-      "https://www.openssl.org/source/old/openssl-1.1.1j.tar.gz"
-    ]
-  1.1.1k:
-    sha256: 892a0875b9872acd04a9fde79b1f943075d5ea162415de3047c327df33fbaee5
-    url: [
-      "https://www.openssl.org/source/openssl-1.1.1k.tar.gz",
-      "https://www.openssl.org/source/old/openssl-1.1.1k.tar.gz"
-    ]
-  1.1.1l:
-    sha256: 0b7a3e5e59c34827fe0c3a74b7ec8baef302b98fa80088d7f9153aa16fa76bd1
-    url: [
-      "https://www.openssl.org/source/openssl-1.1.1l.tar.gz",
-      "https://www.openssl.org/source/old/openssl-1.1.1l.tar.gz"
-    ]
-  1.1.1m:
-    sha256: f89199be8b23ca45fc7cb9f1d8d3ee67312318286ad030f5316aca6462db6c96
-    url: [
-      "https://www.openssl.org/source/openssl-1.1.1m.tar.gz",
-      "https://www.openssl.org/source/old/openssl-1.1.1m.tar.gz"
-    ]
-  1.1.1n:
-    sha256: 40dceb51a4f6a5275bde0e6bf20ef4b91bfc32ed57c0552e2e8e15463372b17a
-    url: [
-      "https://www.openssl.org/source/openssl-1.1.1n.tar.gz",
-      "https://www.openssl.org/source/old/openssl-1.1.1n.tar.gz"
+      "https://www.openssl.org/source/openssl-1.1.1q.tar.gz",
+      "https://www.openssl.org/source/old/openssl-1.1.1q.tar.gz"
     ]
 patches:
-  1.0.2s:
-    - patch_file: patches/1.0.2u-darwin-arm64.patch
-      base_path: source_subfolder
-  1.0.2t:
-    - patch_file: patches/1.0.2u-darwin-arm64.patch
-      base_path: source_subfolder
   1.0.2u:
     - patch_file: patches/1.0.2u-darwin-arm64.patch
       base_path: source_subfolder
-  1.1.1g:
+  1.1.1o:
     - patch_file: patches/1.1.1-tvos-watchos.patch
       base_path: source_subfolder
-  1.1.1h:
+  1.1.1p:
     - patch_file: patches/1.1.1-tvos-watchos.patch
       base_path: source_subfolder
-  1.1.1i:
-    - patch_file: patches/1.1.1-tvos-watchos.patch
-      base_path: source_subfolder
-  1.1.1j:
-    - patch_file: patches/1.1.1-tvos-watchos.patch
-      base_path: source_subfolder
-  1.1.1k:
-    - patch_file: patches/1.1.1-tvos-watchos.patch
-      base_path: source_subfolder
-  1.1.1l:
-    - patch_file: patches/1.1.1-tvos-watchos.patch
-      base_path: source_subfolder
-  1.1.1m:
-    - patch_file: patches/1.1.1-tvos-watchos.patch
-      base_path: source_subfolder
-  1.1.1n:
+  1.1.1q:
     - patch_file: patches/1.1.1-tvos-watchos.patch
       base_path: source_subfolder

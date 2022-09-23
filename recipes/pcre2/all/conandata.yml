@@ -1,4 +1,7 @@
 sources:
+  "10.40":
+    url: "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.40/pcre2-10.40.tar.bz2"
+    sha256: "14e4b83c4783933dc17e964318e6324f7cae1bc75d8f3c79bc6969f00c159d68"
   "10.39":
     url: "https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.39/pcre2-10.39.tar.bz2"
     sha256: "0f03caf57f81d9ff362ac28cd389c055ec2bf0678d277349a1a4bee00ad6d440"
@@ -27,3 +30,39 @@ sources:
       - "https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.32/pcre2-10.32.tar.bz2"
       - "https://sourceforge.net/projects/pcre/files/pcre2/10.32/pcre2-10.32.tar.bz2"
     sha256: "f29e89cc5de813f45786580101aaee3984a65818631d4ddbda7b32f699b87c2e"
+patches:
+  "10.40":
+    - patch_file: "patches/0001-fix-cmake-1.39.patch"
+      patch_description: "correct the order of cmake_minimum_required() and project()"
+      patch_type: "backport"
+      patch_source: "https://github.com/PCRE2Project/pcre2/pull/142"
+  "10.39":
+    - patch_file: "patches/0001-fix-cmake-1.39.patch"
+      patch_description: "correct the order of cmake_minimum_required() and project()"
+      patch_type: "backport"
+      patch_source: "https://github.com/PCRE2Project/pcre2/pull/142"
+  "10.37":
+    - patch_file: "patches/0001-fix-cmake-1.36.patch"
+      patch_description: "correct the order of cmake_minimum_required() and project()"
+      patch_type: "backport"
+      patch_source: "https://github.com/PCRE2Project/pcre2/pull/142"
+  "10.36":
+    - patch_file: "patches/0001-fix-cmake-1.36.patch"
+      patch_description: "correct the order of cmake_minimum_required() and project()"
+      patch_type: "backport"
+      patch_source: "https://github.com/PCRE2Project/pcre2/pull/142"
+  "10.35":
+    - patch_file: "patches/0001-fix-cmake-1.35.patch"
+      patch_description: "correct the order of cmake_minimum_required() and project()"
+      patch_type: "backport"
+      patch_source: "https://github.com/PCRE2Project/pcre2/pull/142"
+  "10.33":
+    - patch_file: "patches/0001-fix-cmake-1.33.patch"
+      patch_description: "correct the order of cmake_minimum_required() and project()"
+      patch_type: "backport"
+      patch_source: "https://github.com/PCRE2Project/pcre2/pull/142"
+  "10.32":
+    - patch_file: "patches/0001-fix-cmake-1.32.patch"
+      patch_description: "correct the order of cmake_minimum_required() and project()"
+      patch_type: "backport"
+      patch_source: "https://github.com/PCRE2Project/pcre2/pull/142"

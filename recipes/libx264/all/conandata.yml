@@ -1,4 +1,7 @@
 sources:
+  "cci.20220602":
+    url: "https://code.videolan.org/videolan/x264/-/archive/baee400fa9ced6f5481a728138fed6e867b0ff7f/x264-baee400fa9ced6f5481a728138fed6e867b0ff7f.tar.bz2"
+    sha256: "ce6623b8b289765daee04a297c2fd1a293cb2565a1749c76d66c8d72c7ddc1ab"
   "20191217":
     url: "https://download.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20191217-2245.tar.bz2"
     sha256: "0bb67d095513391e637b3b47e8efc3ba4603c3844f1b4c2690f4d36da7763055"

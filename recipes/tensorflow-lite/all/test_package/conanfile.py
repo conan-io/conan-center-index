@@ -1,10 +1,19 @@
+from conan import ConanFile
+from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.build import can_run
 import os
-from conans import ConanFile, CMake, tools
 
 
-class TensorflowLiteTestConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
+class TestPackageConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+    test_type = "explicit"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
         cmake = CMake(self)
@@ -12,7 +21,7 @@ class TensorflowLiteTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            model_path = os.path.join("bin", "model.tflite")
-            command = os.path.join("bin", "example")
-            self.run(" ".join([command, model_path]), run_environment=True)
+        if can_run(self):
+            model_path = os.path.join(self.source_folder, "model.tflite")
+            command = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run(f"{command} {model_path}", env="conanrun")

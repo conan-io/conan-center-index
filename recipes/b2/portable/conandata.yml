@@ -38,3 +38,12 @@ sources:
   "4.8.2":
     url: "https://github.com/bfgroup/b2/archive/4.8.2.tar.gz"
     sha256: "220edfbd5022394c5dc264dfdd8bf6d3ec53b784db87461026bb23ea9d9ec4bd"
+  "4.9.0":
+    url: "https://github.com/bfgroup/b2/archive/4.9.0.tar.gz"
+    sha256: "7c614e41f10e004c7539c75c60f7b2df26a61fe35058e9021f8fd5049c97a255"
+  "4.9.1":
+    url: "https://github.com/bfgroup/b2/archive/4.9.1.tar.gz"
+    sha256: "81e49dc85e956c3e708bdd02fcfe0b9f406fca8edca54c75c94ebd6c322ed587"
+  "4.9.2":
+    url: "https://github.com/bfgroup/b2/archive/4.9.2.tar.gz"
+    sha256: "7e1a135b308999d2a65fce3eba8f4ffb41ca82ae133f8494cc42cbca63c890de"

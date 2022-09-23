@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import functools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -16,8 +17,6 @@ class CppcheckConan(ConanFile):
     options = {"with_z3": [True, False], "have_rules": [True, False]}
     default_options = {"with_z3": True, "have_rules": True}
     exports_sources = ["CMakeLists.txt", "patches/**"]
-
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -44,16 +43,15 @@ class CppcheckConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["USE_Z3"] = self.options.with_z3
-        self._cmake.definitions["HAVE_RULES"] = self.options.have_rules
-        self._cmake.definitions["USE_MATCHCOMPILER"] = "Auto"
-        self._cmake.definitions["ENABLE_OSS_FUZZ"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["USE_Z3"] = self.options.with_z3
+        cmake.definitions["HAVE_RULES"] = self.options.have_rules
+        cmake.definitions["USE_MATCHCOMPILER"] = "Auto"
+        cmake.definitions["ENABLE_OSS_FUZZ"] = False
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         self._patch_sources()

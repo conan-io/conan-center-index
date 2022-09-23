@@ -1,7 +1,5 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanException
 import os
-import requests
 
 required_conan_version = ">=1.36.0"
 
@@ -48,33 +46,8 @@ class ClipperConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    @staticmethod
-    def _generate_git_tag_archive_sourceforge(url, timeout=10, retry=2):
-        def try_post(retry_count):
-            try:
-                requests.post(url, timeout=timeout)
-            except:
-                if retry_count < retry:
-                    try_post(retry_count + 1)
-                else:
-                    raise ConanException("All the attempt to generate archive url have failed.")
-        try_post(0)
-
     def source(self):
-        conan_data_version = self.conan_data["sources"][self.version]
-        if "post" in conan_data_version["url"]:
-            # Generate the archive download link
-            self._generate_git_tag_archive_sourceforge(
-                conan_data_version["url"]["post"],
-            )
-
-            # Download archive
-            archive_url = conan_data_version["url"]["archive"]
-            sha256 = conan_data_version["sha256"]
-            tools.get(url=archive_url, sha256=sha256,
-                      destination=self._source_subfolder, strip_root=True)
-        else:
-            tools.get(**conan_data_version, destination=self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:

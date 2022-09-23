@@ -1,36 +1,5 @@
 --- zzip/CMakeLists.txt	2020-04-15 19:36:46.000000000 -0400
 +++ zzip/CMakeLists.txt	2020-08-07 17:46:38.409824600 -0400
-@@ -1,7 +1,7 @@
- cmake_minimum_required (VERSION 3.1)
- project(zzip VERSION "0.13.71" LANGUAGES C)
-
--list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeScripts")
-+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../CMakeScripts")
-
- # generate _config.h
- include ( CheckIncludeFiles )
-@@ -166,18 +166,18 @@
-
- add_library(libzzip ${libzzip_SRCS} )
- target_link_libraries(libzzip ZLIB::ZLIB )
--target_include_directories (libzzip PRIVATE ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
-+target_include_directories (libzzip PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_BINARY_DIR}/..)
-
- if(ZZIPFSEEKO)
- add_library(libzzipfseeko ${libzzipfseeko_SRCS} )
- target_link_libraries(libzzipfseeko ZLIB::ZLIB )
--target_include_directories (libzzipfseeko PRIVATE ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
-+target_include_directories (libzzipfseeko PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_BINARY_DIR}/..)
- endif()
-
- if(ZZIPMMAPPED)
- add_library(libzzipmmapped ${libzzipmmapped_SRCS} )
- target_link_libraries(libzzipmmapped ZLIB::ZLIB )
--target_include_directories (libzzipmmapped PRIVATE ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
-+target_include_directories (libzzipmmapped PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_BINARY_DIR}/..)
- endif()
-
- set_target_properties(libzzip PROPERTIES OUTPUT_NAME "zzip" RELEASE_POSTFIX "-${RELNUM}")
 @@ -247,12 +247,14 @@
 
  install(FILES ${libzzip_HDRS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/zzip )
@@ -56,32 +25,6 @@
  endif()
 --- zzipwrap/CMakeLists.txt	2020-04-15 19:36:46.000000000 -0400
 +++ zzipwrap/CMakeLists.txt	2020-08-07 17:52:32.169278300 -0400
-@@ -1,7 +1,7 @@
- cmake_minimum_required (VERSION 3.1)
- project(zzipwrap VERSION "0.13.71" LANGUAGES C)
-
--list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeScripts")
-+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../CMakeScripts")
-
- include ( CheckIncludeFiles )
- include ( GNUInstallDirs )
-@@ -39,14 +39,14 @@
-
- add_library(libzzipwrap ${libzzipwrap_SRCS} )
- target_link_libraries(libzzipwrap libzzip ZLIB::ZLIB )
--target_include_directories(libzzipwrap PRIVATE "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
-+target_include_directories(libzzipwrap PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/.." "${CMAKE_CURRENT_BINARY_DIR}/.." "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
-
- set_target_properties(libzzipwrap PROPERTIES OUTPUT_NAME "zzipwrap" RELEASE_POSTFIX "-${RELNUM}")
- SET_TARGET_PROPERTIES(libzzipwrap PROPERTIES VERSION ${VERNUM}.${FIXNUM} SOVERSION ${VERNUM})
-
- add_executable(zzipwrap ${zzipwrap_SRCS} )
- target_link_libraries(zzipwrap libzzipwrap )
--target_include_directories(zzipwrap PRIVATE "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
-+target_include_directories(zzipwrap PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/.." "${CMAKE_CURRENT_BINARY_DIR}/.." "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
-
- if(UNIX)
- join_paths(libdir "\${prefix}" "${CMAKE_INSTALL_LIBDIR}")
 @@ -76,6 +76,7 @@
 
  install(FILES ${libzzipwrap_HDRS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/zzip )

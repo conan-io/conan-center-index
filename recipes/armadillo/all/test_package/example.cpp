@@ -166,5 +166,42 @@ main(int argc, char** argv)
   v2.randn();
   v2.print("v2 (randn):");
 
+#ifdef ARMA_USE_HDF5
+  std::cout << "ARMA_USE_HDF5 set" << std::endl;
+  arma::Mat<u8> a;
+  a.randu(20, 20);
+
+  // Save first.
+  a.save("file.h5", hdf5_binary);
+
+  // Load as different matrix.
+  arma::Mat<u8> b;
+  b.load("file.h5", hdf5_binary);
+
+  // Check that they are the same.
+  bool result = true;
+  for (uword i = 0; i < a.n_elem; ++i)
+  {
+        result *= a[i] == b[i];
+  }
+  std::cout << "Matrix written to and read from file.h5 are equivalent: " << result << "\n";
+
+  // Now autoload.
+  arma::Mat<u8> c;
+  c.load("file.h5");
+
+  // Check that they are the same.
+  result = true;
+  for (uword i = 0; i < a.n_elem; ++i)
+    {
+        result *= a[i] == c[i];
+    }
+  std::cout << "Matrix written to and autoloaded from file.h5 are equivalent: " << result << "\n";
+
+  std::remove("file.h5");
+#else
+  std::cout << "ARMA_USE_HDF5 not set" << std::endl;
+#endif
+
   return 0;
   }

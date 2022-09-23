@@ -1,10 +1,28 @@
 sources:
-  "2.12.4":
-    url: "https://github.com/beached/daw_json_link/archive/v2.12.4.tar.gz"
-    sha256: "123dee9eac86b63e13a3233515d3155504fd7a793d7e736ec939646524ac114c"
+  "3.0.5":
+    url: "https://github.com/beached/daw_json_link/archive/v3.0.5.tar.gz"
+    sha256: "77abe2ca525083d59a1e4e8e9aa1d2633e5382d98a0d5d838cd2379eaf8d7edf"
+  "3.0.4":
+    url: "https://github.com/beached/daw_json_link/archive/v3.0.4.tar.gz"
+    sha256: "bf45d116d96337b37b31daa4031ba05beb2579693dd1115bf70b15420e1905a7"
+  "3.0.1":
+    url: "https://github.com/beached/daw_json_link/archive/v3.0.1.tar.gz"
+    sha256: "589e1cc8c6ea2e0624bf7755209c4589cc5dba25cde6b52628b10bdbc8420669"
+  "3.0.0":
+    url: "https://github.com/beached/daw_json_link/archive/v3.0.0.tar.gz"
+    sha256: "298a9ed0cbc228d7ae99594c1babccfaceabc5e0e2a23e0d67d32cbd4bf72f86"
+  "2.15.3":
+    url: "https://github.com/beached/daw_json_link/archive/v2.15.3.tar.gz"
+    sha256: "ec0457a5682a76c5aec709f2d6959ef7bafa0b54c5e7740f911d97991188ee84"
+  "2.15.2":
+    url: "https://github.com/beached/daw_json_link/archive/v2.15.2.tar.gz"
+    sha256: "90a7b375b3c9ffd76541815b1b2107c3f6f7df3bae8d94fb7b64f4fcf8d60c0c"
+  "2.14.0":
+    url: "https://github.com/beached/daw_json_link/archive/v2.14.0.tar.gz"
+    sha256: "811d0c5ab9ed9c79c84fc5837c8e7ef48f1f45177b7931bc849363c48a62261b"
+  "2.12.9":
+    url: "https://github.com/beached/daw_json_link/archive/v2.12.9.tar.gz"
+    sha256: "a55d1517ff785aed58ddf9e570cad5175231b5c356d7066c097bfca129d0b7c8"
   "2.11.0":
     url: "https://github.com/beached/daw_json_link/archive/v2.11.0.tar.gz"
     sha256: "e0c616bb647c6fd1d91e614a3512779000689ba68ab9f88fa284e91b6066801e"
-  "2.10.2":
-    url: "https://github.com/beached/daw_json_link/archive/v2.10.2.tar.gz"
-    sha256: "04695b735c805304aa964da981556106ca9b979dcb6a79245e3593d0dbb955e4"

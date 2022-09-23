@@ -20,6 +20,9 @@ sources:
   "70.1":
     url: "https://github.com/unicode-org/icu/releases/download/release-70-1/icu4c-70_1-src.tgz"
     sha256: "8d205428c17bf13bb535300669ed28b338a157b1c01ae66d31d0d3e2d47c3fd5"
+  "71.1":
+    url: "https://github.com/unicode-org/icu/releases/download/release-71-1/icu4c-71_1-src.tgz"
+    sha256: "67a7e6e51f61faf1306b6935333e13b2c48abd8da6d2f46ce6adca24b1e21ebf"
 patches:
   "67.1":
     - patch_file: "patches/6aba9344a18f4f32e8070ee53b79495630901c26.patch"
@@ -34,4 +37,9 @@ patches:
       base_path: "source_subfolder"
   "70.1":
     - patch_file: "patches/0001-69.1-fix-mingw.patch"
+      base_path: "source_subfolder"
+  "71.1":
+    - patch_file: "patches/0001-69.1-fix-mingw.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0001-71.1-fix-undef-strict-ansi.patch"
       base_path: "source_subfolder"

@@ -1,26 +1,30 @@
-import glob
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
 import os
 
-from conans import ConanFile, CMake, tools
+required_conan_version = ">=1.46.0"
+
 
 class Poly2triConan(ConanFile):
     name = "poly2tri"
     description = "Poly2Tri is a sweepline constrained Delaunay Polygon Triangulation Library."
     license = "BSD-3-Clause"
-    topics = ("conan", "poly2tri", "triangulation", "delaunay", "polygon")
+    topics = ("poly2tri", "triangulation", "delaunay", "polygon")
     homepage = "https://github.com/greenm01/poly2tri"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    exports_sources = "CMakeLists.txt"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -30,25 +34,26 @@ class Poly2triConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name + "-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure()
-        return self._cmake
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["POLY2TRI_SRC_DIR"] = os.path.join(self.source_folder, "poly2tri").replace("\\", "/")
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):

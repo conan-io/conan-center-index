@@ -1,10 +1,13 @@
-import os
+from conan import ConanFile
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, save, copy, export_conandata_patches, apply_conandata_patches
+from conan.errors import ConanInvalidConfiguration
+from os.path import join
 import textwrap
 
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 
 class TensorflowLiteConan(ConanFile):
@@ -15,7 +18,8 @@ class TensorflowLiteConan(ConanFile):
     description = ("TensorFlow Lite is a set of tools that enables on-device machine learning "
                    "by helping developers run their models on mobile, embedded, and IoT devices.")
     topics = ("machine-learning", "neural-networks", "deep-learning")
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -30,57 +34,22 @@ class TensorflowLiteConan(ConanFile):
         "with_ruy": False,
         "with_nnapi": False,
         "with_mmap": True,
-        "with_xnnpack": True,
+        "with_xnnpack": True
     }
-    generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
 
-    _cmake = None
-
-    @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
-    def _module_file(self):
-        return "conan-official-{}-targets.cmake".format(self.name)
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    short_paths = True
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "5",
-            "Visual Studio": "14",
-            "clang": "3.4",
+            "gcc": "8",
+            "Visual Studio": "15.8",
+            "clang": "5",
             "apple-clang": "5.1",
         }
 
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 14)
-
-        def lazy_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn(f"{self.name} requires C++14. Your compiler is unknown. Assuming it supports C++14.")
-        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration(f"{self.name} requires C++14, which your compiler does not support.")
-        if self.options.shared:
-            if self.settings.os == "Linux" and not self.options["ruy"].shared:
-                raise ConanInvalidConfiguration(
-                        f"The project {self.name}/{self.version} with shared=True on Linux requires ruy:shared=True")
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -93,55 +62,68 @@ class TensorflowLiteConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            if self.settings.os == "Linux":
-                self.options["ruy"].shared = True
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-
-    def build_requirements(self):
-        self.build_requires("ninja/1.10.2")
 
     def requirements(self):
-        self.requires("abseil/20210324.2")
+        self.requires("abseil/20220623.0")
         self.requires("eigen/3.4.0")
         self.requires("farmhash/cci.20190513")
         self.requires("fft/cci.20061228")
-        self.requires("flatbuffers/2.0.0")
+        self.requires("flatbuffers/2.0.6")
         self.requires("gemmlowp/cci.20210928")
         if self.settings.arch in ("x86", "x86_64"):
             self.requires("intel-neon2sse/cci.20210225")
-        self.requires("ruy/cci.20210622")
+        self.requires("ruy/cci.20220628")
         if self.options.with_xnnpack:
-            self.requires("xnnpack/cci.20211026")
-            self.requires("fp16/cci.20200514")
+            self.requires("xnnpack/cci.20220801")
+        if self.options.with_xnnpack or self.options.get_safe("with_nnapi", False):
+            self.requires("fp16/cci.20210320")
 
-    def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
-        cmake.build()
+    def build_requirements(self):
+        self.tool_requires("cmake/3.24.0")
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions.update({
+    def layout(self):
+        cmake_layout(self, build_folder=f"build_folder/{self.settings.build_type}")
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables.update({
             "CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS": True,
-            "TFLITE_ENABLE_RUY": self.options.get_safe("with_ruy", False),
+            "TFLITE_ENABLE_RUY": self.options.with_ruy,
             "TFLITE_ENABLE_NNAPI": self.options.get_safe("with_nnapi", False),
             "TFLITE_ENABLE_GPU": False,
             "TFLITE_ENABLE_XNNPACK": self.options.with_xnnpack,
-            "TFLITE_ENABLE_MMAP": self.options.get_safe("with_mmap", False)
+            "TFLITE_ENABLE_MMAP": self.options.get_safe("with_mmap", False),
+            "FETCHCONTENT_FULLY_DISCONNECTED": True,
+            "clog_POPULATED": True,
         })
         if self.settings.arch == "armv8":
             # Not defined by Conan for Apple Silicon. See https://github.com/conan-io/conan/pull/8026
-            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "arm64"
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+            tc.variables["CMAKE_SYSTEM_PROCESSOR"] = "arm64"
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def validate(self):
+        if self.info.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, 17)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn(f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+        elif Version(self.info.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.name} requires C++17, which your compiler does not support.")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
+
+    def build(self):
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=join("tensorflow", "lite"))
+        cmake.build()
 
     @staticmethod
-    def _create_cmake_module_alias_target(module_file):
+    def _create_cmake_module_alias_target(conanfile, module_file):
         aliased = "tensorflowlite::tensorflowlite"
         alias = "tensorflow::tensorflowlite"
         content = textwrap.dedent(f"""\
@@ -150,36 +132,38 @@ class TensorflowLiteConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """)
-        tools.save(module_file, content)
+        save(conanfile, module_file, content)
+
+    @property
+    def _module_file(self):
+        return join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*.h", dst=os.path.join("include", "tensorflow", "lite"), src=os.path.join(self._source_subfolder, "tensorflow", "lite"))
-        self.copy("*", dst="lib", src=os.path.join(self._build_subfolder, "lib"))
-        if self.options.shared:
-            self.copy("*", dst="bin", src=os.path.join(self._build_subfolder, "bin"))
-            tools.remove_files_by_mask(self.package_folder, "*.pdb")
-        self._create_cmake_module_alias_target(os.path.join(self.package_folder, self._module_subfolder, self._module_file))
+        copy(self, "LICENSE", self.source_folder, join(self.package_folder, "licenses"))
+        copy(self, "*.h", join(self.source_folder, "tensorflow", "lite"), join(self.package_folder, "include", "tensorflow", "lite"))
+        copy(self, "*.a", self.build_folder, join(self.package_folder, "lib"))
+        copy(self, "*.so", self.build_folder, join(self.package_folder, "lib"))
+        copy(self, "*.dylib", self.build_folder, join(self.package_folder, "lib"))
+        copy(self, "*.lib", self.build_folder, join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.dll", self.build_folder, join(self.package_folder, "bin"), keep_path=False)
+        self._create_cmake_module_alias_target(self, join(self.package_folder, self._module_file))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "tensorflowlite")
         self.cpp_info.set_property("cmake_target_name", "tensorflow::tensorflowlite")
 
-        self.cpp_info.filenames["cmake_find_package"] = "tensorflowlite"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "tensorflowlite"
         self.cpp_info.names["cmake_find_package"] = "tensorflowlite"
         self.cpp_info.names["cmake_find_package_multi"] = "tensorflowlite"
-        self.cpp_info.build_modules["cmake_find_package"] = [os.path.join(self._module_subfolder, self._module_file)]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [os.path.join(self._module_subfolder, self._module_file)]
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file]
 
         defines = []
         if not self.options.shared:
             defines.append("TFL_STATIC_LIBRARY_BUILD")
-        if self.options.get_safe("with_ruy", False):
+        if self.options.with_ruy:
             defines.append("TFLITE_WITH_RUY")
 
         self.cpp_info.defines = defines
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        self.cpp_info.libs = ["tensorflow-lite"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("dl")

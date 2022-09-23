@@ -1,9 +1,11 @@
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class SfmlConan(ConanFile):
@@ -33,7 +35,6 @@ class SfmlConan(ConanFile):
     }
 
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -42,15 +43,6 @@ class SfmlConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
-    def _is_vc_static_runtime(self):
-        return (self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime) or \
-               (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime == "static")
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -74,7 +66,7 @@ class SfmlConan(ConanFile):
                 self.requires("xorg/system")
         if self.options.graphics:
             self.requires("freetype/2.11.1")
-            self.requires("stb/cci.20210713")
+            self.requires("stb/cci.20210910")
         if self.options.audio:
             self.requires("flac/1.3.3")
             self.requires("openal/1.21.1")
@@ -91,23 +83,22 @@ class SfmlConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
         tools.rmdir(os.path.join(self._source_subfolder, "extlibs"))
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["SFML_DEPENDENCIES_INSTALL_PREFIX"] = self.package_folder
-        self._cmake.definitions["SFML_MISC_INSTALL_PREFIX"] = os.path.join(self.package_folder, "licenses").replace("\\", "/")
-        self._cmake.definitions["SFML_BUILD_WINDOW"] = self.options.window
-        self._cmake.definitions["SFML_BUILD_GRAPHICS"] = self.options.graphics
-        self._cmake.definitions["SFML_BUILD_NETWORK"] = self.options.network
-        self._cmake.definitions["SFML_BUILD_AUDIO"] = self.options.audio
-        self._cmake.definitions["SFML_INSTALL_PKGCONFIG_FILES"] = False
-        self._cmake.definitions["SFML_GENERATE_PDB"] = False
-        self._cmake.definitions["SFML_USE_SYSTEM_DEPS"] = True
-        if self._is_msvc:
-            self._cmake.definitions["SFML_USE_STATIC_STD_LIBS"] = self._is_vc_static_runtime
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["SFML_DEPENDENCIES_INSTALL_PREFIX"] = self.package_folder
+        cmake.definitions["SFML_MISC_INSTALL_PREFIX"] = os.path.join(self.package_folder, "licenses").replace("\\", "/")
+        cmake.definitions["SFML_BUILD_WINDOW"] = self.options.window
+        cmake.definitions["SFML_BUILD_GRAPHICS"] = self.options.graphics
+        cmake.definitions["SFML_BUILD_NETWORK"] = self.options.network
+        cmake.definitions["SFML_BUILD_AUDIO"] = self.options.audio
+        cmake.definitions["SFML_INSTALL_PKGCONFIG_FILES"] = False
+        cmake.definitions["SFML_GENERATE_PDB"] = False
+        cmake.definitions["SFML_USE_SYSTEM_DEPS"] = True
+        if is_msvc(self):
+            cmake.definitions["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

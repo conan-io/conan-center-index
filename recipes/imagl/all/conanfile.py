@@ -17,14 +17,12 @@ class ImaglConan(ConanFile):
         "fPIC": [True, False],
         "with_png": [True, False],
         "with_jpeg": [True, False],
-        "allow_clang_11": [None, True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_png": True,
         "with_jpeg": True,
-        "allow_clang_11": None
     }
     generators = "cmake"
     exports_sources = ["CMakeLists.txt", "patches/**"]

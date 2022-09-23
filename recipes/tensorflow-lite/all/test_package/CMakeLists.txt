@@ -1,14 +1,8 @@
-cmake_minimum_required(VERSION 3.1)
-project(PackageTest CXX)
+cmake_minimum_required(VERSION 3.8)
+project(test_package CXX)
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+find_package(tensorflowlite REQUIRED CONFIG)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-find_package(tensorflowlite REQUIRED)
-
-add_executable(example example.cpp)
-target_link_libraries(example PRIVATE tensorflow::tensorflowlite)
-file(COPY ${CMAKE_CURRENT_LIST_DIR}/model.tflite DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
+add_executable(test_package test_package.cpp)
+target_link_libraries(test_package PRIVATE tensorflow::tensorflowlite)
+target_compile_features(test_package PRIVATE cxx_std_17)

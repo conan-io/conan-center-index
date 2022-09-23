@@ -1,4 +1,7 @@
 sources:
+  "1.7.1":
+    url: "https://github.com/OSGeo/libgeotiff/archive/refs/tags/1.7.1.tar.gz"
+    sha256: "09a0cae5352030011b994a60237743a1327ab95ce482318d45bf9fcb5e5f76b5"
   "1.7.0":
     url: "https://github.com/OSGeo/libgeotiff/archive/refs/tags/1.7.0.tar.gz"
     sha256: "4d5a4d309f9b3032501ad85ea8b921461761a76d9881b415246770a6bddcaf54"
@@ -9,6 +12,9 @@ sources:
     url: "https://github.com/OSGeo/libgeotiff/archive/1.5.1.tar.gz"
     sha256: "fb04491572afb25ffe60239fdfdcfa2c64e6cf644cad9b0b922b10115ccbd488"
 patches:
+  "1.7.1":
+    - patch_file: "patches/fix-cmake-1.7.1.patch"
+      base_path: "source_subfolder"
   "1.7.0":
     - patch_file: "patches/fix-cmake-1.6.0.patch"
       base_path: "source_subfolder"

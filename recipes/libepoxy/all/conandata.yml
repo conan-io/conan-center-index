@@ -8,12 +8,13 @@ sources:
   "1.5.8":
     url: "https://github.com/anholt/libepoxy/archive/1.5.8.tar.gz"
     sha256: "0cd80cb040b75cbe77fadd45c48282ebab82d845c597ce11ee5e8cb9c1efeabb"
-  "1.5.7":
-    url: "https://github.com/anholt/libepoxy/archive/1.5.7.tar.gz"
-    sha256: "b9e22ba707d0e723e9665c67a2b2974a86f4c4c27e3009dde24a988d1aadf643"
-  "1.5.5":
-    url: "https://github.com/anholt/libepoxy/archive/1.5.5.tar.gz"
-    sha256: "5d80a43a6524a1ebdd0c9c5d5105295546a0794681853c636a0c70f8f9c658ce"
-  "1.5.4":
-    sha256: "0bd2cc681dfeffdef739cb29913f8c3caa47a88a451fd2bc6e606c02997289d2"
-    url: "https://github.com/anholt/libepoxy/releases/download/1.5.4/libepoxy-1.5.4.tar.xz"
+patches:
+  "1.5.10":
+    - patch_file: "patches/0001-fix-for-building-on-non-English-locale.patch"
+      base_path: "source_subfolder"
+  "1.5.9":
+    - patch_file: "patches/0001-fix-for-building-on-non-English-locale.patch"
+      base_path: "source_subfolder"
+  "1.5.8":
+    - patch_file: "patches/0001-fix-for-building-on-non-English-locale.patch"
+      base_path: "source_subfolder"
