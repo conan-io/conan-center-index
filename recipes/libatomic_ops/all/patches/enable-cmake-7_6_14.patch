@@ -1,9 +1,9 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 0000000..bc20331
+index 0000000..8b26697
 --- /dev/null
 +++ b/CMakeLists.txt
-@@ -0,0 +1,336 @@
+@@ -0,0 +1,341 @@
 +#
 +# Copyright (c) 2021-2022 Ivan Maidanski
 +##
@@ -125,6 +125,11 @@ index 0000000..bc20331
 +if (NOT enable_atomic_intrinsics)
 +  # Define to avoid GCC atomic intrinsics even if available.
 +  add_compile_options(-DAO_DISABLE_GCC_ATOMICS)
++endif()
++
++# AO API symbols export control.
++if (BUILD_SHARED_LIBS)
++  add_compile_options(-DAO_DLL)
 +endif()
 +
 +if (enable_werror)
@@ -351,3 +356,375 @@ index 0000000..034b456
 +@PACKAGE_INIT@
 +include("${CMAKE_CURRENT_LIST_DIR}/Atomic_opsTargets.cmake")
 +check_required_components(libatomic_ops)
+diff --git a/configure.ac b/configure.ac
+index ccf3230..eec3863 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -234,6 +234,12 @@ else
+ fi
+ AC_SUBST(THREADDLLIBS)
+ 
++# AO API symbols export control.
++# Compile with AO_DLL defined unless building static libraries.
++if test x$enable_shared = xyes -a x$enable_static = xno; then
++  CFLAGS="-DAO_DLL $CFLAGS"
++fi
++
+ AM_CONDITIONAL(ENABLE_SHARED, test x$enable_shared = xyes)
+ AM_CONDITIONAL(HAVE_PTHREAD_H, test x$have_pthreads = xtrue)
+ AM_CONDITIONAL(NEED_ASM, test x$need_asm = xtrue)
+diff --git a/src/atomic_ops.c b/src/atomic_ops.c
+index 5e6577f..1e5f3c9 100644
+--- a/src/atomic_ops.c
++++ b/src/atomic_ops.c
+@@ -51,6 +51,10 @@
+ # define _GNU_SOURCE 1
+ #endif
+ 
++#ifndef AO_BUILD
++# define AO_BUILD
++#endif
++
+ #undef AO_REQUIRE_CAS
+ #include "atomic_ops.h" /* Without cas emulation! */
+ 
+@@ -83,6 +87,8 @@
+ 
+ /* Lock for pthreads-based implementation.      */
+ #ifndef AO_NO_PTHREADS
++  AO_API pthread_mutex_t AO_pt_lock;
++
+   pthread_mutex_t AO_pt_lock = PTHREAD_MUTEX_INITIALIZER;
+ #endif
+ 
+@@ -109,7 +115,7 @@ static AO_TS_t AO_locks[AO_HASH_SIZE] = {
+   AO_TS_INITIALIZER, AO_TS_INITIALIZER, AO_TS_INITIALIZER, AO_TS_INITIALIZER,
+ };
+ 
+-void AO_pause(int); /* defined below */
++AO_API void AO_pause(int); /* defined below */
+ 
+ static void lock_ool(volatile AO_TS_t *l)
+ {
+@@ -156,8 +162,8 @@ AO_INLINE void unlock(volatile AO_TS_t *l)
+   }
+ #endif /* !AO_USE_NO_SIGNALS */
+ 
+-AO_t AO_fetch_compare_and_swap_emulation(volatile AO_t *addr, AO_t old_val,
+-                                         AO_t new_val)
++AO_API AO_t AO_fetch_compare_and_swap_emulation(volatile AO_t *addr,
++                                                AO_t old_val, AO_t new_val)
+ {
+   AO_TS_t *my_lock = AO_locks + AO_HASH(addr);
+   AO_t fetched_val;
+@@ -177,9 +183,10 @@ AO_t AO_fetch_compare_and_swap_emulation(volatile AO_t *addr, AO_t old_val,
+   return fetched_val;
+ }
+ 
+-int AO_compare_double_and_swap_double_emulation(volatile AO_double_t *addr,
+-                                                AO_t old_val1, AO_t old_val2,
+-                                                AO_t new_val1, AO_t new_val2)
++AO_API int
++AO_compare_double_and_swap_double_emulation(volatile AO_double_t *addr,
++                                            AO_t old_val1, AO_t old_val2,
++                                            AO_t new_val1, AO_t new_val2)
+ {
+   AO_TS_t *my_lock = AO_locks + AO_HASH(addr);
+   int result;
+@@ -204,7 +211,7 @@ int AO_compare_double_and_swap_double_emulation(volatile AO_double_t *addr,
+   return result;
+ }
+ 
+-void AO_store_full_emulation(volatile AO_t *addr, AO_t val)
++AO_API void AO_store_full_emulation(volatile AO_t *addr, AO_t val)
+ {
+   AO_TS_t *my_lock = AO_locks + AO_HASH(addr);
+   lock(my_lock);
+@@ -237,7 +244,7 @@ static void AO_spin(int n)
+   AO_store(&spin_dummy, j);
+ }
+ 
+-void AO_pause(int n)
++AO_API void AO_pause(int n)
+ {
+   if (n < 12)
+     AO_spin(n);
+diff --git a/src/atomic_ops.h b/src/atomic_ops.h
+index 92d1f4a..1f996fe 100644
+--- a/src/atomic_ops.h
++++ b/src/atomic_ops.h
+@@ -235,6 +235,30 @@
+ # define AO_ALIGNOF_SUPPORTED 1
+ #endif
+ 
++#if defined(AO_DLL) && !defined(AO_API)
++# ifdef AO_BUILD
++#   if defined(__CEGCC__) || (defined(__MINGW32__) && !defined(__cplusplus))
++#     define AO_API __declspec(dllexport)
++#   elif defined(_MSC_VER) || defined(__BORLANDC__) || defined(__CYGWIN__) \
++         || defined(__DMC__) || defined(__MINGW32__) || defined(__WATCOMC__)
++#     define AO_API extern __declspec(dllexport)
++#   endif
++# else
++#   if defined(_MSC_VER) || defined(__BORLANDC__) || defined(__CEGCC__) \
++       || defined(__CYGWIN__) || defined(__DMC__)
++#     define AO_API __declspec(dllimport)
++#   elif defined(__MINGW32_DELAY_LOAD__)
++#     define AO_API __declspec(dllexport)
++#   elif defined(__MINGW32__) || defined(__WATCOMC__)
++#     define AO_API extern __declspec(dllimport)
++#   endif
++# endif
++#endif /* AO_DLL */
++
++#ifndef AO_API
++# define AO_API extern
++#endif
++
+ #ifdef AO_ALIGNOF_SUPPORTED
+ # define AO_ASSERT_ADDR_ALIGNED(addr) \
+     assert(((size_t)(addr) & (__alignof__(*(addr)) - 1)) == 0)
+diff --git a/src/atomic_ops/sysdeps/emul_cas.h b/src/atomic_ops/sysdeps/emul_cas.h
+index e52f75a..c322a5b 100644
+--- a/src/atomic_ops/sysdeps/emul_cas.h
++++ b/src/atomic_ops/sysdeps/emul_cas.h
+@@ -47,14 +47,15 @@
+   extern "C" {
+ #endif
+ 
+-AO_t AO_fetch_compare_and_swap_emulation(volatile AO_t *addr, AO_t old_val,
+-                                         AO_t new_val);
++AO_API AO_t AO_fetch_compare_and_swap_emulation(volatile AO_t *addr,
++                                                AO_t old_val, AO_t new_val);
+ 
+-int AO_compare_double_and_swap_double_emulation(volatile AO_double_t *addr,
+-                                                AO_t old_val1, AO_t old_val2,
+-                                                AO_t new_val1, AO_t new_val2);
++AO_API int
++AO_compare_double_and_swap_double_emulation(volatile AO_double_t *addr,
++                                            AO_t old_val1, AO_t old_val2,
++                                            AO_t new_val1, AO_t new_val2);
+ 
+-void AO_store_full_emulation(volatile AO_t *addr, AO_t val);
++AO_API void AO_store_full_emulation(volatile AO_t *addr, AO_t val);
+ 
+ #ifndef AO_HAVE_fetch_compare_and_swap_full
+ # define AO_fetch_compare_and_swap_full(addr, old, newval) \
+diff --git a/src/atomic_ops/sysdeps/generic_pthread.h b/src/atomic_ops/sysdeps/generic_pthread.h
+index 854cb77..724b148 100644
+--- a/src/atomic_ops/sysdeps/generic_pthread.h
++++ b/src/atomic_ops/sysdeps/generic_pthread.h
+@@ -39,7 +39,7 @@
+ 
+ /* We define only the full barrier variants, and count on the           */
+ /* generalization section below to fill in the rest.                    */
+-extern pthread_mutex_t AO_pt_lock;
++AO_API pthread_mutex_t AO_pt_lock;
+ 
+ #ifdef __cplusplus
+   } /* extern "C" */
+diff --git a/src/atomic_ops_malloc.c b/src/atomic_ops_malloc.c
+index adced80..19f49b2 100644
+--- a/src/atomic_ops_malloc.c
++++ b/src/atomic_ops_malloc.c
+@@ -19,6 +19,10 @@
+ # undef HAVE_MMAP
+ #endif
+ 
++#ifndef AO_BUILD
++# define AO_BUILD
++#endif
++
+ #define AO_REQUIRE_CAS
+ #include "atomic_ops_malloc.h"
+ 
+@@ -116,7 +120,7 @@ static volatile AO_t initial_heap_ptr = (AO_t)AO_initial_heap;
+ 
+ static volatile AO_t mmap_enabled = 0;
+ 
+-void
++AO_API void
+ AO_malloc_enable_mmap(void)
+ {
+ # if defined(__sun)
+@@ -200,7 +204,7 @@ AO_free_large(char * p)
+ 
+ #else /*  No MMAP */
+ 
+-void
++AO_API void
+ AO_malloc_enable_mmap(void)
+ {
+ }
+@@ -319,7 +323,7 @@ static unsigned msb(size_t s)
+   return result;
+ }
+ 
+-AO_ATTR_MALLOC AO_ATTR_ALLOC_SIZE(1)
++AO_API AO_ATTR_MALLOC AO_ATTR_ALLOC_SIZE(1)
+ void *
+ AO_malloc(size_t sz)
+ {
+@@ -349,7 +353,7 @@ AO_malloc(size_t sz)
+   return result + 1;
+ }
+ 
+-void
++AO_API void
+ AO_free(void *p)
+ {
+   AO_t *base;
+diff --git a/src/atomic_ops_malloc.h b/src/atomic_ops_malloc.h
+index f9ed900..efd8880 100644
+--- a/src/atomic_ops_malloc.h
++++ b/src/atomic_ops_malloc.h
+@@ -66,13 +66,13 @@
+ # endif
+ #endif
+ 
+-void AO_free(void *);
++AO_API void AO_free(void *);
+ 
+-AO_ATTR_MALLOC AO_ATTR_ALLOC_SIZE(1)
++AO_API AO_ATTR_MALLOC AO_ATTR_ALLOC_SIZE(1)
+ void * AO_malloc(size_t);
+ 
+ /* Allow use of mmap to grow the heap.  No-op on some platforms.        */
+-void AO_malloc_enable_mmap(void);
++AO_API void AO_malloc_enable_mmap(void);
+ 
+ #ifdef __cplusplus
+   } /* extern "C" */
+diff --git a/src/atomic_ops_stack.c b/src/atomic_ops_stack.c
+index c31c7bf..a5ac859 100644
+--- a/src/atomic_ops_stack.c
++++ b/src/atomic_ops_stack.c
+@@ -19,6 +19,10 @@
+ #include <stdlib.h>
+ #include <assert.h>
+ 
++#ifndef AO_BUILD
++# define AO_BUILD
++#endif
++
+ #define AO_REQUIRE_CAS
+ #include "atomic_ops_stack.h"
+ 
+@@ -36,7 +40,7 @@
+ 
+ #ifdef AO_USE_ALMOST_LOCK_FREE
+ 
+-  void AO_pause(int); /* defined in atomic_ops.c */
++  AO_API void AO_pause(int); /* defined in atomic_ops.c */
+ 
+ /* LIFO linked lists based on compare-and-swap.  We need to avoid       */
+ /* the case of a node deletion and reinsertion while I'm deleting       */
+@@ -58,8 +62,8 @@
+ /* to be inserted.                                                      */
+ /* Both list headers and link fields contain "perturbed" pointers, i.e. */
+ /* pointers with extra bits "or"ed into the low order bits.             */
+-void AO_stack_push_explicit_aux_release(volatile AO_t *list, AO_t *x,
+-                                        AO_stack_aux *a)
++AO_API void AO_stack_push_explicit_aux_release(volatile AO_t *list, AO_t *x,
++                                               AO_stack_aux *a)
+ {
+   AO_t x_bits = (AO_t)x;
+   AO_t next;
+@@ -139,8 +143,8 @@ void AO_stack_push_explicit_aux_release(volatile AO_t *list, AO_t *x,
+ # define AO_load_next AO_load
+ #endif
+ 
+-AO_t *
+-AO_stack_pop_explicit_aux_acquire(volatile AO_t *list, AO_stack_aux * a)
++AO_API AO_t *AO_stack_pop_explicit_aux_acquire(volatile AO_t *list,
++                                               AO_stack_aux *a)
+ {
+   unsigned i;
+   int j = 0;
+@@ -254,7 +258,7 @@ AO_stack_pop_explicit_aux_acquire(volatile AO_t *list, AO_stack_aux * a)
+   volatile /* non-static */ AO_t AO_noop_sink;
+ #endif
+ 
+-void AO_stack_push_release(AO_stack_t *list, AO_t *element)
++AO_API void AO_stack_push_release(AO_stack_t *list, AO_t *element)
+ {
+     AO_t next;
+ 
+@@ -273,7 +277,7 @@ void AO_stack_push_release(AO_stack_t *list, AO_t *element)
+ #   endif
+ }
+ 
+-AO_t *AO_stack_pop_acquire(AO_stack_t *list)
++AO_API AO_t *AO_stack_pop_acquire(AO_stack_t *list)
+ {
+ #   if defined(__clang__) && !AO_CLANG_PREREQ(3, 5)
+       AO_t *volatile cptr;
+@@ -307,7 +311,7 @@ AO_t *AO_stack_pop_acquire(AO_stack_t *list)
+ /* We have a wide CAS, but only does an AO_t-wide comparison.   */
+ /* We can't use the Treiber optimization, since we only check   */
+ /* for an unchanged version number, not an unchanged pointer.   */
+-void AO_stack_push_release(AO_stack_t *list, AO_t *element)
++AO_API void AO_stack_push_release(AO_stack_t *list, AO_t *element)
+ {
+     AO_t version;
+ 
+@@ -323,7 +327,7 @@ void AO_stack_push_release(AO_stack_t *list, AO_t *element)
+                            version+1, (AO_t) element));
+ }
+ 
+-AO_t *AO_stack_pop_acquire(AO_stack_t *list)
++AO_API AO_t *AO_stack_pop_acquire(AO_stack_t *list)
+ {
+     AO_t *cptr;
+     AO_t next;
+diff --git a/src/atomic_ops_stack.h b/src/atomic_ops_stack.h
+index e03c186..4053071 100644
+--- a/src/atomic_ops_stack.h
++++ b/src/atomic_ops_stack.h
+@@ -141,11 +141,11 @@ typedef struct AO__stack_aux {
+ /* The following two routines should not normally be used directly.     */
+ /* We make them visible here for the rare cases in which it makes sense */
+ /* to share the AO_stack_aux between stacks.                            */
+-void
++AO_API void
+ AO_stack_push_explicit_aux_release(volatile AO_t *list, AO_t *x,
+                                   AO_stack_aux *);
+ 
+-AO_t *
++AO_API AO_t *
+ AO_stack_pop_explicit_aux_acquire(volatile AO_t *list, AO_stack_aux *);
+ 
+ /* And now AO_stack_t for the real interface:                           */
+@@ -213,9 +213,9 @@ AO_INLINE void AO_stack_init(AO_stack_t *list)
+ #define AO_REAL_HEAD_PTR(x) (AO_t *)((x).AO_val2)
+ #define AO_REAL_NEXT_PTR(x) (AO_t *)(x)
+ 
+-void AO_stack_push_release(AO_stack_t *list, AO_t *new_element);
++AO_API void AO_stack_push_release(AO_stack_t *list, AO_t *new_element);
+ #define AO_HAVE_stack_push_release
+-AO_t * AO_stack_pop_acquire(AO_stack_t *list);
++AO_API AO_t *AO_stack_pop_acquire(AO_stack_t *list);
+ #define AO_HAVE_stack_pop_acquire
+ 
+ #endif /* Wide CAS case */
+diff --git a/tests/test_atomic.c b/tests/test_atomic.c
+index a301ced..a905308 100644
+--- a/tests/test_atomic.c
++++ b/tests/test_atomic.c
+@@ -192,11 +192,12 @@ int test_and_set_test(void)
+     extern "C" {
+ # endif
+ 
+-  void AO_store_full_emulation(volatile AO_t *addr, AO_t val);
+-  AO_t AO_fetch_compare_and_swap_emulation(volatile AO_t *addr, AO_t old_val,
+-                                           AO_t new_val);
++  AO_API void AO_store_full_emulation(volatile AO_t *addr, AO_t val);
++  AO_API AO_t AO_fetch_compare_and_swap_emulation(volatile AO_t *addr,
++                                                  AO_t old_val, AO_t new_val);
+ # ifdef AO_HAVE_double_t
+-    int AO_compare_double_and_swap_double_emulation(volatile AO_double_t *,
++    AO_API int
++    AO_compare_double_and_swap_double_emulation(volatile AO_double_t *,
+                                                 AO_t old_val1, AO_t old_val2,
+                                                 AO_t new_val1, AO_t new_val2);
+ # endif
