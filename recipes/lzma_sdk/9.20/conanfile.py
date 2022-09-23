@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.file import get, chdir, replace_in_file, rm
+from conan.tools.files import get, chdir, replace_in_file, rm
 from conans import tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 import os
 
