@@ -1,4 +1,4 @@
 sources:
-    "2.3.1":
-      url: https://github.com/nholthaus/units/archive/v2.3.1.tar.gz
-      sha256: 4a242a6e1b117f0234dffc2796c9133ca57d114f0fdf2c200754e6770db6bfd8
+  "2.3.1":
+    url: "https://github.com/nholthaus/units/archive/v2.3.1.tar.gz"
+    sha256: "4a242a6e1b117f0234dffc2796c9133ca57d114f0fdf2c200754e6770db6bfd8"
