@@ -71,7 +71,7 @@ class GTestConan(ConanFile):
         del self.info.options.debug_postfix # deprecated option that no longer exist
 
     def validate(self):
-        if self.options.shared and (is_msvc(self) or self._is_clang_cl) and is_msvc_static_runtime(self):
+        if self.info.options.shared and (is_msvc(self) or self._is_clang_cl) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(
                 "gtest:shared=True with compiler=\"Visual Studio\" is not "
                 "compatible with compiler.runtime=MT/MTd"
