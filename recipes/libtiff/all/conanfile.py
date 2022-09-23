@@ -147,10 +147,12 @@ class LibtiffConan(ConanFile):
             else:
                 file_find_package_jpeg = os.path.join(self.source_folder, "cmake", "JPEGCodec.cmake")
                 file_jpeg_target = libtiff_cmakelists
-            jpeg_target = "libjpeg-turbo::jpeg" if self.dependencies["libjpeg-turbo"].options.shared else "libjpeg-turbo::jpeg-static"
+            cpp_info_jpeg_turbo = self.dependencies["libjpeg-turbo"].cpp_info
+            jpeg_config = cpp_info_jpeg_turbo.get_property("cmake_file_name") or "libjpeg-turbo"
+            jpeg_target = cpp_info_jpeg_turbo.components["jpeg"].get_property("cmake_target_name") or "libjpeg-turbo::jpeg"
             replace_in_file(self, file_find_package_jpeg,
                                   "find_package(JPEG)",
-                                  "find_package(libjpeg-turbo REQUIRED CONFIG)\nset(JPEG_FOUND TRUE)")
+                                  f"find_package({jpeg_config} REQUIRED CONFIG)\nset(JPEG_FOUND TRUE)")
             replace_in_file(self, file_jpeg_target, "JPEG::JPEG", jpeg_target)
 
         # Export symbols of tiffxx for msvc shared
