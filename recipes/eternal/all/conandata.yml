@@ -1,0 +1,4 @@
+sources:
+  "1.0.1":
+    url: "https://github.com/mapbox/eternal/archive/refs/tags/v1.0.1.tar.gz"
+    sha256: "7d799381b3786d0bd987eea75df2a81f581a64ee962e922a2f7a7d3d0c3d0421"
