@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, chdir, rm, rmdir
-from conan.tools.scm import Version
 from conans import AutoToolsBuildEnvironment
 import functools
 
