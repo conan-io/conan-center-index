@@ -140,7 +140,7 @@ class NSSConan(ConanFile):
                         library += ".lib"
                     result.append(library)
                 else:
-                    result.append(f"-l%{library}")
+                    result.append(f"-l{library}")
             return result
 
 
