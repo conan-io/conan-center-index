@@ -5,3 +5,7 @@
   "0.38.4":
     "url": "https://www.cairographics.org/releases/pixman-0.38.4.tar.gz"
     "sha256": "da66d6fd6e40aee70f7bd02e4f8f76fc3f006ec879d346bae6a723025cfbdde7"
+patches:
+  "0.40.0":
+    - patch_file: "patches/0001-incompatible-pointer-types.patch"
+      base_path: "source_subfolder"

@@ -1,3 +1,4 @@
+from conan.tools import files
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -54,11 +55,16 @@ class PixmanConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("pixman can only be built as a static library on Windows")
 
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
+        files.apply_conandata_patches(self)
         if self.settings.compiler == "Visual Studio":
             tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.win32.common"),
                                   "-MDd ", "-{} ".format(str(self.settings.compiler.runtime)))
