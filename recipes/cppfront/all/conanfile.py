@@ -82,9 +82,9 @@ class CppfrontConan(ConanFile):
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
-        self.env_info.PATH.append(bin_path)
+        # bin_path = os.path.join(self.package_folder, "bin")
+        # self.output.info(f"Appending PATH environment variable: {bin_path}")
+        # self.env_info.PATH.append(bin_path)
 
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
         cppfront_bin = os.path.join(self.package_folder, "bin", "cppfront{}".format(bin_ext)).replace("\\", "/")
@@ -98,16 +98,16 @@ class CppfrontConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
 
-        target = "cppfront"
-        self.cpp_info.set_property("cmake_file_name", "cppfront")
-        self.cpp_info.set_property("cmake_target_name", f"cppfront::{target}")
-        self.cpp_info.set_property("pkg_config_name",  "cppfront")
+        # target = "cppfront"
+        # self.cpp_info.set_property("cmake_file_name", "cppfront")
+        # self.cpp_info.set_property("cmake_target_name", f"cppfront::{target}")
+        # self.cpp_info.set_property("pkg_config_name",  "cppfront")
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "cppfront"
-        self.cpp_info.names["cmake_find_package_multi"] = "cppfront"
-        self.cpp_info.names["pkg_config"] = "cppfront"
-        self.cpp_info.components["_cppfront"].names["cmake_find_package"] = target
-        self.cpp_info.components["_cppfront"].names["cmake_find_package_multi"] = target
-        self.cpp_info.components["_cppfront"].set_property("cmake_target_name", f"cppfront::{target}")
+        # # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        # self.cpp_info.names["cmake_find_package"] = "cppfront"
+        # self.cpp_info.names["cmake_find_package_multi"] = "cppfront"
+        # self.cpp_info.names["pkg_config"] = "cppfront"
+        # self.cpp_info.components["_cppfront"].names["cmake_find_package"] = target
+        # self.cpp_info.components["_cppfront"].names["cmake_find_package_multi"] = target
+        # self.cpp_info.components["_cppfront"].set_property("cmake_target_name", f"cppfront::{target}")
 
