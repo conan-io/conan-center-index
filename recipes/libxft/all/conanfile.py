@@ -1,9 +1,11 @@
 from conan import ConanFile
 from conan.tools import files
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 from conans import AutoToolsBuildEnvironment
 import functools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
 
 class libxftConan(ConanFile):
     name = "libxft"
@@ -26,6 +28,11 @@ class libxftConan(ConanFile):
         self.requires("xorg/system")
         self.requires("freetype/2.12.1")
         self.requires("fontconfig/2.13.93")
+    
+    def validate(self):
+        if Version(self.version) >= "2.3.6":
+            if self.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < 6:
+                raise ConanInvalidConfiguration("libxft requires at least gcc 6.")
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.4")
