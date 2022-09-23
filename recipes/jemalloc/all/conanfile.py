@@ -4,7 +4,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 from conans import tools as tools_legacy
 from conan.tools.files import apply_conandata_patches, get, replace_in_file
-from conan.tools.files import apply_conandata_patches,  get, rename, replace_in_file, rmdir, save
 
 import os
 import shutil
@@ -144,14 +143,14 @@ class JemallocConan(ConanFile):
             makefile_in = os.path.join(self.source_folder, "Makefile.in")
             replace_in_file(self, makefile_in,
                                   "DSO_LDFLAGS = @DSO_LDFLAGS@",
-                                  "DSO_LDFLAGS = @DSO_LDFLAGS@ -Wl,--out-implib,lib/libjemalloc.a")
+                                  "DSO_LDFLAGS = @DSO_LDFLAGS@ -Wl,--out-implib,lib/libjemalloc.a", strict=False)
             replace_in_file(self, makefile_in,
                                   "\t$(INSTALL) -d $(LIBDIR)\n"
                                   "\t$(INSTALL) -m 755 $(objroot)lib/$(LIBJEMALLOC).$(SOREV) $(LIBDIR)",
                                   "\t$(INSTALL) -d $(BINDIR)\n"
                                   "\t$(INSTALL) -d $(LIBDIR)\n"
                                   "\t$(INSTALL) -m 755 $(objroot)lib/$(LIBJEMALLOC).$(SOREV) $(BINDIR)\n"
-                                  "\t$(INSTALL) -m 644 $(objroot)lib/libjemalloc.a $(LIBDIR)")
+                                  "\t$(INSTALL) -m 644 $(objroot)lib/libjemalloc.a $(LIBDIR)", strict=False)
 
         apply_conandata_patches(self)
 
