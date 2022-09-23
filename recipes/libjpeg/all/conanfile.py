@@ -177,6 +177,7 @@ class LibjpegConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libjpeg")
         prefix = "lib" if is_msvc(self) or self._is_clang_cl else ""
         self.cpp_info.libs = [f"{prefix}jpeg"]
+        self.cpp_info.resdirs = ["res"]
         if not self.options.shared:
             self.cpp_info.defines.append("LIBJPEG_STATIC")
 
