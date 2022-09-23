@@ -9,7 +9,6 @@ class PcapplusplusTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
     # Needed to make sure libpcap gets compiled
-    build_policy = "missing"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
