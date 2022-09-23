@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-fron conan.tools.files import download, chdir, replace_in_file
+from conan.tools.files import download, chdir, replace_in_file
 from conans import tools, AutoToolsBuildEnvironment
 import os
 
