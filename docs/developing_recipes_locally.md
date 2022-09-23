@@ -21,7 +21,7 @@ This file is intended to provide all the commands you need to run in order to be
 
 ## Clone your fork
 
-1. Follow the GitHub UI to [fork this repository](https://github.com/prince-chrismc/conan-center-index/fork)
+1. Follow the GitHub UI to [fork this repository](https://github.com/conan-io/conan-center-index/fork)
 2. [Clone your fork](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
 
 ## Setup your environment
@@ -119,11 +119,11 @@ It is possible to run the linter locally the same way it is being run [using Git
 This can be selected when calling `conan create` or sperately with `conan test`
 
 ```sh
-conan create recipes/fmt/all/conanfile.py 9.0.0@ -tf test_v1_package/
+conan create recipes/fmt/all/conanfile.py 9.0.0@ -tf test_v1_package/ -pr:b=default -pr:h=default
 ```
 
 ```sh
-conan test recipes/fmt/all/test_v1_package/conanfile.py fmt/9.0.0@
+conan test recipes/fmt/all/test_v1_package/conanfile.py fmt/9.0.0@ -pr:h=default -pr:b=default
 ```
 
 ## Testing more environments
@@ -144,11 +144,13 @@ docker run -v/Users/barbarian/.conan:/home/conan/.conan conanio/gcc8 bash -c "co
 docker run -v/Users/barbarian/.conan:/home/conan/.conan conanio/gcc8 bash -c "conan install -pr gcc8 fmt/9.0.0@ --build missing"
 ```
 
+> **Note**: If you are running on Mac M1, the follow Docker argument is required: `--platform=linux/amd64
+
 ## Using Conan 2.0
 
 Everything you need to know about the methods, commands line, outputs can be found in the
 [Conan 2.0 Migrations](https://docs.conan.io/en/latest/conan_v2.html) docs. This should be fairly straight forward.
-Conan 2.0 by default has a different `CONANN_USER_HOME` location. You can have to separate caches, profiles
+Conan 2.0 by default has a different `CONAN_USER_HOME` location. You can have to separate caches, profiles
 and settings. So no need to worry about breaking your v1 setup.
 
 > **Note**: There are pretty heavy changes to the CLI so very few of the commands will have survived.
