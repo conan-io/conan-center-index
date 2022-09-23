@@ -21,7 +21,7 @@ class libxftConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-        
+
     def export_sources(self):
         export_conandata_patches(self)
 
