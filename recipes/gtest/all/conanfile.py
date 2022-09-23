@@ -37,7 +37,7 @@ class GTestConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
-            return 11
+        return 11
 
     @property
     def _minimum_compilers_version(self):
