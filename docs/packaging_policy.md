@@ -10,7 +10,10 @@ This document gathers all the relevant information regarding the general lines t
   * [Build](#build)
   * [Package](#package)
   * [Settings](#settings)
-  * [Options](#options)<!-- endToc -->
+  * [Options](#options)
+    * [Predefined Options and Known Defaults](#predefined-options-and-known-defaults)
+    * [Options to Avoid](#options-to-avoid)
+    * [Recommended feature options names](#recommended-feature-options-names)<!-- endToc -->
 
 ## Sources
 

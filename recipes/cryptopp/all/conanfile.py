@@ -38,7 +38,7 @@ class CryptoPPConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "8.7.0":
-            self.tool_requires("cmake/3.21.0")
+            self.tool_requires("cmake/3.24.0")
 
     def validate(self):
         if self.options.shared and Version(self.version) >= "8.7.0":
