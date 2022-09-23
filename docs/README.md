@@ -1,6 +1,6 @@
 <img src="../assets/JFrogConanCenter.png" width="600"/>
 
-The [conan-center-index](https://github.com/conan-io/conan-center-index) (this repository) contains recipes for the remote [JFrog ConanCenter](https://conan.io/center/).
+This repository, ConanCenterIndex, contains recipes for the remote [JFrog ConanCenter](https://conan.io/center/).
 This remote is added by default to a clean installation of the Conan client. Recipes are contributed by opening pull requests as explained in the sections below.
 When pull requests are merged, the CI will upload the generated packages to the [ConanCenter](https://conan.io/center/) remote.
 
