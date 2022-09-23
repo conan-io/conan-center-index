@@ -153,7 +153,7 @@ class JemallocConan(ConanFile):
                                   "\t$(INSTALL) -m 755 $(objroot)lib/$(LIBJEMALLOC).$(SOREV) $(BINDIR)\n"
                                   "\t$(INSTALL) -m 644 $(objroot)lib/libjemalloc.a $(LIBDIR)")
 
-        # apply_conandata_patches(self)
+        apply_conandata_patches(self)
 
         # for x in self.conan_data.get("patches", {}).get(self.version, []):
         #     patch(self, **x)
