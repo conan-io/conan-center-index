@@ -63,12 +63,12 @@ class GTestConan(ConanFile):
         if self.options.debug_postfix != "deprecated":
             self.output.warn("gtest/*:debug_postfix is deprecated.")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def package_id(self):
         del self.info.options.no_main # Only used to expose more targets
         del self.info.options.debug_postfix # deprecated option that no longer exist
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def validate(self):
         if self.options.shared and (is_msvc(self) or self._is_clang_cl) and is_msvc_static_runtime(self):
@@ -93,6 +93,9 @@ class GTestConan(ConanFile):
                 f"{self.ref} requires {compiler} {min_version}. The current compiler is {compiler} {compiler.version}."
             )
 
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+
     def generate(self):
         tc = CMakeToolchain(self)
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
@@ -104,9 +107,6 @@ class GTestConan(ConanFile):
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
             tc.variables["gtest_disable_pthreads"] = True
         tc.generate()
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def _patch_sources(self):
         if is_msvc(self) or self._is_clang_cl:
