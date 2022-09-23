@@ -215,7 +215,11 @@ class ArrowConan(ConanFile):
 
     def _with_re2(self, required=False):
         if required or self.options.with_re2 == "auto":
-            return bool(self.options.gandiva)
+            if self.options.gandiva or self.options.parquet:
+                return True
+            if Version(self) >= "7.0.0" and (self._compute() or self._dataset_modules()):
+                return True
+            return False
         else:
             return bool(self.options.with_re2)
 
@@ -286,6 +290,13 @@ class ArrowConan(ConanFile):
         else:
             return bool(self.options.with_openssl)
 
+    def _with_rapidjson(self):
+        if self.options.with_json:
+            return True
+        if Version(self.version) >= "7.0.0" and self.options.encryption:
+            return True
+        return False
+
     def requirements(self):
         if self._with_thrift():
             self.requires("thrift/0.16.0")
@@ -305,7 +316,7 @@ class ArrowConan(ConanFile):
             self.requires("google-cloud-cpp/1.40.1")
         if self._with_grpc():
             self.requires("grpc/1.48.0")
-        if self.options.with_json:
+        if self._with_rapidjson():
             self.requires("rapidjson/1.1.0")
         if self._with_llvm():
             self.requires("llvm-core/13.0.0")
@@ -394,27 +405,29 @@ class ArrowConan(ConanFile):
         tc.cache_variables["GLOG_SOURCE"] = "SYSTEM"
         tc.cache_variables["ARROW_WITH_BACKTRACE"] = bool(self.options.with_backtrace)
         tc.cache_variables["ARROW_WITH_BROTLI"] = bool(self.options.with_brotli)
-        tc.cache_variables["Brotli_SOURCE"] = "SYSTEM"
+        tc.cache_variables["brotli_SOURCE"] = "SYSTEM"
         if self.options.with_brotli:
             tc.cache_variables["ARROW_BROTLI_USE_SHARED"] = bool(self.options["brotli"].shared)
         tc.cache_variables["gflags_SOURCE"] = "SYSTEM"
         if self._with_gflags():
-            tc.cache_variables["ARROW_BROTLI_USE_SHARED"] = bool(self.options["gflags"].shared)
+            tc.cache_variables["ARROW_GFLAGS_USE_SHARED"] = bool(self.options["gflags"].shared)
         tc.cache_variables["ARROW_WITH_BZ2"] = bool(self.options.with_bz2)
         tc.cache_variables["BZip2_SOURCE"] = "SYSTEM"
         if self.options.with_bz2:
             tc.cache_variables["ARROW_BZ2_USE_SHARED"] = bool(self.options["bzip2"].shared)
         tc.cache_variables["ARROW_WITH_LZ4"] = bool(self.options.with_lz4)
-        tc.cache_variables["Lz4_SOURCE"] = "SYSTEM"
+        tc.cache_variables["lz4_SOURCE"] = "SYSTEM"
         if self.options.with_lz4:
             tc.cache_variables["ARROW_LZ4_USE_SHARED"] = bool(self.options["lz4"].shared)
         tc.cache_variables["ARROW_WITH_SNAPPY"] = bool(self.options.with_snappy)
+        tc.cache_variables["RapidJSON_SOURCE"] = "SYSTEM"
         tc.cache_variables["Snappy_SOURCE"] = "SYSTEM"
         if self.options.with_snappy:
             tc.cache_variables["ARROW_SNAPPY_USE_SHARED"] = bool(self.options["snappy"].shared)
         tc.cache_variables["ARROW_WITH_ZLIB"] = bool(self.options.with_zlib)
         tc.cache_variables["RE2_SOURCE"] = "SYSTEM"
         tc.cache_variables["ZLIB_SOURCE"] = "SYSTEM"
+        tc.cache_variables["xsimd_SOURCE"] = "SYSTEM"
         tc.cache_variables["ARROW_WITH_ZSTD"] = bool(self.options.with_zstd)
         if Version(self.version) >= "2.0":
             tc.cache_variables["zstd_SOURCE"] = "SYSTEM"
@@ -611,7 +624,7 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("cuda::cuda")
         if self.options.with_hiveserver2:
             self.cpp_info.components["libarrow"].requires.append("hiveserver2::hiveserver2")
-        if self.options.with_json:
+        if self._with_rapidjson():
             self.cpp_info.components["libarrow"].requires.append("rapidjson::rapidjson")
         if self.options.with_s3:
             self.cpp_info.components["libarrow"].requires.append("aws-sdk-cpp::s3")
