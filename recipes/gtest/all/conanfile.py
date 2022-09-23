@@ -59,7 +59,10 @@ class GTestConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         if self.options.debug_postfix != "deprecated":
             self.output.warn("gtest/*:debug_postfix is deprecated.")
 
