@@ -6,7 +6,7 @@ from platform import python_version
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
@@ -21,7 +21,7 @@ class TestPackageConan(ConanFile):
         return sys.executable
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             with tools.environment_append({"PYTHONPATH": "lib"}):
                 self.run("{} {}".format(self._python_interpreter, os.path.join(
                     self.source_folder, "test.py")), run_environment=True)

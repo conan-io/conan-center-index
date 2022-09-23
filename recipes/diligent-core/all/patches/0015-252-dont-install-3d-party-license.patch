@@ -1,0 +1,78 @@
+diff --git a/ThirdParty/CMakeLists.txt b/ThirdParty/CMakeLists.txt
+index a77ab3d7..86606aeb 100644
+--- a/ThirdParty/CMakeLists.txt
++++ b/ThirdParty/CMakeLists.txt
+@@ -15,7 +15,6 @@ if (GL_SUPPORTED AND (PLATFORM_WIN32 OR PLATFORM_LINUX OR PLATFORM_MACOS) AND (N
+                 RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}/${DILIGENT_CORE_DIR}/$<CONFIG>"
+         )
+     endif()
+-    install(FILES glew/LICENSE.txt DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME GLEW-License.txt)
+ endif()
+ 
+ if (VULKAN_SUPPORTED OR METAL_SUPPORTED)
+@@ -26,7 +25,6 @@ if (VULKAN_SUPPORTED OR METAL_SUPPORTED)
+         # Note that SPIRV-Headers_SOURCE_DIR variable is normally created by project(SPIRV-Headers)
+         set(SPIRV-Headers_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/SPIRV-Headers")
+         target_include_directories(SPIRV-Headers INTERFACE "${SPIRV-Headers_SOURCE_DIR}/include")
+-        install(FILES "${SPIRV-Headers_SOURCE_DIR}/LICENSE" DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME SPIRV-Headers-License.txt)
+     endif()
+ 
+     if (NOT TARGET Vulkan::Headers)
+@@ -37,7 +35,6 @@ if (VULKAN_SUPPORTED OR METAL_SUPPORTED)
+         set(Vulkan-Headers_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Vulkan-Headers")
+         add_library(Vulkan::Headers ALIAS Vulkan-Headers)
+         target_include_directories(Vulkan-Headers INTERFACE "${Vulkan-Headers_SOURCE_DIR}/include")
+-        install(FILES "${Vulkan-Headers_SOURCE_DIR}/LICENSE.txt" DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME Vulkan-Headers-License.txt)
+     endif()
+ 
+     option(DILIGENT_NO_GLSLANG "Do NOT build glslang compiler" OFF)
+@@ -61,7 +58,6 @@ if (VULKAN_SUPPORTED OR METAL_SUPPORTED)
+         set_target_properties(${SPIRV_TOOLS_EXCLUDE_TARGETS} PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
+ 
+         set(THIRD_PARTY_LIBS SPIRV-Tools-static SPIRV-Tools-opt)
+-        install(FILES "${spirv-tools_SOURCE_DIR}/LICENSE" DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME SPIRV-Tools-License.txt)
+     endif()
+ 
+     if (NOT ${DILIGENT_NO_GLSLANG} AND (NOT TARGET glslang))
+@@ -76,7 +72,6 @@ if (VULKAN_SUPPORTED OR METAL_SUPPORTED)
+         unset(CMAKE_DEBUG_POSTFIX CACHE)
+ 
+         list(APPEND THIRD_PARTY_LIBS GenericCodeGen glslang OGLCompiler OSDependent SPIRV HLSL MachineIndependent)
+-        install(FILES "${glslang_SOURCE_DIR}/LICENSE.txt" DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME GLSLang-License.txt)
+     endif()
+ 
+     if (NOT TARGET spirv-cross-core)
+@@ -101,7 +96,6 @@ if (VULKAN_SUPPORTED OR METAL_SUPPORTED)
+             list(APPEND THIRD_PARTY_LIBS spirv-cross-msl spirv-cross-glsl)
+         endif()
+ 
+-        install(FILES "${SPIRV-Cross_SOURCE_DIR}/LICENSE" DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME SPIRV-Cross-License.txt)
+     endif()
+ 
+     if (DILIGENT_INSTALL_CORE)
+@@ -138,7 +132,6 @@ if (VULKAN_SUPPORTED AND (PLATFORM_WIN32 OR PLATFORM_LINUX OR PLATFORM_MACOS OR
+         EXCLUDE_FROM_DEFAULT_BUILD 1
+         FOLDER "DiligentCore/ThirdParty/volk"
+     )
+-    install(FILES "${volk_SOURCE_DIR}/LICENSE.md" DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME Volk-License.md)
+ endif()
+ 
+ if ((${DILIGENT_BUILD_GOOGLE_TEST}) AND (NOT TARGET gtest))
+@@ -154,7 +147,6 @@ if ((${DILIGENT_BUILD_GOOGLE_TEST}) AND (NOT TARGET gtest))
+         )
+ 
+     get_target_property(GTEST_SOURCE_DIR gtest SOURCE_DIR)
+-    install(FILES "googletest/LICENSE" DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME googletest-License.txt)
+ endif()
+ 
+ if (NOT TARGET xxHash::xxhash)
+@@ -163,9 +155,6 @@ if (NOT TARGET xxHash::xxhash)
+     set(XXHASH_BUILD_ENABLE_INLINE_API OFF)
+     add_subdirectory(xxHash/cmake_unofficial)
+     set_directory_root_folder("xxHash/cmake_unofficial" "DiligentCore/ThirdParty/xxHash")
+-    install(FILES "${xxHash_SOURCE_DIR}/../LICENSE" DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME xxHash-License.txt)
+ endif()
+ 
+-install(FILES stb/stb_image_write_license.txt DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}")
+-install(FILES DirectXShaderCompiler/LICENSE.TXT DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME DXC-License.txt)
+ install(FILES DirectXShaderCompiler/ThirdPartyNotices.txt DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME DXC-ThirdPartyNotices.txt)

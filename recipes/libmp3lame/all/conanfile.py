@@ -31,6 +31,10 @@ class LibMP3LameConan(ConanFile):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
+    def _is_clang_cl(self):
+        return str(self.settings.compiler) in ["clang"] and str(self.settings.os) in ['Windows']
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -57,7 +61,7 @@ class LibMP3LameConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if not self._is_msvc:
+        if not self._is_msvc and not self._is_clang_cl:
             self.build_requires("gnu-config/cci.20201022")
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
@@ -86,10 +90,25 @@ class LibMP3LameConan(ConanFile):
             # Do not hardcode LTO
             tools.replace_in_file("Makefile.MSVC", " /GL", "")
             tools.replace_in_file("Makefile.MSVC", " /LTCG", "")
-            command = "nmake -f Makefile.MSVC comp=msvc asm=yes"
+            tools.replace_in_file("Makefile.MSVC", "ADDL_OBJ = bufferoverflowU.lib", "")
+            command = "nmake -f Makefile.MSVC comp=msvc"
+            if self._is_clang_cl:
+                cl = os.environ.get('CC', "clang-cl")
+                link = os.environ.get("LD", 'lld-link')
+                tools.replace_in_file('Makefile.MSVC', 'CC = cl', 'CC = %s' % cl)
+                tools.replace_in_file('Makefile.MSVC', 'LN = link', 'LN = %s' % link)
+                # what is /GAy? MSDN doesn't know it
+                # clang-cl: error: no such file or directory: '/GAy'
+                # https://docs.microsoft.com/en-us/cpp/build/reference/ga-optimize-for-windows-application?view=msvc-170
+                tools.replace_in_file('Makefile.MSVC', '/GAy', '/GA')
             if self.settings.arch == "x86_64":
                 tools.replace_in_file("Makefile.MSVC", "MACHINE = /machine:I386", "MACHINE =/machine:X64")
+                command += " MSVCVER=Win64 asm=yes"
+            elif self.settings.arch == "armv8":
+                tools.replace_in_file("Makefile.MSVC", "MACHINE = /machine:I386", "MACHINE =/machine:ARM64")
                 command += " MSVCVER=Win64"
+            else:
+                command += " asm=yes"
             command += " libmp3lame.dll" if self.options.shared else " libmp3lame-static.lib"
             self.run(command)
 
@@ -123,14 +142,14 @@ class LibMP3LameConan(ConanFile):
 
     def build(self):
         self._apply_patch()
-        if self._is_msvc:
+        if self._is_msvc or self._is_clang_cl:
             self._build_vs()
         else:
             self._build_autotools()
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
-        if self._is_msvc:
+        if self._is_msvc or self._is_clang_cl:
             self.copy(pattern="*.h", src=os.path.join(self._source_subfolder, "include"), dst=os.path.join("include", "lame"))
             name = "libmp3lame.lib" if self.options.shared else "libmp3lame-static.lib"
             self.copy(name, src=os.path.join(self._source_subfolder, "output"), dst="lib")

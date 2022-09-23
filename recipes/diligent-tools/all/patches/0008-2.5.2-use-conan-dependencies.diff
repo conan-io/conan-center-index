@@ -1,0 +1,18 @@
+diff --git a/TextureLoader/CMakeLists.txt b/TextureLoader/CMakeLists.txt
+index 362e209..256b352 100644
+--- a/TextureLoader/CMakeLists.txt
++++ b/TextureLoader/CMakeLists.txt
+@@ -47,12 +47,7 @@ source_group("interface" FILES ${INTERFACE})
+ 
+ target_link_libraries(Diligent-TextureLoader 
+ PRIVATE 
+-    Diligent-BuildSettings 
+-    Diligent-Common 
+-    Diligent-PlatformInterface 
+-    Diligent-GraphicsEngineInterface 
+-    Diligent-GraphicsAccessories
+-    Diligent-GraphicsTools
++    diligent-core::diligent-core
+     PNG::PNG 
+     TIFF::TIFF
+     ZLIB::ZLIB

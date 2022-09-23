@@ -1,0 +1,77 @@
+reviewers:
+  # List with users whose review is taken into account so that a pull-request is merged.
+  #   - <user>: Name of the github user
+  #   - <type>: Either 'community' for community reviewers or 'team' for Conan reviewers.
+  #   - <request_reviews>: Make the bot proactively request the user's review of pull-requests ready for review.
+  - user: "danimtb"
+    type: "team"
+    request_reviews: true
+  - user: "lasote"
+    type: "team"
+    request_reviews: false
+  - user: "jgsogo"
+    type: "team"
+    request_reviews: true
+  - user: "czoido"
+    type: "team"
+    request_reviews: false
+  - user: "memsharded"
+    type: "team"
+    request_reviews: false
+  - user: "SSE4"
+    type: "team"
+    request_reviews: true
+  - user: "uilianries"
+    type: "team"
+    request_reviews: true
+  - user: "madebr"
+    type: "community"
+    request_reviews: false
+  - user: "SpaceIm"
+    type: "community"
+    request_reviews: false
+  - user: "ericLemanissier"
+    type: "community"
+    request_reviews: false
+  - user: "prince-chrismc"
+    type: "team"
+    request_reviews: false
+  - user: "Croydon"
+    type: "community"
+    request_reviews: false
+  - user: "intelligide"
+    type: "community"
+    request_reviews: false
+  - user: "theirix"
+    type: "community"
+    request_reviews: false
+  - user: "gocarlos"
+    type: "community"
+    request_reviews: false
+  - user: "mathbunnyru"
+    type: "community"
+    request_reviews: false
+  - user: "ericriff"
+    type: "community"
+    request_reviews: false
+  - user: "toge"
+    type: "community"
+    request_reviews: false
+  - user: "AndreyMlashkin"
+    type: "community"
+    request_reviews: false
+  - user: "MartinDelille"
+    type: "community"
+    request_reviews: false
+  - user: "dmn-star"
+    type: "community"
+    request_reviews: false
+  - user: "jcar87"
+    type: "team"
+    request_reviews: true
+  - user: "franramirez688"
+    type: "team"
+    request_reviews: true
+  - user: "paulocoutinhox"
+    type: "community"
+    request_reviews: false

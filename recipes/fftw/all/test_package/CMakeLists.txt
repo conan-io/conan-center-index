@@ -1,12 +1,9 @@
 cmake_minimum_required(VERSION 3.1)
-project(test_package C)
+project(test_package LANGUAGES C)
 
 option(ENABLE_DOUBLE_PRECISION "Enable FFTW single precision" ON)
 option(ENABLE_SINGLE_PRECISION "Enable FFTW single precision" OFF)
 option(ENABLE_LONG_DOUBLE_PRECISION "Enable FFTW single precision" OFF)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
 
 if(ENABLE_SINGLE_PRECISION)
   find_package(FFTW3f REQUIRED CONFIG)

@@ -13,7 +13,7 @@ class NSSConan(ConanFile):
     topics = ("network", "security", "crypto", "ssl")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    default_options = {"shared": True, "fPIC": True}
 
 
     @property
@@ -29,11 +29,12 @@ class NSSConan(ConanFile):
             self.build_requires("msys2/cci.latest")
         if self.settings.os == "Windows":
             self.build_requires("mozilla-build/3.3")
+        if hasattr(self, "settings_build"):
+            self.build_requires("sqlite3/3.38.1")
 
     def configure(self):
         self.options["nspr"].shared = True
         self.options["sqlite3"].shared = True
-        self.options.shared = True
 
         if self.options.shared:
             del self.options.fPIC
@@ -41,9 +42,9 @@ class NSSConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("nspr/4.32")
-        self.requires("sqlite3/3.38.0")
-        self.requires("zlib/1.2.11")
+        self.requires("nspr/4.33")
+        self.requires("sqlite3/3.38.1")
+        self.requires("zlib/1.2.12")
 
     def validate(self):
         if not self.options.shared:
@@ -54,8 +55,9 @@ class NSSConan(ConanFile):
             raise ConanInvalidConfiguration("NSS recipes does not support MTd runtime. Contributions are welcome.")
         if not self.options["sqlite3"].shared:
             raise ConanInvalidConfiguration("NSS cannot link to static sqlite. Please use option sqlite3:shared=True")
-        if self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("ARM builds not yet supported. Contributions are welcome.")
+        if self.settings.arch in ["armv8", "armv8.3"] and self.settings.os in ["Macos"]:
+            raise ConanInvalidConfiguration("Macos ARM64 builds not yet supported. Contributions are welcome.")
+
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -69,8 +71,11 @@ class NSSConan(ConanFile):
                 args.append("CPU_ARCH=i386")
             else:
                 args.append("CPU_ARCH=x86_64")
-        if self.settings.arch in ["armv8"]:
-            args.append("CPU_ARCH=arm")
+        if self.settings.arch in ["armv8", "armv8.3"]:
+            args.append("USE_64=1")
+            args.append("CPU_ARCH=aarch64")
+        if self.settings.compiler == "gcc":
+            args.append("XCFLAGS=-Wno-array-parameter")
         args.append("NSPR_INCLUDE_DIR=%s" % self.deps_cpp_info["nspr"].include_paths[1])
         args.append("NSPR_LIB_DIR=%s" % self.deps_cpp_info["nspr"].lib_paths[0])
 

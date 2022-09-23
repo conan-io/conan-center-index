@@ -5,6 +5,8 @@ project(qdbm_wrapper VERSION "${CONAN_qdbm_VERSION}" LANGUAGES C)
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 conan_basic_setup(TARGETS KEEP_RPATHS)
 
+set(QDBM_SRC_DIR ${PROJECT_SOURCE_DIR}/source_subfolder)
+
 # ---- Dependencies ----
 
 option(THREADS_PREFER_PTHREAD_FLAG "" ON)
@@ -18,27 +20,27 @@ macro(find_package_if condition name)
   endif()
 endmacro()
 
-find_package_if(MYICONV Iconv CONFIG)
-find_package_if(MYZLIB ZLIB CONFIG)
+find_package_if(MYICONV Iconv)
+find_package_if(MYZLIB ZLIB)
 find_package_if(MYPTHREAD Threads)
 
 # ---- Library ----
 
 add_library(
     qdbm
-    depot.c
-    curia.c
-    relic.c
-    hovel.c
-    cabin.c
-    villa.c
-    vista.c
-    odeum.c
-    myconf.c
+    ${QDBM_SRC_DIR}/depot.c
+    ${QDBM_SRC_DIR}/curia.c
+    ${QDBM_SRC_DIR}/relic.c
+    ${QDBM_SRC_DIR}/hovel.c
+    ${QDBM_SRC_DIR}/cabin.c
+    ${QDBM_SRC_DIR}/villa.c
+    ${QDBM_SRC_DIR}/vista.c
+    ${QDBM_SRC_DIR}/odeum.c
+    ${QDBM_SRC_DIR}/myconf.c
 )
 
 if(WIN32)
-  target_sources(qdbm PRIVATE qdbm.def)
+  target_sources(qdbm PRIVATE ${QDBM_SRC_DIR}/qdbm.def)
 endif()
 
 # Too noisy
@@ -51,7 +53,7 @@ if(MSVC)
   target_compile_options(qdbm PRIVATE /wd4267 /wd4996 /wd4244)
 endif()
 
-target_include_directories(qdbm PRIVATE "${PROJECT_SOURCE_DIR}")
+target_include_directories(qdbm PRIVATE "${QDBM_SRC_DIR}")
 
 set_target_properties(
     qdbm PROPERTIES
@@ -72,12 +74,12 @@ install(
 
 install(
     FILES
-    cabin.h
-    curia.h
-    depot.h
-    odeum.h
-    relic.h
-    villa.h
-    vista.h
+    ${QDBM_SRC_DIR}/cabin.h
+    ${QDBM_SRC_DIR}/curia.h
+    ${QDBM_SRC_DIR}/depot.h
+    ${QDBM_SRC_DIR}/odeum.h
+    ${QDBM_SRC_DIR}/relic.h
+    ${QDBM_SRC_DIR}/villa.h
+    ${QDBM_SRC_DIR}/vista.h
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/qdbm"
 )

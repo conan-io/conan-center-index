@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 109a252d..e5d46bce 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -415,7 +415,7 @@ if(USE_MPI)
+ endif(USE_MPI)
+ 
+ if(USE_OPENMP)
+-    if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
++    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang")
+         TARGET_LINK_LIBRARIES(lightgbm OpenMP::OpenMP_CXX)
+         TARGET_LINK_LIBRARIES(_lightgbm OpenMP::OpenMP_CXX)
+     endif()

@@ -1,4 +1,10 @@
 sources:
+  "3.5.3":
+    url: "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.5.3.tar.gz"
+    sha256: "3ab5e5eaef69ce20c6b170ee64d785b42235f48f2e62b095fca5d7b6672b8b28"
+  "3.5.2":
+    url: "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.5.2.tar.gz"
+    sha256: "56feab8e21c3fa6549f8b7d7511658b8e98518162838a795314732654adf3e5f"
   "3.4.3":
     url: "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.4.3.tar.gz"
     sha256: "ff88bffe354818b3ccf545e3cafe454c5031c7a77217074f533271d63c37f08d"

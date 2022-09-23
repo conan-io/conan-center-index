@@ -11,7 +11,7 @@ class LibjpegConan(ConanFile):
     description = "Libjpeg is a widely used C library for reading and writing JPEG image files."
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("image", "format", "jpg", "jpeg", "picture", "multimedia", "graphics")
-    license = "http://ijg.org/files/README"
+    license = "IJG"
     homepage = "http://ijg.org"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -34,6 +34,10 @@ class LibjpegConan(ConanFile):
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
+    @property
+    def _is_clang_cl(self):
+        return self.settings.os == 'Windows' and self.settings.compiler == 'clang'
+
     def export_sources(self):
         self.copy("Win32.Mak")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -54,7 +58,7 @@ class LibjpegConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not self._is_msvc and \
+        if self._settings_build.os == "Windows" and not (self._is_msvc or self. _is_clang_cl) and \
            not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
@@ -67,11 +71,21 @@ class LibjpegConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "Win32.Mak"),
                               "\nccommon = -c ",
                               "\nccommon = -c -DLIBJPEG_BUILDING {}".format("" if self.options.shared else "-DLIBJPEG_STATIC "))
-        with tools.chdir(self._source_subfolder):
+        # clean environment variables that might affect on the build (e.g. if set by Jenkins)
+        with tools.chdir(self._source_subfolder), tools.environment_append({"PROFILE": None, "TUNE": None, "NODEBUG": None}):
             shutil.copy("jconfig.vc", "jconfig.h")
             make_args = [
                 "nodebug=1" if self.settings.build_type != 'Debug' else "",
             ]
+            if self._is_clang_cl:
+                cl = os.environ.get('CC', 'clang-cl')
+                link = os.environ.get('LD', 'lld-link')
+                lib = os.environ.get('AR', 'llvm-lib')
+                rc = os.environ.get('RC', 'llvm-rc')
+                tools.replace_in_file('Win32.Mak', 'cc     = cl', 'cc     = %s' % cl)
+                tools.replace_in_file('Win32.Mak', 'link   = link', 'link   = %s' % link)
+                tools.replace_in_file('Win32.Mak', 'implib = lib', 'implib = %s' % lib)
+                tools.replace_in_file('Win32.Mak', 'rc     = Rc', 'rc     = %s' % rc)
             # set flags directly in makefile.vc
             # cflags are critical for the library. ldflags and ldlibs are only for binaries
             if self.settings.compiler.runtime in ["MD", "MDd"]:
@@ -110,7 +124,7 @@ class LibjpegConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        if self._is_msvc:
+        if self._is_msvc or self._is_clang_cl:
             self._build_nmake()
         else:
             autotools = self._configure_autotools()
@@ -118,7 +132,7 @@ class LibjpegConan(ConanFile):
 
     def package(self):
         self.copy("README", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
-        if self._is_msvc:
+        if (self._is_msvc or self._is_clang_cl):
             for filename in ["jpeglib.h", "jerror.h", "jconfig.h", "jmorecfg.h"]:
                 self.copy(pattern=filename, dst="include", src=self._source_subfolder, keep_path=False)
 
@@ -156,7 +170,7 @@ class LibjpegConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "JPEG"
         self.cpp_info.names["cmake_find_package_multi"] = "JPEG"
 
-        if self._is_msvc:
+        if (self._is_msvc or self._is_clang_cl):
             self.cpp_info.libs = ["libjpeg"]
         else:
             self.cpp_info.libs = ["jpeg"]

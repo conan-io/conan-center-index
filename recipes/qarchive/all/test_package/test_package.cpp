@@ -1,5 +1,5 @@
 #include <QCoreApplication>
-#include <QArchive/QArchive>
+#include <QArchive>
 
 int main(int argc, char **argv)
 {

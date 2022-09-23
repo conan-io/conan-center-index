@@ -1,9 +1,13 @@
 versions:
+  "3.5.1":
+    folder: "post_3.5.0"
+  "3.4.3":
+    folder: "pre_3.5.0"
   "3.4.1":
-    folder: all
+    folder: "pre_3.5.0"
   "3.3.3":
-    folder: all
+    folder: "pre_3.5.0"
   "3.2.3":
-    folder: all
+    folder: "pre_3.5.0"
   "3.1.4":
-    folder: all
+    folder: "pre_3.5.0"

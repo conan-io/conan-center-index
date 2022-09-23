@@ -1,4 +1,10 @@
 sources:
+  "4.8.0":
+    url: "https://github.com/emweb/wt/archive/4.8.0.tar.gz"
+    sha256: "e4030d8f530ec7bdd6b341a2bf31a608fb9ebcedb905155f83ec7f300a7d420d"
+  "4.7.1":
+    url: "https://github.com/emweb/wt/archive/4.7.1.tar.gz"
+    sha256: "04548ff017b026f7c2e46fd2f12cc70fbeeadebaf473fb1d6eb472868d11dce1"
   "4.6.2":
     url: "https://github.com/emweb/wt/archive/refs/tags/4.6.2.tar.gz"
     sha256: "a4e113874c107185a18b052f6d8fe57114d47b26410dee148ed22652eeff4d2f"
@@ -19,5 +25,11 @@ sources:
     sha256: "6c0130f36c829ed67119679770c2f62d7768a62eaa281bb10070c4cf1b145139"
 patches:
   "4.5.0":
+    - patch_file: "patches/wt_4_5_0_gcc_11.patch"
+      base_path: "source_subfolder"
+  "4.4.0":
+    - patch_file: "patches/wt_4_5_0_gcc_11.patch"
+      base_path: "source_subfolder"
+  "4.3.1":
     - patch_file: "patches/wt_4_5_0_gcc_11.patch"
       base_path: "source_subfolder"

@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3828e33..30ef8cb 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -512,6 +512,9 @@ if (MINGW)
+           "to a MinGW bug: http://eigen.tuxfamily.org/bz/show_bug.cgi?id=556")
+   string(REPLACE "-O3" "-O2" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+   update_cache_variable(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
++  # Add the equivalent of /bigobj for MSVC for MinGW to fix 'too many sections'
++  # compile errors due to extensive use of templates.
++  add_compile_options(-Wa,-mbig-obj)
+ endif (MINGW)
+ 
+ # After the tweaks for the compile settings, disable some warnings on MSVC.
+

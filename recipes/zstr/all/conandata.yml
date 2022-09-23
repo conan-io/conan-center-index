@@ -1,4 +1,7 @@
 sources:
+  "1.0.6":
+    url: "https://github.com/mateidavid/zstr/archive/refs/tags/v1.0.6.tar.gz"
+    sha256: "548f3fed81029defc3567d1902f7306eb0aa19f205ce9e06075b7349a3875f32"
   "1.0.5":
     url: "https://github.com/mateidavid/zstr/archive/refs/tags/v1.0.5.tar.gz"
     sha256: "c6ae65f1ed97f8fe2e9b0fa7d71a0980151e3936ec50d17403b8d233efa8276d"

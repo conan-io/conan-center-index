@@ -1,4 +1,7 @@
 sources:
+  "0.4.1":
+    url: "https://github.com/biojppm/rapidyaml/releases/download/v0.4.1/rapidyaml-0.4.1-src.tgz"
+    sha256: "3c0a671a7a5aab972f7d259736d14beb9f428c4441f0c220dc0717a4946b495c"
   "0.4.0":
     url: "https://github.com/biojppm/rapidyaml/releases/download/v0.4.0/rapidyaml-0.4.0-src.tgz"
     sha256: "f8c8c79c28cae568e10fcde9897fbc4350aaa3fa21ea3a6ec4ace3445e61a7cf"
@@ -6,6 +9,9 @@ sources:
     url: "https://github.com/biojppm/rapidyaml/releases/download/v0.3.0/rapidyaml-0.3.0-src.tgz"
     sha256: "38854b8359eaf42cc27352f4b7321f509f6775445a3e2746cc8cd1e468a52aa9"
 patches:
+  "0.4.1":
+    - patch_file: "patches/0.4.1-001-remove-internal-c4core.patch"
+      base_path: "source_subfolder"
   "0.4.0":
     - patch_file: "patches/0.4.0-001-remove-internal-c4core.patch"
       base_path: "source_subfolder"

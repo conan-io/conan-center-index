@@ -1,6 +1,7 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
+import contextlib
+import functools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -13,6 +14,7 @@ class LibIdnConan(ConanFile):
     topics = ("libidn", "encode", "decode", "internationalized", "domain", "name")
     license = "GPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -23,9 +25,6 @@ class LibIdnConan(ConanFile):
         "fPIC": True,
         "threads": True,
     }
-    settings = "os", "arch", "compiler", "build_type"
-
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -34,6 +33,10 @@ class LibIdnConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -62,7 +65,7 @@ class LibIdnConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self):
@@ -77,17 +80,16 @@ class LibIdnConan(ConanFile):
         else:
             yield
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.libs = []
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools.libs = []
         if not self.options.shared:
-            self._autotools.defines.append("LIBIDN_STATIC")
+            autotools.defines.append("LIBIDN_STATIC")
         if self.settings.compiler == "Visual Studio":
             if tools.Version(self.settings.compiler.version) >= "12":
-                self._autotools.flags.append("-FS")
-            self._autotools.link_flags.extend("-L{}".format(p.replace("\\", "/")) for p in self.deps_cpp_info.lib_paths)
+                autotools.flags.append("-FS")
+            autotools.link_flags.extend("-L{}".format(p.replace("\\", "/")) for p in self.deps_cpp_info.lib_paths)
         yes_no = lambda v: "yes" if v else "no"
         conf_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
@@ -97,10 +99,12 @@ class LibIdnConan(ConanFile):
             "--disable-nls",
             "--disable-rpath",
         ]
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
+        autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
+        return autotools
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         if self.settings.compiler == "Visual Studio":
             if self.settings.arch in ("x86_64", "armv8", "armv8.3"):
                 ssize = "signed long long int"

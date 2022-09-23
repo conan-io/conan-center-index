@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class JsondtoConan(ConanFile):
@@ -40,7 +40,7 @@ class JsondtoConan(ConanFile):
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
         elif tools.Version(self.settings.compiler.version) < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
-        
+
         if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "11":
             raise ConanInvalidConfiguration(f"{self.name} requires apple-clang less then version 11")
 
@@ -61,5 +61,7 @@ class JsondtoConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "json-dto")
+        self.cpp_info.set_property("cmake_target_name", "json-dto::json-dto")
         self.cpp_info.names["cmake_find_package"] = "json-dto"
         self.cpp_info.names["cmake_find_package_multi"] = "json-dto"

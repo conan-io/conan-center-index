@@ -54,10 +54,10 @@ class LibxlsxwriterConan(ConanFile):
             raise ConanInvalidConfiguration("{0}:md5=openssl is not suppported in {0}/{1}".format(self.name, self.version))
 
     def requirements(self):
-        self.requires("minizip/1.2.11")
-        self.requires("zlib/1.2.11")
+        self.requires("minizip/1.2.12")
+        self.requires("zlib/1.2.12")
         if self.options.md5 == "openssl":
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1q")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)

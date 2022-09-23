@@ -1,4 +1,7 @@
 sources:
+  "1.26":
+    url: "https://github.com/wayland-project/wayland-protocols/archive/1.26.tar.gz"
+    sha256: "fe56386f436a84e97c3b6a61b76306f205a64425900f247ad0048174b9c32d4d"
   "1.25":
     url: "https://github.com/wayland-project/wayland-protocols/archive/1.25.tar.gz"
     sha256: "4326e2b5e04e459ab4522e83e19bff101a3faf9b085bcf46b6cabbd392cc4458"

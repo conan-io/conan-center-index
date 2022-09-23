@@ -6,14 +6,15 @@ required_conan_version = ">=1.43.0"
 
 class DawJsonLinkConan(ConanFile):
     name = "daw_json_link"
-    description = "Static JSON parsing in C++ "
+    description = "Static JSON parsing in C++"
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/beached/daw_json_link"
     topics = ("json", "parse", "json-parser", "serialization", "constexpr", "header-only")
-    settings = "os", "compiler", "arch", "build_type"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "cmake", "cmake_find_package_multi"
     no_copy_source = True
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
+    short_paths = True
 
     _compiler_required_cpp17 = {
         "Visual Studio": "16",
@@ -32,8 +33,8 @@ class DawJsonLinkConan(ConanFile):
         elif tools.Version(self.version) < "2.12.0":
             self.requires("daw_header_libraries/2.5.3")
         else:
-            self.requires("daw_header_libraries/2.23.0")
-        self.requires("daw_utf_range/2.2.0")
+            self.requires("daw_header_libraries/2.68.1")
+        self.requires("daw_utf_range/2.2.2")
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):

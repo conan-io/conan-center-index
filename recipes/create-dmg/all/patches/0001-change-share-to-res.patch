@@ -1,0 +1,13 @@
+diff --git a/create-dmg b/create-dmg
+index 4a9715e..4181ce4 100755
+--- a/create-dmg
++++ b/create-dmg
+@@ -248,7 +248,7 @@ else
+ 	# We're running inside an installed location
+ 	bin_dir="$SCRIPT_DIR"
+ 	prefix_dir=$(dirname "$bin_dir")
+-	CDMG_SUPPORT_DIR="$prefix_dir/share/create-dmg/support"
++	CDMG_SUPPORT_DIR="$prefix_dir/res"
+ fi
+ 
+ if [[ -z "$VOLUME_NAME" ]]; then

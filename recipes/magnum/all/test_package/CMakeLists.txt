@@ -5,9 +5,9 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
 if(SHARED_PLUGINS)
-    find_package(Magnum REQUIRED)
+    find_package(Magnum REQUIRED CONFIG)
 else()
-    find_package(Magnum REQUIRED ObjImporter)
+    find_package(Magnum REQUIRED ObjImporter CONFIG)
 endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.in

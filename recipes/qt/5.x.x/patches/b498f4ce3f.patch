@@ -1,0 +1,37 @@
+From b498f4ce3f542882767238ea9f01eb85de6c6fda Mon Sep 17 00:00:00 2001
+From: Peter Varga <pvarga@inf.u-szeged.hu>
+Date: Tue, 18 May 2021 09:11:49 +0200
+Subject: [PATCH] Fix build with GCC 11
+
+Change-Id: Ifc73421768e2c6123225064314d39d8479ea4ed8
+Fixes: QTBUG-93824
+Reviewed-by: Allan Sandfeld Jensen <allan.jensen@qt.io>
+---
+ .../abseil-cpp/absl/synchronization/internal/graphcycles.cc      | 1 +
+ .../perfetto/src/trace_processor/containers/string_pool.h        | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/chromium/third_party/abseil-cpp/absl/synchronization/internal/graphcycles.cc b/chromium/third_party/abseil-cpp/absl/synchronization/internal/graphcycles.cc
+index 19f9aab5b1a..27fec21681d 100644
+--- a/chromium/third_party/abseil-cpp/absl/synchronization/internal/graphcycles.cc
++++ b/chromium/third_party/abseil-cpp/absl/synchronization/internal/graphcycles.cc
+@@ -37,6 +37,7 @@
+ 
+ #include <algorithm>
+ #include <array>
++#include <limits>
+ #include "absl/base/internal/hide_ptr.h"
+ #include "absl/base/internal/raw_logging.h"
+ #include "absl/base/internal/spinlock.h"
+diff --git a/chromium/third_party/perfetto/src/trace_processor/containers/string_pool.h b/chromium/third_party/perfetto/src/trace_processor/containers/string_pool.h
+index 11ae91cfeca..6b76b74c91b 100644
+--- a/chromium/third_party/perfetto/src/trace_processor/containers/string_pool.h
++++ b/chromium/third_party/perfetto/src/trace_processor/containers/string_pool.h
+@@ -17,6 +17,7 @@
+ #ifndef SRC_TRACE_PROCESSOR_CONTAINERS_STRING_POOL_H_
+ #define SRC_TRACE_PROCESSOR_CONTAINERS_STRING_POOL_H_
+ 
++#include <limits>
+ #include <stddef.h>
+ #include <stdint.h>
+ 

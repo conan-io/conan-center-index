@@ -5,4 +5,3 @@ sources:
 patches:
   "2.2.2":
     - patch_file: "patches/0001-fix-cross-build-ios.patch"
-      base_path: "source_subfolder"

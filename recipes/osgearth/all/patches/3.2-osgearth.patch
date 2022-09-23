@@ -1,3 +1,29 @@
+diff --git a/src/osgEarthDrivers/lerc/CMakeLists.txt b/src/osgEarthDrivers/lerc/CMakeLists.txt
+--- a/src/osgEarthDrivers/lerc/CMakeLists.txt	(revision 6b5fb806a9190f7425c32db65d3ea905a55a9c16)
++++ b/src/osgEarthDrivers/lerc/CMakeLists.txt	(date 1653145387687)
+@@ -1,17 +1,11 @@
+-INCLUDE_DIRECTORIES( ../../third_party/lerc )
++INCLUDE_DIRECTORIES( ${lerc_INCLUDE_DIR} )
+
+ SET(TARGET_SRC
+     ReaderWriterLERC.cpp
+-    ../../third_party/lerc/BitMask.cpp
+-    ../../third_party/lerc/BitStuffer2.cpp
+-    ../../third_party/lerc/Huffman.cpp
+-    ../../third_party/lerc/Lerc.cpp
+-    ../../third_party/lerc/Lerc_c_api_impl.cpp
+-    ../../third_party/lerc/Lerc2.cpp
+-    ../../third_party/lerc/RLE.cpp
+-    ../../third_party/lerc/Lerc1Decode/BitStuffer.cpp
+-    ../../third_party/lerc/Lerc1Decode/CntZImage.cpp
+ )
++
++
++SET(TARGET_LIBRARIES_VARS lerc_LIBRARIES)
+
+ #### end var setup  ###
+ SETUP_PLUGIN(lerc)
+\ No newline at end of file
 diff --git a/src/osgEarthProcedural/GroundCoverLayer.cpp b/src/osgEarthProcedural/GroundCoverLayer.cpp
 --- a/src/osgEarthProcedural/GroundCoverLayer.cpp	(revision 15d5340f174212d6f93ae55c0d9af606c3d361c0)
 +++ b/src/osgEarthProcedural/GroundCoverLayer.cpp	(date 1639490999900)

@@ -31,13 +31,15 @@ class TestPackageConan(ConanFile):
         with tools.environment_append(RunEnvironment(self).vars):
             autotools.configure()
 
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        if self.options["pkgconf"].enable_lib:
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
     def test(self):
         if not tools.cross_building(self):
-            self.run(os.path.join("bin", "test_package"), run_environment=True)
+            if self.options["pkgconf"].enable_lib:
+                self.run(os.path.join("bin", "test_package"), run_environment=True)
 
             pkg_config = tools.get_env("PKG_CONFIG")
             self.output.info("Read environment variable PKG_CONFIG='{}'".format(pkg_config))

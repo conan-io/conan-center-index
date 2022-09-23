@@ -1,8 +1,12 @@
 sources:
+  "40":
+    url: "https://github.com/SimonKagstrom/kcov/archive/refs/tags/v40.tar.gz"
+    sha256: "6b1c11b066d57426d61375a31c3816f1fcd2610b447050c86d9920e22d5200b3"
   "38":
     url: "https://github.com/SimonKagstrom/kcov/archive/38.tar.gz"
     sha256: "b37af60d81a9b1e3b140f9473bdcb7975af12040feb24cc666f9bb2bb0be68b4"
 patches:
+  "40": []
   "38":
     - patch_file: "patches/0001-fix-SOLIB-path.patch"
       base_path: "source_subfolder"

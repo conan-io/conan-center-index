@@ -1,24 +1,30 @@
 from conans import ConanFile, tools
 import os
 
+required_conan_version = ">=1.33.0"
 
 class GcemConan(ConanFile):
     name = "gcem"
     description = "A C++ compile-time math library using generalized " \
                   "constant expressions."
     license = "Apache-2.0"
-    topics = ("conan", "gcem", "math", "header-only")
+    topics = ("gcem", "math", "header-only")
     homepage = "https://github.com/kthohr/gcem"
     url = "https://github.com/conan-io/conan-center-index"
     no_copy_source = True
+    settings = "os", "arch", "compiler", "build_type",
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy(pattern="*", dst="include",

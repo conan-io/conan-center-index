@@ -10,6 +10,7 @@ The following policies are preferred during the review, but not mandatory:
   * [Subfolder Properties](#subfolder-properties)
   * [Order of methods and attributes](#order-of-methods-and-attributes)
   * [License Attribute](#license-attribute)
+  * [Exporting Patches](#exporting-patches)
   * [Applying Patches](#applying-patches)
   * [CMake](#cmake)
     * [Caching Helper](#caching-helper)
@@ -18,8 +19,9 @@ The following policies are preferred during the review, but not mandatory:
   * [Test Package](#test-package)
     * [Minimalistic Source Code](#minimalistic-source-code)
     * [CMake targets](#cmake-targets)
-  * [Recommended feature options names](#recommended-feature-options-names)
-  * [Supported Versions](#supported-versions)<!-- endToc -->
+  * [Supported Versions](#supported-versions)
+    * [Removing old versions](#removing-old-versions)
+    * [Adding old versions](#adding-old-versions)<!-- endToc -->
 
 ## Trailing white-spaces
 
@@ -32,6 +34,9 @@ If possible, try to avoid mixing single quotes (`'`) and double quotes (`"`) in 
 ## Subfolder Properties
 
 When extracting sources or performing out-of-source builds, it is preferable to use a _subfolder_ attribute, `_source_subfolder` and `_build_subfolder` respectively.
+
+> **Note**: These are only required when using the legacy generator such as `cmake`. For the new generators like `CMakeToolchain` see
+> the [2.0 Migration Guide](v2_migration.md#using-layout-with-new-generators) for more information.
 
 For example doing this with property attributes for these variables:
 
@@ -79,6 +84,24 @@ the order above resembles the execution order of methods on CI. therefore, for i
 
 The mandatory license attribute of each recipe **should** be a [SPDX license](https://spdx.org/licenses/) [short Identifiers](https://spdx.dev/ids/) when applicable.
 
+Where the SPDX guidelines do not apply, packages should do the following:
+
+- When no license is provided or when it's given to the "public domain", the value should be set to [Unlicense](https://spdx.org/licenses/Unlicense) as per [KB-H056](error_knowledge_base.md#kb-h056-license-public-domain) and [FAQ](faqs.md#what-license-should-i-use-for-public-domain).
+- When a custom (e.g. project specific) license is given, the value should be set to `LicenseRef-` as a prefix, followed by the name of the file which contains a custom license. See [this example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/fft/all/conanfile.py#L8). For more details, [read this conversation](https://github.com/conan-io/conan-center-index/pull/4928/files#r596216206)
+
+## Exporting Patches
+
+It's ideal to minimize the number of files in a package the exactly whats required. When recipes support multiple versions with differing patches it's strongly encourged to only export the patches that are being used for that given recipe.
+
+Make sure the `export_sources` attribute is replaced by the following:
+
+```py
+def export_sources(self):
+    self.copy("CMakeLists.txt")
+    for patch in self.conan_data.get("patches", {}).get(self.version, []):
+        self.copy(patch["patch_file"])
+```
+
 ## Applying Patches
 
 Patches can be applied in a different protected method, the pattern name is `_patch_sources`. When applying patch files, `tools.patch` is the best option.
@@ -86,8 +109,7 @@ For simple cases, `tools.replace_in_file` is allowed.
 
 ```py
 def _patch_sources(self):
-    for patch in self.conan_data.get("patches", {}).get(self.version, []):
-        tools.patch(**patch)
+    files.apply_conandata_patches(self)
     # remove bundled xxhash
     tools.remove_files_by_mask(os.path.join(self._source_subfolder, "lib"), "whateer.*")
     tools.replace_in_file(os.path.join(self._cmakelists_subfolder, "CMakeLists.txt"), "...", "")
@@ -159,41 +181,29 @@ target_link_libraries(${PROJECT_NAME} package::package)
 We encourage contributors to check that not only the _global_ target works properly, but also the ones for the components. It can be
 done creating and linking different libraries and/or executables.
 
-## Recommended feature options names
-
-It's often needed to add options to toggle specific library features on/off. Regardless of the default, there is a strong preference for using positive naming for options. In order to avoid the fragmentation, we recommend to use the following naming conventions for such options:
-
-- enable_<feature> / disable_<feature>
-- with_<dependency> / without_<dependency>
-- use_<feature>
-
-the actual recipe code then may look like:
-
-```py
-    options = {"use_tzdb": [True, False]}
-    default_options = {"use_tzdb": True}
-```
-
-```py
-    options = {"enable_locales": [True, False]}
-    default_options = {"enable_locales": True}
-```
-
-```py
-    options = {"with_zlib": [True, False]}
-    default_options = {"with_zlib": True}
-```
-
-having the same naming conventions for the options may help consumers, e.g. they will be able to specify options with wildcards: `-o *:with_threads=True`, therefore, `with_threads` options will be enabled for all packages in the graph that support it.
-
 ## Supported Versions
 
-Keeping older versions is needed due to users who are still using legacy versions and can not update their packages. However, some points should be considered:
-- Adding older versions should be allowed only in strict cases, when required by a user. The committer should express their needs on the PR.
-- Removing older versions is allowed, so long as it keeps:
-  - for each older major release available, at least one version
-  - for the latest major version, at least three last versions should be available (if there are more than three such versions).
+In this repository we are building a subset of all the versions for a given library. This set of version changes over time as new versions
+are released and old ones stop to be used.
 
-Also, consider these FAQs:
-- [What is the policy for adding older versions of a package?](faqs.md#what-is-the-policy-for-adding-older-versions-of-a-package)
-- [What is the policy for removing older versions of a package?](faqs.md#what-is-the-policy-for-removing-older-versions-of-a-package)
+We always welcome latest releases as soon as they are available, and from time to time we remove old versions mainly due to technical reasons:
+the more versions we have, the more resources that are needed in the CI and the more time it takes to build each pull-request (also, the
+more chances of failing because of unexpected errors).
+
+### Removing old versions
+
+When removing old versions, please follow these considerations:
+ - keep one version for every major release
+ - for the latest major release, at least three versions should be available (latest three minor versions)
+
+Logic associated to removed revisions, and entries in `config.yml` and `conandata.yml` files should be removed as well. If anyone needs to
+recover them in the future, Git contains the full history and changes can be recovered from it.
+
+Please, note that even if those versions are removed from this repository, **the packages will always be accessible in ConanCenter remote**
+associated to the recipe revision used to build them.
+
+### Adding old versions
+
+We usually don't add old versions unless there is a specific request for it. If you need some old version, please
+share in the pull-request what is the motivation. Take into account that the version might be removed in future
+pull-requests according to the statements above.

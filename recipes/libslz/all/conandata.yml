@@ -1,0 +1,4 @@
+sources:
+  "1.2.0":
+    url: "https://github.com/wtarreau/libslz/archive/refs/tags/v1.2.0.tar.gz"
+    sha256: "723a8ef648ac5b30e5074c013ff61a5e5f54a5aafc9496f7dab9f6b02030bf24"

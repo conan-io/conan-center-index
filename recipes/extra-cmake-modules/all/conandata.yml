@@ -8,3 +8,6 @@ sources:
   "5.84.0":
     url: "https://download.kde.org/stable/frameworks/5.84/extra-cmake-modules-5.84.0.tar.xz"
     sha256: "bb085ef2e177c182ff46988516b6b31849d1497beb2ff5301165ad2ba12a1c41"
+  "5.93.0":
+    url: "https://download.kde.org/stable/frameworks/5.93/extra-cmake-modules-5.93.0.tar.xz"
+    sha256: "093dea7b11647bc5f74e6971d47ef15b5c410cba2b4620acae00f008d5480b21"

@@ -1,4 +1,10 @@
 sources:
+  "1.5.0":
+    url: "https://github.com/libgit2/libgit2/archive/v1.5.0.tar.gz"
+    sha256: "8de872a0f201b33d9522b817c92e14edb4efad18dae95cf156cf240b2efff93e"
+  "1.4.3":
+    url: "https://github.com/libgit2/libgit2/archive/v1.4.3.tar.gz"
+    sha256: "f48b961e463a9e4e7e7e58b21a0fb5a9b2a1d24d9ba4d15870a0c9b8ad965163"
   "1.3.0":
     url: "https://github.com/libgit2/libgit2/archive/v1.3.0.tar.gz"
     sha256: "192eeff84596ff09efb6b01835a066f2df7cd7985e0991c79595688e6b36444e"
@@ -8,9 +14,25 @@ sources:
   "1.1.1":
     url: "https://github.com/libgit2/libgit2/archive/v1.1.1.tar.gz"
     sha256: "13a525373f64c711a00a058514d890d1512080265f98e0935ab279393f21a620"
-  "1.1.0":
-    url: "https://github.com/libgit2/libgit2/archive/v1.1.0.tar.gz"
-    sha256: "41a6d5d740fd608674c7db8685685f45535323e73e784062cf000a633d420d1e"
   "1.0.1":
     url: "https://github.com/libgit2/libgit2/archive/v1.0.1.tar.gz"
     sha256: "1775427a6098f441ddbaa5bd4e9b8a043c7401e450ed761e69a415530fea81d2"
+patches:
+  "1.5.0":
+    - patch_file: "patches/1.4.3-0001-fix-cmake.patch"
+      base_path: "source_subfolder"
+  "1.4.3":
+    - patch_file: "patches/1.4.3-0001-fix-cmake.patch"
+      base_path: "source_subfolder"
+  "1.3.0":
+    - patch_file: "patches/1.3.0-0001-fix-cmake.patch"
+      base_path: "source_subfolder"
+  "1.2.0":
+    - patch_file: "patches/1.2.0-0001-fix-cmake.patch"
+      base_path: "source_subfolder"
+  "1.1.1":
+    - patch_file: "patches/1.1.1-0001-fix-cmake.patch"
+      base_path: "source_subfolder"
+  "1.0.1":
+    - patch_file: "patches/1.0.1-0001-fix-cmake.patch"
+      base_path: "source_subfolder"

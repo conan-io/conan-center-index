@@ -1,0 +1,4 @@
+sources:
+  "2.3.4":
+    url: "https://www.x.org/archive/individual/lib/libXft-2.3.4.tar.gz"
+    sha256: "1eca71bec9cb483165ce1ab94f5cd3036269f5268651df6a2d99c4a7ab644d79"

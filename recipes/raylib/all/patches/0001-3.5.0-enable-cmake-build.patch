@@ -1,0 +1,123 @@
+diff --git a/examples/CMakeLists.txt b/examples/CMakeLists.txt
+index 57ba74d4..4f019db1 100644
+--- a/examples/CMakeLists.txt
++++ b/examples/CMakeLists.txt
+@@ -28,7 +28,6 @@ if (APPLE AND NOT CMAKE_SYSTEM STRLESS "Darwin-18.0.0")
+   add_definitions(-DGL_SILENCE_DEPRECATION)
+   MESSAGE(AUTHOR_WARNING "OpenGL is deprecated starting with macOS 10.14 (Mojave)!")
+ endif()
+-list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/others/rlgl_standalone.c)
+ 
+ include(CheckIncludeFile)
+ CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
+@@ -51,6 +50,7 @@ endif()
+ if(${PLATFORM} MATCHES "Android")
+   list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/others/rlgl_standalone.c)
+   list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/others/standard_lighting.c)
++  list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/others/opengl_interop.c)
+   list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/core/core_3d_picking.c)
+   list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/core/core_vr_simulator.c)
+   list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/core/core_3d_camera_free.c)
+@@ -119,19 +119,5 @@ foreach(example_source ${example_sources})
+   endif()
+ endforeach()
+ 
+-if (${PLATFORM} MATCHES "Desktop")
+-  # rlgl_standalone can't be linked with raylib because of duplicate rlgl symbols
+-  foreach (example_source "others/rlgl_standalone.c")
+-    # Create the basename for the example
+-    get_filename_component(example_name ${example_source} NAME)
+-    string(REPLACE ".c" "" example_name ${example_name})
+-    add_executable(${example_name} ${example_source})
+-    add_dependencies(${example_name} raylib)
+-    target_link_libraries(${example_name} ${raylib_LDFLAGS})
+-    target_include_directories(${example_name} PRIVATE ${raylib_INCLUDE_DIRS})
+-
+-  endforeach()
+-endif()
+-
+ # Copy all of the resource files to the destination
+ file(COPY ${example_resources} DESTINATION "resources/")
+diff --git a/examples/shapes/shapes_draw_circle_sector.c b/examples/shapes/shapes_draw_circle_sector.c
+index 8b1cf6ec..b58f3f35 100644
+--- a/examples/shapes/shapes_draw_circle_sector.c
++++ b/examples/shapes/shapes_draw_circle_sector.c
+@@ -57,11 +57,11 @@ int main(void)
+             
+             // Draw GUI controls
+             //------------------------------------------------------------------------------
+-            startAngle = GuiSliderBar((Rectangle){ 600, 40, 120, 20}, "StartAngle", startAngle, 0, 720, true );
+-            endAngle = GuiSliderBar((Rectangle){ 600, 70, 120, 20}, "EndAngle", endAngle, 0, 720, true);
++            startAngle = GuiSliderBar((Rectangle){ 600, 40, 120, 20}, "StartAngle",NULL, startAngle, 0, 720);
++            endAngle = GuiSliderBar((Rectangle){ 600, 70, 120, 20}, "EndAngle", NULL, endAngle, 0, 720);
+             
+-            outerRadius = GuiSliderBar((Rectangle){ 600, 140, 120, 20}, "Radius", outerRadius, 0, 200, true);
+-            segments = GuiSliderBar((Rectangle){ 600, 170, 120, 20}, "Segments", segments, 0, 100, true);
++            outerRadius = GuiSliderBar((Rectangle){ 600, 140, 120, 20}, "Radius", NULL, outerRadius, 0, 200);
++            segments = GuiSliderBar((Rectangle){ 600, 170, 120, 20}, "Segments", NULL, segments, 0, 100);
+             //------------------------------------------------------------------------------
+             
+             DrawText(TextFormat("MODE: %s", (segments >= 4)? "MANUAL" : "AUTO"), 600, 200, 10, (segments >= 4)? MAROON : DARKGRAY);
+diff --git a/examples/shapes/shapes_draw_ring.c b/examples/shapes/shapes_draw_ring.c
+index b363dc07..a18fdaf2 100644
+--- a/examples/shapes/shapes_draw_ring.c
++++ b/examples/shapes/shapes_draw_ring.c
+@@ -64,13 +64,13 @@ int main(void)
+ 
+             // Draw GUI controls
+             //------------------------------------------------------------------------------
+-            startAngle = GuiSliderBar((Rectangle){ 600, 40, 120, 20 }, "StartAngle", startAngle, -450, 450, true);
+-            endAngle = GuiSliderBar((Rectangle){ 600, 70, 120, 20 }, "EndAngle", endAngle, -450, 450, true);
++            startAngle = GuiSliderBar((Rectangle){ 600, 40, 120, 20 }, "StartAngle", NULL, startAngle, -450, 450);
++            endAngle = GuiSliderBar((Rectangle){ 600, 70, 120, 20 }, "EndAngle", NULL, endAngle, -450, 450);
+ 
+-            innerRadius = GuiSliderBar((Rectangle){ 600, 140, 120, 20 }, "InnerRadius", innerRadius, 0, 100, true);
+-            outerRadius = GuiSliderBar((Rectangle){ 600, 170, 120, 20 }, "OuterRadius", outerRadius, 0, 200, true);
++            innerRadius = GuiSliderBar((Rectangle){ 600, 140, 120, 20 }, NULL, "InnerRadius", innerRadius, 0, 100);
++            outerRadius = GuiSliderBar((Rectangle){ 600, 170, 120, 20 }, NULL, "OuterRadius", outerRadius, 0, 200);
+ 
+-            segments = GuiSliderBar((Rectangle){ 600, 240, 120, 20 }, "Segments", segments, 0, 100, true);
++            segments = GuiSliderBar((Rectangle){ 600, 240, 120, 20 }, "Segments", NULL, segments, 0, 100);
+ 
+             drawRing = GuiCheckBox((Rectangle){ 600, 320, 20, 20 }, "Draw Ring", drawRing);
+             drawRingLines = GuiCheckBox((Rectangle){ 600, 350, 20, 20 }, "Draw RingLines", drawRingLines);
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 2e9861f8..08b149f1 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -108,7 +108,7 @@ elseif(${PLATFORM} MATCHES "Android")
+   add_if_flag_compiles(-Wa,--noexecstack CMAKE_C_FLAGS)
+   add_if_flag_compiles(-no-canonical-prefixes CMAKE_C_FLAGS)
+   add_definitions(-DANDROID -D__ANDROID_API__=21)
+-  include_directories(external/android/native_app_glue)
++  include_directories(${ANDROID_NDK}/sources/android/native_app_glue)
+   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--exclude-libs,libatomic.a -Wl,--build-id -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -Wl,--warn-shared-textrel -Wl,--fatal-warnings -uANativeActivity_onCreate")
+ 
+   find_library(OPENGL_LIBRARY OpenGL)
+diff --git a/src/core.c b/src/core.c
+index e6d27e5f..fb7014b0 100644
+--- a/src/core.c
++++ b/src/core.c
+@@ -186,7 +186,7 @@
+ 
+     // Support retrieving native window handlers
+     #if defined(_WIN32)
+-        #define GLFW_EXPOSE_NATIVE_WIN32
++
+         #include <GLFW/glfw3native.h>       // WARNING: It requires customization to avoid windows.h inclusion!
+ 
+         #if !defined(SUPPORT_BUSY_WAIT_LOOP)
+@@ -3346,10 +3346,12 @@ static bool InitGraphicsDevice(int width, int height)
+     glfwSwapInterval(0);        // No V-Sync by default
+ #endif
+ 
+-#if defined(PLATFORM_DESKTOP)
++#if defined(PLATFORM_DESKTOP) || defined(PLATFORM_WEB)
+     // Load OpenGL 3.3 extensions
+     // NOTE: GLFW loader function is passed as parameter
+     rlLoadExtensions(glfwGetProcAddress);
++#else
++    rlLoadExtensions(eglGetProcAddress);
+ #endif
+ 
+     // Try to enable GPU V-Sync, so frames are limited to screen refresh rate (60Hz -> 60 FPS)

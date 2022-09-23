@@ -1,4 +1,10 @@
 sources:
+  "2.0.1":
+    url: "https://github.com/choll/xtr/archive/refs/tags/2.0.1.tar.gz"
+    sha256: "92327264541900a2c9d43aaa3070d143d5e91879737fcea8cbf56065330af059"
+  "2.0.0":
+    url: "https://github.com/choll/xtr/archive/refs/tags/2.0.0.tar.gz"
+    sha256: "1d0113d3551e0d5f5b97228ba245d711c6b66a62a69d62bdf1b206fdf45edd41"
   "1.0.1":
     url: "https://github.com/choll/xtr/archive/refs/tags/1.0.1.tar.gz"
     sha256: "7cc5ec7a2d7d2979e33b928191def79dc05c8074f4c8bb76cd0a20d9b514be0c"

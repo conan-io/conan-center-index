@@ -1,14 +1,14 @@
-import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class HiponyEnumerateConan(ConanFile):
     name = "hipony-enumerate"
     license = "BSL-1.0"
-
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/hipony/enumerate"
     description = "C++11 compatible version of enumerate"
@@ -20,17 +20,16 @@ class HiponyEnumerateConan(ConanFile):
         "aggregates": [True, False],
     }
     default_options = {
-        "aggregates": False
+        "aggregates": False,
     }
 
     generators = "cmake", "cmake_find_package_multi"
     no_copy_source = True
     exports_sources = ["CMakeLists.txt"]
-    _cmake = None
 
-    def requirements(self):
-        if self.options.aggregates:
-            self.requires("pfr/2.0.2")
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     @property
     def _compilers_minimum_version(self):
@@ -44,6 +43,13 @@ class HiponyEnumerateConan(ConanFile):
     @property
     def _minimum_standard(self):
         return "17" if self.options.aggregates else "11"
+
+    def requirements(self):
+        if self.options.aggregates:
+            self.requires("pfr/2.0.3")
+
+    def package_id(self):
+        self.info.header_only()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -67,23 +73,17 @@ class HiponyEnumerateConan(ConanFile):
                 "{} {} requires C++{}, which your compiler does not support."
                 .format(self.name, self.version, self._minimum_standard))
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
         cmake = CMake(self)
         cmake.definitions["BUILD_TESTING"] = "OFF"
         cmake.definitions["HIPONY_ENUMERATE_AGGREGATES_ENABLED"] = self.options.aggregates
         cmake.configure()
-        self._cmake = cmake
-        return self._cmake
+        return cmake
 
     def build(self):
         cmake = self._configure_cmake()
@@ -95,19 +95,22 @@ class HiponyEnumerateConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
-    def package_id(self):
-        self.info.header_only()
-
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "hipony-enumerate")
+        self.cpp_info.set_property("cmake_target_name", "hipony::enumerate")
+
+        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
+        if self.options.aggregates:
+            self.cpp_info.components["enumerate"].defines.append(
+                "HIPONY_ENUMERATE_AGGREGATES_ENABLED")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "hipony-enumerate"
         self.cpp_info.filenames["cmake_find_package_multi"] = "hipony-enumerate"
         self.cpp_info.names["cmake_find_package"] = "hipony"
         self.cpp_info.names["cmake_find_package_multi"] = "hipony"
         self.cpp_info.components["enumerate"].names["cmake_find_package"] = "enumerate"
         self.cpp_info.components["enumerate"].names["cmake_find_package_multi"] = "enumerate"
-
+        self.cpp_info.components["enumerate"].set_property("cmake_target_name", "hipony::enumerate")
         if self.options.aggregates:
-            self.cpp_info.components["enumerate"].requires.append(
-                "pfr::pfr")
-            self.cpp_info.components["enumerate"].defines.append(
-                "HIPONY_ENUMERATE_AGGREGATES_ENABLED")
+            self.cpp_info.components["enumerate"].requires.append("pfr::pfr")

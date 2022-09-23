@@ -1,15 +1,22 @@
 sources:
+  "5.32.1.1":
+    x86:
+      url: "http://strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-32bit-portable.zip"
+      sha256: "d9c5711d12573a0f6d977792caa58364b1d46217521ae5c25cf5cc378a7c23c0"
+    x86_64:
+      url: "http://strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-64bit-portable.zip"
+      sha256: "692646105b0f5e058198a852dc52a48f1cebcaf676d63bbdeae12f4eaee9bf5c"
   "5.30.0.1":
-    url:
-      "x86": "http://strawberryperl.com/download/5.30.0.1/strawberry-perl-5.30.0.1-32bit-portable.zip"
-      "x86_64": "http://strawberryperl.com/download/5.30.0.1/strawberry-perl-5.30.0.1-64bit-portable.zip"
-    sha256:
-      "x86": "a1d77821c77b7a3298cf3fe381e57cba43f89b9859204398f36d85f33b287837"
-      "x86_64": "9367a64ac1451b21804a224bb6235fe6848dd42f5fa1871583821ac3dfabf013"
+    x86:
+      url: "http://strawberryperl.com/download/5.30.0.1/strawberry-perl-5.30.0.1-32bit-portable.zip"
+      sha256: "a1d77821c77b7a3298cf3fe381e57cba43f89b9859204398f36d85f33b287837"
+    x86_64:
+      url: "http://strawberryperl.com/download/5.30.0.1/strawberry-perl-5.30.0.1-64bit-portable.zip"
+      sha256: "9367a64ac1451b21804a224bb6235fe6848dd42f5fa1871583821ac3dfabf013"
   "5.28.1.1":
-    url:
-      "x86": "http://strawberryperl.com/download/5.28.1.1/strawberry-perl-5.28.1.1-32bit-portable.zip"
-      "x86_64": "http://strawberryperl.com/download/5.28.1.1/strawberry-perl-5.28.1.1-64bit-portable.zip"
-    sha256:
-      "x86": "8b15c7c9574989568254a7859e473b7d5f68a1145d2e4418036600a81b13805c"
-      "x86_64": "935c95ba096fa11c4e1b5188732e3832d330a2a79e9882ab7ba8460ddbca810d"
+    x86:
+      url: "http://strawberryperl.com/download/5.28.1.1/strawberry-perl-5.28.1.1-32bit-portable.zip"
+      sha256: "8b15c7c9574989568254a7859e473b7d5f68a1145d2e4418036600a81b13805c"
+    x86_64:
+      url: "http://strawberryperl.com/download/5.28.1.1/strawberry-perl-5.28.1.1-64bit-portable.zip"
+      sha256: "935c95ba096fa11c4e1b5188732e3832d330a2a79e9882ab7ba8460ddbca810d"

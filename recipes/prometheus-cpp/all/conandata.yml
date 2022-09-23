@@ -1,4 +1,7 @@
 sources:
+  "1.0.1":
+    url: "https://github.com/jupp0r/prometheus-cpp/archive/v1.0.1.tar.gz"
+    sha256: "593e028d401d3298eada804d252bc38d8cab3ea1c9e88bcd72095281f85e6d16"
   "1.0.0":
     url: "https://github.com/jupp0r/prometheus-cpp/archive/v1.0.0.tar.gz"
     sha256: "07018db604ea3e61f5078583e87c80932ea10c300d979061490ee1b7dc8e3a41"
@@ -11,3 +14,7 @@ sources:
   "0.11.0":
     url: "https://github.com/jupp0r/prometheus-cpp/archive/v0.11.0.tar.gz"
     sha256: "aab4ef8342319f631969e01b8c41e355704847cbe76131cb1dd5ea1862000bda"
+patches:
+  "0.11.0":
+    - patch_file: "patches/0001-include-limits.patch"
+      base_path: "source_subfolder"

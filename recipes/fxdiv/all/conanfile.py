@@ -1,6 +1,9 @@
-from conans import ConanFile, tools
-import glob
+from conan import ConanFile
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 import os
+
+required_conan_version = ">=1.50.0"
 
 
 class FxdivConan(ConanFile):
@@ -8,24 +11,31 @@ class FxdivConan(ConanFile):
     description = "C99/C++ header-only library for division via fixed-point " \
                   "multiplication by inverse."
     license = "MIT"
-    topics = ("conan", "fxdiv", "integer-division")
+    topics = ("fxdiv", "integer-division")
     homepage = "https://github.com/Maratyszcza/FXdiv"
     url = "https://github.com/conan-io/conan-center-index"
-
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("FXdiv-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []

@@ -1,5 +1,7 @@
+from conan.tools.files import rename
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 import textwrap
 
@@ -25,7 +27,6 @@ class LibmediainfoConan(ConanFile):
     }
 
     generators = "cmake", "cmake_find_package"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -45,10 +46,10 @@ class LibmediainfoConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libcurl/7.80.0")
+        self.requires("libcurl/7.82.0")
         self.requires("libzen/0.4.38")
         self.requires("tinyxml2/9.0.0")
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
 
     def validate(self):
         if not self.options["libzen"].enable_unicode:
@@ -58,20 +59,21 @@ class LibmediainfoConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_ZENLIB"] = False
-        self._cmake.definitions["BUILD_ZLIB"] = False
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["BUILD_ZENLIB"] = False
+        cmake.definitions["BUILD_ZLIB"] = False
+        # Generate a relocatable shared lib on Macos
+        cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        cmake.configure()
+        return cmake
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-        tools.rename("Findtinyxml2.cmake", "FindTinyXML.cmake")
+        rename(self, "Findtinyxml2.cmake", "FindTinyXML.cmake")
         tools.replace_in_file("FindTinyXML.cmake", "tinyxml2_LIBRARIES", "TinyXML_LIBRARIES")
 
         # TODO: move this to a patch (see how https://github.com/MediaArea/MediaInfoLib/issues/1408 if addressed by upstream)

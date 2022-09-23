@@ -3,15 +3,12 @@ project(bzip2 C)
 
 include(GNUInstallDirs)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
-
 if(MSVC OR MSVC90 OR MSVC10)
     set(MSVC ON)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
-set(SOURCE_SUBFOLDER ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
+set(SOURCE_SUBFOLDER ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(BZ2_LIBRARY bz2)
 
 option(BZ2_BUILD_EXE ON)

@@ -7,12 +7,7 @@ sources:
     sha256: "3655a090f55c16815eaebb4c3f863ff6c028d4b9c22111f81d4eac86bdb2f867"
   "4.10.0":
     url: "https://sourceforge.net/projects/polyclipping/files/Older%20versions/clipper_ver4.10.0.zip"
-    sha256: "b71269a1e38ffd58b07e0dddf60c6794978cd3d9055c5d70c6c2cc1c7a841848"
-  "4.8.8":
-    url:
-      post: "https://sourceforge.net/p/polyclipping/code/HEAD/tarball?path=/tags/4.8.8"
-      archive: "https://sourceforge.net/code-snapshots/svn/p/po/polyclipping/code/polyclipping-code-r585-tags-4.8.8.zip"
-    sha256: "f5a2da51fb94e3433b06a9e681bcae16ac522777aed5622f45bbdc6205a70379"
+    sha256: "4530e01006d02507a41f7eeaefa758c8067a94a7a0d6e0381fadfa40bc0cf248"
 patches:
   "6.4.2":
     - patch_file: "patches/0001-include-install-directory-6.x.patch"
@@ -21,8 +16,5 @@ patches:
     - patch_file: "patches/0001-include-install-directory-5.x.patch"
       base_path: "source_subfolder"
   "4.10.0":
-    - patch_file: "patches/0001-include-install-directory-5.x.patch"
-      base_path: "source_subfolder"
-  "4.8.8":
     - patch_file: "patches/0001-include-install-directory-5.x.patch"
       base_path: "source_subfolder"

@@ -1,4 +1,7 @@
 sources:
+  "1.3.2":
+    url: "https://github.com/adishavit/argh/archive/v1.3.2.tar.gz"
+    sha256: "4b76d8c55e97cc0752feee4f00b99dc58464dd030dea9ba257c0a7d24a84f9dd"
   "1.3.1":
     url: "https://github.com/adishavit/argh/archive/refs/tags/v1.3.1.tar.gz"
     sha256: "48e09999f2768afbe90ef98864980933cf0ed5323dce3593c3f2f44b0ffda3de"

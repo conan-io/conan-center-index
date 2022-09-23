@@ -1,16 +1,30 @@
 sources:
+  "2.5.2":
+    url: "https://github.com/DiligentGraphics/DiligentTools/archive/refs/tags/v2.5.2.tar.gz"
+    sha256: "6519f3d5871a1119876928531d249c45ef46392237ab7bacc6531b4d538551ca"
   "cci.20211009":
     url: "https://github.com/DiligentGraphics/DiligentTools/archive/846ffbe83ac5ae0c96135f5a772d0077d0d086a8.tar.gz"
     sha256: "12ec01e730aefd64ca0d335b5ac6af47279f5e58617f37bc062cd83422f81703"
 patches:
+  "2.5.2":
+    - patch_file: "patches/0006-2.5.2-use-imgui-from-conan.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0007-2.5.2-use-diligent-core-dependencies.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0008-2.5.2-use-conan-dependencies.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0009-2.5.2-fix-include-path.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0010-2.5.2-fix-render-state-notation-paths.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0011-2.5.2-use-conan-dependencies-part2.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0012-2.5.2-fix-imgui-include-path.diff"
+      base_path: "source_subfolder"
   "cci.20211009":
     - patch_file: "patches/0001-use-imgui-from-conan.diff"
       base_path: "source_subfolder"
     - patch_file: "patches/0002-use-conan-dependencies.diff"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0003-fix-diligent-core-include-paths.diff"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0004-fix-install.diff"
       base_path: "source_subfolder"
     - patch_file: "patches/0005-fix-include-path.diff"
       base_path: "source_subfolder"
