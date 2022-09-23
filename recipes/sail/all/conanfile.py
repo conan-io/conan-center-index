@@ -1,10 +1,9 @@
 from conan.tools.files import rename
-from conan.errors import ConanInvalidConfiguration
 from conans import ConanFile, CMake, tools
 import functools
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.43.0"
 
 class SAILConan(ConanFile):
     name = "sail"
@@ -57,11 +56,6 @@ class SAILConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    # TODO Probably will not be needed in Conan 2.x https://github.com/conan-io/conan-center-index/issues/13001
-    #def validate(self):
-    #    if self.options.with_avif and tools.cross_building(self):
-    #        raise ConanInvalidConfiguration("Cross-building is not implemented due to dependencies (dav1d)")
-
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -80,7 +74,7 @@ class SAILConan(ConanFile):
         if self.options.with_tiff:
             self.requires("libtiff/4.3.0")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.3")
+            self.requires("libwebp/1.2.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
