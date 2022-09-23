@@ -1,0 +1,7 @@
+sources:
+  # Newer versions at the top
+  "11.1.0":
+    url: [
+      "https://github.com/qpdf/qpdf/archive/refs/tags/v11.1.0.tar.gz",
+    ]
+    sha256: "c6cd5a09806a82ea1f75aa467b1b7a1f59694472b4c4d9d732ba3b7fa241d9dc"
