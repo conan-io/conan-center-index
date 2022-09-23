@@ -5,7 +5,8 @@ from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, get, chdir, rename, rm
 from conan.tools.build import cross_building
 from conans import tools
-import os, glob
+import os
+import glob
 
 required_conan_version = ">=1.51.3"
 
@@ -139,7 +140,7 @@ class NSSConan(ConanFile):
                         library += ".lib"
                     result.append(library)
                 else:
-                    result.append("-l%s" % library)
+                    result.append(f"-l%{library}")
             return result
 
 
@@ -192,7 +193,7 @@ class NSSConan(ConanFile):
 
         def _library_name(lib,vers):
             if self.options.shared:
-                return "%s%s" % (lib,vers)
+                return f"{lib}{vers}"
             else:
                 return lib
         self.cpp_info.components["libnss"].libs.append(_library_name("nss", 3))
