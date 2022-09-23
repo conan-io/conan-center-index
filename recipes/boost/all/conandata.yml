@@ -1,10 +1,4 @@
 sources:
-  1.69.0:
-    url: [
-      "https://boostorg.jfrog.io/artifactory/main/release/1.69.0/source/boost_1_69_0.tar.bz2",
-      "https://sourceforge.net/projects/boost/files/boost/1.69.0/boost_1_69_0.tar.bz2",
-    ]
-    sha256: "8f32d4617390d1c2d16f26a27ab60d97807b35440d45891fa340fc2648b04406"
   1.70.0:
     url: [
       "https://boostorg.jfrog.io/artifactory/main/release/1.70.0/source/boost_1_70_0.tar.bz2",
@@ -64,42 +58,13 @@ sources:
       "https://sourceforge.net/projects/boost/files/boost/1.79.0/boost_1_79_0.tar.bz2"
     ]
     sha256: "475d589d51a7f8b3ba2ba4eda022b170e562ca3b760ee922c146b6c65856ef39"
+  1.80.0:
+    url: [
+      "https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.bz2",
+      "https://sourceforge.net/projects/boost/files/boost/1.80.0/boost_1_80_0.tar.bz2"
+    ]
+    sha256: "1e19565d82e43bc59209a168f5ac899d3ba471d55c7610c677d4ccf2c9c500c0"
 patches:
-  1.69.0:
-    - patch_file: "patches/boost_build_asmflags.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/python_base_prefix.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/static_object_init.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/support_msvc_2019.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/boost_mpi_check.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-chrono-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-contract-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-coroutine-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-filesystem-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-locale-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-log-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-random-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-thread-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-timer-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.69.0-type_erasure-no-system.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.70.0-boost_build-with-newer-b2.patch"
-      base_path: "source_subfolder"
   1.70.0:
     - patch_file: "patches/0001-beast-fix-moved-from-executor.patch"
       base_path: "source_subfolder"
@@ -272,9 +237,42 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/1.69.0-locale-no-system.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/1.77.0-type_erasure-no-system.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.77.0-fiber-mingw.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/1.78.0-b2-fix-install.patch"
+    - patch_file: "patches/1.79.0-0001-json-array-erase-relocate.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.79.0-smart_ptr_cw_ppc_msync.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.79.0-geometry_no_rtti.patch"
+      base_path: "source_subfolder"
+      patch_type: "portability"
+      patch_source: "https://github.com/boostorg/geometry/discussions/1041"
+  1.80.0:
+    - patch_file: "patches/1.80.0-locale-fail-on-missing-backend.patch"
+      patch_description: "Fails the build when there is no iconv backend"
+      patch_type: "conan"
+      base_path: "source_subfolder"
+    - patch_file: "patches/boost_1_77_mpi_check.patch"
+      patch_description: "Fails the build when mpi is not configured"
+      patch_type: "conan"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.80.0-0001-filesystem-win-fix-dir-it-net-share.patch"
+      patch_description: "Directory iterators may fail to construct for a network share on Windows prior to 10"
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/filesystem/issues/245"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.80.0-0002-filesystem-fix-weakly-canonical-long-path.patch"
+      patch_description: 'On Windows, weakly_canonical fails to process paths that start with the "\\?\" prefix'
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/filesystem/issues/247"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.80.0-0003-unordered-valid-after-move.patch"
+      patch_description: "Containers are not in a valid state after moving"
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/unordered/issues/139"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.80.0-0004-filesystem-posix-fix-no-at-apis-missing-include.patch"
+      patch_description: "On POSIX systems that don't support *at APIs, compilation fails due to a missing include"
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/filesystem/issues/250"
       base_path: "source_subfolder"

@@ -61,7 +61,7 @@ class Pagmo2Conan(ConanFile):
             raise ConanInvalidConfiguration("{0} requires non header-only boost with these components: {1}".format(self.name, ", ".join(self._required_boost_components)))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.settings.clear()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

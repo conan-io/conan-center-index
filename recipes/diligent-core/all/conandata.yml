@@ -1,4 +1,10 @@
 sources:
+  "api.252004":
+    url: "https://github.com/DiligentGraphics/DiligentCore/archive/refs/tags/API252004.tar.gz"
+    sha256: "06e4ee5f95163ae74bbe62f59dcdf1da5e181ff2d6a8e3982319bb5c8f97c53b"
+  "api.252003":
+    url: "https://github.com/DiligentGraphics/DiligentCore/archive/refs/tags/API252003.tar.gz"
+    sha256: "18f17eaa0b6425022be4019c61fede441b9feec4b94c2b7e8ab73d86a7f6a913"
   "2.5.2":
     url: "https://github.com/DiligentGraphics/DiligentCore/archive/refs/tags/v2.5.2.tar.gz"
     sha256: "6767a6b4f5750c3801ccdba8f7793ac79fa429c8d4518d79717f68ef9dd0ed2a"
@@ -9,6 +15,9 @@ sources:
     url: "https://github.com/DiligentGraphics/DiligentCore/archive/refs/tags/API250014.tar.gz"
     sha256: "8f85fc55c6241f9215875df58a077f797e9134c9b51f330f1489df91d8553b7d"
 patches:
+  "api.252003":
+    - patch_file: "patches/0023-252003-fix-warning-as-error.patch"
+      base_path: "source_subfolder"
   "2.5.2":
     - patch_file: "patches/0014-252-exclude-tests.patch"
       base_path: "source_subfolder"

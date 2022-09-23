@@ -1,9 +1,13 @@
 versions:
-  "2.0.7":
+  "2.3.0":
     folder: all
-  "2.0.8":
+  "2.2.0":
+    folder: all
+  "2.1.0":
     folder: all
   "2.0.9":
     folder: all
-  "2.1.0":
+  "2.0.8":
+    folder: all
+  "2.0.7":
     folder: all

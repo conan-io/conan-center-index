@@ -1,0 +1,41 @@
+diff --git a/include/structopt/app.hpp b/include/structopt/app.hpp
+index b60cc29..c89aa5d 100644
+--- a/include/structopt/app.hpp
++++ b/include/structopt/app.hpp
+@@ -6,7 +6,7 @@
+ #include <string>
+ #include <structopt/is_stl_container.hpp>
+ #include <structopt/parser.hpp>
+-#include <structopt/third_party/visit_struct/visit_struct.hpp>
++#include <visit_struct/visit_struct.hpp>
+ #include <type_traits>
+ #include <vector>
+ 
+diff --git a/include/structopt/parser.hpp b/include/structopt/parser.hpp
+index 5ef391c..a8f51e6 100644
+--- a/include/structopt/parser.hpp
++++ b/include/structopt/parser.hpp
+@@ -13,8 +13,8 @@
+ #include <structopt/is_number.hpp>
+ #include <structopt/is_specialization.hpp>
+ #include <structopt/sub_command.hpp>
+-#include <structopt/third_party/magic_enum/magic_enum.hpp>
+-#include <structopt/third_party/visit_struct/visit_struct.hpp>
++#include <magic_enum.hpp>
++#include <visit_struct/visit_struct.hpp>
+ #include <tuple>
+ #include <type_traits>
+ #include <utility>
+diff --git a/include/structopt/visitor.hpp b/include/structopt/visitor.hpp
+index f36c155..dbaa619 100644
+--- a/include/structopt/visitor.hpp
++++ b/include/structopt/visitor.hpp
+@@ -7,7 +7,7 @@
+ #include <string>
+ #include <structopt/is_specialization.hpp>
+ #include <structopt/string.hpp>
+-#include <structopt/third_party/visit_struct/visit_struct.hpp>
++#include <visit_struct/visit_struct.hpp>
+ #include <type_traits>
+ #include <vector>
+ 

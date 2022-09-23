@@ -1,0 +1,25 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -545,22 +545,6 @@
+ # Library sources. You can use the GNUmakefile to generate the list: `make sources`.
+ # Makefile sorted them at http://github.com/weidai11/cryptopp/pull/426.
+ file(GLOB cryptopp_SOURCES ${SRC_DIR}/*.cpp)
+-list(SORT cryptopp_SOURCES)
+-list(REMOVE_ITEM cryptopp_SOURCES
+-    ${SRC_DIR}/cryptlib.cpp
+-    ${SRC_DIR}/cpu.cpp
+-    ${SRC_DIR}/integer.cpp
+-    ${SRC_DIR}/pch.cpp
+-    ${SRC_DIR}/simple.cpp
+-    ${SRC_DIR}/adhoc.cpp
+-    ${cryptopp_SOURCES_TEST}
+-    )
+-set(cryptopp_SOURCES
+-    ${SRC_DIR}/cryptlib.cpp
+-    ${SRC_DIR}/cpu.cpp
+-    ${SRC_DIR}/integer.cpp
+-    ${cryptopp_SOURCES}
+-    )
+ 
+ set(cryptopp_SOURCES_ASM)
+ 

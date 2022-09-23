@@ -1,5 +1,12 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+try:
+    from conan.tools.build import check_min_cppstd
+except ImportError:
+    from conans.tools import check_min_cppstd  # FIXME : not in 1.49
+from conan.tools.files import get
+from conan.tools.cmake import CMake
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.33.0"
@@ -32,13 +39,17 @@ class PlatformInterfacesConan(ConanFile):
         return {
             "gcc": "10",
             "Visual Studio": "16",
-            "clang": "11",
-            "apple-clang": "11"
+            "clang": "14",
+            "apple-clang": "14"
         }
 
     @property
     def _minimum_cpp_standard(self):
         return 20
+
+    def requirements(self):
+        if Version(self.version) >= "0.3.0":
+            self.requires("platform.delegates/0.2.7")
 
     def validate(self):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
@@ -47,14 +58,14 @@ class PlatformInterfacesConan(ConanFile):
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
 
-        elif tools.Version(self.settings.compiler.version) < minimum_version:
+        elif Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("{}/{} requires c++{}, "
                                             "which is not supported by {} {}.".format(
                 self.name, self.version, self._minimum_cpp_standard, self.settings.compiler,
                 self.settings.compiler.version))
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._minimum_cpp_standard)
 
         if self.settings.arch in ("x86", ):
             raise ConanInvalidConfiguration("{} does not support arch={}".format(self.name, self.settings.arch))
@@ -63,8 +74,7 @@ class PlatformInterfacesConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("*.h", dst="include", src=self._internal_cpp_subfolder)
@@ -81,6 +91,6 @@ class PlatformInterfacesConan(ConanFile):
             }.get(str(self.settings.arch), "")
         self.user_info.suggested_flags = suggested_flags
 
-        if "-march" not in "{} {}".format(tools.get_env("CPPFLAGS", ""), tools.get_env("CXXFLAGS", "")):
+        if "-march" not in "{} {}".format(os.environ.get("CPPFLAGS", ""), os.environ.get("CXXFLAGS", "")):
             self.output.warn("platform.hashing needs to have `-march=ARCH` added to CPPFLAGS/CXXFLAGS. "
                              "A suggestion is available in deps_user_info[{name}].suggested_flags.".format(name=self.name))

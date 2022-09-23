@@ -3,5 +3,13 @@ sources:
     url: "https://github.com/cpp-netlib/url/archive/v1.13.0.tar.gz"
     sha256: "0c9e594f09a9abda5815b07b548ac520b2fc1044fc74b589fc4c5bd18ea4330c"
   "1.12.0":
-    url: https://github.com/cpp-netlib/url/archive/v1.12.0.tar.gz
-    sha256: 42ede3666a4c40828aa74e4b35bf43dfc79de9329e6463ff90f9bb727b3a06f0
+    url: "https://github.com/cpp-netlib/url/archive/v1.12.0.tar.gz"
+    sha256: "42ede3666a4c40828aa74e4b35bf43dfc79de9329e6463ff90f9bb727b3a06f0"
+
+patches:
+  "1.13.0":
+    - patch_file: "patches/1.13.0-0001-fix-cmake.patch"
+      base_path: "source_subfolder"
+  "1.12.0":
+    - patch_file: "patches/1.12.0-0001-fix-cmake.patch"
+      base_path: "source_subfolder"

@@ -1,4 +1,19 @@
 sources:
+  "1.6.1":
+    url: "https://github.com/iboB/itlib/archive/v1.6.1.tar.gz"
+    sha256: "bff70b95ca223b4fbca206d8e1c5f6c75fd5ac86d76c8f8f14f45c748d25866a"
+  "1.5.2":
+    url: "https://github.com/iboB/itlib/archive/v1.5.2.tar.gz"
+    sha256: "9ebff09fcdc873d2b01d8a2d0de2a7d7bd11844ef632f80ec5041f78bdc6ddec"
+  "1.5.1":
+    url: "https://github.com/iboB/itlib/archive/v1.5.1.tar.gz"
+    sha256: "70f3c3cd5b3d4baf440bf19848936882e50c06924ca319d0bf91763ae3a65570"
+  "1.5.0":
+    url: "https://github.com/iboB/itlib/archive/refs/tags/v1.5.0.tar.gz"
+    sha256: "940589080fb486e19d7cf8e79665bac017a55f1c8b8fa4fb889a77f80645f289"
+  "1.4.5":
+    url: "https://github.com/iboB/itlib/archive/refs/tags/v1.4.5.tar.gz"
+    sha256: "f1d3533014433316475b6196cd2b1890bb42db1ae3059616538788712e1a33aa"
   "1.3.0":
-    url: "https://github.com/iboB/itlib/archive/refs/tags/v1.3.0.zip"
-    sha256: "1627c608d895f233cdce90efae102faa700c9f48ba3153328aa83bfb7fe7f15c"
+    url: "https://github.com/iboB/itlib/archive/refs/tags/v1.3.0.tar.gz"
+    sha256: "d3af2ea3cf0dae63fe1e186af79562e584bfb86bf02f358cab9675662fb9b5ef"

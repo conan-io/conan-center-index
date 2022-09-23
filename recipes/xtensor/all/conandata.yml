@@ -1,4 +1,7 @@
 sources:
+  "0.24.2":
+    url: "https://github.com/xtensor-stack/xtensor/archive/0.24.2.tar.gz"
+    sha256: "790d9e449add817154177157a850b9afd0260dc0f9df857d8b3a38886a10ef8b"
   "0.24.0":
     url: "https://github.com/xtensor-stack/xtensor/archive/0.24.0.tar.gz"
     sha256: "37738aa0865350b39f048e638735c05d78b5331073b6329693e8b8f0902df713"
@@ -21,6 +24,9 @@ sources:
     sha256: a32490bc8499f59f8e30c288e178ff41c9511cf4959dc59c9628b29b77049a4a
     url: https://github.com/xtensor-stack/xtensor/archive/0.21.2.tar.gz
 patches:
+  "0.24.2":
+    - patch_file: "patches/0.24.0-cxx11-abi.patch"
+      base_path: "source_subfolder"
   "0.24.0":
     - patch_file: "patches/0.24.0-cxx11-abi.patch"
       base_path: "source_subfolder"

@@ -51,7 +51,7 @@ class RotorConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.69.0")
+        self.requires("boost/1.79.0")
 
 
     def validate(self):
@@ -112,6 +112,9 @@ class RotorConan(ConanFile):
         self.cpp_info.components["core"].libs = ["rotor"]
         self.cpp_info.components["core"].requires = ["boost::date_time", "boost::system", "boost::regex"]
 
+
+        if not self.options.multithreading:
+            self.cpp_info.components["core"].defines.append("BUILD_THREAD_UNSAFE")
 
         if self.options.enable_asio:
             self.cpp_info.components["asio"].libs = ["rotor_asio"]

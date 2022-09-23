@@ -1,7 +1,16 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 3b2444f..95b0074 100644
+index 3b2444f..38e5229 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -6,7 +6,7 @@ project(ryml
+     LANGUAGES CXX)
+ include(./compat.cmake)
+ 
+-c4_project(VERSION 0.4.0 STANDALONE
++c4_project(VERSION 0.4.0
+     AUTHOR "Joao Paulo Magalhaes <dev@jpmag.me>")
+ 
+ 
 @@ -21,8 +21,7 @@ option(RYML_DBG "Enable (very verbose) ryml debug prints." OFF)
  
  #-------------------------------------------------------
@@ -12,11 +21,8 @@ index 3b2444f..95b0074 100644
  
  c4_add_library(ryml
      SOURCES
-@@ -54,10 +53,10 @@ c4_add_library(ryml
-         ryml.natvis
-     SOURCE_ROOT ${RYML_SRC_DIR}
+@@ -56,8 +55,7 @@ c4_add_library(ryml
      INC_DIRS
-+        $<BUILD_INTERFACE:${C4CORE_INCLUDE_DIR}>
          $<BUILD_INTERFACE:${RYML_SRC_DIR}>
          $<INSTALL_INTERFACE:include>
 -    LIBS c4core
@@ -25,7 +31,7 @@ index 3b2444f..95b0074 100644
      )
  
  if(RYML_WITH_TAB_TOKENS)
-@@ -76,7 +75,6 @@ endif()
+@@ -76,7 +74,6 @@ endif()
  #-------------------------------------------------------
  
  c4_install_target(ryml)

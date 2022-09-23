@@ -1,86 +1,32 @@
 sources:
+  "7.85.0":
+    url: "https://curl.se/download/curl-7.85.0.tar.gz"
+    sha256: "78a06f918bd5fde3c4573ef4f9806f56372b32ec1829c9ec474799eeee641c27"
+  "7.84.0":
+    url: "https://curl.se/download/curl-7.84.0.tar.gz"
+    sha256: "3c6893d38d054d4e378267166858698899e9d87258e8ff1419d020c395384535"
+  "7.83.1":
+    url: "https://curl.se/download/curl-7.83.1.tar.gz"
+    sha256: "93fb2cd4b880656b4e8589c912a9fd092750166d555166370247f09d18f5d0c0"
   "7.82.0":
-    sha256: 910cc5fe279dc36e2cca534172c94364cf3fcf7d6494ba56e6c61a390881ddce
-    url: https://curl.se/download/curl-7.82.0.tar.gz
+    url: "https://curl.se/download/curl-7.82.0.tar.gz"
+    sha256: "910cc5fe279dc36e2cca534172c94364cf3fcf7d6494ba56e6c61a390881ddce"
   "7.80.0":
-    sha256: dab997c9b08cb4a636a03f2f7f985eaba33279c1c52692430018fae4a4878dc7
-    url: https://curl.se/download/curl-7.80.0.tar.gz
+    url: "https://curl.se/download/curl-7.80.0.tar.gz"
+    sha256: "dab997c9b08cb4a636a03f2f7f985eaba33279c1c52692430018fae4a4878dc7"
   "7.79.1":
-    sha256: 370b11201349816287fb0ccc995e420277fbfcaf76206e309b3f60f0eda090c2
-    url: https://curl.se/download/curl-7.79.1.tar.gz
-  "7.79.0":
-    sha256: aff0c7c4a526d7ecc429d2f96263a85fa73e709877054d593d8af3d136858074
-    url: https://curl.se/download/curl-7.79.0.tar.gz
+    url: "https://curl.se/download/curl-7.79.1.tar.gz"
+    sha256: "370b11201349816287fb0ccc995e420277fbfcaf76206e309b3f60f0eda090c2"
   "7.78.0":
-    sha256: ed936c0b02c06d42cf84b39dd12bb14b62d77c7c4e875ade022280df5dcc81d7
-    url: https://curl.se/download/curl-7.78.0.tar.gz
+    url: "https://curl.se/download/curl-7.78.0.tar.gz"
+    sha256: "ed936c0b02c06d42cf84b39dd12bb14b62d77c7c4e875ade022280df5dcc81d7"
   "7.77.0":
-    sha256: b0a3428acb60fa59044c4d0baae4e4fc09ae9af1d8a3aa84b2e3fbcd99841f77
-    url: https://curl.se/download/curl-7.77.0.tar.gz
+    url: "https://curl.se/download/curl-7.77.0.tar.gz"
+    sha256: "b0a3428acb60fa59044c4d0baae4e4fc09ae9af1d8a3aa84b2e3fbcd99841f77"
   "7.76.0":
-    sha256: 3b4378156ba09e224008e81dcce854b7ce4d182b1f9cfb97fe5ed9e9c18c6bd3
-    url: https://curl.se/download/curl-7.76.0.tar.gz
-  "7.75.0":
-    sha256: 4d51346fe621624c3e4b9f86a8fd6f122a143820e17889f59c18f245d2d8e7a6
-    url: https://curl.haxx.se/download/curl-7.75.0.tar.gz
-  "7.74.0":
-    sha256: e56b3921eeb7a2951959c02db0912b5fcd5fdba5aca071da819e1accf338bbd7
-    url: https://curl.haxx.se/download/curl-7.74.0.tar.gz
-  "7.73.0":
-    sha256: ba98332752257b47b9dea6d8c0ad25ec1745c20424f1dd3ff2c99ab59e97cf91
-    url: https://curl.haxx.se/download/curl-7.73.0.tar.gz
-  "7.72.0":
-    sha256: d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2
-    url: https://curl.haxx.se/download/curl-7.72.0.tar.gz
-  "7.71.1":
-    sha256: 59ef1f73070de67b87032c72ee6037cedae71dcb1d7ef2d7f59487704aec069d
-    url: https://curl.haxx.se/download/curl-7.71.1.tar.gz
-  "7.71.0":
-    sha256: 62b2b1acee40c4de5a4913e27a4b4194813cf2b7815b73febec7ae53054646ca
-    url: https://curl.haxx.se/download/curl-7.71.0.tar.gz
-  "7.70.0":
-    sha256: ca2feeb8ef13368ce5d5e5849a5fd5e2dd4755fecf7d8f0cc94000a4206fb8e7
-    url: https://curl.haxx.se/download/curl-7.70.0.tar.gz
-  "7.69.1":
-    sha256: 01ae0c123dee45b01bbaef94c0bc00ed2aec89cb2ee0fd598e0d302a6b5e0a98
-    url: https://curl.haxx.se/download/curl-7.69.1.tar.gz
-  "7.68.0":
-    sha256: 1dd7604e418b0b9a9077f62f763f6684c1b092a7bc17e3f354b8ad5c964d7358
-    url: https://curl.haxx.se/download/curl-7.68.0.tar.gz
-  "7.67.0":
-    sha256: 52af3361cf806330b88b4fe6f483b6844209d47ae196ac46da4de59bb361ab02
-    url: https://curl.haxx.se/download/curl-7.67.0.tar.gz
-  "7.66.0":
-    sha256: d0393da38ac74ffac67313072d7fe75b1fa1010eb5987f63f349b024a36b7ffb
-    url: https://curl.haxx.se/download/curl-7.66.0.tar.gz
-  "7.64.1":
-    sha256: 432d3f466644b9416bc5b649d344116a753aeaa520c8beaf024a90cba9d3d35d
-    url: https://curl.haxx.se/download/curl-7.64.1.tar.gz
+    url: "https://curl.se/download/curl-7.76.0.tar.gz"
+    sha256: "3b4378156ba09e224008e81dcce854b7ce4d182b1f9cfb97fe5ed9e9c18c6bd3"
 patches:
   "7.79.0":
     - patch_file: "patches/004-no-checksrc.patch"
-      base_path: "source_subfolder"
-  "7.72.0":
-    - patch_file: "patches/002-add-missing-file-FindZstd.patch"
-      base_path: "source_subfolder"
-  "7.69.1":
-    - patch_file: "patches/003-cross-build-run-ifelse-7.66.0.patch"
-      base_path: "source_subfolder"
-  "7.68.0":
-    - patch_file: "patches/003-cross-build-run-ifelse-7.66.0.patch"
-      base_path: "source_subfolder"
-  "7.67.0":
-    - patch_file: "patches/001-Update-FindLibSSH2.cmake-add-libssh2-as-possible-nam.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/003-cross-build-run-ifelse-7.66.0.patch"
-      base_path: "source_subfolder"
-  "7.66.0":
-    - patch_file: "patches/001-Update-FindLibSSH2.cmake-add-libssh2-as-possible-nam.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/003-cross-build-run-ifelse-7.66.0.patch"
-      base_path: "source_subfolder"
-  "7.64.1":
-    - patch_file: "patches/001-Update-FindLibSSH2.cmake-add-libssh2-as-possible-nam.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/003-cross-build-run-ifelse-7.64.1.patch"
       base_path: "source_subfolder"

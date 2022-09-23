@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.1)
 project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-file(GLOB SOURCE_FILES *.cpp)
+find_package(botan REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} botan::botan)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)

@@ -1,51 +1,72 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get
+from conan.tools.scm import Version
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
 
 
 class PolylineencoderConan(ConanFile):
     name = "polylineencoder"
     description = "Google Encoded Polyline Algorithm Format library"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/vahancho/polylineencoder"
-    license = "MIT"
-    topics = ("conan", "gepaf", "encoded-polyline", "google-polyline")
+    topics = ("gepaf", "encoded-polyline", "google-polyline")
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake"
-    exports_sources = "CMakeLists.txt", "patches/*"
-    _cmake = None
-    short_paths = True
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def package_id(self):
+        if Version(self.version) >= "1.1.2":
+            self.info.clear()
+
+    def generate(self):
+        toolchain = CMakeToolchain(self)
+        toolchain.variables["BUILD_TESTING"] = False
+        if self.settings.os == "Windows" and self.options.shared:
+            toolchain.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = "ON"
+        toolchain.generate()
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs.append("polylineencoder")
+        if Version(self.version) == "1.0.0":
+            self.cpp_info.libs.append("polylineencoder")
+            if self.settings.os in ["Linux", "FreeBSD"] and self.options.shared:
+                self.cpp_info.system_libs.append("m")

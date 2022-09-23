@@ -1,4 +1,10 @@
 sources:
+  "2.6":
+    url: "https://github.com/p-ranav/argparse/archive/v2.6.tar.gz"
+    sha256: "da261c3b3010c10a163f4535bbe2b160319d2a6b1e0fd2eb5a7b9f6a85c29021"
+  "2.5":
+    url: "https://github.com/p-ranav/argparse/archive/refs/tags/v2.5.tar.gz"
+    sha256: "aad087125bed01ae73e650ce33f9a5edbcbceb6c30f6a43824b1afa8df5a6fac"
   "2.4":
     url: "https://github.com/p-ranav/argparse/archive/refs/tags/v2.4.tar.gz"
     sha256: "3589559f115bfedfef2edffb3e7b61d88657ba7b70a0b1f47352ff3043abc825"
@@ -11,3 +17,12 @@ sources:
   "2.1":
     url: "https://github.com/p-ranav/argparse/archive/v2.1.tar.gz"
     sha256: "0a82f464b568b8ee6650fc837f371eb9c81417e2ef9fb3b51f65ad50fa3b8662"
+patches:
+  "2.4":
+    - patch_file: "patches/0001-v2.3-add-missing-include.patch"
+  "2.3":
+    - patch_file: "patches/0001-v2.3-add-missing-include.patch"
+  "2.2":
+    - patch_file: "patches/0001-v2.2-add-missing-include.patch"
+  "2.1":
+    - patch_file: "patches/0001-v2.1-add-missing-include.patch"

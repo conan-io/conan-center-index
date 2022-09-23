@@ -1,0 +1,35 @@
+diff --git a/RenderStateNotation/CMakeLists.txt b/RenderStateNotation/CMakeLists.txt
+index 30ded42..34cc344 100644
+--- a/RenderStateNotation/CMakeLists.txt
++++ b/RenderStateNotation/CMakeLists.txt
+@@ -88,12 +88,7 @@ PRIVATE
+ 
+ target_link_libraries(Diligent-RenderStateNotation
+ PRIVATE
+-    Diligent-BuildSettings 
+-    Diligent-Common 
+-    Diligent-PlatformInterface 
+-    Diligent-GraphicsEngineInterface 
+-    Diligent-GraphicsAccessories
+-    Diligent-GraphicsTools
++diligent-core::diligent-core
+ )
+ 
+ target_compile_definitions(Diligent-RenderStateNotation PUBLIC JSON_DIAGNOSTICS=1)
+diff --git a/RenderStatePackager/CMakeLists.txt b/RenderStatePackager/CMakeLists.txt
+index 003a298..f047083 100644
+--- a/RenderStatePackager/CMakeLists.txt
++++ b/RenderStatePackager/CMakeLists.txt
+@@ -25,11 +25,7 @@ target_include_directories(Diligent-RenderStatePackager
+ 
+ target_link_libraries(Diligent-RenderStatePackager
+ PUBLIC
+-    Diligent-BuildSettings
+-    Diligent-GraphicsAccessories
+-    Diligent-Common
+-    Diligent-Archiver-static
+-    Diligent-RenderStateNotation
++diligent-core::diligent-core
+ )
+ 
+ set_target_properties(Diligent-RenderStatePackager PROPERTIES

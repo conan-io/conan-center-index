@@ -1,8 +1,10 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conan.tools.files import rename
+from conan.tools.microsoft import is_msvc
 from contextlib import contextmanager
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class GslConan(ConanFile):
@@ -29,10 +31,6 @@ class GslConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _settings_build(self):
@@ -67,7 +65,7 @@ class GslConan(ConanFile):
 
     @contextmanager
     def _build_context(self):
-        if self._is_msvc:
+        if is_msvc(self):
             with tools.vcvars(self):
                 env = {
                     "CC": "cl -nologo",
@@ -99,6 +97,7 @@ class GslConan(ConanFile):
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
+            "--with-pic={}".format(yes_no(self.options.get_safe("fPIC", True)))
         ]
         if self.settings.os == "Windows":
             self._autotools.defines.extend(["HAVE_WIN_IEEE_INTERFACE", "WIN32"])
@@ -108,7 +107,7 @@ class GslConan(ConanFile):
         if self.settings.os == "Linux" and "x86" in self.settings.arch:
             self._autotools.defines.append("HAVE_GNUX86_IEEE_INTERFACE")
 
-        if self._is_msvc:
+        if is_msvc(self):
             if self.settings.compiler == "Visual Studio" and \
                tools.Version(self.settings.compiler.version) >= "12":
                 self._autotools.flags.append("-FS")
@@ -139,10 +138,10 @@ class GslConan(ConanFile):
 
         os.unlink(os.path.join(self.package_folder, "bin", "gsl-config"))
 
-        if self._is_msvc and self.options.shared:
+        if is_msvc(self) and self.options.shared:
             pjoin = lambda p: os.path.join(self.package_folder, "lib", p)
-            tools.rename(pjoin("gsl.dll.lib"), pjoin("gsl.lib"))
-            tools.rename(pjoin("gslcblas.dll.lib"), pjoin("gslcblas.lib"))
+            rename(self, pjoin("gsl.dll.lib"), pjoin("gsl.lib"))
+            rename(self, pjoin("gslcblas.dll.lib"), pjoin("gslcblas.lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")

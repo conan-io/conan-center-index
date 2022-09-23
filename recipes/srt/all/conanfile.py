@@ -46,7 +46,7 @@ class SrtConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("openssl/1.1.1k")
+        self.requires("openssl/1.1.1q")
         if not self._has_posix_threads and not self._has_stdcxx_sync:
             self.requires("pthreads4w/3.0.0")
 
