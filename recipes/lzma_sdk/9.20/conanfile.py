@@ -77,7 +77,7 @@ class LzmaSdkConan(ConanFile):
             with tools.vcvars(self):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     with tools.chdir(make_dir):
-                        self.run(f"nmake /f makefile NEW_COMPILER=1 CPU={self._msvc_cpu}")
+                        self.run(f"nmake /f makefile NEW_COMPILER=1 CPU={self._msvc_cpu} NO_BUFFEROVERFLOWU=1")
 
     def _build_autotools(self):
         env_build = AutoToolsBuildEnvironment(self)
