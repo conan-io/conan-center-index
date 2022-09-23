@@ -3,7 +3,7 @@ from conan.tools.files import get, chdir, replace_in_file, rm
 from conans import tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.50.0"
 
 
 """ This older lzma release is used to build 7zip (to extract its sources).
