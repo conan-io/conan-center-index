@@ -1,7 +1,11 @@
-from conans import CMake, ConanFile, tools
-import os.path
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, replace_in_file, rmdir, save
+import os
+import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
 
 
 class HighFiveConan(ConanFile):
@@ -11,8 +15,7 @@ class HighFiveConan(ConanFile):
     topics = ("hdf5", "hdf", "data")
     homepage = "https://github.com/BlueBrain/HighFive"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_boost": [True, False],
@@ -27,15 +30,8 @@ class HighFiveConan(ConanFile):
         "with_opencv": True,
     }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("hdf5/1.12.0")
@@ -48,51 +44,84 @@ class HighFiveConan(ConanFile):
         if self.options.with_opencv:
             self.requires("opencv/4.5.3")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+    def package_id(self):
+        self.info.clear()
 
-    def build(self):
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMake", "HighFiveTargetDeps.cmake"),
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["USE_BOOST"] = self.options.with_boost
+        tc.variables["USE_EIGEN"] = self.options.with_eigen
+        tc.variables["USE_XTENSOR"] = self.options.with_xtensor
+        tc.variables["USE_OPENCV"] = self.options.with_opencv
+        tc.variables["HIGHFIVE_UNIT_TESTS"] = False
+        tc.variables["HIGHFIVE_EXAMPLES"] = False
+        tc.variables["HIGHFIVE_BUILD_DOCS"] = False
+        tc.variables["HIGHFIVE_USE_INSTALL_DEPS"] = False
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def _patch_sources(self):
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "CMake", "HighFiveTargetDeps.cmake"),
             "find_package(Eigen3 NO_MODULE)",
             "find_package(Eigen3 REQUIRED)",
         )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMake", "HighFiveTargetDeps.cmake"),
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "CMake", "HighFiveTargetDeps.cmake"),
             "EIGEN3_INCLUDE_DIRS",
             "Eigen3_INCLUDE_DIRS",
         )
 
-        cmake = self._configure_cmake()
+    def build(self):
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["USE_BOOST"] = self.options.with_boost
-        self._cmake.definitions["USE_EIGEN"] = self.options.with_eigen
-        self._cmake.definitions["USE_XTENSOR"] = self.options.with_xtensor
-        self._cmake.definitions["USE_OPENCV"] = self.options.with_opencv
-        self._cmake.definitions["HIGHFIVE_UNIT_TESTS"] = False
-        self._cmake.definitions["HIGHFIVE_EXAMPLES"] = False
-        self._cmake.definitions["HIGHFIVE_BUILD_DOCS"] = False
-        self._cmake.definitions["HIGHFIVE_USE_INSTALL_DEPS"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
-    def package_id(self):
-        self.info.header_only()
-
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+
+        # TODO: to remove in conan v2 once legacy generators removed
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"HighFive": "HighFive::HighFive"},
+        )
+
+    def _create_cmake_module_alias_targets(self, module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent(f"""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """)
+        save(self, module_file, content)
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "HighFive"
-        self.cpp_info.names["cmake_find_package_multi"] = "HighFive"
+        self.cpp_info.set_property("cmake_file_name", "HighFive")
+        self.cpp_info.set_property("cmake_target_name", "HighFive")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
         self.cpp_info.requires = ["hdf5::hdf5"]
         if self.options.with_boost:
             self.cpp_info.requires.append("boost::headers")
@@ -102,3 +131,9 @@ class HighFiveConan(ConanFile):
             self.cpp_info.requires.append("xtensor::xtensor")
         if self.options.with_opencv:
             self.cpp_info.requires.append("opencv::opencv")
+
+        # TODO: to remove in conan v2 once legacy generators removed
+        self.cpp_info.names["cmake_find_package"] = "HighFive"
+        self.cpp_info.names["cmake_find_package_multi"] = "HighFive"
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
