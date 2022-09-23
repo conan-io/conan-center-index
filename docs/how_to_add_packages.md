@@ -126,8 +126,7 @@ Inside the `conanfile.py` recipe, this data is available in a `self.conan_data` 
 
 ```py
 def export_sources(self):
-    for patch in self.conan_data.get("patches", {}).get(self.version, []):
-        files.copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+    export_conandata_patches(self)
 
 def source(self):
     files.get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
@@ -142,8 +141,8 @@ More details can be found in the [reviewing preference](reviewing.md) documentat
 ### The _recipe folder_: `conanfile.py`
 
 The main files in this repository are the `conanfile.py` ones that contain the logic to build the libraries from sources for all the configurations,
-as we said before there can be one single recipe suitable for all the versions inside the `all` folder, or there can be several recipes targetting
-different versions in different folders. For mainteinance reasons, we prefer to have only one recipe, but sometimes the extra effort doesn't worth
+as we said before there can be one single recipe suitable for all the versions inside the `all` folder, or there can be several recipes targeting
+different versions in different folders. For maintenance reasons, we prefer to have only one recipe, but sometimes the extra effort doesn't worth
 it and it makes sense to split and duplicate it, there is no common rule for it.
 
 Together with the recipe, there can be other files that are needed to build the library: patches, other files related to build systems,
@@ -188,12 +187,12 @@ project files as simple as possible, without the need of extra logic to handle d
 The CI will explore all the folders and run the tests for the ones matching `test_*/conanfile.py` pattern. You can find the output of all
 of them together in the testing logs.
 
-> **Note.-** If, for any reason, it is useful to write a test that should only be checked using Conan v1, you can do so by using the pattern
+> **Note**: If, for any reason, it is useful to write a test that should only be checked using Conan v1, you can do so by using the pattern
 > `test_v1_*/conanfile.py` for the folder. Please, have a look to [linter notes](v2_linter.md) to know how to prevent the linter from
 > checking these files.
 
 > Remember that the `test_<package>` recipes should **test the package configuration that has just been generated** for the _host_ context, otherwise
-> it will fail in crossbuilding scenarios.
+> it will fail in cross-building scenarios.
 
 
 ## How to provide a good recipe

@@ -91,15 +91,14 @@ Where the SPDX guidelines do not apply, packages should do the following:
 
 ## Exporting Patches
 
-It's ideal to minimize the number of files in a package the exactly whats required. When recipes support multiple versions with differing patches it's strongly encourged to only export the patches that are being used for that given recipe.
+It's ideal to minimize the number of files in a package the exactly whats required. When recipes support multiple versions with differing patches it's strongly encouraged to only export the patches that are being used for that given recipe.
 
 Make sure the `export_sources` attribute is replaced by the following:
 
 ```py
 def export_sources(self):
     self.copy("CMakeLists.txt")
-    for patch in self.conan_data.get("patches", {}).get(self.version, []):
-        self.copy(patch["patch_file"])
+    export_conandata_patches(self)
 ```
 
 ## Applying Patches
