@@ -1,8 +1,8 @@
 diff --git a/cmake/sail_check_init_once_execute_once.cmake b/cmake/sail_check_init_once_execute_once.cmake
-index 6fed498e..290e1708 100644
+index 6fed498e..d89f7d5c 100644
 --- a/cmake/sail_check_init_once_execute_once.cmake
 +++ b/cmake/sail_check_init_once_execute_once.cmake
-@@ -4,7 +4,8 @@ function(sail_check_init_once_execute_once)
+@@ -4,12 +4,14 @@ function(sail_check_init_once_execute_once)
      cmake_push_check_state(RESET)
          check_c_source_compiles(
          "
@@ -12,3 +12,9 @@ index 6fed498e..290e1708 100644
              static BOOL CALLBACK OnceHandler(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContext)
              {
                  (void)InitOnce;
+                 (void)Parameter;
+                 (void)lpContext;
++                return FALSE;
+             }
+ 
+             int main(int argc, char *argv[]) {
