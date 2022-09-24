@@ -100,6 +100,14 @@ class OdbcConan(ConanFile):
             "if test -f \"$with_ltdl_lib/libltdl.la\";",
             "if true;",
         )
+        libtool_system_libs = self.dependencies["libtool"].cpp_info.system_libs
+        if libtool_system_libs:
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "configure"),
+                "-L$with_ltdl_lib -lltdl",
+                "-L$with_ltdl_lib -lltdl -l{}".format(" -l".join(libtool_system_libs)),
+            )
         # relocatable shared libs on macOS
         for configure in [
             os.path.join(self.source_folder, "configure"),
