@@ -1,17 +1,25 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -39,8 +39,8 @@ SET(hiredis_sources ${hiredis_sources})
- IF(WIN32)
+@@ -1,6 +1,6 @@
+-CMAKE_MINIMUM_REQUIRED(VERSION 3.4.0)
+-INCLUDE(GNUInstallDirs)
++CMAKE_MINIMUM_REQUIRED(VERSION 3.8)
+ PROJECT(hiredis)
++INCLUDE(GNUInstallDirs)
+ 
+ OPTION(ENABLE_SSL "Build hiredis_ssl for SSL support" OFF)
+ OPTION(DISABLE_TESTS "If tests should be compiled or not" OFF)
+@@ -40,7 +40,8 @@ IF(WIN32)
      ADD_COMPILE_DEFINITIONS(_CRT_SECURE_NO_WARNINGS WIN32_LEAN_AND_MEAN)
  ENDIF()
--
+ 
 -ADD_LIBRARY(hiredis SHARED ${hiredis_sources})
-+SET(CMAKE_C_STANDARD 99)
 +ADD_LIBRARY(hiredis ${hiredis_sources})
++target_compile_features(hiredis PUBLIC c_std_99)
  
  SET_TARGET_PROPERTIES(hiredis
      PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE
-@@ -97,7 +97,7 @@ IF(ENABLE_SSL)
+@@ -97,7 +98,7 @@ IF(ENABLE_SSL)
      FIND_PACKAGE(OpenSSL REQUIRED)
      SET(hiredis_ssl_sources 
          ssl.c)
@@ -20,7 +28,7 @@
              ${hiredis_ssl_sources})
  
      IF (APPLE)
-@@ -109,8 +109,7 @@ IF(ENABLE_SSL)
+@@ -109,8 +110,7 @@ IF(ENABLE_SSL)
          WINDOWS_EXPORT_ALL_SYMBOLS TRUE
          VERSION "${HIREDIS_SONAME}")
  
