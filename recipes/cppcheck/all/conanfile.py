@@ -33,8 +33,12 @@ class CppcheckConan(ConanFile):
                               "RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}",
                               "DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}")
 
+    def config_options(self):
+        if tools.Version(self.version) >= "2.8":
+            del self.options.with_z3
+
     def requirements(self):
-        if self.options.with_z3:
+        if self.options.get_safe("with_z3"):
             self.requires("z3/4.8.8")
         if self.options.have_rules:
             self.requires("pcre/8.45")
@@ -46,7 +50,8 @@ class CppcheckConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["USE_Z3"] = self.options.with_z3
+        if self.options.get_safe("with_z3"):
+            cmake.definitions["USE_Z3"] = True
         cmake.definitions["HAVE_RULES"] = self.options.have_rules
         cmake.definitions["USE_MATCHCOMPILER"] = "Auto"
         cmake.definitions["ENABLE_OSS_FUZZ"] = False
