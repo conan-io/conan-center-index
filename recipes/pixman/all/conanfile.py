@@ -1,9 +1,11 @@
-from conan.tools import files
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools import files, apple, microsoft
+from conan.errors import ConanInvalidConfiguration
+from conans import AutoToolsBuildEnvironment, tools
+
+required_conan_version = ">=1.51.0"
 
 
 class PixmanConan(ConanFile):
@@ -48,7 +50,7 @@ class PixmanConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not os.getenv("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def validate(self):
@@ -60,31 +62,33 @@ class PixmanConan(ConanFile):
             self.copy(patch["patch_file"])
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         files.apply_conandata_patches(self)
-        if self.settings.compiler == "Visual Studio":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.win32.common"),
+        if microsoft.is_msvc(self):
+            files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.win32.common"),
                                   "-MDd ", "-{} ".format(str(self.settings.compiler.runtime)))
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.win32.common"),
+            files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.win32.common"),
                                   "-MD ", "-{} ".format(str(self.settings.compiler.runtime)))
-        if tools.is_apple_os(self.settings.os):
+        if apple.is_apple_os(self):
             # https://lists.freedesktop.org/archives/pixman/2014-November/003461.html
             test_makefile = os.path.join(self._source_subfolder, "test", "Makefile.in")
-            tools.replace_in_file(test_makefile,
+            files.replace_in_file(self, test_makefile,
                                   "region_test_OBJECTS = region-test.$(OBJEXT)",
                                   "region_test_OBJECTS = region-test.$(OBJEXT) utils.$(OBJEXT)")
-            tools.replace_in_file(test_makefile,
+            files.replace_in_file(self, test_makefile,
                                   "scaling_helpers_test_OBJECTS = scaling-helpers-test.$(OBJEXT)",
                                   "scaling_helpers_test_OBJECTS = scaling-helpers-test.$(OBJEXT) utils.$(OBJEXT)")
 
     def _configure_autotools(self):
+        def yes_no(v):
+            return "yes" if v else "no"
+
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
@@ -96,7 +100,7 @@ class PixmanConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        if self.settings.compiler == "Visual Studio":
+        if microsoft.is_msvc(self):
             with tools.vcvars(self):
                 make_vars = {
                     "MMX": "on" if self.settings.arch == "x86" else "off",
@@ -120,11 +124,11 @@ class PixmanConan(ConanFile):
         else:
             autotools = self._configure_autotools()
             autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+            files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = files.collect_libs(self)
         self.cpp_info.includedirs.append(self._includedir)
         self.cpp_info.names["pkg_config"] = "pixman-1"
         if self.settings.os in ("FreeBSD", "Linux"):
