@@ -1,0 +1,16 @@
+This requires linking to ssp on some systems, which might not always present.
+If this is really desired:
+* add `-lssp` to LDFLAGS, and
+* add `-D_FORTIFY_SOURCE=2` to CPPFLAGS/CFLAGS
+
+--- a/lib/config.hin
++++ b/lib/config.hin
+@@ -198,7 +198,7 @@
+ /* Enable compile-time and run-time bounds-checking, and some warnings,
+       without upsetting newer glibc. */
+    #if defined __OPTIMIZE__ && __OPTIMIZE__
+-   # define _FORTIFY_SOURCE 2
++   //# define _FORTIFY_SOURCE 2
+    #endif
+   
+ 
