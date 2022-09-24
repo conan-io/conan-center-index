@@ -11,7 +11,6 @@ sources:
 patches:
   "1.9.3":
     - patch_file: "patches/1.9.3-0003-PKG_CONF_PATH-allow-colon+semicolon-separator.patch"
-      base_path: "source_subfolder"
   "1.7.4":
     - patch_file: "patches/1.7.4-0001-clang-12-strndup-not-in-string-h.patch"
     - patch_file: "patches/1.7.4-0002-fix-static-link.patch"
