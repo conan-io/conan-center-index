@@ -65,6 +65,9 @@ class CppcheckConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
         bin_folder = os.path.join(self.package_folder, "bin")
         self.output.info("Append %s to environment variable PATH" % bin_folder)
         # This is required to run the python script on windows, as we cannot simply add it to the PATH
