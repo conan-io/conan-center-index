@@ -1,0 +1,21 @@
+sources:
+  "cci.20220801":
+    url: "https://github.com/eBay/Jungle/archive/f41b7123489f1bc942a6b76dc54485391485cd27.tar.gz"
+    sha256: 8667a114bcef661b2a93e627a68b0584931f182dc8b96693ce6901d903584ab8
+patches:
+  "cci.20220801":
+    - patch_file: "patches/0001-cmake-alterations.patch"
+      patch_description: "CMake dependency discovery outside subtree."
+      patch_type: "conan"
+      base_path: "source_subfolder"
+      sha256: "a7111a290e145717ae0cbdace9866db69c70782731c8568a806f8579e30759eb"
+    - patch_file: "patches/0002-forestdb-path.patch"
+      patch_description: "Update include macros for ForestDB headers."
+      patch_type: "conan"
+      base_path: "source_subfolder"
+      sha256: "84ec45a312c52e2fa8cb7ab615aaa11088f24dcb4e4b880340b46c2763900d6b"
+    - patch_file: "patches/0003-stdatomic.patch"
+      patch_description: "Include std::atomic from all compilers."
+      patch_type: "portability"
+      base_path: "source_subfolder"
+      sha256: "3ca66676f89e2425255eeb15bf18a77ae21c4f383124013bd6d1cb660cbc1544"

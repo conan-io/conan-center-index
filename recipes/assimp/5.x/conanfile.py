@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
@@ -6,7 +7,7 @@ from conan.tools.scm import Version
 from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.2"
 
 
 class AssimpConan(ConanFile):
@@ -185,6 +186,10 @@ class AssimpConan(ConanFile):
         if self._depends_on_openddlparser:
             self.requires("openddl-parser/0.5.0")
 
+    def validate(self):
+        if self._depends_on_clipper and Version(self.dependencies["clipper"].ref.version).major != "4":
+            raise ConanInvalidConfiguration("Only 'clipper/4.x' is supported")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -252,11 +257,6 @@ class AssimpConan(ConanFile):
             rmdir(self, os.path.join(self.source_folder, "contrib", vendor))
 
     def build(self):
-        # TODO: Move to 'validate()' once there is a way to get the resolved version of dependencies there
-        # FIXME: doesn't work with the new conan v2 model
-        # if self._depends_on_clipper and Version(self.deps_cpp_info["clipper"].version).major != "4":
-        #     raise ConanInvalidConfiguration("Only 'clipper/4.x' is supported")
-
         self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
@@ -282,28 +282,3 @@ class AssimpConan(ConanFile):
             stdcpp_library = tools_legacy.stdcpp_library(self)
             if stdcpp_library:
                 self.cpp_info.system_libs.append(stdcpp_library)
-
-        # FIXME: shouldn't be necessary.
-        # It's a workaround to support conan v1 generators
-        self.cpp_info.requires.append("minizip::minizip")
-        self.cpp_info.requires.append("utfcpp::utfcpp")
-        if Version(self.version) < "5.1.0":
-            self.cpp_info.requires.append("irrxml::irrxml")
-        else:
-            self.cpp_info.requires.append("pugixml::pugixml")
-        if self._depends_on_kuba_zip:
-            self.cpp_info.requires.append("kuba-zip::kuba-zip")
-        if self._depends_on_poly2tri:
-            self.cpp_info.requires.append("poly2tri::poly2tri")
-        if self._depends_on_rapidjson:
-            self.cpp_info.requires.append("rapidjson::rapidjson")
-        if self._depends_on_zlib:
-            self.cpp_info.requires.append("zlib::zlib")
-        if self._depends_on_draco:
-            self.cpp_info.requires.append("draco::draco")
-        if self._depends_on_clipper:
-            self.cpp_info.requires.append("clipper::clipper")
-        if self._depends_on_stb:
-            self.cpp_info.requires.append("stb::stb")
-        if self._depends_on_openddlparser:
-            self.cpp_info.requires.append("openddl-parser::openddl-parser")

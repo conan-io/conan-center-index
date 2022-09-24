@@ -19,7 +19,6 @@ The following policies are preferred during the review, but not mandatory:
   * [Test Package](#test-package)
     * [Minimalistic Source Code](#minimalistic-source-code)
     * [CMake targets](#cmake-targets)
-  * [Recommended feature options names](#recommended-feature-options-names)
   * [Supported Versions](#supported-versions)
     * [Removing old versions](#removing-old-versions)
     * [Adding old versions](#adding-old-versions)<!-- endToc -->
@@ -35,6 +34,9 @@ If possible, try to avoid mixing single quotes (`'`) and double quotes (`"`) in 
 ## Subfolder Properties
 
 When extracting sources or performing out-of-source builds, it is preferable to use a _subfolder_ attribute, `_source_subfolder` and `_build_subfolder` respectively.
+
+> **Note**: These are only required when using the legacy generator such as `cmake`. For the new generators like `CMakeToolchain` see
+> the [2.0 Migration Guide](v2_migration.md#using-layout-with-new-generators) for more information.
 
 For example doing this with property attributes for these variables:
 
@@ -89,15 +91,14 @@ Where the SPDX guidelines do not apply, packages should do the following:
 
 ## Exporting Patches
 
-It's ideal to minimize the number of files in a package the exactly whats required. When recipes support multiple versions with differing patches it's strongly encourged to only export the patches that are being used for that given recipe.
+It's ideal to minimize the number of files in a package the exactly whats required. When recipes support multiple versions with differing patches it's strongly encouraged to only export the patches that are being used for that given recipe.
 
 Make sure the `export_sources` attribute is replaced by the following:
 
 ```py
 def export_sources(self):
     self.copy("CMakeLists.txt")
-    for patch in self.conan_data.get("patches", {}).get(self.version, []):
-        self.copy(patch["patch_file"])
+    export_conandata_patches(self)
 ```
 
 ## Applying Patches
@@ -107,8 +108,7 @@ For simple cases, `tools.replace_in_file` is allowed.
 
 ```py
 def _patch_sources(self):
-    for patch in self.conan_data.get("patches", {}).get(self.version, []):
-        tools.patch(**patch)
+    files.apply_conandata_patches(self)
     # remove bundled xxhash
     tools.remove_files_by_mask(os.path.join(self._source_subfolder, "lib"), "whateer.*")
     tools.replace_in_file(os.path.join(self._cmakelists_subfolder, "CMakeLists.txt"), "...", "")
@@ -180,39 +180,12 @@ target_link_libraries(${PROJECT_NAME} package::package)
 We encourage contributors to check that not only the _global_ target works properly, but also the ones for the components. It can be
 done creating and linking different libraries and/or executables.
 
-## Recommended feature options names
-
-It's often needed to add options to toggle specific library features on/off. Regardless of the default, there is a strong preference for using positive naming for options. In order to avoid the fragmentation, we recommend to use the following naming conventions for such options:
-
-- enable_<feature> / disable_<feature>
-- with_<dependency> / without_<dependency>
-- use_<feature>
-
-the actual recipe code then may look like:
-
-```py
-    options = {"use_tzdb": [True, False]}
-    default_options = {"use_tzdb": True}
-```
-
-```py
-    options = {"enable_locales": [True, False]}
-    default_options = {"enable_locales": True}
-```
-
-```py
-    options = {"with_zlib": [True, False]}
-    default_options = {"with_zlib": True}
-```
-
-having the same naming conventions for the options may help consumers, e.g. they will be able to specify options with wildcards: `-o *:with_threads=True`, therefore, `with_threads` options will be enabled for all packages in the graph that support it.
-
 ## Supported Versions
 
 In this repository we are building a subset of all the versions for a given library. This set of version changes over time as new versions
-are released and old ones stop to be used. 
+are released and old ones stop to be used.
 
-We always welcome latest releases as soon as they are available, and from time to time we remove old versions mainly due to technical reasons: 
+We always welcome latest releases as soon as they are available, and from time to time we remove old versions mainly due to technical reasons:
 the more versions we have, the more resources that are needed in the CI and the more time it takes to build each pull-request (also, the
 more chances of failing because of unexpected errors).
 

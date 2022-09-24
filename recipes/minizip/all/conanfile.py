@@ -1,8 +1,9 @@
-from conans import ConanFile, tools, CMake
+from conan import ConanFile
+from conan.tools import files
+from conans import CMake
 import functools
-import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.46.0"
 
 
 class MinizipConan(ConanFile):
@@ -54,7 +55,7 @@ class MinizipConan(ConanFile):
             self.requires("bzip2/1.0.8")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     @functools.lru_cache(1)
@@ -66,16 +67,15 @@ class MinizipConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        files.apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 
     def _extract_license(self):
-        with tools.chdir(os.path.join(self.source_folder, self._source_subfolder)):
-            tmp = tools.load("zlib.h")
+        with files.chdir(self, f"{self.source_folder}/{self._source_subfolder}"):
+            tmp = files.load(self, "zlib.h")
             license_contents = tmp[2:tmp.find("*/", 1)]
-            tools.save("LICENSE", license_contents)
+            files.save(self, "LICENSE", license_contents)
 
     def package(self):
         self._extract_license()
@@ -85,11 +85,11 @@ class MinizipConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["minizip"]
-        self.cpp_info.includedirs = ["include", os.path.join("include", "minizip")]
+        self.cpp_info.includedirs = ["include", "include/minizip"]
         if self.options.bzip2:
             self.cpp_info.defines.append("HAVE_BZIP2")
 
         if self.options.tools:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            bin_path = f"{self.package_folder}/bin"
+            self.output.info(f"Appending PATH environment variable: {bin_path}")
             self.env_info.PATH.append(bin_path)

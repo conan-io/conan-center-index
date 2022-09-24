@@ -1,7 +1,11 @@
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.build import cross_building
+from conan.errors import ConanInvalidConfiguration
 import os
-from conans import ConanFile, tools
 
-required_conan_version = ">=1.40.1" # For https://github.com/conan-io/conan/pull/9568
+required_conan_version = ">=1.50"
 
 class QwtConan(ConanFile):
     name = "qwt"
@@ -22,29 +26,50 @@ class QwtConan(ConanFile):
         "widgets": [True, False],
         "svg": [True, False],
         "opengl": [True, False],
-        "mathml": [True, False],
-        "designer": [True, False]
+        "designer": [True, False],
+        "polar": [True, False],
+        "playground": [True, False],
+        "examples": [True, False],
+        "test": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "plot": True,
         "widgets": True,
+        "svg": False,
         "opengl": True,
-        "designer": True,
-        "mathml": False,
-        "svg": False
-
+        "designer": False,
+        "polar": True,
+        "playground": False,
+        "examples": False,
+        "test": False
     }
-    generators = "qmake"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-    
+    tool_requires  = (
+        "cmake/3.23.2",
+        "ninja/1.11.0"
+    )
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
+    def export_sources(self):
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+
+
+    def requirements(self):
+        self.requires("qt/5.15.5")
+
     def build_requirements(self):
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             self.build_requires("jom/1.1.3")
+        self.tool_requires("qt/5.15.5") 
+
+    def validate(self):
+        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Qwt recipe does not support cross-compilation yet")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,67 +79,62 @@ class QwtConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def requirements(self):
-        self.requires("qt/5.15.2")
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    def _patch_qwt_config_files(self):
-        # qwtconfig.pri
-        qwtconfig_path = os.path.join(self.source_folder, self._source_subfolder, "qwtconfig.pri")
-        qwtconfig = tools.load(qwtconfig_path)
+    def layout(self):
+        cmake_layout(self)
 
-        qwtconfig = "CONFIG += conan_basic_setup\ninclude(../conanbuildinfo.pri)\n" + qwtconfig
-        qwtconfig += "QWT_CONFIG {}= QwtDll\n".format("+" if self.options.shared else "-")
-        qwtconfig += "QWT_CONFIG {}= QwtPlot\n".format("+" if self.options.plot else "-")
-        qwtconfig += "QWT_CONFIG {}= QwtWidgets\n".format("+" if self.options.widgets else "-")
-        qwtconfig += "QWT_CONFIG {}= QwtSvg\n".format("+" if self.options.svg else "-")
-        qwtconfig += "QWT_CONFIG {}= QwtOpenGL\n".format("+" if self.options.opengl else "-")
-        qwtconfig += "QWT_CONFIG {}= QwtMathML\n".format("+" if self.options.mathml else "-")
-        qwtconfig += "QWT_CONFIG {}= QwtDesigner\n".format("+" if self.options.designer else "-")
-        tools.save(qwtconfig_path, qwtconfig)
+    def generate(self):
+        tc = CMakeToolchain(self, generator="Ninja")
 
-        # qwtbuild.pri
-        qwtbuild_path = os.path.join(self.source_folder, self._source_subfolder, "qwtbuild.pri")
-        qwtbuild = tools.load(qwtbuild_path)
-        # set build type
-        qwtbuild += "CONFIG -= debug_and_release\n"
-        qwtbuild += "CONFIG -= build_all\n"
-        qwtbuild += "CONFIG -= release\n"
-        qwtbuild += "CONFIG += {}\n".format("debug" if self.settings.build_type == "Debug" else "release")
-        if self.settings.build_type == "RelWithDebInfo":
-            qwtbuild += "CONFIG += force_debug_info\n"
-        tools.save(qwtbuild_path, qwtbuild)
+        tc.variables["QWT_DLL"] = "ON" if self.options.shared else "OFF"
+        tc.variables["QWT_STATIC "] = "ON" if not self.options.shared else "OFF"
+        tc.variables["QWT_PLOT"] = "ON" if self.options.plot else "OFF"
+        tc.variables["QWT_WIDGETS"] = "ON" if self.options.widgets else "OFF"
+        tc.variables["QWT_SVG"] = "ON" if self.options.svg else "OFF"
+        tc.variables["QWT_OPENGL"] = "ON" if self.options.opengl else "OFF"
+        tc.variables["QWT_DESIGNER"] = "ON" if self.options.designer else "OFF"
+        tc.variables["QWT_POLAR"] = "ON" if self.options.polar else "OFF"
+        tc.variables["QWT_BUILD_PLAYGROUND"] = "ON" if self.options.playground else "OFF"
+        tc.variables["QWT_BUILD_EXAMPLES"] = "ON" if self.options.examples else "OFF"
+        tc.variables["QWT_BUILD_TESTS"] = "ON" if self.options.test else "OFF"
+        tc.variables["QWT_FRAMEWORK"] = "OFF"
+
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        self._patch_qwt_config_files()
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
-        if self.settings.compiler == "Visual Studio":
-            vcvars = tools.vcvars_command(self.settings)
-            self.run("{} && qmake {}".format(vcvars, self._source_subfolder), run_environment=True)
-            self.run("{} && jom".format(vcvars))
-        else:
-            self.run("qmake {}".format(self._source_subfolder), run_environment=True)
-            self.run("make -j {}".format(tools.cpu_count()))
+        if self.options.test:
+            cmake.test()
 
     def package(self):
-        self.copy("COPYING", src=os.path.join(self._source_subfolder), dst="licenses")
-        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "src"))
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.lib", dst="lib", keep_path=False)
-        self.copy("*.so*", dst="lib", keep_path=False, symlinks=True)
-        self.copy("*.dylib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, f"{self.package_folder}/lib/pkgconfig")        
+        rmdir(self, f"{self.package_folder}/lib/cmake")
+        self.copy("COPYING", src=self.folders.source, dst="licenses")
 
     def package_info(self):
-        postfix = ""
-        if self.settings.build_type == "Debug":
-            if self.settings.os == "Windows":
-                postfix += "d"
-            elif self.settings.os == "Macos":
-                postfix += "_debug"
-        self.cpp_info.libs = ["qwt" + postfix]
+        self.cpp_info.libs = ["qwt"]
         self.env_info.QT_PLUGIN_PATH.append(os.path.join(self.package_folder, 'bin'))
         self.env_info.QT_PLUGIN_PATH.append(os.path.join(self.package_folder, 'lib'))
         self.cpp_info.defines = ['HAVE_QWT', 'QWT_DLL'] if self.options.shared else ['HAVE_QWT']
+        if not self.options.plot:
+            self.cpp_info.defines.append("NO_QWT_PLOT")
+        if not self.options.polar:
+            self.cpp_info.defines.append("NO_QWT_POLAR")
+        if not self.options.widgets:
+            self.cpp_info.defines.append("NO_QWT_WIDGETS")
+        if not self.options.opengl:
+            self.cpp_info.defines.append("NO_QWT_OPENGL")
+        if not self.options.svg:
+            self.cpp_info.defines.append("QWT_NO_SVG")
+

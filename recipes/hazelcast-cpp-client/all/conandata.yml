@@ -14,13 +14,6 @@ sources:
   "4.0.1":
     url: "https://github.com/hazelcast/hazelcast-cpp-client/archive/v4.0.1.zip"
     sha256: "4b3c6a876ebca2a4dcf23a556d3c3d4da2284e4ce1d2bbdf335df7f86b03fd28"
-  "4.0.0":
-    url: "https://github.com/hazelcast/hazelcast-cpp-client/archive/v4.0.0.zip"
-    sha256: "1bba72aec47951cefb367a99c196fd8989a2d621e527310fee9483313d347d1b"
 patches:
   "4.1.0":
     - patch_file: "patches/gcc_4.9_5_fix.patch"
-      base_path: "source_subfolder"
-  "4.0.0":
-    - patch_file: "patches/cmake_install.patch"
-      base_path: "source_subfolder"

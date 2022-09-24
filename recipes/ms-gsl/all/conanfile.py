@@ -1,8 +1,14 @@
 import os
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.43.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.50.0"
 
 
 class MicrosoftGslConan(ConanFile):
@@ -13,7 +19,7 @@ class MicrosoftGslConan(ConanFile):
     license = "MIT"
     topics = ("gsl", "guidelines", "core", "span")
     no_copy_source = True
-    settings = "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "on_contract_violation": ["terminate", "throw", "unenforced"]
     }
@@ -30,43 +36,49 @@ class MicrosoftGslConan(ConanFile):
         }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
     def _compilers_minimum_version(self):
         return {
             "gcc": "5",
-            "Visual Studio": "14",
             "clang": "3.4",
             "apple-clang": "3.4",
         }
 
     def config_options(self):
-        if tools.Version(self.version) >= "3.0.0":
+        if Version(self.version) >= "3.0.0":
             del self.options.on_contract_violation
 
-    def configure(self):
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 14)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("ms-gsl requires C++14, which your compiler does not fully support.")
-        else:
-            self.output.warn("ms-gsl requires C++14. Your compiler is unknown. Assuming it supports C++14.")
-
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 14)
+
+        check_min_vs(self, "190")
+
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version:
+                if Version(self.settings.compiler.version) < minimum_version:
+                    raise ConanInvalidConfiguration("ms-gsl requires C++14, which your compiler does not fully support.")
+            else:
+                self.output.warn("ms-gsl requires C++14. Your compiler is unknown. Assuming it supports C++14.")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "GSL-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        pass
+
+    def build(self):
+        pass
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "*", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Microsoft.GSL")
@@ -80,7 +92,7 @@ class MicrosoftGslConan(ConanFile):
         self.cpp_info.components["_ms-gsl"].names["cmake_find_package"] = "GSL"
         self.cpp_info.components["_ms-gsl"].names["cmake_find_package_multi"] = "GSL"
 
-        if tools.Version(self.version) < "3.0.0":
+        if Version(self.version) < "3.0.0":
             self.cpp_info.components["_ms-gsl"].defines = [
                 self._contract_map[str(self.options.on_contract_violation)]
             ]

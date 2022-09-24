@@ -1,4 +1,11 @@
 sources:
+  "5.32.1.1":
+    x86:
+      url: "http://strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-32bit-portable.zip"
+      sha256: "d9c5711d12573a0f6d977792caa58364b1d46217521ae5c25cf5cc378a7c23c0"
+    x86_64:
+      url: "http://strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-64bit-portable.zip"
+      sha256: "692646105b0f5e058198a852dc52a48f1cebcaf676d63bbdeae12f4eaee9bf5c"
   "5.30.0.1":
     x86:
       url: "http://strawberryperl.com/download/5.30.0.1/strawberry-perl-5.30.0.1-32bit-portable.zip"

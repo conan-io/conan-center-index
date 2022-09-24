@@ -1,11 +1,14 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-from conan.tools.files import rename
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import rename, get, apply_conandata_patches, rmdir
+from conan.tools.build import cross_building
+from conan.tools.scm import Version
+from conans import AutoToolsBuildEnvironment, tools
 from contextlib import contextmanager
 import os
 import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.47.0"
 
 class CoinCglConan(ConanFile):
     name = "coin-cgl"
@@ -61,22 +64,22 @@ class CoinCglConan(ConanFile):
         return getattr(self, "user_info_build", self.deps_user_info)
 
     def build_requirements(self):
-        self.build_requires("gnu-config/cci.20201022")
-        self.build_requires("pkgconf/1.7.4")
+        self.tool_requires("gnu-config/cci.20201022")
+        self.tool_requires("pkgconf/1.7.4")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+            self.tool_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.4")
+            self.tool_requires("automake/1.16.5")
             
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("coin-cgl does not support shared builds on Windows")
         # FIXME: This issue likely comes from very old autotools versions used to produce configure.
-        if hasattr(self, "settings_build") and tools.cross_building(self) and self.options.shared:
+        if hasattr(self, "settings_build") and cross_building(self) and self.options.shared:
             raise ConanInvalidConfiguration("coin-cgl shared not supported yet when cross-building")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
     @contextmanager
@@ -107,15 +110,14 @@ class CoinCglConan(ConanFile):
         ]
         if self.settings.compiler == "Visual Studio":
             self._autotools.cxx_flags.append("-EHsc")
-            configure_args.append("--enable-msvc={}".format(self.settings.compiler.runtime))
-            if tools.Version(self.settings.compiler.version) >= 12:
+            configure_args.append(f"--enable-msvc={self.settings.compiler.runtime}")
+            if Version(self.settings.compiler.version) >= 12:
                 self._autotools.flags.append("-FS")
         self._autotools.configure(configure_dir=os.path.join(self.source_folder, self._source_subfolder), args=configure_args)
         return self._autotools
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
                     os.path.join(self._source_subfolder, "config.sub"))
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
@@ -137,8 +139,8 @@ class CoinCglConan(ConanFile):
                    os.path.join(self.package_folder, "lib", "libCgl.a"),
                    os.path.join(self.package_folder, "lib", "Cgl.lib"))
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["Cgl"]

@@ -1,5 +1,8 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools import files, microsoft, scm
+from conan .errors import ConanInvalidConfiguration
+from conans import CMake, tools
+
 import functools
 import os
 
@@ -74,9 +77,14 @@ class HarfbuzzConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
-        if tools.Version(self.version) >= "4.4.0":
-            if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
+        if scm.Version(self.version) >= "4.4.0":
+            if self.settings.compiler == "gcc" and scm.Version(self.settings.compiler.version) < "7":
                 raise ConanInvalidConfiguration("New versions of harfbuzz require at least gcc 7")
+
+        if self.options.with_glib and self.options["glib"].shared and microsoft.is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration(
+                "Linking shared glib with the MSVC static runtime is not supported"
+            )
 
     def requirements(self):
         if self.options.with_freetype:
@@ -84,10 +92,10 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_icu:
             self.requires("icu/71.1")
         if self.options.with_glib:
-            self.requires("glib/2.73.1")
+            self.requires("glib/2.73.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     @functools.lru_cache(1)
@@ -116,8 +124,7 @@ class HarfbuzzConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        files.apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -125,11 +132,13 @@ class HarfbuzzConan(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "harfbuzz"
         self.cpp_info.names["cmake_find_package_multi"] = "harfbuzz"
+        self.cpp_info.set_property("pkg_config_name", "harfbuzz")
         if self.options.with_icu:
             self.cpp_info.libs.append("harfbuzz-icu")
         if self.options.with_subset:
@@ -149,12 +158,12 @@ class HarfbuzzConan(ConanFile):
             if self.options.with_directwrite:
                 self.cpp_info.system_libs.append("dwrite")
         if tools.is_apple_os(self.settings.os):
-            self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText"])
+            self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText", "ApplicationServices"])
         if not self.options.shared:
             libcxx = tools.stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
 
     def package_id(self):
-        if self.options.with_glib:
+        if self.options.with_glib and not self.options["glib"].shared:
             self.info.requires["glib"].full_package_mode()

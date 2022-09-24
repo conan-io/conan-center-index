@@ -1,6 +1,10 @@
-from conans import ConanFile, CMake, tools
-from fnmatch import fnmatch
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 import os
+
+required_conan_version = ">=1.50.0"
 
 
 class ConcurrentqueueConan(ConanFile):
@@ -10,24 +14,38 @@ class ConcurrentqueueConan(ConanFile):
     description = "A fast multi-producer, multi-consumer lock-free concurrent queue for C++11"
     topics = ("cpp11", "cpp14", "cpp17", "queue", "lock-free")
     license = ["BSD-2-Clause", "BSL-1.0"]
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-    settings = "os"
-    _source_subfolder = "concurrentqueue"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("concurrentqueue-{}".format(self.version),
-                  self._source_subfolder)
-
-    def package(self):
-        self.copy("*.h",
-                  src=os.path.join(self._source_subfolder),
-                  dst=os.path.join("include", "moodycamel"))
-        self.copy("LICENSE.md", src=self._source_subfolder, dst="licenses")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def build(self):
+        pass
+
+    def package(self):
+        copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        for file in ["blockingconcurrentqueue.h", "concurrentqueue.h", "lightweightsemaphore.h"]:
+            copy(self, file, src=self.source_folder, dst=os.path.join(self.package_folder, "include", "moodycamel"))
 
     def package_info(self):
-        if self.settings.os == "Linux":
+        self.cpp_info.set_property("cmake_file_name", "concurrentqueue")
+        self.cpp_info.set_property("cmake_target_name", "concurrentqueue::concurrentqueue")
+        self.cpp_info.includedirs.append(os.path.join("include", "moodycamel"))
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
