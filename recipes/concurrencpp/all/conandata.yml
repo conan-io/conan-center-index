@@ -1,8 +1,14 @@
 sources:
+  "0.1.5":
+    url: "https://github.com/David-Haim/concurrencpp/archive/refs/tags/v.0.1.5.tar.gz"
+    sha256: "330150ebe11b3d30ffcb3efdecc184a34cf50a6bd43b68e294a496225d286651"
   "0.1.4":
     url: "https://github.com/David-Haim/concurrencpp/archive/refs/tags/v.0.1.4.tar.gz"
     sha256: "3ad9424f975b766accc6eaedf4acfe1a20b5fdbb57fa3ae71f400e13d471e86f"
 patches:
+  "0.1.5":
+    - patch_file: "patches/cmake-min-version.patch"
+    - patch_file: "patches/directory-name-0.1.5.patch"
   "0.1.4":
     - patch_file: "patches/cmake-min-version.patch"
     - patch_file: "patches/directory-name.patch"
