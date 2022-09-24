@@ -14,7 +14,9 @@ patches:
       patch_source: "https://github.com/danmar/cppcheck/pull/4430"
   "2.7.5":
     - patch_file: "patches/0001-cmake-source-dir-2.5.patch"
-    - patch_file: "patches/0003-handle-exename-on-macos.patch"
+    - patch_file: "patches/0002-handle-exename-on-macos-3b54e761.patch"
+      patch_source: "https://github.com/danmar/cppcheck/pull/4071"
   "2.7.4":
     - patch_file: "patches/0001-cmake-source-dir-2.5.patch"
-    - patch_file: "patches/0003-handle-exename-on-macos.patch"
+    - patch_file: "patches/0002-handle-exename-on-macos-3b54e761.patch"
+      patch_source: "https://github.com/danmar/cppcheck/pull/4071"
