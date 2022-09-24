@@ -3,7 +3,7 @@ import os
 import re
 
 from conan import ConanFile
-from conan.tools.apple.apple import is_apple_os, to_apple_arch
+from conan.tools.apple import is_apple_os, to_apple_arch
 
 try:
     from conan.tools.cross_building import cross_building
