@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanException
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import copy
@@ -56,14 +55,5 @@ class TestPackageConan(ConanFile):
             self.run(bin_path, env="conanrun")
 
         pkg_config = tools_legacy.get_env("PKG_CONFIG")
-        self.output.info("Read environment variable PKG_CONFIG='{}'".format(pkg_config))
-        if not pkg_config or not pkg_config.startswith(self.deps_cpp_info["pkgconf"].rootpath.replace("\\", "/")):
-            raise ConanException("PKG_CONFIG variable incorrect")
-
-        pkgconf_path = tools_legacy.which("pkgconf").replace("\\", "/")
-        self.output.info("Found pkgconf at '{}'".format(pkgconf_path))
-        if not pkgconf_path or not pkgconf_path.startswith(self.deps_cpp_info["pkgconf"].rootpath.replace("\\", "/")):
-            raise ConanException("pkgconf executable not found")
-
         self.run(f"{pkg_config} libexample1 --libs")
         self.run(f"{pkg_config} libexample1 --cflags")
