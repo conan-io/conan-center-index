@@ -1,8 +1,13 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir, save
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 
 class LeptonicaConan(ConanFile):
@@ -38,21 +43,8 @@ class LeptonicaConan(ConanFile):
         "with_webp": True,
     }
 
-    generators = "cmake", "cmake_find_package", "pkg_config"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -60,9 +52,21 @@ class LeptonicaConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_zlib:
@@ -72,119 +76,126 @@ class LeptonicaConan(ConanFile):
         if self.options.with_jpeg:
             self.requires("libjpeg/9d")
         if self.options.with_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.38")
         if self.options.with_tiff:
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.4.0")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.4.0")
+            self.requires("openjpeg/2.5.0")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.2")
+            self.requires("libwebp/1.2.4")
 
     def build_requirements(self):
         if self.options.with_webp or self.options.with_openjpeg:
-            self.build_requires("pkgconf/1.7.4")
+            self.tool_requires("pkgconf/1.7.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if Version(self.version) < "1.79.0":
+            tc.variables["STATIC"] = not self.options.shared
+        tc.variables["BUILD_PROG"] = False
+        tc.variables["SW_BUILD"] = False
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+        if self.options.with_webp or self.options.with_openjpeg:
+            pc = PkgConfigDeps(self)
+            pc.generate()
+            env = VirtualBuildEnv(self)
+            env.generate()
+            # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
+            env = Environment()
+            env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
+            env.vars(self).save_script("conanbuildenv_pkg_config_path")
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        cmakelists_src = os.path.join(self._source_subfolder, "src", "CMakeLists.txt")
-        cmake_configure = os.path.join(self._source_subfolder, "cmake", "Configure.cmake")
-
-        # Fix installation
-        tools.replace_in_file(cmakelists_src, "${CMAKE_BINARY_DIR}", "${PROJECT_BINARY_DIR}")
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        cmakelists_src = os.path.join(self.source_folder, "src", "CMakeLists.txt")
+        cmake_configure = os.path.join(self.source_folder, "cmake", "Configure.cmake")
 
         # Honor options and inject dependencies definitions
         # TODO: submit a patch upstream
         ## zlib
-        tools.replace_in_file(cmakelists_src, "${ZLIB_LIBRARIES}", "ZLIB::ZLIB")
+        replace_in_file(self, cmakelists_src, "${ZLIB_LIBRARIES}", "ZLIB::ZLIB")
         if not self.options.with_zlib:
-            tools.replace_in_file(cmakelists_src, "if (ZLIB_LIBRARIES)", "if(0)")
-            tools.replace_in_file(cmake_configure, "if (ZLIB_FOUND)", "if(0)")
+            replace_in_file(self, cmakelists_src, "if (ZLIB_LIBRARIES)", "if(0)")
+            replace_in_file(self, cmake_configure, "if (ZLIB_FOUND)", "if(0)")
         ## giflib
-        tools.replace_in_file(cmakelists_src, "${GIF_LIBRARIES}", "GIF::GIF")
+        replace_in_file(self, cmakelists_src, "${GIF_LIBRARIES}", "GIF::GIF")
         if not self.options.with_gif:
-            tools.replace_in_file(cmakelists_src, "if (GIF_LIBRARIES)", "if(0)")
-            tools.replace_in_file(cmake_configure, "if (GIF_FOUND)", "if(0)")
+            replace_in_file(self, cmakelists_src, "if (GIF_LIBRARIES)", "if(0)")
+            replace_in_file(self, cmake_configure, "if (GIF_FOUND)", "if(0)")
         ## libjpeg
-        tools.replace_in_file(cmakelists_src, "${JPEG_LIBRARIES}", "JPEG::JPEG")
+        replace_in_file(self, cmakelists_src, "${JPEG_LIBRARIES}", "JPEG::JPEG")
         if not self.options.with_jpeg:
-            tools.replace_in_file(cmakelists_src, "if (JPEG_LIBRARIES)", "if(0)")
-            tools.replace_in_file(cmake_configure, "if (JPEG_FOUND)", "if(0)")
+            replace_in_file(self, cmakelists_src, "if (JPEG_LIBRARIES)", "if(0)")
+            replace_in_file(self, cmake_configure, "if (JPEG_FOUND)", "if(0)")
         ## libpng
-        tools.replace_in_file(cmakelists_src, "${PNG_LIBRARIES}", "PNG::PNG")
+        replace_in_file(self, cmakelists_src, "${PNG_LIBRARIES}", "PNG::PNG")
         if not self.options.with_png:
-            tools.replace_in_file(cmakelists_src, "if (PNG_LIBRARIES)", "if(0)")
-            tools.replace_in_file(cmake_configure, "if (PNG_FOUND)", "if(0)")
+            replace_in_file(self, cmakelists_src, "if (PNG_LIBRARIES)", "if(0)")
+            replace_in_file(self, cmake_configure, "if (PNG_FOUND)", "if(0)")
         ## libtiff
-        tools.replace_in_file(cmakelists_src, "${TIFF_LIBRARIES}", "TIFF::TIFF")
+        replace_in_file(self, cmakelists_src, "${TIFF_LIBRARIES}", "TIFF::TIFF")
         if not self.options.with_tiff:
-            tools.replace_in_file(cmakelists_src, "if (TIFF_LIBRARIES)", "if(0)")
-            tools.replace_in_file(cmake_configure, "if (TIFF_FOUND)", "if(0)")
+            replace_in_file(self, cmakelists_src, "if (TIFF_LIBRARIES)", "if(0)")
+            replace_in_file(self, cmake_configure, "if (TIFF_FOUND)", "if(0)")
         ## We have to be more aggressive with dependencies found with pkgconfig
         ## Injection of libdirs is ensured by conan_basic_setup()
         ## openjpeg
-        tools.replace_in_file(cmakelists, "if(NOT JP2K)", "if(0)")
-        tools.replace_in_file(cmakelists_src,
+        replace_in_file(self, cmakelists, "if(NOT JP2K)", "if(0)")
+        replace_in_file(self, cmakelists_src,
                               "if (JP2K_FOUND)",
                               "if (JP2K_FOUND)\n"
+                              "target_link_directories(leptonica PRIVATE ${JP2K_LIBRARY_DIRS})\n"
                               "target_compile_definitions(leptonica PRIVATE ${JP2K_CFLAGS_OTHER})")
         if not self.options.with_openjpeg:
-            tools.replace_in_file(cmakelists_src, "if (JP2K_FOUND)", "if(0)")
-            tools.replace_in_file(cmake_configure, "if (JP2K_FOUND)", "if(0)")
+            replace_in_file(self, cmakelists_src, "if (JP2K_FOUND)", "if(0)")
+            replace_in_file(self, cmake_configure, "if (JP2K_FOUND)", "if(0)")
         ## libwebp
-        tools.replace_in_file(cmakelists, "if(NOT WEBP)", "if(0)")
-        tools.replace_in_file(cmakelists_src,
+        replace_in_file(self, cmakelists, "if(NOT WEBP)", "if(0)")
+        replace_in_file(self, cmakelists_src,
                               "if (WEBP_FOUND)",
                               "if (WEBP_FOUND)\n"
+                              "target_link_directories(leptonica PRIVATE ${WEBP_LIBRARY_DIRS} ${WEBPMUX_LIBRARY_DIRS})\n"
                               "target_compile_definitions(leptonica PRIVATE ${WEBP_CFLAGS_OTHER} ${WEBPMUX_CFLAGS_OTHER})")
-        tools.replace_in_file(cmakelists_src, "${WEBP_LIBRARIES}", "${WEBP_LIBRARIES} ${WEBPMUX_LIBRARIES}")
-        if tools.Version(self.version) >= "1.79.0":
-            tools.replace_in_file(cmakelists, "if(NOT WEBPMUX)", "if(0)")
+        replace_in_file(self, cmakelists_src, "${WEBP_LIBRARIES}", "${WEBP_LIBRARIES} ${WEBPMUX_LIBRARIES}")
+        if Version(self.version) >= "1.79.0":
+            replace_in_file(self, cmakelists, "if(NOT WEBPMUX)", "if(0)")
         if not self.options.with_webp:
-            tools.replace_in_file(cmakelists_src, "if (WEBP_FOUND)", "if(0)")
-            tools.replace_in_file(cmake_configure, "if (WEBP_FOUND)", "if(0)")
+            replace_in_file(self, cmakelists_src, "if (WEBP_FOUND)", "if(0)")
+            replace_in_file(self, cmake_configure, "if (WEBP_FOUND)", "if(0)")
 
         # Remove detection of fmemopen() on macOS < 10.13
         # CheckFunctionExists will find it in the link library.
         # There's no error because it's not including the header with the
         # deprecation macros.
         if self.settings.os == "Macos" and self.settings.os.version:
-            if tools.Version(self.settings.os.version) < "10.13":
-                tools.replace_in_file(cmake_configure,
+            if Version(self.settings.os.version) < "10.13":
+                replace_in_file(self, cmake_configure,
                                       "set(functions_list\n    "
                                       "fmemopen\n    fstatat\n)",
                                       "set(functions_list\n    "
                                       "fstatat\n)")
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        if tools.Version(self.version) < "1.79.0":
-            self._cmake.definitions["STATIC"] = not self.options.shared
-        self._cmake.definitions["BUILD_PROG"] = False
-        self._cmake.definitions["SW_BUILD"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
-        self.copy(pattern="leptonica-license.txt", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))  # since 1.81.0
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        copy(self, "leptonica-license.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))  # since 1.81.0
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
@@ -192,27 +203,26 @@ class LeptonicaConan(ConanFile):
             {"leptonica": "Leptonica::Leptonica"}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+            """)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Leptonica")
         self.cpp_info.set_property("cmake_target_name", "leptonica")
         self.cpp_info.set_property("pkg_config_name", "lept")
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
         self.cpp_info.includedirs.append(os.path.join("include", "leptonica"))
