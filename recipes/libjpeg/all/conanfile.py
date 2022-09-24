@@ -82,6 +82,8 @@ class LibjpegConan(ConanFile):
             env.define("TUNE", None)
             env.define("NODEBUG", None)
             env.vars(self).save_script("conanbuildenv_nmake")
+            # TODO: there is probably something missing here
+            # Do we really honor everything from profile (build_type, tools.build:cflags etc)?
         else:
             tc = AutotoolsToolchain(self)
             tc.extra_defines.append("LIBJPEG_BUILDING")
