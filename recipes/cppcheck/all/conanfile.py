@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.52.0"
@@ -26,8 +27,12 @@ class CppcheckConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
+    def config_options(self):
+        if Version(self.version) >= "2.8":
+            del self.options.with_z3
+
     def requirements(self):
-        if self.options.with_z3:
+        if self.options.get_safe("with_z3"):
             self.requires("z3/4.10.2")
         if self.options.have_rules:
             self.requires("pcre/8.45")
@@ -41,7 +46,8 @@ class CppcheckConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["USE_Z3"] = self.options.with_z3
+        if self.options.get_safe("with_z3"):
+            tc.variables["USE_Z3"] = True
         tc.variables["HAVE_RULES"] = self.options.have_rules
         tc.variables["USE_MATCHCOMPILER"] = "Auto"
         tc.variables["ENABLE_OSS_FUZZ"] = False
