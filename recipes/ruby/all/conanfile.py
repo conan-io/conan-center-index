@@ -16,7 +16,7 @@ from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conans import tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 
 class RubyConan(ConanFile):
