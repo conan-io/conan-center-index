@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 743a243..b5d41a1 100644
+index 743a243..d0340d2 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -168,7 +168,7 @@ message(STATUS "Install directory = ${CMAKE_INSTALL_PREFIX}")
@@ -34,7 +34,7 @@ index 743a243..b5d41a1 100644
      install(TARGETS turbojpeg-static ARCHIVE DESTINATION lib)
      if(NOT ENABLE_SHARED)
 -      install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/tjbench-static.exe
-+      install(PROGRAMS ${CMAKE_INSTALL_BINDIR}/tjbench-static.exe
++      install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/tjbench-static.exe
          DESTINATION bin RENAME tjbench.exe)
      endif()
    endif()
@@ -46,13 +46,13 @@ index 743a243..b5d41a1 100644
    install(TARGETS jpeg-static ARCHIVE DESTINATION lib)
    if(NOT ENABLE_SHARED)
 -    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/cjpeg-static.exe
-+    install(PROGRAMS ${CMAKE_INSTALL_BINDIR}/cjpeg-static.exe
++    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/cjpeg-static.exe
        DESTINATION bin RENAME cjpeg.exe)
 -    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/djpeg-static.exe
-+    install(PROGRAMS ${CMAKE_INSTALL_BINDIR}/djpeg-static.exe
++    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/djpeg-static.exe
        DESTINATION bin RENAME djpeg.exe)
 -    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/jpegtran-static.exe
-+    install(PROGRAMS ${CMAKE_INSTALL_BINDIR}/jpegtran-static.exe
++    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/jpegtran-static.exe
        DESTINATION bin RENAME jpegtran.exe)
    endif()
  endif()
