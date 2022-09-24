@@ -2,19 +2,22 @@ from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import copy
-from conan.tools.gnu import Autotools
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conans import tools as tools_legacy
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "AutotoolsToolchain", "VirtualBuildEnv", "VirtualRunEnv"
+    generators = "VirtualBuildEnv", "VirtualRunEnv"
     test_type = "explicit"
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def layout(self):
+        cmake_layout(self)
 
     def requirements(self):
         self.requires(self.tested_reference_str)
@@ -26,10 +29,10 @@ class TestPackageConan(ConanFile):
            not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
             self.tool_requires("msys2/cci.latest")
 
-    def layout(self):
-        cmake_layout(self)
-
     def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.generate()
+
         if self.dependencies["pkgconf"].options.enable_lib:
             tc = CMakeToolchain(self)
             tc.generate()
@@ -42,7 +45,7 @@ class TestPackageConan(ConanFile):
         self.win_bash = True
         autotools.autoreconf()
         autotools.configure()
-        self.win_bash = False
+        self.win_bash = None
 
         if self.options["pkgconf"].enable_lib:
             cmake = CMake(self)
