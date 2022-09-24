@@ -2,8 +2,10 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
-from conan.tools.files import get, rename, rmdir
+from conan.tools.files import get, rename, rmdir, replace_in_file
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps, get_gnu_triplet
 from conan.tools.scm import Version
+from conan.tools.layout import basic_layout
 from conans import AutoToolsBuildEnvironment, tools
 import os
 import contextlib
@@ -11,8 +13,7 @@ import glob
 import shutil
 import re
 
-required_conan_version = ">=1.51.3"
-
+required_conan_version = ">=1.52.0"
 
 class FFMpegConan(ConanFile):
     name = "ffmpeg"
@@ -184,10 +185,6 @@ class FFMpegConan(ConanFile):
     _autotools = None
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
@@ -247,9 +244,21 @@ class FFMpegConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+
+    def layout(self):
+        basic_layout(self)
 
     def requirements(self):
         if self.options.with_zlib:
@@ -325,11 +334,11 @@ class FFMpegConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+            destination=self.source_folder, strip_root=True)
 
     @property
     def _target_arch(self):
-        target_arch, _, _ = tools.get_gnu_triplet(
+        target_arch, _, _ = get_gnu_triplet(
             "Macos" if is_apple_os(self) else str(self.settings.os),
             str(self.settings.arch),
             str(self.settings.compiler) if self.settings.os == "Windows" else None,
@@ -342,7 +351,7 @@ class FFMpegConan(ConanFile):
             return "win32"
         else:
             _, _, target_os = tools.get_gnu_triplet(
-                "Macos" if is_apple_os(self) else str(self.settings.os),
+                "Macos" if is_apple_os( self) else str(self.settings.os),
                 str(self.settings.arch),
                 str(self.settings.compiler) if self.settings.os == "Windows" else None,
             ).split("-")
@@ -355,31 +364,18 @@ class FFMpegConan(ConanFile):
             # suppress MSVC linker warnings: https://trac.ffmpeg.org/ticket/7396
             # warning LNK4049: locally defined symbol x264_levels imported
             # warning LNK4049: locally defined symbol x264_bit_depth imported
-            tools.replace_in_file(os.path.join(self._source_subfolder, "libavcodec", "libx264.c"),
+            replace_in_file(self, os.path.join(self.source_folder, "libavcodec", "libx264.c"),
                                   "#define X264_API_IMPORTS 1", "")
         if self.options.with_ssl == "openssl":
             # https://trac.ffmpeg.org/ticket/5675
             openssl_libraries = " ".join(
                 ["-l%s" % lib for lib in self.deps_cpp_info["openssl"].libs])
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+            replace_in_file(self, os.path.join(self.source_folder, "configure"),
                                   "check_lib openssl openssl/ssl.h SSL_library_init -lssl -lcrypto -lws2_32 -lgdi32 ||",
                                   "check_lib openssl openssl/ssl.h OPENSSL_init_ssl %s || " % openssl_libraries)
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        with tools.environment_append({"PKG_CONFIG_PATH": tools.unix_path(self.build_folder)}):
-            if self._is_msvc:
-                with tools.vcvars(self):
-                    yield
-            else:
-                yield
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(
-            self, win_bash=tools.os_info.is_windows)
-        self._autotools.libs = []
+    def generate(self):
+        tc = AutotoolsToolchain(self)
 
         def opt_enable_disable(
             what, v): return "--{}-{}".format("enable" if v else "disable", what)
@@ -591,7 +587,7 @@ class FFMpegConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+        replace_in_file(self, os.path.join(self.source_folder, "configure"),
                               "echo libx264.lib", "echo x264.lib")
         if self.options.with_libx264:
             shutil.copy("x264.pc", "libx264.pc")
@@ -600,7 +596,7 @@ class FFMpegConan(ConanFile):
             autotools.make()
 
     def package(self):
-        self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE.md", dst="licenses", src=self.source_folder)
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
