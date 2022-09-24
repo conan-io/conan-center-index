@@ -1,4 +1,3 @@
-# pylint: skip-file
 from conans import AutoToolsBuildEnvironment, CMake, ConanFile, tools, RunEnvironment
 from conans.errors import ConanException
 import os

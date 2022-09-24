@@ -1,14 +1,15 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, get, rename, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
+from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class PkgConfConan(ConanFile):
@@ -32,8 +33,7 @@ class PkgConfConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -41,10 +41,16 @@ class PkgConfConan(ConanFile):
 
     def configure(self):
         if not self.options.enable_lib:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
             del self.options.shared
         elif self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         try:
             del self.settings.compiler.libcxx
         except Exception:
@@ -54,15 +60,15 @@ class PkgConfConan(ConanFile):
         except Exception:
             pass
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def package_id(self):
         if not self.options.enable_lib:
             del self.info.settings.compiler
 
     def build_requirements(self):
         self.tool_requires("meson/0.63.2")
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -78,13 +84,10 @@ class PkgConfConan(ConanFile):
         tc.project_options["sharedstatedir"] = self._sharedstatedir
         if not self.options.enable_lib:
             tc.project_options["default_library"] = "static"
-        # TODO: fixed in conan 1.51.0?
-        tc.project_options["bindir"] = "bin"
-        tc.project_options["libdir"] = "lib"
         tc.generate()
 
         env = VirtualBuildEnv(self)
-        env.generate(scope="build")
+        env.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -138,17 +141,17 @@ class PkgConfConan(ConanFile):
         self.conf_info.define("tools.gnu:pkg_config", pkg_config)
         self.buildenv_info.define_path("PKG_CONFIG", pkg_config)
 
-        automake_extra_includes = unix_path(self, os.path.join(self.package_folder , "bin", "aclocal").replace("\\", "/"))
-        self.output.info("Appending AUTOMAKE_CONAN_INCLUDES env var: {}".format(automake_extra_includes))
+        # TODO: replace by conan.tools.microsoft.unix_path when stateless
+        # (see https://github.com/conan-io/conan/issues/12192)
+        automake_extra_includes = tools_legacy.unix_path(os.path.join(self.package_folder , "bin", "aclocal").replace("\\", "/"))
+        self.output.info(f"Appending AUTOMAKE_CONAN_INCLUDES env var: {automake_extra_includes}")
         self.buildenv_info.prepend_path("AUTOMAKE_CONAN_INCLUDES", automake_extra_includes)
 
-        # TODO: to remove in conan v2 once pkg_config generator removed
+        # TODO: to remove in conan v2
         bindir = os.path.join(self.package_folder, "bin")
         self.env_info.PATH.append(bindir)
         self.env_info.PKG_CONFIG = pkg_config
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(automake_extra_includes)
-        if self.options.enable_lib:
-            self.cpp_info.names["pkg_config"] = "libpkgconf"
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib"""
