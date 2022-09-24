@@ -4,7 +4,9 @@ sources:
     sha256: "7fe84ddcae055850dfddf014c17379595bf061e9f72f6382c89fe88238b99a5b"
 patches:
   "0.9.0-rc1":
-    - patch_file: "patches/0.9.0-rc1-avif-find-package.patch"
+    - patch_file: "patches/0.9.0-rc1-001-avif-find-package.patch"
       base_path: "src"
-    - patch_file: "patches/0.9.0-rc1-fix-once-handler.patch"
+    - patch_file: "patches/0.9.0-rc1-002-fix-once-handler.patch"
+      base_path: "src"
+    - patch_file: "patches/0.9.0-rc1-003-disable-once-handler-check.patch"
       base_path: "src"

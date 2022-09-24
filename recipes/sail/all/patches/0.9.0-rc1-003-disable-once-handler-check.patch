@@ -1,0 +1,13 @@
+diff --git a/src/libsail/CMakeLists.txt b/src/libsail/CMakeLists.txt
+index 1ac5e1bd..79230e8b 100644
+--- a/src/libsail/CMakeLists.txt
++++ b/src/libsail/CMakeLists.txt
+@@ -92,7 +92,7 @@ target_link_libraries(sail PUBLIC sail-common)
+ 
+ if (SAIL_THREAD_SAFE)
+     if (WIN32)
+-        sail_check_init_once_execute_once()
++        #sail_check_init_once_execute_once()
+     elseif (UNIX)
+         # pthread_once()
+         find_package(Threads REQUIRED)
