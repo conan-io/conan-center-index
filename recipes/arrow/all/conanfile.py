@@ -299,7 +299,7 @@ class ArrowConan(ConanFile):
 
     def requirements(self):
         if self._with_thrift():
-            self.requires("thrift/0.16.0")
+            self.requires("thrift/0.17.0")
         if self._with_protobuf():
             self.requires("protobuf/3.21.4")
         if self._with_jemalloc():
@@ -365,110 +365,111 @@ class ArrowConan(ConanFile):
                 "armv8": "aarch64",
                 "armv8.3": "aarch64",
             }.get(str(self.settings.arch), str(self.settings.arch))
-            tc.cache_variables["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
+            tc.variables["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
             if cmake_system_processor == "aarch64":
-                tc.cache_variables["ARROW_CPU_FLAG"] = "armv8"
+                tc.variables["ARROW_CPU_FLAG"] = "armv8"
         if is_msvc(self):
-            tc.cache_variables["ARROW_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
-        tc.cache_variables["ARROW_DEPENDENCY_SOURCE"] = "SYSTEM"
-        tc.cache_variables["ARROW_GANDIVA"] = bool(self.options.gandiva)
-        tc.cache_variables["ARROW_PARQUET"] = self._parquet()
-        tc.cache_variables["ARROW_SUBSTRAIT"] = bool(self.options.get_safe("substrait", False))
-        tc.cache_variables["ARROW_PLASMA"] = bool(self.options.plasma)
-        tc.cache_variables["ARROW_DATASET"] = self._dataset_modules()
-        tc.cache_variables["ARROW_FILESYSTEM"] = bool(self.options.filesystem_layer)
-        tc.cache_variables["PARQUET_REQUIRE_ENCRYPTION"] = bool(self.options.encryption)
-        tc.cache_variables["ARROW_HDFS"] = bool(self.options.hdfs_bridgs)
-        tc.cache_variables["ARROW_VERBOSE_THIRDPARTY_BUILD"] = True
-        tc.cache_variables["ARROW_BUILD_SHARED"] = bool(self.options.shared)
-        tc.cache_variables["ARROW_BUILD_STATIC"] = not bool(self.options.shared)
-        tc.cache_variables["ARROW_NO_DEPRECATED_API"] = not bool(self.options.deprecated)
-        tc.cache_variables["ARROW_FLIGHT"] = self._with_flight_rpc()
-        tc.cache_variables["ARROW_FLIGHT_SQL"] = bool(self.options.get_safe("with_flight_sql", False))
-        tc.cache_variables["ARROW_HIVESERVER2"] = bool(self.options.with_hiveserver2)
-        tc.cache_variables["ARROW_COMPUTE"] = self._compute()
-        tc.cache_variables["ARROW_CSV"] = bool(self.options.with_csv)
-        tc.cache_variables["ARROW_CUDA"] = bool(self.options.with_cuda)
-        tc.cache_variables["ARROW_JEMALLOC"] = self._with_jemalloc()
-        tc.cache_variables["ARROW_MIMALLOC"] = bool(self.options.with_mimalloc)
-        tc.cache_variables["ARROW_JSON"] = bool(self.options.with_json)
-        tc.cache_variables["ARROW_GCS"] = bool(self.options.get_safe("with_gcs", False))
-        tc.cache_variables["BOOST_SOURCE"] = "SYSTEM"
-        tc.cache_variables["Protobuf_SOURCE"] = "SYSTEM"
+            tc.variables["ARROW_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
+        tc.variables["ARROW_DEPENDENCY_SOURCE"] = "SYSTEM"
+        tc.variables["ARROW_GANDIVA"] = bool(self.options.gandiva)
+        tc.variables["ARROW_PARQUET"] = self._parquet()
+        tc.variables["ARROW_SUBSTRAIT"] = bool(self.options.get_safe("substrait", False))
+        tc.variables["ARROW_PLASMA"] = bool(self.options.plasma)
+        tc.variables["ARROW_DATASET"] = self._dataset_modules()
+        tc.variables["ARROW_FILESYSTEM"] = bool(self.options.filesystem_layer)
+        tc.variables["PARQUET_REQUIRE_ENCRYPTION"] = bool(self.options.encryption)
+        tc.variables["ARROW_HDFS"] = bool(self.options.hdfs_bridgs)
+        tc.variables["ARROW_VERBOSE_THIRDPARTY_BUILD"] = True
+        tc.variables["ARROW_BUILD_SHARED"] = bool(self.options.shared)
+        tc.variables["ARROW_BUILD_STATIC"] = not bool(self.options.shared)
+        tc.variables["ARROW_NO_DEPRECATED_API"] = not bool(self.options.deprecated)
+        tc.variables["ARROW_FLIGHT"] = self._with_flight_rpc()
+        tc.variables["ARROW_FLIGHT_SQL"] = bool(self.options.get_safe("with_flight_sql", False))
+        tc.variables["ARROW_HIVESERVER2"] = bool(self.options.with_hiveserver2)
+        tc.variables["ARROW_COMPUTE"] = self._compute()
+        tc.variables["ARROW_CSV"] = bool(self.options.with_csv)
+        tc.variables["ARROW_CUDA"] = bool(self.options.with_cuda)
+        tc.variables["ARROW_JEMALLOC"] = self._with_jemalloc()
+        tc.variables["ARROW_MIMALLOC"] = bool(self.options.with_mimalloc)
+        tc.variables["ARROW_JSON"] = bool(self.options.with_json)
+        tc.variables["google_cloud_cpp_SOURCE"] = "SYSTEM"
+        tc.variables["ARROW_GCS"] = bool(self.options.get_safe("with_gcs", False))
+        tc.variables["BOOST_SOURCE"] = "SYSTEM"
+        tc.variables["Protobuf_SOURCE"] = "SYSTEM"
         if self._with_protobuf():
-            tc.cache_variables["ARROW_PROTOBUF_USE_SHARED"] = bool(self.options["protobuf"].shared)
-        tc.cache_variables["gRPC_SOURCE"] = "SYSTEM"
+            tc.variables["ARROW_PROTOBUF_USE_SHARED"] = bool(self.options["protobuf"].shared)
+        tc.variables["gRPC_SOURCE"] = "SYSTEM"
         if self._with_grpc():
-            tc.cache_variables["ARROW_GRPC_USE_SHARED"] = bool(self.options["grpc"].shared)
+            tc.variables["ARROW_GRPC_USE_SHARED"] = bool(self.options["grpc"].shared)
 
-        tc.cache_variables["ARROW_USE_GLOG"] = self._with_glog()
-        tc.cache_variables["GLOG_SOURCE"] = "SYSTEM"
-        tc.cache_variables["ARROW_WITH_BACKTRACE"] = bool(self.options.with_backtrace)
-        tc.cache_variables["ARROW_WITH_BROTLI"] = bool(self.options.with_brotli)
-        tc.cache_variables["brotli_SOURCE"] = "SYSTEM"
+        tc.variables["ARROW_USE_GLOG"] = self._with_glog()
+        tc.variables["GLOG_SOURCE"] = "SYSTEM"
+        tc.variables["ARROW_WITH_BACKTRACE"] = bool(self.options.with_backtrace)
+        tc.variables["ARROW_WITH_BROTLI"] = bool(self.options.with_brotli)
+        tc.variables["brotli_SOURCE"] = "SYSTEM"
         if self.options.with_brotli:
-            tc.cache_variables["ARROW_BROTLI_USE_SHARED"] = bool(self.options["brotli"].shared)
-        tc.cache_variables["gflags_SOURCE"] = "SYSTEM"
+            tc.variables["ARROW_BROTLI_USE_SHARED"] = bool(self.options["brotli"].shared)
+        tc.variables["gflags_SOURCE"] = "SYSTEM"
         if self._with_gflags():
-            tc.cache_variables["ARROW_GFLAGS_USE_SHARED"] = bool(self.options["gflags"].shared)
-        tc.cache_variables["ARROW_WITH_BZ2"] = bool(self.options.with_bz2)
-        tc.cache_variables["BZip2_SOURCE"] = "SYSTEM"
+            tc.variables["ARROW_GFLAGS_USE_SHARED"] = bool(self.options["gflags"].shared)
+        tc.variables["ARROW_WITH_BZ2"] = bool(self.options.with_bz2)
+        tc.variables["BZip2_SOURCE"] = "SYSTEM"
         if self.options.with_bz2:
-            tc.cache_variables["ARROW_BZ2_USE_SHARED"] = bool(self.options["bzip2"].shared)
-        tc.cache_variables["ARROW_WITH_LZ4"] = bool(self.options.with_lz4)
-        tc.cache_variables["lz4_SOURCE"] = "SYSTEM"
+            tc.variables["ARROW_BZ2_USE_SHARED"] = bool(self.options["bzip2"].shared)
+        tc.variables["ARROW_WITH_LZ4"] = bool(self.options.with_lz4)
+        tc.variables["lz4_SOURCE"] = "SYSTEM"
         if self.options.with_lz4:
-            tc.cache_variables["ARROW_LZ4_USE_SHARED"] = bool(self.options["lz4"].shared)
-        tc.cache_variables["ARROW_WITH_SNAPPY"] = bool(self.options.with_snappy)
-        tc.cache_variables["RapidJSON_SOURCE"] = "SYSTEM"
-        tc.cache_variables["Snappy_SOURCE"] = "SYSTEM"
+            tc.variables["ARROW_LZ4_USE_SHARED"] = bool(self.options["lz4"].shared)
+        tc.variables["ARROW_WITH_SNAPPY"] = bool(self.options.with_snappy)
+        tc.variables["RapidJSON_SOURCE"] = "SYSTEM"
+        tc.variables["Snappy_SOURCE"] = "SYSTEM"
         if self.options.with_snappy:
-            tc.cache_variables["ARROW_SNAPPY_USE_SHARED"] = bool(self.options["snappy"].shared)
-        tc.cache_variables["ARROW_WITH_ZLIB"] = bool(self.options.with_zlib)
-        tc.cache_variables["RE2_SOURCE"] = "SYSTEM"
-        tc.cache_variables["ZLIB_SOURCE"] = "SYSTEM"
-        tc.cache_variables["xsimd_SOURCE"] = "SYSTEM"
-        tc.cache_variables["ARROW_WITH_ZSTD"] = bool(self.options.with_zstd)
+            tc.variables["ARROW_SNAPPY_USE_SHARED"] = bool(self.options["snappy"].shared)
+        tc.variables["ARROW_WITH_ZLIB"] = bool(self.options.with_zlib)
+        tc.variables["RE2_SOURCE"] = "SYSTEM"
+        tc.variables["ZLIB_SOURCE"] = "SYSTEM"
+        tc.variables["xsimd_SOURCE"] = "SYSTEM"
+        tc.variables["ARROW_WITH_ZSTD"] = bool(self.options.with_zstd)
         if Version(self.version) >= "2.0":
-            tc.cache_variables["zstd_SOURCE"] = "SYSTEM"
-            tc.cache_variables["ARROW_SIMD_LEVEL"] = str(self.options.simd_level).upper()
-            tc.cache_variables["ARROW_RUNTIME_SIMD_LEVEL"] = str(self.options.runtime_simd_level).upper()
+            tc.variables["zstd_SOURCE"] = "SYSTEM"
+            tc.variables["ARROW_SIMD_LEVEL"] = str(self.options.simd_level).upper()
+            tc.variables["ARROW_RUNTIME_SIMD_LEVEL"] = str(self.options.runtime_simd_level).upper()
         else:
-            tc.cache_variables["ZSTD_SOURCE"] = "SYSTEM"
+            tc.variables["ZSTD_SOURCE"] = "SYSTEM"
         if self.options.with_zstd:
-            tc.cache_variables["ARROW_ZSTD_USE_SHARED"] = bool(self.options["zstd"].shared)
-        tc.cache_variables["ORC_SOURCE"] = "SYSTEM"
-        tc.cache_variables["ARROW_WITH_THRIFT"] = self._with_thrift()
-        tc.cache_variables["Thrift_SOURCE"] = "SYSTEM"
+            tc.variables["ARROW_ZSTD_USE_SHARED"] = bool(self.options["zstd"].shared)
+        tc.variables["ORC_SOURCE"] = "SYSTEM"
+        tc.variables["ARROW_WITH_THRIFT"] = self._with_thrift()
+        tc.variables["Thrift_SOURCE"] = "SYSTEM"
         if self._with_thrift():
-            tc.cache_variables["THRIFT_VERSION"] = bool(self.deps_cpp_info["thrift"].version) # a recent thrift does not require boost
-            tc.cache_variables["ARROW_THRIFT_USE_SHARED"] = bool(self.options["thrift"].shared)
-        tc.cache_variables["ARROW_USE_OPENSSL"] = self._with_openssl()
+            tc.variables["THRIFT_VERSION"] = bool(self.deps_cpp_info["thrift"].version) # a recent thrift does not require boost
+            tc.variables["ARROW_THRIFT_USE_SHARED"] = bool(self.options["thrift"].shared)
+        tc.variables["ARROW_USE_OPENSSL"] = self._with_openssl()
         if self._with_openssl():
-            tc.cache_variables["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
-            tc.cache_variables["ARROW_OPENSSL_USE_SHARED"] = bool(self.options["openssl"].shared)
+            tc.variables["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
+            tc.variables["ARROW_OPENSSL_USE_SHARED"] = bool(self.options["openssl"].shared)
         if self._with_boost():
-            tc.cache_variables["ARROW_BOOST_USE_SHARED"] = bool(self.options["boost"].shared)
-        tc.cache_variables["ARROW_S3"] = bool(self.options.with_s3)
-        tc.cache_variables["AWSSDK_SOURCE"] = "SYSTEM"
-        tc.cache_variables["ARROW_BUILD_UTILITIES"] = bool(self.options.cli)
-        tc.cache_variables["ARROW_BUILD_INTEGRATION"] = False
-        tc.cache_variables["ARROW_INSTALL_NAME_RPATH"] = False
-        tc.cache_variables["ARROW_BUILD_EXAMPLES"] = False
-        tc.cache_variables["ARROW_BUILD_TESTS"] = False
-        tc.cache_variables["ARROW_ENABLE_TIMING_TESTS"] = False
-        tc.cache_variables["ARROW_BUILD_BENCHMARKS"] = False
-        tc.cache_variables["LLVM_SOURCE"] = "SYSTEM"
-        tc.cache_variables["ARROW_WITH_UTF8PROC"] = self._with_utf8proc()
-        tc.cache_variables["ARROW_BOOST_REQUIRED"] = self._with_boost()
-        tc.cache_variables["utf8proc_SOURCE"] = "SYSTEM"
+            tc.variables["ARROW_BOOST_USE_SHARED"] = bool(self.options["boost"].shared)
+        tc.variables["ARROW_S3"] = bool(self.options.with_s3)
+        tc.variables["AWSSDK_SOURCE"] = "SYSTEM"
+        tc.variables["ARROW_BUILD_UTILITIES"] = bool(self.options.cli)
+        tc.variables["ARROW_BUILD_INTEGRATION"] = False
+        tc.variables["ARROW_INSTALL_NAME_RPATH"] = False
+        tc.variables["ARROW_BUILD_EXAMPLES"] = False
+        tc.variables["ARROW_BUILD_TESTS"] = False
+        tc.variables["ARROW_ENABLE_TIMING_TESTS"] = False
+        tc.variables["ARROW_BUILD_BENCHMARKS"] = False
+        tc.variables["LLVM_SOURCE"] = "SYSTEM"
+        tc.variables["ARROW_WITH_UTF8PROC"] = self._with_utf8proc()
+        tc.variables["ARROW_BOOST_REQUIRED"] = self._with_boost()
+        tc.variables["utf8proc_SOURCE"] = "SYSTEM"
         if self._with_utf8proc():
-            tc.cache_variables["ARROW_UTF8PROC_USE_SHARED"] = bool(self.options["utf8proc"].shared)
-        tc.cache_variables["BUILD_WARNING_LEVEL"] = "PRODUCTION"
+            tc.variables["ARROW_UTF8PROC_USE_SHARED"] = bool(self.options["utf8proc"].shared)
+        tc.variables["BUILD_WARNING_LEVEL"] = "PRODUCTION"
         if is_msvc(self):
-            tc.cache_variables["ARROW_USE_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
+            tc.variables["ARROW_USE_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
         if self._with_llvm():
-            tc.cache_variables["LLVM_DIR"] = self.deps_cpp_info["llvm-core"].rootpath.replace("\\", "/")
+            tc.variables["LLVM_DIR"] = self.deps_cpp_info["llvm-core"].rootpath.replace("\\", "/")
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -654,4 +655,3 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("grpc::grpc")
         if self._with_flight_rpc():
             self.cpp_info.components["libarrow_flight"].requires.append("protobuf::protobuf")
-

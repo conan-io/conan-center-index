@@ -1,8 +1,8 @@
 diff --git a/cpp/CMakeLists.txt b/cpp/CMakeLists.txt
-index 2d7baf1..dff5b1a 100644
+index bb463d0..ce2d1df 100644
 --- a/cpp/CMakeLists.txt
 +++ b/cpp/CMakeLists.txt
-@@ -699,7 +699,7 @@ endif()
+@@ -705,7 +705,7 @@ endif()
  
  if(ARROW_WITH_BROTLI)
    # Order is important for static linking
@@ -11,14 +11,13 @@ index 2d7baf1..dff5b1a 100644
    list(APPEND ARROW_LINK_LIBS ${ARROW_BROTLI_LIBS})
    list(APPEND ARROW_STATIC_LINK_LIBS ${ARROW_BROTLI_LIBS})
    if(Brotli_SOURCE STREQUAL "SYSTEM")
-@@ -715,10 +715,17 @@ if(ARROW_WITH_BZ2)
+@@ -721,11 +721,18 @@ if(ARROW_WITH_BZ2)
  endif()
  
  if(ARROW_WITH_LZ4)
--  list(APPEND ARROW_STATIC_LINK_LIBS LZ4::lz4)
+-  list(APPEND ARROW_STATIC_LINK_LIBS lz4::lz4)
 -  if(Lz4_SOURCE STREQUAL "SYSTEM")
 -    list(APPEND ARROW_STATIC_INSTALL_INTERFACE_LIBS LZ4::lz4)
--  endif()
 +  if (TARGET LZ4::lz4_static)
 +    list(APPEND ARROW_STATIC_LINK_LIBS LZ4::lz4_static)
 +    if(Lz4_SOURCE STREQUAL "SYSTEM")
@@ -28,12 +27,13 @@ index 2d7baf1..dff5b1a 100644
 +    list(APPEND ARROW_STATIC_LINK_LIBS LZ4::lz4_shared)
 +    if(Lz4_SOURCE STREQUAL "SYSTEM")
 +      list(APPEND ARROW_STATIC_INSTALL_INTERFACE_LIBS LZ4::lz4_shared)
-+    endif()
-+endif()
+   endif()
  endif()
++endif()
  
  if(ARROW_WITH_SNAPPY)
-@@ -907,8 +914,13 @@ endif()
+   list(APPEND ARROW_STATIC_LINK_LIBS Snappy::snappy)
+@@ -913,8 +920,13 @@ endif()
  
  if(ARROW_MIMALLOC)
    add_definitions(-DARROW_MIMALLOC)
@@ -50,10 +50,18 @@ index 2d7baf1..dff5b1a 100644
  
  # ----------------------------------------------------------------------
 diff --git a/cpp/cmake_modules/ThirdpartyToolchain.cmake b/cpp/cmake_modules/ThirdpartyToolchain.cmake
-index bc38952..62bf314 100644
+index f070323..16faf73 100644
 --- a/cpp/cmake_modules/ThirdpartyToolchain.cmake
 +++ b/cpp/cmake_modules/ThirdpartyToolchain.cmake
-@@ -954,7 +954,7 @@ endif()
+@@ -959,6 +959,7 @@ endif()
+ # - Tests need Boost at runtime.
+ # - S3FS and Flight benchmarks need Boost at runtime.
+ if(ARROW_BUILD_INTEGRATION
++   OR ARROW_BOOST_REQUIRED
+    OR ARROW_BUILD_TESTS
+    OR (ARROW_FLIGHT AND ARROW_BUILD_BENCHMARKS)
+    OR (ARROW_S3 AND ARROW_BUILD_BENCHMARKS))
+@@ -975,7 +976,7 @@ endif()
  
  if(ARROW_BOOST_REQUIRED)
    resolve_dependency(Boost
@@ -62,7 +70,7 @@ index bc38952..62bf314 100644
                       TRUE
                       REQUIRED_VERSION
                       ${ARROW_BOOST_REQUIRED_VERSION}
-@@ -965,7 +965,7 @@ if(ARROW_BOOST_REQUIRED)
+@@ -986,7 +987,7 @@ if(ARROW_BOOST_REQUIRED)
    if(TARGET Boost::system)
      set(BOOST_SYSTEM_LIBRARY Boost::system)
      set(BOOST_FILESYSTEM_LIBRARY Boost::filesystem)
@@ -71,7 +79,7 @@ index bc38952..62bf314 100644
      set(BOOST_SYSTEM_LIBRARY ${Boost_SYSTEM_LIBRARY})
      set(BOOST_FILESYSTEM_LIBRARY ${Boost_FILESYSTEM_LIBRARY})
    else()
-@@ -1108,9 +1108,9 @@ macro(build_brotli)
+@@ -1129,9 +1130,9 @@ macro(build_brotli)
  endmacro()
  
  if(ARROW_WITH_BROTLI)
@@ -83,7 +91,7 @@ index bc38952..62bf314 100644
                        INTERFACE_INCLUDE_DIRECTORIES)
    include_directories(SYSTEM ${BROTLI_INCLUDE_DIR})
  endif()
-@@ -1302,22 +1302,17 @@ endmacro()
+@@ -1323,22 +1324,16 @@ endmacro()
  if(ARROW_NEED_GFLAGS)
    set(ARROW_GFLAGS_REQUIRED_VERSION "2.1.0")
    resolve_dependency(gflags
@@ -96,8 +104,7 @@ index bc38952..62bf314 100644
                       FALSE)
    # TODO: Don't use global includes but rather target_include_directories
 -  include_directories(SYSTEM ${GFLAGS_INCLUDE_DIR})
-+  include_directories(SYSTEM ${gflags_INCLUDE_DIR})
- 
+-
 -  if(NOT TARGET ${GFLAGS_LIBRARIES})
 -    if(TARGET gflags-shared)
 -      set(GFLAGS_LIBRARIES gflags-shared)
@@ -105,12 +112,13 @@ index bc38952..62bf314 100644
 -      set(GFLAGS_LIBRARIES gflags_shared)
 -    endif()
 -  endif()
++  include_directories(SYSTEM ${gflags_INCLUDE_DIR})
 +  list(APPEND ARROW_BUNDLED_STATIC_LIBS ${gflags_LIBRARIES_TARGETS})
 +  set(GFLAGS_LIBRARIES gflags::gflags)
  endif()
  
  # ----------------------------------------------------------------------
-@@ -1411,9 +1406,9 @@ if(ARROW_WITH_THRIFT)
+@@ -1432,9 +1427,9 @@ if(ARROW_WITH_THRIFT)
                         thrift)
    endif()
    # TODO: Don't use global includes but rather target_include_directories
@@ -122,7 +130,7 @@ index bc38952..62bf314 100644
    list(GET VERSION_LIST 0 THRIFT_VERSION_MAJOR)
    list(GET VERSION_LIST 1 THRIFT_VERSION_MINOR)
    list(GET VERSION_LIST 2 THRIFT_VERSION_PATCH)
-@@ -1528,6 +1523,7 @@ if(ARROW_WITH_PROTOBUF)
+@@ -1557,6 +1552,7 @@ if(ARROW_WITH_PROTOBUF)
      set(ARROW_PROTOBUF_REQUIRED_VERSION "2.6.1")
    endif()
    resolve_dependency(Protobuf
@@ -130,7 +138,7 @@ index bc38952..62bf314 100644
                       REQUIRED_VERSION
                       ${ARROW_PROTOBUF_REQUIRED_VERSION}
                       PC_PACKAGE_NAMES
-@@ -1538,7 +1534,7 @@ if(ARROW_WITH_PROTOBUF)
+@@ -1567,7 +1563,7 @@ if(ARROW_WITH_PROTOBUF)
    endif()
  
    # TODO: Don't use global includes but rather target_include_directories
@@ -139,7 +147,7 @@ index bc38952..62bf314 100644
  
    if(TARGET arrow::protobuf::libprotobuf)
      set(ARROW_PROTOBUF_LIBPROTOBUF arrow::protobuf::libprotobuf)
-@@ -1547,9 +1543,9 @@ if(ARROW_WITH_PROTOBUF)
+@@ -1576,9 +1572,9 @@ if(ARROW_WITH_PROTOBUF)
      if(NOT TARGET protobuf::libprotobuf)
        add_library(protobuf::libprotobuf UNKNOWN IMPORTED)
        set_target_properties(protobuf::libprotobuf
@@ -151,7 +159,7 @@ index bc38952..62bf314 100644
      endif()
      set(ARROW_PROTOBUF_LIBPROTOBUF protobuf::libprotobuf)
    endif()
-@@ -1569,7 +1565,7 @@ if(ARROW_WITH_PROTOBUF)
+@@ -1598,7 +1594,7 @@ if(ARROW_WITH_PROTOBUF)
        set_target_properties(protobuf::libprotoc
                              PROPERTIES IMPORTED_LOCATION "${Protobuf_PROTOC_LIBRARY}"
                                         INTERFACE_INCLUDE_DIRECTORIES
@@ -160,7 +168,21 @@ index bc38952..62bf314 100644
      endif()
      set(ARROW_PROTOBUF_LIBPROTOC protobuf::libprotoc)
    endif()
-@@ -1600,6 +1596,7 @@ endif()
+@@ -1690,11 +1686,12 @@ macro(build_substrait)
+ 
+   add_custom_target(substrait_gen ALL DEPENDS ${SUBSTRAIT_PROTO_GEN_ALL})
+ 
+-  set(SUBSTRAIT_INCLUDES ${SUBSTRAIT_CPP_DIR} ${PROTOBUF_INCLUDE_DIR})
++  set(SUBSTRAIT_INCLUDES ${SUBSTRAIT_CPP_DIR} ${protobuf_INCLUDE_DIR})
+ 
+   add_library(substrait STATIC ${SUBSTRAIT_SOURCES})
+   set_target_properties(substrait PROPERTIES POSITION_INDEPENDENT_CODE ON)
+   target_include_directories(substrait PUBLIC ${SUBSTRAIT_INCLUDES})
++  target_include_directories(substrait PUBLIC ${PROTOBUF_INCLUDE_DIR})
+   target_link_libraries(substrait INTERFACE ${ARROW_PROTOBUF_LIBPROTOBUF})
+   add_dependencies(substrait substrait_gen)
+ 
+@@ -1711,6 +1708,7 @@ endif()
  # jemalloc - Unix-only high-performance allocator
  
  if(ARROW_JEMALLOC)
@@ -168,7 +190,7 @@ index bc38952..62bf314 100644
    message(STATUS "Building (vendored) jemalloc from source")
    # We only use a vendored jemalloc as we want to control its version.
    # Also our build of jemalloc is specially prefixed so that it will not
-@@ -1665,12 +1662,18 @@ if(ARROW_JEMALLOC)
+@@ -1780,12 +1778,18 @@ if(ARROW_JEMALLOC)
    add_dependencies(jemalloc::jemalloc jemalloc_ep)
  
    list(APPEND ARROW_BUNDLED_STATIC_LIBS jemalloc::jemalloc)
@@ -187,7 +209,7 @@ index bc38952..62bf314 100644
    message(STATUS "Building (vendored) mimalloc from source")
    # We only use a vendored mimalloc as we want to control its build options.
  
-@@ -1716,6 +1719,11 @@ if(ARROW_MIMALLOC)
+@@ -1836,6 +1840,11 @@ if(ARROW_MIMALLOC)
    add_dependencies(toolchain mimalloc_ep)
  
    list(APPEND ARROW_BUNDLED_STATIC_LIBS mimalloc::mimalloc)
@@ -199,7 +221,7 @@ index bc38952..62bf314 100644
  endif()
  
  # ----------------------------------------------------------------------
-@@ -2001,7 +2009,7 @@ endmacro()
+@@ -2121,7 +2130,7 @@ endmacro()
  if(ARROW_WITH_RAPIDJSON)
    set(ARROW_RAPIDJSON_REQUIRED_VERSION "1.1.0")
    resolve_dependency(RapidJSON
@@ -208,11 +230,12 @@ index bc38952..62bf314 100644
                       TRUE
                       REQUIRED_VERSION
                       ${ARROW_RAPIDJSON_REQUIRED_VERSION}
-@@ -2038,10 +2046,9 @@ endmacro()
+@@ -2158,10 +2167,10 @@ endmacro()
  
  if((NOT ARROW_SIMD_LEVEL STREQUAL "NONE") OR (NOT ARROW_RUNTIME_SIMD_LEVEL STREQUAL "NONE"
                                               ))
 -  set(xsimd_SOURCE "BUNDLED")
++  set(xsimd_SOURCE "SYSTEM")
    resolve_dependency(xsimd)
    # TODO: Don't use global includes but rather target_include_directories
 -  include_directories(SYSTEM ${XSIMD_INCLUDE_DIR})
@@ -220,12 +243,12 @@ index bc38952..62bf314 100644
  endif()
  
  macro(build_zlib)
-@@ -2140,10 +2147,14 @@ macro(build_lz4)
+@@ -2260,10 +2269,14 @@ macro(build_lz4)
  endmacro()
  
  if(ARROW_WITH_LZ4)
 -  resolve_dependency(Lz4 PC_PACKAGE_NAMES liblz4)
-+  resolve_dependency(lz4)
++  resolve_dependency(Lz4)
  
    # TODO: Don't use global includes but rather target_include_directories
 -  get_target_property(LZ4_INCLUDE_DIR LZ4::lz4 INTERFACE_INCLUDE_DIRECTORIES)
@@ -237,16 +260,16 @@ index bc38952..62bf314 100644
    include_directories(SYSTEM ${LZ4_INCLUDE_DIR})
  endif()
  
-@@ -2274,7 +2285,7 @@ if(ARROW_WITH_RE2)
+@@ -2394,7 +2407,7 @@ if(ARROW_WITH_RE2)
    # Don't specify "PC_PACKAGE_NAMES re2" here because re2.pc may
    # include -std=c++11. It's not compatible with C source and C++
    # source not uses C++ 11.
 -  resolve_dependency(re2 HAVE_ALT TRUE)
 +  resolve_dependency(re2 USE_CONFIG TRUE)
    if(${re2_SOURCE} STREQUAL "SYSTEM")
-     get_target_property(RE2_LIB re2::re2 IMPORTED_LOCATION)
-     string(APPEND ARROW_PC_LIBS_PRIVATE " ${RE2_LIB}")
-@@ -2337,7 +2348,7 @@ endmacro()
+     get_target_property(RE2_LIB re2::re2 IMPORTED_LOCATION_${UPPERCASE_BUILD_TYPE})
+     if(NOT RE2_LIB)
+@@ -2464,7 +2477,7 @@ endmacro()
  if(ARROW_WITH_BZ2)
    resolve_dependency(BZip2)
    if(${BZip2_SOURCE} STREQUAL "SYSTEM")
@@ -255,7 +278,7 @@ index bc38952..62bf314 100644
    endif()
  
    if(NOT TARGET BZip2::BZip2)
-@@ -2346,7 +2357,7 @@ if(ARROW_WITH_BZ2)
+@@ -2473,7 +2486,7 @@ if(ARROW_WITH_BZ2)
                            PROPERTIES IMPORTED_LOCATION "${BZIP2_LIBRARIES}"
                                       INTERFACE_INCLUDE_DIRECTORIES "${BZIP2_INCLUDE_DIR}")
    endif()
@@ -264,7 +287,7 @@ index bc38952..62bf314 100644
  endif()
  
  macro(build_utf8proc)
-@@ -3555,7 +3566,7 @@ if(ARROW_WITH_GRPC)
+@@ -3709,7 +3722,7 @@ if(ARROW_WITH_GRPC)
      set(gRPC_SOURCE "${Protobuf_SOURCE}")
    endif()
    resolve_dependency(gRPC
@@ -273,7 +296,7 @@ index bc38952..62bf314 100644
                       TRUE
                       REQUIRED_VERSION
                       ${ARROW_GRPC_REQUIRED_VERSION}
-@@ -3573,9 +3584,9 @@ if(ARROW_WITH_GRPC)
+@@ -3727,9 +3740,9 @@ if(ARROW_WITH_GRPC)
    else()
      # grpc++ headers may reside in ${GRPC_INCLUDE_DIR}/grpc++ or ${GRPC_INCLUDE_DIR}/grpcpp
      # depending on the gRPC version.
@@ -281,14 +304,23 @@ index bc38952..62bf314 100644
 +    if(EXISTS ${gRPC_INCLUDE_DIR}/grpcpp/impl/codegen/config_protobuf.h)
        set(GRPCPP_PP_INCLUDE TRUE)
 -    elseif(EXISTS "${GRPC_INCLUDE_DIR}/grpc++/impl/codegen/config_protobuf.h")
-+    elseif(EXISTS ${gPC_INCLUDE_DIR}/grpc++/impl/codegen/config_protobuf.h)
++    elseif(EXISTS ${gRPC_INCLUDE_DIR}/grpc++/impl/codegen/config_protobuf.h)
        set(GRPCPP_PP_INCLUDE FALSE)
      else()
        message(FATAL_ERROR "Cannot find grpc++ headers in ${GRPC_INCLUDE_DIR}")
-@@ -4097,9 +4108,9 @@ macro(build_opentelemetry)
+@@ -3937,7 +3950,7 @@ macro(build_google_cloud_cpp_storage)
  endmacro()
  
- if(ARROW_WITH_OPENTELEMETRY)
+ if(ARROW_WITH_GOOGLE_CLOUD_CPP)
+-  resolve_dependency(google_cloud_cpp_storage)
++  resolve_dependency(google_cloud_cpp)
+   get_target_property(google_cloud_cpp_storage_INCLUDE_DIR google-cloud-cpp::storage
+                       INTERFACE_INCLUDE_DIRECTORIES)
+   include_directories(SYSTEM ${google_cloud_cpp_storage_INCLUDE_DIR})
+@@ -4264,9 +4277,9 @@ if(ARROW_WITH_OPENTELEMETRY)
+   # cURL is required whether we build from source or use an existing installation
+   # (OTel's cmake files do not call find_curl for you)
+   find_curl()
 -  set(opentelemetry-cpp_SOURCE "AUTO")
 +  set(opentelemetry-cpp_SOURCE "SYSTEM")
    resolve_dependency(opentelemetry-cpp)
@@ -298,10 +330,10 @@ index bc38952..62bf314 100644
    include_directories(SYSTEM ${OPENTELEMETRY_INCLUDE_DIR})
    message(STATUS "Found OpenTelemetry headers: ${OPENTELEMETRY_INCLUDE_DIR}")
 diff --git a/cpp/src/arrow/CMakeLists.txt b/cpp/src/arrow/CMakeLists.txt
-index b984bc1..2c78cd9 100644
+index 690c51a..752f3b9 100644
 --- a/cpp/src/arrow/CMakeLists.txt
 +++ b/cpp/src/arrow/CMakeLists.txt
-@@ -323,10 +323,14 @@ set(ARROW_TESTING_SRCS
+@@ -326,10 +326,14 @@ set(ARROW_TESTING_SRCS
  
  set(_allocator_dependencies "") # Empty list
  if(ARROW_JEMALLOC)
@@ -319,7 +351,7 @@ index b984bc1..2c78cd9 100644
  
  if(_allocator_dependencies)
 diff --git a/cpp/src/arrow/flight/CMakeLists.txt b/cpp/src/arrow/flight/CMakeLists.txt
-index 2cf8c99..90ebb9a 100644
+index f9d1356..c9bcf79 100644
 --- a/cpp/src/arrow/flight/CMakeLists.txt
 +++ b/cpp/src/arrow/flight/CMakeLists.txt
 @@ -17,6 +17,9 @@
@@ -333,10 +365,10 @@ index 2cf8c99..90ebb9a 100644
  
  set(ARROW_FLIGHT_LINK_LIBS gRPC::grpc++ ${ARROW_PROTOBUF_LIBPROTOBUF})
 diff --git a/cpp/src/arrow/memory_pool.cc b/cpp/src/arrow/memory_pool.cc
-index 2dcfb01..0394c01 100644
+index ed1c2d8..37a89da 100644
 --- a/cpp/src/arrow/memory_pool.cc
 +++ b/cpp/src/arrow/memory_pool.cc
-@@ -48,7 +48,7 @@
+@@ -52,7 +52,7 @@
  // Needed to support jemalloc 3 and 4
  #define JEMALLOC_MANGLE
  // Explicitly link to our version of jemalloc
@@ -345,3 +377,49 @@ index 2dcfb01..0394c01 100644
  #endif
  
  #ifdef ARROW_MIMALLOC
+diff --git a/cpp/src/gandiva/CMakeLists.txt b/cpp/src/gandiva/CMakeLists.txt
+index 71faf9a..3aabea1 100644
+--- a/cpp/src/gandiva/CMakeLists.txt
++++ b/cpp/src/gandiva/CMakeLists.txt
+@@ -25,7 +25,7 @@ add_custom_target(gandiva-benchmarks)
+ 
+ add_dependencies(gandiva-all gandiva gandiva-tests gandiva-benchmarks)
+ 
+-find_package(LLVMAlt REQUIRED)
++find_package(LLVM REQUIRED)
+ 
+ if(LLVM_VERSION_MAJOR LESS "10")
+   set(GANDIVA_CXX_STANDARD ${CMAKE_CXX_STANDARD})
+@@ -40,7 +40,7 @@ endif()
+ 
+ add_definitions(-DGANDIVA_LLVM_VERSION=${LLVM_VERSION_MAJOR})
+ 
+-find_package(OpenSSLAlt REQUIRED)
++find_package(OpenSSL REQUIRED)
+ 
+ # Set the path where the bitcode file generated, see precompiled/CMakeLists.txt
+ set(GANDIVA_PRECOMPILED_BC_PATH "${CMAKE_CURRENT_BINARY_DIR}/irhelpers.bc")
+@@ -98,10 +98,11 @@ set(SRC_FILES
+     random_generator_holder.cc
+     ${GANDIVA_PRECOMPILED_CC_PATH})
+ 
+-set(GANDIVA_SHARED_PRIVATE_LINK_LIBS arrow_shared LLVM::LLVM_INTERFACE
+-                                     ${GANDIVA_OPENSSL_LIBS})
++set(GANDIVA_SHARED_PRIVATE_LINK_LIBS arrow_shared llvm-core::llvm-core NTERFACE
++                                    ${GANDIVA_OPENSSL_LIBS})
++
++set(GANDIVA_STATIC_LINK_LIBS arrow_static llvm-core::llvm-core ${GANDIVA_OPENSSL_LIBS})
+ 
+-set(GANDIVA_STATIC_LINK_LIBS arrow_static LLVM::LLVM_INTERFACE ${GANDIVA_OPENSSL_LIBS})
+ 
+ if(ARROW_GANDIVA_STATIC_LIBSTDCPP AND (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX
+                                       ))
+@@ -139,7 +140,7 @@ add_arrow_lib(gandiva
+               arrow_dependencies
+               precompiled
+               EXTRA_INCLUDES
+-              $<TARGET_PROPERTY:LLVM::LLVM_INTERFACE,INTERFACE_INCLUDE_DIRECTORIES>
++              $<TARGET_PROPERTY:llvm-core::llvm-core,INTERFACE_INCLUDE_DIRECTORIES>
+               ${GANDIVA_OPENSSL_INCLUDE_DIR}
+               ${UTF8PROC_INCLUDE_DIR}
+               SHARED_LINK_FLAGS
