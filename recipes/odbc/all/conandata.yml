@@ -12,4 +12,3 @@ sources:
 patches:
   "2.3.7":
     - patch_file: "patches/missing-declarations.patch"
-      base_path: "source_subfolder"
