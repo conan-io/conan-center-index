@@ -65,9 +65,10 @@ class LibjpegConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not (is_msvc(self) or self. _is_clang_cl) and \
-           not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
-            self.tool_requires("msys2/cci.latest")
+        if self._settings_build.os == "Windows" and not (is_msvc(self) or self. _is_clang_cl):
+            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
+                self.tool_requires("msys2/cci.latest")
+            self.win_bash = True
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -132,10 +133,8 @@ class LibjpegConan(ConanFile):
             self._build_nmake()
         else:
             autotools = Autotools(self)
-            self.win_bash = True
             autotools.configure()
             autotools.make()
-            self.win_bash = None
 
     def package(self):
         copy(self, "README", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -148,10 +147,8 @@ class LibjpegConan(ConanFile):
                 copy(self, "*.dll", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
         else:
             autotools = Autotools(self)
-            self.win_bash = True
             # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
             autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
-            self.win_bash = None
             if self.settings.os == "Windows" and self.options.shared:
                 rm(self, "*[!.dll]", os.path.join(self.package_folder, "bin"))
             else:
