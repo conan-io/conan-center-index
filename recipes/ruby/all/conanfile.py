@@ -107,8 +107,8 @@ class RubyConan(ConanFile):
             if "--enable-shared" not in tc.configure_args:
                 tc.configure_args.append("--enable-shared")
 
-        if cross_building(self) and is_apple_os(self.settings.os):
-            apple_arch = to_apple_arch(self.settings.arch)
+        if cross_building(self) and is_apple_os(self):
+            apple_arch = to_apple_arch(self)
             if apple_arch:
                 tc.configure_args.append(f"--with-arch={apple_arch}")
         if is_msvc(self):
@@ -183,7 +183,7 @@ class RubyConan(ConanFile):
         if str(self.settings.compiler) in ("clang", "apple-clang"):
             rubylib.cflags = ["-fdeclspec"]
             rubylib.cxxflags = ["-fdeclspec"]
-        if tools.is_apple_os(self.settings.os):
+        if is_apple_os(self):
             rubylib.frameworks = ["CoreFoundation"]
 
         self.cpp_info.filenames["cmake_find_package"] = "Ruby"
