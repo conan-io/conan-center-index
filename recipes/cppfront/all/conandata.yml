@@ -1,6 +1,6 @@
 sources:
-  "cci.20220922":
-    url: "https://github.com/fpelliccioni/cppfront/archive/c28466c08bb7297ad3bf73cd37b7b68a4f97d6e7.zip"
-    sha256: "4fbb33a34bda4d12ab642dedba30ad64f59f85a1d8f82e02106984b5369aa634"
+  "cci.20220924":
+    url: "https://github.com/hsutter/cppfront/archive/98f6dd46957e100f813245241f183c8aedbcb36f.zip"
+    sha256: "db51c1ac634d45c6047c7eec5c29993ff215443edadf334370f53d09a11cc5b1"
 
 
