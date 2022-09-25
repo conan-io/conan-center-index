@@ -566,9 +566,17 @@ class FFMpegConan(ConanFile):
         args.append("--extra-cflags={}".format(" ".join(extra_cflags)))
         args.append("--extra-ldflags={}".format(" ".join(extra_ldflags)))
 
-        self._autotools.configure(
-            args=args, configure_dir=self._source_subfolder, build=False, host=False, target=False)
-        return self._autotools
+        tc.configure_args.extends (args)
+        tc.generate()
+        tc = PkgConfigDeps(self)
+        tc.generate()
+        tc = AutotoolsDeps(self)
+        tc.generate()
+        # inject tools_require env vars in build context
+        ms = VirtualBuildEnv(self)
+        ms.generate(scope="build")
+        #self._autotools.configure(
+        #    args=args, configure_dir=self.source_folder, build=False, host=False, target=False)
 
     def _split_and_format_options_string(self, flag_name, options_list):
         if not options_list:
