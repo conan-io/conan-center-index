@@ -64,7 +64,7 @@ class Base64Conan(ConanFile):
         apply_conandata_patches(self)
         if is_msvc(self):
             cmake = CMake(self)
-            cmake.configure(os.path.join(self.source_folder, ""))
+            cmake.configure()
             cmake.build(target="base64")
         else:
             env = Environment()
@@ -86,7 +86,7 @@ class Base64Conan(ConanFile):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
         copy(self, pattern="*.a", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)
-        copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)
+        copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["base64"]
