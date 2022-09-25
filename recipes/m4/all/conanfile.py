@@ -46,6 +46,20 @@ class M4Conan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
 
+        env = Environment()
+        env.prepend_path("PATH", self.source_folder)
+        env.vars(self).save_script("m4buildenv_help2man_trick")
+
+        if is_msvc(self):
+            env = Environment()
+            env.define_path("AR", f"{unix_path(self, self.source_folder)}/build-aux/ar-lib lib")
+            env.define("LD", "link")
+            env.define("NM", "dumpbin -symbols")
+            env.define("OBJDUMP", ":")
+            env.define("RANLIB", ":")
+            env.define("STRIP", ":")
+            env.vars(self).save_script("m4buildenv_msvc_for_autotools")
+
         tc = AutotoolsToolchain(self)
         if is_msvc(self):
             tc.extra_cflags.append("-FS")
@@ -70,20 +84,6 @@ class M4Conan(ConanFile):
         if self.settings.os == "Windows":
             tc.configure_args.append("ac_cv_func__set_invalid_parameter_handler=yes")
         tc.generate()
-
-        env = Environment()
-        env.prepend_path("PATH", self.source_folder)
-        env.vars(self).save_script("m4buildenv_help2man_trick")
-
-        if is_msvc(self):
-            env = Environment()
-            env.define_path("AR", f"{unix_path(self, self.source_folder)}/build-aux/ar-lib lib")
-            env.define("LD", "link")
-            env.define("NM", "dumpbin -symbols")
-            env.define("OBJDUMP", ":")
-            env.define("RANLIB", ":")
-            env.define("STRIP", ":")
-            env.vars(self).save_script("m4buildenv_msvc_for_autotools")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
