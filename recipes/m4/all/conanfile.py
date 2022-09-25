@@ -33,9 +33,10 @@ class M4Conan(ConanFile):
         del self.info.settings.compiler
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and \
-           not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
-            self.tool_requires("msys2/cci.latest")
+        if self._settings_build.os == "Windows":
+            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
+                self.tool_requires("msys2/cci.latest")
+            self.win_bash = True
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -76,10 +77,7 @@ class M4Conan(ConanFile):
 
         if is_msvc(self):
             env = Environment()
-            # Workaround for https://github.com/conan-io/conan/issues/12192
-            self.win_bash = True
             env.define_path("AR", f"{unix_path(self, self.source_folder)}/build-aux/ar-lib lib")
-            self.win_bash = None
             env.define("LD", "link")
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
@@ -98,18 +96,14 @@ class M4Conan(ConanFile):
     def build(self):
         self._patch_sources()
         autotools = Autotools(self)
-        self.win_bash = True
         autotools.configure()
         autotools.make()
-        self.win_bash = None
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        self.win_bash = True
         # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
         autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
-        self.win_bash = None
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
