@@ -43,6 +43,9 @@ class M4Conan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         tc = AutotoolsToolchain(self)
         if is_msvc(self):
             tc.extra_cflags.append("-FS")
@@ -67,9 +70,6 @@ class M4Conan(ConanFile):
         if self.settings.os == "Windows":
             tc.configure_args.append("ac_cv_func__set_invalid_parameter_handler=yes")
         tc.generate()
-
-        env = VirtualBuildEnv(self)
-        env.generate()
 
         env = Environment()
         env.prepend_path("PATH", self.source_folder)
