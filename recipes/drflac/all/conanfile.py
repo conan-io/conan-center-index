@@ -18,7 +18,8 @@ class DrflacConan(ConanFile):
         "no_crc": [True, False],
         "no_ogg": [True, False],
         "no_simd": [True, False],
-        "no_stdio": [True, False]
+        "no_stdio": [True, False],
+        "no_wchar": [True, False]
     }
     default_options = {
         "shared": False, 
@@ -27,7 +28,8 @@ class DrflacConan(ConanFile):
         "no_crc": False,
         "no_ogg": False,
         "no_simd": False,
-        "no_stdio": False
+        "no_stdio": False,
+        "no_wchar": False
     }
     generators = "cmake"
     exports_sources = ["CMakeLists.txt", "dr_flac.c"]
@@ -64,6 +66,7 @@ class DrflacConan(ConanFile):
         self._cmake.definitions["NO_OGG"] = self.options.no_ogg
         self._cmake.definitions["NO_SIMD"] = self.options.no_simd
         self._cmake.definitions["NO_STDIO"] = self.options.no_stdio
+        self._cmake.definitions["NO_WCHAR"] = self.options.no_wchar
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -90,3 +93,5 @@ class DrflacConan(ConanFile):
             self.cpp_info.defines.append("DR_FLAC_NO_SIMD")
         if self.options.no_stdio:
             self.cpp_info.defines.append("DR_FLAC_NO_STDIO")
+        if self.options.no_wchar:
+            self.cpp_info.defines.append("DR_FLAC_NO_WCHAR")            
