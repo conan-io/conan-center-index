@@ -68,9 +68,10 @@ class XZUtils(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not is_msvc(self) and \
-           not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
-            self.tool_requires("msys2/cci.latest")
+        if self._settings_build.os == "Windows" and not is_msvc(self):
+            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
+                self.tool_requires("msys2/cci.latest")
+            self.win_bash = True
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -169,10 +170,8 @@ class XZUtils(ConanFile):
             self._build_msvc()
         else:
             autotools = Autotools(self)
-            self.win_bash = True
             autotools.configure()
             autotools.make()
-            self.win_bash = None
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -195,10 +194,8 @@ class XZUtils(ConanFile):
                          os.path.join(self.package_folder, "lib", "lzma.lib"))
         else:
             autotools = Autotools(self)
-            self.win_bash = True
             # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
             autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
-            self.win_bash = None
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "share"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
