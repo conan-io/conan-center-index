@@ -1,9 +1,12 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import copy, get, rm, rmdir, apply_conandata_patches, export_conandata_patches
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.43.0"
-
+required_conan_version = ">=1.52.0"
 
 class C4CoreConan(ConanFile):
     name = "c4core"
@@ -11,28 +14,24 @@ class C4CoreConan(ConanFile):
         "c4core is a library of low-level C++ utilities, written with "
         "low-latency projects in mind."
     )
-    topics = ("utilities", "low-latency", )
+    license = "MIT",
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/biojppm/c4core"
-    license = "MIT",
-
+    topics = ("utilities", "low-latency", )
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_fast_float": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_fast_float": True,
     }
 
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package_multi"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,51 +39,61 @@ class C4CoreConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fast_float/3.4.0")
+        if self.options.with_fast_float:
+            self.requires("fast_float/3.5.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "11")
+            check_min_cppstd(self, "11")
 
-        ## clang with libc++ is not supported. It is already fixed at 2022-01-03.
-        if tools.Version(self.version) <= "0.1.8":
-            if (self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++"):
-                raise ConanInvalidConfiguration(
-                    "{}/{} doesn't support clang with libc++".format(self.name, self.version),
-                )
+        ## clang with libc++ is not supported. It is already fixed since 0.1.9.
+        if Version(self.version) <= "0.1.8":
+            if self.info.settings.compiler in ["clang", "apple-clang"] and \
+                self.info.settings.compiler.get_safe("libcxx") == "libc++":
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang with libc++")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["C4CORE_WITH_FASTFLOAT"] = bool(self.options.with_fast_float)
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "c4/ext/fast_float_all.h", "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "c4", "ext", "fast_float.hpp"),
-            '#include "c4/ext/fast_float_all.h"',
-            '#include "fast_float/fast_float.h"')
-
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "include"), "*.natvis")
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rm(self, "*.natvis", os.path.join(self.package_folder, "include"))
 
     def package_info(self):
+        self.cpp_info.libs = ["c4core"]
+        if not self.options.with_fast_float:
+            self.cpp_info.defines.append("C4CORE_NO_FAST_FLOAT")
+
         self.cpp_info.set_property("cmake_file_name", "c4core")
         self.cpp_info.set_property("cmake_target_name", "c4core::c4core")
-        self.cpp_info.libs = ["c4core"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
