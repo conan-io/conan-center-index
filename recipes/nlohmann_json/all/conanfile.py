@@ -44,4 +44,3 @@ class NlohmannJsonConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "nlohmann_json")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
