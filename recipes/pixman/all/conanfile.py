@@ -87,7 +87,7 @@ class PixmanConan(ConanFile):
         meson.build()
 
     def package(self):
-        self.copy(os.path.join(self.source_folder, "COPYING"), dst="licenses")
+        files.copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
         files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -96,6 +96,6 @@ class PixmanConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = files.collect_libs(self)
         self.cpp_info.includedirs.append(self._includedir)
-        self.cpp_info.names["pkg_config"] = "pixman-1"
+        self.cpp_info.set_property("pkg_config_name", "pixman-1")
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["pthread", "m"]
