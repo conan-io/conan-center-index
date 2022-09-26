@@ -42,7 +42,7 @@ class CppfrontConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.info.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, "20")
 
         def lazy_lt_semver(v1, v2):
