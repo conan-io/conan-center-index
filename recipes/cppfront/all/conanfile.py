@@ -32,8 +32,8 @@ class CppfrontConan(ConanFile):
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
-    def package_id(self):
-        del self.info.settings.compiler
+    # def package_id(self):
+    #     del self.info.settings.compiler
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
