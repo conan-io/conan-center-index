@@ -121,5 +121,5 @@ class Base64Conan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["base64"]
 
-        if Version(self.version) >= "0.5.0" and self.options.shared:
+        if Version(self.version) >= "0.5.0" and not self.options.shared:
             self.cpp_info.defines.append("BASE64_STATIC_DEFINE")
