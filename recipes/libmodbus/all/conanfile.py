@@ -31,6 +31,10 @@ class LibmodbusConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _settings_build(self):
+        return self.settings_build if hasattr(self, "settings_build") else self.settings
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -57,7 +61,7 @@ class LibmodbusConan(ConanFile):
             self.tool_requires("automake/1.16.3")
         # see https://github.com/conan-io/conan/issues/11969
         bash_path = os.getenv("CONAN_BASH_PATH") or self.conf.get("tools.microsoft.bash:path")
-        if self.settings.os == "Windows" and not bash_path:
+        if self._settings_build.os == "Windows" and not bash_path:
             self.tool_requires("msys2/cci.latest")
 
     def source(self):
