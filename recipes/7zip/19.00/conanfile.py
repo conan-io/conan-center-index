@@ -4,7 +4,7 @@ from conan.tools.files import download, chdir, replace_in_file
 from conans import tools, AutoToolsBuildEnvironment
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.47.0"
 
 
 class SevenZipConan(ConanFile):
