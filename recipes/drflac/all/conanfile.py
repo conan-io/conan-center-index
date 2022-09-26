@@ -17,7 +17,7 @@ class DrflacConan(ConanFile):
     options = {
         "shared": [True, False], 
         "fPIC": [True, False],
-        "buffer_size": "ANY",
+        "buffer_size": ["ANY"],
         "no_crc": [True, False],
         "no_ogg": [True, False],
         "no_simd": [True, False],
