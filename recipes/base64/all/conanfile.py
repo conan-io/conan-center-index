@@ -37,6 +37,11 @@ class Base64Conan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         try:
             del self.settings.compiler.libcxx
         except Exception:
