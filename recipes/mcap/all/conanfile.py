@@ -1,5 +1,8 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools import files
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.33.0"
@@ -25,24 +28,24 @@ class McapConan(ConanFile):
         return os.path.join(self._source_subfolder, "cpp", "mcap")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def requirements(self):
         self.requires("lz4/1.9.3")
         self.requires("zstd/1.5.2")
-        if tools.Version(self.version) < "0.1.1":
+        if Version(self.version) < "0.1.1":
             self.requires("fmt/8.1.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
-        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) <= 11:
+            check_min_cppstd(self, "17")
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) <= "11":
             raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
-        if (self.settings.compiler == "gcc" or self.settings.compiler == "clang") and tools.Version(self.settings.compiler.version) <= 8:
+        if (self.settings.compiler in ("gcc", "clang")) and Version(self.settings.compiler.version) <= "8":
             raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
-        if tools.Version(self.version) < "0.1.1" and self.settings.compiler == "Visual Studio":
+        if Version(self.version) < "0.1.1" and self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("Visual Studio compiler support is added in 0.1.1")
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 16:
+        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "16":
             raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
 
     def package(self):
