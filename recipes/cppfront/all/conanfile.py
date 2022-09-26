@@ -1,15 +1,11 @@
 from conan import ConanFile
-from conan.tools.files import save
 
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
-from conan.tools.files import apply_conandata_patches, copy, get, patch, rmdir
-from conan.tools import build
+from conan.tools.files import copy, get, patch, rmdir
 
 import os
-import textwrap
 
 required_conan_version = ">=1.52.0"
 
@@ -36,11 +32,14 @@ class CppfrontConan(ConanFile):
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.info.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, "20")
 
         def lazy_lt_semver(v1, v2):
@@ -58,11 +57,8 @@ class CppfrontConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
 
     def build(self):
-        # apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -70,8 +66,6 @@ class CppfrontConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "cppfront*", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"))
-        copy(self, pattern="*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
-        rmdir(self, os.path.join(self.package_folder, "bin", "test cases"))
 
         cmake = CMake(self)
         cmake.install()
@@ -82,9 +76,9 @@ class CppfrontConan(ConanFile):
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):
-        # bin_path = os.path.join(self.package_folder, "bin")
-        # self.output.info(f"Appending PATH environment variable: {bin_path}")
-        # self.env_info.PATH.append(bin_path)
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info(f"Appending PATH environment variable: {bin_path}")
+        self.env_info.PATH.append(bin_path)
 
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
         cppfront_bin = os.path.join(self.package_folder, "bin", "cppfront{}".format(bin_ext)).replace("\\", "/")
@@ -97,17 +91,4 @@ class CppfrontConan(ConanFile):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
-
-        # target = "cppfront"
-        # self.cpp_info.set_property("cmake_file_name", "cppfront")
-        # self.cpp_info.set_property("cmake_target_name", f"cppfront::{target}")
-        # self.cpp_info.set_property("pkg_config_name",  "cppfront")
-
-        # # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        # self.cpp_info.names["cmake_find_package"] = "cppfront"
-        # self.cpp_info.names["cmake_find_package_multi"] = "cppfront"
-        # self.cpp_info.names["pkg_config"] = "cppfront"
-        # self.cpp_info.components["_cppfront"].names["cmake_find_package"] = target
-        # self.cpp_info.components["_cppfront"].names["cmake_find_package_multi"] = target
-        # self.cpp_info.components["_cppfront"].set_property("cmake_target_name", f"cppfront::{target}")
 
