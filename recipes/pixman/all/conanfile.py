@@ -1,9 +1,11 @@
 import os
 
 from conan import ConanFile
-from conan.tools import files, apple, microsoft
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
+from conan.tools import files
 from conan.errors import ConanInvalidConfiguration
-from conans import AutoToolsBuildEnvironment, tools
 
 required_conan_version = ">=1.51.0"
 
@@ -28,10 +30,6 @@ class PixmanConan(ConanFile):
     _autotools = None
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
@@ -50,8 +48,21 @@ class PixmanConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not os.getenv("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        self.tool_requires("meson/0.63.2")
+
+    def layout(self):
+        basic_layout(self, src_folder="source")
+
+    def generate(self):
+        tc = MesonToolchain(self)
+        tc.project_options.update({
+            "libpng": "disabled",
+            "gtk": "disabled"
+        })
+        tc.generate()
+
+        env = VirtualBuildEnv(self)
+        env.generate()
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
@@ -62,70 +73,25 @@ class PixmanConan(ConanFile):
             self.copy(patch["patch_file"])
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
         files.apply_conandata_patches(self)
-        if microsoft.is_msvc(self):
-            files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.win32.common"),
-                                  "-MDd ", "-{} ".format(str(self.settings.compiler.runtime)))
-            files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.win32.common"),
-                                  "-MD ", "-{} ".format(str(self.settings.compiler.runtime)))
-        if apple.is_apple_os(self):
-            # https://lists.freedesktop.org/archives/pixman/2014-November/003461.html
-            test_makefile = os.path.join(self._source_subfolder, "test", "Makefile.in")
-            files.replace_in_file(self, test_makefile,
-                                  "region_test_OBJECTS = region-test.$(OBJEXT)",
-                                  "region_test_OBJECTS = region-test.$(OBJEXT) utils.$(OBJEXT)")
-            files.replace_in_file(self, test_makefile,
-                                  "scaling_helpers_test_OBJECTS = scaling-helpers-test.$(OBJEXT)",
-                                  "scaling_helpers_test_OBJECTS = scaling-helpers-test.$(OBJEXT) utils.$(OBJEXT)")
-
-    def _configure_autotools(self):
-        def yes_no(v):
-            return "yes" if v else "no"
-
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--disable-libpng",
-            "--disable-gtk",
-        ]
-        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
-        return self._autotools
+        files.replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('test')", "")
+        files.replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('demos')", "")
 
     def build(self):
         self._patch_sources()
-        if microsoft.is_msvc(self):
-            with tools.vcvars(self):
-                make_vars = {
-                    "MMX": "on" if self.settings.arch == "x86" else "off",
-                    "SSE2": "on",
-                    "SSSE3": "on",
-                    "CFG": str(self.settings.build_type).lower(),
-                }
-                var_args = " ".join("{}={}".format(k, v) for k, v in make_vars.items())
-                self.run("make -C {}/pixman -f Makefile.win32 {}".format(self._source_subfolder, var_args),
-                            win_bash=True)
-        else:
-            autotools = self._configure_autotools()
-            autotools.make(target="pixman")
+        meson = Meson(self)
+        meson.configure()
+        meson.build()
 
     def package(self):
-        self.copy(os.path.join(self._source_subfolder, "COPYING"), dst="licenses")
-        if self.settings.compiler == "Visual Studio":
-            self.copy(pattern="*.lib", dst="lib", keep_path=False)
-            self.copy(pattern="*{}pixman.h".format(os.sep), dst=self._includedir, keep_path=False)
-            self.copy(pattern="*{}pixman-version.h".format(os.sep), dst=self._includedir, keep_path=False)
-        else:
-            autotools = self._configure_autotools()
-            autotools.install()
-            files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-            files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        self.copy(os.path.join(self.source_folder, "COPYING"), dst="licenses")
+        meson = Meson(self)
+        meson.install()
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = files.collect_libs(self)
