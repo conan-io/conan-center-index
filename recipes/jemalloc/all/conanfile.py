@@ -153,8 +153,6 @@ class JemallocConan(ConanFile):
 
         apply_conandata_patches(self)
 
-        # for x in self.conan_data.get("patches", {}).get(self.version, []):
-        #     patch(self, **x)
 
     def build(self):
         self._patch_sources()
