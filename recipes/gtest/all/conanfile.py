@@ -7,7 +7,7 @@ from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.1"
 
 
 class GTestConan(ConanFile):
