@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rename, replace_in_file, rmdir, save
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
 import os
 
@@ -20,29 +20,24 @@ class Stlab(ConanFile):
     settings = "arch", "os", "compiler", "build_type",
 
     options = {
-        "use_boost": [True, False],
-        "no_std_coroutines": [True, False],
-        "future_coroutines": [True, False],
+        "boost_optional": [True, False],
+        "boost_variant": [True, False],
+        "coroutines": [True, False],
         "task_system": ["portable", "libdispatch", "emscripten", "pnacl", "windows", "auto"],
-        "thread_system": ["win32", "pthread", "pthread-emscripten", "pthread-apple", "none", "auto"],
-        # "main_executor": ["qt", "libdispatch", "emscripten", "none", "auto"],
-        "test": [True, False],
     }
 
     default_options = {
-        "use_boost": False,
-        "no_std_coroutines": False,
-        "future_coroutines": False,
+        "boost_optional": False,
+        "boost_variant": False,
+        "coroutines": False,
         "task_system": "auto",
-        "thread_system": "auto",
-        "test": False,
     }
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    # no_copy_source = True
-    # _source_subfolder = 'source_subfolder'
+    def _use_boost(self):
+        return self.options.boost_optional or self.options.boost_variant
 
     def _requires_libdispatch(self):
         # On macOS it is not necessary to use the libdispatch conan package, because the library is
@@ -50,7 +45,7 @@ class Stlab(ConanFile):
         return self.options.task_system == "libdispatch" and self.settings.os != "Macos"
 
     def requirements(self):
-        if self.options.use_boost:
+        if self._use_boost():
             self.requires("boost/1.75.0")
 
         if self._requires_libdispatch():
@@ -59,8 +54,17 @@ class Stlab(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-        # extracted_dir = "libraries-" + self.version
-        # os.rename(extracted_dir, self.source_folder)
+    def _fix_boost_components(self):
+        if self.settings.os != "Macos": return
+        if self.settings.compiler != "apple-clang": return
+        if Version(self.settings.compiler.version) >= "12": return
+
+        #
+        # On Apple we have to force the usage of boost.variant, because Apple's implementation of C++17 is not complete.
+        #
+        self.output.info("Apple-Clang versions less than 12 do not correctly support std::optional or std::variant, so we will use boost::optional and boost::variant instead.")
+        self.options.boost_optional = True
+        self.options.boost_variant = True
 
     def _default_task_system(self):
         if self.settings.os == "Macos":
@@ -68,6 +72,9 @@ class Stlab(ConanFile):
 
         if self.settings.os == "Windows":
             return "windows"
+
+        if self.settings.os == "Emscripten":
+            return "emscripten"
 
         return "portable"
 
@@ -78,52 +85,41 @@ class Stlab(ConanFile):
         elif self.settings.os != "Macos":
             raise ConanInvalidConfiguration("{}/{} task_system=libdispatch is not supported on {}. Try using task_system=auto".format(self.name, self.version, self.settings.os))
 
+    def _validate_task_system_windows(self):
+        if self.settings.os != "Windows":
+            self.output.info("Libdispatch is not supported on {}. The task system is changed to {}.".format(self.settings.os, self.options.task_system))
+            raise ConanInvalidConfiguration("{}/{} task_system=windows is not supported on {}. Try using task_system=auto".format(self.name, self.version, self.settings.os))
+
+    def _validate_task_system_emscripten(self):
+        if self.settings.os != "Emscripten":
+            raise ConanInvalidConfiguration("{}/{} task_system=emscripten is not supported on {}. Try using task_system=auto".format(self.name, self.version, self.settings.os))
+
     def _validate_task_system(self):
         if self.options.task_system == "libdispatch":
             self._validate_task_system_libdispatch()
         elif self.options.task_system == "windows":
-            if self.settings.os != "Windows":
-                raise ConanInvalidConfiguration("{}/{} task_system=windows is not supported on {}. Try using task_system=auto".format(self.name, self.version, self.settings.os))
-
-    def _default_thread_system(self):
-        if self.settings.os == "Macos":
-            return "pthread-apple"
-
-        if self.settings.os == "Linux":
-            return "pthread"
-
-        if self.settings.os == "Windows":
-            return "win32"
-
-        if self.settings.os == "Emscripten":
-            return "pthread-emscripten"
-
-        return "none"
-
-    def _validate_thread_system(self):
-        if self.options.thread_system == "pthread-apple":
-            if self.settings.os != "Macos":
-                raise ConanInvalidConfiguration("{}/{} thread_system=pthread-apple is not supported on {}. Try using thread_system=auto".format(self.name, self.version, self.settings.os))
-        elif self.options.thread_system == "pthread":
-            if self.settings.os != "Linux":
-                raise ConanInvalidConfiguration("{}/{} thread_system=pthread is not supported on {}. Try using thread_system=auto".format(self.name, self.version, self.settings.os))
-        elif self.options.thread_system == "win32":
-            if self.settings.os != "Windows":
-                raise ConanInvalidConfiguration("{}/{} thread_system=win32 is not supported on {}. Try using thread_system=auto".format(self.name, self.version, self.settings.os))
-        elif self.options.thread_system == "pthread-emscripten":
-            if self.settings.os != "Emscripten":
-                raise ConanInvalidConfiguration("{}/{} thread_system=pthread-emscripten is not supported on {}. Try using thread_system=auto".format(self.name, self.version, self.settings.os))
+            self._validate_task_system_windows()
+        elif self.options.task_system == "emscripten":
+            self._validate_task_system_emscripten()
 
     def _validate_boost_components(self):
         if self.settings.os != "Macos": return
         if self.settings.compiler != "apple-clang": return
         if Version(self.settings.compiler.version) >= "12": return
-        if self.options.use_boost: return
+        if self.options.boost_optional and self.options.boost_variant: return
         #
-        # On Apple we have to force the usage of boost.variant and boost.optional, because Apple's implementation of C++17
+        # On Apple we have to force the usage of boost.variant, because Apple's implementation of C++17
         # is not complete.
         #
-        raise ConanInvalidConfiguration("Apple-Clang versions less than 12 do not correctly support std::optional or std::variant, so we will use boost::optional and boost::variant instead. Try -o use_boost=True.")
+        msg = "Apple-Clang versions less than 12 do not correctly support std::optional or std::variant, so we will use boost::optional and boost::variant instead. "
+        if not self.options.boost_optional and not self.options.boost_variant:
+            msg += "Try -o boost_optional=True -o boost_variant=True"
+        elif not self.options.boost_optional:
+            msg += "Try -o boost_optional=True."
+        else:
+            msg += "Try -o boost_variant=True."
+
+        raise ConanInvalidConfiguration(msg)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -143,34 +139,22 @@ class Stlab(ConanFile):
             raise ConanInvalidConfiguration("Need msvc >= 19.15")
 
         self._validate_task_system()
-        self._validate_thread_system()
         self._validate_boost_components()
 
     def configure(self):
         if self.options.task_system == "auto":
             self.options.task_system = self._default_task_system()
+        self.output.info("Stlab Task System: {}.".format(self.options.task_system))
 
-        if self.options.thread_system == "auto":
-            self.options.thread_system = self._default_thread_system()
-
-        self.output.info("STLab Use Boost: {}.".format(self.options.use_boost))
-        self.output.info("STLab Future Coroutines: {}.".format(self.options.future_coroutines))
-        self.output.info("STLab No Standard Coroutines: {}.".format(self.options.no_std_coroutines))
-        self.output.info("STLab Task System: {}.".format(self.options.task_system))
-        self.output.info("STLab Thread System: {}.".format(self.options.thread_system))
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_TESTING"] = self.options.test
-        tc.variables["STLAB_USE_BOOST_CPP17_SHIMS"] = self.options.use_boost
-        tc.variables["STLAB_NO_STD_COROUTINES"] = self.options.no_std_coroutines
-        tc.variables["STLAB_THREAD_SYSTEM"] = self.options.thread_system
-        tc.variables["STLAB_TASK_SYSTEM"] = self.options.task_system
-
-        # # If main_executor == "auto" it will be detected by CMake scripts
-        # if self.options.main_executor != "auto":
-        #     tc.variables["STLAB_MAIN_EXECUTOR"] = self.options.main_executor
-
+        tc.variables["stlab.boost_variant"] = self.options.boost_optional
+        tc.variables["stlab.boost_optional"] = self.options.boost_variant
+        tc.variables["stlab.coroutines"] = self.options.coroutines
+        tc.variables["stlab.task_system"] = self.options.task_system
+        tc.generate()
+        tc = CMakeDeps(self)
         tc.generate()
 
     def build(self):
@@ -179,23 +163,18 @@ class Stlab(ConanFile):
         cmake.build()
 
     def package(self):
-        # self.copy("*LICENSE", dst="licenses", keep_path=False)
-        # self.copy("stlab/*", src=self.source_folder, dst='include/')
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
 
     def package_id(self):
         # self.info.header_only()
-        self.info.options.use_boost = "ANY"
-        self.info.options.test = "ANY"
+        self.info.options.boost_optional = "ANY"
+        self.info.options.boost_variant = "ANY"
 
     def package_info(self):
-        future_coroutines_value = 1 if self.options.future_coroutines else 0
+        coroutines_value = 1 if self.options.coroutines else 0
 
         self.cpp_info.defines = [
-            'STLAB_FUTURE_COROUTINES={}'.format(future_coroutines_value)
+            'STLAB_FUTURE_COROUTINES={}'.format(coroutines_value)
         ]
-
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread"]

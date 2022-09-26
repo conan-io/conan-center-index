@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rename, replace_in_file, rmdir, save
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
 import os
 
@@ -25,13 +25,16 @@ class Stlab(ConanFile):
         "future_coroutines": [True, False],
         "task_system": ["portable", "libdispatch", "emscripten", "pnacl", "windows", "auto"],
         "thread_system": ["win32", "pthread", "pthread-emscripten", "pthread-apple", "none", "auto"],
+
+        # TODO
         # "main_executor": ["qt", "libdispatch", "emscripten", "none", "auto"],
+
         "test": [True, False],
     }
 
     default_options = {
         "use_boost": False,
-        "no_std_coroutines": False,
+        "no_std_coroutines": True,          #TODO: how to make checks similar to what are made in Cmake https://github.com/stlab/libraries/blob/main/cmake/StlabUtil.cmake#L35
         "future_coroutines": False,
         "task_system": "auto",
         "thread_system": "auto",
@@ -40,9 +43,6 @@ class Stlab(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-
-    # no_copy_source = True
-    # _source_subfolder = 'source_subfolder'
 
     def _requires_libdispatch(self):
         # On macOS it is not necessary to use the libdispatch conan package, because the library is
@@ -61,9 +61,6 @@ class Stlab(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-
-        # extracted_dir = "libraries-" + self.version
-        # os.rename(extracted_dir, self.source_folder)
 
     def _default_task_system(self):
         if self.settings.os == "Macos":
@@ -170,11 +167,16 @@ class Stlab(ConanFile):
         tc.variables["STLAB_THREAD_SYSTEM"] = self.options.thread_system
         tc.variables["STLAB_TASK_SYSTEM"] = self.options.task_system
 
+        # TODO
         # # If main_executor == "auto" it will be detected by CMake scripts
         # if self.options.main_executor != "auto":
         #     tc.variables["STLAB_MAIN_EXECUTOR"] = self.options.main_executor
 
         tc.generate()
+
+        tc = CMakeDeps(self)
+        tc.generate()
+
 
     def build(self):
         cmake = CMake(self)
@@ -182,13 +184,12 @@ class Stlab(ConanFile):
         cmake.build()
 
     def package(self):
-        # self.copy("*LICENSE", dst="licenses", keep_path=False)
-        # self.copy("stlab/*", src=self.source_folder, dst='include/')
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
 
     def package_id(self):
+        #TODO: is header only but needs a header modified by cmake
         # self.info.header_only()
         self.info.options.use_boost = "ANY"
         self.info.options.test = "ANY"
