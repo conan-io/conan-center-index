@@ -21,10 +21,12 @@ class PackageConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_crypto": ["native","openssl"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_crypto": "native",
     }
 
     @property
@@ -56,6 +58,8 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         # https://qpdf.readthedocs.io/en/stable/installation.html#basic-dependencies
+        if self.options.with_crypto == "openssl":
+            self.requires("openssl/3.0.5")
         self.requires("zlib/1.2.12")
         self.requires("libjpeg-turbo/2.1.4")
 
@@ -79,10 +83,17 @@ class PackageConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
+        # https://qpdf.readthedocs.io/en/latest/installation.html#build-time-crypto-selection
         tc.variables["USE_IMPLICIT_CRYPTO"] = False
-        tc.variables["REQUIRE_CRYPTO_NATIVE"] = True
-        tc.variables["REQUIRE_CRYPTO_GNUTLS"] = False
-        tc.variables["REQUIRE_CRYPTO_OPENSSL"] = False
+        if self.options.with_crypto == "native":
+            tc.variables["REQUIRE_CRYPTO_NATIVE"] = True
+            tc.variables["REQUIRE_CRYPTO_GNUTLS"] = False
+            tc.variables["REQUIRE_CRYPTO_OPENSSL"] = False
+        elif self.options.with_crypto == "openssl":
+            tc.variables["REQUIRE_CRYPTO_NATIVE"] = False
+            tc.variables["REQUIRE_CRYPTO_GNUTLS"] = False
+            tc.variables["REQUIRE_CRYPTO_OPENSSL"] = True
+
         tc.generate()
         tc = CMakeDeps(self) # init requirements from dependencies
         tc.generate()
