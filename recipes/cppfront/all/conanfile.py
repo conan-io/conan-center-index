@@ -66,6 +66,8 @@ class CppfrontConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "cppfront*", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"))
+        copy(self, pattern="*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        rmdir(self, os.path.join(self.package_folder, "bin", "test cases"))
 
         cmake = CMake(self)
         cmake.install()
