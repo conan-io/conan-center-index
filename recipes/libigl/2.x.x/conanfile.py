@@ -68,7 +68,7 @@ class LibiglConan(ConanFile):
         minimum_version = self._minimum_compilers_version.get(str(self.info.settings.compiler), False)
         if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
-        if self.info.options.header_only and is_msvc_static_runtime(self):
+        if self.info.options.get_safe("header_only") is None and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(f"{self.ref} is not supported by {self.info.settings.compiler} with MT runtime")
         if cross_building(self) and Version(self.version) < "2.4.0" and not is_apple_os(self):
             raise ConanInvalidConfiguration(f"{self.ref} can not be cross-compiled.")
