@@ -8,7 +8,7 @@ import os
 import shutil
 import string
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.51.3"
 
 class JemallocConan(ConanFile):
     name = "jemalloc"
