@@ -64,7 +64,7 @@ class NSSConan(ConanFile):
         if self.settings.arch in ["armv8", "armv8.3"] and self.settings.os in ["Macos"]:
             raise ConanInvalidConfiguration("Macos ARM64 builds not yet supported. Contributions are welcome.")
         if Version(self.version) >= "3.83":
-            if self.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < 11:
+            if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 11:
                 raise ConanInvalidConfiguration("nss requires at least gcc 11.")
 
 
