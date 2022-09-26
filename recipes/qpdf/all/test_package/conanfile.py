@@ -23,7 +23,7 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            self.run(os.path.join(self.cpp.build.bindirs[0], "test_package") + " generated.pdf", env="conanrun")
+            self.run(os.path.join(self.cpp.build.bindirs[0], "test_package"), env="conanrun")
             self.run(os.path.join(self.deps_cpp_info["qpdf"].rootpath, "bin", "qpdf") + " --version", env="conanrun")
             self.run(os.path.join(self.deps_cpp_info["qpdf"].rootpath, "bin", "zlib-flate") + " --version", env="conanrun")
             self.run(os.path.join(self.deps_cpp_info["qpdf"].rootpath, "bin", "fix-qdf") + " --version", env="conanrun")
