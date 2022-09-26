@@ -5,4 +5,5 @@ sources:
 patches:
   "1.0.3":
     - patch_file: "patches/0001-check-sys-syscall-h+wrap-includes.patch"
-      base_path: "source_subfolder"
+      patch_description: "Include syscall header only when available"
+      patch_type: "conan"
