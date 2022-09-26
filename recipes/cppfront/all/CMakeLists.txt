@@ -1,16 +1,8 @@
-cmake_minimum_required(VERSION 3.15)
-project(cppfront CXX C)
+cmake_minimum_required(VERSION 3.8)
+project(cppfront CXX)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/source/cppfront.cpp)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
-add_executable(${PROJECT_NAME}
-    source/cppfront.cpp
-)
-
-install(TARGETS ${PROJECT_NAME} DESTINATION "."
-        RUNTIME DESTINATION bin
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        )
+install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
 
