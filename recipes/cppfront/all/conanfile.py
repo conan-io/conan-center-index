@@ -4,7 +4,6 @@ from conan.tools.files import save
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.files import copy, get, patch, rmdir
 
 import os
