@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools import files
+from conan.tools import files, microsoft
 from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.51.0"
@@ -27,7 +27,7 @@ class PixmanConan(ConanFile):
         "fPIC": True,
     }
 
-    _autotools = None
+    _meson = None
 
     @property
     def _settings_build(self):
@@ -80,18 +80,28 @@ class PixmanConan(ConanFile):
         files.replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('test')", "")
         files.replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('demos')", "")
 
+    def _configure_meson(self):
+        if self._meson:
+            return self._meson
+        self._meson = Meson(self)
+        self._meson.configure()
+        return self._meson
+
     def build(self):
         self._patch_sources()
-        meson = Meson(self)
-        meson.configure()
+        meson = self._configure_meson()
         meson.build()
 
     def package(self):
-        files.copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        meson = Meson(self)
+        meson = self._configure_meson()
         meson.install()
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        files.copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        libfolder = os.path.join(self.package_folder, "lib")
+        files.rmdir(self, os.path.join(libfolder, "pkgconfig"))
+        files.rm(self, "*.la", libfolder)
+        if microsoft.is_msvc(self):
+            prefix = "libpixman-1"
+            files.rename(self, os.path.join(libfolder, f"{prefix}.a"), os.path.join(libfolder, "{prefix}.lib"))
 
     def package_info(self):
         self.cpp_info.libs = files.collect_libs(self)
