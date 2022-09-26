@@ -1,10 +1,11 @@
 from conan import ConanFile
 from conan.tools.env import Environment
-from conan.tools.files import copy, get, apply_conandata_patches, chdir, export_conandata_patches
+from conan.tools.files import copy, get, apply_conandata_patches, chdir, export_conandata_patches, rmdir
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 import os
 
@@ -19,10 +20,12 @@ class Base64Conan(ConanFile):
     topics = ("base64", "codec", "encoder", "decoder")
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "fPIC": [True, False]
+        "fPIC": [True, False],
+        "shared": [True, False],
     }
     default_options = {
-        "fPIC": True
+        "fPIC": True,
+        "shared": False,
     }
 
     def export_sources(self):
@@ -31,6 +34,8 @@ class Base64Conan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
+        if Version(self.version) < "0.5.0":
+            del self.options.shared
 
     def configure(self):
         try:
@@ -83,10 +88,18 @@ class Base64Conan(ConanFile):
                 autotools.make(target="lib/libbase64.a")
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
-        copy(self, pattern="*.a", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)
-        copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
+        if is_msvc(self):
+            cmake = CMake(self)
+            cmake.install()
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        else:
+            copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+            copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
+            copy(self, pattern="*.a", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
+            copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["base64"]
+
+        if Version(self.version) >= "0.5.0" and not self.options.shared:
+            self.cpp_info.defines.append("BASE64_STATIC_DEFINE")
