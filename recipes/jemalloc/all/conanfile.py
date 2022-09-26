@@ -4,6 +4,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 from conans import tools as tools_legacy
 from conan.tools.files import apply_conandata_patches, get, rename, replace_in_file
+from conan.tools.layout import basic_layout
 import os
 import shutil
 import string
@@ -52,10 +53,6 @@ class JemallocConan(ConanFile):
 
     _autotools = None
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -88,6 +85,9 @@ class JemallocConan(ConanFile):
             raise ConanInvalidConfiguration("Unsupported compiler version")
         if self.settings.os == "Macos" and self.settings.arch not in ("x86_64", "x86"):
             raise ConanInvalidConfiguration("Unsupported arch")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     @property
     def _settings_build(self):
