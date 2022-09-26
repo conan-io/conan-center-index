@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, get, copy, rm, rmdir, replace_in_file
+from conan.tools.files import get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -13,10 +13,10 @@ required_conan_version = ">=1.51.3"
 class PackageConan(ConanFile):
     name = "qpdf"
     description = "QPDF is a command-line tool and C++ library that performs content-preserving transformations on PDF files."
-    license = "Apache-2.0" # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/qpdf/qpdf"
-    topics = ("pdf") # no "conan" and project name in topics
+    topics = ("pdf")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -31,7 +31,6 @@ class PackageConan(ConanFile):
     def _minimum_cpp_standard(self):
         return 14
 
-    # in case the project requires C++14/17/20/... the minimum compiler version should be listed
     @property
     def _compilers_minimum_version(self):
         return {
@@ -72,7 +71,6 @@ class PackageConan(ConanFile):
         if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
-    # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
         self.tool_requires("cmake/3.24.1")
 
@@ -81,19 +79,13 @@ class PackageConan(ConanFile):
                   destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
         tc = CMakeToolchain(self)
-        # Boolean values are preferred instead of "ON"/"OFF"
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
-        # for now: enforce built-in crypto easing up the crypto dependency management
         tc.variables["USE_IMPLICIT_CRYPTO"] = False
         tc.variables["REQUIRE_CRYPTO_NATIVE"] = True
         tc.variables["REQUIRE_CRYPTO_GNUTLS"] = False
         tc.variables["REQUIRE_CRYPTO_OPENSSL"] = False
-        if is_msvc(self):
-            # don't use self.settings.compiler.runtime
-            tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.generate()
         # In case there are dependencies listed on requirements, CMakeDeps should be used
         tc = CMakeDeps(self)
