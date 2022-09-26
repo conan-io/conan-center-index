@@ -26,6 +26,7 @@ class DbusConan(ConanFile):
         "with_x11": [True, False],
         "with_glib": [True, False],
         "with_selinux": [True, False],
+        "session_socket_dir": "ANY",
     }
     default_options = {
         "system_socket": "",
@@ -33,6 +34,7 @@ class DbusConan(ConanFile):
         "with_x11": False,
         "with_glib": False,
         "with_selinux": False,
+        "session_socket_dir": "/tmp",
     }
 
     generators = "cmake", "cmake_find_package", "VirtualBuildEnv", "VirtualRunEnv"
@@ -94,6 +96,9 @@ class DbusConan(ConanFile):
             # Conan does not provide an EXPAT_LIBRARIES CMake variable for the Expat library.
             # Define EXPAT_LIBRARIES to be the expat::expat target provided by Conan to fix linking.
             self._cmake.definitions["EXPAT_LIBRARIES"] = "expat::expat"
+
+            # https://github.com/freedesktop/dbus/commit/e827309976cab94c806fda20013915f1db2d4f5a
+            self._cmake.definitions["DBUS_SESSION_SOCKET_DIR"] = self.options.session_socket_dir
 
             self._cmake.configure(source_folder=self._source_subfolder,
                                   build_folder=self._build_subfolder)
