@@ -63,7 +63,7 @@ class LibiglConan(ConanFile):
             self.requires("mpfr/4.1.0")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.info.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
         minimum_version = self._minimum_compilers_version.get(str(self.info.settings.compiler), False)
         if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
