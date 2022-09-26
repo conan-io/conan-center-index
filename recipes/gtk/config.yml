@@ -1,7 +1,9 @@
 versions:
     "system":
         folder: "system"
-    "4.7.0":
+    "4.8.1":
+        folder: all
+    "4.7.2":
         folder: all
     "4.6.2":
         folder: all
