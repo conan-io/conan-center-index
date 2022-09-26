@@ -58,8 +58,6 @@ class CppfrontConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
 
     def build(self):
         cmake = CMake(self)
