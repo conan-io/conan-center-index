@@ -98,16 +98,3 @@ class CppfrontConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
 
-        # target = "cppfront"
-        # self.cpp_info.set_property("cmake_file_name", "cppfront")
-        # self.cpp_info.set_property("cmake_target_name", f"cppfront::{target}")
-        # self.cpp_info.set_property("pkg_config_name",  "cppfront")
-
-        # # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        # self.cpp_info.names["cmake_find_package"] = "cppfront"
-        # self.cpp_info.names["cmake_find_package_multi"] = "cppfront"
-        # self.cpp_info.names["pkg_config"] = "cppfront"
-        # self.cpp_info.components["_cppfront"].names["cmake_find_package"] = target
-        # self.cpp_info.components["_cppfront"].names["cmake_find_package_multi"] = target
-        # self.cpp_info.components["_cppfront"].set_property("cmake_target_name", f"cppfront::{target}")
-
