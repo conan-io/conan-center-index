@@ -108,10 +108,10 @@ class GtkConan(ConanFile):
                     raise ConanInvalidConfiguration("with_pango option is mandatory when with_wayland or with_x11 is used")
 
     def build_requirements(self):
-        self.build_requires("meson/0.63.1")
+        self.build_requires("meson/0.63.2")
         if self._gtk4:
             self.build_requires("libxml2/2.9.14") # for xmllint
-        self.build_requires("pkgconf/1.7.4")
+        self.build_requires("pkgconf/1.9.3")
         if self._gtk4:
             self.build_requires("sassc/3.6.2")
 
@@ -125,7 +125,7 @@ class GtkConan(ConanFile):
             self.requires("fribidi/1.0.12")
             self.requires("libpng/1.6.37")
             self.requires("libtiff/4.4.0")
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         if self.settings.os == "Linux":
             if self._gtk4:
                 self.requires("xkbcommon/1.4.1")
@@ -135,13 +135,14 @@ class GtkConan(ConanFile):
                 if self._gtk3:
                     self.requires("xkbcommon/1.4.1")
                 self.requires("wayland/1.21.0")
+                self.requires("wayland-protocols/1.26")
             if self.options.with_x11:
                 self.requires("xorg/system")
         if self._gtk3:
             self.requires("atk/2.38.0")
         self.requires("libepoxy/1.5.10")
         if self.options.with_pango:
-            self.requires("pango/1.50.8")
+            self.requires("pango/1.50.10")
         if self.options.with_ffmpeg:
             self.requires("ffmpeg/5.0")
         if self.options.with_gstreamer:
@@ -301,6 +302,6 @@ class GtkConan(ConanFile):
 
         if self.options.get_safe("with_pango") and not self.options["pango"].shared:
             self.info.requires["glib"].full_package_mode()
-            
+
         if self.settings.compiler != "Visual Studio" and not self.options["cairo"].shared:
             self.info.requires["glib"].full_package_mode()
