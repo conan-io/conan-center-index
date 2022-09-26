@@ -1,7 +1,4 @@
 sources:
-  "1.7.0":
-    url: "https://github.com/stlab/libraries/archive/refs/tags/v1.7.0.tar.gz"
-    sha256: "91b6732aab93d269a64a4e385870f15d0b435ab6aec95bbd6adcead5fb6c17ec"
   "1.6.2":
     url: "https://github.com/stlab/libraries/archive/v1.6.2.tar.gz"
     sha256: "d0369d889c7bf78068d0c4f4b5125d7e9fe9abb0ad7a3be35bf13b6e2c271676"

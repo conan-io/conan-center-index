@@ -2,18 +2,3 @@ sources:
   "1.7.1":
     url: "https://github.com/stlab/libraries/archive/refs/tags/v1.7.1.tar.gz"
     sha256: "0160b5f7be7d423100a9a8b205a99285b106dd438f806978028a82b9f01c6b64"
-  "1.6.2":
-    url: "https://github.com/stlab/libraries/archive/v1.6.2.tar.gz"
-    sha256: "d0369d889c7bf78068d0c4f4b5125d7e9fe9abb0ad7a3be35bf13b6e2c271676"
-  "1.5.6":
-    url: "https://github.com/stlab/libraries/archive/refs/tags/v1.5.6.tar.gz"
-    sha256: "a6b788848be637b6d6c471de76c38486789e708997648e9b9731fdb5a631030c"
-  "1.5.5":
-    url: "https://github.com/stlab/libraries/archive/v1.5.5.tar.gz"
-    sha256: "30ec5a36b4c074feac72a1b9a744f0b279010e18c7bb04bbdc5d44fe9eaf5ad8"
-  "1.5.4":
-    url: "https://github.com/stlab/libraries/archive/v1.5.4.tar.gz"
-    sha256: "87306f58f6614f4a1ca54dda52fedff7e610d3b3dae035829657bac77bc33640"
-  "1.5.2":
-    url: https://github.com/stlab/libraries/archive/v1.5.2.tar.gz
-    sha256: a82eb013e51d0bb3ee2050f0eda31e11997cb4ca74d2abfdc2c8249c5c67c9fb
