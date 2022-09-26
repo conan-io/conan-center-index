@@ -82,9 +82,9 @@ class CppfrontConan(ConanFile):
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):
-        # bin_path = os.path.join(self.package_folder, "bin")
-        # self.output.info(f"Appending PATH environment variable: {bin_path}")
-        # self.env_info.PATH.append(bin_path)
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info(f"Appending PATH environment variable: {bin_path}")
+        self.env_info.PATH.append(bin_path)
 
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
         cppfront_bin = os.path.join(self.package_folder, "bin", "cppfront{}".format(bin_ext)).replace("\\", "/")
