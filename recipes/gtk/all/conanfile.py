@@ -1,14 +1,15 @@
 from conan import ConanFile
 from conan.tools.scm import Version
-from conan.tools import files
-
-from conans import Meson
-from conans import tools
+from conan.tools import files, microsoft
+from conan.tools.layout import basic_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.meson import MesonDeps, MesonToolchain, Meson
 from conan.errors import ConanInvalidConfiguration
 
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.0"
 
 
 class GtkConan(ConanFile):
@@ -18,7 +19,6 @@ class GtkConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gtk.org"
     license = "LGPL-2.1-or-later"
-    generators = "pkg_config"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -45,14 +45,6 @@ class GtkConan(ConanFile):
     }
 
     short_paths = True
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _gtk4(self):
@@ -84,7 +76,7 @@ class GtkConan(ConanFile):
     def validate(self):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("this recipes does not support GCC before version 5. contributions are welcome")
-        if str(self.settings.compiler) in ["Visual Studio", "msvc"]:
+        if microsoft.is_msvc(self):
             if Version(self.version) < "4.2":
                 raise ConanInvalidConfiguration("MSVC support of this recipe requires at least gtk/4.2")
             if not self.options["glib"].shared:
@@ -107,18 +99,21 @@ class GtkConan(ConanFile):
                 if not self.options.with_pango:
                     raise ConanInvalidConfiguration("with_pango option is mandatory when with_wayland or with_x11 is used")
 
+    def layout(self):
+        basic_layout(self, src_folder="source")
+
     def build_requirements(self):
-        self.build_requires("meson/0.63.2")
+        self.tool_requires("meson/0.63.2")
         if self._gtk4:
-            self.build_requires("libxml2/2.9.14") # for xmllint
-        self.build_requires("pkgconf/1.9.3")
+            self.tool_requires("libxml2/2.9.14") # for xmllint
+        self.tool_requires("pkgconf/1.9.3")
         if self._gtk4:
-            self.build_requires("sassc/3.6.2")
+            self.tool_requires("sassc/3.6.2")
 
     def requirements(self):
-        self.requires("gdk-pixbuf/2.42.8")
+        self.requires("gdk-pixbuf/2.42.9")
         self.requires("glib/2.73.3")
-        if self._gtk4 or self.settings.compiler != "Visual Studio":
+        if self._gtk4 or not microsoft.is_msvc(self):
             self.requires("cairo/1.17.4")
         if self._gtk4:
             self.requires("graphene/1.10.8")
@@ -149,10 +144,15 @@ class GtkConan(ConanFile):
             self.requires("gstreamer/1.19.2")
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_meson(self):
-        meson = Meson(self)
+    def generate(self):
+        deps = PkgConfigDeps(self)
+        deps.generate()
+
+        meson_deps = MesonDeps(self)
+        meson_deps.generate()
+
         defs = {}
         if self.settings.os == "Linux":
             defs["wayland_backend" if self._gtk3 else "wayland-backend"] = "true" if self.options.with_wayland else "false"
@@ -163,9 +163,6 @@ class GtkConan(ConanFile):
         defs["tests" if self._gtk3 else "build-tests"] = "false"
         defs["examples" if self._gtk3 else "build-examples"] = "false"
         defs["demos"] = "false"
-        defs["datadir"] = os.path.join(self.package_folder, "res", "share")
-        defs["localedir"] = os.path.join(self.package_folder, "res", "share", "locale")
-        defs["sysconfdir"] = os.path.join(self.package_folder, "res", "etc")
 
         if self._gtk4:
             def enabled(opt):
@@ -176,39 +173,47 @@ class GtkConan(ConanFile):
             defs["print-cups"] = enabled(self.options.with_cups)
             if Version(self.version) < "4.3.2":
                 defs["print-cloudprint"] = enabled(self.options.with_cloudprint)
-        args=[]
-        args.append("--wrap-mode=nofallback")
-        meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=[self.install_folder], args=args)
+
+        tc = MesonToolchain(self)
+        tc.project_options.update(defs)
+        tc.generate()
+
+        venv = VirtualBuildEnv(self)
+        venv.generate()
+
+    def _configure_meson(self):
+        meson = Meson(self)
+        meson.configure()
         return meson
 
     def build(self):
         files.apply_conandata_patches(self)
         if self._gtk3:
-            files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"), "\ntest(\n", "\nfalse and test(\n")
+            files.replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "\ntest(\n", "\nfalse and test(\n")
         if "4.2.0" <= Version(self.version) < "4.6.1":
-            files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"),
+            files.replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
                                   "gtk_update_icon_cache: true",
                                   "gtk_update_icon_cache: false")
         if "4.6.2" <= Version(self.version):
-            files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"),
+            files.replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
                                   "dependency(is_msvc_like ? ",
                                   "dependency(false ? ")
-        with tools.environment_append(tools.RunEnvironment(self).vars):
-            meson = self._configure_meson()
-            meson.build()
+
+        meson = self._configure_meson()
+        meson.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        # defs["datadir"] = os.path.join(self.package_folder, "res", "share")
+        # defs["localedir"] = os.path.join(self.package_folder, "res", "share", "locale")
+        # defs["sysconfdir"] = os.path.join(self.package_folder, "res", "etc")
         meson = self._configure_meson()
-        with tools.environment_append({
-            "PKG_CONFIG_PATH": self.install_folder,
-            "PATH": [os.path.join(self.package_folder, "bin")]}):
-            meson.install()
+        meson.install()
 
-        self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
+        files.copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        files.copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+
         files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        files.rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-        files.rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+        files.rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def _build_gdk3_requirements(self):
         requirements = [
