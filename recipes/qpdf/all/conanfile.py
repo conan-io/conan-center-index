@@ -47,12 +47,12 @@ class PackageConan(ConanFile):
     def configure(self):
         if self.options.shared:
             try:
-                del self.options.fPIC # once removed by config_options, need try..except for a second del
+                del self.options.fPIC
             except Exception:
                 pass
 
     def layout(self):
-        cmake_layout(self, src_folder="src") # src_folder must use the same source folder name the project
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         # https://qpdf.readthedocs.io/en/stable/installation.html#basic-dependencies
@@ -84,8 +84,7 @@ class PackageConan(ConanFile):
         tc.variables["REQUIRE_CRYPTO_GNUTLS"] = False
         tc.variables["REQUIRE_CRYPTO_OPENSSL"] = False
         tc.generate()
-        # In case there are dependencies listed on requirements, CMakeDeps should be used
-        tc = CMakeDeps(self)
+        tc = CMakeDeps(self) # init requirements from dependencies
         tc.generate()
 
     def build(self):
@@ -108,10 +107,8 @@ class PackageConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["qpdf"]
-        # if package provides a CMake config file (package-config.cmake or packageConfig.cmake, with package::package target, usually installed in <prefix>/lib/cmake/<package>/)
         self.cpp_info.set_property("cmake_file_name", "QPDF")
         self.cpp_info.set_property("cmake_target_name", "qpdf::libqpdf")
-        # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
         self.cpp_info.set_property("pkg_config_name", "libqpdf")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
