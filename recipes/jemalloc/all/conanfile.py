@@ -3,8 +3,7 @@ from conans import AutoToolsBuildEnvironment, MSBuild
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 from conans import tools as tools_legacy
-from conan.tools.files import apply_conandata_patches, get, replace_in_file
-
+from conan.tools.files import apply_conandata_patches, get, rename, replace_in_file
 import os
 import shutil
 import string
@@ -53,9 +52,9 @@ class JemallocConan(ConanFile):
 
     _autotools = None
 
-    # @property
-    # def _source_subfolder(self):
-    #     return "source_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -211,7 +210,7 @@ class JemallocConan(ConanFile):
             autotools.make(target="install_lib_shared" if self.options.shared else "install_lib_static")
             autotools.make(target="install_include")
             if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-                tools_legacy.rename(os.path.join(self.package_folder, "lib", "{}.lib".format(self._library_name)),
+                rename(self, os.path.join(self.package_folder, "lib", "{}.lib".format(self._library_name)),
                              os.path.join(self.package_folder, "lib", "lib{}.a".format(self._library_name)))
                 if not self.options.shared:
                     os.unlink(os.path.join(self.package_folder, "lib", "jemalloc.lib"))
