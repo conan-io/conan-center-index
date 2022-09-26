@@ -72,6 +72,10 @@ class PackageConan(ConanFile):
         if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
+    # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
+    def build_requirements(self):
+        self.tool_requires("cmake/3.24.1")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
