@@ -60,15 +60,15 @@ class GdkPixbufConan(ConanFile):
             self.options["glib"].shared = True
 
     def requirements(self):
-        self.requires("glib/2.73.0")
+        self.requires("glib/2.74.0")
         if self.options.with_libpng:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.38")
         if self.options.with_libtiff:
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.4.0")
         if self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.2")
+            self.requires("libjpeg-turbo/2.1.4")
         elif self.options.with_libjpeg == "libjpeg":
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
 
     def validate(self):
         if self.options.shared and not self.options["glib"].shared:
@@ -81,10 +81,10 @@ class GdkPixbufConan(ConanFile):
             raise ConanInvalidConfiguration("This package does not support Macos currently")
 
     def build_requirements(self):
-        self.build_requires("meson/0.61.2")
-        self.build_requires("pkgconf/1.7.4")
+        self.build_requires("meson/0.63.2")
+        self.build_requires("pkgconf/1.9.3")
         if self.options.with_introspection:
-            self.build_requires("gobject-introspection/1.70.0")
+            self.build_requires("gobject-introspection/1.72.0")
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version],
