@@ -1,4 +1,12 @@
 sources:
+  "7.1.0-49":
+    source:
+      url: "https://github.com/ImageMagick/ImageMagick/archive/refs/tags/7.1.0-49.tar.gz"
+      sha256: "18863242462733245308281353eeef27e86a8d0f5f805f8f5fb6293d5bc66b5d"
+    visualmagick:
+      "79e2ee50c7863be84dabfa4f43fa54613cbd32b0":
+        url: "https://github.com/ImageMagick/VisualMagick/archive/79e2ee50c7863be84dabfa4f43fa54613cbd32b0.zip"
+        sha256: "d33460f8934df9c1e9b458657b1e95056457863e2e287271ceed5ee1aa327271"
   "7.0.11-14":
     source:
       url: "https://github.com/ImageMagick/ImageMagick/archive/7.0.11-14.tar.gz"
@@ -8,6 +16,9 @@ sources:
         url: "https://github.com/ImageMagick/VisualMagick/archive/fcd198e4344576b9efc2facd952a2f0c57752c07.zip"
         sha256: "f793c1c48796ed2f295ba9cacb938f6aa7e4bf011226d96f977655911852bfda"
 patches:
+  "7.1.0-49":
+    - patch_file: "patches/remove-unnecessary-dependencies.patch"
+      base_path: "VisualMagick"
   "7.0.11-14":
     - patch_file: "patches/remove-unnecessary-dependencies.patch"
       base_path: "VisualMagick"
