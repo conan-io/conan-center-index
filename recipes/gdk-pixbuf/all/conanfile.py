@@ -94,7 +94,7 @@ class GdkPixbufConan(ConanFile):
                 cmake = CMake(self)
                 cmake.configure(build_script_folder=tmp)
             except ConanException as ex:
-                raise ConanInvalidConfiguration("LLVM Compiler RT is required to link gdk-pixbuf in debug mode") from ex
+                raise ConanException("LLVM Compiler RT is required to link gdk-pixbuf in debug mode") from ex
 
     def generate(self):
         deps = PkgConfigDeps(self)
