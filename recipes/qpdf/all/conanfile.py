@@ -94,7 +94,7 @@ class PackageConan(ConanFile):
             tc.variables["REQUIRE_CRYPTO_OPENSSL"] = True
 
         tc.generate()
-        tc = CMakeDeps(self) # init requirements from dependencies
+        tc = CMakeDeps(self)
         tc.generate()
 
     def build(self):
@@ -107,7 +107,6 @@ class PackageConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
@@ -121,7 +120,6 @@ class PackageConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "qpdf::libqpdf")
         self.cpp_info.set_property("pkg_config_name", "libqpdf")
 
-        # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 
