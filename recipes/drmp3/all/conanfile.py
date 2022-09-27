@@ -26,7 +26,7 @@ class Drmp3Conan(ConanFile):
         "no_simd": False,
         "no_stdio": False
     }
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "dr_mp3.c"]
 
     _cmake = None
 
