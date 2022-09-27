@@ -18,7 +18,7 @@ class PackageConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/MengRao/fmtlog"
-    topics = ("logging", "low-latency", "topic3") # no "conan" and project name in topics
+    topics = ("logging", "low-latency", "topic3")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
