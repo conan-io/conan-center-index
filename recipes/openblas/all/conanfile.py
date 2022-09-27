@@ -50,7 +50,7 @@ class OpenblasConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def requirements(self):
+    def build_requirements(self):
         if self.options.build_lapack:
             self.requires("gfortran/10.2")
 
