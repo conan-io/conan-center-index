@@ -68,8 +68,6 @@ class Catch2Conan(ConanFile):
         tc.variables["CATCH_INSTALL_DOCS"] = False
         tc.variables["CATCH_INSTALL_HELPERS"] = True
         tc.variables["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
-        if self.options.default_reporter:
-            tc.variables["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
         tc.generate()
 
     def build(self):
