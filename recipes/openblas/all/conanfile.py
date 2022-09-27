@@ -52,7 +52,7 @@ class OpenblasConan(ConanFile):
 
     def build_requirements(self):
         if self.options.build_lapack:
-            self.requires("gfortran/10.2")
+            self.tool_requires("gfortran/10.2")
 
     def validate(self):
         if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
