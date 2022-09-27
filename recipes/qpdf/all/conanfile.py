@@ -122,6 +122,10 @@ class PackageConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "qpdf::libqpdf")
         self.cpp_info.set_property("pkg_config_name", "libqpdf")
 
+        # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
+
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "QPDF"
         self.cpp_info.filenames["cmake_find_package_multi"] = "QPDF"
