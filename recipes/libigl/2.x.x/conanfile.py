@@ -17,7 +17,6 @@ class LibiglConan(ConanFile):
     description = "Simple C++ geometry processing library"
     topics = ("geometry", "matrices", "algorithms")
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["patches/**"]
     homepage = "https://libigl.github.io/"
     license = "MPL-2.0"
     settings = "os", "arch", "compiler", "build_type"
