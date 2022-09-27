@@ -14,3 +14,6 @@ sources:
   0.4.0:
     url: https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v0.4.0/main.tar.gz
     sha256: c0ab99e51005fa8b74fe9ca1ed23b205cf532b8b0723eedd243f35a28d7b466b
+  0.5.0:
+    url: https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v0.5.0/main.tar.gz
+    sha256: 408e255a6c6419b16de38a9ecbdd9729d60adc657767b2d52a234d1da1185349
