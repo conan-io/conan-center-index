@@ -189,10 +189,10 @@ class GdkPixbufConan(ConanFile):
         meson.build()
 
     def package(self):
-        files.copy(self, "COPYING", self.source_folder, "licenses")
         meson = self._configure_meson()
         meson.install()
 
+        files.copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         if microsoft.is_msvc(self) and not self.options.shared:
             files.rename(self, os.path.join(self.package_folder, "lib", "libgdk_pixbuf-2.0.a"), os.path.join(self.package_folder, "lib", "gdk_pixbuf-2.0.lib"))
         files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
