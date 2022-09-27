@@ -50,6 +50,10 @@ class OpenblasConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        if self.options.build_lapack:
+            self.requires("gfortran/10.2")
+
     def validate(self):
         if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
