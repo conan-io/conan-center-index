@@ -41,6 +41,8 @@ class Stlab(ConanFile):
         "test": False,
     }
 
+    short_paths = True
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 

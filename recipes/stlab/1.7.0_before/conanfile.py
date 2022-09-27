@@ -33,6 +33,8 @@ class Stlab(ConanFile):
         "task_system": "auto",
     }
 
+    short_paths = True
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
