@@ -11,10 +11,7 @@ sources:
 patches:
   "9e":
     - patch_file: "patches/0001-9e-libjpeg-add-msvc-dll-support.patch"
-      base_path: "source_subfolder"
   "9d":
     - patch_file: "patches/0001-libjpeg-add-msvc-dll-support.patch"
-      base_path: "source_subfolder"
   "9c":
     - patch_file: "patches/0001-libjpeg-add-msvc-dll-support.patch"
-      base_path: "source_subfolder"
