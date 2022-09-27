@@ -5,3 +5,6 @@ sources:
 patches:
   "7.6.14":
     - patch_file: "patches/enable-cmake-7_6_14.patch"
+      patch_description: "Support build with CMake"
+      patch_source: "https://github.com/ivmai/libatomic_ops/blob/044573903530c4a8e8318e20a830d4a0531b2035/CMakeLists.txt"
+      patch_type: "backport"
