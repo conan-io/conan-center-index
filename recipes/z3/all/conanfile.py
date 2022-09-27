@@ -1,20 +1,24 @@
-from conans import CMake, ConanFile, tools
-from conan.tools.files import apply_conandata_patches, get, rmdir
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, save
+from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
-from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 import os
 import textwrap
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class Z3Conan(ConanFile):
     name = "z3"
     description = "The Z3 Theorem Prover"
-    topics = ("z3", "theorem", "smt", "satisfiability", "prover", "solver")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Z3Prover/z3"
-    license = "MIT"
+    topics = ("z3", "theorem", "smt", "satisfiability", "prover", "solver")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -30,21 +34,21 @@ class Z3Conan(ConanFile):
         "multiprecision": "gmp"
     }
 
-    generators = "cmake"
-    _cmake = None
+    @property
+    def _minimum_cpp_standard(self):
+        return 17
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "Visual Studio": "15.7",
+            "clang": "5",
+            "apple-clang": "10",
+        }
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -56,6 +60,9 @@ class Z3Conan(ConanFile):
         if self.options.multiprecision == "internal":
             self.provides.append("gmp")
 
+    def layout(self):
+        cmake_layout(self)
+
     def requirements(self):
         self.output.info(
             f"{self.name} will build using {self.options.multiprecision} multiprecision implementation.")
@@ -66,64 +73,60 @@ class Z3Conan(ConanFile):
         elif self.options.multiprecision == "internal":
             pass
 
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["Z3_USE_LIB_GMP"] = self.options.multiprecision != "internal"
-        self._cmake.definitions["Z3_USE_LIB_MPIR"] = self.options.multiprecision == "mpir"
-        self._cmake.definitions["SINGLE_THREADED"] = not self.options.multithreaded
-        self._cmake.definitions["Z3_BUILD_LIBZ3_SHARED"] = self.options.shared
-        self._cmake.definitions["Z3_INCLUDE_GIT_HASH"] = False
-        self._cmake.definitions["Z3_INCLUDE_GIT_DESCRIBE"] = False
-        self._cmake.definitions["Z3_ENABLE_EXAMPLE_TARGETS"] = False
-        self._cmake.definitions["Z3_BUILD_DOCUMENTATION"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "Visual Studio": "15.7",
-            "clang": "5",
-            "apple-clang": "10",
-        }
-
     def validate(self):
         if Version(self.version) >= "4.8.11":
-            if self.settings.compiler.get_safe("cppstd"):
-                tools.check_min_cppstd(self, "17")
+            if self.info.settings.compiler.cppstd:
+                check_min_cppstd(self, self._minimum_cpp_standard)
             compiler = self.settings.compiler
-            min_version = self._compilers_minimum_version\
-                .get(str(compiler), False)
-            if min_version:
-                if Version(compiler.version) < min_version:
-                    raise ConanInvalidConfiguration(
-                        f"{self.name} requires C++17, which {compiler} {compiler.version} does not support.")
+            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+            if minimum_version:
+                if Version(self.info.settings.compiler.version) < minimum_version:
+                    raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
             else:
                 self.output.info(
                     f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+        if is_msvc(self) and self.info.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["PACKAGE_CUSTOM_DEFINITION"] = True
+        tc.variables["Z3_USE_LIB_GMP"] = self.options.multiprecision != "internal"
+        tc.variables["Z3_USE_LIB_MPIR"] = self.options.multiprecision == "mpir"
+        tc.variables["SINGLE_THREADED"] = not self.options.multithreaded
+        tc.variables["Z3_BUILD_LIBZ3_SHARED"] = self.options.shared
+        tc.variables["Z3_INCLUDE_GIT_HASH"] = False
+        tc.variables["Z3_INCLUDE_GIT_DESCRIBE"] = False
+        tc.variables["Z3_ENABLE_EXAMPLE_TARGETS"] = False
+        tc.variables["Z3_BUILD_DOCUMENTATION"] = False
+        if is_msvc(self):
+            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
+        tc = VirtualBuildEnv(self)
+        tc.generate(scope="build")
 
     def build(self):
         apply_conandata_patches(self)
 
         if self.options.multiprecision == "mpir":
-            tools.save(os.path.join(self._build_subfolder, "gmp.h"), textwrap.dedent("""\
+            save(self, os.path.join(self.build_folder, "gmp.h"), textwrap.dedent("""\
                 #pragma once
                 #include <mpir.h>
                 """))
 
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
