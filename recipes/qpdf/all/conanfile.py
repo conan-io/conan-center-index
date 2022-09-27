@@ -19,7 +19,7 @@ class PackageConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_crypto": ["native","openssl"],
+        "with_crypto": ["native", "openssl", "gnutls"],
     }
     default_options = {
         "shared": False,
@@ -58,12 +58,13 @@ class PackageConan(ConanFile):
         # https://qpdf.readthedocs.io/en/stable/installation.html#basic-dependencies
         if self.options.with_crypto == "openssl":
             self.requires("openssl/3.0.5")
+        elif self.options.with_crypto == "gnutls":
+            raise ConanInvalidConfiguration("GnuTLS is not available in Conan Center yet.")
         self.requires("zlib/1.2.12")
         self.requires("libjpeg-turbo/2.1.4")
 
 
     def validate(self):
-        # validate the minimum cpp standard supported. For C++ projects only
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
