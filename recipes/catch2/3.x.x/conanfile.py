@@ -19,17 +19,11 @@ class Catch2Conan(ConanFile):
     options = {
         "fPIC": [True, False],
         "with_prefix": [True, False],
-        "default_reporter": "ANY",
     }
     default_options = {
         "fPIC": True,
         "with_prefix": False,
-        "default_reporter": None,
     }
-
-    @property
-    def _default_reporter_str(self):
-        return '"{}"'.format(str(self.options.default_reporter).strip('"'))
 
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
@@ -54,12 +48,12 @@ class Catch2Conan(ConanFile):
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, "14")
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
         if minimum_version:
-            if Version(self.settings.compiler.version) < minimum_version:
+            if Version(self.info.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("{}/{}: Unsupported compiler: {}-{} "
                                                 "(https://github.com/p-ranav/structopt#compiler-compatibility)."
-                                                .format(self.name, self.version, self.settings.compiler, self.settings.compiler.version))
+                                                .format(self.name, self.version, self.info.settings.compiler, self.info.settings.compiler.version))
         else:
             self.output.warn("{}/{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name, self.version))
 
@@ -72,8 +66,6 @@ class Catch2Conan(ConanFile):
         tc.variables["CATCH_INSTALL_DOCS"] = False
         tc.variables["CATCH_INSTALL_HELPERS"] = True
         tc.variables["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
-        if self.options.default_reporter:
-            tc.variables["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
         tc.generate()
 
     def build(self):
@@ -123,5 +115,3 @@ class Catch2Conan(ConanFile):
 
         if self.options.with_prefix:
             defines.append("CATCH_CONFIG_PREFIX_ALL")
-        if self.options.default_reporter:
-            defines.append("CATCH_CONFIG_DEFAULT_REPORTER={}".format(self._default_reporter_str))
