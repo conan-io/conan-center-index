@@ -26,4 +26,4 @@ class TestPackageConan(ConanFile):
                 raise ConanException("cppfront environment variable not set")
 
         if not cross_building(self, skip_x64_x86=True):
-            self.run(f"{cppfront_bin} -h")
+            self.run(f"{cppfront_bin} -h", run_environment=True)
