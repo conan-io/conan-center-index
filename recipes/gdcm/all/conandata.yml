@@ -8,3 +8,5 @@ patches:
       base_path: "src"
     - patch_file: "patches/0002-openjpeg-integration.patch"
       base_path: "src"
+    - patch_file: "patches/0003-gcc-11-compilation.patch"
+      base_path: "src"
