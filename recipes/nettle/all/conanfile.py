@@ -82,7 +82,7 @@ class NettleTLS(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        self.tool_requires("libtool/2.4.6")
+        self.tool_requires("libtool/2.4.7")
         if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
             self.tool_requires("msys2/cci.latest")
 
