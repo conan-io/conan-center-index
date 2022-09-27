@@ -28,7 +28,7 @@ class DrwavConan(ConanFile):
         "no_stdio": False,
         "no_wchar": False
     }
-    exports_sources = ["CMakeLists.txt", "dr_wav.c"]
+    exports_sources = ["CMakeLists.txt"]
 
     def config_options(self):
         if self.settings.os == "Windows":
