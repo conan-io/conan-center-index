@@ -70,6 +70,7 @@ class GdkPixbufConan(ConanFile):
                 cmake_file.write(r"""
                         cmake_minimum_required(VERSION 3.16)
                         project(compiler_rt_test)
+                        list(APPEND CMAKE_EXE_LINKER_FLAGS "-rtlib=compiler-rt")
                         try_compile(HAS_COMPILER_RT ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/test.c OUTPUT_VARIABLE OUTPUT)
                         if(NOT HAS_COMPILER_RT)
                         message(FATAL_ERROR compiler-rt not present)
@@ -84,7 +85,6 @@ class GdkPixbufConan(ConanFile):
                             __muloti4(a, b, &overflow);
                             return 0;
                         }""")
-            cmake.definitions["CMAKE_EXE_LINKER_FLAGS"] = "-rtlib=compiler-rt"
             try:
                 cmake.configure(build_script_folder=tmp)
             except ConanException as ex:
