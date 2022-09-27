@@ -169,6 +169,8 @@ class Stlab(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
+        rmdir(self, os.path.join(self.package_folder, "share"))
+
     def package_id(self):
         # self.info.header_only()
         self.info.options.boost_optional = "ANY"

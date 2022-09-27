@@ -190,6 +190,8 @@ class Stlab(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
+        rmdir(self, os.path.join(self.package_folder, "share"))
+
     def package_id(self):
         #TODO: is header only but needs a header modified by cmake
         # self.info.header_only()
