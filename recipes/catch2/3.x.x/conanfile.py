@@ -100,7 +100,7 @@ class Catch2Conan(ConanFile):
         self.cpp_info.components["_catch2"].set_property("pkg_config_name", "catch2")
         self.cpp_info.components["_catch2"].libs = ["Catch2" + lib_suffix]
 
-        self.cpp_info.components["catch2_with_main"].builddirs.append[os.path.join("lib", "cmake", "Catch2")]
+        self.cpp_info.components["catch2_with_main"].builddirs.append(os.path.join("lib", "cmake", "Catch2"))
         self.cpp_info.components["catch2_with_main"].libs = ["Catch2Main" + lib_suffix]
         self.cpp_info.components["catch2_with_main"].requires = ["_catch2"]
         self.cpp_info.components["catch2_with_main"].system_libs = ["log"] if self.settings.os == "Android" else []
