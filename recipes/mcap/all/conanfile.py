@@ -48,6 +48,10 @@ class McapConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "16":
             raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
 
+    def configure(self):
+        if Version(self.version) < "0.3.0":
+            self.license = "Apache-2.0"
+
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_package_path)
         self.copy("include/*", src=self._source_package_path)
