@@ -10,7 +10,7 @@ from conan.tools import files, scm
 from conan.tools.microsoft import is_msvc
 from conans import tools, Meson, VisualStudioBuildEnvironment
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class GLibConan(ConanFile):
@@ -52,8 +52,7 @@ class GLibConan(ConanFile):
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        files.export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
