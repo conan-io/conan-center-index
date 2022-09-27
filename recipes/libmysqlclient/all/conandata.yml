@@ -1,4 +1,9 @@
 sources:
+  "8.0.30":
+    url:
+      - "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.30.tar.gz"
+      - "https://mirrors.huaweicloud.com/mysql/Downloads/MySQL-8.0/mysql-8.0.30.tar.gz"
+    sha256: "c988d5c6ba9a56692a6cd6e9813465b5fc9368ed4b461df97059a2fc160c8b84"
   "8.0.29":
     url:
       - "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.29.tar.gz"
@@ -11,6 +16,9 @@ sources:
     url: "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.17.tar.gz"
     sha256: "c6e3f38199a77bfd8a4925ca00b252d3b6159b90e4980c7232f1c58d6ca759d6"
 patches:
+  "8.0.30":
+    - patch_file: "patches/0006-fix-cpp20-build-8.0.29.patch"
+      base_path: "source_subfolder"
   "8.0.29":
     - patch_file: "patches/0006-fix-cpp20-build-8.0.29.patch"
       base_path: "source_subfolder"
