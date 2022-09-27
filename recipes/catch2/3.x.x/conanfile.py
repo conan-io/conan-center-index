@@ -74,7 +74,8 @@ class Catch2Conan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.cache_variables["CATCH_INSTALL_DOCS"] = False
-        tc.cache_variables["CATCH_INSTALL_HELPERS"] = True
+        tc.cache_variables["CATCH_INSTALL_EXTRAS"] = True
+        tc.cache_variables["CATCH_DEVELOPMENT_BUILD"] = False
         tc.variables["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
         tc.generate()
 
