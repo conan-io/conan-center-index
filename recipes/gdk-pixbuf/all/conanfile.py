@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake
+from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.env import VirtualBuildEnv
@@ -61,7 +61,6 @@ class GdkPixbufConan(ConanFile):
         return self.settings.compiler == "clang" and self.settings.build_type == "Debug"
 
     def _test_for_compiler_rt(self):
-        cmake = CMake(self)
         with TemporaryDirectory() as tmp:
             def open_temp_file(file_name):
                 return open(os.path.join(tmp, file_name), "w", encoding="utf-8")
@@ -70,8 +69,12 @@ class GdkPixbufConan(ConanFile):
                 cmake_file.write(r"""
                         cmake_minimum_required(VERSION 3.16)
                         project(compiler_rt_test)
-                        list(APPEND CMAKE_EXE_LINKER_FLAGS "-rtlib=compiler-rt")
-                        try_compile(HAS_COMPILER_RT ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/test.c OUTPUT_VARIABLE OUTPUT)
+                        try_compile(
+                            HAS_COMPILER_RT
+                            ${CMAKE_BINARY_DIR}
+                            ${CMAKE_SOURCE_DIR}/test.c
+                            OUTPUT_VARIABLE OUTPUT
+                            LINK_OPTIONS -rtlib=compiler-rt)
                         if(NOT HAS_COMPILER_RT)
                         message(FATAL_ERROR compiler-rt not present)
                         endif()""")
@@ -86,6 +89,9 @@ class GdkPixbufConan(ConanFile):
                             return 0;
                         }""")
             try:
+                tc = CMakeToolchain(self)
+                tc.generate()
+                cmake = CMake(self)
                 cmake.configure(build_script_folder=tmp)
             except ConanException as ex:
                 raise ConanInvalidConfiguration("LLVM Compiler RT is required to link gdk-pixbuf in debug mode") from ex
