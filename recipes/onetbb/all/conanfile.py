@@ -75,9 +75,12 @@ class OneTBBConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        # https://github.com/oneapi-src/oneTBB/blob/master/cmake/README.md#build-system-description
         toolchain = CMakeToolchain(self)
         toolchain.variables["TBB_TEST"] = False
         toolchain.variables["TBB_STRICT"] = False
+        toolchain.variables["TBBMALLOC_BUILD"] = self.options.tbbmalloc
+        toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.tbbproxy
         toolchain.generate()
 
     def build(self):
