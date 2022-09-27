@@ -1,13 +1,4 @@
 versions:
   "1.7.1":
     folder: 1.7.0_and_above
-  "1.6.2":
-    folder: 1.7.0_before
-  "1.5.6":
-    folder: 1.7.0_before
-  "1.5.5":
-    folder: 1.7.0_before
-  "1.5.4":
-    folder: 1.7.0_before
-  "1.5.2":
-    folder: 1.7.0_before
+
