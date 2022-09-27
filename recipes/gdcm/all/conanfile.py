@@ -54,8 +54,8 @@ class GDCMConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("expat/2.4.8")
-        self.requires("openjpeg/2.4.0")
+        self.requires("expat/2.4.9")
+        self.requires("openjpeg/2.5.0")
         self.requires("zlib/1.2.12")
 
     def validate(self):
