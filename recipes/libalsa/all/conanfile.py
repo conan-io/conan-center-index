@@ -1,13 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import unix_path
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class LibalsaConan(ConanFile):
@@ -32,8 +31,7 @@ class LibalsaConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def configure(self):
         if self.options.shared:
@@ -47,15 +45,15 @@ class LibalsaConan(ConanFile):
         except Exception:
             pass
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Only Linux supported")
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -95,6 +93,7 @@ class LibalsaConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "ALSA::ALSA")
         self.cpp_info.set_property("pkg_config_name", "alsa")
         self.cpp_info.libs = ["asound"]
+        self.cpp_info.resdirs = ["res"]
         self.cpp_info.system_libs = ["dl", "m", "rt", "pthread"]
         alsa_config_dir = os.path.join(self.package_folder, "res", "alsa")
         self.runenv_info.define_path("ALSA_CONFIG_DIR", alsa_config_dir)
