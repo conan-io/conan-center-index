@@ -62,3 +62,4 @@ class MakeConan(ConanFile):
 
         self.output.info('Creating CONAN_MAKE_PROGRAM environment variable: %s' % make)
         self.env_info.CONAN_MAKE_PROGRAM = make
+        self.env_info.CMAKE_MAKE_PROGRAM = make
