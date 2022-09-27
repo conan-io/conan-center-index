@@ -1,0 +1,4 @@
+sources:
+  "1.0.2":
+    url: "https://github.com/martinus/svector/archive/refs/tags/v1.0.2.tar.gz"
+    sha256: "317743113aff89c7c11682ad7ed504a043885be7497f791cb393ba5a7a8d3c41"
