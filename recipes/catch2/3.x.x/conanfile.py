@@ -19,10 +19,12 @@ class Catch2Conan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
+        "shared": [True, False],
         "with_prefix": [True, False],
     }
     default_options = {
         "fPIC": True,
+        "shared": False,
         "with_prefix": False,
     }
 
@@ -46,6 +48,15 @@ class Catch2Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "3.1.0":
+            del self.options.shared
+
+    def configure(self):
+        if self.options.get_safe("shared"):
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
 
     def layout(self):
         cmake_layout(self, src_folder="src")
