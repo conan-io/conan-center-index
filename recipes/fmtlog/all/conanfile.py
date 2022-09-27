@@ -15,7 +15,7 @@ required_conan_version = ">=1.52.0"
 class PackageConan(ConanFile):
     name = "fmtlog"
     description = "fmtlog is a performant fmtlib-style logging library with latency in nanoseconds."
-    license = "MIT license"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/MengRao/fmtlog"
     topics = ("logging", "low-latency", "topic3") # no "conan" and project name in topics
