@@ -1,62 +1,50 @@
 sources:
-  "1.34.2":
-    url: "https://github.com/libuv/libuv/archive/v1.34.2.zip"
-    sha256: "e1a663bcbfbeb18e447f79a39645ca555db47153d29ed81a1cb289373f357035"
-  "1.38.0":
-    url: "https://github.com/libuv/libuv/archive/v1.38.0.zip"
-    sha256: "6502ee75e1007325ba2e15e06d3d7b94ac911704793b2fe6f7bb933e1748db72"
-  "1.38.1":
-    url: "https://github.com/libuv/libuv/archive/v1.38.1.zip"
-    sha256: "0359369492742eb2a36312fffe26f80bcffe4cec981a4fd72d182b061ee14890"
-  "1.40.0":
-    url: "https://github.com/libuv/libuv/archive/v1.40.0.zip"
-    sha256: "61366e30d8484197dc9e4a94dbd98a0ba52fb55cb6c6d991af1f3701b10f322b"
-  "1.41.0":
-    url: "https://github.com/libuv/libuv/archive/v1.41.0.zip"
-    sha256: "cb89a8b9f686c5ccf7ed09a9e0ece151a73ebebc17af3813159c335b02181794"
-  "1.41.1":
-    url: "https://github.com/libuv/libuv/archive/v1.41.1.tar.gz"
-    sha256: "62c29d1d76b0478dc8aaed0ed1f874324f6cd2d6ff4cb59a44026c09e818cd53"
-  "1.42.0":
-    url: "https://github.com/libuv/libuv/archive/v1.42.0.tar.gz"
-    sha256: "371e5419708f6aaeb8656671f89400b92a9bba6443369af1bb70bcd6e4b3c764"
-  "1.43.0":
-    url: "https://github.com/libuv/libuv/archive/v1.43.0.tar.gz"
-    sha256: "9e27825a55279de69a7c43e42d509fd1337c9bece2547c761e91a1592e91cc4d"
   "1.44.1":
     url: "https://github.com/libuv/libuv/archive/v1.44.1.tar.gz"
     sha256: "e91614e6dc2dd0bfdd140ceace49438882206b7a6fb00b8750914e67a9ed6d6b"
-patches:
-  "1.34.2":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.34.2/fix-cmake.patch"
-  "1.38.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.38.0/fix-cmake.patch"
-  "1.38.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.38.1/fix-cmake.patch"
-  "1.40.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.40.0/fix-cmake.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.40.0/fix-ios.patch"
-  "1.41.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.41.0/fix-cmake.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.40.0/fix-ios.patch"
-  "1.41.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.41.0/fix-cmake.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.40.0/fix-ios.patch"
-  "1.42.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.42.0/fix-cmake.patch"
   "1.43.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.43.0/fix-cmake.patch"
+    url: "https://github.com/libuv/libuv/archive/v1.43.0.tar.gz"
+    sha256: "9e27825a55279de69a7c43e42d509fd1337c9bece2547c761e91a1592e91cc4d"
+  "1.42.0":
+    url: "https://github.com/libuv/libuv/archive/v1.42.0.tar.gz"
+    sha256: "371e5419708f6aaeb8656671f89400b92a9bba6443369af1bb70bcd6e4b3c764"
+  "1.41.1":
+    url: "https://github.com/libuv/libuv/archive/v1.41.1.tar.gz"
+    sha256: "62c29d1d76b0478dc8aaed0ed1f874324f6cd2d6ff4cb59a44026c09e818cd53"
+  "1.41.0":
+    url: "https://github.com/libuv/libuv/archive/v1.41.0.zip"
+    sha256: "cb89a8b9f686c5ccf7ed09a9e0ece151a73ebebc17af3813159c335b02181794"
+  "1.40.0":
+    url: "https://github.com/libuv/libuv/archive/v1.40.0.zip"
+    sha256: "61366e30d8484197dc9e4a94dbd98a0ba52fb55cb6c6d991af1f3701b10f322b"
+  "1.38.1":
+    url: "https://github.com/libuv/libuv/archive/v1.38.1.zip"
+    sha256: "0359369492742eb2a36312fffe26f80bcffe4cec981a4fd72d182b061ee14890"
+  "1.38.0":
+    url: "https://github.com/libuv/libuv/archive/v1.38.0.zip"
+    sha256: "6502ee75e1007325ba2e15e06d3d7b94ac911704793b2fe6f7bb933e1748db72"
+  "1.34.2":
+    url: "https://github.com/libuv/libuv/archive/v1.34.2.zip"
+    sha256: "e1a663bcbfbeb18e447f79a39645ca555db47153d29ed81a1cb289373f357035"
+patches:
   "1.44.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.44.1/fix-cmake.patch"
+    - patch_file: "patches/1.44.1/fix-cmake.patch"
+  "1.43.0":
+    - patch_file: "patches/1.43.0/fix-cmake.patch"
+  "1.42.0":
+    - patch_file: "patches/1.42.0/fix-cmake.patch"
+  "1.41.1":
+    - patch_file: "patches/1.41.0/fix-cmake.patch"
+    - patch_file: "patches/1.40.0/fix-ios.patch"
+  "1.41.0":
+    - patch_file: "patches/1.41.0/fix-cmake.patch"
+    - patch_file: "patches/1.40.0/fix-ios.patch"
+  "1.40.0":
+    - patch_file: "patches/1.40.0/fix-cmake.patch"
+    - patch_file: "patches/1.40.0/fix-ios.patch"
+  "1.38.1":
+    - patch_file: "patches/1.38.1/fix-cmake.patch"
+  "1.38.0":
+    - patch_file: "patches/1.38.0/fix-cmake.patch"
+  "1.34.2":
+    - patch_file: "patches/1.34.2/fix-cmake.patch"
