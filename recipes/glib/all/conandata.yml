@@ -30,6 +30,12 @@ sources:
     url: "https://download.gnome.org/sources/glib/2.74/glib-2.74.0.tar.xz"
     sha256: "3652c7f072d7b031a6b5edd623f77ebc5dcd2ae698598abcc89ff39ca75add30"
 patches:
+  "2.74.0":
+    - patch_file: "patches/0001-clang-static-assert.patch"
+      base_path: "source_subfolder"
+  "2.73.3":
+    - patch_file: "patches/0001-clang-static-assert.patch"
+      base_path: "source_subfolder"
   "2.73.1":
     - patch_file: "patches/f2ea67ae441bc6059b43a1051dd0b750fe5f6301.patch"
       base_path: "source_subfolder"
