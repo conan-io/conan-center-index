@@ -23,8 +23,8 @@ sources:
         url: "https://github.com/bytecodealliance/wasmtime/releases/download/v1.0.1/wasmtime-v1.0.1-x86_64-macos-c-api.tar.xz"
         sha256: "fc570e49cf3c4d66b69770ecee692e1cf27d0fa6a6363c83f3f5cca23ac9dc3b"
       "armv8":
-        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v1.0.1/wasmtime-v1.0.1-aarch64-linux-c-api.tar.xz"
-        sha256: "aa950e47fdff4970efb7a59a3ea9e96b965180f9e84be46280915086f0ad7519"
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v1.0.1/wasmtime-v1.0.1-aarch64-macos-c-api.tar.xz"
+        sha256: "48fe254302c6519bf289a4d1385dd425a1c65c4dd521d88dc6a1fab6f025bd19"
     Android:
       "armv8":
         url: "https://github.com/bytecodealliance/wasmtime/releases/download/v1.0.1/wasmtime-v1.0.1-aarch64-linux-c-api.tar.xz"
