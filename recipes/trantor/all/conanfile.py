@@ -83,7 +83,11 @@ class TrantorConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_TRANTOR_SHARED"] = self.options.shared
+        if Version(self.version) < "1.5.6":
+            tc.variables["BUILD_TRANTOR_SHARED"] = self.options.shared
+        else:
+            # Trantor's CMakeaLists.txt has BUILD_SHARED_LIBS option.
+            tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_C-ARES"] = self.options.with_c_ares
         tc.generate()
 
