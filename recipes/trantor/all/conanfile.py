@@ -1,19 +1,22 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
+from conan.tools.files import get, copy, rmdir, replace_in_file
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+
 import os
-import functools
 
-required_conan_version = ">=1.43.0"
-
+required_conan_version = ">=1.52.0"
 
 class TrantorConan(ConanFile):
     name = "trantor"
     description = "a non-blocking I/O tcp network lib based on c++14/17"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/an-tao/trantor"
     topics = ("tcp-server", "asynchronous-programming", "non-blocking-io")
     license = "BSD-3-Clause"
-    homepage = "https://github.com/an-tao/trantor"
-    url = "https://github.com/conan-io/conan-center-index"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -26,16 +29,9 @@ class TrantorConan(ConanFile):
         "with_c_ares": True,
     }
 
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package"
-
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def _minimum_cpp_standard(self):
+        return 14
 
     @property
     def _compilers_minimum_version(self):
@@ -52,7 +48,13 @@ class TrantorConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("openssl/1.1.1q")
@@ -60,51 +62,52 @@ class TrantorConan(ConanFile):
             self.requires("c-ares/1.18.1")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "14")
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._minimum_cpp_standard)
 
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
         if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("trantor requires C++14, which your compiler does not support.")
+            if Version(self.info.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
         else:
-            self.output.warn("trantor requires C++14. Your compiler is unknown. Assuming it supports C++14.")
+            self.output.warn(f"{self.ref} requires C++{self._minimum_cpp_standard}. Your compiler is unknown. Assuming it supports C++{self._minimum_cpp_standard}.")
 
         # TODO: Compilation succeeds, but execution of test_package fails on Visual Studio 16 MDd
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) == "16" and \
-           self.options.shared == True and self.settings.compiler.runtime == "MDd":
-            raise ConanInvalidConfiguration("trantor does not support the MDd runtime on Visual Studio 16.")
+        if is_msvc(self) and Version(self.info.settings.compiler.version) == "16" and \
+           self.options.shared and self.info.settings.compiler.runtime == "MDd":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support the MDd runtime on Visual Studio 16.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TRANTOR_SHARED"] = self.options.shared
+        tc.variables["BUILD_C-ARES"] = self.options.with_c_ares
+        tc.generate()
+
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def _patch_sources(self):
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         # fix c-ares imported target
-        tools.replace_in_file(cmakelists, "c-ares_lib", "c-ares::cares")
+        replace_in_file(self, cmakelists, "c-ares_lib", "c-ares::cares")
         # Cleanup rpath in shared lib
-        tools.replace_in_file(cmakelists, "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}\")", "")
-
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TRANTOR_SHARED"] = self.options.shared
-        cmake.definitions["BUILD_C-ARES"] = self.options.with_c_ares
-        cmake.configure(build_folder=self._build_subfolder)
-
-        return cmake
+        replace_in_file(self, cmakelists, "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}\")", "")
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Trantor")
