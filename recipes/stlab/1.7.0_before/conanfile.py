@@ -1,13 +1,7 @@
-from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rename, replace_in_file, rmdir, save
-from conan.tools.scm import Version
-from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-
+from conans import ConanFile, tools
+from conans.tools import Version
+from conans.errors import ConanInvalidConfiguration
 import os
-
-required_conan_version = ">=1.52.0"
 
 class Stlab(ConanFile):
     name = 'stlab'
@@ -33,10 +27,8 @@ class Stlab(ConanFile):
         "task_system": "auto",
     }
 
-    short_paths = True
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+    no_copy_source = True
+    _source_subfolder = 'source_subfolder'
 
     def _use_boost(self):
         return self.options.boost_optional or self.options.boost_variant
@@ -46,9 +38,6 @@ class Stlab(ConanFile):
         # included in the OS.
         return self.options.task_system == "libdispatch" and self.settings.os != "Macos"
 
-    # def build_requirements(self):
-    #     self.build_requires("cmake/3.23.3")
-
     def requirements(self):
         if self._use_boost():
             self.requires("boost/1.75.0")
@@ -57,7 +46,9 @@ class Stlab(ConanFile):
             self.requires("libdispatch/5.3.2")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = "libraries-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
 
     def _fix_boost_components(self):
         if self.settings.os != "Macos": return
@@ -128,7 +119,7 @@ class Stlab(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 17)
+            tools.check_min_cppstd(self, '17')
 
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9":
             raise ConanInvalidConfiguration("Need GCC >= 9")
@@ -151,31 +142,12 @@ class Stlab(ConanFile):
             self.options.task_system = self._default_task_system()
         self.output.info("Stlab Task System: {}.".format(self.options.task_system))
 
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["stlab.boost_variant"] = self.options.boost_optional
-        tc.variables["stlab.boost_optional"] = self.options.boost_variant
-        tc.variables["stlab.coroutines"] = self.options.coroutines
-        tc.variables["stlab.task_system"] = self.options.task_system
-        tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
-
-    def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
-
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        cmake = CMake(self)
-        cmake.install()
-
-        rmdir(self, os.path.join(self.package_folder, "share"))
+        self.copy("*LICENSE", dst="licenses", keep_path=False)
+        self.copy("stlab/*", src=self._source_subfolder, dst='include/')
 
     def package_id(self):
-        # self.info.header_only()
+        self.info.header_only()
         self.info.options.boost_optional = "ANY"
         self.info.options.boost_variant = "ANY"
 
@@ -185,3 +157,24 @@ class Stlab(ConanFile):
         self.cpp_info.defines = [
             'STLAB_FUTURE_COROUTINES={}'.format(coroutines_value)
         ]
+
+        if self.options.boost_optional:
+            self.cpp_info.defines.append("STLAB_FORCE_BOOST_OPTIONAL")
+
+        if self.options.boost_variant:
+            self.cpp_info.defines.append("STLAB_FORCE_BOOST_VARIANT")
+
+        if self.options.task_system == "portable":
+            self.cpp_info.defines.append("STLAB_FORCE_TASK_SYSTEM_PORTABLE")
+        elif self.options.task_system == "libdispatch":
+            self.cpp_info.defines.append("STLAB_FORCE_TASK_SYSTEM_LIBDISPATCH")
+        elif self.options.task_system == "emscripten":
+            self.cpp_info.defines.append("STLAB_FORCE_TASK_SYSTEM_EMSRIPTEN")  #Note: there is a typo in Stlab Cmake.
+            self.cpp_info.defines.append("STLAB_FORCE_TASK_SYSTEM_EMSCRIPTEN") #Note: for typo fix in later versions
+        elif self.options.task_system == "pnacl":
+            self.cpp_info.defines.append("STLAB_FORCE_TASK_SYSTEM_PNACL")
+        elif self.options.task_system == "windows":
+            self.cpp_info.defines.append("STLAB_FORCE_TASK_SYSTEM_WINDOWS")
+
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread"]
