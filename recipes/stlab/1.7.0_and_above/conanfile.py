@@ -128,20 +128,20 @@ class Stlab(ConanFile):
         raise ConanInvalidConfiguration("Apple-Clang versions less than 12 do not correctly support std::optional or std::variant, so we will use boost::optional and boost::variant instead. Try -o use_boost=True.")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
+        if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 17)
 
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9":
+        if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < "9":
             raise ConanInvalidConfiguration("Need GCC >= 9")
 
-        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "8":
+        if self.info.settings.compiler == "clang" and Version(self.info.settings.compiler.version) < "8":
             raise ConanInvalidConfiguration("Need Clang >= 8")
 
-        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "15.8":
+        if self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) < "15.8":
             raise ConanInvalidConfiguration("Need Visual Studio >= 2017 15.8 (MSVC 19.15)")
 
         # Actually, we want *at least* 15.8 (MSVC 19.15), but we cannot check this for now with Conan.
-        if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "19.15":
+        if self.info.settings.compiler == "msvc" and Version(self.info.settings.compiler.version) < "19.15":
             raise ConanInvalidConfiguration("Need msvc >= 19.15")
 
         self._validate_task_system()

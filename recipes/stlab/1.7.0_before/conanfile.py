@@ -1,6 +1,9 @@
-from conans import ConanFile, tools
-from conans.tools import Version
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rename, replace_in_file, rmdir, save
+from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
 class Stlab(ConanFile):
@@ -30,6 +33,10 @@ class Stlab(ConanFile):
     no_copy_source = True
     _source_subfolder = 'source_subfolder'
 
+    # short_paths = True
+    # def layout(self):
+    #     cmake_layout(self, src_folder="src")
+
     def _use_boost(self):
         return self.options.boost_optional or self.options.boost_variant
 
@@ -46,9 +53,7 @@ class Stlab(ConanFile):
             self.requires("libdispatch/5.3.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "libraries-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def _fix_boost_components(self):
         if self.settings.os != "Macos": return
@@ -118,20 +123,20 @@ class Stlab(ConanFile):
         raise ConanInvalidConfiguration(msg)
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, '17')
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 17)
 
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9":
+        if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < "9":
             raise ConanInvalidConfiguration("Need GCC >= 9")
 
-        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "8":
+        if self.info.settings.compiler == "clang" and Version(self.info.settings.compiler.version) < "8":
             raise ConanInvalidConfiguration("Need Clang >= 8")
 
-        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "15.8":
+        if self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) < "15.8":
             raise ConanInvalidConfiguration("Need Visual Studio >= 2017 15.8 (MSVC 19.15)")
 
         # Actually, we want *at least* 15.8 (MSVC 19.15), but we cannot check this for now with Conan.
-        if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "19.15":
+        if self.info.settings.compiler == "msvc" and Version(self.info.settings.compiler.version) < "19.15":
             raise ConanInvalidConfiguration("Need msvc >= 19.15")
 
         self._validate_task_system()
