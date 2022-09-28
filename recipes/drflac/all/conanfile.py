@@ -39,6 +39,8 @@ class DrflacConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "0.12.39":
+            del self.option.no_wchar
 
     def configure(self):
         if self.options.shared:
@@ -60,7 +62,7 @@ class DrflacConan(ConanFile):
         tc.variables["NO_OGG"] = self.options.no_ogg
         tc.variables["NO_SIMD"] = self.options.no_simd
         tc.variables["NO_STDIO"] = self.options.no_stdio
-        tc.variables["NO_WCHAR"] = self.options.no_wchar
+        tc.variables["NO_WCHAR"] = self.options.get_safe("no_wchar", False)
         tc.generate()
 
     def build(self):
