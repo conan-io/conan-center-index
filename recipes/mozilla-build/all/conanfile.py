@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import download
 from conan.errors import ConanInvalidConfiguration
-from conans import tools
 import os
 
 required_conan_version = ">=1.52.0"
