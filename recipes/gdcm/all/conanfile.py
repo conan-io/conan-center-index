@@ -96,10 +96,10 @@ class GDCMConan(ConanFile):
 
         if self.settings.os == "Windows":
             bin_dir = os.path.join(self.package_folder, "bin")
-            rm(self, "[!gs]*.dll",  bin_dir)
-            rm(self, "*.pdb",  bin_dir)
+            rm(self, "[!gs]*.dll", bin_dir)
+            rm(self, "*.pdb", bin_dir)
 
-        rm(self, os.path.join(self.package_folder, "lib", self._gdcm_subdir), "[!U]*.cmake") #leave UseGDCM.cmake untouched
+        rm(self, "[!U]*.cmake", os.path.join(self.package_folder, "lib", self._gdcm_subdir)) #leave UseGDCM.cmake untouched
         rmdir(self, os.path.join(self.package_folder, "share"))
         self._create_cmake_variables(os.path.join(self.package_folder, self._gdcm_cmake_variables_path))
 
