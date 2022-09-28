@@ -1,4 +1,7 @@
 sources:
+  "1.37":
+    url: "https://github.com/greg7mdp/parallel-hashmap/archive/1.37.tar.gz"
+    sha256: "2ac652be0552fcb53a1163c08c1f28f29f0756594fcc587eebb4d8b363153709"
   "1.36":
     url: "https://github.com/greg7mdp/parallel-hashmap/archive/refs/tags/1.36.tar.gz"
     sha256: "33acf44158a9661a9d630d13f9250a2aa27a770cb3771df77b1ba1a661c0b766"

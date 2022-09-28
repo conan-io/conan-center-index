@@ -1,4 +1,9 @@
 sources:
+  "2.3.11":
+    url:
+      - "http://www.unixodbc.org/unixODBC-2.3.11.tar.gz"
+      - "http://www.unixodbc.net/unixODBC-2.3.11.tar.gz"
+    sha256: "d9e55c8e7118347e3c66c87338856dad1516b490fb7c756c1562a2c267c73b5c"
   "2.3.9":
     url:
       - "http://www.unixodbc.org/unixODBC-2.3.9.tar.gz"
