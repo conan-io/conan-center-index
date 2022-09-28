@@ -1,9 +1,9 @@
 from conan.tools.microsoft import msvc_runtime_flag
-from conan.tools.files import rename, get, rmdir, chdir, replace_in_files
+from conan.tools.files import rename, get, rmdir, chdir, replace_in_file
 from conan.tools.scm import Version
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conans import tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
 import contextlib
 import functools
 import os
