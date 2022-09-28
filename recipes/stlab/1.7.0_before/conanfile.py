@@ -46,8 +46,8 @@ class Stlab(ConanFile):
         # included in the OS.
         return self.options.task_system == "libdispatch" and self.settings.os != "Macos"
 
-    def build_requirements(self):
-        self.build_requires("cmake/3.23.3")
+    # def build_requirements(self):
+    #     self.build_requires("cmake/3.23.3")
 
     def requirements(self):
         if self._use_boost():
