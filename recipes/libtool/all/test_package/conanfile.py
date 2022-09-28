@@ -7,9 +7,6 @@ from conan.tools.build import can_run
 from conan.tools.layout import basic_layout
 from conan.tools.env import Environment
 
-from contextlib import contextmanager
-import glob
-import os
 import shutil
 
 
@@ -64,6 +61,7 @@ class TestPackageConan(ConanFile):
         cmake = CMake(self)
         cmake.configure(build_script_folder=self.source_path.joinpath("ltdl"))
         cmake.build()
+
     def _build_autotools(self):
         """ Test autotools integration """
         # Copy autotools directory to build folder
@@ -86,40 +84,44 @@ class TestPackageConan(ConanFile):
             vars = env.vars(self, scope="run")
             vars.save_script("autotoolrun")
 
-    # def _build_static_lib_in_shared(self):
-    #     """ Build shared library using libtool (while linking to a static library) """
-    #
-    #     # Copy static-in-shared directory to build folder
-    #     autotools_folder = self.build_path.joinpath("sis")
-    #     shutil.copytree(self.source_path.joinpath("sis"), autotools_folder, dirs_exist_ok=True)
-    #
-    #     install_prefix = autotools_folder.joinpath("prefix")
-    #
-    #     # Build static library using CMake
-    #     cmake = CMake(self)
-    #     cmake.configure(build_script_folder=autotools_folder)
-    #     cmake.build()
-    #     cmake.install()
-    #
-    #     with chdir(self, autotools_folder):
-    #         autotools = Autotools(self)
-    #         self.run("autoreconf -ifv -Wall", cwd=str(autotools_folder))  # Workaround for `Autools.autoreconf()` always running from source
-    #         autotools.configure(build_script_folder=unix_path(self, str(autotools_folder)))
-    #         autotools.make()
-    #         autotools.install(args=[f"DESTDIR={unix_path(self, str(self._package_folder.joinpath('sis_inst')))}"])  # Need to specify the `DESTDIR` as a Unix path, aware of the subsystem
-    #
-    #         # Defining the run environment for testing the autotools created test_package
-    #         env = Environment()
-    #         env.prepend_path("PATH", str(self._package_folder.joinpath("sis_inst", "lib")))
-    #         env.prepend_path("LD_LIBRARY_PATH", str(self._package_folder.joinpath("sis_inst", "lib")))
-    #         env.prepend_path("DYLD_LIBRARY_PATH", str(self._package_folder.joinpath("sis_inst", "lib")))
-    #         vars = env.vars(self, scope="run")
-    #         vars.save_script("sisrun")
+    def _build_static_lib_in_shared(self):
+        """ Build shared library using libtool (while linking to a static library) """
+
+        # Copy static-in-shared directory to build folder
+        self.output.error("=====================================================")
+        self.output.error(self.build_path)
+        self.output.error("=====================================================")
+        autotools_folder = self.build_path.joinpath("ltdl")
+        shutil.copytree(self.source_path.joinpath("ltdl"), autotools_folder, dirs_exist_ok=True)
+
+        install_prefix = autotools_folder.joinpath("prefix")
+
+        # Build static library using CMake
+        cmake = CMake(self)
+        cmake.configure(build_script_folder="ltdl")
+        cmake.build()
+        cmake.install(".")
+
+        with chdir(self, autotools_folder):
+            autotools = Autotools(self)
+            self.run("autoreconf -ifv -Wall", cwd=str(autotools_folder))  # Workaround for `Autools.autoreconf()` always running from source
+            autotools.configure(build_script_folder=unix_path(self, str(autotools_folder)))
+            autotools.make()
+            autotools.install(args=[f"DESTDIR={unix_path(self, str(self._package_folder.joinpath('sis_inst')))}"])  # Need to specify the `DESTDIR` as a Unix path, aware of the subsystem
+
+            # Defining the run environment for testing the autotools created test_package
+            env = Environment()
+            env.prepend_path("PATH", str(self._package_folder.joinpath("sis_inst", "lib")))
+            env.prepend_path("LD_LIBRARY_PATH", str(self._package_folder.joinpath("sis_inst", "lib")))
+            env.prepend_path("DYLD_LIBRARY_PATH", str(self._package_folder.joinpath("sis_inst", "lib")))
+            vars = env.vars(self, scope="run")
+            vars.save_script("sisrun")
 
     def test(self):
         self._test_ltdl()
         if can_run(self):
-            self._test_autotools()
+            pass
+            # self._test_autotools()
             # self._test_static_lib_in_shared()
 
     def _test_ltdl(self):
