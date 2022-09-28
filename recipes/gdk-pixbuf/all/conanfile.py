@@ -55,31 +55,40 @@ class GdkPixbufConan(ConanFile):
         basic_layout(self, src_folder="source")
 
     def generate(self):
+        def is_enabled(value):
+            return "enabled" if value else "disabled"
+
+        def is_true(value):
+            return "true" if value else "false"
+
         deps = PkgConfigDeps(self)
         deps.generate()
 
         tc = MesonToolchain(self)
-        defs = {}
-        if scm.Version(self.version) >= "2.42.0":
-            defs["introspection"] = "false"
-        else:
-            defs["gir"] = "false"
-        defs["docs"] = "false"
-        defs["man"] = "false"
-        defs["installed_tests"] = "false"
-        if scm.Version(self.version) >= "2.42.8":
-            defs["png"] = "enabled" if self.options.with_libpng else "disabled"
-            defs["tiff"] = "enabled" if self.options.with_libtiff else "disabled"
-            defs["jpeg"] = "enabled" if self.options.with_libjpeg else "disabled"
-        else:
-            defs["png"] = "true" if self.options.with_libpng else "false"
-            defs["tiff"] = "true" if self.options.with_libtiff else "false"
-            defs["jpeg"] = "true" if self.options.with_libjpeg else "false"
+        tc.project_options.update({
+            "builtin_loaders": "all",
+            "gio_sniffing": "false",
+            "introspection": is_enabled(self.options.with_introspection),
+            "docs": "false",
+            "man": "false",
+            "installed_tests": "false"
+        })
+        if scm.Version(self.version) < "2.42.0":
+            tc.project_options["gir"] = "false"
 
-        defs["builtin_loaders"] = "all"
-        defs["gio_sniffing"] = "false"
-        defs["introspection"] = "enabled" if self.options.with_introspection else "disabled"
-        tc.project_options.update(defs)
+        if scm.Version(self.version) >= "2.42.8":
+            tc.project_options.update({
+                "png": is_enabled(self.options.with_libpng),
+                "tiff": is_enabled(self.options.with_libtiff),
+                "jpeg": is_enabled(self.options.with_libjpeg)
+            })
+        else:
+            tc.project_options.update({
+                "png": is_true(self.options.with_libpng),
+                "tiff": is_true(self.options.with_libtiff),
+                "jpeg": is_true(self.options.with_libjpeg)
+            })
+
         tc.generate()
 
         venv = VirtualBuildEnv(self)
