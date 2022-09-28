@@ -206,5 +206,8 @@ class Stlab(ConanFile):
             'STLAB_FUTURE_COROUTINES={}'.format(future_coroutines_value)
         ]
 
+        if self.settings.os == "Windows":
+            self.cpp_info.defines = ['NOMINMAX']
+
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
