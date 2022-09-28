@@ -2,11 +2,10 @@ import os
 from conan import ConanFile
 from conans import CMake
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building, check_min_cppstd
-from conan.tools.scm import Version
-from conan.tools.files import rm, get, rmdir, rename, collect_libs, patches
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, rmdir, collect_libs, patches
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
 
 class DiligentToolsConan(ConanFile):
     name = "diligent-tools"
