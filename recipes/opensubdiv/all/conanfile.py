@@ -62,7 +62,7 @@ class OpenSubdivConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "15",
-            "gcc": "5",
+            "gcc": "5" if self.version < "3.5.0" else "6",
             "clang": "11",
             "apple-clang": "11.0",
         }
