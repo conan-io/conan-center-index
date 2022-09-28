@@ -1,7 +1,7 @@
-diff --git CMakeLists.txt CMakeLists.txt
-index 8bc6077..579a7b4 100644
---- CMakeLists.txt
-+++ CMakeLists.txt
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8bc6077..29ce22f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
 @@ -6,7 +6,7 @@ set (HS_MINOR_VERSION 4)
  set (HS_PATCH_VERSION 0)
  set (HS_VERSION ${HS_MAJOR_VERSION}.${HS_MINOR_VERSION}.${HS_PATCH_VERSION})
@@ -67,10 +67,11 @@ index 8bc6077..579a7b4 100644
  if (NOT CORRECT_PCRE_VERSION)
      message(STATUS "PCRE ${PCRE_REQUIRED_VERSION} or above not found")
  endif()
-@@ -483,16 +483,16 @@ if (CORRECT_PCRE_VERSION AND PCRE_BUILD_SOURCE AND BUILD_STATIC_LIBS)
+@@ -482,33 +482,18 @@ if (CORRECT_PCRE_VERSION AND PCRE_BUILD_SOURCE AND BUILD_STATIC_LIBS)
+     set(BUILD_CHIMERA TRUE)
  endif()
  
- add_subdirectory(unit)
+-add_subdirectory(unit)
 -if (EXISTS ${CMAKE_SOURCE_DIR}/tools/CMakeLists.txt)
 +if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tools/CMakeLists.txt)
      add_subdirectory(tools)
@@ -86,17 +87,24 @@ index 8bc6077..579a7b4 100644
 +configure_file(${PROJECT_SOURCE_DIR}/cmake/config.h.in ${PROJECT_BINARY_DIR}/config.h)
  configure_file(src/hs_version.h.in ${PROJECT_BINARY_DIR}/hs_version.h)
  
- if (NOT WIN32)
-@@ -505,7 +505,7 @@ if (NOT WIN32)
-     endforeach()
- 
-     configure_file(libhs.pc.in libhs.pc @ONLY) # only replace @ quoted vars
+-if (NOT WIN32)
+-    # expand out library names for pkgconfig static link info
+-    foreach (LIB ${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES})
+-        # this is fragile, but protects us from toolchain specific files
+-        if (NOT EXISTS ${LIB})
+-            set(PRIVATE_LIBS "${PRIVATE_LIBS} -l${LIB}")
+-        endif()
+-    endforeach()
+-
+-    configure_file(libhs.pc.in libhs.pc @ONLY) # only replace @ quoted vars
 -    install(FILES ${CMAKE_BINARY_DIR}/libhs.pc
-+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libhs.pc
-         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
- endif()
- 
-@@ -524,7 +524,7 @@ if (WIN32)
+-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+-endif()
+-
+ # only set these after all tests are done
+ if (NOT FAT_RUNTIME)
+ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_C_FLAGS} ${HS_C_FLAGS}")
+@@ -524,7 +509,7 @@ if (WIN32)
  set(PCRE_REQUIRED_MAJOR_VERSION 8)
  set(PCRE_REQUIRED_MINOR_VERSION 41)
  set(PCRE_REQUIRED_VERSION ${PCRE_REQUIRED_MAJOR_VERSION}.${PCRE_REQUIRED_MINOR_VERSION})
@@ -105,7 +113,7 @@ index 8bc6077..579a7b4 100644
  if (NOT CORRECT_PCRE_VERSION)
      message(STATUS "PCRE ${PCRE_REQUIRED_VERSION} or above not found")
  endif()
-@@ -535,10 +535,10 @@ if (CORRECT_PCRE_VERSION AND PCRE_BUILD_SOURCE AND BUILD_STATIC_LIBS)
+@@ -535,10 +520,10 @@ if (CORRECT_PCRE_VERSION AND PCRE_BUILD_SOURCE AND BUILD_STATIC_LIBS)
  endif()
  
  add_subdirectory(unit)
@@ -118,7 +126,7 @@ index 8bc6077..579a7b4 100644
      add_subdirectory(chimera)
  endif()
  endif()
-@@ -548,14 +548,14 @@ set(RAGEL_C_FLAGS "-Wno-unused")
+@@ -548,14 +533,14 @@ set(RAGEL_C_FLAGS "-Wno-unused")
  endif()
  
  set_source_files_properties(
@@ -135,7 +143,7 @@ index 8bc6077..579a7b4 100644
      PROPERTIES
          COMPILE_FLAGS "${RAGEL_C_FLAGS}")
  
-@@ -1216,28 +1216,28 @@ else (FAT_RUNTIME)
+@@ -1216,28 +1201,28 @@ else (FAT_RUNTIME)
         list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_core2>)
         set_target_properties(hs_exec_core2 PROPERTIES
             COMPILE_FLAGS "-march=core2"
@@ -168,7 +176,7 @@ index 8bc6077..579a7b4 100644
                 )
         endif (BUILD_AVX512)
         if (BUILD_AVX512VBMI)
-@@ -1245,7 +1245,7 @@ else (FAT_RUNTIME)
+@@ -1245,7 +1230,7 @@ else (FAT_RUNTIME)
             list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_avx512vbmi>)
             set_target_properties(hs_exec_avx512vbmi PROPERTIES
                 COMPILE_FLAGS "${ICELAKE_FLAG}"
@@ -177,7 +185,7 @@ index 8bc6077..579a7b4 100644
                 )
         endif (BUILD_AVX512VBMI)
  
-@@ -1280,21 +1280,21 @@ else (FAT_RUNTIME)
+@@ -1280,21 +1265,21 @@ else (FAT_RUNTIME)
          set_target_properties(hs_exec_shared_core2 PROPERTIES
              COMPILE_FLAGS "-march=core2"
              POSITION_INDEPENDENT_CODE TRUE
@@ -202,7 +210,7 @@ index 8bc6077..579a7b4 100644
              )
  
          if (BUILD_AVX512)
-@@ -1303,7 +1303,7 @@ else (FAT_RUNTIME)
+@@ -1303,7 +1288,7 @@ else (FAT_RUNTIME)
              set_target_properties(hs_exec_shared_avx512 PROPERTIES
                  COMPILE_FLAGS "${SKYLAKE_FLAG}"
                  POSITION_INDEPENDENT_CODE TRUE
@@ -211,7 +219,7 @@ index 8bc6077..579a7b4 100644
                  )
          endif (BUILD_AVX512)
          if (BUILD_AVX512VBMI)
-@@ -1312,7 +1312,7 @@ else (FAT_RUNTIME)
+@@ -1312,7 +1297,7 @@ else (FAT_RUNTIME)
              set_target_properties(hs_exec_shared_avx512vbmi PROPERTIES
                  COMPILE_FLAGS "${ICELAKE_FLAG}"
                  POSITION_INDEPENDENT_CODE TRUE
@@ -220,35 +228,217 @@ index 8bc6077..579a7b4 100644
                  )
          endif (BUILD_AVX512VBMI)
          add_library(hs_exec_common_shared OBJECT
-diff --git chimera/CMakeLists.txt chimera/CMakeLists.txt
-index 1cd66a3..ebb3b49 100644
---- chimera/CMakeLists.txt
-+++ chimera/CMakeLists.txt
-@@ -44,6 +44,6 @@ if (NOT WIN32)
-     set(PRIVATE_LIBS "${PRIVATE_LIBS} -L${LIBDIR} -lpcre")
+diff --git a/chimera/CMakeLists.txt b/chimera/CMakeLists.txt
+index 1cd66a3..d4f4180 100644
+--- a/chimera/CMakeLists.txt
++++ b/chimera/CMakeLists.txt
+@@ -18,6 +18,7 @@ SET(chimera_SRCS
+     ${chimera_HEADERS}
+     ch_alloc.c
+     ch_alloc.h
++    ch_pcre_bridge.c
+     ch_compile.cpp
+     ch_database.c
+     ch_database.h
+@@ -27,23 +28,10 @@ SET(chimera_SRCS
+     ch_scratch.c
+ )
  
-     configure_file(libch.pc.in libch.pc @ONLY) # only replace @ quoted vars
++set_source_files_properties(ch_pcre_bridge.c PROPERTIES COMPILE_FLAGS "/Gd")
++
+ add_library(chimera STATIC ${chimera_SRCS})
+-add_dependencies(chimera hs pcre)
+-target_link_libraries(chimera hs pcre)
++add_dependencies(chimera hs PCRE::libpcre)
++target_link_libraries(chimera hs PCRE::libpcre)
+ 
+ install(TARGETS chimera DESTINATION ${CMAKE_INSTALL_LIBDIR})
+-
+-if (NOT WIN32)
+-    # expand out library names for pkgconfig static link info
+-    foreach (LIB ${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES})
+-        # this is fragile, but protects us from toolchain specific files
+-        if (NOT EXISTS ${LIB})
+-            set(PRIVATE_LIBS "${PRIVATE_LIBS} -l${LIB}")
+-        endif()
+-    endforeach()
+-    set(PRIVATE_LIBS "${PRIVATE_LIBS} -L${LIBDIR} -lpcre")
+-
+-    configure_file(libch.pc.in libch.pc @ONLY) # only replace @ quoted vars
 -    install(FILES ${CMAKE_BINARY_DIR}/chimera/libch.pc
-+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libch.pc
-         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
- endif()
-diff --git chimera/ch_database.h chimera/ch_database.h
-index 28bde86..d757c82 100644
---- chimera/ch_database.h
-+++ chimera/ch_database.h
-@@ -38,7 +38,7 @@ extern "C"
+-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+-endif()
+diff --git a/chimera/ch_compile.cpp b/chimera/ch_compile.cpp
+index 46536f3..43da11b 100644
+--- a/chimera/ch_compile.cpp
++++ b/chimera/ch_compile.cpp
+@@ -337,7 +337,7 @@ void PatternData::buildPcre(const char *pattern, u32 flags) {
+     const char *errptr = nullptr;
+     int erroffset = 0;
+ 
+-    compiled = pcre_compile(pattern, options, &errptr, &erroffset, nullptr);
++    compiled = bridge_pcre_compile(pattern, options, &errptr, &erroffset, nullptr);
+     if (!compiled) {
+         DEBUG_PRINTF("PCRE failed to compile: %s\n", pattern);
+         string err("PCRE compilation failed: ");
+@@ -346,7 +346,7 @@ void PatternData::buildPcre(const char *pattern, u32 flags) {
+         throw CompileError(expr_index, err);
+     }
+ 
+-    extra = pcre_study(compiled, PCRE_STUDY_JIT_COMPILE, &errptr);
++    extra = bridge_pcre_study(compiled, PCRE_STUDY_JIT_COMPILE, &errptr);
+     // Note that it's OK for pcre_study to return NULL if there's nothing
+     // to be found, but a non-NULL error is always bad.
+     if (errptr) {
+@@ -357,19 +357,19 @@ void PatternData::buildPcre(const char *pattern, u32 flags) {
+         throw CompileError(expr_index, err);
+     }
+ 
+-    if (pcre_fullinfo(compiled, extra, PCRE_INFO_SIZE, &compiled_size)) {
++    if (bridge_pcre_fullinfo(compiled, extra, PCRE_INFO_SIZE, &compiled_size)) {
+         throw CompileError(PCRE_ERROR_MSG);
+     }
+ 
+     if (!extra) {
+         study_size = 0;
+     } else {
+-        if (pcre_fullinfo(compiled, extra, PCRE_INFO_STUDYSIZE, &study_size)) {
++        if (bridge_pcre_fullinfo(compiled, extra, PCRE_INFO_STUDYSIZE, &study_size)) {
+             throw CompileError(PCRE_ERROR_MSG);
+         }
+     }
+ 
+-    if (pcre_fullinfo(compiled, extra, PCRE_INFO_CAPTURECOUNT, &capture_cnt)) {
++    if (bridge_pcre_fullinfo(compiled, extra, PCRE_INFO_CAPTURECOUNT, &capture_cnt)) {
+         throw CompileError(PCRE_ERROR_MSG);
+     }
+ 
+@@ -377,7 +377,7 @@ void PatternData::buildPcre(const char *pattern, u32 flags) {
+      * even in the pure unguarded pcre mode where there is no hs available. We
+      * can not use the compile flags due to (*UTF8) verb */
+     unsigned long int opts = 0; // PCRE_INFO_OPTIONS demands an unsigned long
+-    if (pcre_fullinfo(compiled, extra, PCRE_INFO_OPTIONS, &opts)) {
++    if (bridge_pcre_fullinfo(compiled, extra, PCRE_INFO_OPTIONS, &opts)) {
+         throw CompileError(PCRE_ERROR_MSG);
+     }
+     utf8 = opts & PCRE_UTF8;
+diff --git a/chimera/ch_database.h b/chimera/ch_database.h
+index 28bde86..28459e8 100644
+--- a/chimera/ch_database.h
++++ b/chimera/ch_database.h
+@@ -38,9 +38,7 @@ extern "C"
  {
  #endif
  
 -#define PCRE_STATIC
-+/* #define PCRE_STATIC */
- #include <pcre.h>
- 
+-#include <pcre.h>
+-
++#include "ch_pcre_bridge.h"
  #include "ch_compile.h" // for CH_MODE_ flags
-diff --git cmake/pcre.cmake cmake/pcre.cmake
+ #include "ue2common.h"
+ #include "hs_version.h"
+diff --git a/chimera/ch_pcre_bridge.c b/chimera/ch_pcre_bridge.c
+new file mode 100644
+index 0000000..1ff8a84
+--- /dev/null
++++ b/chimera/ch_pcre_bridge.c
+@@ -0,0 +1,32 @@
++// HOTFIX TO PREVENT CALLING CONVENTION MISMATCH ON MSVC
++
++#include "ch_pcre_bridge.h"
++
++pcre * bridge_pcre_compile(const char * pattern, int options, const char ** errptr, int * erroffset, const unsigned char * tableptr)
++{
++    return pcre_compile(pattern, options, errptr, erroffset, tableptr);
++}
++
++int bridge_pcre_fullinfo(const pcre *code, const pcre_extra *extra, int what, void *where)
++{
++    return pcre_fullinfo(code, extra, what, where);
++}
++
++pcre_extra * bridge_pcre_study(const pcre *code, int options, const char **errptr)
++{
++    return pcre_study(code, options, errptr);
++}
++
++int bridge_pcre_exec(const pcre *code, const pcre_extra *extra, const char *subject, int length, int startoffset, int options, int *ovector, int ovecsize)
++{
++    return pcre_exec(code, extra, subject, length, startoffset, options, ovector, ovecsize);
++}
++
++int bridge_pcre_valid_utf(const unsigned char *string, int length, int *erroroffset)
++{
++    return _pcre_valid_utf(string, length, erroroffset);
++}
++
++
++
++
+diff --git a/chimera/ch_pcre_bridge.h b/chimera/ch_pcre_bridge.h
+new file mode 100644
+index 0000000..bc78c7c
+--- /dev/null
++++ b/chimera/ch_pcre_bridge.h
+@@ -0,0 +1,32 @@
++#pragma once
++
++#ifndef CH_PCRE_BRIDGE_H_
++#define CH_PCRE_BRIDGE_H_
++
++/* #define PCRE_STATIC */
++#include <pcre.h>
++
++#ifdef __cplusplus__
++extern "C"
++{
++#endif
++
++#ifdef _MSC_VER
++#   define CH_CALL_CDECL __cdecl
++#else
++#   define CH_CALL_CDECL
++#endif
++
++pcre * CH_CALL_CDECL bridge_pcre_compile(const char * pattern, int options, const char ** errptr, int * erroffset, const unsigned char * tableptr);
++int CH_CALL_CDECL bridge_pcre_fullinfo(const pcre *code, const pcre_extra *extra, int what, void *where);
++pcre_extra * CH_CALL_CDECL bridge_pcre_study(const pcre *code, int options, const char **errptr);
++int CH_CALL_CDECL bridge_pcre_exec(const pcre *code, const pcre_extra *extra, const char *subject, int length, int startoffset, int options, int *ovector, int ovecsize);
++int CH_CALL_CDECL bridge_pcre_valid_utf(const unsigned char *string, int length, int *erroroffset);
++
++#undef CH_CALL_CDECL
++
++#ifdef __cplusplus__
++}
++#endif
++
++#endif
+diff --git a/chimera/ch_runtime.c b/chimera/ch_runtime.c
+index fdb5b99..95ca051 100644
+--- a/chimera/ch_runtime.c
++++ b/chimera/ch_runtime.c
+@@ -139,7 +139,7 @@ char isValidUTF8(struct HybridContext *hyctx, u32 end) {
+     DEBUG_PRINTF("validating %d bytes\n", validate_len);
+ 
+     int erroroffset = 0;
+-    if (_pcre_valid_utf(data, validate_len, &erroroffset)) {
++    if (bridge_pcre_valid_utf(data, validate_len, &erroroffset)) {
+         DEBUG_PRINTF("UTF8 invalid at offset %d\n", erroroffset);
+         return 0;
+     }
+@@ -240,7 +240,7 @@ ch_error_t scanPcre(struct HybridContext *hyctx, UNUSED unsigned int length,
+         }
+     }
+ 
+-    int rv = pcre_exec(p, extra, data, full_length, startoffset, options,
++    int rv = bridge_pcre_exec(p, extra, data, full_length, startoffset, options,
+                        ovector, ovectorSize);
+ 
+     DEBUG_PRINTF("pcre return code is %d\n", rv);
+diff --git a/cmake/pcre.cmake b/cmake/pcre.cmake
 index e0acda5..c68601f 100644
---- cmake/pcre.cmake
-+++ cmake/pcre.cmake
+--- a/cmake/pcre.cmake
++++ b/cmake/pcre.cmake
 @@ -1,4 +1,5 @@
  # first look in pcre-$version or pcre subdirs
 +
@@ -275,10 +465,10 @@ index e0acda5..c68601f 100644
 +        set(PCRE_LDFLAGS "PCRE::libpcre")
 +    endif()
  endif (PCRE_BUILD_SOURCE)
-diff --git tools/CMakeLists.txt tools/CMakeLists.txt
+diff --git a/tools/CMakeLists.txt b/tools/CMakeLists.txt
 index 6ca3fd8..378afd0 100644
---- tools/CMakeLists.txt
-+++ tools/CMakeLists.txt
+--- a/tools/CMakeLists.txt
++++ b/tools/CMakeLists.txt
 @@ -1,3 +1,7 @@
 +
 +# Tools are not installed
@@ -287,20 +477,20 @@ index 6ca3fd8..378afd0 100644
  find_package(Threads)
  
  # remove some warnings
-diff --git tools/hsbench/CMakeLists.txt tools/hsbench/CMakeLists.txt
+diff --git a/tools/hsbench/CMakeLists.txt b/tools/hsbench/CMakeLists.txt
 index bbceda4..18545d0 100644
---- tools/hsbench/CMakeLists.txt
-+++ tools/hsbench/CMakeLists.txt
+--- a/tools/hsbench/CMakeLists.txt
++++ b/tools/hsbench/CMakeLists.txt
 @@ -1,4 +1,4 @@
 -include (${CMAKE_MODULE_PATH}/sqlite3.cmake)
 +include (sqlite3)
  if (NOT SQLITE3_FOUND)
      message(STATUS "sqlite3 not found, not building hsbench")
      return()
-diff --git tools/hscollider/CMakeLists.txt tools/hscollider/CMakeLists.txt
+diff --git a/tools/hscollider/CMakeLists.txt b/tools/hscollider/CMakeLists.txt
 index a4d71b2..f733479 100644
---- tools/hscollider/CMakeLists.txt
-+++ tools/hscollider/CMakeLists.txt
+--- a/tools/hscollider/CMakeLists.txt
++++ b/tools/hscollider/CMakeLists.txt
 @@ -5,7 +5,7 @@ endif()
  
  include_directories(${PCRE_INCLUDE_DIRS})
@@ -310,3 +500,16 @@ index a4d71b2..f733479 100644
  
  # we need static libs - too much deep magic for shared libs
  if (NOT BUILD_STATIC_LIBS)
+diff --git a/unit/CMakeLists.txt b/unit/CMakeLists.txt
+index b0706fa..0f07651 100644
+--- a/unit/CMakeLists.txt
++++ b/unit/CMakeLists.txt
+@@ -150,7 +150,7 @@ if (BUILD_CHIMERA)
+         chimera/scan.cpp
+         )
+     add_executable(unit-chimera ${unit_chimera_SOURCES})
+-    target_link_libraries(unit-chimera chimera hs pcre)
++    target_link_libraries(unit-chimera chimera hs PCRE::libpcre)
+     #
+     # build target to run unit tests
+     #
