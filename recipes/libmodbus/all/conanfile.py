@@ -143,8 +143,6 @@ class LibmodbusConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["modbus"]
 
-        # should this be kept for v1?
-        # self.cpp_info.names["pkg_config"] = "libmodbus"
         self.cpp_info.set_property("pkg_config_name", "libmodbus")
 
         # self.cpp_info.includedirs.append(os.path.join("include", "modbus"))
