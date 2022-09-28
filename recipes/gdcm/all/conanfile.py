@@ -58,7 +58,7 @@ class GDCMConan(ConanFile):
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
-        if is_msvc_static_runtime(self) and self.info.options.shared(self):
+        if is_msvc_static_runtime(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared and static runtime together.")
 
     def source(self):
