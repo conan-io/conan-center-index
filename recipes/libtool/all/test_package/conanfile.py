@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.cmake import CMake
 from conan.tools.files import chdir, mkdir
 from conan.tools.microsoft import unix_path, is_msvc
 from conan.tools.build import can_run
@@ -78,8 +78,6 @@ class TestPackageConan(ConanFile):
 
             # Defining the run environment for testing the autotools created test_package
             env = Environment()
-            env.prepend_path("PATH", str(self._package_folder.joinpath("autotool_inst", "lib")))
-            env.prepend_path("LD_LIBRARY_PATH", str(self._package_folder.joinpath("autotool_inst", "lib")))
             env.prepend_path("DYLD_LIBRARY_PATH", str(self._package_folder.joinpath("autotool_inst", "lib")))
             vars = env.vars(self, scope="run")
             vars.save_script("autotoolrun")
@@ -88,9 +86,6 @@ class TestPackageConan(ConanFile):
         """ Build shared library using libtool (while linking to a static library) """
 
         # Copy static-in-shared directory to build folder
-        self.output.error("=====================================================")
-        self.output.error(self.build_path)
-        self.output.error("=====================================================")
         autotools_folder = self.build_path.joinpath("ltdl")
         shutil.copytree(self.source_path.joinpath("ltdl"), autotools_folder, dirs_exist_ok=True)
 
@@ -120,8 +115,7 @@ class TestPackageConan(ConanFile):
     def test(self):
         self._test_ltdl()
         if can_run(self):
-            pass
-            # self._test_autotools()
+            self._test_autotools()
             # self._test_static_lib_in_shared()
 
     def _test_ltdl(self):
@@ -146,16 +140,16 @@ class TestPackageConan(ConanFile):
 
         if can_run(self):
             ext = ".exe" if self.settings.os == "Windows" else ""
-            self.run(str(self._package_folder.joinpath("autotool_inst", "bin", f"test_package{ext}")), run_environment=True, env="autotoolrun")
+            self.run(str(self._package_folder.joinpath("autotool_inst", "bin", f"test_package{ext}")), env="autotoolrun")
 
     # def _test_static_lib_in_shared(self):
     #     """ Test existence of shared library """
     #     install_prefix = os.path.join(self.build_folder, "sis", "prefix")
     #
-    #     with tools.chdir(install_prefix):
+    #     with chdir(self, install_prefix):
     #         if self.settings.os == "Windows":
     #             assert len(list(glob.glob(os.path.join("bin", "*.dll")))) > 0
-    #         elif tools.is_apple_os(self.settings.os):
+    #         elif is_apple_os(self):
     #             assert len(list(glob.glob(os.path.join("lib", "*.dylib")))) > 0
     #         else:
     #             assert len(list(glob.glob(os.path.join("lib", "*.so")))) > 0
