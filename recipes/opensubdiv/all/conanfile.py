@@ -149,6 +149,9 @@ class OpenSubdivConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
+        for mask in ["Find*.cmake", "*Config*.cmake", "*-config.cmake", "*Targets*.cmake"]:
+            tools.remove_files_by_mask(self.package_folder, mask)
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenSubdiv")
 
