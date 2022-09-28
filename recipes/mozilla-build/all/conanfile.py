@@ -37,6 +37,7 @@ class MozillaBuildConan(ConanFile):
         del self.info.settings.compiler
 
     def package_info(self):
+        self.cpp_info.includedirs = []
         binpath = os.path.join(self.package_folder, "bin")
         self.output.info(f"Adding to PATH: {binpath}")
         self.env_info.PATH.append(binpath)
