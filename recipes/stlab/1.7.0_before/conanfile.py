@@ -6,6 +6,8 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
+required_conan_version = ">=1.52.0"
+
 class Stlab(ConanFile):
     name = 'stlab'
     description = 'The Software Technology Lab libraries.'
@@ -152,7 +154,7 @@ class Stlab(ConanFile):
         self.copy("stlab/*", src=self._source_subfolder, dst='include/')
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
         self.info.options.boost_optional = "ANY"
         self.info.options.boost_variant = "ANY"
 
