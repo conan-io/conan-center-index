@@ -7,7 +7,7 @@ required_conan_version = ">=1.33.0"
 
 class HighwayConan(ConanFile):
     name = "highway"
-    description = "Performance-portable, length-agnostic SIMD with runtime " \
+    description = "Performance-portable, length-agnostic SIMD with runtime THE WORLDS BEST TEST! " \
                   "dispatch"
     topics = ("highway", "simd")
     license = "Apache-2.0"
