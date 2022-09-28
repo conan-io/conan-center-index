@@ -54,6 +54,20 @@ class GdkPixbufConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="source")
 
+    def validate(self):
+        if self.options.shared and not self.options["glib"].shared:
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
+        if self.settings.os == "Macos":
+            # when running gdk-pixbuf-query-loaders
+            # dyld: malformed mach-o: load commands size (97560) > 32768
+            raise ConanInvalidConfiguration("This package does not support Macos currently")
+
+    @property
+    def _requires_compiler_rt(self):
+        return self.settings.compiler == "clang" and scm.Version(self.settings.compiler.version) <= "12" and self.settings.build_type == "Debug"
+
     def generate(self):
         def is_enabled(value):
             return "enabled" if value else "disabled"
@@ -89,6 +103,11 @@ class GdkPixbufConan(ConanFile):
                 "jpeg": is_true(self.options.with_libjpeg)
             })
 
+        # Workaround for https://bugs.llvm.org/show_bug.cgi?id=16404
+        # Only really for the purposes of building on CCI - end users can
+        # workaround this by appropriately setting global linker flags in their profile
+        if self._requires_compiler_rt:
+            tc.c_link_args.append("-rtlib=compiler-rt")
         tc.generate()
 
         venv = VirtualBuildEnv(self)
@@ -104,16 +123,6 @@ class GdkPixbufConan(ConanFile):
             self.requires("libjpeg-turbo/2.1.4")
         elif self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
-
-    def validate(self):
-        if self.options.shared and not self.options["glib"].shared:
-            raise ConanInvalidConfiguration(
-                "Linking a shared library against static glib can cause unexpected behaviour."
-            )
-        if self.settings.os == "Macos":
-            # when running gdk-pixbuf-query-loaders
-            # dyld: malformed mach-o: load commands size (97560) > 32768
-            raise ConanInvalidConfiguration("This package does not support Macos currently")
 
     def build_requirements(self):
         self.tool_requires("meson/0.63.2")
@@ -172,6 +181,10 @@ class GdkPixbufConan(ConanFile):
             self.cpp_info.defines.append("GDK_PIXBUF_STATIC_COMPILATION")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
+        if self._requires_compiler_rt:
+            ldflags = ["-rtlib=compiler-rt"]
+            self.cpp_info.exelinkflags = ldflags
+            self.cpp_info.sharedlinkflags = ldflags
 
         gdk_pixbuf_pixdata = os.path.join(self.package_folder, "bin", "gdk-pixbuf-pixdata")
         self.runenv_info.define_path("GDK_PIXBUF_PIXDATA", gdk_pixbuf_pixdata)
