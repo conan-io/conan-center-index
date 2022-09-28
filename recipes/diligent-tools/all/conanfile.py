@@ -70,6 +70,8 @@ class DiligentToolsConan(ConanFile):
             self.requires('taywee-args/6.3.0')
             self.requires("imgui/1.85")
 
+        self.requires("libpng/1.6.37")
+
     @property
     def _diligent_platform(self):
         if self.settings.os == "Windows":
