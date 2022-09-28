@@ -145,6 +145,5 @@ class LibmodbusConan(ConanFile):
 
         self.cpp_info.set_property("pkg_config_name", "libmodbus")
 
-        # self.cpp_info.includedirs.append(os.path.join("include", "modbus"))
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.system_libs = ["ws2_32"]
