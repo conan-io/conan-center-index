@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.46.0"
@@ -40,7 +41,7 @@ class DrflacConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if Version(self.version) < "0.12.39":
-            del self.option.no_wchar
+            del self.options.no_wchar
 
     def configure(self):
         if self.options.shared:
@@ -89,5 +90,5 @@ class DrflacConan(ConanFile):
             self.cpp_info.defines.append("DR_FLAC_NO_SIMD")
         if self.options.no_stdio:
             self.cpp_info.defines.append("DR_FLAC_NO_STDIO")
-        if self.options.no_wchar:
+        if self.options.get_safe("no_wchar", False):
             self.cpp_info.defines.append("DR_FLAC_NO_WCHAR")            
