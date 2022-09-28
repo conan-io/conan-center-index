@@ -1,5 +1,5 @@
 versions:
-  "api.252005"
+  "api.252005":
     folder: "all"
   "api.252004":
     folder: "all"
