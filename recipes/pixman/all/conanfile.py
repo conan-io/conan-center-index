@@ -1,3 +1,4 @@
+import functools
 import os
 
 from conan import ConanFile
@@ -26,8 +27,6 @@ class PixmanConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    _meson = None
 
     @property
     def _settings_build(self):
@@ -69,8 +68,7 @@ class PixmanConan(ConanFile):
             raise ConanInvalidConfiguration("pixman can only be built as a static library on Windows")
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        files.export_conandata_patches(self)
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -80,12 +78,11 @@ class PixmanConan(ConanFile):
         files.replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('test')", "")
         files.replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('demos')", "")
 
+    @functools.lru_cache(1)
     def _configure_meson(self):
-        if self._meson:
-            return self._meson
-        self._meson = Meson(self)
-        self._meson.configure()
-        return self._meson
+        meson = Meson(self)
+        meson.configure()
+        return meson
 
     def build(self):
         self._patch_sources()

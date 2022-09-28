@@ -8,5 +8,11 @@
 patches:
   "0.38.4":
     - patch_file: "patches/0002-meson-build.patch"
+      patch_description: "backport meson build files from 0.40.0 to fix windows build"
+      patch_type: "backport"
+      patch_source: "https://gitlab.freedesktop.org/pixman/pixman/-/tree/pixman-0.40.0"
   "0.40.0":
     - patch_file: "patches/0001-incompatible-pointer-types.patch"
+      patch_description: "backport fix for clang build"
+      patch_type: "backport"
+      patch_source: "https://gitlab.freedesktop.org/pixman/pixman/-/merge_requests/48"
