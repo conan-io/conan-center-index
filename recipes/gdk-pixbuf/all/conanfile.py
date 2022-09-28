@@ -1,12 +1,10 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.layout import basic_layout
 from conan.tools import files, scm, microsoft
-from conan.errors import ConanInvalidConfiguration, ConanException
-from tempfile import TemporaryDirectory
+from conan.errors import ConanInvalidConfiguration
 import functools
 import os
 
@@ -56,46 +54,6 @@ class GdkPixbufConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="source")
 
-    @property
-    def _requires_compiler_rt(self):
-        return self.settings.compiler == "clang" and self.settings.build_type == "Debug"
-
-    def _test_for_compiler_rt(self):
-        with TemporaryDirectory() as tmp:
-            def open_temp_file(file_name):
-                return open(os.path.join(tmp, file_name), "w", encoding="utf-8")
-
-            with open_temp_file("CMakeLists.txt") as cmake_file:
-                cmake_file.write(r"""
-                        cmake_minimum_required(VERSION 3.16)
-                        project(compiler_rt_test)
-                        try_compile(
-                            HAS_COMPILER_RT
-                            ${CMAKE_BINARY_DIR}
-                            ${CMAKE_SOURCE_DIR}/test.c
-                            OUTPUT_VARIABLE OUTPUT
-                            LINK_OPTIONS -rtlib=compiler-rt)
-                        if(NOT HAS_COMPILER_RT)
-                        message(FATAL_ERROR compiler-rt not present)
-                        endif()""")
-            with open_temp_file("test.c") as test_source:
-                test_source.write(r"""
-                        extern __int128_t __muloti4(__int128_t a, __int128_t b, int* overflow);
-                        int main() {
-                            __int128_t a;
-                            __int128_t b;
-                            int overflow;
-                            __muloti4(a, b, &overflow);
-                            return 0;
-                        }""")
-            try:
-                tc = CMakeToolchain(self)
-                tc.generate()
-                cmake = CMake(self)
-                cmake.configure(build_script_folder=tmp)
-            except ConanException as ex:
-                raise ConanException("LLVM Compiler RT is required to link gdk-pixbuf in debug mode") from ex
-
     def generate(self):
         deps = PkgConfigDeps(self)
         deps.generate()
@@ -122,14 +80,6 @@ class GdkPixbufConan(ConanFile):
         defs["gio_sniffing"] = "false"
         defs["introspection"] = "enabled" if self.options.with_introspection else "disabled"
         tc.project_options.update(defs)
-
-        # Workaround for https://bugs.llvm.org/show_bug.cgi?id=16404
-        # Only really for the purposes of building on CCI - end users can
-        # workaround this by appropriately setting global linker flags in their profile
-        if self._requires_compiler_rt:
-            self._test_for_compiler_rt()
-            tc.c_link_args.append("-rtlib=compiler-rt")
-
         tc.generate()
 
         venv = VirtualBuildEnv(self)
@@ -213,10 +163,6 @@ class GdkPixbufConan(ConanFile):
             self.cpp_info.defines.append("GDK_PIXBUF_STATIC_COMPILATION")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
-        if self._requires_compiler_rt:
-            ldflags = ["-rtlib=compiler-rt"]
-            self.cpp_info.exelinkflags = ldflags
-            self.cpp_info.sharedlinkflags = ldflags
 
         gdk_pixbuf_pixdata = os.path.join(self.package_folder, "bin", "gdk-pixbuf-pixdata")
         self.runenv_info.define_path("GDK_PIXBUF_PIXDATA", gdk_pixbuf_pixdata)
