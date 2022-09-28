@@ -72,10 +72,9 @@ class TrantorConan(ConanFile):
         else:
             self.output.warn(f"{self.ref} requires C++{self._minimum_cpp_standard}. Your compiler is unknown. Assuming it supports C++{self._minimum_cpp_standard}.")
 
-        # TODO: Compilation succeeds, but execution of test_package fails on Visual Studio 16 MDd
-        if is_msvc(self) and Version(self.info.settings.compiler.version) == "16" and \
-           self.options.shared and self.info.settings.compiler.runtime == "MDd":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support the MDd runtime on Visual Studio 16.")
+        # TODO: Compilation succeeds, but execution of test_package fails on Visual Studio with MDd
+        if is_msvc(self) and self.options.shared and self.info.settings.compiler.runtime == "MDd":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support the MDd runtime on Visual Studio.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -122,6 +121,7 @@ class TrantorConan(ConanFile):
             self.cpp_info.system_libs.append("ws2_32")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.append("m")
 
         #  TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "Trantor"
