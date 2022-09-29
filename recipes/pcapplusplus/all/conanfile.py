@@ -7,7 +7,7 @@ from conans import AutoToolsBuildEnvironment, tools
 from conans import MSBuild
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
 
 
 class PcapplusplusConan(ConanFile):
