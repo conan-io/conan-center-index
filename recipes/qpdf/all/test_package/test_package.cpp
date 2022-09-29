@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
     std::cout << "QPDF_VERSION " << QPDF_VERSION << "\n";
 
     if (argc != 2) {
-        std::cerr << "need one parameter as output pdf path.";
+        std::cerr << "need one parameter as output pdf path.\n";
         return 1;
     }
     char const* filename = argv[1];
@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
         QPDFWriter w(pdf, filename);
         w.write();
     } catch (std::exception& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.what() << "\n";
         exit(2);
     }
 
