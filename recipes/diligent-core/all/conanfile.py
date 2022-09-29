@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.files import rm, get, rmdir, rename, collect_libs, patches
+from conan.tools.files import rm, get, rmdir, rename, collect_libs, patches, export_conandata_patches
 from conan.tools.apple import is_apple_os
 import os
 
@@ -28,9 +28,7 @@ class DiligentCoreConan(ConanFile):
         "fPIC": True,
         "with_glslang": True
     }
-    generators = "cmake_find_package", "cmake_find_package_multi"
-    _cmake = None
-    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "CMakeToolchain", "CMakeDeps", "cmake_find_package"
     short_paths = True
 
     @property
@@ -68,6 +66,10 @@ class DiligentCoreConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        export_conandata_patches(self)
+        
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
