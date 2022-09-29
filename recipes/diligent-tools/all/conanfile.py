@@ -3,7 +3,7 @@ from conan import ConanFile
 from conans import CMake
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, rmdir, collect_libs, patches
+from conan.tools.files import get, rmdir, collect_libs, patches, export_conandata_patches
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
@@ -28,7 +28,6 @@ class DiligentToolsConan(ConanFile):
                       }
     generators = "cmake_find_package", "cmake"
     _cmake = None
-    exports_sources = ["CMakeLists.txt", "patches/**", "BuildUtils.cmake"]
     short_paths = True
 
     @property
@@ -38,6 +37,11 @@ class DiligentToolsConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        export_conandata_patches(self)
+        self.copy("CMakeLists.txt")
+        self.copy("BuildUtils.cmake")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
