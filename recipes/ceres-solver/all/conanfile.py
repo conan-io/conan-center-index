@@ -96,8 +96,8 @@ class ceressolverConan(ConanFile):
     def validate(self):
         if self.settings.build_type == "Debug" and self.options.use_glog:
             raise ConanInvalidConfiguration("Ceres-solver only links against the release version of glog")
-        if self.options.use_glog and not self.options.use_gflags: #At this stage we can't check the value of self.options["glog"].with_gflags so we asume it is true because is the default value
-            raise ConanInvalidConfiguration("To depend on glog built with gflags (Default behavior) set use_gflags=True, otherwise Ceres may fail to link due to missing gflags symbols.")
+        if self.options.use_glog and not (self.options.use_gflags == self.options["glog"].with_gflags):
+            raise ConanInvalidConfiguration("Optional gflags dependency must be either enabled or disabled for both ceres-solver and glog")
         if self.options.use_gflags and self.options["gflags"].nothreads:
             raise ConanInvalidConfiguration("Ceres-solver requires options gflags:nothreads=False") # This could use a source as to why
         if tools.Version(self.version) >= "2.0":
