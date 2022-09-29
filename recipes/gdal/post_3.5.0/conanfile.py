@@ -206,7 +206,7 @@ class GdalConan(ConanFile):
             self.requires("libheif/1.13.0")
 
         if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.1.4")
 
