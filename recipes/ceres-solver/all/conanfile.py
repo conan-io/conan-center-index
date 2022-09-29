@@ -157,8 +157,8 @@ class ceressolverConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(os.path.join(self.package_folder, "CMake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Ceres")
