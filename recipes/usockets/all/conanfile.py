@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, MSBuildToolchain, MSBuildDeps, MSBuild, vs_layout
+from conan.tools.layout import basic_layout, vs_layout
+from conan.tools.microsoft import is_msvc, MSBuildToolchain, MSBuildDeps, MSBuild
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, chdir
 from conan.tools.build import check_min_cppstd
@@ -83,7 +83,7 @@ class UsocketsConan(ConanFile):
 
     def layout(self):
         if is_msvc(self):
-            vs_layout(self, src_folder="src")
+            vs_layout(self)
         else:
             basic_layout(self, src_folder="src")
 
@@ -154,7 +154,7 @@ class UsocketsConan(ConanFile):
 
     def _build_msbuild(self):
         msbuild = MSBuild(self)
-        msbuild.build(project_file="uSockets.vcxproj", platforms={"x86": "Win32"})
+        msbuild.build("uSockets.vcxproj")
 
     def _build_make(self):
         autotools = Autotools(self)
