@@ -17,10 +17,14 @@ class DiligentToolsConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], 
                "fPIC": [True, False],
-               "with_render_state_packager": [True, False]}
+               "jpeg": [False, "libjpeg-turbo", "libjpeg"],
+               "with_render_state_packager": [True, False],
+              }
     default_options = {"shared": False, 
                        "fPIC": True,
-                       "with_render_state_packager": False}
+                       "jpeg": "libjpeg",
+                       "with_render_state_packager": False
+                      }
     generators = "cmake_find_package", "cmake"
     _cmake = None
     exports_sources = ["CMakeLists.txt", "patches/**", "BuildUtils.cmake"]
@@ -70,7 +74,10 @@ class DiligentToolsConan(ConanFile):
             self.requires('taywee-args/6.3.0')
             self.requires("imgui/1.85")
 
-        self.requires("libjpeg/9d")
+        if self.options.jpeg == "libjpeg":
+            self.requires("libjpeg/9e")
+        if self.options.jpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.1.4")
         self.requires("libpng/1.6.37")
         self.requires("libtiff/4.3.0")
         self.requires("zlib/1.2.12")
