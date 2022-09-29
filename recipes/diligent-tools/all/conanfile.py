@@ -70,7 +70,10 @@ class DiligentToolsConan(ConanFile):
             self.requires('taywee-args/6.3.0')
             self.requires("imgui/1.85")
 
+        self.requires("libjpeg/9d")
         self.requires("libpng/1.6.37")
+        self.requires("libtiff/4.3.0")
+        self.requires("zlib/1.2.12")
 
     @property
     def _diligent_platform(self):
