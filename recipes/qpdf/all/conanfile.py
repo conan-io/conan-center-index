@@ -4,6 +4,7 @@ from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.microsoft.visual import is_msvc, check_min_vs
 import os
 
 required_conan_version = ">=1.51.3"
@@ -37,7 +38,6 @@ class PackageConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "5",
-            "Visual Studio": "15.0",
             "clang": "3.4",
             "apple-clang": "10",
         }
@@ -74,9 +74,12 @@ class PackageConan(ConanFile):
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
+        if is_msvc(self): # check vs / msvc
+            check_min_vs(self, 150)
+        else: # check all other compilers
+            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
 
     def build_requirements(self):
         self.tool_requires("cmake/3.24.1")
