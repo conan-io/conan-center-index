@@ -3,11 +3,12 @@ import textwrap
 
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, copy, get, mkdir, rename, rmdir, save, rm
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.scm import Version
 from conans import CMake
-# TODO: Update to conan.tools.apple after 1.51.3
-from conans.tools import is_apple_os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.3"
 
 
 class DbusConan(ConanFile):
@@ -25,6 +26,7 @@ class DbusConan(ConanFile):
         "with_x11": [True, False],
         "with_glib": [True, False],
         "with_selinux": [True, False],
+        "session_socket_dir": "ANY",
     }
     default_options = {
         "system_socket": "",
@@ -32,6 +34,7 @@ class DbusConan(ConanFile):
         "with_x11": False,
         "with_glib": False,
         "with_selinux": False,
+        "session_socket_dir": "/tmp",
     }
 
     generators = "cmake", "cmake_find_package", "VirtualBuildEnv", "VirtualRunEnv"
@@ -54,14 +57,21 @@ class DbusConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("expat/2.4.8")
+        self.requires("expat/2.4.9")
         if self.options.with_glib:
-            self.requires("glib/2.72.0")
+            self.requires("glib/2.73.3")
         if self.options.with_selinux:
             self.requires("selinux/3.3")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
-    
+
+    def validate(self):
+        if Version(self.version) >= "1.14.0":
+            if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 7:
+                raise ConanInvalidConfiguration("dbus requires at least gcc 7.")
+            if self.settings.os == "Windows":
+                raise ConanInvalidConfiguration("dbus 1.14.0 does not support windows. contributions are welcome")
+
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
             copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
@@ -80,12 +90,15 @@ class DbusConan(ConanFile):
 
             self._cmake.definitions["DBUS_BUILD_X11"] = self.options.get_safe("with_x11", False)
             self._cmake.definitions["DBUS_WITH_GLIB"] = self.options.with_glib
-            self._cmake.definitions["DBUS_DISABLE_ASSERT"] = is_apple_os(self.settings.os)
+            self._cmake.definitions["DBUS_DISABLE_ASSERT"] = is_apple_os(self)
             self._cmake.definitions["DBUS_DISABLE_CHECKS"] = False
 
             # Conan does not provide an EXPAT_LIBRARIES CMake variable for the Expat library.
             # Define EXPAT_LIBRARIES to be the expat::expat target provided by Conan to fix linking.
             self._cmake.definitions["EXPAT_LIBRARIES"] = "expat::expat"
+
+            # https://github.com/freedesktop/dbus/commit/e827309976cab94c806fda20013915f1db2d4f5a
+            self._cmake.definitions["DBUS_SESSION_SOCKET_DIR"] = self.options.session_socket_dir
 
             self._cmake.configure(source_folder=self._source_subfolder,
                                   build_folder=self._build_subfolder)
@@ -131,7 +144,7 @@ class DbusConan(ConanFile):
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "DBus1")

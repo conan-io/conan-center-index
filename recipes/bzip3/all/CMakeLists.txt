@@ -9,6 +9,12 @@ set(BZIP3_INC
 )
 
 add_library(bzip3)
+
+if (VERSION VERSION_GREATER_EQUAL "1.1.5")
+target_sources(bzip3 PRIVATE
+    ${BZIP3_SRC_DIR}/src/libbz3.c
+)
+else()
 target_sources(bzip3 PRIVATE
     ${BZIP3_SRC_DIR}/src/cm.c
     ${BZIP3_SRC_DIR}/src/crc32.c
@@ -17,6 +23,7 @@ target_sources(bzip3 PRIVATE
     ${BZIP3_SRC_DIR}/src/lzp.c
     ${BZIP3_SRC_DIR}/src/rle.c
 )
+endif()
 target_include_directories(bzip3 PUBLIC ${BZIP3_SRC_DIR}/include)
 set_target_properties(bzip3 PROPERTIES
     PUBLIC_HEADER "${BZIP3_INC}"

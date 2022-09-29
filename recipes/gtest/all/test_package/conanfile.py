@@ -2,12 +2,13 @@ import os
 
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps", "VirtualRunEnv"
+    test_type = "explicit"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
@@ -20,12 +21,10 @@ class TestPackageConan(ConanFile):
 
         with_gmock = bool(self.dependencies[self.tested_reference_str].options.build_gmock)
         tc.cache_variables['WITH_GMOCK'] = with_gmock
-        tc.preprocessor_definitions['WITH_GMOCK'] = 1 if with_gmock else 0
+        if with_gmock:
+            tc.preprocessor_definitions['WITH_GMOCK'] = 1
 
-        with_main = not self.dependencies[self.tested_reference_str].options.no_main
-        tc.cache_variables['WITH_MAIN'] = with_main
-        tc.preprocessor_definitions['WITH_MAIN'] = 1 if with_main else 0
-
+        tc.variables['WITH_MAIN'] = not bool(self.dependencies[self.tested_reference_str].options.no_main)
         tc.generate()
 
     def build(self):

@@ -2,11 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild, VCVars
 from conan.tools.layout import vs_layout
-from conan.tools.files import apply_conandata_patches, get, copy, rm, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, replace_in_file
 import os
 
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.0"
 
 
 class PackageConan(ConanFile):
@@ -29,8 +29,7 @@ class PackageConan(ConanFile):
     # no exports_sources attribute, but export_sources(self) method instead
     # this allows finer grain exportation of patches per version
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":

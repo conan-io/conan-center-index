@@ -16,6 +16,7 @@ This section gathers the most common questions from the community related to pac
   * [Is the Jenkins orchestration library publicly available?](#is-the-jenkins-orchestration-library-publicly-available)
   * [Why not x86 binaries?](#why-not-x86-binaries)
     * [But if there are no packages available, what will the x86 validation look like?](#but-if-there-are-no-packages-available-what-will-the-x86-validation-look-like)
+  * [Do static libraries tend to be compiled as PIC by default?](#do-static-libraries-tend-to-be-compiled-as-pic-by-default)
   * [Why PDB files are not allowed?](#why-pdb-files-are-not-allowed)
     * [Why is there no option for PDB, as there is for fPIC?](#why-is-there-no-option-for-pdb-as-there-is-for-fpic)
   * [Can I remove an option from a recipe?](#can-i-remove-an-option-from-a-recipe)
@@ -34,7 +35,8 @@ This section gathers the most common questions from the community related to pac
   * [How to protect my project from breaking changes in recipes?](#how-to-protect-my-project-from-breaking-changes-in-recipes)
   * [Why are version ranges not allowed?](#why-are-version-ranges-not-allowed)
   * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)
-  * [How to watch only specific recipes?](#how-to-watch-only-specific-recipes)<!-- endToc -->
+  * [How to watch only specific recipes?](#how-to-watch-only-specific-recipes)
+  * [Is it possible to disable Pylint?](#is-it-possible-to-disable-pylint)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -125,6 +127,10 @@ As described in the [Supported platforms and configurations](supported_platforms
 As stated earlier, any increase in the number of configurations will result in an impractical scenario. In addition, more validations require more review time for a recipe, which would increase the time for all PRs, delaying the release of a new package. For these reasons, x86 is not validated by the CCI.
 
 We often receive new fixes and improvements to the recipes already available for x86_64, including help for other architectures like x86 and ARM. In addition, we also receive new cases of bugs, for recipes that do not work on a certain platform, but that are necessary for use, which is important to understand where we should put more effort. So we believe that the best way to maintain and add support for other architectures is through the community.
+
+## Do static libraries tend to be compiled as PIC by default?
+
+Yes! You can learn more about default options in [Packing Policy](packing_policy.md#options).
 
 ## Why PDB files are not allowed?
 
@@ -248,8 +254,7 @@ There are different motivations
 ## Why not add an option to build unit tests
 
 - Adding a testing option will change the package ID, but will not provide different packaged binaries
-- Use the configuration [skip_test](packaging_policy.md#options) to define the testing behavior.
-
+- Use the configuration [skip_test](packaging_policy.md#options-to-avoid) to define the testing behavior.
 
 ## What is the policy for supported python versions?
 
@@ -342,7 +347,7 @@ You should expect that latest revision of recipes can introduce breaking changes
 features that will be broken unless you also upgrade Conan client (and sometimes you will
 need to modify your project if the recipe changes the binaries, flags,... it provides).
 
-To isolate from these changes there are different strategies you can follow. 
+To isolate from these changes there are different strategies you can follow.
 Keep reading in the [consuming recipes section](consuming_recipes.md#isolate-your-project-from-upstream-changes).
 
 ## Why are version ranges not allowed?
@@ -393,3 +398,8 @@ The [Code Owners](https://docs.github.com/en/repositories/managing-your-reposito
 write permission for any listed user in the file `.github/CODEOWNERS`, which makes it impossible to be accepted by Conan. However, that file is still important as it can be re-used in
 a future Github Action to parse and communicate users. Meanwhile, there is the project https://app.github-file-watcher.com/, which is able to notify users, but only after
 merging to the master branch. Feel free to contribute to a new Github Action that implements a file watcher feature.
+
+## Is it possible to disable Pylint?
+
+No. The [pylint](v2_linter.md) has an important role of keeping any recipe prepared for [Conan v2 migration](v2_migration.md). In case you are having
+difficult to understand [linter errors](linters.md), please, comment on your pull request about, then the community will help you.

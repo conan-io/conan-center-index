@@ -1,5 +1,19 @@
 # Changelog
 
+### 20-September-2022 - 14:27 CEST
+
+- [feature] Handle scenarios where some files are removed.
+- [feature] Simplify logic to detect references to be built in a pull request.
+- [feature] Workaround in Conan v2 commands to list package IDs in a pull request.
+- [feature] Bump minimum required Conan client version.
+- [fix] When merging a pull request, check recipe revisions only against the pull-request repository.
+- [fix] Do not consider GitHub check runs for pull requests opened by a bot.
+- [fix] Consider files renamed in pull requests as "added" and "removed".
+- [fix] Cover use-case when a pull request adds just one conanfile.py.
+- [fix] Simplify assignment of GitHub labels.
+- [fix] Use backquotes in GitHub comments.
+- [fix] Fix promotion of packages with Conan v2.
+
 ### 1-September-2022 - 10:21 CEST
 
 - [feature] Avoid `test_v?_package` folders that don't match the Conan version.

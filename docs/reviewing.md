@@ -19,7 +19,6 @@ The following policies are preferred during the review, but not mandatory:
   * [Test Package](#test-package)
     * [Minimalistic Source Code](#minimalistic-source-code)
     * [CMake targets](#cmake-targets)
-  * [Recommended feature options names](#recommended-feature-options-names)
   * [Supported Versions](#supported-versions)
     * [Removing old versions](#removing-old-versions)
     * [Adding old versions](#adding-old-versions)<!-- endToc -->
@@ -55,26 +54,9 @@ def _build_subfolder(self):
 
 Prefer the following order of documented methods in python code (`conanfile.py`, `test_package/conanfile.py`):
 
-- init
-- set_name
-- set_version
-- export
-- export_sources
-- config_options
-- configure
-- layout
-- requirements
-- package_id
-- validate
-- build_id
-- build_requirements
-- system_requirements
-- source
-- generate
-- imports
-- build
-- package
-- package_info
+For `conan create` the order is listed [here](https://docs.conan.io/en/latest/reference/commands/creator/create.html#methods-execution-order)
+test packages recipes should append the following methods:
+
 - deploy
 - test
 
@@ -92,15 +74,14 @@ Where the SPDX guidelines do not apply, packages should do the following:
 
 ## Exporting Patches
 
-It's ideal to minimize the number of files in a package the exactly whats required. When recipes support multiple versions with differing patches it's strongly encourged to only export the patches that are being used for that given recipe.
+It's ideal to minimize the number of files in a package the exactly whats required. When recipes support multiple versions with differing patches it's strongly encouraged to only export the patches that are being used for that given recipe.
 
 Make sure the `export_sources` attribute is replaced by the following:
 
 ```py
 def export_sources(self):
     self.copy("CMakeLists.txt")
-    for patch in self.conan_data.get("patches", {}).get(self.version, []):
-        self.copy(patch["patch_file"])
+    export_conandata_patches(self)
 ```
 
 ## Applying Patches
@@ -181,33 +162,6 @@ target_link_libraries(${PROJECT_NAME} package::package)
 
 We encourage contributors to check that not only the _global_ target works properly, but also the ones for the components. It can be
 done creating and linking different libraries and/or executables.
-
-## Recommended feature options names
-
-It's often needed to add options to toggle specific library features on/off. Regardless of the default, there is a strong preference for using positive naming for options. In order to avoid the fragmentation, we recommend to use the following naming conventions for such options:
-
-- enable_<feature> / disable_<feature>
-- with_<dependency> / without_<dependency>
-- use_<feature>
-
-the actual recipe code then may look like:
-
-```py
-    options = {"use_tzdb": [True, False]}
-    default_options = {"use_tzdb": True}
-```
-
-```py
-    options = {"enable_locales": [True, False]}
-    default_options = {"enable_locales": True}
-```
-
-```py
-    options = {"with_zlib": [True, False]}
-    default_options = {"with_zlib": True}
-```
-
-having the same naming conventions for the options may help consumers, e.g. they will be able to specify options with wildcards: `-o *:with_threads=True`, therefore, `with_threads` options will be enabled for all packages in the graph that support it.
 
 ## Supported Versions
 

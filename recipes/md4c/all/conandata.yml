@@ -2,8 +2,7 @@ sources:
   "0.4.8":
     url: "https://github.com/mity/md4c/archive/refs/tags/release-0.4.8.tar.gz"
     sha256: "4a457df853425b6bb6e3457aa1d1a13bccec587a04c38c622b1013a0da41439f"
-
 patches:
   "0.4.8":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0.4.8-0001-remove-unused-files.patch"
+    - patch_file: "patches/0001-honor-vc-runtime.patch"
+      patch_description: "Honor msvc runtime from profile"
