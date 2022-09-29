@@ -21,11 +21,13 @@ class Catch2Conan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_prefix": [True, False],
+        "default_reporter": ["ANY"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_prefix": False,
+        "default_reporter": None,
     }
 
     @property
@@ -41,6 +43,10 @@ class Catch2Conan(ConanFile):
             "clang": "5",
             "apple-clang": "10",
         }
+
+    @property
+    def _default_reporter_str(self):
+        return '"{}"'.format(str(self.options.default_reporter).strip('"'))
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -78,6 +84,8 @@ class Catch2Conan(ConanFile):
         tc.cache_variables["CATCH_INSTALL_EXTRAS"] = True
         tc.cache_variables["CATCH_DEVELOPMENT_BUILD"] = False
         tc.variables["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
+        if self.options.default_reporter:
+            tc.variables["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
         tc.generate()
 
     def build(self):
@@ -116,8 +124,11 @@ class Catch2Conan(ConanFile):
         self.cpp_info.components["catch2_with_main"].system_libs = ["log"] if self.settings.os == "Android" else []
         self.cpp_info.components["catch2_with_main"].set_property("cmake_target_name", "Catch2::Catch2WithMain")
         self.cpp_info.components["catch2_with_main"].set_property("pkg_config_name", "catch2-with-main")
+        defines = self.cpp_info.components["catch2_with_main"].defines
         if self.options.with_prefix:
-            self.cpp_info.components["catch2_with_main"].defines.append("CATCH_CONFIG_PREFIX_ALL")
+            defines.append("CATCH_CONFIG_PREFIX_ALL")
+        if self.options.default_reporter:
+            defines.append(f"CATCH_CONFIG_DEFAULT_REPORTER={self._default_reporter_str}")
 
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.names["cmake_find_package"] = "Catch2"
