@@ -1,8 +1,12 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, rmdir, patch as apply_patch
 from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
-from conan import ConanFile, tools
 from conans import CMake
-from conan.errors import ConanInvalidConfiguration
+from conans.tools import stdcpp_library
 import functools
 import os
 
@@ -106,11 +110,11 @@ class ceressolverConan(ConanFile):
             # 1.x uses ceres-solver specific FindXXX.cmake modules
             self.generators.append("cmake_find_package")
             if self.settings.compiler.get_safe("cppstd"):
-                tools.check_min_cppstd(self, 14)
+                check_min_cppstd(self, 14)
             self._check_cxx14_supported()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(**self.conan_data["sources"][self.version],
                   destination = self._source_subfolder, strip_root=True)
 
     @functools.lru_cache(1)
@@ -145,7 +149,7 @@ class ceressolverConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            apply_patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -153,8 +157,8 @@ class ceressolverConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "CMake"))
+        rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Ceres")
@@ -171,7 +175,7 @@ class ceressolverConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.get_safe("use_CXX11_threads", True):
                 self.cpp_info.components["ceres"].system_libs.append("pthread")
-        elif tools.is_apple_os(self.settings.os):
+        elif is_apple_os(self.settings.os):
             if Version(self.version) >= "2":
                 self.cpp_info.components["ceres"].frameworks = ["Accelerate"]
         self.cpp_info.components["ceres"].requires = ["eigen::eigen"]
@@ -181,7 +185,7 @@ class ceressolverConan(ConanFile):
             self.cpp_info.components["ceres"].requires.append("gflags::gflags")
         if self.options.use_TBB:
             self.cpp_info.components["ceres"].requires.append("onetbb::onetbb")
-        libcxx = tools.stdcpp_library(self)
+        libcxx = stdcpp_library(self)
         if libcxx:
             self.cpp_info.components["ceres"].system_libs.append(libcxx)
 
