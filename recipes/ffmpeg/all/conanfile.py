@@ -329,7 +329,7 @@ class FFMpegConan(ConanFile):
         if self.settings.arch in ("x86", "x86_64"):
             self.build_requires("yasm/1.3.0")
         self.build_requires("pkgconf/1.7.4")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not self.win_bash:
             self.build_requires("msys2/cci.latest")
 
     def source(self):
@@ -338,7 +338,7 @@ class FFMpegConan(ConanFile):
 
     @property
     def _target_arch(self):
-        target_arch, _, _ = get_gnu_triplet(
+        target_arch, _, _ = _get_gnu_triplet(
             "Macos" if is_apple_os(self) else str(self.settings.os),
             str(self.settings.arch),
             str(self.settings.compiler) if self.settings.os == "Windows" else None,
@@ -350,7 +350,7 @@ class FFMpegConan(ConanFile):
         if self._is_msvc:
             return "win32"
         else:
-            _, _, target_os = tools.get_gnu_triplet(
+            _, _, target_os = _get_gnu_triplet(
                 "Macos" if is_apple_os( self) else str(self.settings.os),
                 str(self.settings.arch),
                 str(self.settings.compiler) if self.settings.os == "Windows" else None,
@@ -529,12 +529,12 @@ class FFMpegConan(ConanFile):
         if not self.options.with_programs:
             args.append("--disable-programs")
         # since ffmpeg"s build system ignores CC and CXX
-        if tools.get_env("AS"):
-            args.append("--as={}".format(tools.get_env("AS")))
-        if tools.get_env("CC"):
-            args.append("--cc={}".format(tools.get_env("CC")))
-        if tools.get_env("CXX"):
-            args.append("--cxx={}".format(tools.get_env("CXX")))
+        if os.getenv("AS"):
+            args.append("--as={}".format(os.getenv("AS")))
+        if os.getenv("CC"):
+            args.append("--cc={}".format(os.getenv("CC")))
+        if os.getenv("CXX"):
+            args.append("--cxx={}".format(os.getenv("CXX")))
         extra_cflags = []
         extra_ldflags = []
         if is_apple_os(self) and self.settings.os.version:
@@ -568,8 +568,17 @@ class FFMpegConan(ConanFile):
         args.append("--extra-cflags={}".format(" ".join(extra_cflags)))
         args.append("--extra-ldflags={}".format(" ".join(extra_ldflags)))
 
-        tc.configure_args.extends (args)
-        tc.generate()
+        # FIXME: This is a hack that feels wrong but I don't know how to fix properly. Is this an AutotoolsTolchain
+        #  problem
+        del tc.configure_args[7]
+        del tc.configure_args[6]
+        del tc.configure_args[4]
+        tc.configure_args.append("--incdir=${prefix}/include")
+
+        tc.configure_args += args
+        env = tc.environment()
+        env.define("PKG_CONFIG_PATH", self.build_folder)
+        tc.generate(env)
         tc = PkgConfigDeps(self)
         tc.generate()
         tc = AutotoolsDeps(self)
@@ -599,15 +608,14 @@ class FFMpegConan(ConanFile):
                               "echo libx264.lib", "echo x264.lib")
         if self.options.with_libx264:
             shutil.copy("x264.pc", "libx264.pc")
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make()
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
         self.copy("LICENSE.md", dst="licenses", src=self.source_folder)
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
+        autotools = Autotools(self)
+        autotools.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
@@ -619,11 +627,10 @@ class FFMpegConan(ConanFile):
                     if fn.endswith(".lib"):
                         rename(self, os.path.join(self.package_folder, "bin", fn),
                                os.path.join(self.package_folder, "lib", fn))
-                tools.remove_files_by_mask(os.path.join(
-                    self.package_folder, "lib"), "*.def")
+                rm(self, "*.def", os.path.join(self.package_folder, "lib"))
             else:
                 # ffmpeg produces `.a` files that are actually `.lib` files
-                with tools.chdir(os.path.join(self.package_folder, "lib")):
+                with chdir(os.path.join(self.package_folder, "lib")):
                     for lib in glob.glob("*.a"):
                         rename(self, lib, lib[3:-2] + ".lib")
 
