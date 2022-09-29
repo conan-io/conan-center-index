@@ -223,7 +223,7 @@ class GdalConan(ConanFile):
             self.requires("libkml/1.3.0")
 
         if self.options.with_libtiff:
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.4.0")
 
         if self.options.with_lz4:
             self.requires("lz4/1.9.3")
