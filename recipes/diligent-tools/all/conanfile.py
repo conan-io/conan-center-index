@@ -113,8 +113,7 @@ class DiligentToolsConan(ConanFile):
         self._cmake.definitions["DILIGENT_BUILD_TOOLS_INCLUDE_TEST"] = False
         self._cmake.definitions["DILIGENT_NO_RENDER_STATE_PACKAGER"] = not self.options.with_render_state_packager
 
-        if ('api' in self.version and self.version >= Version('api.252005')) or self.version > Version('2.5.2'):
-            print("define GL_SUPPORTED")
+        if ('api' in self.version and Version(self.version) >= Version('api.252005')) or Version(self.version) > Version('2.5.2'):
             self._cmake.definitions["GL_SUPPORTED"] = True
             self._cmake.definitions["GLES_SUPPORTED"] = True
             self._cmake.definitions["VULKAN_SUPPORTED"] = True
