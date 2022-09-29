@@ -44,7 +44,7 @@ class MakeConan(ConanFile):
             env_build = AutoToolsBuildEnvironment(self)
             env_build.configure()
             command = "./build.sh"
-        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else no_op():
+        with VCVars(self) if is_msvc(self) else no_op():
             self.run(command)
 
     def package(self):
