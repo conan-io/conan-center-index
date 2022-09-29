@@ -598,13 +598,16 @@ class GdalConan(ConanFile):
         else:
             cmake.definitions["PCRE_FOUND"] = False
 
-        cmake.definitions["GDAL_USE_PDFIUM"] = self.options.with_pcre2
+        cmake.definitions["GDAL_USE_PCRE2"] = self.options.with_pcre2
         if self.options.with_pcre2:
-            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_PDFIUM"] = "pcre2"
-            cmake.definitions["TARGET_FOR_PDFIUM"] = \
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_PCRE2"] = "pcre2"
+            cmake.definitions["TARGET_FOR_PCRE2"] = \
                     self.dependencies["pcre2"].cpp_info.get_property("cmake_target_name")
         else:
-            cmake.definitions["PDFIUM_FOUND"] = False
+            cmake.definitions["PCRE2_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_PDFIUM"] = False
+        cmake.definitions["PDFIUM_FOUND"] = False
 
         cmake.definitions["GDAL_USE_POSTGRESQL"] = self.options.with_pg
         if self.options.with_pg:
@@ -840,7 +843,7 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(['pcre::pcre'])
 
         if self.options.with_pcre2:
-            self.cpp_info.requires.extend(['pcre2::pcre2'])
+            self.cpp_info.requires.extend(['pcre2::pcre2-8'])
 
         if self.options.with_pg:
             self.cpp_info.requires.extend(['libpq::pq'])
