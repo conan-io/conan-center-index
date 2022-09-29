@@ -189,7 +189,8 @@ class UsocketsConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["uSockets"]
-        self.cpp_info.requires = ["boost::headers"]
+        if self.options.eventloop == "boost":
+            self.cpp_info.requires = ["boost::headers"]
 
         if self.options.with_ssl == "openssl":
             self.cpp_info.defines.append("LIBUS_USE_OPENSSL")
