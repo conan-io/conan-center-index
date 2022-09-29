@@ -1,10 +1,7 @@
 from conan import ConanFile
 from conans import AutoToolsBuildEnvironment
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc, VCVars
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
-from conan.tools.microsoft import is_msvc
 from conans.client.tools.env import no_op
 import os
 
@@ -33,7 +30,11 @@ class MakeConan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
 
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
     def build(self):
+        self._patch_sources()
         # README.W32
         if is_msvc(self):
             if self.settings.compiler == "Visual Studio":
