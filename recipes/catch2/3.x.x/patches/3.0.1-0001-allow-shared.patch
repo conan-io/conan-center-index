@@ -20,7 +20,21 @@
      ${SOURCES_DIR}/internal/catch_main.cpp
  )
  add_build_reproducibility_settings(Catch2WithMain)
-@@ -409,3 +407,27 @@ endif()
+@@ -338,8 +336,12 @@ if (NOT_SUBPROJECT)
+         Catch2WithMain
+       EXPORT
+         Catch2Targets
+-      DESTINATION
++      LIBRARY DESTINATION 
++        ${CMAKE_INSTALL_LIBDIR}
++      ARCHIVE DESTINATION
+         ${CMAKE_INSTALL_LIBDIR}
++      RUNTIME DESTINATION
++        ${CMAKE_INSTALL_BINDIR}
+     )
+ 
+ 
+@@ -409,3 +411,27 @@ endif()
  
  list(APPEND CATCH_WARNING_TARGETS Catch2 Catch2WithMain)
  set(CATCH_WARNING_TARGETS ${CATCH_WARNING_TARGETS} PARENT_SCOPE)
