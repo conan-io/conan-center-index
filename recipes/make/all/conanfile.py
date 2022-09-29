@@ -1,8 +1,7 @@
 from conan import ConanFile
 from conans import AutoToolsBuildEnvironment
 from conan.tools.microsoft import is_msvc, VCVars
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
-from conans.client.tools.env import no_op
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, chdir
 import os
 
 required_conan_version = ">=1.52.0"
@@ -10,11 +9,15 @@ required_conan_version = ">=1.52.0"
 class MakeConan(ConanFile):
     name = "make"
     description = "GNU Make is a tool which controls the generation of executables and other non-source files of a program from the program's source files"
-    topics = ("conan", "make", "build", "makefile")
+    topics = ("make", "build", "makefile")
     homepage = "https://www.gnu.org/software/make/"
     url = "https://github.com/conan-io/conan-center-index"
     license = "GPL-3.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -25,7 +28,7 @@ class MakeConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+            destination=self._source_subfolder, strip_root=True)
 
     def package_id(self):
         del self.info.settings.compiler
@@ -34,24 +37,24 @@ class MakeConan(ConanFile):
         apply_conandata_patches(self)
 
     def build(self):
-        self._patch_sources()
-        # README.W32
-        if is_msvc(self):
-            if self.settings.compiler == "Visual Studio":
-                command = "build_w32.bat --without-guile"
+        with chdir(self, self._source_subfolder):
+            self._patch_sources()
+            # README.W32
+            if is_msvc(self):
+                if is_msvc(self):
+                    command = "build_w32.bat --without-guile"
+                else:
+                    command = "build_w32.bat --without-guile gcc"
             else:
-                command = "build_w32.bat --without-guile gcc"
-        else:
-            env_build = AutoToolsBuildEnvironment(self)
-            env_build.configure()
-            command = "./build.sh"
-        with VCVars(self) if is_msvc(self) else no_op():
+                env_build = AutoToolsBuildEnvironment(self)
+                env_build.configure()
+                command = "./build.sh"
             self.run(command)
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses")
-        self.copy(pattern="make", dst="bin", keep_path=False)
-        self.copy(pattern="*gnumake.exe", dst="bin", keep_path=False)
+        self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
+        self.copy(pattern="make", src=self._source_subfolder, dst="bin", keep_path=False)
+        self.copy(pattern="*gnumake.exe", src=self._source_subfolder, dst="bin", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libdirs = []
