@@ -85,7 +85,7 @@ class MpirConan(ConanFile):
 
     @property
     def _vcxproj_paths(self):
-        compiler_version = self.settings.compiler.version if Version(self.settings.compiler.version) <= "16" else "16"
+        compiler_version = self.settings.compiler.version if Version(self.settings.compiler.version) <= "17" else "17"
         build_subdir = "build.vc{}".format(compiler_version)
         vcxproj_paths = [
             os.path.join(self._source_subfolder, build_subdir,

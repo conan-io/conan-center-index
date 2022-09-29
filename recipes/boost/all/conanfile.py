@@ -1,7 +1,6 @@
 from conan.tools.apple import is_apple_os
 from conan.tools.build import build_jobs, check_min_cppstd, cross_building
-from conan.tools.files import chdir, get, mkdir, rename, replace_in_file, rm, rmdir, save
-from conan.tools.files.patches import apply_conandata_patches
+from conan.tools.files import apply_conandata_patches, chdir, get, mkdir, rename, replace_in_file, rm, rmdir, save
 from conan.tools.microsoft import msvc_runtime_flag
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
@@ -1286,11 +1285,19 @@ class BoostConan(ConanFile):
 
     @property
     def _toolset_version(self):
-        if self._is_msvc:
+        if self.settings.get_safe("compiler") == "Visual Studio":
             toolset = tools.msvs_toolset(self)
             match = re.match(r"v(\d+)(\d)$", toolset)
             if match:
                 return f"{match.group(1)}.{match.group(2)}"
+        elif self.settings.get_safe("compiler") == "msvc":
+            toolsets = {'170': '11.0',
+                        '180': '12.0',
+                        '190': '14.0',
+                        '191': '14.1',
+                        '192': '14.2',
+                        "193": '14.3'}
+            return toolsets[self.settings.get_safe("compiler.version")]
         return ""
 
     @property

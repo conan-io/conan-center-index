@@ -3,11 +3,9 @@
 <!-- toc -->
 ## Contents
 
-- [Linter to help migration to Conan v2](#linter-to-help-migration-to-conan-v2)
-  - [Contents](#contents)
-  - [Import ConanFile from `conan`](#import-conanfile-from-conan)
-  - [Import tools from `conan`](#import-tools-from-conan)
-  - [Disable linter for a specific conanfile](#disable-linter-for-a-specific-conanfile)
+  * [Import ConanFile from `conan`](#import-conanfile-from-conan)
+  * [Import tools from `conan`](#import-tools-from-conan)
+  * [Running the linter locally](#running-the-linter-locally)<!-- endToc -->
 
 On our [path to Conan v2](v2_roadmap.md) we are leveraging on custom Pylint rules. This
 linter will run for every pull-request that is submitted to the repository and will
@@ -66,15 +64,31 @@ Here is a list of different imports and their new equivalent (note that the inte
 | conans.errors.ConanInvalidConfiguration | [conan.errors.ConanInvalidConfiguration](https://docs.conan.io/en/latest/migrating_to_2.0/recipes.html#migrating-the-recipes) | 1.47.0 |
 | conans.errors.ConanException | [conan.errors.ConanException](https://docs.conan.io/en/latest/migrating_to_2.0/recipes.html#migrating-the-recipes) | 1.47.0 |
 
-## Disable linter for a specific conanfile
+---
 
-If for some reason a conanfile of a recipe or a test_package is not yet prepared to pass
-all the checks of the linter, it can be skipped from `pylint` adding the following comment to the file:
+## Running the linter locally
 
-**`conanfile.py`**
+It is possible to run the linter locally the same way it is being run [using Github actions](../.github/workflows/linter-conan-v2.yml):
 
-```python
-# pylint: skip-file
-from conans import ConanFile, CMake, tools
-...
-```
+ * (Recommended) Use a dedicated Python virtualenv.
+ * Ensure you have required tools installed: `conan` and `pylint` (better to uses fixed versions)
+
+   ```
+   pip install conan~=1.0 pylint==2.14
+   ```
+
+ * Set environment variable `PYTHONPATH` to the root of the repository
+
+   ```
+   export PYTHONPATH=your/path/conan-center-index
+   ```
+
+  * Now you just need to execute the `pylint` commands:
+
+    ```
+    # Lint a recipe:
+    pylint --rcfile=linter/pylintrc_recipe recipes/boost/all/conanfile.py
+
+    # Lint the test_package
+    pylint --rcfile=linter/pylintrc_testpackage recipes/boost/all/test_package/conanfile.py
+    ```

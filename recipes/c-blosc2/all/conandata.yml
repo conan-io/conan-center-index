@@ -1,9 +1,13 @@
 sources:
+  "2.4.1":
+    url: "https://github.com/Blosc/c-blosc2/archive/refs/tags/v2.4.1.tar.gz"
+    sha256: "f09a43bfac563ceda611a213c799ca5359c3b629281e0a4f3a543e692a64a931"
   "2.2.0":
     url: "https://github.com/Blosc/c-blosc2/archive/refs/tags/v2.2.0.tar.gz"
     sha256: "66f9977de26d6bc9ea1c0e623d873c3225e4fff709aa09b3335fd09d41d57c0e"
 
 patches:
+  "2.4.1":
+    - patch_file: "patches/2.4.1-0001-fix-cmake.patch"
   "2.2.0":
     - patch_file: "patches/2.2.0-0001-fix-cmake.patch"
-      base_path: "source_subfolder"

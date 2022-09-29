@@ -1,4 +1,7 @@
 sources:
+  "2.46.0":
+    url: "https://ftp.gnome.org/pub/gnome/sources/at-spi2-core/2.46/at-spi2-core-2.46.0.tar.xz"
+    sha256: "aa0c86c79f7a8d67bae49a5b7a5ab08430c608cffe6e33bf47a72f41ab03c3d0"
   "2.45.90":
     url: "https://ftp.gnome.org/pub/gnome/sources/at-spi2-core/2.45/at-spi2-core-2.45.90.tar.xz"
     sha256: "e9050ad3c24937548396b2377f2fcdb9321ce2daffad35e7554e8f6ad850ab0d"
@@ -6,6 +9,9 @@ sources:
     sha256: "ba95f346e93108fbb3462c62437081d582154db279b4052dedc52a706828b192"
     url: "https://ftp.gnome.org/pub/gnome/sources/at-spi2-core/2.45/at-spi2-core-2.45.1.tar.xz"
 patches:
+  "2.46.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/93.patch"
   "2.45.90":
     - base_path: "source_subfolder"
       patch_file: "patches/93.patch"

@@ -10,9 +10,6 @@ sources:
     sha256: "6e6bed6f75cf54006b6bafb01b3b96df19605572131a2260fddaf0e87949ced0"
 patches:
   "0.1.5":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-use-PROJECT_SOURCE_DIR.cmake"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0002-disable-overriding-fPIC.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0003-disable-building-tests.patch"
+    - patch_file: "patches/0001-use-PROJECT_SOURCE_DIR.patch"
+    - patch_file: "patches/0002-disable-overriding-fPIC.patch"
+    - patch_file: "patches/0003-disable-building-tests.patch"
