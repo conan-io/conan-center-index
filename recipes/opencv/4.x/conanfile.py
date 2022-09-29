@@ -160,6 +160,7 @@ class OpenCVConan(ConanFile):
             del self.options.contrib_sfm
         if not self.options.dnn:
             del self.options.dnn_cuda
+            del self.options.with_quirc
         if not self.options.with_cuda:
             del self.options.with_cublas
             del self.options.with_cudnn
