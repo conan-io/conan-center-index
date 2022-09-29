@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
