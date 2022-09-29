@@ -149,12 +149,12 @@ class NsprConan(ConanFile):
                 libsuffix = "lib" if self._is_msvc else "a"
                 libprefix = "" if self._is_msvc else "lib"
                 if self.options.shared:
-                    os.unlink(os.path.join(self.package_folder, "lib", "{}{}_s.{}".format(libprefix, lib, libsuffix)))
-                    rename(self, os.path.join(self.package_folder, "lib", "{}.dll".format(lib)),
-                                 os.path.join(self.package_folder, "bin", "{}.dll".format(lib)))
+                    os.unlink(os.path.join(self.package_folder, "lib", f"{libprefix}{lib}_s.{libsuffix}"))
+                    rename(self, os.path.join(self.package_folder, "lib", f"{lib}.dll"),
+                                 os.path.join(self.package_folder, "bin", f"{lib}.dll"))
                 else:
-                    os.unlink(os.path.join(self.package_folder, "lib", "{}{}.{}".format(libprefix, lib, libsuffix)))
-                    os.unlink(os.path.join(self.package_folder, "lib", "{}.dll".format(lib)))
+                    os.unlink(os.path.join(self.package_folder, "lib", f"{libprefix}{lib}.{libsuffix}"))
+                    os.unlink(os.path.join(self.package_folder, "lib", f"{lib}.dll"))
             if not self.options.shared:
                 replace_in_file(self, os.path.join(self.package_folder, "include", "nspr", "prtypes.h"),
                                       "#define NSPR_API(__type) PR_IMPORT(__type)",
@@ -166,14 +166,14 @@ class NsprConan(ConanFile):
             shared_ext = "dylib" if self.settings.os == "Macos" else "so"
             for lib in self._library_names:
                 if self.options.shared:
-                    os.unlink(os.path.join(self.package_folder, "lib", "lib{}.a".format(lib)))
+                    os.unlink(os.path.join(self.package_folder, "lib", f"lib{lib}.a"))
                 else:
-                    os.unlink(os.path.join(self.package_folder, "lib", "lib{}.{}".format(lib, shared_ext)))
+                    os.unlink(os.path.join(self.package_folder, "lib", f"lib{lib}.{shared_ext}"))
 
         if self._is_msvc:
             if self.settings.build_type == "Debug":
                 for lib in self._library_names:
-                    os.unlink(os.path.join(self.package_folder, "lib", "{}.pdb".format(lib)))
+                    os.unlink(os.path.join(self.package_folder, "lib", f"{lib}.pdb"))
 
         if not self.options.shared or self.settings.os == "Windows":
             for f in os.listdir(os.path.join(self.package_folder, "lib")):
@@ -187,7 +187,7 @@ class NsprConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "nspr")
         libs = self._library_names
         if self.settings.os == "Windows" and not self.options.shared:
-            libs = list("{}_s".format(l) for l in libs)
+            libs = list(f"{l}_s" for l in libs)
         self.cpp_info.libs = libs
         if self.settings.compiler == "gcc" and self.settings.os == "Windows":
             if self.settings.arch == "x86":
@@ -201,7 +201,7 @@ class NsprConan(ConanFile):
             self.cpp_info.system_libs.extend(["winmm", "ws2_32"])
 
         aclocal = tools.unix_path(os.path.join(self.package_folder, "res", "aclocal"))
-        self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(aclocal))
+        self.output.info(f"Appending AUTOMAKE_CONAN_INCLUDES environment variable: {aclocal}")
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(aclocal)
 
         self.cpp_info.resdirs = ["res"]
