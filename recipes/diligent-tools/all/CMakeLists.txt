@@ -27,6 +27,7 @@ add_library(Diligent-GraphicsTools               ALIAS CONAN_PKG::diligent-core)
 add_library(Diligent-Archiver-static             ALIAS CONAN_PKG::diligent-core)
 add_library(Diligent-HLSL2GLSLConverterLib       ALIAS CONAN_PKG::diligent-core)
 add_library(Diligent-TargetPlatform              ALIAS CONAN_PKG::diligent-core)
+add_library(Diligent-GraphicsEngineOpenGL-static ALIAS CONAN_PKG::diligent-core)
 
 set(GL_SUPPORTED TRUE)
 set(GLES_SUPPORTED TRUE)
