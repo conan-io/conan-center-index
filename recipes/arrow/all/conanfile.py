@@ -41,7 +41,6 @@ class ArrowConan(ConanFile):
         "with_gflags": ["auto", True, False],
         "with_glog": ["auto", True, False],
         "with_grpc": ["auto", True, False],
-        "with_hiveserver2": [True, False],
         "with_jemalloc": ["auto", True, False],
         "with_json": [True, False],
         "with_llvm": ["auto", True, False],
@@ -89,7 +88,6 @@ class ArrowConan(ConanFile):
         "with_jemalloc": "auto",
         "with_glog": "auto",
         "with_grpc": "auto",
-        "with_hiveserver2": False,
         "with_json": False,
         "with_llvm": "auto",
         "with_openssl": "auto",
@@ -169,8 +167,6 @@ class ArrowConan(ConanFile):
             raise ConanInvalidConfiguration("with_openssl options is required (or choose auto)")
         if self.options.with_cuda:
             raise ConanInvalidConfiguration("CCI has no cuda recipe (yet)")
-        if self.options.with_hiveserver2:
-            raise ConanInvalidConfiguration("CCI has no hiveserver2 recipe (yet)")
         if self.options.with_orc:
             raise ConanInvalidConfiguration("CCI has no orc recipe (yet)")
         if self.options.with_s3 and not self.options["aws-sdk-cpp"].config:
@@ -185,7 +181,7 @@ class ArrowConan(ConanFile):
 
     def _compute(self, required=False):
         if required or self.options.compute == "auto":
-            return bool(self._dataset_modules()) or bool(self.options.get_safe("substrait", False))
+            return bool(self._parquet()) or bool(self._dataset_modules()) or bool(self.options.get_safe("substrait", False))
         else:
             return bool(self.options.compute)
 
@@ -209,7 +205,7 @@ class ArrowConan(ConanFile):
 
     def _with_re2(self, required=False):
         if required or self.options.with_re2 == "auto":
-            return bool(self.options.gandiva)
+            return bool(self.options.gandiva) or bool(self._compute())
         else:
             return bool(self.options.with_re2)
 
@@ -259,12 +255,12 @@ class ArrowConan(ConanFile):
             return bool(self.options.with_boost)
 
     def _with_thrift(self, required=False):
-        # No self.options.with_thift exists
-        return bool(required or self.options.with_hiveserver2 or self._parquet())
+        # No self.options.with_thrift exists
+        return bool(required or self._parquet())
 
     def _with_utf8proc(self, required=False):
         if required or self.options.with_utf8proc == "auto":
-            return False
+            return bool(self._compute() or self.options.gandiva)
         else:
             return bool(self.options.with_utf8proc)
 
@@ -302,8 +298,8 @@ class ArrowConan(ConanFile):
         if self._with_llvm():
             self.requires("llvm-core/13.0.0")
         if self._with_openssl():
-            # aws-sdk-cpp requires openssl/1.1.1. it uses deprecated functions in openssl/3.0.0
-            if self.options.with_s3:
+            # aws-sdk-cpp/grpc requires openssl/1.1.1. it uses deprecated functions in openssl/3.0.0
+            if self.options.with_s3 or self._with_flight_rpc():
                 self.requires("openssl/1.1.1q")
             else:
                 self.requires("openssl/3.0.5")
@@ -342,7 +338,8 @@ class ArrowConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        if tools.cross_building(self.settings):
+        self._cmake.definitions["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = True
+        if tools.cross_building(self):
             cmake_system_processor = {
                 "armv8": "aarch64",
                 "armv8.3": "aarch64",
@@ -350,6 +347,7 @@ class ArrowConan(ConanFile):
             self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["ARROW_USE_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
+        self._cmake.definitions["ARROW_DEFINE_OPTIONS"] = True
         self._cmake.definitions["ARROW_DEPENDENCY_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ARROW_GANDIVA"] = self.options.gandiva
         self._cmake.definitions["ARROW_PARQUET"] = self._parquet()
@@ -365,13 +363,13 @@ class ArrowConan(ConanFile):
         self._cmake.definitions["ARROW_NO_DEPRECATED_API"] = not self.options.deprecated
         self._cmake.definitions["ARROW_FLIGHT"] = self._with_flight_rpc()
         self._cmake.definitions["ARROW_FLIGHT_SQL"] = self.options.get_safe("with_flight_sql", False)
-        self._cmake.definitions["ARROW_HIVESERVER2"] = self.options.with_hiveserver2
         self._cmake.definitions["ARROW_COMPUTE"] = self._compute()
         self._cmake.definitions["ARROW_CSV"] = self.options.with_csv
         self._cmake.definitions["ARROW_CUDA"] = self.options.with_cuda
         self._cmake.definitions["ARROW_JEMALLOC"] = self._with_jemalloc()
+        self._cmake.definitions["jemalloc_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ARROW_JSON"] = self.options.with_json
-        self._cmake.definitions["ARROW_GCS"] = self.options.get_safe("with_gcs", False)
+        self._cmake.definitions["ARROW_GCS"] = self.options.with_gcs
 
         self._cmake.definitions["BOOST_SOURCE"] = "SYSTEM"
         self._cmake.definitions["Protobuf_SOURCE"] = "SYSTEM"
@@ -390,13 +388,16 @@ class ArrowConan(ConanFile):
             self._cmake.definitions["ARROW_BROTLI_USE_SHARED"] = self.options["brotli"].shared
         self._cmake.definitions["gflags_SOURCE"] = "SYSTEM"
         if self._with_gflags():
-            self._cmake.definitions["ARROW_BROTLI_USE_SHARED"] = self.options["gflags"].shared
+            self._cmake.definitions["ARROW_GFLAGS_USE_SHARED"] = self.options["gflags"].shared
         self._cmake.definitions["ARROW_WITH_BZ2"] = self.options.with_bz2
         self._cmake.definitions["BZip2_SOURCE"] = "SYSTEM"
         if self.options.with_bz2:
             self._cmake.definitions["ARROW_BZ2_USE_SHARED"] = self.options["bzip2"].shared
         self._cmake.definitions["ARROW_WITH_LZ4"] = self.options.with_lz4
-        self._cmake.definitions["Lz4_SOURCE"] = "SYSTEM"
+        if tools.Version(self.version) >= "9.0.0":
+            self._cmake.definitions["lz4_SOURCE"] = "SYSTEM"
+        else:
+            self._cmake.definitions["Lz4_SOURCE"] = "SYSTEM"
         if self.options.with_lz4:
             self._cmake.definitions["ARROW_LZ4_USE_SHARED"] = self.options["lz4"].shared
         self._cmake.definitions["ARROW_WITH_SNAPPY"] = self.options.with_snappy
@@ -599,8 +600,6 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("libbacktrace::libbacktrace")
         if self.options.with_cuda:
             self.cpp_info.components["libarrow"].requires.append("cuda::cuda")
-        if self.options.with_hiveserver2:
-            self.cpp_info.components["libarrow"].requires.append("hiveserver2::hiveserver2")
         if self.options.with_json:
             self.cpp_info.components["libarrow"].requires.append("rapidjson::rapidjson")
         if self.options.with_s3:
