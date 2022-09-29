@@ -73,7 +73,7 @@ class TrantorConan(ConanFile):
             self.output.warn(f"{self.ref} requires C++{self._minimum_cpp_standard}. Your compiler is unknown. Assuming it supports C++{self._minimum_cpp_standard}.")
 
         # TODO: Compilation succeeds, but execution of test_package fails on Visual Studio with MDd
-        if is_msvc(self) and self.options.shared and self.info.settings.compiler.runtime == "MDd":
+        if is_msvc(self) and self.options.shared and "MDd" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration(f"{self.ref} does not support the MDd runtime on Visual Studio.")
 
     def source(self):
