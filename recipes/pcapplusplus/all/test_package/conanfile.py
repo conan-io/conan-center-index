@@ -8,7 +8,6 @@ import shutil
 class PcapplusplusTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
-    # Needed to make sure libpcap gets compiled
 
     def requirements(self):
         self.requires(self.tested_reference_str)
