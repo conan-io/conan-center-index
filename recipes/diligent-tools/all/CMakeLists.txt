@@ -29,10 +29,4 @@ add_library(Diligent-HLSL2GLSLConverterLib       ALIAS CONAN_PKG::diligent-core)
 add_library(Diligent-TargetPlatform              ALIAS CONAN_PKG::diligent-core)
 add_library(Diligent-GraphicsEngineOpenGL-static ALIAS CONAN_PKG::diligent-core)
 
-set(GL_SUPPORTED TRUE)
-set(GLES_SUPPORTED TRUE)
-set(VULKAN_SUPPORTED TRUE)
-set(METAL_SUPPORTED TRUE)
-set(ARCHIVER_SUPPORTED TRUE)
-
 add_subdirectory(source_subfolder)
