@@ -55,10 +55,15 @@ class LibnameConan(ConanFile):
             self.options["glib"].shared = True
 
     def validate(self):
-        if self.options.shared and self.options.with_glib and not self.options["glib"].shared:
-            raise ConanInvalidConfiguration(
-                "Linking a shared library against static glib can cause unexpected behaviour."
-            )
+        if self.options.with_glib:
+            if self.options.shared and not self.options["glib"].shared:
+                raise ConanInvalidConfiguration(
+                    "Linking a shared library against static glib can cause unexpected behaviour."
+                )
+            if self.options["glib"].shared and microsoft.is_msvc_static_runtime(self):
+                raise ConanInvalidConfiguration(
+                    "Linking shared glib with the MSVC static runtime is not supported"
+                )
 
     def layout(self):
         basic_layout(self, src_folder="source")
