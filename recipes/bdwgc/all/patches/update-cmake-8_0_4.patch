@@ -1,6 +1,6 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -21,241 +21,604 @@
+@@ -21,241 +21,603 @@
  #  this will generate gc.sln
  #
  
@@ -335,7 +335,6 @@
 +    include_directories(${Threads_INCLUDE_DIR})
 +    set(THREADDLLIBS ${CMAKE_THREAD_LIBS_INIT})
 +  endif()
-+  include_directories(libatomic_ops/src)
 +  if (MSVC)
 +    find_package(Atomic_ops CONFIG)
 +    if (Atomic_ops_FOUND)
