@@ -68,7 +68,7 @@ class AvahiConan(ConanFile):
         tc.configure_args.append("--disable-monodoc")
         tc.configure_args.append("--disable-python")
         tc.configure_args.append("--disable-qt5")
-        tc.configure_args.append(f"--with-systemdsystemunitdir={self.package_folder}/lib/systemd/system")
+        tc.configure_args.append("--with-systemdsystemunitdir=/lib/systemd/system")
         tc.generate()
 
     def build(self):
@@ -84,7 +84,6 @@ class AvahiConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "run"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rmdir(self, os.path.join(self.package_folder, "var"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
