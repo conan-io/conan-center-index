@@ -8,7 +8,7 @@ import contextlib
 import functools
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.47.0"
 
 
 class NsprConan(ConanFile):
