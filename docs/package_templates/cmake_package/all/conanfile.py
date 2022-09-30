@@ -58,11 +58,8 @@ class PackageConan(ConanFile):
             except Exception:
                 pass
         try:
-            del self.settings.compiler.libcxx # for plain C projects only
-        except Exception:
-            pass
-        try:
             del self.settings.compiler.cppstd # for plain C projects only
+            del self.settings.compiler.libcxx # for plain C projects only
         except Exception:
             pass
 
