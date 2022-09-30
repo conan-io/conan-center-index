@@ -9,6 +9,19 @@ sources:
     url: "https://sourceforge.net/projects/geographiclib/files/distrib/GeographicLib-1.50.1.tar.gz"
     sha256: "d1765009e068b8cc5e76957e5d6be45ce6cff08c4aad8e5995e84a28354385f1"
 patches:
+  "1.52":
+    - patch_file: "patches/0002-cmake-minimum-required-1.52.patch"
+      patch_description: "Add cmake_minimum_required() to top CMakeLists"
+      patch_type: "backport"
+      patch_source: "https://github.com/geographiclib/geographiclib/commit/d9ca6c6ec0b721326b9a690eee259eac643b927f"
+  "1.51":
+    - patch_file: "patches/0002-cmake-minimum-required-1.51.patch"
+      patch_description: "Add cmake_minimum_required() to top CMakeLists"
+      patch_type: "backport"
+      patch_source: "https://github.com/geographiclib/geographiclib/commit/d9ca6c6ec0b721326b9a690eee259eac643b927f"
   "1.50.1":
     - patch_file: "patches/0001-streamoff.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0002-cmake-minimum-required-1.50.1.patch"
+      patch_description: "Add cmake_minimum_required() to top CMakeLists"
+      patch_type: "backport"
+      patch_source: "https://github.com/geographiclib/geographiclib/commit/d9ca6c6ec0b721326b9a690eee259eac643b927f"

@@ -1,0 +1,12 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -64,8 +64,8 @@
+ # $Id: //main/2019/qhull/CMakeLists.txt#16 $$Change: 3008 $
+ # $DateTime: 2020/07/30 13:54:27 $$Author: bbarber $
+ 
+-project(qhull)
+ cmake_minimum_required(VERSION 3.0)
++project(qhull)
+ 
+ # Define qhull_VERSION in README.txt, Announce.txt, qh-get.htm, CMakeLists.txt
+ #   qhull-zip.sh (twice), qhull-wiki.md, qhull-news.htm, File_id.diz, index.htm

@@ -1,3 +1,0 @@
-@Library('c3i') _
-
-c3iManager.runBuild(this)

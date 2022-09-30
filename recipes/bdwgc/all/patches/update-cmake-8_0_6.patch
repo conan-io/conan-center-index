@@ -1,6 +1,6 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -21,232 +21,592 @@
+@@ -21,232 +21,602 @@
  #  this will generate gc.sln
  #
  
@@ -322,6 +322,16 @@
 +    set(THREADDLLIBS ${CMAKE_THREAD_LIBS_INIT})
 +  endif()
 +  include_directories(libatomic_ops/src)
++  if (MSVC)
++    # TODO: Rename the following to Atomic_ops
++    find_package(libatomic_ops CONFIG)
++    if (libatomic_ops_FOUND)
++      # TODO: Rename the following to Atomic_ops::atomic_ops
++      get_target_property(AO_INCLUDE_DIRS libatomic_ops::libatomic_ops
++                          INTERFACE_INCLUDE_DIRECTORIES)
++      include_directories(${AO_INCLUDE_DIRS})
++    endif()
++  endif()
 +  if (NOT (APPLE OR CYGWIN OR MSYS OR WIN32 OR HOST MATCHES mips-.*-irix6.*))
 +    set(THREADDLLIBS ${THREADDLLIBS} -ldl)
 +                                # The predefined CMAKE_DL_LIBS may be broken.

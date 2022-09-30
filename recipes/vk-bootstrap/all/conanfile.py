@@ -1,8 +1,14 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
+from conans import tools as tools_legacy
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
 
 
 class VkBootstrapConan(ConanFile):
@@ -23,20 +29,23 @@ class VkBootstrapConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
+    @property
+    def _min_cppstd(self):
+        return "14"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "5",
+            "Visual Studio": "15",
+            "msvc": "191",
+            "clang": "3.7" if tools_legacy.stdcpp_library(self) == "stdc++" else "6",
+            "apple-clang": "10",
+        }
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,60 +56,59 @@ class VkBootstrapConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("vulkan-headers/1.3.204.1")
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "5",
-            "Visual Studio": "15",
-            "clang": "3.7" if tools.stdcpp_library(self) == "stdc++" else "6",
-            "apple-clang": "10",
-        }
+        self.requires("vulkan-headers/1.3.224.0")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 14)
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
 
-        def lazy_lt_semver(v1, v2):
+        def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
             lv2 = [int(v) for v in v2.split(".")]
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn("vk-bootstrap requires C++14. Your compiler is unknown. Assuming it supports C++14.")
-        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration("vk-bootstrap requires C++14, which your compiler does not support.")
+        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+        if minimum_version and loose_lt_semver(str(self.info.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration(
+                f"{self.name} {self.version} requires C++{self._min_cppstd}, which your compiler does not support.",
+            )
 
-        if self._is_msvc and self.options.shared:
+        if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration("vk-boostrap shared not supported with Visual Studio")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["VK_BOOTSTRAP_TEST"] = False
-        if tools.Version(self.version) >= "0.3.0":
-            cmake.definitions["VK_BOOTSTRAP_VULKAN_HEADER_DIR"] = ";".join(self.deps_cpp_info["vulkan-headers"].include_paths)
-        if tools.Version(self.version) >= "0.4.0":
-            cmake.definitions["VK_BOOTSTRAP_WERROR"] = False
-        cmake.configure()
-        return cmake
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["VK_BOOTSTRAP_TEST"] = False
+        vulkan_headers = self.dependencies["vulkan-headers"]
+        includedirs = ";".join(
+            [os.path.join(vulkan_headers.package_folder, includedir).replace("\\", "/")
+             for includedir in vulkan_headers.cpp_info.includedirs],
+        )
+        if Version(self.version) < "0.3.0":
+            tc.variables["Vulkan_INCLUDE_DIR"] = includedirs
+        else:
+            tc.variables["VK_BOOTSTRAP_VULKAN_HEADER_DIR"] = includedirs
+        if Version(self.version) >= "0.4.0":
+            tc.variables["VK_BOOTSTRAP_WERROR"] = False
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
