@@ -89,12 +89,12 @@ class LibmodbusConan(ConanFile):
 
         if is_msvc(self):
             env = Environment()
-            compile = unix_path(self, os.path.join(self.source_folder, "build-aux", "compile"))
-            ar_lib = unix_path(self, self._user_info_build["automake"].ar_lib)
-            env.define("CC", f"{compile} cl -nologo")
-            env.define("CXX", f"{compile} cl -nologo")
+            compile_wrapper = unix_path(self, os.path.join(self.source_folder, "build-aux", "compile"))
+            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
-            env.define("AR", f"{ar_lib} \"lib -nologo\"")
+            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
