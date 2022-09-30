@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, save
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, save
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -77,7 +77,6 @@ class Z3Conan(ConanFile):
         if Version(self.version) >= "4.8.11":
             if self.info.settings.compiler.cppstd:
                 check_min_cppstd(self, self._minimum_cpp_standard)
-            compiler = self.settings.compiler
             minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
             if minimum_version:
                 if Version(self.info.settings.compiler.version) < minimum_version:
