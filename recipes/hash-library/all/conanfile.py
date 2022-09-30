@@ -1,5 +1,6 @@
-from conan import ConanFile, tools
-from conans import CMake
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.files import get
 from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
@@ -43,7 +44,7 @@ class HashLibraryConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+       get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -54,7 +55,7 @@ class HashLibraryConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.files.patch(self, **patch)
+            patch(self, **patch)
         cmake = self._configure_cmake()
         cmake.build()
 
