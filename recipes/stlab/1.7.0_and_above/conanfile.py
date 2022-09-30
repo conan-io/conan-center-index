@@ -56,7 +56,7 @@ class Stlab(ConanFile):
 
     def requirements(self):
         if self.options.use_boost:
-            self.requires("boost/1.75.0")
+            self.requires("boost/1.80.0")
 
         if self._requires_libdispatch():
             self.requires("libdispatch/5.3.2")
