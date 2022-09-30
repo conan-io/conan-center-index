@@ -53,7 +53,7 @@ class GdkPixbufConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.options.shared and not self.info.options["glib"].shared:
+        if self.info.options.shared and not self.options["glib"].shared:
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
@@ -61,7 +61,7 @@ class GdkPixbufConan(ConanFile):
             # when running gdk-pixbuf-query-loaders
             # dyld: malformed mach-o: load commands size (97560) > 32768
             raise ConanInvalidConfiguration("This package does not support Macos currently")
-        if self.info.options["glib"].shared and microsoft.is_msvc_static_runtime(self):
+        if self.options["glib"].shared and microsoft.is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(
                 "Linking shared glib with the MSVC static runtime is not supported"
             )
