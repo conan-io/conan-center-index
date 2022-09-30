@@ -5,10 +5,10 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.layout import basic_layout
 from conan.tools import files, scm, microsoft
 from conan.errors import ConanInvalidConfiguration
-import functools
+
 import os
 
-required_conan_version = ">=1.50.2"
+required_conan_version = ">=1.52.0"
 
 
 class GdkPixbufConan(ConanFile):
@@ -37,8 +37,6 @@ class GdkPixbufConan(ConanFile):
         "with_introspection": False,
     }
 
-    exports_sources = "patches/**"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -52,18 +50,18 @@ class GdkPixbufConan(ConanFile):
             self.options["glib"].shared = True
 
     def layout(self):
-        basic_layout(self, src_folder="source")
+        basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.options.shared and not self.options["glib"].shared:
+        if self.info.options.shared and not self.info.options["glib"].shared:
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
-        if self.settings.os == "Macos":
+        if self.info.settings.os == "Macos":
             # when running gdk-pixbuf-query-loaders
             # dyld: malformed mach-o: load commands size (97560) > 32768
             raise ConanInvalidConfiguration("This package does not support Macos currently")
-        if self.options["glib"].shared and microsoft.is_msvc_static_runtime(self):
+        if self.info.options["glib"].shared and microsoft.is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(
                 "Linking shared glib with the MSVC static runtime is not supported"
             )
@@ -139,6 +137,9 @@ class GdkPixbufConan(ConanFile):
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
 
+    def export_sources(self):
+        files.export_conandata_patches(self)
+
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -160,19 +161,14 @@ class GdkPixbufConan(ConanFile):
             files.replace_in_file(self, meson_build, "is_msvc_like ? 'jpeg' : 'libjpeg'", "'libjpeg'")
             files.replace_in_file(self, meson_build, "is_msvc_like ? 'tiff' : 'libtiff-4'", "'libtiff-4'")
 
-    @functools.lru_cache(1)
-    def _configure_meson(self):
-        meson = Meson(self)
-        meson.configure()
-        return meson
-
     def build(self):
         self._patch_sources()
-        meson = self._configure_meson()
+        meson = Meson(self)
+        meson.configure()
         meson.build()
 
     def package(self):
-        meson = self._configure_meson()
+        meson = Meson(self)
         meson.install()
 
         files.copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
