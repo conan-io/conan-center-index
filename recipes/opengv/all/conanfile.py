@@ -39,7 +39,7 @@ class opengvConan(ConanFile):
     def requirements(self):
         self.requires("eigen/3.4.0")
         if self.options.with_python_bindings:
-            self.requires("pybind11/2.8.1")
+            self.requires("pybind11/2.10.0")
 
     def validate(self):
         # Disable windows builds since they error out.
