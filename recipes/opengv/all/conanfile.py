@@ -48,6 +48,8 @@ class opengvConan(ConanFile):
         #FIXME disable this one CCI has more RAM available
         if self.settings.compiler == "gcc" and self.options.shared:
             raise ConanInvalidConfiguration("Shared builds not supported with gcc since CCI errors out due to excessive memory usage.")
+        if self.settings.compiler == "clang" and self.settings.compiler.version == 12:
+            raise ConanInvalidConfiguration("Clang 12 builds fail on Conan CI.")
 
     def layout(self):
         cmake_layout(self)
