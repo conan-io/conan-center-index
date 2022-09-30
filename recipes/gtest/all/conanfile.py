@@ -7,7 +7,7 @@ from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.1"
 
 
 class GTestConan(ConanFile):
@@ -37,7 +37,7 @@ class GTestConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
-            return 11
+        return 11
 
     @property
     def _minimum_compilers_version(self):
@@ -59,19 +59,22 @@ class GTestConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         if self.options.debug_postfix != "deprecated":
             self.output.warn("gtest/*:debug_postfix is deprecated.")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
         del self.info.options.no_main # Only used to expose more targets
         del self.info.options.debug_postfix # deprecated option that no longer exist
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def validate(self):
-        if self.options.shared and (is_msvc(self) or self._is_clang_cl) and is_msvc_static_runtime(self):
+        if self.info.options.shared and (is_msvc(self) or self._is_clang_cl) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(
                 "gtest:shared=True with compiler=\"Visual Studio\" is not "
                 "compatible with compiler.runtime=MT/MTd"
@@ -93,6 +96,9 @@ class GTestConan(ConanFile):
                 f"{self.ref} requires {compiler} {min_version}. The current compiler is {compiler} {compiler.version}."
             )
 
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+
     def generate(self):
         tc = CMakeToolchain(self)
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
@@ -104,9 +110,6 @@ class GTestConan(ConanFile):
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
             tc.variables["gtest_disable_pthreads"] = True
         tc.generate()
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def _patch_sources(self):
         if is_msvc(self) or self._is_clang_cl:
