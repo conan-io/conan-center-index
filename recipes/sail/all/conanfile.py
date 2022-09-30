@@ -68,13 +68,13 @@ class SAILConan(ConanFile):
         if self.options.with_jpeg2000:
             self.requires("jasper/2.0.33")
         if self.options.with_jpeg:
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/9d")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_tiff:
             self.requires("libtiff/4.3.0")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.3")
+            self.requires("libwebp/1.2.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
