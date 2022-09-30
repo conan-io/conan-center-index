@@ -29,9 +29,10 @@ def main():
     except YAMLValidationError as error:
         print(
             f"::error file={args.path},line={error.context_mark.line},endline={error.problem_mark.line},"
-            f"title={error.context}, {error.problem}"
-            f"::{error}\n"
+            f"title=config.yml schema error"
+            f"::{error.context}, {error.problem}\n"
         )
+        exit(1)
 
 
 if __name__ == "__main__":
