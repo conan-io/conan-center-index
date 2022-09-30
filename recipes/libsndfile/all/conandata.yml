@@ -10,8 +10,6 @@ sources:
     sha256: "2ba20d44817c8176f097ab25eff44ef0aeec9e00973def5a7174c5ae0764b22f"
 patches:
   "1.0.31":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.0.31-0001-disable-static-runtime-logic.patch"
+    - patch_file: "patches/1.0.31-0001-fix-msvc-runtime-logic.patch"
   "1.0.30":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.0.30-0001-disable-static-runtime-logic.patch"
+    - patch_file: "patches/1.0.30-0001-disable-static-libgcc-mingw.patch"

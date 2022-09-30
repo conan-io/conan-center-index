@@ -14,7 +14,5 @@ sources:
 patches:
   "0.9.4":
     - patch_file: "patches/fix-lib-name-mingw-0.9.4.patch"
-      base_path: "source_subfolder"
   "0.9.3":
     - patch_file: "patches/fix-lib-name-mingw-0.9.3.patch"
-      base_path: "source_subfolder"

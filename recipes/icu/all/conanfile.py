@@ -76,34 +76,6 @@ class ICUBase(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def validate(self):
-        if not bool(self._platform):
-            raise ConanInvalidConfiguration(
-                "Compiling ICU for {} with {} not supported yet".format(str(self.settings.os),
-                                                                        str(self.settings.compiler)))
-
-    @property
-    def _platform(self):
-        return {
-            ("Windows", "Visual Studio"): "Cygwin/MSVC",
-            ("Windows", "msvc"): "Cygwin/MSVC",
-            ("Windows", "gcc"): "MinGW",
-            ("AIX", "gcc"): "AIX/GCC",
-            ("AIX", "xlc"): "AIX",
-            ("Android", "clang"): "Linux",
-            ("SunOS", "gcc"): "Solaris/GCC",
-            ("Linux", "gcc"): "Linux/gcc",
-            ("Linux", "clang"): "Linux",
-            ("Macos", "gcc"): "MacOSX",
-            ("Macos", "clang"): "MacOSX",
-            ("Macos", "apple-clang"): "MacOSX",
-            ("iOS", "apple-clang"): "MacOSX",
-            ("tvOS", "apple-clang"): "MacOSX",
-            ("watchOS", "apple-clang"): "MacOSX",
-            ("FreeBSD", "gcc"): "FreeBSD",
-            ("FreeBSD", "clang"): "FreeBSD",
-        }.get((str(self.settings.os), str(self.settings.compiler)))
-
     def package_id(self):
         del self.info.options.with_unit_tests  # ICU unit testing shouldn't affect the package's ID
         del self.info.options.silent  # Verbosity doesn't affect package's ID
@@ -136,8 +108,11 @@ class ICUBase(ConanFile):
         env_build = self._configure_autotools()
         build_dir = os.path.join(self.build_folder, self._source_subfolder, "build")
         os.mkdir(build_dir)
+        build_env = env_build.vars
+        if self._is_msvc:
+            build_env.update({'CC': 'cl', 'CXX': 'cl'})
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
-            with tools.environment_append(env_build.vars):
+            with tools.environment_append(build_env):
                 with tools.chdir(build_dir):
                     # workaround for https://unicode-org.atlassian.net/browse/ICU-20531
                     os.makedirs(os.path.join("data", "out", "tmp"))
@@ -157,14 +132,6 @@ class ICUBase(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-
-        if self._is_msvc:
-            run_configure_icu_file = os.path.join(self._source_subfolder, "source", "runConfigureICU")
-            flags = "-{}".format(msvc_runtime_flag(self))
-            if not (self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "12"):
-                flags += " -FS"
-            tools.replace_in_file(run_configure_icu_file, "-MDd", flags)
-            tools.replace_in_file(run_configure_icu_file, "-MD", flags)
 
         if tools.os_info.is_windows:
             # https://unicode-org.atlassian.net/projects/ICU/issues/ICU-20545
@@ -187,6 +154,8 @@ class ICUBase(ConanFile):
         if self._env_build:
             return self._env_build
         self._env_build = AutoToolsBuildEnvironment(self)
+        if self._is_msvc:
+            self._env_build.flags.append("-FS")
         if not self.options.shared:
             self._env_build.defines.append("U_STATIC_IMPLEMENTATION")
         if tools.is_apple_os(self.settings.os):
@@ -200,8 +169,7 @@ class ICUBase(ConanFile):
         prefix = self.package_folder.replace("\\", "/")
         arch64 = ['x86_64', 'sparcv9', 'ppc64', 'ppc64le', 'armv8', 'armv8.3', 'mips64']
         bits = "64" if self.settings.arch in arch64 else "32"
-        args = [self._platform,
-                "--prefix={0}".format(prefix),
+        args = ["--prefix={0}".format(prefix),
                 "--disable-samples",
                 "--disable-layout",
                 "--disable-layoutex"]
@@ -258,7 +226,7 @@ class ICUBase(ConanFile):
             args.extend(["--enable-static", "--disable-shared"])
         if not self.options.with_unit_tests:
             args.append("--disable-tests")
-        return "../source/runConfigureICU %s" % " ".join(args)
+        return "../source/configure %s" % " ".join(args)
 
     @property
     def _silent(self):

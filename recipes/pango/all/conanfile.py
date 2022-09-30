@@ -1,11 +1,14 @@
 import os
-import shutil
 import glob
 
-from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conans import tools, Meson, VisualStudioBuildEnvironment
+from conan import ConanFile
+from conan.tools.scm import Version
+from conan.tools.files import get, replace_in_file, chdir, rmdir, rm, rename
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.51.3"
 
 class PangoConan(ConanFile):
     name = "pango"
@@ -28,13 +31,23 @@ class PangoConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-    
     def validate(self):
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("this recipe does not support GCC before version 5. contributions are welcome")
+        if self.options.with_xft and not self.settings.os in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("Xft can only be used on Linux and FreeBSD")
+
+        if self.options.with_xft and (not self.options.with_freetype or not self.options.with_fontconfig):
+            raise ConanInvalidConfiguration("Xft requires freetype and fontconfig")
+
+        if self.options.shared and (not self.options["glib"].shared
+                                    or not self.options["harfbuzz"].shared or
+                                    (self.options.with_cairo
+                                     and not self.options["cairo"].shared)):
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
+
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,37 +66,38 @@ class PangoConan(ConanFile):
             self.options.with_freetype = not self.settings.os in ["Windows", "Macos"]
         if self.options.with_fontconfig == "auto":
             self.options.with_fontconfig = not self.settings.os in ["Windows", "Macos"]
-
-        if self.options.with_xft and not self.settings.os in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("Xft can only be used on Linux and FreeBSD")
-
-        if self.options.with_xft and (not self.options.with_freetype or not self.options.with_fontconfig):
-            raise ConanInvalidConfiguration("Xft requires freetype and fontconfig")
+        if self.options.shared:
+            self.options["glib"].shared = True
+            self.options["harfbuzz"].shared = True
+            if self.options.with_cairo:
+                self.options["cairo"].shared = True
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.4")
-        self.build_requires("meson/0.61.2")
+        self.build_requires("meson/0.63.2")
 
     def requirements(self):
         if self.options.with_freetype:
-            self.requires("freetype/2.11.1")
+            self.requires("freetype/2.12.1")
 
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.93")
         if self.options.with_xft:
-            self.requires("xorg/system")
+            self.requires("libxft/2.3.4")
+        if self.options.with_xft and self.options.with_fontconfig and self.options.with_freetype:
+            self.requires("xorg/system")    # for xorg::xrender
         if self.options.with_cairo:
             self.requires("cairo/1.17.4")
-        self.requires("harfbuzz/4.2.0")
-        self.requires("glib/2.72.0")
-        self.requires("fribidi/1.0.10")
+        self.requires("harfbuzz/5.1.0")
+        self.requires("glib/2.73.3")
+        self.requires("fribidi/1.0.12")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
     def _configure_meson(self):
-        defs = dict()
+        defs = {}
         defs["introspection"] = "disabled"
 
         defs["libthai"] = "enabled" if self.options.with_libthai else "disabled"
@@ -98,27 +112,27 @@ class PangoConan(ConanFile):
 
     def build(self):
         meson_build = os.path.join(self._source_subfolder, "meson.build")
-        tools.replace_in_file(meson_build, "subdir('tests')", "")
-        tools.replace_in_file(meson_build, "subdir('tools')", "")
-        tools.replace_in_file(meson_build, "subdir('utils')", "")
-        tools.replace_in_file(meson_build, "subdir('examples')", "")
-        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
+        replace_in_file(self, meson_build, "subdir('tests')", "")
+        replace_in_file(self, meson_build, "subdir('tools')", "")
+        replace_in_file(self, meson_build, "subdir('utils')", "")
+        replace_in_file(self, meson_build, "subdir('examples')", "")
+        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if is_msvc(self) else tools.no_op():
             meson = self._configure_meson()
             meson.build()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
+        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if is_msvc(self) else tools.no_op():
             meson = self._configure_meson()
             meson.install()
-        if self._is_msvc:
-            with tools.chdir(os.path.join(self.package_folder, "lib")):
+        if is_msvc(self):
+            with chdir(self, os.path.join(self.package_folder, "lib")):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
-                    self.output.info("rename %s into %s" % (filename_old, filename_new))
-                    shutil.move(filename_old, filename_new)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(self.package_folder, "*.pdb")
+                    self.output.info(f"rename {filename_old} into {filename_new}")
+                    rename(self, filename_old, filename_new)
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.components['pango_'].libs = ['pango-1.0']
@@ -135,7 +149,7 @@ class PangoConan(ConanFile):
 
 
         if self.options.with_xft:
-            self.cpp_info.components['pango_'].requires.append('xorg::xft')
+            self.cpp_info.components['pango_'].requires.append('libxft::libxft')
             # Pango only uses xrender when Xft, fontconfig and freetype are enabled
             if self.options.with_fontconfig and self.options.with_freetype:
                 self.cpp_info.components['pango_'].requires.append('xorg::xrender')
@@ -182,6 +196,12 @@ class PangoConan(ConanFile):
                 self.cpp_info.components['pangocairo'].system_libs.append('gdi32')
             self.cpp_info.components['pangocairo'].includedirs = [os.path.join(self.package_folder, "include", "pango-1.0")]
 
-
-
         self.env_info.PATH.append(os.path.join(self.package_folder, 'bin'))
+
+    def package_id(self):
+        if not self.options["glib"].shared:
+            self.info.requires["glib"].full_package_mode()
+        if not self.options["harfbuzz"].shared:
+            self.info.requires["harfbuzz"].full_package_mode()
+        if self.options.with_cairo and not self.options["cairo"].shared:
+            self.info.requires["cairo"].full_package_mode()

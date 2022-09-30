@@ -1,9 +1,9 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.43.0"
-
 
 class TaskflowConan(ConanFile):
     name = "taskflow"
@@ -11,24 +11,20 @@ class TaskflowConan(ConanFile):
         "A fast C++ header-only library to help you quickly write parallel "
         "programs with complex task dependencies."
     )
-    topics = ("taskflow", "tasking", "parallelism")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/taskflow/taskflow"
-    license = "MIT"
-
+    topics = ("taskflow", "tasking", "parallelism")
     settings = "os", "arch", "compiler", "build_type"
+    short_paths = True
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
     def _min_cppstd(self):
-        if tools.Version(self.version) <= "2.2.0" or tools.Version(self.version) >= "3.0.0":
+        if tools.Version(self.version) >= "3.0.0":
             return "17"
         return "14"
 
@@ -87,7 +83,7 @@ class TaskflowConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "Taskflow::Taskflow")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
-        if self._is_msvc:
+        if is_msvc(self):
             self.cpp_info.defines.append("_ENABLE_EXTENDED_ALIGNED_STORAGE")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed

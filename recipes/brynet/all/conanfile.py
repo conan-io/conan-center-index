@@ -28,7 +28,7 @@ class BrynetConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1q")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):

@@ -1,10 +1,10 @@
 sources:
-  "1.0.1":
-    url: https://github.com/cameron314/concurrentqueue/archive/v1.0.1.zip
-    sha256: b31dca11745ef331756109af838e3689462fbbc2c52dda9f7e1c416778f1f35b
-  "1.0.2":
-    url: https://github.com/cameron314/concurrentqueue/archive/v1.0.2.zip
-    sha256: 6dc85de0e38a014471fe3c653e3e21dc38a5f069cfc031a90fa59f0a45f7584f
   "1.0.3":
     url: https://github.com/cameron314/concurrentqueue/archive/v1.0.3.zip
     sha256: 5e9e229a1791e8299dcd4bd73ac1be1953424a903818feb7afd929eb16094ef5
+  "1.0.2":
+    url: https://github.com/cameron314/concurrentqueue/archive/v1.0.2.zip
+    sha256: 6dc85de0e38a014471fe3c653e3e21dc38a5f069cfc031a90fa59f0a45f7584f
+  "1.0.1":
+    url: https://github.com/cameron314/concurrentqueue/archive/v1.0.1.zip
+    sha256: b31dca11745ef331756109af838e3689462fbbc2c52dda9f7e1c416778f1f35b

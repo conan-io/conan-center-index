@@ -1,0 +1,11 @@
+--- a/Cbc/configure
++++ b/Cbc/configure
+@@ -30970,7 +30970,7 @@ cat >>confdefs.h <<\_ACEOF
+ #define CBC_THREAD 1
+ _ACEOF
+ 
+-  if test $coin_cxx_is_cl = true ;
++  if test "${with_pthreadsw32_lib+set}" = set ;
+   then
+     # TODO we should check whether the library works and pthread.h is indeed there
+ 

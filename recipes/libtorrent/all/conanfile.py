@@ -93,13 +93,13 @@ class LibtorrentConan(ConanFile):
 
     def requirements(self):
         if tools.Version(self.version) < "2.0.0":
-            self.requires("boost/1.78.0")
+            self.requires("boost/1.79.0")
         else:
             self.requires("boost/1.76.0")
         if self.options.enable_encryption:
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1q")
         if self.options.enable_iconv:
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
 
     def _validate_dependency_graph(self):
         if tools.Version(self.deps_cpp_info["boost"].version) < "1.69.0" and \

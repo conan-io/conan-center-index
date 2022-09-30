@@ -1,9 +1,12 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir, save
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class CjsonConan(ConanFile):
@@ -28,21 +31,9 @@ class CjsonConan(ConanFile):
         "use_locales": True,
     }
 
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -51,51 +42,58 @@ class CjsonConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+           del self.settings.compiler.libcxx
+        except Exception:
+           pass
+        try:
+           del self.settings.compiler.cppstd
+        except Exception:
+           pass
 
     def validate(self):
-        if self.options.shared and \
-           ((self.settings.compiler == "Visual Studio" and self.settings.compiler.runtime == "MTd") or \
-            (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime == "MT" and self.settings.compiler.runtime_type == "Debug")):
-            raise ConanInvalidConfiguration("shared cjson is not supported with MTd runtime")
+        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration("shared cjson is not supported with MT runtime")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["ENABLE_SANITIZERS"] = False
+        tc.variables["ENABLE_SAFE_STACK"] = False
+        tc.variables["ENABLE_PUBLIC_SYMBOLS"] = True
+        tc.variables["ENABLE_HIDDEN_SYMBOLS"] = False
+        tc.variables["ENABLE_TARGET_EXPORT"] = False
+        tc.variables["BUILD_SHARED_AND_STATIC_LIBS"] = False
+        tc.variables["CJSON_OVERRIDE_BUILD_SHARED_LIBS"] = False
+        tc.variables["ENABLE_CJSON_UTILS"] = self.options.utils
+        tc.variables["ENABLE_CJSON_TEST"] = False
+        tc.variables["ENABLE_LOCALES"] = self.options.use_locales
+        tc.variables["ENABLE_FUZZING"] = False
+        tc.variables["ENABLE_CUSTOM_COMPILER_FLAGS"] = False
+        # Relocatable shared libs on macOS
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["ENABLE_SANITIZERS"] = False
-        self._cmake.definitions["ENABLE_SAFE_STACK"] = False
-        self._cmake.definitions["ENABLE_PUBLIC_SYMBOLS"] = True
-        self._cmake.definitions["ENABLE_HIDDEN_SYMBOLS"] = False
-        self._cmake.definitions["ENABLE_TARGET_EXPORT"] = False
-        self._cmake.definitions["BUILD_SHARED_AND_STATIC_LIBS"] = False
-        self._cmake.definitions["CJSON_OVERRIDE_BUILD_SHARED_LIBS"] = False
-        self._cmake.definitions["ENABLE_CJSON_UTILS"] = self.options.utils
-        self._cmake.definitions["ENABLE_CJSON_TEST"] = False
-        self._cmake.definitions["ENABLE_LOCALES"] = self.options.use_locales
-        self._cmake.definitions["ENABLE_FUZZING"] = False
-        self._cmake.definitions["ENABLE_CUSTOM_COMPILER_FLAGS"] = False
-
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         targets = {"cjson": "cJSON::cjson"}
@@ -106,8 +104,7 @@ class CjsonConan(ConanFile):
             targets
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent("""\
@@ -116,7 +113,7 @@ class CjsonConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):

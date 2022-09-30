@@ -7,10 +7,17 @@ Conan Center Index is the source index of recipes of the [ConanCenter](https://c
 This repository includes a Continuous Integration system that will build automatically the Conan packages for the recipes submitted via
 [Pull Request](https://github.com/conan-io/conan-center-index/pulls).
 
+### Add ConanCenter remote
+
+ConanCenter remote is configured by default in any Conan client installation. If, for any reason, you need to add it manually, just execute:
+
+```
+conan remote add conancenter https://center.conan.io
+```
 
 ### How to consume recipes
 
-ConanCenter is added as a remote by default to Conan client, so starting to use recipes from this repository is as easy as running
+Starting to use recipes from this repository is as easy as running
 one simple command after installing Conan:
 
 ```
@@ -39,7 +46,7 @@ This is a list of shortcuts to some interesting topics:
 * :warning: The conan-center **hook errors** reported by CCI Bot can be found in the [docs/error_knowledge_base.md](docs/error_knowledge_base.md).
 * :hammer_and_wrench: The internal changes related to infrastructure can be checked in [docs/changelog.md](docs/changelog.md).
 * :world_map: There are various community lead initiatives which are outlined in [docs/community_resources.md](docs/community_resources.md).
-* :magic_wand: To start preparing your recipes for **Conan 2.0**, please check [docs/preparing_recipes_for_conan2.md](docs/preparing_recipes_for_conan2.md).
+* :magic_wand: To start preparing your recipes for **Conan 2.0**, please check [docs/v2_migration.md](docs/v2_migration.md).
 
 ### Reporting Issues
 

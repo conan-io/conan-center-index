@@ -1,6 +1,8 @@
+import os
+
+from conan.tools.build import cross_building
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanException
-import os
 
 
 class TestPackageConan(ConanFile):
@@ -52,7 +54,7 @@ class TestPackageConan(ConanFile):
             cmake.build()
 
     def test(self):
-        if tools.cross_building(self):
+        if cross_building(self):
             return
         self.run(os.path.join("bin", "lambda_exe"), run_environment=True)
         if self.options["boost"].header_only:

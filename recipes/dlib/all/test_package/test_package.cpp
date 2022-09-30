@@ -8,8 +8,8 @@ dlib::logger dlog("conan-test");
 int main()
 {
     // Every logger has a logging level (given by dlog.level()).  Each log message is tagged with a
-    // level and only levels equal to or higher than dlog.level() will be printed.  By default all 
-    // loggers start with level() == LERROR.  In this case I'm going to set the lowest level LALL 
+    // level and only levels equal to or higher than dlog.level() will be printed.  By default all
+    // loggers start with level() == LERROR.  In this case I'm going to set the lowest level LALL
     // which means that dlog will print all logging messages it gets.
     dlog.set_level(dlib::LALL);
 
@@ -22,7 +22,7 @@ int main()
 
     // the logger can be used pretty much like any ostream object.  But you have to give a logging
     // level first.  But after that you can chain << operators like normal.
-    
+
     if (variable > 4)
         dlog << dlib::LWARN << "The variable is bigger than 4!  Its value is " << variable;
 
@@ -32,4 +32,5 @@ int main()
     dlog << dlib::LINFO << "we just woke up";
 
     dlog << dlib::LINFO << "program ending";
+    return 0;
 }

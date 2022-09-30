@@ -1,0 +1,9 @@
+sources:
+  "2.01":
+    url: "https://github.com/iboB/picobench/archive/refs/tags/v2.01.tar.gz"
+    sha256: "164cb3b2d72a9b31e7559f6829ae38b6b955840571531117e0d6f53d669d3a2b"
+
+patches:
+  "2.01":
+    - patch_file: "patches/2.01-0001-add-install.patch"
+      base_path: "source_subfolder"

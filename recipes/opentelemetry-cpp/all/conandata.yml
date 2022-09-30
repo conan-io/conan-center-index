@@ -1,7 +1,27 @@
 sources:
-  "1.0.1":
-    sha256: "32f12ff15ec257e3462883f84bc291c2d5dc30055604c12ec4b46a36dfa3f189"
-    url: "https://github.com/open-telemetry/opentelemetry-cpp/archive/refs/tags/v1.0.1.tar.gz"
+  "1.4.1":
+    url: "https://github.com/open-telemetry/opentelemetry-cpp/archive/v1.4.1.tar.gz"
+    sha256: "301b1ab74a664723560f46c29f228360aff1e2d63e930b963755ea077ae67524"
+  "1.4.0":
+    url: "https://github.com/open-telemetry/opentelemetry-cpp/archive/refs/tags/v1.4.0.tar.gz"
+    sha256: "110f4fb2e38dcc72a421647631cfbb9429afd3c77c6c98829cc1d11bd0c72563"
+  "1.3.0":
+    url: "https://github.com/open-telemetry/opentelemetry-cpp/archive/refs/tags/v1.3.0.tar.gz"
+    sha256: "6a4c43b9c9f753841ebc0fe2717325271f02e2a1d5ddd0b52735c35243629ab3"
   "1.2.0":
-    sha256: "7a6420f9e4fa44b81a5b06e30e5e116da71decc9086e5cc4f126e1efc8a397c2"
     url: "https://github.com/open-telemetry/opentelemetry-cpp/archive/refs/tags/v1.2.0.tar.gz"
+    sha256: "7a6420f9e4fa44b81a5b06e30e5e116da71decc9086e5cc4f126e1efc8a397c2"
+  "1.0.1":
+    url: "https://github.com/open-telemetry/opentelemetry-cpp/archive/refs/tags/v1.0.1.tar.gz"
+    sha256: "32f12ff15ec257e3462883f84bc291c2d5dc30055604c12ec4b46a36dfa3f189"
+
+patches:
+  "1.4.1":
+    - patch_file: "patches/1.4.0-0001-fix-cmake.patch"
+      base_path: "source_subfolder"
+  "1.4.0":
+    - patch_file: "patches/1.4.0-0001-fix-cmake.patch"
+      base_path: "source_subfolder"
+  "1.3.0":
+    - patch_file: "patches/1.3.0-0001-fix-cmake.patch"
+      base_path: "source_subfolder"

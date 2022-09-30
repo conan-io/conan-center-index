@@ -8,7 +8,5 @@ sources:
 patches:
   "1.23":
     - patch_file: "patches/check_library_exists.1.23.patch"
-      base_path: "source_subfolder"
   "1.22":
     - patch_file: "patches/check_library_exists.1.22.patch"
-      base_path: "source_subfolder"

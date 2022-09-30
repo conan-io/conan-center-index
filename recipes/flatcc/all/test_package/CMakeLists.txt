@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.1)
 project(flatcc_example)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
+
+find_package(flatcc REQUIRED CONFIG)
 
 set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 set(GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
@@ -28,5 +30,4 @@ if (NOT MACOS_SIP_WORKAROUND)
     add_dependencies(monster gen_monster_fbs)
 endif()
 
-
-target_link_libraries(monster ${CONAN_LIBS})
+target_link_libraries(monster flatcc::flatcc)

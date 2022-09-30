@@ -1,10 +1,13 @@
-from conans import ConanFile, CMake, tools
 import os
+
+from conan import ConanFile
+from conan.tools.build import cross_building
+from conans import CMake
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "cmake", "cmake_find_package_multi", "VirtualBuildEnv", "VirtualRunEnv"
 
     def build(self):
         cmake = CMake(self)
@@ -12,6 +15,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not cross_building(self):
             self.run("dbus-monitor --help", run_environment=True)
             self.run(os.path.join("bin", "test_package"), run_environment=True)

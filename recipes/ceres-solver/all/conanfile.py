@@ -16,7 +16,7 @@ class ceressolverConan(ConanFile):
         "Ceres Solver is an open source C++ library for modeling "
         "and solving large, complicated optimization problems"
     )
-    topics = ("optimization","Non-linear Least Squares")
+    topics = ("optimization","non-linear least squares")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {

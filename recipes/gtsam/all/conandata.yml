@@ -1,4 +1,7 @@
 sources:
+  "4.1.1":
+    url: "https://github.com/borglab/gtsam/archive/4.1.1.tar.gz"
+    sha256: "c7b5e6cdad52b141c272778f47baf628975457be3e26ed96a7bc2ae685a00af0"
   "4.0.3":
     url: "https://github.com/borglab/gtsam/archive/4.0.3.tar.gz"
     sha256: "eaa561749edf7a2d402981828253e28aed6c717dae35738301c5ab23e2595f25"
@@ -6,6 +9,11 @@ sources:
     url: "https://github.com/borglab/gtsam/archive/4.0.2.tar.gz"
     sha256: "8770a440f1af98c3f0d9d4dffd568de2d4c21b245e7231e987e26bc236aeb5aa"
 patches:
+  "4.1.1":
+    - patch_file: "patches/0001-conan-4.1.1.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-macos-rpath-4.1.1.patch"
+      base_path: "source_subfolder"
   "4.0.3":
     - patch_file: "patches/0001-conan-4.0.3.patch"
       base_path: "source_subfolder"

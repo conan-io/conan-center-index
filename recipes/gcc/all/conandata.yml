@@ -1,0 +1,4 @@
+sources:
+  "10.2.0":
+    sha256: 27e879dccc639cd7b0cc08ed575c1669492579529b53c9ff27b0b96265fa867d
+    url: https://ftp.gnu.org/gnu/gcc/gcc-10.2.0/gcc-10.2.0.tar.gz

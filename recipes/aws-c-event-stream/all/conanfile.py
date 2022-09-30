@@ -43,7 +43,7 @@ class AwsCEventStream(ConanFile):
         self.requires("aws-checksums/0.1.12")
         self.requires("aws-c-common/0.6.19")
         if tools.Version(self.version) >= "0.2":
-            self.requires("aws-c-io/0.10.20")
+            self.requires("aws-c-io/0.11.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

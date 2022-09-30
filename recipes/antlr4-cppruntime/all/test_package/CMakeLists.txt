@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.8)
 project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(antlr4-cppruntime REQUIRED CONFIG)
+find_package(antlr4-runtime REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 if(TARGET antlr4_shared)

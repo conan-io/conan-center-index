@@ -5,4 +5,3 @@ sources:
 patches:
   "1.12":
     - patch_file: "patches/1.12-0001-fix-error-duplicate-volatile.patch"
-      base_path: "source_subfolder"

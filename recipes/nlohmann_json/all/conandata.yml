@@ -38,3 +38,12 @@ sources:
   "3.10.5":
     url: "https://github.com/nlohmann/json/archive/v3.10.5.tar.gz"
     sha256: "5daca6ca216495edf89d167f808d1d03c4a4d929cef7da5e10f135ae1540c7e4"
+  "3.11.0":
+    url: "https://github.com/nlohmann/json/archive/v3.11.0.tar.gz"
+    sha256: "e0c4fbd03c0bb7e99b40791e0276be61e5f531106e1486e8f0d771a7ed6d754a"
+  "3.11.1":
+    url: "https://github.com/nlohmann/json/archive/v3.11.1.tar.gz"
+    sha256: "598becb62ee0e01cf32795073c8ae09b6e95335cd43a4417b785d93ce105b0d0"
+  "3.11.2":
+    url: "https://github.com/nlohmann/json/archive/v3.11.2.tar.gz"
+    sha256: "d69f9deb6a75e2580465c6c4c5111b89c4dc2fa94e3a85fcd2ffcd9a143d9273"

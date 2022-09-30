@@ -1,0 +1,33 @@
+diff --git a/RenderStateNotation/CMakeLists.txt b/RenderStateNotation/CMakeLists.txt
+index b135f13..babe8a4 100644
+--- a/RenderStateNotation/CMakeLists.txt
++++ b/RenderStateNotation/CMakeLists.txt
+@@ -23,18 +23,6 @@ file(MAKE_DIRECTORY "${RSN_PARSER_GENERATED_HEADERS_DIR}")
+ 
+ find_package(PythonInterp 3 REQUIRED)
+ 
+-execute_process(COMMAND ${PYTHON_EXECUTABLE} -m pip install libclang
+-                RESULT_VARIABLE PYTHON_PIP_LIBCLANG_RESULT)
+-if(NOT PYTHON_PIP_LIBCLANG_RESULT EQUAL "0")
+-    message(FATAL_ERROR "python -m pip install libclang failed with ${PYTHON_PIP_LIBCLANG_RESULT}")
+-endif()
+-
+-execute_process(COMMAND ${PYTHON_EXECUTABLE} -m pip install jinja2
+-                RESULT_VARIABLE PYTHON_PIP_JINJIA_RESULT)
+-if(NOT PYTHON_PIP_JINJIA_RESULT EQUAL "0")
+-    message(FATAL_ERROR "python -m pip install jinja2 failed with ${PYTHON_PIP_JINJIA_RESULT}")
+-endif()
+-
+ file(GLOB INCLUDE    include/*)
+ file(GLOB INTERFACE  interface/*)
+ file(GLOB SOURCE     src/*)
+@@ -80,7 +68,7 @@ PUBLIC
+     interface
+ PRIVATE
+     include
+-    ../../DiligentCore/Graphics/Archiver/interface
++    ${Diligent-GraphicsEngine_SOURCE_DIR}/../Archiver/interface/
+     ${RSN_PARSER_HEADERS_DIR}
+ )
+ 
+

@@ -1,4 +1,13 @@
 sources:
+  "0.39.0":
+    url: "https://github.com/bytecodealliance/wasmtime-cpp/archive/refs/tags/v0.39.0.tar.gz"
+    sha256: "b0b2d4c629d341078f8157a39c3101f9dcd84c643ddb7b25f843ed84eae281ea"
+  "0.38.0":
+    url: "https://github.com/bytecodealliance/wasmtime-cpp/archive/refs/tags/v0.38.0.tar.gz"
+    sha256: "67bf9cc72e8abaa4ec0011efa7aab7187c5588491f474c95e90c708b1a620931"
+  "0.37.0":
+    url: "https://github.com/bytecodealliance/wasmtime-cpp/archive/refs/tags/v0.37.0.tar.gz"
+    sha256: "c731429649fc0d77d69f9a19386d1e47f22a92e316b2d927bc3c76f50c478a3a"
   "0.36.0":
     url: "https://github.com/bytecodealliance/wasmtime-cpp/archive/refs/tags/v0.36.0.tar.gz"
     sha256: "d06a47d338de920508f648d8c2d49c55c5d6291c481c21fa0620ff3b9decefbb"
@@ -8,15 +17,3 @@ sources:
   "0.34.0":
     url: "https://github.com/bytecodealliance/wasmtime-cpp/archive/refs/tags/v0.34.0.tar.gz"
     sha256: "275483f87dadc183ed54708ccaeb025f33c040b8b3aeff797df6f9cd99f0abd8"
-  "0.32.0":
-    url: "https://github.com/bytecodealliance/wasmtime-cpp/archive/refs/tags/v0.32.0.tar.gz"
-    sha256: "5a3f5a3b21a228f9850420c5f1a1baec438617c957bd0c793d01c5db36aa8405"
-  "0.31.0":
-    url: "https://github.com/bytecodealliance/wasmtime-cpp/archive/refs/tags/v0.31.0.tar.gz"
-    sha256: "d291f97fb29f39aad166ae737f25755fe31dfb25513c55976fc60745903cd1b0"
-  "0.30.0":
-    url: "https://github.com/bytecodealliance/wasmtime-cpp/archive/refs/tags/v0.30.0.tar.gz"
-    sha256: "a42e25e93097a1ba84c4d2b9626b9d7a7779ac662c4a6ed2aa7bce30aa69d95f"
-  "0.29.0":
-    url: "https://github.com/bytecodealliance/wasmtime-cpp/archive/refs/tags/v0.29.0.tar.gz"
-    sha256: "6e4e01b5b7474502c32b21ca5eadd2c5a81c8b7898bb7e1c697422436f1b0f13"

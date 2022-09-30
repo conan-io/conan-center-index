@@ -1,10 +1,7 @@
 cmake_minimum_required(VERSION 3.4)
-project(noise)
+project(noise LANGUAGES CXX)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
-
-set(NOISE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/noise/src)
+set(NOISE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/noise/src)
 
 file(GLOB NOISE_SRC_FILES
     ${NOISE_SRC_DIR}/*.cpp

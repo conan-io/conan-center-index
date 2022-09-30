@@ -1,56 +1,26 @@
 sources:
-  "1.45.2":
-    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.45.2.tar.gz"
-    sha256: "e18b16f7976aab9a36c14c38180f042bb0fd196b75c9fd6a20a2b5f934876ad6"
-  "1.44.0":
-    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.44.0.tar.gz"
-    sha256: "8c05641b9f91cbc92f51cc4a5b3a226788d7a63f20af4ca7aaca50d92cc94a0d"
-  "1.43.2":
-    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.43.2.tar.gz"
-    sha256: "b74ce7d26fe187970d1d8e2c06a5d3391122f7bc1fdce569aff5e435fb8fe780"
-  "1.42.0":
-    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.42.0.tar.gz"
-    sha256: "b2f2620c762427bfeeef96a68c1924319f384e877bc0e084487601e4cc6e434c"
-  "1.41.1":
-    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.41.1.tar.gz"
-    sha256: "12a4a6f8c06b96e38f8576ded76d0b79bce13efd7560ed22134c2f433bc496ad"
-  "1.40.0":
-    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.40.0.tar.gz"
-    sha256: "13e7c6460cd979726e5b3b129bb01c34532f115883ac696a75eb7f1d6a9765ed"
-  "1.39.1":
-    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.39.1.tar.gz"
-    sha256: "024118069912358e60722a2b7e507e9c3b51eeaeee06e2dd9d95d9c16f6639ec"
-  "1.38.1":
-    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.38.1.tar.gz"
-    sha256: "f60e5b112913bf776a22c16a3053cc02cf55e60bf27a959fd54d7aaf8e2da6e8"
-  "1.37.1":
-    url: "https://github.com/grpc/grpc/archive/v1.37.1.tar.gz"
-    sha256: "acf247ec3a52edaee5dee28644a4e485c5e5badf46bdb24a80ca1d76cb8f1174"
+  "1.48.0":
+    url: "https://github.com/grpc/grpc/archive/v1.48.0.tar.gz"
+    sha256: "9b1f348b15a7637f5191e4e673194549384f2eccf01fcef7cc1515864d71b424"
+  "1.47.1":
+    url: "https://github.com/grpc/grpc/archive/v1.47.1.tar.gz"
+    sha256: "ba7c36989ad8a52c813adeebb0c65869283448f496dbb2868c75f69941dec6a9"
+  "1.46.3":
+    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.46.3.tar.gz"
+    sha256: "d6cbf22cb5007af71b61c6be316a79397469c58c82a942552a62e708bce60964"
 patches:
-  "1.45.2":
-    - patch_file: "patches/v1.44.x/001-disable-cppstd-override.patch"
+  "1.48.0":
+    - patch_file: "patches/v1.48.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
-  "1.44.0":
-    - patch_file: "patches/v1.44.x/001-disable-cppstd-override.patch"
+    - patch_file: "patches/v1.48.x/002-consume-protos-from-requirements.patch"
       base_path: "source_subfolder"
-  "1.43.2":
-    - patch_file: "patches/v1.43.x/001-disable-cppstd-override.patch"
+  "1.47.1":
+    - patch_file: "patches/v1.47.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
-  "1.42.0":
-    - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
+    - patch_file: "patches/v1.47.x/002-consume-protos-from-requirements.patch"
       base_path: "source_subfolder"
-  "1.41.1":
-    - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
+  "1.46.3":
+    - patch_file: "patches/v1.46.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
-  "1.40.0":
-    - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
-      base_path: "source_subfolder"
-  "1.39.1":
-    - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
-      base_path: "source_subfolder"
-  "1.38.1":
-    - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
-      base_path: "source_subfolder"
-  "1.37.1":
-    - patch_file: "patches/v1.37.x/001-disable-cppstd-override.patch"
+    - patch_file: "patches/v1.46.x/002-consume-protos-from-requirements.patch"
       base_path: "source_subfolder"

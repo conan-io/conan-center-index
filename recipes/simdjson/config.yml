@@ -1,33 +1,19 @@
 versions:
+  "2.2.2":
+    folder: all
+  "2.2.0":
+    folder: all
+  "2.1.0":
+    folder: all
+  "2.0.4":
+    folder: all
+  "2.0.3":
+    folder: all
+  "2.0.1":
+    folder: all
+  "1.1.0":
+    folder: all
   "1.0.2":
-    folder: all
-  "1.0.1":
-    folder: all
-  "1.0.0":
     folder: all
   "0.9.7":
     folder: all
-  "0.9.6":
-    folder: all
-  "0.9.5":
-    folder: all
-  "0.9.2":
-    folder: all
-  "0.9.1":
-    folder: all
-  "0.8.2":
-    folder: all
-  "0.8.0":
-    folder: all
-  "0.7.1":
-    folder: all
-  "0.7.0":
-    folder: all
-  "0.6.1":
-    folder: all
-  "0.5.0":
-    folder: all
-  "0.4.7":
-    folder: all
-  "0.2.1":
-    folder: 0.2.1

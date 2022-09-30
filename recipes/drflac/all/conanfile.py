@@ -1,6 +1,10 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
+from conan.tools.scm import Version
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.46.0"
 
 
 class DrflacConan(ConanFile):
@@ -10,15 +14,16 @@ class DrflacConan(ConanFile):
     topics = ("audio", "flac", "sound")
     license = ("Unlicense", "MIT-0")
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False], 
         "fPIC": [True, False],
-        "buffer_size": "ANY",
+        "buffer_size": ["ANY"],
         "no_crc": [True, False],
         "no_ogg": [True, False],
         "no_simd": [True, False],
-        "no_stdio": [True, False]
+        "no_stdio": [True, False],
+        "no_wchar": [True, False]
     }
     default_options = {
         "shared": False, 
@@ -27,24 +32,16 @@ class DrflacConan(ConanFile):
         "no_crc": False,
         "no_ogg": False,
         "no_simd": False,
-        "no_stdio": False
+        "no_stdio": False,
+        "no_wchar": False
     }
-    generators = "cmake"
     exports_sources = ["CMakeLists.txt", "dr_flac.c"]
-
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "0.12.39":
+            del self.options.no_wchar
 
     def configure(self):
         if self.options.shared:
@@ -52,28 +49,31 @@ class DrflacConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+    def layout(self):
+        cmake_layout(self)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUFFER_SIZE"] = self.options.buffer_size
-        self._cmake.definitions["NO_CRC"] = self.options.no_crc
-        self._cmake.definitions["NO_OGG"] = self.options.no_ogg
-        self._cmake.definitions["NO_SIMD"] = self.options.no_simd
-        self._cmake.definitions["NO_STDIO"] = self.options.no_stdio
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["DRFLAC_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["BUFFER_SIZE"] = self.options.buffer_size
+        tc.variables["NO_CRC"] = self.options.no_crc
+        tc.variables["NO_OGG"] = self.options.no_ogg
+        tc.variables["NO_SIMD"] = self.options.no_simd
+        tc.variables["NO_STDIO"] = self.options.no_stdio
+        tc.variables["NO_WCHAR"] = self.options.get_safe("no_wchar", False)
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
@@ -90,3 +90,5 @@ class DrflacConan(ConanFile):
             self.cpp_info.defines.append("DR_FLAC_NO_SIMD")
         if self.options.no_stdio:
             self.cpp_info.defines.append("DR_FLAC_NO_STDIO")
+        if self.options.get_safe("no_wchar", False):
+            self.cpp_info.defines.append("DR_FLAC_NO_WCHAR")            

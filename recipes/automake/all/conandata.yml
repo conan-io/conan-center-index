@@ -1,4 +1,7 @@
 sources:
+  "1.16.5":
+    url: "https://ftp.gnu.org/gnu/automake/automake-1.16.5.tar.gz"
+    sha256: "07bd24ad08a64bc17250ce09ec56e921d6343903943e99ccf63bbf0705e34605"
   "1.16.4":
     url: "https://ftp.gnu.org/gnu/automake/automake-1.16.4.tar.gz"
     sha256: "8a0f0be7aaae2efa3a68482af28e5872d8830b9813a6a932a2571eac63ca1794"
@@ -12,6 +15,15 @@ sources:
     url: "https://ftp.gnu.org/gnu/automake/automake-1.16.1.tar.gz"
     sha256: "608a97523f97db32f1f5d5615c98ca69326ced2054c9f82e65bade7fc4c9dea8"
 patches:
+  "1.16.5":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-help2man-no-discard-stderr-0.16.4.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-no-perl-path-in-shebang-0.16.4.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0003-remove-embedded-datadirs-introduce-automake-conan-includes-0.16.3.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0004-introduce-automake_perllibdir-0.16.3.patch"
   "1.16.4":
     - base_path: "source_subfolder"
       patch_file: "patches/0001-help2man-no-discard-stderr-0.16.4.patch"

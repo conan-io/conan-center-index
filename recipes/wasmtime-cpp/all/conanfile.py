@@ -7,12 +7,12 @@ required_conan_version = ">=1.33.0"
 
 class WasmtimeCppConan(ConanFile):
     name = 'wasmtime-cpp'
-    homepage = 'https://github.com/bytecodealliance/wasmtime-cpp'
+    description = "Standalone JIT-style runtime for WebAssembly, using Cranelift"
     license = 'Apache-2.0'
     url = 'https://github.com/conan-io/conan-center-index'
-    description = "Standalone JIT-style runtime for WebAssembly, using Cranelift"
+    homepage = 'https://github.com/bytecodealliance/wasmtime-cpp'
     topics = ("webassembly", "wasm", "wasi", "c++")
-    settings = "os", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
@@ -32,7 +32,12 @@ class WasmtimeCppConan(ConanFile):
         version = str(self.version)
         if version == "0.35.0":
             version = "0.35.1"
+        elif version == "0.39.0":
+            version = "0.39.1"
         self.requires(f"wasmtime/{version}")
+
+    def package_id(self):
+        self.info.header_only()
 
     def validate(self):
         compiler = self.settings.compiler
@@ -54,9 +59,6 @@ class WasmtimeCppConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-
-    def package_id(self):
-        self.info.header_only()
 
     def package(self):
         shutil.copytree(os.path.join(self.source_folder, "include"),

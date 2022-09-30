@@ -8,7 +8,5 @@ sources:
 patches:
   "2.2":
     - patch_file: "patches/add-CMakeLists-and-static.patch"
-      base_path: "source_subfolder"
   "2.1":
     - patch_file: "patches/add-CMakeLists-and-static.patch"
-      base_path: "source_subfolder"

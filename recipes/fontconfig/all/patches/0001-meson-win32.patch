@@ -1,11 +1,19 @@
 --- conf.d/link_confs.py
 +++ conf.d/link_confs.py
-@@ -26,7 +26,7 @@
+@@ -3,6 +3,7 @@
+ import os
+ import sys
+ import argparse
++import platform
+ 
+ if __name__=='__main__':
+     parser = argparse.ArgumentParser()
+@@ -26,7 +27,7 @@ if __name__=='__main__':
              break
          except OSError as e:
              # Symlink privileges are not available
 -            if len(e.args) == 1 and 'privilege' in e.args[0]:
-+            if (len(e.args) == 1 and 'privilege' in e.args[0]) or (len(e.args) == 2 and 'privilege' in e.args[1]):
++            if platform.system().lower() == 'windows' and e.winerror == 1314:
                  break
              raise
          except FileExistsError:

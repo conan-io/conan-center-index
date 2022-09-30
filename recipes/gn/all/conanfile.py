@@ -1,11 +1,14 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
+import conan.tools.files as tools_files
+import conan.tools.scm as tools_scm
 import os
+import sys
 import textwrap
 import time
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.46.0"
 
 
 class GnConan(ConanFile):
@@ -30,12 +33,12 @@ class GnConan(ConanFile):
             "apple-clang": 10,
         }.get(str(self.settings.compiler))
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 17)
         else:
             if self._minimum_compiler_version_supporting_cxx17:
-                if tools.Version(self.settings.compiler.version) < self._minimum_compiler_version_supporting_cxx17:
+                if tools_scm.Version(self.settings.compiler.version) < self._minimum_compiler_version_supporting_cxx17:
                     raise ConanInvalidConfiguration("gn requires a compiler supporting c++17")
             else:
                 self.output.warn("gn recipe does not recognize the compiler. gn requires a compiler supporting c++17. Assuming it does.")
@@ -44,7 +47,7 @@ class GnConan(ConanFile):
         del self.info.settings.compiler
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
+        tools_files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder)
 
     def build_requirements(self):
         # FIXME: add cpython build requirements for `build/gen.py`.
@@ -104,7 +107,7 @@ class GnConan(ConanFile):
                 ]
                 if self.settings.build_type == "Debug":
                     conf_args.append("-d")
-                self.run("python build/gen.py {}".format(" ".join(conf_args)), run_environment=True)
+                self.run("{} build/gen.py {}".format(sys.executable, " ".join(conf_args)), run_environment=True)
                 # Try sleeping one second to avoid time skew of the generated ninja.build file (and having to re-run build/gen.py)
                 time.sleep(1)
                 build_args = [
@@ -122,3 +125,4 @@ class GnConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
+        self.cpp_info.includedirs = []

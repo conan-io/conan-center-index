@@ -1,28 +1,34 @@
 sources:
-  "1.4.0":
-    url: "https://github.com/nayuki/QR-Code-generator/archive/v1.4.0.tar.gz"
-    sha256: "fcdf9fd69fde07ae4dca2351d84271a9de8093002f733b77c70f52f1630f6e4a"
-  "1.5.0":
-    url: "https://github.com/nayuki/QR-Code-generator/archive/v1.5.0.tar.gz"
-    sha256: "6cf993c10fbf96b5e8f8e4eaad8ea1ca3bbc58fb4d00a4728b4f818c27fb4d5e"
-  "1.6.0":
-    url: "https://github.com/nayuki/QR-Code-generator/archive/v1.6.0.tar.gz"
-    sha256: "8acee5a77325e075b910747ad4b1fdb1491b7e22d0b8f1b5a6ea15ea08ba33a8"
+  "1.8.0":
+    url: "https://github.com/nayuki/QR-Code-generator/archive/v1.8.0.tar.gz"
+    sha256: "2ec0a4d33d6f521c942eeaf473d42d5fe139abcfa57d2beffe10c5cf7d34ae60"
   "1.7.0":
     url: "https://github.com/nayuki/QR-Code-generator/archive/v1.7.0.tar.gz"
     sha256: "a8138d84a2adbc9168bfadfb9db5272c89b69fb87f72a88ecd08ce7f402ee710"
+  "1.6.0":
+    url: "https://github.com/nayuki/QR-Code-generator/archive/v1.6.0.tar.gz"
+    sha256: "8acee5a77325e075b910747ad4b1fdb1491b7e22d0b8f1b5a6ea15ea08ba33a8"
+  "1.5.0":
+    url: "https://github.com/nayuki/QR-Code-generator/archive/v1.5.0.tar.gz"
+    sha256: "6cf993c10fbf96b5e8f8e4eaad8ea1ca3bbc58fb4d00a4728b4f818c27fb4d5e"
+  "1.4.0":
+    url: "https://github.com/nayuki/QR-Code-generator/archive/v1.4.0.tar.gz"
+    sha256: "fcdf9fd69fde07ae4dca2351d84271a9de8093002f733b77c70f52f1630f6e4a"
 patches:
+  "1.8.0":
+    - base_path: "."
+      patch_file: "patches/004-cmake-1.7.patch"
+  "1.7.0":
+    - base_path: "."
+      patch_file: "patches/004-cmake-1.7.patch"
+  "1.6.0":
+    - base_path: "."
+      patch_file: "patches/003-cmake-1.6.patch"
+  "1.5.0":
+    - base_path: "."
+      patch_file: "patches/002-cmake-pre-1.6.patch"
   "1.4.0":
     - base_path: "source_subfolder"
       patch_file: "patches/001-qrcode-1_4.patch"
     - base_path: "."
       patch_file: "patches/002-cmake-pre-1.6.patch"
-  "1.5.0":
-    - base_path: "."
-      patch_file: "patches/002-cmake-pre-1.6.patch"
-  "1.6.0":
-    - base_path: "."
-      patch_file: "patches/003-cmake-1.6.patch"
-  "1.7.0":
-    - base_path: "."
-      patch_file: "patches/004-cmake-1.7.patch"

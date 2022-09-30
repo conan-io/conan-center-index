@@ -1,4 +1,10 @@
 sources:
+  "0.10.1":
+    url: "https://github.com/capnproto/capnproto/archive/v0.10.1.tar.gz"
+    sha256: "2e9c918f02c198557c75ca7c635fe281337c9755b752a6ab3a841bcc1cf5176b"
+  "0.10.0":
+    url: "https://github.com/capnproto/capnproto/archive/v0.10.0.tar.gz"
+    sha256: "0e46a72d086830762c001116c0a146098fbdce3cd40665a0ffd4742962d42bfd"
   "0.9.1":
     url: "https://github.com/capnproto/capnproto/archive/v0.9.1.tar.gz"
     sha256: "daf49f794560f715e2f4651c842aaece2d065d4216834c5c3d3254962e35b535"
@@ -9,10 +15,18 @@ sources:
     url: "https://github.com/capnproto/capnproto/archive/v0.7.0.tar.gz"
     sha256: 76c7114a3d142ad08b7208b3964a26e72a6320ee81331d3f0b87569fc9c47a28
 patches:
+  "0.10.1":
+    - patch_file: patches/0014-disable-tests-for-0.10.1.patch
+      base_path: source_subfolder
+  "0.10.0":
+    - patch_file: patches/0013-disable-tests-for-0.10.0.patch
+      base_path: source_subfolder
   "0.9.1":
     - patch_file: patches/0010-disable-tests-for-0.9.1.patch
       base_path: source_subfolder
     - patch_file: patches/0011-msvc-cpp17-hassubstring-fix-0.9.1.patch
+      base_path: source_subfolder
+    - patch_file: patches/0012-msvc-nogdi-fix-0.9.1.patch
       base_path: source_subfolder
   "0.8.0":
     - patch_file: patches/0001-disable-tests.patch

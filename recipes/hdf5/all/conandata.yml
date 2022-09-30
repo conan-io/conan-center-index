@@ -1,4 +1,10 @@
 sources:
+  "1.13.1":
+    url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_13_1.tar.gz"
+    sha256: "92552458f35c7e58128ce1bfc2831abf901cc142ea0fdd2b056311e4452db7bf"
+  "1.12.2":
+    url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_12_2.tar.gz"
+    sha256: "1ca14cadff7bc4b61826eee591da1a330f44c107db66c9510ee95df3b2bc5f78"
   "1.12.1":
     url: "https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.1/src/hdf5-1.12.1.tar.gz"
     sha256: "79c66ff67e666665369396e9c90b32e238e501f345afd2234186bfb8331081ca"
@@ -15,6 +21,12 @@ sources:
     url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_8_21.tar.gz"
     sha256: "753520e34a576a64809b8e02d9c015d6126f7974f678c7417a60492d835a88f4"
 patches:
+  "1.13.1":
+    - patch_file: "patches/conanize-link-szip-1.12.2+.patch"
+      base_path: "source_subfolder"
+  "1.12.2":
+    - patch_file: "patches/conanize-link-szip-1.12.2+.patch"
+      base_path: "source_subfolder"
   "1.12.1":
     - patch_file: "patches/conanize-link-szip-1.12.1+.patch"
       base_path: "source_subfolder"

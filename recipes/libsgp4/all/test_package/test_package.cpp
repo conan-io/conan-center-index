@@ -15,11 +15,11 @@
  */
 
 
-#include <Tle.h>
-#include <SGP4.h>
-#include <Observer.h>
-#include <CoordGeodetic.h>
-#include <CoordTopocentric.h>
+#include <SGP4/Tle.h>
+#include <SGP4/SGP4.h>
+#include <SGP4/Observer.h>
+#include <SGP4/CoordGeodetic.h>
+#include <SGP4/CoordTopocentric.h>
 
 #include <list>
 #include <string>

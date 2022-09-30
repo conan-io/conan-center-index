@@ -122,7 +122,7 @@ class ImageMagicConan(ConanFile):
         if self.options.with_openjp2:
             self.requires("openjpeg/2.4.0")
         if self.options.with_pango:
-            self.requires("pango/1.48.5")
+            self.requires("pango/1.50.7")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_tiff:
@@ -328,16 +328,9 @@ class ImageMagicConan(ConanFile):
         )
 
         # FIXME: workaround for xorg/system adding system includes https://github.com/conan-io/conan-center-index/issues/6880
-        xft_path = os.path.join(self.build_folder, "xft.pc")
-        if os.path.exists(xft_path):
-            os.remove(xft_path)
         if "/usr/include/uuid" in self._autotools.include_paths:
             self._autotools.include_paths.remove("/usr/include/uuid")
-        if "/usr/include/freetype2" in self._autotools.include_paths:
-            self._autotools.include_paths.remove("/usr/include/freetype2")
-        for include in self._autotools.include_paths:
-            if include.startswith("/usr/include/libpng"):
-                self._autotools.include_paths.remove(include)
+
 
         def yes_no(o):
             return "yes" if o else "no"

@@ -1,5 +1,4 @@
 diff --git a/AssetLoader/CMakeLists.txt b/AssetLoader/CMakeLists.txt
-index 52b8694..f36f0a5 100644
 --- a/AssetLoader/CMakeLists.txt
 +++ b/AssetLoader/CMakeLists.txt
 @@ -34,13 +34,8 @@ source_group("interface" FILES ${INTERFACE})
@@ -18,7 +17,6 @@ index 52b8694..f36f0a5 100644
  
  if (TARGET draco)
 diff --git a/HLSL2GLSLConverter/CMakeLists.txt b/HLSL2GLSLConverter/CMakeLists.txt
-index 0b1de80..e69515c 100644
 --- a/HLSL2GLSLConverter/CMakeLists.txt
 +++ b/HLSL2GLSLConverter/CMakeLists.txt
 @@ -33,12 +33,7 @@ target_compile_definitions(HLSL2GLSLConverter PRIVATE UNICODE)
@@ -36,7 +34,6 @@ index 0b1de80..e69515c 100644
  
  source_group("source" FILES ${SOURCE})
 diff --git a/Imgui/CMakeLists.txt b/Imgui/CMakeLists.txt
-index 041f324..8c19675 100644
 --- a/Imgui/CMakeLists.txt
 +++ b/Imgui/CMakeLists.txt
 @@ -106,13 +106,8 @@ source_group("imGuIZMO.quat" FILES ${IMGUIZMO_QUAT_SOURCE})
@@ -56,7 +53,6 @@ index 041f324..8c19675 100644
  
  set_target_properties(Diligent-Imgui PROPERTIES
 diff --git a/NativeApp/Android/ndk_helper/CMakeLists.txt b/NativeApp/Android/ndk_helper/CMakeLists.txt
-index 6f23857..3aa07a8 100644
 --- a/NativeApp/Android/ndk_helper/CMakeLists.txt
 +++ b/NativeApp/Android/ndk_helper/CMakeLists.txt
 @@ -29,7 +29,7 @@ PUBLIC
@@ -69,7 +65,6 @@ index 6f23857..3aa07a8 100644
      native_app_glue
  )
 diff --git a/NativeApp/CMakeLists.txt b/NativeApp/CMakeLists.txt
-index 366c303..165ba72 100644
 --- a/NativeApp/CMakeLists.txt
 +++ b/NativeApp/CMakeLists.txt
 @@ -432,8 +432,7 @@ PUBLIC
@@ -83,7 +78,6 @@ index 366c303..165ba72 100644
  
  if(PLATFORM_WIN32)
 diff --git a/NativeApp/Linux/CMakeLists.txt b/NativeApp/Linux/CMakeLists.txt
-index a550fe0..e8f3a87 100644
 --- a/NativeApp/Linux/CMakeLists.txt
 +++ b/NativeApp/Linux/CMakeLists.txt
 @@ -20,7 +20,7 @@ source_group("interface" FILES ${INTERFACE})
@@ -96,7 +90,6 @@ index a550fe0..e8f3a87 100644
  )
  
 diff --git a/TextureLoader/CMakeLists.txt b/TextureLoader/CMakeLists.txt
-index 941a006..34d3242 100644
 --- a/TextureLoader/CMakeLists.txt
 +++ b/TextureLoader/CMakeLists.txt
 @@ -44,16 +44,12 @@ source_group("include" FILES ${INCLUDE})
@@ -123,7 +116,6 @@ index 941a006..34d3242 100644
  
  if (NOT DILIGENT_EXTERNAL_LIBJPEG)
 diff --git a/ThirdParty/CMakeLists.txt b/ThirdParty/CMakeLists.txt
-index 4c89c41..3c7406f 100644
 --- a/ThirdParty/CMakeLists.txt
 +++ b/ThirdParty/CMakeLists.txt
 @@ -1,10 +1,5 @@

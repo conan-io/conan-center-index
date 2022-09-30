@@ -52,7 +52,7 @@ class NASMConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=(self._settings_build.os == "Windows"))
         if self.settings.arch == "x86":
             self._autotools.flags.append("-m32")
         elif self.settings.arch == "x86_64":
@@ -91,3 +91,5 @@ class NASMConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
+        self.cpp_info.libdirs = []
+        self.cpp_info.includedirs = []

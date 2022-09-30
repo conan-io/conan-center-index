@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.33.0"
 
@@ -26,8 +27,11 @@ class CtreConan(ConanFile):
         min_gcc = "7.4" if ctre_version < "3" else "8"
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
-        if (compiler == "Visual Studio" or compiler == "msvc") and compiler_version < "15":
-            raise ConanInvalidConfiguration("{}/{} doesn't support MSVC < 15".format(self.name, self.version))
+        if is_msvc(self):
+            if compiler_version < "15":
+                raise ConanInvalidConfiguration("{}/{} doesn't support MSVC < 15".format(self.name, self.version))
+            if ctre_version >= "3.7" and compiler_version < 16:
+                raise ConanInvalidConfiguration("{}/{} doesn't support MSVC < 16".format(self.name, self.version))
         elif compiler == "gcc" and compiler_version < min_gcc:
             raise ConanInvalidConfiguration("{}/{} doesn't support gcc < {}".format(self.name, self.version, min_gcc))
         elif compiler == "clang" and compiler_version < "6.0":

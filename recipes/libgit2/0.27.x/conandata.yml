@@ -2,6 +2,3 @@ sources:
   "0.27.10":
     url: "https://github.com/libgit2/libgit2/archive/v0.27.10.tar.gz"
     sha256: "f6fd26378ff71bd7a4b17b576c82c774a2e9c2d6b74b24718a8fb29551e1c4a5"
-  "0.27.9":
-    url: "https://github.com/libgit2/libgit2/archive/v0.27.9.tar.gz"
-    sha256: "adf17310b590e6e7618f070c742b5ee028aeeed2c60099bc4190c386b5060de1"

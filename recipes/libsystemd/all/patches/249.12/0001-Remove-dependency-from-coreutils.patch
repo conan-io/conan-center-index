@@ -1,0 +1,29 @@
+From dd758e85278e15db6e66e9802744f120eeb2285c Mon Sep 17 00:00:00 2001
+From: Sergey Bobrenok <bobrofon@gmail.com>
+Date: Thu, 18 Aug 2022 21:51:58 +0300
+Subject: [PATCH] Remove dependency from coreutils
+
+In a conan recipe we already know the relative path to the source directory. We
+can simply replace '@CONAN_SRC_REL_PATH@' with the actual path there.
+---
+ meson.build | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index b9b8ebef45..30c5b6efa1 100644
+--- a/meson.build
++++ b/meson.build
+@@ -25,9 +25,7 @@ conf.set('PROJECT_VERSION',    meson.project_version(),
+ # the wrong result when systemd is being built as a meson subproject
+ project_source_root = meson.current_source_dir()
+ project_build_root = meson.current_build_dir()
+-relative_source_path = run_command('realpath',
+-                                   '--relative-to=@0@'.format(project_build_root),
+-                                   project_source_root).stdout().strip()
++relative_source_path = @CONAN_SRC_REL_PATH@
+ conf.set_quoted('RELATIVE_SOURCE_PATH', relative_source_path)
+ 
+ conf.set10('BUILD_MODE_DEVELOPER', get_option('mode') == 'developer',
+-- 
+2.37.2
+

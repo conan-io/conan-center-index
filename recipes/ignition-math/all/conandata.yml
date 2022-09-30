@@ -1,10 +1,10 @@
 sources:
   "6.7.0":
-    url: "https://github.com/ignitionrobotics/ign-math/archive/ignition-math6_6.7.0.tar.gz"
-    sha256: "8456af51cbb128d7468d65b55124af7a235f052214ac2a239c3f23197416f2d2"
+    url: "https://github.com/gazebosim/gz-math/archive/ignition-math6_6.7.0.tar.gz"
+    sha256: "e5dac5aca6a117af8bd07ebca6e4ec8255682453487bf8d706bdb0315d17d6af"
   "6.10.0":
-    url: "https://github.com/ignitionrobotics/ign-math/archive/refs/tags/ignition-math6_6.10.0.tar.gz"
-    sha256: "9e00284cd6d51afe190165b2b44258e19bd4a28781cbacf21fd6b0bae43c16aa"
+    url: "https://github.com/gazebosim/gz-math/archive/ignition-math6_6.10.0.tar.gz"
+    sha256: "94e853e1dfba97ebec4b6152691a89af1e94660b02f4ecdf04356b763c2848bd"
 patches:
   "6.7.0":
     - base_path: "source_subfolder"

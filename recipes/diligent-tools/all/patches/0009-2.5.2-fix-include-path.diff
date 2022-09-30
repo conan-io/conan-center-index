@@ -1,0 +1,13 @@
+diff --git a/Imgui/src/ImGuiImplWin32.cpp b/Imgui/src/ImGuiImplWin32.cpp
+--- a/Imgui/src/ImGuiImplWin32.cpp
++++ b/Imgui/src/ImGuiImplWin32.cpp
+@@ -32,7 +32,7 @@
+ #include "GraphicsTypes.h"
+ #include "imgui.h"
+ #include "ImGuiImplWin32.hpp"
+-#include "backends/imgui_impl_win32.h"
++#include "../res/bindings/imgui_impl_win32.h"
+ #include "DebugUtilities.hpp"
+
+ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+

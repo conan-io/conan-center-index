@@ -5,10 +5,16 @@ sources:
   "21.11":
     url: "https://github.com/seladb/PcapPlusPlus/archive/v21.11.tar.gz"
     sha256: "56b8566b14b2586b8afc358e7c98268bc1dd6192197b29a3917b9df2120c51b0"
+  "22.05":
+    url: "https://github.com/seladb/PcapPlusPlus/archive/v22.05.tar.gz"
+    sha256: "5f299c4503bf5d3c29f82b8d876a19be7dea29c2aadcb52f2f3b394846c21da9"
 patches:
   "21.05":
     - patch_file: "patches/0001-Pass-CXXFLAGS-CPPFLAGS-when-compiling-3rd-party-sour.patch"
       base_path: "source_subfolder"
   "21.11":
     - patch_file: "patches/0001-Pass-CXXFLAGS-CPPFLAGS-when-compiling-3rd-party-sour.patch"
+      base_path: "source_subfolder"
+  "22.05":
+    - patch_file: "patches/0002-Pass-CXXFLAGS-CPPFLAGS-when-compiling-3rd-party-sour.patch"
       base_path: "source_subfolder"

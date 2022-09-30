@@ -8,8 +8,8 @@ class CnCborStackConan(ConanFile):
     license = "MIT"
     homepage = "https://github.com/jimsch/cn-cbor/"
     url = "https://github.com/conan-io/conan-center-index"
-    description = """A constrained node implementation of CBOR in C"""
-    topics = ("cbor", "nodes", "messaging")
+    description = "A constrained node implementation of CBOR in C"
+    topics = "cbor", "nodes", "messaging"
     exports_sources = ['CMakeLists.txt']
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -39,6 +39,8 @@ class CnCborStackConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            del self.options.fPIC
 
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Windows shared builds are not supported right now")
@@ -64,8 +66,6 @@ class CnCborStackConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
-
-
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
@@ -74,8 +74,7 @@ class CnCborStackConan(ConanFile):
         os.remove(os.path.join(self.package_folder, "LICENSE"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder,
-                                 "lib", "cn-cbor", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cn-cbor", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)

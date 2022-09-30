@@ -1,15 +1,17 @@
-From d446f8cf36cf9e1232210038ec09a8590e8ab79e Mon Sep 17 00:00:00 2001
+From 48a5162899ebeb0ba3ca3141b587a53d2eda4223 Mon Sep 17 00:00:00 2001
 From: Samuel Dowling <samuel.dowling@protonmail.com>
-Date: Sun, 10 Oct 2021 16:35:30 +1030
+Date: Thu, 30 Sep 2021 23:51:35 +0930
 Subject: [PATCH] Guard dependency discovery
 
 * Add guards to prevent usage of custom cmake find package scripts.
+* Remove ability to inject hdf5 include directory into compiled binary
 ---
- CMakeLists.txt | 73 +++++++++++++++++++++++++++++++++++++++++---------
- 1 file changed, 61 insertions(+), 12 deletions(-)
+ CMakeLists.txt                          | 72 ++++++++++++++++++++-----
+ include/armadillo_bits/config.hpp.cmake |  2 +-
+ 2 files changed, 60 insertions(+), 14 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 7857f8c..77e2d46 100644
+index 7857f8c..5f87f7e 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -274,7 +274,11 @@ if(APPLE)
@@ -54,7 +56,7 @@ index 7857f8c..77e2d46 100644
 -  include(ARMA_FindBLAS)
 -  include(ARMA_FindLAPACK)
 +  if(USE_MKL)
-+      find_package(MKL)
++    find_package(MKL)
 +  else()
 +    set(MKL_FOUND NO)
 +  endif()
@@ -93,17 +95,16 @@ index 7857f8c..77e2d46 100644
    endif()
    
    message(STATUS "      MKL_FOUND = ${MKL_FOUND}"       )
-@@ -470,7 +510,8 @@ if(DETECT_HDF5)
+@@ -470,8 +510,6 @@ if(DETECT_HDF5)
      # HDF5_INCLUDE_DIRS is the correct include directory.  So, in either case we
      # can use the first element in the list.  Issue a status message, too, just
      # for good measure.
 -    list(GET HDF5_INCLUDE_DIRS 0 ARMA_HDF5_INCLUDE_DIR)
-+    list(GET HDF5_INCLUDE_DIRS 1 ARMA_HDF5_INCLUDE_DIR)
-+
-     message(STATUS "ARMA_HDF5_INCLUDE_DIR = ${ARMA_HDF5_INCLUDE_DIR}")
+-    message(STATUS "ARMA_HDF5_INCLUDE_DIR = ${ARMA_HDF5_INCLUDE_DIR}")
      message(STATUS "")
      message(STATUS "*** If use of HDF5 is causing problems,")
-@@ -480,7 +521,11 @@ if(DETECT_HDF5)
+     message(STATUS "*** rerun cmake with HDF5 detection disabled:")
+@@ -480,7 +518,11 @@ if(DETECT_HDF5)
    endif()
  endif()
  
@@ -116,7 +117,7 @@ index 7857f8c..77e2d46 100644
  message(STATUS "ARPACK_FOUND = ${ARPACK_FOUND}")
  
  if(ARPACK_FOUND)
-@@ -488,7 +533,11 @@ if(ARPACK_FOUND)
+@@ -488,7 +530,11 @@ if(ARPACK_FOUND)
    set(ARMA_LIBS ${ARMA_LIBS} ${ARPACK_LIBRARY})
  endif()
  
@@ -129,6 +130,19 @@ index 7857f8c..77e2d46 100644
  message(STATUS "SuperLU_FOUND = ${SuperLU_FOUND}")
  
  if(SuperLU_FOUND)
+diff --git a/include/armadillo_bits/config.hpp.cmake b/include/armadillo_bits/config.hpp.cmake
+index 3f7f874..998f6ec 100644
+--- a/include/armadillo_bits/config.hpp.cmake
++++ b/include/armadillo_bits/config.hpp.cmake
+@@ -152,7 +152,7 @@
+   #undef  ARMA_USE_HDF5
+   #define ARMA_USE_HDF5
+   
+-  #define ARMA_HDF5_INCLUDE_DIR ${ARMA_HDF5_INCLUDE_DIR}/
++  // #define ARMA_HDF5_INCLUDE_DIR ${ARMA_HDF5_INCLUDE_DIR}/
+ #endif
+ 
+ #if !defined(ARMA_MAT_PREALLOC)
 -- 
-2.33.0
+2.36.0
 

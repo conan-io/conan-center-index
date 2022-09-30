@@ -1,31 +1,30 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
 import os
-import glob
+
+required_conan_version = ">=1.46.0"
 
 
-class CppOptparse(ConanFile):
+class CppOptparseConan(ConanFile):
     name = "cpp-optparse"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/weisslj/cpp-optparse"
     description = "Python's excellent OptionParser in C++"
-    topics = ("conan", "cpp-optparse", "argument", "parsing")
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"fPIC": [True, False],
-               "shared": [True, False]}
-    default_options = {"fPIC": True,
-                       "shared": False}
-    generators = "cmake"
-    exports_sources = ["CMakeLists.txt"]
-    _cmake = None
+    topics = ("cpp-optparse", "argument", "parsing")
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "fPIC": [True, False],
+        "shared": [True, False],
+    }
+    default_options = {
+        "fPIC": True,
+        "shared": False,
+    }
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    exports_sources = "CMakeLists.txt"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -35,25 +34,27 @@ class CppOptparse(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("cpp-optparse-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CPP_OPTPARSE_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["OptionParser"]

@@ -1,4 +1,13 @@
 sources:
+  "3.0.1":
+    url: "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/refs/tags/v3.0.1.tar.gz"
+    sha256: "2a84762b2d10bf540b9dc1802a198aca8ad1f3d795a4ae144212c595696a360c"
+  "3.0.0":
+    url: "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/refs/tags/v3.0.0.tar.gz"
+    sha256: "dbb621a7a13fb70b8c34fef62fbe5128cc5193c7179c9edacead9f110df79a2f"
   "2.3.0":
     url: "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/v2.3.0.zip"
     sha256: "1c222c372e90f1a0d5e765420974842cf2503683ca14c30f8a0df340ba541f02"
+patches:
+  "3.0.0":
+    - patch_file: "patches/0001-fix-appleclang.patch"

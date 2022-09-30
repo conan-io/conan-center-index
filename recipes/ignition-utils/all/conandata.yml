@@ -1,7 +1,7 @@
 sources:
   "1.3.0":
-    url: "https://github.com/ignitionrobotics/ign-utils/archive/refs/tags/ignition-utils1_1.3.0.tar.gz"
-    sha256: "4ca4f553c2a1cf77c02bd37e0cba35837fd4f46145eac2b0334e33f74fd98163"
+    url: "https://github.com/gazebosim/gz-utils/archive/refs/tags/ignition-utils1_1.3.0.tar.gz"
+    sha256: "062bfbbdc185e1dacc4ffd9e70572fc01e32d11782e991ae027541ee02858e92"
 
 patches:
   "1.3.0":

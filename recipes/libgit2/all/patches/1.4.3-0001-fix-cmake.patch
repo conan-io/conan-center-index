@@ -1,0 +1,42 @@
+diff --git a/cmake/SelectHTTPParser.cmake b/cmake/SelectHTTPParser.cmake
+index 955aea3..ff94eb8 100644
+--- a/cmake/SelectHTTPParser.cmake
++++ b/cmake/SelectHTTPParser.cmake
+@@ -1,10 +1,10 @@
+ # Optional external dependency: http-parser
+ if(USE_HTTP_PARSER STREQUAL "system")
+-	find_package(HTTPParser)
++	find_package(http_parser)
+ 
+-	if(HTTP_PARSER_FOUND AND HTTP_PARSER_VERSION_MAJOR EQUAL 2)
+-		list(APPEND LIBGIT2_SYSTEM_INCLUDES ${HTTP_PARSER_INCLUDE_DIRS})
+-		list(APPEND LIBGIT2_SYSTEM_LIBS ${HTTP_PARSER_LIBRARIES})
++	if(http_parser_FOUND)
++		list(APPEND LIBGIT2_SYSTEM_INCLUDES ${http_parser_INCLUDE_DIRS})
++		list(APPEND LIBGIT2_SYSTEM_LIBS ${http_parser_LIBRARIES})
+ 		list(APPEND LIBGIT2_PC_LIBS "-lhttp_parser")
+ 		add_feature_info(http-parser ON "http-parser support (system)")
+ 	else()
+diff --git a/cmake/SelectSSH.cmake b/cmake/SelectSSH.cmake
+index 23dfc97..a094cc7 100644
+--- a/cmake/SelectSSH.cmake
++++ b/cmake/SelectSSH.cmake
+@@ -1,13 +1,10 @@
+ # Optional external dependency: libssh2
+ if(USE_SSH)
+-	find_pkglibraries(LIBSSH2 libssh2)
+-	if(NOT LIBSSH2_FOUND)
+-		find_package(LibSSH2)
+-		set(LIBSSH2_INCLUDE_DIRS ${LIBSSH2_INCLUDE_DIR})
+-		get_filename_component(LIBSSH2_LIBRARY_DIRS "${LIBSSH2_LIBRARY}" DIRECTORY)
+-		set(LIBSSH2_LIBRARIES ${LIBSSH2_LIBRARY})
+-		set(LIBSSH2_LDFLAGS "-lssh2")
+-	endif()
++	FIND_PACKAGE(Libssh2 REQUIRED)
++	SET(LIBSSH2_FOUND ON)
++	SET(LIBSSH2_INCLUDE_DIRS ${Libssh2_INCLUDE_DIRS})
++	SET(LIBSSH2_LIBRARIES ${Libssh2_LIBRARIES})
++	SET(LIBSSH2_LIBRARY_DIRS ${Libssh2_LIB_DIRS})
+ 
+ 	if(NOT LIBSSH2_FOUND)
+ 		message(FATAL_ERROR "LIBSSH2 not found. Set CMAKE_PREFIX_PATH if it is installed outside of the default search path.")

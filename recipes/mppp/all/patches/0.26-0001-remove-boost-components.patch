@@ -1,0 +1,26 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 317e9be..7110e0d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -407,7 +407,7 @@ endif()
+ # Optional dependency on Boost s11n.
+ set(_MPPP_MIN_BOOST_VERSION "1.60")
+ if(MPPP_WITH_BOOST_S11N)
+-    find_package(Boost ${_MPPP_MIN_BOOST_VERSION} REQUIRED COMPONENTS serialization)
++    find_package(Boost ${_MPPP_MIN_BOOST_VERSION} REQUIRED)
+     target_link_libraries(mp++ PUBLIC Boost::serialization Boost::disable_autolinking)
+ endif()
+ 
+diff --git a/mp++-config.cmake.in b/mp++-config.cmake.in
+index 6aabf77..6d888e5 100644
+--- a/mp++-config.cmake.in
++++ b/mp++-config.cmake.in
+@@ -20,7 +20,7 @@ endif()
+ set(mp++_WITH_MPC @MPPP_WITH_MPC@)
+ 
+ if(@MPPP_WITH_BOOST_S11N@)
+-    find_package(Boost @_MPPP_MIN_BOOST_VERSION@ REQUIRED COMPONENTS serialization)
++    find_package(Boost @_MPPP_MIN_BOOST_VERSION@ REQUIRED)
+ endif()
+ set(mp++_WITH_BOOST_S11N @MPPP_WITH_BOOST_S11N@)
+ 

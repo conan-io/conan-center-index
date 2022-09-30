@@ -2,6 +2,7 @@ import os
 import conan.tools.files
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import textwrap
 
 required_conan_version = ">=1.29.1"
 
@@ -10,7 +11,7 @@ class IgnitionMathConan(ConanFile):
     name = "ignition-math"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://ignitionrobotics.org/libs/math"
+    homepage = "https://gazebosim.org/libs/math"
     description = " Math classes and functions for robot applications"
     topics = ("ignition", "math", "robotics", "gazebo")
     settings = "os", "compiler", "build_type", "arch"
@@ -76,12 +77,7 @@ class IgnitionMathConan(ConanFile):
             self.build_requires("ignition-cmake/2.10.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        version_major = self.version.split(".")[0]
-        conan.tools.files.rename(self, 
-            "ign-math-ignition-math{}_{}".format(version_major, self.version),
-            self._source_subfolder,
-        )
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -104,46 +100,66 @@ class IgnitionMathConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            tools.Version(self.version))
+        
         # Remove MS runtime files
         for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), dll_pattern_to_remove)
 
+    @staticmethod
+    def _create_cmake_module_variables(module_file, version):
+        content = textwrap.dedent("""\
+            set(ignition-math{major}_VERSION_MAJOR {major})
+            set(ignition-math{major}_VERSION_MINOR {minor})
+            set(ignition-math{major}_VERSION_PATCH {patch})
+            set(ignition-math{major}_VERSION_STRING "{major}.{minor}.{patch}")
+            set(ignition-math{major}_INCLUDE_DIRS "${{CMAKE_CURRENT_LIST_DIR}}/../../include/ignition/math{major}")
+        """.format(major=version.major, minor=version.minor, patch=version.patch))
+        tools.save(module_file, content)
+
+
     def package_info(self):
         version_major = tools.Version(self.version).major
-        self.cpp_info.names["cmake_find_package"] = "ignition-math{}".format(version_major)
-        self.cpp_info.names["cmake_find_package_multi"] = "ignition-math{}".format(version_major)
+        lib_name = f"ignition-math{version_major}"
 
-        # cmake_find_package filename: ignition-math6-config.cmake
-        self.cpp_info.components["libignition-math"].libs = ["ignition-math{}".format(version_major)]
-        self.cpp_info.components["libignition-math"].includedirs.append("include/ignition/math{}".format(version_major))
-        self.cpp_info.components["libignition-math"].names["cmake_find_package"] = "ignition-math{}".format(version_major)
-        self.cpp_info.components["libignition-math"].names["cmake_find_package_multi"] = "ignition-math{}".format(version_major)
-        self.cpp_info.components["libignition-math"].names["pkg_config"] = "ignition-math{}".format(version_major)
+        self.cpp_info.names["cmake_find_package"] = lib_name
+        self.cpp_info.names["cmake_find_package_multi"] = lib_name
+        self.cpp_info.names["cmake_paths"] = lib_name
 
-        # FIXME: create in file ignition-math6-eigen3-config.cmake
-        self.cpp_info.components["libignition-math-eigen3"].libs = []
-        self.cpp_info.components["libignition-math-eigen3"].requires = ["libignition-math", "eigen::eigen"]
-        self.cpp_info.components["libignition-math-eigen3"].names["cmake_find_package"] = "ignition-math{}-eigen3".format(version_major)
-        self.cpp_info.components["libignition-math-eigen3"].names["cmake_find_package_multi"] = "ignition-math{}-eigen3".format(version_major)
-        self.cpp_info.components["libignition-math-eigen3"].names["pkg_config"] = "ignition-math{}-eigen3".format(version_major)
+        self.cpp_info.components[lib_name].names["cmake_find_package"] = lib_name
+        self.cpp_info.components[lib_name].names["cmake_find_package_multi"] = lib_name
+        self.cpp_info.components[lib_name].names["cmake_paths"] = lib_name
+        self.cpp_info.components[lib_name].libs = [lib_name]
+        self.cpp_info.components[lib_name].includedirs.append(os.path.join("include", "ignition", "math"+version_major))
+        self.cpp_info.components[lib_name].requires = ["swig::swig", "eigen::eigen", "doxygen::doxygen"]
 
-        # FIXME: create in file ignition-math6-all-config.cmake
-        self.cpp_info.components["libignition-math-all"].libs = []
-        self.cpp_info.components["libignition-math-all"].requires = ["libignition-math-eigen3"]
-        self.cpp_info.components["libignition-math-all"].names["cmake_find_package"] = "ignition-math{}-all".format(version_major)
-        self.cpp_info.components["libignition-math-all"].names["cmake_find_package_multi"] = "ignition-math{}-all".format(version_major)
-        self.cpp_info.components["libignition-math-all"].requires.append("eigen::eigen")
-        self.cpp_info.components["libignition-math-all"].requires.append("doxygen::doxygen")
-        self.cpp_info.components["libignition-math-all"].requires.append("swig::swig")
+        self.cpp_info.components[lib_name].builddirs = [self._module_file_rel_dir]
+        self.cpp_info.components[lib_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components[lib_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.components[lib_name].build_modules["cmake_paths"] = [self._module_file_rel_path]
 
-        self.env_info.LD_LIBRARY_PATH.extend([
-            os.path.join(self.package_folder, x) for x in self.cpp_info.libdirs
-        ])
-        self.env_info.PATH.extend([
-            os.path.join(self.package_folder, x) for x in self.cpp_info.bindirs
-        ])
+        self.cpp_info.components["eigen3"].names["cmake_find_package"] = "eigen3"
+        self.cpp_info.components["eigen3"].names["cmake_find_package_multi"] = "eigen3"
+        self.cpp_info.components["eigen3"].names["cmake_paths"] = "eigen3"
+        self.cpp_info.components["eigen3"].includedirs.append(os.path.join("include", "ignition", "math"+version_major))
+        self.cpp_info.components["eigen3"].requires = ["eigen::eigen"]
+
+        self.cpp_info.components["eigen3"].builddirs = [self._module_file_rel_dir]
+        self.cpp_info.components["eigen3"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["eigen3"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.components["eigen3"].build_modules["cmake_paths"] = [self._module_file_rel_path]
     
     def validate(self):
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("sorry, M1 builds are not currently supported, give up!")
+    
+    @property
+    def _module_file_rel_dir(self):
+        return os.path.join("lib", "cmake")
+    
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_file_rel_dir, f"conan-official-{self.name}-variables.cmake")
+

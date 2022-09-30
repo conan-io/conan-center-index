@@ -1,0 +1,9 @@
+sources:
+  "0.7.2":
+    url: "https://github.com/randy408/libspng/archive/refs/tags/v0.7.2.tar.gz"
+    sha256: "4acf25571d31f540d0b7ee004f5461d68158e0a13182505376805da99f4ccc4e"
+
+patches:
+  "0.7.2":
+    - patch_file: "patches/0.7.2-001-fix-install-path.patch"
+      base_path: "source_subfolder"

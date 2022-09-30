@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["VERSION"] = self.deps_cpp_info["range-v3"].version
         cmake.configure()
         cmake.build()
 

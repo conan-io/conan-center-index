@@ -7,12 +7,12 @@ required_conan_version = ">=1.43.0"
 
 class DawUtfRangeConan(ConanFile):
     name = "daw_utf_range"
+    description = "Range operations on character arrays"
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "Range operations on character arrays"
-    topics = ("utf", "validator", "iterator")
     homepage = "https://github.com/beached/utf_range/"
-    settings = "os", "compiler", "build_type", "arch"
+    topics = ("utf", "validator", "iterator")
+    settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi", "cmake_find_package"
     no_copy_source = True
 
@@ -39,7 +39,7 @@ class DawUtfRangeConan(ConanFile):
             self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
 
     def requirements(self):
-        self.requires("daw_header_libraries/2.23.0")
+        self.requires("daw_header_libraries/2.68.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)

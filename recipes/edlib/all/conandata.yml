@@ -1,8 +1,10 @@
 sources:
+  "1.2.7":
+    url: "https://github.com/Martinsos/edlib/archive/v1.2.7.tar.gz"
+    sha256: "8767bc1b04a1a67282d57662e5702c4908996e96b1753b5520921ff189974621"
   "1.2.6":
     url: "https://github.com/Martinsos/edlib/archive/v1.2.6.tar.gz"
     sha256: "0436f14b0339dabd2aab7faf3779ac1b4bbbdc46246c1bff49be997fe4b4e2c7"
 patches:
   "1.2.6":
     - patch_file: "patches/cmake-install-and-export-symbols.patch"
-      base_path: "source_subfolder"

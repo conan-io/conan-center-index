@@ -1,20 +1,31 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "CMakeDeps", "VirtualRunEnv"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["QT_VERSION"] = self.dependencies["qt"].ref.version
+        tc.generate()
 
     def build(self):
-        with tools.run_environment(self):
-            cmake = CMake(self)
-            cmake.definitions["QT_VERSION"] = self.deps_cpp_info["qt"].version
-            cmake.configure()
-            cmake.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def test(self):
         # can't run in Linux agents (headless)
-        if not (tools.cross_building(self) or self.settings.os == "Linux"):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+        if can_run(self) and self.settings.os != "Linux":
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run(bin_path, env="conanrun")

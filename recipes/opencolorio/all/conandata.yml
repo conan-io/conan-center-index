@@ -11,6 +11,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/pstring.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/strlen.patch"
+      base_path: "source_subfolder"
   "1.1.1":
     - patch_file: "patches/1.1.1.patch"
       base_path: "source_subfolder"

@@ -1,4 +1,7 @@
 sources:
+  "3.3.8":
+    url: "https://github.com/glfw/glfw/archive/refs/tags/3.3.8.tar.gz"
+    sha256: "f30f42e05f11e5fc62483e513b0488d5bceeab7d9c5da0ffe2252ad81816c713"
   "3.3.7":
     url: "https://github.com/glfw/glfw/archive/refs/tags/3.3.7.tar.gz"
     sha256: "fd21a5f65bcc0fc3c76e0f8865776e852de09ef6fbc3620e09ce96d2b2807e04"
@@ -20,4 +23,3 @@ sources:
 patches:
   "3.3.2":
     - patch_file: "patches/fix-objc-cmake3.19+.patch"
-      base_path: "source_subfolder"

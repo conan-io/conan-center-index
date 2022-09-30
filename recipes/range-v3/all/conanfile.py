@@ -64,6 +64,9 @@ class Rangev3Conan(ConanFile):
         self.cpp_info.components["range-v3-meta"].names["cmake_find_package_multi"] = "meta"
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.components["range-v3-meta"].cxxflags = ["/permissive-"]
+            version = tools.Version(self.version)
+            if "0.9.0" <= version and version < "0.11.0":
+                self.cpp_info.components["range-v3-meta"].cxxflags.append("/experimental:preprocessor")
         self.cpp_info.components["range-v3-concepts"].names["cmake_find_package"] = "concepts"
         self.cpp_info.components["range-v3-concepts"].names["cmake_find_package_multi"] = "concepts"
         self.cpp_info.components["range-v3-concepts"].requires = ["range-v3-meta"]

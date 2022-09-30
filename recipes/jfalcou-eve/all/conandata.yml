@@ -1,7 +1,7 @@
 sources:
-  "cci.20210823":
-    url: "https://github.com/jfalcou/eve/archive/30e7a7f6bcc5cf524a6c2cc624234148eee847be.tar.gz"
-    sha256: "c267135f7215197ef6859b2aa1c5b6a7fc45ca8333933beda56c96b0d0400ef1"
   "v2021.10.0":
     url: "https://github.com/jfalcou/eve/archive/refs/tags/v2021.10.0.tar.gz"
     sha256: "580c40a8244039a700b93ea49fb0affc1c8d3c100eb6dc66368e101753f51e5c"
+  "v2022.03.0":
+    url: "https://github.com/jfalcou/eve/archive/refs/tags/v2022.03.0.tar.gz"
+    sha256: "8bf9faea516806e7dd468e778dcedc81c51f0b2c6a70b9c75987ce12bb759911"
