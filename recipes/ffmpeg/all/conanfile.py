@@ -1,14 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
+from conan.tools.microsoft import is_msvc
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.build import cross_building
-from conan.tools.files import get, rename, rmdir, replace_in_file
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps, get_gnu_triplet
-from conan.tools.scm import Version
+from conan.tools.files import get, rm, rename, chdir, rmdir, replace_in_file
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conans import AutoToolsBuildEnvironment, tools
+from conan.tools.scm import Version
 import os
-import contextlib
 import glob
 import shutil
 import re
@@ -182,11 +182,6 @@ class FFMpegConan(ConanFile):
     }
 
     generators = "pkg_config"
-    _autotools = None
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _settings_build(self):
@@ -311,16 +306,16 @@ class FFMpegConan(ConanFile):
             self.requires("vulkan-loader/1.3.221")
 
     def validate(self):
-        if self.options.with_ssl == "securetransport" and not is_apple_os(self):
+        if self.info.options.with_ssl == "securetransport" and not is_apple_os(self):
             raise ConanInvalidConfiguration(
                 "securetransport is only available on Apple")
 
         for dependency, features in self._dependencies.items():
-            if not self.options.get_safe(dependency):
+            if not self.info.options.get_safe(dependency):
                 continue
             used = False
             for feature in features:
-                used = used or self.options.get_safe(feature)
+                used = used or self.info.options.get_safe(feature)
             if not used:
                 raise ConanInvalidConfiguration("FFmpeg '{}' option requires '{}' option to be enabled".format(
                     dependency, "' or '".join(features)))
@@ -336,31 +331,8 @@ class FFMpegConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
-    @property
-    def _target_arch(self):
-        target_arch, _, _ = _get_gnu_triplet(
-            "Macos" if is_apple_os(self) else str(self.settings.os),
-            str(self.settings.arch),
-            str(self.settings.compiler) if self.settings.os == "Windows" else None,
-        ).split("-")
-        return target_arch
-
-    @property
-    def _target_os(self):
-        if self._is_msvc:
-            return "win32"
-        else:
-            _, _, target_os = _get_gnu_triplet(
-                "Macos" if is_apple_os( self) else str(self.settings.os),
-                str(self.settings.arch),
-                str(self.settings.compiler) if self.settings.os == "Windows" else None,
-            ).split("-")
-            if target_os == "gnueabihf":
-                target_os = "gnu" # could also be "linux"
-            return target_os
-
     def _patch_sources(self):
-        if self._is_msvc and self.options.with_libx264 and not self.options["libx264"].shared:
+        if is_msvc(self) and self.options.with_libx264 and not self.options["libx264"].shared:
             # suppress MSVC linker warnings: https://trac.ffmpeg.org/ticket/7396
             # warning LNK4049: locally defined symbol x264_levels imported
             # warning LNK4049: locally defined symbol x264_bit_depth imported
@@ -518,7 +490,7 @@ class FFMpegConan(ConanFile):
         if is_apple_os(self):
             # relocatable shared libs
             args.append("--install-name-dir=@rpath")
-        args.append("--arch={}".format(self._target_arch))
+        args.append("--arch={}".format(str(self.settings.arch)))
         if self.settings.build_type == "Debug":
             args.extend([
                 "--disable-optimizations",
@@ -537,22 +509,18 @@ class FFMpegConan(ConanFile):
             args.append("--cxx={}".format(os.getenv("CXX")))
         extra_cflags = []
         extra_ldflags = []
-        if is_apple_os(self) and self.settings.os.version:
-            extra_cflags.append(tools.apple_deployment_target_flag(
-                self.settings.os, self.settings.os.version))
-            extra_ldflags.append(tools.apple_deployment_target_flag(
-                self.settings.os, self.settings.os.version))
-        if self._is_msvc:
-            args.append("--pkg-config={}".format(tools.get_env("PKG_CONFIG")))
+        if is_msvc(self):
+            args.append("--pkg-config={}".format(os.getenv("PKG_CONFIG")))
             args.append("--toolchain=msvc")
-            if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) <= "12":
+            if self.settings.compiler == "Visual Studio" and self.settings.compiler.version <= "12":
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
-                self._autotools.defines.append("inline=__inline")
+                tc.defines.append("inline=__inline")
         if cross_building(self):
-            if self._target_os == "emscripten":
+            target_os = "Macos" if is_apple_os( self) else str(self.settings.os)
+            if target_os == "emscripten":
                 args.append("--target-os=none")
             else:
-                args.append("--target-os={}".format(self._target_os))
+                args.append("--target-os={}".format(target_os))
 
             if is_apple_os(self):
                 if self.options.with_audiotoolbox:
@@ -586,8 +554,6 @@ class FFMpegConan(ConanFile):
         # inject tools_require env vars in build context
         ms = VirtualBuildEnv(self)
         ms.generate(scope="build")
-        #self._autotools.configure(
-        #    args=args, configure_dir=self.source_folder, build=False, host=False, target=False)
 
     def _split_and_format_options_string(self, flag_name, options_list):
         if not options_list:
@@ -620,7 +586,7 @@ class FFMpegConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
-        if self._is_msvc:
+        if is_msvc(self):
             if self.options.shared:
                 # ffmpeg created `.lib` files in the `/bin` folder
                 for fn in os.listdir(os.path.join(self.package_folder, "bin")):
@@ -630,7 +596,7 @@ class FFMpegConan(ConanFile):
                 rm(self, "*.def", os.path.join(self.package_folder, "lib"))
             else:
                 # ffmpeg produces `.a` files that are actually `.lib` files
-                with chdir(os.path.join(self.package_folder, "lib")):
+                with chdir(self, os.path.join(self.package_folder, "lib")):
                     for lib in glob.glob("*.a"):
                         rename(self, lib, lib[3:-2] + ".lib")
 
