@@ -66,8 +66,8 @@ class Antlr4CppRuntimeConan(ConanFile):
         self.requires("utfcpp/3.2.1")
         # As of 4.11, antlr4-cppruntime no longer requires libuuid.
         # Reference: [C++] Remove libuuid dependency (https://github.com/antlr/antlr4/pull/3787)
-        if self.settings.os in ("FreeBSD", "Linux") and Version(self.version) < "4.11":
-            self.requires("libuuid/1.0.3")
+        # Note that the above PR points that libuuid can be removed from 4.9.3, 4.10 and 4.10.1 as well.
+        # We have backport the fix to these old versions.
 
     def validate(self):
         if str(self.info.settings.arch).startswith("arm") and Version(self.version) < "4.11":
@@ -94,10 +94,6 @@ class Antlr4CppRuntimeConan(ConanFile):
 
             if is_msvc(self) and Version(self.version) == "4.10":
                 raise ConanInvalidConfiguration(f"{self.ref} is broken on msvc - Use 4.10.1 or above.")
-
-    def build_requirements(self):
-        if self.settings.os in ("FreeBSD", "Linux"):
-            self.tool_requires("pkgconf/1.7.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
