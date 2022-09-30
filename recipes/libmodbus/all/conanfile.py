@@ -80,7 +80,8 @@ class LibmodbusConan(ConanFile):
         env.generate()
 
         tc = AutotoolsToolchain(self)
-        tc.configure_args.append("--without-documentation")
+        if Version(self.version) < "3.1.8":
+            tc.configure_args.append("--without-documentation")
         tc.configure_args.append("--disable-tests")
         if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
            (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
