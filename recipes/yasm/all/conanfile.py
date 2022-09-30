@@ -30,7 +30,7 @@ class YASMConan(ConanFile):
         if is_msvc(self):
             vs_layout(self)
         else:
-            basic_layout(self, src_folder="src")
+            basic_layout(self)
 
     def package_id(self):
         del self.info.settings.compiler
