@@ -51,10 +51,6 @@ class YASMConan(ConanFile):
         with chdir(self, self._msvc_subfolder):
             tc = MSBuildToolchain(self)
             tc.generate()
-            tc = MSBuildDeps(self)
-            tc.generate()
-            tc = VCVars(self)
-            tc.generate()
 
     def _generate_autotools(self):
         tc = AutotoolsToolchain(self)
@@ -65,15 +61,6 @@ class YASMConan(ConanFile):
             "--disable-nls",
         ])
         tc.generate()
-        tc = PkgConfigDeps(self)
-        tc.generate()
-        tc = AutotoolsDeps(self)
-        tc.generate()
-        env = VirtualBuildEnv(self)
-        env.generate()
-        if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
 
     def generate(self):
         if is_msvc(self):
@@ -89,30 +76,31 @@ class YASMConan(ConanFile):
             msbuild.build(sln="project_2017.sln")
         else:
             autotools = Autotools(self)
-            autotools.autoreconf()
             autotools.configure()
             autotools.make()
 
     def package(self):
-        copy(self, pattern="BSD.txt", dst="licenses", src=self.source_folder)
-        copy(self, pattern="COPYING", dst="licenses", src=self.source_folder)
+        copy(self, pattern="BSD.txt", src=self.source_folder, dst=os.path.join(package_folder, "licenses"))
+        copy(self, pattern="COPYING", src=self.source_folder, dst=os.path.join(package_folder, "licenses"))
         if is_msvc(self):
             arch = {
                 "x86": "Win32",
                 "x86_64": "x64",
             }[str(self.settings.arch)]
-            mkdir(self, os.path.join(self.package_folder, "bin"))
             build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
             copy(self, pattern="yasm.exe",
                     src=os.path.join(self._msvc_subfolder, arch, build_type),
                     dst=os.path.join(self.package_folder, "bin"))
-            copy(self, pattern="yasm.exe*", src=self.source_folder, dst="bin", keep_path=False)
+            copy(self, pattern="yasm.exe*", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
         else:
             autotools = Autotools(self)
             autotools.install()
-        rmdir(self, os.path.join(self.package_folder, "share"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
+        
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
