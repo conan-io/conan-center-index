@@ -70,11 +70,6 @@ class Antlr4CppRuntimeConan(ConanFile):
         # We have backport the fix to these old versions.
 
     def validate(self):
-        if str(self.info.settings.arch).startswith("arm") and Version(self.version) < "4.11":
-            raise ConanInvalidConfiguration("arm architectures are not supported due to libuuid; please upgrade to antlr 4.11 or later.")
-            # Need to deal with missing libuuid on Arm.
-            # So far ANTLR delivers macOS binary package.
-
         if (self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) < "16") or \
            (self.info.settings.compiler == "msvc" and Version(self.info.settings.compiler.version) < "1920"):
             raise ConanInvalidConfiguration("library claims C2668 'Ambiguous call to overloaded function'")
