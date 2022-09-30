@@ -402,4 +402,4 @@ merging to the master branch. Feel free to contribute to a new Github Action tha
 ## Is it possible to disable Pylint?
 
 No. The [pylint](v2_linter.md) has an important role of keeping any recipe prepared for [Conan v2 migration](v2_migration.md). In case you are having
-difficult to understand linter errors, please, comment on your pull request about, then the community will help you.
+difficult to understand [linter errors](linters.md), please, comment on your pull request about, then the community will help you.
