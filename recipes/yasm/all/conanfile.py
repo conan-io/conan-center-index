@@ -1,10 +1,8 @@
 from conan import ConanFile
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.build import cross_building
-from conan.tools.files import chdir, copy, download, get, mkdir, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.files import chdir, copy, download, get, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout, vs_layout
-from conan.tools.microsoft import is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild, VCVars
+from conan.tools.microsoft import is_msvc, MSBuildToolchain, MSBuild
 
 import os
 
@@ -80,8 +78,8 @@ class YASMConan(ConanFile):
             autotools.make()
 
     def package(self):
-        copy(self, pattern="BSD.txt", src=self.source_folder, dst=os.path.join(package_folder, "licenses"))
-        copy(self, pattern="COPYING", src=self.source_folder, dst=os.path.join(package_folder, "licenses"))
+        copy(self, pattern="BSD.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, pattern="COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
             arch = {
                 "x86": "Win32",
