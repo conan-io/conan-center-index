@@ -49,7 +49,7 @@ class PcapplusplusConan(ConanFile):
         if self.settings.os == "Windows" and not is_msvc(self):
             raise ConanInvalidConfiguration("Can not build on Windows: only msvc compiler is supported.")
         if self.settings.os not in ("FreeBSD", "Linux", "Macos", "Windows"):
-            raise ConanInvalidConfiguration("%s is not supported" % self.settings.os)
+            raise ConanInvalidConfiguration(f"{self.settings.os} is not supported")
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version],
