@@ -78,10 +78,7 @@ class GDCMConan(ConanFile):
             tc.blocks["cppstd"].values = { "cppstd": self._minimum_cpp_standard, "cppstd_extensions": "OFF" }
         tc.generate()
         deps = CMakeDeps(self)
-        previous_value = self.dependencies["expat"].cpp_info.get_property("cmake_find_mode")
-        self.dependencies["expat"].cpp_info.set_property("cmake_find_mode", "module")
         deps.generate()
-        self.dependencies["expat"].cpp_info.set_property("cmake_find_mode", previous_value)
 
     def build(self):
         apply_conandata_patches(self)
