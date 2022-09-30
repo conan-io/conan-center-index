@@ -76,7 +76,7 @@ class Stlab(ConanFile):
     def _validate_task_system_libdispatch(self):
         if self.settings.os == "Linux":
             if self.settings.compiler != "clang":
-                raise ConanInvalidConfiguration("{}/{} task_system=libdispatch needs Clang compiler when using OS: {}. Use Clang compiler or switch to task_system=portable or task_system=auto".format(self.name, self.version, self.settings.os))
+                raise ConanInvalidConfiguration(f"{self.ref} task_system=libdispatch needs Clang compiler when using OS: {self.settings.os}. Use Clang compiler or switch to task_system=portable or task_system=auto")
         elif self.settings.os != "Macos":
             raise ConanInvalidConfiguration("{}/{} task_system=libdispatch is not supported on {}. Try using task_system=auto".format(self.name, self.version, self.settings.os))
 
