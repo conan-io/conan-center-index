@@ -46,9 +46,8 @@ class YASMConan(ConanFile):
         return os.path.join(self.source_folder, "Mkfiles", "vc10")
 
     def _generate_vs(self):
-        with chdir(self, self._msvc_subfolder):
-            tc = MSBuildToolchain(self)
-            tc.generate()
+        tc = MSBuildToolchain(self)
+        tc.generate()
 
     def _generate_autotools(self):
         tc = AutotoolsToolchain(self)
@@ -71,7 +70,7 @@ class YASMConan(ConanFile):
             msbuild = MSBuild(self)
             msbuild.build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
             msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
-            msbuild.build(sln="project_2017.sln")
+            msbuild.build(sln=os.path.join(self._msvc_subfolder, "yasm.sln"))
         else:
             autotools = Autotools(self)
             autotools.configure()
