@@ -13,8 +13,6 @@ conan-center-index tries to make the process as smooth and simple as possible fo
   * [Avoiding conflicts](#avoiding-conflicts)
   * [Draft](#draft)
   * [Getting your pull request reviewed](#getting-your-pull-request-reviewed)
-    * [Official reviewers](#official-reviewers)
-    * [Community reviewers](#community-reviewers)
     * [Rule of 2 reviews](#rule-of-2-reviews)
     * [Reviews from others](#reviews-from-others)
     * [Addressing review comments](#addressing-review-comments)
