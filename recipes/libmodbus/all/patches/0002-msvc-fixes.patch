@@ -1,0 +1,11 @@
+--- src/Makefile.in
++++ src/Makefile.in
+@@ -326,7 +326,7 @@
+ localstatedir = @localstatedir@
+ mandir = @mandir@
+ mkdir_p = @mkdir_p@
+-my_CFLAGS = @my_CFLAGS@
++my_CFLAGS =
+ oldincludedir = @oldincludedir@
+ pdfdir = @pdfdir@
+ prefix = @prefix@
