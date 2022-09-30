@@ -69,7 +69,7 @@ class GDCMConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["GDCM_BUILD_DOCBOOK_MANPAGES"] = False
-        tc.cache_variables["GDCM_BUILD_SHARED_LIBS"] = self.info.options.shared
+        tc.cache_variables["GDCM_BUILD_SHARED_LIBS"] = bool(self.options.shared)
         # FIXME: unvendor deps https://github.com/conan-io/conan-center-index/pull/5705#discussion_r647224146
         tc.cache_variables["GDCM_USE_SYSTEM_EXPAT"] = True
         tc.cache_variables["GDCM_USE_SYSTEM_OPENJPEG"] = True
