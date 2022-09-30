@@ -195,7 +195,7 @@ class Stlab(ConanFile):
 
     def package_id(self):
         #TODO: is header only but needs a header modified by cmake
-        # self.info.header_only()
+        self.info.settings.clear()
         self.info.options.use_boost = "ANY"
         self.info.options.test = "ANY"
 
