@@ -1,4 +1,4 @@
-from conan import ConanFile, CMake, tools
+from conans import ConanFile, CMake, tools
 import os
 
 
