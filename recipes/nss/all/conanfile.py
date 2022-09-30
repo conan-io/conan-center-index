@@ -66,6 +66,9 @@ class NSSConan(ConanFile):
         if Version(self.version) >= "3.83":
             if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 11:
                 raise ConanInvalidConfiguration("nss requires at least gcc 11.")
+        if Version(self.version) < "3.74":
+            if self.settings.compiler == "clang" and Version(self.settings.compiler.version) >= 13:
+                raise ConanInvalidConfiguration("nss < 3.74 requires clang < 13 .")
 
 
     def source(self):
