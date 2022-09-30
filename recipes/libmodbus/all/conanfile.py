@@ -34,6 +34,10 @@ class LibmodbusConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -86,7 +90,7 @@ class LibmodbusConan(ConanFile):
         if is_msvc(self):
             env = Environment()
             compile = unix_path(self, os.path.join(self.source_folder, "build-aux", "compile"))
-            ar_lib = unix_path(self, self.deps_user_info["automake"].ar_lib)
+            ar_lib = unix_path(self, self._user_info_build["automake"].ar_lib)
             env.define("CC", f"{compile} cl -nologo")
             env.define("CXX", f"{compile} cl -nologo")
             env.define("LD", "link -nologo")
