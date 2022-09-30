@@ -114,7 +114,7 @@ class FreetypeConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        if scm.Version(self.Version) >= "2.11.0":
+        if scm.Version(self.version) >= "2.11.0":
             self._cmake.definitions["FT_REQUIRE_ZLIB"] = self.options.with_zlib
             self._cmake.definitions["FT_DISABLE_ZLIB"] = not self.options.with_zlib
             self._cmake.definitions["FT_REQUIRE_PNG"] = self.options.with_png
