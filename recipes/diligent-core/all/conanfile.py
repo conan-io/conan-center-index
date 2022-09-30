@@ -28,16 +28,8 @@ class DiligentCoreConan(ConanFile):
         "fPIC": True,
         "with_glslang": True
     }
-    generators = "CMakeToolchain", "CMakeDeps", "cmake_find_package"
+    generators = "CMakeToolchain", "CMakeDeps"
     short_paths = True
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _minimum_compilers_version(self):
@@ -71,7 +63,8 @@ class DiligentCoreConan(ConanFile):
         export_conandata_patches(self)
         
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def package_id(self):
         if self.settings.compiler == "Visual Studio":
@@ -165,7 +158,7 @@ class DiligentCoreConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "Licenses"))
         rmdir(self, os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "bin"))
-        self.copy("License.txt", dst="licenses", src=self._source_subfolder)
+        self.copy("License.txt", dst="licenses", src=self.source_folder)
 
         if self.options.shared:
             self.copy(pattern="*.dylib", dst="lib", keep_path=False)
