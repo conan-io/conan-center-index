@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.files import copy, get, rmdir, rm
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 
@@ -19,7 +19,6 @@ class AvahiConan(ConanFile):
     homepage = "https://github.com/lathiat/avahi"
     license = "LGPL-2.1-only"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "AutotoolsDeps", "PkgConfigDeps"
 
     options = {
         "shared": [True, False],
@@ -70,6 +69,8 @@ class AvahiConan(ConanFile):
         tc.configure_args.append("--disable-qt5")
         tc.configure_args.append("--with-systemdsystemunitdir=/lib/systemd/system")
         tc.generate()
+        AutotoolsDeps(self).generate()
+        PkgConfigDeps(self).generate()
 
     def build(self):
         autotools = Autotools(self)
