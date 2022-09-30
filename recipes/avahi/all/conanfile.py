@@ -88,9 +88,6 @@ class AvahiConan(ConanFile):
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "Avahi"
-        self.cpp_info.names["cmake_find_package_multi"] = "Avahi"
-
         for lib in ("client", "common", "core", "glib", "gobject", "libevent", "compat-libdns_sd"):
             avahi_lib = f"avahi-{lib}"
             self.cpp_info.components[lib].names["cmake_find_package"] = lib
