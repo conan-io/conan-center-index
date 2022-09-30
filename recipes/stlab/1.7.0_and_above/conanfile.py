@@ -85,7 +85,7 @@ class Stlab(ConanFile):
             self._validate_task_system_libdispatch()
         elif self.options.task_system == "windows":
             if self.settings.os != "Windows":
-                raise ConanInvalidConfiguration(f"{sefl.ref} task_system=windows is not supported on {self.settings.os}. Try using task_system=auto")
+                raise ConanInvalidConfiguration(f"{self.ref} task_system=windows is not supported on {self.settings.os}. Try using task_system=auto")
 
     def _default_thread_system(self):
         if self.settings.os == "Macos":
