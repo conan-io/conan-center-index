@@ -88,7 +88,7 @@ class PcapplusplusConan(ConanFile):
             ]
             self.run(" ".join(config_args), run_environment=True)
             msbuild = MSBuild(self)
-            targets =  ['Common++', 'Packet++', 'Pcap++']
+            targets = ['Common++', 'Packet++', 'Pcap++']
             msbuild.build("mk/vs2015/PcapPlusPlus.sln", targets=targets)
 
     def _build_posix(self):
