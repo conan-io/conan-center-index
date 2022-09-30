@@ -1,5 +1,6 @@
 import os
-from conan import ConanFile, tools
+from conan import ConanFile
+from conan.tools.files import apply_conandata_patches, get, rmdir
 from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.scm import Version
 
@@ -34,7 +35,7 @@ class Box2dConan(ConanFile):
                 pass
 
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -43,7 +44,7 @@ class Box2dConan(ConanFile):
         tc.generate()
 
     def build(self):
-        tools.files.apply_conandata_patches(self)
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -53,7 +54,7 @@ class Box2dConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.install()
-        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "box2d"
