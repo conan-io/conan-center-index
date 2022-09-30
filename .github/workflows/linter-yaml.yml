@@ -30,7 +30,7 @@ jobs:
         if: steps.changed_files.outputs.any_changed == 'true'
         with:
           python-version: ${{ env.PYVER }}
-      
+
       - name: Install dependencies
         if: steps.changed_files.outputs.any_changed == 'true'
         run: pip install yamllint
@@ -56,9 +56,9 @@ jobs:
       - uses: actions/setup-python@v3
         with:
           python-version: ${{ env.PYVER }}
-      
+
       - name: Install dependencies
-        run: pip install yamllint
+        run: pip install yamllint strictyaml argparse
 
       ## Work on config.yml files
       - name: Get changed files (config)
@@ -68,12 +68,13 @@ jobs:
         with:
           files: |
             ${{ env.CONFIG_FILES_PATH }}
-      
+
       - name: Run linter (config.yml)
         if: steps.changed_files_config.outputs.any_changed == 'true' && always()
         run: |
           for file in ${{ steps.changed_files_config.outputs.all_changed_files }}; do
             yamllint --config-file linter/yamllint_rules.yml ${file}
+            python3 linter/yamale_linter.py ${file}
           done
 
       ## Work on conandata.yml files
@@ -84,7 +85,7 @@ jobs:
         with:
           files: |
             ${{ env.CONANDATA_FILES_PATH }}
-      
+
       - name: Run linter (conandata.yml)
         if: steps.changed_files_conandata.outputs.any_changed == 'true' && always()
         run: |
