@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.gnu import PkgConfigDeps
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rm, rmdir, save
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.build import check_min_cppstd
@@ -103,8 +102,6 @@ class Antlr4CppRuntimeConan(ConanFile):
         tc.variables["WITH_DEMO"] = False
         tc.generate()
         tc = CMakeDeps(self)
-        tc.generate()
-        tc = PkgConfigDeps(self)
         tc.generate()
         tc = VirtualBuildEnv(self)
         tc.generate()
