@@ -9,7 +9,6 @@
  oldincludedir = @oldincludedir@
  pdfdir = @pdfdir@
  prefix = @prefix@
-diff -ur source_original/source_subfolder/src/modbus-private.h source/source_subfolder/src/modbus-private.h
 --- src/modbus-private.h
 +++ src/modbus-private.h
 @@ -13,7 +13,7 @@
