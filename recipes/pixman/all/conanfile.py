@@ -1,4 +1,3 @@
-import functools
 import os
 
 from conan import ConanFile
@@ -8,7 +7,7 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools import files, microsoft
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.51.0"
+required_conan_version = ">=1.52.0"
 
 
 class PixmanConan(ConanFile):
@@ -50,7 +49,7 @@ class PixmanConan(ConanFile):
         self.tool_requires("meson/0.63.2")
 
     def layout(self):
-        basic_layout(self, src_folder="source")
+        basic_layout(self, src_folder="src")
 
     def generate(self):
         tc = MesonToolchain(self)
@@ -64,7 +63,7 @@ class PixmanConan(ConanFile):
         env.generate()
 
     def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
+        if self.info.settings.os == "Windows" and self.info.options.shared:
             raise ConanInvalidConfiguration("pixman can only be built as a static library on Windows")
 
     def export_sources(self):
@@ -78,27 +77,23 @@ class PixmanConan(ConanFile):
         files.replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('test')", "")
         files.replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('demos')", "")
 
-    @functools.lru_cache(1)
-    def _configure_meson(self):
-        meson = Meson(self)
-        meson.configure()
-        return meson
-
     def build(self):
         self._patch_sources()
-        meson = self._configure_meson()
+        meson = Meson(self)
+        meson.configure()
         meson.build()
 
     def package(self):
-        meson = self._configure_meson()
+        meson = Meson(self)
         meson.install()
+
         files.copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        libfolder = os.path.join(self.package_folder, "lib")
-        files.rmdir(self, os.path.join(libfolder, "pkgconfig"))
-        files.rm(self, "*.la", libfolder)
+        lib_folder = os.path.join(self.package_folder, "lib")
+        files.rmdir(self, os.path.join(lib_folder, "pkgconfig"))
+        files.rm(self, "*.la", lib_folder)
         if microsoft.is_msvc(self):
             prefix = "libpixman-1"
-            files.rename(self, os.path.join(libfolder, f"{prefix}.a"), os.path.join(libfolder, "{prefix}.lib"))
+            files.rename(self, os.path.join(lib_folder, f"{prefix}.a"), os.path.join(lib_folder, "{prefix}.lib"))
 
     def package_info(self):
         self.cpp_info.libs = files.collect_libs(self)
