@@ -27,10 +27,11 @@ def main():
         with open(args.path) as f:
             person = load(f.read(), schema)
     except YAMLValidationError as error:
+        e = error.__str__().replace("\n", "%0A")
         print(
             f"::error file={args.path},line={error.context_mark.line},endline={error.problem_mark.line},"
             f"title=config.yml schema error"
-            f"::{error.context}, {error.problem}\n"
+            f"::{e}\n"
         )
         exit(1)
 
