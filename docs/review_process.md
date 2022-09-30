@@ -13,8 +13,6 @@ conan-center-index tries to make the process as smooth and simple as possible fo
   * [Avoiding conflicts](#avoiding-conflicts)
   * [Draft](#draft)
   * [Getting your pull request reviewed](#getting-your-pull-request-reviewed)
-    * [Official reviewers](#official-reviewers)
-    * [Community reviewers](#community-reviewers)
     * [Rule of 2 reviews](#rule-of-2-reviews)
     * [Reviews from others](#reviews-from-others)
     * [Addressing review comments](#addressing-review-comments)
@@ -72,42 +70,16 @@ Once you're done with your changes, remember to convert from "Draft" to "Normal"
 
 ## Getting your pull request reviewed
 
-Each PR must be reviewed by several reviewers before it will be merged. It cannot be just reviews from random people, we have two categories of reviewers:
+Each PR must be reviewed by several reviewers before it will be merged. It cannot be just reviews from anyone, we have two categories of reviewers:
 
-### Official reviewers
+- Official reviewers: these are active team members who are responsible for developing Conan, ConanCenter, and ConanCenterIndex.
+- Community reviewers: this list includes former Conan team members and ConanCenterIndex contributors who are very active and proven to be trusted - they frequently submit pull requests and provide their own useful reviews
 
-The list includes only official Conan developers:
-
-- [@memsharded](https://github.com/memsharded)
-- [@lasote](https://github.com/lasote)
-- [@danimtb](https://github.com/danimtb)
-- [@jgsogo](https://github.com/jgsogo)
-- [@czoido](https://github.com/czoido)
-- [@sse4](https://github.com/sse4)
-- [@uilianries](https://github.com/uilianries)
-
-### Community reviewers
-
-The list includes conan-center-index contributors who are very active and proven to be trusted - they frequently submit pull requests and provide their own useful reviews:
-
-- [@madebr](https://github.com/madebr)
-- [@SpaceIm](https://github.com/SpaceIm)
-- [@ericLemanissier](https://github.com/ericLemanissier)
-- [@prince-chrismc](https://github.com/prince-chrismc)
-- [@Croydon](https://github.com/Croydon)
-- [@intelligide](https://github.com/intelligide)
-- [@theirix](https://github.com/theirix)
-- [@gocarlos](https://github.com/gocarlos)
-- [@mathbunnyru](https://github.com/mathbunnyru)
-- [@ericriff](https://github.com/ericriff)
-- [@toge](https://github.com/toge)
-- [@AndreyMlashkin](https://github.com/AndreyMlashkin)
-- [@MartinDelille](https://github.com/MartinDelille)
-- [@dmn-star](https://github.com/dmn-star)
-
-The list, located [here](../.c3i/reviewers.yml),
+The list or reviewers, located [here](../.c3i/reviewers.yml),
 is not constant and will change periodically based on contribution.
 That also means **you can be included in this list** as well - submit PRs and provide reviews, and in time you may be added as a trusted contributor.
+
+> **Note**: GitHubs user interface does not support such custom rules so you should not rely solely on the message it provides.
 
 ### Rule of 2 reviews
 
