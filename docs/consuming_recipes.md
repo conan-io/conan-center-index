@@ -24,7 +24,7 @@ There can be several causes if a recipe (a new revision) might stopped to work i
    Conan will fail to parse the recipe and will raise a cryptic Python syntax error.
 
 - **New Conan Version**: Conan keeps evolving and adding new features, especially on its road to Conan 2.0,
-   and ConanCenter is committed in this [roadmap](v2_roadmap) as well, and tries to prepare the user base to these
+   and ConanCenter is committed in this [roadmap](v2_roadmap.md) as well, and tries to prepare the user base to these
    new features in order to ease the migration to new versions.
 
    New recipe revisions can take into account changes that are introduced in new Conan client
