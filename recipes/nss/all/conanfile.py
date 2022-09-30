@@ -192,10 +192,7 @@ class NSSConan(ConanFile):
     def package_info(self):
 
         def _library_name(lib,vers):
-            if self.options.shared:
-                return f"{lib}{vers}"
-            else:
-                return lib
+            return f"{lib}{vers}" if self.options.shared else lib
         self.cpp_info.components["libnss"].libs.append(_library_name("nss", 3))
         self.cpp_info.components["libnss"].requires = ["nssutil", "nspr::nspr"]
 
