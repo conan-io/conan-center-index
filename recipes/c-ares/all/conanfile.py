@@ -62,6 +62,7 @@ class CAresConan(ConanFile):
         tc.variables["CARES_BUILD_TESTS"] = False
         tc.variables["CARES_MSVC_STATIC_RUNTIME"] = False
         tc.variables["CARES_BUILD_TOOLS"] = self.options.tools
+        tc.blocks["rpath"].skip_rpath=True
         tc.generate()
 
     def build(self):
