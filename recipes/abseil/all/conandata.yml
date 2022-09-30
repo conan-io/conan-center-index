@@ -17,31 +17,20 @@ sources:
 patches:
   "20220623.0":
     - patch_file: "patches/0003-absl-string-libm.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0005-has-unique-object-representations.patch"
-      base_path: "source_subfolder"
       patch_description: "Workaround bug in GCC 7.2"
       patch_source: "https://github.com/abseil/abseil-cpp/pull/1250"
       patch_type: "backport"
   "20211102.0":
     - patch_file: "patches/0003-absl-string-libm.patch"
-      base_path: "source_subfolder"
   "20210324.2":
     - patch_file: "patches/0003-absl-string-libm.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0004-cpp-standard-20210324.patch"
-      base_path: "source_subfolder"
   "20200923.3":
     - patch_file: "patches/0003-absl-string-libm.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0004-cpp-standard-20200923.patch"
-      base_path: "source_subfolder"
   "20200225.3":
     - patch_file: "patches/0001-cmake-install.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-missing-numeric_limits.h.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-absl-string-libm.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0004-cpp-standard-20200225.patch"
-      base_path: "source_subfolder"

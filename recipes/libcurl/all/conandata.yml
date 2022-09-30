@@ -1,4 +1,7 @@
 sources:
+  "7.85.0":
+    url: "https://curl.se/download/curl-7.85.0.tar.gz"
+    sha256: "78a06f918bd5fde3c4573ef4f9806f56372b32ec1829c9ec474799eeee641c27"
   "7.84.0":
     url: "https://curl.se/download/curl-7.84.0.tar.gz"
     sha256: "3c6893d38d054d4e378267166858698899e9d87258e8ff1419d020c395384535"

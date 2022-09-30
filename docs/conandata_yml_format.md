@@ -212,7 +212,7 @@ Usually, the following kind of problems are good candidates for backports:
 - Data corruption.
 - Use of outdated or deprecated API or library.
 
-As sources with backports don't act exactly the same as the version officially released, it may be a source of confusion for the consumers who are relying on the buggy behavior (even if it's completely wrong). Therefore, it's required to introduce a new `cci.<date>` version for such backports, so consumers may choose to use either official version, or modified version with backport(s) included.
+As sources with backports don't act exactly the same as the version officially released, it may be a source of confusion for the consumers who are relying on the buggy behavior (even if it's completely wrong). Therefore, it's required to introduce a new `cci.<YYYYMMDD>` version for such backports, so consumers may choose to use either official version, or modified version with backport(s) included.
 
 ##### portability
 

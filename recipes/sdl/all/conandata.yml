@@ -1,4 +1,7 @@
 sources:
+  "2.24.0":
+    url: "https://www.libsdl.org/release/SDL2-2.24.0.tar.gz"
+    sha256: 91e4c34b1768f92d399b078e171448c6af18cafda743987ed2064a28954d6d97
   "2.0.20":
     url: "https://www.libsdl.org/release/SDL2-2.0.20.tar.gz"
     sha256: c56aba1d7b5b0e7e999e4a7698c70b63a3394ff9704b5f6e1c57e0c16f04dd06
@@ -12,6 +15,9 @@ sources:
     url: "https://www.libsdl.org/release/SDL2-2.0.14.tar.gz"
     sha256: d8215b571a581be1332d2106f8036fcb03d12a70bae01e20f424976d275432bc
 patches:
+  "2.0.20":
+    - patch_file: "patches/0004-2.0.20-ndk.patch"
+      base_path: "source_subfolder"
   "2.0.16":
     - patch_file: "patches/0003-2.0.16-wayland-scanner-buildrequires.patch"
       base_path: "source_subfolder"

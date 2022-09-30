@@ -1,4 +1,6 @@
 versions:
+  "3.5.1":
+    folder: "post_3.5.0"
   "3.4.3":
     folder: "pre_3.5.0"
   "3.4.1":

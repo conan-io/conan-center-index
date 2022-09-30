@@ -1,9 +1,13 @@
-from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conans import CMake
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building, check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.files import rm, get, rmdir, rename, collect_libs, patches
+from conan.tools.apple import is_apple_os
 import os
-from conan.tools.build import cross_building
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.51.3"
 
 
 class DiligentCoreConan(ConanFile):
@@ -52,20 +56,20 @@ class DiligentCoreConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
         if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package_id(self):
         if self.settings.compiler == "Visual Studio":
@@ -83,14 +87,14 @@ class DiligentCoreConan(ConanFile):
             del self.options.fPIC
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        patches.apply_conandata_patches(self)
 
     def build_requirements(self):
-        self.build_requires("cmake/3.22.0")
+        self.tool_requires("cmake/3.24.0")
 
     def requirements(self):
         self.requires("opengl/system")
+        self.requires("wayland/1.21.0")
 
         self.requires("spirv-cross/1.3.216.0")
         self.requires("spirv-tools/1.3.216.0")
@@ -151,37 +155,37 @@ class DiligentCoreConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rename(src=os.path.join(self.package_folder, "include", "source_subfolder"),
+        rename(self, src=os.path.join(self.package_folder, "include", "source_subfolder"),
         dst=os.path.join(self.package_folder, "include", "DiligentCore"))
 
-        tools.rmdir(os.path.join(self.package_folder, "Licenses"))
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
-        tools.rmdir(os.path.join(self.package_folder, "bin"))
+        rmdir(self, os.path.join(self.package_folder, "Licenses"))
+        rmdir(self, os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "bin"))
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
 
         if self.options.shared:
             self.copy(pattern="*.dylib", dst="lib", keep_path=False)
             self.copy(pattern="*.so", dst="lib", keep_path=False)
             self.copy(pattern="*.dll", dst="bin", keep_path=False)
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
+            rm(self, os.path.join(self.package_folder, "lib"), "*.a", recursive=True)
             if self.settings.os != "Windows":
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.lib")
+                rm(self, os.path.join(self.package_folder, "lib"), "*.lib", recursive=True)
         else:
             self.copy(pattern="*.a", dst="lib", keep_path=False)
             self.copy(pattern="*.lib", dst="lib", keep_path=False)
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dylib")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dll")
+            rm(self, os.path.join(self.package_folder, "lib"), "*.dylib", recursive=True)
+            rm(self, os.path.join(self.package_folder, "lib"), "*.so", recursive=True)
+            rm(self, os.path.join(self.package_folder, "lib"), "*.dll", recursive=True)
 
         self.copy(pattern="*.fxh", dst="res", keep_path=False)
 
         self.copy("File2String*", src=os.path.join(self._build_subfolder, "bin"), dst="bin", keep_path=False)
-        tools.remove_files_by_mask(self.package_folder, "*.pdb")
+        rm(self, "*.pdb", self.package_folder, recursive=True)
         # MinGw creates many invalid files, called objects.a, remove them here:
-        tools.remove_files_by_mask(self.package_folder, "objects.a")
+        rm(self, "objects.a", self.package_folder, recursive=True)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
         # included as discussed here https://github.com/conan-io/conan-center-index/pull/10732#issuecomment-1123596308
         self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include"))
         self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "DiligentCore", "Common"))
@@ -203,7 +207,7 @@ class DiligentCoreConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Basic", "interface"))
         if self.settings.os == "Android":
             self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Android", "interface"))
-        elif tools.is_apple_os(self.settings.os):
+        elif is_apple_os(self):
             self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Apple", "interface"))
         elif self.settings.os == "Emscripten":
             self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Emscripten", "interface"))

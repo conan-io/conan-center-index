@@ -4,7 +4,7 @@
 
 int main() {
   double epb = iauEpb(2415019.8135, 30103.18648);
-  printf("%f", epb);
+  printf("%f\n", epb);
 
   return 0;
 }

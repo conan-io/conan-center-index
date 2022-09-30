@@ -1,13 +1,13 @@
 sources:
-  3.0.0:
-    sha256: 99cdb0d90ab1adff9ec63b40a867ec14e1b217fe2d7ac07a6124de201de4ffd0
-    url: https://github.com/pantor/inja/archive/v3.0.0.tar.gz
-  3.1.0:
-    sha256: f4210493e7e3c62d3050ca6e5e9dd72823ec4125a469fa9b28519d7f32fc9731
-    url: https://github.com/pantor/inja/archive/v3.1.0.tar.gz
-  3.2.0:
-    sha256: 825e1f0076504b5aac99cc9ad8c4cbfdc33e57c06c40353f2d7b93a33caae17d
-    url: https://github.com/pantor/inja/archive/v3.2.0.tar.gz
   "3.3.0":
     url: "https://github.com/pantor/inja/archive/v3.3.0.tar.gz"
     sha256: "e628d994762dcdaa9a97f63a9b8b73d9af51af0ffa5acea6bdbba0aceaf8ee25"
+  "3.2.0":
+    url: "https://github.com/pantor/inja/archive/v3.2.0.tar.gz"
+    sha256: "825e1f0076504b5aac99cc9ad8c4cbfdc33e57c06c40353f2d7b93a33caae17d"
+  "3.1.0":
+    url: "https://github.com/pantor/inja/archive/v3.1.0.tar.gz"
+    sha256: "f4210493e7e3c62d3050ca6e5e9dd72823ec4125a469fa9b28519d7f32fc9731"
+  "3.0.0":
+    url: "https://github.com/pantor/inja/archive/v3.0.0.tar.gz"
+    sha256: "99cdb0d90ab1adff9ec63b40a867ec14e1b217fe2d7ac07a6124de201de4ffd0"

@@ -14,17 +14,11 @@ sources:
 patches:
   "1.11.0":
     - patch_file: "patches/0001-fix-concurrent-proto3-remove-1.11.0.patch"
-      base_path: "source_subfolder"
   "1.10.2":
     - patch_file: "patches/0001-fix-concurrent-proto3-remove-1.9.0.patch"
-      base_path: "source_subfolder"
   "1.9.0":
     - patch_file: "patches/0001-fix-concurrent-proto3-remove-1.9.0.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-msvc-no-warnings-as-errors-1.9.0.patch"
-      base_path: "source_subfolder"
   "1.8.1":
     - patch_file: "patches/0001-fix-concurrent-proto3-remove-1.8.1.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-msvc-no-warnings-as-errors-1.8.1.patch"
-      base_path: "source_subfolder"

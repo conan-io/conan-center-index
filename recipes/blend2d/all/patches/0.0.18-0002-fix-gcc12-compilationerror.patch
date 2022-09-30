@@ -1,0 +1,39 @@
+diff --git a/src/blend2d/support/arenaallocator_p.h b/src/blend2d/support/arenaallocator_p.h
+index d09b6da..eebd854 100644
+--- a/src/blend2d/support/arenaallocator_p.h
++++ b/src/blend2d/support/arenaallocator_p.h
+@@ -445,7 +445,7 @@ public:
+ template<size_t N>
+ class BLArenaAllocatorTmp : public BLArenaAllocator {
+ public:
+-  BL_NONCOPYABLE(BLArenaAllocatorTmp<N>)
++  BL_NONCOPYABLE(BLArenaAllocatorTmp)
+ 
+   BL_INLINE explicit BLArenaAllocatorTmp(size_t blockSize, size_t blockAlignment = 1) noexcept
+     : BLArenaAllocator(blockSize, blockAlignment, _storage.data, N) {}
+diff --git a/src/blend2d/support/arenahashmap_p.h b/src/blend2d/support/arenahashmap_p.h
+index 29882e1..911d985 100644
+--- a/src/blend2d/support/arenahashmap_p.h
++++ b/src/blend2d/support/arenahashmap_p.h
+@@ -185,7 +185,7 @@ public:
+ template<typename NodeT>
+ class BLArenaHashMap : public BLArenaHashMapBase {
+ public:
+-  BL_NONCOPYABLE(BLArenaHashMap<NodeT>)
++  BL_NONCOPYABLE(BLArenaHashMap)
+ 
+   typedef NodeT Node;
+ 
+diff --git a/src/blend2d/support/scopedbuffer_p.h b/src/blend2d/support/scopedbuffer_p.h
+index e14df50..379f519 100644
+--- a/src/blend2d/support/scopedbuffer_p.h
++++ b/src/blend2d/support/scopedbuffer_p.h
+@@ -82,7 +82,7 @@ public:
+ template<size_t N>
+ class BLScopedBufferTmp : public BLScopedBuffer {
+ public:
+-  BL_NONCOPYABLE(BLScopedBufferTmp<N>)
++  BL_NONCOPYABLE(BLScopedBufferTmp)
+ 
+   uint8_t _storage[N];
+ 

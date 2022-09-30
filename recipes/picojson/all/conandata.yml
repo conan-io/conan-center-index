@@ -1,7 +1,7 @@
 sources:
-    "cci.20210117":
-        url: "https://github.com/kazuho/picojson/archive/111c9be5188f7350c2eac9ddaedd8cca3d7bf394.zip"
-        sha256: 9937fc918d32a2e802a32e1565f48b04850ece0389ce22e8e3acba54aee13c99
-    "1.3.0":
-        url: "https://github.com/kazuho/picojson/archive/v1.3.0.zip"
-        sha256: 58fff34589d93b0cef208a456788b9de6c7d04cfa9a7be576328ca7b48f10069
+  "cci.20210117":
+    url: "https://github.com/kazuho/picojson/archive/111c9be5188f7350c2eac9ddaedd8cca3d7bf394.zip"
+    sha256: "9937fc918d32a2e802a32e1565f48b04850ece0389ce22e8e3acba54aee13c99"
+  "1.3.0":
+    url: "https://github.com/kazuho/picojson/archive/v1.3.0.zip"
+    sha256: "58fff34589d93b0cef208a456788b9de6c7d04cfa9a7be576328ca7b48f10069"

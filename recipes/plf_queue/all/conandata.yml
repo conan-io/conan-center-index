@@ -1,0 +1,4 @@
+sources:
+  "1.19":
+    url: "https://github.com/mattreecebentley/plf_queue/archive/991661f3674ff30c3f469120f6973556804b8a00.tar.gz"
+    sha256: "7e9a36c0fde9c131c4552d61bd4cf3a71dc78536fba4dc60d8f33b92bf5f4e8d"

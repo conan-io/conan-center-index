@@ -8,4 +8,3 @@ sources:
 patches:
   "1.2.6":
     - patch_file: "patches/cmake-install-and-export-symbols.patch"
-      base_path: "source_subfolder"

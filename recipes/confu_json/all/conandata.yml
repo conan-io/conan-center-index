@@ -2,3 +2,6 @@ sources:
   0.0.5:
     url: https://github.com/werto87/confu_json/archive/refs/tags/v0.0.5.tar.gz
     sha256: bc506d4b7836a7689b1c6a2d89bb0c3441f774c8f845fef79d85c71099df5bf9
+  0.0.9:
+    url: https://github.com/werto87/confu_json/archive/refs/tags/v0.0.9.tar.gz
+    sha256: 29b2940b939cb04f11fdab4964c86bcb23ac75c588550bf54048e024444d2718

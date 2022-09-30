@@ -1,6 +1,5 @@
 # Errors from the conan-center hook (KB-Hxxx)
 
-
 #### **<a name="KB-H001">#KB-H001</a>: "DEPRECATED GLOBAL CPPSTD"**
 
 `Conan > 1.15` deprecated the usage of the global ``cppstd`` setting in favor of ``compiler.cppstd`` to [manage C++ standard](https://docs.conan.io/en/latest/howtos/manage_cpp_standard.html). As a subsetting of the compiler, it shouldn't be declared in the `conanfile.py`.
@@ -11,7 +10,8 @@ The package names in conan-center have to be [lowercase](https://github.com/cona
 
 #### **<a name="KB-H003">#KB-H003</a>: "RECIPE METADATA"**
 
-The recipe has to declare the following attributes: 
+The recipe has to declare the following attributes:
+
 - [url](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#url)
 - [license](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#license)
 - [description](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#description)
@@ -61,11 +61,9 @@ class SomeRecipe(ConanFile):
 
 Here we use [configure()](https://docs.conan.io/en/latest/reference/conanfile/methods.html#configure-config-options) method, because user options are loaded after [config_options()](https://docs.conan.io/en/latest/reference/conanfile/methods.html#configure-config-options) only.
 
-
 #### **<a name="KB-H008">#KB-H008</a>: "VERSION RANGES"**
 
 It is not allowed to use [version ranges](https://docs.conan.io/en/latest/versioning/version_ranges.html) for the recipes in Conan center, where the dependency graph should be deterministic.
-
 
 #### **<a name="KB-H009">#KB-H009</a>: "RECIPE FOLDER SIZE"**
 
@@ -257,29 +255,8 @@ class TestConan(ConanFile):
 
 #### **<a name="KB-H030">#KB-H030</a>: "CONANDATA.YML FORMAT"**
 
-The structure of the [conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html) file should follow this schema:
-
-```yml
-sources:
-  "1.69.0":
-    url: "url1.69.0"
-    sha256: "sha1.69.0"
-  "1.70.0":
-    url: "url1.70.0"
-    sha256: "sha1.70.0"
-patches:
-  "1.70.0":
-    - patch_file: "001-1.70.0.patch"
-      base_path: "source_subfolder/1.70.0"
-    - url: "https://fake_url.com/custom.patch"
-      sha256: "sha_custom"
-      base_path: "source_subfolder"
-  "1.71.0":
-    - patch_file: "001-1.71.0.patch"
-      base_path: "source_subfolder/1.71.0"
-```
-
-See also: [The conandata.yml](how_to_add_packages.md#the-conandatayml).
+The structure of the [conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html) file should follow the schema
+defined in [Adding Packages - `Conandata.yml` Format](conandata_yml_format.md).
 
 #### **<a name="KB-H031">#KB-H031</a>: "CONANDATA.YML REDUCE"**
 
@@ -347,7 +324,8 @@ It's important to have new library version defined in both [config.yml](how_to_a
 
 #### **<a name="KB-H053">#KB-H053</a>: "PRIVATE IMPORTS"**
 
-The recipe imports private Conan API, this is strongly discouraged - private imports are subjects to breaking changes. Avoid usage of private APIs, request to publically expose needed methods, if necessary.
+The recipe imports private Conan API, this is strongly discouraged - private imports are subjects to breaking changes. Avoid usage of private APIs,
+request to publicly expose needed methods, if necessary.
 
 #### **<a name="KB-H054">#KB-H054</a>: "LIBRARY DOES NOT EXIST"**
 
@@ -466,15 +444,15 @@ class SomeRecipe(ConanFile):
         def package_id(self):
             self.info.header_only()
     ```
-    
+
 There is the case when the package is header-only, but the options affects the generated artifact, (e.g. kanguru, pagmo2 ...), so you need to use `self.info.settings.clear()` instead.
-    
+
 - For "tool" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/cmake/3.x.x/conanfile.py#L104-L105)) which only provide binaries, see [our packing policy](packaging_policy.md#settings) for more, should do as follows:
 
     ```python
         def package_id(self):
             del self.info.settings.compiler
-    ```       
+    ```
 
 #### **<a name="KB-H071">#KB-H071</a>: "INCLUDE PATH DOES NOT EXIST"**
 
@@ -485,11 +463,10 @@ def package_info(self):
     self.cpp_info.includedirs = []
 ```
 
-# Deprecated errors
+## Deprecated errors
 
 The following errors from the hooks are deprecated and no longer reported:
 
-#### **<a name="KB-H047">#KB-H047</a>: "NO ASCII CHARACTERS"**
+### **<a name="KB-H047">#KB-H047</a>: "NO ASCII CHARACTERS"**
 
 According to PEP [263](https://www.python.org/dev/peps/pep-0263/), Unicode literals should only appear in Python code if the encoding is declared on one of the first two lines of the source file. Without such a declaration, any Unicode literal will cause a syntax error for Python 2 interpreters.
-

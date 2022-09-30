@@ -5,4 +5,3 @@ sources:
 patches:
   "cci.20210217":
     - patch_file: "patches/fix-conflicting-types.patch"
-      base_path: "source_subfolder"

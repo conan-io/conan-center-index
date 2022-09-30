@@ -1,27 +1,40 @@
+from conan import ConanFile
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 import os
 
-from conans import ConanFile, tools
+required_conan_version = ">=1.50.0"
+
 
 class RxcppConan(ConanFile):
     name = "rxcpp"
     description = "C++11 library for composing operations on streams of asynchronous events."
     license = "Apache-2.0"
-    topics = ("conan", "rxcpp", "reactivex", "asynchronous", "event", "observable", "values-distributed-in-time")
+    topics = ("rxcpp", "reactivex", "asynchronous", "event", "observable", "values-distributed-in-time")
     homepage = "https://github.com/ReactiveX/RxCpp"
     url = "https://github.com/conan-io/conan-center-index"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def package_id(self):
+        self.info.clear()
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("RxCpp-" + self.version, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
-        self.copy("license.md", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*.hpp", dst="include", src=os.path.join(self._source_subfolder, "Rx", "v2", "src"))
+        copy(self, "license.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.hpp", src=os.path.join(self.source_folder, "Rx", "v2", "src"), dst=os.path.join(self.package_folder, "include"))
 
-    def package_id(self):
-        self.info.header_only()
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []

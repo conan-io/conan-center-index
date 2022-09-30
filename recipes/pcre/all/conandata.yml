@@ -8,3 +8,10 @@ sources:
   "8.41":
     url: "https://sourceforge.net/projects/pcre/files/pcre/8.41/pcre-8.41.tar.bz2"
     sha256: "e62c7eac5ae7c0e7286db61ff82912e1c0b7a0c13706616e94a7dd729321b530"
+patches:
+  "8.45":
+    - patch_file: "patches/0001-fix-cmake-8.45.patch"
+  "8.44":
+    - patch_file: "patches/0001-fix-cmake-8.41.patch"
+  "8.41":
+    - patch_file: "patches/0001-fix-cmake-8.41.patch"
