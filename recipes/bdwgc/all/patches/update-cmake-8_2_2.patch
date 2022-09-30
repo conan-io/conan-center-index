@@ -1,14 +1,12 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -161,6 +161,14 @@ if (enable_threads)
+@@ -161,6 +161,12 @@ if (enable_threads)
    message(STATUS "Thread library: ${CMAKE_THREAD_LIBS_INIT}")
    if (without_libatomic_ops OR BORLAND OR MSVC OR WATCOM)
      include_directories(libatomic_ops/src)
-+    # TODO: Rename the following to Atomic_ops
-+    find_package(libatomic_ops CONFIG)
-+    if (libatomic_ops_FOUND)
-+      # TODO: Rename the following to Atomic_ops::atomic_ops
-+      get_target_property(AO_INCLUDE_DIRS libatomic_ops::libatomic_ops
++    find_package(Atomic_ops CONFIG)
++    if (Atomic_ops_FOUND)
++      get_target_property(AO_INCLUDE_DIRS Atomic_ops::atomic_ops
 +                          INTERFACE_INCLUDE_DIRECTORIES)
 +      include_directories(${AO_INCLUDE_DIRS})
 +    endif()
