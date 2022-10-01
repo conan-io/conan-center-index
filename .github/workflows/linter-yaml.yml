@@ -33,7 +33,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.changed_files.outputs.any_changed == 'true'
-        run: pip install yamllint
+        run: pip install yamllint strictyaml argparse
 
       - name: Run linter (config.yml)
         if: steps.changed_files.outputs.any_changed == 'true' && always()
