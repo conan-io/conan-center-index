@@ -32,7 +32,7 @@ patches:
       patch_description: Use pthreads4w from conan center
       patch_type: conan
       base_path: "source_subfolder"
-    - patch_file: patches/0004-Fix-md5-include.patch
+    - patch_file: patches/0005-Fix-md5-include.patch
       patch_description: Fix md5 include configuration
       patch_type: conan
       base_path: source_subfolder
@@ -46,7 +46,7 @@ patches:
       patch_description: Use pthreads4w from conan center
       patch_type: conan
       base_path: "source_subfolder"
-    - patch_file: patches/0004-Fix-md5-include.patch
+    - patch_file: patches/0006-Fix-md5-include.patch
       patch_description: Fix md5 include configuration
       patch_type: conan
       base_path: source_subfolder
