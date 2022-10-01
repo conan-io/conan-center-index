@@ -45,12 +45,12 @@ def main():
     patch_fields = Map(
         {
             "patch_file": Str(),
-
             # Not yet wide spread
-            "patch_description": Str(),
-            "patch_type": Enum(["official", "conan", "portability", "backport"]),  # "vulnerability"
-            Optional("patch_source"): Str(),
-
+            Optional("patch_description"): Str(),
+            Optional("patch_type"): Enum(
+                ["official", "conan", "portability", "backport"]
+            ),  # "vulnerability"
+            Optional("patch_source"): Str(),  # I'd like a warning for this :thinking:
             # No longer required for v2 recipes?
             Optional("base_path"): Str(),
         }
@@ -68,7 +68,7 @@ def main():
     try:
         parsed = load(content, outer_schema)
         print("passed outter validation\n")
-        if any(os in content for os in known_os):
+        if any(os in parsed["sources"].data for os in known_os):
             print("running platform check\n")
             parsed["sources"].revalidate(
                 MapPattern(Str(), platform_specific_source_fields, minimum_keys=1)
@@ -85,6 +85,10 @@ def main():
             f"::{e}\n"
         )
         exit(1)
+    except error:
+        e = error.__str__().replace("\n", "%0A")
+        print(f"::error ::{e}")
+        exit(2)
 
 
 if __name__ == "__main__":
