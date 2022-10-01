@@ -4,11 +4,11 @@
 #include "package/foobar.hpp"
 
 int main(void) {
-  std::cout << "Create a minimal usage for the target project here.\n"
-               "Avoid big examples, bigger than 100 lines.\n"
-               "Avoid networking connections.\n"
+  std::cout << "Create a minimal usage sample for the target project here.\n"
+               "Avoid examples longer than 100 lines.\n"
+               "Avoid network connections.\n"
                "Avoid background apps or servers.\n"
-               "The propose is testing the generated artifacts only.\n";
+               "The purpose is to test the generated artifacts only.\n";
 
   foobar.print_version();
 
