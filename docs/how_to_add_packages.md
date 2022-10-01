@@ -127,8 +127,7 @@ Inside the `conanfile.py` recipe, this data is available in a `self.conan_data` 
 
 ```py
 def export_sources(self):
-    for patch in self.conan_data.get("patches", {}).get(self.version, []):
-        files.copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+    export_conandata_patches(self)
 
 def source(self):
     files.get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
@@ -143,8 +142,8 @@ More details can be found in the [reviewing preference](reviewing.md) documentat
 ### The _recipe folder_: `conanfile.py`
 
 The main files in this repository are the `conanfile.py` ones that contain the logic to build the libraries from sources for all the configurations,
-as we said before there can be one single recipe suitable for all the versions inside the `all` folder, or there can be several recipes targetting
-different versions in different folders. For mainteinance reasons, we prefer to have only one recipe, but sometimes the extra effort doesn't worth
+as we said before there can be one single recipe suitable for all the versions inside the `all` folder, or there can be several recipes targeting
+different versions in different folders. For maintenance reasons, we prefer to have only one recipe, but sometimes the extra effort doesn't worth
 it and it makes sense to split and duplicate it, there is no common rule for it.
 
 Together with the recipe, there can be other files that are needed to build the library: patches, other files related to build systems,
@@ -155,14 +154,15 @@ Also, **every `conanfile.py` should be accompanied by one or several folder to t
 ### The test package folders: `test_package` and `test_<something>`
 
 All the packages in this repository need to be tested before they join ConanCenter. A `test_package` folder with its corresponding `conanfile.py` and
-a minimal project to test the package is strictly required. You can read about it in the [Conan documentation](https://docs.conan.io/en/latest/creating_packages/getting_started.html#the-test-package-folder).
+a minimal project to test the package is strictly required. You can read about it in the 
+[Conan documentation](https://docs.conan.io/en/latest/creating_packages/getting_started.html).
 
-> **Warning** FIXME: This link no longer exist and there is no dedicated section about test package in docs.
 
 Sometimes it is useful to test the package using different build systems (CMake, Autotools,...). Instead of adding complex logic to one
 `test_package/conanfile.py` file, it is better to add another `test_<something>/conanfile.py` file with a minimal example for that build system. That
 way the examples will be short and easy to understand and maintain. In some other situations it could be useful to test different Conan generators
-(`cmake_find_package`, `CMakeDeps`,...) using different folders and `conanfile.py` files ([see example](https://github.com/conan-io/conan-center-index/tree/master/recipes/fmt/all)).
+(`cmake_find_package`, `CMakeDeps`,...) using different folders and `conanfile.py` files
+([see example](https://github.com/conan-io/conan-center-index/tree/master/recipes/fmt/all)).
 
 When using more than one `test_<something>` folder, create a different project for each of them to keep the content of the `conanfile.py` and the
 project files as simple as possible, without the need of extra logic to handle different scenarios.
@@ -188,12 +188,12 @@ project files as simple as possible, without the need of extra logic to handle d
 The CI will explore all the folders and run the tests for the ones matching `test_*/conanfile.py` pattern. You can find the output of all
 of them together in the testing logs.
 
-> **Note.-** If, for any reason, it is useful to write a test that should only be checked using Conan v1, you can do so by using the pattern
+> **Note**: If, for any reason, it is useful to write a test that should only be checked using Conan v1, you can do so by using the pattern
 > `test_v1_*/conanfile.py` for the folder. Please, have a look to [linter notes](v2_linter.md) to know how to prevent the linter from
 > checking these files.
 
 > Remember that the `test_<package>` recipes should **test the package configuration that has just been generated** for the _host_ context, otherwise
-> it will fail in crossbuilding scenarios.
+> it will fail in cross-building scenarios.
 
 
 ## How to provide a good recipe

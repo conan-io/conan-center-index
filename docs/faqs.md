@@ -130,7 +130,7 @@ We often receive new fixes and improvements to the recipes already available for
 
 ## Do static libraries tend to be compiled as PIC by default?
 
-Yes! You can learn more about default options in [Packing Policy](packing_policy.md#options).
+Yes! You can learn more about default options in [Packaging Policy](packaging_policy.md#options).
 
 ## Why PDB files are not allowed?
 
