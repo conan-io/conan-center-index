@@ -2,11 +2,6 @@ from strictyaml import load, Map, Str, Int, Seq, YAMLValidationError, MapPattern
 import argparse
 
 
-class QuotedStr(Regex):
-    def __init__(self):
-        super(QuotedStr, self).__init__(r"\".*\"")
-        self._matching_message = "when expecting a quoted string"
-
 def file_path(a_string):
     from os.path import isfile
     if not isfile(a_string):
@@ -24,7 +19,7 @@ def main():
     args = parser.parse_args()
 
     schema = Map(
-        {"versions": MapPattern(QuotedStr(), Map({"folder": QuotedStr()}), minimum_keys=1)}
+        {"versions": MapPattern(Str(), Map({"folder": Str()}), minimum_keys=1)}
     )
 
     with open(args.path) as f:
