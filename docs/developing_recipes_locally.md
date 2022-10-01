@@ -1,6 +1,6 @@
 # Developing Recipes Locally
 
-One of the early steps for contributing get getting familiar with the Conan client. There's also a few steps you need to take to get your environment setup.
+Before you can contribute any code changes, you'll need to make sure you are familiar with the Conan client and have an environment that is conducive to developing recipes.
 
 This file is intended to provide all the commands you need to run in order to be an expert ConanCenter contributor.
 
@@ -153,16 +153,17 @@ docker run -v/Users/barbarian/.conan:/home/conan/.conan conanio/gcc8 bash -c "co
 ## Using Conan 2.0
 
 Everything you need to know about the methods, commands line, outputs can be found in the
-[Conan 2.0 Migrations](https://docs.conan.io/en/latest/conan_v2.html) docs. This should be fairly straight forward.
-Conan 2.0 by default has a different `CONAN_USER_HOME` location. You can have to separate caches, profiles
-and settings. So no need to worry about breaking your v1 setup.
+[Conan 2.0 Migrations](https://docs.conan.io/en/latest/conan_v2.html) docs. This should be fairly straightforward.
+Conan 2.0 by default has a different `CONAN_USER_HOME` location, which means that it has separate 
+caches, profiles, and settings.
+This will leave your Conan 1.0 setup completely intact when using Conan 2.0.
 
 > **Note**: There are pretty heavy changes to the CLI so very few of the commands will have survived.
 > [Unified Command Pattern](https://docs.conan.io/en/latest/migrating_to_2.0/commands.html#unified-patterns-in-command-arguments)
 > for example changes how settings and options are passed.
 
 
-Simply install Conan with `pip install conan --upgrade --pre`
+Simply install Conan 2.0 with `pip install conan --upgrade --pre`.
 
 You can confirm the installation with
 
