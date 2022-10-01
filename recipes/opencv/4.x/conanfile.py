@@ -191,7 +191,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_openexr:
             self.requires("openexr/2.5.7")
         if self.options.get_safe("with_tiff"):
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.4.0")
         if self.options.with_eigen:
             self.requires("eigen/3.3.9")
         if self.options.get_safe("with_ffmpeg"):
