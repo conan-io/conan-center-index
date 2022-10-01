@@ -208,7 +208,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("contrib_sfm"):
             self.requires("gflags/2.2.2")
             self.requires("glog/0.5.0")
-        if self.options.with_quirc:
+        if self.options.get_safe("with_quirc"):
             self.requires("quirc/1.1")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
@@ -436,7 +436,7 @@ class OpenCVConan(ConanFile):
             self._cmake.definitions["WITH_OPENJPEG"] = self.options.with_jpeg2000 == "openjpeg"
         self._cmake.definitions["WITH_OPENEXR"] = self.options.with_openexr
         self._cmake.definitions["WITH_EIGEN"] = self.options.with_eigen
-        self._cmake.definitions["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc requirement
+        self._cmake.definitions["HAVE_QUIRC"] = self.options.get_safe("with_quirc")  # force usage of quirc requirement
         self._cmake.definitions["WITH_DSHOW"] = self._is_msvc
         self._cmake.definitions["WITH_MSMF"] = self._is_msvc
         self._cmake.definitions["WITH_MSMF_DXVA"] = self._is_msvc
@@ -588,7 +588,7 @@ class OpenCVConan(ConanFile):
             return ["onetbb::onetbb"] if self.options.parallel == "tbb" else []
 
         def quirc():
-            return ["quirc::quirc"] if self.options.with_quirc else []
+            return ["quirc::quirc"] if self.options.get_safe("with_quirc") else []
 
         def gtk():
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
