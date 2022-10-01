@@ -1,4 +1,4 @@
-from strictyaml import load, Map, Str, Int, Seq, YAMLValidationError, MapPattern
+from strictyaml import load, Map, Str, YAMLValidationError, MapPattern
 import argparse
 
 
@@ -35,24 +35,6 @@ def main():
             f"::{e}\n"
         )
         exit(1)
-
-    try:
-        bad_schema_folder_int = Map(
-            {"versions": MapPattern(Str(), Map({"folder": Int() | Str()}), minimum_keys=1)}
-        )
-        parsed = load(content, bad_schema_folder_int)
-        start_line = parsed["folder"].start_line
-        end_line = parsed["folder"].end_line
-        print(
-            f"::error file={args.path},line={start_line},endline={end_line},"
-            f"title=config.yml schema error"
-            f"::'folder' must not be an integer, use a quoted string\n"
-        )
-        exit(1)
-
-    except YAMLValidationError as error:
-        print(error)
-        pass # This is the happy path
 
 if __name__ == "__main__":
     main()
