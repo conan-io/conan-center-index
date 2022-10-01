@@ -69,7 +69,7 @@ class SAILConan(ConanFile):
             self.requires("libwebp/1.2.4")
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        cmake_layout(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
