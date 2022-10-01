@@ -1,4 +1,3 @@
 versions:
   "1.2.0":
-    folder:
-      path: "all"
+    folder: "all"
