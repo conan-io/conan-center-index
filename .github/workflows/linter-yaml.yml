@@ -37,7 +37,11 @@ jobs:
 
       - name: Run linter (config.yml)
         if: steps.changed_files.outputs.any_changed == 'true' && always()
-        run: yamllint --config-file linter/yamllint_rules.yml -f parsable ${{ env.CONFIG_FILES_PATH }}
+        run: |
+          yamllint --config-file linter/yamllint_rules.yml -f parsable ${{ env.CONFIG_FILES_PATH }}
+          for file in ${{ env.CONFIG_FILES_PATH }}; do
+            python3 linter/config_yaml_linter.py ${file}
+          done
 
       - name: Run linter (conandata.yml)
         if: steps.changed_files.outputs.any_changed == 'true' && always()
