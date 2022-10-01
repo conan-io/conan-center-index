@@ -74,7 +74,7 @@ jobs:
         run: |
           for file in ${{ steps.changed_files_config.outputs.all_changed_files }}; do
             yamllint --config-file linter/yamllint_rules.yml ${file}
-            python3 linter/yamale_linter.py ${file}
+            python3 linter/config_yaml_linter.py ${file}
           done
 
       ## Work on conandata.yml files
