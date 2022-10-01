@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, rename, rmdir
 import os
 
@@ -102,6 +102,8 @@ class SAILConan(ConanFile):
         tc.variables["SAIL_INSTALL_PDB"] = False
         tc.variables["SAIL_THREAD_SAFE"] = self.options.thread_safe
         tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
