@@ -77,9 +77,10 @@ class FlatbuffersConan(ConanFile):
         tc.variables["FLATBUFFERS_LIBCXX_WITH_CLANG"] = False
         # Mimic upstream CMake/Version.cmake removed in _patch_sources()
         version = Version(self.version)
-        tc.variables["VERSION_MAJOR"] = version.major
-        tc.variables["VERSION_MINOR"] = version.minor
-        tc.variables["VERSION_PATCH"] = version.patch
+        tc.cache_variables["VERSION_MAJOR"] = str(version.major)
+        tc.cache_variables["VERSION_MINOR"] = str(version.minor or "0")
+        tc.cache_variables["VERSION_PATCH"] = str(version.patch or "0")
+        tc.cache_variables["VERSION_COMMIT"] = str(version.pre or "0")
         # For msvc shared
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         # Relocatable shared libs on Macos
