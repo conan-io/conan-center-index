@@ -43,6 +43,10 @@ class FlatbuffersConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def build_requirements(self):
+        if Version(self.version) >= "2.0.7":
+            self.tool_requires("cmake/3.24.0")
+
     def configure(self):
         if self.options.shared or self.options.header_only:
             del self.options.fPIC
