@@ -19,12 +19,14 @@ set_target_properties(arsenalgear PROPERTIES
 )
 target_compile_features(arsenalgear PUBLIC cxx_std_17)
 
-find_package(Boost REQUIRED CONFIG)
-target_link_libraries(arsenalgear PUBLIC Boost::headers)
+if(${ARSENALGEAR_VERSION} VERSION_LESS 2.0.0)
+    find_package(Boost REQUIRED CONFIG)
+    target_link_libraries(arsenalgear PUBLIC Boost::headers)
 
-find_package(exprtk CONFIG)
-if(${exprtk_FOUND})
-    target_link_libraries(arsenalgear PUBLIC exprtk::exprtk)
+    find_package(exprtk CONFIG)
+    if(${exprtk_FOUND})
+        target_link_libraries(arsenalgear PUBLIC exprtk::exprtk)
+    endif()
 endif()
 
 find_library(LIBM m)

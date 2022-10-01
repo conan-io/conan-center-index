@@ -58,9 +58,10 @@ class ArsenalgearConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.80.0")
-        if self.settings.os in ["Linux", "Macos"]:
-            self.requires("exprtk/0.0.1")
+        if Version(self.version) < "2.0.0":
+            self.requires("boost/1.80.0")
+            if self.settings.os in ["Linux", "Macos"]:
+                self.requires("exprtk/0.0.1")
 
     def validate(self):
         # arsenalgear doesn't support Visual Studio(yet).
