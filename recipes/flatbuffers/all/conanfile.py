@@ -132,11 +132,8 @@ class FlatbuffersConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_module_file_name", "FlatBuffers")
-        if Version(self.version) < "2.0.7":
-            self.cpp_info.set_property("cmake_file_name", "Flatbuffers")
-        else:
-            self.cpp_info.set_property("cmake_file_name", "FlatBuffers")
+        self.cpp_info.set_property("cmake_module_file_name", "flatbuffers")
+        self.cpp_info.set_property("cmake_file_name", "flatbuffers")
         cmake_target = "flatbuffers"
         if not self.options.header_only and self.options.shared:
             cmake_target += "_shared"
@@ -161,11 +158,8 @@ class FlatbuffersConan(ConanFile):
             self.env_info.PATH.append(bindir)
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "FlatBuffers"
-        if Version(self.version) < "2.0.7":
-            self.cpp_info.filenames["cmake_find_package_multi"] = "Flatbuffers"
-        else:
-            self.cpp_info.filenames["cmake_find_package_multi"] = "FlatBuffers"
+        self.cpp_info.filenames["cmake_find_package"] = "flatbuffers"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "flatbuffers"
         self.cpp_info.names["cmake_find_package"] = "flatbuffers"
         self.cpp_info.names["cmake_find_package_multi"] = "flatbuffers"
         self.cpp_info.components["libflatbuffers"].names["cmake_find_package"] = cmake_target
