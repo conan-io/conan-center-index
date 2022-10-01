@@ -51,6 +51,12 @@ jobs:
         if: steps.changed_files.outputs.any_changed == 'true' && always()
         run: yamllint --config-file linter/yamllint_rules.yml -f parsable ${{ env.CONANDATA_FILES_PATH }}
 
+      - name: Run schema check (conandata.yml)
+        if: steps.changed_files.outputs.any_changed == 'true' && always()
+        run: |
+          for file in ${{ env.CONANDATA_FILES_PATH }}; do
+            python3 linter/conandata_yaml_linter.py ${file}
+          done
 
   lint_pr_files:
     # Lint files modified in the pull_request
@@ -99,4 +105,5 @@ jobs:
         run: |
           for file in ${{ steps.changed_files_conandata.outputs.all_changed_files }}; do
             yamllint --config-file linter/yamllint_rules.yml ${file}
+            python3 linter/conandata_yaml_linter.py ${file}
           done
