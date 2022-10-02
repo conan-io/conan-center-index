@@ -72,6 +72,10 @@ class CppcheckConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
+
         bin_folder = os.path.join(self.package_folder, "bin")
         self.output.info("Append %s to environment variable PATH" % bin_folder)
         self.env_info.PATH.append(bin_folder)
