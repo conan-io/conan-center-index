@@ -85,7 +85,9 @@ class LibiconvConan(ConanFile):
             env.define("win32_target", "_WIN32_WINNT_VISTA")
 
         if is_msvc(self) and Version(self.settings.compiler.version) >= "12":
-            tc.extra_cflags.append("-FS")
+            # tc.extra_cflags is not respected.
+            # See https://github.com/conan-io/conan/issues/12228
+            env.define("CFLAGS", tc.cflags + ["-FS"])
 
         tc.generate(env)
 
