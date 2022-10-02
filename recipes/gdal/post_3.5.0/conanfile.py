@@ -153,14 +153,14 @@ class GdalConan(ConanFile):
                 pass
 
     def requirements(self):
-        self.requires("json-c/0.15")
+        self.requires("json-c/0.16")
         self.requires("libgeotiff/1.7.1")
 
         if self.options.with_armadillo:
             self.requires("armadillo/10.7.3")
 
         if self.options.with_arrow:
-            self.requires("arrow/8.0.0")
+            self.requires("arrow/8.0.1")
 
         if self.options.with_blosc:
             self.requires("c-blosc/1.21.1")
@@ -169,16 +169,16 @@ class GdalConan(ConanFile):
             self.requires("cfitsio/4.1.0")
 
         if self.options.with_cryptopp:
-            self.requires("cryptopp/8.6.0")
+            self.requires("cryptopp/8.7.0")
 
         if self.options.with_curl:
-            self.requires("libcurl/7.83.1")
+            self.requires("libcurl/7.85.0")
 
         if self.options.with_dds:
             self.requires("crunch/cci.20190615")
 
         if self.options.with_expat:
-            self.requires("expat/2.4.8")
+            self.requires("expat/2.4.9")
 
         if self.options.with_exr:
             self.requires("openexr/3.1.5")
@@ -203,12 +203,12 @@ class GdalConan(ConanFile):
             self.requires("hdf5/1.13.1")
 
         if self.options.with_heif:
-            self.requires("libheif/1.12.0")
+            self.requires("libheif/1.13.0")
 
         if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.2")
+            self.requires("libjpeg-turbo/2.1.4")
 
         if self.options.with_kea:
             self.requires("kealib/1.4.14")
@@ -223,16 +223,16 @@ class GdalConan(ConanFile):
             self.requires("libkml/1.3.0")
 
         if self.options.with_libtiff:
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.4.0")
 
         if self.options.with_lz4:
-            self.requires("lz4/1.9.3")
+            self.requires("lz4/1.9.4")
 
         if self.options.with_mongocxx:
-            self.requires("mongo-cxx-driver/3.6.6")
+            self.requires("mongo-cxx-driver/3.6.7")
 
         if self.options.with_mysql == "libmysqlclient":
-            self.requires("libmysqlclient/8.0.29")
+            self.requires("libmysqlclient/8.0.30")
         elif self.options.with_mysql == "mariadb-connector-c":
             self.requires("mariadb-connector-c/3.1.12")
 
@@ -240,13 +240,13 @@ class GdalConan(ConanFile):
             self.requires("netcdf/4.8.1")
 
         if self.options.with_odbc:
-            self.requires("odbc/2.3.9")
+            self.requires("odbc/2.3.11")
 
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.0")
 
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1o")
+            self.requires("openssl/1.1.1q")
 
         if self.options.with_pcre:
             self.requires("pcre/8.45")
@@ -255,10 +255,10 @@ class GdalConan(ConanFile):
             self.requires("pcre2/10.40")
 
         if self.options.with_pg:
-            self.requires("libpq/14.2")
+            self.requires("libpq/14.5")
 
         if self.options.with_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.38")
 
         if self.options.with_podofo:
             self.requires("podofo/0.9.7")
@@ -267,16 +267,16 @@ class GdalConan(ConanFile):
             self.requires("poppler/21.07.0")
 
         if self.options.with_proj:
-            self.requires("proj/9.0.0")
+            self.requires("proj/9.0.1")
 
         if self.options.with_qhull:
             self.requires("qhull/8.0.1")
 
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.38.5")
+            self.requires("sqlite3/3.39.3")
 
         if self.options.with_webp:
-            self.requires("libwebp/1.2.2")
+            self.requires("libwebp/1.2.4")
 
         if self.options.with_xerces:
             self.requires("xerces-c/3.2.3")
@@ -598,13 +598,16 @@ class GdalConan(ConanFile):
         else:
             cmake.definitions["PCRE_FOUND"] = False
 
-        cmake.definitions["GDAL_USE_PDFIUM"] = self.options.with_pcre2
+        cmake.definitions["GDAL_USE_PCRE2"] = self.options.with_pcre2
         if self.options.with_pcre2:
-            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_PDFIUM"] = "pcre2"
-            cmake.definitions["TARGET_FOR_PDFIUM"] = \
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_PCRE2"] = "pcre2"
+            cmake.definitions["TARGET_FOR_PCRE2"] = \
                     self.dependencies["pcre2"].cpp_info.get_property("cmake_target_name")
         else:
-            cmake.definitions["PDFIUM_FOUND"] = False
+            cmake.definitions["PCRE2_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_PDFIUM"] = False
+        cmake.definitions["PDFIUM_FOUND"] = False
 
         cmake.definitions["GDAL_USE_POSTGRESQL"] = self.options.with_pg
         if self.options.with_pg:
@@ -840,7 +843,7 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(['pcre::pcre'])
 
         if self.options.with_pcre2:
-            self.cpp_info.requires.extend(['pcre2::pcre2'])
+            self.cpp_info.requires.extend(['pcre2::pcre2-8'])
 
         if self.options.with_pg:
             self.cpp_info.requires.extend(['libpq::pq'])
