@@ -64,9 +64,8 @@ class LibspngConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["SPNG_SHARED"] = self.options.shared
         tc.variables["SPNG_STATIC"] = not self.options.shared
+        tc.variables["SPNG_USE_MINIZ"] = self.options.with_miniz
         tc.variables["BUILD_EXAMPLES"] = False
-        if self.options.with_miniz:
-            tc.preprocessor_definitions["SPNG_USE_MINIZ"] = "1"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
