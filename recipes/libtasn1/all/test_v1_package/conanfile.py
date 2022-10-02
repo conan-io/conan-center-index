@@ -14,9 +14,10 @@ class TestPackageConan(ConanFile):
         self.build_requires(self.tested_reference_str)
 
     def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        if not tools.cross_building(self):
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
     def test(self):
         if not tools.cross_building(self):

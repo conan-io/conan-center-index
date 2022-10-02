@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.1)
 project(test_package LANGUAGES C)
 
-find_package(libtasn1 REQUIRED CONFIG)
 find_program(ASN1_PARSER NAMES asn1Parser)
 if(NOT ASN1_PARSER)
     message(FATAL_ERROR "asn1Parser not found")
 endif()
+find_package(libtasn1 REQUIRED CONFIG)
 
 set(PKIX_ASN1_TAB_C "${CMAKE_CURRENT_BINARY_DIR}/pkix_asn1_tab.c")
 set(PKIX_ASN_IN "${CMAKE_CURRENT_SOURCE_DIR}/pkix.asn")
