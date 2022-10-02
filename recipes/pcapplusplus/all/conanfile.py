@@ -45,6 +45,9 @@ class PcapplusplusConan(ConanFile):
         else:
             self.requires("libpcap/1.9.1")
 
+        # TODO: use conan recipe instead of embedded one
+        # self.requires("hash-library/8.0")
+
     def validate(self):
         if self.settings.os == "Windows" and not is_msvc(self):
             raise ConanInvalidConfiguration("Can not build on Windows: only msvc compiler is supported.")
