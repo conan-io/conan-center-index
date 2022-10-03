@@ -12,7 +12,6 @@ import sys
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     test_type = "explicit"
-    win_bash = True
 
     def requirements(self):
         self.requires(self.tested_reference_str)
