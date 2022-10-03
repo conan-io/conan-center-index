@@ -1,6 +1,5 @@
 #include <cstdlib>
 #include <iostream>
-
 #include "package/foobar.hpp"
 
 int main(void) {
