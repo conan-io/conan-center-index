@@ -4,7 +4,7 @@ from conan.tools.build import can_run
 
 class MoldTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "VirtualRunEnv"
+    generators = "VirtualBuildEnv"
     test_type = "explicit"
 
     def build_requirements(self):
@@ -12,5 +12,5 @@ class MoldTestConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            self.run("mold -v", env="conanrun")
+            self.run("mold -v")
 
