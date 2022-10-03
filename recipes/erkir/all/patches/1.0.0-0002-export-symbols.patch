@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 851f78a..6575859 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -24,6 +24,8 @@ add_library(erkir::erkir ALIAS erkir)
+ # Includes
+ target_include_directories(erkir      PUBLIC  include)
+ 
++set_target_properties(erkir PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
++
+ # Coverage support.
+ option(CODE_COVERAGE "Enable coverage reporting" ON)
+ if (CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
