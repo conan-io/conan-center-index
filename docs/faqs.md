@@ -142,6 +142,11 @@ However, there are ways to get around this, one of them is through the [/Z7](htt
 
 Adding one more common option, it seems the most simple and obvious solution, but it contains a side effect already seen with fPIC. It is necessary to manage the entire recipe, it has become a Boilerplate. So, adding PDB would be one more point to be reviewed for each recipe. In addition, in the future new options could arise, such as sanity or benchmark, further inflating the recipes. For this reason, a new option will not be added. However, the inclusion of the PDB files is discussed in issue [#1982](https://github.com/conan-io/conan-center-index/issues/1982) and there are some ideas for making this possible through a new feature. If you want to comment on the subject, please visit issue.
 
+### Doesn't this make debug builds useless?
+
+No. The PDBs are only needed to debug dependency code. By providing the libraries you are able to link and build your application and debug your own code.
+This is by far the more common scenario which we want to enable.
+
 ## Can I remove an option from a recipe?
 
 It's preferable to leave all options (ie. not removing them) because it may break other packages which require those deleted options.
@@ -402,4 +407,4 @@ merging to the master branch. Feel free to contribute to a new Github Action tha
 ## Is it possible to disable Pylint?
 
 No. The [pylint](v2_linter.md) has an important role of keeping any recipe prepared for [Conan v2 migration](v2_migration.md). In case you are having
-difficult to understand [linter errors](linters.md), please, comment on your pull request about, then the community will help you.
+difficult to understand [linter errors](linters.md), please comment on your pull request about the problem to receive help from the community.
