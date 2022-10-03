@@ -11,7 +11,8 @@ import os
 
 required_conan_version = ">=1.52.0"
 
-#TODO: add option for GOBJECT_INTROSPECTION but that requires a package for gobject-introspection
+# TODO: add option for GOBJECT_INTROSPECTION but that requires a package for gobject-introspection
+
 
 class PackageConan(ConanFile):
     name = "libical"
@@ -34,7 +35,7 @@ class PackageConan(ConanFile):
         "fPIC": True,
         "with_cxx_bindings": True,
         "with_glib": True,
-        "with_gobject_introspection" : False,
+        "with_gobject_introspection": False,
     }
 
     @property
@@ -53,23 +54,25 @@ class PackageConan(ConanFile):
     def configure(self):
         if self.options.shared:
             try:
-                del self.options.fPIC # once removed by config_options, need try..except for a second del
+                del self.options.fPIC  # once removed by config_options, need try..except for a second del
             except Exception:
                 pass
         try:
-            del self.settings.compiler.libcxx # for plain C projects only
+            del self.settings.compiler.libcxx  # for plain C projects only
         except Exception:
             pass
         try:
-            del self.settings.compiler.cppstd # for plain C projects only
+            del self.settings.compiler.cppstd  # for plain C projects only
         except Exception:
             pass
 
     def layout(self):
-        cmake_layout(self, src_folder="src") # src_folder must use the same source folder name the project
+        # src_folder must use the same source folder name the project
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("dependency/0.8.1") # prefer self.requires method instead of requires attribute
+        # prefer self.requires method instead of requires attribute
+        self.requires("dependency/0.8.1")
         if self.options.with_glib:
             self.requires("glib/2.32")
             self.requires("libxml/2.7.3")
@@ -78,12 +81,15 @@ class PackageConan(ConanFile):
         # validate the minimum cpp standard supported. For C++ projects only
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+        minimum_version = self._compilers_minimum_version.get(
+            str(self.info.settings.compiler), False)
         if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
         # in case it does not work in another configuration, it should validated here too
         if is_msvc(self) and self.info.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
+            raise ConanInvalidConfiguration(
+                f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
@@ -91,7 +97,8 @@ class PackageConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+            destination=self.source_folder, strip_root=True)
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -109,22 +116,22 @@ class PackageConan(ConanFile):
         self._cmake_definitions["ICAL_BUILD_DOCS"] = False
         self._cmake.definitions["LIBICAL_BUILD_TESTING"] = False
 
-        #defaults can be overridden by commandline option
+        # defaults can be overridden by commandline option
         self._cmake_definitions["WITH_CXX_BINDINGS"] = self.options.with_cxx_bindings
         self._cmake_definitions["ICAL_GLIB"] = self.options.with_glib
         self._cmake_definitions["GOBJECT_INTROSPECTION"] = self.options.with_gobject_introspection
 
-        #hard-coded, platform dependent
+        # hard-coded, platform dependent
         if self.settings.os == "Windows":
             self._cmake.definitions["USE_BUILTIN_TZDATA"] = True
         else:
             self._cmake.definitions["USE_BUILTIN_TZDATA"] = False
 
-        #handle shared vs. static builds. we only want 1 type
+        # handle shared vs. static builds. we only want 1 type
         if self.options.shared:
             self._cmake.definitions["SHARED_ONLY"] = True
-        else;
-            self._cmake.definitions["STATIC_ONLY"] = True
+        else
+        self._cmake.definitions["STATIC_ONLY"] = True
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -137,7 +144,8 @@ class PackageConan(ConanFile):
         tc.cache_variables["PACKAGE_CUSTOM_DEFINITION"] = True
         if is_msvc(self):
             # don't use self.settings.compiler.runtime
-            tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+            tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(
+                self)
         # deps_cpp_info, deps_env_info and deps_user_info are no longer used
         if self.dependencies["dependency"].options.foobar:
             tc.cache_variables["DEPENDENCY_LIBPATH"] = self.dependencies["dependency"].cpp_info.libdirs
@@ -161,14 +169,16 @@ class PackageConan(ConanFile):
         )
 
     def build(self):
-        self._patch_sources() # It can be apply_conandata_patches(self) only in case no more patches are needed
+        # It can be apply_conandata_patches(self) only in case no more patches are needed
+        self._patch_sources()
         cmake = self._configure.cmake()
         cmake.configure()
         cmake.build()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "license"), src=self.source_folder)
+        copy(self, pattern="LICENSE", dst=os.path.join(
+            self.package_folder, "license"), src=self.source_folder)
         cmake = self._configure_cmake()
         cmake.install()
 
