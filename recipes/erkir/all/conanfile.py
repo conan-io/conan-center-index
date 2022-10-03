@@ -78,6 +78,7 @@ class ErkirConan(ConanFile):
             cmake = CMake(self)
             cmake.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         postfix = "d" if Version(self.version) >= "2.0.0" and self.settings.build_type == "Debug" else ""
