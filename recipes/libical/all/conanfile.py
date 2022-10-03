@@ -1,10 +1,10 @@
-from conan import ConanFile, CMake
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.cmake import CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 import os
 
@@ -42,8 +42,24 @@ class PackageConan(ConanFile):
     def _minimum_cpp_standard(self):
         return 11
 
-    # no exports_sources attribute, but export_sources(self) method instead
-    # this allows finer grain exportation of patches per version
+    # in case the project requires C++14/17/20/... the minimum compiler version should be listed
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "0",
+            "Visual Studio": "0",
+            "clang": "0",
+            "apple-clang": "0",
+        }
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -55,15 +71,15 @@ class PackageConan(ConanFile):
         if self.options.shared:
             try:
                 del self.options.fPIC  # once removed by config_options, need try..except for a second del
-            except Exception:
+            except Exception:  # pylint: disable=broad-except
                 pass
         try:
             del self.settings.compiler.libcxx  # for plain C projects only
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             pass
         try:
             del self.settings.compiler.cppstd  # for plain C projects only
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             pass
 
     def layout(self):
@@ -101,46 +117,39 @@ class PackageConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        # turn off deps to avoid picking up them accidentally
-        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_BDB"] = True
-        self._cmake.definitions["ICAL_ERRORS_ARE_FATAL"] = False
-        self._cmake.definitions["ICAL_ALLOW_EMPTY_PROPERTIES="] = False
-        self._cmake.definitions["ICAL_GLIB_VAPI"] = False
-        self._cmake.definitions["ICAL_GTK_DOC"] = False
-        self._cmake.definitions["USE_32BIT_TIME_T"] = False
-        self._cmake.definitions["ABI_DUMPER"] = False
-        self._cmake.definitions["ADDRESS_SANITIZER"] = False
-        self._cmake.definitions["THREAD_SANITIZER"] = False
-        self._cmake_definitions["ICAL_BUILD_DOCS"] = False
-        self._cmake.definitions["LIBICAL_BUILD_TESTING"] = False
-
-        # defaults can be overridden by commandline option
-        self._cmake_definitions["WITH_CXX_BINDINGS"] = self.options.with_cxx_bindings
-        self._cmake_definitions["ICAL_GLIB"] = self.options.with_glib
-        self._cmake_definitions["GOBJECT_INTROSPECTION"] = self.options.with_gobject_introspection
-
-        # hard-coded, platform dependent
-        if self.settings.os == "Windows":
-            self._cmake.definitions["USE_BUILTIN_TZDATA"] = True
-        else:
-            self._cmake.definitions["USE_BUILTIN_TZDATA"] = False
-
-        # handle shared vs. static builds. we only want 1 type
-        if self.options.shared:
-            self._cmake.definitions["SHARED_ONLY"] = True
-        else:
-            self._cmake.definitions["STATIC_ONLY"] = True
-
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
     def generate(self):
         # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
         tc = CMakeToolchain(self)
+        # turn off deps to avoid picking up them accidentally
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_BDB"] = True
+        tc.variables["ICAL_ERRORS_ARE_FATAL"] = False
+        tc.variables["ICAL_ALLOW_EMPTY_PROPERTIES="] = False
+        tc.variables["ICAL_GLIB_VAPI"] = False
+        tc.variables["ICAL_GTK_DOC"] = False
+        tc.variables["USE_32BIT_TIME_T"] = False
+        tc.variables["ABI_DUMPER"] = False
+        tc.variables["ADDRESS_SANITIZER"] = False
+        tc.variables["THREAD_SANITIZER"] = False
+        tc.variables["ICAL_BUILD_DOCS"] = False
+        tc.variables["LIBICAL_BUILD_TESTING"] = False
+
+        # defaults can be overridden by commandline option
+        tc.variables["WITH_CXX_BINDINGS"] = self.options.with_cxx_bindings
+        tc.variables["ICAL_GLIB"] = self.options.with_glib
+        tc.variables["GOBJECT_INTROSPECTION"] = self.options.with_gobject_introspection
+
+        # hard-coded, platform dependent
+        if self.settings.os == "Windows":
+            tc.variables["USE_BUILTIN_TZDATA"] = True
+        else:
+            tc.variables["USE_BUILTIN_TZDATA"] = False
+
+        # handle shared vs. static builds. we only want 1 type
+        if self.options.shared:
+            tc.variables["SHARED_ONLY"] = True
+        else:
+            tc.variables["STATIC_ONLY"] = True
+
         # Boolean values are preferred instead of "ON"/"OFF"
         tc.cache_variables["PACKAGE_CUSTOM_DEFINITION"] = True
         if is_msvc(self):
@@ -172,7 +181,7 @@ class PackageConan(ConanFile):
     def build(self):
         # It can be apply_conandata_patches(self) only in case no more patches are needed
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
@@ -180,7 +189,7 @@ class PackageConan(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         copy(self, pattern="LICENSE", dst=os.path.join(
             self.package_folder, "license"), src=self.source_folder)
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
 
         # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
