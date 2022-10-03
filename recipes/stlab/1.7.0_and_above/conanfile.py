@@ -125,7 +125,7 @@ class Stlab(ConanFile):
         # On Apple we have to force the usage of boost.variant and boost.optional, because Apple's implementation of C++17
         # is not complete.
         #
-        raise ConanInvalidConfiguration("Apple-Clang versions less than 12 do not correctly support std::optional or std::variant, so we will use boost::optional and boost::variant instead. Try -o use_boost=True.")
+        raise ConanInvalidConfiguration(f"Apple-Clang versions less than 12 do not correctly support std::optional or std::variant, so we will use boost::optional and boost::variant instead. Try -o {self.name}:use_boost=True.")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
