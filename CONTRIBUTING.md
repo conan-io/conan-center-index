@@ -29,7 +29,7 @@ To contribute follow the next steps:
 4. In your fork create a `package/xxx` branch from the `master` branch and develop
    your fix/packages as discussed in previous step.
 5. [Submit a pull request](how_to_add_packages.md#submitting-a-package) once you are ready. This can be when you
-   got everything working or even if you need help. Add the text (besides other comments): "fixes #IssueNumber"
+   got everything working or even if you need help. Add the text to the issue body (besides other comments): "fixes #IssueNumber"
    in the body of the PR, referring to the issue of step 1.
 
 The Conan Community works hard to review all the pull requests and provided assistance where need.
