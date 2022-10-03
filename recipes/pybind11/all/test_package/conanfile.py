@@ -3,6 +3,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conan.tools.env import VirtualRunEnv
 from conan.tools.build import can_run
 from conan.tools.layout import cmake_layout
+from conans.tools import environment_append
 
 import os
 import sys
@@ -44,5 +45,6 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             python_path = os.path.join(self.build_folder, self.cpp.build.libdirs[0])
-            module_path = os.path.join(self.source_folder, "test.py")
-            self.run(f"PYTHONPATH={python_path} {self._python_interpreter} {module_path}", env="conanrun")
+            with environment_append({"PYTHONPATH": python_path}):
+                module_path = os.path.join(self.source_folder, "test.py")
+                self.run(f"{self._python_interpreter} {module_path}", env="conanrun")
