@@ -1,12 +1,13 @@
-from conans import ConanFile, CMake
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, replace_in_file
 from conan.tools.scm import Version
 import os
-import functools
 
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
 
 
 class PyBind11Conan(ConanFile):
@@ -18,36 +19,31 @@ class PyBind11Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = "CMakeLists.txt"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    def validate(self):
-        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "11.0":
-            raise ConanInvalidConfiguration("OSX support is bugged. Check https://github.com/pybind/pybind11/issues/3081")
-
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["PYBIND11_INSTALL"] = True
-        cmake.definitions["PYBIND11_TEST"] = False
-        cmake.definitions["PYBIND11_CMAKECONFIG_INSTALL_DIR"] = "lib/cmake/pybind11"
-        cmake.configure()
-        return cmake
+    def generate(self):
+        toolchain = CMakeToolchain(self)
+        toolchain.cache_variables.update({
+            "PYBIND11_INSTALL": True,
+            "PYBIND11_TEST": False,
+            "PYBIND11_CMAKECONFIG_INSTALL_DIR": "lib/cmake/pybind11"
+        })
+        toolchain.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=os.path.join(self.source_folder, self._source_subfolder), dst=os.path.join(self.package_folder, "licenses"))
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
         for filename in ["pybind11Targets.cmake", "pybind11Config.cmake", "pybind11ConfigVersion.cmake"]:
             try:
