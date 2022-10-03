@@ -5,8 +5,6 @@ import os
 
 required_conan_version = ">=1.52.0"
 
-# TODO: add option for GOBJECT_INTROSPECTION but that requires a package for gobject-introspection
-
 
 class PackageConan(ConanFile):
     name = "libical"
@@ -70,8 +68,10 @@ class PackageConan(ConanFile):
         # prefer self.requires method instead of requires attribute
         self.requires("dependency/0.8.1")
         if self.options.with_glib:
-            self.requires("glib/2.32")
+            self.requires("glib/2.44")
             self.requires("libxml/2.7.3")
+        if self.options.with_gobject_introspection:
+            self.requires("gobject-introspection/0.6.7")
 
     def validate(self):
         # validate the minimum cpp standard supported. For C++ projects only
