@@ -13,6 +13,6 @@ conan_set_vs_runtime()
 find_package(Python COMPONENTS Interpreter Development)
 find_package(pybind11 REQUIRED CONFIG)
 
-Python_add_library(test_package test_package.cpp)
+Python_add_library(test_package ../test_package/test_package.cpp)
 target_link_libraries(test_package PRIVATE pybind11::headers)
 set_property(TARGET test_package PROPERTY CXX_STANDARD 11)
