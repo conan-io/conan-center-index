@@ -5,10 +5,11 @@ from conan.tools import scm
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches
 from conan.tools.build import check_min_cppstd
+from conan.tools.microsoft import check_min_vs
 
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.3"
 
 class ImutilsCppConan(ConanFile):
     name = "imutils-cpp"
@@ -35,8 +36,6 @@ class ImutilsCppConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "9",
-            "Visual Studio": "15.7",
-            "msvc": "191",
             "clang": "12",
             "apple-clang": "10.14",
         }
@@ -58,12 +57,13 @@ class ImutilsCppConan(ConanFile):
 
     def requirements(self):
         self.requires("opencv/4.5.5")
-        self.requires("libcurl/7.84.0")
+        self.requires("libcurl/7.85.0")
         self.requires("openssl/1.1.1q")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
+        check_min_vs(self, 191)
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
         if minimum_version and scm.Version(self.info.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
