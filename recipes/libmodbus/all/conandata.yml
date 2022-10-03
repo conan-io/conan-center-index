@@ -7,6 +7,6 @@ sources:
     sha256: "d7d9fa94a16edb094e5fdf5d87ae17a0dc3f3e3d687fead81835d9572cf87c16"
 patches:
   "3.1.8":
-    - patch_file: "patches/0002-msvc-fixes.patch"
+    - patch_file: "patches/3.1.8-0001-msvc-fixes.patch"
   "3.1.6":
-    - patch_file: "patches/0001-msvc-fixes.patch"
+    - patch_file: "patches/3.1.6-0001-msvc-fixes.patch"
