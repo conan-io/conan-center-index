@@ -29,7 +29,7 @@ class Stlab(ConanFile):
         # TODO
         # "main_executor": ["qt", "libdispatch", "emscripten", "none", "auto"],
 
-        "test": [True, False],
+        # "test": [True, False],
     }
 
     default_options = {
@@ -38,7 +38,7 @@ class Stlab(ConanFile):
         "future_coroutines": False,
         "task_system": "auto",
         "thread_system": "auto",
-        "test": False,
+        # "test": False,
     }
 
     short_paths = True
@@ -128,8 +128,10 @@ class Stlab(ConanFile):
         raise ConanInvalidConfiguration(f"Apple-Clang versions less than 12 do not correctly support std::optional or std::variant, so we will use boost::optional and boost::variant instead. Try -o {self.name}:with_boost=True.")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, 17)
+        # TODO: No cppstd check until this issue is solved
+        #       https://github.com/conan-io/conan/issues/12210
+        # if self.info.settings.compiler.cppstd:
+        #     check_min_cppstd(self, 17)
 
         if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < "9":
             raise ConanInvalidConfiguration("Need GCC >= 9")
@@ -164,7 +166,10 @@ class Stlab(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
-        tc.variables["BUILD_TESTING"] = self.options.test
+
+        # tc.variables["BUILD_TESTING"] = self.options.test
+        tc.definitions['BUILD_TESTING'] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
+
         tc.variables["STLAB_USE_BOOST_CPP17_SHIMS"] = self.options.with_boost
         tc.variables["STLAB_NO_STD_COROUTINES"] = self.options.no_std_coroutines
         tc.variables["STLAB_THREAD_SYSTEM"] = self.options.thread_system
