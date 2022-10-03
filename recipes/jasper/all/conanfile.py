@@ -51,6 +51,9 @@ class JasperConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    def build_requirements(self):
+        self.tool_requires("cmake/3.24.0")
+
     def requirements(self):
         if self.options.with_libjpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.1.2")
