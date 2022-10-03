@@ -15,7 +15,7 @@ class Stlab(ConanFile):
     url = 'https://github.com/conan-io/conan-center-index'
     homepage = 'https://github.com/stlab/libraries'
     license = 'BSL-1.0'
-    topics = 'conan', 'c++', 'concurrency', 'futures', 'channels'
+    topics = 'concurrency', 'futures', 'channels'
 
     settings = "arch", "os", "compiler", "build_type",
 
