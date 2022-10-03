@@ -1,11 +1,5 @@
-from conan import ConanFile
+from conan import ConanFile, CMake, tools
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
-from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 import os
 
 
@@ -172,7 +166,7 @@ class PackageConan(ConanFile):
     def build(self):
         # It can be apply_conandata_patches(self) only in case no more patches are needed
         self._patch_sources()
-        cmake = self._configure.cmake()
+        cmake = self._configure_cmake()
         cmake.configure()
         cmake.build()
 
