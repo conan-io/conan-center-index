@@ -20,7 +20,7 @@ class Stlab(ConanFile):
     settings = "arch", "os", "compiler", "build_type",
 
     options = {
-        "use_boost": [True, False],
+        "with_boost": [True, False],
         "no_std_coroutines": [True, False],
         "future_coroutines": [True, False],
         "task_system": ["portable", "libdispatch", "emscripten", "pnacl", "windows", "auto"],
@@ -33,7 +33,7 @@ class Stlab(ConanFile):
     }
 
     default_options = {
-        "use_boost": False,
+        "with_boost": False,
         "no_std_coroutines": True,          #TODO: how to make checks similar to what are made in Cmake https://github.com/stlab/libraries/blob/main/cmake/StlabUtil.cmake#L35
         "future_coroutines": False,
         "task_system": "auto",
@@ -55,7 +55,7 @@ class Stlab(ConanFile):
         self.build_requires("cmake/3.23.3")
 
     def requirements(self):
-        if self.options.use_boost:
+        if self.options.with_boost:
             self.requires("boost/1.80.0")
 
         if self._requires_libdispatch():
@@ -120,12 +120,12 @@ class Stlab(ConanFile):
         if self.settings.os != "Macos": return
         if self.settings.compiler != "apple-clang": return
         if Version(self.settings.compiler.version) >= "12": return
-        if self.options.use_boost: return
+        if self.options.with_boost: return
         #
         # On Apple we have to force the usage of boost.variant and boost.optional, because Apple's implementation of C++17
         # is not complete.
         #
-        raise ConanInvalidConfiguration("Apple-Clang versions less than 12 do not correctly support std::optional or std::variant, so we will use boost::optional and boost::variant instead. Try -o use_boost=True.")
+        raise ConanInvalidConfiguration("Apple-Clang versions less than 12 do not correctly support std::optional or std::variant, so we will use boost::optional and boost::variant instead. Try -o with_boost=True.")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -155,7 +155,7 @@ class Stlab(ConanFile):
         if self.options.thread_system == "auto":
             self.options.thread_system = self._default_thread_system()
 
-        self.output.info("STLab Use Boost: {}.".format(self.options.use_boost))
+        self.output.info("STLab With Boost: {}.".format(self.options.with_boost))
         self.output.info("STLab Future Coroutines: {}.".format(self.options.future_coroutines))
         self.output.info("STLab No Standard Coroutines: {}.".format(self.options.no_std_coroutines))
         self.output.info("STLab Task System: {}.".format(self.options.task_system))
@@ -165,7 +165,7 @@ class Stlab(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
         tc.variables["BUILD_TESTING"] = self.options.test
-        tc.variables["STLAB_USE_BOOST_CPP17_SHIMS"] = self.options.use_boost
+        tc.variables["STLAB_USE_BOOST_CPP17_SHIMS"] = self.options.with_boost
         tc.variables["STLAB_NO_STD_COROUTINES"] = self.options.no_std_coroutines
         tc.variables["STLAB_THREAD_SYSTEM"] = self.options.thread_system
         tc.variables["STLAB_TASK_SYSTEM"] = self.options.task_system
@@ -196,7 +196,7 @@ class Stlab(ConanFile):
     def package_id(self):
         #TODO: is header only but needs a header modified by cmake
         self.info.settings.clear()
-        self.info.options.use_boost = "ANY"
+        self.info.options.with_boost = "ANY"
         self.info.options.test = "ANY"
 
     def package_info(self):
