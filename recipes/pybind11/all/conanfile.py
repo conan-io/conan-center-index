@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.layout import basic_layout
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, replace_in_file
 from conan.tools.scm import Version
 import os
@@ -17,7 +16,6 @@ class PyBind11Conan(ConanFile):
     homepage = "https://github.com/pybind/pybind11"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
