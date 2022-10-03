@@ -130,12 +130,11 @@ class PackageConan(ConanFile):
         # handle shared vs. static builds. we only want 1 type
         if self.options.shared:
             self._cmake.definitions["SHARED_ONLY"] = True
-        else
-        self._cmake.definitions["STATIC_ONLY"] = True
+        else:
+            self._cmake.definitions["STATIC_ONLY"] = True
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
-
 
     def generate(self):
         # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
