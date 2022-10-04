@@ -70,7 +70,7 @@ class FollyConan(ConanFile):
         self.requires("bzip2/1.0.8")
         self.requires("double-conversion/3.2.0")
         self.requires("gflags/2.2.2")
-        self.requires("glog/0.4.0")
+        self.requires("glog/0.6.0")
         self.requires("libevent/2.1.12")
         self.requires("openssl/1.1.1q")
         self.requires("lz4/1.9.3")
@@ -85,7 +85,9 @@ class FollyConan(ConanFile):
         if self.settings.os == "Linux":
             self.requires("libiberty/9.1.0")
             self.requires("libunwind/1.5.0")
-        if Version(self.version) >= "2020.08.10.00":
+        if Version(self.version) >= "2022.10.03.00":
+            self.requires("fmt/9.1.0")
+        elif Version(self.version) >= "2020.08.10.00":
             self.requires("fmt/7.1.3")
 
     @property

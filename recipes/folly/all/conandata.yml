@@ -8,6 +8,9 @@ sources:
   "2022.01.31.00":
     url: "https://github.com/facebook/folly/archive/v2022.01.31.00.tar.gz"
     sha256: "d764b9a7832d967bb7cfea4bcda15d650315aa4d559fde1da2a52b015cd88b9c"
+  "2022.10.03.00":
+    url: "https://github.com/facebook/folly/archive/v2022.10.03.00.tar.gz"
+    sha256: "42dd54d17eed17fc0ae1c8ff35e0d11c991801d3220b0a32f82865072fe3f145"
 patches:
   "2019.10.21.00":
     - patch_file: "patches/0001-find-packages.patch"
@@ -53,4 +56,9 @@ patches:
     - patch_file: "patches/0019-exclude-example.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0022-fix-windows-minmax.patch"
+      base_path: "source_subfolder"
+  "2022.10.03.00":
+    - patch_file: "patches/0017-compiler-flags.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0023-find-packages.patch"
       base_path: "source_subfolder"
