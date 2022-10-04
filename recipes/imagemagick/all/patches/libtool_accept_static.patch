@@ -2,7 +2,7 @@ diff --git a/configure b/configure
 index 26b3f7ec8..94799dfd3 100755
 --- a/configure
 +++ b/configure
-@@ -12195,7 +12195,7 @@ mingw* | pw32*)
+@@ -12199,7 +12199,7 @@ mingw* | pw32*)
    # func_win32_libid shell function, so use a weaker test based on 'objdump',
    # unless we find 'file', for example because we are cross-compiling.
    if ( file / ) >/dev/null 2>&1; then

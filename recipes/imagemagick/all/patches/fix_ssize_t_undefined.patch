@@ -1,36 +1,51 @@
+diff --git a/MagickCore/nt-base.h b/MagickCore/nt-base.h
+index 7c7678b59..fbfcb372b 100644
+--- a/MagickCore/nt-base.h
++++ b/MagickCore/nt-base.h
+@@ -61,16 +61,10 @@ extern "C" {
+ #  if !defined(SSIZE_MAX)
+ #    define SSIZE_MAX LLONG_MAX
+ #  endif
+-#  if defined(_MSC_VER)
+-#    define MAGICKCORE_SIZEOF_SSIZE_T 8
+-#  endif
+ #else
+ #  if !defined(SSIZE_MAX)
+ #    define SSIZE_MAX LONG_MAX
+ #  endif
+-#  if defined(_MSC_VER)
+-#    define MAGICKCORE_SIZEOF_SSIZE_T 4
+-#  endif
+ #endif
+ #ifndef S_ISCHR
+ #  define S_ISCHR(m) (((m) & S_IFMT) == S_IFCHR)
 diff --git a/config/config.h.in b/config/config.h.in
-index 4d902e626..70b306d4b 100644
+index 7ffe13bb6..b63577c1a 100644
 --- a/config/config.h.in
 +++ b/config/config.h.in
-@@ -1,5 +1,31 @@
+@@ -1,5 +1,10 @@
  /* config/config.h.in.  Generated from configure.ac by autoheader.  */
  
-+/*
-+  Visual C++ does not define double_t, float_t, or ssize_t by default.
-+*/
 +#ifdef _MSC_VER
-+  #if !defined(double_t)
-+    #define MAGICKCORE_HAVE_DOUBLE_T
-+    #if !defined(__MINGW32__)
-+      typedef double double_t;
-+    #endif
-+  #endif
-+  #if !defined(float_t)
-+    #define MAGICKCORE_HAVE_FLOAT_T
-+    #if !defined(__MINGW32__)
-+      typedef float float_t;
-+    #endif
-+  #endif
-+  #if !defined(ssize_t) && !defined(__MINGW32__)
-+    #define MAGICKCORE_HAVE_SSIZE_T
-+    #if defined(_WIN64)
-+      typedef __int64 ssize_t;
-+    #else
-+      typedef long ssize_t;
-+    #endif
-+  #endif
++# include <BaseTsd.h>
++  typedef SSIZE_T ssize_t;
 +#endif
 +
  /* Define if building universal (internal helper macro) */
  #undef AC_APPLE_UNIVERSAL_BUILD
-
+ 
+diff --git a/configure b/configure
+index 94799dfd3..d9a1dc16b 100755
+--- a/configure
++++ b/configure
+@@ -656,6 +656,10 @@ ac_includes_default="\
+ #endif
+ #ifdef HAVE_UNISTD_H
+ # include <unistd.h>
++#endif
++#if _MSC_VER
++# include <BaseTsd.h>
++  typedef SSIZE_T ssize_t;
+ #endif"
+ 
+ ac_header_c_list=

@@ -36,7 +36,7 @@ patches:
       patch_type: "conan"
 
     - patch_file: "patches/fix_make_dependency.patch"
-      patch_description: "install-exec-local-utilities make target depends on install-binPROGRAMS target. Parallel installation (make install -j<N>) fails locally most of the times without this patch."
+      patch_description: "install-exec-local-utilities make target depends on install-binPROGRAMS target. Parallel installation (make install -j<N>) fails on Windows most of the times without this patch."
       patch_type: "conan"
 
     - patch_file: "patches/libtool_accept_static.patch"
