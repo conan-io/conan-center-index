@@ -1,8 +1,6 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index a50a31b..478ea43 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -32,7 +32,13 @@ endif()
+@@ -32,7 +32,12 @@ endif()
  if(SPNG_SHARED)
      add_library(spng SHARED ${spng_SOURCES})
      target_link_libraries(spng ${spng_LIBS})
@@ -12,7 +10,6 @@ index a50a31b..478ea43 100644
 +        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 +        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 +        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 +    )
  
      if(BUILD_EXAMPLES)
