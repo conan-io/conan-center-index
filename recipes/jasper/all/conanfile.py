@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, replace_in_file, copy, rmdir, rm, save, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, copy, rmdir, rm, save, export_conandata_patches, apply_conandata_patches
 import os
 import textwrap
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class JasperConan(ConanFile):
