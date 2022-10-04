@@ -1,9 +1,9 @@
 import os
 
-from conans import ConanFile, CMake
+from conan import ConanFile
+from conans import CMake
 from conan.tools.scm import Version
 from conan.tools.files import get, apply_conandata_patches, copy, rmdir
-from conans import tools
 
 required_conan_version = ">=1.51.3"
 
