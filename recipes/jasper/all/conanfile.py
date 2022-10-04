@@ -28,6 +28,10 @@ class JasperConan(ConanFile):
         "with_libjpeg": "libjpeg",
     }
 
+    @property
+    def _cmake_gen(self):
+        self.conf.get("tools.cmake.cmaketoolchain:generator", check_type=str, default="Ninja")
+
     def export_sources(self):
         export_conandata_patches(self)
 
