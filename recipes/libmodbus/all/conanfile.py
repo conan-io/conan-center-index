@@ -1,16 +1,15 @@
 from conan import ConanFile
-from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
-from conan.tools.build import check_min_cppstd
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rename, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.0"
 
 
 class LibmodbusConan(ConanFile):
@@ -20,7 +19,7 @@ class LibmodbusConan(ConanFile):
     topics = ("modbus", "protocol", "industry", "automation")
     license = "LGPL-2.1"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "patches/**"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -33,7 +32,14 @@ class LibmodbusConan(ConanFile):
 
     @property
     def _settings_build(self):
-        return self.settings_build if hasattr(self, "settings_build") else self.settings
+        return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -42,74 +48,58 @@ class LibmodbusConan(ConanFile):
     def configure(self):
         if self.options.shared:
             try:
-                del self.options.fPIC # once removed by config_options, need try..except for a second del
+                del self.options.fPIC
             except Exception:
                 pass
         try:
-            del self.settings.compiler.libcxx # for plain C projects only
+            del self.settings.compiler.libcxx
         except Exception:
             pass
         try:
-            del self.settings.compiler.cppstd # for plain C projects only
+            del self.settings.compiler.cppstd
         except Exception:
             pass
-        if self.settings.os == "Windows":
-            self.win_bash = True
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def build_requirements(self):
         if is_msvc(self):
-            self.tool_requires("automake/1.16.3")
-        # see https://github.com/conan-io/conan/issues/11969
-        bash_path = os.getenv("CONAN_BASH_PATH") or self.conf.get("tools.microsoft.bash:path")
-        if self._settings_build.os == "Windows" and not bash_path:
-            self.tool_requires("msys2/cci.latest")
+            self.tool_requires("automake/1.16.5")
+        if self._settings_build.os == "Windows":
+            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
+                self.tool_requires("msys2/cci.latest")
+            self.win_bash = True
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
                 destination=self.source_folder, strip_root=True)
 
-    def validate(self):
-        # validate the minimum cpp standard supported
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--without-documentation")
         tc.configure_args.append("--disable-tests")
-
-        # the following MSVC specific part has been ported from conan v1 following https://github.com/conan-io/conan-center-index/pull/12916
-        if is_msvc(self) and Version(self.settings.compiler.version) >= "12":
+        if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
+           (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
             tc.extra_cflags.append("-FS")
-    
-        env = tc.environment()
+        tc.generate()
 
         if is_msvc(self):
-            ar_lib = unix_path(self, self.deps_user_info['automake'].ar_lib)
-            env.define("CC", "cl -nologo")
-            env.define("CXX", "cl -nologo")
+            env = Environment()
+            compile_wrapper = unix_path(self, os.path.join(self.source_folder, "build-aux", "compile"))
+            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
-            env.define("AR", f"{ar_lib} \"lib -nologo -verbose\"")
-            env.define("RANLIB", ":")
-            env.define("STRING", ":")
+            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
             env.define("NM", "dumpbin -symbols")
-
-        tc.generate(env)
-
-        # generate dependencies for pkg-config
-        tc = PkgConfigDeps(self)
-        tc.generate()
-
-        # generate dependencies for autotools
-        tc = AutotoolsDeps(self)
-        tc.generate()
-
-        # inject tools_require env vars in build context
-        ms = VirtualBuildEnv(self)
-        ms.generate()
+            env.define("OBJDUMP", ":")
+            env.define("RANLIB", ":")
+            env.define("STRIP", ":")
+            env.vars(self).save_script("conanbuild_libmodbus_msvc")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -124,26 +114,22 @@ class LibmodbusConan(ConanFile):
         autotools.make()
 
     def package(self):
-        copy(self, pattern="COPYING*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="COPYING*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         # see https://github.com/conan-io/conan/issues/12006
         autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
-
-        if is_apple_os(self):
-            fix_apple_shared_install_name(self)
-
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
+        fix_apple_shared_install_name(self)
+        if is_msvc(self) and self.options.shared:
             rename(self,
                     os.path.join(self.package_folder, "lib", "modbus.dll.lib"),
                     os.path.join(self.package_folder, "lib", "modbus.lib"))
 
     def package_info(self):
-        self.cpp_info.libs = ["modbus"]
-
         self.cpp_info.set_property("pkg_config_name", "libmodbus")
-
+        self.cpp_info.libs = ["modbus"]
+        self.cpp_info.includedirs.append(os.path.join("include", "modbus"))
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.system_libs = ["ws2_32"]
