@@ -3,7 +3,7 @@
 ConanCenterIndex aims to provide the best quality packages for any open source project.
 Any C/C++ project can be made available by contributing a "recipe".
 
-Getting started is easy. Try building an existing package with our [developing recipes](../developing_recipes_locally.md) tutorial.
+Getting started is easy. Try building an existing package with our [developing recipes](developing_recipes_locally.md) tutorial.
 To deepen you understanding, start with the [How to provide a good recipe](#how-to-provide-a-good-recipe) section.
 You can follow the three steps (:one: :two: :three:) described below! :tada:
 
@@ -154,7 +154,7 @@ Also, **every `conanfile.py` should be accompanied by one or several folder to t
 ### The test package folders: `test_package` and `test_<something>`
 
 All the packages in this repository need to be tested before they join ConanCenter. A `test_package` folder with its corresponding `conanfile.py` and
-a minimal project to test the package is strictly required. You can read about it in the 
+a minimal project to test the package is strictly required. You can read about it in the
 [Conan documentation](https://docs.conan.io/en/latest/creating_packages/getting_started.html).
 
 
@@ -273,6 +273,6 @@ Some common errors related to Conan can be found on [troubleshooting](https://do
 ### Linters
 
 Linters are always executed by Github actions to validate parts of your recipe, for instance, if it uses migrated Conan tools imports.
-All executed linters are documented in [v2_linters.md](v2_linters.md).
+All executed linters are documented in [linters.md](linters.md).
 
-Check the [Developing Recipes](developing_recipes_locally.md#running-the-python-linters) for details.
+Check the [Developing Recipes](developing_recipes_locally.md#running-the-python-linters) for running them locally.
