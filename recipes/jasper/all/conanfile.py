@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir, rm, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv
 import os
 import textwrap
 
@@ -49,12 +50,16 @@ class JasperConan(ConanFile):
         elif self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
 
+    def build_requirements(self):
+        self.tool_requires("ninja/1.11.0")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        tc = CMakeToolchain(self)
+        generator = self.conf.get("tools.cmake.cmaketoolchain:generator", check_type=str, default="Ninja")
+        tc = CMakeToolchain(self, generator=generator)
         tc.variables["JAS_ENABLE_DOC"] = False
         tc.variables["JAS_ENABLE_LATEX"] = False
         tc.variables["JAS_ENABLE_PROGRAMS"] = False
@@ -68,6 +73,8 @@ class JasperConan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
+        env = VirtualBuildEnv(self)
+        env.generate()
 
     def build(self):
         apply_conandata_patches(self)
