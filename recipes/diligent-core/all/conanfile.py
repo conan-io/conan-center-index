@@ -64,7 +64,7 @@ class DiligentCoreConan(ConanFile):
         
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+            destination=os.path.join(self.source_folder, "source_subfolder"), strip_root=True)
 
     def package_id(self):
         if self.settings.compiler == "Visual Studio":
