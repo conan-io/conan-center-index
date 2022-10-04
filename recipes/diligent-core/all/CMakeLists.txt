@@ -14,4 +14,9 @@ target_include_directories(glslang INTERFACE ${CONAN_INCLUDE_DIRS_GLSLANG}/glsla
 add_library(SPIRV ALIAS glslang::SPIRV)
 add_library(SPIRV-Headers ALIAS SPIRV-Headers::SPIRV-Headers)
 
+add_library(SPIRV-Tools-opt    ALIAS spirv-tools::spirv-tools)
+add_library(spirv-tools-core   ALIAS spirv-tools::spirv-tools)
+add_library(SPIRV-Tools-static ALIAS spirv-tools::spirv-tools)
+
 add_subdirectory(source_subfolder)
+
