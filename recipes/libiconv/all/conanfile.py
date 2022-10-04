@@ -67,7 +67,17 @@ class LibiconvConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def generate(self):
+        def requires_fs_flag():
+            # See https://github.com/conan-io/conan/issues/11158
+            return (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
+                    (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180")
+
         tc = AutotoolsToolchain(self)
+        if requires_fs_flag():
+            # order of setting flags and environment vars is important
+            # See https://github.com/conan-io/conan/issues/12228
+            tc.extra_cflags.append("-FS")
+
         env = tc.environment()
 
         if is_msvc(self) or self._is_clang_cl:
@@ -84,10 +94,6 @@ class LibiconvConan(ConanFile):
             env.define("NM", "dumpbin -symbols")
             env.define("win32_target", "_WIN32_WINNT_VISTA")
 
-        if is_msvc(self) and Version(self.settings.compiler.version) >= "12":
-            # tc.extra_cflags is not respected.
-            # See https://github.com/conan-io/conan/issues/12228
-            env.define("CFLAGS", tc.cflags + ["-FS"])
 
         tc.generate(env)
 
