@@ -1,6 +1,6 @@
-#include <erkir/sphericalpoint.h>
-#include <erkir/ellipsoidalpoint.h>
-#include <erkir/cartesianpoint.h>
+#include <sphericalpoint.h>
+#include <ellipsoidalpoint.h>
+#include <cartesianpoint.h>
 
 int main(int argc, char **argv)
 {
