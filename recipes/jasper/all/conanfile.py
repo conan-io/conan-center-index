@@ -12,7 +12,7 @@ class JasperConan(ConanFile):
     license = "JasPer-2.0"
     homepage = "https://jasper-software.github.io/jasper"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("tool-kit", "coding")
+    topics = ("toolkit", "coding", "jpeg", "images")
     description = "JasPer Image Processing/Coding Tool Kit"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -59,20 +59,10 @@ class JasperConan(ConanFile):
         tc.variables["JAS_ENABLE_SHARED"] = self.options.shared
         tc.variables["JAS_LIBJPEG_REQUIRED"] = "REQUIRED"
         tc.variables["JAS_ENABLE_OPENGL"] = False
+        tc.variables["JAS_ENABLE_LIBJPEG"] = True
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
-
-    def _patch_sources(self):
-        # INFO: Clean rpath in installed shared lib
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        cmds_to_remove = [
-            "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/lib\")",
-            "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)",
-            "set(CMAKE_INSTALL_RPATH\n		  \"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\")",
-        ]
-        for cmd_to_remove in cmds_to_remove:
-            replace_in_file(self, cmakelists, cmd_to_remove, "")
 
     def build(self):
         apply_conandata_patches(self)
