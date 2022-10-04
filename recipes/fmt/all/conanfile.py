@@ -1,9 +1,9 @@
 import os
 
-from conan import ConanFile
+from conans import ConanFile, CMake
 from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, apply_conandata_patches, copy, rmdir
+from conans import tools
 
 required_conan_version = ">=1.51.3"
 
@@ -39,20 +39,6 @@ class FmtConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             copy(self, patch["patch_file"], src=self.recipe_folder, dst=self.export_sources_folder)
 
-    def generate(self):
-        if not self.options.header_only:
-            tc = CMakeToolchain(self)
-            tc.cache_variables["FMT_DOC"] = False
-            tc.cache_variables["FMT_TEST"] = False
-            tc.cache_variables["FMT_INSTALL"] = True
-            tc.cache_variables["FMT_LIB_DIR"] = "lib"
-            if self._has_with_os_api_option:
-                tc.cache_variables["FMT_OS"] = bool(self.options.with_os_api)
-            tc.generate()
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -83,6 +69,12 @@ class FmtConan(ConanFile):
         apply_conandata_patches(self)
         if not self.options.header_only:
             cmake = CMake(self)
+            cmake.definitions["FMT_DOC"] = "False"
+            cmake.definitions["FMT_TEST"] = "False"
+            cmake.definitions["FMT_INSTALL"] = "True"
+            cmake.definitions["FMT_LIB_DIR"] = "lib"
+            if self._has_with_os_api_option:
+                cmake.definitions["FMT_OS"] = self.options.with_os_api
             cmake.configure()
             cmake.build()
 
