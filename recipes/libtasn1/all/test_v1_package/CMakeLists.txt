@@ -4,7 +4,11 @@ project(test_package LANGUAGES C)
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 conan_basic_setup(TARGETS)
 
-find_program(ASN1_PARSER NAMES asn1Parser)
+# Note: See https://github.com/conan-io/conan/issues/12237
+# `NO_CMAKE_PATH` is added to avoid searching in `CMAKE_PREFIX_PATH`
+# it should find the correct executable by falling back on the `PATH`
+# environment variable defined by Conan during the test_package run.
+find_program(ASN1_PARSER NAMES asn1Parser NO_CMAKE_PATH)
 if(NOT ASN1_PARSER)
     message(FATAL_ERROR "asn1Parser not found")
 endif()
