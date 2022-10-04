@@ -11,8 +11,7 @@ The following summarizes the process for contributing to the CCI (Conan Center I
 
 ## Community
 
-Conan Center Index is an Open Source MIT licensed project.
-Conan Center Index is developed by the Conan maintainers and a great community of contributors.
+ConanCenterIndex is an Open Source MIT licensed project; it is developed by the Conan maintainers and a great community of contributors.
 
 ## Dev-flow & Pull Requests
 
@@ -25,10 +24,10 @@ To contribute follow the next steps:
 1. Comment in the corresponding issue that you want to contribute the package/fix proposed. If there is no open issue, we strongly suggest
    opening one to gather feedback.
 2. Get setup by following [Developing Recipes](docs/developing_recipes_locally.md) guide and learn the basic commands.
-3. Check the [how_to_add_packages](how_to_add_packages.md) for the break on ConanCenter specific conventions and practices.
+3. Check the [How To Add Packages](docs/how_to_add_packages.md) for the break down ConanCenterIndex specific conventions and practices.
 4. In your fork create a `package/xxx` branch from the `master` branch and develop
    your fix/packages as discussed in previous step.
-5. [Submit a pull request](how_to_add_packages.md#submitting-a-package) once you are ready. This can be when you
+5. [Submit a pull request](docs/how_to_add_packages.md#submitting-a-package) once you are ready. This can be when you
    got everything working or even if you need help. Add the text to the issue body (besides other comments): "fixes #IssueNumber"
    in the body of the PR, referring to the issue of step 1.
 

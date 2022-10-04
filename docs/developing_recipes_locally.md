@@ -29,21 +29,21 @@ This file is intended to provide all the commands you need to run in order to be
 1. Install a C++ development toolchain - ConanCenter's [build images](#testing-more-environments) are available
 2. [Install the Conan client](https://docs.conan.io/en/latest/installation.html) - make sure to keep it up to date!
 3. Install CMake - this is the only tool which is assumed to be present
-   [see FAQ](faqs.md#why-recipes-that-use-build-tools-like-cmake-that-have-packages-in-conan-center-do-not-use-it-as-a-build-require-by-default)
+   [see FAQ](faqs.md#why-recipes-that-use-build-tools-like-cmake-that-have-packages-in-conan-center-do-not-use-it-as-a-build-require-by-default) for details.
 
 > **Note**: It's recommended to use a dedicated Python virtualenv when installing with `pip`.
 
 ### Installing the ConanCenter Hooks
 
-The system will use the [conan-center hook](https://github.com/conan-io/hooks) to perform some quality checks. You can install the hook running:
+The system will use the [conan-center hooks](https://github.com/conan-io/hooks) to perform some quality checks. You can install the hooks by running:
 
 ```sh
 conan config install https://github.com/conan-io/hooks.git -sf hooks -tf hooks
 conan config set hooks.conan-center
 ```
 
-The hook will show error messages but the `conan create` won’t fail unless you export the environment variable `CONAN_HOOK_ERROR_LEVEL=40`.
-All hook checks will print a similar message:
+The hooks will show error messages but the `conan create` won’t fail unless you export the environment variable `CONAN_HOOK_ERROR_LEVEL=40`.
+All hooks checks will print a similar message:
 
 ```txt
 [HOOK - conan-center.py] post_source(): [LIBCXX MANAGEMENT (KB-H011)] OK
@@ -52,7 +52,7 @@ All hook checks will print a similar message:
 
 #### Updating conan hooks on your machine
 
-The hooks are updated from time to time, so it's worth keeping your own copy of the hooks updated regularly. To do this:
+The hooks are updated from time to time, so it's worth keeping your own copy of the hooks updated regularly. To do this, simple run:
 
 ```sh
 conan config install
@@ -62,14 +62,14 @@ conan config install
 
 We recommend working from the `recipes/project` folder itself. You can learn about the [recipe file structure](how_to_add_packages.md#recipe-files-structure) to understand the folder and files located there.
 
-> **Note**: You can only change one recipe per pull request, and working from the [_recipe folder_](hhow_to_add_packages.md#the-recipe-folder-conanfilepy) will help prevent making a few mistakes. The default for this folder is `all`, follow the link above to learn more.
+> **Note**: You can only change one recipe per pull request, and working from the [_recipe folder_](how_to_add_packages.md#the-recipe-folder-conanfilepy) will help prevent making a few mistakes. The default for this folder is `all`, follow the link above to learn more.
 
 The [entire workflow of a recipe](https://docs.conan.io/en/latest/developing_packages/package_dev_flow.html) can be execute with the [`conan create`](https://docs.conan.io/en/latest/reference/commands/creator/create.html). This should look like:
 
 * `conan create all/conanfile.py 0.0.0@ -pr:b=default -pr:h=default`
 
-ConanCenter also has a few [support settings/options](supported_platforms_and_configurations.md) which highly recommend to test. For example
-`conan create all/conanfile.py 0.0.0@ -o project:shared=True -s build_type=Debug` is a easy way to more sure the package is correct.
+ConanCenter also has a few [support settings and options](supported_platforms_and_configurations.md) which highly recommend to test. For example
+`conan create all/conanfile.py 0.0.0@ -o project:shared=True -s build_type=Debug` is a easy way to test more configurations ensuring the package is correct.
 
 ### Try it yourself
 
@@ -88,14 +88,16 @@ Some common errors related to Conan can be found on [troubleshooting](https://do
 For ConanCenter Hook errors, go to the [Error Knowledge Base](error_knowledge_base.md) page to know more about those.
 
 To test with the same environment, the [build images](supported_platforms_and_configurations.md#build-images) are available.
-Instructions for using these images can be found in [Testing more environments](#testing-more-environments)
+Instructions for using these images can be found in [Testing more environments](#testing-more-environments) section.
+
+In ConanCenterIndex, the most common failure point is upstream
+build script that are tailored to their specific use cases. It's not uncommon to [patch build scripts](policy_patching.md#policy-about-patching) but make sure to read the [patch policy](policy_patching.md). You are encouraged to submit pull requests upstream.
 
 ## Running the Python Linters
 
 Linters are always executed by Github actions to validate parts of your recipe, for instance, if it uses migrated Conan tools imports.
-To understand how to run linters locally, read [linters](linters.md) documentation.
 
-It is possible to run the linter locally the same way it is being run [using Github actions](../.github/workflows/linter-conan-v2.yml):
+It is possible to run the linter locally the same way it is being run [using Github actions](../.github/workflows/linter-conan-v2.yml) by:
 
 * (Recommended) Use a dedicated Python virtualenv.
 * Ensure you have required tools installed: `conan` and `pylint` (better to uses fixed versions)
@@ -114,10 +116,10 @@ It is possible to run the linter locally the same way it is being run [using Git
 
   ```sh
   # Lint a recipe:
-  pylint --rcfile=linter/pylintrc_recipe recipes/boost/all/conanfile.py
+  pylint --rcfile=linter/pylintrc_recipe recipes/fmt/all/conanfile.py
 
   # Lint the test_package
-  pylint --rcfile=linter/pylintrc_testpackage recipes/boost/all/test_package/conanfile.py
+  pylint --rcfile=linter/pylintrc_testpackage recipes/fmt/all/test_package/conanfile.py
   ```
 
 ## Testing the different `test_*_package`
@@ -143,6 +145,7 @@ For Windows and MacOS users, you can test the Linux build environments by with t
 Assuming you've already tested it locally, and it's successfully export to your cache, you can:
 
 1. Creating a new profile.
+   * You can also download them from CCI build summary
 2. Build missing packages
 
 Example.
@@ -157,9 +160,9 @@ docker run -v/Users/barbarian/.conan:/home/conan/.conan conanio/gcc8 bash -c "co
 ## Using Conan 2.0
 
 Everything you need to know about the methods, commands line, outputs can be found in the
-[Conan 2.0 Migrations](https://docs.conan.io/en/latest/conan_v2.html) docs. This should be fairly straightforward.
-Conan 2.0 by default has a different `CONAN_USER_HOME` location, which means that it has separate
-caches, profiles, and settings.
+[Conan 2.0 Migrations](https://docs.conan.io/en/latest/conan_v2.html) docs.
+
+This should be non-intrusive. Conan 2.0 by default has a different `CONAN_USER_HOME` location, which means that it has separate caches, profiles, and settings.
 This will leave your Conan 1.0 setup completely intact when using Conan 2.0.
 
 > **Note**: There are substantial changes to the CLI so very few of the commands will remain the same.
@@ -191,7 +194,7 @@ Current Conan home: /Users/barbarian/.conan2
 >
 > When running the client for the first time.
 
-You will need to setup profiles, this is one of the changes, the default profile is not opt-in.
+You will need to setup profiles. This is one of the changes in 2.0, the default profile is now opt-in and no longer generated automatically.
 
 ```sh
 conan profile detect
