@@ -20,32 +20,34 @@ index 7c7678b59..fbfcb372b 100644
  #ifndef S_ISCHR
  #  define S_ISCHR(m) (((m) & S_IFMT) == S_IFCHR)
 diff --git a/config/config.h.in b/config/config.h.in
-index 7ffe13bb6..b63577c1a 100644
+index 7ffe13bb6..e8c18bff3 100644
 --- a/config/config.h.in
 +++ b/config/config.h.in
-@@ -1,5 +1,10 @@
+@@ -1,5 +1,11 @@
  /* config/config.h.in.  Generated from configure.ac by autoheader.  */
  
-+#ifdef _MSC_VER
-+# include <BaseTsd.h>
-+  typedef SSIZE_T ssize_t;
++#if _WIN64
++  typedef __int64 ssize_t;
++#elif _WIN32
++  typedef long ssize_t;
 +#endif
 +
  /* Define if building universal (internal helper macro) */
  #undef AC_APPLE_UNIVERSAL_BUILD
  
 diff --git a/configure b/configure
-index 94799dfd3..d9a1dc16b 100755
+index 94799dfd3..e0b311577 100755
 --- a/configure
 +++ b/configure
-@@ -656,6 +656,10 @@ ac_includes_default="\
+@@ -656,6 +656,11 @@ ac_includes_default="\
  #endif
  #ifdef HAVE_UNISTD_H
  # include <unistd.h>
 +#endif
-+#if _MSC_VER
-+# include <BaseTsd.h>
-+  typedef SSIZE_T ssize_t;
++#if _WIN64
++  typedef __int64 ssize_t;
++#elif _WIN32
++  typedef long ssize_t;
  #endif"
  
  ac_header_c_list=
