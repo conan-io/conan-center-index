@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir, rm, save, export_conandata_patches, apply_conandata_patches
+from conan.tools.build import cross_building
 import os
 import textwrap
 
@@ -60,6 +61,8 @@ class JasperConan(ConanFile):
         tc.variables["JAS_LIBJPEG_REQUIRED"] = "REQUIRED"
         tc.variables["JAS_ENABLE_OPENGL"] = False
         tc.variables["JAS_ENABLE_LIBJPEG"] = True
+        if cross_building(self):
+            tc.variables["JAS_STDC_VERSION"] = "199901L"
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
