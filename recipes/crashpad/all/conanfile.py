@@ -35,7 +35,6 @@ class CrashpadConan(ConanFile):
         "http_transport": None,
         "with_tls": "openssl",
     }
-    _autotools_flags = {}
 
     @property
     def _min_cppstd(self):
