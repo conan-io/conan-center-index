@@ -9,7 +9,7 @@ find_package(xxHash REQUIRED CONFIG)
 
 add_library(glslang INTERFACE)
 target_link_libraries(glslang INTERFACE glslang::glslang)
-target_include_directories(glslang INTERFACE ${CONAN_INCLUDE_DIRS_GLSLANG}/glslang)
+target_include_directories(glslang INTERFACE ${glslang_INCLUDE_DIR}/glslang)
 
 add_library(SPIRV ALIAS glslang::SPIRV)
 add_library(SPIRV-Headers ALIAS SPIRV-Headers::SPIRV-Headers)
