@@ -4,7 +4,7 @@ import textwrap
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, copy, rmdir, replace_in_file, collect_libs, save
+from conan.tools.files import get, copy, rmdir, replace_in_file, save
 
 required_conan_version = ">=1.43.0"
 
