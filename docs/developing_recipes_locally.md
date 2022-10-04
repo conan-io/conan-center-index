@@ -31,6 +31,8 @@ This file is intended to provide all the commands you need to run in order to be
 3. Install CMake - this is the only tool which is assumed to be present
    [see FAQ](faqs.md#why-recipes-that-use-build-tools-like-cmake-that-have-packages-in-conan-center-do-not-use-it-as-a-build-require-by-default)
 
+> **Note**: It's recommended to use a dedicated Python virtualenv when installing with `pip`.
+
 ### Installing the ConanCenter Hooks
 
 The system will use the [conan-center hook](https://github.com/conan-io/hooks) to perform some quality checks. You can install the hook running:
@@ -43,7 +45,7 @@ conan config set hooks.conan-center
 The hook will show error messages but the `conan create` won’t fail unless you export the environment variable `CONAN_HOOK_ERROR_LEVEL=40`.
 All hook checks will print a similar message:
 
-```
+```txt
 [HOOK - conan-center.py] post_source(): [LIBCXX MANAGEMENT (KB-H011)] OK
 [HOOK - conan-center.py] post_package(): ERROR: [PACKAGE LICENSE] No package licenses found
 ```
@@ -91,42 +93,44 @@ Instructions for using these images can be found in [Testing more environments](
 ## Running the Python Linters
 
 Linters are always executed by Github actions to validate parts of your recipe, for instance, if it uses migrated Conan tools imports.
-To understand how to run linters locally, read [V2 linter](v2_linter.md) documentation.
+To understand how to run linters locally, read [linters](linters.md) documentation.
 
 It is possible to run the linter locally the same way it is being run [using Github actions](../.github/workflows/linter-conan-v2.yml):
 
- * (Recommended) Use a dedicated Python virtualenv.
- * Ensure you have required tools installed: `conan` and `pylint` (better to uses fixed versions)
+* (Recommended) Use a dedicated Python virtualenv.
+* Ensure you have required tools installed: `conan` and `pylint` (better to uses fixed versions)
 
-   ```
-   pip install conan~=1.0 pylint==2.14
-   ```
+  ```sh
+  pip install conan~=1.0 pylint==2.14
+  ```
 
- * Set environment variable `PYTHONPATH` to the root of the repository
+* Set environment variable `PYTHONPATH` to the root of the repository
 
-   ```
-   export PYTHONPATH=your/path/conan-center-index
-   ```
+  ```sh
+  export PYTHONPATH=your/path/conan-center-index
+  ```
 
-  * Now you just need to execute the `pylint` commands:
+* Now you just need to execute the `pylint` commands:
 
-    ```
-    # Lint a recipe:
-    pylint --rcfile=linter/pylintrc_recipe recipes/boost/all/conanfile.py
+  ```sh
+  # Lint a recipe:
+  pylint --rcfile=linter/pylintrc_recipe recipes/boost/all/conanfile.py
 
-    # Lint the test_package
-    pylint --rcfile=linter/pylintrc_testpackage recipes/boost/all/test_package/conanfile.py
-    ```
+  # Lint the test_package
+  pylint --rcfile=linter/pylintrc_testpackage recipes/boost/all/test_package/conanfile.py
+  ```
 
 ## Testing the different `test_*_package`
 
-This can be selected when calling `conan create` or sperately with `conan test`
+This can be selected when calling `conan create` or separately with `conan test`
 
 ```sh
+# By adding the `-tf` argument
 conan create recipes/fmt/all/conanfile.py 9.0.0@ -tf test_v1_package/ -pr:b=default -pr:h=default
 ```
 
 ```sh
+# Passing test package's conanfile directly (make sure to export first)
 conan test recipes/fmt/all/test_v1_package/conanfile.py fmt/9.0.0@ -pr:h=default -pr:b=default
 ```
 
@@ -143,25 +147,26 @@ Assuming you've already tested it locally, and it's successfully export to your 
 
 Example.
 
-```
+```sh
 docker run -v/Users/barbarian/.conan:/home/conan/.conan conanio/gcc8 bash -c "conan profile new --detect gcc8"
 docker run -v/Users/barbarian/.conan:/home/conan/.conan conanio/gcc8 bash -c "conan install -pr gcc8 fmt/9.0.0@ --build missing"
 ```
 
-> **Note**: If you are running on Mac M1, the follow Docker argument is required: `--platform=linux/amd64
+> **Note**: If you are running on Mac M1, the follow Docker argument is required: `--platform=linux/amd64`
 
 ## Using Conan 2.0
 
 Everything you need to know about the methods, commands line, outputs can be found in the
 [Conan 2.0 Migrations](https://docs.conan.io/en/latest/conan_v2.html) docs. This should be fairly straightforward.
-Conan 2.0 by default has a different `CONAN_USER_HOME` location, which means that it has separate 
+Conan 2.0 by default has a different `CONAN_USER_HOME` location, which means that it has separate
 caches, profiles, and settings.
 This will leave your Conan 1.0 setup completely intact when using Conan 2.0.
 
-> **Note**: There are pretty heavy changes to the CLI so very few of the commands will have survived.
-> [Unified Command Pattern](https://docs.conan.io/en/latest/migrating_to_2.0/commands.html#unified-patterns-in-command-arguments)
-> for example changes how settings and options are passed.
+> **Note**: There are substantial changes to the CLI so very few of the commands will remain the same.
+> The new [Unified Command Pattern](https://docs.conan.io/en/latest/migrating_to_2.0/commands.html#unified-patterns-in-command-arguments),
+> as an example, changes how settings and options are passed.
 
+### Installing Conan 2.0 beta
 
 Simply install Conan 2.0 with `pip install conan --upgrade --pre`.
 
@@ -169,22 +174,24 @@ You can confirm the installation with
 
 ```sh
 $ conan --version
-Conan version 2.0.0-beta2
+Conan version 2.0.0-beta3
 $ conan config home
 Current Conan home: /Users/barbarian/.conan2
 ```
 
 > **Note**: You will most likely see
+>
+> ```sh
+> Initialized file: '/Users/barbarian/.conan2/settings.yml'
+> Initialized file: '/Users/barbarian/.conan2/extensions/plugins/compatibility/compatibility.py'
+> Initialized file: '/Users/barbarian/.conan2/extensions/plugins/compatibility/app_compat.py'
+> Initialized file: '/Users/barbarian/.conan2/extensions/plugins/compatibility/cppstd_compat.py'
+> Initialized file: '/Users/barbarian/.conan2/extensions/plugins/profile.py'
 > ```
-> Initialized file: '/Users/christopherm/.conan2/settings.yml'
-> Initialized file: '/Users/christopherm/.conan2/extensions/plugins/compatibility/compatibility.py'
-> Initialized file: '/Users/christopherm/.conan2/extensions/plugins/compatibility/app_compat.py'
-> Initialized file: '/Users/christopherm/.conan2/extensions/plugins/compatibility/cppstd_compat.py'
-> Initialized file: '/Users/christopherm/.conan2/extensions/plugins/profile.py'
-> ```
+>
 > When running the client for the first time.
 
-You will need to setup profiles
+You will need to setup profiles, this is one of the changes, the default profile is not opt-in.
 
 ```sh
 conan profile detect
@@ -192,13 +199,9 @@ conan profile detect
 
 > **Warning**: This is a best guess, you need to make sure it's correct.
 
-There is a remote for the 2.0 migration binaries which can be added
+### Trying it out
 
-```
-conan remote add conanv2 https://conanv2beta.jfrog.io/artifactory/api/conan/conan --index 0
-```
-
-Trying build an existing recipe
+Trying build an existing recipe, we'll repeat the 1.x example with `fmt` to build the same configurations
 
 ```sh
 cd recipes/fmt
