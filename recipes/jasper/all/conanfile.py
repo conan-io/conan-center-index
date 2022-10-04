@@ -56,13 +56,15 @@ class JasperConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["JAS_ENABLE_DOC"] = False
+        tc.variables["JAS_ENABLE_LATEX"] = False
         tc.variables["JAS_ENABLE_PROGRAMS"] = False
         tc.variables["JAS_ENABLE_SHARED"] = self.options.shared
         tc.variables["JAS_LIBJPEG_REQUIRED"] = "REQUIRED"
         tc.variables["JAS_ENABLE_OPENGL"] = False
         tc.variables["JAS_ENABLE_LIBJPEG"] = True
         if cross_building(self):
-            tc.variables["JAS_STDC_VERSION"] = "199901L"
+            tc.cache_variables["JAS_CROSSCOMPILING"] = True
+            tc.cache_variables["JAS_STDC_VERSION"] = "199901L"
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
