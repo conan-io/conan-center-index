@@ -78,7 +78,7 @@ class CrashpadConan(ConanFile):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
         if is_msvc(self):
-            check_min_vs(1911)
+            check_min_vs(self, 1911)
             if self.info.options.http_transport in ("libcurl", "socket"):
                 raise ConanInvalidConfiguration(f"http_transport={self.info.options.http_transport} is not valid when building with Visual Studio")
         else:
