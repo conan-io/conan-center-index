@@ -46,7 +46,8 @@ class JfalcouEveConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.get_safe("compiler.cppstd"):
+        # FIXME: Need to use self.info.settings for header-only
+        if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         if is_msvc(self):
             raise ConanInvalidConfiguration("EVE does not support MSVC yet (https://github.com/jfalcou/eve/issues/1022).")
