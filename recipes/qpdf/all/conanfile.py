@@ -4,7 +4,7 @@ from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.microsoft.visual import is_msvc, check_min_vs
+from conan.tools.microsoft import is_msvc, check_min_vs
 import os
 
 required_conan_version = ">=1.51.3"
