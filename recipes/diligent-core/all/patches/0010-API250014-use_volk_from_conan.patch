@@ -7,7 +7,7 @@ index 34451f2dd..d61797325 100644
      include
      ../../ThirdParty
 -    ../../ThirdParty/Vulkan-Headers/include
-+${VulkanHeaders_INCLUDE_DIR}/include/
++${VulkanHeaders_INCLUDE_DIR}
 +${volk_INCLUDE_DIR}/
  )
  
