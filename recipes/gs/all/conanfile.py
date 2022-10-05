@@ -1,4 +1,5 @@
 # https://github.com/Alexpux/MINGW-packages/blob/master/mingw-w64-ghostscript/PKGBUILD
+# https://bugs.ghostscript.com/show_bug.cgi?id=690716 --> make libgs for static libs?
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
