@@ -166,7 +166,7 @@ class QtConan(ConanFile):
         config = configparser.ConfigParser()
         config.read(os.path.join(self.recipe_folder, "qtmodules%s.conf" % self.version))
         self._submodules_tree = {}
-        assert config.sections()
+        assert config.sections(), f"no qtmodules.conf file for version {self.version}"
         for s in config.sections():
             section = str(s)
             assert section.startswith("submodule ")
