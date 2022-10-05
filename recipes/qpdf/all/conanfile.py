@@ -5,6 +5,8 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import is_msvc, check_min_vs
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.env import VirtualBuildEnv
 import os
 
 required_conan_version = ">=1.51.3"
@@ -103,10 +105,13 @@ class PackageConan(ConanFile):
             tc.variables["REQUIRE_CRYPTO_NATIVE"] = False
             tc.variables["REQUIRE_CRYPTO_GNUTLS"] = False
             tc.variables["REQUIRE_CRYPTO_OPENSSL"] = True
-
+        tc.generate()
+        tc = PkgConfigDeps(self)
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
+        tc = VirtualBuildEnv(self)
+        tc.generate(scope="build")
 
     def build(self):
         cmake = CMake(self)
