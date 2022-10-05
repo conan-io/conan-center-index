@@ -67,7 +67,7 @@ class FreetypeConan(ConanFile):
 
     def requirements(self):
         if self.options.with_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.38")
         if self.options.with_zlib:
             self.requires("zlib/1.2.12")
         if self.options.with_bzip2:
