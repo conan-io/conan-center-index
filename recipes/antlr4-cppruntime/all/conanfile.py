@@ -28,10 +28,10 @@ class Antlr4CppRuntimeConan(ConanFile):
     short_paths = True
 
     compiler_required_cpp17 = {
-            "Visual Studio": "16",
-            "gcc": "7",
-            "clang": "5",
-            "apple-clang": "9.1"
+        "Visual Studio": "16",
+        "gcc": "7",
+        "clang": "5",
+        "apple-clang": "9.1"
     }
 
 
@@ -62,11 +62,6 @@ class Antlr4CppRuntimeConan(ConanFile):
             self.requires("libuuid/1.0.3")
 
     def validate(self):
-        if str(self.settings.arch).startswith("arm"):
-            raise ConanInvalidConfiguration("arm architectures are not supported")
-            # Need to deal with missing libuuid on Arm.
-            # So far ANTLR delivers macOS binary package.
-
         compiler = self.settings.compiler
         compiler_version = tools.Version(self.settings.compiler.version)
         antlr_version = tools.Version(self.version)
