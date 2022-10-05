@@ -16,7 +16,10 @@ required_conan_version = ">=1.52.0"
 class PackageConan(ConanFile):
     name = "gs"
     description = "Ghostscript is an interpreter for the PostScript®  language and PDF files."
-    license = "GPL Ghostscript"
+    license = "AGPL-3.0"
+    # licence refrences from LICENCE file description and home page documentation as one of the two sides of the dual licensing model:
+    # https://artifex.com/licensing/agpl/
+    # http://git.ghostscript.com/?p=ghostpdl.git;a=blob;f=LICENSE;h=52e83a2ac365dba3fb6aa5b677625504fa3004ae;hb=HEAD
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.ghostscript.com/"
     topics = ("ghostscript", "postscript", "interpreter", "pdf", "ps", "pdl", "print")
