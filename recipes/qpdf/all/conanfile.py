@@ -74,9 +74,9 @@ class PackageConan(ConanFile):
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
-        if is_msvc(self): # check vs / msvc
-            check_min_vs(self, 150)
-        else: # check all other compilers
+        if is_msvc(self):
+            check_min_vs(self, "150")
+        else:
             minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
             if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
