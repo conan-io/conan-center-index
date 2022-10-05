@@ -1,6 +1,6 @@
 # Adding Packages to ConanCenter
 
-ConanCenterIndex aims to provide the best quality packages for any open source project.
+ConanCenterIndex aims to provide the best quality packages of any open source project.
 Any C/C++ project can be made available by contributing a "recipe".
 
 Getting started is easy. Try building an existing package with our [developing recipes](developing_recipes_locally.md) tutorial.
@@ -265,14 +265,14 @@ An example of this can be found in the [sdl_image recipe](https://github.com/con
 The system will use the [conan-center hook](https://github.com/conan-io/hooks) to perform some quality checks. These are required for the
 the CI to merge any pull request.
 
-Follow the [Developing Recipes Locally](developing_recipes_locally.md#installing-the-conancenter-hooks) for instructions.
+Follow the [Developing Recipes Locally](developing_recipes_locally.md#installing-the-conancenter-hooks) guide for instructions.
 
 Go to the [Error Knowledge Base](error_knowledge_base.md) page to know more about Conan Center hook errors.
-Some common errors related to Conan can be found on [troubleshooting](https://docs.conan.io/en/latest/faq/troubleshooting.html) section.
+Some common errors related to Conan can be found on the [troubleshooting](https://docs.conan.io/en/latest/faq/troubleshooting.html) section.
 
 ### Linters
 
 Linters are always executed by Github actions to validate parts of your recipe, for instance, if it uses migrated Conan tools imports.
 All executed linters are documented in [linters.md](linters.md).
-
+Check the [Developing Recipes](developing_recipes_locally.md#running-the-python-linters) page for running them locally.
 Check the [Developing Recipes](developing_recipes_locally.md#running-the-python-linters) for running them locally.

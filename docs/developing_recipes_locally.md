@@ -52,7 +52,7 @@ All hooks checks will print a similar message:
 
 #### Updating conan hooks on your machine
 
-The hooks are updated from time to time, so it's worth keeping your own copy of the hooks updated regularly. To do this, simple run:
+The hooks are updated from time to time, so it's worth keeping your own copy of the hooks updated regularly. To do this, simply run:
 
 ```sh
 conan config install
@@ -140,9 +140,9 @@ conan test recipes/fmt/all/test_v1_package/conanfile.py fmt/9.0.0@ -pr:h=default
 
 This can be difficult for some platforms given virtualization support.
 
-For Windows and MacOS users, you can test the Linux build environments by with the the Docker build images.
+For Windows and MacOS users, you can test the Linux build environments with the Docker build images.
 
-Assuming you've already tested it locally, and it's successfully export to your cache, you can:
+Assuming you've already tested it locally and it's been successfully exported to your cache, you can:
 
 1. Creating a new profile.
    * You can also download them from CCI build summary
@@ -173,7 +173,7 @@ This will leave your Conan 1.0 setup completely intact when using Conan 2.0.
 
 Simply install Conan 2.0 with `pip install conan --upgrade --pre`.
 
-You can confirm the installation with
+You can confirm the installation with:
 
 ```sh
 $ conan --version
@@ -194,7 +194,7 @@ Current Conan home: /Users/barbarian/.conan2
 >
 > When running the client for the first time.
 
-You will need to setup profiles. This is one of the changes in 2.0, the default profile is now opt-in and no longer generated automatically.
+You will need to setup profiles. This is one of the changes in 2.0. The default profile is now opt-in and no longer generated automatically.
 
 ```sh
 conan profile detect
@@ -204,7 +204,7 @@ conan profile detect
 
 ### Trying it out
 
-Trying build an existing recipe, we'll repeat the 1.x example with `fmt` to build the same configurations
+Try building an existing recipe. We'll repeat the 1.x example with `fmt` to build the same configurations:
 
 ```sh
 cd recipes/fmt

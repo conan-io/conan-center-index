@@ -4,7 +4,7 @@ Some linter configuration files are available in the folder [linter](../linter),
 They consume python scripts which are executed to fit CCI rules. Those scripts use [astroid](https://github.com/PyCQA/astroid) and
 [pylint](https://pylint.pycqa.org/en/latest/) classes to parse Conan recipe files and manage their warnings and errors.
 
-The pylint by itself is not able to find ConanCenterIndex rules, so astroid is used to iterate over conanfiles content and
+Pylint by itself is not able to find ConanCenterIndex rules, so astroid is used to iterate over conanfiles content and
 validate CCI conditions. Also, pylint uses [rcfile](https://pylint.pycqa.org/en/latest/user_guide/configuration/index.html)
 (a configuration file based on [toml](https://toml.io/en/) format) to configure plugins, warnings and errors which should be enabled or disabled.
 
@@ -16,7 +16,7 @@ parsed by [recipe_linter.json](../linter/recipe_linter.json), then presented to 
 
 ## Running the linter locally
 
-Check the [Developing Recipes](developing_recipes_locally.md#running-the-python-linters) for details.
+Check the [Developing Recipes](developing_recipes_locally.md#running-the-python-linters) page for details.
 
 ## Pylint configuration files
 
