@@ -27,4 +27,4 @@ class TestPackageConan(ConanFile):
             test_dir = "test_dir"
             mkdir(self, test_dir)
             output_file = os.path.join(test_dir, "output.dcm")
-            self.run(f"'{bin_path}' '{input_file}' '{output_file}'", env="conanrun")
+            self.run(f"\"{bin_path}\" \"{input_file}\" \"{output_file}\"", env="conanrun")
