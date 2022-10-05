@@ -1,8 +1,5 @@
-cmake_minimum_required(VERSION 3.1.2)
+cmake_minimum_required(VERSION 3.15)
 project(test_package CXX)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
 
 find_package(GTest REQUIRED)
 
@@ -25,6 +22,3 @@ else()
 endif()
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
-if(WITH_GMOCK)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE WITH_GMOCK)
-endif()

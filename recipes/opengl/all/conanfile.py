@@ -1,5 +1,6 @@
-from conans import ConanFile, tools
-from conans.errors import ConanException
+from conan import ConanFile
+from conan.errors import ConanException
+from conans import tools
 
 
 class SysConfigOpenGLConan(ConanFile):

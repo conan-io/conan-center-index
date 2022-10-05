@@ -11,4 +11,3 @@ sources:
 patches:
   "3.0.0":
     - patch_file: "patches/0001-fix-appleclang.patch"
-      base_path: "source_subfolder"

@@ -1,31 +1,32 @@
+from conan import ConanFile
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 import os
 
-from conan import ConanFile
-from conan.tools.files import get
+required_conan_version = ">=1.50.0"
 
-required_conan_version = ">=1.45.0"
 
 class OutPtrConan(ConanFile):
     name = "out_ptr"
-
-    # Optional metadata
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/soasis/out_ptr"
     description = "a C++11 implementation of std::out_ptr (p1132), as a standalone library"
     topics = ("utility", "backport")
     settings = "os", "arch", "build_type", "compiler"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    no_copy_source = True
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def package(self):
-        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "*.hpp", src=os.path.join(self.source_folder, "include"),
+                            dst=os.path.join(self.package_folder, "include"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))

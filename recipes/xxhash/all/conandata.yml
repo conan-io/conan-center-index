@@ -8,4 +8,3 @@ sources:
 patches:
   "0.8.1":
     - patch_file: "patches/0.8.1-fix-cmakelists.patch"
-      base_path: "source_subfolder"

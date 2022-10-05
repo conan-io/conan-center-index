@@ -16,17 +16,12 @@ sources:
     sha256: "3ba219959ecb0ef6956f05113aa659d7b605e4eebbdca561b8243ce309e4684e"
 patches:
   "3.7.2":
-    - patch_file: "patches/fix-cmake-install-3.7.0.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/fix-cmake-3.7.x.patch"
   "3.7.1":
-    - patch_file: "patches/fix-cmake-install-3.7.0.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/fix-cmake-3.7.x.patch"
   "3.7.0":
-    - patch_file: "patches/fix-cmake-install-3.7.0.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/fix-cmake-3.7.x.patch"
   "3.6.4":
-    - patch_file: "patches/fix-cmake-install-3.6.4.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/fix-cmake-3.6.4.patch"
   "3.6.3":
-    - patch_file: "patches/fix-cmake-install-3.6.3.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/fix-cmake-3.6.3.patch"

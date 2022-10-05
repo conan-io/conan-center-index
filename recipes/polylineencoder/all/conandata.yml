@@ -1,15 +1,15 @@
 sources:
-  "1.0.0":
-    url: "https://github.com/vahancho/polylineencoder/archive/1.0.0.zip"
-    sha256: "1e02cff3f65bac68ffeca2651fca829c8b2e0d6f674ebe074bc6b9706d71a91b"
   "1.1.2":
     url: "https://github.com/vahancho/polylineencoder/archive/v1.1.2.zip"
     sha256: "fed2eb5cfc747c9aa98a8399d0536ddb52035f8dc9bcb53d9c5404ec2d57bac1"
+  "1.0.0":
+    url: "https://github.com/vahancho/polylineencoder/archive/1.0.0.zip"
+    sha256: "1e02cff3f65bac68ffeca2651fca829c8b2e0d6f674ebe074bc6b9706d71a91b"
 patches:
+  "1.1.2":
+    - patch_file: "patches/1.1.2/0001-cmake.patch"
+    - patch_file: "patches/1.1.2/0002-backward-compatibility.patch"
   "1.0.0":
     - patch_file: "patches/1.0.0/0001-cmake-target-name.patch"
     - patch_file: "patches/1.0.0/0002-include-limits.patch"
     - patch_file: "patches/1.0.0/0003-cmake-install.patch"
-  "1.1.2":
-    - patch_file: "patches/1.1.2/0001-cmake.patch"
-    - patch_file: "patches/1.1.2/0002-backward-compatibility.patch"

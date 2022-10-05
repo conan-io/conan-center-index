@@ -8,13 +8,8 @@ sources:
 patches:
   "0.7.0":
     - patch_file: "patches/0001-fix-cmake-0.7.0.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-fix-mingw-bigobj.patch"
-      base_path: "source_subfolder"
   "0.6.1":
     - patch_file: "patches/0001-fix-cmake-0.6.1.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-fix-mingw-bigobj.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-fix-alias-type-msvc2015.patch"
-      base_path: "source_subfolder"

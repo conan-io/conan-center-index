@@ -11,7 +11,7 @@ import glob
 import shutil
 
 
-required_conan_version = ">=1.51.0"
+required_conan_version = ">=1.52.0"
 
 
 class GLibConan(ConanFile):
@@ -52,8 +52,7 @@ class GLibConan(ConanFile):
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        files.export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -105,8 +104,8 @@ class GLibConan(ConanFile):
             raise ConanInvalidConfiguration("libelf dependency can't be disabled in glib < 2.67.0")
 
     def build_requirements(self):
-        self.build_requires("meson/0.61.2")
-        self.build_requires("pkgconf/1.7.4")
+        self.tool_requires("meson/0.63.2")
+        self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

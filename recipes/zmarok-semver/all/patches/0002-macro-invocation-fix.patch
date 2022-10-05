@@ -1,0 +1,32 @@
+diff -Naur a/include/version.h b/include/version.h
+--- a/include/version.h	2019-03-27 02:47:58.000000000 -0700
++++ b/include/version.h	2022-08-18 09:01:59.633528129 -0700
+@@ -148,8 +148,8 @@
+ 		/// Copy version data from another Basic_version to this one.
+ 		Basic_version& operator=(const Basic_version&);
+ 
+-		int major() const; ///< Get major version.
+-		int minor() const; ///< Get minor version.
++		int (major)() const; ///< Get major version.
++		int (minor)() const; ///< Get minor version.
+ 		int patch() const; ///< Get patch version.
+ 		const std::string prerelease() const; ///< Get prerelease version string.
+ 		const std::string build() const; ///< Get build version string.
+diff -Naur a/include/version.inl b/include/version.inl
+--- a/include/version.inl	2019-03-27 02:47:58.000000000 -0700
++++ b/include/version.inl	2022-08-18 09:01:30.821575915 -0700
+@@ -65,12 +65,12 @@
+ 		const Basic_version<Parser, Comparator, Modifier>&) = default;
+ 
+ 	template<typename Parser, typename Comparator, typename Modifier>
+-	int Basic_version<Parser, Comparator, Modifier>::major() const {
++	int (Basic_version<Parser, Comparator, Modifier>::major)() const {
+ 		return ver_.major;
+ 	}
+ 
+ 	template<typename Parser, typename Comparator, typename Modifier>
+-	int Basic_version<Parser, Comparator, Modifier>::minor() const {
++	int (Basic_version<Parser, Comparator, Modifier>::minor)() const {
+ 		return ver_.minor;
+ 	}
+ 

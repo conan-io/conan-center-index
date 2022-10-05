@@ -14,6 +14,10 @@ def register(linter: PyLinter):
     msge1101.msg += ". Please, check https://github.com/conan-io/conan-center-index/blob/master/docs/v2_linter.md"
     linter.msgs_store.register_message(msge1101)
 
+    msge0611 = linter.msgs_store._messages_definitions["E0611"]
+    msge0611.msg += ". Please, check https://github.com/conan-io/conan-center-index/blob/master/docs/v2_linter.md"
+    linter.msgs_store.register_message(msge0611)
+
 def transform_tools(module):
     """ Transform import module """
     if 'get' in module.locals:
@@ -26,10 +30,11 @@ def transform_tools(module):
         del module.locals['Version']
 
 def transform_errors(module):
-    if 'ConanInvalidConfiguration' in module.locals:
-        del module.locals['ConanInvalidConfiguration']
-    if 'ConanException' in module.locals:
-        del module.locals['ConanException']
+    pass
+    #if 'ConanInvalidConfiguration' in module.locals:
+    #    del module.locals['ConanInvalidConfiguration']
+    #if 'ConanException' in module.locals:
+    #    del module.locals['ConanException']
 
 
 astroid.MANAGER.register_transform(

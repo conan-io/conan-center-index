@@ -8,15 +8,9 @@ sources:
 patches:
   "2.8.2":
     - patch_file: "patches/0004-2.8.2-missing-include.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0005-drop-runtime.patch"
-      base_path: "source_subfolder"
   "2.6.0":
     - patch_file: "patches/0001-cmake-install-pic-cxx-standard-sytem-libs.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-lowercase-include-system-libs-windows.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-typo-declspec.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0004-2.6.0-missing-include.patch"
-      base_path: "source_subfolder"

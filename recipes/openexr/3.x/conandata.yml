@@ -8,7 +8,5 @@ sources:
 patches:
   "3.1.5":
     - patch_file: "patches/v3.1.4-gcc5-bug-workaround.patch"
-      base_path: "source_subfolder"
   "3.1.4":
     - patch_file: "patches/v3.1.4-gcc5-bug-workaround.patch"
-      base_path: "source_subfolder"
