@@ -133,13 +133,11 @@ class Antlr4CppRuntimeConan(ConanFile):
 
         # TODO: to remove in conan v2 once cmake_find_package* generatores removed
         self._create_cmake_module_alias_targets(
-            self,
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"antlr4_shared" if self.options.shared else "antlr4_static": "antlr4-cppruntime::antlr4-cppruntime"}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(conanfile, module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent(f"""\
@@ -148,7 +146,7 @@ class Antlr4CppRuntimeConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """)
-        save(conanfile, module_file, content)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
