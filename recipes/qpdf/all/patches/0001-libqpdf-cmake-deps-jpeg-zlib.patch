@@ -1,0 +1,25 @@
+diff --git a/libqpdf/CMakeLists.txt b/libqpdf/CMakeLists.txt
+index 7053e205..1d0b2e14 100644
+--- a/libqpdf/CMakeLists.txt
++++ b/libqpdf/CMakeLists.txt
+@@ -403,6 +403,11 @@ endif()
+ # use PIC for the object library so we don't have to compile twice.
+ set(OBJECT_LIB libqpdf_object)
+ add_library(${OBJECT_LIB} OBJECT ${libqpdf_SOURCES})
++find_package(JPEG REQUIRED)
++find_package(ZLIB REQUIRED)
++target_link_libraries(${OBJECT_LIB} PRIVATE JPEG::JPEG)
++target_link_libraries(${OBJECT_LIB} PUBLIC ZLIB::ZLIB)
++
+ if(OBJECT_LIB_IS_PIC)
+   target_compile_definitions(${OBJECT_LIB} PRIVATE libqpdf_EXPORTS)
+ endif()
+@@ -498,8 +503,6 @@ if(BUILD_SHARED_LIBS)
+     PUBLIC
+     $<BUILD_INTERFACE:${qpdf_INCLUDE}>
+     $<INSTALL_INTERFACE:include>)
+-  target_link_directories(${SHARED_LIB} PRIVATE ${dep_link_directories})
+-  target_link_libraries(${SHARED_LIB} PRIVATE ${dep_link_libraries})
+   if(ATOMIC_LIBRARY)
+     target_link_libraries(${SHARED_LIB} PRIVATE ${ATOMIC_LIBRARY})
+   endif()

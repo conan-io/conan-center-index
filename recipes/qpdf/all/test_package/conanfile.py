@@ -22,6 +22,3 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             self.run(os.path.join(self.cpp.build.bindirs[0], "test_package") + " out_empty.pdf", env="conanrun")
-            self.run("qpdf --version", env="conanrun")
-            self.run("zlib-flate --version", env="conanrun")
-            self.run("fix-qdf --version", env="conanrun")
