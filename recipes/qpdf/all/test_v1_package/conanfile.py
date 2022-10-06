@@ -17,6 +17,3 @@ class TestPackageV1Conan(ConanFile):
         if not cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path + " out_empty.pdf", run_environment=True)
-            self.run(os.path.join(self.deps_cpp_info["qpdf"].rootpath, "bin", "qpdf") + " --version", run_environment=True)
-            self.run(os.path.join(self.deps_cpp_info["qpdf"].rootpath, "bin", "zlib-flate") + " --version", run_environment=True)
-            self.run(os.path.join(self.deps_cpp_info["qpdf"].rootpath, "bin", "fix-qdf") + " --version", run_environment=True)
