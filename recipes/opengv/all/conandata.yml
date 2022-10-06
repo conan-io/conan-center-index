@@ -5,5 +5,11 @@ sources:
 patches:
   "cci.20200806":
     - patch_file: "patches/0001-use-conans-pybind11.patch"
+       patch_description: "fix call to pybind to use conan provided config file"
+       patch_type: "conan"
     - patch_file: "patches/0002-use-conans-eigen.patch"
+       patch_description: "fix call to find_package to use conan provided file"
+       patch_type: "conan"
     - patch_file: "patches/0003-let-conan-handle-shared-and-fpic.patch"
+       patch_description: "disable some options such that conan manages values"
+       patch_type: "conan"
