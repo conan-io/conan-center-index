@@ -11,14 +11,21 @@ import os
 
 required_conan_version = ">=1.52.0"
 
+#
+# INFO: Please, remove all comments before pushing your PR!
+#
+
 
 class PackageConan(ConanFile):
     name = "package"
     description = "short description"
-    license = "" # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
+    # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
+    # In case not listed there, use "LicenseRef-<license-file-name>"
+    license = ""
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/project/package"
-    topics = ("topic1", "topic2", "topic3") # no "conan" and project name in topics
+    # no "conan" and project name in topics. Use topics from the upstream listed on GH
+    topics = ("topic1", "topic2", "topic3")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -54,23 +61,27 @@ class PackageConan(ConanFile):
     def configure(self):
         if self.options.shared:
             try:
-                del self.options.fPIC # once removed by config_options, need try..except for a second del
+                # once removed by config_options, need try..except for a second del
+                del self.options.fPIC
             except Exception:
                 pass
+        # for plain C projects only
         try:
-            del self.settings.compiler.libcxx # for plain C projects only
+            del self.settings.compiler.libcxx
         except Exception:
             pass
         try:
-            del self.settings.compiler.cppstd # for plain C projects only
+            del self.settings.compiler.cppstd
         except Exception:
             pass
 
     def layout(self):
-        cmake_layout(self, src_folder="src") # src_folder must use the same source folder name the project
+        # src_folder must use the same source folder name the project
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("dependency/0.8.1") # prefer self.requires method instead of requires attribute
+        # prefer self.requires method instead of requires attribute
+        self.requires("dependency/0.8.1")
 
     def validate(self):
         # validate the minimum cpp standard supported. For C++ projects only
@@ -80,7 +91,9 @@ class PackageConan(ConanFile):
         if not is_msvc(self):
             minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
             if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
+                )
         # in case it does not work in another configuration, it should validated here too
         if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
@@ -90,8 +103,7 @@ class PackageConan(ConanFile):
         self.tool_requires("tool/x.y.z")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
         # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
@@ -116,15 +128,10 @@ class PackageConan(ConanFile):
         apply_conandata_patches(self)
         # remove bundled xxhash
         rm(self, "whateer.*", os.path.join(self.source_folder, "lib"))
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            "...",
-            "",
-        )
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "...", "")
 
     def build(self):
-        self._patch_sources() # It can be apply_conandata_patches(self) only in case no more patches are needed
+        self._patch_sources()  # It can be apply_conandata_patches(self) only in case no more patches are needed
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -138,7 +145,7 @@ class PackageConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.la",  os.path.join(self.package_folder, "lib"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
