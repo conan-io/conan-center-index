@@ -43,6 +43,7 @@ class ImageMagicConan(ConanFile):
         "with_freetype": [True, False],
         "with_zstd": [True, False],
         "with_fftw": [True, False],
+        "with_gdi32": [True, False],
         "with_raw": [True, False],
         "with_jxl": [True, False],
         "with_openmp": [True, False],
@@ -57,7 +58,6 @@ class ImageMagicConan(ConanFile):
         "with_lqr": [True, False],
         "with_raqm": [True, False],
         "with_wmf": [True, False],
-        "with_gdi32": [True, False],
         "utilities": [True, False],
     }
     default_options = {
@@ -82,6 +82,7 @@ class ImageMagicConan(ConanFile):
         "with_freetype": True,
         "with_zstd": True,
         "with_fftw": True,
+        "with_gdi32": True,
         "with_raw": False,
         "with_jxl": False,
         "with_openmp": False,
@@ -96,7 +97,6 @@ class ImageMagicConan(ConanFile):
         "with_lqr": False,
         "with_raqm": False,
         "with_wmf": False,
-        "with_gdi32": False,
         "utilities": True,
     }
     exports_sources = "patches/*"
@@ -129,11 +129,6 @@ class ImageMagicConan(ConanFile):
             "lqr": self.options.with_lqr,
             "raqm": self.options.with_raqm,
             "wmf": self.options.with_wmf,
-            # emf.c includes gdiplus.h which is a c++ header library
-            # github.com/ImageMagick/ImageMagick/blob/bb4018a4dc61147b37d3c42d85e5893ca5e2a279/coders/emf.c#L42-L56
-            # while msvc compiles emf.c as a C source code (because of the
-            # extension) which causes compilation errors
-            "gdi32": self.options.with_gdi32
         }
 
         for lib, is_required in unsupported_libs.items():
@@ -149,10 +144,12 @@ class ImageMagicConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
         if microsoft.is_msvc(self):
             self.options.with_openmp = False
-            # FIXME: openexr causes link errors on windows
-            self.options.with_openexr = False
+        if self.settings.os != "Windows":
+            self.options.with_gdi32 = False
+
         if self.settings.os == "Windows":
             self.win_bash = True
 
@@ -279,17 +276,17 @@ class ImageMagicConan(ConanFile):
                 self, os.path.join(self.source_folder, "configure"), "-ljpeg",
                 "-llibjpeg")
 
-            # AutotoolsDeps makes cl include directories of all dependencies and
-            # link against all dependencies, which is useful since this is the
-            # only way for imagemagick to find libjpeg for example but one of
-            # these dependencies defines the "select" function, which makes
-            # imagemagick incorrectly think that Windows supports the POSIX
-            # select function
-            files.replace_in_file(
-                self, os.path.join(self.source_folder, "configure"),
-                "#define HAVE_SELECT 1", "/* #undef HAVE_SELECT */")
+            if self.options.with_gdi32:
+                # emf.c is a c++ source code utilizing the c++ header gdiplus.h
+                # we change emf.c extension to cpp so that msvc compiles it as
+                # c++ code
+                files.replace_in_file(
+                    self, os.path.join(self.source_folder, "Makefile.in"), "emf.c",
+                    "emf.cpp")
 
-            self.conf["tools.microsoft.bash:subsystem"] = "msys2"
+                files.rename(
+                    self, os.path.join(self.source_folder, "coders", "emf.c"),
+                    os.path.join(self.source_folder, "coders", "emf.cpp"))
 
         # FIXME: change pangocairo pkg-config component name in the pango recipe
         if os.path.exists(
@@ -332,6 +329,7 @@ class ImageMagicConan(ConanFile):
             f"--with-utilities={format(yes_no(self.options.utilities))}",
             f"--with-zstd={format(yes_no(self.options.with_zstd))}",
             f"--with-fftw={format(yes_no(self.options.with_fftw))}",
+            f"--with-gdi32={format(yes_no(self.options.with_gdi32))}",
             f"--with-rsvg={format(yes_no(self.options.with_rsvg))}",
             f"--with-autotrace={format(yes_no(self.options.with_autotrace))}",
             f"--with-dps={format(yes_no(self.options.with_dps))}",
@@ -343,8 +341,7 @@ class ImageMagicConan(ConanFile):
             f"--with-lqr={format(yes_no(self.options.with_lqr))}",
             f"--with-raqm={format(yes_no(self.options.with_raqm))}",
             f"--with-wmf={format(yes_no(self.options.with_wmf))}",
-            f"--with-raw={format(yes_no(self.options.with_raw))}",
-            f"--with-gdi32={format(yes_no(self.options.with_raw))}"
+            f"--with-raw={format(yes_no(self.options.with_raw))}"
         ]
         if not self.options.with_openmp:
             args.append("--disable-openmp")
@@ -474,7 +471,10 @@ class ImageMagicConan(ConanFile):
             self.cpp_info.components["MagickCore"].sharedlinkflags.append("-fopenmp")
 
         if self.settings.os == "Windows":
-            self.cpp_info.components["MagickCore"].system_libs = ["urlmon"]
+            self.cpp_info.components["MagickCore"].system_libs.append("urlmon")
+
+        if self.options.with_gdi32:
+            self.cpp_info.components["MagickCore"].system_libs.append("gdi32")
 
         self.cpp_info.components["MagickWand"].names[
             "cmake_find_package_multi"] = "MagickWand"

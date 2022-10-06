@@ -1,0 +1,19 @@
+diff --git a/MagickCore/version.c b/MagickCore/version.c
+index 2e5b13353..394fb6098 100644
+--- a/MagickCore/version.c
++++ b/MagickCore/version.c
+@@ -210,7 +210,13 @@ MagickExport const char *GetMagickDelegates(void)
+   "zip "
+ #endif
+ #if defined(MAGICKCORE_ZLIB_DELEGATE)
+-  "zlib"
++  "zlib "
++#endif
++#if defined(MAGICKCORE_ZSTD_DELEGATE)
++  "zstd "
++#endif
++#if defined(MAGICKCORE_WINGDI32_DELEGATE)
++  "gdi32"
+ #endif
+   ;
+ }

@@ -41,3 +41,5 @@ class TestPackageConan(ConanFile):
                 check(self.options['imagemagick'].with_freetype, 'freetype')
                 check(self.options['imagemagick'].with_xml2, 'xml')
                 check(self.options['imagemagick'].with_fftw, 'fftw')
+                check(self.options['imagemagick'].with_zstd, 'zstd')
+                check(self.options['imagemagick'].with_gdi32, 'gdi32')

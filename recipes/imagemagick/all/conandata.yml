@@ -42,3 +42,7 @@ patches:
     - patch_file: "patches/libtool_accept_static.patch"
       patch_description: "For some reason (which might be valid) libtool doesn't want to link against conan's static libs using msvc. This patch fixes this."
       patch_type: "conan"
+
+    - patch_file: "patches/add_missing_delegates.patch"
+      patch_description: "ImageMagick does not report on using zstd and gdi32 delegates. This patch enables this which is useful for testing if imagemagick is built correctly."
+      patch_type: "conan"
