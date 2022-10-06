@@ -75,7 +75,7 @@ class GDCMConan(ConanFile):
         tc.cache_variables["GDCM_USE_SYSTEM_OPENJPEG"] = True
         tc.cache_variables["GDCM_USE_SYSTEM_ZLIB"] = True
         if not self.settings.compiler.cppstd:
-            tc.blocks["cppstd"].values = { "cppstd": self._minimum_cpp_standard, "cppstd_extensions": "OFF" }
+            toolchain.cache_variables["CMAKE_CXX_STANDARD"] = self._minimum_cpp_standard
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
