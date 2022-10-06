@@ -9,4 +9,3 @@ patches:
     - patch_file: "patches/0001-libqpdf-cmake-deps-jpeg-zlib.patch"
     - patch_file: "patches/0002-libqpdf-cmake-deps-jpeg-zlib-openssl.patch"
     - patch_file: "patches/0003-exclude-unnecessary-cmake-subprojects.patch"
-
