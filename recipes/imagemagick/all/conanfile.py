@@ -57,6 +57,7 @@ class ImageMagicConan(ConanFile):
         "with_lqr": [True, False],
         "with_raqm": [True, False],
         "with_wmf": [True, False],
+        "with_gdi32": [True, False],
         "utilities": [True, False],
     }
     default_options = {
@@ -95,6 +96,7 @@ class ImageMagicConan(ConanFile):
         "with_lqr": False,
         "with_raqm": False,
         "with_wmf": False,
+        "with_gdi32": False,
         "utilities": True,
     }
     exports_sources = "patches/*"
@@ -112,7 +114,7 @@ class ImageMagicConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "This version of ImageMagick can't be built on Windows!")
 
-        # TODO
+        # TODO: Add support to these libraries with ImageMagick
         unsupported_libs = {
             "raw": self.options.with_raw,
             "jxl": self.options.with_jxl,
@@ -126,7 +128,12 @@ class ImageMagicConan(ConanFile):
             "gvc": self.options.with_gvc,
             "lqr": self.options.with_lqr,
             "raqm": self.options.with_raqm,
-            "wmf": self.options.with_wmf
+            "wmf": self.options.with_wmf,
+            # emf.c includes gdiplus.h which is a c++ header library
+            # github.com/ImageMagick/ImageMagick/blob/bb4018a4dc61147b37d3c42d85e5893ca5e2a279/coders/emf.c#L42-L56
+            # while msvc compiles emf.c as a C source code (because of the
+            # extension) which causes compilation errors
+            "gdi32": self.options.with_gdi32
         }
 
         for lib, is_required in unsupported_libs.items():
@@ -157,7 +164,7 @@ class ImageMagicConan(ConanFile):
         if hasattr(self, "settings_build"):
             self.tool_requires("automake/1.16.5")
         if self._settings_build.os == "Windows" and not self.conf.get(
-                "tools.microsoft.bash:path", default=False, check_type=bool):
+                "tools.microsoft.bash:path", default=False, check_type=str):
             self.tool_requires("msys2/cci.latest")
         self.tool_requires("pkgconf/1.7.4")
 
@@ -337,7 +344,7 @@ class ImageMagicConan(ConanFile):
             f"--with-raqm={format(yes_no(self.options.with_raqm))}",
             f"--with-wmf={format(yes_no(self.options.with_wmf))}",
             f"--with-raw={format(yes_no(self.options.with_raw))}",
-            "--with-gdi32=no"  # FIXME
+            f"--with-gdi32={format(yes_no(self.options.with_raw))}"
         ]
         if not self.options.with_openmp:
             args.append("--disable-openmp")
@@ -390,6 +397,7 @@ class ImageMagicConan(ConanFile):
         self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
 
+        self.cpp_info.names["cmake_find_package_multi"] = "ImageMagick"
         self.cpp_info.set_property("cmake_file_name", "ImageMagick")
         self.cpp_info.set_property("cmake_target_name", "ImageMagick")
 
@@ -429,6 +437,8 @@ class ImageMagicConan(ConanFile):
         if self.options.with_fftw:
             core_requires.append("fftw::fftwlib")
 
+        self.cpp_info.components["MagickCore"].names[
+            "cmake_find_package_multi"] = "MagickCore"
         self.cpp_info.components["MagickCore"].set_property(
             "cmake_target_name", "ImageMagick::MagickCore")
 
@@ -466,6 +476,8 @@ class ImageMagicConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.components["MagickCore"].system_libs = ["urlmon"]
 
+        self.cpp_info.components["MagickWand"].names[
+            "cmake_find_package_multi"] = "MagickWand"
         self.cpp_info.components["MagickWand"].set_property(
             "cmake_target_name", "ImageMagick::MagickWand")
 
@@ -482,6 +494,8 @@ class ImageMagicConan(ConanFile):
         self.cpp_info.components["MagickWand"].set_property(
             "pkg_config_name", "MagickWand")
 
+        self.cpp_info.components["Magick++"].names[
+            "cmake_find_package_multi"] = "Magick++"
         self.cpp_info.components["Magick++"].set_property(
             "cmake_target_name", "ImageMagick::Magick++")
         self.cpp_info.components["Magick++"].includedirs = [
