@@ -25,6 +25,7 @@ class RustConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def build_requirements(self):
+        self.tool_requires("ninja/1.11.0")
         self.tool_requires("openssl/3.0.5")
         self.tool_requires("pkgconf/1.9.3")
 
@@ -43,7 +44,7 @@ class RustConan(ConanFile):
                 replacement
             )
         config('#prefix = "/usr/local"', f'prefix = "{self.package_folder}"')
-        config('#docs = true', f'docs = false')
+        config('#docs = true', 'docs = false')
         rename(self, config_file, os.path.join(self.source_folder, "config.toml"))
 
     @property
