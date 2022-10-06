@@ -22,6 +22,7 @@ class DbusConan(ConanFile):
     description = "D-Bus is a simple system for interprocess communication and coordination."
     topics = ("bus", "interprocess", "message")
     settings = "os", "arch", "compiler", "build_type"
+    short_paths = True
     options = {
         "system_socket": ["ANY"],
         "system_pid_file": ["ANY"],
@@ -72,7 +73,7 @@ class DbusConan(ConanFile):
 
     def build_requirements(self):
         if self._meson_available:
-            self.tool_requires("meson/0.63.2")
+            self.tool_requires("meson/0.63.3")
             self.tool_requires("pkgconf/1.9.3")
 
     def requirements(self):
@@ -90,8 +91,9 @@ class DbusConan(ConanFile):
         if Version(self.version) >= "1.14.0":
             if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < 7:
                 raise ConanInvalidConfiguration(f"{self.ref} requires at least gcc 7.")
-            if self.info.settings.os == "Windows":
-                raise ConanInvalidConfiguration(f"{self.ref} does not support windows. Contributions are welcome")
+            
+        if Version(self.version) < "1.15.0" and self.info.settings.os == "Windows":
+                raise ConanInvalidConfiguration(f"{self.ref} does not support Windows. Contributions welcome.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
