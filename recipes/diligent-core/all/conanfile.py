@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.files import rm, get, rmdir, rename, collect_libs, patches, export_conandata_patches
+from conan.tools.files import rm, get, rmdir, rename, collect_libs, patches, export_conandata_patches, copy
 from conan.tools.apple import is_apple_os
 import os
 
@@ -161,22 +161,21 @@ class DiligentCoreConan(ConanFile):
         copy(self, "License.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
         if self.options.shared:
-            self.copy(pattern="*.dylib", dst="lib", keep_path=False)
-            self.copy(pattern="*.so", dst="lib", keep_path=False)
-            self.copy(pattern="*.dll", dst="bin", keep_path=False)
+            copy(self, pattern="*.dylib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
+            copy(self, pattern="*.so", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
+            copy(self, pattern="*.dll", dst=os.path.join(self.package_folder, "bin"), src=self.build_folder, keep_path=False)
             rm(self, os.path.join(self.package_folder, "lib"), "*.a", recursive=True)
             if self.settings.os != "Windows":
                 rm(self, os.path.join(self.package_folder, "lib"), "*.lib", recursive=True)
         else:
-            self.copy(pattern="*.a", dst="lib", keep_path=False)
-            self.copy(pattern="*.lib", dst="lib", keep_path=False)
+            copy(self, pattern="*.a",   dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
+            copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
             rm(self, os.path.join(self.package_folder, "lib"), "*.dylib", recursive=True)
             rm(self, os.path.join(self.package_folder, "lib"), "*.so", recursive=True)
             rm(self, os.path.join(self.package_folder, "lib"), "*.dll", recursive=True)
 
-        self.copy(pattern="*.fxh", dst="res", keep_path=False)
-
-        self.copy("File2String*", src=os.path.join(self.build_folder, "bin"), dst="bin", keep_path=False)
+        copy(self, pattern="*.fxh", dst=os.path.join(self.package_folder, "res"), src=self.source_folder, keep_path=False)
+        copy(self, "File2String*",  dst=os.path.join(self.package_folder, "bin"), src=self.source_folder, keep_path=False)
         rm(self, "*.pdb", self.package_folder, recursive=True)
         # MinGw creates many invalid files, called objects.a, remove them here:
         rm(self, "objects.a", self.package_folder, recursive=True)
