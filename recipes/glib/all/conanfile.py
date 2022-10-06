@@ -95,7 +95,7 @@ class GLibConan(ConanFile):
     def validate(self):
         if Version(self.version) >= "2.69.0" and not self.info.options.with_pcre:
             raise ConanInvalidConfiguration("option glib:with_pcre must be True for glib >= 2.69.0")
-        if self.settings.os == "Windows" and not self.options.shared and Version(self.version) < "2.71.1":
+        if self.info.settings.os == "Windows" and not self.info.options.shared and Version(self.version) < "2.71.1":
             raise ConanInvalidConfiguration(
                 "glib < 2.71.1 can not be built as static library on Windows. "
                 "see https://gitlab.gnome.org/GNOME/glib/-/issues/692"
