@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, rmdir, save, apply_conandata_patches, export_conandata_patches
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 class opengvConan(ConanFile):
     name = "opengv"
