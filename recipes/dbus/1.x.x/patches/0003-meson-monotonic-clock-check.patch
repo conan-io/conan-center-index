@@ -9,7 +9,7 @@ index 3b5b182c..4e400a52 100644
 -    cc.has_header_symbol('pthread.h', 'CLOCK_MONOTONIC', args: compile_args_c),
 +    cc.has_header_symbol('pthread.h', 'CLOCK_MONOTONIC', args: compile_args_c)
 +    and cc.has_header_symbol('pthread.h', 'pthread_condattr_setclock', args: compile_args_c)
-+    and cc.has_header_symbol('pthread.h', 'clock_getres', args: compile_args_c),
++    and cc.has_header_symbol('time.h', 'clock_getres', args: compile_args_c),
  )
  
  glib = dependency(
