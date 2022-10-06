@@ -69,24 +69,28 @@ class Antlr4CppRuntimeConan(ConanFile):
         # We have backport the fix to these old versions.
 
     def validate(self):
-        if (self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) < "16") or \
-           (self.info.settings.compiler == "msvc" and Version(self.info.settings.compiler.version) < "1920"):
+        compiler = self.info.settings.compiler
+        compiler_version = Version(compiler.version)
+        antlr_version = Version(self.version)
+
+        if (compiler == "Visual Studio" and compiler_version < "16") or \
+           (compiler == "msvc" and compiler_version < "1920"):
             raise ConanInvalidConfiguration("library claims C2668 'Ambiguous call to overloaded function'")
             # Compilation of this library on version 15 claims C2668 Error.
-            # This could be Bogus error or malformed Antl4 libary.
+            # This could be Bogus error or malformed Antlr4 library.
             # Version 16 compiles this code correctly.
 
-        if Version(self.version) >= "4.10":
+        if antlr_version >= "4.10":
             # Antlr4 for 4.9.3 does not require C++17 - C++11 is enough.
             # for newest version we need C++17 compatible compiler here
-
-            if self.info.settings.compiler.cppstd:
+            if compiler.cppstd:
                 check_min_cppstd(self, self._minimum_cpp_standard)
-            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+
+            minimum_version = self._compilers_minimum_version.get(str(compiler), False)
+            if minimum_version and compiler_version < minimum_version:
                 raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
 
-            if is_msvc(self) and Version(self.version) == "4.10":
+            if is_msvc(self) and antlr_version == "4.10":
                 raise ConanInvalidConfiguration(f"{self.ref} is broken on msvc - Use 4.10.1 or above.")
 
     def source(self):
