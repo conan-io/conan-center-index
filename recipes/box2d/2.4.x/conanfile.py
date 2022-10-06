@@ -18,7 +18,9 @@ class Box2dConan(ConanFile):
     options = {"shared": [True, False],
                "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True,}
-    exports_sources = ["patches/**"]
+    
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
