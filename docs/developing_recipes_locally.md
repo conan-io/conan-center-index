@@ -17,7 +17,9 @@ This file is intended to provide all the commands you need to run in order to be
   * [Running the Python Linters](#running-the-python-linters)
   * [Testing the different `test__package`](#testing-the-different-test__package)
   * [Testing more environments](#testing-more-environments)
-  * [Using Conan 2.0](#using-conan-20)<!-- endToc -->
+  * [Using Conan 2.0](#using-conan-20)
+    * [Installing Conan 2.0 beta](#installing-conan-20-beta)
+    * [Trying it out](#trying-it-out)<!-- endToc -->
 
 ## Clone your fork
 
