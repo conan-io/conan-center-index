@@ -44,9 +44,7 @@ class PackageConan(ConanFile):
     def build(self):
         get(
             self,
-            **self.conan_data["sources"][self.version][str(self.settings.os)][
-                str(self.settings.arch)
-            ],
+            **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)],
             destination=self.source_folder,
             strip_root=True,
         )

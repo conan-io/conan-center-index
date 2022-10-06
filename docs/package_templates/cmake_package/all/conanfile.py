@@ -97,18 +97,14 @@ class PackageConan(ConanFile):
             check_min_cppstd(self, self._minimum_cpp_standard)
         check_min_vs(self, 191)
         if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(
-                str(self.info.settings.compiler), False
-            )
+            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
             if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
                 )
         # in case it does not work in another configuration, it should validated here too
         if is_msvc(self) and self.info.options.shared:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} can not be built as shared on Visual Studio and msvc."
-            )
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
@@ -132,9 +128,7 @@ class PackageConan(ConanFile):
             tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         # deps_cpp_info, deps_env_info and deps_user_info are no longer used
         if self.dependencies["dependency"].options.foobar:
-            tc.cache_variables["DEPENDENCY_LIBPATH"] = self.dependencies[
-                "dependency"
-            ].cpp_info.libdirs
+            tc.cache_variables["DEPENDENCY_LIBPATH"] = self.dependencies["dependency"].cpp_info.libdirs
         tc.generate()
         # In case there are dependencies listed on requirements, CMakeDeps should be used
         tc = CMakeDeps(self)
