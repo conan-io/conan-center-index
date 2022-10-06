@@ -36,6 +36,7 @@ class RustConan(ConanFile):
 
     def _configure_sources(self):
         config_file = os.path.join(self.source_folder, "config.toml.example")
+
         def config(value, replacement):
             replace_in_file(
                 self,
@@ -43,7 +44,8 @@ class RustConan(ConanFile):
                 value,
                 replacement
             )
-        config('#prefix = "/usr/local"', f'prefix = "{self.package_folder}"')
+        install_folder = os.path.join(self.package_folder, "bin")
+        config('#prefix = "/usr/local"', f'prefix = "{install_folder}"')
         config('#docs = true', 'docs = false')
         rename(self, config_file, os.path.join(self.source_folder, "config.toml"))
 
@@ -72,7 +74,7 @@ class RustConan(ConanFile):
     def package_info(self):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
-        bin_path = os.path.join(self.package_folder, "bin")
+        bin_path = os.path.join(self.package_folder, "bin", "bin")
         self.output.info("Appending PATH environment variable:: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
