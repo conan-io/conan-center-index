@@ -4,7 +4,7 @@ import textwrap
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, copy, rmdir, replace_in_file, save
+from conan.tools.files import get, copy, rmdir, replace_in_file, save, apply_conandata_patches, export_conandata_patches
 
 required_conan_version = ">=1.43.0"
 
@@ -27,6 +27,9 @@ class opengvConan(ConanFile):
         "fPIC": True,
         "with_python_bindings": False,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -57,41 +60,6 @@ class opengvConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    def _patch_sources(self):
-        # Use conan's Eigen
-        old = """\
-            find_package(Eigen REQUIRED)
-            set(ADDITIONAL_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIR}/unsupported)"""
-
-        new = """\
-            find_package(Eigen3 REQUIRED)
-            set(ADDITIONAL_INCLUDE_DIRS ${Eigen3_INCLUDE_DIRS} ${Eigen3_INCLUDE_DIR}/unsupported)"""
-
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            textwrap.dedent(old),
-                            textwrap.dedent(new)
-        )
-
-        # Use conan's pybind11
-        replace_in_file(self, os.path.join(self.source_folder, "python", "CMakeLists.txt"),
-                            "add_subdirectory(pybind11)",
-                            "find_package(pybind11 REQUIRED)"
-        )
-
-        # Let conan handle fPIC / shared
-        old = """\
-            IF(MSVC)
-              set(BUILD_SHARED_LIBS OFF)"""
-
-        new = """\
-            IF(1)
-              #set(BUILD_SHARED_LIBS OFF)"""
-
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            textwrap.dedent(old),
-                            textwrap.dedent(new)
-        )
-
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTS"] = False
@@ -101,9 +69,9 @@ class opengvConan(ConanFile):
 
         cd = CMakeDeps(self)
         cd.generate()
-    
+
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
