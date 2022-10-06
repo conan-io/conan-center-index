@@ -158,7 +158,7 @@ class DiligentCoreConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "Licenses"))
         rmdir(self, os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "bin"))
-        self.copy("License.txt", dst="licenses", src=self.source_folder)
+        copy(self, "License.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
         if self.options.shared:
             self.copy(pattern="*.dylib", dst="lib", keep_path=False)
