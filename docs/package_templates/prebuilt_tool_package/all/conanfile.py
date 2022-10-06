@@ -14,12 +14,8 @@ class PackageConan(ConanFile):
     license = ""  # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/project/package"
-    topics = (
-        "topic1",
-        "topic2",
-        "topic3",
-        "pre-built",
-    )  # no "conan"  and project name in topics. Use "pre-built" for tooling packages
+    # no "conan"  and project name in topics. Use "pre-built" for tooling packages
+    topics = ("topic1", "topic2", "topic3", "pre-built")
     settings = "os", "arch", "compiler", "build_type"  # even for pre-built executables
 
     # not needed but supress warning message from conan commands
@@ -52,24 +48,9 @@ class PackageConan(ConanFile):
     # copy all needed files to the package folder
     def package(self):
         # a license file is always mandatory
-        copy(
-            self,
-            pattern="LICENSE",
-            dst=os.path.join(self.package_folder, "licenses"),
-            src=self.source_folder,
-        )
-        copy(
-            self,
-            pattern="*.exe",
-            dst=os.path.join(self.package_folder, "bin"),
-            src=self.source_folder,
-        )
-        copy(
-            self,
-            pattern="foo",
-            dst=os.path.join(self.package_folder, "bin"),
-            src=self.source_folder,
-        )
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="*.exe", dst=os.path.join(self.package_folder, "bin"), src=self.source_folder)
+        copy(self, pattern="foo", dst=os.path.join(self.package_folder, "bin"), src=self.source_folder)
 
     def package_info(self):
         # folders not used for pre-built binaries

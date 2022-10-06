@@ -2,14 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild, VCVars
 from conan.tools.layout import vs_layout
-from conan.tools.files import (
-    apply_conandata_patches,
-    export_conandata_patches,
-    get,
-    copy,
-    rm,
-    replace_in_file,
-)
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, replace_in_file
 import os
 
 
@@ -80,12 +73,7 @@ class PackageConan(ConanFile):
         self.tool_requires("tool/x.y.z")
 
     def source(self):
-        get(
-            self,
-            **self.conan_data["sources"][self.version],
-            destination=self.source_folder,
-            strip_root=True,
-        )
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
         tc = MSBuildToolchain(self)
@@ -99,12 +87,7 @@ class PackageConan(ConanFile):
         apply_conandata_patches(self)
         # remove bundled xxhash
         rm(self, "whateer.*", os.path.join(self.source_folder, "lib"))
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            "...",
-            "",
-        )
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "...", "")
 
     def build(self):
         self._patch_sources()  # It can be apply_conandata_patches(self) only in case no more patches are needed
@@ -117,25 +100,12 @@ class PackageConan(ConanFile):
         msbuild.build(sln="project_2017.sln")
 
     def package(self):
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(
-            self,
-            pattern="LICENSE",
-            dst=os.path.join(self.package_folder, "licenses"),
-            src=self.source_folder,
+            self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False
         )
         copy(
-            self,
-            pattern="*.lib",
-            dst=os.path.join(self.package_folder, "lib"),
-            src=self.build_folder,
-            keep_path=False,
-        )
-        copy(
-            self,
-            pattern="*.dll",
-            dst=os.path.join(self.package_folder, "bin"),
-            src=self.build_folder,
-            keep_path=False,
+            self, pattern="*.dll", dst=os.path.join(self.package_folder, "bin"), src=self.build_folder, keep_path=False
         )
         copy(
             self,

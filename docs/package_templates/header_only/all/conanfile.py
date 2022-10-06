@@ -76,12 +76,7 @@ class PackageConan(ConanFile):
 
     def source(self):
         # download source package and extract to source folder
-        get(
-            self,
-            **self.conan_data["sources"][self.version],
-            destination=self.source_folder,
-            strip_root=True,
-        )
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     # not mandatory when there is no patch, but will suppress warning message about missing build() method
     def build(self):
@@ -90,12 +85,7 @@ class PackageConan(ConanFile):
 
     # copy all files to the package folder
     def package(self):
-        copy(
-            self,
-            pattern="LICENSE",
-            dst=os.path.join(self.package_folder, "licenses"),
-            src=self.source_folder,
-        )
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(
             self,
             pattern="*.h",
