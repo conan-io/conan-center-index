@@ -93,7 +93,7 @@ class PixmanConan(ConanFile):
         files.rm(self, "*.la", lib_folder)
         if microsoft.is_msvc(self):
             prefix = "libpixman-1"
-            files.rename(self, os.path.join(lib_folder, f"{prefix}.a"), os.path.join(lib_folder, "{prefix}.lib"))
+            files.rename(self, os.path.join(lib_folder, f"{prefix}.a"), os.path.join(lib_folder, f"{prefix}.lib"))
 
     def package_info(self):
         self.cpp_info.libs = files.collect_libs(self)
