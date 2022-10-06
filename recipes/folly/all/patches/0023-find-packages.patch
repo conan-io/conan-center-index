@@ -21,7 +21,7 @@ index 989259a87..e1338c98e 100644
 +list(APPEND FOLLY_LINK_LIBRARIES ${double-conversion_LIBRARIES})
 +list(APPEND FOLLY_INCLUDE_DIRECTORIES ${double-conversion_INCLUDE_DIR})
 +
-+find_package(gflags MODULE)
++find_package(gflags CONFIG)
 +set(FOLLY_HAVE_LIBGFLAGS ${GFLAGS_FOUND})
 +if(GFLAGS_FOUND)
 +  list(APPEND FOLLY_LINK_LIBRARIES ${gflags_LIBRARIES})
