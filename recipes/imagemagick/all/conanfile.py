@@ -474,7 +474,8 @@ class ImageMagicConan(ConanFile):
             self.cpp_info.components["MagickCore"].system_libs.append("urlmon")
 
         if self.options.with_gdi32:
-            self.cpp_info.components["MagickCore"].system_libs.append("gdi32")
+            self.cpp_info.components["MagickCore"].system_libs.extend(
+                ["gdi32", "gdiplus"])
 
         self.cpp_info.components["MagickWand"].names[
             "cmake_find_package_multi"] = "MagickWand"
