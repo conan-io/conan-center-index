@@ -4,7 +4,7 @@ from conan.tools.files import apply_conandata_patches, get, rm, rmdir
 from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.52.0"
 
 
 class Box2dConan(ConanFile):
