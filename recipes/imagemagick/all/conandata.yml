@@ -14,6 +14,10 @@ patches:
       patch_source: "https://github.com/ImageMagick/ImageMagick/commit/ee1f26ff19ae070d91fab8415a9f7950a2b4d19d.patch"
       patch_type: "backport"
 
+    - patch_file: "patches/add_missing_delegates.patch"
+      patch_description: "ImageMagick does not report on using zstd and gdi32 delegates. This patch enables this which is useful for testing if imagemagick is built correctly."
+      patch_type: "conan"
+
   "7.1.0-45":
     - patch_file: "patches/disable_complex_fftw.patch"
       patch_description: "MSVC does not define _Complex keyword. This patch prohibits fftw from using it."
