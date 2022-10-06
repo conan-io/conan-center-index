@@ -6,7 +6,7 @@ from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, Environment
 import os
 
 required_conan_version = ">=1.51.3"
@@ -112,6 +112,11 @@ class PackageConan(ConanFile):
         tc.generate()
         tc = VirtualBuildEnv(self)
         tc.generate(scope="build")
+        # TODO: after https://github.com/conan-io/conan/issues/11962 is solved, remove the following workaround
+        env = Environment()
+        env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
+        envvars = env.vars(self)
+        envvars.save_script("pkg_config")
 
     def build(self):
         cmake = CMake(self)
