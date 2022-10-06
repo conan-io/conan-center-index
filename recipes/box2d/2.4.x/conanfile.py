@@ -36,6 +36,9 @@ class Box2dConan(ConanFile):
             except Exception:
                 pass
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
