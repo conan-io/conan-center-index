@@ -62,7 +62,7 @@ class PackageConan(ConanFile):
         # https://qpdf.readthedocs.io/en/stable/installation.html#basic-dependencies
         self.requires("zlib/1.2.12")
         if self.options.with_crypto == "openssl":
-            self.requires("openssl/3.0.5")
+            self.requires("openssl/1.1.1q")
         elif self.options.with_crypto == "gnutls":
             raise ConanInvalidConfiguration("GnuTLS is not available in Conan Center yet.")
         if self.options.with_jpeg == "libjpeg":
