@@ -465,7 +465,7 @@ def package_info(self):
 
 #### **<a name="KB-H072">#KB-H072</a>: "PYLINT EXECUTION"**
 
-Pylint is executed by default over all `conanfile.py` files in Conan Center Index and it should not be skipped. It's an important tool which helps us keep a standard level of acceptance. Otherwise, it would be incredibly hard to review all recipes and keep them to the same level of standards.
+Pylint is executed by default over all `conanfile.py` files in ConanCenterIndex and it should not be skipped. It's an important tool which helps us keep a standard level of acceptance. Otherwise, it would be incredibly hard to review all recipes and keep them to the same level of standards.
 
 #### **<a name="KB-H073">#KB-H073</a>: "TEST V1 PACKAGE FOLDER"**
 
