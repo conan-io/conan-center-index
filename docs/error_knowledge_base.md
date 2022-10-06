@@ -469,7 +469,7 @@ Pylint is executed by default over all `conanfile.py` files in ConanCenterIndex 
 
 #### **<a name="KB-H073">#KB-H073</a>: "TEST V1 PACKAGE FOLDER"**
 
-The legacy content in test_package should not be removed. Instead, rename that folder to `test_v1_package` and create a new `test_package` folder following the [file structure](https://github.com/conan-io/conan-center-index/blob/master/docs/how_to_add_packages.md#recipe-files-structure) related to Conan v2 and v1 compatibility. Also, you can obtain good examples of Conan v2 test package's from the [template packages](https://github.com/conan-io/conan-center-index/tree/master/docs/package_templates) folder.
+The legacy content in test_package should not be removed. Instead, rename that folder to `test_v1_package` and create a new `test_package` folder following the [file structure](https://github.com/conan-io/conan-center-index/blob/master/docs/how_to_add_packages.md#recipe-files-structure) related to Conan v2 and v1 compatibility. Also, you can obtain good examples of Conan v2 test packages from the [template packages](https://github.com/conan-io/conan-center-index/tree/master/docs/package_templates) folder.
 
 ## Deprecated errors
 
