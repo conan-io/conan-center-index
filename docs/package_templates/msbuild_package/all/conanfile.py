@@ -2,7 +2,14 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild, VCVars
 from conan.tools.layout import vs_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, replace_in_file
+from conan.tools.files import (
+    apply_conandata_patches,
+    export_conandata_patches,
+    get,
+    copy,
+    rm,
+    replace_in_file,
+)
 import os
 
 
@@ -12,10 +19,13 @@ required_conan_version = ">=1.52.0"
 class PackageConan(ConanFile):
     name = "package"
     description = "short description"
-    license = "" # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
+    # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
+    # In case not listed there, use "LicenseRef-<license-file-name>"
+    license = ""
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/project/package"
-    topics = ("topic1", "topic2", "topic3") # no "conan" and project name in topics
+    # no "conan" and project name in topics. Use topics from the upstream listed on GH
+    topics = ("topic1", "topic2", "topic3")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -38,36 +48,46 @@ class PackageConan(ConanFile):
     def configure(self):
         if self.options.shared:
             try:
-                del self.options.fPIC # once removed by config_options, need try..except for a second del
+                # once removed by config_options, need try..except for a second del
+                del self.options.fPIC
             except Exception:
                 pass
+        # for plain C projects only
         try:
-            del self.settings.compiler.libcxx # for plain C projects only
+            del self.settings.compiler.libcxx
         except Exception:
             pass
         try:
-            del self.settings.compiler.cppstd # for plain C projects only
+            del self.settings.compiler.cppstd
         except Exception:
             pass
 
     def layout(self):
-        vs_layout(self, src_folder="src") # src_folder must use the same source folder name the project
+        # src_folder must use the same source folder name the project
+        vs_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("dependency/0.8.1") # prefer self.requires method instead of requires attribute
+        # prefer self.requires method instead of requires attribute
+        self.requires("dependency/0.8.1")
 
     def validate(self):
         # in case it does not work in another configuration, it should validated here too
         if not is_msvc(self):
-            raise ConanInvalidConfiguration(f"{self.ref} can be built only by Visual Studio and msvc.")
+            raise ConanInvalidConfiguration(
+                f"{self.ref} can be built only by Visual Studio and msvc."
+            )
 
     # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
         self.tool_requires("tool/x.y.z")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(
+            self,
+            **self.conan_data["sources"][self.version],
+            destination=self.source_folder,
+            strip_root=True,
+        )
 
     def generate(self):
         tc = MSBuildToolchain(self)
@@ -89,7 +109,7 @@ class PackageConan(ConanFile):
         )
 
     def build(self):
-        self._patch_sources() # It can be apply_conandata_patches(self) only in case no more patches are needed
+        self._patch_sources()  # It can be apply_conandata_patches(self) only in case no more patches are needed
         msbuild = MSBuild(self)
         # customize to Release when RelWithDebInfo
         msbuild.build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
@@ -99,10 +119,32 @@ class PackageConan(ConanFile):
         msbuild.build(sln="project_2017.sln")
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
-        copy(self, pattern="*.dll", dst=os.path.join(self.package_folder, "bin"), src=self.build_folder, keep_path=False)
-        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
+        copy(
+            self,
+            pattern="LICENSE",
+            dst=os.path.join(self.package_folder, "licenses"),
+            src=self.source_folder,
+        )
+        copy(
+            self,
+            pattern="*.lib",
+            dst=os.path.join(self.package_folder, "lib"),
+            src=self.build_folder,
+            keep_path=False,
+        )
+        copy(
+            self,
+            pattern="*.dll",
+            dst=os.path.join(self.package_folder, "bin"),
+            src=self.build_folder,
+            keep_path=False,
+        )
+        copy(
+            self,
+            pattern="*.h",
+            dst=os.path.join(self.package_folder, "include"),
+            src=os.path.join(self.source_folder, "include"),
+        )
 
     def package_info(self):
         self.cpp_info.libs = ["package_lib"]

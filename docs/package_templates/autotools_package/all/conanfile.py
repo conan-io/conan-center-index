@@ -2,7 +2,14 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.build import check_min_cppstd, cross_building
-from conan.tools.files import copy, get, rm, rmdir, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import (
+    copy,
+    get,
+    rm,
+    rmdir,
+    apply_conandata_patches,
+    export_conandata_patches,
+)
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 import os
@@ -10,14 +17,21 @@ import os
 
 required_conan_version = ">=1.52.0"
 
+#
+# INFO: Please, remove all comments before pushing your PR!
+#
+
 
 class PackageConan(ConanFile):
     name = "package"
     description = "short description"
-    license = "" # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
+    # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
+    # In case not listed there, use "LicenseRef-<license-file-name>"
+    license = ""
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/project/package"
-    topics = ("topic1", "topic2", "topic3") # no "conan"  and project name in topics
+    # no "conan" and project name in topics. Use topics from the upstream listed on GH
+    topics = ("topic1", "topic2", "topic3")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -42,23 +56,27 @@ class PackageConan(ConanFile):
     def configure(self):
         if self.options.shared:
             try:
-                del self.options.fPIC # once removed by config_options, need try..except for a second del
+                # once removed by config_options, need try..except for a second del
+                del self.options.fPIC
             except Exception:
                 pass
+        # for plain C projects only
         try:
-            del self.settings.compiler.libcxx # for plain C projects only
+            del self.settings.compiler.libcxx
         except Exception:
             pass
         try:
-            del self.settings.compiler.cppstd # for plain C projects only
+            del self.settings.compiler.cppstd
         except Exception:
             pass
 
     def layout(self):
-        basic_layout(self, src_folder="src") # src_folder must use the same source folder name the project
+        # src_folder must use the same source folder name the project
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("dependency/0.8.1") # prefer self.requires method instead of requires attribute
+        # prefer self.requires method instead of requires attribute
+        self.requires("dependency/0.8.1")
         if self.options.with_foobar:
             self.requires("foobar/0.1.0")
 
@@ -67,7 +85,9 @@ class PackageConan(ConanFile):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
         if self.info.settings.os not in ["Linux", "FreeBSD", "MacOS"]:
-            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.info.settings.os}.")
+            raise ConanInvalidConfiguration(
+                f"{self.ref} is not supported on {self.info.settings.os}."
+            )
 
     # if another tool than the compiler or autotools is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
@@ -75,8 +95,12 @@ class PackageConan(ConanFile):
         self.tool_requires("pkgconf/x.y.z")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(
+            self,
+            **self.conan_data["sources"][self.version],
+            destination=self.source_folder,
+            strip_root=True,
+        )
 
     def generate(self):
         # autotools usually uses 'yes' and 'no' to enable/disable options
@@ -114,7 +138,12 @@ class PackageConan(ConanFile):
         autotools.make()
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(
+            self,
+            pattern="LICENSE",
+            dst=os.path.join(self.package_folder, "licenses"),
+            src=self.source_folder,
+        )
         autotools = Autotools(self)
         autotools.install()
 
