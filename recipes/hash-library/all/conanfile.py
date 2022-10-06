@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake
 from conan.tools.files import apply_conandata_patches, get
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
 
 
 class HashLibraryConan(ConanFile):
@@ -25,7 +25,6 @@ class HashLibraryConan(ConanFile):
     generators = "CMakeToolchain"
     exports_sources = ["CMakeLists.txt", "patches/*"]
 
-    _cmake = None
 
     @property
     def _source_subfolder(self):

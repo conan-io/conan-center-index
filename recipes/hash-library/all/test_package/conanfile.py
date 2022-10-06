@@ -8,6 +8,7 @@ from conan.tools.cmake import CMake, cmake_layout
 class HashLibraryTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+    test_type = "explicit"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
@@ -21,6 +22,6 @@ class HashLibraryTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not cross_building(self):
+        if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
