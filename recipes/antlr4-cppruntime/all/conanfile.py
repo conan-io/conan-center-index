@@ -44,12 +44,6 @@ class Antlr4CppRuntimeConan(ConanFile):
         }
 
     def export_sources(self):
-        # We need this wrapper to build the library on Windows properly.
-        # We cannot use `cmake.configure(build_script_folder="runtime/Cpp")`,
-        # otherwise it is too late to set the option `WITH_STATIC_CRT`,
-        # and as a result the runtime library (< 4.11) is always built with static MSVC runtime.
-        # @see The function `def build(self)`.
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"))
         export_conandata_patches(self)
 
     def config_options(self):
@@ -111,7 +105,7 @@ class Antlr4CppRuntimeConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder="runtime/Cpp")
         cmake.build()
 
     def package(self):
