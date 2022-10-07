@@ -62,7 +62,7 @@ class MDSpanConan(ConanFile):
                         self.name, self._minimum_cpp_standard,
                         self.settings.compiler,
                         compiler_version))
-            if compiler_is_msvc and not check_min_vs(conanfile, self._minimum_compilers_version["msvc"]):
+            if compiler_is_msvc and not check_min_vs(self, self._minimum_compilers_version["msvc"]):
                 raise ConanInvalidConfiguration(
                     "Unsupported MSVC version {} due to upstream bug. The supported MSVC versions are > 15.0 and < 16.6 or >= 17.0."
                     "See upstream issue https://github.com/kokkos/mdspan/issues/26 for details.".format(
