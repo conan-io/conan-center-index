@@ -25,7 +25,7 @@ class LeptonicaConan(ConanFile):
         "fPIC": [True, False],
         "with_zlib": [True, False],
         "with_gif": [True, False],
-        "with_jpeg": ["libjpeg", "libjpeg-turbo", False],
+        "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
         "with_png": [True, False],
         "with_tiff": [True, False],
         "with_openjpeg": [True, False],
