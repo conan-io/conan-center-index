@@ -35,13 +35,10 @@ patches:
       patch_type: backport
       patch_description: fix for clang compilation
       patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/2898
-      base_path: "source_subfolder"
   "2.73.3":
     - patch_file: "patches/0001-2.73.3-clang-static-assert.patch"
       patch_type: backport
       patch_description: fix for clang compilation
       patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/2898
-      base_path: "source_subfolder"
   "2.73.1":
     - patch_file: "patches/f2ea67ae441bc6059b43a1051dd0b750fe5f6301.patch"
-      base_path: "source_subfolder"
