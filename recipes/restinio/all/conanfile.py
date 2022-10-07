@@ -71,19 +71,6 @@ class RestinioConan(ConanFile):
         elif self.options.with_pcre == 2:
             self.requires("pcre2/10.40")
 
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["RESTINIO_INSTALL"] = True
-        tc.variables["RESTINIO_FIND_DEPS"] = False
-        tc.variables["RESTINIO_USE_EXTERNAL_EXPECTED_LITE"] = True
-        tc.variables["RESTINIO_USE_EXTERNAL_OPTIONAL_LITE"] = True
-        tc.variables["RESTINIO_USE_EXTERNAL_STRING_VIEW_LITE"] = True
-        tc.variables["RESTINIO_USE_EXTERNAL_VARIANT_LITE"] = True
-        tc.generate()
-
-        deps = CMakeDeps(self)
-        deps.generate()
-
     def package_id(self):
         self.info.clear()
 
@@ -105,6 +92,19 @@ class RestinioConan(ConanFile):
                     f"{self.ref} requires C++{minimal_cpp_standard}, which your compiler does not support."
                 )
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["RESTINIO_INSTALL"] = True
+        tc.variables["RESTINIO_FIND_DEPS"] = False
+        tc.variables["RESTINIO_USE_EXTERNAL_EXPECTED_LITE"] = True
+        tc.variables["RESTINIO_USE_EXTERNAL_OPTIONAL_LITE"] = True
+        tc.variables["RESTINIO_USE_EXTERNAL_STRING_VIEW_LITE"] = True
+        tc.variables["RESTINIO_USE_EXTERNAL_VARIANT_LITE"] = True
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
                 destination=self.source_folder, strip_root=True)
@@ -112,8 +112,7 @@ class RestinioConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(
-            self.source_folder, "dev", "restinio"))
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, "dev", "restinio"))
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib"))
 
