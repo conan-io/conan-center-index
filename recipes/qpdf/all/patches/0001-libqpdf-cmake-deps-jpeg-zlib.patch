@@ -1,50 +1,33 @@
 diff --git a/libqpdf/CMakeLists.txt b/libqpdf/CMakeLists.txt
-index 7053e205..877c6f44 100644
+index 7053e205..5972b4e6 100644
 --- a/libqpdf/CMakeLists.txt
 +++ b/libqpdf/CMakeLists.txt
-@@ -403,6 +403,9 @@ endif()
+@@ -403,6 +403,10 @@ endif()
  # use PIC for the object library so we don't have to compile twice.
  set(OBJECT_LIB libqpdf_object)
  add_library(${OBJECT_LIB} OBJECT ${libqpdf_SOURCES})
 +find_package(JPEG REQUIRED)
 +find_package(ZLIB REQUIRED)
++target_link_libraries(${OBJECT_LIB} PUBLIC JPEG::JPEG ZLIB::ZLIB)
 +
  if(OBJECT_LIB_IS_PIC)
    target_compile_definitions(${OBJECT_LIB} PRIVATE libqpdf_EXPORTS)
  endif()
-@@ -417,9 +420,9 @@ target_include_directories(${OBJECT_LIB}
-   ${qpdf_SOURCE_DIR}/libqpdf
-   ${CMAKE_CURRENT_BINARY_DIR})
- target_link_directories(${OBJECT_LIB} INTERFACE ${dep_link_directories})
--target_link_libraries(${OBJECT_LIB} INTERFACE ${dep_link_libraries})
-+target_link_libraries(${OBJECT_LIB} INTERFACE ${dep_link_libraries} PUBLIC JPEG::JPEG ZLIB::ZLIB)
- if(ATOMIC_LIBRARY)
--  target_link_libraries(${OBJECT_LIB} INTERFACE ${ATOMIC_LIBRARY})
-+  target_link_libraries(${OBJECT_LIB} INTERFACE ${ATOMIC_LIBRARY} PUBLIC JPEG::JPEG ZLIB::ZLIB)
- endif()
- 
- set(LD_VERSION_FLAGS "")
-@@ -498,10 +501,8 @@ if(BUILD_SHARED_LIBS)
-     PUBLIC
-     $<BUILD_INTERFACE:${qpdf_INCLUDE}>
-     $<INSTALL_INTERFACE:include>)
--  target_link_directories(${SHARED_LIB} PRIVATE ${dep_link_directories})
--  target_link_libraries(${SHARED_LIB} PRIVATE ${dep_link_libraries})
-   if(ATOMIC_LIBRARY)
--    target_link_libraries(${SHARED_LIB} PRIVATE ${ATOMIC_LIBRARY})
-+    target_link_libraries(${SHARED_LIB} PRIVATE ${ATOMIC_LIBRARY} PUBLIC JPEG::JPEG ZLIB::ZLIB)
-   endif()
-   if(LD_VERSION_FLAGS)
+@@ -507,6 +511,8 @@ if(BUILD_SHARED_LIBS)
      target_link_options(${SHARED_LIB} PRIVATE ${LD_VERSION_FLAGS})
-@@ -539,9 +540,9 @@ if(BUILD_STATIC_LIBS)
-   target_link_directories(${STATIC_LIB}
-     INTERFACE $<BUILD_INTERFACE:${dep_link_directories}>
-     PRIVATE $<INSTALL_INTERFACE:${dep_link_directories}>)
--  target_link_libraries(${STATIC_LIB} INTERFACE ${dep_link_libraries})
-+  target_link_libraries(${STATIC_LIB} INTERFACE ${dep_link_libraries} PUBLIC JPEG::JPEG ZLIB::ZLIB)
-   if(ATOMIC_LIBRARY)
--    target_link_libraries(${STATIC_LIB} INTERFACE ${ATOMIC_LIBRARY})
-+    target_link_libraries(${STATIC_LIB} INTERFACE ${ATOMIC_LIBRARY} PUBLIC JPEG::JPEG ZLIB::ZLIB)
    endif()
  
++  target_link_libraries(${SHARED_LIB} PUBLIC JPEG::JPEG ZLIB::ZLIB)
++
+   target_include_directories(${SHARED_LIB}
+     PRIVATE ${qpdf_SOURCE_DIR}/libqpdf ${CMAKE_CURRENT_BINARY_DIR})
+ 
+@@ -544,6 +550,8 @@ if(BUILD_STATIC_LIBS)
+     target_link_libraries(${STATIC_LIB} INTERFACE ${ATOMIC_LIBRARY})
+   endif()
+ 
++  target_link_libraries(${STATIC_LIB} PUBLIC JPEG::JPEG ZLIB::ZLIB)
++
    # Avoid name clashes on Windows with the the DLL import library.
+   if(NOT DEFINED STATIC_SUFFIX AND BUILD_SHARED_LIBS)
+     if (WIN32)
