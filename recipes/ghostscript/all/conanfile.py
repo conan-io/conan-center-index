@@ -5,7 +5,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.build import check_min_cppstd, cross_building
-from conan.tools.files import copy, get, rm, rmdir, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import copy, get, rm, rmdir, rename, apply_conandata_patches, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 import os
@@ -129,7 +129,6 @@ class PackageConan(ConanFile):
             autotools.make(target="so")
         if self.options.shared == False:
             autotools.make(target="libgs")
-        
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
@@ -138,10 +137,11 @@ class PackageConan(ConanFile):
         autotools.make(target="soinstall")
         if self.options.shared == False:
             copy(self, pattern="gs.a", dst=os.path.join(self.package_folder, "lib"), src=os.path.join(self.build_folder, "bin"))
-
-
+            rename(self, os.path.join(self.package_folder, "lib", "gs.a"), os.path.join(self.package_folder, "lib", "libgs.a"))
+            rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = ["gs"]
