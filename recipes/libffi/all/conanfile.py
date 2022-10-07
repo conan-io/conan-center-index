@@ -1,13 +1,13 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.0"
 
 
 class PackageConan(ConanFile):
@@ -16,15 +16,14 @@ class PackageConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sourceware.org/libffi/"
-    topics = ("libffi", "runtime", "foreign-function-interface", "runtime-library")
+    topics = ("runtime", "foreign-function-interface", "runtime-library")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False
-        ,
+        "shared": False,
         "fPIC": True,
     }
 
@@ -38,8 +37,7 @@ class PackageConan(ConanFile):
         return self._settings_build.os == "Windows"
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
