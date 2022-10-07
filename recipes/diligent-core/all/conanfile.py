@@ -59,7 +59,7 @@ class DiligentCoreConan(ConanFile):
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder, keep_path=False)
         export_conandata_patches(self)
         
     def source(self):
@@ -111,7 +111,8 @@ class DiligentCoreConan(ConanFile):
 
     def requirements(self):
         self.requires("opengl/system")
-        self.requires("wayland/1.21.0")
+        if self.settings.os == "Linux":
+            self.requires("wayland/1.21.0")
 
         self.requires("spirv-cross/1.3.216.0")
         self.requires("spirv-tools/1.3.216.0")
