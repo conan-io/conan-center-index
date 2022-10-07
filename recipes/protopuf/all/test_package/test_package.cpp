@@ -1,3 +1,5 @@
+#include <array>
+
 #include "protopuf/message.h"
 
 using namespace pp;
