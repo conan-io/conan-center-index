@@ -3,5 +3,5 @@
 
 int main(void) {
     gsapi_revision_t r;
-    printf("gsapi_revision: %s", gsapi_revision(&r, sizeof(r)));
+    printf("gsapi_revision: %i", gsapi_revision(&r, sizeof(r)).revision);
 }

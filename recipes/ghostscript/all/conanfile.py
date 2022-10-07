@@ -13,9 +13,8 @@ import os
 
 required_conan_version = ">=1.52.0"
 
-# conan create . gs/10.0.0@ -pr:b=default -pr:h=default --build=missing
 class PackageConan(ConanFile):
-    name = "gs"
+    name = "ghostscript"
     description = "Ghostscript is an interpreter for the PostScript®  language and PDF files."
     license = "AGPL-3.0"
     # licence refrences from LICENCE file description and home page documentation as one of the two sides of the dual licensing model:
@@ -134,19 +133,19 @@ class PackageConan(ConanFile):
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-
-        if self.options.shared == False:
-            copy(self, pattern="gs.a", dst=os.path.join(self.package_folder, "lib"), src=os.path.join(self.build_folder, "bin"))
         autotools = Autotools(self)
         # autotools.install()
         autotools.make(target="soinstall")
+        if self.options.shared == False:
+            copy(self, pattern="gs.a", dst=os.path.join(self.package_folder, "lib"), src=os.path.join(self.build_folder, "bin"))
 
-        # rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["gs"]
-        self.cpp_info.set_property("pkg_config_name", "package")
+        self.cpp_info.set_property("pkg_config_name", "libgs")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
