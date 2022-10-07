@@ -7,7 +7,7 @@ from conan.tools.layout import basic_layout
 import os
 
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.47.0"
 
 
 class ProtopufConan(ConanFile):
