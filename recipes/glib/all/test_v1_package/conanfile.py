@@ -16,9 +16,10 @@ class TestPackageConan(ConanFile):
                 pkg_config = tools.PkgConfig("gio-2.0")
                 self.run(f"{pkg_config.variables['gdbus_codegen']} -h", run_environment=True)
 
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        with tools.environment_append({'PKG_CONFIG_PATH': "."}):
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
     def test(self):
         if not tools.cross_building(self):
