@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
+from conan.tools.build import can_run
 from conan.tools.files import get, replace_in_file, rmdir, rm, copy
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.layout import basic_layout
@@ -23,8 +23,6 @@ class GccConan(ConanFile):
     requires = 'mpc/1.2.0', 'mpfr/4.1.0', 'gmp/6.2.1', 'zlib/1.2.12', 'isl/0.24'
     tool_requires = 'flex/2.6.4'
     short_paths = True
-
-    _auto_tools = None
 
     def layout(self):
         basic_layout(self, src_folder=f'gcc-{self.version}')
@@ -56,18 +54,11 @@ class GccConan(ConanFile):
             raise ConanInvalidConfiguration('Windows is not yet supported. Contributions are welcome')
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("Apple silicon is not yet supported. Contributions are welcome")
-        if cross_building(self):
+        if not can_run(self):
             raise ConanInvalidConfiguration('no cross-building support (yet), sorry')
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    @property
-    def auto_tools(self):
-        if self._auto_tools is not None:
-            return self._auto_tools
-        self._auto_tools = Autotools(self)
-        return self._auto_tools
 
     def build(self):
         # If building on x86_64, change the default directory name for 64-bit libraries to "lib":
@@ -80,17 +71,19 @@ class GccConan(ConanFile):
                         '@shlib_slibdir@',
                         os.path.join(self.package_folder, 'lib'),
                         strict=False)
-        self.auto_tools.configure()
-        self.auto_tools.make()
+        auto_tools = Autotools(self)
+        auto_tools.configure()
+        auto_tools.make()
 
     def package_id(self):
         del self.info.settings.compiler
 
     def package(self):
+        auto_tools = Autotools(self)
         if self.settings.build_type == 'Debug':
-            self.auto_tools.install()
+            auto_tools.install()
         else:
-            self.auto_tools.make('install-strip')
+            auto_tools.make('install-strip')
         rmdir(self, os.path.join(self.package_folder, 'share'))
         rm(self, '*.la', self.package_folder, recursive=True)
         copy(self, pattern='COPYING*', dst=os.path.join(self.package_folder, 'licenses'), src=self.source_folder)
@@ -98,15 +91,15 @@ class GccConan(ConanFile):
     def package_info(self):
         bindir = os.path.join(self.package_folder, 'bin')
         self.output.info('Appending PATH env var with : ' + bindir)
-        self.env_info.PATH = [bindir] + self.env_info.PATH
+        self.runenv_info.append('PATH', bindir)
 
         cc = os.path.join(bindir, f'gcc-{self.version}')
         self.output.info('Creating CC env var with : ' + cc)
-        self.env_info.CC = cc
+        self.runenv_info.define('CC', cc)
 
         cxx = os.path.join(bindir, f'g++-{self.version}')
         self.output.info('Creating CXX env var with : ' + cxx)
-        self.env_info.CXX = cxx
+        self.runenv_info.define('CXX', cxx)
 
         if self.settings.os in ['Linux', 'FreeBSD']:
             self.cpp_info.system_libs = ['pthread', 'rt', 'dl', 'm']
