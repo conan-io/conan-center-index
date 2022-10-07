@@ -118,6 +118,9 @@ class RestinioConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
         self.cpp_info.set_property("cmake_file_name", "restinio")
         self.cpp_info.set_property("cmake_target_name", "restinio::restinio")
         self.cpp_info.defines.extend(["RESTINIO_EXTERNAL_EXPECTED_LITE", "RESTINIO_EXTERNAL_OPTIONAL_LITE",
