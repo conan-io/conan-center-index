@@ -42,7 +42,7 @@ class ProtopufConan(ConanFile):
     def validate(self):
         if self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._minimum_cpp_standard}, apple-clang does not support(yet)."
+                f"{self.ref} does not yet support apple-clang."
             )
 
         if self.settings.get_safe("compiler.cppstd"):
