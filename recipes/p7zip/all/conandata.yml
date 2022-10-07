@@ -1,0 +1,24 @@
+sources:
+  "16.02":
+    url: https://downloads.sourceforge.net/project/p7zip/p7zip/16.02/p7zip_16.02_src_all.tar.bz2
+    sha256: "5eb20ac0e2944f6cb9c2d51dd6c4518941c185347d4089ea89087ffdd6e2341f"
+patches:
+  "16.02":
+    - patch_file: "patches/12-CVE-2016-9296.patch"
+      base_path: "source_subfolder"
+      patch_description: "From https://github.com/conda-forge/p7zip-feedstock/tree/main/recipe"
+    - patch_file: "patches/13-CVE-2017-17969.patch"
+      base_path: "source_subfolder"
+      patch_description: "From https://github.com/conda-forge/p7zip-feedstock/tree/main/recipe"
+    - patch_file: "patches/14-Fix-g++-warning.patch"
+      base_path: "source_subfolder"
+      patch_description: "From https://github.com/conda-forge/p7zip-feedstock/tree/main/recipe"
+    - patch_file: "patches/clang.diff"
+      base_path: "source_subfolder"
+      patch_description: "From https://github.com/conda-forge/p7zip-feedstock/tree/main/recipe"
+    - patch_file: "patches/06-CVE-2018-5996.patch"
+      base_path: "source_subfolder"
+      patch_description: "From https://salsa.debian.org/debian/p7zip-rar/-/tree/debian/16.02-3/debian/patches"
+    - patch_file: "patches/CVE-2018-10115.patch"
+      base_path: "source_subfolder"
+      patch_description: "From https://salsa.debian.org/debian/p7zip-rar/-/tree/debian/16.02-3/debian/patches"
