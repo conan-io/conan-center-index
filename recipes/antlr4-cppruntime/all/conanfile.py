@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, check_min_vs
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rm, rmdir, save
 from conan.tools.env import VirtualBuildEnv
@@ -79,12 +79,10 @@ class Antlr4CppRuntimeConan(ConanFile):
         compiler_version = Version(compiler.version)
         antlr_version = Version(self.version)
 
-        if (compiler == "Visual Studio" and compiler_version < "16") or \
-           (compiler == "msvc" and compiler_version < "1920"):
-            raise ConanInvalidConfiguration("library claims C2668 'Ambiguous call to overloaded function'")
-            # Compilation of this library on version 15 claims C2668 Error.
-            # This could be Bogus error or malformed Antlr4 library.
-            # Version 16 compiles this code correctly.
+        # Compilation of this library on version 15 claims C2668 Error.
+        # This could be Bogus error or malformed Antlr4 library.
+        # Guard: The minimum MSVC version is 16 or 1920
+        check_min_vs(self, "1920")
 
         if antlr_version >= "4.10":
             # Antlr4 for 4.9.3 does not require C++17 - C++11 is enough.
