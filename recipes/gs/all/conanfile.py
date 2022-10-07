@@ -55,22 +55,23 @@ class PackageConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
+        # pass
         # self.requires("fontconfig/2.13.93")
         # self.requires("freetype/2.12.1")
-        self.requires("lcms/2.13.1")
+        # self.requires("lcms/2.13.1")
         if self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.1.4")
         elif self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
-        self.requires("libpng/1.6.38")
+        # self.requires("libpng/1.6.38")
         self.requires("libtiff/4.4.0")
-        self.requires("openjpeg/2.5.0")
-        self.requires("libidn/1.36")
-        self.requires("zlib/1.2.12")
+        # self.requires("openjpeg/2.5.0")
+        # self.requires("libidn/1.36")
+        # self.requires("zlib/1.2.12")
         # self.requires("tesseract/5.2.0")
         # self.requires("leptonica/1.82.0")
 
-        self.requires("libiconv/1.17")
+        # self.requires("libiconv/1.17")
         # not handled: cups
         # optional:
         # cairo/1.17.4
@@ -93,32 +94,26 @@ class PackageConan(ConanFile):
         # 'freetype'
         # 'leptonica'
         # 'tesseract'
-        for directory in ['jpeg', 'lcms2mt', 'libpng', 'openjpeg', 'tiff', 'zlib']:
+        # for directory in ['jpeg', 'lcms2mt', 'libpng', 'openjpeg', 'tiff', 'zlib']:
+        # for directory in ['jpeg', 'openjpeg', 'tiff']:
+        #     rmdir(self, os.path.join(self.source_folder, directory))
+        for directory in ['jpeg', 'tiff']:
             rmdir(self, os.path.join(self.source_folder, directory))
-       
 
     def generate(self):
-        # autotools usually uses 'yes' and 'no' to enable/disable options
-        yes_no = lambda v: "yes" if v else "no"
-        # --fpic is automatically managed when 'fPIC'option is declared
-        # --enable/disable-shared is automatically managed when 'shared' option is declared
+        # https://ghostscript.readthedocs.io/en/gs10.0.0/Make.html#how-to-prepare-the-makefiles
         tc = AutotoolsToolchain(self)
-        # tc.configure_args.append("--with-foobar=%s" % yes_no(self.options.with_foobar))
-        # tc.configure_args.append("--enable-tools=no")
-        # tc.configure_args.append("--enable-manpages=no")
+        tc.configure_args.append("--disable-compile-inits")
+        tc.configure_args.append("--with-system-libtiff")
         tc.configure_args.append("--without-tesseract")
+        tc.configure_args.append("--prefix="+self.package_folder)
         tc.generate()
-        # generate dependencies for pkg-config
         tc = PkgConfigDeps(self)
         tc.generate()
-        # generate dependencies for autotools
         tc = AutotoolsDeps(self)
         tc.generate()
-        # inject tools_requires env vars in build scope (not needed if there is no tool_requires)
         env = VirtualBuildEnv(self)
         env.generate()
-        # inject requires env vars in build scope
-        # it's required in case of native build when there is AutotoolsDeps & at least one dependency which might be shared, because configure tries to run a test executable
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
@@ -127,30 +122,31 @@ class PackageConan(ConanFile):
         # apply patches listed in conandata.yml
         # apply_conandata_patches(self)
         autotools = Autotools(self)
-        # run autoreconf to generate configure file
         autotools.autoreconf()
-        # ./configure + toolchain file
         autotools.configure()
+        # https://bugs.ghostscript.com/show_bug.cgi?id=705960
         autotools.make()
-        autotools.make(target="so")
+        if self.options.shared == True:
+            autotools.make(target="so")
+        if self.options.shared == False:
+            autotools.make(target="libgs")
+        
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        autotools = Autotools(self)
-        autotools.install()
 
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if self.options.shared == False:
+            copy(self, pattern="gs.a", dst=os.path.join(self.package_folder, "lib"), src=os.path.join(self.build_folder, "bin"))
+        autotools = Autotools(self)
+        # autotools.install()
+        autotools.make(target="soinstall")
+
+        # rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["package_lib"]
-
-        # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
+        self.cpp_info.libs = ["gs"]
         self.cpp_info.set_property("pkg_config_name", "package")
-
-        # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
