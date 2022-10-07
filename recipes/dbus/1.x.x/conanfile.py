@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout, cmake_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -177,6 +177,7 @@ class DbusConan(ConanFile):
             cmake = CMake(self)
             cmake.install()
 
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "share", "doc"))
         mkdir(self, os.path.join(self.package_folder, "res"))
         for i in ["var", "share", "etc"]:
