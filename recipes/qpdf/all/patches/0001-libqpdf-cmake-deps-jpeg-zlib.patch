@@ -1,5 +1,5 @@
 diff --git a/libqpdf/CMakeLists.txt b/libqpdf/CMakeLists.txt
-index 7053e205..1d0b2e14 100644
+index 7053e205..8fd72c11 100644
 --- a/libqpdf/CMakeLists.txt
 +++ b/libqpdf/CMakeLists.txt
 @@ -403,6 +403,11 @@ endif()
@@ -8,7 +8,7 @@ index 7053e205..1d0b2e14 100644
  add_library(${OBJECT_LIB} OBJECT ${libqpdf_SOURCES})
 +find_package(JPEG REQUIRED)
 +find_package(ZLIB REQUIRED)
-+target_link_libraries(${OBJECT_LIB} PRIVATE JPEG::JPEG)
++target_link_libraries(${OBJECT_LIB} PUBLIC JPEG::JPEG)
 +target_link_libraries(${OBJECT_LIB} PUBLIC ZLIB::ZLIB)
 +
  if(OBJECT_LIB_IS_PIC)
