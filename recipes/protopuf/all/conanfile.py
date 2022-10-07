@@ -30,7 +30,7 @@ class ProtopufConan(ConanFile):
             "Visual Studio": "16",
             "msvc": "192",
             "gcc": "10",
-            "clang": "10",
+            "clang": "12",
             "apple-clang": "10",
         }
 
