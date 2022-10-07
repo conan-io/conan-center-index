@@ -39,7 +39,6 @@ class GLibConan(ConanFile):
         "with_mount": True,
         "with_selinux": True,
     }
-
     short_paths = True
 
     def export_sources(self):
