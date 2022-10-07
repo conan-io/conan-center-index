@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake
 from conan.tools.layout import basic_layout
-from conan.tools import build
+from conan.tools.build import can_run
 
 
 class TestPackageConan(ConanFile):
@@ -23,6 +23,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if build.can_run(self):
+        if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")

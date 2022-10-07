@@ -5,7 +5,15 @@ from conan import ConanFile
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.env import VirtualBuildEnv
-from conan.tools import files, microsoft, scm
+from conan.tools.files import (
+    copy,
+    get,
+    rename,
+    rm,
+    rmdir
+)
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 
@@ -35,7 +43,7 @@ class LibnameConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.settings.compiler == "gcc":
-            if scm.Version(self.settings.compiler.version) < "5.0":
+            if Version(self.settings.compiler.version) < "5.0":
                 raise ConanInvalidConfiguration("graphene does not support GCC before 5.0")
 
     def build_requirements(self):
@@ -55,18 +63,19 @@ class LibnameConan(ConanFile):
             self.options["glib"].shared = True
 
     def validate(self):
-        if self.options.with_glib:
-            if self.options.shared and not self.options["glib"].shared:
+        if self.info.options.with_glib:
+            glib_is_shared = self.dependencies.direct_host["glib"].options.shared
+            if self.info.options.shared and not glib_is_shared:
                 raise ConanInvalidConfiguration(
                     "Linking a shared library against static glib can cause unexpected behaviour."
                 )
-            if self.options["glib"].shared and microsoft.is_msvc_static_runtime(self):
+            if glib_is_shared and is_msvc_static_runtime(self):
                 raise ConanInvalidConfiguration(
                     "Linking shared glib with the MSVC static runtime is not supported"
                 )
 
     def layout(self):
-        basic_layout(self, src_folder="source")
+        basic_layout(self, src_folder="src")
 
     def generate(self):
         deps = PkgConfigDeps(self)
@@ -79,7 +88,7 @@ class LibnameConan(ConanFile):
             "gtk_doc": "false"
         })
         meson.project_options["gobject_types"] = "true" if self.options.with_glib else "false"
-        if scm.Version(self.version) < "1.10.4":
+        if Version(self.version) < "1.10.4":
             meson.project_options["introspection"] = "false"
         else:
             meson.project_options["introspection"] = "disabled"
@@ -89,7 +98,7 @@ class LibnameConan(ConanFile):
         venv.generate()
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @functools.lru_cache(1)
     def _configure_meson(self):
@@ -104,14 +113,14 @@ class LibnameConan(ConanFile):
     def package(self):
         meson = self._configure_meson()
         meson.install()
-        files.copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
-        if microsoft.is_msvc(self) and not self.options.shared:
+        if is_msvc(self) and not self.options.shared:
             libfolder = os.path.join(self.package_folder, "lib")
-            files.rename(self, os.path.join(libfolder, "libgraphene-1.0.a"), os.path.join(libfolder, "graphene-1.0.lib"))
+            rename(self, os.path.join(libfolder, "libgraphene-1.0.a"), os.path.join(libfolder, "graphene-1.0.lib"))
 
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        files.rm(self, "*.pdb", self.package_folder, recursive=True)
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.components["graphene-1.0"].set_property("pkg_config_name", "graphene-1.0")
