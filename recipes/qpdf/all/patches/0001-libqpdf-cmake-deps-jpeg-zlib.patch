@@ -1,5 +1,5 @@
 diff --git a/libqpdf/CMakeLists.txt b/libqpdf/CMakeLists.txt
-index 7053e205..8fd72c11 100644
+index 7053e205..37e40eb7 100644
 --- a/libqpdf/CMakeLists.txt
 +++ b/libqpdf/CMakeLists.txt
 @@ -403,6 +403,11 @@ endif()
@@ -23,3 +23,23 @@ index 7053e205..8fd72c11 100644
    if(ATOMIC_LIBRARY)
      target_link_libraries(${SHARED_LIB} PRIVATE ${ATOMIC_LIBRARY})
    endif()
+@@ -507,6 +510,9 @@ if(BUILD_SHARED_LIBS)
+     target_link_options(${SHARED_LIB} PRIVATE ${LD_VERSION_FLAGS})
+   endif()
+ 
++  target_link_libraries(${SHARED_LIB} PUBLIC JPEG::JPEG)
++  target_link_libraries(${SHARED_LIB} PUBLIC ZLIB::ZLIB)
++
+   target_include_directories(${SHARED_LIB}
+     PRIVATE ${qpdf_SOURCE_DIR}/libqpdf ${CMAKE_CURRENT_BINARY_DIR})
+ 
+@@ -544,6 +550,9 @@ if(BUILD_STATIC_LIBS)
+     target_link_libraries(${STATIC_LIB} INTERFACE ${ATOMIC_LIBRARY})
+   endif()
+ 
++  target_link_libraries(${STATIC_LIB} PUBLIC JPEG::JPEG)
++  target_link_libraries(${STATIC_LIB} PUBLIC ZLIB::ZLIB)
++
+   # Avoid name clashes on Windows with the the DLL import library.
+   if(NOT DEFINED STATIC_SUFFIX AND BUILD_SHARED_LIBS)
+     if (WIN32)
