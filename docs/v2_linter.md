@@ -3,9 +3,9 @@
 <!-- toc -->
 ## Contents
 
+  * [Running the linter locally](#running-the-linter-locally)
   * [Import ConanFile from `conan`](#import-conanfile-from-conan)
-  * [Import tools from `conan`](#import-tools-from-conan)
-  * [Running the linter locally](#running-the-linter-locally)<!-- endToc -->
+  * [Import tools from `conan`](#import-tools-from-conan)<!-- endToc -->
 
 On our [path to Conan v2](v2_roadmap.md) we are leveraging on custom Pylint rules. This
 linter will run for every pull-request that is submitted to the repository and will
