@@ -94,9 +94,6 @@ class Antlr4CppRuntimeConan(ConanFile):
             if minimum_version and compiler_version < minimum_version:
                 raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
 
-            if is_msvc(self) and antlr_version == "4.10":
-                raise ConanInvalidConfiguration(f"{self.ref} is broken on msvc - Use 4.10.1 or above.")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
