@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.files import rm, get, rmdir, rename, collect_libs, patches, export_conandata_patches, copy
+from conan.tools.files import rm, get, rmdir, rename, collect_libs, export_conandata_patches, copy
 from conan.tools.apple import is_apple_os
 import os
 
@@ -28,7 +28,6 @@ class DiligentCoreConan(ConanFile):
         "fPIC": True,
         "with_glslang": True
     }
-    generators = "CMakeToolchain", "CMakeDeps"
     short_paths = True
 
     @property
@@ -145,7 +144,7 @@ class DiligentCoreConan(ConanFile):
             return "PLATFORM_TVOS"
 
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
