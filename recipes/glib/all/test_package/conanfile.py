@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
-from conan.tools.env import Environment, VirtualRunEnv
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.gnu import PkgConfig, PkgConfigDeps
 import os
 
@@ -33,6 +33,9 @@ class TestPackageConan(ConanFile):
             env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
             envvars = env.vars(self)
             envvars.save_script("pkg_config")
+
+            virtual_build_env = VirtualBuildEnv(self)
+            virtual_build_env.generate()
             virtual_run_env = VirtualRunEnv(self)
             virtual_run_env.generate()
             pkg_config_deps = PkgConfigDeps(self)
@@ -52,7 +55,7 @@ class TestPackageConan(ConanFile):
             self.run(bin_path, env="conanrun")
 
             if self.settings.os != "Windows":
-                pkg_config = PkgConfig(self, "gio-2.0", self.generators_folder)
+                pkg_config = PkgConfig(self, "gio-2.0", pkg_config_path=self.generators_folder)
                 gdbus_codegen = pkg_config.variables["gdbus_codegen"]
                 self.run(f"{gdbus_codegen} -h", env="conanrun")
 
