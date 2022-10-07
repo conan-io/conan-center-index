@@ -1,5 +1,5 @@
 diff --git a/libqpdf/CMakeLists.txt b/libqpdf/CMakeLists.txt
-index 7053e205..03f50a50 100644
+index 7053e205..7c8bfa28 100644
 --- a/libqpdf/CMakeLists.txt
 +++ b/libqpdf/CMakeLists.txt
 @@ -403,6 +403,10 @@ endif()
@@ -33,7 +33,7 @@ index 7053e205..03f50a50 100644
 -  target_link_libraries(${SHARED_LIB} PRIVATE ${dep_link_libraries})
    if(ATOMIC_LIBRARY)
 -    target_link_libraries(${SHARED_LIB} PRIVATE ${ATOMIC_LIBRARY})
-+    target_link_libraries(${SHARED_LIB} PRIVATE ${ATOMIC_LIBRARY} JPEG::JPEG ZLIB::ZLIB OpenSSL::SSL)
++    target_link_libraries(${SHARED_LIB} PRIVATE ${ATOMIC_LIBRARY} PUBLIC JPEG::JPEG ZLIB::ZLIB OpenSSL::SSL)
    endif()
    if(LD_VERSION_FLAGS)
      target_link_options(${SHARED_LIB} PRIVATE ${LD_VERSION_FLAGS})
@@ -42,10 +42,10 @@ index 7053e205..03f50a50 100644
      INTERFACE $<BUILD_INTERFACE:${dep_link_directories}>
      PRIVATE $<INSTALL_INTERFACE:${dep_link_directories}>)
 -  target_link_libraries(${STATIC_LIB} INTERFACE ${dep_link_libraries})
-+  target_link_libraries(${STATIC_LIB} INTERFACE ${dep_link_libraries} JPEG::JPEG ZLIB::ZLIB OpenSSL::SSL)
++  target_link_libraries(${STATIC_LIB} INTERFACE ${dep_link_libraries} PUBLIC JPEG::JPEG ZLIB::ZLIB OpenSSL::SSL)
    if(ATOMIC_LIBRARY)
 -    target_link_libraries(${STATIC_LIB} INTERFACE ${ATOMIC_LIBRARY})
-+    target_link_libraries(${STATIC_LIB} INTERFACE ${ATOMIC_LIBRARY} JPEG::JPEG ZLIB::ZLIB OpenSSL::SSL)
++    target_link_libraries(${STATIC_LIB} INTERFACE ${ATOMIC_LIBRARY} PUBLIC JPEG::JPEG ZLIB::ZLIB OpenSSL::SSL)
    endif()
  
    # Avoid name clashes on Windows with the the DLL import library.
