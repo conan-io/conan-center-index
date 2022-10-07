@@ -307,6 +307,7 @@ class GLibConan(ConanFile):
             'datadir': '${prefix}/res',
             'schemasdir': '${datadir}/glib-2.0/schemas',
             'bindir': '${prefix}/bin',
+            # Can't use libdir here as it is libdir1 when using the PkgConfigDeps generator.
             'giomoduledir': '${prefix}/lib/gio/modules',
             'gio': '${bindir}/gio',
             'gio_querymodules': '${bindir}/gio-querymodules',
