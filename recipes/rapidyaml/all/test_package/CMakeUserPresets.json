@@ -1,0 +1,9 @@
+{
+    "version": 4,
+    "vendor": {
+        "conan": {}
+    },
+    "include": [
+        "/home/toge/src/conan-center-index/recipes/rapidyaml/all/test_package/build/generators/CMakePresets.json"
+    ]
+}
