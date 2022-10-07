@@ -102,7 +102,7 @@ class Antlr4CppRuntimeConan(ConanFile):
         tc.variables["WITH_LIBCXX"] = self.settings.compiler.get_safe("libcxx") == "libc++"
         tc.variables["ANTLR_BUILD_CPP_TESTS"] = False
         if is_msvc(self):
-            tc.variables["WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
+            tc.cache_variables["WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
         tc.variables["WITH_DEMO"] = False
         tc.generate()
         tc = CMakeDeps(self)
