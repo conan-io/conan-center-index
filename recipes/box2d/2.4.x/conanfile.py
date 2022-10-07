@@ -18,7 +18,7 @@ class Box2dConan(ConanFile):
     options = {"shared": [True, False],
                "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True,}
-    
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -44,6 +44,7 @@ class Box2dConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.variables["BOX2D_BUILD_TESTBED"] = False
         tc.variables["BOX2D_BUILD_UNIT_TESTS"] = False
         tc.generate()

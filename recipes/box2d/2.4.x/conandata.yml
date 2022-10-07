@@ -8,5 +8,3 @@ sources:
 patches:
   "2.4.0":
     - patch_file: "patches/0001-install-and-allow-shared.patch"
-  "2.4.1":
-    - patch_file: "patches/0002-fix-shared-builds.patch"
