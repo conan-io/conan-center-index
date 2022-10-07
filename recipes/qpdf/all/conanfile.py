@@ -10,7 +10,7 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.env import VirtualBuildEnv, Environment
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.0"
 
 class PackageConan(ConanFile):
     name = "qpdf"
@@ -97,7 +97,6 @@ class PackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         # https://qpdf.readthedocs.io/en/latest/installation.html#build-time-crypto-selection
         tc.variables["USE_IMPLICIT_CRYPTO"] = False
@@ -122,7 +121,7 @@ class PackageConan(ConanFile):
         envvars = env.vars(self)
         envvars.save_script("pkg_config")
 
-    def build(self):
+    def _patch_sources(self):
         # patch 0001 and 0002 are uniquely appliable, based ony dependency config
         patches_to_apply = ["0003-exclude-unnecessary-cmake-subprojects.patch"]
         if self.options.with_crypto == "openssl":
@@ -132,6 +131,9 @@ class PackageConan(ConanFile):
         for patch_file in patches_to_apply:
             patch(self, base_path=self.source_folder,
                   patch_file=os.path.join(self.source_folder, "..", "patches", patch_file))
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
