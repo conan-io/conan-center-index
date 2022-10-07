@@ -82,7 +82,6 @@ class RestinioConan(ConanFile):
             "gcc": "5",
             "clang": "3.4",
             "apple-clang": "10",
-            "Visual Studio": "15"
         }
         check_min_vs(self, 190)
         if not is_msvc(self):
