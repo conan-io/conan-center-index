@@ -43,7 +43,7 @@ class HashLibraryConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-       get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
         apply_conandata_patches(self)
