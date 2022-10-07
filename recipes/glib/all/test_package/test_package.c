@@ -14,7 +14,14 @@ int main() {
     GQueue *queue = g_queue_new();
     g_queue_free(queue);
 
-    g_module_supported();
+    const gboolean supported = g_module_supported();
+    if (supported) {
+        printf("glib module supported: true\n");
+    }
+    else {
+        printf("glib module supported: false\n");
+    }
+
 
     GMutex m;
     g_mutex_init(&m);
