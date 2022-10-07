@@ -67,7 +67,7 @@ class MDSpanConan(ConanFile):
                     "Unsupported MSVC version {} due to upstream bug. The supported MSVC versions are > 15.0 and < 16.6 or >= 17.0."
                     "See upstream issue https://github.com/kokkos/mdspan/issues/26 for details.".format(
                         compiler_version))
-            if compiler_is_msvc and Version(self.version) < "0.4.0" and check_min_vs(conanfile, "1930"): # msc_ver for vs 17.0
+            if compiler_is_msvc and Version(self.version) < "0.4.0" and check_min_vs(self, "1930"): # msc_ver for vs 17.0
                 raise ConanInvalidConfiguration(
                     "Old mdspan versions ( < 0.4.0) doesn't build properly on MSVC version {} due to conflicting upstream and STL type_traits (and another issues)."
                     "See upstream issue https://github.com/kokkos/mdspan/issues/22 for details.".format(compiler_version))
