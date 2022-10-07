@@ -12,7 +12,19 @@ Also, the Github [code review](https://github.com/features/code-review) is integ
 parsed by [recipe_linter.json](../linter/recipe_linter.json), then presented to all users on the tab `Files changed`.
 
 <!-- toc -->
-## Contents<!-- endToc -->
+## Contents
+
+  * [Running the linter locally](#running-the-linter-locally)
+  * [Pylint configuration files](#pylint-configuration-files)
+  * [Linter Warning and Errors](#linter-warning-and-errors)
+    * [E9006 - conan-import-conanfile: ConanFile should be imported from conan](#e9006---conan-import-conanfile-conanfile-should-be-imported-from-conan)
+    * [E9005 - conan-missing-name: Every conan recipe must contain the attribute name](#e9005---conan-missing-name-every-conan-recipe-must-contain-the-attribute-name)
+    * [E9004 - conan-package-name: Conan package names must be lower-case](#e9004---conan-package-name-conan-package-names-must-be-lower-case)
+    * [E9007 - conan-test-no-name: Do not add name attribute in test package recipes](#e9007---conan-test-no-name-do-not-add-name-attribute-in-test-package-recipes)
+    * [E9008 - conan-import-errors: Deprecated imports should be replaced by new imports](#e9008---conan-import-errors-deprecated-imports-should-be-replaced-by-new-imports)
+    * [E9009 - conan-import-error-conanexception: conans.errors is deprecated and conan.errors should be used instead](#e9009---conan-import-error-conanexception-conanserrors-is-deprecated-and-conanerrors-should-be-used-instead)
+    * [E9010 - conan-import-error-conaninvalidconfiguration: conans.errors is deprecated and conan.errors should be used instead](#e9010---conan-import-error-conaninvalidconfiguration-conanserrors-is-deprecated-and-conanerrors-should-be-used-instead)
+    * [E9011 - conan-import-tools: Importing conan.tools or conan.tools.xxx.zzz.yyy should be considered as private](#e9011---conan-import-tools-importing-conantools-or-conantoolsxxxzzzyyy-should-be-considered-as-private)<!-- endToc -->
 
 ## Running the linter locally
 
