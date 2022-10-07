@@ -102,6 +102,7 @@ class PackageConan(ConanFile):
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         # https://qpdf.readthedocs.io/en/latest/installation.html#build-time-crypto-selection
         tc.variables["USE_IMPLICIT_CRYPTO"] = False
+        tc.cache_variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
         if self.options.with_crypto == "native":
             tc.variables["REQUIRE_CRYPTO_NATIVE"] = True
             tc.variables["REQUIRE_CRYPTO_GNUTLS"] = False
