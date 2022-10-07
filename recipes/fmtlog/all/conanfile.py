@@ -84,6 +84,9 @@ class PackageConan(ConanFile):
                   destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        if self.options.header_only:
+            return
+
         tc = CMakeToolchain(self)
         tc.generate()
 
