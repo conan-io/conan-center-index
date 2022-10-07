@@ -1,49 +1,51 @@
 diff --git a/libqpdf/CMakeLists.txt b/libqpdf/CMakeLists.txt
-index 7053e205..692fa5ba 100644
+index 7053e205..03f50a50 100644
 --- a/libqpdf/CMakeLists.txt
 +++ b/libqpdf/CMakeLists.txt
-@@ -403,6 +403,13 @@ endif()
+@@ -403,6 +403,10 @@ endif()
  # use PIC for the object library so we don't have to compile twice.
  set(OBJECT_LIB libqpdf_object)
  add_library(${OBJECT_LIB} OBJECT ${libqpdf_SOURCES})
 +find_package(JPEG REQUIRED)
 +find_package(ZLIB REQUIRED)
-+target_link_libraries(${OBJECT_LIB} PUBLIC JPEG::JPEG)
-+target_link_libraries(${OBJECT_LIB} PUBLIC ZLIB::ZLIB)
 +find_package(OpenSSL REQUIRED)
-+target_link_libraries(${OBJECT_LIB} PUBLIC OpenSSL::SSL)
 +
  if(OBJECT_LIB_IS_PIC)
    target_compile_definitions(${OBJECT_LIB} PRIVATE libqpdf_EXPORTS)
  endif()
-@@ -498,8 +505,6 @@ if(BUILD_SHARED_LIBS)
+@@ -417,9 +421,9 @@ target_include_directories(${OBJECT_LIB}
+   ${qpdf_SOURCE_DIR}/libqpdf
+   ${CMAKE_CURRENT_BINARY_DIR})
+ target_link_directories(${OBJECT_LIB} INTERFACE ${dep_link_directories})
+-target_link_libraries(${OBJECT_LIB} INTERFACE ${dep_link_libraries})
++target_link_libraries(${OBJECT_LIB} INTERFACE ${dep_link_libraries} PUBLIC JPEG::JPEG ZLIB::ZLIB OpenSSL::SSL)
+ if(ATOMIC_LIBRARY)
+-  target_link_libraries(${OBJECT_LIB} INTERFACE ${ATOMIC_LIBRARY})
++  target_link_libraries(${OBJECT_LIB} INTERFACE ${ATOMIC_LIBRARY} PUBLIC JPEG::JPEG ZLIB::ZLIB OpenSSL::SSL)
+ endif()
+ 
+ set(LD_VERSION_FLAGS "")
+@@ -498,10 +502,8 @@ if(BUILD_SHARED_LIBS)
      PUBLIC
      $<BUILD_INTERFACE:${qpdf_INCLUDE}>
      $<INSTALL_INTERFACE:include>)
 -  target_link_directories(${SHARED_LIB} PRIVATE ${dep_link_directories})
 -  target_link_libraries(${SHARED_LIB} PRIVATE ${dep_link_libraries})
    if(ATOMIC_LIBRARY)
-     target_link_libraries(${SHARED_LIB} PRIVATE ${ATOMIC_LIBRARY})
+-    target_link_libraries(${SHARED_LIB} PRIVATE ${ATOMIC_LIBRARY})
++    target_link_libraries(${SHARED_LIB} PRIVATE ${ATOMIC_LIBRARY} JPEG::JPEG ZLIB::ZLIB OpenSSL::SSL)
    endif()
-@@ -507,6 +512,10 @@ if(BUILD_SHARED_LIBS)
+   if(LD_VERSION_FLAGS)
      target_link_options(${SHARED_LIB} PRIVATE ${LD_VERSION_FLAGS})
+@@ -539,9 +541,9 @@ if(BUILD_STATIC_LIBS)
+   target_link_directories(${STATIC_LIB}
+     INTERFACE $<BUILD_INTERFACE:${dep_link_directories}>
+     PRIVATE $<INSTALL_INTERFACE:${dep_link_directories}>)
+-  target_link_libraries(${STATIC_LIB} INTERFACE ${dep_link_libraries})
++  target_link_libraries(${STATIC_LIB} INTERFACE ${dep_link_libraries} JPEG::JPEG ZLIB::ZLIB OpenSSL::SSL)
+   if(ATOMIC_LIBRARY)
+-    target_link_libraries(${STATIC_LIB} INTERFACE ${ATOMIC_LIBRARY})
++    target_link_libraries(${STATIC_LIB} INTERFACE ${ATOMIC_LIBRARY} JPEG::JPEG ZLIB::ZLIB OpenSSL::SSL)
    endif()
  
-+  target_link_libraries(${SHARED_LIB} PUBLIC JPEG::JPEG)
-+  target_link_libraries(${SHARED_LIB} PUBLIC ZLIB::ZLIB)
-+  target_link_libraries(${SHARED_LIB} PUBLIC OpenSSL::SSL)
-+
-   target_include_directories(${SHARED_LIB}
-     PRIVATE ${qpdf_SOURCE_DIR}/libqpdf ${CMAKE_CURRENT_BINARY_DIR})
- 
-@@ -544,6 +553,10 @@ if(BUILD_STATIC_LIBS)
-     target_link_libraries(${STATIC_LIB} INTERFACE ${ATOMIC_LIBRARY})
-   endif()
- 
-+  target_link_libraries(${STATIC_LIB} PUBLIC JPEG::JPEG)
-+  target_link_libraries(${STATIC_LIB} PUBLIC ZLIB::ZLIB)
-+  target_link_libraries(${STATIC_LIB} PUBLIC OpenSSL::SSL)
-+
    # Avoid name clashes on Windows with the the DLL import library.
-   if(NOT DEFINED STATIC_SUFFIX AND BUILD_SHARED_LIBS)
-     if (WIN32)
