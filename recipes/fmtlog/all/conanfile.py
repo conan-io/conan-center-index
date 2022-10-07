@@ -91,9 +91,6 @@ class PackageConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-        be = VirtualBuildEnv(self)
-        be.generate(scope="build")
-
     def build(self):
         if self.options.header_only:
             return
