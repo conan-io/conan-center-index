@@ -22,7 +22,6 @@ class GLibConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.gnome.org/GNOME/glib"
     license = "LGPL-2.1"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
