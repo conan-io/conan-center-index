@@ -81,7 +81,7 @@ class Antlr4CppRuntimeConan(ConanFile):
         # Compilation of this library on version 15 claims C2668 Error.
         # This could be Bogus error or malformed Antlr4 library.
         # Guard: The minimum MSVC version is 16 or 1920
-        check_min_vs(self, "1920")
+        check_min_vs(self, "192")
 
         if antlr_version >= "4.10":
             # Antlr4 for 4.9.3 does not require C++17 - C++11 is enough.
