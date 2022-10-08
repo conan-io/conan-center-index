@@ -84,9 +84,12 @@ class JsoncppConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+
+        # TODO: to remove in conan v2 once legacy generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {
+                "JsonCpp::JsonCpp": "jsoncpp::jsoncpp",   # alias target since 1.9.5
                 "jsoncpp_lib": "jsoncpp::jsoncpp",        # imported target for shared lib, but also static between 1.9.0 & 1.9.3
                 "jsoncpp_static": "jsoncpp::jsoncpp",     # imported target for static lib if >= 1.9.4
                 "jsoncpp_lib_static": "jsoncpp::jsoncpp", # imported target for static lib if < 1.9.0
@@ -110,13 +113,16 @@ class JsoncppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "jsoncpp")
-        self.cpp_info.set_property("cmake_target_name", "jsoncpp_lib")
-        if not self.options.shared:
-            self.cpp_info.set_property("cmake_target_aliases", ["jsoncpp_static", "jsoncpp_lib_static"])
+        self.cpp_info.set_property("cmake_target_name", "JsonCpp::JsonCpp")
+        self.cpp_info.set_property(
+            "cmake_target_aliases",
+            ["jsoncpp_lib"] if self.options.shared else ["jsoncpp_lib", "jsoncpp_static", "jsoncpp_lib_static"],
+        )
         self.cpp_info.set_property("pkg_config_name", "jsoncpp")
         self.cpp_info.libs = ["jsoncpp"]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("JSON_DLL")
 
+        # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

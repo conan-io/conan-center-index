@@ -1,8 +1,12 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
+from conan import ConanFile
+from conan.tools.microsoft import is_msvc
+from conan.tools.files import get, chdir, rmdir, rm, replace_in_file
+from conan.tools.scm import Version
+from conans import AutoToolsBuildEnvironment, MSBuild, tools
 import os
 import re
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.51.3"
 
 
 class LibUSBConan(ConanFile):
@@ -34,10 +38,6 @@ class LibUSBConan(ConanFile):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     @property
-    def _is_msvc(self):
-        return self.settings.os == "Windows" and self.settings.compiler == "Visual Studio"
-
-    @property
     def _settings_build(self):
         return self.settings_build if hasattr(self, "settings_build") else self.settings
 
@@ -57,7 +57,7 @@ class LibUSBConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not self._is_msvc and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not is_msvc(self) and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def requirements(self):
@@ -66,15 +66,15 @@ class LibUSBConan(ConanFile):
                 self.requires("libudev/system")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _build_visual_studio(self):
-        with tools.chdir(self._source_subfolder):
+        with chdir(self, self._source_subfolder):
             # Assume we're using the latest Visual Studio and default to libusb_2019.sln
             # (or libusb_2017.sln for libusb < 1.0.24).
             # If we're not using the latest Visual Studio, select an appropriate solution file.
-            solution_msvc_year = 2019 if tools.Version(self.version) >= "1.0.24" else 2017
+            solution_msvc_year = 2019 if Version(self.version) >= "1.0.24" else 2017
 
             solution_msvc_year = {
                 "11": 2012,
@@ -110,12 +110,12 @@ class LibUSBConan(ConanFile):
         return self._autotools
 
     def build(self):
-        if self._is_msvc:
-            if tools.Version(self.version) < "1.0.24":
+        if is_msvc(self):
+            if Version(self.version) < "1.0.24":
                 for vcxproj in ["fxload_2017", "getopt_2017", "hotplugtest_2017", "libusb_dll_2017",
                                 "libusb_static_2017", "listdevs_2017", "stress_2017", "testlibusb_2017", "xusb_2017"]:
                     vcxproj_path = os.path.join(self._source_subfolder, "msvc", "%s.vcxproj" % vcxproj)
-                    tools.replace_in_file(vcxproj_path, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
+                    replace_in_file(self, vcxproj_path, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
             self._build_visual_studio()
         else:
             autotools = self._configure_autotools()
@@ -136,13 +136,13 @@ class LibUSBConan(ConanFile):
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses", keep_path=False)
-        if self._is_msvc:
+        if is_msvc(self):
             self._package_visual_studio()
         else:
             autotools = self._configure_autotools()
             autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libusb-1.0"

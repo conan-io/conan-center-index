@@ -1,23 +1,30 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get, rm, rmdir, apply_conandata_patches
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.files import copy, get, rm, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 import os
 
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.0"
+
+#
+# INFO: Please, remove all comments before pushing your PR!
+#
 
 
 class PackageConan(ConanFile):
     name = "package"
     description = "short description"
-    license = "" # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
+    # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
+    # In case not listed there, use "LicenseRef-<license-file-name>"
+    license = ""
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/project/package"
-    topics = ("topic1", "topic2", "topic3") # no "conan"  and project name in topics
+    # no "conan" and project name in topics. Use topics from the upstream listed on GH
+    topics = ("topic1", "topic2", "topic3")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -33,8 +40,7 @@ class PackageConan(ConanFile):
     # no exports_sources attribute, but export_sources(self) method instead
     # this allows finer grain exportation of patches per version
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,23 +49,27 @@ class PackageConan(ConanFile):
     def configure(self):
         if self.options.shared:
             try:
-                del self.options.fPIC # once removed by config_options, need try..except for a second del
+                # once removed by config_options, need try..except for a second del
+                del self.options.fPIC
             except Exception:
                 pass
+        # for plain C projects only
         try:
-            del self.settings.compiler.libcxx # for plain C projects only
+            del self.settings.compiler.libcxx
         except Exception:
             pass
         try:
-            del self.settings.compiler.cppstd # for plain C projects only
+            del self.settings.compiler.cppstd
         except Exception:
             pass
 
     def layout(self):
-        basic_layout(self, src_folder="src") # src_folder must use the same source folder name the project
+        # src_folder must use the same source folder name the project
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("dependency/0.8.1") # prefer self.requires method instead of requires attribute
+        # prefer self.requires method instead of requires attribute
+        self.requires("dependency/0.8.1")
         if self.options.with_foobar:
             self.requires("foobar/0.1.0")
 
@@ -76,8 +86,7 @@ class PackageConan(ConanFile):
         self.tool_requires("pkgconf/x.y.z")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
         # autotools usually uses 'yes' and 'no' to enable/disable options
@@ -95,9 +104,14 @@ class PackageConan(ConanFile):
         # generate dependencies for autotools
         tc = AutotoolsDeps(self)
         tc.generate()
-        # inject tools_require env vars in build context
-        ms = VirtualBuildEnv(self)
-        ms.generate(scope="build")
+        # inject tools_requires env vars in build scope (not needed if there is no tool_requires)
+        env = VirtualBuildEnv(self)
+        env.generate()
+        # inject requires env vars in build scope
+        # it's required in case of native build when there is AutotoolsDeps & at least one dependency which might be shared, because configure tries to run a test executable
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
 
     def build(self):
         # apply patches listed in conandata.yml
