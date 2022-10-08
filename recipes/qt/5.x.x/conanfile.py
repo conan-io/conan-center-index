@@ -1138,7 +1138,7 @@ Examples = bin/datadir/examples""")
             build_modules.append(self._cmake_qt5_private_file("Widgets"))
             self.cpp_info.components["qtWidgets"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Widgets"))
             self.cpp_info.components["qtWidgets"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Widgets"))
-        if self.options.gui and self.options.widgets:
+        if self.options.gui and self.options.widgets and not self.settings.os in ["iOS", "watchOS", "tvOS"]:
             _create_module("PrintSupport", ["Gui", "Widgets"])
         if self.options.get_safe("opengl", "no") != "no" and self.options.gui:
             _create_module("OpenGL", ["Gui"])
