@@ -86,7 +86,7 @@ class SwigConan(ConanFile):
             "--host={}".format(self.settings.arch),
             "--with-swiglibdir={}".format(self._swiglibdir),
         ]
-        if self.settings.compiler == 'gcc':
+        if self.settings.os == "Linux":
             args.append("LIBS=-ldl")
 
         host, build = None, None
