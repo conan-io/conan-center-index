@@ -1,10 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.51.3"
 
 
 class SDLImageConan(ConanFile):
@@ -60,7 +61,7 @@ class SDLImageConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os != "Macos":
+        if not is_apple_os(self):
             del self.options.imageio
 
     def configure(self):
@@ -169,9 +170,15 @@ class SDLImageConan(ConanFile):
             self.cpp_info.components["_sdl_image"].requires.append("libwebp::libwebp")
         if self.options.get_safe("imageio") and not self.options.shared:
             self.cpp_info.components["_sdl_image"].frameworks = [
-                "ApplicationServices",
                 "CoreFoundation",
                 "CoreGraphics",
                 "Foundation",
                 "ImageIO",
             ]
+            if self.settings.os == "Macos":
+                self.cpp_info.components["_sdl_image"].frameworks.append("ApplicationServices")
+            else:
+                self.cpp_info.components["_sdl_image"].frameworks.extend([
+                    "MobileCoreServices",
+                    "UIKit",
+                ])
