@@ -1,37 +1,43 @@
 cmake_minimum_required(VERSION 3.4)
 project(bzip3 LANGUAGES C)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
-
-option(WITH_THREAD "enable thread" OFF)
-option(WITH_UTIL "build and install utility" OFF)
+option(BZIP3_WITH_THREAD "enable thread" OFF)
+option(BZIP3_WITH_UTIL "build and install utility" OFF)
 
 set(BZIP3_INC
-    source_subfolder/include/libbz3.h
+    ${BZIP3_SRC_DIR}/include/libbz3.h
 )
 
 add_library(bzip3)
+
+if (VERSION VERSION_GREATER_EQUAL "1.1.5")
 target_sources(bzip3 PRIVATE
-    source_subfolder/src/cm.c
-    source_subfolder/src/crc32.c
-    source_subfolder/src/libbz3.c
-    source_subfolder/src/libsais.c
-    source_subfolder/src/lzp.c
-    source_subfolder/src/rle.c
+    ${BZIP3_SRC_DIR}/src/libbz3.c
 )
-target_include_directories(bzip3 PUBLIC source_subfolder/include)
+else()
+target_sources(bzip3 PRIVATE
+    ${BZIP3_SRC_DIR}/src/cm.c
+    ${BZIP3_SRC_DIR}/src/crc32.c
+    ${BZIP3_SRC_DIR}/src/libbz3.c
+    ${BZIP3_SRC_DIR}/src/libsais.c
+    ${BZIP3_SRC_DIR}/src/lzp.c
+    ${BZIP3_SRC_DIR}/src/rle.c
+)
+endif()
+target_include_directories(bzip3 PUBLIC ${BZIP3_SRC_DIR}/include)
 set_target_properties(bzip3 PROPERTIES
     PUBLIC_HEADER "${BZIP3_INC}"
-    WINDOWS_EXPORT_ALL_SYMBOLS ON
+    C_VISIBILITY_PRESET hidden
     C_EXTENSIONS OFF
 )
-if (with_thread)
+if (BZIP3_WITH_THREAD)
+    find_package(Threads REQUIRED)
+    target_link_libraries(bzip3 PRIVATE Threads::Threads)
     target_compile_definitions(bzip3 PRIVATE "PTHREAD")
 endif()
 
-if (WITH_UTIL)
-    add_executable(bzip3_cmd source_subfolder/src/main.c)
+if (BZIP3_WITH_UTIL)
+    add_executable(bzip3_cmd ${BZIP3_SRC_DIR}/src/main.c)
     target_link_libraries(bzip3_cmd bzip3)
     target_compile_definitions(bzip3_cmd PRIVATE "VERSION=\"${VERSION}\"")
     set_target_properties(bzip3_cmd PROPERTIES OUTPUT_NAME "bzip3")
@@ -49,9 +55,6 @@ install(
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-if (WITH_UTIL)
-    install(
-        TARGETS bzip3_cmd
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    )
+if (BZIP3_WITH_UTIL)
+    install(TARGETS bzip3_cmd DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()

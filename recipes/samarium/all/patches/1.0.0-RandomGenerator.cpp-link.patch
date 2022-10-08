@@ -1,0 +1,22 @@
+diff --git a/src/samarium/util/RandomGenerator.cpp b/src/samarium/util/RandomGenerator.cpp
+index d1a17d6..84c964b 100644
+--- a/src/samarium/util/RandomGenerator.cpp
++++ b/src/samarium/util/RandomGenerator.cpp
+@@ -75,17 +75,6 @@ void RandomGenerator::reseed(u64 new_seed)
+     ranges::generate(cache, [this] { return this->next_scaled(); });
+ }
+ 
+-[[nodiscard]] auto RandomGenerator::next() noexcept -> u64
+-{
+-    const auto oldstate = this->state;
+-    // Advance internal state
+-    this->state = oldstate * magic_number + (this->inc | 1);
+-    // Calculate output function (XSH RR), uses old state for max ILP
+-    const auto xorshifted = static_cast<u32>(((oldstate >> 18UL) ^ oldstate) >> 27UL);
+-    const auto rot        = static_cast<u32>(oldstate >> 59UL);
+-    return (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
+-}
+-
+ [[nodiscard]] auto RandomGenerator::next_scaled() noexcept -> f64
+ {
+     return static_cast<f64>(this->next()) / static_cast<f64>(std::numeric_limits<u32>::max());

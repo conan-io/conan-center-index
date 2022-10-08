@@ -15,14 +15,17 @@ This section gathers the most common questions from the community related to pac
   * [What version should packages use for libraries without official releases?](#what-version-should-packages-use-for-libraries-without-official-releases)
   * [Is the Jenkins orchestration library publicly available?](#is-the-jenkins-orchestration-library-publicly-available)
   * [Why not x86 binaries?](#why-not-x86-binaries)
-      * [But if there are no packages available, what will the x86 validation look like?](#but-if-there-are-no-packages-available-what-will-the-x86-validation-look-like)
+    * [But if there are no packages available, what will the x86 validation look like?](#but-if-there-are-no-packages-available-what-will-the-x86-validation-look-like)
+  * [Do static libraries tend to be compiled as PIC by default?](#do-static-libraries-tend-to-be-compiled-as-pic-by-default)
   * [Why PDB files are not allowed?](#why-pdb-files-are-not-allowed)
-      * [Why is there no option for PDB, as there is for fPIC?](#why-is-there-no-option-for-pdb-as-there-is-for-fpic)
+    * [Why is there no option for PDB, as there is for fPIC?](#why-is-there-no-option-for-pdb-as-there-is-for-fpic)
+    * [Doesn't this make debug builds useless?](#doesnt-this-make-debug-builds-useless)
   * [Can I remove an option from a recipe?](#can-i-remove-an-option-from-a-recipe)
   * [Can I split a project into an installer and library package?](#can-i-split-a-project-into-an-installer-and-library-package)
   * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
   * [What license should I use for a custom project specific license?](#what-license-should-i-use-for-a-custom-project-specific-license)
-  * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-a-toolscheck_min_cppstd-call-not-enough)
+  * [How do I flag a problem to a recipe consumer?](#how-do-i-flag-a-problem-to-a-recipe-consumer)
+  * [Why is a `build.check_min_cppstd` call not enough?](#why-is-a-buildcheck_min_cppstd-call-not-enough)
   * [What is the policy for adding older versions of a package?](#what-is-the-policy-for-adding-older-versions-of-a-package)
   * [What is the policy for removing older versions of a package?](#what-is-the-policy-for-removing-older-versions-of-a-package)
   * [Can I install packages from the system package manager?](#can-i-install-packages-from-the-system-package-manager)
@@ -33,7 +36,8 @@ This section gathers the most common questions from the community related to pac
   * [How to protect my project from breaking changes in recipes?](#how-to-protect-my-project-from-breaking-changes-in-recipes)
   * [Why are version ranges not allowed?](#why-are-version-ranges-not-allowed)
   * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)
-  * [How to watch only specific recipes?](#how-to-watch-only-specific-recipes)<!-- endToc -->
+  * [How to watch only specific recipes?](#how-to-watch-only-specific-recipes)
+  * [Is it possible to disable Pylint?](#is-it-possible-to-disable-pylint)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -104,7 +108,7 @@ Unless they are a general and extended utility in recipes (in which case, we sho
 
 ## What version should packages use for libraries without official releases?
 
-The notation shown below is used for publishing packages where the original library does not make official releases. Thus, we use a format which includes the datestamp corresponding to the date of a commit: `cci.<YEAR MONTH DAY>`. In order to create reproducible builds, we also "commit-lock" to the latest commit on that day. Otherwise, users would get inconsistent results over time when rebuilding the package. An example of this is the [RapidJSON](https://github.com/Tencent/rapidjson) library, where its package reference is `rapidjson/cci.20200410` and its sources are locked the latest commit on that date in [config.yml](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidjson/config.yml#L4). The prefix `cci.` is mandatory to distinguish as a virtual version provided by CCI. If you are interested to know about the origin, please, read [here](https://github.com/conan-io/conan-center-index/pull/1464).
+The notation shown below is used for publishing packages where the original library does not make official releases. Thus, we use a format which includes the datestamp corresponding to the date of a commit: `cci.<YYYYMMDD>`. In order to create reproducible builds, we also "commit-lock" to the latest commit on that day (use UTC+00). Otherwise, users would get inconsistent results over time when rebuilding the package. An example of this is the [RapidJSON](https://github.com/Tencent/rapidjson) library, where its package reference is `rapidjson/cci.20200410` and its sources are locked the latest commit on that date in [conandata.yml](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidjson/all/conandata.yml#L5). The prefix `cci.` is mandatory to distinguish as a virtual version provided by CCI. If you are interested to know about the origin, please, read [here](https://github.com/conan-io/conan-center-index/pull/1464).
 
 ## Is the Jenkins orchestration library publicly available?
 
@@ -125,6 +129,10 @@ As stated earlier, any increase in the number of configurations will result in a
 
 We often receive new fixes and improvements to the recipes already available for x86_64, including help for other architectures like x86 and ARM. In addition, we also receive new cases of bugs, for recipes that do not work on a certain platform, but that are necessary for use, which is important to understand where we should put more effort. So we believe that the best way to maintain and add support for other architectures is through the community.
 
+## Do static libraries tend to be compiled as PIC by default?
+
+Yes! You can learn more about default options in [Packaging Policy](packaging_policy.md#options).
+
 ## Why PDB files are not allowed?
 
 The project initially decided not to support the PDB files primarily due to the size of the final package, which could add an exaggerated size and not even used by users. In addition, PDB files need the source code to perform the debugging and even follow the path in which it was created and not the one used by the user, which makes it difficult to use when compared to the regular development flow with the IDE.
@@ -134,6 +142,11 @@ However, there are ways to get around this, one of them is through the [/Z7](htt
 ### Why is there no option for PDB, as there is for fPIC?
 
 Adding one more common option, it seems the most simple and obvious solution, but it contains a side effect already seen with fPIC. It is necessary to manage the entire recipe, it has become a Boilerplate. So, adding PDB would be one more point to be reviewed for each recipe. In addition, in the future new options could arise, such as sanity or benchmark, further inflating the recipes. For this reason, a new option will not be added. However, the inclusion of the PDB files is discussed in issue [#1982](https://github.com/conan-io/conan-center-index/issues/1982) and there are some ideas for making this possible through a new feature. If you want to comment on the subject, please visit issue.
+
+### Doesn't this make debug builds useless?
+
+No. The PDBs are only needed to debug dependency code. By providing the libraries you are able to link and build your application and debug your own code.
+This is by far the more common scenario which we want to enable.
 
 ## Can I remove an option from a recipe?
 
@@ -176,6 +189,17 @@ No. Some projects provide more than a simple library, but also applications. For
 
 When a non standard open-source license is used, we have decided to use `LicenseRef-` as a prefix, followed by the name of the file which contains a custom license.
 See [the reviewing guidlines](reviewing.md#license-attribute) for more details.
+
+## How do I flag a problem to a recipe consumer?
+
+Regardless of why, if the recipe detects a problem where binaries might not be generated correctly, an exception must be raised. This to prevent the publishing
+incorrect packages which do not work as intented. Use `ConanInvalidConfiguration` which is specially support in ConanCenter.
+
+```py
+raise ConanInvalidConfiguration(f"The project {self.ref} requires liba.enable_feature=True.")
+```
+
+You should not be using the `self.output.warn` and it is not enough to alter consumers or stop the build service.
 
 ## Why is a `build.check_min_cppstd` call not enough?
 
@@ -236,8 +260,7 @@ There are different motivations
 ## Why not add an option to build unit tests
 
 - Adding a testing option will change the package ID, but will not provide different packaged binaries
-- Use the configuration [skip_test](packaging_policy.md#options) to define the testing behavior.
-
+- Use the configuration [skip_test](packaging_policy.md#options-to-avoid) to define the testing behavior.
 
 ## What is the policy for supported python versions?
 
@@ -330,21 +353,8 @@ You should expect that latest revision of recipes can introduce breaking changes
 features that will be broken unless you also upgrade Conan client (and sometimes you will
 need to modify your project if the recipe changes the binaries, flags,... it provides).
 
-To isolate from this changes there are different strategies you can follow:
-
-The minimum solution involves small changes to your Conan client configuration by
-
-* **Pin the version of every reference you consume in your project** using either:
-  * [recipe revision (RREV)](https://docs.conan.io/en/latest/versioning/revisions.html): `foo/1.0@#RREV` instead of `foo/1.0` in your conanfile.
-  * [lockfiles](https://docs.conan.io/en/latest/versioning/lockfiles/introduction.html) (please, be aware there are some [knowns bugs](https://github.com/conan-io/conan/issues?q=is%3Aissue+lockfile) related to lockfiles that are not being fixed in Conan v1.x).
-
-For larger projects and teams it is recommended to add some infrastructure to ensure stability by
-
- * **Cache recipes in your own Artifactory**: your project should use only this remote and
-   new recipe revisions are only pushed to your Artifactory after they have been validated
-   in your project.
-
-Keep reading in the [consuming recipes section](consuming_recipes.md).
+To isolate from these changes there are different strategies you can follow.
+Keep reading in the [consuming recipes section](consuming_recipes.md#isolate-your-project-from-upstream-changes).
 
 ## Why are version ranges not allowed?
 
@@ -394,3 +404,8 @@ The [Code Owners](https://docs.github.com/en/repositories/managing-your-reposito
 write permission for any listed user in the file `.github/CODEOWNERS`, which makes it impossible to be accepted by Conan. However, that file is still important as it can be re-used in
 a future Github Action to parse and communicate users. Meanwhile, there is the project https://app.github-file-watcher.com/, which is able to notify users, but only after
 merging to the master branch. Feel free to contribute to a new Github Action that implements a file watcher feature.
+
+## Is it possible to disable Pylint?
+
+No. The [pylint](v2_linter.md) has an important role of keeping any recipe prepared for [Conan v2 migration](v2_migration.md). In case you are having
+difficult to understand [linter errors](linters.md), please comment on your pull request about the problem to receive help from the community.

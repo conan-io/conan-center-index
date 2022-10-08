@@ -17,20 +17,13 @@ sources:
 patches:
   "1.22.0":
     - patch_file: "patches/1.22.0-0001-disable-shared-when-static.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.22.0-0002-fix-uninitialized-warning.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.22.0-0003-disable-warning-errors.patch"
-      base_path: "source_subfolder"
   "1.17.6":
     - patch_file: "patches/1.17.6-0001-disable-shared-when-static.patch"
-      base_path: "source_subfolder"
   "1.17.4":
     - patch_file: "patches/1.17.2-0001-disable-shared-when-static.patch"
-      base_path: "source_subfolder"
   "1.17.3":
     - patch_file: "patches/1.17.2-0001-disable-shared-when-static.patch"
-      base_path: "source_subfolder"
   "1.17.2":
     - patch_file: "patches/1.17.2-0001-disable-shared-when-static.patch"
-      base_path: "source_subfolder"

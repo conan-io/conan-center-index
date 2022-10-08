@@ -1,9 +1,13 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
-import functools
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
+
 
 class Catch2Conan(ConanFile):
     name = "catch2"
@@ -14,121 +18,122 @@ class Catch2Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "shared": [True, False],
         "fPIC": [True, False],
         "with_prefix": [True, False],
-        "default_reporter": "ANY",
+        "default_reporter": [None, "ANY"],
     }
     default_options = {
+        "shared": False,
         "fPIC": True,
         "with_prefix": False,
         "default_reporter": None,
     }
-    generators = "cmake"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    @property
-    def _default_reporter_str(self):
-        return '"{}"'.format(str(self.options.default_reporter).strip('"'))
-
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    def _min_cppstd(self):
+        return "14"
 
     @property
     def _compilers_minimum_version(self):
         return {
             "gcc": "7",
             "Visual Studio": "15",
+            "msvc": "191",
             "clang": "5",
             "apple-clang": "10",
         }
 
+    @property
+    def _default_reporter_str(self):
+        return '"{}"'.format(str(self.options.default_reporter).strip('"'))
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "14")
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("{}/{}: Unsupported compiler: {}-{} "
-                                                "(https://github.com/p-ranav/structopt#compiler-compatibility)."
-                                                .format(self.name, self.version, self.settings.compiler, self.settings.compiler.version))
-        else:
-            self.output.warn("{}/{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name, self.version))
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler doesn't support",
+            )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TESTING"] = "OFF"
-        cmake.definitions["CATCH_INSTALL_DOCS"] = "OFF"
-        cmake.definitions["CATCH_INSTALL_HELPERS"] = "ON"
-        cmake.definitions["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"] = False
+        tc.cache_variables["CATCH_INSTALL_DOCS"] = False
+        tc.cache_variables["CATCH_INSTALL_EXTRAS"] = True
+        tc.cache_variables["CATCH_DEVELOPMENT_BUILD"] = False
+        tc.variables["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
         if self.options.default_reporter:
-            cmake.definitions["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tc.variables["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
+        tc.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         for cmake_file in ["ParseAndAddCatchTests.cmake", "Catch.cmake", "CatchAddTests.cmake"]:
-            self.copy(
+            copy(
+                self,
                 cmake_file,
-                src=os.path.join(self._source_subfolder, "extras"),
-                dst=os.path.join("lib", "cmake", "Catch2"),
+                src=os.path.join(self.source_folder, "extras"),
+                dst=os.path.join(self.package_folder, "lib", "cmake", "Catch2"),
             )
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Catch2")
         self.cpp_info.set_property("cmake_target_name", "Catch2::Catch2WithMain")
         self.cpp_info.set_property("pkg_config_name", "catch2-with-main")
-        self.cpp_info.names["cmake_find_package"] = "Catch2"
-        self.cpp_info.names["cmake_find_package_multi"] = "Catch2"
 
         lib_suffix = "d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.components["_catch2"].set_property("cmake_target_name", "Catch2::Catch2")
         self.cpp_info.components["_catch2"].set_property("pkg_config_name", "catch2")
-        self.cpp_info.components["_catch2"].names["cmake_find_package"] = "Catch2"
-        self.cpp_info.components["_catch2"].names["cmake_find_package_multi"] = "Catch2"
         self.cpp_info.components["_catch2"].libs = ["Catch2" + lib_suffix]
 
-        self.cpp_info.components["catch2_with_main"].builddirs = [os.path.join("lib", "cmake", "Catch2")]
+        self.cpp_info.components["catch2_with_main"].builddirs.append(os.path.join("lib", "cmake", "Catch2"))
         self.cpp_info.components["catch2_with_main"].libs = ["Catch2Main" + lib_suffix]
         self.cpp_info.components["catch2_with_main"].requires = ["_catch2"]
         self.cpp_info.components["catch2_with_main"].system_libs = ["log"] if self.settings.os == "Android" else []
         self.cpp_info.components["catch2_with_main"].set_property("cmake_target_name", "Catch2::Catch2WithMain")
         self.cpp_info.components["catch2_with_main"].set_property("pkg_config_name", "catch2-with-main")
-        self.cpp_info.components["catch2_with_main"].names["cmake_find_package"] = "Catch2WithMain"
-        self.cpp_info.components["catch2_with_main"].names["cmake_find_package_multi"] = "Catch2WithMain"
         defines = self.cpp_info.components["catch2_with_main"].defines
-
         if self.options.with_prefix:
             defines.append("CATCH_CONFIG_PREFIX_ALL")
         if self.options.default_reporter:
-            defines.append("CATCH_CONFIG_DEFAULT_REPORTER={}".format(self._default_reporter_str))
+            defines.append(f"CATCH_CONFIG_DEFAULT_REPORTER={self._default_reporter_str}")
+
+        # TODO: to remove in conan v2 once legacy generators removed
+        self.cpp_info.names["cmake_find_package"] = "Catch2"
+        self.cpp_info.names["cmake_find_package_multi"] = "Catch2"
+        self.cpp_info.components["_catch2"].names["cmake_find_package"] = "Catch2"
+        self.cpp_info.components["_catch2"].names["cmake_find_package_multi"] = "Catch2"
+        self.cpp_info.components["catch2_with_main"].names["cmake_find_package"] = "Catch2WithMain"
+        self.cpp_info.components["catch2_with_main"].names["cmake_find_package_multi"] = "Catch2WithMain"
