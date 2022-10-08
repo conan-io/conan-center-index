@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy, replace_in_file
-from conan.tools.scm import Version
 import os
 
 
@@ -48,47 +47,34 @@ class PyBind11Conan(ConanFile):
                 os.unlink(os.path.join(self.package_folder, "lib", "cmake", "pybind11", filename))
             except:
                 pass
-        if Version(self.version) >= "2.6.0":
-            replace_in_file(self, os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Common.cmake"),
-                                  "if(TARGET pybind11::lto)",
-                                  "if(FALSE)")
-            replace_in_file(self, os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Common.cmake"),
-                                  "add_library(",
-                                  "# add_library(")
+        replace_in_file(self, os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Common.cmake"),
+                              "if(TARGET pybind11::lto)",
+                              "if(FALSE)")
+        replace_in_file(self, os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Common.cmake"),
+                              "add_library(",
+                              "# add_library(")
 
     def package_id(self):
         self.info.clear()
 
     def package_info(self):
         cmake_base_path = os.path.join("lib", "cmake", "pybind11")
-        if Version(self.version) >= "2.6.0":
-            self.cpp_info.set_property("cmake_target_name", "pybind11_all_do_not_use")
-            self.cpp_info.components["headers"].includedirs = [os.path.join("include", "pybind11")]
-            self.cpp_info.components["pybind11_"].set_property("cmake_target_name", "pybind11::pybind11")
-            self.cpp_info.components["pybind11_"].set_property("cmake_module_file_name", "pybind11")
-            self.cpp_info.components["pybind11_"].names["cmake_find_package"] = "pybind11"
-            self.cpp_info.components["pybind11_"].builddirs = [cmake_base_path]
-            self.cpp_info.components["pybind11_"].requires = ["headers"]
-            cmake_file = os.path.join(cmake_base_path, "pybind11Common.cmake")
-            self.cpp_info.set_property("cmake_build_modules", [cmake_file])
-            for generator in ["cmake_find_package", "cmake_find_package_multi"]:
-                self.cpp_info.components["_pybind11"].build_modules[generator].append(cmake_file)
-            self.cpp_info.components["embed"].requires = ["_pybind11"]
-            self.cpp_info.components["module"].requires = ["_pybind11"]
-            self.cpp_info.components["python_link_helper"].requires = ["_pybind11"]
-            self.cpp_info.components["windows_extras"].requires = ["_pybind11"]
-            self.cpp_info.components["lto"].requires = ["_pybind11"]
-            self.cpp_info.components["thin_lto"].requires = ["_pybind11"]
-            self.cpp_info.components["opt_size"].requires = ["_pybind11"]
-            self.cpp_info.components["python2_no_register"].requires = ["_pybind11"]
-        else:
-            self.cpp_info.includedirs.append(os.path.join(
-                self.package_folder, "include", "pybind11"))
-
-            self.cpp_info.builddirs = [cmake_base_path]
-
-            cmake_files = [os.path.join(cmake_base_path, "FindPythonLibsNew.cmake"),
-                           os.path.join(cmake_base_path, "pybind11Tools.cmake")]
-            self.cpp_info.set_property("cmake_build_modules", cmake_files)
-            for generator in ["cmake", "cmake_multi", "cmake_find_package", "cmake_find_package_multi"]:
-                self.cpp_info.build_modules[generator] = cmake_files
+        self.cpp_info.set_property("cmake_target_name", "pybind11_all_do_not_use")
+        self.cpp_info.components["headers"].includedirs = [os.path.join("include", "pybind11")]
+        self.cpp_info.components["pybind11_"].set_property("cmake_target_name", "pybind11::pybind11")
+        self.cpp_info.components["pybind11_"].set_property("cmake_module_file_name", "pybind11")
+        self.cpp_info.components["pybind11_"].names["cmake_find_package"] = "pybind11"
+        self.cpp_info.components["pybind11_"].builddirs = [cmake_base_path]
+        self.cpp_info.components["pybind11_"].requires = ["headers"]
+        cmake_file = os.path.join(cmake_base_path, "pybind11Common.cmake")
+        self.cpp_info.set_property("cmake_build_modules", [cmake_file])
+        for generator in ["cmake_find_package", "cmake_find_package_multi"]:
+            self.cpp_info.components["_pybind11"].build_modules[generator].append(cmake_file)
+        self.cpp_info.components["embed"].requires = ["_pybind11"]
+        self.cpp_info.components["module"].requires = ["_pybind11"]
+        self.cpp_info.components["python_link_helper"].requires = ["_pybind11"]
+        self.cpp_info.components["windows_extras"].requires = ["_pybind11"]
+        self.cpp_info.components["lto"].requires = ["_pybind11"]
+        self.cpp_info.components["thin_lto"].requires = ["_pybind11"]
+        self.cpp_info.components["opt_size"].requires = ["_pybind11"]
+        self.cpp_info.components["python2_no_register"].requires = ["_pybind11"]
