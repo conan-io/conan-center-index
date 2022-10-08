@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.files import get, copy, replace_in_file
+from conan.tools.files import get, copy, replace_in_file, rm
 import os
 
 
@@ -44,7 +44,7 @@ class PyBind11Conan(ConanFile):
         cmake.install()
         for filename in ["pybind11Targets.cmake", "pybind11Config.cmake", "pybind11ConfigVersion.cmake"]:
             try:
-                os.unlink(os.path.join(self.package_folder, "lib", "cmake", "pybind11", filename))
+                rm(self, filename, os.path.join(self.package_folder, "lib", "cmake", "pybind11"))
             except:
                 pass
         replace_in_file(self, os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Common.cmake"),
@@ -60,7 +60,7 @@ class PyBind11Conan(ConanFile):
     def package_info(self):
         cmake_base_path = os.path.join("lib", "cmake", "pybind11")
         self.cpp_info.set_property("cmake_target_name", "pybind11_all_do_not_use")
-        self.cpp_info.components["headers"].includedirs = [os.path.join("include", "pybind11")]
+        self.cpp_info.components["headers"].includedirs = ["include"]
         self.cpp_info.components["pybind11_"].set_property("cmake_target_name", "pybind11::pybind11")
         self.cpp_info.components["pybind11_"].set_property("cmake_module_file_name", "pybind11")
         self.cpp_info.components["pybind11_"].names["cmake_find_package"] = "pybind11"
