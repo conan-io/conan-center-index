@@ -1,0 +1,50 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a5425aa..943e470 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -7,22 +7,13 @@ project(
+   LANGUAGES C CXX ASM_MASM
+   VERSION ${VERSION})
+ 
+-if(MSVC)
+-  set(LIBCPUID_SHARED OFF)
+-else()
+-  set(LIBCPUID_SHARED ON)
+-endif()
+-option(BUILD_SHARED_LIBS "Build shared lib" ${LIBCPUID_SHARED})
+-
+-option(LIBCPUID_TESTS "Enable building tests" OFF)
+-
+ set(CMAKE_CXX_STANDARD 11)
+ set(CMAKE_C_STANDARD 99)
+ 
+ # Global variables
+ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+ 
+-if(UNIX)
++if(1)
+   include(GNUInstallDirs)
+   set(prefix "${CMAKE_INSTALL_PREFIX}")
+   set(exec_prefix "\${prefix}")
+@@ -32,7 +23,7 @@ if(UNIX)
+   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/libcpuid.pc.in" "${CMAKE_CURRENT_BINARY_DIR}/libcpuid.pc" ESCAPE_QUOTES
+                  @ONLY)
+   install(FILES "${PROJECT_BINARY_DIR}/libcpuid.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+-endif(UNIX)
++endif(1)
+ 
+ # Include subdirectories
+ add_subdirectory(libcpuid)
+diff --git a/cpuid_tool/CMakeLists.txt b/cpuid_tool/CMakeLists.txt
+index b799573..eab18e4 100644
+--- a/cpuid_tool/CMakeLists.txt
++++ b/cpuid_tool/CMakeLists.txt
+@@ -2,7 +2,7 @@ add_executable(cpuid_tool cpuid_tool.c)
+ 
+ target_link_libraries(cpuid_tool cpuid)
+ 
+-if(WIN32)
++if(0)
+   install(
+     TARGETS cpuid_tool
+     CONFIGURATIONS Debug
