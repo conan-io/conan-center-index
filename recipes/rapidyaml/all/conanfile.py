@@ -34,14 +34,6 @@ class RapidYAMLConan(ConanFile):
     def _minimum_cpp_standard(self):
         return 11
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "13",
-            "gcc": "6",
-            "clang": "4",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -68,12 +60,6 @@ class RapidYAMLConan(ConanFile):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
         check_min_vs(self, 190)
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
-                )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
