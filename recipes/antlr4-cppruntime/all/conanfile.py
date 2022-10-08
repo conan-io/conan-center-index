@@ -31,10 +31,11 @@ class Antlr4CppRuntimeConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
-        return 17
+        # Antlr 4.9.3 requires C++11 while newer versions require C++17
+        return 17 if Version(self.version) >= "4.10" else 11
 
     @property
-    def _compilers_minimum_version(self):
+    def _minimum_compiler_versions_cpp17(self):
         return {
             "Visual Studio": "16",
             "msvc": "1923",
@@ -42,6 +43,12 @@ class Antlr4CppRuntimeConan(ConanFile):
             "clang": "5",
             "apple-clang": "9.1"
         }
+
+    def _check_minimum_compiler_version_cpp17(self):
+        compiler = self.info.settings.compiler
+        min_compiler_version = self._minimum_compiler_versions_cpp17.get(str(compiler), False)
+        if min_compiler_version and Version(compiler.version) < min_compiler_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++17, which your compiler does not support.")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -61,31 +68,24 @@ class Antlr4CppRuntimeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("utfcpp/3.2.1")
         # As of 4.11, antlr4-cppruntime no longer requires libuuid.
         # Reference: [C++] Remove libuuid dependency (https://github.com/antlr/antlr4/pull/3787)
         # Note that the above PR points that libuuid can be removed from 4.9.3, 4.10 and 4.10.1 as well.
-        # We have backport the fix to these old versions.
+        # We have patched the CMakeLists.txt to drop the dependency on libuuid from aforementioned antlr versions.
+        self.requires("utfcpp/3.2.1")
 
     def validate(self):
-        compiler = self.info.settings.compiler
-        compiler_version = Version(compiler.version)
-        antlr_version = Version(self.version)
-
         # Compilation of this library on version 15 claims C2668 Error.
         # This could be Bogus error or malformed Antlr4 library.
         # Guard: The minimum MSVC version is 16 or 1920
         check_min_vs(self, "192")
 
-        if antlr_version >= "4.10":
-            # Antlr4 for 4.9.3 does not require C++17 - C++11 is enough.
-            # for newest version we need C++17 compatible compiler here
-            if compiler.cppstd:
-                check_min_cppstd(self, self._minimum_cpp_standard)
-
-            minimum_version = self._compilers_minimum_version.get(str(compiler), False)
-            if minimum_version and compiler_version < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
+        # Check the compiler
+        min_cppstd = self._minimum_cpp_standard
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, min_cppstd)
+        if min_cppstd == 17:
+            self._check_minimum_compiler_version_cpp17()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
