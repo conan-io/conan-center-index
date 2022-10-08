@@ -167,3 +167,11 @@ class SDLImageConan(ConanFile):
             self.cpp_info.components["_sdl_image"].requires.append("libpng::libpng")
         if self.options.with_libwebp:
             self.cpp_info.components["_sdl_image"].requires.append("libwebp::libwebp")
+        if self.options.get_safe("imageio") and not self.options.shared:
+            self.cpp_info.components["_sdl_image"].frameworks = [
+                "ApplicationServices",
+                "CoreFoundation",
+                "CoreGraphics",
+                "Foundation",
+                "ImageIO",
+            ]
