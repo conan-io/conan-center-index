@@ -7,7 +7,7 @@ from conan.tools.files import get, replace_in_file, rmdir, rm, copy
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.layout import basic_layout
 
-required_conan_version = '>=1.49.0'
+required_conan_version = '>=1.43.0'
 
 
 class GccConan(ConanFile):
