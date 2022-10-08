@@ -463,6 +463,14 @@ def package_info(self):
     self.cpp_info.includedirs = []
 ```
 
+#### **<a name="KB-H072">#KB-H072</a>: "PYLINT EXECUTION"**
+
+Pylint is executed by default over all `conanfile.py` files in ConanCenterIndex and it should not be skipped. It's an important tool which helps us keep a standard level of acceptance. Otherwise, it would be incredibly hard to review all recipes and keep them to the same level of standards.
+
+#### **<a name="KB-H073">#KB-H073</a>: "TEST V1 PACKAGE FOLDER"**
+
+The legacy content in test_package should not be removed. Instead, rename that folder to `test_v1_package` and create a new `test_package` folder following the [file structure](https://github.com/conan-io/conan-center-index/blob/master/docs/how_to_add_packages.md#recipe-files-structure) related to Conan v2 and v1 compatibility. Also, you can obtain good examples of Conan v2 test packages from the [template packages](https://github.com/conan-io/conan-center-index/tree/master/docs/package_templates) folder.
+
 ## Deprecated errors
 
 The following errors from the hooks are deprecated and no longer reported:
