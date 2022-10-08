@@ -93,6 +93,16 @@ if(WEBP)
     target_link_libraries(${PROJECT_NAME} PRIVATE WebP::webp)
 endif()
 
+if(APPLE AND IMAGEIO AND BUILD_SHARED_LIBS)
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        "-framework ApplicationServices"
+        "-framework CoreFoundation"
+        "-framework CoreGraphics"
+        "-framework Foundation"
+        "-framework ImageIO"
+    )
+endif()
+
 install(TARGETS ${PROJECT_NAME}
     ARCHIVE DESTINATION "lib"
     LIBRARY DESTINATION "lib"
