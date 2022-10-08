@@ -43,10 +43,7 @@ class PyBind11Conan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         for filename in ["pybind11Targets.cmake", "pybind11Config.cmake", "pybind11ConfigVersion.cmake"]:
-            try:
-                rm(self, filename, os.path.join(self.package_folder, "lib", "cmake", "pybind11"))
-            except:
-                pass
+            rm(self, filename, os.path.join(self.package_folder, "lib", "cmake", "pybind11"))
         replace_in_file(self, os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Common.cmake"),
                               "if(TARGET pybind11::lto)",
                               "if(FALSE)")
