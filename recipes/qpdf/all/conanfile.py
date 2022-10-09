@@ -110,17 +110,14 @@ class PackageConan(ConanFile):
             tc.variables["REQUIRE_CRYPTO_GNUTLS"] = False
             tc.variables["REQUIRE_CRYPTO_OPENSSL"] = True
         tc.generate()
-        tc = PkgConfigDeps(self)
-        tc.generate()
+        # TODO: after https://github.com/conan-io/conan/issues/11962 is solved
+        # we might obsolete here cmake deps generation and cmake patching and get
+        # the possibility to go for to pkg_config based dependency discovery instead.
+        # At the moment, even with the linked work-around, the linkage is mixed-up
         tc = CMakeDeps(self)
         tc.generate()
         tc = VirtualBuildEnv(self)
         tc.generate(scope="build")
-        # TODO: after https://github.com/conan-io/conan/issues/11962 is solved, remove the following workaround
-        env = Environment()
-        env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
-        envvars = env.vars(self)
-        envvars.save_script("pkg_config")
 
     def _patch_sources(self):
         # patch 0001 and 0002 are uniquely appliable, based ony dependency config
