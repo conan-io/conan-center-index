@@ -37,8 +37,6 @@ class Antlr4CppRuntimeConan(ConanFile):
     @property
     def _minimum_compiler_versions_cpp17(self):
         return {
-            "Visual Studio": "16",
-            "msvc": "1923",
             "gcc": "7",
             "clang": "5",
             "apple-clang": "9.1"
@@ -77,13 +75,14 @@ class Antlr4CppRuntimeConan(ConanFile):
     def validate(self):
         # Compilation of this library on version 15 claims C2668 Error.
         # This could be Bogus error or malformed Antlr4 library.
-        # Guard: The minimum MSVC version is 16 or 1920
+        # Guard: The minimum MSVC version is 16 or 1920 (which already supports C++17)
         check_min_vs(self, "192")
 
-        # Check the compiler
+        # Check the minimum C++ standard
         min_cppstd = self._minimum_cpp_standard
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, min_cppstd)
+        # Check the minimum compiler version
         if min_cppstd == 17:
             self._check_minimum_compiler_version_cpp17()
 
