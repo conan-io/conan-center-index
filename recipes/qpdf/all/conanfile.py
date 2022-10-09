@@ -150,7 +150,7 @@ class PackageConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["qpdf"]
-        self.cpp_info.set_property("cmake_file_name", "QPDF")
+        self.cpp_info.set_property("cmake_file_name", "qpdf")
         self.cpp_info.set_property("cmake_target_name", "qpdf::libqpdf")
         self.cpp_info.set_property("pkg_config_name", "libqpdf")
 
