@@ -162,5 +162,3 @@ class PackageConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "qpdf"
         self.cpp_info.names["cmake_find_package"] = "qpdf"
         self.cpp_info.names["cmake_find_package_multi"] = "qpdf"
-        self.cpp_info.components["libqpdf"].names["cmake_find_package"] = "libqpdf"
-        self.cpp_info.components["libqpdf"].names["cmake_find_package_multi"] = "libqpdf"
