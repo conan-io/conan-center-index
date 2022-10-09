@@ -144,7 +144,7 @@ class PackageConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
-    def self.package_info(self):
+    def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "qpdf")
 
         self.cpp_info.components["libqpdf"].libs = ["qpdf"]
