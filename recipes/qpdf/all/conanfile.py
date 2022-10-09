@@ -145,17 +145,25 @@ class PackageConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
-    def package_info(self):
-        self.cpp_info.libs = ["qpdf"]
+    def self.package_info(self):
         self.cpp_info.set_property("cmake_file_name", "qpdf")
-        self.cpp_info.set_property("cmake_target_name", "qpdf::libqpdf")
-        self.cpp_info.set_property("pkg_config_name", "libqpdf")
+
+        self.cpp_info.components["libqpdf"].libs = ["qpdf"]
+        self.cpp_info.components["libqpdf"].set_property("pkg_config_name", "libqpdf")
+        self.cpp_info.components["libqpdf"].set_property("cmake_target_name", "qpdf::libqpdf")
+        self.cpp_info.components["libqpdf"].requires.append("zlib::zlib")
+        self.cpp_info.components["libqpdf"].requires.append(f"{self.options.with_jpeg}::{self.options.with_jpeg}")
+
+        if self.options.with_crypto == "openssl":
+            self.cpp_info.components["libqpdf"].requires.append("openssl::openssl")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["libqpdf"].system_libs.append("m")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "qpdf"
         self.cpp_info.filenames["cmake_find_package_multi"] = "qpdf"
         self.cpp_info.names["cmake_find_package"] = "qpdf"
         self.cpp_info.names["cmake_find_package_multi"] = "qpdf"
+        self.cpp_info.components["libqpdf"].names["cmake_find_package"] = "libqpdf"
+        self.cpp_info.components["libqpdf"].names["cmake_find_package_multi"] = "libqpdf"
