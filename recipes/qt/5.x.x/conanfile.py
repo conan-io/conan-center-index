@@ -1083,7 +1083,7 @@ Examples = bin/datadir/examples""")
                 _create_plugin("QAndroidIntegrationPlugin", "qtforandroid", "platforms", android_reqs)
                 self.cpp_info.components["qtQAndroidIntegrationPlugin"].system_libs = ["android", "jnigraphics"]
             elif self.settings.os == "Macos":
-                cocoa_reqs = ["Core", "Gui", "ClipboardSupport", "ThemeSupport", "FontDatabaseSupport", "GraphicsSupport"]
+                cocoa_reqs = ["Core", "Gui", "ClipboardSupport", "ThemeSupport", "FontDatabaseSupport", "GraphicsSupport", "AccessibilitySupport"]
                 if self.options.get_safe("with_vulkan"):
                     cocoa_reqs.append("VulkanSupport")
                 if self.options.widgets:
