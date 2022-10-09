@@ -1,4 +1,7 @@
 sources:
+  "1.62":
+    url: "https://github.com/mattreecebentley/plf_stack/archive/570a43a2c3be74bee2f150022054b7fe015d166b.tar.gz"
+    sha256: "cb21d3b870536748413ce5a9015e26966ee413e72bac44f22d5e27007a4c1a6e"
   "1.60":
     url: "https://github.com/mattreecebentley/plf_stack/archive/775456d32a0919bc2a6df9ab9b2b5e96b76c6c24.tar.gz"
     sha256: "ac09619bef8aa1c946ccf8bebbf623187627b7bb31ad85c60384ad450f0dd0fa"
