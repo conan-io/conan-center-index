@@ -158,7 +158,9 @@ class PackageConan(ConanFile):
             self.cpp_info.system_libs.append("m")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "QPDF"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "QPDF"
-        self.cpp_info.names["cmake_find_package"] = "QPDF"
-        self.cpp_info.names["cmake_find_package_multi"] = "QPDF"
+        self.cpp_info.filenames["cmake_find_package"] = "qpdf"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "qpdf"
+        self.cpp_info.names["cmake_find_package"] = "qpdf"
+        self.cpp_info.names["cmake_find_package_multi"] = "qpdf"
+        self.cpp_info.components["libqpdf"].names["cmake_find_package"] = "libqpdf"
+        self.cpp_info.components["libqpdf"].names["cmake_find_package_multi"] = "libqpdf"
