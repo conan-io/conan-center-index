@@ -6,8 +6,7 @@ from conan.tools.scm import Version
 from conan.tools.files import patch, export_conandata_patches, get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import is_msvc, check_min_vs
-from conan.tools.gnu import PkgConfigDeps
-from conan.tools.env import VirtualBuildEnv, Environment
+from conan.tools.env import VirtualBuildEnv
 import os
 
 required_conan_version = ">=1.52.0"
