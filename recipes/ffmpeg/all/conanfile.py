@@ -1,6 +1,9 @@
-from conan.tools.files import rename
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
+from conan.tools.files import get, rename, rmdir
+from conan.tools.scm import Version
+from conans import AutoToolsBuildEnvironment, tools
 import os
 import contextlib
 import glob
@@ -320,8 +323,8 @@ class FFMpegConan(ConanFile):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     @property
     def _target_arch(self):
@@ -389,7 +392,7 @@ class FFMpegConan(ConanFile):
         args = [
             "--pkg-config-flags=--static",
             "--disable-doc",
-            opt_enable_disable("cross-compile", tools.cross_building(self)),
+            opt_enable_disable("cross-compile", cross_building(self)),
             opt_enable_disable("asm", self.options.with_asm),
             # Libraries
             opt_enable_disable("shared", self.options.shared),
@@ -550,7 +553,7 @@ class FFMpegConan(ConanFile):
             if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) <= "12":
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
                 self._autotools.defines.append("inline=__inline")
-        if tools.cross_building(self):
+        if cross_building(self):
             if self._target_os == "emscripten":
                 args.append("--target-os=none")
             else:
@@ -600,8 +603,8 @@ class FFMpegConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
         if self._is_msvc:
             if self.options.shared:
@@ -886,7 +889,7 @@ class FFMpegConan(ConanFile):
             if self.options.get_safe("with_coreimage"):
                 self.cpp_info.components["avfilter"].frameworks.append(
                     "CoreImage")
-            if tools.Version(self.version) >= "5.0" and tools.is_apple_os(self.settings.os):
+            if Version(self.version) >= "5.0" and tools.is_apple_os(self.settings.os):
                 self.cpp_info.components["avfilter"].frameworks.append("Metal")
 
         if self.options.get_safe("with_vaapi"):
@@ -901,4 +904,4 @@ class FFMpegConan(ConanFile):
                 "vulkan-loader::vulkan-loader")
 
     def _version_supports_vulkan(self):
-        return tools.Version(self.version) >= "4.3.0"
+        return Version(self.version) >= "4.3.0"
