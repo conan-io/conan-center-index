@@ -162,7 +162,8 @@ class ImageMagicConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
                 self.tool_requires("msys2/cci.latest")
-            self.tool_requires("pkgconf/1.7.4")
+
+        self.tool_requires("pkgconf/1.7.4")
 
     def requirements(self):
         if self.options.with_zlib:
