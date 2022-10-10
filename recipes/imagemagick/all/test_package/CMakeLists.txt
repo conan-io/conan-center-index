@@ -4,4 +4,4 @@ project(test_package C)
 find_package(ImageMagick COMPONENTS Magick++)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} ImageMagick::Magick++)
+target_link_libraries(${PROJECT_NAME} PRIVATE ImageMagick::MagickCore)

@@ -150,9 +150,6 @@ class ImageMagicConan(ConanFile):
         if self.settings.os != "Windows":
             self.options.with_gdi32 = False
 
-        if self.settings.os == "Windows":
-            self.win_bash = True
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
@@ -160,10 +157,12 @@ class ImageMagicConan(ConanFile):
     def build_requirements(self):
         if hasattr(self, "settings_build"):
             self.tool_requires("automake/1.16.5")
-        if self._settings_build.os == "Windows" and not self.conf.get(
-                "tools.microsoft.bash:path", default=False, check_type=str):
-            self.tool_requires("msys2/cci.latest")
-        self.tool_requires("pkgconf/1.7.4")
+
+        if self.settings.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+                self.tool_requires("msys2/cci.latest")
+            self.tool_requires("pkgconf/1.7.4")
 
     def requirements(self):
         if self.options.with_zlib:
@@ -209,95 +208,8 @@ class ImageMagicConan(ConanFile):
                   destination=self.source_folder,
                   strip_root=True)
 
-    def generate(self):
-        tc = AutotoolsToolchain(self)
-        env = tc.environment()
-
-        if microsoft.is_msvc(self):
-            # FIXME: it seems that PKG_CONFIG_PATH is added as a unix style path
-            env.unset("PKG_CONFIG_PATH")
-            env.define("PKG_CONFIG_PATH", self.generators_folder)
-
-            # FIXME: otherwise configure reports "ld" as its linker
-            env.define("LD", "link")
-            # use "compile" script as a compiler driver for cl, since autotools
-            # doesn't work well with cl
-            compile_script = microsoft.unix_path(
-                self, os.path.join(self.source_folder, "config", "compile"))
-            env.define("CC", f'{compile_script} cl.exe -nologo')
-            env.define("CXX", f"{compile_script} cl.exe -nologo")
-
-            env.append("CXXFLAGS", "-FS")
-            env.append("CFLAGS", "-FS")
-
-        tc.generate(env)
-
-        # FIXME: without this, AutotoolsDeps generates unix style path
-        self.win_bash = None
-        td = AutotoolsDeps(self)
-
-        # AutotoolsDeps uses /LIBPATH: which is a linker argument that
-        # will be pased incorrectly to the msvc compiler by autotools
-        # this replaces /LIBPATH: by  -L, which the "compile" script will
-        # fix for us, and replaces /I by -I, which works with the compile script
-        env = td.environment
-        if microsoft.is_msvc(self):
-            ldflags = env.vars(self)["LDFLAGS"].replace("/LIBPATH:", "-L").replace("\\", "/")
-            cppflags = env.vars(self)["CPPFLAGS"].replace("/I", "-I").replace("\\", "/")
-            env.define("LDFLAGS", ldflags)
-            env.define("CPPFLAGS", cppflags)
-
-        # AutotoolsDeps adds all dependencies in the libs variable.
-        # all these libs make `libtool` do the extra work of finding where they
-        # are, which seems to fail on Windows (and macOS as well, due to
-        # different reasons). this variable is not needed anyways, since
-        # autotools will link against the required libraries by itself
-        env.unset("LIBS")
-
-        td.generate()
-
-        self.win_bash = True
-
-        pd = PkgConfigDeps(self)
-        pd.generate()
-
-        env = VirtualBuildEnv(self)
-        env.generate()
-        if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
-
-    def build(self):
-        files.apply_conandata_patches(self)
-
-        if microsoft.is_msvc(self):
-            # jpeg library is named as libjpeg in Windows
-            files.replace_in_file(
-                self, os.path.join(self.source_folder, "configure"), "-ljpeg",
-                "-llibjpeg")
-
-            if self.options.with_gdi32:
-                # emf.c is a c++ source code utilizing the c++ header gdiplus.h
-                # we change emf.c extension to cpp so that msvc compiles it as
-                # c++ code
-                files.replace_in_file(
-                    self, os.path.join(self.source_folder, "Makefile.in"), "emf.c",
-                    "emf.cpp")
-
-                files.rename(
-                    self, os.path.join(self.source_folder, "coders", "emf.c"),
-                    os.path.join(self.source_folder, "coders", "emf.cpp"))
-
-        # FIXME: change pangocairo pkg-config component name in the pango recipe
-        if os.path.exists(
-                os.path.join(self.generators_folder, "pango-pangocairo.pc")):
-            files.rename(
-                self,
-                os.path.join(self.generators_folder, "pango-pangocairo.pc"),
-                os.path.join(self.generators_folder, "pangocairo.pc"))
-
-        autotools = Autotools(self)
-
+    @property
+    def _config_args(self):
         def yes_no(o):
             return "yes" if o else "no"
 
@@ -346,7 +258,94 @@ class ImageMagicConan(ConanFile):
         if not self.options.with_openmp:
             args.append("--disable-openmp")
 
-        autotools.configure(args=args)
+        return args
+
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        env = tc.environment()
+
+        if microsoft.is_msvc(self):
+            # FIXME: it seems that PKG_CONFIG_PATH is added as a unix style path
+            env.unset("PKG_CONFIG_PATH")
+            env.define("PKG_CONFIG_PATH", self.generators_folder)
+
+            # FIXME: otherwise configure reports "ld" as its linker
+            env.define("LD", "link")
+            # use "compile" script as a compiler driver for cl, since autotools
+            # doesn't work well with cl
+            compile_script = microsoft.unix_path(
+                self, os.path.join(self.source_folder, "config", "compile"))
+            env.define("CC", f'{compile_script} cl.exe -nologo')
+            env.define("CXX", f"{compile_script} cl.exe -nologo")
+
+            tc.extra_cxxflags.append("-FS")
+            tc.extra_cflags.append("-FS")
+
+        tc.configure_args.extend(self._config_args)
+        tc.generate(env)
+
+        td = AutotoolsDeps(self)
+
+        # AutotoolsDeps uses /LIBPATH: which is a linker argument that
+        # will be pased incorrectly to the msvc compiler by autotools
+        # this replaces /LIBPATH: by  -L, which the "compile" script will
+        # fix for us, and replaces /I by -I, which works with the compile script
+        env = td.environment
+        if microsoft.is_msvc(self):
+            ldflags = env.vars(self)["LDFLAGS"].replace("/LIBPATH:", "-L").replace("\\", "/")
+            cppflags = env.vars(self)["CPPFLAGS"].replace("/I", "-I").replace("\\", "/")
+            env.define("LDFLAGS", ldflags)
+            env.define("CPPFLAGS", cppflags)
+
+        # AutotoolsDeps adds all dependencies in the libs variable.
+        # all these libs make `libtool` do the extra work of finding where they
+        # are, which seems to fail on Windows (and macOS as well, due to
+        # different reasons). this variable is not needed anyways, since
+        # autotools will link against the required libraries by itself
+        env.unset("LIBS")
+
+        td.generate()
+
+        pd = PkgConfigDeps(self)
+        pd.generate()
+
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
+    def build(self):
+        files.apply_conandata_patches(self)
+
+        if microsoft.is_msvc(self):
+            # jpeg library is named as libjpeg in Windows
+            files.replace_in_file(
+                self, os.path.join(self.source_folder, "configure"), "-ljpeg",
+                "-llibjpeg")
+
+            if self.options.with_gdi32:
+                # emf.c is a c++ source code utilizing the c++ header gdiplus.h
+                # we change emf.c extension to cpp so that msvc compiles it as
+                # c++ code
+                files.replace_in_file(
+                    self, os.path.join(self.source_folder, "Makefile.in"), "emf.c",
+                    "emf.cpp")
+
+                files.rename(
+                    self, os.path.join(self.source_folder, "coders", "emf.c"),
+                    os.path.join(self.source_folder, "coders", "emf.cpp"))
+
+        # FIXME: change pangocairo pkg-config component name in the pango recipe
+        if os.path.exists(
+                os.path.join(self.generators_folder, "pango-pangocairo.pc")):
+            files.rename(
+                self,
+                os.path.join(self.generators_folder, "pango-pangocairo.pc"),
+                os.path.join(self.generators_folder, "pangocairo.pc"))
+
+        autotools = Autotools(self)
+        autotools.configure()
         autotools.make()
 
     def package(self):
@@ -394,9 +393,7 @@ class ImageMagicConan(ConanFile):
         self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
 
-        self.cpp_info.names["cmake_find_package_multi"] = "ImageMagick"
         self.cpp_info.set_property("cmake_file_name", "ImageMagick")
-        self.cpp_info.set_property("cmake_target_name", "ImageMagick")
 
         core_requires = []
         if self.options.with_zlib:

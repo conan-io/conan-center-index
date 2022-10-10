@@ -26,9 +26,9 @@ index 7ffe13bb6..e8c18bff3 100644
 @@ -1,5 +1,11 @@
  /* config/config.h.in.  Generated from configure.ac by autoheader.  */
  
-+#if _WIN64
++#if defined(_WIN64)
 +  typedef __int64 ssize_t;
-+#elif _WIN32
++#elif defined(_WIN32)
 +  typedef long ssize_t;
 +#endif
 +
@@ -44,9 +44,9 @@ index 94799dfd3..e0b311577 100755
  #ifdef HAVE_UNISTD_H
  # include <unistd.h>
 +#endif
-+#if _WIN64
++#if defined(_WIN64)
 +  typedef __int64 ssize_t;
-+#elif _WIN32
++#elif defined(_WIN32)
 +  typedef long ssize_t;
  #endif"
  
