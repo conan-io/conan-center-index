@@ -51,6 +51,8 @@ class LeptonicaConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.with_tiff:
+            self.options["libtiff"].jpeg = self.options.with_jpeg
         if self.options.shared:
             try:
                 del self.options.fPIC
@@ -81,7 +83,6 @@ class LeptonicaConan(ConanFile):
             self.requires("libpng/1.6.38")
         if self.options.with_tiff:
             self.requires("libtiff/4.4.0")
-            self.options["libtiff"].jpeg = self.options.with_jpeg
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.0")
         if self.options.with_webp:
