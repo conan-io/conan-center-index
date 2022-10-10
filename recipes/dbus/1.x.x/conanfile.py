@@ -120,21 +120,21 @@ class DbusConan(ConanFile):
             env.generate(scope="build")
         else:
             tc = CMakeToolchain(self)
-            tc.cache_variables["DBUS_BUILD_TESTS"] = False
-            tc.cache_variables["DBUS_ENABLE_DOXYGEN_DOCS"] = False
-            tc.cache_variables["DBUS_ENABLE_XML_DOCS"] = False
-            tc.cache_variables["DBUS_BUILD_X11"] = bool(self.options.get_safe("with_x11", False))
-            tc.cache_variables["ENABLE_SYSTEMD"] = "ON" if self.options.get_safe("with_systemd", False) else "OFF"
-            tc.cache_variables["DBUS_WITH_GLIB"] = bool(self.options.get_safe("with_glib", False))
-            tc.cache_variables["DBUS_DISABLE_ASSERT"] = is_apple_os(self)
-            tc.cache_variables["DBUS_DISABLE_CHECKS"] = False
+            tc.variables["DBUS_BUILD_TESTS"] = False
+            tc.variables["DBUS_ENABLE_DOXYGEN_DOCS"] = False
+            tc.variables["DBUS_ENABLE_XML_DOCS"] = False
+            tc.variables["DBUS_BUILD_X11"] = bool(self.options.get_safe("with_x11", False))
+            tc.variables["ENABLE_SYSTEMD"] = "ON" if self.options.get_safe("with_systemd", False) else "OFF"
+            tc.variables["DBUS_WITH_GLIB"] = bool(self.options.get_safe("with_glib", False))
+            tc.variables["DBUS_DISABLE_ASSERT"] = is_apple_os(self)
+            tc.variables["DBUS_DISABLE_CHECKS"] = False
 
             # Conan does not provide an EXPAT_LIBRARIES CMake variable for the Expat library.
             # Define EXPAT_LIBRARIES to be the expat::expat target provided by Conan to fix linking.
-            tc.cache_variables["EXPAT_LIBRARIES"] = "expat::expat"
+            tc.variables["EXPAT_LIBRARIES"] = "expat::expat"
 
             # https://github.com/freedesktop/dbus/commit/e827309976cab94c806fda20013915f1db2d4f5a
-            tc.cache_variables["DBUS_SESSION_SOCKET_DIR"] = str(self.options.session_socket_dir)
+            tc.variables["DBUS_SESSION_SOCKET_DIR"] = str(self.options.session_socket_dir)
             tc.generate()
             cmake_deps = CMakeDeps(self)
             cmake_deps.generate()
