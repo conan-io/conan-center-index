@@ -5,7 +5,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.build import check_min_cppstd, cross_building
-from conan.tools.files import copy, get, rm, rmdir, rename, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import copy, get, rm, rmdir, rename
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 import os
@@ -68,6 +68,11 @@ class PackageConan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="src")
+
+    def build_requirements(self):
+        self.tool_requires("autoconf/2.71")
+        self.tool_requires("automake/1.16.5")
+        self.tool_requires("libtool/2.4.7")
 
     def requirements(self):
         if self.options.with_jpeg == "libjpeg-turbo":
