@@ -1,6 +1,8 @@
+from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conan.tools.files import rename
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conan.tools.build import cross_building
+from conan.tools.files import get, rename, rmdir
+from conans import tools, AutoToolsBuildEnvironment
 import contextlib
 import os
 
@@ -64,8 +66,8 @@ class LibX264Conan(ConanFile):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     @contextlib.contextmanager
     def _build_context(self):
@@ -120,7 +122,7 @@ class LibX264Conan(ConanFile):
         if self._with_nasm:
             # FIXME: get using user_build_info
             self._override_env["AS"] = os.path.join(self.dependencies.build["nasm"].package_folder, "bin", "nasm{}".format(".exe" if tools.os_info.is_windows else "")).replace("\\", "/")
-        if tools.cross_building(self):
+        if cross_building(self):
             if self.settings.os == "Android":
                 # the as of ndk does not work well for building libx264
                 self._override_env["AS"] = os.environ["CC"]
@@ -167,7 +169,7 @@ class LibX264Conan(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self._is_msvc:
             ext = ".dll.lib" if self.options.shared else ".lib"
             rename(self, os.path.join(self.package_folder, "lib", "libx264{}".format(ext)),
