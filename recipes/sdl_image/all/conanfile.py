@@ -84,7 +84,7 @@ class SDLImageConan(ConanFile):
         if self.options.with_libtiff:
             self.requires("libtiff/4.4.0")
         if self.options.with_libjpeg:
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         if self.options.with_libpng:
             self.requires("libpng/1.6.37")
         if self.options.with_libwebp:
