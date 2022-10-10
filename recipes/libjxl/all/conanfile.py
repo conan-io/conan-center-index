@@ -1,10 +1,16 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, rename
+from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+
 import os
-import shutil
 import glob
 
-required_conan_version = ">=1.33.0"
-
+required_conan_version = ">=1.52.0"
 
 class LibjxlConan(ConanFile):
     name = "libjxl"
@@ -13,18 +19,22 @@ class LibjxlConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libjxl/libjxl"
     topics = ("image", "jpeg-xl", "jxl", "jpeg")
-
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-
-    exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake"
-    _cmake = None
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _minimum_cpp_standard(self):
+        return 11
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -32,65 +42,71 @@ class LibjxlConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("brotli/1.0.9")
         self.requires("highway/0.12.2")
-        self.requires("lcms/2.11")
+        self.requires("lcms/2.13.1")
+
+    def validate(self):
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["JPEGXL_STATIC"] = not self.options.shared
-        self._cmake.definitions["JPEGXL_ENABLE_BENCHMARK"] = False
-        self._cmake.definitions["JPEGXL_ENABLE_EXAMPLES"] = False
-        self._cmake.definitions["JPEGXL_ENABLE_MANPAGES"] = False
-        self._cmake.definitions["JPEGXL_ENABLE_SJPEG"] = False
-        self._cmake.definitions["JPEGXL_ENABLE_OPENEXR"] = False
-        self._cmake.definitions["JPEGXL_ENABLE_SKCMS"] = False
-        self._cmake.definitions["JPEGXL_ENABLE_TCMALLOC"] = False
-        if tools.cross_building(self):
-            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = \
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["JPEGXL_STATIC"] = not self.options.shared
+        tc.variables["JPEGXL_ENABLE_BENCHMARK"] = False
+        tc.variables["JPEGXL_ENABLE_EXAMPLES"] = False
+        tc.variables["JPEGXL_ENABLE_MANPAGES"] = False
+        tc.variables["JPEGXL_ENABLE_SJPEG"] = False
+        tc.variables["JPEGXL_ENABLE_OPENEXR"] = False
+        tc.variables["JPEGXL_ENABLE_SKCMS"] = False
+        tc.variables["JPEGXL_ENABLE_TCMALLOC"] = False
+        if cross_building(self):
+            tc.variables["CMAKE_SYSTEM_PROCESSOR"] = \
                 str(self.settings.arch)
-        self._cmake.configure()
-        return self._cmake
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
 
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         if self.options.shared:
             libs_dir = os.path.join(self.package_folder, "lib")
-            tools.remove_files_by_mask(libs_dir, "*.a")
-            tools.remove_files_by_mask(libs_dir, "*-static.lib")
+            rm(self, pattern="*.a", folder=libs_dir)
+            rm(self, pattern="*-static.lib", folder=libs_dir)
 
             if self.settings.os == "Windows":
-                self.copy("jxl_dec.dll", src="bin", dst="bin")
-                self.copy("jxl_dec.lib", src="lib", dst="lib")
+                copy(self, "jxl_dec.dll", src="bin", dst="bin")
+                copy(self, "jxl_dec.lib", src="lib", dst="lib")
                 for dll_path in glob.glob(os.path.join(libs_dir, "*.dll")):
-                    shutil.move(dll_path, os.path.join(self.package_folder,
-                                "bin", os.path.basename(dll_path)))
+                    rename(self, src=dll_path, dst=os.path.join(self.package_folder, "bin", os.path.basename(dll_path)))
             else:
-                self.copy("libjxl_dec.*", src="lib", dst="lib")
+                copy(self, "libjxl_dec.*", src="lib", dst="lib")
 
     def _lib_name(self, name):
         if not self.options.shared and self.settings.os == "Windows":

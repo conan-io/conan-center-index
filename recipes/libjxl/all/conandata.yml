@@ -1,18 +1,18 @@
 sources:
-  "0.5.0":
-    url: "https://github.com/libjxl/libjxl/archive/v0.5.zip"
-    sha256: "a208be41542c6f81f10a82c6bb4bc75d3eceb9d4f7ecb6ea0ad2f2d236694c4b"
+  "0.7.0":
+    url: "https://github.com/libjxl/libjxl/archive/v0.7.0.tar.gz"
+    sha256: "3114bba1fabb36f6f4adc2632717209aa6f84077bc4e93b420e0d63fa0455c5e"
   "0.6.1":
-    url: "https://github.com/libjxl/libjxl/archive/v0.6.1.zip"
-    sha256: "3e4877daef07724aa6f490bf80c45ada804f35fe3cce59c27e89c5ae3099535a"
-patches:
+    url: "https://github.com/libjxl/libjxl/archive/v0.6.1.tar.gz"
+    sha256: "ccbd5a729d730152303be399f033b905e608309d5802d77a61a95faa092592c5"
   "0.5.0":
-    - patch_file: "patches/0001-clean-targets-v0.5.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-fix-dependencies-v0.5.patch"
-      base_path: "source_subfolder"
+    url: "https://github.com/libjxl/libjxl/archive/v0.5.tar.gz"
+    sha256: "911cb4b50eb621131ca22382166f40d4914a4ff4453dd299ade1e3292f311f89"
+patches:
   "0.6.1":
     - patch_file: "patches/0001-clean-targets-v0.6.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-fix-dependencies-v0.6.patch"
-      base_path: "source_subfolder"
+  "0.5.0":
+    - patch_file: "patches/0001-clean-targets-v0.5.patch"
+    - patch_file: "patches/0002-fix-dependencies-v0.5.patch"
+    - patch_file: "patches/0003-use-find-package-v0.5.patch"
