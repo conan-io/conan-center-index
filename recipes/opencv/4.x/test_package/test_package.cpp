@@ -12,7 +12,7 @@
 #include <opencv2/gapi/core.hpp>
 #include <opencv2/gapi/imgproc.hpp>
 #endif
-#ifdef BUILD_WITH_FFMPEF
+#ifdef BUILT_WITH_FFMPEG
 #include <opencv2/videoio.hpp>
 #endif
 #ifdef BUILT_CONTRIB_SFM
@@ -218,7 +218,7 @@ void TestGAPI()
 
 void TestVideo()
 {
-#ifdef BUILD_WITH_FFMPEG
+#ifdef BUILT_WITH_FFMPEG
     if (!videoio_registry::hasBackend(CAP_FFMPEG))
         throw std::runtime_error("FFmpeg backend was not found");
 #endif
