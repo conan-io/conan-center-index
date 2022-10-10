@@ -21,13 +21,13 @@ class PackageConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_crypto": ["native", "openssl", "gnutls"],
+        "with_ssl": ["internal", "openssl", "gnutls"],
         "with_jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_crypto": "native",
+        "with_ssl": "openssl",
         "with_jpeg": "libjpeg",
     }
 
@@ -63,9 +63,9 @@ class PackageConan(ConanFile):
     def requirements(self):
         # https://qpdf.readthedocs.io/en/stable/installation.html#basic-dependencies
         self.requires("zlib/1.2.12")
-        if self.options.with_crypto == "openssl":
+        if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1q")
-        elif self.options.with_crypto == "gnutls":
+        elif self.options.with_ssl == "gnutls":
             raise ConanInvalidConfiguration("GnuTLS is not available in Conan Center yet.")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
@@ -99,11 +99,11 @@ class PackageConan(ConanFile):
         # https://qpdf.readthedocs.io/en/latest/installation.html#build-time-crypto-selection
         tc.variables["USE_IMPLICIT_CRYPTO"] = False
         tc.cache_variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
-        if self.options.with_crypto == "native":
+        if self.options.with_ssl == "internal":
             tc.variables["REQUIRE_CRYPTO_NATIVE"] = True
             tc.variables["REQUIRE_CRYPTO_GNUTLS"] = False
             tc.variables["REQUIRE_CRYPTO_OPENSSL"] = False
-        elif self.options.with_crypto == "openssl":
+        elif self.options.with_ssl == "openssl":
             tc.variables["REQUIRE_CRYPTO_NATIVE"] = False
             tc.variables["REQUIRE_CRYPTO_GNUTLS"] = False
             tc.variables["REQUIRE_CRYPTO_OPENSSL"] = True
@@ -120,7 +120,7 @@ class PackageConan(ConanFile):
     def _patch_sources(self):
         # patch 0001 and 0002 are uniquely appliable, based ony dependency config
         patches_to_apply = ["0003-exclude-unnecessary-cmake-subprojects.patch"]
-        if self.options.with_crypto == "openssl":
+        if self.options.with_ssl == "openssl":
             patches_to_apply.append("0002-libqpdf-cmake-deps-jpeg-zlib-openssl.patch")
         else:
             patches_to_apply.append("0001-libqpdf-cmake-deps-jpeg-zlib.patch")
@@ -152,7 +152,7 @@ class PackageConan(ConanFile):
         self.cpp_info.components["libqpdf"].requires.append("zlib::zlib")
         self.cpp_info.components["libqpdf"].requires.append(f"{self.options.with_jpeg}::{self.options.with_jpeg}")
 
-        if self.options.with_crypto == "openssl":
+        if self.options.with_ssl == "openssl":
             self.cpp_info.components["libqpdf"].requires.append("openssl::openssl")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
