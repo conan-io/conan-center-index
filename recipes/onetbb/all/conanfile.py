@@ -27,17 +27,21 @@ class OneTBBConan(ConanFile):
         "fPIC": [True, False],
         "tbbmalloc": [True, False],
         "tbbproxy": [True, False],
+        "interprocedural_optimization": [True, False],
     }
     default_options = {
         "shared": True,
         "fPIC": True,
         "tbbmalloc": False,
         "tbbproxy": False,
+        "interprocedural_optimization": True,
     }
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not (Version(self.version) >= "2021.6.0" and self.options.shared and self.settings.os != "Android"):
+            del self.options.interprocedural_optimization
         if Version(self.version) < "2021.2.0":
             del self.options.shared
             del self.options.fPIC
@@ -47,8 +51,9 @@ class OneTBBConan(ConanFile):
             del self.options.fPIC
 
     def package_id(self):
-        del self.info.options.tbbmalloc
-        del self.info.options.tbbproxy
+        if Version(self.version) < "2021.6.0":
+            del self.info.options.tbbmalloc
+            del self.info.options.tbbproxy
 
     def validate(self):
         if (is_apple_os(self)
@@ -79,6 +84,10 @@ class OneTBBConan(ConanFile):
         toolchain = CMakeToolchain(self)
         toolchain.variables["TBB_TEST"] = False
         toolchain.variables["TBB_STRICT"] = False
+        if Version(self.version) >= "2021.6.0":
+            toolchain.variables["TBBMALLOC_BUILD"] = self.options.tbbmalloc
+            toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.tbbproxy
+            toolchain.variables["TBB_ENABLE_IPO"] = self.options.get_safe("interprocedural_optimization", False)
         toolchain.generate()
 
     def build(self):
