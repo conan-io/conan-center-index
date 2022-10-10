@@ -32,6 +32,6 @@ sources:
 patches:
   "4.1.2":
     - patch_file: "patches/0001-jasper.patch"
-      base_path: "source_subfolder"
+      base_path: "src"
     - patch_file: "patches/0002-openexr.patch"
-      base_path: "source_subfolder"
+      base_path: "src"

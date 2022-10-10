@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.8)
 project(test_package LANGUAGES CXX)
 
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
+
 find_package(OpenCV REQUIRED imgcodecs highgui objdetect CONFIG)
 
 option(built_with_ade "Enabled if opencv is built with ade" OFF)
@@ -18,7 +21,7 @@ if(built_contrib_sfm)
     add_definitions(-DBUILT_CONTRIB_SFM)
 endif()
 
-add_executable(${PROJECT_NAME} test_package.cpp)
+add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE
     opencv_imgcodecs
     opencv_highgui
