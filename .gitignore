@@ -6,6 +6,9 @@ conaninfo.txt
 graph_info.json
 build/
 
+# CMake
+CMakeUserPresets.json
+
 # IDEs
 .idea
 .vscode
