@@ -123,7 +123,7 @@ class OpenCVConan(ConanFile):
 
     @property
     def _protobuf_version(self):
-        return "protobuf/3.17.1"
+        return "protobuf/3.21.4"
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -178,35 +178,36 @@ class OpenCVConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.12")
         if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.2")
+            self.requires("libjpeg-turbo/2.1.4")
         if self.options.get_safe("with_jpeg2000") == "jasper":
             self.requires("jasper/2.0.33")
         elif self.options.get_safe("with_jpeg2000") == "openjpeg":
-            self.requires("openjpeg/2.4.0")
+            self.requires("openjpeg/2.5.0")
         if self.options.with_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.38")
         if self.options.with_openexr:
             self.requires("openexr/2.5.7")
         if self.options.get_safe("with_tiff"):
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.4.0")
         if self.options.with_eigen:
             self.requires("eigen/3.3.9")
         if self.options.get_safe("with_ffmpeg"):
+            # opencv doesn't support ffmpeg >= 5.0.0 for the moment (until 4.5.5 at least)
             self.requires("ffmpeg/4.4")
         if self.options.parallel == "tbb":
-            self.requires("onetbb/2020.3")
+            self.requires("onetbb/2021.3.0")
         if self.options.with_ipp == "intel-ipp":
             self.requires("intel-ipp/2020")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.2")
+            self.requires("libwebp/1.2.4")
         if self.options.get_safe("contrib_freetype"):
-            self.requires("freetype/2.11.1")
-            self.requires("harfbuzz/3.2.0")
+            self.requires("freetype/2.12.1")
+            self.requires("harfbuzz/5.3.0")
         if self.options.get_safe("contrib_sfm"):
             self.requires("gflags/2.2.2")
-            self.requires("glog/0.5.0")
+            self.requires("glog/0.6.0")
         if self.options.with_quirc:
             self.requires("quirc/1.1")
         if self.options.get_safe("with_gtk"):
@@ -214,7 +215,7 @@ class OpenCVConan(ConanFile):
         if self.options.dnn:
             self.requires(self._protobuf_version)
         if self.options.with_ade:
-            self.requires("ade/0.1.1f")
+            self.requires("ade/0.1.2a")
 
     def validate(self):
         if self.options.shared and self._is_msvc and "MT" in msvc_runtime_flag(self):

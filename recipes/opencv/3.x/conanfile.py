@@ -84,28 +84,29 @@ class OpenCVConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.12")
         if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.2")
+            self.requires("libjpeg-turbo/2.1.4")
         if self.options.with_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.38")
         if self.options.with_jasper:
             self.requires("jasper/2.0.33")
         if self.options.with_openexr:
             self.requires("openexr/2.5.7")
         if self.options.with_tiff:
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.4.0")
         if self.options.with_eigen:
             self.requires("eigen/3.3.9")
         if self.options.parallel == "tbb":
+            # opencv 3.x doesn't support onetbb >= 2021
             self.requires("onetbb/2020.3")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.2")
+            self.requires("libwebp/1.2.4")
         if self.options.contrib:
-            self.requires("freetype/2.11.1")
-            self.requires("harfbuzz/3.2.0")
+            self.requires("freetype/2.12.1")
+            self.requires("harfbuzz/5.3.0")
             self.requires("gflags/2.2.2")
-            self.requires("glog/0.5.0")
+            self.requires("glog/0.6.0")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
 
