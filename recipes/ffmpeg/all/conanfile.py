@@ -783,7 +783,7 @@ class FFMpegConan(ConanFile):
                     "CoreGraphics"]
             if self.options.avcodec:
                 self.cpp_info.components["avcodec"].frameworks = [
-                    "CoreVideo", "CoreMedia"]
+                    "CoreFoundation", "CoreVideo", "CoreMedia"]
             if self.settings.os == "Macos":
                 if self.options.avdevice:
                     self.cpp_info.components["avdevice"].frameworks.append(
