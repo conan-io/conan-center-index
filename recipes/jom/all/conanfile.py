@@ -34,13 +34,13 @@ class JomInstallerConan(ConanFile):
     def package(self):
         self.copy("LICENSE.GPL", dst= 'licenses', src='')
         self.copy("*.exe", dst="bin", src="")
-        
+
     def package_info(self):
         self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
-        
+
         bin_folder = os.path.join(self.package_folder, "bin")
         # In case need to find packaged tools when building a package
         self.buildenv_info.append("PATH", bin_folder)
