@@ -1,9 +1,10 @@
+from conan.tools.apple import is_apple_os
 from conan.tools.files import rename
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 import contextlib
 import os
 
-required_conan_version = ">=1.38.0"
+required_conan_version = ">=1.51.3"
 
 
 class LibX264Conan(ConanFile):
@@ -98,11 +99,23 @@ class LibX264Conan(ConanFile):
             args.append("--enable-pic")
         if self.settings.build_type == "Debug":
             args.append("--enable-debug")
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+        if is_apple_os(self) and self.settings.arch == "armv8":
             # bitstream-a.S:29:18: error: unknown token in expression
             extra_asflags.append("-arch arm64")
             extra_ldflags.append("-arch arm64")
             args.append("--host=aarch64-apple-darwin")
+            if self.settings.os != "Macos":
+                deployment_target_flag = tools.apple_deployment_target_flag(
+                    self.settings.os,
+                    self.settings.get_safe("os.version"),
+                    self.settings.get_safe("os.sdk"),
+                    self.settings.get_safe("os.subsystem"),
+                    self.settings.get_safe("arch")
+                )
+                platform_flags = ["-isysroot", tools.XCRun(self.settings).sdk_path, deployment_target_flag]
+                extra_asflags.extend(platform_flags)
+                extra_cflags.extend(platform_flags)
+                extra_ldflags.extend(platform_flags)
 
         if self._with_nasm:
             # FIXME: get using user_build_info
@@ -127,8 +140,8 @@ class LibX264Conan(ConanFile):
                 extra_cflags.append("-FS")
         build_canonical_name = None
         host_canonical_name = None
-        if self._is_msvc:
-            # autotools does not know about the msvc canonical name(s)
+        if self._is_msvc or self.settings.os in ["iOS", "watchOS", "tvOS"]:
+            # autotools does not know about the msvc and Apple embedded OS canonical name(s)
             build_canonical_name = False
             host_canonical_name = False
         if extra_asflags:
