@@ -153,6 +153,13 @@ class MoltenVKConan(ConanFile):
         elif self.settings.os in ["iOS", "tvOS"]:
             self.cpp_info.frameworks.append("UIKit")
 
+        self.cpp_info.requires = [
+            "cereal::cereal", "glslang::glslang-core", "glslang::spirv", "spirv-cross::spirv-cross-core",
+            "spirv-cross::spirv-cross-msl", "spirv-cross::spirv-cross-reflect", "vulkan-headers::vulkan-headers",
+        ]
+        if self.options.with_spirv_tools:
+            self.cpp_info.requires.append("spirv-tools::spirv-tools-core")
+
         if self.options.shared:
             moltenvk_icd_path = os.path.join(self.package_folder, "lib", "MoltenVK_icd.json")
             self.output.info(f"Prepending to VK_ICD_FILENAMES runtime environment variable: {moltenvk_icd_path}")
