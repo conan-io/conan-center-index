@@ -11,6 +11,9 @@ sources:
   "5.2.0":
     url: "https://github.com/harfbuzz/harfbuzz/releases/download/5.2.0/harfbuzz-5.2.0.tar.xz"
     sha256: "735a94917b47936575acb4d4fa7e7986522f8a89527e4635721474dee2bc942c"
+  "5.3.0":
+    url: "https://github.com/harfbuzz/harfbuzz/archive/5.3.0.tar.gz"
+    sha256: "94712b8cdae68f0b585ec8e3cd8c5160fdc241218119572236497a62dae770de"
 patches:
   "3.2.0":
     - patch_file: "patches/icu-3.0.x.patch"
@@ -22,5 +25,8 @@ patches:
     - patch_file: "patches/icu-5.1.x.patch"
       base_path: "source_subfolder"
   "5.2.0":
+    - patch_file: "patches/icu-5.2.x.patch"
+      base_path: "source_subfolder"
+  "5.3.0":
     - patch_file: "patches/icu-5.2.x.patch"
       base_path: "source_subfolder"
