@@ -1,4 +1,5 @@
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.files import save, get
 import os
 
 
@@ -16,7 +17,7 @@ class WafConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        get(self, **self.conan_data["sources"][self.version])
         os.rename("waf-{}".format(self.version), self._source_subfolder)
 
     @property
@@ -34,7 +35,7 @@ class WafConan(ConanFile):
         os.mkdir(binpath)
         os.mkdir(libpath)
 
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._license_text)
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._license_text)
 
         self.copy("waf", src=self._source_subfolder, dst=binpath)
         self.copy("waf-light", src=self._source_subfolder, dst=binpath)
@@ -57,5 +58,3 @@ class WafConan(ConanFile):
         wafdir = os.path.join(self.package_folder, "lib")
         self.output.info("Setting WAFDIR env var: {}".format(wafdir))
         self.env_info.WAFDIR = wafdir
-
-
