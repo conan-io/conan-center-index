@@ -48,6 +48,7 @@ class WafConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libdirs = []
+        self.cpp_info.includedirs = []
 
         binpath = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var: {}".format(binpath))
