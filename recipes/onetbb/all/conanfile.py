@@ -1,12 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, load, rmdir
 from conan.tools.scm import Version
 import os
 import re
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.51.3"
 
 
 class OneTBBConan(ConanFile):
@@ -50,7 +51,7 @@ class OneTBBConan(ConanFile):
         del self.info.options.tbbproxy
 
     def validate(self):
-        if (self.settings.os == "Macos"
+        if (is_apple_os(self)
                 and self.settings.compiler == "apple-clang"
                 and Version(self.settings.compiler.version) < "11.0"):
             raise ConanInvalidConfiguration(
