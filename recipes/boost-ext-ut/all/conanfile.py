@@ -3,12 +3,12 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class UTConan(ConanFile):
@@ -37,8 +37,7 @@ class UTConan(ConanFile):
         }
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, patch["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if Version(self.version) <= "1.1.8":
@@ -47,13 +46,13 @@ class UTConan(ConanFile):
             self.options.disable_module = True
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
         if Version(self.version) <= "1.1.8" and is_msvc(self):
-            raise ConanInvalidConfiguration(f"{self.name} version 1.1.8 may not be built with MSVC. "
+            raise ConanInvalidConfiguration(f"{self.ref} may not be built with MSVC. "
                                             "Please use at least version 1.1.9 with MSVC.")
 
         if is_msvc(self):
@@ -64,12 +63,12 @@ class UTConan(ConanFile):
             min_version = self._minimum_compilers_version.get(
                 str(self.settings.compiler))
             if not min_version:
-                self.output.warn(f"{self.name} recipe lacks information about the {self.settings.compiler} "
+                self.output.warn(f"{self.ref} recipe lacks information about the {self.settings.compiler} "
                                  "compiler support.")
             else:
                 if Version(self.settings.compiler.version) < min_version:
                     raise ConanInvalidConfiguration(
-                        f"{self.name} requires C++{self._minimum_cpp_standard} support. "
+                        f"{self.ref} requires C++{self._minimum_cpp_standard} support. "
                         f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
     def source(self):
