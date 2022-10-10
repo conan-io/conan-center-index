@@ -52,18 +52,26 @@ class WasmedgeConan(ConanFile):
 
         srclibdir = os.path.join(self._source_subfolder, "lib64" if self.settings.os == "Linux" else "lib")
         srcbindir = os.path.join(self._source_subfolder, "bin")
-
-        self.copy("wasmedge_c.lib", src=srclibdir, dst="lib", keep_path=False)
-        self.copy("wasmedge_c.dll", src=srcbindir, dst="bin", keep_path=False)
-        self.copy("libwasmedge_c.so*", src=srclibdir, dst="lib", keep_path=False)
-        self.copy("libwasmedge_c.dylib", src=srclibdir,  dst="lib", keep_path=False)
+        if tools.Version(self.version) >= "0.11.1":
+            self.copy("wasmedge.lib", src=srclibdir, dst="lib", keep_path=False)
+            self.copy("wasmedge.dll", src=srcbindir, dst="bin", keep_path=False)
+            self.copy("libwasmedge.so*", src=srclibdir, dst="lib", keep_path=False)
+            self.copy("libwasmedge.dylib", src=srclibdir,  dst="lib", keep_path=False)
+        else:
+            self.copy("wasmedge_c.lib", src=srclibdir, dst="lib", keep_path=False)
+            self.copy("wasmedge_c.dll", src=srcbindir, dst="bin", keep_path=False)
+            self.copy("libwasmedge_c.so*", src=srclibdir, dst="lib", keep_path=False)
+            self.copy("libwasmedge_c.dylib", src=srclibdir,  dst="lib", keep_path=False)
 
         self.copy("wasmedge*", src=srcbindir, dst="bin", keep_path=False)
 
         self.copy("LICENSE", dst="licenses", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["wasmedge_c"]
+        if tools.Version(self.version) >= "0.11.1":
+            self.cpp_info.libs = ["wasmedge"]
+        else:
+            self.cpp_info.libs = ["wasmedge_c"]
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
