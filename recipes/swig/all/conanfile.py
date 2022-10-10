@@ -1,4 +1,5 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conan import ConanFile
+from conans import AutoToolsBuildEnvironment, tools
 import contextlib
 import functools
 import os
