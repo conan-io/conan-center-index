@@ -393,6 +393,7 @@ class ImageMagicConan(ConanFile):
         self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
 
+        self.cpp_info.names["cmake_find_package_multi"] = "ImageMagick"
         self.cpp_info.set_property("cmake_file_name", "ImageMagick")
 
         core_requires = []
