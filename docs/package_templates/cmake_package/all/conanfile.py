@@ -109,13 +109,15 @@ class PackageConan(ConanFile):
         # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
         tc = CMakeToolchain(self)
         # Boolean values are preferred instead of "ON"/"OFF"
-        tc.cache_variables["PACKAGE_CUSTOM_DEFINITION"] = True
+        tc.variables["PACKAGE_CUSTOM_DEFINITION"] = True
         if is_msvc(self):
             # don't use self.settings.compiler.runtime
-            tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         # deps_cpp_info, deps_env_info and deps_user_info are no longer used
         if self.dependencies["dependency"].options.foobar:
-            tc.cache_variables["DEPENDENCY_LIBPATH"] = self.dependencies["dependency"].cpp_info.libdirs
+            tc.variables["DEPENDENCY_LIBPATH"] = self.dependencies["dependency"].cpp_info.libdirs
+        # cache_variables should be used sparingly, example setting cmake policies
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         # In case there are dependencies listed on requirements, CMakeDeps should be used
         tc = CMakeDeps(self)
