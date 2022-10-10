@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.files import patch, export_conandata_patches, get, copy, rmdir
+from conan.tools.files import replace_in_file, apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.env import VirtualBuildEnv
@@ -118,15 +118,13 @@ class PackageConan(ConanFile):
         tc.generate(scope="build")
 
     def _patch_sources(self):
-        # patch 0001 and 0002 are uniquely appliable, based ony dependency config
-        patches_to_apply = ["0003-exclude-unnecessary-cmake-subprojects.patch"]
+        apply_conandata_patches(self)
         if self.options.with_ssl == "openssl":
-            patches_to_apply.append("0002-libqpdf-cmake-deps-jpeg-zlib-openssl.patch")
-        else:
-            patches_to_apply.append("0001-libqpdf-cmake-deps-jpeg-zlib.patch")
-        for patch_file in patches_to_apply:
-            patch(self, base_path=self.source_folder,
-                  patch_file=os.path.join(self.source_folder, "..", "patches", patch_file))
+            replace_in_file(self, os.path.join(self.source_folder, "libqpdf", "CMakeLists.txt"),
+                "find_package(ZLIB REQUIRED)",
+                "find_package(ZLIB REQUIRED)\nfind_package(OpenSSL REQUIRED)\n")
+            replace_in_file(self, os.path.join(self.source_folder, "libqpdf", "CMakeLists.txt"),
+                "PUBLIC JPEG::JPEG ZLIB::ZLIB", "PUBLIC JPEG::JPEG ZLIB::ZLIB OpenSSL::SSL")
 
     def build(self):
         self._patch_sources()
