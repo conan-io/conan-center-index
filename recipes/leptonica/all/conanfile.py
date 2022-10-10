@@ -25,7 +25,7 @@ class LeptonicaConan(ConanFile):
         "fPIC": [True, False],
         "with_zlib": [True, False],
         "with_gif": [True, False],
-        "with_jpeg": [True, False],
+        "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
         "with_png": [True, False],
         "with_tiff": [True, False],
         "with_openjpeg": [True, False],
@@ -36,7 +36,7 @@ class LeptonicaConan(ConanFile):
         "fPIC": True,
         "with_zlib": True,
         "with_gif": True,
-        "with_jpeg": True,
+        "with_jpeg": "libjpeg",
         "with_png": True,
         "with_tiff": True,
         "with_openjpeg": True,
@@ -73,12 +73,15 @@ class LeptonicaConan(ConanFile):
             self.requires("zlib/1.2.12")
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
-        if self.options.with_jpeg:
-            self.requires("libjpeg/9d")
+        if self.options.with_jpeg == "libjpeg":
+            self.requires("libjpeg/9e")
+        if self.options.with_jpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.1.4")
         if self.options.with_png:
             self.requires("libpng/1.6.38")
         if self.options.with_tiff:
             self.requires("libtiff/4.4.0")
+            self.options["libtiff"].jpeg = self.options.with_jpeg
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.0")
         if self.options.with_webp:
