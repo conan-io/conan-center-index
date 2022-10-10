@@ -110,14 +110,11 @@ class MoltenVKConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} only supported on MacOS, iOS and tvOS")
         if self.info.settings.compiler != "apple-clang":
             raise ConanInvalidConfiguration(f"{self.ref} requires apple-clang")
-        if Version(self.version) >= "1.0.42" and not self.info.options.shared:
+        if Version(self.version) >= "1.0.42":
             if Version(self.info.settings.compiler.version) < "12.0":
-                raise ConanInvalidConfiguration(f"{self.ref} static requires XCode 12.0 or higher at build & consume time")
+                raise ConanInvalidConfiguration(f"{self.ref} requires XCode 12.0 or higher at build time")
 
     def validate_build(self):
-        if Version(self.version) >= "1.0.42":
-            if Version(self.settings.compiler.version) < "12.0":
-                raise ConanInvalidConfiguration(f"{self.ref} requires XCode 12.0 or higher at build time")
         spirv_cross = self.dependencies["spirv-cross"]
         if spirv_cross.options.shared or not spirv_cross.options.msl or not spirv_cross.options.reflect:
             raise ConanInvalidConfiguration(f"{self.ref} requires spirv-cross static with msl & reflect enabled")
