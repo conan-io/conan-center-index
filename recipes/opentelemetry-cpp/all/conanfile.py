@@ -42,12 +42,12 @@ class OpenTelemetryCppConan(ConanFile):
 
     def requirements(self):
         self.requires("abseil/20211102.0")
-        self.requires("grpc/1.45.2")
+        self.requires("grpc/1.48.0")
         self.requires("libcurl/7.83.1")
         self.requires("nlohmann_json/3.11.2")
-        self.requires("openssl/1.1.1o")
-        self.requires("opentelemetry-proto/0.19.0")
-        self.requires("protobuf/3.21.1")
+        self.requires("openssl/1.1.1q")
+        self.requires("opentelemetry-proto/0.18.0")
+        self.requires("protobuf/3.21.4")
         self.requires("thrift/0.15.0")
         if tools.Version(self.version) >= "1.3.0":
             self.requires("boost/1.79.0")
@@ -99,7 +99,9 @@ class OpenTelemetryCppConan(ConanFile):
           "WITH_EXAMPLES": False,
           "WITH_JAEGER": True,
           "WITH_OTLP": True,
+          "WITH_OTLP_HTTP": True,
           "WITH_ZIPKIN": True,
+          "WITH_LOGS_PREVIEW": True
         }
         cmake.configure(defs=defs, build_folder=self._build_subfolder)
         return cmake
@@ -163,14 +165,20 @@ class OpenTelemetryCppConan(ConanFile):
             "opentelemetry_exporter_in_memory",
             "opentelemetry_exporter_jaeger_trace",
             "opentelemetry_exporter_ostream_span",
+            "opentelemetry_exporter_ostream_logs",
+            "opentelemetry_exporter_ostream_metrics",
             "opentelemetry_exporter_otlp_grpc",
             "opentelemetry_exporter_otlp_http",
+            "opentelemetry_exporter_otlp_http_log",
+            "opentelemetry_exporter_otlp_http_client",
             "opentelemetry_exporter_zipkin_trace",
             "opentelemetry_otlp_recordable",
             "opentelemetry_proto",
             "opentelemetry_resources",
             "opentelemetry_trace",
+            "opentelemetry_logs",
             "opentelemetry_version",
+            "opentelemetry_metrics"
         ]
         if self.settings.os == "Windows":
             libraries.extend([
@@ -215,6 +223,14 @@ class OpenTelemetryCppConan(ConanFile):
             "opentelemetry_trace",
         ])
 
+        self.cpp_info.components["opentelemetry_exporter_ostream_metrics"].requires.extend([
+            "opentelemetry_metrics",
+        ])
+
+        self.cpp_info.components["opentelemetry_exporter_ostream_logs"].requires.extend([
+            "opentelemetry_logs",
+        ])
+
         self.cpp_info.components["opentelemetry_exporter_otlp_grpc"].requires.extend([
             "grpc::grpc++",
             "opentelemetry_otlp_recordable",
@@ -222,6 +238,19 @@ class OpenTelemetryCppConan(ConanFile):
         ])
 
         self.cpp_info.components["opentelemetry_exporter_otlp_http"].requires.extend([
+            self._http_client_name,
+            "nlohmann_json::nlohmann_json",
+            "opentelemetry_otlp_recordable",
+        ])
+
+        self.cpp_info.components["opentelemetry_exporter_otlp_http_log"].requires.extend([
+            self._http_client_name,
+            "nlohmann_json::nlohmann_json",
+            "opentelemetry_otlp_recordable",
+            "opentelemetry_exporter_otlp_http_client"
+        ])
+
+        self.cpp_info.components["opentelemetry_exporter_otlp_http_client"].requires.extend([
             self._http_client_name,
             "nlohmann_json::nlohmann_json",
             "opentelemetry_otlp_recordable",
@@ -249,6 +278,11 @@ class OpenTelemetryCppConan(ConanFile):
         ])
 
         self.cpp_info.components["opentelemetry_trace"].requires.extend([
+            "opentelemetry_common",
+            "opentelemetry_resources",
+        ])
+
+        self.cpp_info.components["opentelemetry_logs"].requires.extend([
             "opentelemetry_common",
             "opentelemetry_resources",
         ])
