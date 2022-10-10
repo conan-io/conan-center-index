@@ -1,4 +1,7 @@
 sources:
+  "2.0.24":
+    url: "https://waf.io/waf-2.0.24.tar.bz2"
+    sha256: "6b78a3594540b232a154f64c4eb7e21f28e4e073c7e1605e4b9977519a6cb89e"
   "2.0.19":
     url: "https://waf.io/waf-2.0.19.tar.bz2"
     sha256: "d8402689b72fe75f759a83b5f6bdf9b4f34ca7fd6007d80680ecfcbef5c2bba5"
