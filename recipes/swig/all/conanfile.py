@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.files import get
 from conans import AutoToolsBuildEnvironment, tools
 import contextlib
 import functools
@@ -41,8 +42,8 @@ class SwigConan(ConanFile):
         del self.info.settings.compiler
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     @property
     def _user_info_build(self):
