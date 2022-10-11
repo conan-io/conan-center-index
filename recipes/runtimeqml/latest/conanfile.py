@@ -1,9 +1,6 @@
-import os
-
 from conan import ConanFile
-from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir
+from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.files import get
 
 required_conan_version = ">=1.49.0"
 
@@ -29,14 +26,11 @@ class RuntimeQml(ConanFile):
     generators = "CMakeDeps", "CMakeToolchain"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt", dst="src")
+        self.copy("CMakeLists.txt")
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)],
             destination=self.source_folder, strip_root=True)
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("qt/[>=6.0.0]")
@@ -60,9 +54,12 @@ class RuntimeQml(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", src=self.source_folder, dst="licenses")
-        self.copy(pattern="*.lib", dst="lib")
-        self.copy(pattern="*.dylib", dst="lib")
-        self.copy(pattern="*.so", dst="lib")
-        self.copy(pattern="*.dll", dst="bin")
-        self.copy(pattern="*.hpp", src=self.source_folder, dst="include")
+        self.copy(pattern="LICENSE", src=self.source_folder, dst="licenses", keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", keep_path=False)
+        self.copy(pattern="*.dylib", dst="lib", keep_path=False)
+        self.copy(pattern="*.so", dst="lib", keep_path=False)
+        self.copy(pattern="*.dll", dst="bin", keep_path=False)
+        self.copy(pattern="*.hpp", src=self.source_folder, dst="include", keep_path=False)
+    
+    def package_info(self):
+        self.cpp_info.libs = ["runtimeqml"]

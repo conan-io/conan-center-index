@@ -1,11 +1,6 @@
-from conans import ConanFile, tools
-import os
-
 from conan import ConanFile
-from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir
-
+from conan.tools.cmake import CMake, cmake_layout
+import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
@@ -17,6 +12,7 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires("qt/[>=6.0.0]")
+        self.requires("runtimeqml/latest")
 
     def configure(self):
         self.options["qt"].shared = True
@@ -30,4 +26,9 @@ class TestPackageConan(ConanFile):
         cmake.build()
     
     def test(self):
-        pass
+        # if self.settings.os == "Windows":
+        #     self.run(os.path.join(self.build_folder, "bin/RuntimeQmlTest.exe"))
+        # else:
+        #     self.run(os.path.join(self.build_folder, "build/bin/RuntimeQmlTest"))
+        bin_path = os.path.join("bin", "RuntimeQmlTest")
+        self.run(bin_path, run_environment=True)
