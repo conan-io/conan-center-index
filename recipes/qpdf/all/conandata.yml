@@ -5,8 +5,8 @@ sources:
 patches:
   "11.1.1":
     - patch_file: "patches/0001-libqpdf-cmake-deps-jpeg-zlib.patch"
-      patch_description: "Disable cmake fails, caused by pkg_config fail to find dependencies. Add conan generated cmake dependencies instead."
+      patch_description: "Inject Conan Deps, disable qpdf-dep handling: update libqpdf/CMakeLists.txt by disabling cmake fails, caused by pkg_config fail to find dependencies. Add conan generated cmake dependencies instead."
       patch_type: "conan"
     - patch_file: "patches/0002-exclude-unnecessary-cmake-subprojects.patch"
-      patch_description: "Exclude unnecessary cmake subdirs, like binaries, tests, examples, docs and fuzzing"
+      patch_description: "Exclude unnecessary targets: update CMakeLists.txt removing subdir includes for binaries, tests, examples, docs and fuzzing"
       patch_type: "conan"
