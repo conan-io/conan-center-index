@@ -1,5 +1,12 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -1,5 +1,5 @@
++CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
+ PROJECT(CCfits)
+-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
+ 
+ # Allow the developer to select if Dynamic or Static libraries are built
+ OPTION (BUILD_SHARED_LIBS "Build Shared Libraries" OFF)
 @@ -22,8 +22,7 @@ ENDIF()
  
  #add_subdirectory (src)
