@@ -25,13 +25,11 @@ class PyBind11Conan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        toolchain = CMakeToolchain(self)
-        toolchain.cache_variables.update({
-            "PYBIND11_INSTALL": True,
-            "PYBIND11_TEST": False,
-            "PYBIND11_CMAKECONFIG_INSTALL_DIR": "lib/cmake/pybind11"
-        })
-        toolchain.generate()
+        tc = CMakeToolchain(self)
+        tc.variables["PYBIND11_INSTALL"] = True
+        tc.variables["PYBIND11_TEST"] = False
+        tc.variables["PYBIND11_CMAKECONFIG_INSTALL_DIR"] = "lib/cmake/pybind11"
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)
