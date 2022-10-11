@@ -560,6 +560,9 @@ class FFMpegConan(ConanFile):
                 args.append("--target-os={}".format(self._target_os))
 
             if tools.is_apple_os(self.settings.os):
+                if self.options.with_audiotoolbox:
+                    args.append("--disable-outdev=audiotoolbox")
+
                 xcrun = tools.XCRun(self.settings)
                 apple_arch = tools.to_apple_arch(str(self.settings.arch))
                 extra_cflags.extend(
