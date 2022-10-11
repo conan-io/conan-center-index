@@ -135,6 +135,8 @@ class LuauConan(ConanFile):
         self.cpp_info.components["CodeGen"].libs = ["Luau.CodeGen"]
         self.cpp_info.components["CodeGen"].set_property("cmake_target_name", "Luau::CodeGen")
         self.cpp_info.components["CodeGen"].requires = ["Ast"]
+        if Version(self.version) >= "0.548":
+            self.cpp_info.components["CodeGen"].requires.append("VM")
 
         if self.options.with_cli:
             bin_path = os.path.join(self.package_folder, "bin")
