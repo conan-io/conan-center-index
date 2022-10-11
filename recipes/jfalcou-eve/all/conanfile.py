@@ -41,6 +41,8 @@ class JfalcouEveConan(ConanFile):
         version = Version(self.version.strip("v"))
         if version.major < 2022 or (version.major == 2022 and version.minor < 9):
             self.license = "MIT"
+        else:
+            self.license = "BSL-1.0"
 
     def layout(self):
         basic_layout(self, src_folder="src")
