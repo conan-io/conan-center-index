@@ -21,7 +21,7 @@ class TestPackageConan(ConanFile):
         deps.generate()
 
         toolchain = CMakeToolchain(self)
-        toolchain.cache_variables["PYTHON_EXECUTABLE"] = self._python_interpreter
+        toolchain.variables["PYTHON_EXECUTABLE"] = self._python_interpreter
         toolchain.generate()
 
         run = VirtualRunEnv(self)
