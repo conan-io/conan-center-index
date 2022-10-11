@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import chdir, copy, download, get, rmdir
+from conan.tools.files import apply_conandata_patches, chdir, copy, download, export_conandata_patches, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout, vs_layout
 from conan.tools.microsoft import is_msvc, MSBuildToolchain, MSBuild
@@ -21,6 +21,9 @@ class YASMConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -66,6 +69,7 @@ class YASMConan(ConanFile):
             self._generate_autotools()
 
     def build(self):
+        apply_conandata_patches(self)
         if is_msvc(self):
             msbuild = MSBuild(self)
             msbuild.build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
