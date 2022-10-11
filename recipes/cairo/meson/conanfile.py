@@ -1,13 +1,25 @@
-import contextlib
 import glob
 import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools import files, microsoft
-from conans import tools, Meson, VisualStudioBuildEnvironment
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.apple import is_apple_os
+from conan.tools.layout import basic_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import (
+    apply_conandata_patches,
+    copy,
+    export_conandata_patches,
+    get,
+    rename,
+    replace_in_file,
+    rm,
+    rmdir)
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.meson import MesonToolchain, Meson
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class CairoConan(ConanFile):
@@ -50,26 +62,17 @@ class CairoConan(ConanFile):
         "with_symbol_lookup": False,
         "tee": True,
     }
-
-    generators = "pkg_config"
-
-    _meson = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    short_paths = True
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         del self.settings.compiler.libcxx
@@ -107,7 +110,7 @@ class CairoConan(ConanFile):
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_glib:
-            self.requires("glib/2.73.3")
+            self.requires("glib/2.74.0")
         if self.settings.os == "Linux":
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system")
@@ -129,7 +132,7 @@ class CairoConan(ConanFile):
             raise ConanInvalidConfiguration("'with_xlib_xrender' option requires 'with_xlib' option to be enabled as well!")
         if self.options.with_glib:
             if self.options["glib"].shared:
-                if microsoft.is_msvc_static_runtime(self):
+                if is_msvc_static_runtime(self):
                     raise ConanInvalidConfiguration(
                         "Linking shared glib with the MSVC static runtime is not supported"
                     )
@@ -138,26 +141,12 @@ class CairoConan(ConanFile):
                     "Linking a shared library against static glib can cause unexpected behaviour."
                 )
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        if microsoft.is_msvc(self):
-            env_build = VisualStudioBuildEnvironment(self)
-            if not self.options.shared:
-                env_build.flags.append("-DCAIRO_WIN32_STATIC_BUILD")
-                env_build.cxx_flags.append("-DCAIRO_WIN32_STATIC_BUILD")
-            with tools.environment_append(env_build.vars):
-                yield
-        else:
-            yield
-
-    def source(self):
-        files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-
-    def _configure_meson(self):
+    def generate(self):
         def boolean(value):
             return "enabled" if value else "disabled"
 
-        meson = Meson(self)
+        pkg_deps = PkgConfigDeps(self)
+        pkg_deps.generate()
 
         defs = dict()
         defs["tests"] = "disabled"
@@ -189,49 +178,55 @@ class CairoConan(ConanFile):
         # for now, disabling explicitly, to avoid non-reproducible auto-detection of system libs
         defs["cogl"] = "disabled"  # https://gitlab.gnome.org/GNOME/cogl
         defs["directfb"] = "disabled"
-        defs["drm"] = "disabled" # not yet compilable in cairo 1.17.4
+        defs["drm"] = "disabled"  # not yet compilable in cairo 1.17.4
         defs["openvg"] = "disabled"  # https://www.khronos.org/openvg/
-        defs["qt"] = "disabled" # not yet compilable in cairo 1.17.4
+        defs["qt"] = "disabled"  # not yet compilable in cairo 1.17.4
         defs["gtk2-utils"] = "disabled"
         defs["spectre"] = "disabled"  # https://www.freedesktop.org/wiki/Software/libspectre/
 
-        meson.configure(
-            source_folder=self._source_subfolder,
-            args=["--wrap-mode=nofallback"],
-            build_folder=self._build_subfolder,
-            defs=defs,
-        )
-        return meson
+        meson = MesonToolchain(self)
+        meson.project_options.update(defs)
+
+        if not self.options.shared:
+            meson.c_args.append("-DCAIRO_WIN32_STATIC_BUILD")
+
+        meson.generate()
+
+        env = VirtualBuildEnv(self)
+        env.generate()
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def build(self):
-        files.apply_conandata_patches(self)
+        apply_conandata_patches(self)
 
         # Dependency freetype2 found: NO found 2.11.0 but need: '>= 9.7.3'
         if self.options.with_freetype:
-            files.replace_in_file(self, "freetype2.pc",
-                                  f"Version: {self.deps_cpp_info['freetype'].version}",
-                                  "Version: 9.7.3")
-        with self._build_context():
-            meson = self._configure_meson()
-            meson.build()
+            replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
+                                  "freetype_required_version = '>= 9.7.3'",
+                                  f"freetype_required_version = '>= {self.deps_cpp_info['freetype'].version}'")
+        meson = Meson(self)
+        meson.configure()
+        meson.build()
 
-    def _fix_library_names(self):
-        if microsoft.is_msvc(self):
-            with tools.chdir(os.path.join(self.package_folder, "lib")):
-                for filename_old in glob.glob("*.a"):
-                    filename_new = filename_old[3:-2] + ".lib"
-                    self.output.info("rename %s into %s" % (filename_old, filename_new))
-                    files.rename(self, filename_old, filename_new)
+    def _fix_library_names(self, path):
+        if is_msvc(self):
+            for filename_old in glob.glob(os.path.join(path, "*.a")):
+                root, _ = os.path.splitext(filename_old)
+                folder, basename = os.path.split(root)
+                rename(self, filename_old, os.path.join(folder, basename.replace("lib", "") + ".lib"))
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("COPYING*", src=self._source_subfolder, dst="licenses", keep_path=False)
-        with self._build_context():
-            meson = self._configure_meson()
-            meson.install()
-        self._fix_library_names()
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        files.rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        meson = Meson(self)
+        meson.install()
+        self._fix_library_names(os.path.join(self.package_folder, "lib"))
+        src_license_folder = os.path.join(self.source_folder, "licenses")
+        dest_license_folder = os.path.join(self.package_folder, "licenses")
+        copy(self, "LICENSE", src_license_folder, dest_license_folder)
+        copy(self, "COPYING*", src_license_folder, dest_license_folder)
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         base_requirements = {"pixman::pixman"}
@@ -290,7 +285,7 @@ class CairoConan(ConanFile):
             if self.options.get_safe("with_xlib"):
                 add_component_and_base_requirements("cairo-xlib-xcb", ["xorg::x11-xcb"])
 
-        if tools.is_apple_os(self.settings.os):
+        if is_apple_os(self):
             self.cpp_info.components["cairo-quartz"].set_property("pkg_config_name", "cairo-quartz")
             self.cpp_info.components["cairo-quartz"].names["pkg_config"] = "cairo-quartz"
             self.cpp_info.components["cairo-quartz"].requires = ["cairo_"]
