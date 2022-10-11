@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -99,6 +99,7 @@ class CbloscConan(ConanFile):
             tc.variables["PREFER_EXTERNAL_SNAPPY"] = True
         tc.variables["PREFER_EXTERNAL_ZLIB"] = True
         tc.variables["PREFER_EXTERNAL_ZSTD"] = True
+        tc.variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
         # Generate a relocatable shared lib on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
@@ -109,13 +110,6 @@ class CbloscConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         rmdir(self, os.path.join(self.source_folder, "cmake"))
-        # Do not install system libs
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            "include(InstallRequiredSystemLibraries)",
-            "",
-        )
 
     def build(self):
         self._patch_sources()
