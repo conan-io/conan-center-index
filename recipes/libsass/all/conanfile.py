@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, chdir, save, replace_in_file, rmdir, rm
 from conan.tools.microsoft import is_msvc
 from conans import AutoToolsBuildEnvironment, MSBuild, tools
