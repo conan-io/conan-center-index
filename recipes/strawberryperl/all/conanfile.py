@@ -18,8 +18,8 @@ class StrawberryPerlConan(ConanFile):
         self.folders.build = "build"
 
     def package_id(self):
-        del self.settings.compiler
-        del self.settings.build_type
+        del self.info.settings.compiler
+        del self.info.settings.build_type
 
     def validate(self):
         if self.info.settings.os != "Windows":
