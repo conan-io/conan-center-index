@@ -1,9 +1,8 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.cmake import CMake
 from conan.tools.files import get
 
 required_conan_version = ">=1.49.0"
-
 
 class RuntimeQml(ConanFile):
     name = "runtimeqml"
