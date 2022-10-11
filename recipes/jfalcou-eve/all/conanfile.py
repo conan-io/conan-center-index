@@ -19,7 +19,7 @@ class JfalcouEveConan(ConanFile):
                    )
     homepage = "https://jfalcou.github.io/eve/"
     topics = ("cpp", "simd")
-    license = ("BSL-1.0")
+    license = ("MIT", "BSL-1.0")
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
