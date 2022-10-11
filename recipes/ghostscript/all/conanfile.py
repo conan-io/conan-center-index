@@ -27,15 +27,15 @@ class PackageConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_jpeg": ["native", "libjpeg", "libjpeg-turbo"],
-        "with_tiff": ["native", "libtiff"],
-        "with_openjpeg": ["native", "openjpeg"],
-        "width_zlib": ["native", "zlib"],
-        "with_freetype": ["native", "freetype"],
-        "with_lcms": ["native", "lcms"],
-        "with_png": ["native", "libpng"],
-        "with_leptonica": ["native", "leptonica"],
-        "with_tesseract": [False, "native", "tesseract"],
+        "with_jpeg": ["internal", "libjpeg", "libjpeg-turbo"],
+        "with_tiff": ["internal", "libtiff"],
+        "with_openjpeg": ["internal", "openjpeg"],
+        "width_zlib": ["internal", "zlib"],
+        "with_freetype": ["internal", "freetype"],
+        "with_lcms": ["internal", "lcms"],
+        "with_png": ["internal", "libpng"],
+        "with_leptonica": ["internal", "leptonica"],
+        "with_tesseract": [False, "internal", "tesseract"],
     }
     default_options = {
         "shared": False,
@@ -44,10 +44,10 @@ class PackageConan(ConanFile):
         "with_tiff": "libtiff",
         "with_openjpeg": "openjpeg",
         "width_zlib": "zlib",
-        "with_freetype": "native",
-        "with_lcms": "native",
-        "with_png": "native",
-        "with_leptonica": "native",
+        "with_freetype": "internal",
+        "with_lcms": "internal",
+        "with_png": "internal",
+        "with_leptonica": "internal",
         "with_tesseract": False,
     }
 
@@ -124,33 +124,33 @@ class PackageConan(ConanFile):
         # TODO: add the font package https://www.linuxfromscratch.org/blfs/view/svn/pst/gs.html
         get(self, **self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
-        native_deps_to_remove = []
-        if self.options.with_jpeg != "native":
-            native_deps_to_remove.append('jpeg')
-        if self.options.with_tiff != "native":
-            native_deps_to_remove.append('tiff')
-        if self.options.with_openjpeg != "native":
-            native_deps_to_remove.append('openjpeg')
-        if self.options.width_zlib != "native":
-            native_deps_to_remove.append('zlib')
-        if self.options.with_freetype != "native":
-            native_deps_to_remove.append('freetype')
-        if self.options.with_lcms != "native":
-            native_deps_to_remove.append('lcms2mt')
-        if self.options.with_png != "native":
-            native_deps_to_remove.append('libpng')
-        if self.options.with_leptonica != "native":
-            native_deps_to_remove.append('leptonica')
-        if self.options.with_tesseract != "native":
-            native_deps_to_remove.append('tesseract')
-        for directory in native_deps_to_remove:
+        internal_deps_to_remove = []
+        if self.options.with_jpeg != "internal":
+            internal_deps_to_remove.append('jpeg')
+        if self.options.with_tiff != "internal":
+            internal_deps_to_remove.append('tiff')
+        if self.options.with_openjpeg != "internal":
+            internal_deps_to_remove.append('openjpeg')
+        if self.options.width_zlib != "internal":
+            internal_deps_to_remove.append('zlib')
+        if self.options.with_freetype != "internal":
+            internal_deps_to_remove.append('freetype')
+        if self.options.with_lcms != "internal":
+            internal_deps_to_remove.append('lcms2mt')
+        if self.options.with_png != "internal":
+            internal_deps_to_remove.append('libpng')
+        if self.options.with_leptonica != "internal":
+            internal_deps_to_remove.append('leptonica')
+        if self.options.with_tesseract != "internal":
+            internal_deps_to_remove.append('tesseract')
+        for directory in internal_deps_to_remove:
             rmdir(self, os.path.join(self.source_folder, directory))
 
     def generate(self):
         # https://ghostscript.readthedocs.io/en/gs10.0.0/Make.html#how-to-prepare-the-makefiles
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--disable-compile-inits")
-        if self.options.with_tiff != "native":
+        if self.options.with_tiff != "internal":
             tc.configure_args.append("--with-system-libtiff")
         if self.options.with_tesseract == False:
             tc.configure_args.append("--without-tesseract")
