@@ -64,12 +64,12 @@ class PyBind11Conan(ConanFile):
         cmake_file = os.path.join(cmake_base_path, "pybind11Common.cmake")
         self.cpp_info.set_property("cmake_build_modules", [cmake_file])
         for generator in ["cmake_find_package", "cmake_find_package_multi"]:
-            self.cpp_info.components["_pybind11"].build_modules[generator].append(cmake_file)
-        self.cpp_info.components["embed"].requires = ["_pybind11"]
-        self.cpp_info.components["module"].requires = ["_pybind11"]
-        self.cpp_info.components["python_link_helper"].requires = ["_pybind11"]
-        self.cpp_info.components["windows_extras"].requires = ["_pybind11"]
-        self.cpp_info.components["lto"].requires = ["_pybind11"]
-        self.cpp_info.components["thin_lto"].requires = ["_pybind11"]
-        self.cpp_info.components["opt_size"].requires = ["_pybind11"]
-        self.cpp_info.components["python2_no_register"].requires = ["_pybind11"]
+            self.cpp_info.components["pybind11_"].build_modules[generator].append(cmake_file)
+        self.cpp_info.components["embed"].requires = ["pybind11_"]
+        self.cpp_info.components["module"].requires = ["pybind11_"]
+        self.cpp_info.components["python_link_helper"].requires = ["pybind11_"]
+        self.cpp_info.components["windows_extras"].requires = ["pybind11_"]
+        self.cpp_info.components["lto"].requires = ["pybind11_"]
+        self.cpp_info.components["thin_lto"].requires = ["pybind11_"]
+        self.cpp_info.components["opt_size"].requires = ["pybind11_"]
+        self.cpp_info.components["python2_no_register"].requires = ["pybind11_"]
