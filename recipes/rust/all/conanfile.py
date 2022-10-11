@@ -1,3 +1,4 @@
+from pathlib import PureWindowsPath
 import os.path
 import sys
 
@@ -37,6 +38,11 @@ class RustConan(ConanFile):
     def _configure_sources(self):
         config_file = os.path.join(self.source_folder, "config.toml.example")
 
+        def unix_path(path):
+            if self.settings.os == "Windows":
+                return PureWindowsPath(path).as_posix()
+            return path
+
         def config(value, replacement):
             replace_in_file(
                 self,
@@ -44,7 +50,7 @@ class RustConan(ConanFile):
                 value,
                 replacement
             )
-        install_folder = os.path.join(self.package_folder, "bin")
+        install_folder = unix_path(os.path.join(self.package_folder, "bin"))
         config('#prefix = "/usr/local"', f'prefix = "{install_folder}"')
         config('#docs = true', 'docs = false')
         rename(self, config_file, os.path.join(self.source_folder, "config.toml"))
