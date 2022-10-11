@@ -42,7 +42,7 @@ This process helps conan-center-index against spam and malicious code. The proce
 
 > :warning: The requests are reviewed manually, checking the GitHub profile activity of the requester to avoid a misuse of the service. In case of detecting a misuse or inappropriate behavior, the requester will be dropped from the authorized users list and at last instance even banned from the repository.
 
-When submitting a pull request for the first time you will be promted to sign the [CLA](CONTRIBUTOR_LICENSE_AGREEMENT.md) for your code contributions.
+When submitting a pull request for the first time, you will be prompted to sign the [CLA](CONTRIBUTOR_LICENSE_AGREEMENT.md) for your code contributions.
 You can view your signed CLA's by going to <https://cla-assistant.io/> and signing in.
 
 ## Submitting a Package

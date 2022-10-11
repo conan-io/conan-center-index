@@ -23,9 +23,9 @@ To contribute follow the next steps:
 
 1. Comment in the corresponding issue that you want to contribute the package/fix proposed. If there is no open issue, we strongly suggest
    opening one to gather feedback.
-2. Make sure to [request access](docs/how_to_add_packages.md#request-access) and be aware there is a [CLA](docs/CONTRIBUTOR_LICENSE_AGREEMENT.md)
-3. Get setup by following [Developing Recipes](docs/developing_recipes_locally.md) guide and learn the basic commands.
-4. Check the [How To Add Packages](docs/how_to_add_packages.md) for the break down ConanCenterIndex specific conventions and practices.
+2. Make sure to [request access](docs/how_to_add_packages.md#request-access) and be aware there is a [CLA](docs/CONTRIBUTOR_LICENSE_AGREEMENT.md).
+3. Get setup by following the [Developing Recipes](docs/developing_recipes_locally.md) guide and learn the basic commands.
+4. Check the [How To Add Packages](docs/how_to_add_packages.md) page for the break down of ConanCenterIndex specific conventions and practices.
 5. In your fork create a `package/xxx` branch from the `master` branch and develop
    your fix/packages as discussed in previous step.
 6. [Submit a pull request](docs/how_to_add_packages.md#submitting-a-package) once you are ready. This can be when you
