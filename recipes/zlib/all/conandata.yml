@@ -9,11 +9,11 @@ patches:
   "1.2.12":
     - patch_file: "patches/0001-fix-cmake.patch"
     - patch_file: "patches/0002-gzguts-xcode12-compile-fix.patch"
-      # CVE-2022-37434 https://github.com/madler/zlib/issues/686
+    # CVE-2022-37434 https://github.com/madler/zlib/issues/686
     - patch_file: "patches/0004-Fix-a-bug-when-getting-a-gzip-header-extra-field-wit.patch"
     - patch_file: "patches/0005-Fix-extra-field-processing-bug-that-dereferences-NUL.patch"
   "1.2.11":
     - patch_file: "patches/0001-fix-cmake.patch"
     - patch_file: "patches/0002-gzguts-xcode12-compile-fix.patch"
-      # https://github.com/madler/zlib/issues/268
+    # https://github.com/madler/zlib/issues/268
     - patch_file: "patches/0003-gzguts-fix-widechar-condition.patch"
