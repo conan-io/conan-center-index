@@ -135,27 +135,16 @@ class DbusConan(ConanFile):
 
             # https://github.com/freedesktop/dbus/commit/e827309976cab94c806fda20013915f1db2d4f5a
             tc.variables["DBUS_SESSION_SOCKET_DIR"] = str(self.options.session_socket_dir)
+
+            tc.cache_variables["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = False
             tc.generate()
             cmake_deps = CMakeDeps(self)
             cmake_deps.generate()
         pkg_config_deps = PkgConfigDeps(self)
         pkg_config_deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        if not self._meson_available:
-            # Unfortunately, there is currently no other way to force disable
-            # CMAKE_FIND_PACKAGE_PREFER_CONFIG ON in CMake conan_toolchain.
-            replace_in_file(
-                self,
-                os.path.join(self.generators_folder, "conan_toolchain.cmake"),
-                "set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)",
-                "",
-                strict=False,
-            )
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         if self._meson_available:
             meson = Meson(self)
             meson.configure()
