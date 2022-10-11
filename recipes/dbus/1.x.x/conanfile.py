@@ -93,7 +93,7 @@ class DbusConan(ConanFile):
                 raise ConanInvalidConfiguration(f"{self.ref} requires at least gcc 7.")
             
         if not self._meson_available and self.info.settings.os == "Windows":
-                raise ConanInvalidConfiguration(f"{self.ref} does not support Windows. Contributions welcome.")
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Windows. Contributions welcome.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
