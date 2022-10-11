@@ -54,12 +54,14 @@ class RuntimeQml(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", src=self.source_folder, dst="licenses", keep_path=False)
+        self.copy(pattern="LICENSE", src=self.source_folder,
+                  dst="licenses", keep_path=False)
         self.copy(pattern="*.lib", dst="lib", keep_path=False)
         self.copy(pattern="*.dylib", dst="lib", keep_path=False)
         self.copy(pattern="*.so", dst="lib", keep_path=False)
         self.copy(pattern="*.dll", dst="bin", keep_path=False)
-        self.copy(pattern="*.hpp", src=self.source_folder, dst="include", keep_path=False)
-    
+        self.copy(pattern="*.hpp", src=self.source_folder,
+                  dst="include", keep_path=False)
+
     def package_info(self):
         self.cpp_info.libs = ["runtimeqml"]
