@@ -1,9 +1,14 @@
-from conans import ConanFile, CMake, tools
-from conan.tools.microsoft import is_msvc
-import os
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 
-required_conan_version = ">=1.43.0"
+import os
+
+required_conan_version = ">=1.52.0"
 
 class LuauConan(ConanFile):
     name = "luau"
@@ -25,16 +30,23 @@ class LuauConan(ConanFile):
         "with_cli": False,
         "with_web": False,
     }
-    generators = "cmake"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _minimum_cpp_standard(self):
+        return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "16",
+            "gcc": "8",
+            "clang": "7",
+            "apple-clang": "12",
+        }
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -42,55 +54,56 @@ class LuauConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
 
-    @property
-    def _compiler_required_cpp17(self):
-        return {
-            "Visual Studio": "16",
-            "gcc": "8",
-            "clang": "7",
-            "apple-clang": "12.0",
-        }
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 17)
-
-        minimum_version = self._compiler_required_cpp17.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
-                raise tools.ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
-        else:
-            self.output.warn("{0} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
+        check_min_vs(self, 191)
+        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
+            )
 
         if is_msvc(self) and self.options.shared:
-            raise tools.ConanInvalidConfiguration("{} does not support shared build in MSVC".format(self.name))
+            raise ConanInvalidConfiguration("{} does not support shared build in MSVC".format(self.name))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["LUAU_BUILD_CLI"] = self.options.with_cli
-        cmake.definitions["LUAU_BUILD_TESTS"] = False
-        cmake.definitions["LUAU_BUILD_WEB"] = self.options.with_web
-        cmake.definitions["LUAU_WERROR"] = False
-        cmake.definitions["LUAU_STATIC_CRT"] = False
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["LUAU_BUILD_CLI"] = self.options.with_cli
+        tc.variables["LUAU_BUILD_TESTS"] = False
+        tc.variables["LUAU_BUILD_WEB"] = self.options.with_web
+        tc.variables["LUAU_WERROR"] = False
+        tc.variables["LUAU_STATIC_CRT"] = False
+        tc.variables["LUAU_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        if Version(self.version) >= "0.548" and self.options.shared:
+            replace_in_file(self, os.path.join(self.source_folder, "VM", "include", "luaconf.h"),
+                "#define LUAI_FUNC __attribute__((visibility(\"hidden\"))) extern",
+                "#define LUAI_FUNC extern")
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy(pattern="lua_LICENSE*", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "lua_LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
