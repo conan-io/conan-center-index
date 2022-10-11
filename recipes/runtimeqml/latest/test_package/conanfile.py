@@ -15,10 +15,8 @@ class TestPackageConan(ConanFile):
         self.requires("runtimeqml/latest")
 
     def configure(self):
-        self.options["qt"].shared = True
         self.options["qt"].qtdeclarative = True
         self.options["qt"].qtshadertools = True
-        self.options["qt"].with_libjpeg = "libjpeg-turbo"
 
     def build(self):
         cmake = CMake(self)
@@ -26,9 +24,5 @@ class TestPackageConan(ConanFile):
         cmake.build()
     
     def test(self):
-        # if self.settings.os == "Windows":
-        #     self.run(os.path.join(self.build_folder, "bin/RuntimeQmlTest.exe"))
-        # else:
-        #     self.run(os.path.join(self.build_folder, "build/bin/RuntimeQmlTest"))
         bin_path = os.path.join("bin", "RuntimeQmlTest")
         self.run(bin_path, run_environment=True)
