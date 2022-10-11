@@ -1,39 +1,47 @@
 import os
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, copy, rmdir
 
 
-class StrawberryperlConan(ConanFile):
+class StrawberryPerlConan(ConanFile):
     name = "strawberryperl"
-    description = "Strawbery Perl for Windows. Useful as build_require"
-    license = "GNU Public License or the Artistic License"
+    description = "Strawberry Perl for Windows. Useful as build_require"
+    license = ("Artistic-1.0", "GPL-1.0")
     homepage = "http://strawberryperl.com"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "installer", "perl", "windows")
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     short_paths = True
 
-    def configure(self):
-        if self.settings.os != "Windows":
+    def layout(self):
+        self.folders.build = "build"
+
+    def package_id(self):
+        del self.settings.compiler
+        del self.settings.build_type
+
+    def validate(self):
+        if self.info.settings.os != "Windows":
             raise ConanInvalidConfiguration("Only windows supported for Strawberry Perl.")
 
     def build(self):
-        arch = str(self.settings.arch)
-        tools.get(**self.conan_data["sources"][self.version][arch])
+        get(self, **self.conan_data["sources"][self.version][str(self.settings.arch)],
+            destination=self.build_folder, strip_root=True)
 
     def package(self):
-        self.copy(pattern="License.rtf*", dst="licenses", src="licenses")
-        self.copy(pattern="*", src=os.path.join("perl", "bin"), dst="bin")
-        self.copy(pattern="*", src=os.path.join("perl", "lib"), dst="lib")
-        self.copy(pattern="*", src=os.path.join("perl", "vendor", "lib"), dst="lib")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        copy(self, pattern="License.rtf*", src="licenses", dst="licenses")
+        copy(self, pattern="*", src=os.path.join(self.build_folder, "perl", "bin"), dst=os.path.join(self.package_folder, "bin"))
+        copy(self, pattern="*", src=os.path.join(self.build_folder, "perl", "lib"), dst=os.path.join(self.package_folder,"lib"))
+        copy(self, pattern="*", src=os.path.join(self.build_folder, "perl", "vendor", "lib"), dst=os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
 
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: %s" % bin_path)
+        self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
 
         self.user_info.perl = os.path.join(self.package_folder, "bin", "perl.exe").replace("\\", "/")
