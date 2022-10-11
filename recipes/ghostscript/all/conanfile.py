@@ -57,9 +57,7 @@ class PackageConan(ConanFile):
 
     def configure(self):
         self.options["libtiff"].jpeg = self.options.with_jpeg
-        # TODO: update leptonica with_jpeg interface to switch used jpeg dependency
-        # self.options["leptonica"].with_jpeg = self.options.with_jpeg
-        self.options["leptonica"].with_jpeg = True
+        self.options["leptonica"].with_jpeg = self.options.with_jpeg
         if self.options.shared:
             try:
                 del self.options.fPIC
@@ -109,16 +107,19 @@ class PackageConan(ConanFile):
             check_min_cppstd(self, 11)
         # TODO: makefile patching is nedded to enable those dependencies from conan,
         # since there are not found linker statements
-        options_currently_only_supported_as_native = ['with_freetype', 'with_lcms', 'with_png', 'with_leptonica']
-        for option in options_currently_only_supported_as_native:
-            if self.options.get_safe(option) != "native":
-                raise ConanInvalidConfiguration("option "+option+" is at the moment only supported as \"native\"")
+        options_currently_only_supported_as_internal = ['with_freetype', 'with_lcms', 'with_png', 'with_leptonica']
+        for option in options_currently_only_supported_as_internal:
+            if self.options.get_safe(option) != "internal":
+                raise ConanInvalidConfiguration("option "+option+" is at the moment only supported as \"internal\"")
         if self.options.with_tesseract == "tesseract":
-            raise ConanInvalidConfiguration("option with_tesseract is at the moment only supported as \"False\" or \"native\"")
-        if self.options.with_jpeg == "libjpeg-turbo":
-            raise ConanInvalidConfiguration("libjpeg turbo is not supported at the mement. \
-                Transitive dependency leptonica needs to be able to handle it as well. \
-                Waiting here for PR: https://github.com/conan-io/conan-center-index/pull/13344")
+            raise ConanInvalidConfiguration("option with_tesseract is at the moment only supported as \"False\" or \"internal\"")
+        if self.options.with_jpeg != "internal":
+            if self.options.with_tiff != "internal":
+                if self.dependencies["libtiff"].options.jpeg != self.options.with_jpeg:
+                    raise ConanInvalidConfiguration(f"{self.ref} requires option value {self.name}:with_jpeg equal to libtiff:jpeg or internal.")
+            if self.options.with_leptonica != "internal":
+                if self.dependencies["leptonica"].options.with_jpeg != self.options.with_jpeg:
+                    raise ConanInvalidConfiguration(f"{self.ref} requires option value {self.name}:with_jpeg equal to leptonica:with_jpeg or internal.")
 
     def source(self):
         # TODO: add the font package https://www.linuxfromscratch.org/blfs/view/svn/pst/gs.html
