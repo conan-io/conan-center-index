@@ -24,14 +24,10 @@ class LibMysqlClientCConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_ssl": [True, False],
-        "with_zlib": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_ssl": True,
-        "with_zlib": True,
     }
 
     short_paths = True
@@ -71,10 +67,8 @@ class LibMysqlClientCConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        if self.options.with_ssl:
-            self.requires("openssl/1.1.1q")
-        if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+        self.requires("openssl/1.1.1q")
+        self.requires("zlib/1.2.12")
         if self._with_zstd:
             self.requires("zstd/1.5.2")
         if self._with_lz4:
@@ -223,11 +217,9 @@ class LibMysqlClientCConan(ConanFile):
         if is_msvc(self):
             cmake.definitions["WINDOWS_RUNTIME_MD"] = "MD" in msvc_runtime_flag(self)
 
-        if self.options.with_ssl:
-            cmake.definitions["WITH_SSL"] = self.deps_cpp_info["openssl"].rootpath
+        cmake.definitions["WITH_SSL"] = self.deps_cpp_info["openssl"].rootpath
 
-        if self.options.with_zlib:
-            cmake.definitions["WITH_ZLIB"] = "system"
+        cmake.definitions["WITH_ZLIB"] = "system"
         cmake.configure(source_dir=self._source_subfolder)
         return cmake
 
