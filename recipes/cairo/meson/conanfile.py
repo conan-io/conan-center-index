@@ -221,10 +221,7 @@ class CairoConan(ConanFile):
         meson = Meson(self)
         meson.install()
         self._fix_library_names(os.path.join(self.package_folder, "lib"))
-        src_license_folder = os.path.join(self.source_folder, "licenses")
-        dest_license_folder = os.path.join(self.package_folder, "licenses")
-        copy(self, "LICENSE", src_license_folder, dest_license_folder)
-        copy(self, "COPYING*", src_license_folder, dest_license_folder)
+        copy(self, "COPYING*", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
