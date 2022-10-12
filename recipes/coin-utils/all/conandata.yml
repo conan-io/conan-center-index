@@ -5,4 +5,3 @@ sources:
 patches:
   "2.11.4":
     - patch_file: "patches/0001-no-check-pkgconfig.patch"
-      base_path: "source_subfolder"
