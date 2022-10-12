@@ -131,28 +131,20 @@ class GLibConan(ConanFile):
         tc.generate()
         # it's needed so MesonToolchain reads from AutotoolsDeps, should it be automatic?
         self.buildenv.compose_env(tc.environment)
+
         tc = MesonToolchain(self)
-
-        defs = dict()
         if is_apple_os(self):
-            defs["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
-        defs["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
-        defs["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
-
+            tc.project_options["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
+        tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
+        tc.project_options["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
         if Version(self.version) < "2.69.0":
-            defs["internal_pcre"] = not self.options.with_pcre
-
+            tc.project_options["internal_pcre"] = not self.options.with_pcre
         if self.settings.os == "FreeBSD":
-            defs["xattr"] = "false"
+            tc.project_options["xattr"] = "false"
         if Version(self.version) >= "2.67.2":
-            defs["tests"] = "false"
-
+            tc.project_options["tests"] = "false"
         if Version(self.version) >= "2.67.0":
-            defs["libelf"] = "enabled" if self.options.get_safe("with_elf") else "disabled"
-
-        for name, value in defs.items():
-            tc.project_options[name] = value
-        tc.project_options["libdir"] = "lib"
+            tc.project_options["libelf"] = "enabled" if self.options.get_safe("with_elf") else "disabled"
         tc.generate()
 
     def _patch_sources(self):
