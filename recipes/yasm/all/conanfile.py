@@ -46,7 +46,7 @@ class YASMConan(ConanFile):
 
     @property
     def _msvc_subfolder(self):
-        return os.path.join(self.source_folder, "Mkfiles", "vc10")
+        return os.path.join(self.source_folder, "Mkfiles", "vc12")
 
     def _generate_vs(self):
         tc = MSBuildToolchain(self)
