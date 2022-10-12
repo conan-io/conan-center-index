@@ -1083,7 +1083,7 @@ Examples = bin/datadir/examples""")
                 _create_plugin("QAndroidIntegrationPlugin", "qtforandroid", "platforms", android_reqs)
                 self.cpp_info.components["qtQAndroidIntegrationPlugin"].system_libs = ["android", "jnigraphics"]
             elif self.settings.os == "Macos":
-                cocoa_reqs = ["Core", "Gui", "ClipboardSupport", "ThemeSupport", "FontDatabaseSupport", "GraphicsSupport"]
+                cocoa_reqs = ["Core", "Gui", "ClipboardSupport", "ThemeSupport", "FontDatabaseSupport", "GraphicsSupport", "AccessibilitySupport"]
                 if self.options.get_safe("with_vulkan"):
                     cocoa_reqs.append("VulkanSupport")
                 if self.options.widgets:
@@ -1095,7 +1095,7 @@ Examples = bin/datadir/examples""")
             elif self.settings.os in ["iOS", "tvOS"]:
                 _create_plugin("QIOSIntegrationPlugin", "qios", "platforms", ["ClipboardSupport", "FontDatabaseSupport", "GraphicsSupport"])
                 self.cpp_info.components["QIOSIntegrationPlugin"].frameworks = ["AudioToolbox", "Foundation", "Metal",
-                    "QuartzCore", "UIKit"]
+                    "MobileCoreServices", "OpenGLES", "QuartzCore", "UIKit"]
             elif self.settings.os == "watchOS":
                 _create_plugin("QMinimalIntegrationPlugin", "qminimal", "platforms", ["EventDispatcherSupport", "FontDatabaseSupport"])
             elif self.settings.os == "Emscripten":
@@ -1140,6 +1140,8 @@ Examples = bin/datadir/examples""")
             self.cpp_info.components["qtWidgets"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Widgets"))
         if self.options.gui and self.options.widgets and not self.settings.os in ["iOS", "watchOS", "tvOS"]:
             _create_module("PrintSupport", ["Gui", "Widgets"])
+            if self.settings.os == "Macos" and not self.options.shared:
+                self.cpp_info.components["PrintSupport"].system_libs.append("cups")
         if self.options.get_safe("opengl", "no") != "no" and self.options.gui:
             _create_module("OpenGL", ["Gui"])
         if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
@@ -1391,14 +1393,17 @@ Examples = bin/datadir/examples""")
                 if self.options.get_safe("qtwinextras"):
                     self.cpp_info.components["qtWinExtras"].system_libs.append("dwmapi")  # qtwinextras requires "DwmGetColorizationColor" which is in "dwmapi.lib" library
 
-
+            if is_apple_os(self):
+                self.cpp_info.components["qtCore"].frameworks.append("CoreServices" if self.settings.os == "Macos" else "MobileCoreServices")
+                self.cpp_info.components["qtNetwork"].frameworks.append("SystemConfiguration")
+                if self.options.with_gssapi:
+                    self.cpp_info.components["qtNetwork"].frameworks.append("GSS")
+                if not self.options.openssl: # with SecureTransport
+                    self.cpp_info.components["qtNetwork"].frameworks.append("Security")
             if self.settings.os == "Macos":
                 self.cpp_info.components["qtCore"].frameworks.append("IOKit")     # qtcore requires "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
-                self.cpp_info.components["qtNetwork"].frameworks.append("SystemConfiguration")
-                if self.options.with_gssapi:
-                    self.cpp_info.components["qtNetwork"].frameworks.append("GSS")
 
         self.cpp_info.components["qtCore"].builddirs.append(os.path.join("bin","archdatadir","bin"))
         build_modules.append(self._cmake_core_extras_file)
