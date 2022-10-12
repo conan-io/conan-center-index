@@ -111,7 +111,7 @@ class PackageConan(ConanFile):
             if "MT" in msvc_runtime_flag(self):
                 tc.extra_defines.append("USE_STATIC_RTL")
             if "d" in msvc_runtime_flag(self):
-                tc.extra_defines.append("d")
+                tc.extra_defines.append("USE_DEBUG_RTL")
 
         if self.options.shared:
             tc.extra_defines.append("FFI_BUILDING_DLL")
