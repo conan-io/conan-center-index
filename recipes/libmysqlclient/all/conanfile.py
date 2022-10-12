@@ -69,10 +69,10 @@ class LibMysqlClientCConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-    if self.options.with_ssl != "deprecated":
-        self.output.warn("with_ssl option is deprecated, do not use anymore. SSL cannot be disabled")
-    if self.options.with_zlib != "deprecated":
-        self.output.warn("with_zlib option is deprecated, do not use anymore. Zlib cannot be disabled")
+        if self.options.with_ssl != "deprecated":
+            self.output.warn("with_ssl option is deprecated, do not use anymore. SSL cannot be disabled")
+        if self.options.with_zlib != "deprecated":
+            self.output.warn("with_zlib option is deprecated, do not use anymore. Zlib cannot be disabled")
 
     def package_id(self):
         del self.info.options.with_ssl
