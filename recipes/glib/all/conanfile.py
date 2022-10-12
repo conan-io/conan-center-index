@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps, AutotoolsDeps
 from conan.tools.layout import basic_layout
@@ -224,8 +224,7 @@ class GLibConan(ConanFile):
             os.path.join(self.package_folder, "res"),
         )
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pc", os.path.join(self.package_folder, "lib"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.components["glib-2.0"].set_property("pkg_config_name", "glib-2.0")
