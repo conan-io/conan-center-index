@@ -24,10 +24,14 @@ class LibMysqlClientCConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_ssl": [True, False, "deprecated"],
+        "with_zlib": [True, False, "deprecated"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_ssl": "deprecated",
+        "with_zlib": "deprecated",
     }
 
     short_paths = True
@@ -65,7 +69,15 @@ class LibMysqlClientCConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+    if self.options.with_ssl != "deprecated":
+        self.output.warn("with_ssl option is deprecated, do not use anymore. SSL cannot be disabled")
+    if self.options.with_zlib != "deprecated":
+        self.output.warn("with_zlib option is deprecated, do not use anymore. Zlib cannot be disabled")
 
+    def package_id(self):
+        del self.info.options.with_ssl
+        del self.info.options.with_zlib
+        
     def requirements(self):
         self.requires("openssl/1.1.1q")
         self.requires("zlib/1.2.12")
