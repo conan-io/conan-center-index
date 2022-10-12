@@ -1,11 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.scm import Version
-from conan.tools.microsoft import is_msvc
-from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.gnu import PkgConfigDeps, AutotoolsDeps
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, replace_in_file, rmdir, chdir, rm, copy
 from conan.tools.apple import is_apple_os
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.gnu import PkgConfigDeps, AutotoolsDeps
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 import glob
 import shutil
@@ -40,14 +41,6 @@ class GLibConan(ConanFile):
     }
     short_paths = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
         export_conandata_patches(self)
@@ -77,6 +70,9 @@ class GLibConan(ConanFile):
             del self.settings.compiler.cppstd
         except Exception:
             pass
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("zlib/1.2.12")
@@ -118,12 +114,7 @@ class GLibConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
-    def layout(self):
-        self.folders.build = self._build_subfolder
-        self.folders.source = self._source_subfolder
-
     def generate(self):
-
         tc = PkgConfigDeps(self)
         tc.generate()
         tc = AutotoolsDeps(self)
