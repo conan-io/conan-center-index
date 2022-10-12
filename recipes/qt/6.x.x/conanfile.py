@@ -1021,6 +1021,10 @@ class QtConan(ConanFile):
             self.cpp_info.components["qtGui"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6_private_file("Gui"))
 
             if self.settings.os == "Windows":
+                self.cpp_info.components["qtGui"].system_libs = ["advapi32", "gdi32", "ole32", "shell32", "user32", "d3d11",
+                    "dxgi", "dxguid", "d2d1", "dwrite"]
+                if self.settings.compiler == "gcc":
+                    self.cpp_info.components["qtGui"].system_libs.append("uuid")
                 _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", ["Core", "Gui"])
                 _create_plugin("QWindowsVistaStylePlugin", "qwindowsvistastyle", "styles", ["Core", "Gui"])
                 self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs = ["advapi32", "dwmapi", "gdi32", "imm32",
