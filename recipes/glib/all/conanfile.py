@@ -73,7 +73,7 @@ class GLibConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.2.12")
-        self.requires("libffi/3.4.2")
+        self.requires("libffi/3.4.3")
         if self.options.with_pcre:
             if Version(self.version) >= "2.73.2":
                 self.requires("pcre2/10.40")
