@@ -4,6 +4,7 @@ from conan.tools.scm import Version
 from conan.tools.files import get, replace_in_file, rmdir, apply_conandata_patches, rename, mkdir, rm, export_conandata_patches
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
+from conan.tools.microsoft import is_msvc
 from conans import AutoToolsBuildEnvironment, MSBuild, tools
 from io import StringIO
 import os
