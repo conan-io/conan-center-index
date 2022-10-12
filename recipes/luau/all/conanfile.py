@@ -12,7 +12,7 @@ required_conan_version = ">=1.52.0"
 
 class LuauConan(ConanFile):
     name = "luau"
-    description = "A fast, small, safe, gradually typed embeddable scripting language derived from Lua "
+    description = "A fast, small, safe, gradually typed embeddable scripting language derived from Lua"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://luau-lang.org/"
@@ -38,7 +38,6 @@ class LuauConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "16",
             "gcc": "8",
             "clang": "7",
             "apple-clang": "12",
@@ -73,7 +72,7 @@ class LuauConan(ConanFile):
             )
 
         if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration("{} does not support shared build in MSVC".format(self.name))
+            raise ConanInvalidConfiguration(f"{self.ref} does not support shared build in MSVC")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
@@ -140,7 +139,7 @@ class LuauConan(ConanFile):
 
         if self.options.with_cli:
             bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.output.info(f"Appending PATH environment variable: {bin_path}")
             self.env_info.PATH.append(bin_path)
 
         if self.options.with_web:
