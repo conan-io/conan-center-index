@@ -107,7 +107,7 @@ class GLibConan(ConanFile):
             raise ConanInvalidConfiguration("libelf dependency can't be disabled in glib < 2.67.0")
 
     def build_requirements(self):
-        self.tool_requires("meson/0.63.2")
+        self.tool_requires("meson/0.63.3")
         self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
