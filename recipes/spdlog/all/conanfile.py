@@ -140,6 +140,7 @@ class SpdlogConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "spdlog"
         self.cpp_info.names["cmake_find_package_multi"] = "spdlog"
+        self.cpp_info.set_property("cmake_find_mode", "both")
 
         target = "spdlog_header_only" if self.options.header_only else "spdlog"
         self.cpp_info.set_property("cmake_file_name", "spdlog")
