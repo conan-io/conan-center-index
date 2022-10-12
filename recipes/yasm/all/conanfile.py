@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, chdir, copy, download, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout, vs_layout
 from conan.tools.microsoft import is_msvc, MSBuildToolchain, MSBuild
@@ -72,8 +72,6 @@ class YASMConan(ConanFile):
         apply_conandata_patches(self)
         if is_msvc(self):
             msbuild = MSBuild(self)
-            msbuild.build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
-            msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
             msbuild.build(sln=os.path.join(self._msvc_subfolder, "yasm.sln"))
         else:
             autotools = Autotools(self)
