@@ -9,7 +9,6 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
-import glob
 import shutil
 
 
