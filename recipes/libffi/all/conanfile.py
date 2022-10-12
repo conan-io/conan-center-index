@@ -6,7 +6,9 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
 from conan.tools.scm import Version
+import glob
 import os
+import shutil
 
 required_conan_version = ">=1.52.0"
 
@@ -171,7 +173,8 @@ class PackageConan(ConanFile):
         autotools = Autotools(self)
         autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])  # Need to specify the `DESTDIR` as a Unix path, aware of the subsystem
         fix_apple_shared_install_name(self)
-        copy(self, "*.dll", os.path.join(self.package_folder, "lib"), os.path.join(self.package_folder, "bin"))
+        for dll in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
+            shutil.move(dll, os.path.join(self.package_folder, "bin"))
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
