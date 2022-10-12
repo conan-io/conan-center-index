@@ -2,6 +2,11 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir
+from conan.tools.scm import Version
+
+from conans import __version__ as conan_version
+
+required_conan_version = ">=1.47.0"
 
 
 class StrawberryPerlConan(ConanFile):
@@ -12,7 +17,7 @@ class StrawberryPerlConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "installer", "perl", "windows")
     settings = "os", "arch", "compiler", "build_type"
-    short_paths = True
+    short_paths=True
 
     def layout(self):
         self.folders.build = "build"
@@ -26,13 +31,12 @@ class StrawberryPerlConan(ConanFile):
             raise ConanInvalidConfiguration("Only windows supported for Strawberry Perl.")
 
     def build(self):
-        get(self, **self.conan_data["sources"][self.version][str(self.settings.arch)],
-            destination=self.build_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version][str(self.settings.arch)], destination=self.build_folder)
 
     def package(self):
-        copy(self, pattern="License.rtf*", src="licenses", dst="licenses")
+        copy(self, pattern="License.rtf*", src=os.path.join(self.build_folder, "licenses"), dst=os.path.join(self.package_folder, "licenses"))
         copy(self, pattern="*", src=os.path.join(self.build_folder, "perl", "bin"), dst=os.path.join(self.package_folder, "bin"))
-        copy(self, pattern="*", src=os.path.join(self.build_folder, "perl", "lib"), dst=os.path.join(self.package_folder,"lib"))
+        copy(self, pattern="*", src=os.path.join(self.build_folder, "perl", "lib"), dst=os.path.join(self.package_folder, "lib"))
         copy(self, pattern="*", src=os.path.join(self.build_folder, "perl", "vendor", "lib"), dst=os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
@@ -42,6 +46,12 @@ class StrawberryPerlConan(ConanFile):
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH environment variable: {bin_path}")
-        self.env_info.PATH.append(bin_path)
+        self.buildenv_info.append_path("PATH", bin_path)
+        self.runenv_info.append_path("PATH", bin_path)
+        if Version(conan_version) < "2.0.0-beta":
+            self.env_info.PATH.append(bin_path)
 
-        self.user_info.perl = os.path.join(self.package_folder, "bin", "perl.exe").replace("\\", "/")
+        perl_path = os.path.join(self.package_folder, "bin", "perl.exe").replace("\\", "/")
+        self.conf_info.define("user.cci:perl", perl_path)
+        if Version(conan_version) < "2.0.0-beta":
+            self.user_info.perl = perl_path
