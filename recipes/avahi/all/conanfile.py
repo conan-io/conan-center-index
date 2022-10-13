@@ -14,7 +14,7 @@ class AvahiConan(ConanFile):
     # --enable-compat-libdns_sd means that this recipe provides the mdnsresponder compile interface
     provides = "mdnsresponder"
     description = "Avahi - Service Discovery for Linux using mDNS/DNS-SD -- compatible with Bonjour"
-    topics = ("avahi", "Bonjour", "DNS-SD", "mDNS")
+    topics = ("bonjour", "dns", "dns-sd", "mdns")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lathiat/avahi"
     license = "LGPL-2.1-only"
@@ -45,16 +45,19 @@ class AvahiConan(ConanFile):
             raise ConanInvalidConfiguration("Only Linux is supported for this package.")
 
     def configure(self):
-        try:
-            del self.settings.compiler.cppstd
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
         if self.options.shared:
             try:
                 del self.options.fPIC
             except Exception:
                 pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
