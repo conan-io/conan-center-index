@@ -24,14 +24,14 @@ class LibMysqlClientCConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_ssl": [True, False],
-        "with_zlib": [True, False],
+        "with_ssl": [True, False, "deprecated"],
+        "with_zlib": [True, False, "deprecated"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_ssl": True,
-        "with_zlib": True,
+        "with_ssl": "deprecated",
+        "with_zlib": "deprecated",
     }
 
     short_paths = True
@@ -69,12 +69,18 @@ class LibMysqlClientCConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.with_ssl != "deprecated":
+            self.output.warn("with_ssl option is deprecated, do not use anymore. SSL cannot be disabled")
+        if self.options.with_zlib != "deprecated":
+            self.output.warn("with_zlib option is deprecated, do not use anymore. Zlib cannot be disabled")
 
+    def package_id(self):
+        del self.info.options.with_ssl
+        del self.info.options.with_zlib
+        
     def requirements(self):
-        if self.options.with_ssl:
-            self.requires("openssl/1.1.1q")
-        if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+        self.requires("openssl/1.1.1q")
+        self.requires("zlib/1.2.12")
         if self._with_zstd:
             self.requires("zstd/1.5.2")
         if self._with_lz4:
@@ -223,11 +229,9 @@ class LibMysqlClientCConan(ConanFile):
         if is_msvc(self):
             cmake.definitions["WINDOWS_RUNTIME_MD"] = "MD" in msvc_runtime_flag(self)
 
-        if self.options.with_ssl:
-            cmake.definitions["WITH_SSL"] = self.deps_cpp_info["openssl"].rootpath
+        cmake.definitions["WITH_SSL"] = self.deps_cpp_info["openssl"].rootpath
 
-        if self.options.with_zlib:
-            cmake.definitions["WITH_ZLIB"] = "system"
+        cmake.definitions["WITH_ZLIB"] = "system"
         cmake.configure(source_dir=self._source_subfolder)
         return cmake
 
