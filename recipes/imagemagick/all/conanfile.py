@@ -7,6 +7,7 @@ from conan.tools.gnu import (Autotools, AutotoolsDeps, PkgConfigDeps,
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools import files, microsoft, scm
 import os
+import glob
 
 required_conan_version = ">=1.50.0"
 
@@ -309,6 +310,11 @@ class ImageMagicConan(ConanFile):
 
         pd = PkgConfigDeps(self)
         pd.generate()
+
+        # FIXME workaround bug with pkgconfig files and apple frameworks
+        # see https://github.com/conan-io/conan/pull/12307
+        for pc in glob.glob(os.path.join(self.generators_folder, "*.pc")):
+            files.replace_in_file(self, pc, "-F ", "-F", strict=False)
 
         env = VirtualBuildEnv(self)
         env.generate()
