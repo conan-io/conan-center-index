@@ -1,9 +1,11 @@
+import os
+
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import collect_libs, get
+from conan.tools.files import collect_libs, copy, get, rmdir
 
 
-class libsshRecipe(ConanFile):
+class LibSSHRecipe(ConanFile):
     name = "libssh"
     version = "0.10.4"
     license = "LGPL-2.1"
@@ -59,8 +61,11 @@ class libsshRecipe(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libssh")
