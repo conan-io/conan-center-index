@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake
 from conan.tools.files import get
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.49.0"
 
@@ -42,8 +43,10 @@ class RuntimeQml(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-        self.options["qt"].qtdeclarative = True
-        self.options["qt"].qtshadertools = True
+    def validate(self):
+        qt = self.dependencies["qt"]
+        if not qt.options.qtdeclarative and not qt.options.qtshaderTools:
+            raise ConanInvalidConfiguration(f"{self.ref} requires option qt:qtdeclarative=True and qt::qtshadertools=True")
 
     def build(self):
         cmake = CMake(self)
