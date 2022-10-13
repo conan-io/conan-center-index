@@ -3,9 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, replace_in_file, chdir
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import AutotoolsToolchain, Autotools
-from conan.tools.build import cross_building
 from conan.tools.apple import is_apple_os, to_apple_arch
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 import os
 
 
