@@ -204,6 +204,9 @@ class ImageMagicConan(ConanFile):
         if self.options.with_fftw:
             self.requires("fftw/3.3.9")
 
+        # FIXME: temporary fix for requirements conflict, remove once resolved
+        self.requires("expat/2.4.9")
+
     def source(self):
         files.get(self,
                   **self.conan_data["sources"][self.version],
@@ -318,7 +321,7 @@ class ImageMagicConan(ConanFile):
             env.generate(scope="build")
 
         if self.settings.os == "Macos":
-            # FIXME workaround bug with pkgconfig files and apple frameworks
+            # FIXME: workaround bug with pkgconfig files and apple frameworks
             # see https://github.com/conan-io/conan/pull/12307
             for pc in glob.glob(os.path.join(self.generators_folder, "*.pc")):
                 files.replace_in_file(self, pc, "-F ", "-F", strict=False)
@@ -444,6 +447,9 @@ class ImageMagicConan(ConanFile):
             core_requires.append("zstd::zstdlib")
         if self.options.with_fftw:
             core_requires.append("fftw::fftwlib")
+
+        # FIXME: temporary fix for requirements conflict, remove once resolved
+        core_requires.append("expat::expat")
 
         self.cpp_info.components["MagickCore"].names[
             "cmake_find_package_multi"] = "MagickCore"
