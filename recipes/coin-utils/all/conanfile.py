@@ -97,6 +97,8 @@ class CoinUtilsConan(ConanFile):
             if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
                (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
                 tc.extra_cflags.append("-FS")
+        # TODO: move to autotools.install() once https://github.com/conan-io/conan/issues/12296 fixed
+        tc.make_args.append("-j1")
         tc.generate()
 
         deps = AutotoolsDeps(self)
@@ -133,8 +135,8 @@ class CoinUtilsConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # TODO: replace by autotools.install(args=["-j1"]) once https://github.com/conan-io/conan/issues/12153 fixed
-        autotools.install(args=["-j1", f"DESTDIR={unix_path(self, self.package_folder)}"])
+        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
+        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
