@@ -1,0 +1,4 @@
+versions: map(include('version'), key=str(), min=1)
+---
+version:
+  folder: str()
