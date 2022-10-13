@@ -58,7 +58,7 @@ class PackageConan(ConanFile):
             pass
 
     def layout(self):
-        basic_layout(self, src_folder="libffi")
+        basic_layout(self, src_folder="src")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
