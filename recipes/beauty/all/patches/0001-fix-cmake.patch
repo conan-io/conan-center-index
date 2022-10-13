@@ -1,0 +1,18 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.15)
+ project(Beauty)
+ set(VERSION 0.1-rc)
+ 
++if(0)
+ if (CONAN_EXPORTED)
+ else()
+     if (NOT EXISTS ${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
+@@ -20,6 +21,7 @@ else()
+ endif()
+ 
+ include(${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
++endif()
+ 
+ # C++
+ set(CMAKE_CXX_STANDARD 20)

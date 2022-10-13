@@ -1,8 +1,11 @@
-from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, rmdir
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class ExpatConan(ConanFile):
@@ -12,7 +15,6 @@ class ExpatConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libexpat/libexpat"
     license = "MIT"
-
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -25,87 +27,76 @@ class ExpatConan(ConanFile):
         "char_type": "char",
     }
 
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) < "2.2.8":
+        if Version(self.version) < "2.2.8":
             del self.options.char_type
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+           del self.settings.compiler.libcxx
+        except Exception:
+           pass
+        try:
+           del self.settings.compiler.cppstd
+        except Exception:
+           pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(
+        tools.files.get(self,
             **self.conan_data["sources"][self.version],
-            destination=self._source_subfolder,
+            destination=self.source_folder,
             strip_root=True
         )
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        if tools.Version(self.version) < "2.2.8":
-            self._cmake.definitions["BUILD_doc"] = "Off"
-            self._cmake.definitions["BUILD_examples"] = "Off"
-            self._cmake.definitions["BUILD_shared"] = self.options.shared
-            self._cmake.definitions["BUILD_tests"] = "Off"
-            self._cmake.definitions["BUILD_tools"] = "Off"
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if Version(self.version) < "2.2.8":
+            tc.variables["BUILD_doc"] = False
+            tc.variables["BUILD_examples"] = False
+            tc.variables["BUILD_shared"] = self.options.shared
+            tc.variables["BUILD_tests"] = False
+            tc.variables["BUILD_tools"] = False
             # Generate a relocatable shared lib on Macos
-            self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         else:
             # These options were renamed in 2.2.8 to be more consistent
-            self._cmake.definitions["EXPAT_BUILD_DOCS"] = "Off"
-            self._cmake.definitions["EXPAT_BUILD_EXAMPLES"] = "Off"
-            self._cmake.definitions["EXPAT_SHARED_LIBS"] = self.options.shared
-            self._cmake.definitions["EXPAT_BUILD_TESTS"] = "Off"
-            self._cmake.definitions["EXPAT_BUILD_TOOLS"] = "Off"
+            tc.variables["EXPAT_BUILD_DOCS"] = False
+            tc.variables["EXPAT_BUILD_EXAMPLES"] = False
+            tc.variables["EXPAT_SHARED_LIBS"] = self.options.shared
+            tc.variables["EXPAT_BUILD_TESTS"] = False
+            tc.variables["EXPAT_BUILD_TOOLS"] = False
             # EXPAT_CHAR_TYPE was added in 2.2.8
-            self._cmake.definitions["EXPAT_CHAR_TYPE"] = self.options.char_type
-            if self._is_msvc:
-                self._cmake.definitions["EXPAT_MSVC_STATIC_CRT"] = "MT" in msvc_runtime_flag(self)
-        if tools.Version(self.version) >= "2.2.10":
-            self._cmake.definitions["EXPAT_BUILD_PKGCONFIG"] = False
-
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+            tc.variables["EXPAT_CHAR_TYPE"] = self.options.char_type
+            if is_msvc(self):
+                tc.variables["EXPAT_MSVC_STATIC_CRT"] = is_msvc_static_runtime(self)
+        if Version(self.version) >= "2.2.10":
+            tc.variables["EXPAT_BUILD_PKGCONFIG"] = False
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
@@ -118,7 +109,7 @@ class ExpatConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "EXPAT"
         self.cpp_info.names["cmake_find_package_multi"] = "expat"
 
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines = ["XML_STATIC"]
         if self.options.get_safe("char_type") in ("wchar_t", "ushort"):

@@ -1,31 +1,19 @@
 sources:
+  "14.5":
+    url: "https://ftp.postgresql.org/pub/source/v14.5/postgresql-14.5.tar.bz2"
+    sha256: "d4f72cb5fb857c9a9f75ec8cf091a1771272802f2178f0b2e65b7b6ff64f4a30"
   "14.2":
     url: "https://ftp.postgresql.org/pub/source/v14.2/postgresql-14.2.tar.bz2"
     sha256: "2cf78b2e468912f8101d695db5340cf313c2e9f68a612fb71427524e8c9a977a"
   "13.6":
     url: "https://ftp.postgresql.org/pub/source/v13.6/postgresql-13.6.tar.gz"
     sha256: "42dcde620b627d35bf51dfc2c1d0f7f25f44d3dbedd81cc459da2d2c9e859059"
-  "13.4":
-    url: "https://ftp.postgresql.org/pub/source/v13.4/postgresql-13.4.tar.gz"
-    sha256: "59d7bc523e78570c549876fed297ec3e46dd307e90f5b1d22f49181191cf203e"
-  "13.3":
-    url: "https://ftp.postgresql.org/pub/source/v13.3/postgresql-13.3.tar.gz"
-    sha256: "0b54a8a68dbfaf5dcddd89eb3922740143df50fbea02fefda8de743d8af99516"
-  "13.2":
-    url: "https://ftp.postgresql.org/pub/source/v13.2/postgresql-13.2.tar.gz"
-    sha256: "3386a40736332aceb055c7c9012ecc665188536d874d967fcc5a33e7992f8080"
   "12.10":
     url: "https://ftp.postgresql.org/pub/source/v12.10/postgresql-12.10.tar.gz"
     sha256: "987e008699d52d5de4bae0580416f6c75aa28016b11543c42f5fbde5efbdfb56"
-  "12.2":
-    url: "https://ftp.postgresql.org/pub/source/v12.2/postgresql-12.2.tar.gz"
-    sha256: "8808449444ee9b086054a6dcfbfb98029e4f8022372c2edf3de5b6d8f417c8e4"
   "11.15":
     url: "https://ftp.postgresql.org/pub/source/v11.15/postgresql-11.15.tar.gz"
     sha256: "5f6ef2add1acb93d69012a55c3f276b91f4f0c91aa9a91243d9c5737ed5b5541"
-  "11.9":
-    url: "https://ftp.postgresql.org/pub/source/v11.9/postgresql-11.9.tar.gz"
-    sha256: "e98a8649814e2fa632a5d86bfb91f1ad570d47b108bc5c0d0d854803282abb03"
   "10.20":
     url: "https://ftp.postgresql.org/pub/source/v10.20/postgresql-10.20.tar.gz"
     sha256: "403bdad47101f7c0a15824627dd0fa0ad4abf1fa26d2bde77dea8921da25a48e"

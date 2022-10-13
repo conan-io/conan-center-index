@@ -77,6 +77,9 @@ sources:
   "7.7.3":
     url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.7.3.tar.gz"
     sha256: "11e147bbe2d3024d68d29b38eab5d75899dbb6131e421a2dbf9f88bac9bf4b0d"
+  "7.7.4":
+    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.7.4.tar.gz"
+    sha256: "65b0a06fffd565a19edacedada1dcfa0c1ecd782cead0ee067b19e2464875c36"
 patches:
   "7.0.1":
     - patch_file: "patches/0001-cmake-fix-module.patch"
@@ -196,5 +199,8 @@ patches:
     - patch_file: "patches/fix-install-library-symlink-7.7.2.patch"
       base_path: "source_subfolder"
   "7.7.3":
+    - patch_file: "patches/0001-cmake-fix-module.patch"
+      base_path: "source_subfolder"
+  "7.7.4":
     - patch_file: "patches/0001-cmake-fix-module.patch"
       base_path: "source_subfolder"

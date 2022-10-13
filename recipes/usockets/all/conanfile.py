@@ -107,16 +107,16 @@ class UsocketsConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1q")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/4.8.1")
+            self.requires("wolfssl/5.3.0")
 
         if self.options.eventloop == "libuv":
-            self.requires("libuv/1.41.1")
+            self.requires("libuv/1.44.1")
         elif self.options.eventloop == "gcd":
             self.requires("libdispatch/5.3.2")
         elif self.options.eventloop == "boost":
-            self.requires("boost/1.77.0")
+            self.requires("boost/1.79.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

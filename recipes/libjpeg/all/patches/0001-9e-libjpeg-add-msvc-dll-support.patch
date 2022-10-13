@@ -1,0 +1,92 @@
+--- jmorecfg.h
++++ jmorecfg.h
+@@ -238,14 +238,26 @@
+  * or code profilers that require it.
+  */
+ 
++#if defined(_MSC_VER)
++#if defined(LIBJPEG_STATIC)
++#define LIBJPEG_EXPORTS
++#elif !defined(LIBJPEG_BUILDING)
++#define LIBJPEG_EXPORTS __declspec(dllimport)
++#else
++#define LIBJPEG_EXPORTS __declspec(dllexport)
++#endif
++#else
++#define LIBJPEG_EXPORTS
++#endif
++
+ /* a function called through method pointers: */
+ #define METHODDEF(type)		static type
+ /* a function used only in its module: */
+ #define LOCAL(type)		static type
+ /* a function referenced thru EXTERNs: */
+-#define GLOBAL(type)		type
++#define GLOBAL(type)		LIBJPEG_EXPORTS type
+ /* a reference to a GLOBAL function: */
+-#define EXTERN(type)		extern type
++#define EXTERN(type)		extern GLOBAL(type)
+ 
+ 
+ /* This macro is used to declare a "method", that is, a function pointer.
+
+--- makefile.vc
++++ makefile.vc
+@@ -30,6 +30,7 @@
+ # miscellaneous OS-dependent stuff
+ # file deletion command
+ RM= del
++MKDIR=mkdir
+ 
+ # End of configurable options.
+ 
+@@ -108,20 +109,30 @@
+ 	$(cc) $(CFLAGS) $*.c
+ 
+ 
+-all: libjpeg.lib cjpeg.exe djpeg.exe jpegtran.exe rdjpgcom.exe wrjpgcom.exe
++all: shared/libjpeg.lib static/libjpeg.lib cjpeg.exe djpeg.exe jpegtran.exe rdjpgcom.exe wrjpgcom.exe
+ 
+-libjpeg.lib: $(LIBOBJECTS)
+-	$(RM) libjpeg.lib
+-	lib -out:libjpeg.lib  $(LIBOBJECTS)
++shared:
++	$(MKDIR) shared
++	
++static:
++	$(MKDIR) static
++	
++static/libjpeg.lib: $(LIBOBJECTS) static
++	$(RM) static\libjpeg.lib
++	lib -out:static/libjpeg.lib  $(LIBOBJECTS)
++
++shared/libjpeg.lib shared/libjpeg-9.dll: $(LIBOBJECTS) shared
++	$(RM) shared\libjpeg.lib shared\libjpeg-9.dll
++	link -DLL -out:shared/libjpeg-9.dll -implib:shared/libjpeg.lib $(LIBOBJECTS)
+ 
+-cjpeg.exe: $(COBJECTS) libjpeg.lib
+-	$(link) $(LDFLAGS) -out:cjpeg.exe $(COBJECTS) libjpeg.lib $(LDLIBS)
++cjpeg.exe: $(COBJECTS) static/libjpeg.lib
++	$(link) $(LDFLAGS) -out:cjpeg.exe $(COBJECTS) static/libjpeg.lib $(LDLIBS)
+ 
+-djpeg.exe: $(DOBJECTS) libjpeg.lib
+-	$(link) $(LDFLAGS) -out:djpeg.exe $(DOBJECTS) libjpeg.lib $(LDLIBS)
++djpeg.exe: $(DOBJECTS) static/libjpeg.lib
++	$(link) $(LDFLAGS) -out:djpeg.exe $(DOBJECTS) static/libjpeg.lib $(LDLIBS)
+ 
+-jpegtran.exe: $(TROBJECTS) libjpeg.lib
+-	$(link) $(LDFLAGS) -out:jpegtran.exe $(TROBJECTS) libjpeg.lib $(LDLIBS)
++jpegtran.exe: $(TROBJECTS) static/libjpeg.lib
++	$(link) $(LDFLAGS) -out:jpegtran.exe $(TROBJECTS) static/libjpeg.lib $(LDLIBS)
+ 
+ rdjpgcom.exe: rdjpgcom.obj
+ 	$(link) $(LDFLAGS) -out:rdjpgcom.exe rdjpgcom.obj $(LDLIBS)
+@@ -131,7 +142,7 @@
+ 
+ 
+ clean:
+-	$(RM) *.obj *.exe libjpeg.lib
++	$(RM) *.obj *.exe static\libjpeg.lib shared\libjpeg.lib shared\libjpeg-9.dll
+ 	$(RM) testout*
+ 
+ setup-vc6:

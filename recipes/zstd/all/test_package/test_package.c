@@ -113,9 +113,13 @@ static const char* createOutFilename_orDie(const char* filename)
 
 int main(int argc, const char** argv)
 {
-    const char* const inFilename = "logo.png";
+    if (argc < 2) {
+        fprintf(stderr, "Need at least one argument\n");
+        return 1;
+    }
+    const char* const inFilename = argv[1];
 
-    const char* const outFilename = createOutFilename_orDie(inFilename);
+    const char* const outFilename = createOutFilename_orDie("logo.png");
     compressFile_orDie(inFilename, outFilename, 1);
 
     return 0;

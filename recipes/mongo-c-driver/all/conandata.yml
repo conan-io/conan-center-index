@@ -1,4 +1,7 @@
 sources:
+  "1.22.0":
+    url: "https://github.com/mongodb/mongo-c-driver/releases/download/1.22.0/mongo-c-driver-1.22.0.tar.gz"
+    sha256: "272067f75e7e57c98f90a6f0c42500ef818b4b085539343676b6ce6831655eaf"
   "1.17.6":
     url: "https://github.com/mongodb/mongo-c-driver/releases/download/1.17.6/mongo-c-driver-1.17.6.tar.gz"
     sha256: "8644deec7ae585e8d12566978f2017181e883f303a028b5b3ccb83c91248b150"
@@ -12,15 +15,15 @@ sources:
     url: "https://github.com/mongodb/mongo-c-driver/releases/download/1.17.2/mongo-c-driver-1.17.2.tar.gz"
     sha256: "bc53d5f72ab628a1ae549db6888325d6dc34db3ca31c5e16e550c1bb4266d864"
 patches:
+  "1.22.0":
+    - patch_file: "patches/1.22.0-0001-disable-shared-when-static.patch"
+    - patch_file: "patches/1.22.0-0002-fix-uninitialized-warning.patch"
+    - patch_file: "patches/1.22.0-0003-disable-warning-errors.patch"
   "1.17.6":
-    - patch_file: "patches/disable-shared-when-static-1.17.6.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.17.6-0001-disable-shared-when-static.patch"
   "1.17.4":
-    - patch_file: "patches/disable-shared-when-static.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.17.2-0001-disable-shared-when-static.patch"
   "1.17.3":
-    - patch_file: "patches/disable-shared-when-static.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.17.2-0001-disable-shared-when-static.patch"
   "1.17.2":
-    - patch_file: "patches/disable-shared-when-static.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.17.2-0001-disable-shared-when-static.patch"

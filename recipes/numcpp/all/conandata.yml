@@ -1,4 +1,7 @@
 sources:
+  "2.8.0":
+    url: "https://github.com/dpilger26/NumCpp/archive/Version_2.8.0.tar.gz"
+    sha256: "3868cf24b0981d5b5bfeaea65719f541f82d331ef7b79ba0d73cedb4dc7ddd47"
   "2.7.0":
     url: "https://github.com/dpilger26/NumCpp/archive/Version_2.7.0.tar.gz"
     sha256: "3805ef996ba73502a6525c9ddc529ebd0fa6967385e508db71843c08c50105b0"

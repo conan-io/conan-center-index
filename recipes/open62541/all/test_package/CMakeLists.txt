@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.12)
 project(test_package C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
@@ -7,7 +7,8 @@ conan_basic_setup(TARGETS)
 find_package(open62541 REQUIRED CONFIG)
 find_package(Threads REQUIRED)
 
-find_package(PythonInterp REQUIRED)
+find_package(Python3 REQUIRED)
+set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
 
 # Output directory for Nodeset Compiler
 set(GENERATE_OUTPUT_DIR "${CMAKE_BINARY_DIR}/src_generated/")

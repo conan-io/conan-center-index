@@ -1,76 +1,50 @@
 sources:
-  "1.3.0":
-    url: "https://github.com/edenhill/librdkafka/archive/v1.3.0.tar.gz"
-    sha256: "465cab533ebc5b9ca8d97c90ab69e0093460665ebaf38623209cf343653c76d2"
-  "1.4.0":
-    url: "https://github.com/edenhill/librdkafka/archive/v1.4.0.tar.gz"
-    sha256: "ae27ea3f3d0d32d29004e7f709efbba2666c5383a107cc45b3a1949486b2eb84"
-  "1.5.2":
-    url: "https://github.com/edenhill/librdkafka/archive/v1.5.2.tar.gz"
-    sha256: "ca3db90d04ef81ca791e55e9eed67e004b547b7adedf11df6c24ac377d4840c6"
-  "1.5.3":
-    url: "https://github.com/edenhill/librdkafka/archive/v1.5.3.tar.gz"
-    sha256: "2105ca01fef5beca10c9f010bc50342b15d5ce6b73b2489b012e6d09a008b7bf"
-  "1.6.0":
-    url: "https://github.com/edenhill/librdkafka/archive/v1.6.0.tar.gz"
-    sha256: "3130cbd391ef683dc9acf9f83fe82ff93b8730a1a34d0518e93c250929be9f6b"
-  "1.6.1":
-    url: "https://github.com/edenhill/librdkafka/archive/v1.6.1.tar.gz"
-    sha256: "689028b5fdfdce026f396fc2f3bfe9e38947210d9bd22be28c3159cc8c41b57e"
-  "1.7.0":
-    url: "https://github.com/edenhill/librdkafka/archive/v1.7.0.tar.gz"
-    sha256: "c71b8c5ff419da80c31bb8d3036a408c87ad523e0c7588e7660ee5f3c8973057"
-  "1.8.0":
-    url: "https://github.com/edenhill/librdkafka/archive/v1.8.0.tar.gz"
-    sha256: "93b12f554fa1c8393ce49ab52812a5f63e264d9af6a50fd6e6c318c481838b7f"
+  "1.9.2":
+    url: "https://github.com/edenhill/librdkafka/archive/refs/tags/v1.9.2.tar.gz"
+    sha256: "3fba157a9f80a0889c982acdd44608be8a46142270a389008b22d921be1198ad"
+  "1.9.1":
+    url: "https://github.com/edenhill/librdkafka/archive/refs/tags/v1.9.1.tar.gz"
+    sha256: "3a54cf375218977b7af4716ed9738378e37fe400a6c5ddb9d622354ca31fdc79"
   "1.8.2":
     url: "https://github.com/edenhill/librdkafka/archive/refs/tags/v1.8.2.tar.gz"
     sha256: "6a747d293a7a4613bd2897e28e8791476fbe1ae7361f2530a876e0fd483482a6"
-patches:
-  "1.3.0":
-    - patch_file: patches/0001-Remove-cmake-module-path-and-change-library-names-1-3-0.patch
-      base_path: source_subfolder
-    - patch_file: patches/0002-Change-library-targets-and-result-variables-1-3-0.patch
-      base_path: source_subfolder
-  "1.4.0":
-    - patch_file: patches/0001-Remove-cmake-module-path-and-change-library-names-1-3-0.patch
-      base_path: source_subfolder
-    - patch_file: patches/0002-Change-library-targets-and-result-variables-1-4-0.patch
-      base_path: source_subfolder
-    - patch_file: patches/0003-Fix-broken-version-1-4-0-on-windows.patch
-      base_path: source_subfolder
-  "1.5.2":
-    - patch_file: patches/0001-Change-library-names-1-5-2.patch
-      base_path: source_subfolder
-    - patch_file: patches/0002-Change-library-targets-and-result-variables-1-5-2.patch
-      base_path: source_subfolder
-  "1.5.3":
-    - patch_file: patches/0001-Change-library-names-1-5-2.patch
-      base_path: source_subfolder
-    - patch_file: patches/0002-Change-library-targets-and-result-variables-1-5-2.patch
-      base_path: source_subfolder
-  "1.6.0":
-    - patch_file: patches/0001-Change-library-names-1-5-2.patch
-      base_path: source_subfolder
-    - patch_file: patches/0002-Change-library-targets-and-result-variables-1-6-0.patch
-      base_path: source_subfolder
-  "1.6.1":
-    - patch_file: patches/0001-Change-library-names-1-5-2.patch
-      base_path: source_subfolder
-    - patch_file: patches/0002-Change-library-targets-and-result-variables-1-6-1.patch
-      base_path: source_subfolder
-  "1.7.0":
-    - patch_file: patches/0001-Change-library-names-1-7-0.patch
-      base_path: source_subfolder
-    - patch_file: patches/0002-Change-library-targets-and-result-variables-1-7-0.patch
-      base_path: source_subfolder
   "1.8.0":
-    - patch_file: patches/0001-Change-library-names-1-7-0.patch
-      base_path: source_subfolder
-    - patch_file: patches/0002-Change-library-targets-and-result-variables-1-7-0.patch
-      base_path: source_subfolder
+    url: "https://github.com/edenhill/librdkafka/archive/v1.8.0.tar.gz"
+    sha256: "93b12f554fa1c8393ce49ab52812a5f63e264d9af6a50fd6e6c318c481838b7f"
+  "1.7.0":
+    url: "https://github.com/edenhill/librdkafka/archive/v1.7.0.tar.gz"
+    sha256: "c71b8c5ff419da80c31bb8d3036a408c87ad523e0c7588e7660ee5f3c8973057"
+  "1.6.1":
+    url: "https://github.com/edenhill/librdkafka/archive/v1.6.1.tar.gz"
+    sha256: "689028b5fdfdce026f396fc2f3bfe9e38947210d9bd22be28c3159cc8c41b57e"
+  "1.6.0":
+    url: "https://github.com/edenhill/librdkafka/archive/v1.6.0.tar.gz"
+    sha256: "3130cbd391ef683dc9acf9f83fe82ff93b8730a1a34d0518e93c250929be9f6b"
+  "1.5.3":
+    url: "https://github.com/edenhill/librdkafka/archive/v1.5.3.tar.gz"
+    sha256: "2105ca01fef5beca10c9f010bc50342b15d5ce6b73b2489b012e6d09a008b7bf"
+patches:
+  "1.9.2":
+    - patch_file: patches/0001-Change-library-names-1-9-1.patch
+    - patch_file: patches/0002-Change-library-targets-and-result-variables-1-9-1.patch
+  "1.9.1":
+    - patch_file: patches/0001-Change-library-names-1-9-1.patch
+    - patch_file: patches/0002-Change-library-targets-and-result-variables-1-9-1.patch
   "1.8.2":
     - patch_file: patches/0001-Change-library-names-1-7-0.patch
-      base_path: source_subfolder
     - patch_file: patches/0002-Change-library-targets-and-result-variables-1-7-0.patch
-      base_path: source_subfolder
+  "1.8.0":
+    - patch_file: patches/0001-Change-library-names-1-7-0.patch
+    - patch_file: patches/0002-Change-library-targets-and-result-variables-1-7-0.patch
+  "1.7.0":
+    - patch_file: patches/0001-Change-library-names-1-7-0.patch
+    - patch_file: patches/0002-Change-library-targets-and-result-variables-1-7-0.patch
+  "1.6.1":
+    - patch_file: patches/0001-Change-library-names-1-5-2.patch
+    - patch_file: patches/0002-Change-library-targets-and-result-variables-1-6-1.patch
+  "1.6.0":
+    - patch_file: patches/0001-Change-library-names-1-5-2.patch
+    - patch_file: patches/0002-Change-library-targets-and-result-variables-1-6-0.patch
+  "1.5.3":
+    - patch_file: patches/0001-Change-library-names-1-5-2.patch
+    - patch_file: patches/0002-Change-library-targets-and-result-variables-1-5-2.patch

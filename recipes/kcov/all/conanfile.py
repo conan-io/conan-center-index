@@ -1,7 +1,7 @@
 import os
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conans import CMake, tools
 from conans.errors import ConanInvalidConfiguration
-
 
 class KcovConan(ConanFile):
     name = "kcov"
@@ -14,9 +14,9 @@ class KcovConan(ConanFile):
     topics = ("coverage", "linux", "debug")
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = "CMakeLists.txt", "patches/**"
-    requires = ["zlib/1.2.11",
+    requires = ["zlib/1.2.12",
                 "libiberty/9.1.0",
-                "libcurl/7.64.1",
+                "libcurl/7.83.1",
                 "elfutils/0.180"]
     generators = "cmake"
     _cmake = None
@@ -60,3 +60,4 @@ class KcovConan(ConanFile):
         self.output.info("Appending PATH environment variable: {}"
                          .format(bindir))
         self.env_info.PATH.append(bindir)
+        self.cpp_info.includedirs = []

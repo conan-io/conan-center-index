@@ -4,5 +4,5 @@ sources:
     sha256: "c5ab61185f283f46388c700c43dc08606b0e260cd53f06b967ec0ad7a809ff11"
 patches:
   "1.0.8":
-    - patch_file: "patches/optional-sdl.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-optional-sdl.patch"
+    - patch_file: "patches/0002-fix-out-of-source-build.patch"

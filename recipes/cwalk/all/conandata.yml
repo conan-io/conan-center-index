@@ -20,19 +20,13 @@ sources:
 patches:
   "1.2.7":
     - patch_file: "patches/0001-fix-cmake-1.2.5.patch"
-      base_path: "source_subfolder"
   "1.2.6":
     - patch_file: "patches/0001-fix-cmake-1.2.5.patch"
-      base_path: "source_subfolder"
   "1.2.5":
     - patch_file: "patches/0001-fix-cmake-1.2.5.patch"
-      base_path: "source_subfolder"
   "1.2.2":
     - patch_file: "patches/0001-fix-cmake-1.2.2.patch"
-      base_path: "source_subfolder"
   "1.1.0":
     - patch_file: "patches/0001-fix-cmake-1.1.0.patch"
-      base_path: "source_subfolder"
   "1.0.0":
     - patch_file: "patches/0001-fix-cmake-1.0.0.patch"
-      base_path: "source_subfolder"

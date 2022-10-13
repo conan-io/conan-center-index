@@ -8,4 +8,3 @@ sources:
 patches:
   "1.0.6":
     - patch_file: "patches/0001-fix-sys-stat-include.patch"
-      base_path: "source_subfolder"

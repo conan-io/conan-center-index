@@ -8,14 +8,9 @@ sources:
 patches:
   "1.2.12":
     - patch_file: "patches/0001-fix-cmake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-gzguts-xcode12-compile-fix.patch"
-      base_path: "source_subfolder"
   "1.2.11":
     - patch_file: "patches/0001-fix-cmake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-gzguts-xcode12-compile-fix.patch"
-      base_path: "source_subfolder"
       # https://github.com/madler/zlib/issues/268
     - patch_file: "patches/0003-gzguts-fix-widechar-condition.patch"
-      base_path: "source_subfolder"

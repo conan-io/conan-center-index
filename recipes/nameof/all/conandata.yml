@@ -8,3 +8,6 @@ sources:
   "0.10.1":
     url: "https://github.com/Neargye/nameof/archive/v0.10.1.tar.gz"
     sha256: "000a55de58fb57cd77043ab9e91a3c91dbea5947b2cb0034cddf869ecf16e86d"
+  "0.10.2":
+    url: "https://github.com/Neargye/nameof/archive/v0.10.2.tar.gz"
+    sha256: "b596fd0804c61781bc8d87d9b8e448e2450debddb52c70ed3e89bf02c6c16f4f"

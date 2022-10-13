@@ -1,5 +1,7 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools import files
+from conan.errors import ConanInvalidConfiguration
+from conans import AutoToolsBuildEnvironment, CMake, tools
 import os
 import shutil
 
@@ -38,7 +40,7 @@ class LibelfConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-    
+
     def validate(self):
         if self.options.shared and self.settings.os not in ["Linux", "FreeBSD", "Windows"]:
             raise ConanInvalidConfiguration("libelf can not be built as shared library on non linux/FreeBSD/windows platforms")
@@ -49,7 +51,7 @@ class LibelfConan(ConanFile):
             self.build_requires("gnu-config/cci.20210814")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
@@ -70,7 +72,7 @@ class LibelfConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        with tools.chdir(self._source_subfolder):
+        with files.chdir(self, self._source_subfolder):
             self.run("autoreconf -fiv", run_environment=True)
         args = ["--enable-shared={}".format("yes" if self.options.shared else "no")]
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
@@ -84,8 +86,8 @@ class LibelfConan(ConanFile):
     def _package_autotools(self):
         autotools = self._configure_autotools()
         autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "locale"))
+        files.rmdir(self, os.path.join(self.package_folder, "share"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "locale"))
         if self.settings.os in ["Linux", "FreeBSD"] and self.options.shared:
             os.remove(os.path.join(self.package_folder, "lib", "libelf.a"))
 
@@ -101,7 +103,7 @@ class LibelfConan(ConanFile):
         if self.settings.os == "Windows":
             self._build_cmake()
         else:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "Makefile.in"),
+            files.replace_in_file(self, os.path.join(self._source_subfolder, "lib", "Makefile.in"),
                                   "$(LINK_SHLIB)",
                                   "$(LINK_SHLIB) $(LDFLAGS)")
             # libelf sources contains really outdated 'config.sub' and
@@ -118,7 +120,7 @@ class LibelfConan(ConanFile):
             self._package_cmake()
         else:
             self._package_autotools()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)

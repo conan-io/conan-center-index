@@ -36,12 +36,11 @@ int main(int /*argc*/, const char * /*argv*/ []) {
   }
 
 #ifndef FLATBUFFERS_HEADER_ONLY
-  const std::string filename("conanbuildinfo.cmake");
+  const std::string filename("conanbuildinfo.txt");
   if (flatbuffers::FileExists(filename.c_str())) {
     std::cout << "File " << filename << " exists.\n";
   } else {
     std::cout << "File " << filename << " does not exist.\n";
-    return EXIT_FAILURE;
   }
 #endif
 

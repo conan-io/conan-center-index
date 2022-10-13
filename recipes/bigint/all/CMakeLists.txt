@@ -1,12 +1,7 @@
 cmake_minimum_required(VERSION 3.4)
-project(bigint)
-
-include(conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
+project(bigint LANGUAGES CXX)
 
 include(GNUInstallDirs)
-
-set(BIGINT_SRC_DIR source_subfolder)
 
 add_library(bigint
     ${BIGINT_SRC_DIR}/BigUnsigned.cc

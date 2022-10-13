@@ -1,0 +1,30 @@
+[MASTER]
+load-plugins=linter.conanv2_transition,
+             linter.transform_conanfile,
+             linter.transform_imports
+
+py-version=3.6
+recursive=no
+suggestion-mode=yes
+unsafe-load-any-extension=no
+
+[MESSAGES CONTROL]
+disable=fixme,
+        line-too-long,
+        missing-module-docstring,
+        missing-function-docstring,
+        missing-class-docstring,
+        invalid-name,
+        wrong-import-order,  # TODO: Remove
+        import-outside-toplevel  # TODO: Remove
+
+enable=conan-bad-name,
+       conan-missing-name,
+       conan-import-conanfile
+
+[REPORTS]
+evaluation=max(0, 0 if fatal else 10.0 - ((float(5 * error) / statement) * 10))
+output-format=text
+reports=no
+score=no
+

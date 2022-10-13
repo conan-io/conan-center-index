@@ -1,7 +1,9 @@
-from conan.tools.files import rename
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
+from conan.tools.files import rename, get, rmdir
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
-from conans.errors import ConanInvalidConfiguration
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans import AutoToolsBuildEnvironment, tools
 from contextlib import contextmanager
 from functools import total_ordering
 import fnmatch
@@ -138,6 +140,7 @@ class OpenSSLConan(ConanFile):
     }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
+    default_options["no_md2"] = True
     default_options["openssldir"] = None
 
     _env_build = None
@@ -170,7 +173,7 @@ class OpenSSLConan(ConanFile):
     def _win_bash(self):
         return self._settings_build.os == "Windows" and \
                not self._use_nmake and \
-               (self._is_mingw or tools.cross_building(self, skip_x64_x86=True))
+               (self._is_mingw or cross_building(self, skip_x64_x86=True))
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -243,8 +246,8 @@ class OpenSSLConan(ConanFile):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     @property
     def _target_prefix(self):
@@ -517,6 +520,9 @@ class OpenSSLConan(ConanFile):
                 args.append("-DOPENSSL_CAPIENG_DIALOG=1")
         else:
             args.append("-fPIC" if self.options.get_safe("fPIC", True) else "no-pic")
+
+        args.append("no-md2" if self.options.get_safe("no_md2", True) else "enable-md2")
+
         if self.settings.os == "Neutrino":
             args.append("no-asm -lsocket -latomic")
         if self._is_clangcl:
@@ -536,7 +542,7 @@ class OpenSSLConan(ConanFile):
                 include_path = self._adjust_path(include_path)
                 lib_path = self._adjust_path(lib_path)
 
-                if zlib_info.shared:
+                if self.options["zlib"].shared:
                     args.append("zlib-dynamic")
                 else:
                     args.append("zlib")
@@ -547,7 +553,7 @@ class OpenSSLConan(ConanFile):
 
         for option_name in self.options.values.fields:
             activated = getattr(self.options, option_name)
-            if activated and option_name not in ["fPIC", "openssldir", "capieng_dialog", "enable_capieng"]:
+            if activated and option_name not in ["fPIC", "openssldir", "capieng_dialog", "enable_capieng", "no_md2"]:
                 self.output.info("activated option: %s" % option_name)
                 args.append(option_name.replace("_", "-"))
         return args
@@ -809,18 +815,15 @@ class OpenSSLConan(ConanFile):
                 if file.endswith(".a"):
                     os.unlink(os.path.join(libdir, file))
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path)
         )
 
-    @staticmethod
-    def _create_cmake_module_variables(module_file):
+    def _create_cmake_module_variables(self, module_file):
         content = textwrap.dedent("""\
-            if(DEFINED OpenSSL_FOUND)
-                set(OPENSSL_FOUND ${OpenSSL_FOUND})
-            endif()
+            set(OPENSSL_FOUND TRUE)
             if(DEFINED OpenSSL_INCLUDE_DIR)
                 set(OPENSSL_INCLUDE_DIR ${OpenSSL_INCLUDE_DIR})
             endif()
@@ -830,6 +833,12 @@ class OpenSSLConan(ConanFile):
                                              ${OpenSSL_Crypto_DEPENDENCIES}
                                              ${OpenSSL_Crypto_FRAMEWORKS}
                                              ${OpenSSL_Crypto_SYSTEM_LIBS})
+            elseif(DEFINED openssl_OpenSSL_Crypto_LIBS_%(config)s)
+                set(OPENSSL_CRYPTO_LIBRARY ${openssl_OpenSSL_Crypto_LIBS_%(config)s})
+                set(OPENSSL_CRYPTO_LIBRARIES ${openssl_OpenSSL_Crypto_LIBS_%(config)s}
+                                             ${openssl_OpenSSL_Crypto_DEPENDENCIES_%(config)s}
+                                             ${openssl_OpenSSL_Crypto_FRAMEWORKS_%(config)s}
+                                             ${openssl_OpenSSL_Crypto_SYSTEM_LIBS_%(config)s})
             endif()
             if(DEFINED OpenSSL_SSL_LIBS)
                 set(OPENSSL_SSL_LIBRARY ${OpenSSL_SSL_LIBS})
@@ -837,6 +846,12 @@ class OpenSSLConan(ConanFile):
                                           ${OpenSSL_SSL_DEPENDENCIES}
                                           ${OpenSSL_SSL_FRAMEWORKS}
                                           ${OpenSSL_SSL_SYSTEM_LIBS})
+            elseif(DEFINED openssl_OpenSSL_SSL_LIBS_%(config)s)
+                set(OPENSSL_SSL_LIBRARY ${openssl_OpenSSL_SSL_LIBS_%(config)s})
+                set(OPENSSL_SSL_LIBRARIES ${openssl_OpenSSL_SSL_LIBS_%(config)s}
+                                          ${openssl_OpenSSL_SSL_DEPENDENCIES_%(config)s}
+                                          ${openssl_OpenSSL_SSL_FRAMEWORKS_%(config)s}
+                                          ${openssl_OpenSSL_SSL_SYSTEM_LIBS_%(config)s})
             endif()
             if(DEFINED OpenSSL_LIBRARIES)
                 set(OPENSSL_LIBRARIES ${OpenSSL_LIBRARIES})
@@ -844,7 +859,7 @@ class OpenSSLConan(ConanFile):
             if(DEFINED OpenSSL_VERSION)
                 set(OPENSSL_VERSION ${OpenSSL_VERSION})
             endif()
-        """)
+        """ % {"config":str(self.settings.build_type).upper()})
         tools.save(module_file, content)
 
     @property

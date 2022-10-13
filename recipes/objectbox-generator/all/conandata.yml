@@ -1,0 +1,14 @@
+sources:
+  "0.13.0":
+    Windows:
+      url: "https://github.com/objectbox/objectbox-generator/releases/download/v0.13.0/objectbox-generator-Windows.zip"
+      sha256: "ac59297401c73e5f3bc670e59545300fdef5bafb8aa1d5eac8ff5d949576c9dd"
+    Linux:
+      url: "https://github.com/objectbox/objectbox-generator/releases/download/v0.13.0/objectbox-generator-Linux.zip"
+      sha256: "61586f42a658fb46b3b2247bf2bfff898858d91df4fab485d1b0759240fe1964"
+    Macos:
+      url: "https://github.com/objectbox/objectbox-generator/releases/download/v0.13.0/objectbox-generator-macOS.zip"
+      sha256: "09665663f0380c3b112da197186e438cef36bd5f492944fd4b378f1e76b55175"
+    License:
+      url: "https://raw.githubusercontent.com/objectbox/objectbox-generator/v0.13.0/LICENSE.txt"
+      sha256: "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"

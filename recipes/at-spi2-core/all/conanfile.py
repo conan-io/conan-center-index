@@ -27,11 +27,11 @@ class AtSpi2CoreConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-        
+
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-    
+
     _meson = None
 
     def export_sources(self):
@@ -43,18 +43,24 @@ class AtSpi2CoreConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            self.options["glib"].shared = True
 
     def build_requirements(self):
-        self.build_requires("meson/0.59.1")
+        self.build_requires("meson/0.62.2")
         self.build_requires("pkgconf/1.7.4")
-    
+
     def requirements(self):
-        self.requires("glib/2.70.0")
+        self.requires("glib/2.73.0")
         if self.options.with_x11:
             self.requires("xorg/system")
         self.requires("dbus/1.12.20")
 
     def validate(self):
+        if self.options.shared and not self.options["glib"].shared:
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("only linux is supported by this recipe")
 
@@ -77,7 +83,7 @@ class AtSpi2CoreConan(ConanFile):
         self._meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=".", args=args)
         return self._meson
 
-    def build(self):        
+    def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         if tools.Version(self.version) >= "2.42.0":
@@ -100,3 +106,5 @@ class AtSpi2CoreConan(ConanFile):
         self.cpp_info.includedirs = ["include/at-spi-2.0"]
         self.cpp_info.names["pkg_config"] = "atspi-2"
 
+    def package_id(self):
+        self.info.requires["glib"].full_package_mode()

@@ -1,4 +1,7 @@
 sources:
+  "1.2.5":
+    url: "https://github.com/cxong/tinydir/archive/refs/tags/1.2.5.tar.gz"
+    sha256: "7ab150a16fa78ea76e9fd58ef88922c03eca2334c023b8d9bc94755fdde522c7"
   "1.2.4":
     url: "https://github.com/cxong/tinydir/archive/refs/tags/1.2.4.tar.gz"
     sha256: "9c50eda69ba4854bb76ffa18961f49fd75f323b4cbebdf6b4b2d2db28f9f5ce2"

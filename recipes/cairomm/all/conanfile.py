@@ -40,6 +40,11 @@ class CairommConan(ConanFile):
                 tools.check_min_cppstd(self, 17)
             else:
                 tools.check_min_cppstd(self, 11)
+        if self.options.shared and not self.options["cairo"].shared:
+            raise ConanInvalidConfiguration(
+                "Linking against static cairo would cause shared cairomm to link "
+                "against static glib which can cause problems."
+            )
 
     @property
     def _source_subfolder(self):
@@ -69,6 +74,8 @@ class CairommConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.shared:
+            self.options["cairo"].shared = True
 
     def build_requirements(self):
         self.build_requires("meson/0.59.1")
@@ -182,3 +189,6 @@ class CairommConan(ConanFile):
                 self.cpp_info.components["cairomm-1.0"].frameworks = [
                     "CoreFoundation"
                 ]
+
+    def package_id(self):
+        self.info.requires["cairo"].full_package_mode()

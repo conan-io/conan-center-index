@@ -1,5 +1,5 @@
---- a/getProcAddress.cpp
-+++ b/getProcAddress.cpp
+--- a/source/glbinding/source/getProcAddress.cpp
++++ b/source/glbinding/source/getProcAddress.cpp
 @@ -21,7 +21,7 @@ ProcAddress getProcAddress(const char * name)
      static auto module = LoadLibrary(_T("OPENGL32.DLL"));
  

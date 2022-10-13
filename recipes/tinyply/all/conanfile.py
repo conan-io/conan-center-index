@@ -1,25 +1,29 @@
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import collect_libs, get, load, rmdir, save
 import os
 
-from conans import ConanFile, CMake, tools
+required_conan_version = ">=1.50.0"
+
 
 class TinyplyConan(ConanFile):
     name = "tinyply"
     description = "C++11 ply 3d mesh format importer & exporter."
     license = ["Unlicense", "BSD-2-Clause"]
-    topics = ("conan", "tinyply", "ply", "geometry", "mesh", "file-format")
+    topics = ("tinyply", "ply", "geometry", "mesh", "file-format")
     homepage = "https://github.com/ddiakopoulos/tinyply"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -28,40 +32,45 @@ class TinyplyConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+
+    def validate(self):
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["SHARED_LIB"] = self.options.shared
-        self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["SHARED_LIB"] = self.options.shared
+        tc.variables["BUILD_TESTS"] = False
+        # Relocatable shared lib on macOS
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
-        cmake = self._configure_cmake()
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def _extract_license(self):
-        readme = tools.load(os.path.join(self.source_folder, self._source_subfolder, "readme.md"))
+        readme = load(self, os.path.join(self.source_folder, "readme.md"))
         begin = readme.find("## License")
         return readme[begin:]
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "tinyply"
-        self.cpp_info.names["cmake_find_package_multi"] = "tinyply"
-        self.cpp_info.names["pkg_config"] = "tinyply"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.set_property("cmake_file_name", "tinyply")
+        self.cpp_info.set_property("cmake_target_name", "tinyply::tinyply")
+        self.cpp_info.set_property("pkg_config_name", "tinyply")
+        self.cpp_info.libs = collect_libs(self)

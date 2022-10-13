@@ -1,0 +1,189 @@
+---
+# Configuration for `https://github.com/conan-io/conan-center-index` repository
+id: 'conan-io/conan-center-index'
+
+conan:
+  version: 1.52.0
+
+artifactory:
+  url: "https://c3i.jfrog.io/c3i"
+  main_repo: "conan-center"
+  pull-request_repo_prefix: "c3i_PR"
+  pull-request_permission: "c3i-pr"
+  logs_repo: "misc"
+  cache_repo: "cache"
+
+github:
+  reviewers: "reviewers.yml"
+  authorized_users: "authorized_users.yml"
+  check_runs:
+    - "Lint changed files (YAML files)"
+    - "Lint changed conanfile.py (v2 migration)"
+
+# Requirements to merge a given pull-request:
+# * status_checks refers to notifications coming from external tools (Jenkins, CLA,...)
+# * check_runs refers to notifications from GH actions
+status_checks:
+  - "license/cla"
+  - "continuous-integration/jenkins/pr-merge"
+
+slack:
+  credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
+  ceredential_errors_url: SLACK_FAILURE_WEBHOOK_URL
+
+# Things related to Jenkins jobs
+tasks:
+  conan_v2_run_export: true
+  write_comments: true
+  detailed_status_checks: true
+  update_labels: true
+  automatic_merge:
+    reviews_required_total: 2  # Reviews that a PR needs so it can be merged
+    reviews_required_team: 1  # Reviews from the Conan team that a PR needs so it can be merged
+
+# Profile configurations to build packages
+configurations:
+  - id: linux-gcc
+    epochs: [0]
+    hrname: "Linux, GCC"
+    content:
+      - os: [ "Linux" ]
+        arch: [ "x86_64" ]
+        compiler:
+          - "gcc":
+              compiler.libcxx: [ "libstdc++11", "libstdc++" ]
+              compiler.version: [ "5", "7", "8", "9", "10" ]
+              build_type: [ "Release", "Debug" ]
+  - id: linux-gcc
+    epochs: [20211221, 20220120]
+    hrname: "Linux, GCC"
+    content:
+      - os: ["Linux"]
+        arch: ["x86_64"]
+        compiler:
+          - "gcc":
+              compiler.libcxx: ["libstdc++11", "libstdc++"]
+              compiler.version: ["5", "7", "8", "9", "10", "11"]
+              build_type: ["Release", "Debug"]
+  - id: linux-clang
+    epochs: [0]
+    hrname: "Linux, Clang"
+    content:
+      - os: [ "Linux" ]
+        arch: [ "x86_64" ]
+        compiler:
+          - "clang":
+              compiler.libcxx: [ "libstdc++", "libc++" ]
+              compiler.version: [ "11" ]
+              build_type: [ "Release", "Debug" ]
+  - id: linux-clang
+    epochs: [20211221, 20220120]
+    hrname: "Linux, Clang"
+    content:
+      - os: ["Linux"]
+        arch: ["x86_64"]
+        compiler:
+          - "clang":
+              compiler.libcxx: ["libstdc++", "libc++"]
+              compiler.version: ["11", "12", "13"]
+              build_type: ["Release", "Debug"]
+  - id: configs/macos-clang
+    epochs: [0, 20211221]
+    hrname: "macOS, Clang"
+    content:
+      - os: [ "Macos" ]
+        arch: [ "x86_64" ]
+        compiler:
+          - "apple-clang":
+              compiler.version: [ "11.0", "12.0" ]
+              compiler.libcxx: [ "libc++" ]
+              build_type: [ "Release", "Debug" ]
+  - id: configs/macos-clang
+    epochs: [20220120]
+    hrname: "macOS, Clang"
+    content:
+      - os: [ "Macos" ]
+        arch: [ "x86_64" ]
+        compiler:
+          - "apple-clang":
+              compiler.version: [ "11.0", "12.0", "13.0"]
+              compiler.libcxx: [ "libc++" ]
+              build_type: [ "Release", "Debug" ]
+  - id: configs/macos-m1-clang
+    epochs: [0, 20211221]
+    hrname: "macOS, Clang (M1/arm64)"
+    build_profile:
+      os: "Macos"
+      arch: "x86_64"
+    content:
+      - os: [ "Macos" ]
+        arch: [ "armv8" ]
+        compiler:
+          - "apple-clang":
+              compiler.version: [ "12.0" ]
+              compiler.libcxx: [ "libc++" ]
+              build_type: [ "Release", "Debug" ]
+  - id: configs/macos-m1-clang
+    epochs: [20220120]
+    hrname: "macOS, Clang (M1/arm64)"
+    build_profile:
+      os: "Macos"
+      arch: "x86_64"
+    content:
+      - os: [ "Macos" ]
+        arch: [ "armv8" ]
+        compiler:
+          - "apple-clang":
+              compiler.version: [ "12.0", "13.0" ]
+              compiler.libcxx: [ "libc++" ]
+              build_type: [ "Release", "Debug" ]
+  - id: configs/windows-visual_studio
+    epochs: [0, 20211221, 20220120]
+    hrname: "Windows, Visual Studio"
+    content:
+      - os: [ "Windows" ]
+        arch: [ "x86_64" ]
+        compiler:
+          - "Visual Studio":
+              compiler.version: [ "15", "16" ]
+              build_type:
+                - "Release":
+                    compiler.runtime: [ "MT", "MD" ]
+                - "Debug":
+                    compiler.runtime: [ "MTd", "MDd" ]
+
+jenkins:
+  url: "http://mb-jenkins-my-bloody-jenkins:8080"
+
+node_labels:
+  Windows:
+    x86_64:
+      "Visual Studio":
+        default: "windows20220803"
+  Macos:
+    x86_64:
+      "apple-clang":
+        default: "mac_apple_clang_${compiler.version}"
+    armv8:
+      "apple-clang":
+        default: "mac_apple_clang_${compiler.version}"
+  Linux:
+    x86_64:
+      "gcc":
+        default: "linux_gcc_${compiler.version}"
+        "11": "linux_gcc_${compiler.version}_ubuntu16.04"
+      "clang":
+        default: "linux_clang_${compiler.version}_ubuntu16.04"
+        "11": "linux_clang_${compiler.version}"
+
+pod_size:
+  # Map with references that need special memory resources to compile.
+  #   - Can be only by name or by name/version.
+  #   - name/version notation takes preference over the name only one
+  #   - Both notations can be combined for the same reference name
+  large:
+    - "pcl"
+    - "duckdb"
+  xlarge:
+    - "llvm"
+    - "opengv"

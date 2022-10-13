@@ -34,7 +34,7 @@ class WebsocketPPConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1o")
 
         if self.options.with_zlib:
             self.requires("zlib/1.2.12")
@@ -42,7 +42,7 @@ class WebsocketPPConan(ConanFile):
         if self.options.asio == "standalone":
             self.requires("asio/1.22.1")
         elif self.options.asio == "boost":
-            self.requires("boost/1.78.0")
+            self.requires("boost/1.79.0")
 
     def package_id(self):
         self.info.header_only()

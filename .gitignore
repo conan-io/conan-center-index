@@ -1,3 +1,14 @@
+# Conan specific
+test_package/build/
+conan.lock
+conanbuildinfo.txt
+conaninfo.txt
+graph_info.json
+build/
+
+# CMake
+CMakeUserPresets.json
+
 # IDEs
 .idea
 .vscode
@@ -9,12 +20,9 @@
 ## emacs
 *~
 
-
 # Byte-compiled / optimized / DLL files / Cache
 __pycache__/
 test_package/__pycache__/
-test_package/build/
-build/
 *.pyc
 *.py[cod]
 *$py.class

@@ -1,7 +1,7 @@
 --- /dev/null
 +++ b/CMakeLists.txt
 @@ -0,0 +1,24 @@
-+cmake_minimum_required(VERSION 3.0.2)
++cmake_minimum_required(VERSION 3.8)
 +project(Lerc)
 +
 +file(GLOB SOURCES 
@@ -10,9 +10,9 @@
 +)
 +
 +add_library(LercLib ${SOURCES})
-+set_property(TARGET LercLib PROPERTY CXX_STANDARD 11)
++target_compile_features(LercLib PRIVATE cxx_std_11)
 +if(BUILD_SHARED_LIBS)
-+  set_property(TARGET LercLib PROPERTY CXX_VISIBILITY_PRESET hidden)
++  set_target_properties(LercLib PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN TRUE)
 +  if(WIN32)
 +    target_compile_definitions(LercLib PRIVATE LERC_EXPORTS)
 +  endif()

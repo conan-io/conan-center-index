@@ -1,4 +1,7 @@
 sources:
-    "2.2.0":
-      url: "https://github.com/beached/utf_range/archive/refs/tags/v2.2.0.tar.gz"
-      sha256: "00f60360736062403c8a7a94dd07c750366958f20d1864578faecf2e09d84265"
+  "2.2.2":
+    url: "https://github.com/beached/utf_range/archive/refs/tags/v2.2.2.tar.gz"
+    sha256: "5380ade7c7eb5c82a748211896fc7385eaec00d3215af1374aec8f0e326f91fd"
+  "2.2.0":
+    url: "https://github.com/beached/utf_range/archive/refs/tags/v2.2.0.tar.gz"
+    sha256: "00f60360736062403c8a7a94dd07c750366958f20d1864578faecf2e09d84265"

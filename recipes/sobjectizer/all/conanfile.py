@@ -102,7 +102,7 @@ class SobjectizerConan(ConanFile):
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["_sobjectizer"].libs = tools.collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["_sobjectizer"].system_libs.append("pthread")
+            self.cpp_info.components["_sobjectizer"].system_libs = ["pthread", "m"]
         if not self.options.shared:
             self.cpp_info.components["_sobjectizer"].defines.append("SO_5_STATIC_LIB")
 

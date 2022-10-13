@@ -1,0 +1,81 @@
+name: 'Package: Bug Report'
+description: 'Report a bug, something does not work as it supposed to'
+title: '[package] <LIBRARY-NAME>/<LIBRARY-VERSION>: SHORT DESCRIPTION'
+labels: bug
+body:
+- type: textarea
+  attributes:
+    label: Description
+    description: What is not working? What were you expecting? Are there any workarounds?
+    value: |
+      _Please don't forget to update the issue title._
+      
+      Missing profile or a short log will make extremely difficult to investigate your case or provide any help,
+      please, include all applicable information with details to help us reproduce your problem.
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Package and Environment Details
+    description: (include every applicable attribute)
+    value: |
+     * Package Name/Version: **zlib/1.2.8**
+     * Operating System+version: **Linux Ubuntu 18.04**
+     * Compiler+version: **GCC 8**
+     * Docker image: **conanio/gcc8**
+     * Conan version: **conan 1.18.0**
+     * Python version: **Python 3.7.4**
+    placeholder: |
+      cat /etc/lsb-release | grep
+      gcc --version
+      docker info
+      cmake --version
+      conan -v
+      python3 --version
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Conan profile
+    description: output of `conan profile show default` or `conan profile show <profile>` if custom profile is in use
+    value: |
+      [settings]
+      os=Macos
+      os_build=Macos
+      arch=armv8
+      arch_build=armv8
+      compiler=apple-clang
+      compiler.version=14
+      compiler.libcxx=libc++
+      build_type=Release
+      [options]
+      [conf]
+      [build_requires]
+      [env]
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label:  Steps to reproduce
+    description: Which commands did you run?
+    value: conan install -r conancenter foobar/0.1.0@ -pr:b=default -pr:h=default
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label:  Logs
+    description: Include/Attach the entire command output here.
+    value: |
+      <details><summary>Click to expand log</summary>
+
+      ```
+      Put your log output here
+      ```
+
+      </details>
+  validations:
+    required: true

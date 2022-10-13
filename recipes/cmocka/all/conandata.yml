@@ -5,4 +5,3 @@ sources:
 patches:
   "1.1.5":
     - patch_file: "patches/build_either_static_or_shared.patch"
-      base_path: "source_subfolder"

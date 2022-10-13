@@ -1,4 +1,7 @@
 sources:
+  "4.2.0":
+    url: "https://github.com/Naios/continuable/archive/4.2.0.tar.gz"
+    sha256: "d85bed930ac19d4b36b23778ad9ae943c2981f7492982bd51dadb89e8908d53f"
   "4.1.0":
     sha256: "CBCF50B1B73D8B4EB54734C827D6736CD038960E13F80699958DBB87F1827650"
     url: "https://github.com/Naios/continuable/archive/4.1.0.tar.gz"

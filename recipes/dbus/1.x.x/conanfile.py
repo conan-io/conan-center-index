@@ -1,9 +1,13 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools, CMake
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rmdir, save
+from conan.tools.scm import Version
 import os
-import shutil
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 
 class DbusConan(ConanFile):
@@ -16,124 +20,111 @@ class DbusConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "system_socket": "ANY",
-        "system_pid_file": "ANY",
+        "system_socket": ["ANY"],
+        "system_pid_file": ["ANY"],
         "with_x11": [True, False],
         "with_glib": [True, False],
+        "with_selinux": [True, False],
+        "session_socket_dir": ["ANY"],
     }
     default_options = {
         "system_socket": "",
         "system_pid_file": "",
         "with_x11": False,
         "with_glib": False,
+        "with_selinux": False,
+        "session_socket_dir": "/tmp",
     }
 
-    generators = "pkg_config", "cmake", "cmake_find_package"
-    _autotools = None
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os not in ("Linux", "FreeBSD"):
             del self.options.with_x11
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("expat/2.4.8")
+        self.requires("expat/2.4.9")
         if self.options.with_glib:
-            self.requires("glib/2.72.0")
+            self.requires("glib/2.74.0")
+        if self.options.with_selinux:
+            self.requires("selinux/3.3")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
 
+    def validate(self):
+        if Version(self.version) >= "1.14.0":
+            if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < 7:
+                raise ConanInvalidConfiguration(f"{self.ref} requires at least gcc 7.")
+            if self.info.settings.os == "Windows":
+                raise ConanInvalidConfiguration(f"{self.ref} does not support windows. contributions are welcome")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    def _configure_autotools(self):
-        if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self)
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["DBUS_BUILD_TESTS"] = False
+        tc.variables["DBUS_ENABLE_DOXYGEN_DOCS"] = False
+        tc.variables["DBUS_ENABLE_XML_DOCS"] = False
+        tc.variables["DBUS_BUILD_X11"] = self.options.get_safe("with_x11", False)
+        tc.variables["DBUS_WITH_GLIB"] = self.options.with_glib
+        tc.variables["DBUS_DISABLE_ASSERT"] = is_apple_os(self)
+        tc.variables["DBUS_DISABLE_CHECKS"] = False
+        # https://github.com/freedesktop/dbus/commit/e827309976cab94c806fda20013915f1db2d4f5a
+        tc.variables["DBUS_SESSION_SOCKET_DIR"] = self.options.session_socket_dir
+        tc.generate()
 
-            args = []
-            args.append("--disable-tests")
-            args.append("--disable-doxygen-docs")
-            args.append("--disable-xml-docs")
+        deps = CMakeDeps(self)
+        deps.generate()
 
-            args.append("--with-x=%s" % ("yes" if self.options.get_safe("with_x11", False) else "no"))
-            args.append("--%s-x11-autolaunch" % ("enable" if self.options.get_safe("with_x11", False) else "disable"))
-            args.append("--disable-asserts")
-            args.append("--disable-checks")
-
-            args.append("--with-systemdsystemunitdir=%s" % os.path.join(self.package_folder, "lib", "systemd", "system"))
-            args.append("--with-systemduserunitdir=%s" % os.path.join(self.package_folder, "lib", "systemd", "user"))
-
-            if str(self.options.system_socket) != "":
-                args.append("--with-system-socket=%s" % self.options.system_socket)
-            if str(self.options.system_pid_file) != "":
-                args.append("--with-system-pid-file=%s" % self.options.system_pid_file)
-
-            args.append("--disable-launchd")
-            args.append("--disable-systemd")
-
-            self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
-
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-
-            self._cmake.definitions["DBUS_BUILD_TESTS"] = False
-            self._cmake.definitions["DBUS_ENABLE_DOXYGEN_DOCS"] = False
-            self._cmake.definitions["DBUS_ENABLE_XML_DOCS"] = False
-
-            self._cmake.definitions["DBUS_BUILD_X11"] = self.options.get_safe("with_x11", False)
-            self._cmake.definitions["DBUS_WITH_GLIB"] = self.options.with_glib
-            self._cmake.definitions["DBUS_DISABLE_ASSERT"] = False
-            self._cmake.definitions["DBUS_DISABLE_CHECKS"] = False
-
-            path_to_cmake_lists = os.path.join(self._source_subfolder, "cmake")
-
-            self._cmake.configure(source_folder=path_to_cmake_lists,
-                                  build_folder=self._build_subfolder)
-        return self._cmake
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        # Unfortunately, there is currently no other way to force disable
+        # CMAKE_FIND_PACKAGE_PREFER_CONFIG ON in CMake conan_toolchain.
+        replace_in_file(
+            self,
+            os.path.join(self.generators_folder, "conan_toolchain.cmake"),
+            "set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)",
+            "",
+            strict=False,
+        )
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "CMakeLists.txt"),
-                              "project(dbus)",
-                              "project(dbus)\ninclude(../../conanbuildinfo.cmake)\nconan_basic_setup()")
-        if self.settings.os == "Windows":
-            cmake = self._configure_cmake()
-            cmake.build()
+        self._patch_sources()
+        cmake = CMake(self)
+        if Version(self.version) < "1.14.0":
+            cmake.configure(build_script_folder=os.path.join(self.source_folder, "cmake"))
         else:
-            autotools = self._configure_autotools()
-            autotools.make()
+            cmake.configure()
+        cmake.build()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses",
-                  src=self._source_subfolder)
-        if self.settings.os == "Windows":
-            cmake = self._configure_cmake()
-            cmake.install()
-        else:
-            autotools = self._configure_autotools()
-            autotools.install()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "share", "doc"))
+        rmdir(self, os.path.join(self.package_folder, "share", "doc"))
+        mkdir(self, os.path.join(self.package_folder, "res"))
         for i in ["var", "share", "etc"]:
-            shutil.move(os.path.join(self.package_folder, i), os.path.join(self.package_folder, "res", i))
+            rename(self, os.path.join(self.package_folder, i), os.path.join(self.package_folder, "res", i))
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "systemd"))
-        tools.remove_files_by_mask(self.package_folder, "*.la")
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "systemd"))
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
@@ -141,21 +132,20 @@ class DbusConan(ConanFile):
             {"dbus-1": "dbus-1::dbus-1"}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+            """)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "DBus1")
@@ -165,7 +155,14 @@ class DbusConan(ConanFile):
             os.path.join("include", "dbus-1.0"),
             os.path.join("lib", "dbus-1.0", "include"),
         ])
+        self.cpp_info.resdirs = ["res"]
         self.cpp_info.libs = ["dbus-1"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("rt")
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["iphlpapi", "ws2_32"])
+        else:
+            self.cpp_info.system_libs.append("pthread")
 
         # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
         self.cpp_info.filenames["cmake_find_package"] = "DBus1"

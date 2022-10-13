@@ -1,20 +1,31 @@
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
+import functools
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.45.0"
 
 class SkyrUrlConan(ConanFile):
     name = "skyr-url"
-    homepage = "https://cpp-netlib.github.io/url"
     description = "A C++ library that implements the WhatWG URL specification"
-    topics = ("conan", "whatwg", "url", "parser")
-    url = "https://github.com/conan-io/conan-center-index"
     license = "BSL-1.0"
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "with_json": [True, False], "with_fs": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "with_json": True, "with_fs": True}
-    exports_sources = "CMakeLists.txt"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://cpp-netlib.github.io/url"
+    topics = ("whatwg", "url", "parser")
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_json": [True, False],
+        "with_fs": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_json": True,
+        "with_fs": True,
+    }
     generators = "cmake", "cmake_find_package_multi"
     _cmake = None
 
@@ -40,12 +51,21 @@ class SkyrUrlConan(ConanFile):
             "apple-clang": "10",
         }
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.get_safe("compiler.cppstd"):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
@@ -58,41 +78,35 @@ class SkyrUrlConan(ConanFile):
 
         if self.options.with_fs and self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration("apple-clang currently does not support with filesystem")
-
-        if self.options.shared:
-            # https://github.com/cpp-netlib/url/blob/dd345361ed86e4c1cabfe94743a8e769b346840c/src/CMakeLists.txt#L17
-            raise ConanInvalidConfiguration("shared is currently not supported by upstream")
-
-        if tools.Version(self.version) >= "1.13.0" and not self.settings.compiler == "Visual Studio":
-            # There's tedious compilation errors in C3i against ranges-v3
-            raise ConanInvalidConfiguration("{}/{} with {} is currently not supported".format(self.name, self.version, self.settings.compiler))
+        if self.settings.compiler.get_safe("libcxx") == "libstdc++":
+            raise ConanInvalidConfiguration("{} supports only libstdc++'s new ABI".format(self.name))
 
     def requirements(self):
         self.requires("tl-expected/1.0.0")
-        self.requires("range-v3/0.11.0")
+        self.requires("range-v3/0.12.0")
         if self.options.with_json:
-            self.requires("nlohmann_json/3.9.1")
+            self.requires("nlohmann_json/3.10.5")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "url-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["skyr_BUILD_TESTS"] = False
-        self._cmake.definitions["skyr_FULL_WARNINGS"] = False
-        self._cmake.definitions["skyr_WARNINGS_AS_ERRORS"] = False
-        self._cmake.definitions["skyr_ENABLE_JSON_FUNCTIONS"] = self.options.with_json
-        self._cmake.definitions["skyr_ENABLE_FILESYSTEM_FUNCTIONS"] = self.options.with_fs
-        if self.settings.compiler == "Visual Studio":
-            self._cmake.definitions["skyr_USE_STATIC_CRT"] = "MT" in self.settings.compiler.runtime
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["skyr_BUILD_TESTS"] = False
+        cmake.definitions["skyr_FULL_WARNINGS"] = False
+        cmake.definitions["skyr_WARNINGS_AS_ERRORS"] = False
+        cmake.definitions["skyr_ENABLE_JSON_FUNCTIONS"] = self.options.with_json
+        cmake.definitions["skyr_ENABLE_FILESYSTEM_FUNCTIONS"] = self.options.with_fs
+        if is_msvc(self):
+            cmake.definitions["skyr_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -103,12 +117,18 @@ class SkyrUrlConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "skyr-url")
+        self.cpp_info.set_property("cmake_target_name", "skyr::skyr-url")
+
+        self.cpp_info.components["url"].name = "skyr-url"
+        self.cpp_info.components["url"].libs = tools.collect_libs(self)
+        self.cpp_info.components["url"].requires = ["tl-expected::tl-expected", "range-v3::range-v3"]
+        if self.options.with_json:
+            self.cpp_info.components["url"].requires.append("nlohmann_json::nlohmann_json")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["url"].system_libs.append("m")
+
         self.cpp_info.filenames["cmake_find_package"] = "skyr-url"
         self.cpp_info.filenames["cmake_find_package_multi"] = "skyr-url"
         self.cpp_info.names["cmake_find_package"] = "skyr"
         self.cpp_info.names["cmake_find_package_multi"] = "skyr"
-        self.cpp_info.components["url"].name = "skyr-url"
-        self.cpp_info.components["url"].libs = tools.collect_libs(self)
-        self.cpp_info.components["url"].requires = ["tl-expected::tl-expected", "range-v3::range-v3" ]
-        if self.options.with_json:
-            self.cpp_info.components["url"].requires.append("nlohmann_json::nlohmann_json")

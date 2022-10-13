@@ -1,0 +1,91 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e285ba0..69f3c19 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -126,33 +126,23 @@ set(OPTIONAL_LIBRARIES_STATIC)
+ ########################################################################
+ # LIBZMQ dependency
+ ########################################################################
+-find_package(libzmq REQUIRED)
+-IF (LIBZMQ_FOUND)
+-    include_directories(${LIBZMQ_INCLUDE_DIRS})
+-    list(APPEND MORE_LIBRARIES ${LIBZMQ_LIBRARIES})
+-  IF (PC_LIBZMQ_FOUND)
+-      set(pkg_config_names_private "${pkg_config_names_private} libzmq")
+-      list(APPEND OPTIONAL_LIBRARIES_STATIC ${PC_LIBZMQ_STATIC_LDFLAGS})
+-  ELSE (PC_LIBZMQ_FOUND)
+-      set(pkg_config_libs_private "${pkg_config_libs_private} -lzmq")
+-  ENDIF (PC_LIBZMQ_FOUND)
+-ELSE (LIBZMQ_FOUND)
++find_package(ZeroMQ REQUIRED)
++IF (ZEROMQ_FOUND)
++  include_directories(${CONAN_INCLUDE_DIRS_LIBZMQ})
++  list(APPEND MORE_LIBRARIES ZeroMQ::ZeroMQ)
++  set(pkg_config_libs_private "${pkg_config_libs_private} -lzmq")
++ELSE (ZEROMQ_FOUND)
+     message( FATAL_ERROR "libzmq not found." )
+-ENDIF (LIBZMQ_FOUND)
++ENDIF (ZEROMQ_FOUND)
+ 
+ ########################################################################
+ # CZMQ dependency
+ ########################################################################
+ find_package(czmq REQUIRED)
+ IF (CZMQ_FOUND)
+-    include_directories(${CZMQ_INCLUDE_DIRS})
+-    list(APPEND MORE_LIBRARIES ${CZMQ_LIBRARIES})
+-  IF (PC_CZMQ_FOUND)
+-      set(pkg_config_names_private "${pkg_config_names_private} libczmq")
+-      list(APPEND OPTIONAL_LIBRARIES_STATIC ${PC_CZMQ_STATIC_LDFLAGS})
+-  ELSE (PC_CZMQ_FOUND)
+-      set(pkg_config_libs_private "${pkg_config_libs_private} -lczmq")
+-  ENDIF (PC_CZMQ_FOUND)
++  include_directories(${CONAN_INCLUDE_DIRS_CZMQ})
++  list(APPEND MORE_LIBRARIES czmq::czmq)
++  set(pkg_config_libs_private "${pkg_config_libs_private} -lczmq")
+ ELSE (CZMQ_FOUND)
+     message( FATAL_ERROR "czmq not found." )
+ ENDIF (CZMQ_FOUND)
+@@ -237,6 +227,7 @@ if (ZYRE_BUILD_SHARED)
+   set_target_properties (zyre PROPERTIES
+     PUBLIC_HEADER "${public_headers}"
+     DEFINE_SYMBOL "ZYRE_EXPORTS"
++    LINKER_LANGUAGE CXX
+     SOVERSION "2"
+     VERSION "${ZYRE_VERSION}"
+     COMPILE_DEFINITIONS "DLL_EXPORT"
+@@ -303,8 +294,9 @@ if (ZYRE_BUILD_STATIC)
+ 
+ endif()
+ 
+-
++if(BUILD_EXECUTABLES)
+ include(${CMAKE_CURRENT_SOURCE_DIR}/src/CMakeLists-local.txt) # Optional project-local hook
++endif()
+ 
+ ########################################################################
+ # pkgconfig
+@@ -360,6 +352,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/zyreConfig.cmake
+ ########################################################################
+ # executables
+ ########################################################################
++if(BUILD_EXECUTABLES)
+ add_executable(
+     perf_local
+     "${SOURCE_DIR}/src/perf_local.c"
+@@ -491,6 +484,7 @@ target_link_libraries(
+     ${OPTIONAL_LIBRARIES}
+ )
+ endif()
++
+ if (NOT TARGET zyre AND TARGET zyre-static)
+ target_link_libraries(
+     zyre_selftest
+@@ -501,6 +495,7 @@ target_link_libraries(
+     ${OPTIONAL_LIBRARIES_STATIC}
+ )
+ endif()
++endif()
+ 
+ ########################################################################
+ # tests

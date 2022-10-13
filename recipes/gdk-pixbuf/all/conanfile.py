@@ -1,10 +1,14 @@
-from conans import ConanFile, Meson, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
-import os
-import shutil
+from conan import ConanFile
+from conan.tools.meson import MesonToolchain, Meson
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.layout import basic_layout
+from conan.tools import files, scm, microsoft
+from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.36.0"
+import os
+
+required_conan_version = ">=1.52.0"
 
 
 class GdkPixbufConan(ConanFile):
@@ -22,7 +26,6 @@ class GdkPixbufConan(ConanFile):
         "with_libpng": [True, False],
         "with_libtiff": [True, False],
         "with_libjpeg": ["libjpeg", "libjpeg-turbo", False],
-        "with_jasper": [True, False],
         "with_introspection": [True, False],
     }
     default_options = {
@@ -31,121 +34,149 @@ class GdkPixbufConan(ConanFile):
         "with_libpng": True,
         "with_libtiff": True,
         "with_libjpeg": "libjpeg",
-        "with_jasper": False,
         "with_introspection": False,
     }
-
-    generators = "pkg_config"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) >= "2.42.0":
-            del self.options.with_jasper
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            self.options["glib"].shared = True
 
-    def requirements(self):
-        if self.settings.compiler == "clang":
-            # FIXME: cannot bump glib due to "undefined reference to `__muloti4'"
-            # see https://github.com/conan-io/conan-center-index/pull/10154#issuecomment-1094224794
-            self.requires("glib/2.70.4")
-        else:
-            self.requires("glib/2.72.0")
-        if self.options.with_libpng:
-            self.requires("libpng/1.6.37")
-        if self.options.with_libtiff:
-            self.requires("libtiff/4.3.0")
-        if self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.2")
-        elif self.options.with_libjpeg == "libjpeg":
-            self.requires("libjpeg/9d")
-        if self.options.get_safe("with_jasper"):
-            self.requires("jasper/2.0.33")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os == "Macos":
+        if self.info.options.shared and not self.dependencies.direct_host["glib"].options.shared:
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
+        if self.info.settings.os == "Macos":
             # when running gdk-pixbuf-query-loaders
             # dyld: malformed mach-o: load commands size (97560) > 32768
             raise ConanInvalidConfiguration("This package does not support Macos currently")
+        if self.dependencies.direct_host["glib"].options.shared and microsoft.is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration(
+                "Linking shared glib with the MSVC static runtime is not supported"
+            )
+
+    @property
+    def _requires_compiler_rt(self):
+        return self.settings.compiler == "clang" and scm.Version(self.settings.compiler.version) <= "12" and self.settings.build_type == "Debug"
+
+    def generate(self):
+        def is_enabled(value):
+            return "enabled" if value else "disabled"
+
+        def is_true(value):
+            return "true" if value else "false"
+
+        deps = PkgConfigDeps(self)
+        deps.generate()
+
+        tc = MesonToolchain(self)
+        tc.project_options.update({
+            "builtin_loaders": "all",
+            "gio_sniffing": "false",
+            "introspection": is_enabled(self.options.with_introspection),
+            "docs": "false",
+            "man": "false",
+            "installed_tests": "false"
+        })
+        if scm.Version(self.version) < "2.42.0":
+            tc.project_options["gir"] = "false"
+
+        if scm.Version(self.version) >= "2.42.8":
+            tc.project_options.update({
+                "png": is_enabled(self.options.with_libpng),
+                "tiff": is_enabled(self.options.with_libtiff),
+                "jpeg": is_enabled(self.options.with_libjpeg)
+            })
+        else:
+            tc.project_options.update({
+                "png": is_true(self.options.with_libpng),
+                "tiff": is_true(self.options.with_libtiff),
+                "jpeg": is_true(self.options.with_libjpeg)
+            })
+
+        # Workaround for https://bugs.llvm.org/show_bug.cgi?id=16404
+        # Only really for the purposes of building on CCI - end users can
+        # workaround this by appropriately setting global linker flags in their profile
+        if self._requires_compiler_rt:
+            tc.c_link_args.append("-rtlib=compiler-rt")
+        tc.generate()
+
+        venv = VirtualBuildEnv(self)
+        venv.generate()
+
+    def requirements(self):
+        if not microsoft.is_msvc(self):
+            self.requires("glib/2.74.0")
+        else:
+            # Workaround due to https://github.com/conan-io/conan-center-index/issues/12342
+            # Test again when the glib recipe is updated to the new meson toolchain
+            self.requires("glib/2.73.0")
+        if self.options.with_libpng:
+            self.requires("libpng/1.6.38")
+        if self.options.with_libtiff:
+            self.requires("libtiff/4.4.0")
+        if self.options.with_libjpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.1.4")
+        elif self.options.with_libjpeg == "libjpeg":
+            self.requires("libjpeg/9e")
 
     def build_requirements(self):
-        self.build_requires("meson/0.61.2")
-        self.build_requires("pkgconf/1.7.4")
+        self.tool_requires("meson/0.63.2")
+        self.tool_requires("pkgconf/1.9.3")
         if self.options.with_introspection:
-            self.build_requires("gobject-introspection/1.70.0")
+            self.tool_requires("gobject-introspection/1.72.0")
+
+    def export_sources(self):
+        files.export_conandata_patches(self)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
-        meson_build = os.path.join(self._source_subfolder, "meson.build")
-        tools.replace_in_file(meson_build, "subdir('tests')", "#subdir('tests')")
-        tools.replace_in_file(meson_build, "subdir('thumbnailer')", "#subdir('thumbnailer')")
-        tools.replace_in_file(meson_build,
-                              "gmodule_dep.get_variable(pkgconfig: 'gmodule_supported')" if tools.Version(self.version) >= "2.42.6"
+        files.apply_conandata_patches(self)
+
+        meson_build = os.path.join(self.source_folder, "meson.build")
+        files.replace_in_file(self, meson_build, "subdir('tests')", "#subdir('tests')")
+        files.replace_in_file(self, meson_build, "subdir('thumbnailer')", "#subdir('thumbnailer')")
+        files.replace_in_file(self, meson_build,
+                              "gmodule_dep.get_variable(pkgconfig: 'gmodule_supported')" if scm.Version(self.version) >= "2.42.6"
                               else "gmodule_dep.get_pkgconfig_variable('gmodule_supported')", "'true'")
         # workaround https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/issues/203
-        if tools.Version(self.version) >= "2.42.6":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "build-aux", "post-install.py"),
+        if scm.Version(self.version) >= "2.42.6":
+            files.replace_in_file(self, os.path.join(self.source_folder, "build-aux", "post-install.py"),
                                   "close_fds=True", "close_fds=(sys.platform != 'win32')")
-
-    @functools.lru_cache(1)
-    def _configure_meson(self):
-        meson = Meson(self)
-        defs = {}
-        if tools.Version(self.version) >= "2.42.0":
-            defs["introspection"] = "false"
-        else:
-            defs["gir"] = "false"
-        defs["docs"] = "false"
-        defs["man"] = "false"
-        defs["installed_tests"] = "false"
-        defs["png"] = "true" if self.options.with_libpng else "false"
-        defs["tiff"] = "true" if self.options.with_libtiff else "false"
-        defs["jpeg"] = "true" if self.options.with_libjpeg else "false"
-        if "with_jasper" in self.options:
-            defs["jasper"] = "true" if self.options.with_jasper else "false"
-        if tools.Version(self.version) < "2.42.0":
-            defs["x11"] = "false"
-        defs["builtin_loaders"] = "all"
-        defs["gio_sniffing"] = "false"
-        defs["introspection"] = "enabled" if self.options.with_introspection else "disabled"
-        args=[]
-        args.append("--wrap-mode=nofallback")
-        meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=".", args=args)
-        return meson
+        if scm.Version(self.version) >= "2.42.9":
+            files.replace_in_file(self, meson_build, "is_msvc_like ? 'png' : 'libpng'", "'libpng'")
+            files.replace_in_file(self, meson_build, "is_msvc_like ? 'jpeg' : 'libjpeg'", "'libjpeg'")
+            files.replace_in_file(self, meson_build, "is_msvc_like ? 'tiff' : 'libtiff-4'", "'libtiff-4'")
 
     def build(self):
         self._patch_sources()
-        if self.options.with_libpng:
-            shutil.move("libpng.pc", "libpng16.pc")
-        meson = self._configure_meson()
+        meson = Meson(self)
+        meson.configure()
         meson.build()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        with tools.environment_append({"LD_LIBRARY_PATH": os.path.join(self.package_folder, "lib")}):
-            meson = self._configure_meson()
-            meson.install()
-        if str(self.settings.compiler) in ["Visual Studio", "msvc"] and not self.options.shared:
-            os.rename(os.path.join(self.package_folder, "lib", "libgdk_pixbuf-2.0.a"), os.path.join(self.package_folder, "lib", "gdk_pixbuf-2.0.lib"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(self.package_folder, "*.pdb")
+        meson = Meson(self)
+        meson.install()
+
+        files.copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        if microsoft.is_msvc(self) and not self.options.shared:
+            files.rename(self, os.path.join(self.package_folder, "lib", "libgdk_pixbuf-2.0.a"), os.path.join(self.package_folder, "lib", "gdk_pixbuf-2.0.lib"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rmdir(self, os.path.join(self.package_folder, "share"))
+        files.rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "gdk-pixbuf-2.0")
@@ -155,6 +186,10 @@ class GdkPixbufConan(ConanFile):
             self.cpp_info.defines.append("GDK_PIXBUF_STATIC_COMPILATION")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
+        if self._requires_compiler_rt:
+            ldflags = ["-rtlib=compiler-rt"]
+            self.cpp_info.exelinkflags = ldflags
+            self.cpp_info.sharedlinkflags = ldflags
 
         gdk_pixbuf_pixdata = os.path.join(self.package_folder, "bin", "gdk-pixbuf-pixdata")
         self.runenv_info.define_path("GDK_PIXBUF_PIXDATA", gdk_pixbuf_pixdata)
@@ -162,3 +197,7 @@ class GdkPixbufConan(ConanFile):
 
         # TODO: to remove in conan v2 once pkg_config generator removed
         self.cpp_info.names["pkg_config"] = "gdk-pixbuf-2.0"
+
+    def package_id(self):
+        if not self.options["glib"].shared:
+            self.info.requires["glib"].full_package_mode()

@@ -31,26 +31,38 @@ class AtSPI2AtkConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-    
+
     def validate(self):
         if self.settings.os not in ("Linux", "FreeBSD"):
             raise ConanInvalidConfiguration("at-spi2-atk is only supported on Linux and FreeBSD")
+        if self.options.shared and (not self.options["glib"].shared
+                                    or not self.options["at-spi2-core"].shared
+                                    or not self.options["atk"].shared):
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
+
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            self.options["at-spi2-core"].shared = True
+            self.options["atk"].shared = True
+            self.options["glib"].shared = True
+
 
     def build_requirements(self):
-        self.build_requires('meson/0.60.2')
+        self.build_requires("meson/0.62.2")
         self.build_requires('pkgconf/1.7.4')
 
     def requirements(self):
-        self.requires('at-spi2-core/2.42.0')
-        self.requires('atk/2.36.0')
-        self.requires('glib/2.70.1')
-        self.requires('libxml2/2.9.12')
+        self.requires("at-spi2-core/2.44.1")
+        self.requires("atk/2.38.0")
+        self.requires("glib/2.73.0")
+        self.requires("libxml2/2.9.14")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -79,3 +91,8 @@ class AtSPI2AtkConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs = [os.path.join('include', 'at-spi2-atk', '2.0')]
         self.cpp_info.names['pkg_config'] = 'atk-bridge-2.0'
+
+    def package_id(self):
+        self.info.requires["at-spi2-core"].full_package_mode()
+        self.info.requires["atk"].full_package_mode()
+        self.info.requires["glib"].full_package_mode()

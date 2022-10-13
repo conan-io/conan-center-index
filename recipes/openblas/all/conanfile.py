@@ -1,18 +1,18 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import functools
 
 required_conan_version = ">=1.43.0"
 
 
 class OpenblasConan(ConanFile):
     name = "openblas"
+    description = "An optimized BLAS library based on GotoBLAS2 1.13 BSD version"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.openblas.net"
-    description = "An optimized BLAS library based on GotoBLAS2 1.13 BSD version"
-    topics = ("openblas", "blas", "lapack")
-
+    topics = ("blas", "lapack")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -28,10 +28,8 @@ class OpenblasConan(ConanFile):
         "use_thread": True,
         "dynamic_arch": False,
     }
-
-    exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
-    _cmake = None
+    short_paths = True
 
     @property
     def _source_subfolder(self):
@@ -40,6 +38,9 @@ class OpenblasConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -60,31 +61,30 @@ class OpenblasConan(ConanFile):
             destination=self._source_subfolder
         )
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
+        cmake = CMake(self)
 
         if self.options.build_lapack:
             self.output.warn("Building with lapack support requires a Fortran compiler.")
-        self._cmake.definitions["NOFORTRAN"] = not self.options.build_lapack
-        self._cmake.definitions["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
-        self._cmake.definitions["DYNAMIC_ARCH"] = self.options.dynamic_arch
-        self._cmake.definitions["USE_THREAD"] = self.options.use_thread
+        cmake.definitions["NOFORTRAN"] = not self.options.build_lapack
+        cmake.definitions["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
+        cmake.definitions["DYNAMIC_ARCH"] = self.options.dynamic_arch
+        cmake.definitions["USE_THREAD"] = self.options.use_thread
 
         # Required for safe concurrent calls to OpenBLAS routines
-        self._cmake.definitions["USE_LOCKING"] = not self.options.use_thread
+        cmake.definitions["USE_LOCKING"] = not self.options.use_thread
 
-        self._cmake.definitions[
+        cmake.definitions[
             "MSVC_STATIC_CRT"
         ] = False  # don't, may lie to consumer, /MD or /MT is managed by conan
 
         # This is a workaround to add the libm dependency on linux,
         # which is required to successfully compile on older gcc versions.
-        self._cmake.definitions["ANDROID"] = self.settings.os in ["Linux", "Android"]
+        cmake.definitions["ANDROID"] = self.settings.os in ["Linux", "Android"]
 
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         if tools.Version(self.version) >= "0.3.12":
@@ -134,6 +134,7 @@ endif()"""
         )
         self.cpp_info.components["openblas_component"].libs = tools.collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["openblas_component"].system_libs.append("m")
             if self.options.use_thread:
                 self.cpp_info.components["openblas_component"].system_libs.append("pthread")
             if self.options.build_lapack:

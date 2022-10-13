@@ -1,4 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.33.0"
@@ -8,10 +9,9 @@ class LibdeflateConan(ConanFile):
     name = "libdeflate"
     description = "Heavily optimized library for DEFLATE/zlib/gzip compression and decompression."
     license = "MIT"
-    topics = ("libdeflate", "compression", "decompression", "deflate", "zlib", "gzip")
-    homepage = "https://github.com/ebiggers/libdeflate"
     url = "https://github.com/conan-io/conan-center-index"
-
+    homepage = "https://github.com/ebiggers/libdeflate"
+    topics = ("libdeflate", "compression", "decompression", "deflate", "zlib", "gzip")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -31,12 +31,12 @@ class LibdeflateConan(ConanFile):
         return self.settings.compiler == "clang" and self.settings.os == "Windows"
 
     @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -49,7 +49,7 @@ class LibdeflateConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not self._is_msvc and \
+        if self._settings_build.os == "Windows" and not is_msvc(self) and \
            not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
@@ -58,11 +58,6 @@ class LibdeflateConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _build_msvc(self):
-        makefile_msc_file = os.path.join(self._source_subfolder, "Makefile.msc")
-        if self._is_clangcl:
-            tools.replace_in_file(makefile_msc_file, "CC = cl", "CC = $(CC)")
-        tools.replace_in_file(makefile_msc_file, "CFLAGS = /MD /O2 -I.", "CFLAGS = /nologo $(CFLAGS) -I.")
-        tools.replace_in_file(makefile_msc_file, "LDFLAGS =", "")
         with tools.chdir(self._source_subfolder):
             with tools.vcvars(self):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
@@ -70,19 +65,14 @@ class LibdeflateConan(ConanFile):
                     self.run("nmake /f Makefile.msc {}".format(target))
 
     def _build_make(self):
-        makefile = os.path.join(self._source_subfolder, "Makefile")
-        tools.replace_in_file(makefile, "-O2", "")
-        tools.replace_in_file(
-            makefile,
-            "-install_name $(SHARED_LIB)",
-            "-install_name @rpath/$(SHARED_LIB)", # relocatable shared lib on Macos
-        )
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         with tools.chdir(self._source_subfolder):
             autotools.make()
 
     def build(self):
-        if self._is_msvc or self._is_clangcl:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        if is_msvc(self) or self._is_clangcl:
             self._build_msvc()
         else:
             self._build_make()

@@ -1,58 +1,64 @@
 sources:
-  "1.0.3":
-    url: "https://github.com/open62541/open62541/archive/v1.0.3.tar.gz"
-    sha256: "3e4c939d702d06d89f32a1cafe2b992c7f3d81c8f8579e093a972d4bc4fb3d50"
-  "1.0.6":
-    url: "https://github.com/open62541/open62541/archive/v1.0.6.tar.gz"
-    sha256: "299940025c14929533064abe0044d5805ea50d52b32d05ad9bc0e6996569c2a6"
-  "1.1.3":
-    url: "https://github.com/open62541/open62541/archive/v1.1.3.tar.gz"
-    sha256: "12770bf9f5d9f44dedce0d1b34066dd14111d24c73a2f0153420e0a750e85d19"
-  "1.1.5":
-    url: "https://github.com/open62541/open62541/archive/v1.1.5.tar.gz"
-    sha256: "a3e689216d75c3313bffdbb1cb7190d63b173410f392b8c558062fdd667635d7"
-  "1.1.6":
-    url: "https://github.com/open62541/open62541/archive/v1.1.6.tar.gz"
-    sha256: "005bb336ba52f2c0add479bb46de8aa4216efa7f2bfd8b1c24a0271494edbd3f"
-  "1.2.2":
-    url: "https://github.com/open62541/open62541/archive/v1.2.2.tar.gz"
-    sha256: "9b5bfd811ee523be601f11abc514a93c67fe5c6e957cd6c36fe6ea4f28e009bb"
+  "1.3.1":
+    url: "https://github.com/open62541/open62541/archive/v1.3.1.tar.gz"
+    sha256: "f54d10325fd08fc1505aea37d83daa085912a269521e6d018bfc41a744ba57aa"
   "1.2.4":
     url: "https://github.com/open62541/open62541/archive/v1.2.4.tar.gz"
     sha256: "b2d00b91e8315b61efaef6398f0902a0c9a8f357aa6d02f7f000a429048c97ae"
-patches:
-  "1.0.3":
-    - patch_file: "patches/1_0_x.patch"
-      base_path: "source_subfolder"
-  "1.0.6":
-    - patch_file: "patches/1_0_x.patch"
-      base_path: "source_subfolder"
-  "1.1.3":
-    - patch_file: "patches/0001-fix-cmake-find-deps-1_1_x.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-disable-sanitizers-1_1_3-and-1_1_5.patch"
-      base_path: "source_subfolder"
+  "1.2.2":
+    url: "https://github.com/open62541/open62541/archive/v1.2.2.tar.gz"
+    sha256: "9b5bfd811ee523be601f11abc514a93c67fe5c6e957cd6c36fe6ea4f28e009bb"
+  "1.1.6":
+    url: "https://github.com/open62541/open62541/archive/v1.1.6.tar.gz"
+    sha256: "005bb336ba52f2c0add479bb46de8aa4216efa7f2bfd8b1c24a0271494edbd3f"
   "1.1.5":
-    - patch_file: "patches/0001-fix-cmake-find-deps-1_1_x.patch"
+    url: "https://github.com/open62541/open62541/archive/v1.1.5.tar.gz"
+    sha256: "a3e689216d75c3313bffdbb1cb7190d63b173410f392b8c558062fdd667635d7"
+  "1.1.3":
+    url: "https://github.com/open62541/open62541/archive/v1.1.3.tar.gz"
+    sha256: "12770bf9f5d9f44dedce0d1b34066dd14111d24c73a2f0153420e0a750e85d19"
+  "1.0.6":
+    url: "https://github.com/open62541/open62541/archive/v1.0.6.tar.gz"
+    sha256: "299940025c14929533064abe0044d5805ea50d52b32d05ad9bc0e6996569c2a6"
+  "1.0.3":
+    url: "https://github.com/open62541/open62541/archive/v1.0.3.tar.gz"
+    sha256: "3e4c939d702d06d89f32a1cafe2b992c7f3d81c8f8579e093a972d4bc4fb3d50"
+patches:
+  "1.3.1":
+    - patch_file: "patches/0001-fix-cmake-find-deps-1_3_x.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0002-disable-sanitizers-1_1_3-and-1_1_5.patch"
+  "1.2.4":
+    - patch_file: "patches/0001-fix-cmake-find-deps-1_2_x.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-disable-sanitizers-1_2_x.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-fix-use-usr-bin-env-python3.patch"
+      base_path: "source_subfolder"
+  "1.2.2":
+    - patch_file: "patches/0001-fix-cmake-find-deps-1_2_x.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-disable-sanitizers-1_2_x.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-fix-use-usr-bin-env-python3.patch"
       base_path: "source_subfolder"
   "1.1.6":
     - patch_file: "patches/0001-fix-cmake-find-deps-1_1_x.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0003-disable-sanitizers-1_1_6.patch"
       base_path: "source_subfolder"
-  "1.2.2":
-    - patch_file: "patches/0001-fix-cmake-find-deps-1_2_x.patch"
+  "1.1.5":
+    - patch_file: "patches/0001-fix-cmake-find-deps-1_1_x.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0003-disable-sanitizers-1_2_x.patch"
+    - patch_file: "patches/0002-disable-sanitizers-1_1_3-and-1_1_5.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0003-fix-use-usr-bin-env-python3.patch"
+  "1.1.3":
+    - patch_file: "patches/0001-fix-cmake-find-deps-1_1_x.patch"
       base_path: "source_subfolder"
-  "1.2.4":
-    - patch_file: "patches/0001-fix-cmake-find-deps-1_2_x.patch"
+    - patch_file: "patches/0002-disable-sanitizers-1_1_3-and-1_1_5.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0003-disable-sanitizers-1_2_x.patch"
+  "1.0.6":
+    - patch_file: "patches/1_0_x.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0003-fix-use-usr-bin-env-python3.patch"
+  "1.0.3":
+    - patch_file: "patches/1_0_x.patch"
       base_path: "source_subfolder"

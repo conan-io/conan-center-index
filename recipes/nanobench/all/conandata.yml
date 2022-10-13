@@ -11,3 +11,6 @@ sources:
   "4.3.6":
     url: "https://github.com/martinus/nanobench/archive/v4.3.6.tar.gz"
     sha256: "cfa223fefca8752c0c96416f3440a9b02219f4695a8307db7e8c7054aaed7f01"
+  "4.3.7":
+    url: "https://github.com/martinus/nanobench/archive/v4.3.7.tar.gz"
+    sha256: "6a2dadb8230370c7fb7a9362be1c3677e44d8e06193a4ecb489a4748ef9483d7"

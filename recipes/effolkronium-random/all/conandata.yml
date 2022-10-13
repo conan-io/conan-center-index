@@ -1,4 +1,7 @@
 sources:
+  "1.4.1":
+    url: "https://github.com/effolkronium/random/archive/v1.4.1.tar.gz"
+    sha256: "ec6beb67496ad2ce722d311d3fa5efb7e847dac5fd1c16b8920b51562fe20f53"
   "1.4.0":
     url: "https://github.com/effolkronium/random/archive/v1.4.0.tar.gz"
     sha256: "228baa24736a409b37bbe31df40ef7537f04bfbe3921dfed3d806d4eef112632"

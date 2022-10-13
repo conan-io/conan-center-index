@@ -11,11 +11,10 @@ required_conan_version = ">=1.33.0"
 class OpenTelemetryCppConan(ConanFile):
     name = "opentelemetry-cpp"
     description = "The C++ OpenTelemetry API and SDK"
-    topics = ("opentelemetry", "telemetry", "tracing", "metrics", "logs")
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/open-telemetry/opentelemetry-cpp"
-    generators = "cmake", "cmake_find_package_multi"
+    topics = ("opentelemetry", "telemetry", "tracing", "metrics", "logs")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -25,6 +24,7 @@ class OpenTelemetryCppConan(ConanFile):
         "fPIC": True,
         "shared": False,
     }
+    generators = "cmake", "cmake_find_package_multi"
     short_paths = True
 
     def export_sources(self):
@@ -43,11 +43,11 @@ class OpenTelemetryCppConan(ConanFile):
     def requirements(self):
         self.requires("abseil/20211102.0")
         self.requires("grpc/1.45.2")
-        self.requires("libcurl/7.83.0")
+        self.requires("libcurl/7.83.1")
         self.requires("nlohmann_json/3.10.5")
         self.requires("openssl/1.1.1o")
-        self.requires("opentelemetry-proto/0.17.0")
-        self.requires("protobuf/3.20.0")
+        self.requires("opentelemetry-proto/0.18.0")
+        self.requires("protobuf/3.21.1")
         self.requires("thrift/0.15.0")
         if tools.Version(self.version) >= "1.3.0":
             self.requires("boost/1.79.0")
@@ -105,7 +105,7 @@ class OpenTelemetryCppConan(ConanFile):
         return cmake
 
     def _patch_sources(self):
-        protos_path = self.deps_cpp_info["opentelemetry-proto"].res_paths[0].replace("\\", "/")
+        protos_path = self.deps_user_info["opentelemetry-proto"].proto_root.replace("\\", "/")
         protos_cmake_path = os.path.join(
             self._source_subfolder,
             "cmake",

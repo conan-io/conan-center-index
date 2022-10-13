@@ -1,0 +1,4 @@
+sources:
+  "cci.20220630":
+    url: "https://github.com/microsoft/Detours/archive/a1dd93fddfbba5ad07992edbaf4a296dcfca8d6f.tar.gz"
+    sha256: "6e1c9c8f7264749e58931660721b3aaa520ce1b489559bc9ad7003eb705427df"

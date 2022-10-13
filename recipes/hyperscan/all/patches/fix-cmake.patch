@@ -220,6 +220,73 @@ index 8bc6077..579a7b4 100644
                  )
          endif (BUILD_AVX512VBMI)
          add_library(hs_exec_common_shared OBJECT
+diff --git chimera/CMakeLists.txt chimera/CMakeLists.txt
+index 1cd66a3..ebb3b49 100644
+--- chimera/CMakeLists.txt
++++ chimera/CMakeLists.txt
+@@ -44,6 +44,6 @@ if (NOT WIN32)
+     set(PRIVATE_LIBS "${PRIVATE_LIBS} -L${LIBDIR} -lpcre")
+ 
+     configure_file(libch.pc.in libch.pc @ONLY) # only replace @ quoted vars
+-    install(FILES ${CMAKE_BINARY_DIR}/chimera/libch.pc
++    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libch.pc
+         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+ endif()
+diff --git chimera/ch_database.h chimera/ch_database.h
+index 28bde86..d757c82 100644
+--- chimera/ch_database.h
++++ chimera/ch_database.h
+@@ -38,7 +38,7 @@ extern "C"
+ {
+ #endif
+ 
+-#define PCRE_STATIC
++/* #define PCRE_STATIC */
+ #include <pcre.h>
+ 
+ #include "ch_compile.h" // for CH_MODE_ flags
+diff --git cmake/pcre.cmake cmake/pcre.cmake
+index e0acda5..c68601f 100644
+--- cmake/pcre.cmake
++++ cmake/pcre.cmake
+@@ -1,4 +1,5 @@
+ # first look in pcre-$version or pcre subdirs
++
+ if (PCRE_SOURCE)
+     # either provided on cmdline or we've seen it already
+     set (PCRE_BUILD_SOURCE TRUE)
+@@ -50,14 +51,10 @@ if (PCRE_BUILD_SOURCE)
+     set(PCRE_INCLUDE_DIRS ${PCRE_SOURCE} ${PROJECT_BINARY_DIR}/pcre)
+     set(PCRE_LDFLAGS -L"${LIBDIR}" -lpcre)
+ else ()
+-    # pkgconf should save us
+-    find_package(PkgConfig)
+-    pkg_check_modules(PCRE libpcre>=${PCRE_REQUIRED_VERSION})
+-    if (PCRE_FOUND)
++    # conan should save us
++    find_package(PCRE)
++    if(PCRE_FOUND AND (PCRE_VERSION VERSION_GREATER_EQUAL PCRE_REQUIRED_VERSION))
+         set(CORRECT_PCRE_VERSION TRUE)
+-        message(STATUS "PCRE version ${PCRE_REQUIRED_VERSION} or above")
+-    else ()
+-        message(STATUS "PCRE version ${PCRE_REQUIRED_VERSION} or above not found")
+-        return ()
+-    endif ()
++        set(PCRE_LDFLAGS "PCRE::libpcre")
++    endif()
+ endif (PCRE_BUILD_SOURCE)
+diff --git tools/CMakeLists.txt tools/CMakeLists.txt
+index 6ca3fd8..378afd0 100644
+--- tools/CMakeLists.txt
++++ tools/CMakeLists.txt
+@@ -1,3 +1,7 @@
++
++# Tools are not installed
++return ()
++
+ find_package(Threads)
+ 
+ # remove some warnings
 diff --git tools/hsbench/CMakeLists.txt tools/hsbench/CMakeLists.txt
 index bbceda4..18545d0 100644
 --- tools/hsbench/CMakeLists.txt

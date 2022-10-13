@@ -3,15 +3,15 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import functools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 class RoaringConan(ConanFile):
     name = "roaring"
     description = "Portable Roaring bitmaps in C and C++"
-    topics = ("bitset", "compression", "index", "format")
-    homepage = "https://github.com/RoaringBitmap/CRoaring"
+    license = ("Apache-2.0", "MIT")
     url = "https://github.com/conan-io/conan-center-index"
-    license = "Apache-2.0"
+    homepage = "https://github.com/RoaringBitmap/CRoaring"
+    topics = ("bitset", "compression", "index", "format")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -27,7 +27,6 @@ class RoaringConan(ConanFile):
         "with_neon": True,
         "native_optimization": False,
     }
-    exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
 
     @property
@@ -37,6 +36,9 @@ class RoaringConan(ConanFile):
     @property
     def _build_subfolder(self):
           return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -87,7 +89,11 @@ class RoaringConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
+        self.cpp_info.libs = ["roaring"]
+
+        self.cpp_info.set_property("cmake_target_name", "roaring::roaring")
+        self.cpp_info.set_property("pkg_config_name", "roaring")
+
         self.cpp_info.names["cmake_find_package"] = "roaring"
         self.cpp_info.names["cmake_find_package_multi"] = "roaring"
         self.cpp_info.names["pkg_config"] = "roaring"
-        self.cpp_info.libs = ["roaring"]

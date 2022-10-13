@@ -1,0 +1,25 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 33b3ced..93f49b1 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -207,9 +207,7 @@ if(WITH_ZLIB)
+ endif()
+ 
+ if(WITH_ZSTD)
+-  target_link_libraries(rdkafka PRIVATE ${ZSTD_LIBRARY})
+-  target_include_directories(rdkafka PRIVATE ${ZSTD_INCLUDE_DIR})
+-  message(STATUS "Found ZSTD: ${ZSTD_LIBRARY}")
++  target_link_libraries(rdkafka PRIVATE $<IF:$<TARGET_EXISTS:zstd::libzstd_shared>,zstd::libzstd_shared,zstd::libzstd_static>)
+ endif()
+ 
+ if(WITH_SSL)
+@@ -248,8 +246,7 @@ if(WITH_LIBDL)
+ endif()
+ 
+ if(WITH_LZ4_EXT)
+-  target_include_directories(rdkafka PRIVATE ${LZ4_INCLUDE_DIRS})
+-  target_link_libraries(rdkafka PUBLIC LZ4::LZ4)
++  target_link_libraries(rdkafka PUBLIC lz4::lz4)
+ endif()
+ 
+ if(WIN32)

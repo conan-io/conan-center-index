@@ -47,7 +47,7 @@ class FpgenConan(ConanFile):
         )
 
     def validate(self):
-        if self.settings.compiler == "clang" and "clang" not in self.version:
+        if self.settings.compiler == "clang" and "clang" not in str(self.version):
             raise ConanInvalidConfiguration(
                 f"Use '{self.version}-clang' for Clang support."
             )

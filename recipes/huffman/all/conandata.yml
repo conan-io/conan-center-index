@@ -1,4 +1,15 @@
 sources:
+  "1.2.7":
+    # Don't use tar.gz because test data files in tar.gz has invalid paths on Windows.
+    url: "https://github.com/drichardson/huffman/archive/refs/tags/v1.2.7.zip"
+    sha256: "0d382f271daf47623676307710cb05d246839247370989b8ffa6fee82bea375a"
   "1.2.2":
     url: "https://github.com/drichardson/huffman/archive/refs/tags/v1.2.2.zip"
     sha256: "7968728c4a0e2705575e9f03e0252cb5195919756d3a64343255f518548cb533"
+patches:
+  "1.2.7":
+    - patch_file: "patches/1.2.7-0001-use-_WIN32.patch"
+      base_path: "source_subfolder"
+  "1.2.2":
+    - patch_file: "patches/1.2.2-0001-use-_WIN32.patch"
+      base_path: "source_subfolder"

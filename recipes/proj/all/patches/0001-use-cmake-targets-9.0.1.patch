@@ -1,0 +1,31 @@
+--- a/src/lib_proj.cmake
++++ b/src/lib_proj.cmake
+@@ -444,8 +444,7 @@ if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+   target_link_libraries(proj PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+ endif()
+ 
+-target_include_directories(proj PRIVATE ${SQLITE3_INCLUDE_DIR})
+-target_link_libraries(proj PRIVATE ${SQLITE3_LIBRARY})
++target_link_libraries(proj PRIVATE CONAN_PKG::sqlite3)
+ 
+ if(NLOHMANN_JSON STREQUAL "external")
+   target_compile_definitions(proj PRIVATE EXTERNAL_NLOHMANN_JSON)
+@@ -455,16 +454,14 @@ endif()
+ 
+ if(TIFF_ENABLED)
+   target_compile_definitions(proj PRIVATE -DTIFF_ENABLED)
+-  target_include_directories(proj PRIVATE ${TIFF_INCLUDE_DIR})
+-  target_link_libraries(proj PRIVATE ${TIFF_LIBRARY})
++  target_link_libraries(proj PRIVATE TIFF::TIFF)
+ endif()
+ 
+ if(CURL_ENABLED)
+   target_compile_definitions(proj PRIVATE -DCURL_ENABLED)
+-  target_include_directories(proj PRIVATE ${CURL_INCLUDE_DIRS})
+   target_link_libraries(proj
+     PRIVATE
+-      ${CURL_LIBRARIES}
++      CURL::libcurl
+       $<$<CXX_COMPILER_ID:MSVC>:ws2_32>
+       $<$<CXX_COMPILER_ID:MSVC>:wldap32>
+       $<$<CXX_COMPILER_ID:MSVC>:advapi32>
