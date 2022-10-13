@@ -1,10 +1,16 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, copy, chdir, get
-from conans import tools
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, replace_in_file, chdir
+from conan.tools.layout import basic_layout
+from conan.tools.gnu import AutotoolsToolchain, Autotools
+from conan.tools.build import cross_building
+from conan.tools.apple import is_apple_os, to_apple_arch
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 import os
 
-required_conan_version = ">=1.47.0"
+
+required_conan_version = ">=1.52.0"
+
 
 class PSevenZipConan(ConanFile):
     name = "p7zip"
@@ -15,61 +21,47 @@ class PSevenZipConan(ConanFile):
     topics = ("7zip", "zip", "compression", "decompression")
     settings = "os", "arch", "compiler", "build_type"
 
-    @property
-    def _make_tool(self):
-        return "make" if self.settings.os != "FreeBSD" else "gmake"
+    def export_sources(self):
+        export_conandata_patches(self)
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        del self.info.settings.compiler
 
     def validate(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows unsupported - use `7zip` instead")
-        if self.settings.arch not in ("armv8", "x86_64"):
-            raise ConanInvalidConfiguration("Unsupported architecture")
-
-    def build_requirements(self):
-        self.build_requires("make/4.3")
+        if self.info.settings.os == "Windows":
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on Windows - use `7zip` instead")
+        if self.info.settings.arch not in ("armv8", "x86_64"):
+            raise ConanInvalidConfiguration(f"{self.ref} is only supported by x86_64 and armv8")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    def _build_make(self):
-        with chdir(self, os.path.join(self._source_subfolder)):
-            command = f"{self._make_tool} -j {tools.cpu_count()}"
-            self.run(command)
-
-    def export_sources(self):
-        for p in self.conan_data.get("patches").get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.generate()
 
     def _patch_compiler(self):
-        cc = tools.get_env("CC")
-        cxx = tools.get_env("CXX")
         optflags = ''
-        if tools.is_apple_os(self.settings.os):
-            optflags = '-arch ' + tools.to_apple_arch(self.settings.arch)
-            if not cc:
-                cc = "clang"
-            if not cxx:
-                cxx = "clang++"
-        else:
-            if not cc:
-                cc = "clang" if self.settings.compiler == "clang" else "gcc"
-            if not cxx:
-                cxx = "clang++" if self.settings.compiler == "clang" else "g++"
+        if is_apple_os(self):
+            optflags = '-arch ' + to_apple_arch(self)
+        cc = "clang" if "clang" in str(self.settings.compiler) else str(self.settings.compiler)
+        cxx = "clang++" if "clang" in str(self.settings.compiler) else str(self.settings.compiler)
+        if self.settings.compiler == "gcc":
+            cxx = "g++"
         # Replace the hard-coded compilers instead of using the 40 different Makefile permutations
-        tools.replace_in_file(os.path.join(self._source_subfolder, "makefile.machine"),
+        replace_in_file(self, os.path.join(self.source_folder, "makefile.machine"),
                               "CC=gcc", f"CC={cc}")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "makefile.machine"),
+        replace_in_file(self, os.path.join(self.source_folder, "makefile.machine"),
                               "CXX=g++", f"CXX={cxx}")
         # Manually modify the -O flag here based on the build type
         optflags += " -O2" if self.settings.build_type == "Release" else " -O0"
         # Silence the warning about `-s` not being valid on clang
         if cc != "clang":
             optflags += ' -s'
-        tools.replace_in_file(os.path.join(self._source_subfolder, "makefile.machine"),
+        replace_in_file(self, os.path.join(self.source_folder, "makefile.machine"),
                             "OPTFLAGS=-O -s", "OPTFLAGS=" + optflags)
 
     def _patch_sources(self):
@@ -78,16 +70,19 @@ class PSevenZipConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        self._build_make()
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            autotools.make()
 
     def package(self):
-        self.copy("DOC/License.txt", src=self._source_subfolder, dst="licenses", keep_path=False)
-        self.copy("DOC/unRarLicense.txt", src=self._source_subfolder, dst="licenses", keep_path=False)
-        self.copy("7za", src=os.path.join(self._source_subfolder, "bin"), dst="bin", keep_path=False)
+        copy(self, "License.txt", src=os.path.join(self.source_folder, "DOC"), dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "unRarLicense.txt", src=os.path.join(self.source_folder, "DOC"), dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "7za", src=os.path.join(self.source_folder, "bin"), dst=os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH environment variable: {bin_path}")
-        self.env_info.path.append(bin_path)
+        self.env_info.PATH.append(bin_path)
+
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
