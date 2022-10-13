@@ -45,13 +45,14 @@ class StrawberryPerlConan(ConanFile):
         self.cpp_info.includedirs = []
 
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
+        # # self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.buildenv_info.append_path("PATH", bin_path)
-        self.runenv_info.append_path("PATH", bin_path)
-        if Version(conan_version) < "2.0.0-beta":
-            self.env_info.PATH.append(bin_path)
+        self.buildenv_info.append_path("PATH_WROGNF", bin_path)
+        # # self.runenv_info.append_path("PATH", bin_path)
+        # if Version(conan_version) < "2.0.0-beta":
+        #     self.env_info.PATH.append(bin_path)
 
-        perl_path = os.path.join(self.package_folder, "bin", "perl.exe").replace("\\", "/")
-        self.conf_info.define("user.cci:perl", perl_path)
-        if Version(conan_version) < "2.0.0-beta":
-            self.user_info.perl = perl_path
+        # perl_path = os.path.join(self.package_folder, "bin", "perl.exe").replace("\\", "/")
+        # self.conf_info.define("user.cci:perl", perl_path)
+        # if Version(conan_version) < "2.0.0-beta":
+        #     self.user_info.perl = perl_path
