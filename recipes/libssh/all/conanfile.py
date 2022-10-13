@@ -52,7 +52,11 @@ class LibSSHRecipe(ConanFile):
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["CLIENT_TESTING"] = False
         tc.variables["SERVER_TESTING"] = False
+        tc.variables["WITH_GSSAPI"] = False
         tc.variables["WITH_ZLIB"] = self.options.with_zlib
+        tc.variables["WITH_GCRYPT"] = self.options.crypto_backend == "gcrypt"
+        tc.variables["WITH_MBEDTLS"] = False
+        tc.variables["WITH_EXAMPLES"] = False
         tc.generate()
 
     def build(self):
