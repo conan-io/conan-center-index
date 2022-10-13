@@ -311,16 +311,22 @@ class ImageMagicConan(ConanFile):
         pd = PkgConfigDeps(self)
         pd.generate()
 
-        # FIXME workaround bug with pkgconfig files and apple frameworks
-        # see https://github.com/conan-io/conan/pull/12307
-        for pc in glob.glob(os.path.join(self.generators_folder, "*.pc")):
-            files.replace_in_file(self, pc, "-F ", "-F", strict=False)
-
         env = VirtualBuildEnv(self)
         env.generate()
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
+
+        if self.settings.os == "Macos":
+            # FIXME workaround bug with pkgconfig files and apple frameworks
+            # see https://github.com/conan-io/conan/pull/12307
+            for pc in glob.glob(os.path.join(self.generators_folder, "*.pc")):
+                files.replace_in_file(self, pc, "-F ", "-F", strict=False)
+            files.replace_in_file(self,
+                                  os.path.join(self.generators_folder,
+                                               "conanautotoolsdeps.sh"),
+                                  "-F ", "-F", strict=False)
+
 
     def build(self):
         files.apply_conandata_patches(self)
