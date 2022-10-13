@@ -1,0 +1,4 @@
+sources:
+  "0.10.4":
+    url: "https://www.libssh.org/files/0.10/libssh-0.10.4.tar.xz"
+    sha256: "07392c54ab61476288d1c1f0a7c557b50211797ad00c34c3af2bbc4dbc4bd97d"
