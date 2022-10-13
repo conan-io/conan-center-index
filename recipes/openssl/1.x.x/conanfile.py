@@ -227,6 +227,9 @@ class OpenSSLConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def layout(self):
+        pass
+
     def requirements(self):
         if self._full_version < "1.1.0" and self.options.get_safe("no_zlib") == False:
             self.requires("zlib/1.2.12")
