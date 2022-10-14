@@ -1,5 +1,7 @@
 from conan import ConanFile
-from conan import tools
+from conan.tools.microsoft import visual
+from conan.tools.build import cross_building
+from conan.tools.files import get, rmdir, rename
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conans import CMake, tools as tools_legacy
@@ -104,7 +106,7 @@ class grpcConan(ConanFile):
             if self.settings.compiler == "Visual Studio":
                 vs_ide_version = self.settings.compiler.version
             else:
-                vs_ide_version = tools.microsoft.visual.msvc_version_to_vs_ide_version(self.settings.compiler.version)
+                vs_ide_version = visual.msvc_version_to_vs_ide_version(self.settings.compiler.version)
             if Version(vs_ide_version) < "14":
                 raise ConanInvalidConfiguration("gRPC can only be built with Visual Studio 2015 or higher.")
 
@@ -128,11 +130,11 @@ class grpcConan(ConanFile):
         if hasattr(self, "settings_build"):
             self.build_requires('protobuf/3.21.4')
             # when cross compiling we need pre compiled grpc plugins for protoc
-            if tools.build.cross_building(self):
+            if cross_building(self):
                 self.build_requires('grpc/{}'.format(self.version))
 
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
@@ -175,7 +177,7 @@ class grpcConan(ConanFile):
         if not tools_legacy.valid_min_cppstd(self, self._cxxstd_required):
             self._cmake.definitions["CMAKE_CXX_STANDARD"] = self._cxxstd_required
 
-        if tools.build.cross_building(self):
+        if cross_building(self):
             # otherwise find_package() can't find config files since
             # conan doesn't populate CMAKE_FIND_ROOT_PATH
             self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_PACKAGE"] = "BOTH"
@@ -221,8 +223,8 @@ class grpcConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         # Create one custom module file per executable in order to emulate
         # CMake executables imported targets of grpc
@@ -273,7 +275,7 @@ class grpcConan(ConanFile):
         # Rename it
         dst_file = os.path.join(self.package_folder, self._module_path,
                                 "{}.cmake".format(executable))
-        tools.files.rename(self, os.path.join(self.package_folder, self._module_path, self._grpc_plugin_template),
+        rename(self, os.path.join(self.package_folder, self._module_path, self._grpc_plugin_template),
                      dst_file)
 
         # Replace placeholders
