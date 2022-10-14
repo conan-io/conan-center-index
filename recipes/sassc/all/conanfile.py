@@ -28,6 +28,10 @@ class SasscConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def package_id(self):
+        del self.info.settings.compiler
+        del self.info.settings.build_type
+
     def validate(self):
         if not is_msvc(self) and self.info.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration("sassc supports only Linux, FreeBSD, Macos and Windows Visual Studio at this time, contributions are welcomed")
@@ -44,7 +48,7 @@ class SasscConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
-        replace_in_file(self, 
+        replace_in_file(self,
             os.path.join(self.build_folder, self._source_subfolder, "win", "sassc.vcxproj"),
             "$(LIBSASS_DIR)\\win\\libsass.targets",
             os.path.join(self.build_folder, "conanbuildinfo.props"))
@@ -85,8 +89,15 @@ class SasscConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
-        self.cpp_info.includedirs = []
+        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH env var with : {bin_path}")
-        self.env_info.PATH.append(bin_path)
+        self.cpp_info.resdirs = []
+        self.cpp_info.includedirs = []
+
+        bin_folder = os.path.join(self.package_folder, "bin")
+        # In case need to find packaged tools when building a package
+        self.buildenv_info.append("PATH", bin_folder)
+        # In case need to find packaged tools at runtime
+        self.runenv_info.append("PATH", bin_folder)
+        # TODO: Legacy, to be removed on Conan 2.0
+        self.env_info.PATH.append(bin_folder)
