@@ -10,42 +10,39 @@ set (HEADERS
   "include/theora/theoraenc.h"
 )
 
+set(LIBTHEORA_COMMON
+   "lib/apiwrapper.c"
+   "lib/bitpack.c"   # was not in enc in SConstruct
+   "lib/dequant.c"
+   "lib/fragment.c"
+   "lib/idct.c"
+   "lib/info.c"   # was not in enc in SConstruct
+   "lib/internal.c"
+   "lib/state.c"
+   "lib/quant.c"
+   )
+
 set(LIBTHEORA_ENC
-	"lib/analyze.c"
-	"lib/apiwrapper.c"
-	"lib/encapiwrapper.c"
-	"lib/encfrag.c"
-	"lib/encinfo.c"
-	"lib/encode.c"
-	"lib/enquant.c"
-	"lib/fdct.c"
-	"lib/fragment.c"
-	"lib/huffenc.c"
-	"lib/idct.c"
-	"lib/internal.c"
-	"lib/mathops.c"
-	"lib/mcenc.c"
-	"lib/quant.c"
-	"lib/rate.c"
-	"lib/state.c"
-	"lib/tokenize.c"
+   "lib/analyze.c"
+   "lib/encapiwrapper.c"
+   "lib/encfrag.c"
+   "lib/encinfo.c"
+   "lib/encode.c"
+   "lib/enquant.c"
+   "lib/fdct.c"
+   "lib/huffenc.c"
+   "lib/mathops.c"
+   "lib/mcenc.c"
+   "lib/rate.c"
+   "lib/tokenize.c"
    )
 
 
 set(LIBTHEORA_DEC
-   "lib/apiwrapper.c"
-	"lib/bitpack.c"
    "lib/decapiwrapper.c"
    "lib/decinfo.c"
    "lib/decode.c"
-   "lib/dequant.c"
-   "lib/fragment.c"
    "lib/huffdec.c"
-   "lib/idct.c"
-   "lib/info.c"
-   "lib/internal.c"
-   "lib/quant.c"
-   "lib/state.c"
    )
 
 
@@ -55,7 +52,7 @@ if (USE_X86_32)
    message("Enabling x86-32 assembly optimizations")
    add_definitions(-DOC_X86_ASM)
 
-   list (APPEND LIBTHEORA_DEC
+   list (APPEND LIBTHEORA_COMMON
       "lib/x86/mmxidct.c"
       "lib/x86/mmxfrag.c"
       "lib/x86/mmxstate.c"
@@ -63,20 +60,20 @@ if (USE_X86_32)
       )
 
    list (APPEND LIBTHEORA_ENC
-	   "lib/x86/mmxencfrag.c"
-	   "lib/x86/mmxfdct.c"
-	   "lib/x86/x86enc.c"
-	   "lib/x86/mmxfrag.c"
-	   "lib/x86/mmxidct.c"
-	   "lib/x86/mmxstate.c"
-	   "lib/x86/x86state.c"
+      "lib/x86/mmxencfrag.c"
+      "lib/x86/mmxfdct.c"
+      "lib/x86/x86enc.c"
+      "lib/x86/mmxfrag.c"
+      "lib/x86/mmxidct.c"
+      "lib/x86/mmxstate.c"
+      "lib/x86/x86state.c"
       )
 elseif (USE_X86_64)
    message("Enabling x86-64 assembly optimizations")
    add_definitions(-DOC_X86_ASM)
    add_definitions(-DOC_X86_64_ASM)
 
-   list (APPEND LIBTHEORA_DEC
+   list (APPEND LIBTHEORA_COMMON
       "lib/x86/mmxidct.c"
       "lib/x86/mmxfrag.c"
       "lib/x86/mmxstate.c"
@@ -84,14 +81,10 @@ elseif (USE_X86_64)
       )
 
    list (APPEND LIBTHEORA_ENC
-	   "lib/x86/mmxencfrag.c"
-	   "lib/x86/mmxfdct.c"
-	   "lib/x86/x86enc.c"
-	   "lib/x86/sse2fdct.c"
-	   "lib/x86/mmxfrag.c"
-	   "lib/x86/mmxidct.c"
-	   "lib/x86/mmxstate.c"
-	   "lib/x86/x86state.c"
+      "lib/x86/mmxencfrag.c"
+      "lib/x86/mmxfdct.c"
+      "lib/x86/x86enc.c"
+      "lib/x86/sse2fdct.c"
       )
 else()
    message("Not enabling any assembly optimizations (x86 and x86_64 asm optimizations are available)")
@@ -106,15 +99,15 @@ if (BUILD_SHARED_LIBS)
 endif()
 
 
-add_library(theora ${LIBTHEORA_ENC} ${LIBTHEORA_DEC} "lib/theora.def")
+add_library(theora ${LIBTHEORA_COMMON} ${LIBTHEORA_ENC} ${LIBTHEORA_DEC} "lib/theora.def")
 target_link_libraries(theora PUBLIC Ogg::ogg)
 target_include_directories(theora PUBLIC include)
 
-add_library(theoraenc ${LIBTHEORA_ENC} "win32/xmingw32/libtheoraenc-all.def")
+add_library(theoraenc ${LIBTHEORA_COMMON} ${LIBTHEORA_ENC} "win32/xmingw32/libtheoraenc-all.def")
 target_link_libraries(theoraenc PUBLIC Ogg::ogg)
 target_include_directories(theoraenc PUBLIC include)
 
-add_library(theoradec ${LIBTHEORA_DEC} "win32/xmingw32/libtheoradec-all.def")
+add_library(theoradec ${LIBTHEORA_COMMON} ${LIBTHEORA_DEC} "win32/xmingw32/libtheoradec-all.def")
 target_link_libraries(theoradec PUBLIC Ogg::ogg)
 target_include_directories(theoradec PUBLIC include)
 
