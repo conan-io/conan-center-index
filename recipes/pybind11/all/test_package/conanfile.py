@@ -6,6 +6,7 @@ from conan.tools.layout import cmake_layout
 from conans.tools import environment_append
 
 import os
+from pathlib import PurePath
 import sys
 
 
@@ -21,7 +22,7 @@ class TestPackageConan(ConanFile):
         deps.generate()
 
         toolchain = CMakeToolchain(self)
-        toolchain.variables["PYTHON_EXECUTABLE"] = self._python_interpreter
+        toolchain.variables["PYTHON_EXECUTABLE"] = PurePath(self._python_interpreter).as_posix()
         toolchain.generate()
 
         run = VirtualRunEnv(self)
