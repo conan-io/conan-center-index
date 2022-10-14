@@ -4,8 +4,6 @@ project(quickjs C)
 option(USE_BIGNUM "Use bignum" ON)
 option(DUMP_LEAKS "dump leaks" OFF)
 
-include_directories(${QUICKJS_SRC_DIR})
-
 file(STRINGS ${QUICKJS_SRC_DIR}/VERSION version)
 set(cdef CONFIG_VERSION="${version}" _GNU_SOURCE)
 
@@ -37,8 +35,8 @@ if(USE_BIGNUM)
     list(APPEND QUICKJS_INC ${QUICKJS_SRC_DIR}/libbf.h)
 endif()
 
-
 add_library(quickjs ${QUICKJS_SRC})
+target_include_directories(quickjs PRIVATE ${QUICKJS_SRC_DIR})
 set_target_properties(quickjs PROPERTIES
     PUBLIC_HEADER "${QUICKJS_INC}"
     WINDOWS_EXPORT_ALL_SYMBOLS ON
