@@ -5,7 +5,7 @@ from conan.tools.microsoft import is_msvc
 from conans import AutoToolsBuildEnvironment, tools, MSBuild
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.47.0"
 
 
 class SasscConan(ConanFile):
@@ -30,7 +30,6 @@ class SasscConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.compiler
-        del self.info.settings.build_type
 
     def validate(self):
         if not is_msvc(self) and self.info.settings.os not in ["Linux", "FreeBSD", "Macos"]:
