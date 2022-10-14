@@ -191,9 +191,11 @@ class FreetypeConan(ConanFile):
         save(self, self._libtool_version_txt, libtool_version)
         self._make_freetype_config(libtool_version)
 
-        copy(self, "FTL.TXT", src=os.path.join(self.source_folder, "docs"), dst="licenses")
-        copy(self, "GPLv2.TXT", src=os.path.join(self.source_folder, "docs"), dst="licenses")
-        copy(self, "LICENSE.TXT", src=os.path.join(self.source_folder, "docs"), dst="licenses")
+        doc_folder = os.path.join(self.source_folder, "docs")
+        license_folder = os.path.join(self.package_folder, "licenses")
+        copy(self, "FTL.TXT", doc_folder, license_folder)
+        copy(self, "GPLv2.TXT", doc_folder, license_folder)
+        copy(self, "LICENSE.TXT", doc_folder, license_folder)
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
