@@ -98,6 +98,6 @@ node_labels:
   Linux:
     x86_64:
       "gcc":
-        default: "linux_gcc_${compiler.version}_ubuntu16.04"
+        default: "linux_gcc_${compiler.version}_ubuntu18.04"
       "clang":
-        default: "linux_clang_${compiler.version}_ubuntu16.04"
+        default: "linux_clang_${compiler.version}_ubuntu18.04"

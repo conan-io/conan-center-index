@@ -171,9 +171,9 @@ node_labels:
     x86_64:
       "gcc":
         default: "linux_gcc_${compiler.version}"
-        "11": "linux_gcc_${compiler.version}_ubuntu16.04"
+        "11": "linux_gcc_${compiler.version}_ubuntu18.04"
       "clang":
-        default: "linux_clang_${compiler.version}_ubuntu16.04"
+        default: "linux_clang_${compiler.version}_ubuntu18.04"
         "11": "linux_clang_${compiler.version}"
 
 pod_size:
