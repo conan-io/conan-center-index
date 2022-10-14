@@ -26,7 +26,8 @@ class DiligentToolsConan(ConanFile):
                        "jpeg": "libjpeg",
                        "with_render_state_packager": False
                       }
-    generators = "cmake_find_package", "cmake"
+
+    generators = "cmake_find_package", "cmake_find_package_multi", "cmake"
     _cmake = None
     short_paths = True
 
