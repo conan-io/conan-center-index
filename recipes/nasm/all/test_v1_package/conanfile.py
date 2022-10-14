@@ -11,8 +11,8 @@ class TestPackageConan(ConanFile):
             asm_file = os.path.join(self.source_folder, "hello_linux.asm")
             out_file = os.path.join(self.build_folder, "hello_linux.o")
             bin_file = os.path.join(self.build_folder, "hello_linux")
-            self.run("nasm -felf64 {} -o {}".format(asm_file, out_file), run_environment=True)
+            self.run("nasm -felf64 {asm_file} -o {out_file}", run_environment=True)
             if self.settings.os == "Linux" and self.settings.arch == "x86_64":
                 ld = tools.get_env("LD", "ld")
-                self.run("{} hello_linux.o -o {}".format(ld, bin_file), run_environment=True)
+                self.run(f"{ld} hello_linux.o -o {bin_file}", run_environment=True)
                 self.run(bin_file)
