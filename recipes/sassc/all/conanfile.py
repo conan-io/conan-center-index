@@ -29,7 +29,7 @@ class SasscConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if not is_msvc(self) and self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
+        if not is_msvc(self) and self.info.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration("sassc supports only Linux, FreeBSD, Macos and Windows Visual Studio at this time, contributions are welcomed")
 
     def requirements(self):
@@ -85,6 +85,8 @@ class SasscConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH env var with : {bin_path}")
         self.env_info.PATH.append(bin_path)
