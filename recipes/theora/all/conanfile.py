@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
-from conan.tools.files import chdir, copy, download, get, rename, replace_in_file, rm, rmdir
+from conan.tools.files import copy, download, get
 from conan.tools.microsoft import is_msvc
 import os
 
@@ -80,6 +80,6 @@ class TheoraConan(ConanFile):
         self.cpp_info.components["theoraenc"].libs = ["theoraenc"]
         self.cpp_info.components["theoradec"].libs = ["theoradec"]
 
-        self.cpp_info.components["theora"].requires = ["Ogg::ogg"]
-        self.cpp_info.components["theoraenc"].requires = ["Ogg::ogg"]
-        self.cpp_info.components["theoradec"].requires = ["Ogg::ogg"]
+        self.cpp_info.components["theora"].requires = ["ogg::ogg"]
+        self.cpp_info.components["theoraenc"].requires = ["ogg::ogg"]
+        self.cpp_info.components["theoradec"].requires = ["ogg::ogg"]
