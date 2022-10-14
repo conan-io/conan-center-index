@@ -7,7 +7,7 @@ required_conan_version = ">=1.45.0"
 
 class EdynConan(ConanFile):
     name = "edyn"
-    version = "1.1.0"
+    version = "1.0.0"
     description = "Edyn is a real-time physics engine organized as an ECS"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
