@@ -66,9 +66,9 @@ class NASMConan(ConanFile):
             VCVars(self).generate()
             tc.configure_args.append("-nologo")
         if self.settings.arch == "x86":
-            tc.configure_args.append("-m32")
+            tc.extra_cflags.append("-m32")
         elif self.settings.arch == "x86_64":
-            tc.configure_args.append("-m64")
+            tc.extra_cflags.append("-m64")
         tc.generate()
 
         # required as we have some tool_requires
