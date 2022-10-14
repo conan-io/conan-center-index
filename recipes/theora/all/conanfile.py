@@ -80,6 +80,6 @@ class TheoraConan(ConanFile):
         self.cpp_info.components["theoraenc"].libs = ["theoraenc"]
         self.cpp_info.components["theoradec"].libs = ["theoradec"]
 
-        self.cpp_info.components["theora"].requires = ["ogg::ogg"]
-        self.cpp_info.components["theoraenc"].requires = ["ogg::ogg"]
-        self.cpp_info.components["theoradec"].requires = ["ogg::ogg"]
+        self.cpp_info.components["theora"].requires = ["Ogg::ogg"]
+        self.cpp_info.components["theoraenc"].requires = ["Ogg::ogg"]
+        self.cpp_info.components["theoradec"].requires = ["Ogg::ogg"]

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(theora C)
 
-find_package(ogg REQUIRED)
+find_package(Ogg REQUIRED)
 
 set (HEADERS
   "include/theora/codec.h"
