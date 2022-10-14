@@ -123,12 +123,24 @@ class PackageConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        # we generally expect to have one crypto in-place, but need to patch the found mechanics
+        # since we avoid currently the correct pkg_config
+        replace_in_file(self, os.path.join(self.source_folder, "libqpdf", "CMakeLists.txt"),
+                "set(FOUND_CRYPTO OFF)", "set(FOUND_CRYPTO ON)")
         if self.options.with_ssl == "openssl":
+            replace_in_file(self, os.path.join(self.source_folder, "libqpdf", "CMakeLists.txt"),
+                "set(USE_CRYPTO_OPENSSL OFF)", "set(USE_CRYPTO_OPENSSL ON)")
             replace_in_file(self, os.path.join(self.source_folder, "libqpdf", "CMakeLists.txt"),
                 "find_package(ZLIB REQUIRED)",
                 "find_package(ZLIB REQUIRED)\nfind_package(OpenSSL REQUIRED)\n")
             replace_in_file(self, os.path.join(self.source_folder, "libqpdf", "CMakeLists.txt"),
                 "PUBLIC JPEG::JPEG ZLIB::ZLIB", "PUBLIC JPEG::JPEG ZLIB::ZLIB OpenSSL::SSL")
+        if self.options.with_ssl == "gnutls":
+            replace_in_file(self, os.path.join(self.source_folder, "libqpdf", "CMakeLists.txt"),
+                "set(USE_CRYPTO_GNUTLS OFF)", "set(USE_CRYPTO_GNUTLS ON)")
+        if self.options.with_ssl == "internal":
+            replace_in_file(self, os.path.join(self.source_folder, "libqpdf", "CMakeLists.txt"),
+                "set(USE_CRYPTO_NATIVE OFF)", "set(USE_CRYPTO_NATIVE ON)")
 
     def build(self):
         self._patch_sources()
