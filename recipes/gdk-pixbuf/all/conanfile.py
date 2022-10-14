@@ -36,6 +36,7 @@ class GdkPixbufConan(ConanFile):
         "with_libjpeg": "libjpeg",
         "with_introspection": False,
     }
+    short_paths = True
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -116,12 +117,7 @@ class GdkPixbufConan(ConanFile):
         venv.generate()
 
     def requirements(self):
-        if not microsoft.is_msvc(self):
-            self.requires("glib/2.74.0")
-        else:
-            # Workaround due to https://github.com/conan-io/conan-center-index/issues/12342
-            # Test again when the glib recipe is updated to the new meson toolchain
-            self.requires("glib/2.73.0")
+        self.requires("glib/2.74.0")
         if self.options.with_libpng:
             self.requires("libpng/1.6.38")
         if self.options.with_libtiff:
