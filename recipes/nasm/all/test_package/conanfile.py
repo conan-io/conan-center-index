@@ -20,6 +20,7 @@ class TestPackageConan(ConanFile):
             bin_file = os.path.join(self.build_folder, "hello_linux")
             self.run(f"nasm -felf64 {asm_file} -o {out_file}", env="conanrun")
             if self.settings.os == "Linux" and self.settings.arch == "x86_64":
-                ld = tools.get_env("LD", "ld")
+                # TODO was tools.get_env, what should it be?
+                ld = os.getenv("LD", "ld")
                 self.run(f"{ld} hello_linux.o -o {bin_file}", env="conanrun")
                 self.run(bin_file)
