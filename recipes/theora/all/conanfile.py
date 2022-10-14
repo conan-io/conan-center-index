@@ -28,8 +28,14 @@ class TheoraConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
     def layout(self):
         cmake_layout(self)
