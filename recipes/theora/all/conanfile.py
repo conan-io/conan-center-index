@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
 from conan.tools.files import chdir, copy, download, get, rename, replace_in_file, rm, rmdir
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.52.0"
@@ -46,6 +47,9 @@ class TheoraConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["USE_X86_32"] = (self.settings.arch == "x86")
+        # note: MSVC does not support inline assembly for 64 bit builds
+        tc.variables["USE_X86_64"] = (self.settings.arch == "x86_64" and not is_msvc(self))
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
