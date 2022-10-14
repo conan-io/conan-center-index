@@ -7,13 +7,14 @@ required_conan_version = ">=1.45.0"
 
 class EdynConan(ConanFile):
     name = "edyn"
+    version = "1.2.0"
     description = "Edyn is a real-time physics engine organized as an ECS"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xissburg/edyn"
     topics = ("physics", "game-development", "ecs")
     settings = "os", "arch", "compiler", "build_type"
-    
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -26,29 +27,8 @@ class EdynConan(ConanFile):
     }
     generators = "cmake", "cmake_find_package_multi"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
     def requirements(self):
-        self.requires("entt/3.9.0")
+        self.requires("entt/3.10.1")
 
     @property
     def _compiler_required(self):
@@ -65,29 +45,23 @@ class EdynConan(ConanFile):
                 raise ConanInvalidConfiguration("This package requires C++17 support. The current compiler does not support it.")
         except KeyError:
             self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
-   
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        self.run("git clone https://github.com/xissburg/edyn.git")
+        self.run("cd edyn && git checkout v" + self.version)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-    @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["EDYN_INSTALL"] = True
-        cmake.configure(build_folder=self._build_subfolder)
+        cmake.configure(source_folder="edyn")
         return cmake
 
     def build(self):
-        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="LICENSE", dst="licenses", src="edyn")
         cmake = self._configure_cmake()
         cmake.install()
 
