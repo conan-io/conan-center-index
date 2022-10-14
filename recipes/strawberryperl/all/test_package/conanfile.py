@@ -16,4 +16,5 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             self.run("perl --version")
-            self.run(f"perl {os.path.join(self.source_folder, "list_files.pl")}", env="conanbuild")
+            perl_script = os.path.join(self.source_folder, "list_files.pl")
+            self.run(f"perl {perl_script}", env="conanbuild")
