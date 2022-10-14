@@ -1,11 +1,19 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -22,8 +22,6 @@ ENDIF()
+@@ -1,5 +1,5 @@
++CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
+ PROJECT(CCfits)
+-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
+ 
+ # Allow the developer to select if Dynamic or Static libraries are built
+ OPTION (BUILD_SHARED_LIBS "Build Shared Libraries" OFF)
+@@ -22,8 +22,7 @@ ENDIF()
  
  #add_subdirectory (src)
  
 -find_package(CFITSIO REQUIRED)
 -INCLUDE_DIRECTORIES(${CFITSIO_INCLUDE_DIR})
++find_package(cfitsio REQUIRED CONFIG)
  
  SET (LIB_TYPE STATIC)
  IF (BUILD_SHARED_LIBS)
@@ -14,7 +22,7 @@
  
  ADD_LIBRARY(${LIB_NAME} ${LIB_TYPE} ${H_FILES} ${SRC_FILES})
 -TARGET_LINK_LIBRARIES(${LIB_NAME} ${CFITSIO_LIBRARY}
-+TARGET_LINK_LIBRARIES(${LIB_NAME} ${CONAN_LIBS}
++TARGET_LINK_LIBRARIES(${LIB_NAME} cfitsio::cfitsio
  )
  
  SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
