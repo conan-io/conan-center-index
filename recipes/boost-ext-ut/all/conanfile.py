@@ -101,17 +101,19 @@ class UTConan(ConanFile):
         self.info.clear()
 
     def package_info(self):
+        newer_than_1_1_8 = Version(self.version) > "1.1.8"
+        namespace = "Boost" if newer_than_1_1_8 else "boost"
         self.cpp_info.set_property("cmake_file_name", "ut")
-        self.cpp_info.set_property("cmake_target_name", "boost::ut")
+        self.cpp_info.set_property("cmake_target_name", f"{namespace}::ut")
 
-        self.cpp_info.names["cmake_find_package"] = "boost"
-        self.cpp_info.names["cmake_find_package_multi"] = "boost"
+        self.cpp_info.names["cmake_find_package"] = namespace
+        self.cpp_info.names["cmake_find_package_multi"] = namespace
         self.cpp_info.filenames["cmake_find_package"] = "ut"
         self.cpp_info.filenames["cmake_find_package_multi"] = "ut"
         self.cpp_info.components["ut"].names["cmake_find_package"] = "ut"
         self.cpp_info.components["ut"].names["cmake_find_package_multi"] = "ut"
 
-        if Version(self.version) > "1.1.8":
+        if newer_than_1_1_8:
             self.cpp_info.components["ut"].includedirs = [os.path.join("include", "ut-" + self.version, "include")]
 
         if self.options.get_safe("disable_module"):
