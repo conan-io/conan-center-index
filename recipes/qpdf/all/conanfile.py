@@ -103,10 +103,14 @@ class PackageConan(ConanFile):
             tc.variables["REQUIRE_CRYPTO_NATIVE"] = True
             tc.variables["REQUIRE_CRYPTO_GNUTLS"] = False
             tc.variables["REQUIRE_CRYPTO_OPENSSL"] = False
-        elif self.options.with_ssl == "openssl":
+        if self.options.with_ssl == "openssl":
             tc.variables["REQUIRE_CRYPTO_NATIVE"] = False
             tc.variables["REQUIRE_CRYPTO_GNUTLS"] = False
             tc.variables["REQUIRE_CRYPTO_OPENSSL"] = True
+        if self.options.with_ssl == "gnutls":
+            tc.variables["REQUIRE_CRYPTO_NATIVE"] = False
+            tc.variables["REQUIRE_CRYPTO_GNUTLS"] = True
+            tc.variables["REQUIRE_CRYPTO_OPENSSL"] = False
         tc.generate()
         # TODO: after https://github.com/conan-io/conan/issues/11962 is solved
         # we might obsolete here cmake deps generation and cmake patching and get
