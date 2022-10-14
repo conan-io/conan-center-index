@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.0)
 project(test_package C)
 
 find_package(quickjs REQUIRED CONFIG)
