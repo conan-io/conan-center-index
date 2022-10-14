@@ -1,4 +1,5 @@
 from conans import CMake, ConanFile, tools
+from conan.tools.files import copy, apply_conandata_patches, export_conandata_patches
 import os
 
 required_conan_version = ">=1.43.0"
@@ -28,7 +29,6 @@ class AngelScriptConan(ConanFile):
     }
 
     short_paths = True
-    exports_sources = "CMakeLists.txt"
     generators = "cmake"
     _cmake = None
 
@@ -43,6 +43,11 @@ class AngelScriptConan(ConanFile):
     @property
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -70,6 +75,7 @@ class AngelScriptConan(ConanFile):
         return self._cmake
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 
