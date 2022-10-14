@@ -13,7 +13,7 @@ class StrawberryPerlConan(ConanFile):
     license = ("Artistic-1.0", "GPL-1.0")
     homepage = "http://strawberryperl.com"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "installer", "perl", "windows")
+    topics = ("installer", "perl", "windows")
     settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):
