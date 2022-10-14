@@ -42,11 +42,15 @@ This process helps conan-center-index against spam and malicious code. The proce
 
 > :warning: The requests are reviewed manually, checking the GitHub profile activity of the requester to avoid a misuse of the service. In case of detecting a misuse or inappropriate behavior, the requester will be dropped from the authorized users list and at last instance even banned from the repository.
 
+When submitting a pull request for the first time, you will be prompted to sign the [CLA](CONTRIBUTOR_LICENSE_AGREEMENT.md) for your code contributions.
+You can view your signed CLA's by going to <https://cla-assistant.io/> and signing in.
+
 ## Submitting a Package
 
 :two: To contribute a package, you can submit a [Pull Request](https://github.com/conan-io/conan-center-index/pulls) to this GitHub repository https://github.com/conan-io/conan-center-index.
 
 The specific steps to add new packages are:
+
 * Fork the [conan-center-index](https://github.com/conan-io/conan-center-index) git repository, and then clone it locally.
 * Copy a template from [package_templates](package_templates) folder in the recipes/ folder and rename it to the project name (it should be lower-case). Read templates [documentation](package_templates/README.md) to find more information.
 * Make sure you are using the latest [Conan client](https://conan.io/downloads) version, as recipes might evolve introducing features of the newer Conan releases.
