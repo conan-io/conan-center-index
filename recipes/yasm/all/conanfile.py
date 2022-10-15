@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.layout import basic_layout, vs_layout
+from conan.tools.layout import basic_layout, cmake_layout
 from conan.tools.microsoft import is_msvc
 
 import os
@@ -32,7 +32,7 @@ class YASMConan(ConanFile):
 
     def layout(self):
         if is_msvc(self):
-            vs_layout(self)
+            cmake_layout(self)
         else:
             basic_layout(self)
 
