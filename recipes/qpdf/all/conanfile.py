@@ -62,8 +62,9 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         # https://qpdf.readthedocs.io/en/stable/installation.html#basic-dependencies
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         if self.options.with_ssl == "openssl":
+            # TODO: update to 3.x branch of openssl, when zlib is able to handle it
             self.requires("openssl/1.1.1q")
         elif self.options.with_ssl == "gnutls":
             raise ConanInvalidConfiguration("GnuTLS is not available in Conan Center yet.")
@@ -72,7 +73,7 @@ class PackageConan(ConanFile):
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.1.4")
         elif self.options.with_jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.0.0")
+            self.requires("mozjpeg/4.1.1")
 
 
     def validate(self):
