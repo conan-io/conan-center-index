@@ -7,7 +7,6 @@ from conan.tools.files import collect_libs, copy, get, rmdir
 
 class LibSSHRecipe(ConanFile):
     name = "libssh"
-    version = "0.10.4"
     license = "LGPL-2.1"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libssh.org/"
