@@ -6,7 +6,7 @@ import itertools
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 
 class Libxml2Conan(ConanFile):
@@ -126,6 +126,9 @@ class Libxml2Conan(ConanFile):
                 "configure.js",
                 "compiler=msvc",
                 "prefix={}".format(self.package_folder),
+                # THIS is completely wrong for msvc:
+                # - it will append cruntime=/dynamic instead of cruntime=/MD
+                # so this fails for static or dynamic builds on windows for the 'msvc' compiler.
                 "cruntime=/{}".format(self.settings.compiler.runtime),
                 "debug={}".format(debug),
                 "static={}".format(static),
@@ -238,6 +241,7 @@ class Libxml2Conan(ConanFile):
 
     @functools.lru_cache(1)
     def _configure_autotools(self):
+        breakpoint()
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         autotools.libs = []
         yes_no = lambda v: "yes" if v else "no"
