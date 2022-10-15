@@ -1,8 +1,10 @@
 import os
 
 from conan import ConanFile
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import collect_libs, copy, get, rmdir
+
+required_conan_version = ">=1.47.0"
 
 
 class LibSSHRecipe(ConanFile):
@@ -11,7 +13,7 @@ class LibSSHRecipe(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libssh.org/"
     description = "multiplatform C library implementing the SSHv2 protocol on client and server side"
-    topics = ("libssh", "ssh", "shell", "ssh2", "connection")
+    topics = ("ssh", "shell", "ssh2", "connection")
 
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -31,6 +33,10 @@ class LibSSHRecipe(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configures(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def layout(self):
         cmake_layout(self)
 
@@ -48,7 +54,6 @@ class LibSSHRecipe(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["CLIENT_TESTING"] = False
         tc.variables["SERVER_TESTING"] = False
         tc.variables["WITH_GSSAPI"] = False
@@ -56,6 +61,8 @@ class LibSSHRecipe(ConanFile):
         tc.variables["WITH_GCRYPT"] = self.options.crypto_backend == "gcrypt"
         tc.variables["WITH_MBEDTLS"] = False
         tc.variables["WITH_EXAMPLES"] = False
+        tc.generate()
+        tc = CMakeDeps(self)
         tc.generate()
 
     def build(self):
