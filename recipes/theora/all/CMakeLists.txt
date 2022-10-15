@@ -111,5 +111,11 @@ add_library(theoradec ${LIBTHEORA_COMMON} ${LIBTHEORA_DEC} "win32/xmingw32/libth
 target_link_libraries(theoradec PUBLIC Ogg::ogg)
 target_include_directories(theoradec PUBLIC include)
 
+# note: the original recipe generated libtheora.dll on Windows
+# So we do this to be consistent with the original outputs.
+set_target_properties(theora PROPERTIES PREFIX "lib")
+set_target_properties(theoraenc PROPERTIES PREFIX "lib")
+set_target_properties(theoradec PROPERTIES PREFIX "lib")
+
 install(FILES ${HEADERS} DESTINATION include/theora)
 install(TARGETS theora theoraenc theoradec)
