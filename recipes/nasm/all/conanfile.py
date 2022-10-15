@@ -4,8 +4,8 @@ import shutil
 from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import chdir, copy, get, rm, rmdir, apply_conandata_patches, export_conandata_patches, replace_in_file
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.files import chdir, copy, get, rmdir, apply_conandata_patches, export_conandata_patches, replace_in_file
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import VCVars, is_msvc
 
@@ -93,7 +93,7 @@ class NASMConan(ConanFile):
                 shutil.copy("ndisasm.exe", "ndisasmw.exe")
         else:
             autotools = Autotools(self)
-            autotools.autoreconf()
+            # TODO Do we need this?  autotools.autoreconf()
             autotools.configure()
 
             # GCC9 - "pure" attribute on function returning "void"
