@@ -5,4 +5,3 @@ sources:
 patches:
   "2.2.0":
     - patch_file: "patches/fix-pic.patch"
-      base_path: "source_subfolder"
