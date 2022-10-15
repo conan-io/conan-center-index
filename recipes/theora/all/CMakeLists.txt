@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
 project(theora C)
 
+# Note that I wrote this cmake file because:
+# - the old msvc sln was very old and required upgrades each time it was built
+# - the old msvc did not support RelWithDebInfo
+# - the recipe needed to be upgraded for conan-v2, so a simpler recipe was desired
+
 find_package(Ogg REQUIRED)
 
 set (HEADERS
@@ -99,23 +104,23 @@ if (BUILD_SHARED_LIBS)
 endif()
 
 
-add_library(theora ${LIBTHEORA_COMMON} ${LIBTHEORA_ENC} ${LIBTHEORA_DEC} "lib/theora.def")
+add_library(theora ${LIBTHEORA_COMMON} ${LIBTHEORA_ENC} ${LIBTHEORA_DEC} "conan-theora.def")
 target_link_libraries(theora PUBLIC Ogg::ogg)
 target_include_directories(theora PUBLIC include)
 
-add_library(theoraenc ${LIBTHEORA_COMMON} ${LIBTHEORA_ENC} "win32/xmingw32/libtheoraenc-all.def")
-target_link_libraries(theoraenc PUBLIC Ogg::ogg)
-target_include_directories(theoraenc PUBLIC include)
-
-add_library(theoradec ${LIBTHEORA_COMMON} ${LIBTHEORA_DEC} "win32/xmingw32/libtheoradec-all.def")
-target_link_libraries(theoradec PUBLIC Ogg::ogg)
-target_include_directories(theoradec PUBLIC include)
-
-# note: the original recipe generated libtheora.dll on Windows
-# So we do this to be consistent with the original outputs.
-set_target_properties(theora PROPERTIES PREFIX "lib")
-set_target_properties(theoraenc PROPERTIES PREFIX "lib")
-set_target_properties(theoradec PROPERTIES PREFIX "lib")
-
 install(FILES ${HEADERS} DESTINATION include/theora)
-install(TARGETS theora theoraenc theoradec)
+install(TARGETS theora)
+
+# theoraenc and theoradec libraries can be built, but are untested,
+# so if someonw wants to use them, then uncomment here and in the recipe and in theory they'll work.
+# The original conan recipe only built the full theora library.
+#
+# add_library(theoraenc ${LIBTHEORA_COMMON} ${LIBTHEORA_ENC} "win32/xmingw32/libtheoraenc-all.def")
+# target_link_libraries(theoraenc PUBLIC Ogg::ogg)
+# target_include_directories(theoraenc PUBLIC include)
+#
+# add_library(theoradec ${LIBTHEORA_COMMON} ${LIBTHEORA_DEC} "win32/xmingw32/libtheoradec-all.def")
+# target_link_libraries(theoradec PUBLIC Ogg::ogg)
+# target_include_directories(theoradec PUBLIC include)
+#
+# install(TARGETS theoraenc theoradec)

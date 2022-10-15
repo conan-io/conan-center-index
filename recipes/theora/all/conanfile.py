@@ -18,8 +18,9 @@ class TheoraConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+    # original theora.def from: "https://raw.githubusercontent.com/xiph/theora/v1.1.1/lib/theora.def"
+    # edited to change library name to just "theora"
+    exports_sources = "CMakeLists.txt", "conan-theora.def"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,12 +45,7 @@ class TheoraConan(ConanFile):
         self.requires("ogg/1.3.5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
-
-        def_file = self.conan_data["sources"][self.version][1]
-        url = def_file["url"]
-        filename = url[url.rfind("/") + 1:]
-        download(self, **def_file, filename=os.path.join(self.source_folder, "lib", filename))
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -77,12 +73,17 @@ class TheoraConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "theora")
 
         self.cpp_info.components["theora"].libs = ["theora"]
-        self.cpp_info.components["theoraenc"].libs = ["theoraenc"]
-        self.cpp_info.components["theoradec"].libs = ["theoradec"]
-
         self.cpp_info.components["theora"].requires = ["ogg::ogg"]
-        self.cpp_info.components["theoraenc"].requires = ["ogg::ogg"]
-        self.cpp_info.components["theoradec"].requires = ["ogg::ogg"]
+
+        # theoraenc and theoradec libraries can be built, but are untested,
+        # so if someonw wants to use them, then uncomment in CMakeLists.txt,
+        # and in the recipe and in theory they'll work.
+        # The original conan recipe only built the full theora library.
+#
+        # self.cpp_info.components["theoraenc"].libs = ["theoraenc"]
+        # self.cpp_info.components["theoraenc"].requires = ["ogg::ogg"]
+        # self.cpp_info.components["theoradec"].libs = ["theoradec"]
+        # self.cpp_info.components["theoradec"].requires = ["ogg::ogg"]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "theora"
