@@ -116,6 +116,17 @@ class Libxml2Conan(ConanFile):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     yield
 
+    @property
+    def _msvc_cruntime(self):
+        if str(self.settings.compiler) == "msvc":
+            if self.settings.compiler.runtime == "dynamic":
+                return "MDd" if self.settings.compiler.runtime_type == "Debug" else "MD"
+            elif self.settings.compiler.runtime == "static":
+                return "MTd" if self.settings.compiler.runtime_type == "Debug" else "MT"
+        else:
+            return self.settings.compiler.runtime
+
+
     def _build_msvc(self):
         with self._msvc_build_environment():
             debug = "yes" if self.settings.build_type == "Debug" else "no"
@@ -126,10 +137,7 @@ class Libxml2Conan(ConanFile):
                 "configure.js",
                 "compiler=msvc",
                 "prefix={}".format(self.package_folder),
-                # THIS is completely wrong for msvc:
-                # - it will append cruntime=/dynamic instead of cruntime=/MD
-                # so this fails for static or dynamic builds on windows for the 'msvc' compiler.
-                "cruntime=/{}".format(self.settings.compiler.runtime),
+                "cruntime=/{}".format(self._msvc_cruntime),
                 "debug={}".format(debug),
                 "static={}".format(static),
             ]
