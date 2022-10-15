@@ -130,7 +130,7 @@ class CMakeConan(ConanFile):
 
         self.buildenv_info.prepend_path("CMAKE_ROOT", self.package_folder)
         self.env_info.CMAKE_ROOT = self.package_folder
-        mod_path = os.path.join(self.package_folder, "share", "cmake-%s" % module_version, "Modules")
+        mod_path = os.path.join(self.package_folder, "share", f"cmake-{module_version}", "Modules")
         self.buildenv_info.prepend_path("CMAKE_MODULE_PATH", mod_path)
         self.env_info.CMAKE_MODULE_PATH = mod_path
         if not os.path.exists(mod_path):
