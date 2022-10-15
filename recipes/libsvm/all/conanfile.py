@@ -39,10 +39,7 @@ class libsvmConan(ConanFile):
             self.options.shared
         ):
             raise ConanInvalidConfiguration(
-                "{} can not be built as shared library + runtime {}.".format(
-                    self.name,
-                    self.settings.compiler.runtime
-                )
+                f"{self.name} can not be built as shared library + runtime {self.settings.compiler.runtime}."
             )
 
     def layout(self):
