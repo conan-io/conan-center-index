@@ -59,7 +59,7 @@ not depend on settings or options.
 As described in the documentation `self.user_info` has been depreated and you are now required to use
 `self.conf_info` to define individual properties to expose to downstream recipes.
 The [2.0 migrations docs](https://docs.conan.io/en/latest/migrating_to_2.0/recipes.html#removed-self-user-info)
-should over the technical details however for ConanCenterIndex we need to make sure there are no collisions
+should cover the technical details, however for ConanCenterIndex we need to make sure there are no collisions
 `conf_info` must be named `user.<recipe_name>:<variable>`.
 
 ## New cpp_info set_property model
