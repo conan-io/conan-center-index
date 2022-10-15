@@ -42,8 +42,6 @@ class YASMConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0],
                   destination=self.source_folder, strip_root=True)
-        download(self, **self.conan_data["sources"][self.version][1],
-                       filename=os.path.join(self.source_folder, "YASM-VERSION-GEN.bat"))
 
     @property
     def _msvc_subfolder(self):
