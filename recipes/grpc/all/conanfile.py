@@ -18,7 +18,7 @@ class grpcConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/grpc/grpc"
-    topics = ("grpc", "rpc")
+    topics = ("rpc")
 
     settings = "os", "arch", "compiler", "build_type"
 
