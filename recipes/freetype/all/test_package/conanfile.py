@@ -24,4 +24,4 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             font_path = os.path.join(self.source_folder, "OpenSans-Bold.ttf")
-            self.run("{} {}".format(bin_path, font_path), env="conanrun")
+            self.run(f"{bin_path} {font_path}", env="conanrun")

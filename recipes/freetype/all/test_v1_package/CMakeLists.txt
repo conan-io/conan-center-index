@@ -7,4 +7,4 @@ conan_basic_setup(TARGETS)
 find_package(Freetype REQUIRED)
 
 add_executable(${PROJECT_NAME} ../test_package/test_package.c)
-target_link_libraries(${PROJECT_NAME} Freetype::Freetype)
+target_link_libraries(${PROJECT_NAME} PRIVATE Freetype::Freetype)

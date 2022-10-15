@@ -15,4 +15,4 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             font_path = os.path.join(self.source_folder, "..", "test_package", "OpenSans-Bold.ttf")
-            self.run("{} {}".format(bin_path, font_path), run_environment=True)
+            self.run(f"{bin_path} {font_path}", run_environment=True)
