@@ -33,15 +33,18 @@ class FlecsConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         try:
-           del self.settings.compiler.libcxx
+            del self.settings.compiler.libcxx
         except Exception:
-           pass
+            pass
         try:
-           del self.settings.compiler.cppstd
+            del self.settings.compiler.cppstd
         except Exception:
-           pass
+            pass
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -52,10 +55,14 @@ class FlecsConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["FLECS_STATIC_LIBS"] = not self.options.shared
+        if Version(self.version) < "3.0.1":
+            tc.variables["FLECS_STATIC_LIBS"] = not self.options.shared
+            tc.variables["FLECS_SHARED_LIBS"] = self.options.shared
+            tc.variables["FLECS_DEVELOPER_WARNINGS"] = False
+        else:
+            tc.variables["FLECS_STATIC"] = not self.options.shared
+            tc.variables["FLECS_SHARED"] = self.options.shared
         tc.variables["FLECS_PIC"] = self.options.get_safe("fPIC", True)
-        tc.variables["FLECS_SHARED_LIBS"] = self.options.shared
-        tc.variables["FLECS_DEVELOPER_WARNINGS"] = False
         tc.generate()
 
     def build(self):
@@ -72,10 +79,10 @@ class FlecsConan(ConanFile):
     def package_info(self):
         suffix = "" if self.options.shared else "_static"
         self.cpp_info.set_property("cmake_file_name", "flecs")
-        self.cpp_info.set_property("cmake_target_name", "flecs::flecs{}".format(suffix))
+        self.cpp_info.set_property("cmake_target_name", f"flecs::flecs{suffix}")
 
         # TODO: back to global scope once cmake_find_package* generators removed
-        self.cpp_info.components["_flecs"].libs = ["flecs{}".format(suffix)]
+        self.cpp_info.components["_flecs"].libs = [f"flecs{suffix}"]
         if not self.options.shared:
             self.cpp_info.components["_flecs"].defines.append("flecs_STATIC")
         if Version(self.version) >= "3.0.0":
@@ -87,6 +94,6 @@ class FlecsConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "flecs"
         self.cpp_info.names["cmake_find_package_multi"] = "flecs"
-        self.cpp_info.components["_flecs"].names["cmake_find_package"] = "flecs{}".format(suffix)
-        self.cpp_info.components["_flecs"].names["cmake_find_package_multi"] = "flecs{}".format(suffix)
-        self.cpp_info.components["_flecs"].set_property("cmake_target_name", "flecs::flecs{}".format(suffix))
+        self.cpp_info.components["_flecs"].names["cmake_find_package"] = f"flecs{suffix}"
+        self.cpp_info.components["_flecs"].names["cmake_find_package_multi"] = f"flecs{suffix}"
+        self.cpp_info.components["_flecs"].set_property("cmake_target_name", f"flecs::flecs{suffix}")
