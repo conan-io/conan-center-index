@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.4)
 project(svm C CXX)
 
-include(${CMAKE_SOURCE_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
-
 add_library(svm source_subfolder/svm.cpp)
 set_property(TARGET svm PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS ON)
 set_target_properties(svm PROPERTIES PUBLIC_HEADER source_subfolder/svm.h)
