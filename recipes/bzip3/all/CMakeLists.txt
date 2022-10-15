@@ -25,11 +25,6 @@ target_sources(bzip3 PRIVATE
 )
 endif()
 target_include_directories(bzip3 PUBLIC ${BZIP3_SRC_DIR}/include)
-
-if (VERSION VERSION_GREATER_EQUAL "1.1.6" AND BUILD_SHARED_LIBS)
-    target_compile_definitions(bzip3 PRIVATE "BZIP3_DLL_EXPORT=1")
-endif()
-
 set_target_properties(bzip3 PROPERTIES
     PUBLIC_HEADER "${BZIP3_INC}"
     C_VISIBILITY_PRESET hidden
