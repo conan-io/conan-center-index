@@ -18,8 +18,8 @@ class TheoraConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    # Sources are located in the same place as this recipe, copy them to the recipe
-    exports_sources = "CMakeLists.txt"
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -83,3 +83,9 @@ class TheoraConan(ConanFile):
         self.cpp_info.components["theora"].requires = ["ogg::ogg"]
         self.cpp_info.components["theoraenc"].requires = ["ogg::ogg"]
         self.cpp_info.components["theoradec"].requires = ["ogg::ogg"]
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "theora"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "theora"
+        self.cpp_info.names["cmake_find_package"] = "theora"
+        self.cpp_info.names["cmake_find_package_multi"] = "theora"
