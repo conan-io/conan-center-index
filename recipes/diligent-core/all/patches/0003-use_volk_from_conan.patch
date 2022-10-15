@@ -7,8 +7,8 @@ index e760513d..a0d2de9c 100644
      include
      ../../ThirdParty
 -    ../../ThirdParty/Vulkan-Headers/include
-+${CONAN_INCLUDE_DIRS_VULKAN-HEADERS}/include/
-+${CONAN_INCLUDE_DIRS_VOLK}/
++${VulkanHeaders_INCLUDE_DIR}
++${volk_INCLUDE_DIR}/
  )
  
  set(PRIVATE_DEPENDENCIES

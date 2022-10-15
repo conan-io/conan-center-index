@@ -1,4 +1,7 @@
 sources:
+  "2.71.0":
+    url: "https://github.com/beached/header_libraries/archive/v2.71.0.tar.gz"
+    sha256: "50b9ddebdbc808a5714408a45f686fafe9d1d3b78c988df3973c12c9928828b9"
   "2.68.3":
     url: "https://github.com/beached/header_libraries/archive/v2.68.3.tar.gz"
     sha256: "9bb7d25d161b89ad4a0ac857c28734c061cf53f6e80212c7fe70b8e0fd14789f"
