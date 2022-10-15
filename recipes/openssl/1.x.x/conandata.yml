@@ -29,12 +29,6 @@ sources:
       "https://www.openssl.org/source/openssl-1.1.1q.tar.gz",
       "https://www.openssl.org/source/old/1.1.1/openssl-1.1.1q.tar.gz"
     ]
-  1.1.1r:
-    sha256: e389352ae3d5ae4d38597bf8a54f1dcb6fb3c8b50f4fe58a94bb1bf7f85d82a0
-    url: [
-      "https://www.openssl.org/source/openssl-1.1.1r.tar.gz",
-      "https://www.openssl.org/source/old/1.1.1/openssl-1.1.1r.tar.gz"
-    ]
 patches:
   1.0.2u:
     - patch_file: patches/1.0.2u-darwin-arm64.patch
@@ -46,8 +40,5 @@ patches:
     - patch_file: patches/1.1.1-tvos-watchos.patch
       base_path: source_subfolder
   1.1.1q:
-    - patch_file: patches/1.1.1-tvos-watchos.patch
-      base_path: source_subfolder
-  1.1.1r:
     - patch_file: patches/1.1.1-tvos-watchos.patch
       base_path: source_subfolder
