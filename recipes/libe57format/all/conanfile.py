@@ -99,8 +99,8 @@ class LibE57FormatConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "E57Format")
         suffix = "-d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = [f"E57Format{suffix}"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+        if self.settings.os in ["Linux", "FreeBSD"] and not self.options.shared:
+            self.cpp_info.system_libs.extend(["m", "pthread"])
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "e57format"
