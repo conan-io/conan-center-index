@@ -1,14 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, load, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, rm, rmdir, save
 from conan.tools.microsoft import check_min_vs
 from conan.tools.scm import Version
 import glob
 import os
 import textwrap
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class EmbreeConan(ConanFile):
@@ -83,6 +83,9 @@ class EmbreeConan(ConanFile):
             if self.options.get_safe(simd_option):
                 num_isa += 1
         return num_isa
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -161,6 +164,7 @@ class EmbreeConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         # some compilers (e.g. clang) do not like UTF-16 sources
         rc = os.path.join(self.source_folder, "kernels", "embree.rc")
         content = load(self, rc, encoding="utf_16_le")
