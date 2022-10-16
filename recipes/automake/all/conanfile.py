@@ -143,7 +143,7 @@ class AutomakeConan(ConanFile):
         self.env_info.ACLOCAL = str(aclocal_bin)
         self.buildenv_info.define_path("ACLOCAL", str(aclocal_bin))
 
-        aclocal_bin_conf_key = "tools.automake:aclocal"
+        aclocal_bin_conf_key = "user.automake:aclocal"
         self.output.info(f"Defining path to aclocal binary in configuration as `{aclocal_bin_conf_key}` with value: {aclocal_bin}")
         self.conf_info.define(aclocal_bin_conf_key, str(aclocal_bin))
 
@@ -152,27 +152,27 @@ class AutomakeConan(ConanFile):
         self.env_info.AUTOMAKE = str(automake_bin)
         self.buildenv_info.define_path("AUTOMAKE", str(automake_bin))
 
-        automake_bin_conf_key = "tools.automake:automake"
+        automake_bin_conf_key = "user.automake:automake"
         self.output.info(f"Defining path to automake binary in configuration as `{automake_bin_conf_key}` with value: {automake_bin}")
         self.conf_info.define(automake_bin_conf_key, str(automake_bin))
 
         compile_bin = automake_dataroot_path.joinpath("compile")
         self.output.info(f"Define path to `compile` binary in user_info as: {compile_bin}")
         self.user_info.compile = str(compile_bin)
-        compile_conf_key = "tools.automake:compile"
+        compile_conf_key = "user.automake:compile"
         self.output.info(f"Defining path to `compile` binary in configuration as `{compile_conf_key}` with value: {compile_bin}")
         self.conf_info.define(compile_conf_key, str(compile_bin))
 
         ar_lib_bin = automake_dataroot_path.joinpath("ar-lib")
         self.output.info(f"Define path to ar_lib binary in user_info as: {ar_lib_bin}")
         self.user_info.ar_lib = str(ar_lib_bin)
-        ar_lib_conf_key = "tools.automake:ar-lib"
+        ar_lib_conf_key = "user.automake:ar-lib"
         self.output.info(f"Defining path to ar-lib binary in configuration as `{ar_lib_conf_key}` with value: {ar_lib_bin}")
         self.conf_info.define(ar_lib_conf_key, str(ar_lib_bin))
 
         install_sh_bin = automake_dataroot_path.joinpath("install-sh")
         self.output.info(f"Define path to install_sh binary in user_info as: {install_sh_bin}")
         self.user_info.install_sh = str(install_sh_bin)
-        install_sh_conf_key = "tools.automake:install-sh"
+        install_sh_conf_key = "user.automake:install-sh"
         self.output.info(f"Defining path to install_sh binary in configuration as `{install_sh_conf_key}` with value: {install_sh_bin}")
         self.conf_info.define(install_sh_conf_key, str(install_sh_bin))
