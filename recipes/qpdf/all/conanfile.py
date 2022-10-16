@@ -64,7 +64,6 @@ class PackageConan(ConanFile):
         # https://qpdf.readthedocs.io/en/stable/installation.html#basic-dependencies
         self.requires("zlib/1.2.13")
         if self.options.with_ssl == "openssl":
-            # TODO: update to 3.x branch of openssl, when zlib is able to handle it
             self.requires("openssl/1.1.1q")
         elif self.options.with_ssl == "gnutls":
             raise ConanInvalidConfiguration("GnuTLS is not available in Conan Center yet.")
