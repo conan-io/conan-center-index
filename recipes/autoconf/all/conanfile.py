@@ -114,7 +114,7 @@ class AutoconfConan(ConanFile):
         self.env_info.AUTOCONF = str(autoconf_bin)
         self.buildenv_info.define_path("AUTOCONF", str(autoconf_bin))
 
-        autoconf_bin_conf_key = "tools.autoconf:autoconf"
+        autoconf_bin_conf_key = "user.autoconf:autoconf"
         self.output.info(f"Defining path to autoconf binary in configuration as `{autoconf_bin_conf_key}` with value: {autoconf_bin}")
         self.conf_info.define(autoconf_bin_conf_key, str(autoconf_bin))
 
@@ -123,7 +123,7 @@ class AutoconfConan(ConanFile):
         self.env_info.AUTORECONF = str(autoreconf_bin)
         self.buildenv_info.define_path("AUTORECONF", str(autoreconf_bin))
 
-        autoreconf_bin_conf_key = "tools.autoconf:autoreconf"
+        autoreconf_bin_conf_key = "user.autoconf:autoreconf"
         self.output.info(f"Defining path to autoreconf binary in configuration as `{autoreconf_bin_conf_key}` with value: {autoreconf_bin}")
         self.conf_info.define(autoreconf_bin_conf_key, str(autoreconf_bin))
 
@@ -132,7 +132,7 @@ class AutoconfConan(ConanFile):
         self.env_info.AUTOHEADER = str(autoheader_bin)
         self.buildenv_info.define_path("AUTOHEADER", str(autoheader_bin))
 
-        autoheader_bin_conf_key = "tools.autoconf:autoheader"
+        autoheader_bin_conf_key = "user.autoconf:autoheader"
         self.output.info(f"Defining path to autoheader binary in configuration as `{autoheader_bin_conf_key}` with value: {autoheader_bin}")
         self.conf_info.define(autoheader_bin_conf_key, str(autoheader_bin))
 
@@ -141,6 +141,6 @@ class AutoconfConan(ConanFile):
         self.env_info.AUTOM4TE = str(autom4te_bin)
         self.buildenv_info.define_path("AUTOM4TE", str(autom4te_bin))
 
-        autom4te_bin_conf_key = "tools.autoconf:autom4te"
+        autom4te_bin_conf_key = "user.autoconf:autom4te"
         self.output.info(f"Defining path to autom4te binary in configuration as `{autom4te_bin_conf_key}` with value: {autom4te_bin}")
         self.conf_info.define(autom4te_bin_conf_key, str(autom4te_bin))
