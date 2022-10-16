@@ -88,7 +88,10 @@ class grpcConan(ConanFile):
             self.options["grpc-proto"].shared = True
 
     def requirements(self):
-        self.requires("abseil/20220623.0")
+        if is_msvc(self) and Version(self.version) < "1.47":
+            self.requires("abseil/20211102.0")
+        else:
+            self.requires("abseil/20220623.0")
         self.requires("c-ares/1.18.1")
         self.requires("openssl/1.1.1q")
         self.requires("re2/20220601")
