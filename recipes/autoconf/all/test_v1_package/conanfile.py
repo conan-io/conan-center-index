@@ -9,7 +9,7 @@ required_conan_version = ">=1.45.0"
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = "configure.ac", "config.h.in", "Makefile.in", "test_package_c.c", "test_package_cpp.cpp",
+    exports_sources = "../test_package/configure.ac", "../test_package/config.h.in", "../test_package/Makefile.in", "../test_package/test_package_c.c", "../test_package/test_package_cpp.cpp",
     test_type = "explicit"
 
     @property
