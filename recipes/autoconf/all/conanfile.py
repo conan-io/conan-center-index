@@ -1,3 +1,5 @@
+from os import path
+
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir, apply_conandata_patches, replace_in_file
@@ -67,7 +69,7 @@ class AutoconfConan(ConanFile):
                 tc.configure_args.append(f"--host={host}")
 
         env = tc.environment()
-        env.define("INSTALL", unix_path(self, str(self.source_path.joinpath('build-aux', 'install-sh'))))
+        env.define("INSTALL", unix_path(self,  path.join(self.source_folder, 'build-aux', 'install-sh')))
         tc.generate(env)
 
         deps = AutotoolsDeps(self)
@@ -78,7 +80,7 @@ class AutoconfConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        replace_in_file(self, self.source_path.joinpath("Makefile.in"), "M4 = /usr/bin/env m4", "#M4 = /usr/bin/env m4")
+        replace_in_file(self, path.join(self.source_folder, "Makefile.in"), "M4 = /usr/bin/env m4", "#M4 = /usr/bin/env m4")
 
         autotools = Autotools(self)
         autotools.configure()
@@ -88,59 +90,59 @@ class AutoconfConan(ConanFile):
         autotools = Autotools(self)
         autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])  # Need to specify the `DESTDIR` as a Unix path, aware of the subsystem
 
-        copy(self, "COPYING*", src=self.source_folder, dst=self.package_path.joinpath("licenses"))
-        rmdir(self, self.package_path.joinpath("res", "info"))
-        rmdir(self, self.package_path.joinpath("res", "man"))
+        copy(self, "COPYING*", src=self.source_folder, dst=path.join(self.package_folder, "licenses"))
+        rmdir(self, path.join(self.package_folder, "res", "info"))
+        rmdir(self, path.join(self.package_folder, "res", "man"))
 
     def package_info(self):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
 
-        bin_path = self.package_path.joinpath("bin")
+        bin_path = path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH environment variable: {bin_path}")
-        self.env_info.PATH.append(str(bin_path))
+        self.env_info.PATH.append(bin_path)
 
-        dataroot_path = self.package_path.joinpath("res", "autoconf")
+        dataroot_path = path.join(self.package_folder, "res", "autoconf")
         self.output.info(f"Defining AC_MACRODIR environment variable: {dataroot_path}")
-        self.env_info.AC_MACRODIR = str(dataroot_path)
-        self.buildenv_info.define_path("AC_MACRODIR", str(dataroot_path))
+        self.env_info.AC_MACRODIR = dataroot_path
+        self.buildenv_info.define_path("AC_MACRODIR", dataroot_path)
 
         self.output.info(f"Defining AUTOM4TE_PERLLIBDIR environment variable: {dataroot_path}")
-        self.env_info.AUTOM4TE_PERLLIBDIR = str(dataroot_path)
-        self.buildenv_info.define_path("AUTOM4TE_PERLLIBDIR", str(dataroot_path))
+        self.env_info.AUTOM4TE_PERLLIBDIR = dataroot_path
+        self.buildenv_info.define_path("AUTOM4TE_PERLLIBDIR", dataroot_path)
 
-        autoconf_bin = bin_path.joinpath("autoconf")
+        autoconf_bin = path.join(bin_path, "autoconf")
         self.output.info(f"Defining AUTOCONF environment variable: {autoconf_bin}")
-        self.env_info.AUTOCONF = str(autoconf_bin)
-        self.buildenv_info.define_path("AUTOCONF", str(autoconf_bin))
+        self.env_info.AUTOCONF = autoconf_bin
+        self.buildenv_info.define_path("AUTOCONF", autoconf_bin)
 
         autoconf_bin_conf_key = "user.autoconf:autoconf"
         self.output.info(f"Defining path to autoconf binary in configuration as `{autoconf_bin_conf_key}` with value: {autoconf_bin}")
-        self.conf_info.define(autoconf_bin_conf_key, str(autoconf_bin))
+        self.conf_info.define(autoconf_bin_conf_key, autoconf_bin)
 
-        autoreconf_bin = bin_path.joinpath("autoreconf")
+        autoreconf_bin = path.join(bin_path, "autoreconf")
         self.output.info(f"Defining AUTORECONF environment variable: {autoreconf_bin}")
-        self.env_info.AUTORECONF = str(autoreconf_bin)
-        self.buildenv_info.define_path("AUTORECONF", str(autoreconf_bin))
+        self.env_info.AUTORECONF = autoreconf_bin
+        self.buildenv_info.define_path("AUTORECONF", autoreconf_bin)
 
         autoreconf_bin_conf_key = "user.autoconf:autoreconf"
         self.output.info(f"Defining path to autoreconf binary in configuration as `{autoreconf_bin_conf_key}` with value: {autoreconf_bin}")
-        self.conf_info.define(autoreconf_bin_conf_key, str(autoreconf_bin))
+        self.conf_info.define(autoreconf_bin_conf_key, autoreconf_bin)
 
-        autoheader_bin = bin_path.joinpath("autoheader")
+        autoheader_bin = path.join(bin_path, "autoheader")
         self.output.info(f"Defining AUTOHEADER environment variable: {autoheader_bin}")
-        self.env_info.AUTOHEADER = str(autoheader_bin)
-        self.buildenv_info.define_path("AUTOHEADER", str(autoheader_bin))
+        self.env_info.AUTOHEADER = autoheader_bin
+        self.buildenv_info.define_path("AUTOHEADER", autoheader_bin)
 
         autoheader_bin_conf_key = "user.autoconf:autoheader"
         self.output.info(f"Defining path to autoheader binary in configuration as `{autoheader_bin_conf_key}` with value: {autoheader_bin}")
-        self.conf_info.define(autoheader_bin_conf_key, str(autoheader_bin))
+        self.conf_info.define(autoheader_bin_conf_key, autoheader_bin)
 
-        autom4te_bin = bin_path.joinpath("autom4te")
+        autom4te_bin = path.join(bin_path, "autom4te")
         self.output.info(f"Defining AUTOM4TE environment variable: {autom4te_bin}")
-        self.env_info.AUTOM4TE = str(autom4te_bin)
-        self.buildenv_info.define_path("AUTOM4TE", str(autom4te_bin))
+        self.env_info.AUTOM4TE = autom4te_bin
+        self.buildenv_info.define_path("AUTOM4TE", autom4te_bin)
 
         autom4te_bin_conf_key = "user.autoconf:autom4te"
         self.output.info(f"Defining path to autom4te binary in configuration as `{autom4te_bin_conf_key}` with value: {autom4te_bin}")
-        self.conf_info.define(autom4te_bin_conf_key, str(autom4te_bin))
+        self.conf_info.define(autom4te_bin_conf_key, autom4te_bin)
