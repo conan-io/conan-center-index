@@ -15,7 +15,7 @@ class TestPackageConan(ConanFile):
 
     @property
     def _test_executable(self):
-        return os.path.join(self.cpp.build.bindirs[0], "test_package")
+        return os.path.join("bin", "test_package")
 
     def test(self):
         if not tools.cross_building(self):
