@@ -1,7 +1,9 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
+from conan import ConanFile
+from conan.tools.files import get, chdir, replace_in_file, rm
+from conans import tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
 
 
 """ This older lzma release is used to build 7zip (to extract its sources).
@@ -41,9 +43,9 @@ class LzmaSdkConan(ConanFile):
         del self.info.settings.compiler
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
-        os.unlink(os.path.join(self._source_subfolder, "7zr.exe"))
-        os.unlink(os.path.join(self._source_subfolder, "lzma.exe"))
+        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder)
+        rm(self, "7zr.exe", self._source_subfolder)
+        rm(self, "lzma.exe", self._source_subfolder)
 
     @property
     def _msvc_build_dirs(self):
@@ -66,8 +68,8 @@ class LzmaSdkConan(ConanFile):
     def _autotools_build_dirs(self):
         es = ".exe" if self.settings.os == "Windows" else ""
         return (
-            (os.path.join(self._source_subfolder, "C", "Util", "7z"), "7zDec{}".format(es)),
-            (os.path.join(self._source_subfolder, "CPP", "7zip", "Bundles", "LzmaCon"), "lzma{}".format(es)),
+            (os.path.join(self._source_subfolder, "C", "Util", "7z"), f"7zDec{es}"),
+            (os.path.join(self._source_subfolder, "CPP", "7zip", "Bundles", "LzmaCon"), f"lzma{es}"),
         )
 
     def _build_msvc(self):
@@ -75,13 +77,13 @@ class LzmaSdkConan(ConanFile):
             with tools.vcvars(self):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     with tools.chdir(make_dir):
-                        self.run("nmake /f makefile NEW_COMPILER=1 CPU={}".format(self._msvc_cpu))
+                        self.run(f"nmake /f makefile NEW_COMPILER=1 CPU={self._msvc_cpu} NO_BUFFEROVERFLOWU=1")
 
     def _build_autotools(self):
         env_build = AutoToolsBuildEnvironment(self)
         with tools.environment_append(env_build.vars):
             for make_dir, _ in self._autotools_build_dirs:
-                with tools.chdir(make_dir):
+                with chdir(self, make_dir):
                     args = [
                         "-f", "makefile.gcc",
                     ]
@@ -92,24 +94,24 @@ class LzmaSdkConan(ConanFile):
 
     def _patch_sources(self):
         if self.settings.compiler == "Visual Studio":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CPP", "Build.mak"),
+            replace_in_file(self, os.path.join(self._source_subfolder, "CPP", "Build.mak"),
                                   "-MT\r", "-" + str(self.settings.compiler.runtime))
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CPP", "Build.mak"),
+            replace_in_file(self, os.path.join(self._source_subfolder, "CPP", "Build.mak"),
                                   "-MD\r", "-" + str(self.settings.compiler.runtime))
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CPP", "Build.mak"),
+            replace_in_file(self, os.path.join(self._source_subfolder, "CPP", "Build.mak"),
                                   " -WX ", " ")
 
         # Patches for other build systems
-        tools.replace_in_file(os.path.join(self._source_subfolder, "C", "Util", "7z", "makefile.gcc"),
+        replace_in_file(self, os.path.join(self._source_subfolder, "C", "Util", "7z", "makefile.gcc"),
                               "CFLAGS = ",
                               "CFLAGS = -fpermissive ")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "C", "Util", "7z", "makefile.gcc"),
+        replace_in_file(self, os.path.join(self._source_subfolder, "C", "Util", "7z", "makefile.gcc"),
                               ": 7zAlloc.c",
                               ": ../../7zAlloc.c")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "C", "Util", "Lzma", "makefile.gcc"),
+        replace_in_file(self, os.path.join(self._source_subfolder, "C", "Util", "Lzma", "makefile.gcc"),
                               "CFLAGS = ",
                               "CFLAGS = -fpermissive ")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CPP", "Common", "MyString.h"),
+        replace_in_file(self, os.path.join(self._source_subfolder, "CPP", "Common", "MyString.h"),
                               "#ifdef _WIN32\r\n",
                               "#ifdef _WIN32\r\n#ifndef UNDER_CE\r\n#include <windows.h>\r\n#endif\r\n")
 
@@ -132,6 +134,7 @@ class LzmaSdkConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libdirs = []
+        self.cpp_info.includedirs = []
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.path.append(bin_path)

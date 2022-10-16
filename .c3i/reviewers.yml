@@ -75,3 +75,6 @@ reviewers:
   - user: "paulocoutinhox"
     type: "community"
     request_reviews: false
+  - user: "jwillikers"
+    type: "community"
+    request_reviews: false

@@ -19,7 +19,6 @@ The following policies are preferred during the review, but not mandatory:
   * [Test Package](#test-package)
     * [Minimalistic Source Code](#minimalistic-source-code)
     * [CMake targets](#cmake-targets)
-  * [Recommended feature options names](#recommended-feature-options-names)
   * [Supported Versions](#supported-versions)
     * [Removing old versions](#removing-old-versions)
     * [Adding old versions](#adding-old-versions)<!-- endToc -->
@@ -55,26 +54,9 @@ def _build_subfolder(self):
 
 Prefer the following order of documented methods in python code (`conanfile.py`, `test_package/conanfile.py`):
 
-- init
-- set_name
-- set_version
-- export
-- export_sources
-- config_options
-- configure
-- layout
-- requirements
-- package_id
-- validate
-- build_id
-- build_requirements
-- system_requirements
-- source
-- generate
-- imports
-- build
-- package
-- package_info
+For `conan create` the order is listed [here](https://docs.conan.io/en/latest/reference/commands/creator/create.html#methods-execution-order)
+test packages recipes should append the following methods:
+
 - deploy
 - test
 
@@ -92,15 +74,14 @@ Where the SPDX guidelines do not apply, packages should do the following:
 
 ## Exporting Patches
 
-It's ideal to minimize the number of files in a package the exactly whats required. When recipes support multiple versions with differing patches it's strongly encourged to only export the patches that are being used for that given recipe.
+It's ideal to minimize the number of files in a package the exactly whats required. When recipes support multiple versions with differing patches it's strongly encouraged to only export the patches that are being used for that given recipe.
 
 Make sure the `export_sources` attribute is replaced by the following:
 
 ```py
 def export_sources(self):
     self.copy("CMakeLists.txt")
-    for patch in self.conan_data.get("patches", {}).get(self.version, []):
-        self.copy(patch["patch_file"])
+    export_conandata_patches(self)
 ```
 
 ## Applying Patches

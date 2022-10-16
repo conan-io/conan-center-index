@@ -1,0 +1,11 @@
+--- libpkgconf/path.c
++++ libpkgconf/path.c
+@@ -138,7 +138,7 @@
+ 		return 0;
+ 
+ 	iter = workbuf = strdup(text);
+-	while ((p = strtok(iter, PKG_CONFIG_PATH_SEP_S)) != NULL)
++	while ((p = strtok(iter, ":;")) != NULL)
+ 	{
+ 		pkgconf_path_add(p, dirlist, filter);
+ 

@@ -67,7 +67,7 @@ class FreetypeConan(ConanFile):
 
     def requirements(self):
         if self.options.with_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.38")
         if self.options.with_zlib:
             self.requires("zlib/1.2.12")
         if self.options.with_bzip2:
@@ -114,13 +114,27 @@ class FreetypeConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["FT_WITH_ZLIB"] = self.options.with_zlib
-        self._cmake.definitions["FT_WITH_PNG"] = self.options.with_png
-        self._cmake.definitions["FT_WITH_BZIP2"] = self.options.with_bzip2
-        # TODO: Harfbuzz can be added as an option as soon as it is available.
-        self._cmake.definitions["FT_WITH_HARFBUZZ"] = False
-        if self._has_with_brotli_option:
-            self._cmake.definitions["FT_WITH_BROTLI"] = self.options.with_brotli
+        if scm.Version(self.version) >= "2.11.0":
+            self._cmake.definitions["FT_REQUIRE_ZLIB"] = self.options.with_zlib
+            self._cmake.definitions["FT_DISABLE_ZLIB"] = not self.options.with_zlib
+            self._cmake.definitions["FT_REQUIRE_PNG"] = self.options.with_png
+            self._cmake.definitions["FT_DISABLE_PNG"] = not self.options.with_png
+            self._cmake.definitions["FT_REQUIRE_BZIP2"] = self.options.with_bzip2
+            self._cmake.definitions["FT_DISABLE_BZIP2"] = not self.options.with_bzip2
+            # TODO: Harfbuzz can be added as an option as soon as it is available.
+            self._cmake.definitions["FT_REQUIRE_HARFBUZZ"] = False
+            self._cmake.definitions["FT_DISABLE_HARFBUZZ"] = True
+            if self._has_with_brotli_option:
+                self._cmake.definitions["FT_REQUIRE_BROTLI"] = self.options.with_brotli
+                self._cmake.definitions["FT_DISABLE_BROTLI"] = not self.options.with_brotli
+        else:
+            self._cmake.definitions["FT_WITH_ZLIB"] = self.options.with_zlib
+            self._cmake.definitions["FT_WITH_PNG"] = self.options.with_png
+            self._cmake.definitions["FT_WITH_BZIP2"] = self.options.with_bzip2
+            # TODO: Harfbuzz can be added as an option as soon as it is available.
+            self._cmake.definitions["FT_WITH_HARFBUZZ"] = False
+            if self._has_with_brotli_option:
+                self._cmake.definitions["FT_WITH_BROTLI"] = self.options.with_brotli
         # Generate a relocatable shared lib on Macos
         self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         self._cmake.configure(build_dir=self._build_subfolder)

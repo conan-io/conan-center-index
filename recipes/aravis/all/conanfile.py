@@ -1,8 +1,12 @@
-from conans import ConanFile, Meson, RunEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, export_conandata_patches, apply_conandata_patches, rename, chdir, rm, rmdir
+from conan.tools.microsoft import is_msvc
+from conans import Meson, RunEnvironment, tools
 import os
 import glob
 
+required_conan_version = ">=1.52.0"
 
 class AravisConan(ConanFile):
     name = "aravis"
@@ -46,10 +50,6 @@ class AravisConan(ConanFile):
     def _aravis_api_version(self):
         return ".".join(self.version.split(".")[0:2])
 
-    @property
-    def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -62,7 +62,7 @@ class AravisConan(ConanFile):
         self.options["glib"].shared = True
 
     def validate(self):
-        if self._is_msvc and self.settings.get_safe("compiler.runtime", "").startswith("MT"):
+        if is_msvc(self) and self.settings.get_safe("compiler.runtime", "").startswith("MT"):
             raise ConanInvalidConfiguration("Static MT/MTd runtime is not supported on Windows due to GLib issues")
         if not self.options["glib"].shared and self.options.shared:
             raise ConanInvalidConfiguration("Shared Aravis cannot link to static GLib")
@@ -70,31 +70,26 @@ class AravisConan(ConanFile):
             raise ConanInvalidConfiguration("macOS builds are disabled until conan-io/conan#7324 gets merged to fix macOS SIP issue #8443")
 
     def build_requirements(self):
-        self.build_requires("meson/0.60.2")
-        self.build_requires("pkgconf/1.7.4")
+        self.build_requires("meson/0.63.3")
+        self.build_requires("pkgconf/1.9.3")
         if self.options.introspection:
-            self.build_requires("gobject-introspection/1.70.0")
+            self.build_requires("gobject-introspection/1.72.0")
 
     def requirements(self):
-        self.requires("glib/2.70.1")
-        self.requires("libxml2/2.9.12")
-        self.requires("zlib/1.2.11")
+        self.requires("glib/2.74.0")
+        self.requires("libxml2/2.9.14")
+        self.requires("zlib/1.2.12")
         if self.options.usb:
-            self.requires("libusb/1.0.24")
+            self.requires("libusb/1.0.26")
         if self.options.gst_plugin:
             self.requires("gstreamer/1.19.2")
             self.requires("gst-plugins-base/1.19.2")
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_meson(self):
         if self._meson:
@@ -115,19 +110,19 @@ class AravisConan(ConanFile):
         return self._meson
 
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         with tools.environment_append(RunEnvironment(self).vars):
             meson = self._configure_meson()
             meson.build()
 
     def _fix_library_names(self, path):
         # https://github.com/mesonbuild/meson/issues/1412
-        if not self.options.shared and self._is_msvc:
-            with tools.chdir(path):
+        if not self.options.shared and is_msvc(self):
+            with chdir(self, path):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
-                    self.output.info("rename %s into %s" % (filename_old, filename_new))
-                    tools.rename(filename_old, filename_new)
+                    self.output.info(f"rename {filename_old} into {filename_new}")
+                    rename(self, filename_old, filename_new)
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses", keep_path=False)
@@ -138,10 +133,10 @@ class AravisConan(ConanFile):
         self._fix_library_names(os.path.join(self.package_folder, "lib"))
         if self.options.gst_plugin:
             self._fix_library_names(os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(self.package_folder, "*.pdb")
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
         if not self.options.tools:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "arv-*")
+            rm(self, "arv-*", os.path.join(self.package_folder, "bin"))
 
     def package_id(self):
         self.info.requires["glib"].full_package_mode()
@@ -150,7 +145,7 @@ class AravisConan(ConanFile):
             self.info.requires["gst-plugins-base"].full_package_mode()
 
     def package_info(self):
-        aravis_name = "aravis-{}".format(self._aravis_api_version)
+        aravis_name = f"aravis-{self._aravis_api_version}"
         self.cpp_info.names["pkg_config"] = aravis_name
         self.cpp_info.includedirs = [os.path.join("include", aravis_name)]
         self.cpp_info.libs = [aravis_name]
@@ -161,9 +156,9 @@ class AravisConan(ConanFile):
 
         if self.options.tools:
             bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.output.info(f"Appending PATH environment variable: {bin_path}")
             self.env_info.PATH.append(bin_path)
         if self.options.gst_plugin and self.options.shared:
             gst_plugin_path = os.path.join(self.package_folder, "lib", "gstreamer-1.0")
-            self.output.info("Appending GST_PLUGIN_PATH env var: {}".format(gst_plugin_path))
+            self.output.info(f"Appending GST_PLUGIN_PATH env var: {gst_plugin_path}")
             self.env_info.GST_PLUGIN_PATH.append(gst_plugin_path)
