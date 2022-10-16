@@ -11,10 +11,7 @@ sources:
 patches:
   "6.4.2":
     - patch_file: "patches/0001-include-install-directory-6.x.patch"
-      base_path: "source_subfolder"
   "5.1.6":
     - patch_file: "patches/0001-include-install-directory-5.x.patch"
-      base_path: "source_subfolder"
   "4.10.0":
     - patch_file: "patches/0001-include-install-directory-5.x.patch"
-      base_path: "source_subfolder"
