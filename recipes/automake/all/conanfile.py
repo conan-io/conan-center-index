@@ -1,3 +1,5 @@
+from os import path
+
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
@@ -96,7 +98,7 @@ class AutomakeConan(ConanFile):
         apply_conandata_patches(self)
         if self.settings.os == "Windows":
             # tracing using m4 on Windows returns Windows paths => use cygpath to convert to unix paths
-            replace_in_file(self, self.source_path.joinpath("bin", "aclocal.in"),
+            replace_in_file(self, path.join(self.source_folder, "bin", "aclocal.in"),
                             "          $map_traced_defs{$arg1} = $file;",
                             "          $file = `cygpath -u $file`;\n"
                             "          $file =~ s/^\\s+|\\s+$//g;\n"
@@ -110,69 +112,68 @@ class AutomakeConan(ConanFile):
         autotools = Autotools(self)
         autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])  # Need to specify the `DESTDIR` as a Unix path, aware of the subsystem
 
-        copy(self, "COPYING*", src=self.source_folder, dst=self.package_path.joinpath("licenses"))
-        rmdir(self, self.package_path.joinpath("res", "info"))
-        rmdir(self, self.package_path.joinpath("res", "man"))
-        rmdir(self, self.package_path.joinpath("res", "doc"))
+        copy(self, "COPYING*", src=self.source_folder, dst=path.join(self.package_folder, "licenses"))
+        for sub_path in ("info", "man", "doc"):
+            rmdir(self, path.join(self.package_folder, "res", sub_path))
 
     def package_info(self):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
 
-        bin_path = self.package_path.joinpath("bin")
+        bin_path = path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH environment variable: {bin_path}")
-        self.env_info.PATH.append(str(bin_path))
+        self.env_info.PATH.append(bin_path)
 
-        dataroot_path = self.package_path.joinpath("res")
+        dataroot_path = path.join(self.package_folder, "res")
         self.output.info(f"Defining AUTOMAKE_DATADIR environment variable: {dataroot_path}")
-        self.env_info.AUTOMAKE_DATADIR = str(dataroot_path)
-        self.buildenv_info.define_path("AUTOMAKE_DATADIR", str(dataroot_path))
+        self.env_info.AUTOMAKE_DATADIR = dataroot_path
+        self.buildenv_info.define_path("AUTOMAKE_DATADIR", dataroot_path)
 
         version = Version(self.version)
-        automake_dataroot_path = dataroot_path.joinpath(f"automake-{version.major}.{version.minor}")
+        automake_dataroot_path = path.join(dataroot_path, f"automake-{version.major}.{version.minor}")
         self.output.info(f"Defining AUTOMAKE_LIBDIR environment variable: {automake_dataroot_path}")
-        self.env_info.AUTOMAKE_LIBDIR = str(automake_dataroot_path)
-        self.buildenv_info.define_path("AUTOMAKE_LIBDIR", str(automake_dataroot_path))
+        self.env_info.AUTOMAKE_LIBDIR = automake_dataroot_path
+        self.buildenv_info.define_path("AUTOMAKE_LIBDIR", automake_dataroot_path)
 
         self.output.info(f"Defining AUTOMAKE_PERLLIBDIR environment variable: {automake_dataroot_path}")
-        self.env_info.AUTOMAKE_PERLLIBDIR = str(automake_dataroot_path)
-        self.buildenv_info.define_path("AUTOMAKE_PERLLIBDIR", str(automake_dataroot_path))
+        self.env_info.AUTOMAKE_PERLLIBDIR = automake_dataroot_path
+        self.buildenv_info.define_path("AUTOMAKE_PERLLIBDIR", automake_dataroot_path)
 
-        aclocal_bin = bin_path.joinpath("aclocal")
+        aclocal_bin = path.join(bin_path, "aclocal")
         self.output.info(f"Defining ACLOCAL environment variable: {aclocal_bin}")
-        self.env_info.ACLOCAL = str(aclocal_bin)
-        self.buildenv_info.define_path("ACLOCAL", str(aclocal_bin))
+        self.env_info.ACLOCAL = aclocal_bin
+        self.buildenv_info.define_path("ACLOCAL", aclocal_bin)
 
         aclocal_bin_conf_key = "user.automake:aclocal"
         self.output.info(f"Defining path to aclocal binary in configuration as `{aclocal_bin_conf_key}` with value: {aclocal_bin}")
-        self.conf_info.define(aclocal_bin_conf_key, str(aclocal_bin))
+        self.conf_info.define(aclocal_bin_conf_key, aclocal_bin)
 
-        automake_bin = bin_path.joinpath("automake")
+        automake_bin = path.join(bin_path, "automake")
         self.output.info(f"Defining AUTOMAKE environment variable: {automake_bin}")
-        self.env_info.AUTOMAKE = str(automake_bin)
-        self.buildenv_info.define_path("AUTOMAKE", str(automake_bin))
+        self.env_info.AUTOMAKE = automake_bin
+        self.buildenv_info.define_path("AUTOMAKE", automake_bin)
 
         automake_bin_conf_key = "user.automake:automake"
         self.output.info(f"Defining path to automake binary in configuration as `{automake_bin_conf_key}` with value: {automake_bin}")
-        self.conf_info.define(automake_bin_conf_key, str(automake_bin))
+        self.conf_info.define(automake_bin_conf_key, automake_bin)
 
-        compile_bin = automake_dataroot_path.joinpath("compile")
+        compile_bin = path.join(automake_dataroot_path, "compile")
         self.output.info(f"Define path to `compile` binary in user_info as: {compile_bin}")
-        self.user_info.compile = str(compile_bin)
+        self.user_info.compile = compile_bin
         compile_conf_key = "user.automake:compile"
         self.output.info(f"Defining path to `compile` binary in configuration as `{compile_conf_key}` with value: {compile_bin}")
-        self.conf_info.define(compile_conf_key, str(compile_bin))
+        self.conf_info.define(compile_conf_key, compile_bin)
 
-        ar_lib_bin = automake_dataroot_path.joinpath("ar-lib")
+        ar_lib_bin = path.join(automake_dataroot_path, "ar-lib")
         self.output.info(f"Define path to ar_lib binary in user_info as: {ar_lib_bin}")
-        self.user_info.ar_lib = str(ar_lib_bin)
+        self.user_info.ar_lib = ar_lib_bin
         ar_lib_conf_key = "user.automake:ar-lib"
         self.output.info(f"Defining path to ar-lib binary in configuration as `{ar_lib_conf_key}` with value: {ar_lib_bin}")
-        self.conf_info.define(ar_lib_conf_key, str(ar_lib_bin))
+        self.conf_info.define(ar_lib_conf_key, ar_lib_bin)
 
-        install_sh_bin = automake_dataroot_path.joinpath("install-sh")
+        install_sh_bin = path.join(automake_dataroot_path, "install-sh")
         self.output.info(f"Define path to install_sh binary in user_info as: {install_sh_bin}")
-        self.user_info.install_sh = str(install_sh_bin)
+        self.user_info.install_sh = install_sh_bin
         install_sh_conf_key = "user.automake:install-sh"
         self.output.info(f"Defining path to install_sh binary in configuration as `{install_sh_conf_key}` with value: {install_sh_bin}")
-        self.conf_info.define(install_sh_conf_key, str(install_sh_bin))
+        self.conf_info.define(install_sh_conf_key, install_sh_bin)
