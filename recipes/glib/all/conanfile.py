@@ -73,7 +73,7 @@ class GLibConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.2.12")
-        self.requires("libffi/3.4.2")
+        self.requires("libffi/3.4.3")
         if self.options.with_pcre:
             if Version(self.version) >= "2.73.2":
                 self.requires("pcre2/10.40")
@@ -279,9 +279,11 @@ class GLibConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.components["glib-2.0"].system_libs += ["ws2_32", "ole32", "shell32", "user32", "advapi32"]
             self.cpp_info.components["gio-2.0"].system_libs.extend(["iphlpapi", "dnsapi", "shlwapi"])
+            self.cpp_info.components["gio-windows-2.0"].set_property("pkg_config_name", "gio-windows-2.0")
             self.cpp_info.components["gio-windows-2.0"].requires = ["gobject-2.0", "gmodule-no-export-2.0", "gio-2.0"]
             self.cpp_info.components["gio-windows-2.0"].includedirs = [os.path.join("include", "gio-win32-2.0")]
         else:
+            self.cpp_info.components["gio-unix-2.0"].set_property("pkg_config_name", "gio-unix-2.0")
             self.cpp_info.components["gio-unix-2.0"].requires += ["gobject-2.0", "gio-2.0"]
             self.cpp_info.components["gio-unix-2.0"].includedirs = [os.path.join("include", "gio-unix-2.0")]
 
