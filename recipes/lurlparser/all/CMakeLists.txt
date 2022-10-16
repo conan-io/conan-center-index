@@ -8,6 +8,7 @@ set_target_properties(lurlparser PROPERTIES
     PUBLIC_HEADER  ${LURLPARSER_SRC_DIR}/LUrlParser.h
     CMAKE_CXX_STANDARD_REQUIRED ON
     CMAKE_CXX_EXTENSIONS OFF
+    WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 
 include(GNUInstallDirs)
