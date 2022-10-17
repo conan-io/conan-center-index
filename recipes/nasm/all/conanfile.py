@@ -94,7 +94,6 @@ class NASMConan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.configure()
-            autotools.configure()
 
             # GCC9 - "pure" attribute on function returning "void"
             replace_in_file(self, "Makefile", "-Werror=attributes", "")
