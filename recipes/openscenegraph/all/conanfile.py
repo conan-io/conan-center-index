@@ -94,7 +94,7 @@ class OpenSceneGraphConanFile(ConanFile):
             # Default to false with fontconfig until it is supported on Windows
             self.options.use_fontconfig = False
 
-        if is_apple_os(self.settings.os):
+        if is_apple_os(self):
             # osg uses imageio on Apple platforms
             del self.options.with_gif
             del self.options.with_jpeg
@@ -337,7 +337,7 @@ class OpenSceneGraphConanFile(ConanFile):
         if self.options.enable_windowing_system:
             if self.settings.os == "Linux":
                 library.requires.append("xorg::xorg")
-            elif is_apple_os(self.settings.os):
+            elif is_apple_os(self):
                 library.frameworks = ["Cocoa"]
         if self.settings.os == "Windows":
             library.system_libs = ["gdi32"]
@@ -483,7 +483,7 @@ class OpenSceneGraphConanFile(ConanFile):
         # with_directshow
         # setup_plugin("directshow")
 
-        if is_apple_os(self.settings.os):
+        if is_apple_os(self):
             setup_plugin("imageio").frameworks = ["Accelerate"]
 
         if ((self.settings.os == "Macos" and self.settings.os.version and Version(self.settings.os.version) >= "10.8")
