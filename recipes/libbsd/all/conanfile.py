@@ -39,7 +39,7 @@ class LibBsdConan(ConanFile):
         del self.settings.compiler.cppstd
     
     def validate(self):
-        if not tools.is_apple_os(self.settings.os) and self.settings.os != "Linux":
+        if not tools.is_apple_os(self.settings.os) and self.settings.os not in ("Linux", "Android"):
             raise ConanInvalidConfiguration("libbsd is only available for GNU-like operating systems (e.g. Linux)")
 
     def source(self):
