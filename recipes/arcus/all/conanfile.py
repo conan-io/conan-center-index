@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 import textwrap
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.52.0"
 
 
 class ArcusConan(ConanFile):
@@ -29,6 +29,9 @@ class ArcusConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -66,18 +69,8 @@ class ArcusConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        # Do not force PIC
-        replace_in_file(self, cmakelists, "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
-        replace_in_file(self, cmakelists, "set_target_properties(Arcus PROPERTIES COMPILE_FLAGS -fPIC)", "")
-        # Link to protobuf imported target
-        replace_in_file(self, cmakelists,
-                              "target_link_libraries(Arcus PUBLIC ${PROTOBUF_LIBRARIES})",
-                              "target_link_libraries(Arcus PUBLIC protobuf::libprotobuf)")
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
