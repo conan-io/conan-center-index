@@ -125,7 +125,7 @@ class LiefConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "LIEF")
         self.cpp_info.set_property("cmake_target_name", "LIEF::LIEF")
-        self.cpp_info.set_property("pkg_config_name", "lief")
+        self.cpp_info.set_property("pkg_config_name", "LIEF")
 
         if self.options.shared:
             self.cpp_info.defines.append("LIEF_IMPORT")
@@ -139,4 +139,4 @@ class LiefConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "LIEF"
         self.cpp_info.names["cmake_find_package"] = "LIEF"
         self.cpp_info.names["cmake_find_package_multi"] = "LIEF"
-        self.cpp_info.names["pkg_config"] = "lief"
+        self.cpp_info.names["pkg_config"] = "LIEF"
