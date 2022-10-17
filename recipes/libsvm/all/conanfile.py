@@ -63,7 +63,7 @@ class libsvmConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "COPYRIGHT", src=self.source_folder, dst="licenses")
+        copy(self, "COPYRIGHT", src=self.source_folder, dst=os.path.joins(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
