@@ -1,4 +1,0 @@
-sources:
-  "latest":
-    url: https://github.com/GIPdA/runtimeqml/archive/refs/heads/master.zip
-    sha256: "1bf2b8a6e9b9114ec94208db63a0f8de8becc2d85ca57661099d81e3122ecc47"

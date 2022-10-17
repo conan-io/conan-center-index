@@ -33,7 +33,10 @@ class RuntimeQml(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def requirements(self):
-        self.requires("qt/[>=6.0.0]")
+        if self.version == "qt5":
+            self.requires("qt/[>=5.0.0 <6.0.0]")
+        else:
+            self.requires("qt/[>=6.0.0]")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,8 +48,8 @@ class RuntimeQml(ConanFile):
 
     def validate(self):
         qt = self.dependencies["qt"]
-        if not qt.options.qtdeclarative and not qt.options.qtshaderTools:
-            raise ConanInvalidConfiguration(f"{self.ref} requires option qt:qtdeclarative=True and qt::qtshadertools=True")
+        if not qt.options.qtdeclarative:
+            raise ConanInvalidConfiguration(f"{self.ref} requires option qt:qtdeclarative=True")
 
     def build(self):
         cmake = CMake(self)
@@ -60,7 +63,7 @@ class RuntimeQml(ConanFile):
         self.copy(pattern="*.dylib", dst="lib", keep_path=False)
         self.copy(pattern="*.so", dst="lib", keep_path=False)
         self.copy(pattern="*.dll", dst="bin", keep_path=False)
-        self.copy(pattern="*.hpp", src=self.source_folder,
+        self.copy(pattern="*.h*", src=self.source_folder,
                   dst="include", keep_path=False)
 
     def package_info(self):
