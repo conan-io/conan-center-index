@@ -12,7 +12,7 @@ class TheoraConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xiph/theora"
     description = "Theora is a free and open video compression format from the Xiph.org Foundation"
-    topics = ("theora", "video", "video-compressor", "video-format")
+    topics = "video", "video-compressor", "video-format"
 
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -39,7 +39,7 @@ class TheoraConan(ConanFile):
             pass
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("ogg/1.3.5")
@@ -68,8 +68,6 @@ class TheoraConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "theora")
-        self.cpp_info.set_property("cmake_target_name", "theora::theora")
         self.cpp_info.set_property("pkg_config_name", "theora")
 
         self.cpp_info.components["theora"].libs = ["theora"]
