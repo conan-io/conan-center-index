@@ -114,7 +114,7 @@ class NASMConan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.install()
-            rmdir(self, os.path.join(self.package_folder, "res"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
