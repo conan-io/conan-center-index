@@ -1,0 +1,15 @@
+diff --git a/src/funopen.c b/src/funopen.c
+index 1e6f43a..c96108b 100644
+--- a/src/funopen.c
++++ b/src/funopen.c
+@@ -143,6 +143,10 @@ funopen(const void *cookie,
+  * they will not add the needed support to implement it. Just ignore this
+  * interface there, as it has never been provided anyway.
+  */
++#elif defined(__ANDROID__)
++/*
++ * The Android NDK sysroot does not have fopencookie.
++ */
+ #else
+ #error "Function funopen() needs to be ported or disabled."
+ #endif
