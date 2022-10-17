@@ -20,7 +20,9 @@ class TheoraConan(ConanFile):
 
     # original theora.def from: "https://raw.githubusercontent.com/xiph/theora/v1.1.1/lib/theora.def"
     # edited to change library name to just "theora"
-    exports_sources = "CMakeLists.txt", "conan-theora.def"
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder,"src"))
+        copy(self, "conan-theora.def", self.recipe_folder, os.path.join(self.export_sources_folder,"src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
