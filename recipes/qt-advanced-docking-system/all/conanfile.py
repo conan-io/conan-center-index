@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir
 from conans import CMake
 import os
 
@@ -36,7 +36,7 @@ class QtADS(ConanFile):
         return "source_subfolder"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
         export_conandata_patches(self)
 
     def config_options(self):
