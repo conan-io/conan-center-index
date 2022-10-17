@@ -9,8 +9,6 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgCon
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
-# TODO: Migrate
-from conans.tools import get_env
 
 import os
 import re
@@ -210,7 +208,7 @@ class LibcurlConan(ConanFile):
         else:
             self.tool_requires("libtool/2.4.6")
             self.tool_requires("pkgconf/1.7.4")
-            if self._settings_build.os == "Windows" and not get_env("CONAN_BASH_PATH") and not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
+            if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
                 self.tool_requires("msys2/cci.latest")
 
     def layout(self):
