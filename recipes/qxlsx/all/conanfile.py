@@ -42,7 +42,10 @@ class QXlsxConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("qt/5.15.7")
+        if Version(self.version) <= "1.4.4":
+            self.requires("qt/5.15.2")
+        else:
+            self.requires("qt/6.4.2")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
