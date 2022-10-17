@@ -5,7 +5,7 @@ import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 
 class QarchiveConan(ConanFile):
