@@ -80,7 +80,7 @@ jobs:
       - name: Get changed files (conandata)
         id: changed_files_conandata
         if: always()
-        uses: tj-actions/changed-files@v20
+        uses: tj-actions/changed-files@v32
         with:
           files: |
             ${{ env.CONANDATA_FILES_PATH }}
