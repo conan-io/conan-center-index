@@ -1,7 +1,12 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
+from conan.tools.files import apply_conandata_patches, copy, get
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.49.1"
 
 
 class DatadogOpenTracingConan(ConanFile):
@@ -22,17 +27,6 @@ class DatadogOpenTracingConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     @property
     def _compilers_minimum_version(self):
         return {
@@ -42,8 +36,22 @@ class DatadogOpenTracingConan(ConanFile):
             "apple-clang": "7",
         }
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_PLUGIN"] = False
+        tc.variables["BUILD_SHARED"] = self.options.shared
+        tc.variables["BUILD_STATIC"] = not self.options.shared
+        tc.variables["BUILD_TESTING"] = False
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
     def export_sources(self):
-        self.copy("CMakeLists.txt")
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
@@ -64,38 +72,27 @@ class DatadogOpenTracingConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 14)
+            check_min_cppstd(self, 14)
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
+            if Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("Datadog-opentracing requires C++14, which your compiler does not support.")
         else:
             self.output.warn("Datadog-opentracing requires C++14. Your compiler is unknown. Assuming it supports C++14.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_PLUGIN"] = False
-        self._cmake.definitions["BUILD_SHARED"] = self.options.shared
-        self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        self.copy("LICENSE", dst="licenses", src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
