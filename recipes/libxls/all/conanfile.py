@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
-from conan.tools.files import apply_conandata_patches, rmdir, copy, save, replace_in_file, get, rm
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, rmdir, copy, save, replace_in_file, get, rm
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.apple import is_apple_os
 from conan.tools.env import VirtualBuildEnv
@@ -10,7 +10,7 @@ from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.0"
 
 class LibxlsConan(ConanFile):
     name = "libxls"
@@ -32,8 +32,7 @@ class LibxlsConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -119,7 +118,7 @@ class LibxlsConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["xlsreader"]
 
-        if self.settings.os == "Macos":
+        if is_apple_os(self):
             self.cpp_info.system_libs.append("iconv")
 
         self.cpp_info.set_property("cmake_file_name", "libxls")
