@@ -53,7 +53,7 @@ class JxrlibConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if is_msvc(self) and self.options.shared:
+        if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} shared not supported by Visual Studio")
 
     def source(self):
