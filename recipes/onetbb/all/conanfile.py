@@ -65,6 +65,12 @@ class OneTBBConan(ConanFile):
                     self.version,
                 ))
         if not self.options.get_safe("shared", True):
+            if Version(self.version) >= "2021.6.0":
+                raise ConanInvalidConfiguration(
+                    "Building oneTBB as a static library is highly discouraged and not supported "
+                    "to avoid unforeseen issues like https://github.com/oneapi-src/oneTBB/issues/920. "
+                    "Please consider fixing at least the aforementioned issue in upstream."
+                )
             self.output.warn(
                 "oneTBB strongly discourages usage of static linkage")
         if (self.options.tbbproxy
