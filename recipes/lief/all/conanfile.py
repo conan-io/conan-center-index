@@ -72,8 +72,8 @@ class LiefConan(ConanFile):
         if self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) <= "14" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} does not support Visual Studio <= 14 with shared:True")
 
-        if self.info.settings.compiler == "gcc" and self.info.settings.compiler.get_safe("libcxx") == "libstdc++":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support gcc with libstdc++")
+        if self.info.settings.compiler.get_safe("libcxx") == "libstdc++":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support libstdc++")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
