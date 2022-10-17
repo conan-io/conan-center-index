@@ -31,7 +31,10 @@ class TheoraConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except ConanException:
+                pass
         try:
             del self.settings.compiler.libcxx
         except ConanException:
