@@ -1,9 +1,14 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
+from conan.tools.files import get, copy, rmdir
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class RestinioConan(ConanFile):
@@ -28,21 +33,13 @@ class RestinioConan(ConanFile):
         "with_pcre": None,
     }
 
-    generators = "cmake"
-    exports_sources = ["CMakeLists.txt"]
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def layout(self):
+        basic_layout(self)
 
     def requirements(self):
         self.requires("http_parser/2.9.4")
 
-        if tools.Version(self.version) >= "0.6.16":
+        if Version(self.version) >= "0.6.16":
             self.requires("fmt/9.0.0")
         else:
             self.requires("fmt/8.1.1")
@@ -53,12 +50,12 @@ class RestinioConan(ConanFile):
         self.requires("variant-lite/2.0.0")
 
         if self.options.asio == "standalone":
-            if tools.Version(self.version) >= "0.6.9":
+            if Version(self.version) >= "0.6.9":
                 self.requires("asio/1.22.1")
             else:
                 self.requires("asio/1.16.1")
         else:
-            if tools.Version(self.version) >= "0.6.9":
+            if Version(self.version) >= "0.6.9":
                 self.requires("boost/1.78.0")
             else:
                 self.requires("boost/1.73.0")
@@ -75,51 +72,53 @@ class RestinioConan(ConanFile):
             self.requires("pcre2/10.40")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def validate(self):
         minimal_cpp_standard = "14"
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, minimal_cpp_standard)
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, minimal_cpp_standard)
         minimal_version = {
             "gcc": "5",
             "clang": "3.4",
             "apple-clang": "10",
-            "Visual Studio": "15"
         }
-        compiler = str(self.settings.compiler)
-        if compiler not in minimal_version:
-            self.output.warn(
-                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
-            self.output.warn(
-                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
-            return
-        version = tools.Version(self.settings.compiler.version)
-        if version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+        check_min_vs(self, 190)
+        if not is_msvc(self):
+            minimum_version = minimal_version.get(str(self.info.settings.compiler), False)
+            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{minimal_cpp_standard}, which your compiler does not support."
+                )
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["RESTINIO_INSTALL"] = True
+        tc.variables["RESTINIO_FIND_DEPS"] = False
+        tc.variables["RESTINIO_USE_EXTERNAL_EXPECTED_LITE"] = True
+        tc.variables["RESTINIO_USE_EXTERNAL_OPTIONAL_LITE"] = True
+        tc.variables["RESTINIO_USE_EXTERNAL_STRING_VIEW_LITE"] = True
+        tc.variables["RESTINIO_USE_EXTERNAL_VARIANT_LITE"] = True
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["RESTINIO_INSTALL"] = True
-        cmake.definitions["RESTINIO_FIND_DEPS"] = False
-        cmake.definitions["RESTINIO_USE_EXTERNAL_EXPECTED_LITE"] = True
-        cmake.definitions["RESTINIO_USE_EXTERNAL_OPTIONAL_LITE"] = True
-        cmake.definitions["RESTINIO_USE_EXTERNAL_STRING_VIEW_LITE"] = True
-        cmake.definitions["RESTINIO_USE_EXTERNAL_VARIANT_LITE"] = True
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        get(self, **self.conan_data["sources"][self.version],
+                destination=self.source_folder, strip_root=True)
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, "dev", "restinio"))
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
         self.cpp_info.set_property("cmake_file_name", "restinio")
         self.cpp_info.set_property("cmake_target_name", "restinio::restinio")
         self.cpp_info.defines.extend(["RESTINIO_EXTERNAL_EXPECTED_LITE", "RESTINIO_EXTERNAL_OPTIONAL_LITE",
