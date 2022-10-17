@@ -121,13 +121,12 @@ class LiefConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["LIEF"]
 
         self.cpp_info.set_property("cmake_file_name", "LIEF")
         self.cpp_info.set_property("cmake_target_name", "LIEF::LIEF")
         self.cpp_info.set_property("pkg_config_name", "lief")
 
-        self.cpp_info.defines = ["_GLIBCXX_USE_CXX11_ABI=1"]
         if self.options.shared:
             self.cpp_info.defines.append("LIEF_IMPORT")
         if is_msvc(self):
