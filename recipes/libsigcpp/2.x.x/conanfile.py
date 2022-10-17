@@ -2,6 +2,8 @@ from conan import ConanFile
 from conan.tools import build, files
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.env import VirtualBuildEnv
 from conan.errors import ConanInvalidConfiguration
 
 import glob
@@ -29,7 +31,6 @@ class LibSigCppConanV2(ConanFile):
         "fPIC": True,
     }
 
-    generators = "pkg_config"
     short_paths = True
 
     def validate(self):
@@ -47,13 +48,16 @@ class LibSigCppConanV2(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        self.tool_requires("meson/0.63.1")
-        self.tool_requires("pkgconf/1.7.4")
+        self.tool_requires("meson/0.63.3")
+        self.tool_requires("pkgconf/1.9.3")
 
     def layout(self):
-        return basic_layout(self, src_folder="source_subfolder")
+        basic_layout(self, src_folder="src")
 
     def generate(self):
+        deps = PkgConfigDeps(self)
+        deps.generate()
+
         tc = MesonToolchain(self)
         tc.project_options.update({
             "build-examples": "false",
@@ -61,6 +65,9 @@ class LibSigCppConanV2(ConanFile):
             "default_library": "shared" if self.options.shared else "static"
         })
         tc.generate()
+
+        env = VirtualBuildEnv(self)
+        env.generate()
 
     def source(self):
         files.get(self,
@@ -74,17 +81,14 @@ class LibSigCppConanV2(ConanFile):
             files.replace_in_file(self,
                 os.path.join(self.source_folder, "sigc++config.h.meson"),
                 "define SIGC_DLL 1", "undef SIGC_DLL")
-        meson = self._configure_meson()
-        meson.build()
-
-    def _configure_meson(self):
+        files.replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('tests')", "")
         meson = Meson(self)
         meson.configure()
-        return meson
+        meson.build()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self.source_folder)
-        meson = self._configure_meson()
+        meson = Meson(self)
         meson.install()
         if self.settings.compiler == "Visual Studio":
             files.rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))

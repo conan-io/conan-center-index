@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools import build, files
-from conan.tools.cmake import CMake
+from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 
@@ -29,14 +29,10 @@ class LibSigCppConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    generators = "CMakeToolchain"
-    _cmake = None
+    short_paths = True
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        files.export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -72,7 +68,11 @@ class LibSigCppConan(ConanFile):
             raise ConanInvalidConfiguration("libsigcpp requires C++17, which your compiler does not support.")
 
     def layout(self):
-        return basic_layout(self, src_folder="source_subfolder")
+        return basic_layout(self, src_folder="src")
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version],
