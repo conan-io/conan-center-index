@@ -150,7 +150,7 @@ class OpenTelemetryCppConan(ConanFile):
     @property
     def _otel_cmake_variables_path(self):
         return os.path.join(self._module_subfolder,
-                            "conan-official-{}-variables.cmake".format(self.name))
+                            f"conan-official-{self.name}-variables.cmake")
 
     @property
     def _otel_build_modules(self):
