@@ -53,7 +53,7 @@ class LibSigCppConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-           build.check_min_cppstd(self, 17)
+            build.check_min_cppstd(self, 17)
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -78,25 +78,19 @@ class LibSigCppConan(ConanFile):
         files.get(self, **self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure()
-        return self._cmake
-
     def build(self):
         files.apply_conandata_patches(self)
         if not self.options.shared:
             files.replace_in_file(self, os.path.join(self.source_folder, "sigc++config.h.cmake"),
                                   "define SIGC_DLL 1", "undef SIGC_DLL")
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self.source_folder)
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
+        files.copy(self, os.path.join(self.source_folder, "COPYING"), os.path.join(self.package_folder, "licenses"))
         for header_file in glob.glob(os.path.join(self.package_folder, "lib", "sigc++-3.0", "include", "*.h")):
             shutil.move(
                 header_file,
