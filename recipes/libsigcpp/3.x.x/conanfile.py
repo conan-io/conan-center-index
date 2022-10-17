@@ -90,7 +90,7 @@ class LibSigCppConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        files.copy(self, os.path.join(self.source_folder, "COPYING"), os.path.join(self.package_folder, "licenses"))
+        files.copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         for header_file in glob.glob(os.path.join(self.package_folder, "lib", "sigc++-3.0", "include", "*.h")):
             shutil.move(
                 header_file,
@@ -108,17 +108,17 @@ class LibSigCppConan(ConanFile):
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
+            """)
         files.save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "sigc++-3")
