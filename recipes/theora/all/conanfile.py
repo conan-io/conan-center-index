@@ -1,7 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
-from conan.tools.files import copy, download, get
+from conan.tools.files import copy, get
 from conan.tools.microsoft import is_msvc
+from conan.errors import ConanException
 import os
 
 required_conan_version = ">=1.52.0"
@@ -33,11 +34,11 @@ class TheoraConan(ConanFile):
             del self.options.fPIC
         try:
             del self.settings.compiler.libcxx
-        except Exception:
+        except ConanException:
             pass
         try:
             del self.settings.compiler.cppstd
-        except Exception:
+        except ConanException:
             pass
 
     def layout(self):
