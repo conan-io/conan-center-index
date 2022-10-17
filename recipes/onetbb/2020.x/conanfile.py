@@ -195,6 +195,17 @@ class OneTBBConan(ConanFile):
                 extra += " compiler=icl"
             else:
                 extra += " compiler=cl"
+        cxx_std_flag = tools.cppstd_flag(self.settings)
+        if cxx_std_flag:
+            cxx_std_value = (
+                cxx_std_flag.split("=")[1]
+                if "=" in cxx_std_flag
+                else cxx_std_flag.split(":")[1]
+                if ":" in cxx_std_flag
+                else None
+            )
+            if cxx_std_value:
+                extra += f" stdver={cxx_std_value}"
 
         make = tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make") or tools.which("mingw32-make"))
         if not make:
