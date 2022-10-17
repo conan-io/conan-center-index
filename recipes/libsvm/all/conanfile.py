@@ -43,7 +43,7 @@ class libsvmConan(ConanFile):
             )
 
     def layout(self):
-        cmake_layout(self, src_folder="source_subfolder")
+        cmake_layout(self, src_folder="src")
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
@@ -54,6 +54,7 @@ class libsvmConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["LIBSVM_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.generate()
 
     def build(self):
