@@ -71,6 +71,9 @@ class DiligentToolsConan(ConanFile):
         if self.options.shared:
             raise ConanInvalidConfiguration("Can't build diligent tools as shared lib")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/3.24.2")
+
     def requirements(self):
         if self.version == "cci.20211009":
             self.requires("diligent-core/2.5.1")
