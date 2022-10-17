@@ -9,7 +9,7 @@ import os
 import shutil
 import textwrap
 
-required_conan_version = ">=1.50.2"
+required_conan_version = ">=1.53.0"
 
 
 class LibSigCppConan(ConanFile):

@@ -8,7 +8,7 @@ import glob
 import os
 import shutil
 
-required_conan_version = ">=1.50.2"
+required_conan_version = ">=1.53.0"
 
 
 class LibSigCppConanV2(ConanFile):
