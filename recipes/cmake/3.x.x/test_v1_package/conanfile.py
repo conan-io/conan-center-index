@@ -6,7 +6,7 @@ from conan.tools.build import can_run
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch"
-    generators = "VirtualRunEnv"
+    test_type = "explicit"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
@@ -14,7 +14,7 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             output = StringIO()
-            self.run("cmake --version", env="conanrun", output=output)
+            self.run("cmake --version", output=output, run_environment=True)
             output_str = str(output.getvalue())
             self.output.info("Installed version: {}".format(output_str))
             require_version = str(self.deps_cpp_info["cmake"].version)
