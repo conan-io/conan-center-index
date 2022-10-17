@@ -5,3 +5,6 @@ sources:
   "v2022.03.0":
     url: "https://github.com/jfalcou/eve/archive/refs/tags/v2022.03.0.tar.gz"
     sha256: "8bf9faea516806e7dd468e778dcedc81c51f0b2c6a70b9c75987ce12bb759911"
+  "v2022.09.0":
+    url: "https://github.com/jfalcou/eve/archive/refs/tags/v2022.09.0.tar.gz"
+    sha256: "53a4e1944a1080c67380a6d7f4fb42998f1c1db35e2370e02d7853c3ac1e0a33"
