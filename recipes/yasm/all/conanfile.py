@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain
-from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout, cmake_layout
 from conan.tools.microsoft import is_msvc
@@ -42,10 +42,6 @@ class YASMConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0],
                   destination=self.source_folder, strip_root=True)
-
-    @property
-    def _msvc_subfolder(self):
-        return os.path.join(self.source_folder, "Mkfiles", "vc12")
 
     def _generate_autotools(self):
         tc = AutotoolsToolchain(self)
