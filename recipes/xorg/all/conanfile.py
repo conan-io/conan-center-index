@@ -12,7 +12,7 @@ class XorgConan(ConanFile):
     license = "MIT"
     homepage = "https://www.x.org/wiki/"
     description = "The X.Org project provides an open source implementation of the X Window System."
-    settings = "os"
+    settings = "os", "arch"
     topics = ("x11", "xorg")
 
     def validate(self):
