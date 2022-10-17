@@ -93,7 +93,7 @@ class NASMConan(ConanFile):
                 shutil.copy("ndisasm.exe", "ndisasmw.exe")
         else:
             autotools = Autotools(self)
-            autotools.autoreconf()
+            autotools.configure()
             autotools.configure()
 
             # GCC9 - "pure" attribute on function returning "void"
