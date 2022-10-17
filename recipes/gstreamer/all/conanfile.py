@@ -1,10 +1,14 @@
-from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile,
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, chdir, rmdir, rm
+from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
+from conans import tools, Meson, VisualStudioBuildEnvironment
 import glob
 import os
 import shutil
 
-required_conan_version = ">=1.29"
+required_conan_version = ">=1.52.0"
 
 class GStreamerConan(ConanFile):
     name = "gstreamer"
@@ -36,11 +40,7 @@ class GStreamerConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires("glib/2.72.0")
-
-    @property
-    def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        self.requires("glib/2.74.0")
 
     def configure(self):
         if self.options.shared:
@@ -58,26 +58,25 @@ class GStreamerConan(ConanFile):
             raise ConanInvalidConfiguration("shared GStreamer cannot link to static GLib")
 
     def build_requirements(self):
-        self.build_requires("meson/0.61.2")
-        self.build_requires("pkgconf/1.7.4")
+        self.build_requires("meson/0.63.3")
+        self.build_requires("pkgconf/1.9.3")
         if self.options.with_introspection:
-            self.build_requires("gobject-introspection/1.70.0")
+            self.build_requires("gobject-introspection/1.72.0")
         if self.settings.os == 'Windows':
             self.build_requires("winflexbison/2.5.24")
         else:
-            self.build_requires("bison/3.7.6")
+            self.build_requires("bison/3.8.2")
             self.build_requires("flex/2.6.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("%s-%s" % (self.name, self.version), self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_meson(self):
         if self._meson:
             return self._meson
         meson = Meson(self)
-        if self._is_msvc:
-            if tools.Version(self.settings.compiler.version) < "14":
+        if is_msvc(self):
+            if Version(self.settings.compiler.version) < "14":
                 meson.options["c_args"] = " -Dsnprintf=_snprintf"
                 meson.options["cpp_args"] = " -Dsnprintf=_snprintf"
         if self.settings.get_safe("compiler.runtime"):
@@ -94,31 +93,31 @@ class GStreamerConan(ConanFile):
         return self._meson
 
     def build(self):
-        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
+        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if is_msvc(self) else tools.no_op():
             meson = self._configure_meson()
             meson.build()
 
     def _fix_library_names(self, path):
         # regression in 1.16
         if self.settings.compiler == "Visual Studio":
-            with tools.chdir(path):
+            with chdir(self, path):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
-                    self.output.info("rename %s into %s" % (filename_old, filename_new))
+                    self.output.info(f"rename {filename_old} into {filename_new}")
                     shutil.move(filename_old, filename_new)
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
+        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if is_msvc(self) else tools.no_op():
             meson = self._configure_meson()
             meson.install()
 
         self._fix_library_names(os.path.join(self.package_folder, "lib"))
         self._fix_library_names(os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(self.package_folder, "*.pdb")
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_id(self):
         self.info.requires["glib"].full_package_mode()
@@ -137,7 +136,7 @@ class GStreamerConan(ConanFile):
             "libexecdir": "${prefix}/libexec",
             "pluginscannerdir": "${libexecdir}/gstreamer-1.0",
         }
-        pkgconfig_custom_content = "\n".join("{}={}".format(key, value) for key, value in pkgconfig_variables.items())
+        pkgconfig_custom_content = "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items())
 
         self.cpp_info.components["gstreamer-1.0"].names["pkg_config"] = "gstreamer-1.0"
         self.cpp_info.components["gstreamer-1.0"].requires = ["glib::glib-2.0", "glib::gobject-2.0"]
@@ -193,18 +192,18 @@ class GStreamerConan(ConanFile):
             self.cpp_info.components["gstcoretracers"].libdirs = [gst_plugin_path]
 
         if self.options.shared:
-            self.output.info("Appending GST_PLUGIN_PATH env var : %s" % gst_plugin_path)
+            self.output.info(f"Appending GST_PLUGIN_PATH env var : {gst_plugin_path}")
             self.env_info.GST_PLUGIN_PATH.append(gst_plugin_path)
         gstreamer_root = self.package_folder
-        self.output.info("Creating GSTREAMER_ROOT env var : %s" % gstreamer_root)
+        self.output.info(f"Creating GSTREAMER_ROOT env var : {gstreamer_root}")
         self.env_info.GSTREAMER_ROOT = gstreamer_root
         gst_plugin_scanner = "gst-plugin-scanner.exe" if self.settings.os == "Windows" else "gst-plugin-scanner"
         gst_plugin_scanner = os.path.join(self.package_folder, "bin", "gstreamer-1.0", gst_plugin_scanner)
-        self.output.info("Creating GST_PLUGIN_SCANNER env var : %s" % gst_plugin_scanner)
+        self.output.info(f"Creating GST_PLUGIN_SCANNER env var : {gst_plugin_scanner}")
         self.env_info.GST_PLUGIN_SCANNER = gst_plugin_scanner
         if self.settings.arch == "x86":
-            self.output.info("Creating GSTREAMER_ROOT_X86 env var : %s" % gstreamer_root)
+            self.output.info(f"Creating GSTREAMER_ROOT_X86 env var : {gstreamer_root}")
             self.env_info.GSTREAMER_ROOT_X86 = gstreamer_root
         elif self.settings.arch == "x86_64":
-            self.output.info("Creating GSTREAMER_ROOT_X86_64 env var : %s" % gstreamer_root)
+            self.output.info(f"Creating GSTREAMER_ROOT_X86_64 env var : {gstreamer_root}")
             self.env_info.GSTREAMER_ROOT_X86_64 = gstreamer_root
