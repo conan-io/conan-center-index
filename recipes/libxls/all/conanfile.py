@@ -1,3 +1,4 @@
+from audioop import cross
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
@@ -5,6 +6,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, rmdir, copy, save, replace_in_file, get, rm
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.scm import Version
 
@@ -74,6 +76,9 @@ class LibxlsConan(ConanFile):
 
     def generate(self):
         toolchain = AutotoolsToolchain(self)
+        if cross_building(self):
+            toolchain.configure_args.append("ac_cv_func_malloc_0_nonnull=yes")
+            toolchain.configure_args.append("ac_cv_func_realloc_0_nonnull=yes")
         toolchain.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
