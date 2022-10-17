@@ -136,6 +136,8 @@ class LiefConan(ConanFile):
             self.cpp_info.cxxflags += ["/FIiso646.h"]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.system_libs = ["ws2_32"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "LIEF"
