@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.4)
 project(svm C CXX)
 
+include(GNUInstallDirs)
+
 add_library(svm ${LIBSVM_SRC_DIR}/svm.cpp)
 set_property(TARGET svm PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS ON)
 set_target_properties(svm PROPERTIES PUBLIC_HEADER ${LIBSVM_SRC_DIR}/svm.h)
