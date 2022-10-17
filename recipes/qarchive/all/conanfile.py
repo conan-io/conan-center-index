@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import get, apply_conandata_patches, rmdir, save, export_conandata_patches
-from conans import tools, CMake
+from conans import CMake
 import functools
 import os
 import textwrap
@@ -82,8 +82,7 @@ class QarchiveConan(ConanFile):
             {"QArchive": "QArchive::QArchive"}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent("""\
