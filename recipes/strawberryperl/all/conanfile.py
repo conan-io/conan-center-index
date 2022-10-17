@@ -4,6 +4,8 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir
 from conan.tools.scm import Version
 
+from conans import __version__ as conan_version
+
 required_conan_version = ">=1.47.0"
 
 
@@ -42,10 +44,11 @@ class StrawberryPerlConan(ConanFile):
         self.cpp_info.includedirs = []
 
         # TODO remove once conan v2 is the only support and recipes have been migrated
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.buildenv_info.append_path("PATH", bin_path)
-        self.env_info.PATH.append(bin_path)
+        if Version(conan_version) < "2.0.0-beta":
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.env_info.PATH.append(bin_path)
 
         perl_path = os.path.join(self.package_folder, "bin", "perl.exe").replace("\\", "/")
         self.conf_info.define("user.strawberryperl:perl", perl_path)
-        self.user_info.perl = perl_path
+        if Version(conan_version) < "2.0.0-beta":
+            self.user_info.perl = perl_path
