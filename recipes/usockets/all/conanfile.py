@@ -158,7 +158,7 @@ class UsocketsConan(ConanFile):
             elif self.options.eventloop == "boost":
                 args.append("WITH_ASIO=1")
 
-            args.extend("{}={}".format(key, value) for key, value in autotools.vars.items())
+            args.extend(f"{key}={value}" for key, value in autotools.vars.items())
             autotools.make(target="default", args=args)
 
     def build(self):
