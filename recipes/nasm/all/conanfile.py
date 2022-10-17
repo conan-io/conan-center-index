@@ -97,7 +97,7 @@ class NASMConan(ConanFile):
             autotools.configure()
 
             # GCC9 - "pure" attribute on function returning "void"
-            replace_in_file(self, os.path.join(self.source_folder, "Makefile"), "-Werror=attributes", "")
+            replace_in_file(self, "Makefile", "-Werror=attributes", "")
 
             # Need "-arch" flag for the linker when cross-compiling.
             # FIXME: Revisit after https://github.com/conan-io/conan/issues/9069, using new Autotools integration
