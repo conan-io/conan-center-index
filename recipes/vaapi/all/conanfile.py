@@ -43,22 +43,22 @@ class SysConfigVAAPIConan(ConanFile):
 
     def system_requirements(self):
         dnf = package_manager.Dnf(self)
-        dnf.install(["libva-devel"])
+        dnf.install(["libva-devel"], update=True, check=True)
 
         yum = package_manager.Yum(self)
-        yum.install(["libva-devel"])
+        yum.install(["libva-devel"], update=True, check=True)
 
         apt = package_manager.Apt(self)
-        apt.install(["libva-dev"])
+        apt.install(["libva-dev"], update=True, check=True)
 
         pacman = package_manager.PacMan(self)
-        pacman.install(["libva"])
+        pacman.install(["libva"], update=True, check=True)
 
         zypper = package_manager.Zypper(self)
-        zypper.install(["libva-devel"])
+        zypper.install(["libva-devel"], update=True, check=True)
 
         pkg = package_manager.Pkg(self)
-        pkg.install(["libva"])
+        pkg.install(["libva"], update=True, check=True)
 
     def package_info(self):
         self.cpp_info.includedirs = []
