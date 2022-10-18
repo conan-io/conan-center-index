@@ -55,7 +55,7 @@ class SysConfigVAAPIConan(ConanFile):
         pacman.install(["libva"])
 
         zypper = package_manager.Zypper(self)
-        zypper.install(["libva-devel"]
+        zypper.install(["libva-devel"])
 
         pkg = package_manager.Pkg(self)
         pkg.install(["libva"])
