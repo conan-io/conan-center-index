@@ -17,7 +17,7 @@ class SysConfigVDPAUConan(ConanFile):
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
-    
+
     def package_id(self):
         self.info.settings.clear()
 
