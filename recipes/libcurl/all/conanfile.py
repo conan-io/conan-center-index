@@ -190,14 +190,14 @@ class LibcurlConan(ConanFile):
         del self.info.settings.compiler
 
     def validate(self):
-        if self.options.with_ssl == "schannel" and self.settings.os != "Windows":
+        if self.info.options.with_ssl == "schannel" and self.info.settings.os != "Windows":
             raise ConanInvalidConfiguration("schannel only suppported on Windows.")
-        if self.options.with_ssl == "darwinssl" and not is_apple_os(self):
+        if self.info.options.with_ssl == "darwinssl" and not is_apple_os(self):
             raise ConanInvalidConfiguration("darwinssl only suppported on Apple like OS (Macos, iOS, watchOS or tvOS).")
-        if self.options.with_ssl == "wolfssl" and self._is_using_cmake_build and Version(self.version) < "7.70.0":
+        if self.info.options.with_ssl == "wolfssl" and self._is_using_cmake_build and Version(self.version) < "7.70.0":
             raise ConanInvalidConfiguration("Before 7.70.0, libcurl has no wolfssl support for Visual Studio or \"Windows to Android cross compilation\"")
-        if self.options.with_ssl == "openssl":
-            if self.options.with_ntlm and self.options["openssl"].no_des:
+        if self.info.options.with_ssl == "openssl":
+            if self.info.options.with_ntlm and self.info.options["openssl"].no_des:
                 raise ConanInvalidConfiguration("option with_ntlm=True requires openssl:no_des=False")
 
     def build_requirements(self):
