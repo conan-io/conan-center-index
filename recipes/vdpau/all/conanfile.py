@@ -1,5 +1,6 @@
-from conans import ConanFile, tools
-from conans.errors import ConanException
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration, ConanException
+from conans import tools
 
 
 class SysConfigVDPAUConan(ConanFile):
@@ -10,10 +11,14 @@ class SysConfigVDPAUConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.freedesktop.org/wiki/Software/VDPAU/"
     license = "MIT"
-    settings = {"os": ["Linux", "FreeBSD"]}
+    settings = "os", "arch", "compiler", "build_type"
 
+    def validate(self):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
+    
     def package_id(self):
-        self.info.header_only()
+        self.info.settings.clear()
 
     def _fill_cppinfo_from_pkgconfig(self, name):
         pkg_config = tools.PkgConfig(name)
