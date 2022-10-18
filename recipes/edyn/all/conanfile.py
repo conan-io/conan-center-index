@@ -4,7 +4,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.50.0"
 
 class EdynConan(ConanFile):
     name = "edyn"
@@ -27,7 +27,10 @@ class EdynConan(ConanFile):
     }
 
     def requirements(self):
-        self.requires("entt/3.10.1")
+        if scm.Version(self.version) < "1.2.0":
+            self.requires("entt/3.9.0")
+        else:
+            self.requires("entt/3.10.1")
 
     @property
     def _compiler_required(self):
