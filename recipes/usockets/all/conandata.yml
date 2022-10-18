@@ -18,6 +18,8 @@ patches:
   "0.8.2":
     - patch_file: "patches/0001-makefile_0.8.2.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0002-vcxproj_0.8.1.patch"
+      base_path: "source_subfolder"
   "0.8.1":
     - patch_file: "patches/0001-makefile_0.8.1.patch"
       base_path: "source_subfolder"
