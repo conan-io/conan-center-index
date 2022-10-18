@@ -37,7 +37,7 @@ class CrashpadConan(ConanFile):
     }
 
     @property
-    def _min_cppstd(self):
+    def _minimum_cpp_standard(self):
         return 14
 
     @property
