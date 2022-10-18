@@ -3,14 +3,21 @@ import glob
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools import (
-    files,
-    microsoft,
-    scm
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.meson import MesonToolchain, Meson
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.files import (
+    copy,
+    get,
+rename,
+    rm,
+    replace_in_file,
+    rmdir
 )
-from conans import tools, Meson, VisualStudioBuildEnvironment
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.0"
 
 
 class PangoConan(ConanFile):
@@ -40,15 +47,6 @@ class PangoConan(ConanFile):
         "with_fontconfig": "auto"
     }
     generators = "pkg_config"
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def validate(self):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
@@ -60,7 +58,7 @@ class PangoConan(ConanFile):
         if self.options.with_xft and (not self.options.with_freetype or not self.options.with_fontconfig):
             raise ConanInvalidConfiguration("Xft requires freetype and fontconfig")
 
-        if self.options["glib"].shared and microsoft.is_msvc_static_runtime(self):
+        if self.options["glib"].shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Linking shared glib against static MSVC runtime is not supported")
 
         if self.options.shared and (not self.options["glib"].shared
@@ -94,9 +92,33 @@ class PangoConan(ConanFile):
             if self.options.with_cairo:
                 self.options["cairo"].shared = True
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def generate(self):
+        def is_enabled(option):
+            return "enabled" if option else "disabled"
+
+        pkg_deps = PkgConfigDeps(self)
+        pkg_deps.generate()
+
+        meson = MesonToolchain(self)
+        meson.project_options.update({
+            "introspection": is_enabled(False),
+            "libthai": is_enabled(self.options.with_libthai),
+            "cairo": is_enabled(self.options.with_cairo),
+            "xft": is_enabled(self.options.with_xft),
+            "fontconfig": is_enabled(self.options.with_fontconfig),
+            "freetype": is_enabled(self.options.with_freetype)
+        })
+        meson.generate()
+
+        env = VirtualBuildEnv(self)
+        env.generate()
+
     def build_requirements(self):
-        self.tool_requires("pkgconf/1.7.4")
-        self.tool_requires("meson/0.63.1")
+        self.tool_requires("pkgconf/1.9.3")
+        self.tool_requires("meson/0.63.3")
 
     def requirements(self):
         if self.options.with_freetype:
@@ -105,58 +127,43 @@ class PangoConan(ConanFile):
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.93")
         if self.options.with_xft:
-            self.requires("libxft/2.3.4")
+            self.requires("libxft/2.3.6")
         if self.options.with_xft and self.options.with_fontconfig and self.options.with_freetype:
             self.requires("xorg/system")    # for xorg::xrender
         if self.options.with_cairo:
             self.requires("cairo/1.17.4")
-        self.requires("harfbuzz/5.1.0")
-        self.requires("glib/2.73.3")
+        self.requires("harfbuzz/5.3.0")
+        self.requires("glib/2.74.0")
         self.requires("fribidi/1.0.12")
+        #self.requires("libong/1.6.38") # override
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
-
-    def _configure_meson(self):
-        defs = {}
-        defs["introspection"] = "disabled"
-
-        defs["libthai"] = "enabled" if self.options.with_libthai else "disabled"
-        defs["cairo"] = "enabled" if self.options.with_cairo else "disabled"
-        defs["xft"] = "enabled" if self.options.with_xft else "disabled"
-        defs["fontconfig"] = "enabled" if self.options.with_fontconfig else "disabled"
-        defs["freetype"] = "enabled" if self.options.with_freetype else "disabled"
-
-        meson = Meson(self)
-        meson.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder, defs=defs, args=["--wrap-mode=nofallback"])
-        return meson
+                  strip_root=True, destination=self.source_folder)
 
     def build(self):
-        meson_build = os.path.join(self._source_subfolder, "meson.build")
+        meson_build = os.path.join(self.source_folder, "meson.build")
         replace_in_file(self, meson_build, "subdir('tests')", "")
         replace_in_file(self, meson_build, "subdir('tools')", "")
         replace_in_file(self, meson_build, "subdir('utils')", "")
         replace_in_file(self, meson_build, "subdir('examples')", "")
-        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if microsoft.is_msvc(self) else \
-                tools.no_op():
-            meson = self._configure_meson()
-            meson.build()
+        meson = Meson(self)
+        meson.configure()
+        meson.build()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if microsoft.is_msvc(self) else \
-                tools.no_op():
-            meson = self._configure_meson()
-            meson.install()
-        if microsoft.is_msvc(self):
-            with chdir(self, os.path.join(self.package_folder, "lib")):
-                for filename_old in glob.glob("*.a"):
-                    filename_new = filename_old[3:-2] + ".lib"
-                    self.output.info(f"rename {filename_old} into {filename_new}")
-                    rename(self, filename_old, filename_new)
+        meson = Meson(self)
+        meson.install()
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        if is_msvc(self):
+            lib_folder = os.path.join(self.package_folder, "lib")
+            for filename_old in glob.glob(os.path.join(lib_folder, "*.a")):
+                filename_new = filename_old[3:-2] + ".lib"
+                self.output.info(f"rename {filename_old} into {filename_new}")
+                rename(self, filename_old, filename_new)
+
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rm(self, "*.pdb", self.package_folder, recursive=True)
+        rm(self, "*.pdb", self.package_folder)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "pango-all-do-no-use")
