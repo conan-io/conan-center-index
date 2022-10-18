@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanException
+from conan.tools.system import package_manager
 from conans import tools
 
 
@@ -15,24 +16,23 @@ class SysConfigGLUConan(ConanFile):
     requires = "opengl/system"
 
     def system_requirements(self):
-        packages = []
-        if tools.os_info.is_linux and self.settings.os == "Linux":
-            if tools.os_info.with_yum or tools.os_info.with_dnf:
-                packages = ["mesa-libGLU-devel"]
-            elif tools.os_info.with_apt:
-                packages = ["libglu1-mesa-dev"]
-            elif tools.os_info.with_pacman:
-                packages = ["glu"]
-            elif tools.os_info.with_zypper:
-                packages = ["glu-devel"]
-            else:
-                self.output.warn("Don't know how to install GLU for your distro")
-        if tools.os_info.is_freebsd and self.settings.os == "FreeBSD":
-            packages = ["libGLU"]
-        if packages:
-            package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
-            for p in packages:
-                package_tool.install(update=True, packages=p)
+        dnf = package_manager.Dnf(self)
+        dnf.install(["mesa-libGLU-devel"])
+
+        yum = package_manager.Yum(self)
+        yum.install(["mesa-libGLU-devel"])
+
+        apt = package_manager.Apt(self)
+        apt.install(["libglu1-mesa-dev"])
+
+        pacman = package_manager.Pacman(self)
+        pacman.install(["glu"])
+
+        zypper = package_manager.Zypper(self)
+        zypper(["glu-devel"])
+
+        pkg = package_manager.pkg(self)
+        pkg.install(["libGLU"])
 
     def _fill_cppinfo_from_pkgconfig(self, name):
         pkg_config = tools.PkgConfig(name)
