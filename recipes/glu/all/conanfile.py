@@ -25,13 +25,13 @@ class SysConfigGLUConan(ConanFile):
         apt = package_manager.Apt(self)
         apt.install(["libglu1-mesa-dev"])
 
-        pacman = package_manager.Pacman(self)
+        pacman = package_manager.PacMan(self)
         pacman.install(["glu"])
 
         zypper = package_manager.Zypper(self)
-        zypper(["glu-devel"])
+        zypper.install(["glu-devel"])
 
-        pkg = package_manager.pkg(self)
+        pkg = package_manager.Pkg(self)
         pkg.install(["libGLU"])
 
     def _fill_cppinfo_from_pkgconfig(self, name):
