@@ -6,7 +6,7 @@ from conans import AutoToolsBuildEnvironment
 import functools
 import os
 
-required_conan_version = ">1.52.0"
+required_conan_version = ">=1.52.0"
 
 
 class LibmicrohttpdConan(ConanFile):
