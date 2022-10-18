@@ -174,7 +174,7 @@ class PackageConan(ConanFile):
         autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])  # Need to specify the `DESTDIR` as a Unix path, aware of the subsystem
         fix_apple_shared_install_name(self)
         for dll in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
-            shutil.move(dll, os.path.join(self.package_folder, "bin"))
+            shutil.move(dll, os.path.join(self.package_folder, "bin", os.path.basename(dll)))
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
