@@ -66,7 +66,7 @@ class LibeventConan(ConanFile):
         tc = CMakeToolchain(self)
         if self.options.with_openssl:
             tc.variables["OPENSSL_ROOT_DIR"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
-        tc.variables["EVENT__LIBRARY_TYPE"] = "SHARED" if self.options.shared else "STATIC"
+        tc.cache_variables["EVENT__LIBRARY_TYPE"] = "SHARED" if self.options.shared else "STATIC"
         tc.variables["EVENT__DISABLE_DEBUG_MODE"] = self.settings.build_type == "Release"
         tc.variables["EVENT__DISABLE_OPENSSL"] = not self.options.with_openssl
         tc.variables["EVENT__DISABLE_THREAD_SUPPORT"] = self.options.disable_threads
