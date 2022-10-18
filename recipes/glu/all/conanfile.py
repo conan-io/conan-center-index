@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanException
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conans import tools
 
 
@@ -11,8 +11,15 @@ class SysConfigGLUConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://cgit.freedesktop.org/mesa/glu/"
     license = "SGI-B-2.0"
-    settings = "os"
+    settings = "os", "arch", "compiler", "build_type"
     requires = "opengl/system"
+
+    def validate(self):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
+    
+    def package_id(self):
+        self.info.settings.clear()
 
     def system_requirements(self):
         packages = []
