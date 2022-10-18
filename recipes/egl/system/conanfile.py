@@ -1,5 +1,6 @@
-from conans import ConanFile, tools
-from conans.errors import ConanException, ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanException, ConanInvalidConfiguration
+from conans import tools
 
 
 class SysConfigEGLConan(ConanFile):
@@ -10,7 +11,7 @@ class SysConfigEGLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.khronos.org/egl"
     license = "MIT"
-    settings = "os"
+    settings = "os", "arch", "compiler", "build_type"
 
     def configure(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
