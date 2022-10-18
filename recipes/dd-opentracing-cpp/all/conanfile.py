@@ -2,11 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
-from conan.tools.files import apply_conandata_patches, copy, get
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.49.1"
+required_conan_version = ">=1.52.0"
 
 
 class DatadogOpenTracingConan(ConanFile):
@@ -52,8 +52,7 @@ class DatadogOpenTracingConan(ConanFile):
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
