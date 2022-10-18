@@ -51,7 +51,6 @@ class DatadogOpenTracingConan(ConanFile):
         deps.generate()
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
         export_conandata_patches(self)
 
     def config_options(self):
