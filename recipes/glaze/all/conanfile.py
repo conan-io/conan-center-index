@@ -39,6 +39,7 @@ class PackageConan(ConanFile):
         self.requires("fmt/9.1.0")
         self.requires("fast_float/3.5.1")
         self.requires("frozen/1.1.1")
+        self.requires("nanorange/20200505")
 
     def package_id(self):
         self.info.clear()
