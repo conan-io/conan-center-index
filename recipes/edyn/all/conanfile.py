@@ -75,11 +75,10 @@ class EdynConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src="edyn")
-        #cmake = self._configure_cmake()
         cmake = CMake(self)
         cmake.install()
 
+        files.copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         files.rmdir(self, os.path.join(self.package_folder, "share"))
