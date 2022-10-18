@@ -32,7 +32,7 @@ class DatadogOpenTracingConan(ConanFile):
         return {
             "gcc": "5",
             "Visual Studio": "15",
-            "clang": "3.4",
+            "clang": "4.0",
             "apple-clang": "7",
         }
 
