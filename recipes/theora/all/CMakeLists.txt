@@ -96,36 +96,35 @@ else()
 endif()
 
 
+if (MSVC AND BUILD_SHARED_LIBS)
+   set (LIBTHEORA_DEF "conan-theora.def")
+   set (LIBTHEORA_ENC_DEF "win32/xmingw32/libtheoraenc-all.def")
+   set (LIBTHEORA_DEC_DEF "win32/xmingw32/libtheoradec-all.def")
+endif ()
 
-# theoraenc and theoradec libraries can be built, but are untested,
-# so if someonw wants to use them, then uncomment here and in the recipe and in theory they'll work.
-# The original conan recipe only built the full theora library.
-#
-add_library(theora ${LIBTHEORA_COMMON} ${LIBTHEORA_ENC} ${LIBTHEORA_DEC} "conan-theora.def")
-# add_library(theoraenc ${LIBTHEORA_COMMON} ${LIBTHEORA_ENC} "win32/xmingw32/libtheoraenc-all.def")
-# add_library(theoradec ${LIBTHEORA_COMMON} ${LIBTHEORA_DEC} "win32/xmingw32/libtheoradec-all.def")
+add_library(theora ${LIBTHEORA_COMMON} ${LIBTHEORA_ENC} ${LIBTHEORA_DEC} ${LIBTHEORA_DEF})
+add_library(theoraenc ${LIBTHEORA_COMMON} ${LIBTHEORA_ENC} ${LIBTHEORA_ENC_DEF})
+add_library(theoradec ${LIBTHEORA_COMMON} ${LIBTHEORA_DEC} ${LIBTHEORA_DEC_DEF})
 
-# This was defined by the original MSVC project, but this symbol doesn't appear in ANY of the source files.
-# So I assume we don't need it at all !
-# if (BUILD_SHARED_LIBS)
-   # target_compile_definitions(theora PRIVATE LIBTHEORA_EXPORTS)
-   # target_compile_definitions(theoraenc PRIVATE LIBTHEORA_EXPORTS)
-   # target_compile_definitions(theoradec PRIVATE LIBTHEORA_EXPORTS)
-# endif()
+if (BUILD_SHARED_LIBS)
+   target_compile_definitions(theora PRIVATE LIBTHEORA_EXPORTS)
+   target_compile_definitions(theoraenc PRIVATE LIBTHEORA_EXPORTS)
+   target_compile_definitions(theoradec PRIVATE LIBTHEORA_EXPORTS)
+endif()
 
-target_compile_definitions (theora PRIVATE _CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_DEPRECATE)
-# target_compile_definitions (theoraenc PRIVATE _CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_DEPRECATE)
-# target_compile_definitions (theoradec PRIVATE _CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_DEPRECATE)
+if (MSVC)
+   target_compile_definitions (theora PRIVATE _CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_DEPRECATE)
+   target_compile_definitions (theoraenc PRIVATE _CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_DEPRECATE)
+   target_compile_definitions (theoradec PRIVATE _CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_DEPRECATE)
+endif ()
 
 target_link_libraries(theora PUBLIC Ogg::ogg)
-# target_link_libraries(theoraenc PUBLIC Ogg::ogg)
-# target_link_libraries(theoradec PUBLIC Ogg::ogg)
+target_link_libraries(theoraenc PUBLIC Ogg::ogg)
+target_link_libraries(theoradec PUBLIC Ogg::ogg)
 
 target_include_directories(theora PUBLIC include)
-# target_include_directories(theoraenc PUBLIC include)
-# target_include_directories(theoradec PUBLIC include)
+target_include_directories(theoraenc PUBLIC include)
+target_include_directories(theoradec PUBLIC include)
 
 install(FILES ${HEADERS} DESTINATION include/theora)
-install(TARGETS theora)
-# install(TARGETS theoraenc)
-# install(TARGETS theoradec)
+install(TARGETS theora theoraenc theoradec)

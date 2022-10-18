@@ -74,23 +74,25 @@ class TheoraConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.set_property("pkg_config_name", "theora")
+        self.cpp_info.set_property("pkg_config_name", "theora_full_package")    # to avoid conflicts with theora component
 
+        self.cpp_info.components["theora"].set_property("pkg_config_name", "theora")
         self.cpp_info.components["theora"].libs = ["theora"]
         self.cpp_info.components["theora"].requires = ["ogg::ogg"]
 
-        # theoraenc and theoradec libraries can be built, but are untested,
-        # so if someonw wants to use them, then uncomment in CMakeLists.txt,
-        # and in the recipe and in theory they'll work.
-        # The original conan recipe only built the full theora library.
-#
-        # self.cpp_info.components["theoraenc"].libs = ["theoraenc"]
-        # self.cpp_info.components["theoraenc"].requires = ["ogg::ogg"]
-        # self.cpp_info.components["theoradec"].libs = ["theoradec"]
-        # self.cpp_info.components["theoradec"].requires = ["ogg::ogg"]
+        self.cpp_info.components["theoradec"].set_property("pkg_config_name", "theoradec")
+        self.cpp_info.components["theoradec"].libs = ["theoradec"]
+        self.cpp_info.components["theoradec"].requires = ["ogg::ogg"]
+
+        self.cpp_info.components["theoraenc"].set_property("pkg_config_name", "theoraenc")
+        self.cpp_info.components["theoraenc"].libs = ["theoraenc"]
+        self.cpp_info.components["theoraenc"].requires = ["ogg::ogg"]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "theora"
         self.cpp_info.filenames["cmake_find_package_multi"] = "theora"
         self.cpp_info.names["cmake_find_package"] = "theora"
         self.cpp_info.names["cmake_find_package_multi"] = "theora"
+
+        # TODO: to remove in conan v2 once pkg_config generator removed
+        self.cpp_info.names["pkg_config"] = "theora_full_package"
