@@ -1,6 +1,8 @@
-from conan import ConanFile
+from conan import ConanFile, Version
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, rm, save
+from conan.tools.build.cppstd import check_min_cppstd
 import os
 import re
 
@@ -44,6 +46,14 @@ class RestbedConan(ConanFile):
                 pass
         if self.settings.os in ("Windows", ):
             del self.options.ipc
+
+    def validate(self):
+        if getattr(self.info.settings.compiler, "cppstd"):
+            check_min_cppstd(self, 14)
+        if self.settings.compiler == "gcc":
+            if self.settings.compiler.version < Version(5):
+                raise ConanInvalidConfiguration("gcc 5+ is required for c++14 support")
+
 
     def layout(self):
         cmake_layout(self, src_folder="src")
