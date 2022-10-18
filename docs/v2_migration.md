@@ -62,6 +62,31 @@ The [2.0 migrations docs](https://docs.conan.io/en/latest/migrating_to_2.0/recip
 should cover the technical details, however for ConanCenterIndex we need to make sure there are no collisions
 `conf_info` must be named `user.<recipe_name>:<variable>`.
 
+For usage options of `conf_info`, the [documenation](https://docs.conan.io/en/latest/reference/config_files/global_conf.html?highlight=conf_info#configuration-in-your-recipes)
+
+In ConanCenterIndex this will typically looks like:
+
+- defining a value
+  ```py
+      def package_info(self):
+          tool_path = os.path.join(self.package_folder, "bin", "tool")
+          self.conf_info.define("user.pkg:tool", tool_path)
+  ```
+- using a value
+  ```py
+      #generators = "VirtualBuildEnv", "VirtualRunEnv"
+      
+      def build_requirements(self):
+          self.tool_requires("tool/0.1")
+
+      def build(self):
+          tool_path = self.conf_info.get("user.pkg:tool")
+          self.run(f"{tool_path} --build")
+  ```
+> **Note**: This should only be used when absolutely required. In the vast majority of cases, the new
+> ["Environments"](https://docs.conan.io/en/latest/reference/conanfile/tools/env/environment.html?highlight=Virtual)
+> will include the `self.cpp_info.bindirs` which will provide access to the tools in the correct scopes.
+
 ## New cpp_info set_property model
 
 New Conan generators like
