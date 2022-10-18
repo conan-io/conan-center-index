@@ -14,9 +14,9 @@ class InnoextractConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     requires = (
-        "boost/1.78.0",
+        "boost/1.80.0",
         "xz_utils/5.2.5",
-        "libiconv/1.16"
+        "libiconv/1.17"
     )
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
