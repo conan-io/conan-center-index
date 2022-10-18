@@ -1,3 +1,14 @@
+--- w32/common/common-build-settings.vcxproj
++++ w32/common/common-build-settings.vcxproj
+@@ -5,7 +5,7 @@
+          Only 0 and 1 are used currently -->
+     <TargetOSLevel Condition="$(PlatformToolset.EndsWith('_xp'))">0</TargetOSLevel>
+     <TargetOSLevel Condition="! $(PlatformToolset.EndsWith('_xp'))">1</TargetOSLevel>
+-  </PropertyGroup>
++  </PropertyGroup><Import Project="../../conan/conantoolchain.props" />
+   <PropertyGroup>
+     <IncludePath>$(SolutionDir);$(MhdW32Common);$(MhdSrc)include;$(IncludePath)</IncludePath>
+   </PropertyGroup>
 --- w32/common/libmicrohttpd-build-settings.vcxproj
 +++ w32/common/libmicrohttpd-build-settings.vcxproj
 @@ -31,8 +31,8 @@
