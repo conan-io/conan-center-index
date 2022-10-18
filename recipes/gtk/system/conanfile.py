@@ -44,22 +44,22 @@ class ConanGTK(ConanFile):
 
     def system_requirements(self):
         dnf = package_manager.Dnf(self)
-        dnf.install([f"gtk{self.options.version}-devel"])
+        dnf.install([f"gtk{self.options.version}-devel"], update=True, check=True)
 
         yum = package_manager.Yum(self)
-        dnf.install([f"gtk{self.options.version}-devel"])
+        dnf.install([f"gtk{self.options.version}-devel"], update=True, check=True)
 
         apt = package_manager.Apt(self)
-        apt.install(["libgtk2.0-dev"] if self.options.version == 2 else ["libgtk-3-dev"])
+        apt.install(["libgtk2.0-dev"] if self.options.version == 2 else ["libgtk-3-dev"], update=True, check=True)
 
         pacman = package_manager.PacMan(self)
-        pacman.install(f["gtk{self.options.version}"])
+        pacman.install([f"gtk{self.options.version}"], update=True, check=True)
 
         zypper = package_manager.Zypper(self)
-        zypper.install(f["gtk{self.options.version}-devel"])
+        zypper.install([f"gtk{self.options.version}-devel"], update=True, check=True)
 
         pkg = package_manager.Pkg(self)
-        pkg.install([f"gtk{self.options.version}"])
+        pkg.install([f"gtk{self.options.version}"], update=True, check=True)
 
     def package_info(self):
         for name in ["gtk+-{}.0".format(self.options.version)]:
