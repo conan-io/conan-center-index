@@ -31,6 +31,10 @@ class LibexifConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -74,12 +78,11 @@ class LibexifConan(ConanFile):
         # env vars
         env = tc.environment()
         if is_msvc(self):
-            cc, lib, link = self._msvc_tools
             compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
             ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
-            env.define("CC", f"{compile_wrapper} {cc} -nologo")
-            env.define("AR", f"{ar_wrapper} {lib}")
-            env.define("LD", f"{compile_wrapper} {link} -nologo")
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("AR", f"{ar_wrapper} lib")
+            env.define("LD", f"{compile_wrapper} link -nologo")
 
         tc.generate(env)
 
