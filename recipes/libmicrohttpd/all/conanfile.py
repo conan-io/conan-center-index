@@ -1,5 +1,5 @@
 from conan import ConanFile, Version
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, vs_layout
 from conan.errors import ConanInvalidConfiguration
 from conans import AutoToolsBuildEnvironment
@@ -97,14 +97,8 @@ class LibmicrohttpdConan(ConanFile):
     def generate(self):
         if is_msvc(self):
             tc = MSBuildToolchain(self)
+            tc.configuration = self._msvc_configuration
             tc.generate()
-            # FIXME: MSBuildToolchain cannot change the configuation names
-            replace_in_file(
-                self,
-                os.path.join(self.build_folder, "conan", "conantoolchain.props"),
-                f"'{str(self.settings.build_type)}'",
-                f"'{self._msvc_configuration}'"
-            )
 
     @property
     def _msvc_configuration(self):
