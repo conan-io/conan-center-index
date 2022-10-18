@@ -8,7 +8,5 @@ sources:
 patches:
   "0.6.24":
     - patch_file: patches/replace_ssize_t_windows.diff
-      base_path: source_subfolder
   "0.6.23":
     - patch_file: patches/replace_ssize_t_windows.diff
-      base_path: source_subfolder
