@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.tools.system import package_manager
 from conans import tools
 
 
@@ -42,26 +43,23 @@ class ConanGTK(ConanFile):
         self.cpp_info.components[name].cxxflags = cflags
 
     def system_requirements(self):
-        packages = []
-        if tools.os_info.is_linux and self.settings.os == "Linux":
-            if tools.os_info.with_apt:
-                packages = ["libgtk2.0-dev"] if self.options.version == 2 else ["libgtk-3-dev"]
-            elif tools.os_info.with_yum or tools.os_info.with_dnf:
-                packages = ["gtk{}-devel".format(self.options.version)]
-            elif tools.os_info.with_pacman:
-                packages = ["gtk{}".format(self.options.version)]
-            elif tools.os_info.with_zypper:
-                packages = ["gtk{}-devel".format(self.options.version)]
-            else:
-                self.output.warn("Do not know how to install 'GTK-{}' for {}."
-                                 .format(self.options.version,
-                                         tools.os_info.linux_distro))
-        if tools.os_info.is_freebsd and self.settings.os == "FreeBSD":
-            packages = ["gtk{}".format(self.options.version)]
-        if packages:
-            package_tool = tools.SystemPackageTool(conanfile=self, default_mode="verify")
-            for p in packages:
-                package_tool.install(update=True, packages=p)
+        dnf = package_manager.Dnf(self)
+        dnf.install([f"gtk{self.options.version}-devel"])
+
+        yum = package_manager.Yum(self)
+        dnf.install([f"gtk{self.options.version}-devel"])
+
+        apt = package_manager.Apt(self)
+        apt.install(["libgtk2.0-dev"] if self.options.version == 2 else ["libgtk-3-dev"])
+
+        pacman = package_manager.PacMan(self)
+        pacman.install(f["gtk{self.options.version}"])
+
+        zypper = package_manager.Zypper(self)
+        zypper.install(f["gtk{self.options.version}-devel"])
+
+        pkg = package_manager.Pkg(self)
+        pkg.install([f"gtk{self.options.version}"])
 
     def package_info(self):
         for name in ["gtk+-{}.0".format(self.options.version)]:
