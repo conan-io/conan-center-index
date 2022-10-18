@@ -1,4 +1,6 @@
 #include <edyn/edyn.hpp>
+#include <edyn/serialization/math_s11n.hpp>
+#include <edyn/serialization/entt_s11n.hpp>
 #include <cassert>
 
 int main()
