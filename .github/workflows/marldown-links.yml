@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
+      with:
+        fetch-depth: 2
     - uses: gaurav-nelson/github-action-markdown-link-check@v1
       with:
         config-file: .github/workflows/mlc_config.json
