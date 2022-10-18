@@ -18,14 +18,14 @@ class ConanGTK(ConanFile):
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
-    
+
     def package_id(self):
         self.info.settings.clear()
 
     def _fill_cppinfo_from_pkgconfig(self, name):
         pkg_config = tools.PkgConfig(name)
         if not pkg_config.provides:
-            raise ConanException("GTK-{} development files aren't available, give up.".format(self.options.version))
+            raise ConanException(f"GTK-{self.options.version} development files aren't available, give up.")
         libs = [lib[2:] for lib in pkg_config.libs_only_l]
         lib_dirs = [lib[2:] for lib in pkg_config.libs_only_L]
         ldflags = [flag for flag in pkg_config.libs_only_other]
@@ -62,5 +62,5 @@ class ConanGTK(ConanFile):
         pkg.install([f"gtk{self.options.version}"], update=True, check=True)
 
     def package_info(self):
-        for name in ["gtk+-{}.0".format(self.options.version)]:
+        for name in [f"gtk+-{self.options.version}.0"]:
             self._fill_cppinfo_from_pkgconfig(name)
