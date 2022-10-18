@@ -12,6 +12,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         self.run("perl --version")
-        self.run(f"{self.conf.get('user.strawberryperl:perl')} --version")
         perl_script = os.path.join(self.source_folder, "list_files.pl")
         self.run(f"perl {perl_script}")
