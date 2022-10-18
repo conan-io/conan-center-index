@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.errors import ConanException
 from conans import tools
 
 
@@ -13,13 +13,6 @@ class SysConfigGLUConan(ConanFile):
     license = "SGI-B-2.0"
     settings = "os", "arch", "compiler", "build_type"
     requires = "opengl/system"
-
-    def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
-    
-    def package_id(self):
-        self.info.settings.clear()
 
     def system_requirements(self):
         packages = []
