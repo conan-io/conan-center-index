@@ -69,7 +69,10 @@ class LiefConan(ConanFile):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
 
-        if self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) <= "14" and self.options.shared:
+        if ((self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) <= "14")
+            or
+            (self.info.settings.compiler == "msvc" and Version(self.info.settings.compiler.version) <= "190")) \
+            and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} does not support Visual Studio <= 14 with shared:True")
 
         if self.info.settings.compiler.get_safe("libcxx") == "libstdc++":
