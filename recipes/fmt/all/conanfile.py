@@ -3,9 +3,10 @@ import os
 from conan import ConanFile
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, apply_conandata_patches, copy, rmdir
+from conan.tools.files import get, apply_conandata_patches, copy, rmdir, export_conandata_patches
+from conan.tools.layout import basic_layout
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.0"
 
 
 class FmtConan(ConanFile):
@@ -36,8 +37,7 @@ class FmtConan(ConanFile):
         return Version(str(self.version)) >= "7.0.0"
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, patch["patch_file"], src=self.recipe_folder, dst=self.export_sources_folder)
+        export_conandata_patches(self)
 
     def generate(self):
         if not self.options.header_only:
@@ -51,7 +51,10 @@ class FmtConan(ConanFile):
             tc.generate()
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        if self.options.header_only:
+            basic_layout(self, src_folder="src")
+        else:
+            cmake_layout(self, src_folder="src")
 
     def config_options(self):
         if self.settings.os == "Windows":
