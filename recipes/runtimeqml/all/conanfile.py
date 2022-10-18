@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake
-from conan.tools.files import get
+from conan.tools.files import get, copy
 from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.49.0"
@@ -26,7 +26,7 @@ class RuntimeQml(ConanFile):
     generators = "CMakeDeps", "CMakeToolchain"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)],
