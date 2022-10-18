@@ -1,9 +1,14 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout, cmake_layout
+from conan.tools.microsoft import is_msvc
+
 import os
-import shutil
 
-required_conan_version = ">=1.33.0"
 
+required_conan_version = ">=1.52.0"
 
 class YASMConan(ConanFile):
     name = "yasm"
@@ -14,87 +19,79 @@ class YASMConan(ConanFile):
     license = "BSD-2-Clause"
     settings = "os", "arch", "compiler", "build_type"
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def build_requirements(self):
-        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+    def layout(self):
+        if is_msvc(self):
+            cmake_layout(self)
+        else:
+            basic_layout(self)
 
     def package_id(self):
         del self.info.settings.compiler
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][0],
-                  destination=self._source_subfolder, strip_root=True)
-        tools.download(**self.conan_data["sources"][self.version][1],
-                       filename=os.path.join(self._source_subfolder, "YASM-VERSION-GEN.bat"))
+        get(self, **self.conan_data["sources"][self.version][0],
+                  destination=self.source_folder, strip_root=True)
 
-    @property
-    def _msvc_subfolder(self):
-        return os.path.join(self._source_subfolder, "Mkfiles", "vc10")
-
-    def _build_vs(self):
-        with tools.chdir(self._msvc_subfolder):
-            msbuild = MSBuild(self)
-            if self.settings.arch == "x86":
-                msbuild.build_env.link_flags.append("/MACHINE:X86")
-            elif self.settings.arch == "x86_64":
-                msbuild.build_env.link_flags.append("/SAFESEH:NO /MACHINE:X64")
-            build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
-            msbuild.build(project_file="yasm.sln", build_type=build_type, upgrade_project=False,
-                          targets=["yasm"], platforms={"x86": "Win32"}, force_vcvars=True)
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        yes_no = lambda v: "yes" if v else "no"
-        conf_args = [
-            "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
+    def _generate_autotools(self):
+        tc = AutotoolsToolchain(self)
+        enable_debug = "yes" if self.settings.build_type == "Debug" else "no"
+        tc.configure_args.extend([
+            f"--enable-debug={enable_debug}",
             "--disable-rpath",
             "--disable-nls",
-        ]
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
+        ])
+        tc.generate()
+
+    def _generate_cmake(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["YASM_BUILD_TESTS"] = False
+        tc.generate()
+
+    def generate(self):
+        if is_msvc(self):
+            self._generate_cmake()
+        else:
+            self._generate_autotools()
 
     def build(self):
-        if self.settings.compiler == "Visual Studio":
-            self._build_vs()
+        apply_conandata_patches(self)
+        if is_msvc(self):
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
+            autotools.configure()
             autotools.make()
 
     def package(self):
-        self.copy(pattern="BSD.txt", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        if self.settings.compiler == "Visual Studio":
-            arch = {
-                "x86": "Win32",
-                "x86_64": "x64",
-            }[str(self.settings.arch)]
-            tools.mkdir(os.path.join(self.package_folder, "bin"))
-            build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
-            shutil.copy(os.path.join(self._msvc_subfolder, arch, build_type, "yasm.exe"),
-                        os.path.join(self.package_folder, "bin", "yasm.exe"))
-            self.copy(pattern="yasm.exe*", src=self._source_subfolder, dst="bin", keep_path=False)
+        copy(self, pattern="BSD.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, pattern="COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if is_msvc(self):
+            cmake = CMake(self)
+            cmake.install()
+            rmdir(self, os.path.join(self.package_folder, "include"))
+            rmdir(self, os.path.join(self.package_folder, "lib"))
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
             autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
+
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
