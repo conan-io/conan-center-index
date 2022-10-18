@@ -1,9 +1,8 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, rm, save
 import os
-import textwrap
+import re
 
 required_conan_version = ">=1.52.0"
 
@@ -46,11 +45,6 @@ class RestbedConan(ConanFile):
         if self.settings.os in ("Windows", ):
             del self.options.ipc
 
-    def validate(self):
-        if self.settings.os in ("Windows", ) and not self.options.shared:
-            # The headers don't allow to avoid __declspec(dllimport)/__declsped(dllexport)
-            raise ConanInvalidConfiguration("Static libraries for Windows are not supported")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -74,6 +68,15 @@ class RestbedConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        if not self.options.shared:
+            # Remove __declspec(dllexport) and __declspec(dllimport)
+            for root, _, files in os.walk(self.source_folder):
+                for file in files:
+                    if os.path.splitext(file)[1] in (".hpp", ".h"):
+                        full_path = os.path.join(root, file)
+                        data = load(self, full_path)
+                        data, _ = re.subn(r"__declspec\((dllexport|dllimport)\)", "", data)
+                        save(self, full_path, data)
 
     def build(self):
         self._patch_sources()
@@ -87,10 +90,6 @@ class RestbedConan(ConanFile):
         cmake.install()
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
-    @property
-    def _libzmq_target(self):
-        return "libzmq" if self.options.shared else "libzmq-static"
-
     def package_info(self):
         libname = "restbed"
         if self.settings.os in ("Windows", ) and self.options.shared:
@@ -99,3 +98,5 @@ class RestbedConan(ConanFile):
 
         if self.settings.os in ("FreeBSD", "Linux", ):
             self.cpp_info.system_libs.append("dl")
+        elif self.settings.os in ("Windows", ):
+            self.cpp_info.system_libs.append("mswsock")
