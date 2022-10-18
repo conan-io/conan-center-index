@@ -47,7 +47,7 @@ class ConanGTK(ConanFile):
         dnf.install([f"gtk{self.options.version}-devel"], update=True, check=True)
 
         yum = package_manager.Yum(self)
-        dnf.install([f"gtk{self.options.version}-devel"], update=True, check=True)
+        yum.install([f"gtk{self.options.version}-devel"], update=True, check=True)
 
         apt = package_manager.Apt(self)
         apt.install(["libgtk2.0-dev"] if self.options.version == 2 else ["libgtk-3-dev"], update=True, check=True)
