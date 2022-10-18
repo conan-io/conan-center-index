@@ -37,6 +37,7 @@ class EdynConan(ConanFile):
         return {
             "gcc": "9.3", # GCC 9.3 started supporting attributes in constructor arguments
             "clang": "8",
+            "apple-clang": "10",
             "Visual Studio": "16",
             "msvc": "192"
         }
@@ -64,6 +65,9 @@ class EdynConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["EDYN_INSTALL"] = True
+        tc.variables["EDYN_BUILD_EXAMPLES"] = False
+        if self.options.floating_type == "double":
+            tc.variables["EDYN_CONFIG_DOUBLE"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
