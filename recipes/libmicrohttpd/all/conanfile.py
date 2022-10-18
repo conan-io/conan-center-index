@@ -1,5 +1,5 @@
 from conan import ConanFile, Version
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, vs_layout
 from conan.errors import ConanInvalidConfiguration
 from conans import AutoToolsBuildEnvironment
@@ -98,6 +98,13 @@ class LibmicrohttpdConan(ConanFile):
         if is_msvc(self):
             tc = MSBuildToolchain(self)
             tc.generate()
+            # FIXME: MSBuildToolchain cannot change the configuation names
+            replace_in_file(
+                self,
+                os.path.join(self.build_folder, "conan", "conantoolchain.props"),
+                f"'{str(self.settings.build_type)}'",
+                f"'{self._msvc_configuration}'"
+            )
 
     @property
     def _msvc_configuration(self):
@@ -106,7 +113,7 @@ class LibmicrohttpdConan(ConanFile):
     @property
     def _msvc_sln_folder(self):
         if self.settings.compiler == "Visual Studio":
-            if Version(self.settings.compiler.version) >= 2019:
+            if Version(self.settings.compiler.version) >= 16:
                 subdir = "VS-Any-Version"
             else:
                 subdir = "VS2017"
@@ -150,6 +157,15 @@ class LibmicrohttpdConan(ConanFile):
     def build(self):
         self._patch_sources()
         if is_msvc(self):
+            # vs_path = vs_installation_path("15")
+            # vcvars_path = os.path.join(vs_path, "VC/Auxiliary/Build/vcvarsall.bat")
+
+            # platform_arch = "x86" if self.settings.arch == "x86" else "x64"
+            # build_type = self.settings.build_type
+            # cmd = ('set "VSCMD_START_DIR=%%CD%%" && '
+            #        '"%s" x64 && msbuild "MyProject.sln" /p:Configuration=%s '
+            #        '/p:Platform=%s ' % (vcvars_path, build_type, platform_arch))
+            # self.run(cmd)
             msbuild = MSBuild(self)
             msbuild.build_type = self._msvc_configuration
             msbuild.build(sln=os.path.join(self._msvc_sln_folder, "libmicrohttpd.sln"), targets=["libmicrohttpd"])
