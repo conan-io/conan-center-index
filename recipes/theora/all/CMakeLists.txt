@@ -6,7 +6,7 @@ project(theora C)
 # - the old msvc did not support RelWithDebInfo
 # - the recipe needed to be upgraded for conan-v2, so a simpler recipe was desired
 
-find_package(Ogg REQUIRED)
+find_package(Ogg CONFIG REQUIRED)
 
 set (HEADERS
   "include/theora/codec.h"
