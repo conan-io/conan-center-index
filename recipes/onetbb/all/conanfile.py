@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import replace_in_file, copy, get, load, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, replace_in_file, copy, get, load, rmdir
 from conan.tools.scm import Version
 import os
 import re
@@ -45,6 +45,9 @@ class OneTBBConan(ConanFile):
         if Version(self.version) < "2021.2.0":
             del self.options.shared
             del self.options.fPIC
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
         if self.options.get_safe("shared", True):
@@ -97,14 +100,9 @@ class OneTBBConan(ConanFile):
         toolchain.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
-        if self.settings.os == "Android":
-            replace_in_file(self, os.path.join(self.build_folder, "src", "tbb", "CMakeFiles", "tbb.dir", "flags.make"),
-                "-Wformat =format-security", "-Wformat-security")
-            if self.options.shared == True:
-                replace_in_file(self, os.path.join(self.build_folder, "src", "tbb", "CMakeFiles", "tbb.dir", "link.txt"),
-                    "-Wformat =format-security", "-Wformat-security")
         cmake.build()
 
     def package(self):
