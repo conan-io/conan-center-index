@@ -33,10 +33,10 @@ class RuntimeQml(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def requirements(self):
-        if self.version == "qt5":
-            self.requires("qt/[>=5.0.0 <6.0.0]")
+        if self.version == "cci.20211220": # Only version which supports qt5
+            self.requires("qt/5.15.5")
         else:
-            self.requires("qt/[>=6.0.0]")
+            self.requires("qt/6.3.1")
 
     def config_options(self):
         if self.settings.os == "Windows":

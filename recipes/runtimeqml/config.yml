@@ -1,7 +1,5 @@
 versions:
-  "latest":
-    folder: "all"
   "cci.20220923":
     folder: "all"
-  "qt5":
+  "cci.20211220":
     folder: "all"
