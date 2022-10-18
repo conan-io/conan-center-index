@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.tools.system import package_manager
 from conans import tools
 
 
@@ -41,24 +42,23 @@ class SysConfigVDPAUConan(ConanFile):
         self.cpp_info.cxxflags.extend(cflags)
 
     def system_requirements(self):
-        packages = []
-        if tools.os_info.is_linux and self.settings.os == "Linux":
-            if tools.os_info.with_yum:
-                packages = ["libvdpau-devel"]
-            elif tools.os_info.with_apt:
-                packages = ["libvdpau-dev"]
-            elif tools.os_info.with_pacman:
-                packages = ["libvdpau"]
-            elif tools.os_info.with_zypper:
-                packages = ["libvdpau-devel"]
-            else:
-                self.output.warn("Don't know how to install %s for your distro." % self.name)
-        elif tools.os_info.is_freebsd and self.settings.os == "FreeBSD":
-            packages = ["libvdpau"]
-        if packages:
-            package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
-            for p in packages:
-                package_tool.install(update=True, packages=p)
+        dnf = package_manager.Dnf(self)
+        dnf.install(["libvdpau-devel"])
+
+        yum = package_manager.Yum(self)
+        yum.install(["libvdpau-devel"])
+
+        apt = package_manager.Apt(self)
+        apt.install(["libvdpau-dev"])
+
+        pacman = package_manager.PacMan(self)
+        pacman.install(["libvdpau"])
+
+        zypper = package_manager.Zypper(self)
+        zypper.install(["libvdpau-devel"])
+
+        pkg = package_manager.Pkg(self)
+        pkg.install(["libvdpau"])
 
     def package_info(self):
         self.cpp_info.includedirs = []
