@@ -12,6 +12,10 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     test_type = "explicit"
 
+    @property
+    def _has_build_profile(self):
+        return hasattr(self, "settings_build")
+
     def requirements(self):
         self.requires(self.tested_reference_str)
 
@@ -28,8 +32,9 @@ class TestPackageConan(ConanFile):
         cmake_deps = CMakeDeps(self)
         cmake_deps.generate()
         pkg_config_deps = PkgConfigDeps(self)
-        pkg_config_deps.build_context_activated = ["wayland"]
-        pkg_config_deps.build_context_suffix = {"wayland": "_BUILD"}
+        if self._has_build_profile:
+            pkg_config_deps.build_context_activated = ["wayland"]
+            pkg_config_deps.build_context_suffix = {"wayland": "_BUILD"}
         pkg_config_deps.generate()
         virtual_build_env = VirtualBuildEnv(self)
         virtual_build_env.generate()
@@ -39,9 +44,10 @@ class TestPackageConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-        pkg_config = PkgConfig(self, "wayland-scanner_BUILD", self.generators_folder)
-        wayland_scanner = pkg_config.variables["wayland_scanner"]
-        self.run(f"{wayland_scanner} --version", env="conanrun")
+        if self._has_build_profile:
+            pkg_config = PkgConfig(self, "wayland-scanner_BUILD", self.generators_folder)
+            wayland_scanner = pkg_config.variables["wayland_scanner"]
+            self.run(f"{wayland_scanner} --version", env="conanrun")
 
     def test(self):
         if can_run(self):
