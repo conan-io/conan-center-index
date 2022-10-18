@@ -43,22 +43,22 @@ class SysConfigVDPAUConan(ConanFile):
 
     def system_requirements(self):
         dnf = package_manager.Dnf(self)
-        dnf.install(["libvdpau-devel"])
+        dnf.install(["libvdpau-devel"], update=True, check=True)
 
         yum = package_manager.Yum(self)
-        yum.install(["libvdpau-devel"])
+        yum.install(["libvdpau-devel"], update=True, check=True)
 
         apt = package_manager.Apt(self)
-        apt.install(["libvdpau-dev"])
+        apt.install(["libvdpau-dev"], update=True, check=True)
 
         pacman = package_manager.PacMan(self)
-        pacman.install(["libvdpau"])
+        pacman.install(["libvdpau"], update=True, check=True)
 
         zypper = package_manager.Zypper(self)
-        zypper.install(["libvdpau-devel"])
+        zypper.install(["libvdpau-devel"], update=True, check=True)
 
         pkg = package_manager.Pkg(self)
-        pkg.install(["libvdpau"])
+        pkg.install(["libvdpau"], update=True, check=True)
 
     def package_info(self):
         self.cpp_info.includedirs = []
