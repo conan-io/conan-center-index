@@ -6,7 +6,7 @@ from conans import AutoToolsBuildEnvironment
 import functools
 import os
 
-required_conan_version = ">1.48.0"
+required_conan_version = ">1.52.0"
 
 
 class LibmicrohttpdConan(ConanFile):
@@ -44,7 +44,7 @@ class LibmicrohttpdConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
-        if self.settings.os == "Windows":
+        if self.settings.os != "Linux":
             del self.options.fPIC
             del self.options.epoll
         if is_msvc(self):
@@ -52,30 +52,35 @@ class LibmicrohttpdConan(ConanFile):
             del self.options.with_error_messages
             del self.options.with_postprocessor
             del self.options.with_digest_authentification
-            del self.options.epoll
             del self.options.with_zlib
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
     def validate(self):
         if is_msvc(self):
-            if self.settings.arch not in ("x86", "x86_64"):
+            if self.info.settings.arch not in ("x86", "x86_64"):
                 raise ConanInvalidConfiguration("Unsupported architecture (only x86 and x86_64 are supported)")
-            if self.settings.build_type not in ("Release", "Debug"):
+            if self.info.settings.build_type not in ("Release", "Debug"):
                 raise ConanInvalidConfiguration("Unsupported build type (only Release and Debug are supported)")
 
     def requirements(self):
         if self.options.get_safe("with_zlib", False):
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.get_safe("with_https", False):
             raise ConanInvalidConfiguration("gnutls is not (yet) available in cci")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not is_msvc(self) and not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
+        if self._settings_build.os == "Windows" and not is_msvc(self) and not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
@@ -122,13 +127,13 @@ class LibmicrohttpdConan(ConanFile):
                 libdir = self.deps_cpp_info["zlib"].lib_paths[0]
                 autotools.link_flags.extend([os.path.join(libdir, lib).replace("\\", "/") for lib in os.listdir(libdir)])
         autotools.configure(self.source_folder,[
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--enable-https={}".format(yes_no(self.options.with_https)),
-            "--enable-messages={}".format(yes_no(self.options.with_error_messages)),
-            "--enable-postprocessor={}".format(yes_no(self.options.with_postprocessor)),
-            "--enable-dauth={}".format(yes_no(self.options.with_digest_authentification)),
-            "--enable-epoll={}".format(yes_no(self.options.get_safe("epoll"))),
+            f"--enable-shared={yes_no(self.options.shared)}",
+            f"--enable-static={yes_no(not self.options.shared)}",
+            f"--enable-https={yes_no(self.options.with_https)}",
+            f"--enable-messages={yes_no(self.options.with_error_messages)}",
+            f"--enable-postprocessor={yes_no(self.options.with_postprocessor)}",
+            f"--enable-dauth={yes_no(self.options.with_digest_authentification)}",
+            f"--enable-epoll={yes_no(self.options.get_safe('epoll'))}",
             "--disable-doc",
             "--disable-examples",
             "--disable-curl",
