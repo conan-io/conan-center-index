@@ -100,7 +100,7 @@ class AvcppConan(ConanFile):
 
         self.cpp_info.components["AvCpp"].names["cmake_find_package"] = target_name
         self.cpp_info.components["AvCpp"].names["cmake_find_package_multi"] = target_name
-        self.cpp_info.components["AvCpp"].set_property(f"cmake_target_name", f"avcpp::{target_name}")
+        self.cpp_info.components["AvCpp"].set_property("cmake_target_name", f"avcpp::{target_name}")
         self.cpp_info.components["AvCpp"].libs = ["avcpp", ]
         self.cpp_info.components["AvCpp"].requires = ["ffmpeg::ffmpeg", ]
         if self.settings.os in ["Linux", "FreeBSD"]:
