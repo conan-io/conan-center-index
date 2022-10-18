@@ -3,6 +3,8 @@ from conan.errors import ConanException
 from conan.tools.system import package_manager
 from conans import tools
 
+required_conan_version = ">=1.47"
+
 
 class SysConfigOpenGLConan(ConanFile):
     name = "opengl"
