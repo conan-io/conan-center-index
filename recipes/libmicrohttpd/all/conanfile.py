@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, Version
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, vs_layout
 from conan.errors import ConanInvalidConfiguration
@@ -105,7 +105,14 @@ class LibmicrohttpdConan(ConanFile):
 
     @property
     def _msvc_sln_folder(self):
-        return os.path.join("w32", "VS-Any-Version")
+        if self.settings.compiler == "Visual Studio":
+            if Version(self.settings.compiler.version) >= 2019:
+                subdir = "VS-Any-Version"
+            else:
+                subdir = "VS2017"
+        else:
+            subdir = "VS-Any-Version"
+        return os.path.join("w32", subdir)
 
     @property
     def _msvc_arch(self):
