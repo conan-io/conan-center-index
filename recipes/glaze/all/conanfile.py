@@ -29,6 +29,7 @@ class PackageConan(ConanFile):
             "msvc": "192",
             "gcc": "11",
             "clang": "12",
+            "apple-clang": "13.1",
         }
 
     def layout(self):
@@ -44,9 +45,6 @@ class PackageConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler == "apple-clang":
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard} and does not support {self.settings.compiler}.")
-
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -72,6 +70,4 @@ class PackageConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
