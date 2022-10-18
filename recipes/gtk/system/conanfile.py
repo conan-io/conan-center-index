@@ -1,5 +1,6 @@
-from conans import ConanFile, tools
-from conans.errors import ConanException, ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration, ConanException
+from conans import tools
 
 
 class ConanGTK(ConanFile):
@@ -8,12 +9,12 @@ class ConanGTK(ConanFile):
     license = "LGPL-2.1-or-later"
     homepage = "https://www.gtk.org"
     description = "A free and open-source cross-platform widget toolkit for creating graphical user interfaces"
-    settings = "os"
+    settings = "os", "arch", "compiler", "build_type"
     options = {"version": [2, 3]}
     default_options = {"version": 2}
     topics = ("gui", "widget", "graphical")
 
-    def configure(self):
+    def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
     
