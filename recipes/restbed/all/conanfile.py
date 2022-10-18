@@ -50,10 +50,9 @@ class RestbedConan(ConanFile):
     def validate(self):
         if getattr(self.info.settings.compiler, "cppstd"):
             check_min_cppstd(self, 14)
-        if self.settings.compiler == "gcc":
-            if self.settings.compiler.version < Version(5):
+        if self.info.settings.compiler == "gcc":
+            if self.info.settings.compiler.version < Version(5):
                 raise ConanInvalidConfiguration("gcc 5+ is required for c++14 support")
-
 
     def layout(self):
         cmake_layout(self, src_folder="src")
