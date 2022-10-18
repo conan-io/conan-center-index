@@ -3,7 +3,7 @@ from conan import ConanFile
 from conans import CMake
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, rmdir, collect_libs, patches, export_conandata_patches
+from conan.tools.files import get, rmdir, rm, collect_libs, patches, export_conandata_patches
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
@@ -144,6 +144,7 @@ class DiligentToolsConan(ConanFile):
         self.copy(pattern="*.a", src=self._build_subfolder, dst="lib", keep_path=False)
         self.copy("*", src=os.path.join(self._build_subfolder, "bin"), dst="bin", keep_path=False)
         rmdir(self, os.path.join(self.package_folder, "Licenses"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
