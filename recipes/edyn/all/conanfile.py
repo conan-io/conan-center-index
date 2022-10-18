@@ -1,5 +1,8 @@
 from conan import ConanFile
-from conan.tools import files, build, scm, layout
+from conan.tools.files import rmdir, rm, copy, get, collect_libs
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.layout import cmake_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 import os
@@ -27,7 +30,7 @@ class EdynConan(ConanFile):
     }
 
     def requirements(self):
-        if scm.Version(self.version) < "1.2.0":
+        if Version(self.version) < "1.2.0":
             self.requires("entt/3.9.0")
         else:
             self.requires("entt/3.10.1")
@@ -48,19 +51,19 @@ class EdynConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            build.check_min_cppstd(self, 17)
+            check_min_cppstd(self, 17)
         try:
             minimum_required_compiler_version = self._compiler_required[str(self.settings.compiler)]
-            if scm.Version(self.settings.compiler.version) < minimum_required_compiler_version:
+            if Version(self.settings.compiler.version) < minimum_required_compiler_version:
                 raise ConanInvalidConfiguration("This package requires C++17 support. The current compiler does not support it.")
         except KeyError:
             self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
 
     def layout(self):
-        layout.cmake_layout(self, src_folder="edyn")
+        cmake_layout(self, src_folder="edyn")
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -82,17 +85,15 @@ class EdynConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        files.copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        files.rmdir(self, os.path.join(self.package_folder, "share"))
-        files.rm(self, os.path.join(self.package_folder, "bin"), "*.pdb")
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, os.path.join(self.package_folder, "bin"), "*.pdb")
 
     def package_info(self):
-        self.cpp_info.libs = files.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
 
-        self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_module_file_name", "Edyn")
         self.cpp_info.set_property("cmake_file_name", "Edyn")
         self.cpp_info.set_property("cmake_target_name", "Edyn::Edyn")
         self.cpp_info.set_property("pkg_config_name", "Edyn")
