@@ -6,9 +6,9 @@ from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.1"
 
-class PackageConan(ConanFile):
+class GlazeConan(ConanFile):
     name = "glaze"
     description = "Extremely fast, in memory, JSON and interface library for modern C++"
     license = "MIT"
