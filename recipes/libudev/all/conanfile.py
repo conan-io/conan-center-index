@@ -1,5 +1,6 @@
-from conans import ConanFile, tools
-from conans.errors import ConanException, ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanException, ConanInvalidConfiguration
+from conans import tools
 
 
 class LibUDEVConan(ConanFile):
@@ -10,7 +11,7 @@ class LibUDEVConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.freedesktop.org/software/systemd/man/udev.html"
     license = "GPL-2.0-or-later", "LGPL-2.1-or-later"
-    settings = "os"
+    settings = "os", "arch", "compiler", "build_type"
 
     def validate(self):
         if self.settings.os != "Linux":
