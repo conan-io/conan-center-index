@@ -8,7 +8,7 @@ import os
 
 required_conan_version = ">=1.50.0"
 
-class PackageConan(ConanFile):
+class GlazeConan(ConanFile):
     name = "glaze"
     description = "Extremely fast, in memory, JSON and interface library for modern C++"
     license = "MIT"
