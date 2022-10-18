@@ -3,6 +3,8 @@ from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.system import package_manager
 from conans import tools
 
+required_conan_version = ">=1.47"
+
 
 class ConanGTK(ConanFile):
     name = "gtk"
