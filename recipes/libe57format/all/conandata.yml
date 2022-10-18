@@ -4,5 +4,5 @@ sources:
     url: "https://github.com/asmaloney/libE57Format/archive/refs/tags/v2.2.0.tar.gz"
 patches:
   "2.2.0":
-    - patch_file: "patches/fix-pic.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-fix-pic.patch"
+    - patch_file: "patches/0002-missing-include.patch"

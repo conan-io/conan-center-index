@@ -30,6 +30,10 @@ set_target_properties(bzip3 PROPERTIES
     C_VISIBILITY_PRESET hidden
     C_EXTENSIONS OFF
 )
+if (VERSION VERSION_GREATER_EQUAL "1.1.6" AND (MSVC OR MSVC90 OR MSVC10) AND BUILD_SHARED_LIBS)
+    target_compile_definitions(bzip3 PRIVATE "BZIP3_DLL_EXPORT=1")
+endif()
+
 if (BZIP3_WITH_THREAD)
     find_package(Threads REQUIRED)
     target_link_libraries(bzip3 PRIVATE Threads::Threads)
