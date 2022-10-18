@@ -17,7 +17,7 @@ class SysConfigEGLConan(ConanFile):
     def configure(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("This recipes supports only Linux and FreeBSD")
-            
+
     def package_id(self):
         self.info.header_only()
 
@@ -53,9 +53,9 @@ class SysConfigEGLConan(ConanFile):
         debian_11_or_later = tools.os_info.linux_distro == "debian" and tools.os_info.os_version >= "11"
         pop_os_20_or_later = tools.os_info.linux_distro == "pop" and tools.os_info.os_version >= "20"
         if ubuntu_20_or_later or debian_11_or_later or pop_os_20_or_later:
-             apt.install(["libegl-dev"], update=True, check=True)
+            apt.install(["libegl-dev"], update=True, check=True)
         else:
-             apt.install(["libegl1-mesa-dev"], update=True, check=True)
+            apt.install(["libegl1-mesa-dev"], update=True, check=True)
 
         pacman = package_manager.PacMan(self)
         pacman.install(["libglvnd"], update=True, check=True)
