@@ -4,7 +4,7 @@ from conan.tools.files import get, copy, rename, rmdir, rm, export_conandata_pat
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.scm import Version
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, unix_path
 import os
 
 required_conan_version = ">=1.52.0"
@@ -57,7 +57,6 @@ class LibexifConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self.output.warn("Source folder" + self.source_folder)
 
     def generate(self):
         tc = AutotoolsToolchain(self)
@@ -75,18 +74,19 @@ class LibexifConan(ConanFile):
         # env vars
         env = tc.environment()
         if is_msvc(self):
-            env = tc.environment()
-            env.define("CC", "cl -nologo")
-            env.define("AR", "lib")
-            env.define("LD", "link -nologo")
+            cc, lib, link = self._msvc_tools
+            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
+            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
+            env.define("CC", f"{compile_wrapper} {cc} -nologo")
+            env.define("AR", f"{ar_wrapper} {lib}")
+            env.define("LD", f"{compile_wrapper} {link} -nologo")
 
-        tc.generate()
+        tc.generate(env)
 
         env = VirtualBuildEnv(self)
         env.generate()
 
     def build(self):
-        self.output.warn("Source folder" + self.source_folder)
         apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.autoreconf()
