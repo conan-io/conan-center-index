@@ -1,16 +1,6 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
-from conan.tools.files import (
-    collect_libs,
-    copy,
-    load,
-    get,
-    rename,
-    replace_in_file,
-    rmdir,
-    save
-)
-from conan.tools.layout import basic_layout
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.files import collect_libs, copy, load, get, rename, replace_in_file, rmdir, save
 from conan.tools.scm import Version
 import os
 import re
@@ -59,9 +49,18 @@ class FreetypeConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
     def requirements(self):
         if self.options.with_png:
@@ -74,7 +73,7 @@ class FreetypeConan(ConanFile):
             self.requires("brotli/1.0.9")
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def generate(self):
         deps = CMakeDeps(self)
@@ -103,8 +102,7 @@ class FreetypeConan(ConanFile):
             if self._has_with_brotli_option:
                 cmake.variables["FT_WITH_BROTLI"] = self.options.with_brotli
         # Generate a relocatable shared lib on Macos
-        cmake.variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-
+        cmake.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         cmake.generate()
 
     def source(self):
@@ -140,7 +138,7 @@ class FreetypeConan(ConanFile):
 
         config_h = os.path.join(self.source_folder, "include", "freetype", "config", "ftoption.h")
         if self.options.subpixel:
-            replace_in_file(self,config_h, "/* #define FT_CONFIG_OPTION_SUBPIXEL_RENDERING */", "#define FT_CONFIG_OPTION_SUBPIXEL_RENDERING")
+            replace_in_file(self, config_h, "/* #define FT_CONFIG_OPTION_SUBPIXEL_RENDERING */", "#define FT_CONFIG_OPTION_SUBPIXEL_RENDERING")
 
     def build(self):
         self._patch_sources()
