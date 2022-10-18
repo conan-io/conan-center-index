@@ -3,6 +3,8 @@ from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.system import package_manager
 from conans import tools
 
+required_conan_version = ">=1.47"
+
 
 class SysConfigVDPAUConan(ConanFile):
     name = "vdpau"
@@ -19,7 +21,7 @@ class SysConfigVDPAUConan(ConanFile):
             raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
 
     def package_id(self):
-        self.info.settings.clear()
+        self.info.header_only()
 
     def _fill_cppinfo_from_pkgconfig(self, name):
         pkg_config = tools.PkgConfig(name)
