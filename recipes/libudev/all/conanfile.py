@@ -43,19 +43,19 @@ class LibUDEVConan(ConanFile):
 
     def system_requirements(self):
         dnf = package_manager.Dnf(self)
-        dnf.install(["systemd-devel"])
+        dnf.install(["systemd-devel"], update=True, check=True)
 
         yum = package_manager.Yum(self)
-        yum.install(["systemd-devel"])
+        yum.install(["systemd-devel"], update=True, check=True)
 
         apt = package_manager.Apt(self)
-        apt.install(["libudev-dev"])
+        apt.install(["libudev-dev"], update=True, check=True)
 
         pacman = package_manager.PacMan(self)
-        pacman.install(["systemd-libs"])
+        pacman.install(["systemd-libs"], update=True, check=True)
 
         zypper = package_manager.Zypper(self)
-        zypper.install(["libudev-devel"])
+        zypper.install(["libudev-devel"], update=True, check=True)
 
     def package_info(self):
         self.cpp_info.includedirs = []
