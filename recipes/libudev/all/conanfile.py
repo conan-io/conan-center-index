@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.system import package_manager
 from conans import tools
 
 
@@ -41,22 +42,20 @@ class LibUDEVConan(ConanFile):
         self.cpp_info.cxxflags = cflags
 
     def system_requirements(self):
-        packages = []
-        if tools.os_info.is_linux and self.settings.os == "Linux":
-            if tools.os_info.with_yum:
-                packages = ["systemd-devel"]
-            elif tools.os_info.with_apt:
-                packages = ["libudev-dev"]
-            elif tools.os_info.with_pacman:
-                packages = ["systemd-libs"]
-            elif tools.os_info.with_zypper:
-                packages = ["libudev-devel"]
-            else:
-                self.output.warn("Don't know how to install %s for your distro." % self.name)
-        if packages:
-            package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
-            for p in packages:
-                package_tool.install(update=True, packages=p)
+        dnf = package_manager.Dnf(self)
+        dnf.install(["systemd-devel"])
+
+        yum = package_manager.Yum(self)
+        yum.install(["systemd-devel"])
+
+        apt = package_manager.Apt(self)
+        apt.install(["libudev-dev"])
+
+        pacman = package_manager.PacMan(self)
+        pacman.install(["systemd-libs"])
+
+        zypper = package_manager.Zypper(self)
+        zypper.install(["libudev-devel"])
 
     def package_info(self):
         self.cpp_info.includedirs = []
