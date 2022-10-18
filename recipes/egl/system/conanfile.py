@@ -43,28 +43,28 @@ class SysConfigEGLConan(ConanFile):
 
     def system_requirements(self):
         dnf = package_manager.Dnf(self)
-        dnf.install(["mesa-libEGL-devel"])
+        dnf.install(["mesa-libEGL-devel"], update=True, check=True)
 
         yum = package_manager.Yum(self)
-        yum.install(["mesa-libEGL-devel"])
+        yum.install(["mesa-libEGL-devel"], update=True, check=True)
 
         apt = package_manager.Apt(self)
         ubuntu_20_or_later = tools.os_info.linux_distro == "ubuntu" and tools.os_info.os_version >= "20"
         debian_11_or_later = tools.os_info.linux_distro == "debian" and tools.os_info.os_version >= "11"
         pop_os_20_or_later = tools.os_info.linux_distro == "pop" and tools.os_info.os_version >= "20"
         if ubuntu_20_or_later or debian_11_or_later or pop_os_20_or_later:
-             apt.install(["libegl-dev"])
+             apt.install(["libegl-dev"], update=True, check=True)
         else:
-             apt.install(["libegl1-mesa-dev"])
+             apt.install(["libegl1-mesa-dev"], update=True, check=True)
 
         pacman = package_manager.PacMan(self)
-        pacman.install(["libglvnd"])
+        pacman.install(["libglvnd"], update=True, check=True)
 
         zypper = package_manager.Zypper(self)
-        zypper.install(["Mesa-libEGL-devel"])
+        zypper.install(["Mesa-libEGL-devel"], update=True, check=True)
 
         pkg = package_manager.Pkg(self)
-        pkg.install(["libglvnd"])
+        pkg.install(["libglvnd"], update=True, check=True)
 
     def package_info(self):
         # TODO: Workaround for #2311 until a better solution can be found
