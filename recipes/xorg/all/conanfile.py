@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.gnu import PkgConfig
-from conan.tools.system.package_manager import Apt, Dnf, PacMan, Pkg, Yum, Zypper
+from conan.tools.system import package_manager
 from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.47"
@@ -12,7 +12,7 @@ class XorgConan(ConanFile):
     license = "MIT"
     homepage = "https://www.x.org/wiki/"
     description = "The X.Org project provides an open source implementation of the X Window System."
-    settings = "os"
+    settings = "os", "arch", "compiler", "build_type"
     topics = ("x11", "xorg")
 
     def validate(self):
@@ -23,7 +23,7 @@ class XorgConan(ConanFile):
         self.info.header_only()
 
     def system_requirements(self):
-        apt = Apt(self)
+        apt = package_manager.Apt(self)
         apt.install(["libx11-dev", "libx11-xcb-dev", "libfontenc-dev", "libice-dev", "libsm-dev", "libxau-dev", "libxaw7-dev",
                      "libxcomposite-dev", "libxcursor-dev", "libxdamage-dev", "libxdmcp-dev", "libxext-dev", "libxfixes-dev",
                      "libxi-dev", "libxinerama-dev", "libxkbfile-dev", "libxmu-dev", "libxmuu-dev",
@@ -35,33 +35,33 @@ class XorgConan(ConanFile):
         apt.install_substitutes(
             ["libxcb-util-dev"], ["libxcb-util0-dev"], update=True, check=True)
 
-        Yum(self).install(["libxcb-devel", "libfontenc-devel", "libXaw-devel", "libXcomposite-devel",
+        package_manager.Yum(self).install(["libxcb-devel", "libfontenc-devel", "libXaw-devel", "libXcomposite-devel",
                            "libXcursor-devel", "libXdmcp-devel", "libXtst-devel", "libXinerama-devel",
                            "libxkbfile-devel", "libXrandr-devel", "libXres-devel", "libXScrnSaver-devel", "libXvMC-devel",
                            "xorg-x11-xtrans-devel", "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
                            "xcb-util-renderutil-devel", "libXdamage-devel", "libXxf86vm-devel", "libXv-devel",
                            "xcb-util-devel", "libuuid-devel", "xkeyboard-config-devel"], update=True, check=True)
 
-        Dnf(self).install(["libxcb-devel", "libfontenc-devel", "libXaw-devel", "libXcomposite-devel",
+        package_manager.Dnf(self).install(["libxcb-devel", "libfontenc-devel", "libXaw-devel", "libXcomposite-devel",
                            "libXcursor-devel", "libXdmcp-devel", "libXtst-devel", "libXinerama-devel",
                            "libxkbfile-devel", "libXrandr-devel", "libXres-devel", "libXScrnSaver-devel", "libXvMC-devel",
                            "xorg-x11-xtrans-devel", "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
                            "xcb-util-renderutil-devel", "libXdamage-devel", "libXxf86vm-devel", "libXv-devel",
                            "xcb-util-devel", "libuuid-devel", "xkeyboard-config-devel"], update=True, check=True)
 
-        Zypper(self).install(["libxcb-devel", "libfontenc-devel", "libXaw-devel", "libXcomposite-devel",
+        package_manager.Zypper(self).install(["libxcb-devel", "libfontenc-devel", "libXaw-devel", "libXcomposite-devel",
                               "libXcursor-devel", "libXdmcp-devel", "libXtst-devel", "libXinerama-devel",
                               "libxkbfile-devel", "libXrandr-devel", "libXres-devel", "libXScrnSaver-devel", "libXvMC-devel",
                               "xorg-x11-xtrans-devel", "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
                               "xcb-util-renderutil-devel", "libXdamage-devel", "libXxf86vm-devel", "libXv-devel",
                               "xcb-util-devel", "libuuid-devel", "xkeyboard-config"], update=True, check=True)
 
-        PacMan(self).install(["libxcb", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
+        package_manager.PacMan(self).install(["libxcb", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
                               "libxdamage", "libxdmcp", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
                               "libxss", "libxvmc", "xtrans", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
                               "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util", "util-linux-libs"], update=True, check=True)
 
-        Pkg(self).install(["libX11", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
+        package_manager.Pkg(self).install(["libX11", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
                            "libxdamage", "libxdmcp", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
                            "libXScrnSaver", "libxvmc", "xtrans", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
                            "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util"], update=True, check=True)

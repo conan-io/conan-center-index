@@ -1,12 +1,20 @@
 import os
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.scm import Version
 
 
-class DefaultNameConan(ConanFile):
-    settings = "os", "arch"
+class TestPackageConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "VirtualBuildEnv"
+    test_type = "explicit"
+
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
 
     def test(self):
-        if not tools.cross_building(self):
-            self.run("perl --version", run_environment=True)
+        if can_run(self):
+            self.run("perl --version")
             perl_script = os.path.join(self.source_folder, "list_files.pl")
-            self.run("perl {}".format(perl_script), run_environment=True)
+            self.run(f"perl {perl_script}", env="conanbuild")

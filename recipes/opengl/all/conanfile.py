@@ -11,7 +11,7 @@ class SysConfigOpenGLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.opengl.org/"
     license = "MIT"
-    settings = "os"
+    settings = "os", "arch", "compiler", "build_type"
 
     def package_id(self):
         self.info.header_only()
