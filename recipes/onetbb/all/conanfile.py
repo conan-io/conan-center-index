@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, replace_in_file, copy, get, load, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, load, rmdir
 from conan.tools.scm import Version
 import os
 import re
