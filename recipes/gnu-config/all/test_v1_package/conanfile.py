@@ -14,9 +14,9 @@ class TestPackageConan(ConanFile):
             self.build_requires("msys2/cci.latest")
 
     def test(self):
-        triplet = tools.get_gnu_triplet(str(self.settings.os), str(self.settings.arch), str(self.settings.compiler))
         self.run("config.guess", run_environment=True, win_bash=tools.os_info.is_windows)
         try:
+            triplet = tools.get_gnu_triplet(str(self.settings.os), str(self.settings.arch), str(self.settings.compiler))
             self.run(f"config.sub {triplet}", run_environment=True, win_bash=tools.os_info.is_windows)
         except ConanException:
             self.output.info("Current configuration is not supported by GNU config.\nIgnoring...")
