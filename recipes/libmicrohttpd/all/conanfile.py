@@ -157,15 +157,6 @@ class LibmicrohttpdConan(ConanFile):
     def build(self):
         self._patch_sources()
         if is_msvc(self):
-            # vs_path = vs_installation_path("15")
-            # vcvars_path = os.path.join(vs_path, "VC/Auxiliary/Build/vcvarsall.bat")
-
-            # platform_arch = "x86" if self.settings.arch == "x86" else "x64"
-            # build_type = self.settings.build_type
-            # cmd = ('set "VSCMD_START_DIR=%%CD%%" && '
-            #        '"%s" x64 && msbuild "MyProject.sln" /p:Configuration=%s '
-            #        '/p:Platform=%s ' % (vcvars_path, build_type, platform_arch))
-            # self.run(cmd)
             msbuild = MSBuild(self)
             msbuild.build_type = self._msvc_configuration
             msbuild.build(sln=os.path.join(self._msvc_sln_folder, "libmicrohttpd.sln"), targets=["libmicrohttpd"])
