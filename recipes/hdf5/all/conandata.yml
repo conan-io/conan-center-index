@@ -23,42 +23,25 @@ sources:
 patches:
   "1.13.1":
     - patch_file: "patches/conanize-link-szip-1.12.2+.patch"
-      base_path: "source_subfolder"
   "1.12.2":
     - patch_file: "patches/conanize-link-szip-1.12.2+.patch"
-      base_path: "source_subfolder"
   "1.12.1":
     - patch_file: "patches/conanize-link-szip-1.12.1+.patch"
-      base_path: "source_subfolder"
   "1.12.0":
     - patch_file: "patches/conanize-link-szip-1.10.5+.patch"
-      base_path: "source_subfolder"
   "1.10.6":
     - patch_file: "patches/fix-missing-function-prototypes-1.10.5+.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-missing-function-prototypes-1.10.6.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/conanize-link-szip-1.10.5+.patch"
-      base_path: "source_subfolder"
   "1.10.5":
     - patch_file: "patches/fix-missing-function-prototypes-1.10.5+.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/conanize-link-szip-1.10.5+.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/build-either-static-or-shared-1.10.5.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/mingw-cmake-size-type-checks-1.10.5.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/mingw-fix-prefix-lib.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/mingw-unused-ellipses.patch"
-      base_path: "source_subfolder"
   "1.8.21":
     - patch_file: "patches/conanize-link-szip-1.8.21.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/build-either-static-or-shared-1.8.21.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/mingw-cmake-size-type-checks-1.8.21.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/mingw-fix-prefix-lib.patch"
-      base_path: "source_subfolder"
