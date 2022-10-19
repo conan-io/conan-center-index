@@ -1,8 +1,10 @@
+import glob
 import os
+import shutil
 
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.files import copy, get, mkdir, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -102,7 +104,7 @@ class XkbcommonConan(ConanFile):
         if self._has_xkbregistry_option:
             tc.project_options["enable-xkbregistry"] = self.options.xkbregistry
         if self._has_build_profile:
-            tc.project_options["build.pkg_config_path"] = self.generators_folder
+            tc.project_options["build.pkg_config_path"] = os.path.join(self.generators_folder, "build")
         tc.generate()
 
         pkg_config_deps = PkgConfigDeps(self)
@@ -110,30 +112,30 @@ class XkbcommonConan(ConanFile):
             pkg_config_deps.build_context_activated = ["wayland", "wayland-protocols"]
             pkg_config_deps.build_context_suffix = {"wayland": "_BUILD"}
         pkg_config_deps.generate()
+        if self._has_build_profile and self.options.get_safe("with_wayland"):
+            mkdir(self, os.path.join(self.generators_folder, "build"))
+            for pc in glob.glob(os.path.join(self.generators_folder, "*_BUILD.pc")):
+                original_pc = os.path.basename(pc)[:-9] + ".pc"
+                shutil.move(pc, os.path.join(self.generators_folder, "build", original_pc))
 
         virtual_build_env = VirtualBuildEnv(self)
         virtual_build_env.generate()
 
     def build(self):
-        if self.options.get_safe("with_wayland"):
+        if self.options.get_safe("with_wayland") and not self._has_build_profile:
             meson_build_file = os.path.join(self.source_folder, "meson.build")
-            if self._has_build_profile:
-                replace_in_file(self, meson_build_file,
-                                "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
-                                "wayland_scanner_dep = dependency('wayland-scanner_BUILD', required: false, native: true)")
-            else:
-                # Conan doesn't provide a `wayland-scanner.pc` file for the package in the _build_ context
-                replace_in_file(self, meson_build_file,
-                                "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
-                                "# wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)")
+            # Conan doesn't provide a `wayland-scanner.pc` file for the package in the _build_ context
+            replace_in_file(self, meson_build_file,
+                            "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
+                            "# wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)")
 
-                replace_in_file(self, meson_build_file,
-                                "if not wayland_client_dep.found() or not wayland_protocols_dep.found() or not wayland_scanner_dep.found()",
-                                "if not wayland_client_dep.found() or not wayland_protocols_dep.found()")
+            replace_in_file(self, meson_build_file,
+                            "if not wayland_client_dep.found() or not wayland_protocols_dep.found() or not wayland_scanner_dep.found()",
+                            "if not wayland_client_dep.found() or not wayland_protocols_dep.found()")
 
-                replace_in_file(self, meson_build_file,
-                                "wayland_scanner = find_program(wayland_scanner_dep.get_pkgconfig_variable('wayland_scanner'))",
-                                "wayland_scanner = find_program('wayland-scanner')")
+            replace_in_file(self, meson_build_file,
+                            "wayland_scanner = find_program(wayland_scanner_dep.get_pkgconfig_variable('wayland_scanner'))",
+                            "wayland_scanner = find_program('wayland-scanner')")
 
         meson = Meson(self)
         meson.configure()
