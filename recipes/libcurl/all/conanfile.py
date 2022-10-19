@@ -197,7 +197,8 @@ class LibcurlConan(ConanFile):
         if self.info.options.with_ssl == "wolfssl" and self._is_using_cmake_build and Version(self.version) < "7.70.0":
             raise ConanInvalidConfiguration("Before 7.70.0, libcurl has no wolfssl support for Visual Studio or \"Windows to Android cross compilation\"")
         if self.info.options.with_ssl == "openssl":
-            if self.info.options.with_ntlm and self.info.options["openssl"].no_des:
+            openssl = self.dependencies["openssl"]
+            if self.info.options.with_ntlm and openssl.options.no_des:
                 raise ConanInvalidConfiguration("option with_ntlm=True requires openssl:no_des=False")
 
     def build_requirements(self):
@@ -207,8 +208,10 @@ class LibcurlConan(ConanFile):
         else:
             self.tool_requires("libtool/2.4.6")
             self.tool_requires("pkgconf/1.7.4")
-            if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
-                self.tool_requires("msys2/cci.latest")
+                if self._settings_build.os == "Windows":
+                    self.win_bash = True
+                    if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+                        self.tool_requires("msys2/cci.latest")
 
     def layout(self):
         if self._is_using_cmake_build:
