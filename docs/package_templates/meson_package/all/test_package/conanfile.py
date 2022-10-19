@@ -15,7 +15,9 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def build_requirements(self):
-         self.tool_requires("meson/0.63.3")
+        self.tool_requires("meson/0.63.3")
+        if not self.conf.get("tools.meson.mesontoolchain:backend", default=False, check_type=str):
+            self.tools_requires("ninja/1.11.1")
 
     def layout(self):
         basic_layout(self)

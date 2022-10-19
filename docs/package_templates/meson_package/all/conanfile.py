@@ -104,6 +104,9 @@ class PackageConan(ConanFile):
     def build_requirements(self):
         # meson package is no installed by default on ConanCenterIndex CI
         self.tool_requires("meson/0.63.3")
+        # meson uses Ninja as backend by default. Ninja package is not installed by default on ConanCenterIndex
+        if not self.conf.get("tools.meson.mesontoolchain:backend", default=False, check_type=str):
+            self.tools_requires("ninja/1.11.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)

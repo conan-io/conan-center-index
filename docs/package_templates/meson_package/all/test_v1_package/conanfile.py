@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake
+from conans import ConanFile, Meson
 from conan.tools.build import cross_building
 import os
 
@@ -6,12 +6,16 @@ import os
 # legacy validation with Conan 1.x
 class TestPackageV1Conan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "pkg_config"
+
+    def build_requirements(self):
+        self.build_requires("meson/0.63.3")
+        self.build_requires("ninja/1.11.1")
 
     def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        meson = Meson(self)
+        meson.configure(build_folder="bin")
+        meson.build()
 
     def test(self):
         if not cross_building(self):
