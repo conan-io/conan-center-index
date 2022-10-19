@@ -66,11 +66,11 @@ class AndroidNDKConan(ConanFile):
                   destination=self.source_folder, strip_root=True)
 
     def package(self):
-        copy(self, "*", src=self.source_folder, dst=self.package_folder, keep_path=True)
+        copy(self, "*", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=True)
         copy(self, "*NOTICE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*NOTICE.toolchain", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "cmake-wrapper.cmd", src=os.path.join(self.source_folder, os.pardir), dst=self.package_folder)
-        copy(self, "cmake-wrapper", src=os.path.join(self.source_folder, os.pardir), dst=self.package_folder)
+        copy(self, "cmake-wrapper.cmd", src=os.path.join(self.source_folder, os.pardir), dst=os.path.join(self.package_folder, "bin"))
+        copy(self, "cmake-wrapper", src=os.path.join(self.source_folder, os.pardir), dst=os.path.join(self.package_folder, "bin"))
         self._fix_broken_links()
         self._fix_permissions()
 
@@ -134,7 +134,7 @@ class AndroidNDKConan(ConanFile):
     def _fix_permissions(self):
         if os.name != "posix":
             return
-        for root, _, files in os.walk(self.package_folder):
+        for root, _, files in os.walk(os.path.join(self.package_folder, "bin")):
             for filename in files:
                 filename = os.path.join(root, filename)
                 with open(filename, "rb") as f:
@@ -170,7 +170,7 @@ class AndroidNDKConan(ConanFile):
                      f"toolchains/llvm/prebuilt/{platform}-x86_64/x86_64-linux-android/bin/as": "../../bin/x86_64-linux-android-as",
                      f"toolchains/llvm/prebuilt/{platform}-x86_64/i686-linux-android/bin/as": "../../bin/i686-linux-android-as"}
             for path, target in links.items():
-                path = os.path.join(self.package_folder, path)
+                path = os.path.join(self.package_folder, "bin", path)
                 os.unlink(path)
                 os.symlink(target, path)
 
@@ -180,7 +180,7 @@ class AndroidNDKConan(ConanFile):
 
     @property
     def _ndk_root(self):
-        return os.path.join(self.package_folder, "toolchains", "llvm", "prebuilt", self._host)
+        return os.path.join(self.package_folder, "bin", "toolchains", "llvm", "prebuilt", self._host)
 
     def _wrap_executable(self, tool):
         suffix = ".exe" if self.settings_build.os == "Windows" else ""
@@ -221,7 +221,6 @@ class AndroidNDKConan(ConanFile):
         if not os.path.isfile(path):
             self.output.error(f"'Environment variable {name} could not be created: '{path}'")
             return "UNKNOWN"
-        self.output.info(f"Creating {name} environment variable: {path}")
         return path
 
     def _define_tool_var_naked(self, name, value):
@@ -230,7 +229,6 @@ class AndroidNDKConan(ConanFile):
         if not os.path.isfile(path):
             self.output.error(f"'Environment variable {name} could not be created: '{path}'")
             return "UNKNOWN"
-        self.output.info(f"Creating {name} environment variable: {path}")
         return path
 
     @staticmethod
@@ -239,18 +237,16 @@ class AndroidNDKConan(ConanFile):
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):
+        self.cpp_info.bindirs.append(os.path.join(self._ndk_root, "bin"))
         self.cpp_info.includedirs = []
-
-        # test shall pass, so this runs also in the build as build requirement context
-        # ndk-build: https://developer.android.com/ndk/guides/ndk-build
-        self.cpp_info.bindirs.append(".")
+        self.cpp_info.libdirs = []
 
         # You should use the ANDROID_NDK_ROOT environment variable to indicate where the NDK is located.
         # That's what most NDK-related scripts use (inside the NDK, and outside of it).
         # https://groups.google.com/g/android-ndk/c/qZjhOaynHXc
-        self.buildenv_info.define_path("ANDROID_NDK_ROOT", self.package_folder)
+        self.buildenv_info.define_path("ANDROID_NDK_ROOT", os.path.join(self.package_folder, "bin"))
 
-        self.buildenv_info.define_path("ANDROID_NDK_HOME", self.package_folder)
+        self.buildenv_info.define_path("ANDROID_NDK_HOME", os.path.join(self.package_folder, "bin"))
 
         #  this is not enough, I can kill that .....
         if not hasattr(self, "settings_target"):
@@ -279,7 +275,7 @@ class AndroidNDKConan(ConanFile):
 
         # CMakeToolchain automatically adds the standard Android toolchain file that ships with the NDK
         # when `tools.android:ndk_path` is provided, so it MUST NOT be manually injected here to `tools.cmake.cmaketoolchain:user_toolchain` conf_info
-        self.conf_info.define("tools.android:ndk_path", self.package_folder)
+        self.conf_info.define("tools.android:ndk_path", os.path.join(self.package_folder, "bin"))
 
         self.buildenv_info.define_path("CC", self._define_tool_var("CC", "clang"))
         self.buildenv_info.define_path("CXX", self._define_tool_var("CXX", "clang++"))
@@ -314,9 +310,9 @@ class AndroidNDKConan(ConanFile):
 
         # TODO: conan v1 stuff to remove later
         if Version(conan_version).major < 2:
-            self.env_info.PATH.append(self.package_folder)
-            self.env_info.ANDROID_NDK_ROOT = self.package_folder
-            self.env_info.ANDROID_NDK_HOME = self.package_folder
+            self.env_info.PATH.extend([os.path.join(self.package_folder, "bin"), os.path.join(self._ndk_root, "bin")])
+            self.env_info.ANDROID_NDK_ROOT = os.path.join(self.package_folder, "bin")
+            self.env_info.ANDROID_NDK_HOME = os.path.join(self.package_folder, "bin")
             cmake_system_processor = self._cmake_system_processor
             if cmake_system_processor:
                 self.env_info.CONAN_CMAKE_SYSTEM_PROCESSOR = cmake_system_processor
@@ -327,11 +323,11 @@ class AndroidNDKConan(ConanFile):
             self.env_info.CONAN_CMAKE_FIND_ROOT_PATH = ndk_sysroot
             self.env_info.SYSROOT = ndk_sysroot
             self.env_info.ANDROID_NATIVE_API_LEVEL = str(self.settings_target.os.api_level)
-            self._chmod_plus_x(os.path.join(self.package_folder, "cmake-wrapper"))
+            self._chmod_plus_x(os.path.join(self.package_folder, "bin", "cmake-wrapper"))
             cmake_wrapper = "cmake-wrapper.cmd" if self.settings.os == "Windows" else "cmake-wrapper"
-            cmake_wrapper = os.path.join(self.package_folder, cmake_wrapper)
+            cmake_wrapper = os.path.join(self.package_folder, "bin", cmake_wrapper)
             self.env_info.CONAN_CMAKE_PROGRAM = cmake_wrapper
-            self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = os.path.join(self.package_folder, "build", "cmake", "android.toolchain.cmake")
+            self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = os.path.join(self.package_folder, "bin", "build", "cmake", "android.toolchain.cmake")
             self.env_info.CC = self._define_tool_var("CC", "clang")
             self.env_info.CXX = self._define_tool_var("CXX", "clang++")
             self.env_info.AR = self._define_tool_var("AR", "ar", bare)
