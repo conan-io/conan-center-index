@@ -1,21 +1,19 @@
-import os
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
+import os
 
-from conans import __version__ as conan_version
-
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.52.0"
 
 
 class StrawberryPerlConan(ConanFile):
     name = "strawberryperl"
-    description = "Strawberry Perl for Windows. Useful as build_require"
+    description = "Strawberry Perl for Windows."
     license = ("Artistic-1.0", "GPL-1.0")
     homepage = "http://strawberryperl.com"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("installer", "perl", "windows")
+    topics = ("perl", "interpreter", "windows")
     settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):
@@ -28,6 +26,9 @@ class StrawberryPerlConan(ConanFile):
     def validate(self):
         if self.info.settings.os != "Windows":
             raise ConanInvalidConfiguration("Strawberry Perl is only intended to be used on Windows.")
+
+    def source(self):
+        pass
 
     def build(self):
         get(self, **self.conan_data["sources"][self.version][str(self.settings.arch)], destination=self.build_folder)
@@ -43,12 +44,11 @@ class StrawberryPerlConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
 
-        # TODO remove once conan v2 is the only support and recipes have been migrated
-        if Version(conan_version) < "2.0.0-beta":
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.env_info.PATH.append(bin_path)
-
         perl_path = os.path.join(self.package_folder, "bin", "perl.exe").replace("\\", "/")
         self.conf_info.define("user.strawberryperl:perl", perl_path)
-        if Version(conan_version) < "2.0.0-beta":
+
+        # TODO remove once conan v2 is the only support and recipes have been migrated
+        if Version(conan_version).major < 2:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.env_info.PATH.append(bin_path)
             self.user_info.perl = perl_path
