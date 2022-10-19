@@ -44,7 +44,7 @@ class XkeyboardConfigConan(ConanFile):
         pkg_config = PkgConfig(self, "xkeyboard-config")
         pkg_config.fill_cpp_info(
             self.cpp_info, is_system=self.settings.os != "FreeBSD")
-        self.cpp_info.set_property("pkg_config_name", "xkeybaord-config")
+        self.cpp_info.set_property("pkg_config_name", "xkeyboard-config")
         self.cpp_info.set_property("component_version", pkg_config.version)
         self.cpp_info.set_property("pkg_config_custom_content",
                                                     "\n".join(f"{key}={value}" for key, value in pkg_config.variables.items() if key not in ["pcfiledir","prefix", "includedir"]))
