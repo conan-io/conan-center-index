@@ -237,7 +237,6 @@ class AndroidNDKConan(ConanFile):
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):
-        self.cpp_info.bindirs.append(os.path.join(self._ndk_root, "bin"))
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
 
@@ -261,6 +260,8 @@ class AndroidNDKConan(ConanFile):
         if not self.settings_target.os == "Android":
             self.output.warn(f"You've added {self.name}/{self.version} as a build requirement, while os={self.settings_target.os} != Android")
             return
+
+        self.cpp_info.bindirs.append(os.path.join(self._ndk_root, "bin"))
 
         self.buildenv_info.define_path("NDK_ROOT", self._ndk_root)
 
