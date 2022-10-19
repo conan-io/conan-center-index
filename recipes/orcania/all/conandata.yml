@@ -6,4 +6,7 @@ patches:
   "2.3.1":
     - patch_file: "patches/2.3.1-0001-shared-static-conan.patch"
       patch_description: "Build shared and static libraries + fix MSVC support"
-      patch_type: "conan (parts can be upstreamed)"
+      patch_type: "conan"
+    - patch_file: "patches/2.3.1-0002-no-m.patch"
+      patch_description: "m math library is not really needed"
+      patch_type: "conan"
