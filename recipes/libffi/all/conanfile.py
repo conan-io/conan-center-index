@@ -106,7 +106,7 @@ class PackageConan(ConanFile):
                 tc.extra_defines.append("USE_DEBUG_RTL")
 
             env = Environment()
-            compile_wrapper = unix_path(self, os.path.join(self.source_folder, "build-aux", "compile"))
+            compile_wrapper = unix_path(self, os.path.join(self.source_folder, "msvcc.sh"))
             # FIXME: Use the conf once https://github.com/conan-io/conan-center-index/pull/12898 is merged
             # env.define("AR", f"{unix_path(self, self.conf.get('tools.automake:ar-lib'))}")
             [version_major, version_minor, _] = self.dependencies.direct_build['automake'].ref.version.split(".", 2)
@@ -120,12 +120,11 @@ class PackageConan(ConanFile):
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
+            env.define("CXXCPP", "cl -nologo -EP")
+            env.define("CPP", "cl -nologo -EP")
+            env.define("LIBTOOL", unix_path(self, os.path.join(self.source_folder, "ltmain.sh")))
+            env.define("INSTALL", unix_path(self, os.path.join(self.source_folder, "install-sh")))
             env.vars(self).save_script("conanbuild_libffi_msvc")
-
-            # env.define("CXXCPP", "cl -nologo -EP")
-            # env.define("CPP", "cl -nologo -EP")
-            # env.define("LIBTOOL", unix_path(self, os.path.join(self.source_folder, "ltmain.sh")))
-            # env.define("INSTALL", unix_path(self, os.path.join(self.source_folder, "install-sh")))
         tc.generate()
 
     def _patch_source(self):
