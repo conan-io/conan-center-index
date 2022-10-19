@@ -1,12 +1,13 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import cmake_layout, CMake
-import os
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
+from conan.tools.env import VirtualBuildEnv
 
+import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
     test_type = "explicit"
 
     def requirements(self):
@@ -14,6 +15,19 @@ class TestPackageConan(ConanFile):
 
     def layout(self):
         cmake_layout(self)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        # fix "error C2039: '​CheckForDuplicateEntries': is not a member of 'Microsoft::WRL::Details'"
+        if is_msvc(self):
+            tc.definitions["CMAKE_SYSTEM_VERSION"] = "10.0.18362.0"
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
+        be = VirtualBuildEnv(self)
+        be.generate(scope="build")
 
     def build(self):
         cmake = CMake(self)
