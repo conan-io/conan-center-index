@@ -1,5 +1,6 @@
 from conan import ConanFile, Version
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, vs_layout
 from conan.errors import ConanInvalidConfiguration
 from conans import AutoToolsBuildEnvironment
@@ -13,7 +14,7 @@ class LibmicrohttpdConan(ConanFile):
     name = "libmicrohttpd"
     description = "A small C library that is supposed to make it easy to run an HTTP server"
     homepage = "https://www.gnu.org/software/libmicrohttpd/"
-    topics = ("libmicrohttpd", "httpd", "server", "service")
+    topics = ("httpd", "server", "service")
     license = "LGPL-2.1"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
@@ -37,7 +38,6 @@ class LibmicrohttpdConan(ConanFile):
         "epoll": True,
         "with_zlib": True,
     }
-    generators = "pkg_config"
 
     @property
     def _settings_build(self):
@@ -99,6 +99,9 @@ class LibmicrohttpdConan(ConanFile):
             tc = MSBuildToolchain(self)
             tc.configuration = self._msvc_configuration
             tc.generate()
+        else:
+            pkg = PkgConfigDeps(self)
+            pkg.generate()
 
     @property
     def _msvc_configuration(self):
