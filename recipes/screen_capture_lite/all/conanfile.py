@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.52.0"
 
 class ScreenCaptureLiteConan(ConanFile):
     name = "screen_capture_lite"
@@ -75,7 +75,7 @@ class ScreenCaptureLiteConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
         tc.variables["BUILD_EXAMPLE"] = False
         tc.generate()
 
