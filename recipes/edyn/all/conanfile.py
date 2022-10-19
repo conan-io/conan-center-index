@@ -60,7 +60,7 @@ class EdynConan(ConanFile):
             self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
 
     def layout(self):
-        cmake_layout(self, src_folder="edyn")
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
