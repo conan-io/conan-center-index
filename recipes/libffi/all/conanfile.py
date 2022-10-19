@@ -81,35 +81,11 @@ class PackageConan(ConanFile):
             "--enable-docs=no",
         ])
 
-        if is_msvc(self):
-            build = "{}-{}-{}".format(
-                "x86_64" if self._settings_build.arch == "x86_64" else "i686",
-                "pc" if self._settings_build.arch == "x86" else "win64",
-                "mingw64")
-            host = "{}-{}-{}".format(
-                "x86_64" if self.settings.arch == "x86_64" else "i686",
-                "pc" if self.settings.arch == "x86" else "win64",
-                "mingw64")
-            tc.configure_args.extend([
-                f"--build={build}",
-                f"--host={host}",
-            ])
-
         if self._settings_build.compiler == "apple-clang":
             tc.configure_args.append("--disable-multi-os-directory")
 
         if is_msvc(self):
             msvcc = unix_path(self, os.path.join(self.source_folder, "msvcc.sh"))
-            msvcc_args = []
-            if self.settings.arch == "x86_64":
-                msvcc_args.append("-m64")
-            elif self.settings.arch == "x86":
-                msvcc_args.append("-m32")
-
-            if msvcc_args:
-                msvcc_args = " ".join(msvcc_args)
-                msvcc = f"{msvcc} {msvcc_args}"
-
             if "MT" in msvc_runtime_flag(self):
                 tc.extra_defines.append("USE_STATIC_RTL")
             if "d" in msvc_runtime_flag(self):
