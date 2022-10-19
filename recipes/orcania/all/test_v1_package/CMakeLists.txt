@@ -4,7 +4,7 @@ project(test_package LANGUAGES C)
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 conan_basic_setup(TARGETS)
 
-find_package(orcania REQUIRED CONFIG)
+find_package(Orcania REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} ../test_package/test_package.c)
 if(ORCANIA_SHARED)
