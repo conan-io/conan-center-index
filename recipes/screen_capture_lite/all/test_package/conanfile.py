@@ -18,7 +18,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # fix "error C2039: '​CheckForDuplicateEntries': is not a member of 'Microsoft::WRL::Details'"
+        # fix "error C2039: 'CheckForDuplicateEntries': is not a member of 'Microsoft::WRL::Details'"
         if is_msvc(self):
             tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0.18362.0"
         tc.generate()
