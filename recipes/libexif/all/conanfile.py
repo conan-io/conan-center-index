@@ -78,8 +78,8 @@ class LibexifConan(ConanFile):
         # env vars
         env = tc.environment()
         if is_msvc(self):
-            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
-            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
+            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile).replace("\\", "/")
+            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib).replace("\\", "/")
             env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("AR", f"{ar_wrapper} lib")
             env.define("LD", f"{compile_wrapper} link -nologo")
