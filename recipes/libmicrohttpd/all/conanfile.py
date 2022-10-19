@@ -45,7 +45,10 @@ class LibmicrohttpdConan(ConanFile):
 
     def config_options(self):
         if self.settings.os != "Linux":
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
             del self.options.epoll
         if is_msvc(self):
             del self.options.with_https
