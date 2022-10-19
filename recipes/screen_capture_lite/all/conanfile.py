@@ -70,6 +70,9 @@ class ScreenCaptureLiteConan(ConanFile):
                     f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
                 )
 
+        if self.info.settings.compiler == "clang" and self.info.settings.compiler.get_safe("libcxx") == "libstdc++":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support clang with libstdc++")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
@@ -97,6 +100,7 @@ class ScreenCaptureLiteConan(ConanFile):
         self.cpp_info.libs = ["screen_capture_lite_shared" if self.options.shared else "screen_capture_lite_static"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
             self.cpp_info.requires.extend([
                 "xorg::x11",
