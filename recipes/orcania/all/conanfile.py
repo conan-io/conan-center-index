@@ -59,9 +59,9 @@ class OrcaniaConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["BUILD_BASE64URL"] = self.options.base64url
-        tc.cache_variables["BUILD_SHARED"] = self.options.shared
-        tc.cache_variables["BUILD_STATIC"] = not self.options.shared
+        tc.variables["BUILD_BASE64URL"] = self.options.base64url
+        tc.variables["BUILD_SHARED"] = self.options.shared
+        tc.variables["BUILD_STATIC"] = not self.options.shared
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
