@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, load, replace_in_file, save
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, load, replace_in_file, save
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.49.0"
+required_conan_version = ">=1.52.0"
 
 
 class ZlibConan(ConanFile):
@@ -31,8 +31,7 @@ class ZlibConan(ConanFile):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,15 +39,18 @@ class ZlibConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         try:
-           del self.settings.compiler.libcxx
+            del self.settings.compiler.libcxx
         except Exception:
-           pass
+            pass
         try:
-           del self.settings.compiler.cppstd
+            del self.settings.compiler.cppstd
         except Exception:
-           pass
+            pass
 
     def layout(self):
         cmake_layout(self, src_folder="src")
