@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, load, replace_in_file, save
-from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
@@ -28,8 +27,8 @@ class ZlibConan(ConanFile):
     }
 
     @property
-    def _is_clang_cl(self):
-        return self.settings.os == "Windows" and self.settings.compiler == "clang"
+    def _is_mingw(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
@@ -103,7 +102,7 @@ class ZlibConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "ZLIB")
         self.cpp_info.set_property("cmake_target_name", "ZLIB::ZLIB")
         self.cpp_info.set_property("pkg_config_name", "zlib")
-        if is_msvc(self) or self._is_clang_cl:
+        if self.settings.os == "Windows" and not self._is_mingw:
             libname = "zdll" if self.options.shared else "zlib"
         else:
             libname = "z"
