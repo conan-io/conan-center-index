@@ -7,7 +7,8 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
-        cmake = CMake(self)
+        cmake = CMake(self))
+        cmake.definitions["ORCANIA_SHARED"] = self.options["orcania"].shared
         cmake.configure()
         cmake.build()
 

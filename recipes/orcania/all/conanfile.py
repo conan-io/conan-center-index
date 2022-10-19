@@ -89,5 +89,16 @@ class OrcaniaConan(ConanFile):
             libname += "-static"
         self.cpp_info.libs = [libname]
 
+        target_name = "Orcania::Orcanisa" if self.options.shared else "Orcania::Orcania-static"
+        self.cpp_info.set_property("cmake_file_name", "Orcania")
+        self.cpp_info.set_property("cmake_target_name", target_name)
+        self.cpp_info.set_property("cmake_module_file_name", "Orcania")
+        self.cpp_info.set_property("cmake_module_target_name", target_name)
         self.cpp_info.set_property("pkg_config_name", "libcorcania")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "Orcania"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Orcania"
+        self.cpp_info.names["cmake_find_package"] = "Orcania"
+        self.cpp_info.names["cmake_find_package_multi"] = "Orcania"
         self.cpp_info.names["pkg_config"] = "liborcania"

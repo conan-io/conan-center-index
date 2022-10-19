@@ -17,6 +17,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["ORCANIA_SHARED"] = self.options["orcania"].shared
         tc.generate()
 
     def build(self):

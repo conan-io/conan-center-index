@@ -3,5 +3,11 @@ project(test_package LANGUAGES C)
 
 find_package(orcania REQUIRED CONFIG)
 
+option(ORCANIA_SHARED "Orcnia is built as a shared library")
+
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} PRIVATE orcania::orcania)
+if(ORCANIA_SHARED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Orcania::Orcania)
+else()
+    target_link_libraries(${PROJECT_NAME} PRIVATE Orcania::Orcania-static)
+endif()
