@@ -97,7 +97,7 @@ endif()
 
 
 if (MSVC AND BUILD_SHARED_LIBS)
-   set (LIBTHEORA_DEF "conan-theora.def")
+   set (LIBTHEORA_DEF "lib/theora.def")
    set (LIBTHEORA_ENC_DEF "win32/xmingw32/libtheoraenc-all.def")
    set (LIBTHEORA_DEC_DEF "win32/xmingw32/libtheoradec-all.def")
 endif ()
