@@ -17,10 +17,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: ${{ github.event.pull_request.commits }} + 1
 
       - name: Get changed files
-        uses: tj-actions/changed-files@v20
+        uses: tj-actions/changed-files@v32
         id: changed_files
         with:
           files: |
@@ -51,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: ${{ github.event.pull_request.commits }} + 1
 
       - uses: actions/setup-python@v4
         with:
@@ -64,7 +64,7 @@ jobs:
       - name: Get changed files (config)
         id: changed_files_config
         if: always()
-        uses: tj-actions/changed-files@v20
+        uses: tj-actions/changed-files@v32
         with:
           files: |
             ${{ env.CONFIG_FILES_PATH }}
@@ -80,7 +80,7 @@ jobs:
       - name: Get changed files (conandata)
         id: changed_files_conandata
         if: always()
-        uses: tj-actions/changed-files@v20
+        uses: tj-actions/changed-files@v32
         with:
           files: |
             ${{ env.CONANDATA_FILES_PATH }}
