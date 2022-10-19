@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -98,32 +98,36 @@ class PackageConan(ConanFile):
 
         if self.settings.build_type == "Debug":
             tc.extra_defines.append("FFI_DEBUG")
+        
+        if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
+           (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+            tc.extra_cflags.append("-FS")
 
-        env = tc.environment()
         if is_msvc(self):
-            env.define_path("CXX", msvcc)
-            env.define_path("CC", msvcc)
-            env.define("CXXCPP", "cl -nologo -EP")
-            env.define("CPP", "cl -nologo -EP")
-
+            env = Environment()
+            compile_wrapper = unix_path(self, os.path.join(self.source_folder, "build-aux", "compile"))
             # FIXME: Use the conf once https://github.com/conan-io/conan-center-index/pull/12898 is merged
             # env.define("AR", f"{unix_path(self, self.conf.get('tools.automake:ar-lib'))}")
             [version_major, version_minor, _] = self.dependencies.direct_build['automake'].ref.version.split(".", 2)
             automake_version = f"{version_major}.{version_minor}"
-            ar_lib = unix_path(self, os.path.join(self.dependencies.direct_build['automake'].cpp_info.resdirs[0], f"automake-{automake_version}", "ar-lib"))
-            env.define("AR", f"{ar_lib} lib")
-            env.define("LD", "link")
-            env.define("LIBTOOL", unix_path(self, os.path.join(self.source_folder, "ltmain.sh")))
-            env.define("INSTALL", unix_path(self, os.path.join(self.source_folder, "install-sh")))
+            ar_wrapper = unix_path(self, os.path.join(self.dependencies.direct_build['automake'].cpp_info.resdirs[0], f"automake-{automake_version}", "ar-lib"))
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.define("LD", "link -nologo")
+            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
+            env.vars(self).save_script("conanbuild_libffi_msvc")
 
-        tc.generate(env)
+            # env.define("CXXCPP", "cl -nologo -EP")
+            # env.define("CPP", "cl -nologo -EP")
+            # env.define("LIBTOOL", unix_path(self, os.path.join(self.source_folder, "ltmain.sh")))
+            # env.define("INSTALL", unix_path(self, os.path.join(self.source_folder, "install-sh")))
 
-        ms = VirtualBuildEnv(self)
-        ms.generate(scope="build")
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
 
     def _patch_source(self):
         apply_conandata_patches(self)
