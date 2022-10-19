@@ -558,7 +558,8 @@ class OpenCVConan(ConanFile):
             return False
         gtk_version = self.deps_cpp_info["gtk"].version
         if gtk_version == "system":
-            return self.options["gtk"].version == 2
+            # system gtk has to be gtk3.
+            return False
         else:
             return tools.Version(gtk_version) < "3.0.0"
 
