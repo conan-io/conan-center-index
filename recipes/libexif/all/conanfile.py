@@ -52,8 +52,8 @@ class LibexifConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        self.build_requires("gettext/0.21")
-        self.build_requires("libtool/2.4.6")
+        self.tool_requires("gettext/0.21")
+        self.tool_requires("libtool/2.4.6")
         if self._settings_build.os == "Windows":
             if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
                 self.tool_requires("msys2/cci.latest")
