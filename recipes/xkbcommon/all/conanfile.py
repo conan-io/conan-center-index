@@ -122,9 +122,9 @@ class XkbcommonConan(ConanFile):
         virtual_build_env.generate()
 
     def build(self):
+        # Conan doesn't provide a `wayland-scanner.pc` file for the package in the _build_ context
         if self.options.get_safe("with_wayland") and not self._has_build_profile:
             meson_build_file = os.path.join(self.source_folder, "meson.build")
-            # Conan doesn't provide a `wayland-scanner.pc` file for the package in the _build_ context
             replace_in_file(self, meson_build_file,
                             "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
                             "# wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)")
