@@ -21,6 +21,10 @@ class XorgConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+    
+    def requirements(self):
+        self.requires("xtrans/system")
+        self.requires("xkeyboard-config/system")
 
     def system_requirements(self):
         apt = package_manager.Apt(self)
@@ -34,7 +38,6 @@ class XorgConan(ConanFile):
                      "libxcb-xinerama0-dev", "libxcb-dri3-dev", "uuid-dev"], update=True, check=True)
         apt.install_substitutes(
             ["libxcb-util-dev"], ["libxcb-util0-dev"], update=True, check=True)
-        apt.install(["xkb-data", "xtrans-dev"], update=True, check=True) # these packages have no architecture
 
         yum = package_manager.Yum(self)
         yum.install(["libxcb-devel", "libfontenc-devel", "libXaw-devel", "libXcomposite-devel",
@@ -43,7 +46,6 @@ class XorgConan(ConanFile):
                            "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
                            "xcb-util-renderutil-devel", "libXdamage-devel", "libXxf86vm-devel", "libXv-devel",
                            "xcb-util-devel", "libuuid-devel"], update=True, check=True)
-        yum.install(["xorg-x11-xtrans-devel", "xkeyboard-config-devel"], update=True, check=True) # these packages have no architecture
 
         dnf = package_manager.Dnf(self)
         dnf.install(["libxcb-devel", "libfontenc-devel", "libXaw-devel", "libXcomposite-devel",
@@ -52,37 +54,34 @@ class XorgConan(ConanFile):
                            "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
                            "xcb-util-renderutil-devel", "libXdamage-devel", "libXxf86vm-devel", "libXv-devel",
                            "xcb-util-devel", "libuuid-devel"], update=True, check=True)
-        dnf.install(["xorg-x11-xtrans-devel", "xkeyboard-config-devel"], update=True, check=True) # these packages have no architecture
 
         zypper = package_manager.Zypper(self)
         zypper.install(["libxcb-devel", "libfontenc-devel", "libXaw-devel", "libXcomposite-devel",
                               "libXcursor-devel", "libXdmcp-devel", "libXtst-devel", "libXinerama-devel",
                               "libxkbfile-devel", "libXrandr-devel", "libXres-devel", "libXScrnSaver-devel", "libXvMC-devel",
-                              "xorg-x11-xtrans-devel", "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
+                              "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
                               "xcb-util-renderutil-devel", "libXdamage-devel", "libXxf86vm-devel", "libXv-devel",
                               "xcb-util-devel", "libuuid-devel"], update=True, check=True)
-        zypper.install(["xkeyboard-config"], update=True, check=True) # these packages have no architecture
 
         pacman = package_manager.PacMan(self)
         pacman.install(["libxcb", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
                               "libxdamage", "libxdmcp", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
                               "libxss", "libxvmc", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
                               "libxxf86vm", "libxv", "xcb-util", "util-linux-libs"], update=True, check=True)
-        pacman.install(["xkeyboard-config", "xtrans"], update=True, check=True) # these packages have no architecture
 
         package_manager.Pkg(self).install(["libX11", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
                            "libxdamage", "libxdmcp", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
-                           "libXScrnSaver", "libxvmc", "xtrans", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
+                           "libXScrnSaver", "libxvmc", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
                            "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util"], update=True, check=True)
 
     def package_info(self):
         for name in ["x11", "x11-xcb", "fontenc", "ice", "sm", "xau", "xaw7",
                      "xcomposite", "xcursor", "xdamage", "xdmcp", "xext", "xfixes", "xi",
                      "xinerama", "xkbfile", "xmu", "xmuu", "xpm", "xrandr", "xrender", "xres",
-                     "xscrnsaver", "xt", "xtst", "xv", "xvmc", "xxf86vm", "xtrans",
+                     "xscrnsaver", "xt", "xtst", "xv", "xvmc", "xxf86vm", 
                      "xcb-xkb", "xcb-icccm", "xcb-image", "xcb-keysyms", "xcb-randr", "xcb-render",
                      "xcb-renderutil", "xcb-shape", "xcb-shm", "xcb-sync", "xcb-xfixes",
-                     "xcb-xinerama", "xcb", "xkeyboard-config", "xcb-atom", "xcb-aux", "xcb-event", "xcb-util",
+                     "xcb-xinerama", "xcb", "xcb-atom", "xcb-aux", "xcb-event", "xcb-util",
                      "xcb-dri3"] + ([] if self.settings.os == "FreeBSD" else ["uuid"]):
             pkg_config = PkgConfig(self, name)
             pkg_config.fill_cpp_info(
