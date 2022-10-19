@@ -1,5 +1,6 @@
 from conan import ConanFile
-from conan.tools import build, layout
+from conan.tools.build import can_run
+from conan.tools.layout import cmake_layout
 from conan.tools.cmake import CMake
 
 class TestPackageConan(ConanFile):
@@ -8,7 +9,7 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def layout(self):
-        layout.cmake_layout(self)
+        cmake_layout(self)
 
     def requirements(self):
         self.requires(self.tested_reference_str)
@@ -19,5 +20,5 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if build.can_run(self):
+        if can_run(self):
             self.run("test_package", run_environment=True)
