@@ -13,7 +13,7 @@ class XkeyboardConfigConan(ConanFile):
     homepage = "https://www.freedesktop.org/wiki/Software/XKeyboardConfig/"
     description = "The non-arch keyboard configuration database for X Window."
     settings = "os", "compiler", "build_type" # no arch here, because the xkeyboard-config system package is arch independant
-    topics = ("x11", "xorg")
+    topics = ("x11", "xorg", "keyboard")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
