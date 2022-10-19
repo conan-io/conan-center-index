@@ -1,10 +1,18 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index d646b23..d2e88e7 100644
+index d646b23..fe28583 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -24,12 +24,20 @@ endif()
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.20)
++cmake_minimum_required(VERSION 3.12)
+ project(screen_capture_lite_build)
+ 
+ set(CMAKE_CXX_STANDARD 20)
+@@ -22,14 +22,21 @@ else()
+ endif()
+ 
  add_subdirectory(src_cpp) 
- add_subdirectory(src_csharp) 
+-add_subdirectory(src_csharp) 
  
 -install (TARGETS screen_capture_lite_static screen_capture_lite_shared 
 -	RUNTIME DESTINATION bin
