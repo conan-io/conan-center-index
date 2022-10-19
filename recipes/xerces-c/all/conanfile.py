@@ -113,6 +113,8 @@ class XercesCConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
         tc = CMakeToolchain(self)
+        # Because upstream overrides BUILD_SHARED_LIBS as a CACHE variable
+        tc.cache_variables["BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
         # https://xerces.apache.org/xerces-c/build-3.html
         tc.variables["network-accessor"] = self.options.network_accessor
         tc.variables["transcoder"] = self.options.transcoder
