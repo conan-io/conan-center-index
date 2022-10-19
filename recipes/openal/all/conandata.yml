@@ -16,13 +16,22 @@ sources:
     sha256: "9f3536ab2bb7781dbafabc6a61e0b34b17edd16bd6c2eaf2ae71bc63078f98c7"
 patches:
   "1.22.2":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.22.2-fix-al-optional-in-if-compile-error.patch"
+    - patch_file: "patches/1.22.2-0001-fix-al-optional-in-if-compile-error.patch"
   "1.21.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.21.0-c++14-does-not-have-std-aligned_alloc.patch"
+    - patch_file: "patches/1.21.0-0001-c++14-does-not-have-std-aligned_alloc.patch"
+    - patch_file: "patches/1.21.0-0002-fix-windows-sdk.patch"
+      patch_description: "Avoid explicitly searching for the WindowsSDK"
+      patch_type: "backport"
+      patch_source: "https://github.com/kcat/openal-soft/commit/13698362f1726326ab60180b04a86df79b518614"
+  "1.20.1":
+    - patch_file: "patches/1.20.1-0001-fix-windows-sdk.patch"
+      patch_description: "Avoid explicitly searching for the WindowsSDK"
+      patch_type: "backport"
+      patch_source: "https://github.com/kcat/openal-soft/commit/13698362f1726326ab60180b04a86df79b518614"
   "1.19.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.19.1/aligned-alloc.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.19.1/gcc-10-fnocommon.patch"
+    - patch_file: "patches/1.19.1-0001-aligned-alloc.patch"
+    - patch_file: "patches/1.19.1-0002-gcc-10-fnocommon.patch"
+    - patch_file: "patches/1.19.1-0003-fix-windows-sdk.patch"
+      patch_description: "Avoid explicitly searching for the WindowsSDK"
+      patch_type: "backport"
+      patch_source: "https://github.com/kcat/openal-soft/commit/13698362f1726326ab60180b04a86df79b518614"

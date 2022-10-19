@@ -16,11 +16,11 @@ class GodotHeadersConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    def package_id(self):
-        self.info.clear()
-
     def layout(self):
         basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        self.info.clear()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -36,5 +36,5 @@ class GodotHeadersConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = ["res"]

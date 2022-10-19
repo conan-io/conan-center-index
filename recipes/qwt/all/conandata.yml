@@ -1,7 +1,9 @@
 sources:
-  "6.1.6":
-    url: "https://sourceforge.net/projects/qwt/files/qwt/6.1.6/qwt-6.1.6.zip"
-    sha256: "4b2452662ae64656aca92f1bef44a281229f77056689100af62c4b9f24462873"
   "6.2.0":
     url: "https://sourceforge.net/projects/qwt/files/qwt/6.2.0/qwt-6.2.0.zip"
     sha256: "3e9632a9be6a883db5c496e42ce74cbbf8da02cc3328faa89e2c43e434a2eb76"
+patches:
+  "6.2.0":
+    - patch_file: "patches/cmake-support.patch"
+      patch_source: "https://github.com/MehdiChinoune/qwt/blob/cmake/CMakeLists.txt"
+    - patch_file: "patches/cmake-support-patch.patch"

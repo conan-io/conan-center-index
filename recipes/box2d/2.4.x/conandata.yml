@@ -7,5 +7,4 @@ sources:
     sha256: "d6b4650ff897ee1ead27cf77a5933ea197cbeef6705638dd181adc2e816b23c2"
 patches:
   "2.4.0":
-    - patch_file: "patches/install-and-allow-shared.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-install-and-allow-shared.patch"

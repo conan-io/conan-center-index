@@ -1,0 +1,43 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7418a34..82b1777 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,13 +1,26 @@
+ cmake_minimum_required(VERSION 3.9)
+ project(imutils_cpp VERSION 1.0.1 DESCRIPTION "imutils_cpp A series of convenience functions to make basic image processing functions such as translation, rotation, resizing and skeletonization easier with OpenCV ")
++set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+ find_package(OpenCV REQUIRED)
++find_package(CURL REQUIRED)
+ include(GNUInstallDirs)
+-add_library(imutils_cpp SHARED STATIC src/text.cpp include/imutils/text.h src/paths.cpp include/imutils/paths.h src/perspective.cpp include/imutils/perspective.h src/convenience.cpp include/imutils/convenience.h)
+-set_target_properties(imutils_cpp PROPERTIES VERSION ${PROJECT_VERSION})
++add_library(imutils_cpp src/text.cpp src/paths.cpp src/perspective.cpp src/convenience.cpp)
++set(IMUTILS_HEADERS include/imutils/text.h include/imutils/paths.h include/imutils/perspective.h include/imutils/convenience.h)
++set_target_properties(imutils_cpp PROPERTIES
++    VERSION ${PROJECT_VERSION}
++    PUBLIC_HEADER "${IMUTILS_HEADERS}"
++)
+ target_include_directories(imutils_cpp PRIVATE include)
+ target_include_directories(imutils_cpp PRIVATE src)
+ include(GNUInstallDirs)
+ install(TARGETS imutils_cpp
+         ${PROJECT_NAME}
+-        DESTINATION lib/${PROJECT_NAME})
+-target_link_libraries(imutils_cpp ${OpenCV_LIBS} curl)
++        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/imutils
++)
++target_link_libraries(imutils_cpp opencv::opencv CURL::libcurl)
++if (MSVC)
++  target_compile_options(imutils_cpp PRIVATE "/permissive-")
++endif()
+diff --git b/build/.cmake/api/v1/query/client-vscode/query.json b/build/.cmake/api/v1/query/client-vscode/query.json
+new file mode 100644
+index 0000000..82bb964
+--- /dev/null
++++ b/build/.cmake/api/v1/query/client-vscode/query.json
+@@ -0,0 +1 @@
++{"requests":[{"kind":"cache","version":2},{"kind":"codemodel","version":2},{"kind":"toolchains","version":1},{"kind":"cmakeFiles","version":1}]}
+\ No newline at end of file
