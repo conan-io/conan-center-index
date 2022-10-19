@@ -20,16 +20,13 @@ class UsocketsConan(ConanFile):
     options = {
         "fPIC": [True, False],
         "with_ssl": [False, "openssl", "wolfssl"],
-        "with_libuv": [True, False, "deprecated"],
         "eventloop": ["syscall", "libuv", "gcd", "boost"],
     }
     default_options = {
         "fPIC": True,
         "with_ssl": False,
-        "with_libuv": "deprecated",
         "eventloop": "syscall",
     }
-    exports_sources = "patches/**"
 
     @property
     def _minimum_cpp_standard(self):
@@ -88,9 +85,6 @@ class UsocketsConan(ConanFile):
         if self.options.with_ssl == "wolfssl" and not self.options["wolfssl"].opensslextra:
             raise ConanInvalidConfiguration("wolfssl needs opensslextra option enabled for usockets")
 
-        if not self.options.with_libuv and self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("uSockets in Windows uses libuv by default. After 0.8.0, you can choose boost.asio by eventloop=boost.")
-
         cppstd = self._minimum_cpp_standard
         if not cppstd:
             return
@@ -107,15 +101,14 @@ class UsocketsConan(ConanFile):
 
     def configure(self):
         if bool(self._minimum_cpp_standard) == False:
-            del self.settings.compiler.cppstd
-            del self.settings.compiler.libcxx
-
-        if self.options.with_libuv != "deprecated":
-            self.output.warn("with_libuv is deprecated, use 'eventloop' instead.")
-            if self.options.with_libuv == True:
-                self.options.eventloop = "libuv"
-            else:
-                self.options.eventloop = "syscall"
+            try:
+                del self.settings.compiler.libcxx
+            except Exception:
+                pass
+            try:
+                del self.settings.compiler.cppstd
+            except Exception:
+                pass
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
@@ -175,10 +168,6 @@ class UsocketsConan(ConanFile):
         copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self._source_subfolder, keep_path=False)
         # drop internal headers
         rmdir(self, os.path.join(self.package_folder, "include", "internal"))
-
-    def package_id(self):
-        # Deprecated options
-        del self.info.options.with_libuv
 
     def package_info(self):
         self.cpp_info.libs = ["uSockets"]
