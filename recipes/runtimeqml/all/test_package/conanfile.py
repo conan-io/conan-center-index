@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.cmake import CMake
 import os
 
 class TestPackageConan(ConanFile):
@@ -7,11 +7,9 @@ class TestPackageConan(ConanFile):
 
     generators = "CMakeDeps", "CMakeToolchain"
 
-    def requirements(self):
-        self.requires("qt/[>=5.0.0]")
-
-    def configure(self):
-        self.options["qt"].qtdeclarative = True
+    default_options = {
+        "qt:qtdeclarative": True
+    }
 
     def build(self):
         cmake = CMake(self)
