@@ -31,7 +31,6 @@ class NASMConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        # for plain C projects only
         try:
             del self.settings.compiler.libcxx
         except Exception:
@@ -42,11 +41,7 @@ class NASMConan(ConanFile):
             pass
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         basic_layout(self, src_folder="src")
-
-    # no requirements(self)
-    # no validate(self)
 
     def build_requirements(self):
         if self.info.settings.os == "Windows":
@@ -59,8 +54,6 @@ class NASMConan(ConanFile):
         del self.info.settings.compiler
 
     def generate(self):
-        # --fpic is automatically managed when 'fPIC'option is declared
-        # --enable/disable-shared is automatically managed when 'shared' option is declared
         tc = AutotoolsToolchain(self)
         if is_msvc(self):
             VCVars(self).generate()
@@ -71,7 +64,6 @@ class NASMConan(ConanFile):
             tc.extra_cflags.append("-m64")
         tc.generate()
 
-        # required as we have some tool_requires
         env = VirtualBuildEnv(self)
         env.generate()
 
@@ -119,5 +111,7 @@ class NASMConan(ConanFile):
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
+        self.env_info.libdirs = []
         self.buildenv_info.append_path("PATH", bin_path)
         self.cpp_info.includedirs = []
