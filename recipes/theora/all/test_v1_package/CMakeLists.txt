@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
-project(PackageTest C)
+project(test_package C)
+
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
 
 find_package(theora CONFIG REQUIRED)
 
