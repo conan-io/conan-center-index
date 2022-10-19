@@ -73,6 +73,9 @@ class PackageConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
+
         yes_no = lambda v: "yes" if v else "no"
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
@@ -84,13 +87,6 @@ class PackageConan(ConanFile):
         if self._settings_build.compiler == "apple-clang":
             tc.configure_args.append("--disable-multi-os-directory")
 
-        if is_msvc(self):
-            msvcc = unix_path(self, os.path.join(self.source_folder, "msvcc.sh"))
-            if "MT" in msvc_runtime_flag(self):
-                tc.extra_defines.append("USE_STATIC_RTL")
-            if "d" in msvc_runtime_flag(self):
-                tc.extra_defines.append("USE_DEBUG_RTL")
-
         if self.options.shared:
             tc.extra_defines.append("FFI_BUILDING_DLL")
         else:
@@ -98,12 +94,17 @@ class PackageConan(ConanFile):
 
         if self.settings.build_type == "Debug":
             tc.extra_defines.append("FFI_DEBUG")
-        
-        if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-           (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
-            tc.extra_cflags.append("-FS")
 
         if is_msvc(self):
+            if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
+                (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+                tc.extra_cflags.append("-FS")
+
+            if "MT" in msvc_runtime_flag(self):
+                tc.extra_defines.append("USE_STATIC_RTL")
+            if "d" in msvc_runtime_flag(self):
+                tc.extra_defines.append("USE_DEBUG_RTL")
+
             env = Environment()
             compile_wrapper = unix_path(self, os.path.join(self.source_folder, "build-aux", "compile"))
             # FIXME: Use the conf once https://github.com/conan-io/conan-center-index/pull/12898 is merged
@@ -125,9 +126,6 @@ class PackageConan(ConanFile):
             # env.define("CPP", "cl -nologo -EP")
             # env.define("LIBTOOL", unix_path(self, os.path.join(self.source_folder, "ltmain.sh")))
             # env.define("INSTALL", unix_path(self, os.path.join(self.source_folder, "install-sh")))
-
-        virtual_build_env = VirtualBuildEnv(self)
-        virtual_build_env.generate()
 
     def _patch_source(self):
         apply_conandata_patches(self)
