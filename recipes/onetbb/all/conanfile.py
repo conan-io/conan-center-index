@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 import os
 import re
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.0"
 
 
 class OneTBBConan(ConanFile):
