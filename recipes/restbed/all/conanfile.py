@@ -106,6 +106,6 @@ class RestbedConan(ConanFile):
         self.cpp_info.libs = [libname]
 
         if self.settings.os in ("FreeBSD", "Linux", ):
-            self.cpp_info.system_libs.append("dl")
+            self.cpp_info.system_libs.extend(["dl", "m"])
         elif self.settings.os in ("Windows", ):
             self.cpp_info.system_libs.append("mswsock")
