@@ -114,6 +114,9 @@ class SzipConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m"])
 
+        if self.options.shared:
+            self.cpp_info.defines.append("SZ_BUILT_AS_DYNAMIC_LIB=1")
+
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "szip"
         self.cpp_info.names["cmake_find_package_multi"] = "szip"
