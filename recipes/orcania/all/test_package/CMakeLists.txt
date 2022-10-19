@@ -3,7 +3,7 @@ project(test_package LANGUAGES C)
 
 find_package(Orcania REQUIRED CONFIG)
 
-option(ORCANIA_SHARED "Orcnia is built as a shared library")
+option(ORCANIA_SHARED "Orcania is built as a shared library")
 
 add_executable(${PROJECT_NAME} test_package.c)
 if(ORCANIA_SHARED)

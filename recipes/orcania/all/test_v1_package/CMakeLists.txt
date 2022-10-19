@@ -6,6 +6,8 @@ conan_basic_setup(TARGETS)
 
 find_package(Orcania REQUIRED CONFIG)
 
+option(ORCANIA_SHARED "Orcania is built as a shared library")
+
 add_executable(${PROJECT_NAME} ../test_package/test_package.c)
 if(ORCANIA_SHARED)
     target_link_libraries(${PROJECT_NAME} PRIVATE Orcania::Orcania)

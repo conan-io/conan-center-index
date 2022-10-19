@@ -85,12 +85,11 @@ class OrcaniaConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
-        if not self.options.shared:
-            # TODO: to remove in conan v2 once cmake_find_package* generators removed
-            self._create_cmake_module_alias_targets(
-                os.path.join(self.package_folder, self._module_file_rel_path),
-                {"Orcania::Orcania-static": "Orcania::Orcania"}
-            )
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {} if self.options.shared else {"Orcania::Orcania-static": "Orcania::Orcania"}
+        )
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
@@ -113,12 +112,12 @@ class OrcaniaConan(ConanFile):
             libname += "-static"
         self.cpp_info.libs = [libname]
 
-        target_name = "Orcania::Orcanisa" if self.options.shared else "Orcania::Orcania-static"
+        target_name = "Orcania::Orcania" if self.options.shared else "Orcania::Orcania-static"
         self.cpp_info.set_property("cmake_file_name", "Orcania")
         self.cpp_info.set_property("cmake_target_name", target_name)
         self.cpp_info.set_property("cmake_module_file_name", "Orcania")
         self.cpp_info.set_property("cmake_module_target_name", target_name)
-        self.cpp_info.set_property("pkg_config_name", "libcorcania")
+        self.cpp_info.set_property("pkg_config_name", "liborcania")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "Orcania"
@@ -126,5 +125,6 @@ class OrcaniaConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Orcania"
         self.cpp_info.names["cmake_find_package_multi"] = "Orcania"
         self.cpp_info.names["pkg_config"] = "liborcania"
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
