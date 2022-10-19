@@ -98,7 +98,7 @@ class LibexifConan(ConanFile):
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        autotools.install()
+        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
         if is_msvc(self) and self.options.shared:
             rename(self, os.path.join(self.package_folder, "lib", "exif.dll.lib"),
                          os.path.join(self.package_folder, "lib", "exif.lib"))
