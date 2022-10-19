@@ -12,7 +12,7 @@ class XtransConan(ConanFile):
     license = "MIT"
     homepage = "https://www.x.org/wiki/"
     description = "X Network Transport layer shared code"
-    settings = "os", "compiler", "build_type"
+    settings = "os", "compiler", "build_type" # no arch here, because the xtrans system package is arch independant
     topics = ("x11", "xorg")
 
     def validate(self):
