@@ -126,6 +126,7 @@ class PackageConan(ConanFile):
             # env.define("CPP", "cl -nologo -EP")
             # env.define("LIBTOOL", unix_path(self, os.path.join(self.source_folder, "ltmain.sh")))
             # env.define("INSTALL", unix_path(self, os.path.join(self.source_folder, "install-sh")))
+        tc.generate()
 
     def _patch_source(self):
         apply_conandata_patches(self)
