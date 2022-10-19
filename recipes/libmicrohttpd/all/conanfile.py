@@ -1,10 +1,8 @@
 from conan import ConanFile, Version
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.gnu import PkgConfigDeps
-from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, vs_layout
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, vs_layout, unix_path
 from conan.errors import ConanInvalidConfiguration
-from conans import AutoToolsBuildEnvironment
-import functools
 import os
 
 required_conan_version = ">=1.52.0"
@@ -105,8 +103,28 @@ class LibmicrohttpdConan(ConanFile):
             tc.configuration = self._msvc_configuration
             tc.generate()
         else:
+            yes_no = lambda v: "yes" if v else "no"
             pkg = PkgConfigDeps(self)
             pkg.generate()
+            autotools = AutotoolsToolchain(self)
+            autotools.configure_args.extend([
+                f"--enable-shared={yes_no(self.options.shared)}",
+                f"--enable-static={yes_no(not self.options.shared)}",
+                f"--enable-https={yes_no(self.options.with_https)}",
+                f"--enable-messages={yes_no(self.options.with_error_messages)}",
+                f"--enable-postprocessor={yes_no(self.options.with_postprocessor)}",
+                f"--enable-dauth={yes_no(self.options.with_digest_authentification)}",
+                f"--enable-epoll={yes_no(self.options.get_safe('epoll'))}",
+                "--disable-doc",
+                "--disable-examples",
+                "--disable-curl",
+            ])
+            if self.settings.os == "Windows":
+                if self.options.with_zlib:
+                    # This fixes libtool refusing to build a shared library when it sees `-lz`
+                    libdir = self.deps_cpp_info["zlib"].lib_paths[0]
+                    autotools.extra_ldflags.extend([os.path.join(libdir, lib).replace("\\", "/") for lib in os.listdir(libdir)])
+            autotools.generate()
 
     @property
     def _msvc_configuration(self):
@@ -133,29 +151,6 @@ class LibmicrohttpdConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        yes_no = lambda v: "yes" if v else "no"
-        autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
-        autotools.libs = []
-        if self.settings.os == "Windows":
-            if self.options.with_zlib:
-                libdir = self.deps_cpp_info["zlib"].lib_paths[0]
-                autotools.link_flags.extend([os.path.join(libdir, lib).replace("\\", "/") for lib in os.listdir(libdir)])
-        autotools.configure(self.source_folder,[
-            f"--enable-shared={yes_no(self.options.shared)}",
-            f"--enable-static={yes_no(not self.options.shared)}",
-            f"--enable-https={yes_no(self.options.with_https)}",
-            f"--enable-messages={yes_no(self.options.with_error_messages)}",
-            f"--enable-postprocessor={yes_no(self.options.with_postprocessor)}",
-            f"--enable-dauth={yes_no(self.options.with_digest_authentification)}",
-            f"--enable-epoll={yes_no(self.options.get_safe('epoll'))}",
-            "--disable-doc",
-            "--disable-examples",
-            "--disable-curl",
-        ])
-        return autotools
-
     def build(self):
         self._patch_sources()
         if is_msvc(self):
@@ -163,7 +158,8 @@ class LibmicrohttpdConan(ConanFile):
             msbuild.build_type = self._msvc_configuration
             msbuild.build(sln=os.path.join(self._msvc_sln_folder, "libmicrohttpd.sln"), targets=["libmicrohttpd"])
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
+            autotools.configure()
             autotools.make()
 
     def package(self):
@@ -173,7 +169,7 @@ class LibmicrohttpdConan(ConanFile):
             copy(self, "*.dll", os.path.join(self.build_folder, self._msvc_sln_folder, "Output", self._msvc_arch), os.path.join(self.package_folder, "bin"))
             copy(self, "*.h", os.path.join(self.build_folder, self._msvc_sln_folder, "Output", self._msvc_arch), os.path.join(self.package_folder, "include"))
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
             autotools.install()
 
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
