@@ -169,7 +169,7 @@ class LibmicrohttpdConan(ConanFile):
             autotools.make()
 
     def package(self):
-        copy(self, "COPYING", os.path.join(self.build_folder), os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING", os.path.join(self.source_folder), os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
             copy(self, "*.lib", os.path.join(self.build_folder, self._msvc_sln_folder, "Output", self._msvc_arch), os.path.join(self.package_folder, "lib"))
             copy(self, "*.dll", os.path.join(self.build_folder, self._msvc_sln_folder, "Output", self._msvc_arch), os.path.join(self.package_folder, "bin"))
