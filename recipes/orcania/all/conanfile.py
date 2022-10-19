@@ -12,7 +12,7 @@ class OrcaniaConan(ConanFile):
     name = "orcania"
     description = "Potluck with different functions for different purposes that can be shared among C programs"
     homepage = "https://github.com/babelouest/orcania"
-    topics = ("orcania", "utility", "functions", )
+    topics = ("utility", "functions", )
     license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
