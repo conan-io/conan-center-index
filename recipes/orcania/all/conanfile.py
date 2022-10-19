@@ -85,6 +85,11 @@ class OrcaniaConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
+        save(self, os.path.join(self.package_folder, self._variable_file_rel_path),
+            textwrap.dedent(f"""\
+                set(ORCANIA_VERSION_STRING "{self.version}")
+           """))
+
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
@@ -106,6 +111,10 @@ class OrcaniaConan(ConanFile):
     def _module_file_rel_path(self):
         return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
+    @property
+    def _variable_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
+
     def package_info(self):
         libname = "orcania"
         if is_msvc(self) and not self.options.shared:
@@ -118,6 +127,9 @@ class OrcaniaConan(ConanFile):
         self.cpp_info.set_property("cmake_module_file_name", "Orcania")
         self.cpp_info.set_property("cmake_module_target_name", target_name)
         self.cpp_info.set_property("pkg_config_name", "liborcania")
+        self.cpp_info.set_property("cmake_build_modules", [self._variable_file_rel_path])
+
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "Orcania"
@@ -125,6 +137,5 @@ class OrcaniaConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Orcania"
         self.cpp_info.names["cmake_find_package_multi"] = "Orcania"
         self.cpp_info.names["pkg_config"] = "liborcania"
-        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path, self._variable_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path, self._variable_file_rel_path]
