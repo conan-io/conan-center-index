@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, collect_libs, get, copy, replace_in_file, save
-from conan.tools.build import can_run
+from conan.tools.build import cross_building
 import os
 import textwrap
 
@@ -75,7 +75,7 @@ class SzipConan(ConanFile):
         tc.variables["SZIP_BUILD_FRAMEWORKS"] = False
         tc.variables["SZIP_PACK_MACOSX_FRAMEWORK"] = False
         tc.variables["SZIP_ENABLE_LARGE_FILE"] = self.options.enable_large_file
-        if can_run(self) and self.options.enable_large_file:
+        if cross_building(self, skip_x64_x86=True) and self.options.enable_large_file:
             # Assume it works, otherwise raise in 'validate' function
             tc.variables["TEST_LFS_WORKS_RUN"] = True
             tc.variables["TEST_LFS_WORKS_RUN__TRYRUN_OUTPUT"] = True
