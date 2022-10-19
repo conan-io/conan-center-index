@@ -1,7 +1,8 @@
 from conan import ConanFile, Version
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
-from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, vs_layout, unix_path
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, vs_layout
+from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -57,7 +58,10 @@ class LibmicrohttpdConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         try:
             del self.settings.compiler.libcxx
         except Exception:
@@ -96,6 +100,8 @@ class LibmicrohttpdConan(ConanFile):
     def layout(self):
         if is_msvc(self):
             vs_layout(self)
+        else:
+            basic_layout(self)
 
     def generate(self):
         if is_msvc(self):
