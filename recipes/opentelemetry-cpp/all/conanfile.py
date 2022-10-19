@@ -4,6 +4,7 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import check_min_vs
 
 import os
 import textwrap
@@ -65,15 +66,12 @@ class OpenTelemetryCppConan(ConanFile):
             self.requires("boost/1.80.0")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
-
         if self.info.settings.arch != "x86_64":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support architecture : {self.info.settings.arch}")
 
-        if (self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) < "16") or \
-           (self.info.settings.compiler == "msvc" and Version(self.info.settings.compiler.version) < "192"):
-            raise ConanInvalidConfiguration(f"{self.ref} requires Visual Studio 2019 or higher")
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
+        check_min_vs(self, "192")
 
         if self.settings.os != "Linux" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} supports building shared libraries only on Linux")
