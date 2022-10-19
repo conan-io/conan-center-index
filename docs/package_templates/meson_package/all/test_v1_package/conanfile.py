@@ -14,7 +14,7 @@ class TestPackageV1Conan(ConanFile):
 
     def build(self):
         meson = Meson(self)
-        meson.configure(build_folder="bin")
+        meson.configure(build_folder="bin", source_folder="../test_package")
         meson.build()
 
     def test(self):
