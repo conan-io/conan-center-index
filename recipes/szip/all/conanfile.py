@@ -109,7 +109,6 @@ class SzipConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "szip")
         self.cpp_info.set_property("cmake_target_name", "szip-shared" if self.options.shared else "szip-static")
-        self.cpp_info.set_property("cmake_target_aliases", ["szip::szip"])
         self.cpp_info.libs = collect_libs(self)
 
         if self.settings.os in ["Linux", "FreeBSD"]:
