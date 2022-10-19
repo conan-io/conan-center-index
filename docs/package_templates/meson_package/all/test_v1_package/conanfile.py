@@ -9,6 +9,7 @@ class TestPackageV1Conan(ConanFile):
     generators = "pkg_config"
 
     def build_requirements(self):
+        self.build_requires("pkgconf/1.9.3")
         self.build_requires("meson/0.63.3")
         self.build_requires("ninja/1.11.1")
 

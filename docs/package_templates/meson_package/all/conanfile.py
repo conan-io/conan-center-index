@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
+from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.layout import basic_layout
@@ -102,9 +102,11 @@ class PackageConan(ConanFile):
 
     # if another tool than the compiler or Meson is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
-        # meson package is no installed by default on ConanCenterIndex CI
+        # Meson package is no installed by default on ConanCenterIndex CI
         self.tool_requires("meson/0.63.3")
-        # meson uses Ninja as backend by default. Ninja package is not installed by default on ConanCenterIndex
+        # pkgconf is largely used by Meson, in case needed on Windows, it should be added are build requirement
+        self.tool_requires("pkgconf/1.9.3")
+        # Meson uses Ninja as backend by default. Ninja package is not installed by default on ConanCenterIndex
         if not self.conf.get("tools.meson.mesontoolchain:backend", default=False, check_type=str):
             self.tools_requires("ninja/1.11.1")
 
@@ -134,7 +136,7 @@ class PackageConan(ConanFile):
         apply_conandata_patches(self)
         # remove bundled xxhash
         rm(self, "whateer.*", os.path.join(self.source_folder, "lib"))
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "...", "")
+        replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "...", "")
 
     def build(self):
         self._patch_sources()  # It can be apply_conandata_patches(self) only in case no more patches are needed
@@ -144,23 +146,20 @@ class PackageConan(ConanFile):
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        cmake = Meson(self)
-        cmake.install()
+        meson = Meson(self)
+        meson.install()
 
         # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
+        # avoid collect_libs(), prefer explicit library name instead
         self.cpp_info.libs = ["package_lib"]
-
         # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
         self.cpp_info.set_property("pkg_config_name", "package")
-
         # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
