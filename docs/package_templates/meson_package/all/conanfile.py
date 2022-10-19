@@ -108,7 +108,7 @@ class PackageConan(ConanFile):
         self.tool_requires("pkgconf/1.9.3")
         # Meson uses Ninja as backend by default. Ninja package is not installed by default on ConanCenterIndex
         if not self.conf.get("tools.meson.mesontoolchain:backend", default=False, check_type=str):
-            self.tools_requires("ninja/1.11.1")
+            self.tool_requires("ninja/1.11.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
@@ -151,7 +151,6 @@ class PackageConan(ConanFile):
 
         # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
