@@ -21,10 +21,6 @@ class XorgConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
-    
-    def requirements(self):
-        self.requires("xtrans/system")
-        self.requires("xkeyboard-config/system")
 
     def system_requirements(self):
         apt = package_manager.Apt(self)
