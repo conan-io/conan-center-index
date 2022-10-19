@@ -7,9 +7,9 @@ class TestPackageConan(ConanFile):
 
     generators = "CMakeDeps", "CMakeToolchain"
 
-    default_options = {
-        "qt:qtdeclarative": True
-    }
+    def configure(self):
+        qt = self.dependencies["qt"]
+        qt.options.qtdeclarative = True
 
     def build(self):
         cmake = CMake(self)
