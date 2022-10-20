@@ -151,10 +151,11 @@ class Hdf5Conan(ConanFile):
         # Do not force PIC
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                 "set (CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                              "option (BUILD_SHARED_LIBS \"Build Shared Libraries\" ON)", "")
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                              "option (BUILD_STATIC_LIBS \"Build Static Libraries\" ON)", "")
+        if Version(self.version) >= "1.12.0":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                  "option (BUILD_SHARED_LIBS \"Build Shared Libraries\" ON)", "")
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                  "option (BUILD_STATIC_LIBS \"Build Static Libraries\" ON)", "")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
