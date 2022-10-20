@@ -102,6 +102,8 @@ class Hdf5Conan(ConanFile):
         cmakedeps.generate()
 
         tc = CMakeToolchain(self)
+        if self.options.szip_support == "with_libaec":
+            tc.variables["USE_LIBAEC"] = True
         tc.variables["HDF5_EXTERNALLY_CONFIGURED"] = True
         tc.variables["HDF5_EXTERNAL_LIB_PREFIX"] = ""
         tc.variables["HDF5_USE_FOLDERS"] = False
