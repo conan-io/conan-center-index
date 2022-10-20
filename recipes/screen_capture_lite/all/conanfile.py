@@ -111,7 +111,7 @@ class ScreenCaptureLiteConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend([
                 "dwmapi",
-                "d3dll",
+                "d3d11",
                 "dxgi",
             ])
         elif self.settings.os == "Macos":
