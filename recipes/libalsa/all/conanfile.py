@@ -62,6 +62,9 @@ class LibalsaConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
+
         tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args.extend([
@@ -70,8 +73,6 @@ class LibalsaConan(ConanFile):
             "--datadir=${prefix}/res",
         ])
         tc.generate()
-        env = VirtualBuildEnv(self)
-        env.generate()
 
     def build(self):
         apply_conandata_patches(self)
