@@ -208,10 +208,10 @@ class LibcurlConan(ConanFile):
         else:
             self.tool_requires("libtool/2.4.6")
             self.tool_requires("pkgconf/1.7.4")
-                if self._settings_build.os == "Windows":
-                    self.win_bash = True
-                    if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
-                        self.tool_requires("msys2/cci.latest")
+            if self._settings_build.os == "Windows":
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def layout(self):
         if self._is_using_cmake_build:
