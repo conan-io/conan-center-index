@@ -3,7 +3,7 @@
 ConanCenterIndex aims to provide the best quality packages of any open source project.
 Any C/C++ project can be made available by contributing a "recipe".
 
-Getting started is easy. Try building an existing package with our [developing recipes](developing_recipes_locally.md) tutorial.
+Getting started is easy. Try building an existing package with our [developing recipes](../developing_recipes_locally.md) tutorial.
 To deepen you understanding, start with the [How to provide a good recipe](#how-to-provide-a-good-recipe) section.
 You can follow the three steps (:one: :two: :three:) described below! :tada:
 
@@ -63,7 +63,7 @@ The specific steps to add new packages are:
 
 The **build service** associated to this repo will generate binary packages automatically for the most common platforms and compilers. See [the Supported Platforms and Configurations page](supported_platforms_and_configurations.md) for a list of generated configurations. For a C++ library, the system is currently generating more than 100 binary packages.
 
-> ⚠️ **Note**: This not a testing service, it is a binary building service for package **released**. Unit tests shouldn't be built nor run in recipes by default, see the [FAQs](faqs.md#why-conancenter-does-not-build-and-execute-tests-in-recipes) for more. Before submitting a pull request, please ensure that it works locally for some configurations.
+> ⚠️ **Note**: This not a testing service, it is a binary building service for package **released**. Unit tests shouldn't be built nor run in recipes by default, see the [FAQs](../faqs.md#why-conancenter-does-not-build-and-execute-tests-in-recipes) for more. Before submitting a pull request, please ensure that it works locally for some configurations.
 
 - The CI bot will start a new build only after the author is approved. Your PR may be reviewed in the mean time, but is not guaranteed.
 - The CI system will also report with messages in the PR any error in the process, even linking to the logs to see more details and debug.
@@ -125,7 +125,7 @@ should be listed here. The file is organized into two sections, `sources` and `p
 for each version of the library. All the files that are downloaded from the internet should include a checksum, so we can validate that
 they are not changed.
 
-A detailed breakdown of all the fields can be found in [conandata_yml_format.md](adding_packages/conandata_yml_format.md). We **strongly** encourage adding the [patch fields](adding_packages/conandata_yml_format.md#patches-fields) to help track where patches come from and what issue they solve.
+A detailed breakdown of all the fields can be found in [conandata_yml_format.md](conandata_yml_format.md). We **strongly** encourage adding the [patch fields](conandata_yml_format.md#patches-fields) to help track where patches come from and what issue they solve.
 
 Inside the `conanfile.py` recipe, this data is available in a `self.conan_data` attribute that can be used as follows:
 
@@ -193,7 +193,7 @@ The CI will explore all the folders and run the tests for the ones matching `tes
 of them together in the testing logs.
 
 > **Note**: If, for any reason, it is useful to write a test that should only be checked using Conan v1, you can do so by using the pattern
-> `test_v1_*/conanfile.py` for the folder. Please, have a look to [linter notes](v2_linter.md) to know how to prevent the linter from
+> `test_v1_*/conanfile.py` for the folder. Please, have a look to [linter notes](../v2_linter.md) to know how to prevent the linter from
 > checking these files.
 
 > Remember that the `test_<package>` recipes should **test the package configuration that has just been generated** for the _host_ context, otherwise
@@ -231,7 +231,7 @@ For cases where a project only offers source files, but not a build script, you 
 
 ### System Packages
 
-> :information_source: For exceptional cases where only system packages can be used and a regular Conan package may result in an incompatible and fragile package, a separated system package may be created. See the [FAQs](faqs.md#can-i-install-packages-from-the-system-package-manager) for more.
+> :information_source: For exceptional cases where only system packages can be used and a regular Conan package may result in an incompatible and fragile package, a separated system package may be created. See the [FAQs](../faqs.md#can-i-install-packages-from-the-system-package-manager) for more.
 
 The [SystemPackageTool](https://docs.conan.io/en/latest/reference/conanfile/methods.html#systempackagetool) can easily manage a system package manager (e.g. apt,
 pacman, brew, choco) and install packages which are missing on Conan Center but available for most distributions. It is key to correctly fill in the `cpp_info` for the consumers of a system package to have access to whatever was installed.

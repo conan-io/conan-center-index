@@ -188,7 +188,7 @@ No. Some projects provide more than a simple library, but also applications. For
 ## What license should I use for a custom project specific license?
 
 When a non standard open-source license is used, we have decided to use `LicenseRef-` as a prefix, followed by the name of the file which contains a custom license.
-See [the reviewing guidlines](reviewing.md#license-attribute) for more details.
+See [the reviewing guidlines](adding_packages/reviewing.md#license-attribute) for more details.
 
 ## How do I flag a problem to a recipe consumer?
 
@@ -236,7 +236,7 @@ Older versions can be removed from packages given the considerations below. When
 that is specific to them: logic from the recipe and references in `config.yml` and `conandata.yml`. In any case, packages
 are never removed from ConanCenter remote.
 
-When removing older versions, please take into account [these considerations](reviewing.md#supported-versions).
+When removing older versions, please take into account [these considerations](adding_packages/reviewing.md#supported-versions).
 
 ## Can I install packages from the system package manager?
 

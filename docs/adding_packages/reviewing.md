@@ -36,7 +36,7 @@ If possible, try to avoid mixing single quotes (`'`) and double quotes (`"`) in 
 When extracting sources or performing out-of-source builds, it is preferable to use a _subfolder_ attribute, `_source_subfolder` and `_build_subfolder` respectively.
 
 > **Note**: These are only required when using the legacy generator such as `cmake`. For the new generators like `CMakeToolchain` see
-> the [2.0 Migration Guide](v2_migration.md#using-layout-with-new-generators) for more information.
+> the [2.0 Migration Guide](../v2_migration.md#using-layout-with-new-generators) for more information.
 
 For example doing this with property attributes for these variables:
 
