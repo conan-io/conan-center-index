@@ -8,6 +8,7 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
     test_type = "explicit"
 
     def requirements(self):
@@ -15,19 +16,6 @@ class TestPackageConan(ConanFile):
 
     def layout(self):
         cmake_layout(self)
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        # fix "error C2039: 'CheckForDuplicateEntries': is not a member of 'Microsoft::WRL::Details'"
-        if is_msvc(self):
-            tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0.18362.0"
-        tc.generate()
-
-        deps = CMakeDeps(self)
-        deps.generate()
-
-        be = VirtualBuildEnv(self)
-        be.generate(scope="build")
 
     def build(self):
         cmake = CMake(self)
