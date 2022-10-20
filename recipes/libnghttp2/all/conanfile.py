@@ -68,13 +68,13 @@ class Nghttp2Conan(ConanFile):
             self.requires("libev/4.33")
             self.requires("libevent/2.1.12")
             self.requires("libxml2/2.9.14")
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
             if self.options.with_jemalloc:
-                self.requires("jemalloc/5.2.1")
+                self.requires("jemalloc/5.3.0")
         if self.options.with_hpack:
             self.requires("jansson/2.14")
         if self.options.with_asio:
-            self.requires("boost/1.79.0")
+            self.requires("boost/1.80.0")
 
     def validate(self):
         if self.options.with_asio and self._is_msvc:
