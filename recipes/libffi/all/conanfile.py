@@ -109,11 +109,6 @@ class PackageConan(ConanFile):
                 f"--host={host}",
             ])
 
-            if self.settings.arch == "x86_64":
-                tc.extra_cflags.append("-m64")
-            elif self.settings.arch == "x86":
-                tc.extra_cflags.append("-m32")
-
             if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
                 (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
                 tc.extra_cflags.append("-FS")
@@ -123,8 +118,16 @@ class PackageConan(ConanFile):
             if "d" in msvc_runtime_flag(self):
                 tc.extra_defines.append("USE_DEBUG_RTL")
 
+            architecture_flag = ""
+            if self.settings.arch == "x86_64":
+                architecture_flag = "-m64"
+            elif self.settings.arch == "x86":
+                architecture_flag = "-m32"
+
             env = Environment()
             compile_wrapper = unix_path(self, os.path.join(self.source_folder, "msvcc.sh"))
+            if architecture_flag:
+                compiler_wrapper = f"{compile_wrapper} {architecture_flag}"
             # FIXME: Use the conf once https://github.com/conan-io/conan-center-index/pull/12898 is merged
             # env.define("AR", f"{unix_path(self, self.conf.get('tools.automake:ar-lib'))}")
             [version_major, version_minor, _] = self.dependencies.direct_build['automake'].ref.version.split(".", 2)
