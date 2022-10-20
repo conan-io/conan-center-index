@@ -3,6 +3,7 @@ import os
 import shutil
 
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, mkdir, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
@@ -84,7 +85,8 @@ class XkbcommonConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("meson/0.63.3")
         self.tool_requires("bison/3.8.2")
-        self.tool_requires("pkgconf/1.9.3")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
         if self._has_build_profile and self.options.get_safe("with_wayland"):
             self.tool_requires("wayland/1.21.0")
             self.tool_requires("wayland-protocols/1.27")
@@ -145,6 +147,7 @@ class XkbcommonConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
+        fix_apple_shared_install_name(self)
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
