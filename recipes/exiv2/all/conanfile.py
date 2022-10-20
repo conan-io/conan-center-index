@@ -1,10 +1,12 @@
-from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, copy, rmdir, save, export_conandata_patches, apply_conandata_patches
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 
 class Exiv2Conan(ConanFile):
@@ -34,25 +36,8 @@ class Exiv2Conan(ConanFile):
 
     provides = []
 
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -79,44 +64,45 @@ class Exiv2Conan(ConanFile):
         if self.options.with_xmp == "external":
             raise ConanInvalidConfiguration("adobe-xmp-toolkit is not available on cci (yet)")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["EXIV2_BUILD_SAMPLES"] = False
+        tc.variables["EXIV2_BUILD_EXIV2_COMMAND"] = False
+        tc.variables["EXIV2_ENABLE_PNG"] = self.options.with_png
+        tc.variables["EXIV2_ENABLE_XMP"] = self.options.with_xmp == "bundled"
+        tc.variables["EXIV2_ENABLE_EXTERNAL_XMP"] = self.options.with_xmp == "external"
+        # NLS is used only for tool which is not built
+        tc.variables["EXIV2_ENABLE_NLS"] = False
+        tc.variables["EXIV2_ENABLE_WEBREADY"] = self.options.with_curl
+        tc.variables["EXIV2_ENABLE_CURL"] = self.options.with_curl
+        tc.variables["EXIV2_ENABLE_SSH"] = False
+
+        if is_msvc(self):
+            tc.variables["EXIV2_ENABLE_DYNAMIC_RUNTIME"] = "MD" in msvc_runtime_flag(self)
+        # set PIC manually because of object target exiv2_int
+        tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["EXIV2_BUILD_SAMPLES"] = False
-        self._cmake.definitions["EXIV2_BUILD_EXIV2_COMMAND"] = False
-        self._cmake.definitions["EXIV2_ENABLE_PNG"] = self.options.with_png
-        self._cmake.definitions["EXIV2_ENABLE_XMP"] = self.options.with_xmp == "bundled"
-        self._cmake.definitions["EXIV2_ENABLE_EXTERNAL_XMP"] = self.options.with_xmp == "external"
-        # NLS is used only for tool which is not built
-        self._cmake.definitions["EXIV2_ENABLE_NLS"] = False
-        self._cmake.definitions["EXIV2_ENABLE_WEBREADY"] = self.options.with_curl
-        self._cmake.definitions["EXIV2_ENABLE_CURL"] = self.options.with_curl
-        self._cmake.definitions["EXIV2_ENABLE_SSH"] = False
-        if self._is_msvc:
-            self._cmake.definitions["EXIV2_ENABLE_DYNAMIC_RUNTIME"] = "MD" in msvc_runtime_flag(self)
-        # set PIC manually because of object target exiv2_int
-        self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         targets = {"exiv2lib": "exiv2::exiv2lib"}
@@ -127,8 +113,7 @@ class Exiv2Conan(ConanFile):
             targets
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent("""\
@@ -137,7 +122,7 @@ class Exiv2Conan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
