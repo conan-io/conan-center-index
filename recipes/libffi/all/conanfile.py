@@ -95,7 +95,7 @@ class PackageConan(ConanFile):
         if self.settings.build_type == "Debug":
             tc.extra_defines.append("FFI_DEBUG")
 
-        if is_msvc(self):
+        if self._settings_build.os == "Windows" and (is_msvc(self) or self.settings.compiler == "clang"):
             build = "{}-{}-{}".format(
                 "x86_64" if self._settings_build.arch == "x86_64" else "i686",
                 "pc" if self._settings_build.arch == "x86" else "win64",
@@ -119,10 +119,13 @@ class PackageConan(ConanFile):
                 tc.extra_defines.append("USE_DEBUG_RTL")
 
             architecture_flag = ""
-            if self.settings.arch == "x86_64":
-                architecture_flag = "-m64"
-            elif self.settings.arch == "x86":
-                architecture_flag = "-m32"
+            if is_msvc(self):
+                if self.settings.arch == "x86_64":
+                    architecture_flag = "-m64"
+                elif self.settings.arch == "x86":
+                    architecture_flag = "-m32"
+            elif self.settings.compiler == "clang":
+                    architecture_flag = "-clang-cl"
 
             env = Environment()
             compile_wrapper = unix_path(self, os.path.join(self.source_folder, "msvcc.sh"))
