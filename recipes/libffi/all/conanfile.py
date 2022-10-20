@@ -35,10 +35,6 @@ class PackageConan(ConanFile):
         # TODO: Remove for Conan v2
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -71,7 +67,6 @@ class PackageConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
         self.tool_requires("automake/1.16.5")
         self.tool_requires("libtool/2.4.7")
-        self.tool_requires("gnu-config/cci.20210814")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -160,11 +155,6 @@ class PackageConan(ConanFile):
 
     def _patch_source(self):
         apply_conandata_patches(self)
-
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self.source_folder, "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self.source_folder, "config.guess"))
 
         if Version(self.version) < "3.3":
             if self.settings.compiler == "clang" and Version(str(self.settings.compiler.version)) >= 7.0:
