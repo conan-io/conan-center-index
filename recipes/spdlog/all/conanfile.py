@@ -77,7 +77,7 @@ class SpdlogConan(ConanFile):
             check_min_cppstd(self, 11)
         if self._info.settings.os != "Windows" and (self._info.options.wchar_support or self._info.options.wchar_filenames):
             raise ConanInvalidConfiguration("wchar is only supported under windows")
-        if self._info.get_safe("shared") and is_msvc_static_runtime(self):
+        if self._info.options.get_safe("shared") and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def source(self):
