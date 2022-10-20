@@ -73,8 +73,6 @@ class PackageConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        ms = VCVars(self)
-        ms.generate()
         virtual_build_env = VirtualBuildEnv(self)
         virtual_build_env.generate()
 
