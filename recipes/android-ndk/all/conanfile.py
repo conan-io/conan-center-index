@@ -179,8 +179,12 @@ class AndroidNDKConan(ConanFile):
         return f"{self._platform}-{self._arch}"
 
     @property
+    def _ndk_root_rel_path(self):
+        return os.path.join("bin", "toolchains", "llvm", "prebuilt", self._host)
+
+    @property
     def _ndk_root(self):
-        return os.path.join(self.package_folder, "bin", "toolchains", "llvm", "prebuilt", self._host)
+        return os.path.join(self.package_folder, self._ndk_root_rel_path)
 
     def _wrap_executable(self, tool):
         suffix = ".exe" if self.settings_build.os == "Windows" else ""
@@ -261,7 +265,7 @@ class AndroidNDKConan(ConanFile):
             self.output.warn(f"You've added {self.name}/{self.version} as a build requirement, while os={self.settings_target.os} != Android")
             return
 
-        self.cpp_info.bindirs.append(os.path.join(self._ndk_root, "bin"))
+        self.cpp_info.bindirs.append(os.path.join(self._ndk_root_rel_path, "bin"))
 
         self.buildenv_info.define_path("NDK_ROOT", self._ndk_root)
 
