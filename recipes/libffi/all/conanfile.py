@@ -96,6 +96,19 @@ class PackageConan(ConanFile):
             tc.extra_defines.append("FFI_DEBUG")
 
         if is_msvc(self):
+            build = "{}-{}-{}".format(
+                "x86_64" if self._settings_build.arch == "x86_64" else "i686",
+                "pc" if self._settings_build.arch == "x86" else "win64",
+                "mingw64")
+            host = "{}-{}-{}".format(
+                "x86_64" if self.settings.arch == "x86_64" else "i686",
+                "pc" if self.settings.arch == "x86" else "win64",
+                "mingw64")
+            tc.configure_args.extend([
+                f"--build={build}",
+                f"--host={host}",
+            ])
+
             if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
                 (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
                 tc.extra_cflags.append("-FS")
