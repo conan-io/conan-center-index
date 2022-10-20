@@ -67,6 +67,8 @@ class LibaecConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):
@@ -74,8 +76,6 @@ class LibaecConan(ConanFile):
         if Version(self.version) < "1.0.6":
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                   "add_subdirectory(tests)", "")
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                  "option(BUILD_SHARED_LIBS \"Build Shared Libraries\" ON)", "")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
