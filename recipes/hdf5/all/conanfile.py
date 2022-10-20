@@ -151,11 +151,8 @@ class Hdf5Conan(ConanFile):
         # Do not force PIC
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                 "set (CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
-        if Version(self.version) >= "1.12.0":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                  "option (BUILD_SHARED_LIBS \"Build Shared Libraries\" ON)", "")
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                  "option (BUILD_STATIC_LIBS \"Build Static Libraries\" ON)", "")
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
