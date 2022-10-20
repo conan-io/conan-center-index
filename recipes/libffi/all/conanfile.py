@@ -95,6 +95,7 @@ class PackageConan(ConanFile):
         if self.settings.build_type == "Debug":
             tc.extra_defines.append("FFI_DEBUG")
 
+        env = tc.environment()
         if self._settings_build.os == "Windows" and (is_msvc(self) or self.settings.compiler == "clang"):
             build = "{}-{}-{}".format(
                 "x86_64" if self._settings_build.arch == "x86_64" else "i686",
@@ -127,10 +128,9 @@ class PackageConan(ConanFile):
             elif self.settings.compiler == "clang":
                     architecture_flag = "-clang-cl"
 
-            env = tc.environment()
             compile_wrapper = unix_path(self, os.path.join(self.source_folder, "msvcc.sh"))
             if architecture_flag:
-                compiler_wrapper = f"{compile_wrapper} {architecture_flag}"
+                compile_wrapper = f"{compile_wrapper} {architecture_flag}"
             # FIXME: Use the conf once https://github.com/conan-io/conan-center-index/pull/12898 is merged
             # env.define("AR", f"{unix_path(self, self.conf.get('tools.automake:ar-lib'))}")
             [version_major, version_minor, _] = self.dependencies.direct_build['automake'].ref.version.split(".", 2)
@@ -139,10 +139,6 @@ class PackageConan(ConanFile):
             env.define("CC", f"{compile_wrapper}")
             env.define("CXX", f"{compile_wrapper}")
             env.define("LD", "link -nologo")
-            if self.settings.arch == "x86_64":
-                env.define("AS", "ml64 -nologo")
-            else:
-                env.define("AS", "ml -nologo")
             env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
@@ -152,8 +148,7 @@ class PackageConan(ConanFile):
             env.define("CPP", "cl -nologo -EP")
             env.define("LIBTOOL", unix_path(self, os.path.join(self.source_folder, "ltmain.sh")))
             env.define("INSTALL", unix_path(self, os.path.join(self.source_folder, "install-sh")))
-            # env.vars(self).save_script("conanbuild_libffi_msvc")
-        tc.generate()
+        tc.generate(env=env)
 
     def _patch_source(self):
         apply_conandata_patches(self)
