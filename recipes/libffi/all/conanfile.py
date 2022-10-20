@@ -109,6 +109,11 @@ class PackageConan(ConanFile):
                 f"--host={host}",
             ])
 
+            if self.settings.arch == "x86_64":
+                tc.extra_cflags.append("-m64")
+            elif self.settings.arch == "x86":
+                tc.extra_cflags.append("-m32")
+
             if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
                 (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
                 tc.extra_cflags.append("-FS")
