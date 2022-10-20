@@ -22,7 +22,8 @@ class MesonConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def requirements(self):
-        self.requires("ninja/1.11.0")
+        if self.conf.get("tools.meson.mesontoolchain:backend", default=False, check_type=str) in (False, "ninja"):
+            self.requires("ninja/1.11.0")
 
     def package_id(self):
         self.info.clear()
