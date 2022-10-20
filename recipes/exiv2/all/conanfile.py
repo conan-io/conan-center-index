@@ -67,13 +67,13 @@ class Exiv2Conan(ConanFile):
             self.provides.append("xmp-toolkit-sdk")
 
     def requirements(self):
-        self.requires("libiconv/1.16")
+        self.requires("libiconv/1.17")
         if self.options.with_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.38")
         if self.options.with_xmp == "bundled":
-            self.requires("expat/2.4.3")
+            self.requires("expat/2.4.9")
         if self.options.with_curl:
-            self.requires("libcurl/7.80.0")
+            self.requires("libcurl/7.85.0")
 
     def validate(self):
         if self.options.with_xmp == "external":
