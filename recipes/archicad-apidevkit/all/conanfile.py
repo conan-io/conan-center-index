@@ -36,6 +36,9 @@ class ArchicadApidevkitConan (ConanFile):
         if not self.info.settings.os in ("Macos", "Windows"):
             raise ConanInvalidConfiguration(
                 f"{self.ref} is not supported by the OS {self.info.settings.os}")
+        if not str(self.settings.arch) in ("x86_64"):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} is not supported yet.")
 
     def build(self):
         get(self, **self.conan_data["sources"][self.version][str(self.settings.os)]
