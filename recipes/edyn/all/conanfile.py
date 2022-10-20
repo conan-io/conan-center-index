@@ -3,6 +3,7 @@ from conan.tools.files import rmdir, rm, copy, get, collect_libs
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.layout import cmake_layout
+from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 import os
@@ -41,8 +42,6 @@ class EdynConan(ConanFile):
             "gcc": "9.3", # GCC 9.3 started supporting attributes in constructor arguments
             "clang": "8",
             "apple-clang": "10",
-            "Visual Studio": "16",
-            "msvc": "192"
         }
 
     def configure(self):
@@ -52,15 +51,17 @@ class EdynConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 17)
-        try:
-            minimum_required_compiler_version = self._compiler_required[str(self.settings.compiler)]
-            if Version(self.settings.compiler.version) < minimum_required_compiler_version:
-                raise ConanInvalidConfiguration("This package requires C++17 support. The current compiler does not support it.")
-        except KeyError:
-            self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
+        check_min_vs(self, 192)
+        if not is_msvc(self):
+            try:
+                minimum_required_compiler_version = self._compiler_required[str(self.settings.compiler)]
+                if Version(self.settings.compiler.version) < minimum_required_compiler_version:
+                    raise ConanInvalidConfiguration("This package requires C++17 support. The current compiler does not support it.")
+            except KeyError:
+                self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
 
     def layout(self):
-        cmake_layout(self, src_folder="edyn")
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
