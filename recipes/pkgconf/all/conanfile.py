@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import export_conandata_patches, get, apply_conandata_patches, replace_in_file, rm, rmdir, rename
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
+from conan.tools.build import cross_building
 from conans import Meson, tools
 import functools
 import os
@@ -60,7 +61,7 @@ class PkgConfConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("Cross-building is not implemented in the recipe")
 
     def build_requirements(self):
