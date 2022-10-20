@@ -55,11 +55,8 @@ jobs:
         if: steps.changed_files.outputs.any_changed == 'true' && always()
         run: |
           for file in ${{ env.CONANDATA_FILES_PATH }}; do
-            python3 linter/conandata_yaml_linter.py ${file} || error=true
+            python3 linter/conandata_yaml_linter.py ${file}
           done
-          if [ $error ]; then
-              exit -1
-          fi
 
   lint_pr_files:
     # Lint files modified in the pull_request

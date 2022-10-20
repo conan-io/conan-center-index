@@ -31,7 +31,6 @@ def main():
             f"title=config.yml schema error"
             f"::{e}\n"
         )
-        exit(1)
 
 
 if __name__ == "__main__":

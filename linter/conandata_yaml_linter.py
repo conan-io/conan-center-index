@@ -33,7 +33,7 @@ def main():
                 ["official", "conan", "portability", "backport", "vulnerability"]
             ),
             Optional("patch_source"): Str(),
-            Optional("sha256"): Str(), # Really uncommon
+            Optional("sha256"): Str(),  # Really uncommon
             # No longer required for v2 recipes with layouts
             Optional("base_path"): Str(),
         }
@@ -54,7 +54,10 @@ def main():
         if "patches" in parsed:
             for patch in parsed["patches"]:
                 type = patch["patch_type"]
-                if type in ["official", "backport", "vulnerability"] and not "patch_source" in patch:
+                if (
+                    type in ["official", "backport", "vulnerability"]
+                    and not "patch_source" in patch
+                ):
                     print(
                         f"::warning file={args.path},line={type.start_line},endline={type.end_line},"
                         f"title='patch_type' should have 'patch_source'"
@@ -68,11 +71,9 @@ def main():
             f"title=config.yml schema error"
             f"::{e}\n"
         )
-        exit(1)
     except error:
         e = error.__str__().replace("\n", "%0A")
         print(f"::error ::{e}")
-        exit(2)
 
 
 if __name__ == "__main__":
