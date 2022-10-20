@@ -1,13 +1,14 @@
 import os
 import shutil
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, copy, get, rmdir, apply_conandata_patches, export_conandata_patches, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import VCVars, is_msvc
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
 
@@ -45,7 +46,7 @@ class NASMConan(ConanFile):
 
     def build_requirements(self):
         if self.info.settings.os == "Windows":
-            self.tool_requires("strawberryperl/5.30.0.1")
+            self.tool_requires("strawberryperl/5.32.1.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
@@ -67,13 +68,6 @@ class NASMConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
 
-        # TODO I assume this is required
-        # inject requires env vars in build scope
-        # it's required in case of native build when there is AutotoolsDeps & at least one dependency which might be shared, because configure tries to run a test executable
-        if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
-
 
     def build(self):
         apply_conandata_patches(self)
@@ -81,8 +75,6 @@ class NASMConan(ConanFile):
         if is_msvc(self):
             with chdir(self, self.source_folder):
                 self.run("nmake /f {}".format(os.path.join("Mkfiles", "msvc.mak")))
-                shutil.copy("nasm.exe", "nasmw.exe")
-                shutil.copy("ndisasm.exe", "ndisasmw.exe")
         else:
             autotools = Autotools(self)
             autotools.configure()
@@ -103,15 +95,19 @@ class NASMConan(ConanFile):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         if is_msvc(self):
             copy(self, pattern="*.exe", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+            with chdir(self, os.path.join(self.package_folder, "bin")):
+                shutil.copy("nasm.exe", "nasmw.exe")
+                shutil.copy("ndisasm.exe", "ndisasmw.exe")
         else:
             autotools = Autotools(self)
             autotools.install()
-            rmdir(self, os.path.join(self.package_folder, "share"))
+            # TODO: to remove in conan v2
+            if Version(conan_version).major < 2:
+                rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
-        self.env_info.libdirs = []
-        self.buildenv_info.append_path("PATH", bin_path)
+        self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
