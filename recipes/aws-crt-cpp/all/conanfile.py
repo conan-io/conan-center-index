@@ -54,13 +54,15 @@ class AwsCrtCpp(ConanFile):
             self.requires("aws-c-http/0.6.13")
             self.requires("aws-c-auth/0.6.11")
             self.requires("aws-c-s3/0.1.37")
+            self.requires("aws-c-mqtt/0.7.10")
+            self.requires("aws-c-event-stream/0.2.7")
         else:
             self.requires("aws-c-io/0.13.4")
             self.requires("aws-c-http/0.6.22")
             self.requires("aws-c-auth/0.6.17")
             self.requires("aws-c-s3/0.1.49")
-        self.requires("aws-c-mqtt/0.7.12")
-        self.requires("aws-c-event-stream/0.2.15")
+            self.requires("aws-c-mqtt/0.7.12")
+            self.requires("aws-c-event-stream/0.2.15")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
