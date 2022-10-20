@@ -1,11 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
+from conan.tools.microsoft import is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
-from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 import os
 
 required_conan_version = ">=1.52.0"
@@ -84,9 +82,9 @@ class LibaecConan(ConanFile):
 
     def package(self):
         if Version(self.version) < "1.0.6":
-            copy(self, pattern="Copyright.txt", dst="licenses", src=self.source_folder)
+            copy(self, pattern="Copyright.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         else:
-            self.copy(pattern="LICENSE.txt", dst="licenses", src=self.source_folder)
+            copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
