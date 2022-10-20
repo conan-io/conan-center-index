@@ -1,0 +1,20 @@
+{
+    "problemMatcher": [
+        {
+            "owner": "yaml_linter_errors",
+            "severity": "error",
+            "pattern": [
+                {
+                    "regexp": "Error: (.*):(\\d+):(\\d+): (.*)",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "message": 4
+                }
+            ]
+        }
+    ]
+}
+
+
+
