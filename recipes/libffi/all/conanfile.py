@@ -141,6 +141,10 @@ class PackageConan(ConanFile):
             env.define("CC", f"{compile_wrapper}")
             env.define("CXX", f"{compile_wrapper}")
             env.define("LD", "link -nologo")
+            if self.settings.arch == "x86_64":
+                env.define("AS", "ml64 -nologo")
+            else:
+                env.define("AS", "ml -nologo")
             env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
