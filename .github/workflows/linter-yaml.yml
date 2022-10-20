@@ -24,6 +24,7 @@ jobs:
         id: changed_files
         with:
           base_sha: ${{ github.event.pull_request.base.sha }}
+          target_branch_fetch_depth: 0
           files: |
             linter/**
 
@@ -68,6 +69,7 @@ jobs:
         uses: tj-actions/changed-files@v32
         with:
           base_sha: ${{ github.event.pull_request.base.sha }}
+          target_branch_fetch_depth: 0
           files: |
             ${{ env.CONFIG_FILES_PATH }}
 
@@ -85,6 +87,7 @@ jobs:
         uses: tj-actions/changed-files@v32
         with:
           base_sha: ${{ github.event.pull_request.base.sha }}
+          target_branch_fetch_depth: 0
           files: |
             ${{ env.CONANDATA_FILES_PATH }}
 
