@@ -14,10 +14,9 @@ class LibalsaConan(ConanFile):
     license = "LGPL-2.1"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/alsa-project/alsa-lib"
-    topics = ("libalsa", "alsa", "sound", "audio", "midi")
+    topics = ("alsa", "sound", "audio", "midi")
     description = "Library of ALSA: The Advanced Linux Sound Architecture, that provides audio " \
                   "and MIDI functionality to the Linux operating system"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -35,7 +34,10 @@ class LibalsaConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         try:
             del self.settings.compiler.libcxx
         except Exception:
@@ -49,8 +51,8 @@ class LibalsaConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Only Linux supported")
+        if self.info.settings.os != "Linux":
+            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
