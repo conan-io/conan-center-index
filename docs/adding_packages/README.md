@@ -38,7 +38,8 @@ You can follow the three steps (:one: :two: :three:) described below! :tada:
 requesting access in this GitHub [issue](https://github.com/conan-io/conan-center-index/issues/4). Feel free to introduce yourself and
 your motivation to join ConanCenter community.
 
-This process helps conan-center-index against spam and malicious code. The process is not not automated on purpose and the requests are generally approved on a weekly basis.
+This process helps ConanCenter against spam and malicious code. The process is not not automated on purpose and the requests are generally approved
+on a weekly basis.
 
 > **Note** The requests are reviewed manually, checking the GitHub profile activity of the requester to avoid any misuse of the service.
 > All interactions are subject to the expectations of the [code of conduct](../code_of_conduct.md). Any misuse or inappropriate behavior are subject

@@ -402,8 +402,9 @@ Conan will build from sources all the packages and use the shared libraries when
 
 The [Code Owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) feature requires
 write permission for any listed user in the file `.github/CODEOWNERS`, which makes it impossible to be accepted by Conan. However, that file is still important as it can be re-used in
-a future Github Action to parse and communicate users. Meanwhile, there is the project https://app.github-file-watcher.com/, which is able to notify users, but only after
-merging to the master branch. Feel free to contribute to a new Github Action that implements a file watcher feature.
+a future Github Action to parse and communicate users. Meanwhile, there is the project https://app.github-file-watcher.com/,
+which is able to notify users, but only after merging to the master branch. Feel free to contribute to a new Github Action that
+implements a file watcher feature.
 
 ## Is it possible to disable Pylint?
 

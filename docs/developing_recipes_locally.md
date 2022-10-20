@@ -44,6 +44,8 @@ conan config install https://github.com/conan-io/hooks.git -sf hooks -tf hooks
 conan config set hooks.conan-center
 ```
 
+> **Note**: Hooks are generally for package correctness and the pylinters are for the recipe syntax
+
 The hooks will show error messages but the `conan create` won’t fail unless you export the environment variable `CONAN_HOOK_ERROR_LEVEL=40`.
 All hooks checks will print a similar message:
 
@@ -97,7 +99,9 @@ build script that are tailored to their specific use cases. It's not uncommon to
 
 ## Running the Python Linters
 
-Linters are always executed by Github actions to validate parts of your recipe, for instance, if it uses migrated Conan tools imports.
+Linters are always executed by GitHub Actions to validate parts of your recipe, for instance, if it uses migrated Conan tools imports.
+
+> **Note**: Hooks are generally for package correctness and the pylinters are for the recipe syntax
 
 It is possible to run the linter locally the same way it is being run [using Github actions](../.github/workflows/linter-conan-v2.yml) by:
 
