@@ -49,7 +49,6 @@ class LibaecConan(ConanFile):
             pass
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         cmake_layout(self, src_folder="src")
 
     def validate(self):
