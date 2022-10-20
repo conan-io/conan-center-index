@@ -63,8 +63,6 @@ class SzipConan(ConanFile):
         apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                               "set (CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                              "option (BUILD_SHARED_LIBS \"Build Shared Libraries\" ON)", "")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -81,6 +79,8 @@ class SzipConan(ConanFile):
             # Assume it works, otherwise raise in 'validate' function
             tc.variables["TEST_LFS_WORKS_RUN"] = True
             tc.variables["TEST_LFS_WORKS_RUN__TRYRUN_OUTPUT"] = True
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def package(self):
