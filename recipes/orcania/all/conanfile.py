@@ -19,12 +19,12 @@ class OrcaniaConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "base64url": [True, False],
+        "enable_base64url": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "base64url": True,
+        "enable_base64url": True,
     }
 
     def config_options(self):
@@ -47,7 +47,7 @@ class OrcaniaConan(ConanFile):
             pass
 
     def requirements(self):
-        if is_msvc(self) and self.options.base64url:
+        if is_msvc(self) and self.options.enable_base64url:
             self.requires("getopt-for-visual-studio/20200201")
 
     def source(self):
@@ -62,7 +62,7 @@ class OrcaniaConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_BASE64URL"] = self.options.base64url
+        tc.variables["BUILD_BASE64URL"] = self.options.enable_base64url
         tc.variables["BUILD_SHARED"] = self.options.shared
         tc.variables["BUILD_STATIC"] = not self.options.shared
         tc.generate()
