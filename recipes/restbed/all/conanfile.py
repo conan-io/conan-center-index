@@ -22,14 +22,14 @@ class RestbedConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "ssl": [True, False],
         "ipc": [True, False],
+        "with_openssl": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "ssl": True,
         "ipc": False,
+        "with_openssl": True,
     }
 
     def export_sources(self):
@@ -60,7 +60,7 @@ class RestbedConan(ConanFile):
 
     def requirements(self):
         self.requires("asio/1.24.0")
-        if self.options.ssl:
+        if self.options.with_openssl:
             self.requires("openssl/3.0.5")
 
     def source(self):
@@ -70,7 +70,7 @@ class RestbedConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTS"] = False
-        tc.variables["BUILD_SSL"] = self.options.ssl
+        tc.variables["BUILD_SSL"] = self.options.with_openssl
         tc.variables["BUILD_IPC"] = self.options.get_safe("ipc", False)
         tc.generate()
         deps = CMakeDeps(self)

@@ -3,6 +3,7 @@
 #include <memory>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 static void post_method_handler( const std::shared_ptr< restbed::Session > session )
 {
@@ -17,7 +18,7 @@ static void post_method_handler( const std::shared_ptr< restbed::Session > sessi
     } );
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
     auto resource = std::make_shared< restbed::Resource >( );
     resource->set_path( "/resource" );
@@ -29,10 +30,11 @@ int main(void)
 
     restbed::Service service;
     service.publish( resource );
-#if 0
-    // Don't start the service to avoid blocking
-    service.start( settings );
-#endif
+
+    if (argc > 1 && strcmp(argv[1], "run") == 0) {
+        // Don't start the service to avoid blocking
+        service.start( settings );
+    }
 
     return EXIT_SUCCESS;
 }
