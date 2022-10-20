@@ -1,8 +1,5 @@
-import os
 from conan import ConanFile
-from conan.tools.build import can_run
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.scm import Version
+import os
 
 
 class TestPackageConan(ConanFile):
@@ -14,7 +11,6 @@ class TestPackageConan(ConanFile):
         self.tool_requires(self.tested_reference_str)
 
     def test(self):
-        if can_run(self):
-            self.run("perl --version")
-            perl_script = os.path.join(self.source_folder, "list_files.pl")
-            self.run(f"perl {perl_script}", env="conanbuild")
+        self.run("perl --version")
+        perl_script = os.path.join(self.source_folder, "list_files.pl")
+        self.run(f"perl {perl_script}")
