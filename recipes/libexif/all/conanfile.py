@@ -72,7 +72,8 @@ class LibexifConan(ConanFile):
             "--disable-nls",
             "--disable-rpath",
         ])
-        if is_msvc(self) and Version(self.settings.compiler.version) >= "12":
+        if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
+                (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
             tc.extra_cflags.append("-FS")
 
         # env vars
