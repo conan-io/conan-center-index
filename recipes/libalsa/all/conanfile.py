@@ -75,7 +75,7 @@ class LibalsaConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         autotools = Autotools(self)
-        if Version(self.version) > "1.2.2":
+        if Version(self.version) > "1.2.4":
             autotools.autoreconf()
             autotools.configure()
             autotools.make()
@@ -87,7 +87,7 @@ class LibalsaConan(ConanFile):
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        if Version(self.version) > "1.2.2":
+        if Version(self.version) > "1.2.4":
             autotools = Autotools(self)
             autotools.install()
         else:
