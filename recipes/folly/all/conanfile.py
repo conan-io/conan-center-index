@@ -22,10 +22,12 @@ class FollyConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_sse4_2" : [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_sse4_2" : True
     }
 
     generators = "cmake", "cmake_find_package"
@@ -57,9 +59,13 @@ class FollyConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+        if str(self.settings.arch) not in ['x86', 'x86_64']:
+            del self.options.with_sse4_2
 
     def configure(self):
         if self.options.shared:
@@ -144,6 +150,9 @@ class FollyConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         if can_run(self):
+            if self.options.with_sse4_2:
+                cmake.definitions["FOLLY_SSE"] = "4"
+                cmake.definitions["FOLLY_SSE_MINOR"] = "2"
             cmake.definitions["FOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE"] = "0"
             cmake.definitions["FOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE__TRYRUN_OUTPUT"] = ""
             cmake.definitions["FOLLY_HAVE_LINUX_VDSO_EXITCODE"] = "0"
@@ -254,3 +263,30 @@ class FollyConan(ConanFile):
         self.cpp_info.components["libfolly"].names["cmake_find_package_multi"] = "folly"
         self.cpp_info.components["libfolly"].set_property("cmake_target_name", "Folly::folly")
         self.cpp_info.components["libfolly"].set_property("pkg_config_name", "libfolly")
+
+        if Version(self.version) >= "2019.10.21.00":
+            self.cpp_info.components["follybenchmark"].set_property("cmake_target_name", "Folly::follybenchmark")
+            self.cpp_info.components["follybenchmark"].set_property("pkg_config_name", "libfollybenchmark")
+            self.cpp_info.components["follybenchmark"].libs = ["follybenchmark"]
+            self.cpp_info.components["follybenchmark"].requires = ["libfolly"]
+
+            self.cpp_info.components["folly_test_util"].set_property("cmake_target_name", "Folly::folly_test_util")
+            self.cpp_info.components["folly_test_util"].set_property("pkg_config_name", "libfolly_test_util")
+            self.cpp_info.components["folly_test_util"].libs = ["folly_test_util"]
+            self.cpp_info.components["folly_test_util"].requires = ["libfolly"]
+
+            if Version(self.version) >= "2020.08.10.00" and self.settings.os == "Linux":
+                self.cpp_info.components["folly_exception_tracer_base"].set_property("cmake_target_name", "Folly::folly_exception_tracer_base")
+                self.cpp_info.components["folly_exception_tracer_base"].set_property("pkg_config_name", "libfolly_exception_tracer_base")
+                self.cpp_info.components["folly_exception_tracer_base"].libs = ["folly_exception_tracer_base"]
+                self.cpp_info.components["folly_exception_tracer_base"].requires = ["libfolly"]
+
+                self.cpp_info.components["folly_exception_tracer"].set_property("cmake_target_name", "Folly::folly_exception_tracer")
+                self.cpp_info.components["folly_exception_tracer"].set_property("pkg_config_name", "libfolly_exception_tracer")
+                self.cpp_info.components["folly_exception_tracer"].libs = ["folly_exception_tracer"]
+                self.cpp_info.components["folly_exception_tracer"].requires = ["folly_exception_tracer_base"]
+
+                self.cpp_info.components["folly_exception_counter"].set_property("cmake_target_name", "Folly::folly_exception_counter")
+                self.cpp_info.components["folly_exception_counter"].set_property("pkg_config_name", "libfolly_exception_counter")
+                self.cpp_info.components["folly_exception_counter"].libs = ["folly_exception_counter"]
+                self.cpp_info.components["folly_exception_counter"].requires = ["folly_exception_tracer"]
