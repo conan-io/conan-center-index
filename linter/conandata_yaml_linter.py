@@ -32,7 +32,8 @@ def main():
             "patch_type": Enum(
                 ["official", "conan", "portability", "backport", "vulnerability"]
             ),
-            Optional("patch_source"): Str(),  # I'd like a warning for this :thinking:
+            Optional("patch_source"): Str(),
+            Optional("sha256"): Str(), # Really uncommon
             # No longer required for v2 recipes with layouts
             Optional("base_path"): Str(),
         }
