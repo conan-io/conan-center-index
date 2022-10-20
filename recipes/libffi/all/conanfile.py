@@ -4,7 +4,7 @@ from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, VCVars
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
 from conan.tools.scm import Version
 import glob
 import os
@@ -127,7 +127,7 @@ class PackageConan(ConanFile):
             elif self.settings.compiler == "clang":
                     architecture_flag = "-clang-cl"
 
-            env = Environment()
+            env = tc.environment()
             compile_wrapper = unix_path(self, os.path.join(self.source_folder, "msvcc.sh"))
             if architecture_flag:
                 compiler_wrapper = f"{compile_wrapper} {architecture_flag}"
@@ -152,7 +152,7 @@ class PackageConan(ConanFile):
             env.define("CPP", "cl -nologo -EP")
             env.define("LIBTOOL", unix_path(self, os.path.join(self.source_folder, "ltmain.sh")))
             env.define("INSTALL", unix_path(self, os.path.join(self.source_folder, "install-sh")))
-            env.vars(self).save_script("conanbuild_libffi_msvc")
+            # env.vars(self).save_script("conanbuild_libffi_msvc")
         tc.generate()
 
     def _patch_source(self):
