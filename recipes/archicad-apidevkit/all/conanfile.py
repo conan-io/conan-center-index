@@ -44,7 +44,6 @@ class ArchicadApidevkitConan (ConanFile):
             self.settings.os)][self._acdevkit_arch][1])
 
     def package(self):
-        copy(self, "*", src=self.build_folder, dst=self.package_folder)
-        copy(self, "LICENSE", src=self.build_folder,
-             dst=os.path.join(self.package_folder, "licenses"))
-        os.remove(os.path.join(self.package_folder, "LICENSE"))
+        copy(self, "*", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"))
+        copy(self, "LICENSE", src=self.build_folder, dst=os.path.join(self.package_folder, "licenses"))
+        os.remove(os.path.join(self.package_folder, "bin/LICENSE"))
