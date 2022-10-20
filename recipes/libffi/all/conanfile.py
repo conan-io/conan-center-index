@@ -4,7 +4,7 @@ from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, VCVars
 from conan.tools.scm import Version
 import glob
 import os
@@ -78,6 +78,8 @@ class PackageConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        ms = VCVars(self)
+        ms.generate()
         virtual_build_env = VirtualBuildEnv(self)
         virtual_build_env.generate()
 
