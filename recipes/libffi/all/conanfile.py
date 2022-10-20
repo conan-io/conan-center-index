@@ -160,9 +160,9 @@ class PackageConan(ConanFile):
         apply_conandata_patches(self)
 
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "config.sub"))
+                    os.path.join(self.source_folder, "config.sub"))
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "config.guess"))
+                    os.path.join(self.source_folder, "config.guess"))
 
         if Version(self.version) < "3.3":
             if self.settings.compiler == "clang" and Version(str(self.settings.compiler.version)) >= 7.0:
