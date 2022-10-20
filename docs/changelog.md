@@ -1,5 +1,31 @@
 # Changelog
 
+### 17-October-2022 - 10:33 CEST
+
+- [feature] Improve management of GitHub labels on pull requests.
+- [feature] New EpochsSummary job to show epoch status for each reference.
+- [feature] Save bot comments as labels as job artifacts for easier user feedback.
+- [feature] Ability to wait for a job and merge bot messages from another pipeline: Allows to provide feedback to users in PRs from the Conan v2 pipeline in the future.
+- [feature] Add timeout to AutomaticMerge job.
+- [feature] Add note about Windows SDK on supported platforms documentation.
+- [fix] Fix getting package IDs from Artifactory in the Conan v2 pipeline.
+- [fix] Bump dependencies pull requests should only consider modified comments.
+- [fix] ValidateInfrastructure job parameter for macos executors.
+
+### 20-September-2022 - 14:27 CEST
+
+- [feature] Handle scenarios where some files are removed.
+- [feature] Simplify logic to detect references to be built in a pull request.
+- [feature] Workaround in Conan v2 commands to list package IDs in a pull request.
+- [feature] Bump minimum required Conan client version.
+- [fix] When merging a pull request, check recipe revisions only against the pull-request repository.
+- [fix] Do not consider GitHub check runs for pull requests opened by a bot.
+- [fix] Consider files renamed in pull requests as "added" and "removed".
+- [fix] Cover use-case when a pull request adds just one conanfile.py.
+- [fix] Simplify assignment of GitHub labels.
+- [fix] Use backquotes in GitHub comments.
+- [fix] Fix promotion of packages with Conan v2.
+
 ### 1-September-2022 - 10:21 CEST
 
 - [feature] Avoid `test_v?_package` folders that don't match the Conan version.

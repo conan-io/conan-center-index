@@ -1,5 +1,7 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import get, download
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.33.0"
@@ -41,10 +43,10 @@ class WasmedgeConan(ConanFile):
         self.info.settings.compiler = self._compiler_alias
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)][self._compiler_alias][0],
+        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)][self._compiler_alias][0],
                   destination=self._source_subfolder, strip_root=True)
-        tools.download(filename="LICENSE",
-                       **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)][self._compiler_alias][1])
+        download(self, filename="LICENSE",
+                       **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)][self._compiler_alias][1])  # noqa: E128
 
     def package(self):
         self.copy("*.h", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
@@ -52,18 +54,26 @@ class WasmedgeConan(ConanFile):
 
         srclibdir = os.path.join(self._source_subfolder, "lib64" if self.settings.os == "Linux" else "lib")
         srcbindir = os.path.join(self._source_subfolder, "bin")
-
-        self.copy("wasmedge_c.lib", src=srclibdir, dst="lib", keep_path=False)
-        self.copy("wasmedge_c.dll", src=srcbindir, dst="bin", keep_path=False)
-        self.copy("libwasmedge_c.so*", src=srclibdir, dst="lib", keep_path=False)
-        self.copy("libwasmedge_c.dylib", src=srclibdir,  dst="lib", keep_path=False)
+        if Version(self.version) >= "0.11.1":
+            self.copy("wasmedge.lib", src=srclibdir, dst="lib", keep_path=False)
+            self.copy("wasmedge.dll", src=srcbindir, dst="bin", keep_path=False)
+            self.copy("libwasmedge.so*", src=srclibdir, dst="lib", keep_path=False)
+            self.copy("libwasmedge.dylib", src=srclibdir,  dst="lib", keep_path=False)
+        else:
+            self.copy("wasmedge_c.lib", src=srclibdir, dst="lib", keep_path=False)
+            self.copy("wasmedge_c.dll", src=srcbindir, dst="bin", keep_path=False)
+            self.copy("libwasmedge_c.so*", src=srclibdir, dst="lib", keep_path=False)
+            self.copy("libwasmedge_c.dylib", src=srclibdir,  dst="lib", keep_path=False)
 
         self.copy("wasmedge*", src=srcbindir, dst="bin", keep_path=False)
 
         self.copy("LICENSE", dst="licenses", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["wasmedge_c"]
+        if Version(self.version) >= "0.11.1":
+            self.cpp_info.libs = ["wasmedge"]
+        else:
+            self.cpp_info.libs = ["wasmedge_c"]
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))

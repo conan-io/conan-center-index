@@ -3,11 +3,11 @@ project(alac LANGUAGES C CXX)
 
 include(GNUInstallDirs)
 
-file(GLOB ALAC_LIB_SRCS src/codec/*.c src/codec/*.cpp)
-file(GLOB ALAC_LIB_PUBLIC_HDRS src/codec/ALAC*.h)
+file(GLOB ALAC_LIB_SRCS ${ALAC_SRC_DIR}/codec/*.c ${ALAC_SRC_DIR}/codec/*.cpp)
+file(GLOB ALAC_LIB_PUBLIC_HDRS ${ALAC_SRC_DIR}/codec/ALAC*.h)
 
 add_library(alac ${ALAC_LIB_SRCS})
-target_include_directories(alac PUBLIC src/codec)
+target_include_directories(alac PUBLIC ${ALAC_SRC_DIR}/codec)
 set_property(TARGET alac PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 target_compile_definitions(alac
     PRIVATE
@@ -21,7 +21,7 @@ install(TARGETS alac
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if(ALAC_BUILD_UTILITY)
-    file(GLOB ALAC_CONVERTER_SRCS src/convert-utility/*.cpp)
+    file(GLOB ALAC_CONVERTER_SRCS ${ALAC_SRC_DIR}/convert-utility/*.cpp)
 
     add_executable(alacconvert ${ALAC_CONVERTER_SRCS})
     target_link_libraries(alacconvert PRIVATE alac)

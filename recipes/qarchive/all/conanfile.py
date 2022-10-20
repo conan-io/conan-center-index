@@ -1,9 +1,11 @@
-from conans import ConanFile, tools, CMake
+from conan import ConanFile
+from conan.tools.files import get, apply_conandata_patches, rmdir, save, export_conandata_patches
+from conans import CMake
 import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 
 class QarchiveConan(ConanFile):
@@ -35,8 +37,7 @@ class QarchiveConan(ConanFile):
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,14 +48,14 @@ class QarchiveConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libarchive/3.6.0")
-        self.requires("qt/5.15.3")
+        self.requires("libarchive/3.6.1")
+        self.requires("qt/5.15.6")
 
     def build_requirements(self):
-        self.build_requires("cmake/3.23.1")
+        self.build_requires("cmake/3.24.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     @functools.lru_cache(1)
@@ -64,8 +65,7 @@ class QarchiveConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -73,8 +73,8 @@ class QarchiveConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
@@ -82,21 +82,20 @@ class QarchiveConan(ConanFile):
             {"QArchive": "QArchive::QArchive"}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+            """)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "QArchive")

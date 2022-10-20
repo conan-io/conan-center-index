@@ -1,4 +1,10 @@
 sources:
+  "0.548":
+    url: "https://github.com/Roblox/luau/archive/0.548.tar.gz"
+    sha256: "1ec0aa919955aaa2d88dbef115801681d3b4dbfa7a276435a03d20230918659c"
+  "0.544":
+    url: "https://github.com/Roblox/luau/archive/0.544.tar.gz"
+    sha256: "c1e2d4e04fe6f191192d1570bd83f96531804fc484a0bc0e00b53248a01d7dee"
   "0.541":
     url: "https://github.com/Roblox/luau/archive/0.541.tar.gz"
     sha256: "02d50b8c0396a353ed641a61959851d6858607d535ed7373478b8fbc2a508eba"
@@ -19,33 +25,27 @@ sources:
     sha256: "e6de36e83e9c537d92bcc94852ab498e3c15a310fd2c4cc4e21c616d8ae1a84f"
 
 patches:
+  "0.548":
+    - patch_file: "patches/0.536-0001-fix-cmake.patch"
+    - patch_file: "patches/0.536-0002-rename-lerp.patch"
+  "0.544":
+    - patch_file: "patches/0.536-0001-fix-cmake.patch"
+    - patch_file: "patches/0.536-0002-rename-lerp.patch"
   "0.541":
     - patch_file: "patches/0.536-0001-fix-cmake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0.536-0002-rename-lerp.patch"
-      base_path: "source_subfolder"
   "0.540":
     - patch_file: "patches/0.536-0001-fix-cmake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0.536-0002-rename-lerp.patch"
-      base_path: "source_subfolder"
   "0.539":
     - patch_file: "patches/0.536-0001-fix-cmake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0.536-0002-rename-lerp.patch"
-      base_path: "source_subfolder"
   "0.538":
     - patch_file: "patches/0.536-0001-fix-cmake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0.536-0002-rename-lerp.patch"
-      base_path: "source_subfolder"
   "0.537":
     - patch_file: "patches/0.536-0001-fix-cmake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0.536-0002-rename-lerp.patch"
-      base_path: "source_subfolder"
   "0.536":
     - patch_file: "patches/0.536-0001-fix-cmake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0.536-0002-rename-lerp.patch"
-      base_path: "source_subfolder"

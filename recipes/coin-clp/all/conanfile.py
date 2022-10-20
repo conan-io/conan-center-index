@@ -1,10 +1,14 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, apply_conandata_patches, mkdir, rm, rmdir, rename
+from conan.tools.build import cross_building
+from conan.tools.scm import Version
+from conans import AutoToolsBuildEnvironment, tools
 from contextlib import contextmanager
 import os
 import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
 
 
 class CoinClpConan(ConanFile):
@@ -60,7 +64,7 @@ class CoinClpConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("coin-clp does not support shared builds on Windows")
         # FIXME: This issue likely comes from very old autotools versions used to produce configure.
-        if hasattr(self, "settings_build") and tools.cross_building(self) and self.options.shared:
+        if hasattr(self, "settings_build") and cross_building(self) and self.options.shared:
             raise ConanInvalidConfiguration("coin-clp shared not supported yet when cross-building")
 
     def build_requirements(self):
@@ -69,25 +73,27 @@ class CoinClpConan(ConanFile):
             self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
             self.build_requires("automake/1.16.4")
+        self.build_requires("pkgconf/1.7.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     @contextmanager
     def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
-                env = {
-                    "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                    "LD": "{} link -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                    "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
+        with tools.environment_append({"PKG_CONFIG_PATH": self.install_folder}):
+            if self.settings.compiler == "Visual Studio":
+                with tools.vcvars(self.settings):
+                    env = {
+                        "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                        "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                        "LD": "{} link -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                        "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
+                    }
+                    with tools.environment_append(env):
+                        yield
+            else:
+                yield
 
     def _configure_autotools(self):
         if self._autotools:
@@ -98,14 +104,13 @@ class CoinClpConan(ConanFile):
         configure_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
         ]
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) >= 12:
+        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= 12:
             self._autotools.flags.append("-FS")
         self._autotools.configure(self._source_subfolder, args=configure_args)
         return self._autotools
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
                     os.path.join(self._source_subfolder, "config.sub"))
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
@@ -117,18 +122,18 @@ class CoinClpConan(ConanFile):
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         # Installation script expects include/coin to already exist
-        tools.mkdir(os.path.join(self.package_folder, "include", "coin"))
+        mkdir(self, os.path.join(self.package_folder, "include", "coin"))
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install(args=["-j1"]) # due to configure generated with old autotools version
 
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.compiler == "Visual Studio":
             for l in ("Clp", "ClpSolver", "OsiClp"):
-                tools.rename(os.path.join(self.package_folder, "lib", "lib{}.a").format(l),
-                             os.path.join(self.package_folder, "lib", "{}.lib").format(l))
+                rename(self, os.path.join(self.package_folder, "lib", f"lib{l}.a"),
+                             os.path.join(self.package_folder, "lib", f"{l}.lib"))
 
     def package_info(self):
         self.cpp_info.components["clp"].libs = ["ClpSolver", "Clp"]

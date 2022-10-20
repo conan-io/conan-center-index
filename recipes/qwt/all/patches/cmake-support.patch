@@ -1,0 +1,1439 @@
+From eeda942e335afb509f297a1778b654e34d5e4c2b Mon Sep 17 00:00:00 2001
+From: Mehdi Chinoune <mehdi.chinoune@hotmail.com>
+Date: Sun, 22 Aug 2021 16:14:37 +0100
+Subject: [PATCH] Support CMake buildsystem
+
+---
+ CMakeLists.txt                           | 127 +++++++
+ designer/CMakeLists.txt                  |  35 ++
+ examples/CMakeLists.txt                  |  41 +++
+ examples/animation/CMakeLists.txt        |   8 +
+ examples/barchart/CMakeLists.txt         |   8 +
+ examples/bode/CMakeLists.txt             |  11 +
+ examples/controls/CMakeLists.txt         |  22 ++
+ examples/cpuplot/CMakeLists.txt          |  12 +
+ examples/curvedemo/CMakeLists.txt        |   4 +
+ examples/dials/CMakeLists.txt            |  14 +
+ examples/distrowatch/CMakeLists.txt      |   8 +
+ examples/friedberg/CMakeLists.txt        |  10 +
+ examples/itemeditor/CMakeLists.txt       |  12 +
+ examples/legends/CMakeLists.txt          |  13 +
+ examples/oscilloscope/CMakeLists.txt     |  18 +
+ examples/polardemo/CMakeLists.txt        |  13 +
+ examples/polarspectrogram/CMakeLists.txt |  10 +
+ examples/radio/CMakeLists.txt            |  10 +
+ examples/rasterview/CMakeLists.txt       |   8 +
+ examples/realtime/CMakeLists.txt         |  16 +
+ examples/refreshtest/CMakeLists.txt      |  15 +
+ examples/scatterplot/CMakeLists.txt      |   8 +
+ examples/simpleplot/CMakeLists.txt       |   4 +
+ examples/sinusplot/CMakeLists.txt        |   4 +
+ examples/spectrogram/CMakeLists.txt      |   8 +
+ examples/splineeditor/CMakeLists.txt     |  12 +
+ examples/stockchart/CMakeLists.txt       |  14 +
+ examples/sysinfo/CMakeLists.txt          |   4 +
+ examples/tvplot/CMakeLists.txt           |   8 +
+ playground/CMakeLists.txt                |  19 +
+ playground/curvetracker/CMakeLists.txt   |  10 +
+ playground/graphicscale/CMakeLists.txt   |  10 +
+ playground/plotmatrix/CMakeLists.txt     |   8 +
+ playground/rescaler/CMakeLists.txt       |  10 +
+ playground/scaleengine/CMakeLists.txt    |  12 +
+ playground/shapes/CMakeLists.txt         |   4 +
+ playground/svgmap/CMakeLists.txt         |   9 +
+ playground/symbols/CMakeLists.txt        |   4 +
+ playground/timescale/CMakeLists.txt      |  13 +
+ playground/vectorfield/CMakeLists.txt    |   4 +
+ src/CMakeLists.txt                       | 439 +++++++++++++++++++++++
+ src/qwt-config.cmake.in                  |  17 +
+ src/qwt.pc.in                            |  12 +
+ tests/CMakeLists.txt                     |   4 +
+ tests/splineprof/CMakeLists.txt          |   4 +
+ tests/splinetest/CMakeLists.txt          |   4 +
+ 46 files changed, 1060 insertions(+)
+ create mode 100644 CMakeLists.txt
+ create mode 100644 designer/CMakeLists.txt
+ create mode 100644 examples/CMakeLists.txt
+ create mode 100644 examples/animation/CMakeLists.txt
+ create mode 100644 examples/barchart/CMakeLists.txt
+ create mode 100644 examples/bode/CMakeLists.txt
+ create mode 100644 examples/controls/CMakeLists.txt
+ create mode 100644 examples/cpuplot/CMakeLists.txt
+ create mode 100644 examples/curvedemo/CMakeLists.txt
+ create mode 100644 examples/dials/CMakeLists.txt
+ create mode 100644 examples/distrowatch/CMakeLists.txt
+ create mode 100644 examples/friedberg/CMakeLists.txt
+ create mode 100644 examples/itemeditor/CMakeLists.txt
+ create mode 100644 examples/legends/CMakeLists.txt
+ create mode 100644 examples/oscilloscope/CMakeLists.txt
+ create mode 100644 examples/polardemo/CMakeLists.txt
+ create mode 100644 examples/polarspectrogram/CMakeLists.txt
+ create mode 100644 examples/radio/CMakeLists.txt
+ create mode 100644 examples/rasterview/CMakeLists.txt
+ create mode 100644 examples/realtime/CMakeLists.txt
+ create mode 100644 examples/refreshtest/CMakeLists.txt
+ create mode 100644 examples/scatterplot/CMakeLists.txt
+ create mode 100644 examples/simpleplot/CMakeLists.txt
+ create mode 100644 examples/sinusplot/CMakeLists.txt
+ create mode 100644 examples/spectrogram/CMakeLists.txt
+ create mode 100644 examples/splineeditor/CMakeLists.txt
+ create mode 100644 examples/stockchart/CMakeLists.txt
+ create mode 100644 examples/sysinfo/CMakeLists.txt
+ create mode 100644 examples/tvplot/CMakeLists.txt
+ create mode 100644 playground/CMakeLists.txt
+ create mode 100644 playground/curvetracker/CMakeLists.txt
+ create mode 100644 playground/graphicscale/CMakeLists.txt
+ create mode 100644 playground/plotmatrix/CMakeLists.txt
+ create mode 100644 playground/rescaler/CMakeLists.txt
+ create mode 100644 playground/scaleengine/CMakeLists.txt
+ create mode 100644 playground/shapes/CMakeLists.txt
+ create mode 100644 playground/svgmap/CMakeLists.txt
+ create mode 100644 playground/symbols/CMakeLists.txt
+ create mode 100644 playground/timescale/CMakeLists.txt
+ create mode 100644 playground/vectorfield/CMakeLists.txt
+ create mode 100644 src/CMakeLists.txt
+ create mode 100644 src/qwt-config.cmake.in
+ create mode 100644 src/qwt.pc.in
+ create mode 100644 tests/CMakeLists.txt
+ create mode 100644 tests/splineprof/CMakeLists.txt
+ create mode 100644 tests/splinetest/CMakeLists.txt
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+new file mode 100644
+index 0000000..004d4a3
+--- /dev/null
++++ b/CMakeLists.txt
+@@ -0,0 +1,127 @@
++cmake_minimum_required(VERSION 3.16)
++
++project(Qwt
++  VERSION 6.2.0
++  DESCRIPTION "Qt Widgets for Technical Applications"
++  HOMEPAGE_URL "https://qwt.sourceforge.io"
++  LANGUAGES CXX
++)
++
++set(CMAKE_CXX_STANDARD 11)
++set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
++set(CMAKE_CXX_EXTENSIONS OFF)
++
++if(MSVC)
++  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /permissive-")
++else()
++  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wcast-qual \
++    -Wcast-align -Wredundant-decls -Wformat -Wshadow -Woverloaded-virtual \
++    -fno-math-errno -funsafe-math-optimizations")
++  if(CMAKE_COMPILER_ID STREQUAL "GNU")
++    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wlogical-op")
++  endif()
++  add_compile_definitions(QT_STRICT_ITERATORS)
++endif()
++
++include(CheckPIESupported)
++check_pie_supported(OUTPUT_VARIABLE PIE_MESSAGE LANGUAGES CXX)
++if(CMAKE_CXX_LINK_PIE_SUPPORTED)
++  set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
++endif()
++
++include(GNUInstallDirs)
++
++set(QWT_NAME_SUFFIX "" CACHE STRING "Qwt Name Suffix")
++
++set(QWT_QT_VERSION_MAJOR "A" CACHE
++  STRING "Expected Qt major version. Valid values are A (auto-select), 5, 6.")
++set(SUPPORTED_QT_VERSIONS "A" 5 6)
++set_property(CACHE QWT_QT_VERSION_MAJOR PROPERTY STRINGS ${SUPPORTED_QT_VERSIONS})
++if(NOT QWT_QT_VERSION_MAJOR STREQUAL "A")
++  if(NOT QWT_QT_VERSION_MAJOR IN_LIST SUPPORTED_QT_VERSIONS)
++    message(FATAL_ERROR "Supported Qt versions are \"${SUPPORTED_QT_VERSIONS}\"."
++            " But QWT_QT_VERSION_MAJOR is set to ${QWT_QT_VERSION_MAJOR}.")
++  endif()
++endif()
++
++option(QWT_DLL "Build shared library" ON)
++
++option(QWT_STATIC "Build static library" OFF)
++
++if(NOT (QWT_DLL OR QWT_STATIC))
++  message(FATAL_ERROR "QWT_DLL and QWT_STATIC are both set to OFF")
++endif()
++
++option(QWT_PLOT "Enable QwtPlot widget" ON)
++
++option(QWT_POLAR "Enable QwtPolar classes" ON)
++
++option(QWT_WIDGETS "Enables other widgets (sliders, dials, ...), beside QwtPlot" ON)
++
++option(QWT_SVG "Enable SVG Support (Displaying & Exporting)" ON)
++
++option(QWT_OPENGL "Enable OpenGL Plot Canvas" ON)
++
++option(QWT_DESIGNER "Build Qwt Designer plugin" ON)
++
++if(WIN32)
++  option(QWT_DESIGNER_SELF_CONTAINED "Build a self-contained designer plugin" ON)
++endif()
++
++if(APPLE)
++  option(QWT_FRAMEWORK "Build Qwt as a framework" ON)
++endif()
++
++option(QWT_BUILD_PLAYGROUND "Build the applications in playground" OFF)
++
++option(QWT_BUILD_TESTS "Build Tests" OFF)
++
++option(QWT_BUILD_EXAMPLES "Build Examples" OFF)
++
++if(QWT_QT_VERSION_MAJOR STREQUAL "A")
++  find_package(Qt6 COMPONENTS Core QUIET)
++  if(Qt6_FOUND)
++    set(QT_VERSION ${Qt6_VERSION})
++    set(QT_VERSION_MAJOR 6)
++  else()
++    find_package(Qt5 COMPONENTS Core REQUIRED)
++    set(QT_VERSION ${Qt5_VERSION})
++    set(QT_VERSION_MAJOR 5)
++  endif()
++else()
++  find_package(Qt${QWT_QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
++  set(QT_VERSION ${Qt${QWT_QT_VERSION_MAJOR}_VERSION})
++  set(QT_VERSION_MAJOR ${QWT_QT_VERSION_MAJOR})
++endif()
++
++find_package(Qt${QT_VERSION_MAJOR} COMPONENTS PrintSupport Concurrent Widgets REQUIRED)
++
++if(QWT_OPENGL)
++  find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGL REQUIRED)
++  if(QT_VERSION_MAJOR VERSION_GREATER_EQUAL 6)
++    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGLWidgets REQUIRED)
++  endif()
++endif()
++
++if(QWT_SVG)
++  find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Svg REQUIRED)
++endif()
++
++add_subdirectory(src)
++
++if(QWT_DESIGNER)
++  find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Designer)
++  add_subdirectory(designer)
++endif()
++
++if(QWT_BUILD_PLAYGROUND)
++  add_subdirectory(playground)
++endif()
++
++if(QWT_BUILD_TESTS)
++  add_subdirectory(tests)
++endif()
++
++if(QWT_BUILD_EXAMPLES)
++  add_subdirectory(examples)
++endif()
+diff --git a/designer/CMakeLists.txt b/designer/CMakeLists.txt
+new file mode 100644
+index 0000000..aa81efd
+--- /dev/null
++++ b/designer/CMakeLists.txt
+@@ -0,0 +1,35 @@
++if(QWT_DESIGNER_SELF_CONTAINED)
++  add_library(qwt_designer_plugin SHARED
++    qwt_designer_plugin.cpp
++    qwt_designer_plugin.qrc
++    $<TARGET_OBJECTS:qwt_objects>
++  )
++  target_link_libraries(qwt_designer_plugin PRIVATE qwt_objects)
++  target_compile_definitions(qwt_designer_plugin PRIVATE
++    QWT_MAKEDLL
++    QT_NO_KEYWORDS
++    QWT_MOC_INCLUDE
++  )
++else()
++  add_library(qwt_designer_plugin SHARED
++    qwt_designer_plugin.cpp
++    qwt_designer_plugin.qrc
++  )
++  target_link_libraries(qwt_designer_plugin PRIVATE qwt)
++endif()
++
++target_link_libraries(qwt_designer_plugin PUBLIC Qt${QT_VERSION_MAJOR}::Designer)
++
++set_target_properties(qwt_designer_plugin PROPERTIES
++  AUTOMOC ON
++  AUTORCC ON
++)
++
++if(MINGW)
++  set_target_properties(qwt_designer_plugin PROPERTIES PREFIX "")
++endif()
++
++install(TARGETS qwt_designer_plugin
++  RUNTIME DESTINATION ${CMAKE_INSTALL_DATADIR}/qt${QT_VERSION_MAJOR}/plugins/designer
++  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/qt${QT_VERSION_MAJOR}/plugins/designer
++)
+diff --git a/examples/CMakeLists.txt b/examples/CMakeLists.txt
+new file mode 100644
+index 0000000..522436c
+--- /dev/null
++++ b/examples/CMakeLists.txt
+@@ -0,0 +1,41 @@
++
++set(CMAKE_AUTOMOC ON)
++
++if(QWT_PLOT)
++  add_subdirectory(animation)
++  add_subdirectory(barchart)
++  add_subdirectory(cpuplot)
++  add_subdirectory(curvedemo)
++  add_subdirectory(distrowatch)
++  add_subdirectory(friedberg)
++  add_subdirectory(itemeditor)
++  add_subdirectory(legends)
++  add_subdirectory(stockchart)
++  add_subdirectory(simpleplot)
++  add_subdirectory(sinusplot)
++  add_subdirectory(realtime)
++  add_subdirectory(refreshtest)
++  add_subdirectory(scatterplot)
++  add_subdirectory(spectrogram)
++  add_subdirectory(rasterview)
++  add_subdirectory(tvplot)
++
++  if(QWT_WIDGETS)
++    add_subdirectory(bode)
++    add_subdirectory(splineeditor)
++    add_subdirectory(oscilloscope)
++  endif()
++
++  if(QWT_POLAR)
++    add_subdirectory(polardemo)
++    add_subdirectory(polarspectrogram)
++  endif()
++
++endif()
++
++if(QWT_WIDGETS)
++  add_subdirectory(sysinfo)
++  add_subdirectory(radio)
++  add_subdirectory(dials)
++  add_subdirectory(controls)
++endif()
+diff --git a/examples/animation/CMakeLists.txt b/examples/animation/CMakeLists.txt
+new file mode 100644
+index 0000000..b5559c6
+--- /dev/null
++++ b/examples/animation/CMakeLists.txt
+@@ -0,0 +1,8 @@
++
++add_executable(animation
++  main.cpp
++  Plot.cpp
++  Plot.h
++)
++
++target_link_libraries(animation qwt)
+diff --git a/examples/barchart/CMakeLists.txt b/examples/barchart/CMakeLists.txt
+new file mode 100644
+index 0000000..e09a78a
+--- /dev/null
++++ b/examples/barchart/CMakeLists.txt
+@@ -0,0 +1,8 @@
++
++add_executable(barchart
++  main.cpp
++  BarChart.cpp
++  BarChart.h
++)
++
++target_link_libraries(barchart qwt)
+diff --git a/examples/bode/CMakeLists.txt b/examples/bode/CMakeLists.txt
+new file mode 100644
+index 0000000..d0a7d77
+--- /dev/null
++++ b/examples/bode/CMakeLists.txt
+@@ -0,0 +1,11 @@
++
++add_executable(bode
++  main.cpp
++  MainWindow.cpp
++  MainWindow.h
++  Pixmaps.h
++  Plot.cpp
++  Plot.h
++)
++
++target_link_libraries(bode qwt)
+diff --git a/examples/controls/CMakeLists.txt b/examples/controls/CMakeLists.txt
+new file mode 100644
+index 0000000..c6467ed
+--- /dev/null
++++ b/examples/controls/CMakeLists.txt
+@@ -0,0 +1,22 @@
++
++add_executable(controls
++  main.cpp
++  SliderBox.h
++  SliderTab.h
++  WheelBox.h
++  WheelTab.h
++  KnobBox.h
++  KnobTab.h
++  DialBox.h
++  DialTab.h
++  SliderBox.cpp
++  SliderTab.cpp
++  WheelBox.cpp
++  WheelTab.cpp
++  KnobBox.cpp
++  KnobTab.cpp
++  DialBox.cpp
++  DialTab.cpp
++)
++
++target_link_libraries(controls qwt)
+diff --git a/examples/cpuplot/CMakeLists.txt b/examples/cpuplot/CMakeLists.txt
+new file mode 100644
+index 0000000..9eecb0a
+--- /dev/null
++++ b/examples/cpuplot/CMakeLists.txt
+@@ -0,0 +1,12 @@
++
++add_executable(cpuplot
++  main.cpp
++  CpuPieMarker.cpp
++  CpuPieMarker.h
++  CpuPlot.cpp
++  CpuPlot.h
++  CpuStat.cpp
++  CpuStat.h
++)
++
++target_link_libraries(cpuplot qwt)
+diff --git a/examples/curvedemo/CMakeLists.txt b/examples/curvedemo/CMakeLists.txt
+new file mode 100644
+index 0000000..75b6514
+--- /dev/null
++++ b/examples/curvedemo/CMakeLists.txt
+@@ -0,0 +1,4 @@
++
++add_executable(curvedemo main.cpp)
++
++target_link_libraries(curvedemo qwt)
+diff --git a/examples/dials/CMakeLists.txt b/examples/dials/CMakeLists.txt
+new file mode 100644
+index 0000000..5f2ca85
+--- /dev/null
++++ b/examples/dials/CMakeLists.txt
+@@ -0,0 +1,14 @@
++
++add_executable(dials
++  main.cpp
++  AttitudeIndicator.h
++  SpeedoMeter.h
++  CockpitGrid.h
++  CompassGrid.h
++  AttitudeIndicator.cpp
++  SpeedoMeter.cpp
++  CockpitGrid.cpp
++  CompassGrid.cpp
++)
++
++target_link_libraries(dials qwt)
+diff --git a/examples/distrowatch/CMakeLists.txt b/examples/distrowatch/CMakeLists.txt
+new file mode 100644
+index 0000000..c9b7e02
+--- /dev/null
++++ b/examples/distrowatch/CMakeLists.txt
+@@ -0,0 +1,8 @@
++
++add_executable(distrowatch
++  main.cpp
++  BarChart.cpp
++  BarChart.h
++)
++
++target_link_libraries(distrowatch qwt)
+diff --git a/examples/friedberg/CMakeLists.txt b/examples/friedberg/CMakeLists.txt
+new file mode 100644
+index 0000000..322b631
+--- /dev/null
++++ b/examples/friedberg/CMakeLists.txt
+@@ -0,0 +1,10 @@
++
++add_executable(friedberg
++  main.cpp
++  Friedberg2007.h
++  Friedberg2007.cpp
++  Plot.h
++  Plot.cpp
++)
++
++target_link_libraries(friedberg qwt)
+diff --git a/examples/itemeditor/CMakeLists.txt b/examples/itemeditor/CMakeLists.txt
+new file mode 100644
+index 0000000..0d2df52
+--- /dev/null
++++ b/examples/itemeditor/CMakeLists.txt
+@@ -0,0 +1,12 @@
++
++add_executable(itemeditor
++  main.cpp
++  Editor.h
++  ShapeFactory.h
++  Plot.h
++  Editor.cpp
++  ShapeFactory.cpp
++  Plot.cpp
++)
++
++target_link_libraries(itemeditor qwt)
+diff --git a/examples/legends/CMakeLists.txt b/examples/legends/CMakeLists.txt
+new file mode 100644
+index 0000000..7ad01b3
+--- /dev/null
++++ b/examples/legends/CMakeLists.txt
+@@ -0,0 +1,13 @@
++
++add_executable(legends
++  main.cpp
++  MainWindow.h
++  Panel.h
++  Settings.h
++  Plot.h
++  MainWindow.cpp
++  Panel.cpp
++  Plot.cpp
++)
++
++target_link_libraries(legends qwt)
+diff --git a/examples/oscilloscope/CMakeLists.txt b/examples/oscilloscope/CMakeLists.txt
+new file mode 100644
+index 0000000..828b8fe
+--- /dev/null
++++ b/examples/oscilloscope/CMakeLists.txt
+@@ -0,0 +1,18 @@
++
++add_executable(oscilloscope
++  main.cpp
++  SignalData.h
++  Plot.h
++  Knob.h
++  WheelBox.h
++  SamplingThread.h
++  MainWindow.h
++  SignalData.cpp
++  Plot.cpp
++  Knob.cpp
++  WheelBox.cpp
++  SamplingThread.cpp
++  MainWindow.cpp
++)
++
++target_link_libraries(oscilloscope qwt)
+diff --git a/examples/polardemo/CMakeLists.txt b/examples/polardemo/CMakeLists.txt
+new file mode 100644
+index 0000000..3683dfd
+--- /dev/null
++++ b/examples/polardemo/CMakeLists.txt
+@@ -0,0 +1,13 @@
++
++add_executable(polardemo
++  main.cpp
++	Pixmaps.h
++	PlotBox.h
++	Plot.h
++	SettingsEditor.h
++	PlotBox.cpp
++	Plot.cpp
++	SettingsEditor.cpp
++)
++
++target_link_libraries(polardemo qwt)
+diff --git a/examples/polarspectrogram/CMakeLists.txt b/examples/polarspectrogram/CMakeLists.txt
+new file mode 100644
+index 0000000..e4a1c22
+--- /dev/null
++++ b/examples/polarspectrogram/CMakeLists.txt
+@@ -0,0 +1,10 @@
++
++add_executable(polarspectrogram
++  main.cpp
++	Plot.h
++	PlotWindow.h
++	Plot.cpp
++	PlotWindow.cpp
++)
++
++target_link_libraries(polarspectrogram qwt)
+diff --git a/examples/radio/CMakeLists.txt b/examples/radio/CMakeLists.txt
+new file mode 100644
+index 0000000..00ed82c
+--- /dev/null
++++ b/examples/radio/CMakeLists.txt
+@@ -0,0 +1,10 @@
++
++add_executable(radio
++  main.cpp
++  AmplifierBox.h
++  TunerBox.h
++  AmplifierBox.cpp
++  TunerBox.cpp
++)
++
++target_link_libraries(radio qwt)
+diff --git a/examples/rasterview/CMakeLists.txt b/examples/rasterview/CMakeLists.txt
+new file mode 100644
+index 0000000..7c21eb8
+--- /dev/null
++++ b/examples/rasterview/CMakeLists.txt
+@@ -0,0 +1,8 @@
++
++add_executable(rasterview
++  main.cpp
++  Plot.h
++  Plot.cpp
++)
++
++target_link_libraries(rasterview qwt)
+diff --git a/examples/realtime/CMakeLists.txt b/examples/realtime/CMakeLists.txt
+new file mode 100644
+index 0000000..8a01943
+--- /dev/null
++++ b/examples/realtime/CMakeLists.txt
+@@ -0,0 +1,16 @@
++
++add_executable(realtime
++  main.cpp
++  ScrollZoomer.h
++  ScrollBar.h
++  IncrementalPlot.h
++  RandomPlot.h
++  MainWindow.h
++  ScrollZoomer.cpp
++  ScrollBar.cpp
++  IncrementalPlot.cpp
++  RandomPlot.cpp
++  MainWindow.cpp
++)
++
++target_link_libraries(realtime qwt)
+diff --git a/examples/refreshtest/CMakeLists.txt b/examples/refreshtest/CMakeLists.txt
+new file mode 100644
+index 0000000..7100f79
+--- /dev/null
++++ b/examples/refreshtest/CMakeLists.txt
+@@ -0,0 +1,15 @@
++
++add_executable(refreshtest
++  main.cpp
++  Settings.h
++  CircularBuffer.h
++  Panel.h
++  Plot.h
++  MainWindow.h
++  CircularBuffer.cpp
++  Panel.cpp
++  Plot.cpp
++  MainWindow.cpp
++)
++
++target_link_libraries(refreshtest qwt)
+diff --git a/examples/scatterplot/CMakeLists.txt b/examples/scatterplot/CMakeLists.txt
+new file mode 100644
+index 0000000..02b5efb
+--- /dev/null
++++ b/examples/scatterplot/CMakeLists.txt
+@@ -0,0 +1,8 @@
++
++add_executable(scatterplot
++  main.cpp
++  Plot.h
++  Plot.cpp
++)
++
++target_link_libraries(scatterplot qwt)
+diff --git a/examples/simpleplot/CMakeLists.txt b/examples/simpleplot/CMakeLists.txt
+new file mode 100644
+index 0000000..27fdfb8
+--- /dev/null
++++ b/examples/simpleplot/CMakeLists.txt
+@@ -0,0 +1,4 @@
++
++add_executable(simpleplot main.cpp)
++
++target_link_libraries(simpleplot qwt)
+diff --git a/examples/sinusplot/CMakeLists.txt b/examples/sinusplot/CMakeLists.txt
+new file mode 100644
+index 0000000..a6ce2be
+--- /dev/null
++++ b/examples/sinusplot/CMakeLists.txt
+@@ -0,0 +1,4 @@
++
++add_executable(sinusplot main.cpp)
++
++target_link_libraries(sinusplot qwt)
+diff --git a/examples/spectrogram/CMakeLists.txt b/examples/spectrogram/CMakeLists.txt
+new file mode 100644
+index 0000000..134be44
+--- /dev/null
++++ b/examples/spectrogram/CMakeLists.txt
+@@ -0,0 +1,8 @@
++
++add_executable(spectrogram
++  main.cpp
++  Plot.h
++  Plot.cpp
++)
++
++target_link_libraries(spectrogram qwt)
+diff --git a/examples/splineeditor/CMakeLists.txt b/examples/splineeditor/CMakeLists.txt
+new file mode 100644
+index 0000000..2231f64
+--- /dev/null
++++ b/examples/splineeditor/CMakeLists.txt
+@@ -0,0 +1,12 @@
++
++add_executable(splineeditor
++  main.cpp
++  ScalePicker.h
++  CanvasPicker.h
++  Plot.h
++  ScalePicker.cpp
++  CanvasPicker.cpp
++  Plot.cpp
++)
++
++target_link_libraries(splineeditor qwt)
+diff --git a/examples/stockchart/CMakeLists.txt b/examples/stockchart/CMakeLists.txt
+new file mode 100644
+index 0000000..ca4f4c8
+--- /dev/null
++++ b/examples/stockchart/CMakeLists.txt
+@@ -0,0 +1,14 @@
++
++add_executable(stockchart
++  main.cpp
++  Legend.h
++  GridItem.h
++  Plot.h
++  QuoteFactory.h
++  Legend.cpp
++  GridItem.cpp
++  Plot.cpp
++  QuoteFactory.cpp
++)
++
++target_link_libraries(stockchart qwt)
+diff --git a/examples/sysinfo/CMakeLists.txt b/examples/sysinfo/CMakeLists.txt
+new file mode 100644
+index 0000000..954e9f0
+--- /dev/null
++++ b/examples/sysinfo/CMakeLists.txt
+@@ -0,0 +1,4 @@
++
++add_executable(sysinfo main.cpp)
++
++target_link_libraries(sysinfo qwt)
+diff --git a/examples/tvplot/CMakeLists.txt b/examples/tvplot/CMakeLists.txt
+new file mode 100644
+index 0000000..8224c3b
+--- /dev/null
++++ b/examples/tvplot/CMakeLists.txt
+@@ -0,0 +1,8 @@
++
++add_executable(tvplot
++  main.cpp
++  TVPlot.h
++  TVPlot.cpp
++)
++
++target_link_libraries(tvplot qwt)
+diff --git a/playground/CMakeLists.txt b/playground/CMakeLists.txt
+new file mode 100644
+index 0000000..8384661
+--- /dev/null
++++ b/playground/CMakeLists.txt
+@@ -0,0 +1,19 @@
++
++set(CMAKE_AUTOMOC ON)
++
++if(QWT_PLOT)
++  add_subdirectory(plotmatrix)
++  add_subdirectory(timescale)
++  add_subdirectory(scaleengine)
++  add_subdirectory(rescaler)
++  add_subdirectory(shapes)
++  add_subdirectory(curvetracker)
++  add_subdirectory(vectorfield)
++  add_subdirectory(symbols)
++
++  if(QWT_SVG)
++    add_subdirectory(svgmap)
++    add_subdirectory(graphicscale)
++  endif()
++
++endif()
+diff --git a/playground/curvetracker/CMakeLists.txt b/playground/curvetracker/CMakeLists.txt
+new file mode 100644
+index 0000000..9440612
+--- /dev/null
++++ b/playground/curvetracker/CMakeLists.txt
+@@ -0,0 +1,10 @@
++
++add_executable(curvetracker
++  main.cpp
++  CurveTracker.cpp
++  CurveTracker.h
++  Plot.cpp
++  Plot.h
++)
++
++target_link_libraries(curvetracker qwt)
+diff --git a/playground/graphicscale/CMakeLists.txt b/playground/graphicscale/CMakeLists.txt
+new file mode 100644
+index 0000000..32c580b
+--- /dev/null
++++ b/playground/graphicscale/CMakeLists.txt
+@@ -0,0 +1,10 @@
++
++add_executable(graphicscale
++  main.cpp
++  Canvas.cpp
++  Canvas.h
++  MainWindow.cpp
++  MainWindow.h
++)
++
++target_link_libraries(graphicscale qwt)
+diff --git a/playground/plotmatrix/CMakeLists.txt b/playground/plotmatrix/CMakeLists.txt
+new file mode 100644
+index 0000000..d85a098
+--- /dev/null
++++ b/playground/plotmatrix/CMakeLists.txt
+@@ -0,0 +1,8 @@
++
++add_executable(plotmatrix
++  main.cpp
++  PlotMatrix.cpp
++  PlotMatrix.h
++)
++
++target_link_libraries(plotmatrix qwt)
+diff --git a/playground/rescaler/CMakeLists.txt b/playground/rescaler/CMakeLists.txt
+new file mode 100644
+index 0000000..34d1ca7
+--- /dev/null
++++ b/playground/rescaler/CMakeLists.txt
+@@ -0,0 +1,10 @@
++
++add_executable(rescaler
++  main.cpp
++  MainWindow.cpp
++  MainWindow.h
++  Plot.cpp
++  Plot.h
++)
++
++target_link_libraries(rescaler qwt)
+diff --git a/playground/scaleengine/CMakeLists.txt b/playground/scaleengine/CMakeLists.txt
+new file mode 100644
+index 0000000..07ff410
+--- /dev/null
++++ b/playground/scaleengine/CMakeLists.txt
+@@ -0,0 +1,12 @@
++
++add_executable(scaleengine
++  main.cpp
++  MainWindow.cpp
++  MainWindow.h
++  Plot.cpp
++  Plot.h
++  TransformPlot.cpp
++  TransformPlot.h
++)
++
++target_link_libraries(scaleengine qwt)
+diff --git a/playground/shapes/CMakeLists.txt b/playground/shapes/CMakeLists.txt
+new file mode 100644
+index 0000000..bd25989
+--- /dev/null
++++ b/playground/shapes/CMakeLists.txt
+@@ -0,0 +1,4 @@
++
++add_executable(shapes main.cpp)
++
++target_link_libraries(shapes qwt)
+diff --git a/playground/svgmap/CMakeLists.txt b/playground/svgmap/CMakeLists.txt
+new file mode 100644
+index 0000000..0306537
+--- /dev/null
++++ b/playground/svgmap/CMakeLists.txt
+@@ -0,0 +1,9 @@
++
++add_executable(svgmap
++  main.cpp
++  Plot.cpp
++  Plot.h
++  svgmap.qrc
++)
++
++target_link_libraries(svgmap qwt)
+diff --git a/playground/symbols/CMakeLists.txt b/playground/symbols/CMakeLists.txt
+new file mode 100644
+index 0000000..77084a0
+--- /dev/null
++++ b/playground/symbols/CMakeLists.txt
+@@ -0,0 +1,4 @@
++
++add_executable(symbols main.cpp)
++
++target_link_libraries(symbols qwt)
+diff --git a/playground/timescale/CMakeLists.txt b/playground/timescale/CMakeLists.txt
+new file mode 100644
+index 0000000..cfd8968
+--- /dev/null
++++ b/playground/timescale/CMakeLists.txt
+@@ -0,0 +1,13 @@
++
++add_executable(timescale
++  main.cpp
++  MainWindow.cpp
++  MainWindow.h
++  Panel.cpp
++  Panel.h
++  Plot.cpp
++  Plot.h
++  Settings.h
++)
++
++target_link_libraries(timescale qwt)
+diff --git a/playground/vectorfield/CMakeLists.txt b/playground/vectorfield/CMakeLists.txt
+new file mode 100644
+index 0000000..ea78d87
+--- /dev/null
++++ b/playground/vectorfield/CMakeLists.txt
+@@ -0,0 +1,4 @@
++
++add_executable(vectorfield main.cpp)
++
++target_link_libraries(vectorfield qwt)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+new file mode 100644
+index 0000000..a6a4bf2
+--- /dev/null
++++ b/src/CMakeLists.txt
+@@ -0,0 +1,439 @@
++set(HEADERS
++  qwt.h
++  qwt_abstract_scale_draw.h
++  qwt_bezier.h
++  qwt_clipper.h
++  qwt_color_map.h
++  qwt_column_symbol.h
++  qwt_date.h
++  qwt_date_scale_draw.h
++  qwt_date_scale_engine.h
++  qwt_dyngrid_layout.h
++  qwt_global.h
++  qwt_graphic.h
++  qwt_interval.h
++  qwt_interval_symbol.h
++  qwt_math.h
++  qwt_magnifier.h
++  qwt_null_paintdevice.h
++  qwt_painter.h
++  qwt_painter_command.h
++  qwt_panner.h
++  qwt_picker.h
++  qwt_picker_machine.h
++  qwt_pixel_matrix.h
++  qwt_point_3d.h
++  qwt_point_polar.h
++  qwt_round_scale_draw.h
++  qwt_scale_div.h
++  qwt_scale_draw.h
++  qwt_scale_engine.h
++  qwt_scale_map.h
++  qwt_spline.h
++  qwt_spline_basis.h
++  qwt_spline_parametrization.h
++  qwt_spline_local.h
++  qwt_spline_cubic.h
++  qwt_spline_pleasing.h
++  qwt_spline_polynomial.h
++  qwt_symbol.h
++  qwt_system_clock.h
++  qwt_text_engine.h
++  qwt_text_label.h
++  qwt_text.h
++  qwt_transform.h
++  qwt_widget_overlay.h
++)
++set(SOURCES
++  qwt.cpp
++  qwt_abstract_scale_draw.cpp
++  qwt_bezier.cpp
++  qwt_clipper.cpp
++  qwt_color_map.cpp
++  qwt_column_symbol.cpp
++  qwt_date.cpp
++  qwt_date_scale_draw.cpp
++  qwt_date_scale_engine.cpp
++  qwt_dyngrid_layout.cpp
++  qwt_event_pattern.cpp
++  qwt_graphic.cpp
++  qwt_interval.cpp
++  qwt_interval_symbol.cpp
++  qwt_math.cpp
++  qwt_magnifier.cpp
++  qwt_null_paintdevice.cpp
++  qwt_painter.cpp
++  qwt_painter_command.cpp
++  qwt_panner.cpp
++  qwt_picker.cpp
++  qwt_picker_machine.cpp
++  qwt_pixel_matrix.cpp
++  qwt_point_3d.cpp
++  qwt_point_polar.cpp
++  qwt_round_scale_draw.cpp
++  qwt_scale_div.cpp
++  qwt_scale_draw.cpp
++  qwt_scale_map.cpp
++  qwt_scale_engine.cpp
++  qwt_spline.cpp
++  qwt_spline_basis.cpp
++  qwt_spline_parametrization.cpp
++  qwt_spline_local.cpp
++  qwt_spline_cubic.cpp
++  qwt_spline_pleasing.cpp
++  qwt_spline_polynomial.cpp
++  qwt_symbol.cpp
++  qwt_system_clock.cpp
++  qwt_text_engine.cpp
++  qwt_text_label.cpp
++  qwt_text.cpp
++  qwt_transform.cpp
++  qwt_widget_overlay.cpp
++)
++
++if(QWT_PLOT)
++  list(APPEND HEADERS
++    qwt_axis.h
++    qwt_axis_id.h
++    qwt_curve_fitter.h
++    qwt_spline_curve_fitter.h
++    qwt_weeding_curve_fitter.h
++    qwt_event_pattern.h
++    qwt_abstract_legend.h
++    qwt_legend.h
++    qwt_legend_data.h
++    qwt_legend_label.h
++    qwt_plot.h
++    qwt_plot_renderer.h
++    qwt_plot_curve.h
++    qwt_plot_dict.h
++    qwt_plot_directpainter.h
++    qwt_plot_graphicitem.h
++    qwt_plot_grid.h
++    qwt_plot_histogram.h
++    qwt_plot_item.h
++    qwt_plot_abstract_barchart.h
++    qwt_plot_barchart.h
++    qwt_plot_multi_barchart.h
++    qwt_plot_intervalcurve.h
++    qwt_plot_tradingcurve.h
++    qwt_plot_layout.h
++    qwt_plot_marker.h
++    qwt_plot_zoneitem.h
++    qwt_plot_textlabel.h
++    qwt_plot_rasteritem.h
++    qwt_plot_spectrogram.h
++    qwt_plot_spectrocurve.h
++    qwt_plot_scaleitem.h
++    qwt_plot_legenditem.h
++    qwt_plot_seriesitem.h
++    qwt_plot_shapeitem.h
++    qwt_plot_vectorfield.h
++    qwt_plot_abstract_canvas.h
++    qwt_plot_canvas.h
++    qwt_plot_panner.h
++    qwt_plot_picker.h
++    qwt_plot_zoomer.h
++    qwt_plot_magnifier.h
++    qwt_plot_rescaler.h
++    qwt_point_mapper.h
++    qwt_raster_data.h
++    qwt_matrix_raster_data.h
++    qwt_vectorfield_symbol.h
++    qwt_sampling_thread.h
++    qwt_samples.h
++    qwt_series_data.h
++    qwt_series_store.h
++    qwt_point_data.h
++    qwt_scale_widget.h
++  )
++  list(APPEND SOURCES
++    qwt_curve_fitter.cpp
++    qwt_spline_curve_fitter.cpp
++    qwt_weeding_curve_fitter.cpp
++    qwt_abstract_legend.cpp
++    qwt_legend.cpp
++    qwt_legend_data.cpp
++    qwt_legend_label.cpp
++    qwt_plot.cpp
++    qwt_plot_renderer.cpp
++    qwt_plot_axis.cpp
++    qwt_plot_curve.cpp
++    qwt_plot_dict.cpp
++    qwt_plot_directpainter.cpp
++    qwt_plot_graphicitem.cpp
++    qwt_plot_grid.cpp
++    qwt_plot_histogram.cpp
++    qwt_plot_item.cpp
++    qwt_plot_abstract_barchart.cpp
++    qwt_plot_barchart.cpp
++    qwt_plot_multi_barchart.cpp
++    qwt_plot_intervalcurve.cpp
++    qwt_plot_zoneitem.cpp
++    qwt_plot_tradingcurve.cpp
++    qwt_plot_spectrogram.cpp
++    qwt_plot_spectrocurve.cpp
++    qwt_plot_scaleitem.cpp
++    qwt_plot_legenditem.cpp
++    qwt_plot_seriesitem.cpp
++    qwt_plot_shapeitem.cpp
++    qwt_plot_vectorfield.cpp
++    qwt_plot_marker.cpp
++    qwt_plot_textlabel.cpp
++    qwt_plot_layout.cpp
++    qwt_plot_abstract_canvas.cpp
++    qwt_plot_canvas.cpp
++    qwt_plot_panner.cpp
++    qwt_plot_rasteritem.cpp
++    qwt_plot_picker.cpp
++    qwt_plot_zoomer.cpp
++    qwt_plot_magnifier.cpp
++    qwt_plot_rescaler.cpp
++    qwt_point_mapper.cpp
++    qwt_raster_data.cpp
++    qwt_matrix_raster_data.cpp
++    qwt_vectorfield_symbol.cpp
++    qwt_sampling_thread.cpp
++    qwt_series_data.cpp
++    qwt_point_data.cpp
++    qwt_scale_widget.cpp
++  )
++endif()
++
++if(QWT_OPENGL)
++  list(APPEND HEADERS qwt_plot_opengl_canvas.h)
++  list(APPEND SOURCES qwt_plot_opengl_canvas.cpp)
++  if(QT_VERSION_MAJOR VERSION_LESS 6)
++    list(APPEND HEADERS qwt_plot_glcanvas.h)
++    list(APPEND SOURCES qwt_plot_glcanvas.cpp)
++  endif()
++endif()
++
++if(QWT_SVG)
++  list(APPEND HEADERS qwt_plot_svgitem.h)
++  list(APPEND SOURCES qwt_plot_svgitem.cpp)
++endif()
++
++if(QWT_POLAR)
++  list( APPEND HEADERS
++    qwt_polar.h
++    qwt_polar_canvas.h
++    qwt_polar_curve.h
++    qwt_polar_fitter.h
++    qwt_polar_grid.h
++    qwt_polar_itemdict.h
++    qwt_polar_item.h
++    qwt_polar_layout.h
++    qwt_polar_magnifier.h
++    qwt_polar_marker.h
++    qwt_polar_panner.h
++    qwt_polar_picker.h
++    qwt_polar_plot.h
++    qwt_polar_renderer.h
++    qwt_polar_spectrogram.h
++  )
++  list(APPEND SOURCES
++    qwt_polar_canvas.cpp
++    qwt_polar_curve.cpp
++    qwt_polar_fitter.cpp
++    qwt_polar_grid.cpp
++    qwt_polar_item.cpp
++    qwt_polar_itemdict.cpp
++    qwt_polar_layout.cpp
++    qwt_polar_magnifier.cpp
++    qwt_polar_marker.cpp
++    qwt_polar_panner.cpp
++    qwt_polar_picker.cpp
++    qwt_polar_plot.cpp
++    qwt_polar_renderer.cpp
++    qwt_polar_spectrogram.cpp
++  )
++endif()
++
++if(QWT_WIDGETS)
++  list(APPEND HEADERS
++    qwt_abstract_slider.h
++    qwt_abstract_scale.h
++    qwt_arrow_button.h
++    qwt_analog_clock.h
++    qwt_compass.h
++    qwt_compass_rose.h
++    qwt_counter.h
++    qwt_dial.h
++    qwt_dial_needle.h
++    qwt_knob.h
++    qwt_slider.h
++    qwt_thermo.h
++    qwt_wheel.h
++  )
++  list(APPEND SOURCES
++    qwt_abstract_slider.cpp
++    qwt_abstract_scale.cpp
++    qwt_arrow_button.cpp
++    qwt_analog_clock.cpp
++    qwt_compass.cpp
++    qwt_compass_rose.cpp
++    qwt_counter.cpp
++    qwt_dial.cpp
++    qwt_dial_needle.cpp
++    qwt_knob.cpp
++    qwt_slider.cpp
++    qwt_thermo.cpp
++    qwt_wheel.cpp
++  )
++endif()
++
++add_library(qwt_objects OBJECT ${SOURCES} ${HEADERS})
++
++target_include_directories(qwt_objects INTERFACE
++  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
++  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/classincludes>
++  $<INSTALL_INTERFACE:include/qwt${QWT_NAME_SUFFIX}>
++)
++
++target_link_libraries(qwt_objects PUBLIC
++  Qt${QT_VERSION_MAJOR}::Core
++  Qt${QT_VERSION_MAJOR}::Concurrent
++  Qt${QT_VERSION_MAJOR}::PrintSupport
++)
++
++target_compile_definitions(qwt_objects PRIVATE
++  QT_NO_KEYWORDS
++  QWT_MOC_INCLUDE
++)
++
++set_target_properties(qwt_objects PROPERTIES AUTOMOC ON)
++
++if(NOT QWT_PLOT)
++  target_compile_definitions(qwt_objects PUBLIC NO_QWT_PLOT)
++endif()
++
++if(NOT QWT_POLAR)
++  target_compile_definitions(qwt_objects PUBLIC NO_QWT_POLAR)
++endif()
++
++if(QWT_WIDGETS)
++  target_link_libraries(qwt_objects PUBLIC Qt${QT_VERSION_MAJOR}::Widgets)
++else()
++  target_compile_definitions(qwt_objects PUBLIC NO_QWT_WIDGETS)
++endif()
++
++if(QWT_OPENGL)
++  target_link_libraries(qwt_objects PUBLIC Qt${QT_VERSION_MAJOR}::OpenGL)
++  if(QT_VERSION_MAJOR VERSION_GREATER_EQUAL 6)
++    target_link_libraries(qwt_objects PUBLIC Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
++  endif()
++else()
++  target_compile_definitions(qwt_objects PUBLIC QWT_NO_OPENGL)
++endif()
++
++if(QWT_SVG)
++  target_link_libraries(qwt_objects PUBLIC Qt${QT_VERSION_MAJOR}::Svg)
++else()
++  target_compile_definitions(qwt_objects PUBLIC QWT_NO_SVG)
++endif()
++
++
++if(WIN32 AND QWT_DLL)
++  target_compile_definitions(qwt_objects
++    PUBLIC QWT_DLL
++    PRIVATE QWT_MAKEDLL
++  )
++endif()
++
++set(QWT_LIBS "")
++
++if(QWT_DLL)
++  add_library(qwt_shared SHARED)
++  target_link_libraries(qwt_shared PUBLIC qwt_objects)
++  list(APPEND QWT_LIBS qwt_shared)
++  set_target_properties(qwt_shared PROPERTIES EXPORT_NAME "Qwt_SHARED")
++  set_target_properties(qwt_shared PROPERTIES OUTPUT_NAME "qwt${QWT_NAME_SUFFIX}")
++endif()
++
++if(QWT_STATIC)
++  add_library(qwt_static STATIC)
++  target_link_libraries(qwt_static PUBLIC qwt_objects)
++  list(APPEND QWT_LIBS qwt_static)
++  set_target_properties(qwt_static PROPERTIES EXPORT_NAME "Qwt_STATIC")
++  if((MSVC OR (APPLE AND QWT_FRAMEWORK)) AND QWT_DLL)
++    set_target_properties(qwt_static PROPERTIES OUTPUT_NAME "qwt${QWT_NAME_SUFFIX}-static")
++  else()
++    set_target_properties(qwt_static PROPERTIES OUTPUT_NAME "qwt${QWT_NAME_SUFFIX}")
++  endif()
++endif()
++
++if(QWT_DLL)
++  add_library(qwt ALIAS qwt_shared)
++else()
++  add_library(qwt ALIAS qwt_static)
++endif()
++
++if(QWT_DLL AND NOT APPLE AND NOT MSVC)
++  set_target_properties(qwt_shared PROPERTIES
++    VERSION ${PROJECT_VERSION}
++    SOVERSION ${PROJECT_VERSION_MAJOR}
++  )
++endif()
++
++if(APPLE AND QWT_FRAMEWORK)
++  set_target_properties(${QWT_LIBS} PROPERTIES FRAMEWORK TRUE)
++endif()
++
++install(TARGETS ${QWT_LIBS} qwt_objects
++  EXPORT QwtTargets
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)
++
++set(QWT_CONFIG_NAME "Qt${QT_VERSION_MAJOR}Qwt6")
++
++install(EXPORT QwtTargets
++  FILE ${QWT_CONFIG_NAME}Targets.cmake
++  NAMESPACE "Qwt::"
++  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${QWT_CONFIG_NAME}
++)
++include(CMakePackageConfigHelpers)
++
++get_target_property(QT_LIBRARIES qwt_objects INTERFACE_LINK_LIBRARIES)
++string(JOIN " " QT_LIBRARIES ${QT_LIBRARIES})
++string(REPLACE "::" "" QT_LIBRARIES ${QT_LIBRARIES})
++
++configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/qwt-config.cmake.in
++  "${CMAKE_CURRENT_BINARY_DIR}/${QWT_CONFIG_NAME}Config.cmake"
++  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${QWT_CONFIG_NAME}"
++  NO_SET_AND_CHECK_MACRO
++  NO_CHECK_REQUIRED_COMPONENTS_MACRO
++)
++write_basic_package_version_file(
++  "${CMAKE_CURRENT_BINARY_DIR}/${QWT_CONFIG_NAME}ConfigVersion.cmake"
++  VERSION "${Qwt_VERSION}"
++  COMPATIBILITY AnyNewerVersion
++)
++install(FILES
++  ${CMAKE_CURRENT_BINARY_DIR}/${QWT_CONFIG_NAME}Config.cmake
++  ${CMAKE_CURRENT_BINARY_DIR}/${QWT_CONFIG_NAME}ConfigVersion.cmake
++  DESTINATION lib/cmake/${QWT_CONFIG_NAME}
++)
++
++install(FILES ${HEADERS}
++  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/qwt${QWT_NAME_SUFFIX}
++)
++install(DIRECTORY ${CMAKE_SOURCE_DIR}/classincludes/
++  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/qwt${QWT_NAME_SUFFIX}
++  PATTERN "classincludes.pro" EXCLUDE
++)
++
++get_target_property(QWT_COMPILE_DEFINITIONS qwt_objects INTERFACE_COMPILE_DEFINITIONS)
++string(JOIN " -D" QWT_COMPILE_DEFINITIONS ${QWT_COMPILE_DEFINITIONS})
++string(PREPEND QWT_COMPILE_DEFINITIONS "-D")
++
++set(QWT_PKGCONFIG_FILE ${QWT_CONFIG_NAME}.pc)
++
++configure_file(qwt.pc.in ${QWT_PKGCONFIG_FILE} @ONLY)
++
++install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${QWT_PKGCONFIG_FILE}
++  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
++)
+diff --git a/src/qwt-config.cmake.in b/src/qwt-config.cmake.in
+new file mode 100644
+index 0000000..cdd79d1
+--- /dev/null
++++ b/src/qwt-config.cmake.in
+@@ -0,0 +1,17 @@
++
++@PACKAGE_INIT@
++
++include ( "${CMAKE_CURRENT_LIST_DIR}/@QWT_CONFIG_NAME@Targets.cmake" )
++
++set(QWT_INCLUDE_DIRS ${PACKAGE_PREFIX_DIR}/include/qwt@QWT_NAME_SUFFIX@)
++
++if(TARGET Qwt::Qwt_SHARED)
++  add_library(Qwt::Qwt ALIAS Qwt::Qwt_SHARED)
++else()
++  add_library(Qwt::Qwt ALIAS Qwt::Qwt_STATIC)
++endif()
++
++set(QT_LIBRARIES @QT_LIBRARIES@)
++foreach(qt_lib ${QT_LIBRARIES})
++  find_package(${qt_lib} @QT_VERSION@ REQUIRED)
++endforeach()
+diff --git a/src/qwt.pc.in b/src/qwt.pc.in
+new file mode 100644
+index 0000000..05be4e4
+--- /dev/null
++++ b/src/qwt.pc.in
+@@ -0,0 +1,12 @@
++prefix=@CMAKE_INSTALL_PREFIX@
++exec_prefix=${prefix}
++libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
++includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
++
++Name: @PROJECT_NAME@
++Description: @PROJECT_DESCRIPTION@
++Version: @PROJECT_VERSION@
++
++Libs: -L${libdir} -lqwt@QWT_NAME_SUFFIX@
++Cflags: -I${includedir}/qwt@QWT_NAME_SUFFIX@ @QWT_COMPILE_DEFINITIONS@
++Requires: @QT_LIBRARIES@
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+new file mode 100644
+index 0000000..c530d58
+--- /dev/null
++++ b/tests/CMakeLists.txt
+@@ -0,0 +1,4 @@
++
++add_subdirectory(splinetest)
++
++add_subdirectory(splineprof)
+diff --git a/tests/splineprof/CMakeLists.txt b/tests/splineprof/CMakeLists.txt
+new file mode 100644
+index 0000000..821b725
+--- /dev/null
++++ b/tests/splineprof/CMakeLists.txt
+@@ -0,0 +1,4 @@
++
++add_executable(splineprof main.cpp)
++
++target_link_libraries(splineprof qwt)
+diff --git a/tests/splinetest/CMakeLists.txt b/tests/splinetest/CMakeLists.txt
+new file mode 100644
+index 0000000..a08f9f6
+--- /dev/null
++++ b/tests/splinetest/CMakeLists.txt
+@@ -0,0 +1,4 @@
++
++add_executable(splinetest main.cpp)
++
++target_link_libraries(splinetest qwt)
+-- 
+2.36.1
+
