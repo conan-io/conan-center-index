@@ -107,7 +107,7 @@ class SzipConan(ConanFile):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "szip")
+        self.cpp_info.set_property("cmake_file_name", "SZIP")
         self.cpp_info.set_property("cmake_target_name", "szip-shared" if self.options.shared else "szip-static")
         self.cpp_info.libs = collect_libs(self)
 
@@ -118,7 +118,7 @@ class SzipConan(ConanFile):
             self.cpp_info.defines.append("SZ_BUILT_AS_DYNAMIC_LIB=1")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "szip"
-        self.cpp_info.names["cmake_find_package_multi"] = "szip"
+        self.cpp_info.names["cmake_find_package"] = "SZIP"
+        self.cpp_info.names["cmake_find_package_multi"] = "SZIP"
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
