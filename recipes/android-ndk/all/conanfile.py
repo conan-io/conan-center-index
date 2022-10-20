@@ -272,10 +272,8 @@ class AndroidNDKConan(ConanFile):
         self.buildenv_info.define("CHOST", self._llvm_triplet)
 
         ndk_sysroot = os.path.join(self._ndk_root, "sysroot")
+        self.conf_info.define("tools.build:sysroot", ndk_sysroot)
         self.buildenv_info.define_path("SYSROOT", ndk_sysroot)
-
-        # FIXME: What is that? self.cpp_info object has no sysroot attribute in conan. Should we define 'tools.build:sysroot' config?
-        self.cpp_info.sysroot = ndk_sysroot
 
         self.buildenv_info.define("ANDROID_NATIVE_API_LEVEL", str(self.settings_target.os.api_level))
 
