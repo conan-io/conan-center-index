@@ -5,6 +5,7 @@ from io import StringIO
 from conan import ConanFile
 from conans import CMake, tools
 from conan.tools.files import get, copy
+from conan.tools.scm import Version
 from conans.errors import ConanInvalidConfiguration
 
 from helpers import parse_proto_libraries
@@ -119,7 +120,7 @@ class GoogleAPIS(ConanFile):
         #  - Inconvenient macro names from usr/include/sys/syslimits.h in some macOS SDKs: GID_MAX
         #    Patched here: https://github.com/protocolbuffers/protobuf/commit/f138d5de2535eb7dd7c8d0ad5eb16d128ab221fd
         #    as of 3.21.4 issue still exist
-        if tools.Version(self.deps_cpp_info["protobuf"].version) <= "3.21.5" and self.settings.os == "Macos" or \
+        if Version(self.deps_cpp_info["protobuf"].version) <= "3.21.5" and self.settings.os == "Macos" or \
             self.settings.os == "Android":
             deactivate_library("//google/storagetransfer/v1:storagetransfer_proto")
         #  - Inconvenient macro names from /usr/include/math.h : DOMAIN
@@ -128,7 +129,7 @@ class GoogleAPIS(ConanFile):
             deactivate_library("//google/cloud/channel/v1:channel_proto")
             deactivate_library("//google/cloud/channel/v1:channel_cc_proto")
         #  - Inconvenient names for android
-        if (self.settings.os == "Android"):
+        if self.settings.os == "Android":
             deactivate_library("//google/identity/accesscontextmanager/type:type_proto")
             deactivate_library("//google/identity/accesscontextmanager/type:type_cc_proto")
             deactivate_library("//google/identity/accesscontextmanager/v1:accesscontextmanager_proto")
