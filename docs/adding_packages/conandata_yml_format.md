@@ -7,7 +7,7 @@ file to provide declarative data for the recipe (which is imperative). This is a
 In the context of conan-center-index, this file is _mandatory_ and consists of two main entries:
 
 * `sources`: Library sources origin with their verification checksums.
- * `patches`: Details about the different patches the library needs for several reasons.
+* `patches`: Details about the any patches the may library need
 
 <!-- toc -->
 ## Contents
