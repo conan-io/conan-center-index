@@ -63,6 +63,8 @@ class SzipConan(ConanFile):
         apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                               "set (CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                              "option (BUILD_SHARED_LIBS \"Build Shared Libraries\" ON)", "")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
