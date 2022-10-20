@@ -2,13 +2,17 @@ import os
 import functools
 import glob
 from io import StringIO
-from conan import ConanFile
+
 from conans import CMake, tools
+
+from conan import ConanFile
 from conan.tools.files import get, copy
 from conan.tools.scm import Version
-from conans.errors import ConanInvalidConfiguration
+
+from conan.errors import ConanInvalidConfiguration
 
 from helpers import parse_proto_libraries
+
 
 class GoogleAPIS(ConanFile):
     name = "googleapis"
@@ -20,11 +24,11 @@ class GoogleAPIS(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
     options = {
-        "shared": [True, False], 
+        "shared": [True, False],
         "fPIC": [True, False]
         }
     default_options = {
-        "shared": False, 
+        "shared": False,
         "fPIC": True
         }
     exports = "helpers.py"
@@ -48,7 +52,7 @@ class GoogleAPIS(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) <= "5":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "5":
             raise ConanInvalidConfiguration("Build with GCC 5 fails")
 
         if self.settings.compiler in ["Visual Studio", "msvc"] and self.options.shared:
@@ -103,6 +107,7 @@ class GoogleAPIS(ConanFile):
 
         # Mark the libraries we need recursively (C++ context)
         all_dict = {f"{it.qname}:{it.name}": it for it in proto_libraries}
+
         def activate_library(proto_library):
             proto_library.is_used = True
             for it_dep in proto_library.deps:
@@ -159,7 +164,7 @@ class GoogleAPIS(ConanFile):
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, pattern="*.proto", src=self.source_folder, dst=os.path.join(self.package_folder, "res"))
         copy(self, pattern="*.pb.h", src=self.build_folder, dst=os.path.join(self.package_folder, "include"))
-        
+
         copy(self, pattern="*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, pattern="*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
         copy(self, pattern="*.so*", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
