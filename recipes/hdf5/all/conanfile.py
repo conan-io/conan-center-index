@@ -111,6 +111,7 @@ class Hdf5Conan(ConanFile):
         tc.variables["ALLOW_UNSUPPORTED"] = False
         if Version(self.version) >= "1.10.6":
             tc.variables["ONLY_SHARED_LIBS"] = self.options.shared
+        tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["BUILD_STATIC_EXECS"] = False
         tc.variables["HDF5_ENABLE_COVERAGE"] = False
         tc.variables["HDF5_ENABLE_USING_MEMCHECKER"] = False
@@ -150,6 +151,10 @@ class Hdf5Conan(ConanFile):
         # Do not force PIC
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                 "set (CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                              "option (BUILD_SHARED_LIBS \"Build Shared Libraries\" ON)", "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                              "option (BUILD_STATIC_LIBS \"Build Static Libraries\" ON)", "")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
