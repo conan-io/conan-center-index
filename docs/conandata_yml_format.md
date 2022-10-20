@@ -229,7 +229,7 @@ _Optional_
 * Link to the mail list discussion.
 * Link to the patch itself in another repository (e.g. MSYS, Debian, etc.).
 
-For the `patch_type: portability` there might be no patch source matching the definition above. Although we encourage contributors to submit all such portability fixes upstream first, it's not always possible (e.g. for projects no longer maintained). In that case, a link to the Conan issue is a valid patch source (if there is no issue, you may [create](https://github.com/conan-io/ConanCenterIndex/issues/new/choose) one).
+For the `patch_type: portability` there might be no patch source matching the definition above. Although we encourage contributors to submit all such portability fixes upstream first, it's not always possible (e.g. for projects no longer maintained). In that case, a link to the Conan issue is a valid patch source (if there is no issue, you may [create](https://github.com/conan-io/conan-center-index/issues/new/choose) one).
 For the `patch_type: conan`, it doesn't make sense to submit patch upstream, so there will be no patch source.
 
 #### base_path
