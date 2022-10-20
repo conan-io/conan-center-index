@@ -140,6 +140,9 @@ class FollyConan(ConanFile):
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
 
+        if self.options.get_safe("use_sse4_2") and str(self.settings.arch) not in ['x86', 'x86_64']:
+            raise ConanInvalidConfiguration(f"{self.ref} can use the option use_sse4_2 only on x86 and x86_64 archs.")
+
     # FIXME: Freeze max. CMake version at 3.16.2 to fix the Linux build
     def build_requirements(self):
         self.build_requires("cmake/3.16.9")
@@ -151,7 +154,7 @@ class FollyConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         if can_run(self):
-            if self.options.use_sse4_2 and str(self.settings.arch) in ['x86', 'x86_64']:
+            if self.options.get_safe("use_sse4_2") and str(self.settings.arch) in ['x86', 'x86_64']:
                 cmake.definitions["FOLLY_SSE"] = "4"
                 cmake.definitions["FOLLY_SSE_MINOR"] = "2"
             cmake.definitions["FOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE"] = "0"
@@ -173,6 +176,7 @@ class FollyConan(ConanFile):
             cmake.definitions["MSVC_USE_STATIC_RUNTIME"] = "MT" in msvc_runtime_flag(self)
         cmake.configure()
         return cmake
+
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
