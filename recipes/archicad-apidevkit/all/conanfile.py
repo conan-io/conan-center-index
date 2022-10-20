@@ -1,6 +1,6 @@
-from conan import ConanFile
 from conans import tools
-from conan.tools.files import get, copy
+from conan import ConanFile
+from conan.tools.files import copy, get
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -38,7 +38,7 @@ class ArchicadApidevkitConan (ConanFile):
                 f"{self.ref} is not supported by the OS {self.info.settings.os}")
 
     def build(self):
-        tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)]
+        get(**self.conan_data["sources"][self.version][str(self.settings.os)]
                   [self._acdevkit_arch][0], destination=self.build_folder, strip_root=True)
         tools.download(filename="LICENSE", **self.conan_data["sources"][self.version][str(
             self.settings.os)][self._acdevkit_arch][1])
