@@ -1,9 +1,13 @@
-import shutil
-from conan import tools
+from conan import ConanFile
+from conan.tools.apple import is_apple_os
+from conan.tools.microsoft import visual, is_msvc
+from conan.tools.build import cross_building, valid_min_cppstd, check_min_cppstd
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, rename, replace_in_file
 from conan.tools.scm import Version
-from conans import ConanFile, CMake, tools as tools_legacy
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
+from conans import CMake
 import os
+import shutil
 
 required_conan_version = ">=1.49.0"
 
@@ -11,10 +15,10 @@ required_conan_version = ">=1.49.0"
 class grpcConan(ConanFile):
     name = "grpc"
     description = "Google's RPC (remote procedure call) library and framework."
-    topics = ("grpc", "rpc")
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/grpc/grpc"
-    license = "Apache-2.0"
+    topics = ("rpc")
 
     settings = "os", "arch", "compiler", "build_type"
 
@@ -60,10 +64,6 @@ class grpcConan(ConanFile):
         return "build_subfolder"
 
     @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
     def _grpc_plugin_template(self):
         return "grpc_plugin_template.cmake.in"
 
@@ -74,8 +74,7 @@ class grpcConan(ConanFile):
     def export_sources(self):
         self.copy("CMakeLists.txt")
         self.copy(os.path.join("cmake", self._grpc_plugin_template))
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -89,7 +88,10 @@ class grpcConan(ConanFile):
             self.options["grpc-proto"].shared = True
 
     def requirements(self):
-        self.requires("abseil/20211102.0")
+        if is_msvc(self) and Version(self.version) < "1.47":
+            self.requires("abseil/20211102.0")
+        else:
+            self.requires("abseil/20220623.0")
         self.requires("c-ares/1.18.1")
         self.requires("openssl/1.1.1q")
         self.requires("re2/20220601")
@@ -99,11 +101,11 @@ class grpcConan(ConanFile):
         self.requires("grpc-proto/cci.20220627")
 
     def validate(self):
-        if self._is_msvc:
+        if is_msvc(self):
             if self.settings.compiler == "Visual Studio":
                 vs_ide_version = self.settings.compiler.version
             else:
-                vs_ide_version = tools.microsoft.visual.msvc_version_to_vs_ide_version(self.settings.compiler.version)
+                vs_ide_version = visual.msvc_version_to_vs_ide_version(self.settings.compiler.version)
             if Version(vs_ide_version) < "14":
                 raise ConanInvalidConfiguration("gRPC can only be built with Visual Studio 2015 or higher.")
 
@@ -114,7 +116,7 @@ class grpcConan(ConanFile):
             raise ConanInvalidConfiguration("GCC older than 6 is not supported")
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools_legacy.check_min_cppstd(self, self._cxxstd_required)
+            check_min_cppstd(self, self._cxxstd_required)
 
         if self.options.shared and (not self.options["protobuf"].shared or not self.options["googleapis"].shared or not self.options["grpc-proto"].shared):
             raise ConanInvalidConfiguration("If built as shared, protobuf, googleapis and grpc-proto must be shared as well. Please, use `protobuf:shared=True` and `googleapis:shared=True` and `grpc-proto:shared=True`")
@@ -127,11 +129,11 @@ class grpcConan(ConanFile):
         if hasattr(self, "settings_build"):
             self.build_requires('protobuf/3.21.4')
             # when cross compiling we need pre compiled grpc plugins for protoc
-            if tools.build.cross_building(self):
+            if cross_building(self):
                 self.build_requires('grpc/{}'.format(self.version))
 
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
@@ -171,41 +173,40 @@ class grpcConan(ConanFile):
         self._cmake.definitions["gRPC_BUILD_GRPC_RUBY_PLUGIN"] = self.options.ruby_plugin
 
         # Consumed targets (abseil) via interface target_compiler_feature can propagate newer standards
-        if not tools_legacy.valid_min_cppstd(self, self._cxxstd_required):
+        if not valid_min_cppstd(self, self._cxxstd_required):
             self._cmake.definitions["CMAKE_CXX_STANDARD"] = self._cxxstd_required
 
-        if tools.build.cross_building(self):
+        if cross_building(self):
             # otherwise find_package() can't find config files since
             # conan doesn't populate CMAKE_FIND_ROOT_PATH
             self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_PACKAGE"] = "BOTH"
 
-        if tools_legacy.is_apple_os(self.settings.os):
+        if is_apple_os(self):
             # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
             self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
 
-        if self._is_msvc and Version(self.version) >= "1.48":
+        if is_msvc(self) and Version(self.version) >= "1.48":
             self._cmake.definitions["CMAKE_SYSTEM_VERSION"] = "10.0.18362.0"
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools_legacy.patch(**patch)
+        apply_conandata_patches(self)
 
         # Clean existing proto files, they will be taken from requirements
         shutil.rmtree(os.path.join(self._source_subfolder, "src", "proto", "grpc"))
 
         if Version(self.version) >= "1.47":
             # Take googleapis from requirement instead of vendored/hardcoded version
-            tools_legacy.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 "if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/googleapis)",
                 "if (FALSE)  # Do not download, it is provided by Conan"
             )
 
         # We are fine with protobuf::protoc coming from conan generated Find/config file
         # TODO: to remove when moving to CMakeToolchain (see https://github.com/conan-io/conan/pull/10186)
-        tools_legacy.replace_in_file(os.path.join(self._source_subfolder, "cmake", "protobuf.cmake"),
+        replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "protobuf.cmake"),
             "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)",
             "set(_gRPC_PROTOBUF_PROTOC_EXECUTABLE $<TARGET_FILE:protobuf::protoc>)"
         )
@@ -220,8 +221,8 @@ class grpcConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         # Create one custom module file per executable in order to emulate
         # CMake executables imported targets of grpc
@@ -272,19 +273,19 @@ class grpcConan(ConanFile):
         # Rename it
         dst_file = os.path.join(self.package_folder, self._module_path,
                                 "{}.cmake".format(executable))
-        tools.files.rename(self, os.path.join(self.package_folder, self._module_path, self._grpc_plugin_template),
+        rename(self, os.path.join(self.package_folder, self._module_path, self._grpc_plugin_template),
                      dst_file)
 
         # Replace placeholders
-        tools_legacy.replace_in_file(dst_file, "@target_name@", target)
-        tools_legacy.replace_in_file(dst_file, "@executable_name@", executable)
+        replace_in_file(self, dst_file, "@target_name@", target)
+        replace_in_file(self, dst_file, "@executable_name@", executable)
 
         find_program_var = "{}_PROGRAM".format(executable.upper())
-        tools_legacy.replace_in_file(dst_file, "@find_program_variable@", find_program_var)
+        replace_in_file(self, dst_file, "@find_program_variable@", find_program_var)
 
         module_folder_depth = len(os.path.normpath(self._module_path).split(os.path.sep))
         rel_path = "".join(["../"] * module_folder_depth)
-        tools_legacy.replace_in_file(dst_file, "@relative_path@", rel_path)
+        replace_in_file(self, dst_file, "@relative_path@", rel_path)
 
     @property
     def _module_path(self):
@@ -308,7 +309,7 @@ class grpcConan(ConanFile):
             return ["wsock32"] if self.settings.os == "Windows" else []
 
         def corefoundation():
-            return ["CoreFoundation"] if tools_legacy.is_apple_os(self.settings.os) else []
+            return ["CoreFoundation"] if is_apple_os(self) else []
 
         components = {
             "address_sorting": {

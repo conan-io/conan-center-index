@@ -19,6 +19,7 @@ This section gathers the most common questions from the community related to pac
   * [Do static libraries tend to be compiled as PIC by default?](#do-static-libraries-tend-to-be-compiled-as-pic-by-default)
   * [Why PDB files are not allowed?](#why-pdb-files-are-not-allowed)
     * [Why is there no option for PDB, as there is for fPIC?](#why-is-there-no-option-for-pdb-as-there-is-for-fpic)
+    * [Doesn't this make debug builds useless?](#doesnt-this-make-debug-builds-useless)
   * [Can I remove an option from a recipe?](#can-i-remove-an-option-from-a-recipe)
   * [Can I split a project into an installer and library package?](#can-i-split-a-project-into-an-installer-and-library-package)
   * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
@@ -130,7 +131,7 @@ We often receive new fixes and improvements to the recipes already available for
 
 ## Do static libraries tend to be compiled as PIC by default?
 
-Yes! You can learn more about default options in [Packing Policy](packing_policy.md#options).
+Yes! You can learn more about default options in [Packaging Policy](packaging_policy.md#options).
 
 ## Why PDB files are not allowed?
 
@@ -141,6 +142,11 @@ However, there are ways to get around this, one of them is through the [/Z7](htt
 ### Why is there no option for PDB, as there is for fPIC?
 
 Adding one more common option, it seems the most simple and obvious solution, but it contains a side effect already seen with fPIC. It is necessary to manage the entire recipe, it has become a Boilerplate. So, adding PDB would be one more point to be reviewed for each recipe. In addition, in the future new options could arise, such as sanity or benchmark, further inflating the recipes. For this reason, a new option will not be added. However, the inclusion of the PDB files is discussed in issue [#1982](https://github.com/conan-io/conan-center-index/issues/1982) and there are some ideas for making this possible through a new feature. If you want to comment on the subject, please visit issue.
+
+### Doesn't this make debug builds useless?
+
+No. The PDBs are only needed to debug dependency code. By providing the libraries you are able to link and build your application and debug your own code.
+This is by far the more common scenario which we want to enable.
 
 ## Can I remove an option from a recipe?
 
@@ -402,4 +408,4 @@ merging to the master branch. Feel free to contribute to a new Github Action tha
 ## Is it possible to disable Pylint?
 
 No. The [pylint](v2_linter.md) has an important role of keeping any recipe prepared for [Conan v2 migration](v2_migration.md). In case you are having
-difficult to understand [linter errors](linters.md), please, comment on your pull request about, then the community will help you.
+difficult to understand [linter errors](linters.md), please comment on your pull request about the problem to receive help from the community.

@@ -21,7 +21,7 @@ class Catch2Conan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_prefix": [True, False],
-        "default_reporter": ["ANY"],
+        "default_reporter": [None, "ANY"],
     }
     default_options = {
         "shared": False,

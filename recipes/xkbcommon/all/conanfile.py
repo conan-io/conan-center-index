@@ -53,7 +53,9 @@ class XkbcommonConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("xorg/system")
+        self.requires("xkeyboard-config/system")
+        if self.options.with_x11:
+            self.requires("xorg/system")
         if self.options.get_safe("xkbregistry"):
             self.requires("libxml2/2.9.14")
         if self.options.get_safe("with_wayland"):
@@ -121,7 +123,7 @@ class XkbcommonConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["libxkbcommon"].set_property("pkg_config_name", "xkbcommon")
         self.cpp_info.components["libxkbcommon"].libs = ["xkbcommon"]
-        self.cpp_info.components["libxkbcommon"].requires = ["xorg::xkeyboard-config"]
+        self.cpp_info.components["libxkbcommon"].requires = ["xkeyboard-config::xkeyboard-config"]
         self.cpp_info.components["libxkbcommon"].resdirs = ["res"]
 
         if self.options.with_x11:

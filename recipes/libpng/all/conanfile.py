@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, get, rmdir, replace_in_file, copy, rm
 from conan.tools.microsoft import is_msvc
-from conan.tools.build.cross_building import cross_building
+from conan.tools.build import cross_building
 from conan.tools.apple import is_apple_os
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -149,6 +149,9 @@ class LibpngConan(ConanFile):
             tc.variables["PNG_INTEL_SSE"] = self._neon_msa_sse_vsx_mapping[str(self.options.sse)]
         if self._has_vsx_support:
             tc.variables["PNG_POWERPC_VSX"] = self._neon_msa_sse_vsx_mapping[str(self.options.vsx)]
+        if Version(self.version) >= "1.6.38":
+            tc.variables["PNG_EXECUTABLES"] = False
+
         tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False
         tc.generate()
         tc = CMakeDeps(self)

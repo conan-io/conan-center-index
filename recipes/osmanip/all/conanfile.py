@@ -37,13 +37,16 @@ class OsmanipConan(ConanFile):
     def configure(self):
         if self.options.shared:
             try:
-                del self.options.fPIC # once removed by config_options, need try..except for a second del
+                del self.options.fPIC
             except Exception:
                 pass
 
     def requirements(self):
         self.requires("boost/1.80.0")
-        self.requires("arsenalgear/1.2.2")
+        if Version(self.version) < "4.2.0":
+            self.requires("arsenalgear/1.2.2")
+        else:
+            self.requires("arsenalgear/2.0.1")
 
     @property
     def _minimum_cpp_standard(self):

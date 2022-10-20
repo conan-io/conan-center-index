@@ -1,4 +1,10 @@
 sources:
+  "1.3.231":
+    url: "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/v1.3.231.tar.gz"
+    sha256: "4cb1c0aeb858e1a4955a736b86b0da8511ca8701222e9a252adcf093d40a8d28"
+  "1.3.224.1":
+    url: "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/sdk-1.3.224.1.tar.gz"
+    sha256: "628bd5943c0d007c192769480e789801a088f892445c80cb336fc9b6d236c5ef"
   "1.3.224.0":
     url: "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/sdk-1.3.224.0.tar.gz"
     sha256: "ccdfa47cea58a080957481fb6c35908d005d04cc5dd1778150dc0c651ccea077"

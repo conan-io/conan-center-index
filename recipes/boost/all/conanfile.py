@@ -253,6 +253,10 @@ class BoostConan(ConanFile):
     def _is_windows_platform(self):
         return self.settings.os in ["Windows", "WindowsStore", "WindowsCE"]
 
+    @property
+    def _is_apple_embedded_platform(self):
+        return self.settings.os in ["iOS", "watchOS", "tvOS"]
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -359,7 +363,7 @@ class BoostConan(ConanFile):
 
     @property
     def _stacktrace_addr2line_available(self):
-        if (self.settings.os in ["iOS", "watchOS", "tvOS"] or self.settings.get_safe("os.subsystem") == "catalyst"):
+        if (self._is_apple_embedded_platform or self.settings.get_safe("os.subsystem") == "catalyst"):
              # sandboxed environment - cannot launch external processes (like addr2line), system() function is forbidden
             return False
         return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
@@ -969,7 +973,7 @@ class BoostConan(ConanFile):
             flags.append("numa=on")
 
         # https://www.boost.org/doc/libs/1_70_0/libs/context/doc/html/context/architectures.html
-        if self._b2_os:
+        if not self._is_apple_embedded_platform and self._b2_os:
             flags.append(f"target-os={self._b2_os}")
         if self._b2_architecture:
             flags.append(f"architecture={self._b2_architecture}")
@@ -1276,6 +1280,9 @@ class BoostConan(ConanFile):
             contents += f'<linkflags>"{ldflags.strip()}" '
         if asflags.strip():
             contents += f'<asmflags>"{asflags.strip()}" '
+
+        if self._is_apple_embedded_platform:
+            contents += f'<target-os>"{self._b2_os}" '
 
         contents += " ;"
 

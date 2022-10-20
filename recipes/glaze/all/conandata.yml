@@ -1,0 +1,4 @@
+sources:
+  "0.0.7":
+    url: "https://github.com/stephenberry/glaze/archive/refs/tags/v0.0.7.tar.gz"
+    sha256: "124f7e8fea58c012b548ba1b643684fe428c7dbfeb8d8a5f701eb7db4356a759"
