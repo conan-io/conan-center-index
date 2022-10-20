@@ -101,13 +101,12 @@ class NASMConan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.install()
-            # TODO: to remove in conan v2
-            if Version(conan_version).major < 2:
-                rmdir(self, os.path.join(self.package_folder, "share"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        if Version(conan_version).major < 2:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
