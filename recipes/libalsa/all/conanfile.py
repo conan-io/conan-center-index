@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 import os
@@ -75,17 +75,15 @@ class LibalsaConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        with chdir(self, self.source_folder):
-            autotools = Autotools(self)
-            autotools.autoreconf()
-            autotools.configure()
-            autotools.make()
+        autotools = Autotools(self)
+        autotools.autoreconf()
+        autotools.configure()
+        autotools.make()
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        with chdir(self, self.source_folder):
-            autotools = Autotools(self)
-            autotools.install()
+        autotools = Autotools(self)
+        autotools.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
