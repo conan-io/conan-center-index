@@ -138,8 +138,8 @@ class PackageConan(ConanFile):
             [version_major, version_minor, _] = self.dependencies.direct_build['automake'].ref.version.split(".", 2)
             automake_version = f"{version_major}.{version_minor}"
             ar_wrapper = unix_path(self, os.path.join(self.dependencies.direct_build['automake'].cpp_info.resdirs[0], f"automake-{automake_version}", "ar-lib"))
-            env.define("CC", f"{compile_wrapper} cl -nologo")
-            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.define("CC", f"{compile_wrapper}")
+            env.define("CXX", f"{compile_wrapper}")
             env.define("LD", "link -nologo")
             env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
             env.define("NM", "dumpbin -symbols")
