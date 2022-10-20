@@ -6,7 +6,6 @@ from conan.tools.files import get, copy, replace_in_file, rm, rmdir, apply_conan
 from conan.tools.scm import Version
 from conan.tools.build import can_run
 
-import functools
 import textwrap
 
 required_conan_version = ">=1.52.0"
@@ -71,11 +70,11 @@ class Hdf5Conan(ConanFile):
         if not self.options.enable_cxx:
             try:
                 del self.settings.compiler.libcxx
-            except ConanException:
+            except Exception:
                 pass
             try:
                 del self.settings.compiler.cppstd
-            except ConanException:
+            except Exception:
                 pass
         if self.options.enable_cxx or self.options.hl or (self.settings.os == "Windows" and not self.options.shared):
             del self.options.threadsafe
@@ -97,23 +96,6 @@ class Hdf5Conan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-
-    # the result of this will be used for:
-    # find_package (libname REQUIRE CONFIG)
-    def _get_szip_package(self):
-        return {
-            "with_libaec": "libaec",
-            "with_szip": "szip",
-        }.get(str(self.options.szip_support))
-
-    # the result of this will be used for:
-    # target_link_libraries (whatever libname::libname)
-    def _get_szip_target(self):
-        return {
-            "with_libaec": "libaec::libaec",
-            "with_szip": "szip-shared" if self.dependencies["szip"].options.shared else "szip-static"
-        }.get(str(self.options.szip_support))
 
     def generate(self):
         cmakedeps = CMakeDeps(self)
@@ -142,9 +124,6 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_ENABLE_PARALLEL"] = self.options.parallel
         tc.variables["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib
         tc.variables["HDF5_ENABLE_SZIP_SUPPORT"] = bool(self.options.szip_support)
-        if bool(self.options.szip_support):
-            tc.variables["CONAN_SZIP_PACKAGE"] = self._get_szip_package() # this variable is added by conanize-link-szip*.patch
-            tc.variables["CONAN_SZIP_TARGET"] = self._get_szip_target() # this variable is added by conanize-link-szip*.patch
         tc.variables["HDF5_ENABLE_SZIP_ENCODING"] = self.options.get_safe("szip_encoding", False)
         tc.variables["HDF5_PACKAGE_EXTLIBS"] = False
         tc.variables["HDF5_ENABLE_THREADSAFE"] = self.options.get_safe("threadsafe", False)
