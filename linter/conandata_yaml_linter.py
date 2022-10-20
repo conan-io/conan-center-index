@@ -1,3 +1,4 @@
+import argparse
 from strictyaml import (
     load,
     Map,
@@ -9,19 +10,13 @@ from strictyaml import (
     Enum,
     Any,
 )
-import argparse
-
-
-def file_path(a_string):
-    from os.path import isfile
-
-    if not isfile(a_string):
-        raise argparse.ArgumentTypeError(f"{a_string} does not point to a file")
-    return a_string
+from yaml_linting import file_path
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Validate yaml file.")
+    parser = argparse.ArgumentParser(
+        description="Validate Conan's 'conandata.yaml' file to ConanCenterIndex's requirements."
+    )
     parser.add_argument(
         "path",
         nargs="?",
@@ -30,32 +25,19 @@ def main():
     )
     args = parser.parse_args()
 
-    # Generic "source" objects
-    sources_with_mirrors = Map({"url": Str() | Seq(Str()), "sha256": Str()})
-    # sources_with_multiple_assets = MapPattern(Str(), Map({"url": Str(), "sha256": Str()}), minimum_keys=1)
-    sources_with_multiple_assets = Seq(Map({"url": Str(), "sha256": Str()}))
-    source_object = sources_with_mirrors | sources_with_multiple_assets
-
-    # Platform specific archives
-    known_os = ["Windows", "Linux", "Macos"]
-    platform_specific_source_fields = MapPattern(
-        Enum(known_os),
-        MapPattern(Enum(["x86_64", "armv7", "armv8"]), source_object),
-    )
     patch_fields = Map(
         {
             "patch_file": Str(),
-            # Not yet wide spread
-            Optional("patch_description"): Str(),
-            Optional("patch_type"): Enum(
-                ["official", "conan", "portability", "backport"]
-            ),  # "vulnerability"
+            "patch_description": Str(),
+            "patch_type": Enum(
+                ["official", "conan", "portability", "backport", "vulnerability"]
+            ),
             Optional("patch_source"): Str(),  # I'd like a warning for this :thinking:
-            # No longer required for v2 recipes?
+            # No longer required for v2 recipes with layouts
             Optional("base_path"): Str(),
         }
     )
-    outer_schema = Map(
+    schema = Map(
         {
             "sources": MapPattern(Str(), Any(), minimum_keys=1),
             Optional("patches"): MapPattern(Str(), Seq(patch_fields), minimum_keys=1),
@@ -66,17 +48,18 @@ def main():
         content = f.read()
 
     try:
-        parsed = load(content, outer_schema)
-        print("passed outter validation\n")
-        if any(os in parsed["sources"].data for os in known_os):
-            print("running platform check\n")
-            parsed["sources"].revalidate(
-                MapPattern(Str(), platform_specific_source_fields, minimum_keys=1)
-            )
-        else:
-            parsed["sources"].revalidate(
-                MapPattern(Str(), source_object, minimum_keys=1)
-            )
+        parsed = load(content, schema)
+
+        if "patches" in parsed:
+            for patch in parsed["patches"]:
+                type = patch["patch_type"]
+                if type in ["official", "backport", "vulnerability"] and not "patch_source" in patch:
+                    print(
+                        f"::warning file={args.path},line={type.start_line},endline={type.end_line},"
+                        f"title='patch_type' should have 'patch_source'"
+                        "::As per https://github.com/conan-io/conan-center-index/blob/master/docs/conandata_yml_format.md#patches-fields"
+                        " it is expected to have a source (e.g. a URL) to where it originates from to help with reviewing and consumers to evaluate patches\n"
+                    )
     except YAMLValidationError as error:
         e = error.__str__().replace("\n", "%0A")
         print(

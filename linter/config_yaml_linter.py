@@ -1,15 +1,12 @@
-from strictyaml import load, Map, Str, YAMLValidationError, MapPattern
 import argparse
+from strictyaml import load, Map, Str, YAMLValidationError, MapPattern
+from yaml_linting import file_path
 
-
-def file_path(a_string):
-    from os.path import isfile
-    if not isfile(a_string):
-        raise argparse.ArgumentTypeError(f"{a_string} does not point to a file")
-    return a_string
 
 def main():
-    parser = argparse.ArgumentParser(description="Validate yaml file.")
+    parser = argparse.ArgumentParser(
+        description="Validate ConanCenterIndex's 'config.yaml' file."
+    )
     parser.add_argument(
         "path",
         nargs="?",
@@ -35,6 +32,7 @@ def main():
             f"::{e}\n"
         )
         exit(1)
+
 
 if __name__ == "__main__":
     main()
