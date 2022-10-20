@@ -143,6 +143,8 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_BUILD_CPP_LIB"] = self.options.enable_cxx
         if Version(self.version) >= "1.10.0":
             tc.variables["HDF5_BUILD_JAVA"] = False
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
 
@@ -151,8 +153,6 @@ class Hdf5Conan(ConanFile):
         # Do not force PIC
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                 "set (CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
