@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get, copy
 from conan.errors import ConanInvalidConfiguration
 
@@ -23,20 +23,20 @@ class RuntimeQml(ConanFile):
         "fPIC": True
     }
 
-    generators = "CMakeDeps", "CMakeToolchain"
+    @property
+    def _minimum_cpp_standard(self):
+        return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "clang": "7",
+            "apple-clang": "10",
+        }
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
-
-    def source(self):
-        get(self, **self.conan_data["sources"][str(self.version)],
-            destination=self.source_folder, strip_root=True)
-
-    def requirements(self):
-        if self.version == "cci.20211220": # Only version which supports qt5
-            self.requires("qt/5.15.5")
-        else:
-            self.requires("qt/6.3.1")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,12 +44,43 @@ class RuntimeQml(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+
+    def layout(self):
+        cmake_layout(self)
+            
+    def requirements(self):
+        if Version(self.version) <= "cci.20211220"
+            self.requires("qt/5.15.5")
+        else:
+            self.requires("qt/6.3.1")
 
     def validate(self):
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
+        check_min_vs(self, 191)
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
+                )
         qt = self.dependencies["qt"]
         if not qt.options.qtdeclarative:
             raise ConanInvalidConfiguration(f"{self.ref} requires option qt:qtdeclarative=True")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][str(self.version)],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -59,12 +90,8 @@ class RuntimeQml(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE", src=self.source_folder,
                   dst="licenses", keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib", keep_path=False)
-        self.copy(pattern="*.so", dst="lib", keep_path=False)
-        self.copy(pattern="*.dll", dst="bin", keep_path=False)
-        self.copy(pattern="*.h*", src=self.source_folder,
-                  dst="include", keep_path=False)
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["runtimeqml"]
