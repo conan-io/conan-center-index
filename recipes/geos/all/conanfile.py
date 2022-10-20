@@ -1,9 +1,12 @@
 from conan import ConanFile
-from conans import CMake, tools
-import functools
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
+from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class GeosConan(ConanFile):
@@ -28,24 +31,9 @@ class GeosConan(ConanFile):
         "utils": True,
     }
 
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     @property
     def _has_inline_option(self):
-        return tools.Version(self.version) < "3.11.0"
-
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        return Version(self.version) < "3.11.0"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -58,39 +46,39 @@ class GeosConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_BENCHMARKS"] = False
+        if self._has_inline_option:
+            tc.variables["DISABLE_GEOS_INLINE"] = not self.options.inline
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["BUILD_DOCUMENTATION"] = False
+        tc.variables["BUILD_ASTYLE"] = False
+        tc.variables["BUILD_GEOSOP"] = self.options.utils
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, {}):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_BENCHMARKS"] = False
-        if self._has_inline_option:
-            cmake.definitions["DISABLE_GEOS_INLINE"] = not self.options.inline
-        cmake.definitions["BUILD_TESTING"] = False
-        cmake.definitions["BUILD_DOCUMENTATION"] = False
-        cmake.definitions["BUILD_ASTYLE"] = False
-        cmake.definitions["BUILD_GEOSOP"] = self.options.utils
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
-
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        self.copy("geos.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        copy(self, "geos.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "geos")
@@ -119,8 +107,10 @@ class GeosConan(ConanFile):
         self.cpp_info.components["geos_cpp"].libs = ["geos"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["geos_cpp"].system_libs.append("m")
-        if not self.options.shared and tools.stdcpp_library(self):
-            self.cpp_info.components["geos_cpp"].system_libs.append(tools.stdcpp_library(self))
+        if not self.options.shared:
+            stdcpp_library = tools_legacy.stdcpp_library(self)
+            if stdcpp_library:
+                self.cpp_info.components["geos_cpp"].system_libs.append(stdcpp_library)
         self.cpp_info.components["geos_cpp"].requires = ["geos_cxx_flags"]
 
         # GEOS::geos_c

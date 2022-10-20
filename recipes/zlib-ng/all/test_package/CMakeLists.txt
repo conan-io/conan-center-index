@@ -1,9 +1,8 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES C)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+find_package(zlib-ng REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} CONAN_PKG::zlib-ng)
+target_link_libraries(${PROJECT_NAME} zlib-ng::zlib-ng)
 set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 99)

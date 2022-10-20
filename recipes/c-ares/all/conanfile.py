@@ -1,7 +1,11 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.apple import is_apple_os
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rm, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.51.3"
 
 
 class CAresConan(ConanFile):
@@ -24,21 +28,9 @@ class CAresConan(ConanFile):
         "tools": True,
     }
 
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,39 +39,45 @@ class CAresConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _cmake_configure(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["CARES_STATIC"] = not self.options.shared
-        self._cmake.definitions["CARES_SHARED"] = self.options.shared
-        self._cmake.definitions["CARES_BUILD_TESTS"] = False
-        self._cmake.definitions["CARES_MSVC_STATIC_RUNTIME"] = False
-        self._cmake.definitions["CARES_BUILD_TOOLS"] = self.options.tools
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CARES_STATIC"] = not self.options.shared
+        tc.variables["CARES_SHARED"] = self.options.shared
+        tc.variables["CARES_BUILD_TESTS"] = False
+        tc.variables["CARES_MSVC_STATIC_RUNTIME"] = False
+        tc.variables["CARES_BUILD_TOOLS"] = self.options.tools
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._cmake_configure()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._cmake_configure()
+        copy(self, "*LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        self.copy("*LICENSE.md", src=self._source_subfolder, dst="licenses", keep_path=False)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "c-ares")
@@ -87,16 +85,16 @@ class CAresConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libcares")
 
         # TODO: back to global scope once cmake_find_package* generators removed
-        self.cpp_info.components["cares"].libs = tools.collect_libs(self)
+        self.cpp_info.components["cares"].libs = collect_libs(self)
         if not self.options.shared:
             self.cpp_info.components["cares"].defines.append("CARES_STATICLIB")
         if self.settings.os == "Linux":
             self.cpp_info.components["cares"].system_libs.append("rt")
         elif self.settings.os == "Windows":
             self.cpp_info.components["cares"].system_libs.extend(["ws2_32", "advapi32"])
-            if tools.Version(self.version) >= "1.18.0":
+            if Version(self.version) >= "1.18.0":
                 self.cpp_info.components["cares"].system_libs.append("iphlpapi")
-        elif tools.is_apple_os(self.settings.os):
+        elif is_apple_os(self):
             self.cpp_info.components["cares"].system_libs.append("resolv")
 
         if self.options.tools:

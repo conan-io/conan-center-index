@@ -1,8 +1,10 @@
-from conans import ConanFile, CMake, tools
-import functools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class GlbindingConan(ConanFile):
@@ -23,16 +25,9 @@ class GlbindingConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,53 +38,55 @@ class GlbindingConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["OPTION_SELF_CONTAINED"] = False
+        tc.variables["OPTION_BUILD_TESTS"] = False
+        tc.variables["OPTION_BUILD_DOCS"] = False
+        tc.variables["OPTION_BUILD_TOOLS"] = False
+        tc.variables["OPTION_BUILD_EXAMPLES"] = False
+        tc.variables["OPTION_BUILD_WITH_BOOST_THREAD"] = False
+        tc.variables["OPTION_BUILD_CHECK"] = False
+        # TODO: might be a good idea to fix upstream CMakeLists to not rely on
+        # WriteCompilerDetectionHeader, and just use cxx_std_11 compile feature
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0120"] = "OLD"
+        tc.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
+        compile_options = os.path.join(self.source_folder, "cmake", "CompileOptions.cmake")
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         # Don't force PIC
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "CompileOptions.cmake"),
-                              "POSITION_INDEPENDENT_CODE ON", "")
+        replace_in_file(self, compile_options, "POSITION_INDEPENDENT_CODE ON", "")
         # Don't replace /W3 by /W4
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "CompileOptions.cmake"),
-                              "/W4", "")
+        replace_in_file(self, compile_options, "/W4", "")
         # No whole program optimization
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "CompileOptions.cmake"),
-                              "/GL", "")
+        replace_in_file(self, compile_options, "/GL", "")
         # Don't populate rpath
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "if(NOT SYSTEM_DIR_INSTALL)", "if(0)")
-
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["OPTION_SELF_CONTAINED"] = False
-        cmake.definitions["OPTION_BUILD_TESTS"] = False
-        cmake.definitions["OPTION_BUILD_DOCS"] = False
-        cmake.definitions["OPTION_BUILD_TOOLS"] = False
-        cmake.definitions["OPTION_BUILD_EXAMPLES"] = False
-        cmake.definitions["OPTION_BUILD_WITH_BOOST_THREAD"] = False
-        cmake.definitions["OPTION_BUILD_CHECK"] = False
-        cmake.configure()
-        return cmake
+        replace_in_file(self, cmakelists, "if(NOT SYSTEM_DIR_INSTALL)", "if(0)")
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "glbinding")
@@ -110,7 +107,7 @@ class GlbindingConan(ConanFile):
         self.cpp_info.components["khrplatform"].libdirs = []
 
         # workaround to propagate all components in CMakeDeps generator
-        self.cpp_info.set_property("cmake_file_name", "glbinding::glbinding-aux")
+        self.cpp_info.set_property("cmake_target_name", "glbinding::glbinding-aux")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "glbinding"

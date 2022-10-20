@@ -16,7 +16,7 @@ index 7f3dd0f..89a21e7 100644
  set(WITH_LZ4_EXT OFF)
  if(ENABLE_LZ4_EXT)
 -  find_package(LZ4)
-+  find_package(lz4 CONFIG)
++  find_package(lz4 REQUIRED CONFIG)
 +  set(LZ4_FOUND ON)
    if(LZ4_FOUND)
      set(WITH_LZ4_EXT ON)

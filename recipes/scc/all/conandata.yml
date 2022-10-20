@@ -1,0 +1,4 @@
+sources:
+  "2022.08":
+    url: "https://github.com/Minres/SystemC-Components/releases/download/2022.08/systemc-components.tar.gz"
+    sha256: "825dfc38e7b00df34330f01ba38f5913e1a88c5002344e433b972faf0e6c4501"

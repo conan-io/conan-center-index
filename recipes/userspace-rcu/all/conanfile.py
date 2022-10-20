@@ -1,10 +1,10 @@
 import os
 
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conan.tools.files import get, rmdir
 from conans.errors import ConanInvalidConfiguration
-from conan.tools.gnu.pkgconfigdeps.pc_files_creator import get_pc_files_and_content
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.47.0"
 
 
 class UserspaceRCUConan(ConanFile):
@@ -38,8 +38,8 @@ class UserspaceRCUConan(ConanFile):
     generators = "PkgConfigDeps"
 
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("Only Linux/FreeBSD supported")
+        if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
+            raise ConanInvalidConfiguration("Building for {} unsupported".format(self.settings.os))
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -48,7 +48,7 @@ class UserspaceRCUConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
@@ -77,8 +77,8 @@ class UserspaceRCUConan(ConanFile):
         autotools.install()
 
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         for lib_type in ["", "-bp", "-cds", "-mb", "-memb", "-qsbr", "-signal"]:

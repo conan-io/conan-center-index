@@ -1,0 +1,21 @@
+diff --git a/src/lib/CMakeLists.txt b/src/lib/CMakeLists.txt
+index f8bfc92..b1ae13c 100644
+--- a/src/lib/CMakeLists.txt
++++ b/src/lib/CMakeLists.txt
+@@ -224,7 +224,7 @@ endif()
+ # Package tdf lib for customer
+ ############################################################
+ 
+-set(TDF_LIB_INSTALL_LOCATION  ${PROJECT_SOURCE_DIR}/../../tdf-lib-cpp)
++set(TDF_LIB_INSTALL_LOCATION  ${CMAKE_INSTALL_PREFIX})
+ install(DIRECTORY DESTINATION ${TDF_LIB_INSTALL_LOCATION})
+ 
+ # move the headers(to include) and tdf(to lib) directory under tdf-lib-cpp
+@@ -244,7 +244,4 @@ else()
+     DESTINATION ${TDF_LIB_INSTALL_LOCATION}/lib)
+ endif()
+ 
+-install(FILES ${PROJECT_SOURCE_DIR}/../../README.md DESTINATION ${TDF_LIB_INSTALL_LOCATION})
+-install(FILES ${PROJECT_SOURCE_DIR}/../../LICENSE DESTINATION ${TDF_LIB_INSTALL_LOCATION})
+-install(FILES ${PROJECT_SOURCE_DIR}/../../VERSION DESTINATION ${TDF_LIB_INSTALL_LOCATION})
+         

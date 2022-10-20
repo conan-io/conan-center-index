@@ -9,7 +9,7 @@ index 33b3ced..93f49b1 100644
 -  target_link_libraries(rdkafka PRIVATE ${ZSTD_LIBRARY})
 -  target_include_directories(rdkafka PRIVATE ${ZSTD_INCLUDE_DIR})
 -  message(STATUS "Found ZSTD: ${ZSTD_LIBRARY}")
-+  target_link_libraries(rdkafka PRIVATE zstd::zstd)
++  target_link_libraries(rdkafka PRIVATE $<IF:$<TARGET_EXISTS:zstd::libzstd_shared>,zstd::libzstd_shared,zstd::libzstd_static>)
  endif()
  
  if(WITH_SSL)

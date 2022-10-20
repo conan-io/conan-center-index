@@ -1,20 +1,15 @@
 cmake_minimum_required(VERSION 3.1)
-project(test_package CXX)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+project(test_package LANGUAGES CXX)
 
 find_package(rabbitmq-c REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 if(RABBITMQ_SHARED)
-  target_link_libraries(${PROJECT_NAME} rabbitmq::rabbitmq)
+    target_link_libraries(${PROJECT_NAME} PRIVATE rabbitmq::rabbitmq)
 else()
-  target_link_libraries(${PROJECT_NAME} rabbitmq::rabbitmq-static)
+    target_link_libraries(${PROJECT_NAME} PRIVATE rabbitmq::rabbitmq-static)
 endif()
 
 if(WITH_SSL)
-  list(APPEND test_compile_definitions WITH_SSL)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE WITH_SSL)
 endif()
-
-target_compile_definitions(${PROJECT_NAME} PRIVATE ${test_compile_definitions})

@@ -11,7 +11,5 @@ sources:
 patches:
   "1.14":
     - patch_file: "patches/0001-fix-install-bundle.patch"
-      base_path: "source_subfolder"
   "1.13":
     - patch_file: "patches/0001-fix-install-bundle.patch"
-      base_path: "source_subfolder"

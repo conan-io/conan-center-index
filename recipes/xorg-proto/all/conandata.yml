@@ -1,4 +1,7 @@
 sources:
+  "2022.2":
+    url: "https://www.x.org/releases/individual/proto/xorgproto-2022.2.tar.gz"
+    sha256: "da351a403d07a7006d7bdc8dcfc14ddc1b588b38fb81adab9989a8eef605757b"
   "2021.4":
     url: "https://www.x.org/releases/individual/proto/xorgproto-2021.4.tar.gz"
     sha256: "9de0babd3d8cb16b0c1c47b8389a52f3e1326bb0bc9a9ab34a9500778448a2bd"

@@ -8,13 +8,3 @@ sources:
   "3.10.2":
     url: "https://github.com/libgeos/geos/archive/refs/tags/3.10.2.tar.gz"
     sha256: "d71932b444c9bd5d0bdf9eab4d22f25d9c31c122a73d619e2ec15294fb32147d"
-patches:
-  "3.11.0":
-    - patch_file: "patches/fix-cmake-3.11.0.patch"
-      base_path: "source_subfolder"
-  "3.10.3":
-    - patch_file: "patches/fix-cmake-3.10.2.patch"
-      base_path: "source_subfolder"
-  "3.10.2":
-    - patch_file: "patches/fix-cmake-3.10.2.patch"
-      base_path: "source_subfolder"

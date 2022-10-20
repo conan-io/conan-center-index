@@ -1,11 +1,11 @@
 from conan import ConanFile, tools
-from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, rmdir
-from conan.tools.microsoft import msvc_runtime_flag, is_msvc
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.50.0"
 
 
 class ExpatConan(ConanFile):
@@ -40,9 +40,17 @@ class ExpatConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if not is_msvc(self):
-            del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+           del self.settings.compiler.libcxx
+        except Exception:
+           pass
+        try:
+           del self.settings.compiler.cppstd
+        except Exception:
+           pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         tools.files.get(self,
@@ -54,24 +62,24 @@ class ExpatConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         if Version(self.version) < "2.2.8":
-            tc.variables["BUILD_doc"] = "Off"
-            tc.variables["BUILD_examples"] = "Off"
+            tc.variables["BUILD_doc"] = False
+            tc.variables["BUILD_examples"] = False
             tc.variables["BUILD_shared"] = self.options.shared
-            tc.variables["BUILD_tests"] = "Off"
-            tc.variables["BUILD_tools"] = "Off"
+            tc.variables["BUILD_tests"] = False
+            tc.variables["BUILD_tools"] = False
             # Generate a relocatable shared lib on Macos
-            tc.variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         else:
             # These options were renamed in 2.2.8 to be more consistent
-            tc.variables["EXPAT_BUILD_DOCS"] = "Off"
-            tc.variables["EXPAT_BUILD_EXAMPLES"] = "Off"
+            tc.variables["EXPAT_BUILD_DOCS"] = False
+            tc.variables["EXPAT_BUILD_EXAMPLES"] = False
             tc.variables["EXPAT_SHARED_LIBS"] = self.options.shared
-            tc.variables["EXPAT_BUILD_TESTS"] = "Off"
-            tc.variables["EXPAT_BUILD_TOOLS"] = "Off"
+            tc.variables["EXPAT_BUILD_TESTS"] = False
+            tc.variables["EXPAT_BUILD_TOOLS"] = False
             # EXPAT_CHAR_TYPE was added in 2.2.8
             tc.variables["EXPAT_CHAR_TYPE"] = self.options.char_type
             if is_msvc(self):
-                tc.variables["EXPAT_MSVC_STATIC_CRT"] = "MT" in msvc_runtime_flag(self)
+                tc.variables["EXPAT_MSVC_STATIC_CRT"] = is_msvc_static_runtime(self)
         if Version(self.version) >= "2.2.10":
             tc.variables["EXPAT_BUILD_PKGCONFIG"] = False
         tc.generate()
@@ -83,7 +91,7 @@ class ExpatConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "COPYING", self.build_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

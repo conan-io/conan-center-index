@@ -5,7 +5,8 @@ from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.47"
 
-class ConanXOrg(ConanFile):
+
+class XorgConan(ConanFile):
     name = "xorg"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
@@ -84,6 +85,6 @@ class ConanXOrg(ConanFile):
                 "component_version", pkg_config.version)
             self.cpp_info.components[name].set_property("pkg_config_custom_content",
                                                         "\n".join(f"{key}={value}" for key, value in pkg_config.variables.items() if key not in ["pcfiledir","prefix", "includedir"]))
-        
+
         if self.settings.os == "Linux":
             self.cpp_info.components["sm"].requires.append("uuid")

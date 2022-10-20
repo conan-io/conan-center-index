@@ -48,7 +48,7 @@ jobs:
         id: linter_test_package
         if: steps.changed_files.outputs.any_changed == 'true'
         run: |
-          pylint --rcfile=linter/pylintrc_testpackage recipes/*/*/test_*/conanfile.py --output-format=json --output=test_package.json --score=y --fail-under=${{ env.SCORE_THRESHOLD }}
+          pylint --rcfile=linter/pylintrc_testpackage recipes/*/*/test_*/conanfile.py --ignore-paths="recipes/[^/]*/[^/]*/test_v1[^/]*/conanfile.py" --output-format=json --output=test_package.json --score=y --fail-under=${{ env.SCORE_THRESHOLD }}
 
       - name: Archive production artifacts
         if: steps.changed_files.outputs.any_changed == 'true' && always()
@@ -145,6 +145,5 @@ jobs:
         run: |
           echo "::add-matcher::linter/recipe_linter.json"
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            pylint --rcfile=linter/pylintrc_testpackage --output-format=parseable ${file}
+            pylint --rcfile=linter/pylintrc_testpackage --ignore-paths="recipes/[^/]*/[^/]*/test_v1[^/]*/conanfile.py" --output-format=parseable ${file}
           done
-

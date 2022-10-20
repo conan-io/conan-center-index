@@ -1,5 +1,8 @@
 import os
-from conans import tools, ConanFile, CMake
+from conan import ConanFile
+from conan.tools.scm import Version
+from conan.tools.files import rmdir, get
+from conans import tools, AutoToolsBuildEnvironment, CMake
 from conans.errors import ConanInvalidConfiguration, ConanException
 
 required_conan_version = ">=1.35.0"
@@ -16,9 +19,11 @@ class CMakeConan(ConanFile):
 
     options = {
         "with_openssl": [True, False],
+        "bootstrap": [True, False],
     }
     default_options = {
         "with_openssl": True,
+        "bootstrap": False,
     }
 
     _source_subfolder = "source_subfolder"
@@ -39,6 +44,9 @@ class CMakeConan(ConanFile):
         if self.settings.os == "Macos" and self.settings.arch == "x86":
             raise ConanInvalidConfiguration("CMake does not support x86 for macOS")
 
+        if self.settings.os == "Windows" and self.options.bootstrap:
+            raise ConanInvalidConfiguration("CMake does not support bootstrapping on Windows")
+
         minimal_cpp_standard = "11"
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, minimal_cpp_standard)
@@ -58,13 +66,13 @@ class CMakeConan(ConanFile):
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
             return
 
-        version = tools.Version(self.settings.compiler.version)
+        version = Version(self.settings.compiler.version)
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if not self._cmake:
@@ -84,22 +92,34 @@ class CMakeConan(ConanFile):
         return self._cmake
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "project(CMake)",
-                              "project(CMake)\ninclude(\"{}/conanbuildinfo.cmake\")\nconan_basic_setup(NO_OUTPUT_DIRS)".format(
-                                  self.install_folder.replace("\\", "/")))
-        if self.settings.os == "Linux":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Utilities", "cmcurl", "CMakeLists.txt"),
-                                  "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})",
-                                  "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES} ${CMAKE_DL_LIBS} pthread)")
-        cmake = self._configure_cmake()
-        cmake.build()
+        if self.options.bootstrap:
+            with tools.chdir(self._source_subfolder):
+                self.run(['./bootstrap', '--prefix={}'.format(self.package_folder), '--parallel={}'.format(tools.cpu_count())])
+                autotools = AutoToolsBuildEnvironment(self)
+                autotools.make()
+        else:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                  "project(CMake)",
+                                  "project(CMake)\ninclude(\"{}/conanbuildinfo.cmake\")\nconan_basic_setup(NO_OUTPUT_DIRS)".format(
+                                      self.install_folder.replace("\\", "/")))
+            if self.settings.os == "Linux":
+                tools.replace_in_file(os.path.join(self._source_subfolder, "Utilities", "cmcurl", "CMakeLists.txt"),
+                                      "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})",
+                                      "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES} ${CMAKE_DL_LIBS} pthread)")
+
+            cmake = self._configure_cmake()
+            cmake.build()
 
     def package(self):
         self.copy("Copyright.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "doc"))
+        if self.options.bootstrap:
+            with tools.chdir(self._source_subfolder):
+                autotools = AutoToolsBuildEnvironment(self)
+                autotools.install()
+        else:
+            cmake = self._configure_cmake()
+            cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "doc"))
 
     def package_id(self):
         del self.info.settings.compiler
@@ -118,5 +138,5 @@ class CMakeConan(ConanFile):
         self.env_info.CMAKE_MODULE_PATH = mod_path
         if not os.path.exists(mod_path):
             raise ConanException("Module path not found: %s" % mod_path)
-            
+
         self.cpp_info.includedirs = []

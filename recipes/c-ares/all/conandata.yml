@@ -20,15 +20,10 @@ sources:
 patches:
   "1.17.1":
     - patch_file: "patches/upstream-pr-395-bundle-destination-v16-17.patch"
-      base_path: "source_subfolder"
   "1.16.1":
     - patch_file: "patches/upstream-pr-395-bundle-destination-v16-17.patch"
-      base_path: "source_subfolder"
   "1.15.0":
     - patch_file: "patches/upstream-pr-395-bundle-destination-v15.patch"
-      base_path: "source_subfolder"
   "1.14.0":
     - patch_file: "patches/option-tools.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/upstream-pr-395-bundle-destination-v14.patch"
-      base_path: "source_subfolder"

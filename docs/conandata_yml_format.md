@@ -9,6 +9,34 @@ In the context of conan-center-index, this file is mandatory and consists of two
  * `sources`: Library sources origin with their verification checksums.
  * `patches`: Details about the different patches the library needs for several reasons.
 
+<!-- toc -->
+## Contents
+
+  * [sources](#sources)
+    * [Mirrors](#mirrors)
+    * [Sources fields](#sources-fields)
+      * [url](#url)
+      * [sha256](#sha256)
+      * [sha1](#sha1)
+      * [md5](#md5)
+    * [Other cases](#other-cases)
+      * [Source code & license](#source-code--license)
+      * [Several source code archives](#several-source-code-archives)
+      * [Different source code archives per configuration](#different-source-code-archives-per-configuration)
+  * [patches](#patches)
+    * [Patches fields](#patches-fields)
+      * [patch_file](#patch_file)
+      * [patch_description](#patch_description)
+      * [patch_type](#patch_type)
+        * [official](#official)
+        * [vulnerability](#vulnerability)
+        * [backport](#backport)
+        * [portability](#portability)
+        * [conan](#conan)
+      * [patch_source](#patch_source)
+      * [base_path](#base_path)
+      * [sha256](#sha256-1)<!-- endToc -->
+
 ## sources
 
 `sources` is a top level dictionary, containing entries of sources and checksums for each of the supported versions.
@@ -184,7 +212,7 @@ Usually, the following kind of problems are good candidates for backports:
 - Data corruption.
 - Use of outdated or deprecated API or library.
 
-As sources with backports don't act exactly the same as the version officially released, it may be a source of confusion for the consumers who are relying on the buggy behavior (even if it's completely wrong). Therefore, it's required to introduce a new `cci.<date>` version for such backports, so consumers may choose to use either official version, or modified version with backport(s) included.
+As sources with backports don't act exactly the same as the version officially released, it may be a source of confusion for the consumers who are relying on the buggy behavior (even if it's completely wrong). Therefore, it's required to introduce a new `cci.<YYYYMMDD>` version for such backports, so consumers may choose to use either official version, or modified version with backport(s) included.
 
 ##### portability
 

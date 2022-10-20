@@ -9,16 +9,16 @@ from conan.tools.layout import cmake_layout
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeToolchain", "CMakeDeps", "PkgConfigDeps", "VirtualBuildEnv", "VirtualRunEnv"
+    generators = "CMakeToolchain", "CMakeDeps", "PkgConfigDeps", "VirtualRunEnv"
 
     def layout(self):
         cmake_layout(self)
 
     def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
         if not cross_building(self):
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
             pkg_config = PkgConfig(self, "wayland-scanner", self.generators_folder)
             self.run('%s --version' % pkg_config.variables["wayland_scanner"], env="conanrun")
 

@@ -1,7 +1,9 @@
-from conan.tools.files import rename
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
+from conan.tools.files import rename, get, rmdir
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
-from conans.errors import ConanInvalidConfiguration
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans import AutoToolsBuildEnvironment, tools
 from contextlib import contextmanager
 from functools import total_ordering
 import fnmatch
@@ -171,7 +173,7 @@ class OpenSSLConan(ConanFile):
     def _win_bash(self):
         return self._settings_build.os == "Windows" and \
                not self._use_nmake and \
-               (self._is_mingw or tools.cross_building(self, skip_x64_x86=True))
+               (self._is_mingw or cross_building(self, skip_x64_x86=True))
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -225,6 +227,9 @@ class OpenSSLConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def layout(self):
+        pass
+
     def requirements(self):
         if self._full_version < "1.1.0" and self.options.get_safe("no_zlib") == False:
             self.requires("zlib/1.2.12")
@@ -244,8 +249,8 @@ class OpenSSLConan(ConanFile):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     @property
     def _target_prefix(self):
@@ -540,7 +545,7 @@ class OpenSSLConan(ConanFile):
                 include_path = self._adjust_path(include_path)
                 lib_path = self._adjust_path(lib_path)
 
-                if zlib_info.shared:
+                if self.options["zlib"].shared:
                     args.append("zlib-dynamic")
                 else:
                     args.append("zlib")
@@ -813,18 +818,15 @@ class OpenSSLConan(ConanFile):
                 if file.endswith(".a"):
                     os.unlink(os.path.join(libdir, file))
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path)
         )
 
-    @staticmethod
-    def _create_cmake_module_variables(module_file):
+    def _create_cmake_module_variables(self, module_file):
         content = textwrap.dedent("""\
-            if(DEFINED OpenSSL_FOUND)
-                set(OPENSSL_FOUND ${OpenSSL_FOUND})
-            endif()
+            set(OPENSSL_FOUND TRUE)
             if(DEFINED OpenSSL_INCLUDE_DIR)
                 set(OPENSSL_INCLUDE_DIR ${OpenSSL_INCLUDE_DIR})
             endif()
@@ -834,6 +836,12 @@ class OpenSSLConan(ConanFile):
                                              ${OpenSSL_Crypto_DEPENDENCIES}
                                              ${OpenSSL_Crypto_FRAMEWORKS}
                                              ${OpenSSL_Crypto_SYSTEM_LIBS})
+            elseif(DEFINED openssl_OpenSSL_Crypto_LIBS_%(config)s)
+                set(OPENSSL_CRYPTO_LIBRARY ${openssl_OpenSSL_Crypto_LIBS_%(config)s})
+                set(OPENSSL_CRYPTO_LIBRARIES ${openssl_OpenSSL_Crypto_LIBS_%(config)s}
+                                             ${openssl_OpenSSL_Crypto_DEPENDENCIES_%(config)s}
+                                             ${openssl_OpenSSL_Crypto_FRAMEWORKS_%(config)s}
+                                             ${openssl_OpenSSL_Crypto_SYSTEM_LIBS_%(config)s})
             endif()
             if(DEFINED OpenSSL_SSL_LIBS)
                 set(OPENSSL_SSL_LIBRARY ${OpenSSL_SSL_LIBS})
@@ -841,6 +849,12 @@ class OpenSSLConan(ConanFile):
                                           ${OpenSSL_SSL_DEPENDENCIES}
                                           ${OpenSSL_SSL_FRAMEWORKS}
                                           ${OpenSSL_SSL_SYSTEM_LIBS})
+            elseif(DEFINED openssl_OpenSSL_SSL_LIBS_%(config)s)
+                set(OPENSSL_SSL_LIBRARY ${openssl_OpenSSL_SSL_LIBS_%(config)s})
+                set(OPENSSL_SSL_LIBRARIES ${openssl_OpenSSL_SSL_LIBS_%(config)s}
+                                          ${openssl_OpenSSL_SSL_DEPENDENCIES_%(config)s}
+                                          ${openssl_OpenSSL_SSL_FRAMEWORKS_%(config)s}
+                                          ${openssl_OpenSSL_SSL_SYSTEM_LIBS_%(config)s})
             endif()
             if(DEFINED OpenSSL_LIBRARIES)
                 set(OPENSSL_LIBRARIES ${OpenSSL_LIBRARIES})
@@ -848,7 +862,7 @@ class OpenSSLConan(ConanFile):
             if(DEFINED OpenSSL_VERSION)
                 set(OPENSSL_VERSION ${OpenSSL_VERSION})
             endif()
-        """)
+        """ % {"config":str(self.settings.build_type).upper()})
         tools.save(module_file, content)
 
     @property
