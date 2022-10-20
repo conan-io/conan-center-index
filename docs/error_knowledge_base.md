@@ -182,7 +182,7 @@ There is a complete explanation in the [FAQ](faqs.md#should-recipes-export-a-rec
 
 #### **<a name="KB-H024">#KB-H024</a>: "TEST PACKAGE FOLDER"**
 
-The [test_package](https://docs.conan.io/en/latest/creating_packages/getting_started.html#the-test-package-folder) folder is required for every recipe in Conan Center Index.
+The [test_package](https://docs.conan.io/en/latest/creating_packages/getting_started.html) folder is required for every recipe in Conan Center Index.
 
 ```
 . conanfile.py
@@ -226,7 +226,7 @@ class SomeRecipe(ConanFile):
 #### **<a name="KB-H027">#KB-H027</a>: "CONAN CENTER INDEX URL"**
 
 The attribute [url](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#url) should point to the address where the recipe is located.
-The current Conan Center Index address is https://github.com/conan-io/conan-center-index
+The current Conan Center Index address is <https://github.com/conan-io/conan-center-index>
 
 #### **<a name="KB-H028">#KB-H028</a>: "CMAKE MINIMUM VERSION"**
 
@@ -242,7 +242,7 @@ project(conanwrapper)
 
 #### **<a name="KB-H029">#KB-H029</a>: "TEST PACKAGE - RUN ENVIRONMENT"**
 
-The [RunEnvironment()](https://docs.conan.io/en/latest/reference/build_helpers/run_environment.html#runenvironment) build helper is no longer needed in the *test_package/conanfile.py*. It has been integrated by [run_environment](https://docs.conan.io/en/latest/devtools/running_packages.html#running-from-packages) parameter.
+The [RunEnvironment()](https://docs.conan.io/en/latest/reference/build_helpers/run_environment.html#runenvironment) build helper is no longer needed in the _test_package/conanfile.py_. It has been integrated by [run_environment](https://docs.conan.io/en/latest/devtools/running_packages.html#running-from-packages) parameter.
 
 ```python
 # test_package/conanfile.py

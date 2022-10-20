@@ -38,7 +38,7 @@ and package structure will be required.
 ### With New Generators
 
 When doing this there is no need to manually define `self._subfolder_[...]` in a recipe.
-Simply use `self.source_folder` and `self.build_folder` instead of [subfolder properties](adding_packages/reviewing.md#subfolder-properties)
+Simply use `self.source_folder` and `self.build_folder` instead of "subfolder properties" that used to be the norm.
 
 ### With Multiple Build Helpers
 

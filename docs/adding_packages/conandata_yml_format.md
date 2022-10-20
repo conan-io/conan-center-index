@@ -1,12 +1,12 @@
 # conandata.yml
 
-[conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html) is a [YAML](https://yaml.org/) file to provide declarative data for the recipe (which is imperative).
+[conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html) is a [YAML](https://yaml.org/)
+file to provide declarative data for the recipe (which is imperative). This is a built-in Conan feature (available since
+1.22.0) without a fixed structure, but ConanCenter has a specific format to ensure quality of recipes.
 
-`conandata.yml` is a built-in Conan feature (available since 1.22.0) without a fixed structure, but conan-center-index uses it for its own purposes.
+In the context of conan-center-index, this file is _mandatory_ and consists of two main entries:
 
-In the context of conan-center-index, this file is mandatory and consists of two main sections that we will explain in the next sections with more detail:
-
- * `sources`: Library sources origin with their verification checksums.
+* `sources`: Library sources origin with their verification checksums.
  * `patches`: Details about the different patches the library needs for several reasons.
 
 <!-- toc -->
@@ -58,6 +58,7 @@ sources:
 Every entry for a version consists in a dictionary with the `url` and the hashing algorithm of the artifact. `sha256` is required, but others like `sha1` or `md5` can be used as well.
 
 ### Mirrors
+
 Sometimes it is useful to declare mirrors, use a list in the `url` field. Conan will try to download the artifacts from any of those mirrors.
 
 ```yml
@@ -101,7 +102,7 @@ There are other ways to specify sources to cover other cases.
 
 Certain projects provide license on their own, and released artifacts do not include it. In this case, a license URL can be provided separately:
 
-```
+```yml
 sources:
   8.0.0:
     - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.8.0.0/ApprovalTests.v.8.0.0.hpp
@@ -114,7 +115,7 @@ sources:
 
 Some projects may include multiple tarballs as a part of release, [OpenCV](https://opencv.org/) is an example which includes auxiliary [contrib](https://github.com/opencv/opencv_contrib) archive:
 
-```
+```yml
 sources:
   "4.5.0":
     - sha256: dde4bf8d6639a5d3fe34d5515eab4a15669ded609a1d622350c7ff20dace1907
@@ -127,7 +128,7 @@ sources:
 
 This is the most advanced and sophisticated use-case, but no so common. Some projects may provide different sources for different platforms for awkward reasons, it could be expressed as:
 
-```
+```yml
 sources:
   "0066":
     "Macos":
@@ -146,7 +147,10 @@ This approach requires a special code within [build](https://docs.conan.io/en/la
 
 Sometimes sources provided by project require patching for various reasons. The `conandata.yml` file is the right place to indicate this information as well.
 
-This section follows the same pattern as the `sources` above: one entry per version with a list of patches to apply.
+> **Note**: Under our mission to ensure quality, patches undergo extra scrutiny. **Make sure to review** our
+> [Patching Policy](sources_and_patches.md#policy-about-patching) to understand the requirements before adding any.
+
+This section follows the same pattern as the `sources` above - one entry per version with a list of patches to apply.
 
 ```yaml
 patches:
@@ -154,7 +158,6 @@ patches:
     - patch_file: "patches/1.2.0-002-link-core-with-find-library.patch"
       patch_description: "Link CoreFoundation and CoreServices with find_library"
       patch_type: "portability"
-      base_path: "source_subfolder"
       patch_source: "https://a-url-to-a-pull-request-mail-list-topic-issue-or-question"
       sha256: "qafe4rq54533qa43esdaq53ewqa5"
 ```
@@ -174,9 +177,9 @@ _Required_
 
 `patch_description` is an arbitrary text describing the following aspects of the patch:
 
-- What does patch do (example - `add missing unistd.h header`)
-- Why is it necessary (example - `port to Android`)
-- How exactly does patch achieve that (example - `update configure.ac`)
+* What does patch do (example - `add missing unistd.h header`)
+* Why is it necessary (example - `port to Android`)
+* How exactly does patch achieve that (example - `update configure.ac`)
 
 An example of a full patch description could be: `port to Android: update configure.ac adding missing unistd.h header`.
 
@@ -229,7 +232,7 @@ Such patches may contain variables and targets generated only by Conan, but not 
 
 #### patch_source
 
-_Optional_
+_Recommended_
 
 `patch_source` is the URL from where patch was taken from. https scheme is preferred, but other URLs (e.g. git/svn/hg) are also accepted if there is no alternative. Types of patch sources are:
 
@@ -246,7 +249,7 @@ For the `patch_type: conan`, it doesn't make sense to submit patch upstream, so 
 
 _Optional_
 
-Specifies a sub-directory in project's sources to apply patch. This directory is relative to the [source_folder](https://docs.conan.io/en/latest/reference/conanfile/attributes.html?highlight=source_folder#source-folder). Usually, it would be a `source_subfolder`, but could be a lower-level sub-directory (e.g. if it's a patch for a submodule).
+Specifies a sub-directory in project's sources to apply patch. This directory is relative to the [source_folder](https://docs.conan.io/en/latest/reference/conanfile/attributes.html?highlight=source_folder#source-folder). Usually, patches are generated relative to the root of the project.
 
 #### sha256
 
