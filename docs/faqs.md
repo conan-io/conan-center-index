@@ -51,7 +51,7 @@ For example, `GSL` is the name of `Guidelines Support Library` from Microsoft an
 
 ## What is the policy on creating packages from pre-compiled binaries?
 
-The policy is that in the general case [recipes should build packages from sources](packaging_policy.md), because of reproducibility and security concerns. The implication is that the sources must be publicly available, and in a format that can be consumed programmatically.
+The policy is that in the general case [recipes should build packages from sources](adding_packages/packaging_policy.md), because of reproducibility and security concerns. The implication is that the sources must be publicly available, and in a format that can be consumed programmatically.
 
 Check the link for further details.
 
@@ -131,7 +131,7 @@ We often receive new fixes and improvements to the recipes already available for
 
 ## Do static libraries tend to be compiled as PIC by default?
 
-Yes! You can learn more about default options in [Packaging Policy](packaging_policy.md#options).
+Yes! You can learn more about default options in [Packaging Policy](adding_packages/packaging_policy.md#options).
 
 ## Why PDB files are not allowed?
 
@@ -247,7 +247,7 @@ The hook [KB-H032](error_knowledge_base.md#KB-H032) does not allow `system_requi
 system packages at same recipe.
 
 There are exceptions where some projects are closer to system drivers or hardware and packaging as a regular library could result
-in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, see the [How-to](how_to_add_packages.md#system-packages) for more.
+in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, see the [How-to](adding_packages/how_to_add_packages.md#system-packages) for more.
 
 ## Why ConanCenter does **not** build and execute tests in recipes
 
@@ -260,7 +260,7 @@ There are different motivations
 ## Why not add an option to build unit tests
 
 - Adding a testing option will change the package ID, but will not provide different packaged binaries
-- Use the configuration [skip_test](packaging_policy.md#options-to-avoid) to define the testing behavior.
+- Use the configuration [skip_test](adding_packages/packaging_policy.md#options-to-avoid) to define the testing behavior.
 
 ## What is the policy for supported python versions?
 

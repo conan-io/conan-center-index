@@ -62,9 +62,9 @@ conan config install
 
 ## Basic Commands
 
-We recommend working from the `recipes/project` folder itself. You can learn about the [recipe file structure](how_to_add_packages.md#recipe-files-structure) to understand the folder and files located there.
+We recommend working from the `recipes/project` folder itself. You can learn about the [recipe file structure](adding_packages/how_to_add_packages.md#recipe-files-structure) to understand the folder and files located there.
 
-> **Note**: You can only change one recipe per pull request, and working from the [_recipe folder_](how_to_add_packages.md#the-recipe-folder-conanfilepy) will help prevent making a few mistakes. The default for this folder is `all`, follow the link above to learn more.
+> **Note**: You can only change one recipe per pull request, and working from the [_recipe folder_](adding_packages/how_to_add_packages.md#the-recipe-folder-conanfilepy) will help prevent making a few mistakes. The default for this folder is `all`, follow the link above to learn more.
 
 The [entire workflow of a recipe](https://docs.conan.io/en/latest/developing_packages/package_dev_flow.html) can be execute with the [`conan create`](https://docs.conan.io/en/latest/reference/commands/creator/create.html). This should look like:
 

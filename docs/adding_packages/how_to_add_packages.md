@@ -42,7 +42,7 @@ This process helps conan-center-index against spam and malicious code. The proce
 
 > :warning: The requests are reviewed manually, checking the GitHub profile activity of the requester to avoid a misuse of the service. In case of detecting a misuse or inappropriate behavior, the requester will be dropped from the authorized users list and at last instance even banned from the repository.
 
-When submitting a pull request for the first time, you will be prompted to sign the [CLA](CONTRIBUTOR_LICENSE_AGREEMENT.md) for your code contributions.
+When submitting a pull request for the first time, you will be prompted to sign the [CLA](../CONTRIBUTOR_LICENSE_AGREEMENT.md) for your code contributions.
 You can view your signed CLA's by going to <https://cla-assistant.io/> and signing in.
 
 ## Submitting a Package
@@ -52,7 +52,7 @@ You can view your signed CLA's by going to <https://cla-assistant.io/> and signi
 The specific steps to add new packages are:
 
 * Fork the [conan-center-index](https://github.com/conan-io/conan-center-index) git repository, and then clone it locally.
-* Copy a template from [package_templates](package_templates) folder in the recipes/ folder and rename it to the project name (it should be lower-case). Read templates [documentation](package_templates/README.md) to find more information.
+* Copy a template from [package_templates](../package_templates) folder in the recipes/ folder and rename it to the project name (it should be lower-case). Read templates [documentation](../package_templates/README.md) to find more information.
 * Make sure you are using the latest [Conan client](https://conan.io/downloads) version, as recipes might evolve introducing features of the newer Conan releases.
 * Commit and Push to GitHub then submit a pull request.
 * Our automated build service will build 100+ different configurations, and provide messages that indicate if there were any issues found during the pull request on GitHub.
@@ -125,7 +125,7 @@ should be listed here. The file is organized into two sections, `sources` and `p
 for each version of the library. All the files that are downloaded from the internet should include a checksum, so we can validate that
 they are not changed.
 
-A detailed breakdown of all the fields can be found in [conandata_yml_format.md](conandata_yml_format.md). We **strongly** encourage adding the [patch fields](conandata_yml_format.md#patches-fields) to help track where patches come from and what issue they solve.
+A detailed breakdown of all the fields can be found in [conandata_yml_format.md](adding_packages/conandata_yml_format.md). We **strongly** encourage adding the [patch fields](adding_packages/conandata_yml_format.md#patches-fields) to help track where patches come from and what issue they solve.
 
 Inside the `conanfile.py` recipe, this data is available in a `self.conan_data` attribute that can be used as follows:
 
@@ -206,12 +206,12 @@ The [recipes](https://github.com/conan-io/conan-center-index/tree/master/recipes
 
 ### Header Only
 
-If you are looking for header-only projects, you can take a look on [header-only template](package_templates/header_only).
+If you are looking for header-only projects, you can take a look on [header-only template](../package_templates/header_only).
 Also, Conan Docs has a section about [how to package header-only libraries](https://docs.conan.io/en/latest/howtos/header_only.html).
 
 ### CMake
 
-For C/C++ projects which use CMake for building, you can take a look on [cmake package template](package_templates/cmake_package).
+For C/C++ projects which use CMake for building, you can take a look on [cmake package template](../package_templates/cmake_package).
 
 #### Components
 
@@ -269,14 +269,13 @@ An example of this can be found in the [sdl_image recipe](https://github.com/con
 The system will use the [conan-center hook](https://github.com/conan-io/hooks) to perform some quality checks. These are required for the
 the CI to merge any pull request.
 
-Follow the [Developing Recipes Locally](developing_recipes_locally.md#installing-the-conancenter-hooks) guide for instructions.
+Follow the [Developing Recipes Locally](../developing_recipes_locally.md#installing-the-conancenter-hooks) guide for instructions.
 
-Go to the [Error Knowledge Base](error_knowledge_base.md) page to know more about Conan Center hook errors.
+Go to the [Error Knowledge Base](../error_knowledge_base.md) page to know more about Conan Center hook errors.
 Some common errors related to Conan can be found on the [troubleshooting](https://docs.conan.io/en/latest/faq/troubleshooting.html) section.
 
 ### Linters
 
 Linters are always executed by Github actions to validate parts of your recipe, for instance, if it uses migrated Conan tools imports.
-All executed linters are documented in [linters.md](linters.md).
-Check the [Developing Recipes](developing_recipes_locally.md#running-the-python-linters) page for running them locally.
-Check the [Developing Recipes](developing_recipes_locally.md#running-the-python-linters) for running them locally.
+All executed linters are documented in [linters.md](../linters.md).
+Check the [Developing Recipes](../developing_recipes_locally.md#running-the-python-linters) page for running them locally.

@@ -256,7 +256,7 @@ class TestConan(ConanFile):
 #### **<a name="KB-H030">#KB-H030</a>: "CONANDATA.YML FORMAT"**
 
 The structure of the [conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html) file should follow the schema
-defined in [Adding Packages - `Conandata.yml` Format](conandata_yml_format.md).
+defined in [Adding Packages - `Conandata.yml` Format](adding_packages/conandata_yml_format.md).
 
 #### **<a name="KB-H031">#KB-H031</a>: "CONANDATA.YML REDUCE"**
 
@@ -320,7 +320,7 @@ The attribue [default_options](https://docs.conan.io/en/latest/reference/conanfi
 
 #### **<a name="KB-H052">#KB-H052</a>: "CONFIG.YML HAS NEW VERSION"**
 
-It's important to have new library version defined in both [config.yml](how_to_add_packages.md#the-version-folders) and [conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html), otherwise newly added version will not be checked and built by CI and will not be available for download.
+It's important to have new library version defined in both [config.yml](adding_packages/how_to_add_packages.md#the-version-folders) and [conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html), otherwise newly added version will not be checked and built by CI and will not be available for download.
 
 #### **<a name="KB-H053">#KB-H053</a>: "PRIVATE IMPORTS"**
 
@@ -391,7 +391,7 @@ class SomeRecipe(ConanFile):
 
 ```
 
-See also: [Submitting a Package](how_to_add_packages.md#submitting-a-package).
+See also: [Submitting a Package](adding_packages/how_to_add_packages.md#submitting-a-package).
 
 #### **<a name="KB-H066">#KB-H066</a>: "SHORT_PATHS USAGE"**
 
@@ -447,7 +447,7 @@ class SomeRecipe(ConanFile):
 
 There is the case when the package is header-only, but the options affects the generated artifact, (e.g. kanguru, pagmo2 ...), so you need to use `self.info.settings.clear()` instead.
 
-- For "tool" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/cmake/3.x.x/conanfile.py#L104-L105)) which only provide binaries, see [our packing policy](packaging_policy.md#settings) for more, should do as follows:
+- For "tool" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/cmake/3.x.x/conanfile.py#L104-L105)) which only provide binaries, see [our packing policy](adding_packages/packaging_policy.md#settings) for more, should do as follows:
 
     ```python
         def package_id(self):
@@ -469,7 +469,7 @@ Pylint is executed by default over all `conanfile.py` files in ConanCenterIndex 
 
 #### **<a name="KB-H073">#KB-H073</a>: "TEST V1 PACKAGE FOLDER"**
 
-The legacy content in test_package should not be removed. Instead, rename that folder to `test_v1_package` and create a new `test_package` folder following the [file structure](https://github.com/conan-io/conan-center-index/blob/master/docs/how_to_add_packages.md#recipe-files-structure) related to Conan v2 and v1 compatibility. Also, you can obtain good examples of Conan v2 test packages from the [template packages](https://github.com/conan-io/conan-center-index/tree/master/docs/package_templates) folder.
+The legacy content in test_package should not be removed. Instead, rename that folder to `test_v1_package` and create a new `test_package` folder following the [file structure](adding_packages/how_to_add_packages.md#recipe-files-structure) related to Conan v2 and v1 compatibility. Also, you can obtain good examples of Conan v2 test packages from the [template packages](package_templates/README.md) folder.
 
 ## Deprecated errors
 

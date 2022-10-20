@@ -115,7 +115,7 @@ in this direction. However, there are a couple of options that have a special me
 
 ### Predefined Options and Known Defaults
 
-ConanCenter supports many combinations, these are outline in the [supported configurations](supported_platforms_and_configurations.md) document for each platform.
+ConanCenter supports many combinations, these are outline in the [supported configurations](../supported_platforms_and_configurations.md) document for each platform.
 By default recipes should use `shared=False` with `fPIC=True`. If support, `header_only=False` is the default.
 
 Usage of each option should follow the rules:
@@ -125,7 +125,7 @@ Usage of each option should follow the rules:
 
    > **Note**: The CI applies `shared=True` only to the package being built, while every other requirement will `shared=False`. To consume everything as a shared library you will set `--build=always` and/or `-o *:shared=True`)
    > It's important to keep this in mind when trying to consume shared packages from ConanCenter
-   > as their requirements were linked inside the shared library. See [FAQs](faqs.md#how-to-consume-a-graph-of-shared-libraries) for more information.
+   > as their requirements were linked inside the shared library. See [FAQs](../faqs.md#how-to-consume-a-graph-of-shared-libraries) for more information.
 
 * `fPIC` (with values `True` or `False`). The **default should be `fPIC=True`** and will generate all the configurations with values `fPIC=True` and `fPIC=False`.
   This option does not make sense on all the support configurations so it should be removed.
