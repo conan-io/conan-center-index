@@ -1,9 +1,12 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.microsoft import is_msvc, check_min_vs
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
 from conan.tools.files import get, copy
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.49.0"
+required_conan_version = ">=1.50.0"
 
 class RuntimeQml(ConanFile):
     name = "runtimeqml"
@@ -53,7 +56,7 @@ class RuntimeQml(ConanFile):
         cmake_layout(self)
             
     def requirements(self):
-        if Version(self.version) <= "cci.20211220"
+        if Version(self.version) <= "cci.20211220":
             self.requires("qt/5.15.5")
         else:
             self.requires("qt/6.3.1")
