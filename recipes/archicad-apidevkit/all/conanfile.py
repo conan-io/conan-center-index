@@ -15,7 +15,7 @@ class ArchicadApidevkitConan (ConanFile):
     license = "LicenseRef-LICENSE"
     settings = "os", "arch", "build_type", "compiler"
     no_copy_source = True
-    topics = "api, archicad, development"
+    topics = "api", "archicad", "development"
     short_paths = True
 
     @property
