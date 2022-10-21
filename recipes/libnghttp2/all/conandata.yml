@@ -32,48 +32,29 @@ sources:
 patches:
   "1.49.0":
     - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
   "1.48.0":
     - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
   "1.47.0":
     - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
   "1.46.0":
     - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
   "1.45.1":
     - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
   "1.43.0":
     - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
   "1.42.0":
     - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
   "1.40.0":
     - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
   "1.39.2":
     - patch_file: "patches/fix-addNghttp2IncludesPathCMake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
