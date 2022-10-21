@@ -96,8 +96,8 @@ class NASMConan(ConanFile):
         if is_msvc(self):
             copy(self, pattern="*.exe", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
             with chdir(self, os.path.join(self.package_folder, "bin")):
-                shutil.copy("nasm.exe", "nasmw.exe")
-                shutil.copy("ndisasm.exe", "ndisasmw.exe")
+                shutil.copy2("nasm.exe", "nasmw.exe")
+                shutil.copy2("ndisasm.exe", "ndisasmw.exe")
         else:
             autotools = Autotools(self)
             autotools.install()
