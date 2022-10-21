@@ -34,4 +34,3 @@ patches:
     - patch_file: "patches/0004-3.2.1-fix-complex-type-msvc.patch"
     - patch_file: "patches/0005-3.2.1-do-not-install-libraries-to-arch-dependent-directories.patch"
     - patch_file: "patches/0006-3.2.1-library-no-version-suffix.patch"
-    - patch_file: "patches/0007-3.2.1-fix-msvc-version-check.patch"
