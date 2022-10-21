@@ -35,7 +35,7 @@ jobs:
         if: steps.changed_files.outputs.any_changed == 'true'
         run: pip install yamllint strictyaml argparse
 
-      - name: Run linter (config.yml) test
+      - name: Run linter (config.yml)
         if: steps.changed_files.outputs.any_changed == 'true' && always()
         uses: prince-chrismc/action-yamllint@main
         with:
