@@ -83,6 +83,7 @@ class Exiv2Conan(ConanFile):
         tc.variables["EXIV2_ENABLE_WEBREADY"] = self.options.with_curl
         tc.variables["EXIV2_ENABLE_CURL"] = self.options.with_curl
         tc.variables["EXIV2_ENABLE_SSH"] = False
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
         if is_msvc(self):
             tc.variables["EXIV2_ENABLE_DYNAMIC_RUNTIME"] = "MD" in msvc_runtime_flag(self)
