@@ -61,7 +61,7 @@ class XnnpackConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cpuinfo/cci.20201217")
+        self.requires("cpuinfo/cci.20220228")
         self.requires("fp16/cci.20210320")
         self.requires("pthreadpool/cci.20210218")
 
