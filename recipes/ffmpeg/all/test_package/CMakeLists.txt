@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
-
+cmake_minimum_required(VERSION 3.1)
 project(test_package C)
 
 find_package(ffmpeg REQUIRED CONFIG)

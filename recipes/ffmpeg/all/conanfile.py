@@ -3,10 +3,10 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, to_apple_arch
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.build import cross_building
-from conan.tools.files import chdir, get, rename, replace_in_file, rm, rmdir
+from conan.tools.files import chdir, copy, get, rename, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps, get_gnu_triplet
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 from conans.tools import apple_deployment_target_flag, XCRun
 import os
@@ -320,10 +320,10 @@ class FFMpegConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.arch in ("x86", "x86_64"):
-            self.build_requires("yasm/1.3.0")
-        self.build_requires("pkgconf/1.7.4")
+            self.tool_requires("yasm/1.3.0")
+        self.tool_requires("pkgconf/1.7.4")
         if self._settings_build.os == "Windows" and not self.win_bash:
-            self.build_requires("msys2/cci.latest")
+            self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -368,6 +368,14 @@ class FFMpegConan(ConanFile):
                                   f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libraries} || ")
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
+        tc = AutotoolsToolchain(self)
+
         def opt_enable_disable(what, v):
             action = "enable" if v else "disable"
             return f"--{action}-{what}"
@@ -375,8 +383,6 @@ class FFMpegConan(ConanFile):
         def opt_append_disable_if_set(args, what, v):
             if v:
                 args.append(f"--disable-{what}")
-
-        tc = AutotoolsToolchain(self)
 
         args = [
             "--pkg-config-flags=--static",
@@ -573,17 +579,12 @@ class FFMpegConan(ConanFile):
         del tc.configure_args[4] # --sbin=${prefix}/bin
         tc.configure_args.append("--incdir=${prefix}/include")
 
-        tc.configure_args += args
+        tc.configure_args.extend(args)
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
         tc = AutotoolsDeps(self)
         tc.generate()
-        env = VirtualBuildEnv(self)
-        env.generate()
-        if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
 
     def _split_and_format_options_string(self, flag_name, options_list):
         if not options_list:
@@ -607,9 +608,10 @@ class FFMpegConan(ConanFile):
         autotools.make()
 
     def package(self):
-        self.copy("LICENSE.md", dst="licenses", src=self.source_folder)
+        copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        autotools.install()
+        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
+        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
