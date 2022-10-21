@@ -9,7 +9,7 @@ from conan.errors import ConanInvalidConfiguration
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.52.0"
 
 
 class Nghttp2Conan(ConanFile):
@@ -46,10 +46,19 @@ class Nghttp2Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            self.options.rm_safe("fPIC")
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         if not (self.options.with_app or self.options.with_hpack or self.options.with_asio):
-            self.settings.rm_safe("compiler.cppstd")
-            self.settings.rm_safe("compiler.libcxx")
+            try:
+                del self.settings.compiler.cppstd
+            except Exception:
+                pass
+            try:
+                del self.settings.compiler.libcxx
+            except Exception:
+                pass
         if not self.options.with_app:
             del self.options.with_jemalloc
 
