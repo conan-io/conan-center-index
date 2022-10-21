@@ -66,8 +66,9 @@ class MoldConan(ConanFile):
 
         cd = CMakeDeps(self)
         cd.generate()
-        tc = VirtualBuildEnv(self)
-        tc.generate()
+
+        vbe = VirtualBuildEnv(self)
+        vbe.generate()
 
     def build(self):
         cmake = CMake(self)
