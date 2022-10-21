@@ -51,10 +51,10 @@ jobs:
 
       - name: Run linter (conandata.yml)
         if: steps.changed_files.outputs.any_changed == 'true' && always()
-        run: |
-          echo "::add-matcher::linter/yaml_linter.json"
-          yamllint --config-file linter/yamllint_rules.yml -f parsable ${{ env.CONANDATA_FILES_PATH }}
-          echo "::remove-matcher owner=yaml_linter_errors::"
+        uses: prince-chrismc/action-yamllint@main
+        with:
+          config: linter/yamllint_rules.yml
+          path: ${{ env.CONANDATA_FILES_PATH }}
 
       - name: Run schema check (conandata.yml)
         if: steps.changed_files.outputs.any_changed == 'true' && always()
