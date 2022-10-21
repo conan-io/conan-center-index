@@ -87,7 +87,7 @@ class MoldConan(ConanFile):
         
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
-        mold_location = os.path.join(bindir, "bindir")
+        mold_location = os.path.join(bindir, "mold")
 
         self.output.info('Appending PATH environment variable: {}'.format(bindir))
         self.env_info.PATH.append(bindir)
