@@ -187,6 +187,11 @@ class CairoConan(ConanFile):
         meson = MesonToolchain(self)
         meson.project_options.update(defs)
 
+        if is_apple_os(self):
+            # These system libs are missing from the command line with the new toolchain - but were present with the old
+            # conans.meson.Meson toolchain. Not sure if this is a meson or conan issue.
+            meson.c_link_args += ["-framework", "AppKit", "-framework", "Foundation", "-framework", "CoreServices", "-framework", "CoreFoundation"]
+
         if not self.options.shared:
             meson.c_args.append("-DCAIRO_WIN32_STATIC_BUILD")
 
@@ -206,8 +211,6 @@ class CairoConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
                                   "freetype_required_version = '>= 9.7.3'",
                                   f"freetype_required_version = '>= {self.deps_cpp_info['freetype'].version}'")
-        replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
-                        """'Image': true,""", """'Image': true, 'flags': extra_link_args,""")
         meson = Meson(self)
         meson.configure()
         meson.build()
