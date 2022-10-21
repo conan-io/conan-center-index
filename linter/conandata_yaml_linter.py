@@ -54,7 +54,7 @@ def main():
         if "patches" in parsed:
             for version in parsed["patches"]:
                 patches = parsed["patches"][version]
-                for i, patch in  enumerate(patches):
+                for i, patch in enumerate(patches):
                     type = parsed["patches"][version][i]["patch_type"]
                     if (
                         type in ["official", "backport", "vulnerability"]
