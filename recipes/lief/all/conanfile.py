@@ -140,7 +140,7 @@ class LiefConan(ConanFile):
         apply_conandata_patches(self)
 
         # dirty fix for compilation error on gcc 5
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
+        if self.version == "0.12.2" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
             replace_in_file(self, os.path.join(self.source_folder, "src", "PE", "Binary.cpp"),
                 "for (const Debug& debug : debug()) {",
                 "for (const Debug& debug : this->debug()) {"
