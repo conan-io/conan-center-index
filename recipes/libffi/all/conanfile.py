@@ -91,9 +91,6 @@ class PackageConan(ConanFile):
         if self.options.shared:
             tc.extra_defines.append("FFI_BUILDING_DLL")
 
-        if self.settings.build_type == "Debug":
-            tc.extra_defines.append("FFI_DEBUG")
-
         env = tc.environment()
         if self._settings_build.os == "Windows" and (is_msvc(self) or self.settings.compiler == "clang"):
             build = "{}-{}-{}".format(
