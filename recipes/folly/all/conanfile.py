@@ -110,7 +110,7 @@ class FollyConan(ConanFile):
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
 
-        if self.version < "2022.01.31.00" and self.settings.os != "Linux":
+        if Version(self.version) < "2022.01.31.00" and self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Conan support for non-Linux platforms starts with Folly version 2022.01.31.00")
 
         if self.settings.os == "Macos" and self.settings.arch != "x86_64":
@@ -122,7 +122,7 @@ class FollyConan(ConanFile):
         if self.settings.os in ["Macos", "Windows"] and self.options.shared:
             raise ConanInvalidConfiguration("Folly could not be built on {} as shared library".format(self.settings.os))
 
-        if self.version == "2020.08.10.00" and self.settings.compiler == "clang" and self.options.shared:
+        if Version(self.version) == "2020.08.10.00" and self.settings.compiler == "clang" and self.options.shared:
             raise ConanInvalidConfiguration("Folly could not be built by clang as a shared library")
 
         if self.options["boost"].header_only:
