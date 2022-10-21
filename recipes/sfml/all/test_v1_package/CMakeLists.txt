@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.1)
 project(test_package LANGUAGES CXX)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
+
+add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
 
 set(SFML_COMPONENTS system)
 set(SFML_TARGETS sfml-system)
