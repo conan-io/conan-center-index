@@ -66,7 +66,8 @@ class CpuinfoConan(ConanFile):
         # cpuinfo
         tc.cache_variables["CPUINFO_LIBRARY_TYPE"] = "default"
         tc.cache_variables["CPUINFO_RUNTIME_TYPE"] = "default"
-        tc.cache_variables["CPUINFO_LOG_LEVEL"] = self.options.log_level
+        # TODO: remove str cast in conan 1.53.0 (see https://github.com/conan-io/conan/pull/12086)
+        tc.cache_variables["CPUINFO_LOG_LEVEL"] = str(self.options.log_level)
         tc.variables["CPUINFO_BUILD_TOOLS"] = False
         tc.variables["CPUINFO_BUILD_UNIT_TESTS"] = False
         tc.variables["CPUINFO_BUILD_MOCK_TESTS"] = False
