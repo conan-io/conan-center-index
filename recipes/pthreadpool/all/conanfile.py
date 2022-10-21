@@ -63,7 +63,8 @@ class PthreadpoolConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["PTHREADPOOL_LIBRARY_TYPE"] = "default"
         tc.variables["PTHREADPOOL_ALLOW_DEPRECATED_API"] = True
-        tc.cache_variables["PTHREADPOOL_SYNC_PRIMITIVE"] = self.options.sync_primitive
+        # TODO: remove str cast in conan 1.53.0 (see https://github.com/conan-io/conan/pull/12086)
+        tc.cache_variables["PTHREADPOOL_SYNC_PRIMITIVE"] = str(self.options.sync_primitive)
         tc.variables["PTHREADPOOL_BUILD_TESTS"] = False
         tc.variables["PTHREADPOOL_BUILD_BENCHMARKS"] = False
         tc.cache_variables["FXDIV_SOURCE_DIR"] = "dummy" # this value doesn't really matter, it's just to avoid a download
