@@ -49,6 +49,8 @@ class EdynConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
+        if self.options.shared and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "11" and self.settings.build_type == "Release" and self.settings.compiler.libcxx == "libstdc++11":
+            raise ConanInvalidConfiguration(f"{self.ref} does not build in C3i as shared with gcc-11 in release using libstdc++11. Please submit a PR to fix this https://github.com/conan-io/conan-center-index/pull/13562#issuecomment-1284854656")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 17)
         check_min_vs(self, 192)
