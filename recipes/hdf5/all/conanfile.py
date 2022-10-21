@@ -57,7 +57,7 @@ class Hdf5Conan(ConanFile):
         if self.info.options.parallel:
             if self.info.options.enable_cxx:
                 raise ConanInvalidConfiguration("Parallel and C++ options are mutually exclusive")
-            if self.info.options.get_safe("threadsafe", False):
+            if self.info.options.get_safe("threadsafe"): # FIXME why can't I define the default valid as False?
                 raise ConanInvalidConfiguration("Parallel and Threadsafe options are mutually exclusive")
         if self.info.options.szip_support == "with_szip" and \
                 self.info.options.szip_encoding and \
