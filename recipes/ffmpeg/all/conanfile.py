@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os, to_apple_arch, XCRun
+from conan.tools.apple import is_apple_os, to_apple_arch
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.build import cross_building
 from conan.tools.files import chdir, get, rename, replace_in_file, rm, rmdir
@@ -8,12 +8,12 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgCon
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-from conans.tools import apple_deployment_target_flag
+from conans.tools import apple_deployment_target_flag, XCRun
 import os
 import glob
 import re
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.52.0"
 
 class FFMpegConan(ConanFile):
     name = "ffmpeg"
@@ -550,7 +550,7 @@ class FFMpegConan(ConanFile):
                 if self.options.with_audiotoolbox:
                     args.append("--disable-outdev=audiotoolbox")
 
-                xcrun = XCRun(self)
+                xcrun = XCRun(self.settings)
                 apple_arch = to_apple_arch(self)
                 extra_cflags.extend(
                     [f"-arch {apple_arch}", f"-isysroot {xcrun.sdk_path}"])
