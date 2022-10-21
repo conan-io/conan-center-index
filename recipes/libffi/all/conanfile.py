@@ -87,10 +87,9 @@ class PackageConan(ConanFile):
         if self._settings_build.compiler == "apple-clang":
             tc.configure_args.append("--disable-multi-os-directory")
 
+        tc.extra_defines.append("FFI_BUILDING")
         if self.options.shared:
             tc.extra_defines.append("FFI_BUILDING_DLL")
-        else:
-            tc.extra_defines.append("FFI_BUILDING")
 
         if self.settings.build_type == "Debug":
             tc.extra_defines.append("FFI_DEBUG")
