@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.build import cross_building
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
