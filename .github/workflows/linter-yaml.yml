@@ -37,10 +37,10 @@ jobs:
 
       - name: Run linter (config.yml)
         if: steps.changed_files.outputs.any_changed == 'true' && always()
-        run: |
-          echo "::add-matcher::linter/yaml_linter.json"
-          yamllint --config-file linter/yamllint_rules.yml -f parsable ${{ env.CONFIG_FILES_PATH }}
-          echo "::remove-matcher owner=yaml_linter_errors::"
+        uses: frenck/action-yamllint@v1
+        with:
+          config: linter/yamllint_rules.yml
+          path: ${{ env.CONFIG_FILES_PATH }}
 
       - name: Run schema check (config.yml)
         if: steps.changed_files.outputs.any_changed == 'true' && always()
