@@ -75,7 +75,7 @@ class VulkanLoaderConan(ConanFile):
         self.requires(f"vulkan-headers/{self.version}")
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
-        if self.options.get_safe("with_wsi_wayland"):
+        if Version(self.version) < "1.3.231" and self.options.get_safe("with_wsi_wayland"):
             self.requires("wayland/1.20.0")
 
     def validate(self):
