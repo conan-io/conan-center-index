@@ -1,9 +1,10 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.52.0"
 
 
 class AlacConan(ConanFile):
@@ -35,7 +36,10 @@ class AlacConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -46,6 +50,7 @@ class AlacConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["ALAC_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.variables["ALAC_BUILD_UTILITY"] = self.options.utility
         tc.generate()
 
@@ -62,7 +67,5 @@ class AlacConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["alac"]
 
-        if self.options.utility:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
+        if Version(conan_version).major < 2 and self.options.utility:
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

@@ -1,8 +1,9 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.52.0"
@@ -82,11 +83,7 @@ class XercesCConan(ConanFile):
                    OS(es) that `value` is valid on
         """
         if self.info.settings.os not in os and getattr(self.info.options, option) == value:
-            raise ConanInvalidConfiguration(
-                "Option '{option}={value}' is only supported on {os}".format(
-                    option=option, value=value, os=os
-                )
-            )
+            raise ConanInvalidConfiguration(f"Option '{option}={value}' is only supported on {os}")
 
     def validate(self):
         if self.info.settings.os not in ("Windows", "Macos", "Linux"):
@@ -113,6 +110,8 @@ class XercesCConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
         tc = CMakeToolchain(self)
+        # Because upstream overrides BUILD_SHARED_LIBS as a CACHE variable
+        tc.cache_variables["BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
         # https://xerces.apache.org/xerces-c/build-3.html
         tc.variables["network-accessor"] = self.options.network_accessor
         tc.variables["transcoder"] = self.options.transcoder
@@ -153,5 +152,6 @@ class XercesCConan(ConanFile):
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
 
-        self.cpp_info.names["cmake_find_package"] = "XercesC"
-        self.cpp_info.names["cmake_find_package_multi"] = "XercesC"
+        if Version(conan_version).major < 2:
+            self.cpp_info.names["cmake_find_package"] = "XercesC"
+            self.cpp_info.names["cmake_find_package_multi"] = "XercesC"

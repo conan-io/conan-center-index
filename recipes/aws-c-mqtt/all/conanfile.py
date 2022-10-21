@@ -1,11 +1,7 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
-from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, copy, rmdir
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 
 import os
 
@@ -51,8 +47,12 @@ class AwsCMQTT(ConanFile):
     def requirements(self):
         self.requires("aws-c-common/0.8.2")
         self.requires("aws-c-cal/0.5.13")
-        self.requires("aws-c-io/0.13.4")
-        self.requires("aws-c-http/0.6.22")
+        if Version(self.version) < "0.7.12":
+            self.requires("aws-c-io/0.10.20")
+            self.requires("aws-c-http/0.6.13")
+        else:
+            self.requires("aws-c-io/0.13.4")
+            self.requires("aws-c-http/0.6.22")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
