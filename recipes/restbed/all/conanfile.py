@@ -1,9 +1,10 @@
 from conan import ConanFile
-from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, rm, save
-from conan.tools.build import check_min_cppstd
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 import re
 
@@ -32,6 +33,18 @@ class RestbedConan(ConanFile):
         "with_openssl": True,
     }
 
+    @property
+    def _minimum_cpp_standard(self):
+        return 14
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "5",
+            "clang": "7",
+            "apple-clang": "10",
+        }
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -50,10 +63,13 @@ class RestbedConan(ConanFile):
 
     def validate(self):
         if getattr(self.info.settings.compiler, "cppstd"):
-            check_min_cppstd(self, 14)
-        if self.info.settings.compiler == "gcc":
-            if self.info.settings.compiler.version < Version(5):
-                raise ConanInvalidConfiguration("gcc 5+ is required for c++14 support")
+            check_min_cppstd(self, self._minimum_cpp_standard)
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
+                )
 
     def layout(self):
         cmake_layout(self, src_folder="src")
