@@ -389,8 +389,6 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("cross-compile", cross_building(self)),
             opt_enable_disable("asm", self.options.with_asm),
             # Libraries
-            opt_enable_disable("shared", self.options.shared),
-            opt_enable_disable("static", not self.options.shared),
             opt_enable_disable("pic", self.options.get_safe("fPIC", True)),
             # Components
             opt_enable_disable("avdevice", self.options.avdevice),
@@ -568,6 +566,14 @@ class FFMpegConan(ConanFile):
         args.append("--extra-ldflags={}".format(" ".join(extra_ldflags)))
 
         tc = AutotoolsToolchain(self)
+
+        # FIXME: This is a hack that feels wrong but I don't know how to fix properly. Is this an AutotoolsTolchain
+        #  problem
+        del tc.configure_args[7] # --oldincludedir=${prefix}/include
+        del tc.configure_args[6] # --includedir=${prefix}/include
+        del tc.configure_args[4] # --sbin=${prefix}/bin
+        tc.configure_args.append("--incdir=${prefix}/include")
+
         tc.configure_args += args
         tc.generate()
         tc = PkgConfigDeps(self)
