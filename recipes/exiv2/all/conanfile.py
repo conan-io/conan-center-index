@@ -88,7 +88,7 @@ class Exiv2Conan(ConanFile):
         if is_msvc(self):
             tc.variables["EXIV2_ENABLE_DYNAMIC_RUNTIME"] = "MD" in msvc_runtime_flag(self)
         # set PIC manually because of object target exiv2_int
-        tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+        tc.cache_variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         tc.generate()
 
     def build(self):
