@@ -119,11 +119,14 @@ class ScreenCaptureLiteConan(ConanFile):
             ])
         elif self.settings.os == "Macos":
             self.cpp_info.frameworks.extend([
-                'Cocoa',
-                'Carbon',
-                "CoreMedia",
-                'CoreFoundation',
-                "CoreGraphics",
-                "CoreVideo",
+                "AppKit",
                 "AVFoundation",
+                "Carbon",
+                "Cocoa",
+                "CoreFoundation",
+                "CoreGraphics",
+                "CoreMedia",
+                "CoreVideo",
+                "Foundation",
+                "ImageIO",
             ])
