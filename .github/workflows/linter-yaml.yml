@@ -39,7 +39,7 @@ jobs:
         if: steps.changed_files.outputs.any_changed == 'true' && always()
         uses: frenck/action-yamllint@v1
         with:
-          config: linter/yamllint_rules.yml
+          config: ./linter/yamllint_rules.yml
           path: ${{ env.CONFIG_FILES_PATH }}
 
       - name: Run schema check (config.yml)
