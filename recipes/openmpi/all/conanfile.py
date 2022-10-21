@@ -103,7 +103,7 @@ class OpenMPIConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "etc"))
-        remove_files_by_mask(self, os.path.join(self.package_folder, "lib"), "*.la")
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["mpi", "open-rte", "open-pal"]
