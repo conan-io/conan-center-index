@@ -10,11 +10,11 @@ diff -r -u a/CMakeLists.txt b/CMakeLists.txt
  option(CGNS_ENABLE_HDF5 "Enable or disable HDF5 interface" "ON")
 -if (CGNS_ENABLE_HDF5)
 -
++if (CGNS_ENABLE_HDF5)
 +set(HDF5_LIBRARY hdf5::hdf5)
-+find_package(HDF5)
++find_package(HDF5 CONFIG REQUIRED)
 +# All this logic is useless for conan
 +# (but don't forget to handle HDF5_NEED_MPI cache variable when we could use openmpi in hdf5)
-+if(0)
    if (CGNS_BUILD_SHARED)
      set (CG_HDF5_LINK_TYPE "shared")
      set (CG_HDF5_LINK_TYPE_UPPER "SHARED")
@@ -35,7 +35,7 @@ diff -r -u a/src/CMakeLists.txt b/src/CMakeLists.txt
    endif ()
    if (CGNS_ENABLE_HDF5 AND HDF5_LIBRARY)
 -    target_link_libraries(cgns_shared PUBLIC hdf5::hdf5-${CG_HDF5_LINK_TYPE} $<$<NOT:$<PLATFORM_ID:Windows>>:${CMAKE_DL_LIBS}>)
-+    target_link_libraries(cgns_shared PUBLIC hdf5::hdf5 $<$<NOT:$<PLATFORM_ID:Windows>>:${CMAKE_DL_LIBS}>)
++    target_link_libraries(cgns_shared PUBLIC $<$<BOOL:${CGNS_ENABLE_HDF5}>:hdf5::hdf5> $<$<NOT:$<PLATFORM_ID:Windows>>:${CMAKE_DL_LIBS}>)
      if(HDF5_NEED_ZLIB AND ZLIB_LIBRARY)
        target_link_libraries(cgns_shared PUBLIC ${ZLIB_LIBRARY})
      endif()

@@ -1,17 +1,17 @@
-import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.errors import ConanException, ConanInvalidConfiguration
-from conan.tools.files import get, copy, rmdir, apply_conandata_patches
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
+import os
 
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 class CgnsConan(ConanFile):
     name = "cgns"
     description = "Standard for data associated with the numerical solution " \
                   "of fluid dynamics equations."
-    topics = ("cgns", "data", "cfd", "fluids")
+    topics = "data", "cfd", "fluids"
     homepage = "http://cgns.org/"
     license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
@@ -30,39 +30,42 @@ class CgnsConan(ConanFile):
     }
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", src=".", dst=self.export_sources_folder)
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, patch["patch_file"], src=".", dst=self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def validate(self):
-        if self.info.options.parallel and not (self.info.options.with_hdf5 and self.info.options["hdf5"].parallel):
-            raise ConanInvalidConfiguration("The option 'parallel' requires HDF5 with parallel=True")
-        if self.info.options.parallel and self.info.options.with_hdf5 and self.info.options["hdf5"].enable_cxx:
-            raise ConanInvalidConfiguration("The option 'parallel' requires HDF5 with enable_cxx=False")
-
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         try:
-            # In windows, with msvc, the compiler.libcxx doesn't exist, so it will raise.
             del self.settings.compiler.libcxx
-        except ConanException:
+        except Exception:
             pass
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_hdf5:
             self.requires("hdf5/1.13.1")
 
-    def layout(self):
-        cmake_layout(self)
+    def validate(self):
+        if self.info.options.parallel and not (self.info.options.with_hdf5 and self.dependencies["hdf5"].options.parallel):
+            raise ConanInvalidConfiguration("The option 'parallel' requires HDF5 with parallel=True")
+        if self.info.options.parallel and self.info.options.with_hdf5 and self.dependencies["hdf5"].options.enable_cxx:
+            raise ConanInvalidConfiguration("The option 'parallel' requires HDF5 with enable_cxx=False")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
         cmake = CMakeDeps(self)
@@ -97,7 +100,7 @@ class CgnsConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        os.remove(os.path.join(self.package_folder, "include", "cgnsBuild.defs"))
+        rm(self, "cgnsBuild.defs", os.path.join(self.package_folder, "include"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):

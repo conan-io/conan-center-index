@@ -1,21 +1,17 @@
 import os
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.build import can_run
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 class CgnsTestConan(ConanFile):
-    test_type = "explicit"
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+    test_type = "explicit"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.generate()
 
     def layout(self):
         cmake_layout(self)
@@ -27,4 +23,5 @@ class CgnsTestConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            self.run(os.path.join(self.cpp.build.bindirs[0], "test_package"), env="conanrun")
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run(bin_path, env="conanrun")
