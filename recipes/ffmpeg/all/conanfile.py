@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, to_apple_arch, XCRun
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.build import cross_building
 from conan.tools.files import chdir, get, rename, replace_in_file, rm, rmdir
@@ -10,12 +10,10 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conans.tools import apple_deployment_target_flag
 import os
-import contextlib
 import glob
-import shutil
 import re
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class FFMpegConan(ConanFile):
     name = "ffmpeg"
@@ -182,9 +180,6 @@ class FFMpegConan(ConanFile):
         "disable_filters": None,
         "enable_filters": None,
     }
-
-    generators = "pkg_config"
-    _autotools = None
 
     @property
     def _dependencies(self):
@@ -555,8 +550,8 @@ class FFMpegConan(ConanFile):
                 if self.options.with_audiotoolbox:
                     args.append("--disable-outdev=audiotoolbox")
 
-                xcrun = tools.XCRun(self.settings)
-                apple_arch = tools.to_apple_arch(str(self.settings.arch))
+                xcrun = XCRun(self)
+                apple_arch = to_apple_arch(self)
                 extra_cflags.extend(
                     [f"-arch {apple_arch}", f"-isysroot {xcrun.sdk_path}"])
                 extra_ldflags.extend(
@@ -603,8 +598,6 @@ class FFMpegConan(ConanFile):
         self._patch_sources()
         replace_in_file(self, os.path.join(self.source_folder, "configure"),
                               "echo libx264.lib", "echo x264.lib")
-        if self.options.with_libx264:
-            shutil.copy("x264.pc", "libx264.pc")
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
