@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os, to_apple_arch
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, to_apple_arch
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.build import cross_building
 from conan.tools.files import chdir, get, rename, replace_in_file, rm, rmdir
@@ -627,6 +627,8 @@ class FFMpegConan(ConanFile):
                 with chdir(self, os.path.join(self.package_folder, "lib")):
                     for lib in glob.glob("*.a"):
                         rename(self, lib, lib[3:-2] + ".lib")
+
+        fix_apple_shared_install_name(self)
 
     def _read_component_version(self, component_name):
         version_file_name = os.path.join(self.package_folder,
