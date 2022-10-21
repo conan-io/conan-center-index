@@ -52,18 +52,20 @@ def main():
         parsed = load(content, schema)
 
         if "patches" in parsed:
-            for patch in parsed["patches"]:
-                type = patch["patch_type"]
-                if (
-                    type in ["official", "backport", "vulnerability"]
-                    and not "patch_source" in patch
-                ):
-                    print(
-                        f"::warning file={args.path},line={type.start_line},endline={type.end_line},"
-                        f"title='patch_type' should have 'patch_source'"
-                        "::As per https://github.com/conan-io/conan-center-index/blob/master/docs/conandata_yml_format.md#patches-fields"
-                        " it is expected to have a source (e.g. a URL) to where it originates from to help with reviewing and consumers to evaluate patches\n"
-                    )
+            for version in parsed["patches"]:
+                patches = parsed["patches"][version]
+                for i, patch in  enumerate(patches):
+                    type = parsed["patches"][version][i]["patch_type"]
+                    if (
+                        type in ["official", "backport", "vulnerability"]
+                        and not "patch_source" in patch
+                    ):
+                        print(
+                            f"::warning file={args.path},line={type.start_line},endline={type.end_line},"
+                            f"title='patch_type' should have 'patch_source'"
+                            "::As per https://github.com/conan-io/conan-center-index/blob/master/docs/conandata_yml_format.md#patches-fields"
+                            " it is expected to have a source (e.g. a URL) to where it originates from to help with reviewing and consumers to evaluate patches\n"
+                        )
     except YAMLValidationError as error:
         e = error.__str__().replace("\n", "%0A")
         print(
