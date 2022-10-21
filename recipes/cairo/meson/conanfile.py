@@ -3,9 +3,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.apple import is_apple_os
-from conan.tools.layout import basic_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches,
@@ -17,7 +15,10 @@ from conan.tools.files import (
     rm,
     rmdir)
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
 
@@ -187,10 +188,9 @@ class CairoConan(ConanFile):
         meson = MesonToolchain(self)
         meson.project_options.update(defs)
 
-        if is_apple_os(self):
-            # These system libs are missing from the command line with the new toolchain - but were present with the old
-            # conans.meson.Meson toolchain. Not sure if this is a meson or conan issue.
-            meson.c_link_args += ["-framework", "AppKit", "-framework", "Foundation", "-framework", "CoreServices", "-framework", "CoreFoundation"]
+        if is_apple_os(self) and Version(self.version) <= "1.17.4":
+            # This was fixed in the meson build from 1.17.6
+            meson.c_link_args += ["-framework", "ApplicationServices", "-framework", "CoreFoundation"]
 
         if not self.options.shared:
             meson.c_args.append("-DCAIRO_WIN32_STATIC_BUILD")
@@ -300,7 +300,7 @@ class CairoConan(ConanFile):
             self.cpp_info.components["cairo-quartz-font"].names["pkg_config"] = "cairo-quartz-font"
             self.cpp_info.components["cairo-quartz-font"].requires = ["cairo_"]
 
-            self.cpp_info.components["cairo_"].frameworks.append("CoreGraphics")
+            self.cpp_info.components["cairo_"].frameworks += ["ApplicationServices", "CoreFoundation"]
 
         if self.settings.os == "Windows":
             self.cpp_info.components["cairo-win32"].set_property("pkg_config_name", "cairo-win32")
