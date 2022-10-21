@@ -13,7 +13,7 @@ class Bzip2Conan(ConanFile):
     homepage = "http://www.bzip.org"
     license = "bzip2-1.0.8"
     description = "bzip2 is a free and open-source file compression program that uses the Burrows Wheeler algorithm."
-    topics = ("bzip2", "data-compressor", "file-compression")
+    topics = ("data-compressor", "file-compression")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
