@@ -210,6 +210,10 @@ class FFMpegConan(ConanFile):
             "with_sdl": ["with_programs"],
         }
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -318,7 +322,7 @@ class FFMpegConan(ConanFile):
         if self.settings.arch in ("x86", "x86_64"):
             self.build_requires("yasm/1.3.0")
         self.build_requires("pkgconf/1.7.4")
-        if getattr(self, "settings_build", self.settings).os == "Windows" and not self.win_bash:
+        if self._settings_build.os == "Windows" and not self.win_bash:
             self.build_requires("msys2/cci.latest")
 
     def source(self):
