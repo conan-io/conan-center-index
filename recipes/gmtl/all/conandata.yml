@@ -1,0 +1,8 @@
+sources:
+  # Newer versions at the top
+  "0.7.1":
+    url: [
+      "https://github.com/psyinf/gmtl/archive/refs/tags/0.7.1.tar.gz",
+    ]
+    sha256: "abaf1fcbc70ed0e72b313c0a1e526117ccf889edf732b994221f82151c4a8fbe"
+  
