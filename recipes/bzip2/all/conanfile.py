@@ -59,9 +59,10 @@ class Bzip2Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BZ2_VERSION_STRING"] = self.version
-        tc.variables["BZ2_VERSION_MAJOR"] = str(self.version).split(".")[0]
         tc.variables["BZ2_BUILD_EXE"] = self.options.build_executable
+        tc.variables["BZ2_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["BZ2_VERSION_MAJOR"] = str(self.version).split(".")[0]
+        tc.variables["BZ2_VERSION_STRING"] = self.version
         tc.generate()
 
     def build(self):
