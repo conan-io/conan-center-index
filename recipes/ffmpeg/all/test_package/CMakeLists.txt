@@ -1,8 +1,6 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package LANGUAGES C)
+cmake_minimum_required(VERSION 3.8)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+project(test_package C)
 
 find_package(ffmpeg REQUIRED CONFIG)
 
