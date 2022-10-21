@@ -22,17 +22,19 @@ class MoldConan(ConanFile):
         "with_mimalloc": False,
     }
 
-    def validate(self):
+    def validate_build(self):
         if self.settings.build_type == "Debug":
             raise ConanInvalidConfiguration('Mold is a build tool, specify mold:build_type=Release in your build profile, see https://github.com/conan-io/conan-center-index/pull/11536#issuecomment-1195607330')
         if self.settings.compiler in ["gcc", "clang", "intel-cc"] and self.settings.compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration('Mold can only be built with libstdc++11; specify mold:compiler.libcxx=libstdc++11 in your build profile')
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(f'{self.name} can not be built on {self.settings.os}.')
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "10":
             raise ConanInvalidConfiguration("GCC version 10 or higher required")
         if self.settings.compiler in ('clang', 'apple-clang') and Version(self.settings.compiler.version) < "12":
             raise ConanInvalidConfiguration("Clang version 12 or higher required")
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration(f'{self.name} can not be built on {self.settings.os}.')
         if self.settings.compiler == "apple-clang" and "armv8" == self.settings.arch :
             raise ConanInvalidConfiguration(f'{self.name} is still not supported by Mac M1.')
 
@@ -42,8 +44,8 @@ class MoldConan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
 
-    def build_requirements(self):
-        self.tool_requires("cmake/3.24.1")
+    #def build_requirements(self):
+    #    self.tool_requires("cmake/3.24.1")
 
     def requirements(self):
         self.requires("zlib/1.2.12")
