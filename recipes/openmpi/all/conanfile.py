@@ -1,9 +1,10 @@
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.build import check_min_cppstd, cross_building
-from conan.tools.files import copy, get, rm, rmdir, apply_conandata_patches, export_conandata_patches
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.build import cross_building
+from conan.tools.files import copy, get, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.52.0"
@@ -68,12 +69,12 @@ class OpenMPIConan(ConanFile):
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args.append("--disable-wrapper-rpath")
         tc.configure_args.append("--disable-wrapper-runpath")
-        tc.configure_args.append("--enable-shared={}".format(yes_no(self.options.shared)))
-        tc.configure_args.append("--enable-static={}".format(yes_no(not self.options.shared)))
-        tc.configure_args.append("--with-pic={}".format(yes_no(self.options.get_safe("fPIC", True))))
-        tc.configure_args.append("--enable-mpi-fortran={}".format(str(self.options.fortran)))
-        tc.configure_args.append("--with-zlib={}".format(self.deps_cpp_info["zlib"].rootpath))
-        tc.configure_args.append("--with-zlib-libdir={}".format(self.deps_cpp_info["zlib"].lib_paths[0]))
+        tc.configure_args.append(f"--enable-shared={yes_no(self.options.shared)}")
+        tc.configure_args.append(f"--enable-static={yes_no(not self.options.shared)}")
+        tc.configure_args.append(f"--with-pic={yes_no(self.options.get_safe('fPIC', True))}")
+        tc.configure_args.append(f"--enable-mpi-fortran={str(self.options.fortran)}")
+        tc.configure_args.append(f"--with-zlib={self.deps_cpp_info['zlib'].rootpath}")
+        tc.configure_args.append(f"--with-zlib-libdir={self.deps_cpp_info['zlib'].lib_paths[0]}")
         tc.configure_args.append("--datarootdir=${prefix}/res")
         if self.settings.build_type == "Debug":
             tc.configure_args.append("--enable-debug")
@@ -109,12 +110,12 @@ class OpenMPIConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "pthread", "rt", "util"]
 
-        self.output.info("Creating MPI_HOME environment variable: {}".format(self.package_folder))
+        self.output.info("Creating MPI_HOME environment variable: {self.package_folder}")
         self.env_info.MPI_HOME = self.package_folder
-        self.output.info("Creating OPAL_PREFIX environment variable: {}".format(self.package_folder))
+        self.output.info("Creating OPAL_PREFIX environment variable: {self.package_folder}")
         self.env_info.OPAL_PREFIX = self.package_folder
         mpi_bin = os.path.join(self.package_folder, "bin")
-        self.output.info("Creating MPI_BIN environment variable: {}".format(mpi_bin))
+        self.output.info("Creating MPI_BIN environment variable: {mpi_bin}")
         self.env_info.MPI_BIN = mpi_bin
-        self.output.info("Appending PATH environment variable: {}".format(mpi_bin))
+        self.output.info("Appending PATH environment variable: {mpi_bin}")
         self.env_info.PATH.append(mpi_bin)
