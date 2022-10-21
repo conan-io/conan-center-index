@@ -207,7 +207,7 @@ class LibcurlConan(ConanFile):
                 self.tool_requires("ninja/1.11.0")
         else:
             self.tool_requires("libtool/2.4.6")
-            if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str)
+            if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
                 self.tool_requires("pkgconf/1.7.4")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
