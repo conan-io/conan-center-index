@@ -6,7 +6,7 @@ on:
 env:
   PYTHONPATH: ${{github.workspace}}
   PYVER: "3.8"
-  CONFIG_FILES_PATH: "recipes/**/config.yml"
+  CONFIG_FILES_PATH: "recipes/*/*/config.yml"
   CONANDATA_FILES_PATH: "recipes/**/**/conandata.yml"
 
 jobs:
