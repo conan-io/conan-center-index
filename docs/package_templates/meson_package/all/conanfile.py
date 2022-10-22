@@ -1,13 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
-from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
-from conan.tools.gnu import PkgConfigDeps
-from conan.tools.meson import Meson, MesonToolchain, MesonDeps
 from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain, MesonDeps
+from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.scm import Version
 import os
 
 
@@ -39,7 +40,7 @@ class PackageConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 17
 
     # in case the project requires C++14/17/20/... the minimum compiler version should be listed
@@ -87,14 +88,14 @@ class PackageConan(ConanFile):
 
     def validate(self):
         # validate the minimum cpp standard supported. For C++ projects only
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 191)
         if not is_msvc(self):
             minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
             if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
         # in case it does not work in another configuration, it should validated here too
         if is_msvc(self) and self.info.options.shared:
@@ -102,13 +103,11 @@ class PackageConan(ConanFile):
 
     # if another tool than the compiler or Meson is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
-        # Meson package is no installed by default on ConanCenterIndex CI
+        # CCI policy assumes that Meson may not be installed on consumers machine
         self.tool_requires("meson/0.63.3")
-        # pkgconf is largely used by Meson, in case needed on Windows, it should be added are build requirement
-        self.tool_requires("pkgconf/1.9.3")
-        # Meson uses Ninja as backend by default. Ninja package is not installed by default on ConanCenterIndex
-        if not self.conf.get("tools.meson.mesontoolchain:backend", default=False, check_type=str):
-            self.tool_requires("ninja/1.11.1")
+        # pkgconf is largely used by Meson, it should be added in build requirement when there are dependencies
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
@@ -130,7 +129,7 @@ class PackageConan(ConanFile):
         tc.generate()
         # In case there are dependencies listed on build_requirements, VirtualBuildEnv should be used
         tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
+        tc.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -153,6 +152,9 @@ class PackageConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+
+        # In shared lib/executable files, meson set install_name (macOS) to lib dir absolute path instead of @rpath, it's not relocatable, so fix it
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         # avoid collect_libs(), prefer explicit library name instead
