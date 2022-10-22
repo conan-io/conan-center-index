@@ -563,14 +563,14 @@ class LibcurlConan(ConanFile):
         tc.variables["NTLM_WB_ENABLED"] = self.options.with_ntlm_wb
 
         if self.options.with_ca_bundle is False:
-            tc.variables['CURL_CA_BUNDLE'] = 'none'
+            tc.cache_variables["CURL_CA_BUNDLE"] = "none"
         elif self.options.with_ca_bundle:
-            tc.variables['CURL_CA_BUNDLE'] = self.options.with_ca_bundle
+            tc.cache_variables["CURL_CA_BUNDLE"] = str(self.options.with_ca_bundle)
 
         if self.options.with_ca_path is False:
-            tc.variables['CURL_CA_PATH'] = 'none'
+            tc.cache_variables["CURL_CA_PATH"] = "none"
         elif self.options.with_ca_path:
-            tc.variables['CURL_CA_PATH'] = self.options.with_ca_path
+            tc.cache_variables["CURL_CA_PATH"] = str(self.options.with_ca_path)
 
         tc.generate()
 
