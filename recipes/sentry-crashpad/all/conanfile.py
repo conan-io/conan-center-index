@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, apply_conandata_patches, copy, rmdir, rm, replace_in_file
+from conan.tools.files import get, apply_conandata_patches, copy, export_conandata_patches, rmdir, rm, replace_in_file
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
@@ -47,8 +47,7 @@ class SentryCrashpadConan(ConanFile):
         }
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, patch["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
