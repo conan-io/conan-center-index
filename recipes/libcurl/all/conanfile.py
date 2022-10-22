@@ -172,13 +172,13 @@ class LibcurlConan(ConanFile):
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1q")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/5.4.0")
+            self.requires("wolfssl/5.5.1")
         if self.options.with_nghttp2:
-            self.requires("libnghttp2/1.48.0")
+            self.requires("libnghttp2/1.49.0")
         if self.options.with_libssh2:
             self.requires("libssh2/1.10.0")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("with_zstd"):
@@ -201,14 +201,14 @@ class LibcurlConan(ConanFile):
     def build_requirements(self):
         if self._is_using_cmake_build:
             if self._is_win_x_android:
-                self.tool_requires("ninja/1.11.0")
+                self.tool_requires("ninja/1.11.1")
         else:
-            self.tool_requires("libtool/2.4.6")
-            if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-                self.tool_requires("pkgconf/1.7.4")
+            self.tool_requires("libtool/2.4.7")
+            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                self.tool_requires("pkgconf/1.9.3")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
-                if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                     self.tool_requires("msys2/cci.latest")
 
     def layout(self):
