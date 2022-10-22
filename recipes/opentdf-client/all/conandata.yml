@@ -1,4 +1,13 @@
 sources:
+  "1.3.2":
+    url: "https://github.com/opentdf/client-cpp/archive/1.3.2.tar.gz"
+    sha256: "d9a38d3aa6114159c90e0c254c78ddda921e2d520851e4def57f3cd26c564b16"
+  "1.2.0":
+    url: "https://github.com/opentdf/client-cpp/archive/1.2.0.tar.gz"
+    sha256: "15828038809ed291ff7881206a675abc5162e1175c8b515363b9c584aebb08f7"
+  "1.1.6":
+    url: "https://github.com/opentdf/client-cpp/archive/1.1.6.tar.gz"
+    sha256: "83992c37c9a58ae2152660a4ffbf1784fe63d7a9e7b8466d10ca1074697b3d3a"
   "1.1.5":
     url: "https://github.com/opentdf/client-cpp/archive/1.1.5.tar.gz"
     sha256: "8fd5b22b36b19cd58a18f63cbffe3d538263ef3aecde4802059951c4eb5ce044"

@@ -1,5 +1,9 @@
-from conans import ConanFile, tools
-from conans.errors import ConanException, ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.system import package_manager
+from conans import tools
+
+required_conan_version = ">=1.47"
 
 
 class LibUDEVConan(ConanFile):
@@ -10,7 +14,7 @@ class LibUDEVConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.freedesktop.org/software/systemd/man/udev.html"
     license = "GPL-2.0-or-later", "LGPL-2.1-or-later"
-    settings = "os"
+    settings = "os", "arch", "compiler", "build_type"
 
     def validate(self):
         if self.settings.os != "Linux":
@@ -40,22 +44,20 @@ class LibUDEVConan(ConanFile):
         self.cpp_info.cxxflags = cflags
 
     def system_requirements(self):
-        packages = []
-        if tools.os_info.is_linux and self.settings.os == "Linux":
-            if tools.os_info.with_yum:
-                packages = ["systemd-devel"]
-            elif tools.os_info.with_apt:
-                packages = ["libudev-dev"]
-            elif tools.os_info.with_pacman:
-                packages = ["systemd-libs"]
-            elif tools.os_info.with_zypper:
-                packages = ["libudev-devel"]
-            else:
-                self.output.warn("Don't know how to install %s for your distro." % self.name)
-        if packages:
-            package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
-            for p in packages:
-                package_tool.install(update=True, packages=p)
+        dnf = package_manager.Dnf(self)
+        dnf.install(["systemd-devel"], update=True, check=True)
+
+        yum = package_manager.Yum(self)
+        yum.install(["systemd-devel"], update=True, check=True)
+
+        apt = package_manager.Apt(self)
+        apt.install(["libudev-dev"], update=True, check=True)
+
+        pacman = package_manager.PacMan(self)
+        pacman.install(["systemd-libs"], update=True, check=True)
+
+        zypper = package_manager.Zypper(self)
+        zypper.install(["libudev-devel"], update=True, check=True)
 
     def package_info(self):
         self.cpp_info.includedirs = []
