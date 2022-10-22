@@ -55,9 +55,6 @@ class SentryCrashpadConan(ConanFile):
         if self.settings.os not in ("Linux", "Android") or Version(self.version) < "0.4":
             del self.options.with_tls
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def build_requirements(self):
         if self._is_mingw:
             self.tool_requires("jwasm/2.13")
@@ -80,6 +77,9 @@ class SentryCrashpadConan(ConanFile):
             raise ConanInvalidConfiguration(f"Build requires support for C++14. Minimum version for {self.settings.compiler} is {minimum_version}")
         if Version(self.version) < "0.4.7" and self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)])
