@@ -1,10 +1,10 @@
 sources:
   "1.0.6":
-    url: https://github.com/syoyo/tinyobjloader/archive/v1.0.6.zip
-    sha256: ba549b59eafcdcd3d6a0ce367c9655affbc8e6f85053ea793a7333fe276879a2
+    url: "https://github.com/tinyobjloader/tinyobjloader/archive/refs/tags/v1.0.6.tar.gz"
+    sha256: "19ee82cd201761954dd833de551edb570e33b320d6027e0d91455faf7cd4c341"
 patches:
   "1.0.6":
     - patch_file: "patches/0001-cmake-minimum-required.patch"
       patch_description: "CMake: move cmake_minimum_required() before project()"
-      patch_type: backport
+      patch_type: "backport"
       patch_source: "https://github.com/tinyobjloader/tinyobjloader/pull/347"
