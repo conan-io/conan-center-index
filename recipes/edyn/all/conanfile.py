@@ -30,12 +30,6 @@ class EdynConan(ConanFile):
         "floating_type": "float",
     }
 
-    def requirements(self):
-        if Version(self.version) < "1.2.0":
-            self.requires("entt/3.9.0")
-        else:
-            self.requires("entt/3.10.1")
-
     @property
     def _compiler_required(self):
         return {
@@ -48,9 +42,18 @@ class EdynConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        if Version(self.version) < "1.2.0":
+            self.requires("entt/3.9.0")
+        else:
+            self.requires("entt/3.10.1")
+
     def validate(self):
-        if self.options.shared and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "11" and self.settings.build_type == "Release" and self.settings.compiler.libcxx == "libstdc++11":
-            raise ConanInvalidConfiguration(f"{self.ref} does not build in C3i as shared with gcc-11 in release using libstdc++11. Please submit a PR to fix this https://github.com/conan-io/conan-center-index/pull/13562#issuecomment-1284854656")
+        if self.options.shared and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "11" and self.settings.build_type == "Release":
+            raise ConanInvalidConfiguration(f"{self.ref} does not build in C3i as shared with gcc-11 in release. Please submit a PR to fix this https://github.com/conan-io/conan-center-index/pull/13562#issuecomment-1284854656")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 17)
         check_min_vs(self, 192)
@@ -61,9 +64,6 @@ class EdynConan(ConanFile):
                     raise ConanInvalidConfiguration("This package requires C++17 support. The current compiler does not support it.")
             except KeyError:
                 self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
