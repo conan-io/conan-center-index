@@ -57,7 +57,8 @@ class TinyObjLoaderConan(ConanFile):
             tc.variables["TINYOBJLOADER_COMPILATION_SHARED"] = self.options.shared
         tc.variables["TINYOBJLOADER_BUILD_OBJ_STICHER"] = False
         tc.variables["CMAKE_INSTALL_DOCDIR"] = "licenses"
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        if Version(self.version).major < 2:
+            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
 
     def build(self):
