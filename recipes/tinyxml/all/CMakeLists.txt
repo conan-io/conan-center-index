@@ -14,7 +14,6 @@ set(TINYXML_SRCS
 
 add_library(tinyxml ${TINYXML_SRCS})
 target_include_directories(tinyxml PUBLIC ${TINYXML_SRC_DIR})
-set_target_properties(tinyxml PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 if(TINYXML_WITH_STL)
     target_compile_definitions(tinyxml PUBLIC TIXML_USE_STL)

@@ -1,9 +1,11 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, save
+from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.47.0"
 
 
 class TinyXmlConan(ConanFile):
@@ -41,6 +43,10 @@ class TinyXmlConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if is_msvc(self) and self.info.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} shared not supported by Visual Studio")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
