@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conans import AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
+from conans import AutoToolsBuildEnvironment
 from conan.tools.microsoft import is_msvc
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, chdir, rmdir, copy, rm
 from conan.tools.env import Environment
@@ -63,7 +63,7 @@ class LibdeflateConan(ConanFile):
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not is_msvc(self):
             if "CONAN_BASH_PATH" not in Environment().vars(self, scope="build").keys():
-                self.tools_requires("msys2/cci.latest")
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -72,7 +72,7 @@ class LibdeflateConan(ConanFile):
         with chdir(self, self._source_subfolder):
             msbuild = MSBuild(self)
             target = "libdeflate.dll" if self.options.shared else "libdeflatestatic.lib"
-            msbuild.build(project_file="Makefile.msc", target=target)
+            msbuild.build(project_file="Makefile.msc", targets=[target])
 
     def _build_make(self):
         autotools = AutoToolsBuildEnvironment(self, win_bash=(self._settings_build.os == "Windows"))
@@ -103,7 +103,10 @@ class LibdeflateConan(ConanFile):
         rm(self, "*.a" if self.options.shared else "*.[so|dylib]*", os.path.join(self.package_folder, "lib") )
 
     def package(self):
-        copy(self, "COPYING", src=self._source_subfolder, dst="licenses")
+        copy(self, "COPYING", 
+            src=os.path.join(self.source_folder, self._source_subfolder), 
+            dst=os.path.join(self.package_folder, "licenses"
+        ))
         if self.settings.os == "Windows":
             self._package_windows()
         else:
