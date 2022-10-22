@@ -451,15 +451,15 @@ class LibcurlConan(ConanFile):
         if not self.options.with_ntlm_wb:
             tc.configure_args.append("--disable-ntlm-wb")
 
-        if self.options.with_ca_bundle is False:
+        if self.options.with_ca_bundle:
+            tc.configure_args.append(f"--with-ca-bundle={str(self.options.with_ca_bundle)}")
+        else:
             tc.configure_args.append("--without-ca-bundle")
-        elif self.options.with_ca_bundle:
-            tc.configure_args.append("--with-ca-bundle=" + str(self.options.with_ca_bundle))
 
-        if self.options.with_ca_path is False:
-            tc.configure_args.append('--without-ca-path')
-        elif self.options.with_ca_path:
-            tc.configure_args.append("--with-ca-path=" + str(self.options.with_ca_path))
+        if self.options.with_ca_path:
+            tc.configure_args.append(f"--with-ca-path={str(self.options.with_ca_path)}")
+        else:
+            tc.configure_args.append("--without-ca-path")
 
         # Cross building flags
         if cross_building(self):
@@ -571,15 +571,15 @@ class LibcurlConan(ConanFile):
                 tc.variables["CURL_DISABLE_NTLM"] = True
         tc.variables["NTLM_WB_ENABLED"] = self.options.with_ntlm_wb
 
-        if self.options.with_ca_bundle is False:
-            tc.cache_variables["CURL_CA_BUNDLE"] = "none"
-        elif self.options.with_ca_bundle:
+        if self.options.with_ca_bundle:
             tc.cache_variables["CURL_CA_BUNDLE"] = str(self.options.with_ca_bundle)
+        else:
+            tc.cache_variables["CURL_CA_BUNDLE"] = "none"
 
-        if self.options.with_ca_path is False:
-            tc.cache_variables["CURL_CA_PATH"] = "none"
-        elif self.options.with_ca_path:
+        if self.options.with_ca_path:
             tc.cache_variables["CURL_CA_PATH"] = str(self.options.with_ca_path)
+        else:
+            tc.cache_variables["CURL_CA_PATH"] = "none"
 
         tc.generate()
 
