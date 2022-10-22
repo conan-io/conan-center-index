@@ -67,8 +67,8 @@ class LibcurlConan(ConanFile):
         "with_symbol_hiding": [True, False],
         "with_unix_sockets": [True, False],
         "with_verbose_strings": [True, False],
-        "with_ca_bundle": "ANY",
-        "with_ca_path": "ANY",
+        "with_ca_bundle": [None, "ANY"],
+        "with_ca_path": [None, "ANY"],
     }
     default_options = {
         "shared": False,
