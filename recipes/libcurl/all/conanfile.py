@@ -158,9 +158,18 @@ class LibcurlConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
         # These options are not used in CMake build yet
         if self._is_using_cmake_build:
