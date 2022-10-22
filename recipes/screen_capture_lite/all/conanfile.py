@@ -78,9 +78,10 @@ class ScreenCaptureLiteConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
         tc.variables["BUILD_EXAMPLE"] = False
-        tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0.18362.0"
+        if is_msvc(self):
+            # fix "error C2039: 'CheckForDuplicateEntries': is not a member of 'Microsoft::WRL::Details'"
+            tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0.18362.0"
         tc.generate()
 
         deps = CMakeDeps(self)

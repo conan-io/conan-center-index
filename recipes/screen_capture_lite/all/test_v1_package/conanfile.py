@@ -10,9 +10,6 @@ class TestPackageV1Conan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        # fix "error C2039: 'CheckForDuplicateEntries': is not a member of 'Microsoft::WRL::Details'"
-        if is_msvc(self):
-            cmake.definitions["CMAKE_SYSTEM_VERSION"] = "10.0.18362.0"
         cmake.configure()
         cmake.build()
 

@@ -1,14 +1,21 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index d646b23..fe28583 100644
+index d646b23..23742b8 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -1,4 +1,4 @@
+@@ -1,11 +1,10 @@
 -cmake_minimum_required(VERSION 3.20)
 +cmake_minimum_required(VERSION 3.12)
  project(screen_capture_lite_build)
  
  set(CMAKE_CXX_STANDARD 20)
-@@ -22,14 +22,21 @@ else()
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS OFF) 
+ option(BUILD_EXAMPLE "Build example" ON)
+-set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "Build shared libraries")
+ set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+ 
+@@ -22,13 +21,20 @@ else()
  endif()
  
  add_subdirectory(src_cpp) 
@@ -19,7 +26,6 @@ index d646b23..fe28583 100644
 -	ARCHIVE DESTINATION lib
 -	LIBRARY DESTINATION lib
 -)
-- 
 +if(BUILD_SHARED_LIBS)
 +  install (TARGETS screen_capture_lite_shared
 +    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -33,99 +39,14 @@ index d646b23..fe28583 100644
 +    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 +  )
 +endif()
-+
+  
  install (FILES 
  	include/ScreenCapture.h 
- 	DESTINATION include
 diff --git a/src_cpp/CMakeLists.txt b/src_cpp/CMakeLists.txt
-index bc59c0b..2b173d5 100644
+index bc59c0b..1c4a1b4 100644
 --- a/src_cpp/CMakeLists.txt
 +++ b/src_cpp/CMakeLists.txt
-@@ -1,28 +1,28 @@
- project(screen_capture_lite)
- 
- if(WIN32)
--    set(SCREEN_CAPTURE_PLATFORM_SRC     
-+    set(SCREEN_CAPTURE_PLATFORM_SRC
- 		windows/GetWindows.cpp
--		windows/GetMonitors.cpp 
--		windows/DXFrameProcessor.cpp 
-+		windows/GetMonitors.cpp
-+		windows/DXFrameProcessor.cpp
- 		../include/windows/DXFrameProcessor.h
--		windows/GDIFrameProcessor.cpp 
-+		windows/GDIFrameProcessor.cpp
- 		../include/windows/GDIFrameProcessor.h
- 		windows/GDIMouseProcessor.cpp
- 		../include/windows/GDIMouseProcessor.h
- 		windows/ThreadRunner.cpp
- 		../include/windows/GDIHelpers.h
-     )
--    set(SCREEN_CAPTURE_PLATFORM_INC     
--       ../include/windows 
-+    set(SCREEN_CAPTURE_PLATFORM_INC
-+       ../include/windows
-     )
- 	add_definitions(-DNOMINMAX)
- elseif(APPLE)
- 
-     set(SCREEN_CAPTURE_PLATFORM_SRC
--        ios/GetWindows.cpp 
-+        ios/GetWindows.cpp
-         ios/NSMouseCapture.m
--        ../include/ios/NSMouseCapture.h 
-+        ../include/ios/NSMouseCapture.h
-         ios/NSFrameProcessor.cpp
-         ios/NSFrameProcessor.mm
-         ../include/ios/NSFrameProcessorm.h
-@@ -35,13 +35,13 @@ elseif(APPLE)
-         ios/ThreadRunner.cpp
-     )
-     set(SCREEN_CAPTURE_PLATFORM_INC
--       ../include/ios 
-+       ../include/ios
-     )
- else()
--  set(SCREEN_CAPTURE_PLATFORM_SRC 
--       ../include/linux/X11MouseProcessor.h 
--       linux/X11MouseProcessor.cpp 
--       ../include/linux/X11FrameProcessor.h 
-+  set(SCREEN_CAPTURE_PLATFORM_SRC
-+       ../include/linux/X11MouseProcessor.h
-+       linux/X11MouseProcessor.cpp
-+       ../include/linux/X11FrameProcessor.h
-        linux/X11FrameProcessor.cpp
-        linux/GetMonitors.cpp
-        linux/GetWindows.cpp
-@@ -55,36 +55,37 @@ else()
-  		message(FATAL_ERROR "X11 fixes extension is required, but not found!")
- 	endif()
- 	set(SCREEN_CAPTURE_PLATFORM_INC
--       ../include/linux 
-+       ../include/linux
- 		${X11_INCLUDE_DIR}
-     )
- endif()
- 
- 
- include_directories(
--	../include 
-+	../include
- 	${SCREEN_CAPTURE_PLATFORM_INC}
- )
- 
--set(libsrc 
--	../include/ScreenCapture.h 
--		../include/internal/SCCommon.h 
--		../include/internal/ThreadManager.h 
--		ScreenCapture.cpp 
--		SCCommon.cpp 
-+set(libsrc
-+	../include/ScreenCapture.h
-+		../include/internal/SCCommon.h
-+		../include/internal/ThreadManager.h
-+		ScreenCapture.cpp
-+		SCCommon.cpp
+@@ -75,10 +75,12 @@ set(libsrc
  		ThreadManager.cpp
  		${SCREEN_CAPTURE_PLATFORM_SRC}
  )
@@ -134,34 +55,14 @@ index bc59c0b..2b173d5 100644
 +if(NOT BUILD_SHARED_LIBS)
  message("Building STATIC Library")
  add_library(${PROJECT_NAME}_static STATIC ${libsrc})
--
+ 
 +else()
    message("Building SHARED Library")
--  
-+
+   
      add_library(${PROJECT_NAME}_shared SHARED ${libsrc})
- 
- 	set_target_properties(${PROJECT_NAME}_shared PROPERTIES DEFINE_SYMBOL SC_LITE_DLL)
--	 if(WIN32) 
-+	 if(WIN32)
- 		target_link_libraries(${PROJECT_NAME}_shared Dwmapi)
- 		install (FILES $<TARGET_PDB_FILE:${PROJECT_NAME}_shared> DESTINATION bin OPTIONAL)
- 	elseif(APPLE)
-@@ -95,7 +96,7 @@ add_library(${PROJECT_NAME}_static STATIC ${libsrc})
-         find_library(avfoundation_lib AVFoundation REQUIRED)
-         find_library(coregraphics_lib CoreGraphics REQUIRED)
-         find_library(corevideo_lib CoreVideo REQUIRED)
--       
-+
-         target_link_libraries(
-            ${PROJECT_NAME}_shared
-             ${CMAKE_THREAD_LIBS_INIT}
-@@ -122,6 +123,6 @@ add_library(${PROJECT_NAME}_static STATIC ${libsrc})
- 			${X11_XTest_LIB}
- 			${X11_Xinerama_LIB}
+@@ -124,4 +126,4 @@ add_library(${PROJECT_NAME}_static STATIC ${libsrc})
  			${CMAKE_THREAD_LIBS_INIT}
--		)	 
-+		)
+ 		)	 
  	endif()
 -  
 \ No newline at end of file
