@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, get, export_conandata_patches, rmdir, save
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -52,7 +53,8 @@ class TinyObjLoaderConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["TINYOBJLOADER_USE_DOUBLE"] = self.options.double
         tc.variables["TINYOBJLOADER_BUILD_TEST_LOADER"] = False
-        tc.variables["TINYOBJLOADER_COMPILATION_SHARED"] = self.options.shared
+        if Version(self.version) < "1.0.7":
+            tc.variables["TINYOBJLOADER_COMPILATION_SHARED"] = self.options.shared
         tc.variables["TINYOBJLOADER_BUILD_OBJ_STICHER"] = False
         tc.variables["CMAKE_INSTALL_DOCDIR"] = "licenses"
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
@@ -95,7 +97,8 @@ class TinyObjLoaderConan(ConanFile):
     def package_info(self):
         suffix = "_double" if self.options.double else ""
         self.cpp_info.set_property("cmake_file_name", "tinyobjloader")
-        self.cpp_info.set_property("cmake_target_name", f"tinyobjloader{suffix}")
+        self.cpp_info.set_property("cmake_target_name", f"tinyobjloader::tinyobjloader{suffix}")
+        self.cpp_info.set_property("cmake_target_aliases", [f"tinyobjloader{suffix}"]) # old target (before 1.0.7)
         self.cpp_info.set_property("pkg_config_name", f"tinyobjloader{suffix}")
         self.cpp_info.libs = [f"tinyobjloader{suffix}"]
         if self.options.double:
