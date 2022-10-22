@@ -583,7 +583,8 @@ class LibcurlConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         else:
             autotools = Autotools(self)
-            autotools.install()
+            # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
+            autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
             fix_apple_shared_install_name(self)
             rmdir(self, os.path.join(self.package_folder, "share"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
