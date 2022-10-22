@@ -55,15 +55,6 @@ class SentryCrashpadConan(ConanFile):
         if self.settings.os not in ("Linux", "Android") or Version(self.version) < "0.4":
             del self.options.with_tls
 
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["CRASHPAD_ENABLE_INSTALL"] = True
-        tc.variables["CRASHPAD_ENABLE_INSTALL_DEV"] = True
-        tc.variables["CRASHPAD_ZLIB_SYSTEM"] = True
-        tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -92,6 +83,15 @@ class SentryCrashpadConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)])
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CRASHPAD_ENABLE_INSTALL"] = True
+        tc.variables["CRASHPAD_ENABLE_INSTALL_DEV"] = True
+        tc.variables["CRASHPAD_ZLIB_SYSTEM"] = True
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
