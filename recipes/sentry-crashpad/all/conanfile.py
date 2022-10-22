@@ -47,7 +47,6 @@ class SentryCrashpadConan(ConanFile):
         }
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             copy(self, patch["patch_file"], self.recipe_folder, self.export_sources_folder)
 
@@ -67,11 +66,11 @@ class SentryCrashpadConan(ConanFile):
         tc.generate()
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
         if self._is_mingw:
-            self.build_requires("jwasm/2.13")
+            self.tool_requires("jwasm/2.13")
 
     def requirements(self):
         self.requires("zlib/1.2.12")
@@ -79,7 +78,7 @@ class SentryCrashpadConan(ConanFile):
             self.requires("openssl/1.1.1n")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
+        if self.info.settings.compiler.get_safe("cppstd"):
             # Set as required in crashpad CMake file.
             # See https://github.com/getsentry/crashpad/blob/71bcaad4cf30294b8de1bfa02064ab629437163b/CMakeLists.txt#L67
             check_min_cppstd(self, 14)
