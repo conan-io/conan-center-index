@@ -223,27 +223,12 @@ class LibcurlConan(ConanFile):
         download(self, "https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True, sha256="2cff03f9efdaf52626bd1b451d700605dc1ea000c5da56bd0fc59f8f43071040")
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         if self._is_using_cmake_build:
             self._generate_with_cmake()
         else:
             self._generate_with_autotools()
-        ms = VirtualBuildEnv(self)
-        ms.generate()
-        if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
-
-    # TODO: remove imports once rpath of shared libs of libcurl dependencies fixed on macOS
-    def imports(self):
-        # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
-        #
-        # Configure script creates conftest that cannot execute without shared openssl binaries.
-        # Ways to solve the problem:
-        # 1. set *LD_LIBRARY_PATH (works with Linux with RunEnvironment
-        #     but does not work on OS X 10.11 with SIP)
-        # 2. copying dylib's to the build directory (fortunately works on OS X)
-        if self.settings.os == "Macos":
-            copy(self, "*.dylib*", src=self.build_folder, dst=self.source_folder, keep_path=False)
 
     def build(self):
         self._patch_sources()
@@ -365,6 +350,10 @@ class LibcurlConan(ConanFile):
         return "yes" if value else "no"
 
     def _generate_with_autotools(self):
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
             f"--with-libidn2={self._yes_no(self.options.with_libidn)}",
@@ -497,7 +486,6 @@ class LibcurlConan(ConanFile):
         tc.generate()
         tc = AutotoolsDeps(self)
         tc.generate()
-
 
     def _get_linux_arm_host(self):
         arch = None
