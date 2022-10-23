@@ -12,7 +12,7 @@ required_conan_version = ">=1.52.0"
 
 class PackageConan(ConanFile):
     name = "gmtl"
-    description = "Generic Math Template Library"
+    The Generic Math Template Library. A math library designed to be high-performance, extensible, and generic.
     # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
     # In case not listed there, use "LicenseRef-<license-file-name>"
     license = "LGPL"
@@ -55,8 +55,7 @@ class PackageConan(ConanFile):
 
     # not mandatory when there is no patch, but will suppress warning message about missing build() method
     def build(self):
-        # The attribute no_copy_source should not be used when applying patches in build
-        apply_conandata_patches(self)
+        pass
 
     # copy all files to the package folder
     def package(self):
