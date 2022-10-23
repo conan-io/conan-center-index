@@ -173,13 +173,13 @@ class LibmicrohttpdConan(ConanFile):
         copy(self, "COPYING", os.path.join(self.source_folder), os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
             # 32-bit (x86) libraries are stored in the root
-            copy(self, "*.lib", os.path.join(self.build_folder, self._msvc_sln_folder, "Output"), os.path.join(self.package_folder, "lib"))
-            copy(self, "*.dll", os.path.join(self.build_folder, self._msvc_sln_folder, "Output"), os.path.join(self.package_folder, "bin"))
-            copy(self, "*.h", os.path.join(self.build_folder, self._msvc_sln_folder, "Output"), os.path.join(self.package_folder, "include"))
-            # 64-bit (x64) libraries are stored in a subfolder
-            copy(self, "*.lib", os.path.join(self.build_folder, self._msvc_sln_folder, "Output", self._msvc_platform), os.path.join(self.package_folder, "lib"))
-            copy(self, "*.dll", os.path.join(self.build_folder, self._msvc_sln_folder, "Output", self._msvc_platform), os.path.join(self.package_folder, "bin"))
-            copy(self, "*.h", os.path.join(self.build_folder, self._msvc_sln_folder, "Output", self._msvc_platform), os.path.join(self.package_folder, "include"))
+            output_dir = os.path.join(self.build_folder, self._msvc_sln_folder, "Output")
+            if self.settings.arch in ("x86_64", ):
+                # 64-bit (x64) libraries are stored in a subfolder
+                output_dir = os.path.join(output_dir, self._msvc_platform)
+            copy(self, "*.lib", output_dir, os.path.join(self.package_folder, "lib"))
+            copy(self, "*.dll", output_dir, os.path.join(self.package_folder, "bin"))
+            copy(self, "*.h", output_dir, os.path.join(self.package_folder, "include"))
         else:
             autotools = Autotools(self)
             autotools.install()
