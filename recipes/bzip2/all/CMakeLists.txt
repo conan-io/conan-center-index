@@ -3,8 +3,7 @@ project(bzip2 LANGUAGES C)
 
 include(GNUInstallDirs)
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-option(BZ2_BUILD_EXE ON)
+option(BZ2_BUILD_EXE "Build bzip2 command-line utility" ON)
 
 add_library(
     bz2
@@ -24,6 +23,7 @@ set_target_properties(
     PUBLIC_HEADER "${BZ2_SRC_DIR}/bzlib.h"
     SOVERSION ${BZ2_VERSION_MAJOR}
     VERSION ${BZ2_VERSION_STRING}
+    WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 install(TARGETS bz2)
 
