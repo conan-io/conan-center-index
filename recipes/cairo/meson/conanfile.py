@@ -95,7 +95,7 @@ class CairoConan(ConanFile):
     def requirements(self):
         self.requires("pixman/0.40.0")
         if self.options.with_zlib and self.options.with_png:
-            self.requires("expat/2.4.8")
+            self.requires("expat/2.4.9")
         if self.options.with_lzo:
             self.requires("lzo/2.10")
         if self.options.with_zlib:
@@ -105,7 +105,7 @@ class CairoConan(ConanFile):
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.93")
         if self.options.with_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.38")
         if self.options.with_glib:
             self.requires("glib/2.73.3")
         if self.settings.os == "Linux":
@@ -121,8 +121,8 @@ class CairoConan(ConanFile):
             self.requires("egl/system")
 
     def build_requirements(self):
-        self.tool_requires("meson/0.63.1")
-        self.tool_requires("pkgconf/1.7.4")
+        self.tool_requires("meson/0.63.3")
+        self.tool_requires("pkgconf/1.9.3")
 
     def validate(self):
         if self.options.get_safe("with_xlib_xrender") and not self.options.get_safe("with_xlib"):
