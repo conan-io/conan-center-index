@@ -3,19 +3,20 @@ import glob
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.gnu import PkgConfigDeps
-from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.files import (
     copy,
     get,
-rename,
+    rename,
     rm,
     replace_in_file,
     rmdir
 )
+from conan.tools.layout import basic_layout
+from conan.tools.meson import MesonToolchain, Meson
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
 
@@ -135,7 +136,6 @@ class PangoConan(ConanFile):
         self.requires("harfbuzz/5.3.0")
         self.requires("glib/2.74.0")
         self.requires("fribidi/1.0.12")
-        #self.requires("libong/1.6.38") # override
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -152,15 +152,18 @@ class PangoConan(ConanFile):
         meson.build()
 
     def package(self):
-        meson = Meson(self)
-        meson.install()
-        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        if is_msvc(self):
+        def rename_msvc_libs():
             lib_folder = os.path.join(self.package_folder, "lib")
             for filename_old in glob.glob(os.path.join(lib_folder, "*.a")):
                 filename_new = filename_old[3:-2] + ".lib"
                 self.output.info(f"rename {filename_old} into {filename_new}")
                 rename(self, filename_old, filename_new)
+
+        meson = Meson(self)
+        meson.install()
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        if is_msvc(self):
+            rename_msvc_libs()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", self.package_folder)

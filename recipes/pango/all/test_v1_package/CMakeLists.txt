@@ -3,5 +3,8 @@ project(test_package)
 
 find_package(pango CONFIG REQUIRED)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+
+add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE pango::pango)
