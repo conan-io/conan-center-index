@@ -2,11 +2,12 @@ diff --git a/a/tscns.h b/b/tscns.h
 index e66153d..939c923 100644
 --- a/a/tscns.h
 +++ b/b/tscns.h
-@@ -25,6 +25,7 @@ SOFTWARE.
+@@ -25,6 +25,8 @@ SOFTWARE.
  #pragma once
  #include <chrono>
  #include <atomic>
 +#include <thread>
- 
++#include <cstdint>
+
  #ifdef _MSC_VER
  #include <intrin.h>
