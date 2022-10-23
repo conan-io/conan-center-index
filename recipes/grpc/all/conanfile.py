@@ -9,7 +9,7 @@ from conans import CMake
 import os
 import shutil
 
-required_conan_version = ">=1.49.0"
+required_conan_version = ">=1.52.0"
 
 
 class grpcConan(ConanFile):
