@@ -11,6 +11,13 @@ int main(int argc, char **argv)
         return 1;
     }
 
+#ifdef TINYOBJLOADER_GE_2
+    tinyobj::ObjReaderConfig config;
+    config.mtl_search_path = argv[2];
+
+    tinyobj::ObjReader reader;
+    reader.ParseFromFile(argv[1], config);
+#else
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
@@ -39,6 +46,7 @@ int main(int argc, char **argv)
         std::cerr << "Failed to load/parse .obj" << std::endl;
         return 1;
     }
+#endif
 
     return 0;
 }
