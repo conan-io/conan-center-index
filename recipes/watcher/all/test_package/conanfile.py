@@ -25,9 +25,8 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            env_vars = Environment().vars(self, scope="conanrun")
             try:
                 # Because watcher API never returns, we have to set timeout
-                subprocess.run([bin_path], timeout=3, env=env_vars)
+                subprocess.run([bin_path], timeout=3)
             except subprocess.TimeoutExpired:
                 pass
