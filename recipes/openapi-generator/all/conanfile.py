@@ -15,12 +15,13 @@ class OpenApiGeneratorConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://openapi-generator.tech"
     topics = ("api", "sdk", "generator", "openapi")
-    settings = "os", "compiler", "build_type"
+    settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):
         pass
 
     def package_id(self):
+        del self.info.settings.arch
         del self.info.settings.compiler
         del self.info.settings.build_type
 
