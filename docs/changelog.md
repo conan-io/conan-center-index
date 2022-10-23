@@ -1,5 +1,17 @@
 # Changelog
 
+### 17-October-2022 - 10:33 CEST
+
+- [feature] Improve management of GitHub labels on pull requests.
+- [feature] New EpochsSummary job to show epoch status for each reference.
+- [feature] Save bot comments as labels as job artifacts for easier user feedback.
+- [feature] Ability to wait for a job and merge bot messages from another pipeline: Allows to provide feedback to users in PRs from the Conan v2 pipeline in the future.
+- [feature] Add timeout to AutomaticMerge job.
+- [feature] Add note about Windows SDK on supported platforms documentation.
+- [fix] Fix getting package IDs from Artifactory in the Conan v2 pipeline.
+- [fix] Bump dependencies pull requests should only consider modified comments.
+- [fix] ValidateInfrastructure job parameter for macos executors.
+
 ### 20-September-2022 - 14:27 CEST
 
 - [feature] Handle scenarios where some files are removed.

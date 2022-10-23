@@ -75,7 +75,7 @@ index b412dc7..a5284ed 100644
  endif()
  
 -if(UNIX)
-+if(MSVC)
++if(WIN32 AND NOT MINGW)
 +    if(BUILD_SHARED_LIBS)
 +        set_target_properties(zlib PROPERTIES ARCHIVE_OUTPUT_NAME zdll)
 +    endif()

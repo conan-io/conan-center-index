@@ -1,4 +1,7 @@
 sources:
+  "0.1.49":
+    url: "https://github.com/awslabs/aws-c-s3/archive/v0.1.49.tar.gz"
+    sha256: "71acbba41a02477a6c352172da561bc2138bf239b936490c773d7aaa83afc9ab"
   "0.1.37":
     url: "https://github.com/awslabs/aws-c-s3/archive/v0.1.37.tar.gz"
     sha256: "2c35100c1739300e438d47f49aaa2c374001416a79fe3c6f27d79371fb2ac90b"
