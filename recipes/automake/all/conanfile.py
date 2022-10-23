@@ -2,13 +2,13 @@ from os import path
 
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52"
 
 
 class AutomakeConan(ConanFile):
@@ -26,8 +26,7 @@ class AutomakeConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def configure(self):
         self.win_bash = self._settings_build.os == "Windows"
