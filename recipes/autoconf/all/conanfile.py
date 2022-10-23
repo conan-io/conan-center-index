@@ -32,7 +32,7 @@ class AutoconfConan(ConanFile):
         self.win_bash = self._settings_build.os == "Windows"
 
     def layout(self):
-        basic_layout(self, src_folder="autoconf")
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("m4/1.4.19")
