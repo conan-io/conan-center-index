@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.tools.files import copy, download, save
-from conan.tools.scm import Version
 import os
 import stat
 
@@ -72,5 +71,3 @@ class OpenApiGeneratorConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
-
-        bin_folder = os.path.join(self.package_folder, "bin")
