@@ -40,7 +40,7 @@ class AutomakeConan(ConanFile):
             pass
 
     def layout(self):
-        basic_layout(self, src_folder="automake")
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("autoconf/2.71")
