@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.scm import Version
 from conan.tools.files import get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
@@ -47,7 +48,10 @@ class AwsCHttp(ConanFile):
     def requirements(self):
         self.requires("aws-c-common/0.8.2")
         self.requires("aws-c-compression/0.2.15")
-        self.requires("aws-c-io/0.13.4")
+        if Version(self.version) < "0.6.22":
+            self.requires("aws-c-io/0.10.20")
+        else:
+            self.requires("aws-c-io/0.13.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

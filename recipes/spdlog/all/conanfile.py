@@ -1,18 +1,13 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get, copy, rmdir, replace_in_file
-from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc_static_runtime
-from conan.tools.build import check_min_cppstd
-from conan.errors import ConanInvalidConfiguration
-
-# TODO: Need to be ported for Conan 2.0
-from conans import __version__ as conan_version
-
+from conan.tools.scm import Version
 import os
 
-
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class SpdlogConan(ConanFile):
@@ -45,46 +40,45 @@ class SpdlogConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
+        if self.options.shared or self.options.header_only:
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         if self.options.header_only:
             del self.options.shared
-            del self.options.fPIC
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # TODO: Remove in Conan 2.0 - 1.x self.requires does not support transitive_headers
-        requires = lambda ref: self.requires(ref, transitive_headers=True) if Version(conan_version) >= "2.0.0-beta" else self.requires(ref)
         if Version(self.version) >= "1.10.0":
-            requires("fmt/8.1.1")
+            self.requires("fmt/8.1.1", transitive_headers=True)
         elif Version(self.version) >= "1.9.0":
-            requires("fmt/8.0.1")
+            self.requires("fmt/8.0.1", transitive_headers=True)
         elif Version(self.version) >= "1.7.0":
-            requires("fmt/7.1.3")
+            self.requires("fmt/7.1.3", transitive_headers=True)
         elif Version(self.version) >= "1.5.0":
-            requires("fmt/6.2.1")
+            self.requires("fmt/6.2.1", transitive_headers=True)
         else:
-            requires("fmt/6.0.0")
+            self.requires("fmt/6.0.0", transitive_headers=True)
 
     def package_id(self):
         if self.info.options.header_only:
             self.info.clear()
 
-    def validate(self):
+    @property
+    def _info(self):
         # FIXME: Conan 1.x is not able to parse self.info.xxx as Conan 2.x when is header-only
-        if Version(conan_version) >= "2.0.0-beta":
-            if self.info.settings.compiler.cppstd:
-                check_min_cppstd(self, 11)
-            if self.info.settings.os != "Windows" and (self.info.options.wchar_support or self.info.options.wchar_filenames):
-                raise ConanInvalidConfiguration("wchar is only supported under windows")
-            if not self.info.options.header_only and self.info.options.shared and is_msvc_static_runtime(self):
-                raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
-        else:
-            if self.settings.compiler.cppstd:
-                check_min_cppstd(self, 11)
-            if self.settings.os != "Windows" and (self.options.wchar_support or self.options.wchar_filenames):
-                raise ConanInvalidConfiguration("wchar is only supported under windows")
-            if self.options.get_safe("shared") and is_msvc_static_runtime(self):
-                raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
+        return self if Version(conan_version).major < 2 else self.info
+
+    def validate(self):
+        if self._info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
+        if self._info.settings.os != "Windows" and (self._info.options.wchar_support or self._info.options.wchar_filenames):
+            raise ConanInvalidConfiguration("wchar is only supported under windows")
+        if self._info.options.get_safe("shared") and is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
@@ -112,9 +106,6 @@ class SpdlogConan(ConanFile):
         cmake_deps = CMakeDeps(self)
         cmake_deps.generate()
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def _disable_werror(self):
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "utils.cmake"), "/WX", "")
 
@@ -137,21 +128,13 @@ class SpdlogConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "lib", "spdlog", "cmake"))
 
     def package_info(self):
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "spdlog"
-        self.cpp_info.names["cmake_find_package_multi"] = "spdlog"
-
         target = "spdlog_header_only" if self.options.header_only else "spdlog"
         self.cpp_info.set_property("cmake_file_name", "spdlog")
         self.cpp_info.set_property("cmake_target_name", f"spdlog::{target}")
         self.cpp_info.set_property("pkg_config_name", "spdlog")
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["libspdlog"].names["cmake_find_package"] = target
-        self.cpp_info.components["libspdlog"].names["cmake_find_package_multi"] = target
-
+        # TODO: back to global scope in conan v2 once legacy generators removed
         self.cpp_info.components["libspdlog"].set_property("cmake_target_name", f"spdlog::{target}")
-
         self.cpp_info.components["libspdlog"].defines.append("SPDLOG_FMT_EXTERNAL")
         self.cpp_info.components["libspdlog"].requires = ["fmt::fmt"]
 
@@ -169,3 +152,9 @@ class SpdlogConan(ConanFile):
             self.cpp_info.components["libspdlog"].system_libs = ["pthread"]
         if self.options.header_only and self.settings.os in ("iOS", "tvOS", "watchOS"):
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_NO_TLS")
+
+        if Version(conan_version).major < 2:
+            self.cpp_info.names["cmake_find_package"] = "spdlog"
+            self.cpp_info.names["cmake_find_package_multi"] = "spdlog"
+            self.cpp_info.components["libspdlog"].names["cmake_find_package"] = target
+            self.cpp_info.components["libspdlog"].names["cmake_find_package_multi"] = target

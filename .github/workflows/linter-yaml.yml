@@ -26,11 +26,11 @@ jobs:
           files: |
             linter/**
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         if: steps.changed_files.outputs.any_changed == 'true'
         with:
           python-version: ${{ env.PYVER }}
-      
+
       - name: Install dependencies
         if: steps.changed_files.outputs.any_changed == 'true'
         run: pip install yamllint
@@ -53,10 +53,10 @@ jobs:
         with:
           fetch-depth: 2
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYVER }}
-      
+
       - name: Install dependencies
         run: pip install yamllint
 
@@ -68,7 +68,7 @@ jobs:
         with:
           files: |
             ${{ env.CONFIG_FILES_PATH }}
-      
+
       - name: Run linter (config.yml)
         if: steps.changed_files_config.outputs.any_changed == 'true' && always()
         run: |
@@ -84,7 +84,7 @@ jobs:
         with:
           files: |
             ${{ env.CONANDATA_FILES_PATH }}
-      
+
       - name: Run linter (conandata.yml)
         if: steps.changed_files_conandata.outputs.any_changed == 'true' && always()
         run: |

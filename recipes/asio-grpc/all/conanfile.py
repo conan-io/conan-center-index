@@ -61,7 +61,7 @@ class AsioGrpcConan(ConanFile):
     def requirements(self):
         self.requires("grpc/1.48.0")
         if self.options.use_boost_container or self.options.backend == "boost":
-            self.requires("boost/1.79.0")
+            self.requires("boost/1.80.0")
         if self.options.backend == "asio":
             self.requires("asio/1.24.0")
         if self.options.backend == "unifex":
