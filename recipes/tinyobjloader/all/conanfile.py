@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, get, export_conandata_patches, rmdir, save
+from conan.tools.files import apply_conandata_patches, get, export_conandata_patches, load, replace_in_file, rmdir, save
 from conan.tools.scm import Version
 import os
 import textwrap
@@ -72,6 +72,7 @@ class TinyObjLoaderConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "tinyobjloader"))
+        self._remove_implementation(os.path.join(self.package_folder, "include", "tiny_obj_loader.h"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         cmake_target = "tinyobjloader_double" if self.options.double else "tinyobjloader"
@@ -79,6 +80,12 @@ class TinyObjLoaderConan(ConanFile):
             os.path.join(self.package_folder, self._module_file_rel_path),
             {cmake_target: "tinyobjloader::tinyobjloader"}
         )
+
+    def _remove_implementation(self, header_fullpath):
+        header_content = load(self, header_fullpath)
+        begin = header_content.find("#ifdef TINYOBJLOADER_IMPLEMENTATION")
+        implementation = header_content[begin:-1]
+        replace_in_file(self, header_fullpath, implementation, "")
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
