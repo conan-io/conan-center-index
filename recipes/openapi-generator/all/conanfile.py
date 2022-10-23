@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import copy, download, save
 from conan.tools.scm import Version
 import os
+import stat
 
 
 required_conan_version = ">=1.47.0"
@@ -42,7 +43,6 @@ class OpenApiGeneratorConan(ConanFile):
                 )
 
     def package(self):
-        # a license file is always mandatory
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, pattern="openapi-generator.jar", dst=os.path.join(self.package_folder, "res"), src=self.source_folder)
         jar = os.path.join(self.package_folder, "res", "openapi-generator.jar")
@@ -54,13 +54,16 @@ class OpenApiGeneratorConan(ConanFile):
                          """
                  )
         else:
+            bin_path = os.path.join(self.package_folder, "bin", "openapi-generator")
             save(self,
-                 path=os.path.join(self.package_folder, "bin", "openapi-generator"),
+                 path=bin_path,
                  content=f"""\
                          #!/bin/bash
                          java -jar {jar} $@
                          """
                  )
+            st = os.stat(bin_path)
+            os.chmod(bin_path, st.st_mode | stat.S_IEXEC)
 
     def package_info(self):
         # folders not used for pre-built binaries
