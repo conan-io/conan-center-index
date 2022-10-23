@@ -12,11 +12,7 @@ sources:
 patches:
   "2.72.1":
     - patch_file: "patches/enable_static_libs_2_72_1.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix_initialization_order_fiasco_2_72_1.patch"
-      base_path: "source_subfolder"
   "2.66.4":
     - patch_file: "patches/enable_static_libs_2_66_4.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix_initialization_order_fiasco_2_66_4.patch"
-      base_path: "source_subfolder"

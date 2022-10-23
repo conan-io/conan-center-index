@@ -34,9 +34,6 @@ class GlibmmConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-
-    generators = "pkg_config"
-    exports_sources = "patches/**"
     short_paths = True
 
     @property
@@ -100,7 +97,7 @@ class GlibmmConan(ConanFile):
             "build-examples": "false",
             "build-documentation": "false",
             "msvc14x-parallel-installable": "false",
-            "default_library": "shared" if self.options.shared else "static",
+            "default_library": "shared" if self.options.shared else "static"
         })
         tc.generate()
 
