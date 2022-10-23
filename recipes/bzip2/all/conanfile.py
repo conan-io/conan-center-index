@@ -1,10 +1,11 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, save
+from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.52.0"
 
 
 class Bzip2Conan(ConanFile):
@@ -29,25 +30,27 @@ class Bzip2Conan(ConanFile):
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        self.license = "bzip2-{}".format(self.version)
+        self.license = f"bzip2-{self.version}"
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         try:
-           del self.settings.compiler.libcxx
+            del self.settings.compiler.libcxx
         except Exception:
-           pass
+            pass
         try:
-           del self.settings.compiler.cppstd
+            del self.settings.compiler.cppstd
         except Exception:
-           pass
+            pass
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -58,8 +61,9 @@ class Bzip2Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["BZ2_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.variables["BZ2_VERSION_STRING"] = self.version
-        tc.variables["BZ2_VERSION_MAJOR"] = str(self.version).split(".")[0]
+        tc.variables["BZ2_VERSION_MAJOR"] = Version(self.version).major
         tc.variables["BZ2_BUILD_EXE"] = self.options.build_executable
         tc.generate()
 
@@ -98,7 +102,7 @@ class Bzip2Conan(ConanFile):
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
@@ -107,11 +111,9 @@ class Bzip2Conan(ConanFile):
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.libs = ["bz2"]
 
-        self.cpp_info.names["cmake_find_package"] = "BZip2"
-        self.cpp_info.names["cmake_find_package_multi"] = "BZip2"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-
-        if self.options.build_executable:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
+        if Version(conan_version).major < 2:
+            self.cpp_info.names["cmake_find_package"] = "BZip2"
+            self.cpp_info.names["cmake_find_package_multi"] = "BZip2"
+            self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+            if self.options.build_executable:
+                self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
