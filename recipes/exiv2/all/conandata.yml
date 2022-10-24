@@ -9,7 +9,13 @@ patches:
   "0.27.5":
     - patch_file: "patches/0001-link-0.27.5.patch"
     - patch_file: "patches/0003-fix-ios.patch"
+    - patch_file: "patches/0004-find-expat.patch"
+      patch_description: "enforce usage of FindEXPAT.cmake"
+      patch_type: "conan"
   "0.27.4":
     - patch_file: "patches/0001-link.patch"
     - patch_file: "patches/0002-fpic.patch"
     - patch_file: "patches/0003-fix-ios.patch"
+    - patch_file: "patches/0004-find-expat.patch"
+      patch_description: "enforce usage of FindEXPAT.cmake"
+      patch_type: "conan"
