@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index a5425aa..943e470 100644
+index 40c352d..2426b4b 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -7,22 +7,13 @@ project(
+@@ -9,22 +9,13 @@ project(
    LANGUAGES C CXX ASM_MASM
    VERSION ${VERSION})
  
@@ -26,12 +26,12 @@ index a5425aa..943e470 100644
    include(GNUInstallDirs)
    set(prefix "${CMAKE_INSTALL_PREFIX}")
    set(exec_prefix "\${prefix}")
-@@ -32,7 +23,7 @@ if(UNIX)
+@@ -34,7 +25,7 @@ if(UNIX)
    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/libcpuid.pc.in" "${CMAKE_CURRENT_BINARY_DIR}/libcpuid.pc" ESCAPE_QUOTES
                   @ONLY)
    install(FILES "${PROJECT_BINARY_DIR}/libcpuid.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 -endif(UNIX)
-+endif(1)
++endif()
  
  # Include subdirectories
  add_subdirectory(libcpuid)
