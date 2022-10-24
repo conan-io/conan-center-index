@@ -8,7 +8,6 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgCon
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
-from conans.tools import apple_deployment_target_flag, XCRun
 import os
 import glob
 import re
@@ -342,15 +341,14 @@ class FFMpegConan(ConanFile):
     def _target_os(self):
         if is_msvc(self):
             return "win32"
-        else:
-            _, _, target_os = get_gnu_triplet._get_gnu_triplet(
-                "Macos" if is_apple_os(self) else str(self.settings.os),
-                str(self.settings.arch),
-                str(self.settings.compiler) if self.settings.os == "Windows" else None,
-            ).split("-")
-            if target_os == "gnueabihf":
-                target_os = "gnu" # could also be "linux"
-            return target_os
+        _, _, target_os = get_gnu_triplet._get_gnu_triplet(
+            "Macos" if is_apple_os(self) else str(self.settings.os),
+            str(self.settings.arch),
+            str(self.settings.compiler) if self.settings.os == "Windows" else None,
+        ).split("-")
+        if target_os == "gnueabihf":
+            target_os = "gnu" # could also be "linux"
+        return target_os
 
     def _patch_sources(self):
         if is_msvc(self) and self.options.with_libx264 and not self.options["libx264"].shared:
@@ -536,13 +534,6 @@ class FFMpegConan(ConanFile):
         cxx = os.getenv("CXX")
         if cxx:
             args.append(f"--cxx={cxx}")
-        extra_cflags = []
-        extra_ldflags = []
-        if is_apple_os(self) and self.settings.os.version:
-            extra_cflags.append(apple_deployment_target_flag(
-                self.settings.os, self.settings.os.version))
-            extra_ldflags.append(apple_deployment_target_flag(
-                self.settings.os, self.settings.os.version))
         if is_msvc(self):
             pkg_config = os.getenv("PKG_CONFIG")
             args.append(f"--pkg-config={pkg_config}")
@@ -559,18 +550,7 @@ class FFMpegConan(ConanFile):
             if is_apple_os(self):
                 if self.options.with_audiotoolbox:
                     args.append("--disable-outdev=audiotoolbox")
-
-                xcrun = XCRun(self.settings)
-                apple_arch = to_apple_arch(self)
-                extra_cflags.extend(
-                    [f"-arch {apple_arch}", f"-isysroot {xcrun.sdk_path}"])
-                extra_ldflags.extend(
-                    [f"-arch {apple_arch}", f"-isysroot {xcrun.sdk_path}"])
-
-        extra_cflags_string = " ".join(extra_cflags)
-        args.append(f"--extra-cflags={extra_cflags_string}")
-        extra_ldflags_string = " ".join(extra_ldflags)
-        args.append(f"--extra-ldflags={extra_ldflags_string}")
+                tc.apple_arch_flag = to_apple_arch(self)
 
         # FIXME: This is a hack that feels wrong but I don't know how to fix properly. Is this an AutotoolsTolchain
         #  problem
