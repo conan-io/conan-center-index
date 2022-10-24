@@ -148,7 +148,7 @@ class LibmicrohttpdConan(ConanFile):
         return os.path.join("w32", subdir)
 
     @property
-    def _msvc_arch(self):
+    def _msvc_platform(self):
         return {
             "x86": "Win32",
             "x86_64": "x64",
@@ -162,6 +162,7 @@ class LibmicrohttpdConan(ConanFile):
         if is_msvc(self):
             msbuild = MSBuild(self)
             msbuild.build_type = self._msvc_configuration
+            msbuild.platform = self._msvc_platform
             msbuild.build(sln=os.path.join(self._msvc_sln_folder, "libmicrohttpd.sln"), targets=["libmicrohttpd"])
         else:
             autotools = Autotools(self)
@@ -171,9 +172,14 @@ class LibmicrohttpdConan(ConanFile):
     def package(self):
         copy(self, "COPYING", os.path.join(self.source_folder), os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
-            copy(self, "*.lib", os.path.join(self.build_folder, self._msvc_sln_folder, "Output", self._msvc_arch), os.path.join(self.package_folder, "lib"))
-            copy(self, "*.dll", os.path.join(self.build_folder, self._msvc_sln_folder, "Output", self._msvc_arch), os.path.join(self.package_folder, "bin"))
-            copy(self, "*.h", os.path.join(self.build_folder, self._msvc_sln_folder, "Output", self._msvc_arch), os.path.join(self.package_folder, "include"))
+            # 32-bit (x86) libraries are stored in the root
+            output_dir = os.path.join(self.build_folder, self._msvc_sln_folder, "Output")
+            if self.settings.arch in ("x86_64", ):
+                # 64-bit (x64) libraries are stored in a subfolder
+                output_dir = os.path.join(output_dir, self._msvc_platform)
+            copy(self, "*.lib", output_dir, os.path.join(self.package_folder, "lib"))
+            copy(self, "*.dll", output_dir, os.path.join(self.package_folder, "bin"))
+            copy(self, "*.h", output_dir, os.path.join(self.package_folder, "include"))
         else:
             autotools = Autotools(self)
             autotools.install()

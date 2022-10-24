@@ -110,7 +110,7 @@ class PackageConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        # inject tools_requires env vars in build scope (not needed if there is no tool_requires)
+        # inject tool_requires env vars in build scope (not needed if there is no tool_requires)
         env = VirtualBuildEnv(self)
         env.generate()
         # inject requires env vars in build scope

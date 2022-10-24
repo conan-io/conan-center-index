@@ -22,7 +22,6 @@ class WaylandConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://wayland.freedesktop.org"
     license = "MIT"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -61,11 +60,12 @@ class WaylandConan(ConanFile):
 
     def validate(self):
         if self.info.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Wayland can be built on Linux only")
+            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
 
     def build_requirements(self):
         self.tool_requires("meson/0.63.3")
-        self.tool_requires("pkgconf/1.9.3")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
         if cross_building(self):
             self.tool_requires(self.ref)
 
