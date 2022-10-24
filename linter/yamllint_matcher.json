@@ -1,7 +1,7 @@
 {
     "problemMatcher": [
         {
-            "owner": "yamllint",
+            "owner": "yamllint_matcher",
             "pattern": [
                 {
                     "regexp": "^(.*\\.ya?ml)$",

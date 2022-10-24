@@ -38,9 +38,9 @@ jobs:
       - name: Run linter (config.yml) test
         if: steps.changed_files.outputs.any_changed == 'true' && always()
         run: |
-          echo "::add-matcher::linter/yaml_linter.json"
+          echo "::add-matcher::linter/yamllint_matcher.json"
           yamllint --config-file linter/yamllint_rules.yml -f standard ${{ env.CONFIG_FILES_PATH }}
-          echo "::remove-matcher owner=yaml_linter_errors::"
+          echo "::remove-matcher owner=yamllint_matcher::"
 
       - name: Run schema check (config.yml)
         if: steps.changed_files.outputs.any_changed == 'true' && always()
@@ -52,9 +52,9 @@ jobs:
       - name: Run linter (conandata.yml)
         if: steps.changed_files.outputs.any_changed == 'true' && always()
         run: |
-          echo "::add-matcher::linter/yaml_linter.json"
+          echo "::add-matcher::linter/yamllint_matcher.json"
           yamllint --config-file linter/yamllint_rules.yml -f standard ${{ env.CONANDATA_FILES_PATH }}
-          echo "::remove-matcher owner=yaml_linter_errors::"
+          echo "::remove-matcher owner=yamllint_matcher::"
 
       - name: Run schema check (conandata.yml)
         if: steps.changed_files.outputs.any_changed == 'true' && always()
@@ -91,11 +91,11 @@ jobs:
       - name: Run linter (config.yml)
         if: steps.changed_files_config.outputs.any_changed == 'true' && always()
         run: |
-          echo "::add-matcher::linter/yaml_linter.json"
+          echo "::add-matcher::linter/yamllint_matcher.json"
           for file in ${{ steps.changed_files_config.outputs.all_changed_files }}; do
             yamllint --config-file linter/yamllint_rules.yml -f standard ${file}
           done
-          echo "::remove-matcher owner=yaml_linter_errors::"
+          echo "::remove-matcher owner=yamllint_matcher::"
 
           for file in ${{ steps.changed_files_conandata.outputs.all_changed_files }}; do
             python3 linter/config_yaml_linter.py ${file}
@@ -113,11 +113,11 @@ jobs:
       - name: Run linter (conandata.yml)
         if: steps.changed_files_conandata.outputs.any_changed == 'true' && always()
         run: |
-          echo "::add-matcher::linter/yaml_linter.json"
+          echo "::add-matcher::linter/yamllint_matcher.json"
           for file in ${{ steps.changed_files_conandata.outputs.all_changed_files }}; do
             yamllint --config-file linter/yamllint_rules.yml -f standard ${file}
           done
-          echo "::remove-matcher owner=yaml_linter_errors::"
+          echo "::remove-matcher owner=yamllint_matcher::"
 
           for file in ${{ steps.changed_files_conandata.outputs.all_changed_files }}; do
             python3 linter/conandata_yaml_linter.py ${file}
