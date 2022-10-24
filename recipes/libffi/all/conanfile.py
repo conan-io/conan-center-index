@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, unix_path
 from conan.tools.scm import Version
 import glob
 import os
@@ -13,7 +13,7 @@ import shutil
 required_conan_version = ">=1.52.0"
 
 
-class PackageConan(ConanFile):
+class LibffiConan(ConanFile):
     name = "libffi"
     description = "A portable, high level programming interface to various calling conventions"
     license = "MIT"
@@ -110,7 +110,7 @@ class PackageConan(ConanFile):
                 (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
                 tc.extra_cflags.append("-FS")
 
-            if "MT" in msvc_runtime_flag(self):
+            if is_msvc_static_runtime(self):
                 tc.extra_defines.append("USE_STATIC_RTL")
             if "d" in msvc_runtime_flag(self):
                 tc.extra_defines.append("USE_DEBUG_RTL")
@@ -122,7 +122,7 @@ class PackageConan(ConanFile):
                 elif self.settings.arch == "x86":
                     architecture_flag = "-m32"
             elif self.settings.compiler == "clang":
-                    architecture_flag = "-clang-cl"
+                architecture_flag = "-clang-cl"
 
             compile_wrapper = unix_path(self, os.path.join(self.source_folder, "msvcc.sh"))
             if architecture_flag:
