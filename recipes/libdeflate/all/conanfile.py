@@ -1,9 +1,9 @@
 from conan import ConanFile
-from conans import AutoToolsBuildEnvironment
 from conan.tools.microsoft import is_msvc
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, chdir, rmdir, copy, rm
 from conan.tools.env import Environment
-from conans import MSBuild, AutoToolsBuildEnvironment
+from conans import MSBuild, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
+from conans.tools import vcvars, environment_append
 import os
 
 required_conan_version = ">=1.33.0"
@@ -70,9 +70,9 @@ class LibdeflateConan(ConanFile):
 
     def _build_msvc(self):
         with chdir(self, self._source_subfolder):
-            msbuild = MSBuild(self)
-            target = "libdeflate.dll" if self.options.shared else "libdeflatestatic.lib"
-            msbuild.build(project_file="Makefile.msc", targets=[target])
+            with vcvars(self), environment_append(VisualStudioBuildEnvironment(self).vars):
+                target = "libdeflate.dll" if self.options.shared else "libdeflatestatic.lib"
+                self.run("nmake /f Makefile.msc {}".format(target))
 
     def _build_make(self):
         autotools = AutoToolsBuildEnvironment(self, win_bash=(self._settings_build.os == "Windows"))
