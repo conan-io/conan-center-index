@@ -116,3 +116,7 @@ class AnyRPCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["anyrpc"]
+
+        if not self.options.shared:
+            if self.settings.os == "Windows":
+                self.cpp_info.system_libs.append("ws2_32")
