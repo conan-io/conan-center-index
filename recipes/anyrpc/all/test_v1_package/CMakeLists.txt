@@ -7,5 +7,5 @@ conan_basic_setup(TARGETS)
 
 find_package(anyrpc REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
+add_executable(${PROJECT_NAME} ../test_package/test_anyrpc.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE anyrpc::anyrpc)
