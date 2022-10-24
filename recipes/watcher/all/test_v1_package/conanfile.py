@@ -1,7 +1,6 @@
 from conans import ConanFile, CMake
 from conan.tools.build import cross_building
 import os
-import subprocess 
 
 class TestPackageV1Conan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
@@ -15,8 +14,4 @@ class TestPackageV1Conan(ConanFile):
     def test(self):
         if not cross_building(self):
             bin_path = os.path.join("bin", "test_package")
-            try:
-                # Because watcher API never returns, we have to set timeout
-                subprocess.run([bin_path], timeout=3)
-            except subprocess.TimeoutExpired:
-                pass
+            self.run(bin_path, run_environment=True)

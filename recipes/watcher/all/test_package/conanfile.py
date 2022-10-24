@@ -1,10 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake
 from conan.tools.build import can_run
-from conan.tools.env import Environment
 
 import os
-import subprocess
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
@@ -25,8 +23,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            try:
-                # Because watcher API never returns, we have to set timeout
-                subprocess.run([bin_path], timeout=3)
-            except subprocess.TimeoutExpired:
-                pass
+            self.run(bin_path, env="conanrun")
