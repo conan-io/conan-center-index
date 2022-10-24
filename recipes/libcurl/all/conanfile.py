@@ -584,8 +584,8 @@ class LibcurlConan(ConanFile):
         tc.generate()
 
     def package(self):
-        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(self, pattern="cacert.pem", src=self.build_folder, dst="res")
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "cacert.pem", src=self.source_folder, dst=os.path.join(self.package_folder, "res"))
         if self._is_using_cmake_build:
             cmake = CMake(self)
             cmake.install()
@@ -610,6 +610,7 @@ class LibcurlConan(ConanFile):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("pkg_config_name", "libcurl")
 
+        self.cpp_info.components["curl"].resdirs = ["res"]
         if is_msvc(self):
             self.cpp_info.components["curl"].libs = ["libcurl_imp"] if self.options.shared else ["libcurl"]
         else:
