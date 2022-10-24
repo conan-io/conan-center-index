@@ -26,4 +26,3 @@ sources:
           sha256: "e7da392408f6150c58f3cba5d4f05118f1eaed4519fdb76895e13aed9ceede97"
         - url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/licenses.zip"
           sha256: "ad798e4760d784a84d2708be77b3c8d7562a88ac8cddbc3177f21a6d6e91772a"
-
