@@ -148,7 +148,7 @@ This approach requires a special code within [build](https://docs.conan.io/en/la
 Sometimes sources provided by project require patching for various reasons. The `conandata.yml` file is the right place to indicate this information as well.
 
 > **Note**: Under our mission to ensure quality, patches undergo extra scrutiny. **Make sure to review** our
-> [Patching Policy](sources_and_patches.md#policy-about-patching) to understand the requirements before adding any.
+> [Patching Policy](policy_patching.md) to understand the requirements before adding any.
 
 This section follows the same pattern as the `sources` above - one entry per version with a list of patches to apply.
 
