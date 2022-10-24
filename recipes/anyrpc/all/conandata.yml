@@ -7,3 +7,7 @@ patches:
     - patch_file: "patches/0001-use-conan-libs-1.0.2.patch"
       patch_description: "Link to conan libs"
       patch_type: "conan"
+    - patch_file: "patches/0002-fix-shared-library-1.0.2.patch"
+      patch_description: "Fixed 'undefined reference' error when compile for windows platform"
+      patch_type: backport
+      patch_source: "https://github.com/sgieseking/anyrpc/pull/43"
