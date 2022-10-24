@@ -63,7 +63,7 @@ class Nghttp2Conan(ConanFile):
             del self.options.with_jemalloc
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_app or self.options.with_asio:
