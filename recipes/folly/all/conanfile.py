@@ -154,9 +154,6 @@ class FollyConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         if can_run(self):
-            if self.options.get_safe("use_sse4_2") and str(self.settings.arch) in ['x86', 'x86_64']:
-                cmake.definitions["FOLLY_SSE"] = "4"
-                cmake.definitions["FOLLY_SSE_MINOR"] = "2"
             cmake.definitions["FOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE"] = "0"
             cmake.definitions["FOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE__TRYRUN_OUTPUT"] = ""
             cmake.definitions["FOLLY_HAVE_LINUX_VDSO_EXITCODE"] = "0"
@@ -165,6 +162,16 @@ class FollyConan(ConanFile):
             cmake.definitions["FOLLY_HAVE_WCHAR_SUPPORT_EXITCODE__TRYRUN_OUTPUT"] = ""
             cmake.definitions["HAVE_VSNPRINTF_ERRORS_EXITCODE"] = "0"
             cmake.definitions["HAVE_VSNPRINTF_ERRORS_EXITCODE__TRYRUN_OUTPUT"] = ""
+
+        if self.options.get_safe("use_sse4_2") and str(self.settings.arch) in ['x86', 'x86_64']:
+            # in folly, if simd >=sse4.2, we also needs -mfma flag to avoid compiling error.
+            if not is_msvc(self):
+                cmake.definitions["CMAKE_C_FLAGS"] = "-mfma"
+                cmake.definitions["CMAKE_CXX_FLAGS"] = "-mfma"
+            else:
+                cmake.definitions["CMAKE_C_FLAGS"] = "/arch:FMA"
+                cmake.definitions["CMAKE_CXX_FLAGS"] = "/arch:FMA"
+
         cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
 
         cxx_std_flag = tools.cppstd_flag(self.settings)
@@ -257,6 +264,9 @@ class FollyConan(ConanFile):
 
         if self.settings.os == "Macos" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) >= "11.0":
             self.cpp_info.components["libfolly"].system_libs.append("c++abi")
+
+        if self.options.get_safe("use_sse4_2") and str(self.settings.arch) in ['x86', 'x86_64']:
+            self.cpp_info.components["libfolly"].defines = ["FOLLY_SSE=4", "FOLLY_SSE_MINOR=2"]
 
         # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
         self.cpp_info.filenames["cmake_find_package"] = "folly"
