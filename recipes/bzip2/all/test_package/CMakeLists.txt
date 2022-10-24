@@ -6,6 +6,7 @@ find_package(BZip2 REQUIRED)
 add_executable(test_package test_package.c)
 target_link_libraries(test_package PRIVATE BZip2::BZip2)
 
+# Test whether variables from https://cmake.org/cmake/help/latest/module/FindBZip2.html are properly defined
 set(_custom_vars
     BZIP2_FOUND
     BZIP2_NEED_PREFIX
