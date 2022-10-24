@@ -10,3 +10,6 @@ patches:
       patch_description: "include thread header (this patch is already applied upstream)"
       patch_type: "backport"
       patch_source: "https://github.com/MengRao/tscns/commit/3d9179de9af88358eef66d9f03c8e2126d35296a"
+    - patch_file: "patches/0002-support-older-compiler.patch"
+      patch_description: "support older compiler by fix initializer"
+      patch_type: "backport"
