@@ -67,8 +67,8 @@ class LibcurlConan(ConanFile):
         "with_symbol_hiding": [True, False],
         "with_unix_sockets": [True, False],
         "with_verbose_strings": [True, False],
-        "with_ca_bundle": "ANY",
-        "with_ca_path": "ANY",
+        "with_ca_bundle": [None, "ANY"],
+        "with_ca_path": [None, "ANY"],
     }
     default_options = {
         "shared": False,
@@ -158,9 +158,18 @@ class LibcurlConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
         # These options are not used in CMake build yet
         if self._is_using_cmake_build:
@@ -172,22 +181,19 @@ class LibcurlConan(ConanFile):
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1q")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/5.4.0")
+            self.requires("wolfssl/5.5.1")
         if self.options.with_nghttp2:
-            self.requires("libnghttp2/1.48.0")
+            self.requires("libnghttp2/1.49.0")
         if self.options.with_libssh2:
             self.requires("libssh2/1.10.0")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("with_zstd"):
             self.requires("zstd/1.5.2")
         if self.options.with_c_ares:
             self.requires("c-ares/1.18.1")
-
-    def package_id(self):
-        del self.info.settings.compiler
 
     def validate(self):
         if self.info.options.with_ssl == "schannel" and self.info.settings.os != "Windows":
@@ -204,14 +210,14 @@ class LibcurlConan(ConanFile):
     def build_requirements(self):
         if self._is_using_cmake_build:
             if self._is_win_x_android:
-                self.tool_requires("ninja/1.11.0")
+                self.tool_requires("ninja/1.11.1")
         else:
-            self.tool_requires("libtool/2.4.6")
-            if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-                self.tool_requires("pkgconf/1.7.4")
+            self.tool_requires("libtool/2.4.7")
+            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                self.tool_requires("pkgconf/1.9.3")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
-                if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                     self.tool_requires("msys2/cci.latest")
 
     def layout(self):
@@ -226,27 +232,12 @@ class LibcurlConan(ConanFile):
         download(self, "https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True, sha256="2cff03f9efdaf52626bd1b451d700605dc1ea000c5da56bd0fc59f8f43071040")
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         if self._is_using_cmake_build:
             self._generate_with_cmake()
         else:
             self._generate_with_autotools()
-        ms = VirtualBuildEnv(self)
-        ms.generate()
-        if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
-
-    # TODO: remove imports once rpath of shared libs of libcurl dependencies fixed on macOS
-    def imports(self):
-        # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
-        #
-        # Configure script creates conftest that cannot execute without shared openssl binaries.
-        # Ways to solve the problem:
-        # 1. set *LD_LIBRARY_PATH (works with Linux with RunEnvironment
-        #     but does not work on OS X 10.11 with SIP)
-        # 2. copying dylib's to the build directory (fortunately works on OS X)
-        if self.settings.os == "Macos":
-            copy(self, "*.dylib*", src=self.build_folder, dst=self.source_folder, keep_path=False)
 
     def build(self):
         self._patch_sources()
@@ -368,6 +359,10 @@ class LibcurlConan(ConanFile):
         return "yes" if value else "no"
 
     def _generate_with_autotools(self):
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
             f"--with-libidn2={self._yes_no(self.options.with_libidn)}",
@@ -456,15 +451,15 @@ class LibcurlConan(ConanFile):
         if not self.options.with_ntlm_wb:
             tc.configure_args.append("--disable-ntlm-wb")
 
-        if self.options.with_ca_bundle is False:
+        if self.options.with_ca_bundle:
+            tc.configure_args.append(f"--with-ca-bundle={str(self.options.with_ca_bundle)}")
+        else:
             tc.configure_args.append("--without-ca-bundle")
-        elif self.options.with_ca_bundle:
-            tc.configure_args.append("--with-ca-bundle=" + str(self.options.with_ca_bundle))
 
-        if self.options.with_ca_path is False:
-            tc.configure_args.append('--without-ca-path')
-        elif self.options.with_ca_path:
-            tc.configure_args.append("--with-ca-path=" + str(self.options.with_ca_path))
+        if self.options.with_ca_path:
+            tc.configure_args.append(f"--with-ca-path={str(self.options.with_ca_path)}")
+        else:
+            tc.configure_args.append("--without-ca-path")
 
         # Cross building flags
         if cross_building(self):
@@ -500,7 +495,6 @@ class LibcurlConan(ConanFile):
         tc.generate()
         tc = AutotoolsDeps(self)
         tc.generate()
-
 
     def _get_linux_arm_host(self):
         arch = None
@@ -577,28 +571,29 @@ class LibcurlConan(ConanFile):
                 tc.variables["CURL_DISABLE_NTLM"] = True
         tc.variables["NTLM_WB_ENABLED"] = self.options.with_ntlm_wb
 
-        if self.options.with_ca_bundle is False:
-            tc.variables['CURL_CA_BUNDLE'] = 'none'
-        elif self.options.with_ca_bundle:
-            tc.variables['CURL_CA_BUNDLE'] = self.options.with_ca_bundle
+        if self.options.with_ca_bundle:
+            tc.cache_variables["CURL_CA_BUNDLE"] = str(self.options.with_ca_bundle)
+        else:
+            tc.cache_variables["CURL_CA_BUNDLE"] = "none"
 
-        if self.options.with_ca_path is False:
-            tc.variables['CURL_CA_PATH'] = 'none'
-        elif self.options.with_ca_path:
-            tc.variables['CURL_CA_PATH'] = self.options.with_ca_path
+        if self.options.with_ca_path:
+            tc.cache_variables["CURL_CA_PATH"] = str(self.options.with_ca_path)
+        else:
+            tc.cache_variables["CURL_CA_PATH"] = "none"
 
         tc.generate()
 
     def package(self):
-        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(self, pattern="cacert.pem", src=self.build_folder, dst="res")
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "cacert.pem", src=self.source_folder, dst=os.path.join(self.package_folder, "res"))
         if self._is_using_cmake_build:
             cmake = CMake(self)
             cmake.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         else:
             autotools = Autotools(self)
-            autotools.install()
+            # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
+            autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
             fix_apple_shared_install_name(self)
             rmdir(self, os.path.join(self.package_folder, "share"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
@@ -615,6 +610,7 @@ class LibcurlConan(ConanFile):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("pkg_config_name", "libcurl")
 
+        self.cpp_info.components["curl"].resdirs = ["res"]
         if is_msvc(self):
             self.cpp_info.components["curl"].libs = ["libcurl_imp"] if self.options.shared else ["libcurl"]
         else:
