@@ -56,6 +56,13 @@ class SpixConan(ConanFile):
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
+        
+    def configure(self):
+        # shadertools and qtdeclarative provide the Quick module
+        if self.options.qt_major == 6:
+            self.options["qt"].qtshadertools = True
+        self.options["qt"].qtdeclarative = True
+        self.options["qt"].gui = True
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
