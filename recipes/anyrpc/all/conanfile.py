@@ -34,7 +34,7 @@ class AnyRPCConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_log4cplus": True,
+        "with_log4cplus": False,
         "with_threading": True,
         "with_wchar": True,
         "with_regex": True,
@@ -64,6 +64,10 @@ class AnyRPCConan(ConanFile):
     def requirements(self):
         if self.options.with_log4cplus:
             self.requires("log4cplus/2.0.7")
+            
+    def validate(self):
+        if self.options.with_log4cplus and self.options.with_wchar:
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built with both log4cplus and wchar, see https://github.com/sgieseking/anyrpc/issues/25")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
