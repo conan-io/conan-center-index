@@ -112,6 +112,8 @@ class DuckdbConan(ConanFile):
         tc.variables["BUILD_UNITTESTS"] = False
         tc.variables["BUILD_RDTSC"] = self.options.with_rdtsc
         tc.variables["EXTENSION_STATIC_BUILD"] = not self.options.shared
+        tc.variables["ENABLE_SANITIZER"] = False
+        tc.variables["ENABLE_UBSAN"] = False
         tc.generate()
 
         dpes = CMakeDeps(self)
