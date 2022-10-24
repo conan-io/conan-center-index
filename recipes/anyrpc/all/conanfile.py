@@ -9,7 +9,7 @@ import os
 required_conan_version = ">=1.52.0"
 
 
-class AnyRPCConan(ConanFile): 
+class AnyRPCConan(ConanFile):
     name = "anyrpc"
     description = "A multiprotocol remote procedure call system for C++"
     license = "MIT"
@@ -105,7 +105,7 @@ class AnyRPCConan(ConanFile):
         copy(self, pattern="license", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        
+
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
