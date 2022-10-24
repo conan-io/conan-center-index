@@ -1,20 +1,22 @@
 {
     "problemMatcher": [
         {
-            "owner": "yaml_linter_errors",
-            "severity": "error",
+            "owner": "yamllint",
             "pattern": [
                 {
-                    "regexp": "Error: (.*):(\\d+):(\\d+): (.*)",
-                    "file": 1,
-                    "line": 2,
-                    "column": 3,
-                    "message": 4
+                    "regexp": "^(.*\\.ya?ml)$",
+                    "file": 1
+                },
+                {
+                    "regexp": "^\\s{2}(\\d+):(\\d+)\\s+(error|warning)\\s+(.*?)\\s+\\((.*)\\)$",
+                    "line": 1,
+                    "column": 2,
+                    "severity": 3,
+                    "message": 4,
+                    "code": 5,
+                    "loop": true
                 }
             ]
         }
     ]
 }
-
-
-
