@@ -17,7 +17,6 @@ class WatcherConan(ConanFile):
     homepage = "https://github.com/e-dant/watcher/"
     topics = ("watch", "filesystem", "event", "header-only")
     settings = "os", "arch", "compiler", "build_type"
-    # no_copy_source = True
 
     @property
     def _minimum_cpp_standard(self):
