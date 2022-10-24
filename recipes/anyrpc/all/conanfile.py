@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
@@ -39,6 +40,10 @@ class AnyRPCConan(ConanFile):
         "with_protocol_messagepack": True,
     }
 
+    @property
+    def _minimum_cpp_standard(self):
+        return 11
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -58,6 +63,9 @@ class AnyRPCConan(ConanFile):
             self.requires("log4cplus/2.0.7")
 
     def validate(self):
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
+
         if self.options.with_log4cplus and self.options.with_wchar:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built with both log4cplus and wchar, see https://github.com/sgieseking/anyrpc/issues/25")
 
