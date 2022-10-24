@@ -220,11 +220,11 @@ class GLibConan(ConanFile):
             os.path.join("include", "glib-2.0"),
             os.path.join("lib", "glib-2.0", "include")
         ]
-        self.cpp_info.components["glib-2.0"].libdirs = ["lib"]
+        self.cpp_info.components["glib-2.0"].resdirs = ["res"]
 
         self.cpp_info.components["gmodule-no-export-2.0"].set_property("pkg_config_name", "gmodule-no-export-2.0")
         self.cpp_info.components["gmodule-no-export-2.0"].libs = ["gmodule-2.0"]
-        self.cpp_info.components["gmodule-no-export-2.0"].libdirs = ["lib"]
+        self.cpp_info.components["gmodule-no-export-2.0"].resdirs = ["res"]
         self.cpp_info.components["gmodule-no-export-2.0"].requires.append("glib-2.0")
 
         self.cpp_info.components["gmodule-export-2.0"].set_property("pkg_config_name", "gmodule-export-2.0")
@@ -235,17 +235,17 @@ class GLibConan(ConanFile):
 
         self.cpp_info.components["gobject-2.0"].set_property("pkg_config_name", "gobject-2.0")
         self.cpp_info.components["gobject-2.0"].libs = ["gobject-2.0"]
-        self.cpp_info.components["gobject-2.0"].libdirs = ["lib"]
+        self.cpp_info.components["gobject-2.0"].resdirs = ["res"]
         self.cpp_info.components["gobject-2.0"].requires += ["glib-2.0", "libffi::libffi"]
 
         self.cpp_info.components["gthread-2.0"].set_property("pkg_config_name", "gthread-2.0")
         self.cpp_info.components["gthread-2.0"].libs = ["gthread-2.0"]
-        self.cpp_info.components["gthread-2.0"].libdirs = ["lib"]
+        self.cpp_info.components["gthread-2.0"].resdirs = ["res"]
         self.cpp_info.components["gthread-2.0"].requires.append("glib-2.0")
 
         self.cpp_info.components["gio-2.0"].set_property("pkg_config_name", "gio-2.0")
         self.cpp_info.components["gio-2.0"].libs = ["gio-2.0"]
-        self.cpp_info.components["gio-2.0"].libdirs = ["lib"]
+        self.cpp_info.components["gio-2.0"].resdirs = ["res"]
         self.cpp_info.components["gio-2.0"].requires += ["glib-2.0", "gobject-2.0", "gmodule-2.0", "zlib::zlib"]
 
         self.cpp_info.components["gresource"].set_property("pkg_config_name", "gresource")
