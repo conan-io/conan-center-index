@@ -591,7 +591,7 @@ class LibcurlConan(ConanFile):
 
     def package(self):
         copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(self, pattern="cacert.pem", src=self.build_folder, dst="res")
+        copy(self, "cacert.pem", dst=os.path.join(self.package_folder, "res"), src=self.source_folder)
         if self._is_using_cmake_build:
             cmake = CMake(self)
             cmake.install()
