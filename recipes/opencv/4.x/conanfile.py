@@ -226,6 +226,8 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("dnn_cuda", False) and \
             (not self.options.with_cuda or not self.options.contrib or not self.options.with_cublas or not self.options.with_cudnn):
             raise ConanInvalidConfiguration("with_cublas, with_cudnn and contrib must be enabled for dnn_cuda")
+        if self.options.get_safe("contrib_sfm") and not self.options.with_eigen:
+            raise ConanInvalidConfiguration("with_eigen must be enabled for contrib_sfm")
         if self.options.with_ipp == "opencv-icv" and \
             (not str(self.settings.arch) in ["x86", "x86_64"] or \
              not str(self.settings.os) in ["Linux", "Macos", "Windows"]):
@@ -689,9 +691,12 @@ class OpenCVConan(ConanFile):
             if self.version >= "4.3.0":
                 opencv_components.extend([
                     {"target": "opencv_intensity_transform", "lib": "intensity_transform", "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
-                    {"target": "opencv_alphamat",            "lib": "alphamat",            "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
                     {"target": "opencv_rapid",               "lib": "rapid",               "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen() + ipp()},
                 ])
+                if self.options.with_eigen:
+                    opencv_components.extend([
+                        {"target": "opencv_alphamat",            "lib": "alphamat",            "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
+                    ])
 
             if self.options.get_safe("contrib_freetype"):
                 opencv_components.extend([
