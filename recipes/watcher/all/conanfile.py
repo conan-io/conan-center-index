@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.apple import is_apple_os
 from conan.tools.microsoft import check_min_vs
@@ -17,7 +17,7 @@ class WatcherConan(ConanFile):
     homepage = "https://github.com/e-dant/watcher/"
     topics = ("watch", "filesystem", "event", "header-only")
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
+    # no_copy_source = True
 
     @property
     def _minimum_cpp_standard(self):
@@ -30,6 +30,9 @@ class WatcherConan(ConanFile):
             "clang": "13",
             "apple-clang": "13.1",
         }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -58,7 +61,7 @@ class WatcherConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def build(self):
-        pass
+        apply_conandata_patches(self)
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
