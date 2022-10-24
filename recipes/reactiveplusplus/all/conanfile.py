@@ -32,7 +32,7 @@ class ReactivePlusPlusConan(ConanFile):
             "Visual Studio": "16.10",
             "msvc": "192",
             "gcc": "10",
-            "clang": "11",
+            "clang": "12",
             "apple-clang": "14",
         }
 
