@@ -35,7 +35,7 @@ class PackageConan(ConanFile):
             self,
             pattern="*.h",
             dst=os.path.join(self.package_folder, "include"),
-            src=os.path.join(self.source_folder, "."),
+            src=self.source_folder,
         )
 
     def package_info(self):
