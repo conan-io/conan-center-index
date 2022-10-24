@@ -101,8 +101,6 @@ build script that are tailored to their specific use cases. It's not uncommon to
 
 Linters are always executed by GitHub Actions to validate parts of your recipe, for instance, if it uses migrated Conan tools imports.
 
-> **Note**: Hooks are generally for package correctness and the pylinters are for the recipe syntax
-
 It is possible to run the linter locally the same way it is being run [using Github actions](../.github/workflows/linter-conan-v2.yml) by:
 
 * (Recommended) Use a dedicated Python virtualenv.
