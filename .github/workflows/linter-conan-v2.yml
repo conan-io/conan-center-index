@@ -16,11 +16,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Get changed files
-        uses: tj-actions/changed-files@v20
+        uses: tj-actions/changed-files@v32
         id: changed_files
         with:
+          base_sha: ${{ github.event.pull_request.base.sha }}
           files: |
             linter/**
       - name: Get Conan v1 version
@@ -84,11 +85,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v20
+        uses: tj-actions/changed-files@v32
         with:
+          base_sha: ${{ github.event.pull_request.base.sha }}
           files: |
             recipes/*/*/conanfile.py
       - name: Get Conan v1 version
@@ -119,11 +121,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v20
+        uses: tj-actions/changed-files@v32
         with:
+          base_sha: ${{ github.event.pull_request.base.sha }}
           files: |
             recipes/*/*/test_*/conanfile.py
       - name: Get Conan v1 version
