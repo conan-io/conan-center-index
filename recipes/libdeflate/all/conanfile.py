@@ -6,7 +6,7 @@ from conans import MSBuild, AutoToolsBuildEnvironment, VisualStudioBuildEnvironm
 from conans.tools import vcvars, environment_append
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
 
 
 class LibdeflateConan(ConanFile):
