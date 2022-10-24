@@ -1,9 +1,13 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.files import apply_conandata_patches, get, copy, rmdir
+from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
 
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 class HyperscanConan(ConanFile):
     name = "hyperscan"
@@ -13,8 +17,8 @@ class HyperscanConan(ConanFile):
     description = "High-performance regular expression matching library"
     topics = ("regex", "regular expressions")
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
+    exports_sources = ["patches/**"]
+    generators = "cmake_find_package"
 
     _cmake = None
 
@@ -41,27 +45,40 @@ class HyperscanConan(ConanFile):
     }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _minimum_compilers_version(self):
+        return {
+            "apple-clang": "5.1",
+            "clang": "3.4",
+            "gcc": "4.9",
+            "intel": "15",
+            "sun-cc": "5.14",
+            "Visual Studio": "12"
+        }
 
     @property
     def _build_subfolder(self):
         return "build_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("hyperscan-{0}".format(self.version), self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build_requirements(self):
-        self.build_requires("ragel/6.10");
+        self.build_requires("ragel/6.10")
 
     def requirements(self):
-        self.requires("boost/1.79.0");
+        self.requires("boost/1.79.0")
         if self.options.build_chimera:
             self.requires("pcre/8.45")
 
     def validate(self):
-        tools.check_min_cppstd(self, "11")
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, "11")
+
+        minimum_version = self._minimum_compilers_version.get(str(self.info.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("{}/{} requires C++11. Your compiler is unknown. Assuming it supports C++11.".format(self.name, self.version))
+        elif Version(self.info.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("{}/{} requires C++11, which your compiler does not support.".format(self.name, self.version))
 
         if self.settings.arch not in ["x86", "x86_64"]:
             raise ConanInvalidConfiguration("Hyperscan only support x86 architecture")
@@ -70,21 +87,18 @@ class HyperscanConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self);
+    def generate(self):
+        tc = CMakeToolchain(self)
         if self.options.optimise != "auto":
-            self._cmake.definitions["OPTIMISE"] = self.options.optimise
+            tc.variables["OPTIMISE"] = self.options.optimise
         if self.options.debug_output != "auto":
-            self._cmake.definitions["DEBUG_OUTPUT"] = self.options.debug_output
-        self._cmake.definitions["BUILD_AVX512"] = self.options.build_avx512
-        self._cmake.definitions["FAT_RUNTIME"] = self.options.fat_runtime
-        self._cmake.definitions["BUILD_CHIMERA"] = self.options.build_chimera
+            tc.variables["DEBUG_OUTPUT"] = self.options.debug_output
+        tc.variables["BUILD_AVX512"] = self.options.build_avx512
+        tc.variables["FAT_RUNTIME"] = self.options.fat_runtime
+        tc.variables["BUILD_CHIMERA"] = self.options.build_chimera
         if self.options.dump_support != "auto":
-            self._cmake.definitions["DUMP_SUPPORT"] = self.options.dump_support
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+            tc.variables["DUMP_SUPPORT"] = self.options.dump_support
+        tc.generate()
 
     def configure(self):
         if self.options.shared:
@@ -94,17 +108,17 @@ class HyperscanConan(ConanFile):
             raise ConanInvalidConfiguration("Chimera build requires static building")
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        copy(self, "LICENSE", dst="licenses", src=self.source_folder)
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "hyperscan"
@@ -142,4 +156,3 @@ class HyperscanConan(ConanFile):
 
                 if self.options.build_chimera:
                     self.cpp_info.components["chimera"].system_libs = ["m"]
-

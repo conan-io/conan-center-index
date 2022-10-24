@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 project(PackageTest CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
 find_package(hyperscan COMPONENTS hs REQUIRED)
 add_executable(hs_example hs_example.cpp)
 target_link_libraries(hs_example PRIVATE hyperscan::hs)

@@ -5,4 +5,12 @@ sources:
 patches:
   "5.4.0":
     - patch_file: "patches/fix-cmake.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: >
+        Link to pcre conan dependency. Remove Unit Tests from build.
+        Specific patch for windows: Add wrappers for libpcre.
+          Hypescan uses a calling convention vectorcall instead of cdecl. Libpcre is compiled with the cdecl options in conan,
+          which is expected from a conan recipe. It is therefore necessary to put a wrapper between hyperscan and libpcre to avoid
+          link errors.
+          In upstream, libpcre is compiled with the sources (add_subdirectory from CMakeLists), so with the same parameters as hyperscan,
+          that is to say that libpcre is compiled with vectorcall and so we don't have any link problem.
