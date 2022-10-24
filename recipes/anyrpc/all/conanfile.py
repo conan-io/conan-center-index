@@ -74,6 +74,7 @@ class AnyRPCConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["ANYRPC_LIB_BUILD_SHARED"] = self.options.shared
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_TEST"] = False
         tc.variables["BUILD_WITH_ADDRESS_SANITIZE"] = False
