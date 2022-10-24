@@ -42,9 +42,9 @@ class ArchicadApidevkitConan (ConanFile):
 
     def build(self):
         get(self, **self.conan_data["sources"][self.version][str(self.settings.os)]
-                  [self._acdevkit_arch][0], destination=self.build_folder, strip_root=True)
-        tools.download(filename="LICENSE", **self.conan_data["sources"][self.version][str(
-            self.settings.os)][self._acdevkit_arch][1])
+            [self._acdevkit_arch][0], destination=self.build_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)]
+            [self._acdevkit_arch][1], destination=self.build_folder, strip_root=True)
 
     def package(self):
         copy(self, "*", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"))
