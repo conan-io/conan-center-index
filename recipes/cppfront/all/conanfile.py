@@ -4,6 +4,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get, rmdir
+from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
 
 import os
 
@@ -17,6 +18,10 @@ class CppfrontConan(ConanFile):
     homepage = "https://github.com/hsutter/cppfront"
     license = "CC-BY-NC-ND-4.0"
     settings = "os", "arch", "compiler", "build_type"
+
+    @property
+    def _minimum_cpp_standard(self):
+        return 20
 
     @property
     def _compilers_minimum_version(self):
@@ -36,20 +41,26 @@ class CppfrontConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, "20")
+        # if self.settings.get_safe("compiler.cppstd"):
+        #     check_min_cppstd(self, "20")
 
-        def lazy_lt_semver(v1, v2):
+        # validate the minimum cpp standard supported. For C++ projects only
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
+
+        def _lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
             lv2 = [int(v) for v in v2.split(".")]
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn("{} {} requires C++20. Your compiler is unknown. Assuming it supports C++20.".format(self.name, self.version))
-        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration("{} {} requires C++20, which your compiler does not support.".format(self.name, self.version))
+        check_min_vs(self, "192.9")
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if not minimum_version:
+                self.output.warn(f"{self.name} {self.version} requires C++20. Your compiler is unknown. Assuming it supports C++20.")
+            elif _lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
+                raise ConanInvalidConfiguration(f"{self.name} {self.version} requires C++20, which your compiler does not support.")
 
     def generate(self):
         tc = CMakeToolchain(self)
