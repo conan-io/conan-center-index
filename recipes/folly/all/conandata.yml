@@ -8,6 +8,9 @@ sources:
   "2022.01.31.00":
     url: "https://github.com/facebook/folly/archive/v2022.01.31.00.tar.gz"
     sha256: "d764b9a7832d967bb7cfea4bcda15d650315aa4d559fde1da2a52b015cd88b9c"
+  "2022.10.31.00":
+    url: "https://github.com/facebook/folly/archive/v2022.10.31.00.tar.gz"
+    sha256: "46389ab812d010bd03de531e9a18f985ced23737fc26480393720e730821f7be"
 patches:
   "2019.10.21.00":
     - patch_file: "patches/0001-find-packages.patch"
@@ -28,6 +31,10 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0020-include-ssizet.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0023-fix-cmake-generator-expr.patch"
+      base_path: "source_subfolder"
+      patch_description: "CMake: Handle generator expressions requiring a target for pkg-config #1433"
+      patch_type: "backport"
   "2020.08.10.00":
     - patch_file: "patches/0008-find-packages.patch"
       base_path: "source_subfolder"
@@ -43,6 +50,10 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0015-benchmark-format-macros.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0024-fix-cmake-generator-expr.patch"
+      base_path: "source_subfolder"
+      patch_description: "CMake: Handle generator expressions requiring a target for pkg-config #1433"
+      patch_type: "backport"
   "2022.01.31.00":
     - patch_file: "patches/0016-find-packages.patch"
       base_path: "source_subfolder"
@@ -54,3 +65,16 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0022-fix-windows-minmax.patch"
       base_path: "source_subfolder"
+  "2022.10.31.00":
+    - patch_file: "patches/0017-compiler-flags.patch"
+      base_path: "source_subfolder"
+      patch_description: "fix the hard-coded flag"
+      patch_type: "conan"
+    - patch_file: "patches/0019-exclude-example.patch"
+      base_path: "source_subfolder"
+      patch_description: "exclude example"
+      patch_type: "conan"
+    - patch_file: "patches/0025-find-packages.patch"
+      base_path: "source_subfolder"
+      patch_description: "fix cmake find_package"
+      patch_type: "conan"
