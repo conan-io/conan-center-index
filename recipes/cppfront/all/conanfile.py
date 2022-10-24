@@ -41,10 +41,6 @@ class CppfrontConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def validate(self):
-        # if self.settings.get_safe("compiler.cppstd"):
-        #     check_min_cppstd(self, "20")
-
-        # validate the minimum cpp standard supported. For C++ projects only
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
 
