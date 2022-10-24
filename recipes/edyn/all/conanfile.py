@@ -46,10 +46,7 @@ class EdynConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) < "1.2.0":
-            self.requires("entt/3.9.0")
-        else:
-            self.requires("entt/3.10.1")
+        self.requires("entt/3.10.1")
 
     def validate(self):
         if self.options.shared and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "11" and self.settings.build_type == "Release":
