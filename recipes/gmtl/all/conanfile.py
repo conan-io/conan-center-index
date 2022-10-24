@@ -14,7 +14,7 @@ class PackageConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://ggt.sourceforge.net/html/main.html"
     topics = ("linear-algebra", "collision", "vector", "matrix", "template", "math", "header-only")
-    settings = "os", "arch", "compiler", "build_type"  # even for header only
+    settings = "os", "arch", "compiler", "build_type" 
     no_copy_source = True 
    
     def export_sources(self):
