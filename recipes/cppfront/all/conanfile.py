@@ -8,7 +8,7 @@ from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.47.0"
 
 class CppfrontConan(ConanFile):
     name = "cppfront"
