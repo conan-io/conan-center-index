@@ -1,11 +1,11 @@
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
-from conan.tools.build import can_run
+from conan.tools.build import can_run,check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools import files
 from conan import ConanFile
-from conans import CMake, tools
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.errors import ConanInvalidConfiguration
-import functools
+from conans import tools
 import os
 
 required_conan_version = ">=1.45.0"
@@ -30,8 +30,6 @@ class FollyConan(ConanFile):
         "fPIC": True,
         "use_sse4_2" : False
     }
-
-    generators = "cmake", "cmake_find_package"
 
     @property
     def _source_subfolder(self):
@@ -59,7 +57,6 @@ class FollyConan(ConanFile):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
-
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -92,8 +89,10 @@ class FollyConan(ConanFile):
         if self.settings.os == "Linux":
             self.requires("libiberty/9.1.0")
             self.requires("libunwind/1.5.0")
-        if Version(self.version) >= "2020.08.10.00":
+        if Version(self.version) >= "2020.08.10.00" and Version(self.version) < "2022.01.31.00":
             self.requires("fmt/7.1.3")
+        if Version(self.version) >= "2022.01.31.00":
+            self.requires("fmt/8.0.1") # Folly bumpup fmt to 8.0.1 in v2022.01.31.00
 
     @property
     def _required_boost_components(self):
@@ -101,7 +100,7 @@ class FollyConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(self.name, self.settings.compiler))
@@ -143,57 +142,59 @@ class FollyConan(ConanFile):
         if self.options.get_safe("use_sse4_2") and str(self.settings.arch) not in ['x86', 'x86_64']:
             raise ConanInvalidConfiguration(f"{self.ref} can use the option use_sse4_2 only on x86 and x86_64 archs.")
 
-    # FIXME: Freeze max. CMake version at 3.16.2 to fix the Linux build
-    def build_requirements(self):
-        self.build_requires("cmake/3.16.9")
-
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
+    def layout(self):
+        cmake_layout(self)
+
+
+    def generate(self):
+        tc = CMakeToolchain(self)
         if can_run(self):
-            cmake.definitions["FOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE"] = "0"
-            cmake.definitions["FOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE__TRYRUN_OUTPUT"] = ""
-            cmake.definitions["FOLLY_HAVE_LINUX_VDSO_EXITCODE"] = "0"
-            cmake.definitions["FOLLY_HAVE_LINUX_VDSO_EXITCODE__TRYRUN_OUTPUT"] = ""
-            cmake.definitions["FOLLY_HAVE_WCHAR_SUPPORT_EXITCODE"] = "0"
-            cmake.definitions["FOLLY_HAVE_WCHAR_SUPPORT_EXITCODE__TRYRUN_OUTPUT"] = ""
-            cmake.definitions["HAVE_VSNPRINTF_ERRORS_EXITCODE"] = "0"
-            cmake.definitions["HAVE_VSNPRINTF_ERRORS_EXITCODE__TRYRUN_OUTPUT"] = ""
+            tc.variables["FOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE"] = "0"
+            tc.variables["FOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE__TRYRUN_OUTPUT"] = ""
+            tc.variables["FOLLY_HAVE_LINUX_VDSO_EXITCODE"] = "0"
+            tc.variables["FOLLY_HAVE_LINUX_VDSO_EXITCODE__TRYRUN_OUTPUT"] = ""
+            tc.variables["FOLLY_HAVE_WCHAR_SUPPORT_EXITCODE"] = "0"
+            tc.variables["FOLLY_HAVE_WCHAR_SUPPORT_EXITCODE__TRYRUN_OUTPUT"] = ""
+            tc.variables["HAVE_VSNPRINTF_ERRORS_EXITCODE"] = "0"
+            tc.variables["HAVE_VSNPRINTF_ERRORS_EXITCODE__TRYRUN_OUTPUT"] = ""
 
         if self.options.get_safe("use_sse4_2") and str(self.settings.arch) in ['x86', 'x86_64']:
-            # in folly, if simd >=sse4.2, we also needs -mfma flag to avoid compiling error.
+            tc.preprocessor_definitions["FOLLY_SSE"] = "4"
+            tc.preprocessor_definitions["FOLLY_SSE_MINOR"] = "2"
             if not is_msvc(self):
-                cmake.definitions["CMAKE_C_FLAGS"] = "-mfma"
-                cmake.definitions["CMAKE_CXX_FLAGS"] = "-mfma"
+                tc.variables["CMAKE_C_FLAGS"] = "-mfma"
+                tc.variables["CMAKE_CXX_FLAGS"] = "-mfma"
             else:
-                cmake.definitions["CMAKE_C_FLAGS"] = "/arch:FMA"
-                cmake.definitions["CMAKE_CXX_FLAGS"] = "/arch:FMA"
+                tc.variables["CMAKE_C_FLAGS"] = "/arch:FMA"
+                tc.variables["CMAKE_CXX_FLAGS"] = "/arch:FMA"
 
-        cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+        tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
 
         cxx_std_flag = tools.cppstd_flag(self.settings)
         cxx_std_value = cxx_std_flag.split('=')[1] if cxx_std_flag else "c++{}".format(self._minimum_cpp_standard)
-        cmake.definitions["CXX_STD"] = cxx_std_value
+        tc.variables["CXX_STD"] = cxx_std_value
         if is_msvc:
-            cmake.definitions["MSVC_LANGUAGE_VERSION"] = cxx_std_value
-            cmake.definitions["MSVC_ENABLE_ALL_WARNINGS"] = False
-            cmake.definitions["MSVC_USE_STATIC_RUNTIME"] = "MT" in msvc_runtime_flag(self)
-        cmake.configure()
-        return cmake
+            tc.variables["MSVC_LANGUAGE_VERSION"] = cxx_std_value
+            tc.variables["MSVC_ENABLE_ALL_WARNINGS"] = False
+            tc.variables["MSVC_USE_STATIC_RUNTIME"] = "MT" in msvc_runtime_flag(self)
 
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        files.apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
         files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -203,7 +204,6 @@ class FollyConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "Folly::folly")
         self.cpp_info.set_property("pkg_config_name", "libfolly")
 
-        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         if Version(self.version) == "2019.10.21.00":
             self.cpp_info.components["libfolly"].libs = [
                 "follybenchmark",
@@ -228,7 +228,7 @@ class FollyConan(ConanFile):
                 ]
 
         self.cpp_info.components["libfolly"].requires = [
-            "boost::boost",
+            "boost::context", "boost::filesystem", "boost::program_options", "boost::regex", "boost::system", "boost::thread",
             "bzip2::bzip2",
             "double-conversion::double-conversion",
             "gflags::gflags",
@@ -265,17 +265,6 @@ class FollyConan(ConanFile):
         if self.settings.os == "Macos" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) >= "11.0":
             self.cpp_info.components["libfolly"].system_libs.append("c++abi")
 
-        if self.options.get_safe("use_sse4_2") and str(self.settings.arch) in ['x86', 'x86_64']:
-            self.cpp_info.components["libfolly"].defines = ["FOLLY_SSE=4", "FOLLY_SSE_MINOR=2"]
-
-        # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "folly"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "folly"
-        self.cpp_info.names["cmake_find_package"] = "Folly"
-        self.cpp_info.names["cmake_find_package_multi"] = "Folly"
-        self.cpp_info.names["pkg_config"] = "libfolly"
-        self.cpp_info.components["libfolly"].names["cmake_find_package"] = "folly"
-        self.cpp_info.components["libfolly"].names["cmake_find_package_multi"] = "folly"
         self.cpp_info.components["libfolly"].set_property("cmake_target_name", "Folly::folly")
         self.cpp_info.components["libfolly"].set_property("pkg_config_name", "libfolly")
 
