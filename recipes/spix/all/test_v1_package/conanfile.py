@@ -3,8 +3,7 @@ from conan.tools.build import cross_building
 import os
 
 
-# legacy validation with Conan 1.x
-class TestPackageV1Conan(ConanFile):
+class TestSpixV1Conan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
 
@@ -15,5 +14,5 @@ class TestPackageV1Conan(ConanFile):
 
     def test(self):
         if not cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
+            bin_path = os.path.join("bin", "test_spix")
             self.run(bin_path, run_environment=True)
