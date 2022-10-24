@@ -1,11 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
-from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 import os
 
 
@@ -52,11 +48,7 @@ class AnyRPCConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                # once removed by config_options, need try..except for a second del
-                del self.options.fPIC
-            except Exception:
-                pass
+            del self.options.fPIC
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -64,7 +56,7 @@ class AnyRPCConan(ConanFile):
     def requirements(self):
         if self.options.with_log4cplus:
             self.requires("log4cplus/2.0.7")
-            
+
     def validate(self):
         if self.options.with_log4cplus and self.options.with_wchar:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built with both log4cplus and wchar, see https://github.com/sgieseking/anyrpc/issues/25")
