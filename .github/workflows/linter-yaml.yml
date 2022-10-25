@@ -27,7 +27,7 @@ jobs:
           import pathlib
           import os
 
-          res = subprocess.run(["gh", "api", "/repos/conan-io/conan-center-index/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
+          res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
           files = json.loads(res.stdout)
           files = [f["filename"] for f in files]
           files = [f for f in files if pathlib.Path(f).is_relative_to("linter/")]
@@ -93,7 +93,7 @@ jobs:
           import pathlib
           import os
 
-          res = subprocess.run(["gh", "api", "/repos/conan-io/conan-center-index/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
+          res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
           files = json.loads(res.stdout)
           files = [f["filename"] for f in files]
           files = [f for f in files if pathlib.Path(f).match('${{ env.CONFIG_FILES_PATH }}')]
@@ -125,7 +125,7 @@ jobs:
           import pathlib
           import os
 
-          res = subprocess.run(["gh", "api", "/repos/conan-io/conan-center-index/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
+          res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
           files = json.loads(res.stdout)
           files = [f["filename"] for f in files]
           files = [f for f in files if pathlib.Path(f).match('${{ env.CONANDATA_FILES_PATH }}')]
