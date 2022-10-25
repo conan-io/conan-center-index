@@ -7,4 +7,4 @@ conan_basic_setup(TARGETS)
 find_package(libdeflate REQUIRED CONFIG)
 
 add_executable(test_package test_package.c)
-target_link_libraries(test_package libdeflate::libdeflate)
+target_link_libraries(test_package PRIVATE libdeflate::libdeflate)
