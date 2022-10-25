@@ -128,63 +128,6 @@ Usually, `url` has a [https](https://tools.ietf.org/html/rfc2660) scheme, but ot
 You may use an [online service](https://hash.online-convert.com/sha256-generator) to compute `sha256` sum for the given `url`.
 Also, you may use [sha256sum](https://linux.die.net/man/1/sha256sum) command ([windows](http://www.labtestproject.com/files/win/sha256sum/sha256sum.exe)).
 
-#### sha1
-
-[sha1](https://tools.ietf.org/html/rfc3174) is an alternate method to specify hash sum. It's usage is discouraged and `sha256` is preferred.
-
-#### md5
-
-[md5](https://tools.ietf.org/html/rfc1321) is an alternate method to specify hash sum. It's usage is discouraged and `sha256` is preferred.
-
-### Other cases
-
-There are other ways to specify sources to cover other cases.
-
-#### Source code & license
-
-Certain projects provide license on their own, and released artifacts do not include it. In this case, a license URL can be provided separately:
-
-```yml
-sources:
-  8.0.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.8.0.0/ApprovalTests.v.8.0.0.hpp
-      sha256: e16a97081f8582be951d95a9d53dc611f1f5a84e117a477029890d0b34ae99d6
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.8.0.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-```
-
-#### Several source code archives
-
-Some projects may include multiple tarballs as a part of release, [OpenCV](https://opencv.org/) is an example which includes auxiliary [contrib](https://github.com/opencv/opencv_contrib) archive:
-
-```yml
-sources:
-  "4.5.0":
-    - sha256: dde4bf8d6639a5d3fe34d5515eab4a15669ded609a1d622350c7ff20dace1907
-      url: https://github.com/opencv/opencv/archive/4.5.0.tar.gz
-    - sha256: a65f1f0b98b2c720abbf122c502044d11f427a43212d85d8d2402d7a6339edda
-      url: https://github.com/opencv/opencv_contrib/archive/4.5.0.tar.gz
-```
-
-#### Different source code archives per configuration
-
-This is the most advanced and sophisticated use-case, but no so common. Some projects may provide different sources for different platforms for awkward reasons, it could be expressed as:
-
-```yml
-sources:
-  "0066":
-    "Macos":
-      "apple-clang":
-        "x86":
-          - url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/MacIntel_OSX_AppleC_32bit/packages/cspice.tar.Z"
-            sha256: "9a4b5f674ea76821c43aa9140829da4091de646ef3ce40fd5be1d09d7c37b6b3"
-        "x86_64":
-          - url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/MacIntel_OSX_AppleC_64bit/packages/cspice.tar.Z"
-            sha256: "f5d48c4b0d558c5d71e8bf6fcdf135b0943210c1ff91f8191dfc447419a6b12e"
-```
-
-This approach requires a special code within [build](https://docs.conan.io/en/latest/reference/conanfile/methods.html#build) method to handle.
-
 ## patches
 
 Sometimes sources provided by project require patching for various reasons. The `conandata.yml` file is the right place to indicate this information as well.
