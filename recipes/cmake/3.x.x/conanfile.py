@@ -69,7 +69,10 @@ class CMakeConan(ConanFile):
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        if self.options.bootstrap:
+            basic_layout(self, src_folder="src")
+        else:
+            cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
