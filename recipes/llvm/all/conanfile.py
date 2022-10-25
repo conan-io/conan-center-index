@@ -187,10 +187,6 @@ class Llvm(ConanFile):
         for patch in self.conan_data.get('patches', {}).get(self.version, []):
             tools.patch(**patch)
 
-        # fix LOCATION / LOCATION_${build_type} not set on libxml2
-        tools.replace_in_file(self._source_subfolder + "/llvm/lib/WindowsManifest/CMakeLists.txt", "get_property",
-                              'find_library(libxml2_library NAME xml2 PATHS ${LibXml2_LIB_DIRS} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH) #')
-
     def _cmake_configure(self):
         enabled_projects = [
             project for project in projects
