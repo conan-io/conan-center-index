@@ -43,8 +43,8 @@ class SwigConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.build_requires("winflexbison/2.5.24")
         else:
-            self.build_requires("bison/3.7.6")
-        self.build_requires("automake/1.16.4")
+            self.build_requires("bison/3.8.2")
+        self.build_requires("automake/1.16.5")
 
     def package_id(self):
         del self.info.settings.compiler
