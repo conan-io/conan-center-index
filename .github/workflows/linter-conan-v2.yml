@@ -31,7 +31,7 @@ jobs:
           res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
           files = json.loads(res.stdout)
           files = [f["filename"] for f in files]
-          files = [f for f in files if pathlib.Path(f).is_relative_to('linter/')]
+          files = [f for f in files if f.startswith('linter/')]
           with open(os.getenv("GITHUB_OUTPUT"), "a") as output_file:
               output_file.write(f"any_changed={'true' if files else 'false'}\n")
       - uses: actions/checkout@v3
