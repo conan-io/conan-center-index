@@ -2,8 +2,7 @@ import os
 import shutil
 
 from conan import ConanFile, conan_version
-from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, copy, get, rmdir, apply_conandata_patches, export_conandata_patches, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -104,9 +103,5 @@ class NASMConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        if Version(conan_version).major < 2:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
