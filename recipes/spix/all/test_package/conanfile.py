@@ -18,7 +18,7 @@ class TestSpixConan(ConanFile):
 
     def _patch_sources(self):
         if self.options["spix"].qt_major == 6:
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 14)", "set(CMAKE_CXX_STANDARD 17)")
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "cxx_std_14", "cxx_std_17")
 
     def build(self):
         self._patch_sources()
