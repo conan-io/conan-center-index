@@ -1,7 +1,8 @@
 from conan import ConanFile, conan_version
 from conan.tools.files import chdir, copy, rmdir, get, replace_in_file
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.gnu import AutotoolsToolchain, Autotools
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.gnu import Autotools, AutotoolsDeps,  AutotoolsToolchain
+from conan.tools.layout import basic_layout
 from conan.tools.build import build_jobs, cross_building, check_min_cppstd
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
