@@ -25,13 +25,13 @@ jobs:
         run: |
           import json
           import subprocess
-          import pathlib
+          import fnmatch
           import os
 
           res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
           files = json.loads(res.stdout)
           files = [f["filename"] for f in files]
-          files = [f for f in files if f.startswith('linter/')]
+          files = [f for f in files if fnmatch.fnmatch(f, 'linter/**')]
           with open(os.getenv("GITHUB_OUTPUT"), "a") as output_file:
               output_file.write(f"any_changed={'true' if files else 'false'}\n")
       - uses: actions/checkout@v3
@@ -102,13 +102,13 @@ jobs:
         run: |
           import json
           import subprocess
-          import pathlib
+          import fnmatch
           import os
 
           res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
           files = json.loads(res.stdout)
           files = [f["filename"] for f in files]
-          files = [f for f in files if pathlib.Path(f).match('recipes/*/*/conanfile.py')]
+          files = [f for f in files if fnmatch.fnmatch(f, 'recipes/*/*/conanfile.py')]
           with open(os.getenv("GITHUB_OUTPUT"), "a") as output_file:
               output_file.write(f"any_changed={'true' if files else 'false'}\n")
               output_file.write(f"all_changed_files={' '.join(files)}\n")
@@ -147,13 +147,13 @@ jobs:
         run: |
           import json
           import subprocess
-          import pathlib
+          import fnmatch
           import os
 
           res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
           files = json.loads(res.stdout)
           files = [f["filename"] for f in files]
-          files = [f for f in files if pathlib.Path(f).match('recipes/*/*/test_*/conanfile.py')]
+          files = [f for f in files if fnmatch.fnmatch(f, 'recipes/*/*/test_*/conanfile.py')]
           with open(os.getenv("GITHUB_OUTPUT"), "a") as output_file:
               output_file.write(f"any_changed={'true' if files else 'false'}\n")
               output_file.write(f"all_changed_files={' '.join(files)}\n")

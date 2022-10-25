@@ -26,13 +26,13 @@ jobs:
         run: |
           import json
           import subprocess
-          import pathlib
+          import fnmatch
           import os
 
           res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
           files = json.loads(res.stdout)
           files = [f["filename"] for f in files]
-          files = [f for f in files if f.startswith("linter/")]
+          files = [f for f in files if fnmatch.fnmatch(f, "linter/")]
           with open(os.getenv("GITHUB_OUTPUT"), "a") as output_file:
               output_file.write(f"any_changed={'true' if files else 'false'}\n")
               output_file.write(f"all_changed_files={' '.join(files)}\n")
@@ -94,13 +94,13 @@ jobs:
         run: |
           import json
           import subprocess
-          import pathlib
+          import fnmatch
           import os
 
           res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
           files = json.loads(res.stdout)
           files = [f["filename"] for f in files]
-          files = [f for f in files if pathlib.Path(f).match('${{ env.CONFIG_FILES_PATH }}')]
+          files = [f for f in files if fnmatch.fnmatch(f, '${{ env.CONFIG_FILES_PATH }}')]
           with open(os.getenv("GITHUB_OUTPUT"), "a") as output_file:
               output_file.write(f"any_changed={'true' if files else 'false'}\n")
               output_file.write(f"all_changed_files={' '.join(files)}\n")
@@ -129,13 +129,13 @@ jobs:
         run: |
           import json
           import subprocess
-          import pathlib
+          import fnmatch
           import os
 
           res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
           files = json.loads(res.stdout)
           files = [f["filename"] for f in files]
-          files = [f for f in files if pathlib.Path(f).match('${{ env.CONANDATA_FILES_PATH }}')]
+          files = [f for f in files if fnmatch.fnmatch(f, '${{ env.CONANDATA_FILES_PATH }}')]
           with open(os.getenv("GITHUB_OUTPUT"), "a") as output_file:
               output_file.write(f"any_changed={'true' if files else 'false'}\n")
               output_file.write(f"all_changed_files={' '.join(files)}\n")           
