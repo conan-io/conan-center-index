@@ -55,12 +55,12 @@ patches:
       patch_source: "https://github.com/KhronosGroup/Vulkan-Loader/pull/1020"
       sha256: "f08b35f57884624fea618405affff17215cd747740bbce11af53a69911b48452"
   "1.2.182":
-    - patch_file: "patches/fix-mingw-1.2.182.patch"
+    - patch_file: "patches/1.2.182-0001-fix-mingw.patch"
       patch_description: "Fix MinGW"
       patch_type: "portability"
       sha256: "a05375c60b7f4a91f48df2278518be27e578e38190034bfcc887e5ceaa289c25"
   "1.2.154.0":
-    - patch_file: "patches/fix-mingw-1.2.154.0.patch"
+    - patch_file: "patches/1.2.154.0-0001-fix-mingw.patch"
       patch_description: "Fix MinGW"
       patch_type: "portability"
       patch_source:
