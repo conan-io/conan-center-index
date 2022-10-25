@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -106,6 +106,8 @@ class SpixConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        if self.options.qt_major == 6:
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 14)", "set(CMAKE_CXX_STANDARD 17)")
 
     def build(self):
         self._patch_sources()

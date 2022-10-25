@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake
+from conan.tools.files import replace_in_file
 import os
 
 
@@ -15,7 +16,12 @@ class TestSpixConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
+    def _patch_sources(self):
+        if self.options["spix"].qt_major == 6:
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 14)", "set(CMAKE_CXX_STANDARD 17)")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
