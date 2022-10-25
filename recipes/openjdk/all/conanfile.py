@@ -1,6 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import copy, get
-from conan.tools.files.symlinks import remove_broken_symlinks
+from conan.tools.files import copy, get, symlinks
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -29,10 +28,10 @@ class OpenJDK(ConanFile):
 
     def package(self):
         if self.settings.os == "Macos":
-            source_folder = os.path.join(self.source_folder, "jdk-{}.jdk".format(self.version), "Contents", "Home")
+            source_folder = os.path.join(self.source_folder, f"jdk-{self.version}.jdk", "Contents", "Home")
         else:
             source_folder = self.source_folder
-        remove_broken_symlinks(self, source_folder)
+        symlinks.remove_broken_symlinks(self, source_folder)
         copy(self, pattern="*",
                 src=os.path.join(source_folder, "bin"),
                 dst=os.path.join(self.package_folder, "bin"),
