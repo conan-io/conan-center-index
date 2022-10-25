@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, to_apple_arch
 from conan.tools.microsoft import is_msvc
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.build import cross_building
@@ -526,12 +526,12 @@ class FFMpegConan(ConanFile):
                 if self.options.with_audiotoolbox:
                     args.append("--disable-outdev=audiotoolbox")
 
-                xcrun = tools.XCRun(self.settings)
-                apple_arch = tools.to_apple_arch(str(self.settings.arch))
+                apple_arch = to_apple_arch(self)
+                sdk_path = self.conf.get("tools.apple:sdk_path")
                 extra_cflags.extend(
-                    ["-arch {}".format(apple_arch), "-isysroot {}".format(xcrun.sdk_path)])
+                    ["-arch {}".format(apple_arch), "-isysroot {}".format(sdk_path)])
                 extra_ldflags.extend(
-                    ["-arch {}".format(apple_arch), "-isysroot {}".format(xcrun.sdk_path)])
+                    ["-arch {}".format(apple_arch), "-isysroot {}".format(sdk_path)])
 
         args.append("--extra-cflags={}".format(" ".join(extra_cflags)))
         args.append("--extra-ldflags={}".format(" ".join(extra_ldflags)))
