@@ -19,6 +19,9 @@ class OpenApiGeneratorConan(ConanFile):
     def layout(self):
         pass
 
+    def requirements(self):
+        self.requires("openjdk/16.0.1")
+
     def package_id(self):
         del self.info.settings.arch
         del self.info.settings.compiler
