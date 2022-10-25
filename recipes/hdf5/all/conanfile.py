@@ -61,7 +61,7 @@ class Hdf5Conan(ConanFile):
                 raise ConanInvalidConfiguration("Parallel and Threadsafe options are mutually exclusive")
         if self.info.options.szip_support == "with_szip" and \
                 self.info.options.szip_encoding and \
-                not self.info.options["szip"].enable_encoding:
+                not self.dependencies["szip"].options.enable_encoding:
             raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
 
     def configure(self):
@@ -231,6 +231,7 @@ class Hdf5Conan(ConanFile):
             self.cpp_info.components[component_name].set_property("pkg_config_name", alias_target)
             self.cpp_info.components[component_name].libs = [_config_libname(alias_target)]
             self.cpp_info.components[component_name].requires = requirements
+            self.cpp_info.components[component_name].includedirs.append(os.path.join("include", "hdf5"))
 
             # TODO: to remove in conan v2 once cmake_find_package_* generators removed
             self.cpp_info.components[component_name].names["cmake_find_package"] = component
