@@ -27,7 +27,10 @@ class SwigConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def requirements(self):
-        self.requires("pcre/8.45")
+        if self.version in ['4.0.1', '4.0.2']:
+            self.requires("pcre/8.45")
+        else:
+            self.requires("pcre2/10.40")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
