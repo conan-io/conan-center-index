@@ -17,7 +17,6 @@ class WatcherConan(ConanFile):
     homepage = "https://github.com/e-dant/watcher/"
     topics = ("watch", "filesystem", "event", "header-only")
     settings = "os", "arch", "compiler", "build_type"
-    # no_copy_source = True
 
     @property
     def _minimum_cpp_standard(self):
@@ -54,7 +53,7 @@ class WatcherConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration(
-                f"{self.name} {self.version} requires C++{self._minimum_cpp_standard}, which your compiler does not support.",
+                f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.",
             )
 
     def source(self):
