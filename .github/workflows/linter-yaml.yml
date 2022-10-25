@@ -15,31 +15,19 @@ jobs:
     name: Test linter changes (YAML files)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYVER }}
-      - name: Get changed files
-        id: changed_files
-        shell: python
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          import json
-          import subprocess
-          import fnmatch
-          import os
-
-          res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
-          files = json.loads(res.stdout)
-          files = [f["filename"] for f in files]
-          files = [f for f in files if fnmatch.fnmatch(f, "linter/**")]
-          with open(os.getenv("GITHUB_OUTPUT"), "a") as output_file:
-              output_file.write(f"any_changed={'true' if files else 'false'}\n")
-              output_file.write(f"all_changed_files={' '.join(files)}\n")
       - uses: actions/checkout@v3
+      - name: Get changed files
+        uses: ./.github/actions/pr_changed_files
+        id: changed_files
+        with:
+          files: |
+            linter/**
+
+      - uses: actions/setup-python@v4
         if: steps.changed_files.outputs.any_changed == 'true'
         with:
-          fetch-depth: 2
+          python-version: ${{ env.PYVER }}
+
       - name: Install dependencies
         if: steps.changed_files.outputs.any_changed == 'true'
         run: pip install yamllint strictyaml argparse
@@ -77,6 +65,7 @@ jobs:
     name: Lint changed files (YAML files)
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYVER }}
@@ -88,23 +77,10 @@ jobs:
       - name: Get changed files (config)
         id: changed_files_config
         if: always()
-        shell: python
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          import json
-          import subprocess
-          import fnmatch
-          import os
-
-          res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
-          files = json.loads(res.stdout)
-          files = [f["filename"] for f in files]
-          files = [f for f in files if fnmatch.fnmatch(f, '${{ env.CONFIG_FILES_PATH }}')]
-          with open(os.getenv("GITHUB_OUTPUT"), "a") as output_file:
-              output_file.write(f"any_changed={'true' if files else 'false'}\n")
-              output_file.write(f"all_changed_files={' '.join(files)}\n")
-      - uses: actions/checkout@v3
+        uses: ./.github/actions/pr_changed_files
+        with:
+          files: |
+            ${{ env.CONFIG_FILES_PATH }}
 
       - name: Run linter (config.yml)
         if: steps.changed_files_config.outputs.any_changed == 'true' && always()
@@ -123,22 +99,10 @@ jobs:
       - name: Get changed files (conandata)
         id: changed_files_conandata
         if: always()
-        shell: python
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          import json
-          import subprocess
-          import fnmatch
-          import os
-
-          res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
-          files = json.loads(res.stdout)
-          files = [f["filename"] for f in files]
-          files = [f for f in files if fnmatch.fnmatch(f, '${{ env.CONANDATA_FILES_PATH }}')]
-          with open(os.getenv("GITHUB_OUTPUT"), "a") as output_file:
-              output_file.write(f"any_changed={'true' if files else 'false'}\n")
-              output_file.write(f"all_changed_files={' '.join(files)}\n")           
+        uses: ./.github/actions/pr_changed_files
+        with:
+          files: |
+            ${{ env.CONANDATA_FILES_PATH }}
 
       - name: Run linter (conandata.yml)
         if: steps.changed_files_conandata.outputs.any_changed == 'true' && always()

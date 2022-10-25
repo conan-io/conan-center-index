@@ -14,34 +14,23 @@ jobs:
     name: Test linter changes (v2 migration)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYVER }}
-      - name: Get changed files
-        id: changed_files
-        shell: python
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          import json
-          import subprocess
-          import fnmatch
-          import os
-
-          res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
-          files = json.loads(res.stdout)
-          files = [f["filename"] for f in files]
-          files = [f for f in files if fnmatch.fnmatch(f, 'linter/**')]
-          with open(os.getenv("GITHUB_OUTPUT"), "a") as output_file:
-              output_file.write(f"any_changed={'true' if files else 'false'}\n")
       - uses: actions/checkout@v3
-        if: steps.changed_files.outputs.any_changed == 'true'
+      - name: Get changed files
+        uses: ./.github/actions/pr_changed_files
+        id: changed_files
+        with:
+          files: |
+            linter/**
       - name: Get Conan v1 version
         id: parse_conan_v1_version
         if: steps.changed_files.outputs.any_changed == 'true'
         uses: mikefarah/yq@master
         with:
           cmd: yq '.conan.version' '.c3i/config_v1.yml'
+      - uses: actions/setup-python@v4
+        if: steps.changed_files.outputs.any_changed == 'true'
+        with:
+          python-version: ${{ env.PYVER }}
       - name: Install requirements
         if: steps.changed_files.outputs.any_changed == 'true'
         run: |
@@ -91,35 +80,23 @@ jobs:
     name: Lint changed conanfile.py (v2 migration)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYVER }}
+      - uses: actions/checkout@v3
       - name: Get changed files
         id: changed-files
-        shell: python
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          import json
-          import subprocess
-          import fnmatch
-          import os
-
-          res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
-          files = json.loads(res.stdout)
-          files = [f["filename"] for f in files]
-          files = [f for f in files if fnmatch.fnmatch(f, 'recipes/*/*/conanfile.py')]
-          with open(os.getenv("GITHUB_OUTPUT"), "a") as output_file:
-              output_file.write(f"any_changed={'true' if files else 'false'}\n")
-              output_file.write(f"all_changed_files={' '.join(files)}\n")
-      - uses: actions/checkout@v3
-        if: steps.changed-files.outputs.any_changed == 'true'
+        uses: ./.github/actions/pr_changed_files
+        with:
+          files: |
+            recipes/*/*/conanfile.py
       - name: Get Conan v1 version
         id: parse_conan_v1_version
         if: steps.changed-files.outputs.any_changed == 'true'
         uses: mikefarah/yq@master
         with:
           cmd: yq '.conan.version' '.c3i/config_v1.yml'
+      - uses: actions/setup-python@v4
+        if: steps.changed-files.outputs.any_changed == 'true'
+        with:
+          python-version: ${{ env.PYVER }}
       - name: Install dependencies
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
@@ -136,35 +113,23 @@ jobs:
     name: Lint changed test_package/conanfile.py (v2 migration)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYVER }}
+      - uses: actions/checkout@v3
       - name: Get changed files
         id: changed-files
-        shell: python
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          import json
-          import subprocess
-          import fnmatch
-          import os
-
-          res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
-          files = json.loads(res.stdout)
-          files = [f["filename"] for f in files]
-          files = [f for f in files if fnmatch.fnmatch(f, 'recipes/*/*/test_*/conanfile.py')]
-          with open(os.getenv("GITHUB_OUTPUT"), "a") as output_file:
-              output_file.write(f"any_changed={'true' if files else 'false'}\n")
-              output_file.write(f"all_changed_files={' '.join(files)}\n")
-      - uses: actions/checkout@v3
-        if: steps.changed-files.outputs.any_changed == 'true'            
+        uses: ./.github/actions/pr_changed_files
+        with:
+          files: |
+            recipes/*/*/test_*/conanfile.py
       - name: Get Conan v1 version
         id: parse_conan_v1_version
         if: steps.changed-files.outputs.any_changed == 'true'
         uses: mikefarah/yq@master
         with:
           cmd: yq '.conan.version' '.c3i/config_v1.yml'
+      - uses: actions/setup-python@v4
+        if: steps.changed-files.outputs.any_changed == 'true'
+        with:
+          python-version: ${{ env.PYVER }}
       - name: Install dependencies
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
