@@ -15,10 +15,8 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             output = StringIO()
-            if Version(conan_version).major < 2:
-                self.run("cmake --version", env="conanrun", output=output)
-            else:
-                self.run("cmake --version", env="conanrun", stdout=output)
+            # Third arg to self.run renamed "stdout" in Conan 2.0 but 1.x linter doesn't like it
+            self.run("cmake --version", env="conanrun", output)
             output_str = str(output.getvalue())
             self.output.info("Installed version: {}".format(output_str))
             require_version = str(self.dependencies["cmake"].ref.version)
