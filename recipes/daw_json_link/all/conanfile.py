@@ -21,7 +21,7 @@ class DawJsonLinkConan(ConanFile):
     short_paths = True
 
     @property
-    def _min_cppstd(self):
+    def _minimum_cpp_standard(self):
         return 17
 
     @property
