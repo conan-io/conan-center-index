@@ -19,8 +19,6 @@ class TheoraConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    # original theora.def from: "https://raw.githubusercontent.com/xiph/theora/v1.1.1/lib/theora.def"
-    # edited to change library name to just "theora"
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder,"src"))
 
