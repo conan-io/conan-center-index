@@ -1,8 +1,6 @@
-import os
 from six import StringIO
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.scm import Version
 
 
 class TestPackageConan(ConanFile):
