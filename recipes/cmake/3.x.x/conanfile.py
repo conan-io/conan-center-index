@@ -98,6 +98,8 @@ class CMakeConan(ConanFile):
                 tc.variables["HAVE_POLL_FINE_EXITCODE"] = ''
                 tc.variables["HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT"] = ''
             tc.generate()
+            tc = CMakeDeps(self)
+            tc.generate()
 
     def build(self):
         if self.info.options.bootstrap:
