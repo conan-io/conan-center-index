@@ -42,7 +42,7 @@ patches:
     - patch_file: "patches/1.7-0001-fix-makefiles.patch"
       base_path: "source_subfolder"
       patch_description: "disable optimization and apply compiler settings on conan recipe"
-      patch_type: "backport"
+      patch_type: "conan"
   "1.7":
     - patch_file: "patches/1.7-0001-fix-makefiles.patch"
       base_path: "source_subfolder"
