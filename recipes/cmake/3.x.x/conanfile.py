@@ -1,5 +1,5 @@
 from conan import ConanFile, conan_version
-from conan.tools.files import chdir, copy, rmdir, replace_in_file
+from conan.tools.files import chdir, copy, rmdir, get, replace_in_file
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.build import build_jobs, cross_building, check_min_cppstd
@@ -70,11 +70,11 @@ class CMakeConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-    
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
-    
+
     def generate(self):
         if self.info.options.bootstrap:
             tc = AutotoolsToolchain(self)
@@ -135,7 +135,7 @@ class CMakeConan(ConanFile):
             raise ConanException("Module path not found: %s" % mod_path)
 
         self.cpp_info.includedirs = []
-        
+
         # TODO remove once conan v2 is the only support and recipes have been migrated
         if Version(conan_version).major < 2:
             bindir = os.path.join(self.package_folder, "bin")
