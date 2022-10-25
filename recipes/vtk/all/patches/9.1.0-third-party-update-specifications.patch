@@ -44,30 +44,6 @@ index 3a8919aea4..06ecd6f860 100644
      STANDARD_INCLUDE_DIRS)
  
  configure_file(
-diff --git a/ThirdParty/jsoncpp/CMakeLists.txt b/ThirdParty/jsoncpp/CMakeLists.txt
-index a9581f862c..c7eaa21927 100644
---- a/ThirdParty/jsoncpp/CMakeLists.txt
-+++ b/ThirdParty/jsoncpp/CMakeLists.txt
-@@ -9,8 +9,8 @@ vtk_module_third_party(
-     STANDARD_INCLUDE_DIRS
-   EXTERNAL
-     PACKAGE JsonCpp
--    VERSION 0.7.0
--    TARGETS JsonCpp::JsonCpp
-+    VERSION 1.9.4
-+    TARGETS jsoncpp::jsoncpp
-     STANDARD_INCLUDE_DIRS)
- 
- if (VTK_MODULE_USE_EXTERNAL_vtkjsoncpp)
-@@ -20,7 +20,7 @@ if (VTK_MODULE_USE_EXTERNAL_vtkjsoncpp)
-     set (JsonCpp_FORWARDING_HEADER_NAME "forwards.h")
-   endif ()
-   include(vtkDetectLibraryType)
--  vtk_detect_library_shared(vtkjsoncpp JsonCpp::JsonCpp)
-+  vtk_detect_library_shared(vtkjsoncpp jsoncpp::jsoncpp)
- else ()
-   set(vtkjsoncpp_is_shared "${BUILD_SHARED_LIBS}")
- endif ()
 diff --git a/ThirdParty/libproj/CMakeLists.txt b/ThirdParty/libproj/CMakeLists.txt
 index 39e1859bb8..a8847b47ca 100644
 --- a/ThirdParty/libproj/CMakeLists.txt
