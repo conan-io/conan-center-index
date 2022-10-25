@@ -5,7 +5,7 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
 
-find_package(SZIP REQUIRED)
+find_package(szip REQUIRED)
 
 add_executable(${PROJECT_NAME} ../test_package/test_package.c)
 
