@@ -126,4 +126,4 @@ class SpixConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.libs = ["spix"]
+        self.cpp_info.libs = ["Spix"]
