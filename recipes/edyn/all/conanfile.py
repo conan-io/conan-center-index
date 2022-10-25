@@ -93,7 +93,7 @@ class EdynConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, self.package_folder, "*.pdb", recursive=True)
+        rm(self, pattern="*.pdb", folder=self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
