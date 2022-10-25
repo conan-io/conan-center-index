@@ -14,10 +14,10 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             output = StringIO()
-            self.run("cmake --version", env="conanrun", output=output)
+            self.run("cmake --version", env="conanrun", stdout=output)
             output_str = str(output.getvalue())
             self.output.info("Installed version: {}".format(output_str))
-            require_version = str(self.deps_cpp_info["cmake"].version)
+            require_version = str(self.dependencies["cmake"].ref.version)
             self.output.info("Expected version: {}".format(require_version))
             assert_cmake_version = "cmake version %s" % require_version
             assert(assert_cmake_version in output_str)
