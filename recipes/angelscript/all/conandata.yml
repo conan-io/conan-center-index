@@ -15,10 +15,10 @@ patches:
   "2.35.1":
     - patch_file: "patches/2.35.1-0001-fix-compatibility-apple-clang.patch"
       patch_description: "Fix apple-clang compatibility of ASM arm"
-      patch_type: "backport"
+      patch_type: "portability"
       patch_source: "https://github.com/codecat/angelscript-mirror/commit/7ec10a763d9c078b57c413b552a2d05c2638878f"
   "2.35.0":
     - patch_file: "patches/2.35.0-0001-fix-compatibility-apple-clang.patch"
       patch_description: "Fix apple-clang compatibility of ASM arm"
-      patch_type: "backport"
+      patch_type: "portability"
       patch_source: "https://github.com/codecat/angelscript-mirror/commit/7ec10a763d9c078b57c413b552a2d05c2638878f"
