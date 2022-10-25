@@ -13,13 +13,16 @@ patches:
     - patch_file: "patches/2.36.0-0001-missing-include-stdint.patch"
       patch_description: "Add missing stdint.h include"
       patch_type: "portability"
+      sha256: "16d08c43a871a2ab4695e63829e9c07f9fab4237515185c1921e55c0b76483d3"
   "2.35.1":
     - patch_file: "patches/2.35.1-0001-fix-compatibility-apple-clang.patch"
       patch_description: "Fix apple-clang compatibility of ASM arm"
       patch_type: "portability"
       patch_source: "https://github.com/codecat/angelscript-mirror/commit/7ec10a763d9c078b57c413b552a2d05c2638878f"
+      sha256: "6cd39d941cc9e674f5ec2f94d2dc0d2eec04dfb348bbc8956eb2c6e6f5b2b895"
   "2.35.0":
     - patch_file: "patches/2.35.0-0001-fix-compatibility-apple-clang.patch"
       patch_description: "Fix apple-clang compatibility of ASM arm"
       patch_type: "portability"
       patch_source: "https://github.com/codecat/angelscript-mirror/commit/7ec10a763d9c078b57c413b552a2d05c2638878f"
+      sha256: "03446786a60dbf53e0e69385ae918dbc4004bcf1a64c14960d11b856f3b0c64a"
