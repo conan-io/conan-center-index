@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -136,18 +136,8 @@ class LiefConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
-        # dirty fix for compilation error on gcc 5
-        if self.version == "0.12.2" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
-            replace_in_file(self, os.path.join(self.source_folder, "src", "PE", "Binary.cpp"),
-                "for (const Debug& debug : debug()) {",
-                "for (const Debug& debug : this->debug()) {"
-            )
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
