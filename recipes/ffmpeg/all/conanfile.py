@@ -181,6 +181,10 @@ class FFMpegConan(ConanFile):
     }
 
     @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
     def _dependencies(self):
         return {
             "avformat": ["avcodec"],
@@ -208,10 +212,6 @@ class FFMpegConan(ConanFile):
             "with_pulse": ["avdevice"],
             "with_sdl": ["with_programs"],
         }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -303,16 +303,16 @@ class FFMpegConan(ConanFile):
             self.requires("vulkan-loader/1.3.221")
 
     def validate(self):
-        if self.options.with_ssl == "securetransport" and not is_apple_os(self):
+        if self.info.options.with_ssl == "securetransport" and not is_apple_os(self):
             raise ConanInvalidConfiguration(
                 "securetransport is only available on Apple")
 
         for dependency, features in self._dependencies.items():
-            if not self.options.get_safe(dependency):
+            if not self.info.options.get_safe(dependency):
                 continue
             used = False
             for feature in features:
-                used = used or self.options.get_safe(feature)
+                used = used or self.info.options.get_safe(feature)
             if not used:
                 dependency_string = "' or '".join(features)
                 raise ConanInvalidConfiguration(f"FFmpeg '{dependency_string}' option requires '{dependency_string}' option to be enabled")
@@ -327,28 +327,6 @@ class FFMpegConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
-
-    @property
-    def _target_arch(self):
-        target_arch, _, _ = get_gnu_triplet._get_gnu_triplet(
-            "Macos" if is_apple_os(self) else str(self.settings.os),
-            str(self.settings.arch),
-            str(self.settings.compiler) if self.settings.os == "Windows" else None,
-        ).split("-")
-        return target_arch
-
-    @property
-    def _target_os(self):
-        if is_msvc(self):
-            return "win32"
-        _, _, target_os = get_gnu_triplet._get_gnu_triplet(
-            "Macos" if is_apple_os(self) else str(self.settings.os),
-            str(self.settings.arch),
-            str(self.settings.compiler) if self.settings.os == "Windows" else None,
-        ).split("-")
-        if target_os == "gnueabihf":
-            target_os = "gnu" # could also be "linux"
-        return target_os
 
     def _patch_sources(self):
         if is_msvc(self) and self.options.with_libx264 and not self.options["libx264"].shared:
@@ -514,7 +492,7 @@ class FFMpegConan(ConanFile):
         if is_apple_os(self):
             # relocatable shared libs
             args.append("--install-name-dir=@rpath")
-        args.append(f"--arch={self._target_arch}")
+        args.append(f"--arch={self.info.settings.arch}")
         if self.settings.build_type == "Debug":
             args.extend([
                 "--disable-optimizations",
@@ -542,15 +520,15 @@ class FFMpegConan(ConanFile):
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
                 tc.defines.append("inline=__inline")
         if cross_building(self):
-            if self._target_os == "emscripten":
+            target_os = "Macos" if is_apple_os(self) else str(self.info.settings.os)
+            if target_os == "emscripten":
                 args.append("--target-os=none")
             else:
-                args.append(f"--target-os={self._target_os}")
+                args.append(f"--target-os={target_os}")
 
             if is_apple_os(self):
                 if self.options.with_audiotoolbox:
                     args.append("--disable-outdev=audiotoolbox")
-                tc.apple_arch_flag = to_apple_arch(self)
 
         # FIXME: This is a hack that feels wrong but I don't know how to fix properly. Is this an AutotoolsTolchain
         #  problem
