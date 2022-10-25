@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import chdir, copy
+from conan.tools.files import copy
 from conan.tools.build import can_run
 from conan.tools.layout import basic_layout
 import os
