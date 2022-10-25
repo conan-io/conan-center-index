@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
@@ -30,7 +31,28 @@ class SpixConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
-        return 14
+        # Qt6 requires C++17
+        if self.options.qt_major == 6:
+            return 17
+        else:
+            return 14
+            
+    @property
+    def _compilers_minimum_version(self):
+        if self.options.qt_major == 6:
+            return {
+                "Visual Studio": "16",
+                "gcc": "8",
+                "clang": "9",
+                "apple-clang": "11"
+            }
+        else:
+            return {
+                "Visual Studio": "14",
+                "gcc": "5",
+                "clang": "3.4",
+                "apple-clang": "10"
+            }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -56,6 +78,11 @@ class SpixConan(ConanFile):
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
+        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
+            )
         
     def configure(self):
         # shadertools and qtdeclarative provide the Quick module
