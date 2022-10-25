@@ -97,14 +97,12 @@ endif()
 
 
 if (MSVC AND BUILD_SHARED_LIBS)
-   set (LIBTHEORA_DEF "lib/theora.def")
-   set (LIBTHEORA_ENC_DEF "win32/xmingw32/libtheoraenc-all.def")
-   set (LIBTHEORA_DEC_DEF "win32/xmingw32/libtheoradec-all.def")
+   set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif ()
 
-add_library(theora ${LIBTHEORA_COMMON} ${LIBTHEORA_ENC} ${LIBTHEORA_DEC} ${LIBTHEORA_DEF})
-add_library(theoraenc ${LIBTHEORA_COMMON} ${LIBTHEORA_ENC} ${LIBTHEORA_ENC_DEF})
-add_library(theoradec ${LIBTHEORA_COMMON} ${LIBTHEORA_DEC} ${LIBTHEORA_DEC_DEF})
+add_library(theora ${LIBTHEORA_COMMON} ${LIBTHEORA_ENC} ${LIBTHEORA_DEC})
+add_library(theoraenc ${LIBTHEORA_COMMON} ${LIBTHEORA_ENC})
+add_library(theoradec ${LIBTHEORA_COMMON} ${LIBTHEORA_DEC})
 
 if (BUILD_SHARED_LIBS)
    target_compile_definitions(theora PRIVATE LIBTHEORA_EXPORTS)

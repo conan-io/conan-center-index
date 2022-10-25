@@ -48,14 +48,7 @@ class TheoraConan(ConanFile):
         self.requires("ogg/1.3.5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version][0], destination=self.source_folder, strip_root=True)
-
-        def_source = self.conan_data["sources"][self.version][1]
-        def_url = def_source["url"]
-        def_filename = def_url[def_url.rfind("/") + 1:]
-        def_path = os.path.join(self.source_folder, "lib", def_filename)
-        download(self, **def_source, filename=def_path)
-        replace_in_file(self, def_path, "LIBRARY	libtheora", "LIBRARY	theora")
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
