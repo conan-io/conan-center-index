@@ -1,4 +1,3 @@
-import functools
 import os
 
 from conan import ConanFile
@@ -47,7 +46,7 @@ class LibnameConan(ConanFile):
                 raise ConanInvalidConfiguration("graphene does not support GCC before 5.0")
 
     def build_requirements(self):
-        self.tool_requires("meson/0.63.2")
+        self.tool_requires("meson/0.63.3")
         self.tool_requires("pkgconf/1.9.3")
 
     def requirements(self):
@@ -100,18 +99,13 @@ class LibnameConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_meson(self):
+    def build(self):
         meson = Meson(self)
         meson.configure()
-        return meson
-
-    def build(self):
-        meson = self._configure_meson()
         meson.build()
 
     def package(self):
-        meson = self._configure_meson()
+        meson = Meson(self)
         meson.install()
         copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
