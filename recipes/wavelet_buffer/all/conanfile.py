@@ -57,6 +57,10 @@ class WaveletBufferConan(ConanFile):
         tc.variables["CONAN_EXPORTED"] = True
         tc.generate()
 
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            build.check_min_cppstd(self, 20)
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
