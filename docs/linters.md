@@ -12,7 +12,8 @@ to configure plugins, warnings and errors which should be enabled or disabled.
 <!-- toc -->
 ## Contents
 
-  * [Running the linter locally](#running-the-linter-locally)
+  * [Understanding the different linters](#understanding-the-different-linters)
+  * [Running the linters locally](#running-the-linters-locally)
   * [Pylint configuration files](#pylint-configuration-files)
   * [Linter Warning and Errors](#linter-warning-and-errors)
     * [E9006 - conan-import-conanfile: ConanFile should be imported from conan](#e9006---conan-import-conanfile-conanfile-should-be-imported-from-conan)
