@@ -21,6 +21,8 @@ jobs:
       - name: Get changed files
         id: changed_files
         shell: python
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           import json
           import subprocess
@@ -87,6 +89,8 @@ jobs:
         id: changed_files_config
         if: always()
         shell: python
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           import json
           import subprocess
