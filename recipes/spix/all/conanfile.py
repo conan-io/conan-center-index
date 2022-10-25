@@ -34,9 +34,8 @@ class SpixConan(ConanFile):
         # Qt6 requires C++17
         if self.options.qt_major == 6:
             return 17
-        else:
-            return 14
-            
+        return 14
+
     @property
     def _compilers_minimum_version(self):
         if self.options.qt_major == 6:
@@ -46,13 +45,12 @@ class SpixConan(ConanFile):
                 "clang": "9",
                 "apple-clang": "11"
             }
-        else:
-            return {
-                "Visual Studio": "14",
-                "gcc": "5",
-                "clang": "3.4",
-                "apple-clang": "10"
-            }
+        return {
+            "Visual Studio": "14",
+            "gcc": "5",
+            "clang": "3.4",
+            "apple-clang": "10"
+        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -64,6 +62,12 @@ class SpixConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+        # shadertools and qtdeclarative provide the Quick module
+        if self.options.qt_major == 6:
+            self.options["qt"].qtshadertools = True
+        self.options["qt"].qtdeclarative = True
+        self.options["qt"].gui = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -83,13 +87,6 @@ class SpixConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
             )
-        
-    def configure(self):
-        # shadertools and qtdeclarative provide the Quick module
-        if self.options.qt_major == 6:
-            self.options["qt"].qtshadertools = True
-        self.options["qt"].qtdeclarative = True
-        self.options["qt"].gui = True
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
