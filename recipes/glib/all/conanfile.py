@@ -115,24 +115,12 @@ class GLibConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
-        tc = AutotoolsDeps(self)
-        # bug? meson toolchain doesn't read CPPFLAGS
-        cppflags = tc.vars().get("CPPFLAGS")
-        tc.environment.append('CFLAGS', cppflags)
-        tc.environment.append('CXXFLAGS', cppflags)
-        # conan or meson bug? LIBPATH is ignored
-        ldflags = tc.vars().get("LDFLAGS")
-        ldflags = ldflags.replace("-LIBPATH", "/LIBPATH")
-        tc.environment.define('LDFLAGS', ldflags)
-        tc.generate()
-        # it's needed so MesonToolchain reads from AutotoolsDeps, should it be automatic?
-        self.buildenv.compose_env(tc.environment)
-
         tc = MesonToolchain(self)
+
         if is_apple_os(self):
             tc.project_options["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
         tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
