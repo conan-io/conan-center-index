@@ -54,6 +54,7 @@ class DuckdbConan(ConanFile):
         "with_threads": True,
         "with_rdtsc": False,
     }
+    short_paths = True
 
     @property
     def _minimum_cpp_standard(self):
