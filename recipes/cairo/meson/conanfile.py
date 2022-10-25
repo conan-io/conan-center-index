@@ -143,50 +143,50 @@ class CairoConan(ConanFile):
                 )
 
     def generate(self):
-        def boolean(value):
+        def is_enabled(value):
             return "enabled" if value else "disabled"
 
         pkg_deps = PkgConfigDeps(self)
         pkg_deps.generate()
 
-        defs = dict()
-        defs["tests"] = "disabled"
-        defs["zlib"] = boolean(self.options.with_zlib)
-        defs["png"] = boolean(self.options.with_png)
-        defs["freetype"] = boolean(self.options.with_freetype)
-        defs["fontconfig"] = boolean(self.options.with_fontconfig)
+        options = dict()
+        options["tests"] = "disabled"
+        options["zlib"] = is_enabled(self.options.with_zlib)
+        options["png"] = is_enabled(self.options.with_png)
+        options["freetype"] = is_enabled(self.options.with_freetype)
+        options["fontconfig"] = is_enabled(self.options.with_fontconfig)
         if self.settings.os == "Linux":
-            defs["xcb"] = boolean(self.options.get_safe("with_xcb"))
-            defs["xlib"] = boolean(self.options.get_safe("with_xlib"))
-            defs["xlib-xrender"] = boolean(self.options.get_safe("with_xlib_xrender"))
+            options["xcb"] = is_enabled(self.options.get_safe("with_xcb"))
+            options["xlib"] = is_enabled(self.options.get_safe("with_xlib"))
+            options["xlib-xrender"] = is_enabled(self.options.get_safe("with_xlib_xrender"))
         else:
-            defs["xcb"] = "disabled"
-            defs["xlib"] = "disabled"
+            options["xcb"] = "disabled"
+            options["xlib"] = "disabled"
         if self.options.get_safe("with_opengl") == "desktop":
-            defs["gl-backend"] = "gl"
+            options["gl-backend"] = "gl"
         elif self.options.get_safe("with_opengl") == "gles2":
-            defs["gl-backend"] = "glesv2"
+            options["gl-backend"] = "glesv2"
         elif self.options.get_safe("with_opengl") == "gles3":
-            defs["gl-backend"] = "glesv3"
+            options["gl-backend"] = "glesv3"
         else:
-            defs["gl-backend"] = "disabled"
-        defs["glesv2"] = boolean(self.options.get_safe("with_opengl") == "gles2")
-        defs["glesv3"] = boolean(self.options.get_safe("with_opengl") == "gles3")
-        defs["tee"] = boolean(self.options.tee)
-        defs["symbol-lookup"] = boolean(self.options.get_safe("with_symbol_lookup"))
+            options["gl-backend"] = "disabled"
+        options["glesv2"] = is_enabled(self.options.get_safe("with_opengl") == "gles2")
+        options["glesv3"] = is_enabled(self.options.get_safe("with_opengl") == "gles3")
+        options["tee"] = is_enabled(self.options.tee)
+        options["symbol-lookup"] = is_enabled(self.options.get_safe("with_symbol_lookup"))
 
         # future options to add, see meson_options.txt.
         # for now, disabling explicitly, to avoid non-reproducible auto-detection of system libs
-        defs["cogl"] = "disabled"  # https://gitlab.gnome.org/GNOME/cogl
-        defs["directfb"] = "disabled"
-        defs["drm"] = "disabled"  # not yet compilable in cairo 1.17.4
-        defs["openvg"] = "disabled"  # https://www.khronos.org/openvg/
-        defs["qt"] = "disabled"  # not yet compilable in cairo 1.17.4
-        defs["gtk2-utils"] = "disabled"
-        defs["spectre"] = "disabled"  # https://www.freedesktop.org/wiki/Software/libspectre/
+        options["cogl"] = "disabled"  # https://gitlab.gnome.org/GNOME/cogl
+        options["directfb"] = "disabled"
+        options["drm"] = "disabled"  # not yet compilable in cairo 1.17.4
+        options["openvg"] = "disabled"  # https://www.khronos.org/openvg/
+        options["qt"] = "disabled"  # not yet compilable in cairo 1.17.4
+        options["gtk2-utils"] = "disabled"
+        options["spectre"] = "disabled"  # https://www.freedesktop.org/wiki/Software/libspectre/
 
         meson = MesonToolchain(self)
-        meson.project_options.update(defs)
+        meson.project_options.update(options)
 
         if is_apple_os(self) and Version(self.version) <= "1.17.4":
             # This was fixed in the meson build from 1.17.6
@@ -300,7 +300,7 @@ class CairoConan(ConanFile):
             self.cpp_info.components["cairo-quartz-font"].names["pkg_config"] = "cairo-quartz-font"
             self.cpp_info.components["cairo-quartz-font"].requires = ["cairo_"]
 
-            self.cpp_info.components["cairo_"].frameworks += ["ApplicationServices", "CoreFoundation"]
+            self.cpp_info.components["cairo_"].frameworks += ["ApplicationServices", "CoreFoundation", "CoreGraphics"]
 
         if self.settings.os == "Windows":
             self.cpp_info.components["cairo-win32"].set_property("pkg_config_name", "cairo-win32")
