@@ -1,18 +1,17 @@
 import os
 
 from conan import ConanFile
-from conan.tools.cmake import CMake
-from conan.tools.layout import basic_layout
+from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.build import can_run
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeToolchain", "CMakeDeps", "VirtualBuildEnv", "VirtualRunEnv"
+    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
 
     def layout(self):
-        basic_layout(self)
+        cmake_layout(self)
 
     def requirements(self):
         self.requires(self.tested_reference_str)
