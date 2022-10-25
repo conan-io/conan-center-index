@@ -23,7 +23,6 @@ class TheoraConan(ConanFile):
     # edited to change library name to just "theora"
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder,"src"))
-        copy(self, "conan-theora.def", self.recipe_folder, os.path.join(self.export_sources_folder,"src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -81,7 +80,7 @@ class TheoraConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.set_property("pkg_config_name", "theora_full_package")    # to avoid conflicts with theora component
+        self.cpp_info.set_property("pkg_config_name", "theora_full_package_do_not_use")    # to avoid conflicts with theora component
 
         self.cpp_info.components["theora"].set_property("pkg_config_name", "theora")
         self.cpp_info.components["theora"].libs = ["theora"]
@@ -95,11 +94,6 @@ class TheoraConan(ConanFile):
         self.cpp_info.components["theoraenc"].libs = ["theoraenc"]
         self.cpp_info.components["theoraenc"].requires = ["ogg::ogg"]
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "theora"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "theora"
-        self.cpp_info.names["cmake_find_package"] = "theora"
-        self.cpp_info.names["cmake_find_package_multi"] = "theora"
 
         # TODO: to remove in conan v2 once pkg_config generator removed
         self.cpp_info.names["pkg_config"] = "theora_full_package"

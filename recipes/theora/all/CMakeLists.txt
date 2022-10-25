@@ -112,12 +112,6 @@ if (BUILD_SHARED_LIBS)
    target_compile_definitions(theoradec PRIVATE LIBTHEORA_EXPORTS)
 endif()
 
-if (MSVC)
-   target_compile_definitions (theora PRIVATE _CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_DEPRECATE)
-   target_compile_definitions (theoraenc PRIVATE _CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_DEPRECATE)
-   target_compile_definitions (theoradec PRIVATE _CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_DEPRECATE)
-endif ()
-
 target_link_libraries(theora PUBLIC Ogg::ogg)
 target_link_libraries(theoraenc PUBLIC Ogg::ogg)
 target_link_libraries(theoradec PUBLIC Ogg::ogg)
