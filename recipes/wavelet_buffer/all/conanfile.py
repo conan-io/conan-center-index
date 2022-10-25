@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import get
+from conan.tools.build import check_min_cppstd
 
 required_conan_version = ">=1.50"
 
@@ -59,7 +60,7 @@ class WaveletBufferConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            build.check_min_cppstd(self, 20)
+            check_min_cppstd(self, 20)
 
     def build(self):
         cmake = CMake(self)
