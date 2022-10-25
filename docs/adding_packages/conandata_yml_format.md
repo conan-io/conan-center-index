@@ -4,25 +4,22 @@
 file to provide declarative data for the recipe (which is imperative). This is a built-in Conan feature (available since
 1.22.0) without a fixed structure, but ConanCenter has a specific format to ensure quality of recipes.
 
-In the context of conan-center-index, this file is _mandatory_ and consists of two main entries:
+In the context of ConanCenterIndex, this file is _mandatory_ and consists of two main sections that will be explained in the
+next sections with more detail:
 
-* `sources`: Library sources origin with their verification checksums.
-* `patches`: Details about the any patches the may library need
+* `sources`: Library sources origin with their verification checksums. Freeform structure specific to a recipe.
+* `patches`: Details about the different patches the library needs along with details for traceability.
 
 <!-- toc -->
 ## Contents
 
   * [sources](#sources)
     * [Mirrors](#mirrors)
+    * [Multiple Assets](#multiple-assets)
+      * [Different source archives per configuration](#different-source-archives-per-configuration)
     * [Sources fields](#sources-fields)
       * [url](#url)
       * [sha256](#sha256)
-      * [sha1](#sha1)
-      * [md5](#md5)
-    * [Other cases](#other-cases)
-      * [Source code & license](#source-code--license)
-      * [Several source code archives](#several-source-code-archives)
-      * [Different source code archives per configuration](#different-source-code-archives-per-configuration)
   * [patches](#patches)
     * [Patches fields](#patches-fields)
       * [patch_file](#patch_file)
@@ -64,14 +61,59 @@ Sometimes it is useful to declare mirrors, use a list in the `url` field. Conan 
 ```yml
 sources:
   "1.2.11":
-    url: [
-         "https://zlib.net/zlib-1.2.11.tar.gz",
-         "https://downloads.sourceforge.net/project/libpng/zlib/1.2.11/zlib-1.2.11.tar.gz",
-       ]
+    url:
+    - "https://zlib.net/zlib-1.2.11.tar.gz",
+    - "https://downloads.sourceforge.net/project/libpng/zlib/1.2.11/zlib-1.2.11.tar.gz",
     sha256: "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1"
 ```
 
 Keep in mind all the mirrors have to provide the exactly same source (e.g. no repackaging), thus using the same hash sum.
+
+### Multiple Assets
+
+It's rare but some projects ship archives missing files that are required to build or specifically to ConanCenter requirements.
+You can name each asset and download them in the `conanfile.py`'s `source()` referring to the names.
+
+```yml
+sources:
+  "10.12.2":
+    "sources":
+      url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.12.2/ApprovalTests.v.10.12.2.hpp
+      sha256: 4c43d0ea98669e3d6fbb5810cc47b19adaf88cabb1421b488aa306b08c434131
+    "license":
+      url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.12.2/LICENSE"
+      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
+```
+
+You can list as many assets you need and reference them by their index. But make sure you keep them in order if there is any specific
+logic about handling.
+
+```yml
+sources:
+  "10.12.2":
+    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.12.2/ApprovalTests.v.10.12.2.hpp
+      sha256: 4c43d0ea98669e3d6fbb5810cc47b19adaf88cabb1421b488aa306b08c434131
+    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.12.2/LICENSE"
+      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
+```
+
+#### Different source archives per configuration
+
+This is the most advanced and sophisticated use-case, but not so common. Some projects may provide different sources for different platforms, it could be expressed as:
+
+```yml
+sources:
+  "0066":
+    "Macos": # Operating system
+      "x86": # Architecture
+      - url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/MacIntel_OSX_AppleC_32bit/packages/cspice.tar.Z"
+        sha256: "9a4b5f674ea76821c43aa9140829da4091de646ef3ce40fd5be1d09d7c37b6b3"
+      "x86_64":
+      - url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/MacIntel_OSX_AppleC_64bit/packages/cspice.tar.Z"
+        sha256: "f5d48c4b0d558c5d71e8bf6fcdf135b0943210c1ff91f8191dfc447419a6b12e"
+```
+
+This approach requires a special code within [build](https://docs.conan.io/en/latest/reference/conanfile/methods.html#build) method to handle.
 
 ### Sources fields
 
@@ -164,12 +206,14 @@ patches:
 
 ### Patches fields
 
+Theres are necessary for Conan to work as well as provide key information to reviewers and consumers which need to understand
+the reasoning behind patches.
+
 #### patch_file
 
 _Required_
 
-Patch file might be committed to the conan-center-index, near to the conanfile (usually, into the `patches` sub-directory). Such patch files usually have either `.diff` or `.patch` extension.
-The recommended way to generate such patches is [git format-patch](https://git-scm.com/docs/git-format-patch). The path to the patch is relative to the directory containing `conandata.yml` and `conanfile.py`.
+Patch file that are committed to the ConanCenterIndex, go into the `patches` sub-directory (next to the `conanfile.py`). Such patch files usually have either `.diff` or `.patch` extension. The recommended way to generate such patches is [git format-patch](https://git-scm.com/docs/git-format-patch). The path to the patch is relative to the directory containing `conandata.yml` and `conanfile.py`.
 
 #### patch_description
 
@@ -187,7 +231,7 @@ An example of a full patch description could be: `port to Android: update config
 
 _Required_
 
-The `patch_type` field specifies the type of the patch. In conan-center-index we currently accept only several kind of patches:
+The `patch_type` field specifies the type of the patch. In ConanCenterIndex we currently accept only several kind of patches:
 
 ##### official
 
@@ -202,18 +246,20 @@ Usually, original library projects do new releases fixing vulnerabilities for th
 
 ##### backport
 
-`patch_type: backport`: Indicates a patch that backports an existing bug fix from the newer release or master branch (or equivalent, such as main/develop/trunk/etc). The patch source may be a pull request, or bug within the project's issue tracker.
+> **Note**: These are likely to undergo extra scrutiny during review as they may modify the source code.
+
+`patch_type: backport`: Indicates a patch that backports an existing bug fix from the newer release or master branch (or equivalent, such as main/develop/trunk/etc). The [`patch_source`](#patch_source) may be a pull request, or bug within the project's issue tracker.
 Backports are accepted only for bugs that break normal execution flow, never for feature requests.
 Usually, the following kind of problems are good candidates for backports:
 
-- Program doesn't start at all.
-- Crash (segmentation fault or access violation).
-- Hang up or deadlock.
-- Memory leak or resource leak in general.
-- Garbage output.
-- Abnormal termination without a crash (e.g. just exit code 1 at very beginning of the execution).
-- Data corruption.
-- Use of outdated or deprecated API or library.
+* Program doesn't start at all.
+* Crash (segmentation fault or access violation).
+* Hang up or deadlock.
+* Memory leak or resource leak in general.
+* Garbage output.
+* Abnormal termination without a crash (e.g. just exit code 1 at very beginning of the execution).
+* Data corruption.
+* Use of outdated or deprecated API or library.
 
 As sources with backports don't act exactly the same as the version officially released, it may be a source of confusion for the consumers who are relying on the buggy behavior (even if it's completely wrong). Therefore, it's required to introduce a new `cci.<YYYYMMDD>` version for such backports, so consumers may choose to use either official version, or modified version with backport(s) included.
 
@@ -236,11 +282,11 @@ _Recommended_
 
 `patch_source` is the URL from where patch was taken from. https scheme is preferred, but other URLs (e.g. git/svn/hg) are also accepted if there is no alternative. Types of patch sources are:
 
-- Link to the public commit in project hosting like GitHub/GitLab/BitBucket/Savanha/SourceForge/etc.
-- Link to the Pull Request or equivalent (e.g. gerrit review).
-- Link to the bug tracker (such as JIRA, BugZilla, etc.).
-- Link to the mail list discussion.
-- Link to the patch itself in another repository (e.g. MSYS, Debian, etc.).
+* Link to the public commit in project hosting like GitHub/GitLab/BitBucket/Savanha/SourceForge/etc.
+* Link to the Pull Request or equivalent (e.g. gerrit review).
+* Link to the bug tracker (such as JIRA, BugZilla, etc.).
+* Link to the mail list discussion.
+* Link to the patch itself in another repository (e.g. MSYS, Debian, etc.).
 
 For the `patch_type: portability` there might be no patch source matching the definition above. Although we encourage contributors to submit all such portability fixes upstream first, it's not always possible (e.g. for projects no longer maintained). In that case, a link to the Conan issue is a valid patch source (if there is no issue, you may [create](https://github.com/conan-io/conan-center-index/issues/new/choose) one).
 For the `patch_type: conan`, it doesn't make sense to submit patch upstream, so there will be no patch source.
