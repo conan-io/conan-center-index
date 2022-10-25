@@ -18,3 +18,4 @@ def register(linter: PyLinter) -> None:
     linter.register_checker(ImportErrorsConanException(linter))
     linter.register_checker(ImportErrorsConanInvalidConfiguration(linter))
     linter.register_checker(ImportTools(linter))
+
