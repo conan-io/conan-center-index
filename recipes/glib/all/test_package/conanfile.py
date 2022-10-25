@@ -45,5 +45,7 @@ class TestPackageConan(ConanFile):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
 
-            pkg_config = PkgConfig(self, "gio-2.0", pkg_config_path=self.generators_folder)
-            self.run(f"{pkg_config.variables['gdbus_codegen']} -h", env="conanrun")
+            if self.settings.os != "Windows":
+                pkg_config = PkgConfig(self, "gio-2.0", pkg_config_path=self.generators_folder)
+                gdbus_codegen = pkg_config.variables["gdbus_codegen"]
+                self.run(f"{gdbus_codegen} -h", env="conanrun")
