@@ -37,6 +37,10 @@ class WaveletBufferConan(ConanFile):
 
         self.settings.build_type = "Release"
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def source(self):
         get(
             self,
