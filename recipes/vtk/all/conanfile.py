@@ -406,9 +406,6 @@ class VtkConan(ConanFile):
         if self.settings.os != "Windows":
             self.requires("openssl/1.1.1o", override=True)
 
-        # HACK TODO working around a dependency bug in conan
-        self.requires("cmake/3.23.2")
-
 
     def build_requirements(self):
         # Recipe Maintainers:
@@ -684,9 +681,12 @@ class VtkConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        # VTK installs the licenses under the res/licenses/VTK directory, move it
-        rename( os.path.join(self.package_folder,"res","licenses","VTK"),
+        # VTK installs the licenses under the share/licenses/VTK directory, move it
+        rename( os.path.join(self.package_folder,"share","licenses","VTK"),
                 os.path.join(self.package_folder,"licenses"))
+
+        rmdir(os.path.join(self.package_folder,"share","licenses"))
+        rmdir(os.path.join(self.package_folder,"share"))
 
         # keep copy of generated VTK cmake files, for inspection
         if _debug_packaging:
@@ -698,11 +698,7 @@ class VtkConan(ConanFile):
 
         # make a copy of the modules.json, we use that in package_info
         # TODO where should this file live?  perhaps just in the base package folder?
-        self.copy("modules.json",
-                dst=os.path.join(self.package_folder), # ,"lib","conan"))
-                src=os.path.join(self.build_folder,"modules.json"),
-                keep_path=False
-                )
+        self.copy("modules.json", src=self.build_folder, dst=self.package_folder, keep_path=False)
 
         # create a cmake file with our special variables
         content = textwrap.dedent("""\
