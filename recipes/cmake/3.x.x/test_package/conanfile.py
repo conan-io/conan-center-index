@@ -16,7 +16,7 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             output = StringIO()
             # Third arg to self.run renamed "stdout" in Conan 2.0 but 1.x linter doesn't like it
-            self.run("cmake --version", env="conanrun", output)
+            self.run("cmake --version", output, env="conanrun")
             output_str = str(output.getvalue())
             self.output.info("Installed version: {}".format(output_str))
             require_version = str(self.dependencies["cmake"].ref.version)
