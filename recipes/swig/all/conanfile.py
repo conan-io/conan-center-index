@@ -26,11 +26,16 @@ class SwigConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    @property
+    def _use_pcre2(self):
+        return self.version not in ['4.0.1', '4.0.2']
+
+
     def requirements(self):
-        if self.version in ['4.0.1', '4.0.2']:
-            self.requires("pcre/8.45")
-        else:
+        if self._use_pcre2:
             self.requires("pcre2/10.40")
+        else:
+            self.requires("pcre/8.45")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
@@ -86,8 +91,8 @@ class SwigConan(ConanFile):
 
         libargs = list("-L\"{}\"".format(p) for p in deps_libpaths) + list("-l\"{}\"".format(l) for l in deps_libs)
         args = [
-            "PCRE_LIBS={}".format(" ".join(libargs)),
-            "PCRE_CPPFLAGS={}".format(" ".join("-D{}".format(define) for define in deps_defines)),
+            "{}_LIBS={}".format("PCRE2" if self._use_pcre2 else "PCRE", " ".join(libargs)),
+            "{}_CPPFLAGS={}".format("PCRE2" if self._use_pcre2 else "PCRE", " ".join("-D{}".format(define) for define in deps_defines)),
             "--host={}".format(self.settings.arch),
             "--with-swiglibdir={}".format(self._swiglibdir),
         ]
