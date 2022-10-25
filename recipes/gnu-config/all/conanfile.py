@@ -1,8 +1,7 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanException
 from conan.tools.files import copy, get, load, save
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.52.0"
@@ -60,7 +59,6 @@ class GnuConfigConan(ConanFile):
         self.conf_info.define("user.gnu-config:config_sub", os.path.join(bin_path, "config.sub"))
 
         # TODO: to remove in conan v2
-        if Version(conan_version).major < 2:
-            self.user_info.CONFIG_GUESS = os.path.join(bin_path, "config.guess")
-            self.user_info.CONFIG_SUB = os.path.join(bin_path, "config.sub")
-            self.env_info.PATH.append(bin_path)
+        self.user_info.CONFIG_GUESS = os.path.join(bin_path, "config.guess")
+        self.user_info.CONFIG_SUB = os.path.join(bin_path, "config.sub")
+        self.env_info.PATH.append(bin_path)
