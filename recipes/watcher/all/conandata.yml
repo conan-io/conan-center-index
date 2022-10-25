@@ -1,0 +1,11 @@
+sources:
+  "0.3.1":
+    url: "https://github.com/e-dant/watcher/archive/refs/tags/release/0.3.1.tar.gz"
+    sha256: "0fa79d21ac16c96b7ca50f2563aed9d8841e5b8f139af27d0b2cf199d0d281dc"
+
+patches:
+  "0.3.1":
+    - patch_file: "patches/0.3.1-fix-include.patch"
+      patch_description: "add missing include headers for some compilers"
+      patch_type: "portability"
+      patch_source: "https://github.com/e-dant/watcher/pull/18"

@@ -1,10 +1,11 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.files import copy, get, rmdir, save
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class MesonConan(ConanFile):
@@ -21,14 +22,15 @@ class MesonConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
-        self.requires("ninja/1.11.0")
+        if self.conf.get("tools.meson.mesontoolchain:backend", default=False, check_type=str) in (False, "ninja"):
+            self.requires("ninja/1.11.1")
 
     def package_id(self):
         self.info.clear()
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -78,15 +80,13 @@ class MesonConan(ConanFile):
 
     def package_info(self):
         meson_root = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {meson_root}")
-        self.env_info.PATH.append(meson_root)
-
         self._chmod_plus_x(os.path.join(meson_root, "meson"))
         self._chmod_plus_x(os.path.join(meson_root, "meson.py"))
 
         self.cpp_info.builddirs = [os.path.join("bin", "mesonbuild", "cmake", "data")]
 
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
+
+        if Version(conan_version).major < 2:
+            self.env_info.PATH.append(meson_root)

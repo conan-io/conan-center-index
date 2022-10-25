@@ -1,5 +1,9 @@
-from conans import ConanFile, tools
-from conans.errors import ConanException
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.tools.system import package_manager
+from conans import tools
+
+required_conan_version = ">=1.47"
 
 
 class SysConfigVAAPIConan(ConanFile):
@@ -10,7 +14,11 @@ class SysConfigVAAPIConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://01.org/linuxmedia/vaapi"
     license = "MIT"
-    settings = {"os": ["Linux", "FreeBSD"]}
+    settings = "os", "arch", "compiler", "build_type"
+
+    def validate(self):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
 
     def package_id(self):
         self.info.header_only()
@@ -36,24 +44,23 @@ class SysConfigVAAPIConan(ConanFile):
         self.cpp_info.cxxflags.extend(cflags)
 
     def system_requirements(self):
-        packages = []
-        if tools.os_info.is_linux and self.settings.os == "Linux":
-            if tools.os_info.with_yum:
-                packages = ["libva-devel"]
-            elif tools.os_info.with_apt:
-                packages = ["libva-dev"]
-            elif tools.os_info.with_pacman:
-                packages = ["libva"]
-            elif tools.os_info.with_zypper:
-                packages = ["libva-devel"]
-            else:
-                self.output.warn("Don't know how to install %s for your distro." % self.name)
-        elif tools.os_info.is_freebsd and self.settings.os == "FreeBSD":
-            packages = ["libva"]
-        if packages:
-            package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
-            for p in packages:
-                package_tool.install(update=True, packages=p)
+        dnf = package_manager.Dnf(self)
+        dnf.install(["libva-devel"], update=True, check=True)
+
+        yum = package_manager.Yum(self)
+        yum.install(["libva-devel"], update=True, check=True)
+
+        apt = package_manager.Apt(self)
+        apt.install(["libva-dev"], update=True, check=True)
+
+        pacman = package_manager.PacMan(self)
+        pacman.install(["libva"], update=True, check=True)
+
+        zypper = package_manager.Zypper(self)
+        zypper.install(["libva-devel"], update=True, check=True)
+
+        pkg = package_manager.Pkg(self)
+        pkg.install(["libva"], update=True, check=True)
 
     def package_info(self):
         self.cpp_info.includedirs = []
