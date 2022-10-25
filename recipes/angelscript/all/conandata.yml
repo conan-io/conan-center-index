@@ -12,6 +12,7 @@ patches:
   "2.36.0":
     - patch_file: "patches/2.36.0-0001-missing-include-stdint.patch"
       patch_description: "Add missing stdint.h include"
+      patch_type: "portability"
   "2.35.1":
     - patch_file: "patches/2.35.1-0001-fix-compatibility-apple-clang.patch"
       patch_description: "Fix apple-clang compatibility of ASM arm"
