@@ -17,11 +17,10 @@ required_conan_version = ">=1.52.0"
 class GLibConan(ConanFile):
     name = "glib"
     description = "GLib provides the core application building blocks for libraries and applications written in C"
-    topics = ("glib", "gobject", "gio", "gmodule")
+    topics = ("gobject", "gio", "gmodule")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.gnome.org/GNOME/glib"
     license = "LGPL-2.1"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -39,7 +38,6 @@ class GLibConan(ConanFile):
         "with_mount": True,
         "with_selinux": True,
     }
-
     short_paths = True
 
     @property
@@ -324,7 +322,7 @@ class GLibConan(ConanFile):
             'datadir': '${prefix}/res',
             'schemasdir': '${datadir}/glib-2.0/schemas',
             'bindir': '${prefix}/bin',
-            'giomoduledir': '${libdir}/gio/modules',
+            'giomoduledir': '${prefix}/lib/gio/modules',
             'gio': '${bindir}/gio',
             'gio_querymodules': '${bindir}/gio-querymodules',
             'glib_compile_schemas': '${bindir}/glib-compile-schemas',
