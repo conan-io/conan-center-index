@@ -15,22 +15,29 @@ jobs:
     name: Test linter changes (YAML files)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
-
-      - name: Get changed files
-        uses: tj-actions/changed-files@v20
-        id: changed_files
-        with:
-          files: |
-            linter/**
-
       - uses: actions/setup-python@v4
-        if: steps.changed_files.outputs.any_changed == 'true'
         with:
           python-version: ${{ env.PYVER }}
+      - name: Get changed files
+        id: changed_files
+        shell: python
+        run: |
+          import json
+          import subprocess
+          import pathlib
+          import os
 
+          res = subprocess.run(["gh", "api", "/repos/conan-io/conan-center-index/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
+          files = json.loads(res.stdout)
+          files = [f["filename"] for f in files]
+          files = [f for f in files if pathlib.Path(f).is_relative_to("linter/")]
+          with open(os.getenv("GITHUB_OUTPUT"), "a") as output_file:
+              output_file.write(f"any_changed={'true' if files else 'false'}\n")
+              output_file.write(f"all_changed_files={' '.join(files)}\n")
+      - uses: actions/checkout@v3
+        if: steps.changed_files.outputs.any_changed == 'true'
+        with:
+          fetch-depth: 2
       - name: Install dependencies
         if: steps.changed_files.outputs.any_changed == 'true'
         run: pip install yamllint strictyaml argparse
@@ -68,10 +75,6 @@ jobs:
     name: Lint changed files (YAML files)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
-
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYVER }}
@@ -83,10 +86,21 @@ jobs:
       - name: Get changed files (config)
         id: changed_files_config
         if: always()
-        uses: tj-actions/changed-files@v20
-        with:
-          files: |
-            ${{ env.CONFIG_FILES_PATH }}
+        shell: python
+        run: |
+          import json
+          import subprocess
+          import pathlib
+          import os
+
+          res = subprocess.run(["gh", "api", "/repos/conan-io/conan-center-index/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
+          files = json.loads(res.stdout)
+          files = [f["filename"] for f in files]
+          files = [f for f in files if pathlib.Path(f).match('${{ env.CONFIG_FILES_PATH }}')]
+          with open(os.getenv("GITHUB_OUTPUT"), "a") as output_file:
+              output_file.write(f"any_changed={'true' if files else 'false'}\n")
+              output_file.write(f"all_changed_files={' '.join(files)}\n")
+      - uses: actions/checkout@v3
 
       - name: Run linter (config.yml)
         if: steps.changed_files_config.outputs.any_changed == 'true' && always()
@@ -105,10 +119,19 @@ jobs:
       - name: Get changed files (conandata)
         id: changed_files_conandata
         if: always()
-        uses: tj-actions/changed-files@v20
-        with:
-          files: |
-            ${{ env.CONANDATA_FILES_PATH }}
+        run: |
+          import json
+          import subprocess
+          import pathlib
+          import os
+
+          res = subprocess.run(["gh", "api", "/repos/conan-io/conan-center-index/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
+          files = json.loads(res.stdout)
+          files = [f["filename"] for f in files]
+          files = [f for f in files if pathlib.Path(f).match('${{ env.CONANDATA_FILES_PATH }}')]
+          with open(os.getenv("GITHUB_OUTPUT"), "a") as output_file:
+              output_file.write(f"any_changed={'true' if files else 'false'}\n")
+              output_file.write(f"all_changed_files={' '.join(files)}\n")           
 
       - name: Run linter (conandata.yml)
         if: steps.changed_files_conandata.outputs.any_changed == 'true' && always()
