@@ -82,6 +82,8 @@ class CMakeConan(ConanFile):
         if self.info.options.bootstrap:
             tc = AutotoolsToolchain(self)
             tc.generate()
+            tc = AutotoolsDeps(self)
+            tc.generate()
         else:
             tc = CMakeToolchain(self)
             if not self.settings.compiler.cppstd:
