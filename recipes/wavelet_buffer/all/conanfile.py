@@ -11,9 +11,10 @@ required_conan_version = ">=1.50"
 class WaveletBufferConan(ConanFile):
     name = "wavelet_buffer"
     license = "MPL-2.0"
-    author = "PANDA GmbH"
     description = "An universal C++ compression library based on wavelet transformation"
-    url = "https://github.com/panda-official/WaveletBuffer"
+    topics = ("compression", "signal-processing", "wavelet")
+    homepage = "https://github.com/panda-official/WaveletBuffer"
+    url = "https://github.com/conan-io/conan-center-index/recipes/wavelet_buffer"
     requires = "openblas/0.3.20", "blaze/3.8", "libjpeg-turbo/2.1.2", "cimg/3.0.2"
     default_options = {
         "cimg:enable_fftw": False,
@@ -40,8 +41,12 @@ class WaveletBufferConan(ConanFile):
         self.settings.build_type = "Release"
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                destination=self.source_folder, strip_root=True)
+        get(
+            self,
+            **self.conan_data["sources"][self.version],
+            destination=self.source_folder,
+            strip_root=True
+        )
 
     def layout(self):
         cmake_layout(self)
