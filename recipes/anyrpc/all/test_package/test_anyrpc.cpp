@@ -3,10 +3,15 @@
 
 #include "anyrpc/anyrpc.h"
 
+void testFunc(anyrpc::Value& params, anyrpc::Value& result)
+{
+}
+
 int main(void)
 {
     anyrpc::JsonHttpServer server;
-    std::cout << "Success!" << std::endl;
+    anyrpc::MethodManager* methodManager = server.GetMethodManager();
+    methodManager->AddFunction(&testFunc, "testFunc", "Test function");
 
     return EXIT_SUCCESS;
 }
