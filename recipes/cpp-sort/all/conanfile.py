@@ -1,6 +1,7 @@
 import os.path
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
@@ -52,7 +53,7 @@ class CppSortConan(ConanFile):
             self.output.warn(msg)
 
     def layout(self):
-       cmake_layout(self, src_folder="source")
+        cmake_layout(self, src_folder="source")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
