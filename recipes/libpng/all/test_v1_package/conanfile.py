@@ -24,6 +24,9 @@ class TestPackageConan(ConanFile):
 
     def test_arm(self):
         file_ext = "so" if self.options["libpng"].shared else "a"
-        lib_path = os.path.join(self.deps_cpp_info["libpng"].libdirs[0], "libpng.%s" % file_ext)
+        lib_path = os.path.join(
+            self.deps_cpp_info['libpng'].rootpath,
+            self.deps_cpp_info["libpng"].libdirs[0],
+            "libpng.%s" % file_ext)
         output = subprocess.check_output(["readelf", "-h", lib_path]).decode()
-        assert re.search(r"Machine:\s+ARM", output)
+        assert re.search(r"Machine:\s+ARM|AArch", output)
