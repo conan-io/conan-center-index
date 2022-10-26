@@ -1,11 +1,9 @@
 from conan import ConanFile
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, unix_path, VCVars
+from conan.tools.microsoft import is_msvc, VCVars
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, chdir, rmdir, copy, rm
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.layout import basic_layout
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
-# from conans import MSBuild, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
-# from conans.tools import vcvars, environment_append
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 import os
 
 required_conan_version = ">=1.52.0"
@@ -59,12 +57,12 @@ class LibdeflateConan(ConanFile):
             pass
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not is_msvc(self):
-            if "CONAN_BASH_PATH" not in Environment().vars(self, scope="build").keys():
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
@@ -77,59 +75,18 @@ class LibdeflateConan(ConanFile):
         if is_msvc(self) or self._is_clangcl:
             vc = VCVars(self)
             vc.generate()
-            env = Environment()
-            # env.define("PROFILE", None)
-            # env.define("TUNE", None)
-            # env.define("NODEBUG", None)
-            env.vars(self).save_script("conanbuildenv_nmake")
         else:
-            pass
-        # there is no configure, just make
             tc = AutotoolsToolchain(self)
-#            # yes_no = lambda v: "yes" if v else "no"
-#            # tc.configure_args.extend([
-#                # f"--with-foobar={yes_no(self.options.with_foobar)}",
-#                # "--enable-tools=no",
-#                # "--enable-manpages=no",
-#            # ])
             tc.generate()
-#            # generate pkg-config files of dependencies (useless if upstream configure.ac doesn't rely on PKG_CHECK_MODULES macro)
-#            tc = PkgConfigDeps(self)
-#            tc.generate()
-
-#        # If Visual Studio is supported
-#        if is_msvc(self):
-#            env = Environment()
-#            # get compile & ar-lib from automake (or eventually lib source code if available)
-#            # it's not always required to wrap CC, CXX & AR with these scripts, it depends on how much love was put in
-#            # upstream build files
-#            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
-#            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
-#            env.define("CC", f"{compile_wrapper} cl -nologo")
-#            env.define("CXX", f"{compile_wrapper} cl -nologo")
-#            env.define("LD", "link -nologo")
-#            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
-#            env.define("NM", "dumpbin -symbols")
-#            env.define("OBJDUMP", ":")
-#            env.define("RANLIB", ":")
-#            env.define("STRIP", ":")
-#            env.vars(self).save_script("conanbuild_msvc")
 
     def _build_nmake(self):
         with chdir(self, self.source_folder):
-            # with vcvars(self), environment_append(VisualStudioBuildEnvironment(self).vars):
             target = "libdeflate.dll" if self.options.shared else "libdeflatestatic.lib"
             self.run(f"nmake /f Makefile.msc {target}")
 
     def _build_make(self):
-        # autotools = AutoToolsBuildEnvironment(self, win_bash=(self._settings_build.os == "Windows"))
-        # with chdir(self, self._source_subfolder):
-            # autotools.make()
         autotools = Autotools(self)
         with chdir(self, self.source_folder):
-            # there is no configure, just make
-            # autotools.autoreconf()
-            # autotools.configure()
             autotools.make()
 
     def build(self):
