@@ -3,10 +3,19 @@
 
 #include "Spix/QtQmlBot.h"
 
+class MyTests : public spix::TestServer
+{
+protected:
+    void executeTest() override
+    {
+    }
+};
 
-int main(void) {
+int main(void)
+{
     spix::QtQmlBot bot;
-    std::cout << "Success!" << std::endl;
+    MyTests tests;
+    bot.runTestServer(tests);
 
     return EXIT_SUCCESS;
 }
