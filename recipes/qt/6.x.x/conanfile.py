@@ -1343,7 +1343,7 @@ class QtConan(ConanFile):
             self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_entry_point_file)
             self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_entry_point_file)
 
-        for m in os.listdir(os.path.join("lib", "cmake")):
+        for m in sorted(os.listdir(os.path.join("lib", "cmake"))):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
             component_name = m.replace("Qt6", "qt")
             if component_name == "qt":
