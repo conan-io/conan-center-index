@@ -1,7 +1,7 @@
 from conan import ConanFile, conan_version
 from conan.tools.files import chdir, copy, rmdir, get, replace_in_file
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.build import build_jobs, cross_building, check_min_cppstd
 from conan.tools.scm import Version
@@ -83,8 +83,6 @@ class CMakeConan(ConanFile):
         if self.info.options.bootstrap:
             tc = AutotoolsToolchain(self)
             tc.generate()
-            tc = AutotoolsDeps(self)
-            tc.generate()
         else:
             tc = CMakeToolchain(self)
             if not self.settings.compiler.cppstd:
@@ -99,8 +97,6 @@ class CMakeConan(ConanFile):
                 tc.variables["HAVE_POLL_FINE_EXITCODE"] = ''
                 tc.variables["HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT"] = ''
             tc.generate()
-            tc = CMakeDeps(self)
-            tc.generate()
 
     def build(self):
         if self.info.options.bootstrap:
@@ -109,10 +105,6 @@ class CMakeConan(ConanFile):
                 autotools = Autotools(self)
                 autotools.make()
         else:
-            if self.settings.os == "Linux":
-                replace_in_file(self, os.path.join(self.source_folder, "Utilities", "cmcurl", "CMakeLists.txt"),
-                                      "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})",
-                                      "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES} ${CMAKE_DL_LIBS} pthread)")
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
