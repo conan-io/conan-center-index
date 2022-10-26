@@ -1,19 +1,19 @@
 sources:
   "2.68.3":
-    url: "https://gitlab.gnome.org/GNOME/glib/-/archive/2.68.3/glib-2.68.3.tar.gz"
-    sha256: "465c0727dd5505e998ebb1dae7c38683440dc6d6beffbca6bbf3eaabdb4f6ac7"
+    url: "https://download.gnome.org/sources/glib/2.68/glib-2.68.3.tar.xz"
+    sha256: "62fd061d08a75492617e625a73e2c05e259f831acbb8e1f8b9c81f23f7993a3b"
   "2.69.3":
-    url: "https://gitlab.gnome.org/GNOME/glib/-/archive/2.69.3/glib-2.69.3.tar.gz"
-    sha256: "290f05eb5affd1bac142010d6511c7a3de361e5f69addc677cf6b3c92a757b44"
-  "2.70.4":
-    url: "https://gitlab.gnome.org/GNOME/glib/-/archive/2.70.4/glib-2.70.4.tar.gz"
-    sha256: "23461c4e694b465fad32ea677b3abc9306fa8511d12e915aee09b53f362c7fff"
+    url: "https://download.gnome.org/sources/glib/2.69/glib-2.69.3.tar.xz"
+    sha256: "47af2c6e06becee44d447ae7d1212dbab255b002b5141d9b62a4357c0ecc058f"
+  "2.70.5":
+    url: "https://download.gnome.org/sources/glib/2.70/glib-2.70.5.tar.xz"
+    sha256: "f70bf76ebcc84e0705722f038be8e2f9a58d17e1a700810c635fcc18b8974b7e"
   "2.71.3":
-    url: "https://gitlab.gnome.org/GNOME/glib/-/archive/2.71.3/glib-2.71.3.tar.gz"
-    sha256: "08e17cf608f5ac3462092bff13828c1c0aab37c5b4827d4e17b948215b4e40ea"
-  "2.72.1":
-    url: "https://gitlab.gnome.org/GNOME/glib/-/archive/2.72.1/glib-2.72.1.tar.gz"
-    sha256: "4a345987a9ee7709417f5a5c6f4eeec2497bc2a913f14c1b9bdc403409d5ffb7"
+    url: "https://download.gnome.org/sources/glib/2.71/glib-2.71.3.tar.xz"
+    sha256: "288549404c26db3d52cf7a37f2f42b495b31ccffce2b4cb2439a64099c740343"
+  "2.72.4":
+    url: "https://download.gnome.org/sources/glib/2.72/glib-2.72.4.tar.xz"
+    sha256: "8848aba518ba2f4217d144307a1d6cb9afcc92b54e5c13ac1f8c4d4608e96f0e"
   "2.73.3":
     url: "https://download.gnome.org/sources/glib/2.73/glib-2.73.3.tar.xz"
     sha256: "df1a2b841667d6b48b2ef6969ebda4328243829f6e45866726f806f90f64eead"
