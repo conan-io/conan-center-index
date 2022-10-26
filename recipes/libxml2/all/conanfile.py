@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.build import can_run
 from conan.tools.files import copy, get, rename, rm, rmdir, apply_conandata_patches, export_conandata_patches, replace_in_file, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -123,15 +123,27 @@ class Libxml2Conan(ConanFile):
         # rename(self, f"libxml2-{self.version}", self.source_folder)
 
 
+    def _generate_msvc(self):
+        tc = MSBuildToolchain(self)
+        tc.generate()
+        tc = MSBuildDeps(self)
+        tc.generate()
+        tc = VCVars(self)
+        tc.generate()
+
+
     def generate(self):
         if is_msvc(self):
-            pass # self._generate_msvc()
+            self._generate_msvc()
 #        elif self._is_mingw_windows:
 #            pass # self._generate_mingw()
         else:
-            # autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            virtual_build_env = VirtualBuildEnv(self)
-            virtual_build_env.generate()
+            env = VirtualBuildEnv(self)
+            env.generate()
+
+            if not cross_building(self):
+                env = VirtualRunEnv(self)
+                env.generate(scope="build")
 
             tc = AutotoolsToolchain(self)
 
@@ -139,7 +151,6 @@ class Libxml2Conan(ConanFile):
             tc.configure_args.extend([
                 f"--enable-shared={yes_no(self.options.shared)}",
                 f"--enable-static={yes_no(not self.options.shared)}",
-                # f"--prefix={self.package_folder}",
             ])
             for option_name in self._option_names:
                 option_value = getattr(self.options, option_name)
@@ -148,6 +159,9 @@ class Libxml2Conan(ConanFile):
             tc.generate()
 
             tc = PkgConfigDeps(self)
+            tc.generate()
+
+            tc = AutotoolsDeps(self)
             tc.generate()
 
 
@@ -311,11 +325,11 @@ class Libxml2Conan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.configure()
-            autotools.make("libxml2.la")
+            autotools.make("libxml2.la", args=["V=1"])
 
             if self.options.include_utils:
                 for target in ["xmllint", "xmlcatalog", "xml2-config"]:
-                    autotools.make(target)
+                    autotools.make(target, args=["V=1"])
 
     def package(self):
         # copy package license
@@ -324,10 +338,10 @@ class Libxml2Conan(ConanFile):
             self._package_msvc()
             # remove redundant libraries to avoid confusion
             if not self.options.shared:
-                os.remove(os.path.join(self.package_folder, "bin", "libxml2.dll"))
-            os.remove(os.path.join(self.package_folder, "lib", "libxml2_a_dll.lib"))
-            os.remove(os.path.join(self.package_folder, "lib", "libxml2_a.lib" if self.options.shared else "libxml2.lib"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+                rm(self, "libxml2.dll", os.path.join(self.package_folder, "bin"))
+            rm(self, "libxml2_a_dll.lib", os.path.join(self.package_folder, "lib"))
+            rm(self, "libxml2_a.lib" if self.options.shared else "libxml2.lib", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 #        elif self._is_mingw_windows:
 #            self._package_mingw()
 #            if self.options.shared:
@@ -341,7 +355,7 @@ class Libxml2Conan(ConanFile):
             autotools = Autotools(self)
             # autotools.install()
             for target in ["install-libLTLIBRARIES", "install-data"]:
-                autotools.make(target=target, args=[f"DESTDIR={self.package_folder}"])
+                autotools.make(target=target, args=[f"DESTDIR={unix_path(self, self.package_folder)}", "V=1"])
 
             if self.options.include_utils:
                 autotools.install()
