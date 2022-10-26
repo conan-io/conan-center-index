@@ -1,8 +1,7 @@
-from conans import ConanFile, tools
-import os
+from conan import ConanFile
 
 
-class TestPackgeConan(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "arch"
 
     def test(self):
