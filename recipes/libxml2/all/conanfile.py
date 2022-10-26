@@ -64,8 +64,6 @@ class Libxml2Conan(ConanFile):
     options = {name: [True, False] for name in default_options.keys()}
     _option_names = [name for name in default_options.keys() if name not in ["shared", "fPIC", "include_utils"]]
 
-    # PCH TODO
-    generators = "pkg_config"
 
     @property
     def _settings_build(self):
@@ -147,6 +145,9 @@ class Libxml2Conan(ConanFile):
                 option_value = getattr(self.options, option_name)
                 tc.configure_args.append(f"--with-{option_name}={yes_no(option_value)}")
 
+            tc.generate()
+
+            tc = PkgConfigDeps(self)
             tc.generate()
 
 
