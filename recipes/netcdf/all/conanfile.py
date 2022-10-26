@@ -34,7 +34,7 @@ class NetcdfConan(ConanFile):
         "netcdf4": True,
         "with_hdf5": True,
         "cdf5": True,
-        "dap": True,
+        "dap": False,
         "byterange": False,
     }
 
