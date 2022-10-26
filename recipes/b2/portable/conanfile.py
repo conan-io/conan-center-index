@@ -104,12 +104,11 @@ class B2Conan(ConanFile):
         command = "build" if use_windows_commands else "./build.sh"
         if self.options.toolset != 'auto':
             command += " "+str(self.options.toolset)
-        os.chdir(self.b2_engine_dir)
-        with self.bootstrap_env():
-            self.run(command)
+        with conan.tools.files.chdir(self, self.b2_engine_dir):
+            with self.bootstrap_env():
+                self.run(command)
 
         self.output.info("Install..")
-        os.chdir(self.b2_dir)
         command = os.path.join(
             self.b2_engine_dir, "b2.exe" if use_windows_commands else "b2")
         # auto, cxx, and cross-cxx aren't toolsets in b2; they're only used to affect
@@ -122,7 +121,8 @@ class B2Conan(ConanFile):
              "--abbreviate-paths " +
              "install " +
              "b2-install-layout=portable").format(command, self.b2_output_dir)
-        self.run(full_command)
+        with conan.tools.files.chdir(self, self.b2_dir):
+            self.run(full_command)
 
     def package(self):
         conan.tools.files.copy(
