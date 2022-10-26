@@ -22,6 +22,6 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            bin_path = os.path.join("bin", "test_package")
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             img_path = os.path.join(self.source_folder, "test.jxl")
-            self.run(bin_path, env="conanrun")
+            self.run(f"{bin_path} {img_path}", env="conanrun")

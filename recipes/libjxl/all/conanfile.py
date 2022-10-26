@@ -53,7 +53,7 @@ class LibjxlConan(ConanFile):
 
     def requirements(self):
         self.requires("brotli/1.0.9")
-        self.requires("highway/0.12.2")
+        self.requires("highway/1.0.1")
         self.requires("lcms/2.13.1")
 
     def validate(self):
@@ -77,6 +77,9 @@ class LibjxlConan(ConanFile):
         if cross_building(self):
             tc.variables["CMAKE_SYSTEM_PROCESSOR"] = \
                 str(self.settings.arch)
+        tc.variables["JPEGXL_ENABLE_TOOLS"] = False
+        # tc.cache_variables["JXL_HWY_DISABLED_TARGETS_FORCED"]=False
+        # tc.cache_variables["JPEGXL_ENABLE_SIZELESS_VECTORS"]=False
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -113,6 +116,18 @@ class LibjxlConan(ConanFile):
             return name + "-static"
         return name
 
+    def _stdcpp_library(self):
+        libcxx = self.settings.get_safe("compiler.libcxx")
+        if libcxx in ["libstdc++", "libstdc++11"]:
+            return "stdc++"
+        elif libcxx in ["libc++"]:
+            return "c++"
+        elif libcxx in ["c++_shared"]:
+            return "c++_shared"
+        elif libcxx in ["c++_static"]:
+            return "c++_static"
+        return None
+
     def package_info(self):
         # jxl
         self.cpp_info.components["jxl"].names["pkg_config"] = "libjxl"
@@ -134,10 +149,10 @@ class LibjxlConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.components["jxl_threads"].system_libs = ["pthread"]
 
-        if not self.options.shared and tools.stdcpp_library(self):
+        if not self.options.shared and self._stdcpp_library():
             self.cpp_info.components["jxl"].system_libs.append(
-                tools.stdcpp_library(self))
+                self._stdcpp_library())
             self.cpp_info.components["jxl_dec"].system_libs.append(
-                tools.stdcpp_library(self))
+                self._stdcpp_library())
             self.cpp_info.components["jxl_threads"].system_libs.append(
-                tools.stdcpp_library(self))
+                self._stdcpp_library())

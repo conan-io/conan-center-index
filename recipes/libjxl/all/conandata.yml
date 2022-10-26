@@ -9,6 +9,9 @@ sources:
     url: "https://github.com/libjxl/libjxl/archive/v0.5.tar.gz"
     sha256: "911cb4b50eb621131ca22382166f40d4914a4ff4453dd299ade1e3292f311f89"
 patches:
+  "0.7.0":
+    - patch_file: "patches/0001-clean-targets-v0.7.patch"
+    - patch_file: "patches/0002-fix-dependencies-v0.7.patch"
   "0.6.1":
     - patch_file: "patches/0001-clean-targets-v0.6.patch"
     - patch_file: "patches/0002-fix-dependencies-v0.6.patch"
