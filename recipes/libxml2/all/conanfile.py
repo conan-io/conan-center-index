@@ -2,13 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.scm import Version
-from conan.tools.build import can_run
-from conan.tools.build import check_min_cppstd, cross_building, build_jobs
-from conan.tools.files import copy, get, rename, rm, rmdir, apply_conandata_patches, export_conandata_patches, replace_in_file, save, chdir
+from conan.tools.build import cross_building, build_jobs
+from conan.tools.files import copy, get, rename, rm, rmdir, replace_in_file, save, chdir, mkdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import msvc_runtime_flag
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, unix_path, VCVars
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, VCVars
 import os
 
 import itertools
@@ -121,21 +119,9 @@ class Libxml2Conan(ConanFile):
                     self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        # can't use strip_root here because if fails since 2.9.10 with:
-        # KeyError: "linkname 'libxml2-2.9.1x/test/relaxng/ambig_name-class.xml' not found"
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-        # rename(self, f"libxml2-{self.version}", self.source_folder)
 
 
-    def _generate_msvc(self):
-        # tc = MSBuildToolchain(self)
-        # tc.generate()
-        # tc = MSBuildDeps(self)
-        # tc.generate()
-        tc = VCVars(self)
-        tc.generate()
-        # with tools.vcvars(self.settings):
-            # with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
 
     def generate(self):
         if is_msvc(self):
@@ -170,17 +156,9 @@ class Libxml2Conan(ConanFile):
             tc.generate()
 
 
-
-
-
-
-
-
-
-
-
-
-    def _build_msvc(self):
+    def _generate_msvc(self):
+        tc = VCVars(self)
+        tc.generate()
         with chdir(self, os.path.join(self.source_folder, 'win32')):
             debug = "yes" if self.settings.build_type == "Debug" else "no"
             static = "no" if self.options.shared else "yes"
@@ -194,10 +172,11 @@ class Libxml2Conan(ConanFile):
                 f"debug={debug}",
                 f"static={static}",
             ]
-            if self.deps_cpp_info.include_paths:
-                args.append("include=\"{}\"".format(";".join(self.deps_cpp_info.include_paths)))
-            if self.deps_cpp_info.lib_paths:
-                args.append("lib=\"{}\"".format(";".join(self.deps_cpp_info.lib_paths)))
+
+            incdirs = [incdir for dep in self.dependencies.values() for incdir in dep.cpp_info.includedirs]
+            libdirs = [libdir for dep in self.dependencies.values() for libdir in dep.cpp_info.libdirs]
+            args.append("include=\"{}\"".format(";".join(incdirs)))
+            args.append("lib=\"{}\"".format(";".join(libdirs)))
 
             for name in self._option_names:
                 cname = {"mem-debug": "mem_debug",
@@ -215,7 +194,7 @@ class Libxml2Conan(ConanFile):
             def fix_library(option, package, old_libname):
                 if option:
                     libs = []
-                    for lib in itertools.chain(self.deps_cpp_info[package].libs, self.deps_cpp_info[package].system_libs):
+                    for lib in itertools.chain(self.dependencies[package].cpp_info.libs, self.dependencies[package].cpp_info.system_libs):
                         libname = lib
                         if not libname.endswith('.lib'):
                             libname += '.lib'
@@ -230,6 +209,9 @@ class Libxml2Conan(ConanFile):
             fix_library(self.options.icu, 'icu', 'advapi32.lib sicuuc.lib sicuin.lib sicudt.lib')
             fix_library(self.options.icu, 'icu', 'icuuc.lib icuin.lib icudt.lib')
 
+
+    def _build_msvc(self):
+        with chdir(self, os.path.join(self.source_folder, 'win32')):
             self.run("nmake /f Makefile.msvc libxml libxmla libxmladll")
 
             if self.options.include_utils:
@@ -245,10 +227,9 @@ class Libxml2Conan(ConanFile):
 
     def _generate_mingw(self):
         # with tools.environment_append(AutoToolsBuildEnvironment(self).vars):
-        env = VirtualBuildEnv(self)
-        env.generate()
-        # tc = AutotoolsToolchain(self)
-        # tc.generate()
+        # FIXME is this needed?
+        # env = VirtualBuildEnv(self)
+        # env.generate()
 
         with chdir(self, os.path.join(self.source_folder, "win32")):
             # configuration
@@ -262,11 +243,11 @@ class Libxml2Conan(ConanFile):
                 # FIXME self.options --> self.info.options ?
                 "static={}".format(yes_no(not self.options.shared)),
             ]
-            # FIXME deps_cpp_info
-            if self.deps_cpp_info.include_paths:
-                args.append("include=\"{}\"".format(" -I".join(self.deps_cpp_info.include_paths)))
-            if self.deps_cpp_info.lib_paths:
-                args.append("lib=\"{}\"".format(" -L".join(self.deps_cpp_info.lib_paths)))
+
+            incdirs = [incdir for dep in self.dependencies.values() for incdir in dep.cpp_info.includedirs]
+            libdirs = [libdir for dep in self.dependencies.values() for libdir in dep.cpp_info.libdirs]
+            args.append("include=\"{}\"".format(" -I".join(incdirs)))
+            args.append("lib=\"{}\"".format(" -L".join(libdirs)))
 
             for name in self._option_names:
                 cname = {
@@ -285,7 +266,7 @@ class Libxml2Conan(ConanFile):
                     replace_in_file(self,
                         "Makefile.mingw",
                         "LIBS += -l{}".format(old_libname),
-                        "LIBS += -l{}".format(" -l".join(self.deps_cpp_info[package].libs)),
+                        "LIBS += -l{}".format(" -l".join(self.dependencies[package].cpp_info.libs)),
                     )
 
             fix_library(self.options.iconv, "libiconv", "iconv")
@@ -293,15 +274,12 @@ class Libxml2Conan(ConanFile):
             fix_library(self.options.lzma, "xz_utils", "lzma")
 
     def _build_mingw(self):
-        # autotools = Autotools(self)
         with chdir(self, os.path.join(self.source_folder, "win32")):
             self.run(f"mingw32-make -j{build_jobs(self)} -f Makefile.mingw libxml libxmla")
             if self.options.include_utils:
                 self.run(f"mingw32-make -j{build_jobs(self)} -f Makefile.mingw utils")
 
     def _package_mingw(self):
-        # autotools = Autotools(self)
-
         with chdir(self, os.path.join(self.source_folder, "win32")):
             mkdir(self, os.path.join(self.package_folder, "include", "libxml2"))
             self.run("mingw32-make -f Makefile.mingw install-libs")
@@ -340,6 +318,7 @@ class Libxml2Conan(ConanFile):
     def package(self):
         # copy package license
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"), ignore_case=True, keep_path=False)
+        copy(self, "Copyright", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"), ignore_case=True, keep_path=False)
         if is_msvc(self):
             self._package_msvc()
             # remove redundant libraries to avoid confusion
