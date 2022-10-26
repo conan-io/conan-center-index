@@ -26,19 +26,12 @@ sources:
 patches:
   "1.2.198.0":
     - patch_file: "patches/0005-fix-cmake-1.2.198.0.patch"
-      base_path: "source_subfolder"
   "1.2.189.2":
     - patch_file: "patches/0005-fix-cmake-1.2.189.2.patch"
-      base_path: "source_subfolder"
   "1.2.182":
     - patch_file: "patches/0005-fix-cmake-1.2.182.patch"
-      base_path: "source_subfolder"
   "1.2.154.0":
     - patch_file: "patches/0001-duplicated-declaration.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-fix-mingw.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-disable-nortti-and-warnings-as-errors.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0004-fix-installation.patch"
-      base_path: "source_subfolder"
