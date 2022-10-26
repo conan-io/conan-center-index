@@ -115,13 +115,24 @@ class VulkanValidationLayersConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        # Unusual but prefer custom FindVulkanHeaders.cmake from upstream instead of config file of conan
+        replace_in_file(self, cmakelists,
+                              "find_package(VulkanHeaders REQUIRED)",
+                              "find_package(VulkanHeaders REQUIRED MODULE)")
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "FindVulkanHeaders.cmake"),
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
+        # Useless and may fail
+        if Version(self.version) >= "1.3.231":
+            replace_in_file(self, cmakelists, "include(VVLGenerateSourceCode)", "")
         # FIXME: two CMake module/config files should be generated (SPIRV-ToolsConfig.cmake and SPIRV-Tools-optConfig.cmake),
         # but it can't be modeled right now in spirv-tools recipe
-        if not os.path.exists("SPIRV-Tools-optConfig.cmake"):
-            shutil.copy("SPIRV-ToolsConfig.cmake", "SPIRV-Tools-optConfig.cmake")
+        if not os.path.exists(os.path.join(self.generators_folder, "SPIRV-Tools-optConfig.cmake")):
+            shutil.copy(
+                os.path.join(self.generators_folder, "SPIRV-ToolsConfig.cmake"),
+                os.path.join(self.generators_folder, "SPIRV-Tools-optConfig.cmake"),
+            )
 
     def build(self):
         self._patch_sources()
