@@ -156,9 +156,9 @@ class CairoConan(ConanFile):
         options["freetype"] = is_enabled(self.options.with_freetype)
         options["fontconfig"] = is_enabled(self.options.with_fontconfig)
         if self.settings.os == "Linux":
-            options["xcb"] = is_enabled(self.options.get_safe("with_xcb"))
-            options["xlib"] = is_enabled(self.options.get_safe("with_xlib"))
-            options["xlib-xrender"] = is_enabled(self.options.get_safe("with_xlib_xrender"))
+            options["xcb"] = is_enabled(self.options.with_xcb)
+            options["xlib"] = is_enabled(self.options.with_xlib)
+            options["xlib-xrender"] = is_enabled(self.options.with_xlib_xrender)
         else:
             options["xcb"] = "disabled"
             options["xlib"] = "disabled"
@@ -188,7 +188,7 @@ class CairoConan(ConanFile):
         meson = MesonToolchain(self)
         meson.project_options.update(options)
 
-        if is_apple_os(self) and Version(self.version) <= "1.17.4":
+        if is_apple_os(self) and Version(self.version) < "1.17.6":
             # This was fixed in the meson build from 1.17.6
             meson.c_link_args += ["-framework", "ApplicationServices", "-framework", "CoreFoundation"]
 
