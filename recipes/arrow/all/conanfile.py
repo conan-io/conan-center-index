@@ -303,7 +303,7 @@ class ArrowConan(ConanFile):
         if self._with_protobuf():
             self.requires("protobuf/3.21.4")
         if self._with_jemalloc():
-            self.requires("jemalloc/5.2.1")
+            self.requires("jemalloc/5.3.0")
         if self.options.with_mimalloc:
             self.requires("mimalloc/1.7.6")
         if self._with_boost():
@@ -315,7 +315,7 @@ class ArrowConan(ConanFile):
         if self.options.get_safe("with_gcs"):
             self.requires("google-cloud-cpp/1.40.1")
         if self._with_grpc():
-            self.requires("grpc/1.48.0")
+            self.requires("grpc/1.50.0")
         if self._with_rapidjson():
             self.requires("rapidjson/1.1.0")
         if self._with_llvm():
@@ -327,7 +327,7 @@ class ArrowConan(ConanFile):
             else:
                 self.requires("openssl/3.0.5")
         if self.options.get_safe("with_opentelemetry"):
-            self.requires("opentelemetry-cpp/1.4.1")
+            self.requires("opentelemetry-cpp/1.6.1")
         if self.options.with_s3:
             self.requires("aws-sdk-cpp/1.9.234")
         if self.options.with_brotli:
@@ -343,7 +343,7 @@ class ArrowConan(ConanFile):
             self.options.get_safe("runtime_simd_level") != None:
             self.requires("xsimd/8.1.0")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
         if self._with_re2():
@@ -426,7 +426,7 @@ class ArrowConan(ConanFile):
         if self.options.with_snappy:
             tc.variables["ARROW_SNAPPY_USE_SHARED"] = bool(self.options["snappy"].shared)
         tc.variables["ARROW_WITH_ZLIB"] = bool(self.options.with_zlib)
-        tc.variables["RE2_SOURCE"] = "SYSTEM"
+        tc.variables["re2_SOURCE"] = "SYSTEM"
         tc.variables["ZLIB_SOURCE"] = "SYSTEM"
         tc.variables["xsimd_SOURCE"] = "SYSTEM"
         tc.variables["ARROW_WITH_ZSTD"] = bool(self.options.with_zstd)
@@ -449,6 +449,7 @@ class ArrowConan(ConanFile):
             tc.variables["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
             tc.variables["ARROW_OPENSSL_USE_SHARED"] = bool(self.options["openssl"].shared)
         if self._with_boost():
+            tc.variables["ARROW_USE_BOOST"] = True
             tc.variables["ARROW_BOOST_USE_SHARED"] = bool(self.options["boost"].shared)
         tc.variables["ARROW_S3"] = bool(self.options.with_s3)
         tc.variables["AWSSDK_SOURCE"] = "SYSTEM"
@@ -587,7 +588,7 @@ class ArrowConan(ConanFile):
 
         if (self.options.cli and (self.options.with_cuda or self._with_flight_rpc() or self._parquet())) or self.options.plasma:
             binpath = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH env var: {}".format(binpath))
+            self.output.info(f"Appending PATH env var: {binpath}")
             self.env_info.PATH.append(binpath)
 
         if self._with_boost():

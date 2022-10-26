@@ -1,0 +1,65 @@
+diff --git a/cpp/cmake_modules/ThirdpartyToolchain.cmake b/cpp/cmake_modules/ThirdpartyToolchain.cmake
+index b7cd31f..2d975aa 100644
+--- a/cpp/cmake_modules/ThirdpartyToolchain.cmake
++++ b/cpp/cmake_modules/ThirdpartyToolchain.cmake
+@@ -1399,22 +1399,14 @@ endmacro()
+ if(ARROW_NEED_GFLAGS)
+   set(ARROW_GFLAGS_REQUIRED_VERSION "2.1.0")
+   resolve_dependency(gflags
+-                     HAVE_ALT
++                     USE_CONFIG
+                      TRUE
+                      REQUIRED_VERSION
+                      ${ARROW_GFLAGS_REQUIRED_VERSION}
+                      IS_RUNTIME_DEPENDENCY
+                      FALSE)
+ 
+-  if(NOT TARGET ${GFLAGS_LIBRARIES})
+-    if(TARGET gflags::gflags_shared)
+-      set(GFLAGS_LIBRARIES gflags::gflags_shared)
+-    elseif(TARGET gflags-shared)
+-      set(GFLAGS_LIBRARIES gflags-shared)
+-    elseif(TARGET gflags_shared)
+-      set(GFLAGS_LIBRARIES gflags_shared)
+-    endif()
+-  endif()
++  set(GFLAGS_LIBRARIES gflags::gflags)
+ endif()
+ 
+ # ----------------------------------------------------------------------
+@@ -1638,7 +1630,7 @@ if(ARROW_WITH_PROTOBUF)
+     set(ARROW_PROTOBUF_REQUIRED_VERSION "2.6.1")
+   endif()
+   resolve_dependency(Protobuf
+-                     HAVE_ALT
++                     USE_CONFIG
+                      TRUE
+                      REQUIRED_VERSION
+                      ${ARROW_PROTOBUF_REQUIRED_VERSION}
+@@ -1770,7 +1762,7 @@ macro(build_substrait)
+ 
+   add_custom_target(substrait_gen ALL DEPENDS ${SUBSTRAIT_PROTO_GEN_ALL})
+ 
+-  set(SUBSTRAIT_INCLUDES ${SUBSTRAIT_CPP_DIR} ${PROTOBUF_INCLUDE_DIR})
++  set(SUBSTRAIT_INCLUDES ${SUBSTRAIT_CPP_DIR} ${protobuf_INCLUDE_DIR})
+ 
+   add_library(substrait STATIC ${SUBSTRAIT_SOURCES})
+   set_target_properties(substrait PROPERTIES POSITION_INDEPENDENT_CODE ON)
+@@ -1781,6 +1773,8 @@ macro(build_substrait)
+   list(APPEND ARROW_BUNDLED_STATIC_LIBS substrait)
+ endmacro()
+ 
++set(CMAKE_VERBOSE_MAKEFILE ON)
++
+ if(ARROW_SUBSTRAIT)
+   # Currently, we can only build Substrait from source.
+   set(Substrait_SOURCE "BUNDLED")
+@@ -2477,7 +2471,7 @@ if(ARROW_WITH_RE2)
+   # Don't specify "PC_PACKAGE_NAMES re2" here because re2.pc may
+   # include -std=c++11. It's not compatible with C source and C++
+   # source not uses C++ 11.
+-  resolve_dependency(re2 HAVE_ALT TRUE)
++  resolve_dependency(re2 USE_CONFIG TRUE)
+   if(${re2_SOURCE} STREQUAL "SYSTEM")
+     get_target_property(RE2_TYPE re2::re2 TYPE)
+     if(NOT RE2_TYPE STREQUAL "INTERFACE_LIBRARY")
