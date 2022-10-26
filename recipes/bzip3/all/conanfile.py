@@ -9,7 +9,7 @@ required_conan_version = ">=1.52.0"
 class BZip3Conan(ConanFile):
     name = "bzip3"
     description = "A better and stronger spiritual successor to BZip2."
-    license = "LGPL-3.0"
+    license = "LGPL-3.0", "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/kspalaiologos/bzip3"
     topics = ("bzip2", "lzma", "compression")
@@ -77,7 +77,7 @@ class BZip3Conan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
