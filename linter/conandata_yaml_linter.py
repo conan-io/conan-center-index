@@ -73,7 +73,7 @@ def main():
             f"title=config.yml schema error"
             f"::{e}\n"
         )
-    except error:
+    except BaseException as error:
         e = error.__str__().replace("\n", "%0A")
         print(f"::error ::{e}")
 
