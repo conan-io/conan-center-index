@@ -121,8 +121,6 @@ class Libxml2Conan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-
-
     def generate(self):
         if is_msvc(self):
             self._generate_msvc()
@@ -226,11 +224,6 @@ class Libxml2Conan(ConanFile):
 
 
     def _generate_mingw(self):
-        # with tools.environment_append(AutoToolsBuildEnvironment(self).vars):
-        # FIXME is this needed?
-        # env = VirtualBuildEnv(self)
-        # env.generate()
-
         with chdir(self, os.path.join(self.source_folder, "win32")):
             # configuration
             yes_no = lambda v: "yes" if v else "no"
@@ -240,7 +233,6 @@ class Libxml2Conan(ConanFile):
                 "compiler=mingw",
                 "prefix={}".format(self.package_folder),
                 "debug={}".format(yes_no(self.settings.build_type == "Debug")),
-                # FIXME self.options --> self.info.options ?
                 "static={}".format(yes_no(not self.options.shared)),
             ]
 
@@ -257,7 +249,7 @@ class Libxml2Conan(ConanFile):
                 }.get(name, name)
                 args.append("{}={}".format(cname, yes_no(getattr(self.options, name))))
             configure_command = " ".join(args)
-            self.output.info(configure_command) # FIXME is self.output.info ok ?
+            self.output.info(configure_command)
             self.run(configure_command)
 
             # build
@@ -283,7 +275,6 @@ class Libxml2Conan(ConanFile):
         with chdir(self, os.path.join(self.source_folder, "win32")):
             mkdir(self, os.path.join(self.package_folder, "include", "libxml2"))
             self.run("mingw32-make -f Makefile.mingw install-libs")
-            # FIXME self.info.options
             if self.options.include_utils:
                 self.run("mingw32-make -f Makefile.mingw install-dist")
 
@@ -316,7 +307,6 @@ class Libxml2Conan(ConanFile):
                     autotools.make(target)
 
     def package(self):
-        # copy package license
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"), ignore_case=True, keep_path=False)
         copy(self, "Copyright", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"), ignore_case=True, keep_path=False)
         if is_msvc(self):
@@ -404,7 +394,6 @@ class Libxml2Conan(ConanFile):
             self.cpp_info.defines = ["LIBXML_STATIC"]
         if self.options.include_utils:
             bindir = os.path.join(self.package_folder, "bin")
-            # FIXME can this be deleted? like in that other recipe...
             self.output.info(f"Appending PATH environment variable: {bindir}")
             self.env_info.PATH.append(bindir)
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
