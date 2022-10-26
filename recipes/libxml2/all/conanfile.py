@@ -1,9 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.scm import Version
 from conan.tools.build import can_run
-from conan.tools.build import check_min_cppstd, cross_building
-from conan.tools.files import copy, get, rename, rm, rmdir, apply_conandata_patches, export_conandata_patches, replace_in_file, save
+from conan.tools.build import check_min_cppstd, cross_building, build_jobs
+from conan.tools.files import copy, get, rename, rm, rmdir, apply_conandata_patches, export_conandata_patches, replace_in_file, save, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import msvc_runtime_flag
@@ -63,29 +64,31 @@ class Libxml2Conan(ConanFile):
     }
 
     options = {name: [True, False] for name in default_options.keys()}
-    _option_names = [name for name in default_options.keys() if name not in ["shared", "fPIC", "include_utils"]]
 
+    @property
+    def _option_names(self):
+        return [name for name in self.info.options.keys() if name not in ["shared", "fPIC", "include_utils"]]
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-#    @property
-#    def _is_mingw_windows(self):
-#        return self.settings.compiler == "gcc" and self.settings.os == "Windows" and self._settings_build.os == "Windows"
+    @property
+    def _is_mingw_windows(self):
+        return self.settings.compiler == "gcc" and self.settings.os == "Windows" and self._settings_build.os == "Windows"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) >= "2.10.3":
+            del self.options.docbook
 
     def configure(self):
         if self.options.shared:
             try:
-                # once removed by config_options, need try..except for a second del
                 del self.options.fPIC
             except Exception:
                 pass
-        # for plain C projects only
         try:
             del self.settings.compiler.libcxx
         except Exception:
@@ -109,7 +112,7 @@ class Libxml2Conan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if not (is_msvc(self)): # or self._is_mingw_windows):
+        if not (is_msvc(self) or self._is_mingw_windows):
             if self.options.zlib or self.options.lzma or self.options.icu:
                 self.build_requires("pkgconf/1.9.3")
             if self._settings_build.os == "Windows":
@@ -136,8 +139,8 @@ class Libxml2Conan(ConanFile):
     def generate(self):
         if is_msvc(self):
             self._generate_msvc()
-#        elif self._is_mingw_windows:
-#            pass # self._generate_mingw()
+        elif self._is_mingw_windows:
+            self._generate_mingw()
         else:
             env = VirtualBuildEnv(self)
             env.generate()
@@ -245,65 +248,76 @@ class Libxml2Conan(ConanFile):
 #MSVC            if self.options.include_utils:
 #MSVC                self.run("nmake /f Makefile.msvc install-dist")
 
-#    @contextmanager
-#    def _mingw_build_environment(self):
-#        with tools.chdir(os.path.join(self.source_folder, "win32")):
-#            with tools.environment_append(AutoToolsBuildEnvironment(self).vars):
-#                yield
-#
-#    def _build_mingw(self):
-#        with self._mingw_build_environment():
-#            # configuration
-#            yes_no = lambda v: "yes" if v else "no"
-#            args = [
-#                "cscript",
-#                "configure.js",
-#                "compiler=mingw",
-#                "prefix={}".format(self.package_folder),
-#                "debug={}".format(yes_no(self.settings.build_type == "Debug")),
-#                "static={}".format(yes_no(not self.options.shared)),
-#            ]
-#            if self.deps_cpp_info.include_paths:
-#                args.append("include=\"{}\"".format(" -I".join(self.deps_cpp_info.include_paths)))
-#            if self.deps_cpp_info.lib_paths:
-#                args.append("lib=\"{}\"".format(" -L".join(self.deps_cpp_info.lib_paths)))
-#
-#            for name in self._option_names:
-#                cname = {
-#                    "mem-debug": "mem_debug",
-#                    "run-debug": "run_debug",
-#                    "docbook": "docb",
-#                }.get(name, name)
-#                args.append("{}={}".format(cname, yes_no(getattr(self.options, name))))
-#            configure_command = " ".join(args)
-#            self.output.info(configure_command)
-#            self.run(configure_command)
-#
-#            # build
-#            def fix_library(option, package, old_libname):
-#                if option:
-#                    replace_in_file(self,
-#                        "Makefile.mingw",
-#                        "LIBS += -l{}".format(old_libname),
-#                        "LIBS += -l{}".format(" -l".join(self.deps_cpp_info[package].libs)),
-#                    )
-#
-#            fix_library(self.options.iconv, "libiconv", "iconv")
-#            fix_library(self.options.zlib, "zlib", "z")
-#            fix_library(self.options.lzma, "xz_utils", "lzma")
-#
-#            self.run("mingw32-make -j{} -f Makefile.mingw libxml libxmla".format(tools.cpu_count()))
-#            if self.options.include_utils:
-#                self.run("mingw32-make -j{} -f Makefile.mingw utils".format(tools.cpu_count()))
+    # @contextmanager
+    # def _mingw_build_environment(self):
+        # with tools.chdir(os.path.join(self.source_folder, "win32")):
+            # with tools.environment_append(AutoToolsBuildEnvironment(self).vars):
+                # yield
 
-#    def _package_mingw(self):
-#        autotools = Autotools(self)
-#
-#        with self._mingw_build_environment():
-#            mkdir(self, os.path.join(self.package_folder, "include", "libxml2"))
-#            self.run("mingw32-make -f Makefile.mingw install-libs")
-#            if self.options.include_utils:
-#                self.run("mingw32-make -f Makefile.mingw install-dist")
+    def _generate_mingw(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        # tc = AutotoolsToolchain(self)
+        # tc.generate()
+
+        with chdir(self, os.path.join(self.source_folder, "win32")):
+            # configuration
+            yes_no = lambda v: "yes" if v else "no"
+            args = [
+                "cscript",
+                "configure.js",
+                "compiler=mingw",
+                "prefix={}".format(self.package_folder),
+                "debug={}".format(yes_no(self.settings.build_type == "Debug")),
+                # FIXME self.options --> self.info.options ?
+                "static={}".format(yes_no(not self.options.shared)),
+            ]
+            # FIXME deps_cpp_info
+            if self.deps_cpp_info.include_paths:
+                args.append("include=\"{}\"".format(" -I".join(self.deps_cpp_info.include_paths)))
+            if self.deps_cpp_info.lib_paths:
+                args.append("lib=\"{}\"".format(" -L".join(self.deps_cpp_info.lib_paths)))
+
+            for name in self._option_names:
+                cname = {
+                    "mem-debug": "mem_debug",
+                    "run-debug": "run_debug",
+                    "docbook": "docb",
+                }.get(name, name)
+                args.append("{}={}".format(cname, yes_no(getattr(self.options, name))))
+            configure_command = " ".join(args)
+            self.output.info(configure_command) # FIXME is self.output.info ok ?
+            self.run(configure_command)
+
+            # build
+            def fix_library(option, package, old_libname):
+                if option:
+                    replace_in_file(self,
+                        "Makefile.mingw",
+                        "LIBS += -l{}".format(old_libname),
+                        "LIBS += -l{}".format(" -l".join(self.deps_cpp_info[package].libs)),
+                    )
+
+            fix_library(self.options.iconv, "libiconv", "iconv")
+            fix_library(self.options.zlib, "zlib", "z")
+            fix_library(self.options.lzma, "xz_utils", "lzma")
+
+    def _build_mingw(self):
+        # autotools = Autotools(self)
+        with chdir(self, os.path.join(self.source_folder, "win32")):
+            self.run(f"mingw32-make -j{build_jobs(self)} -f Makefile.mingw libxml libxmla")
+            if self.options.include_utils:
+                self.run(f"mingw32-make -j{build_jobs(self)} -f Makefile.mingw utils")
+
+    def _package_mingw(self):
+        # autotools = Autotools(self)
+
+        with chdir(self, os.path.join(self.source_folder, "win32")):
+            mkdir(self, os.path.join(self.package_folder, "include", "libxml2"))
+            self.run("mingw32-make -f Makefile.mingw install-libs")
+            # FIXME self.info.options
+            if self.options.include_utils:
+                self.run("mingw32-make -f Makefile.mingw install-dist")
 
 
     def _patch_sources(self):
@@ -325,8 +339,8 @@ class Libxml2Conan(ConanFile):
         self._patch_sources()
         if is_msvc(self):
             self._build_msvc()
-#        elif self._is_mingw_windows:
-#            self._build_mingw()
+        elif self._is_mingw_windows:
+            self._build_mingw()
         else:
             autotools = Autotools(self)
             autotools.configure()
