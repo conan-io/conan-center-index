@@ -317,6 +317,10 @@ class Libxml2Conan(ConanFile):
                               "-install_name \\$rpath/",
                               "-install_name @rpath/")
 
+    def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("MSVC not implemented again, yet - working on linux/mingw first")
+
     def build(self):
         self._patch_sources()
         if is_msvc(self):
