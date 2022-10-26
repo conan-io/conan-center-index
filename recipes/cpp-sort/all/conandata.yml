@@ -35,3 +35,6 @@ sources:
   "1.13.1":
     sha256: 139912c6004df8748bb1cfd3b94f2c6bfc2713885ed4b8e927a783d6b66963a8
     url: https://github.com/Morwenn/cpp-sort/archive/1.13.1.tar.gz
+  "1.13.2":
+    sha256: f5384ed9c8abef2f26cb010df2687ac8bba52f0e1726935826a80e83c1347b23
+    url: https://github.com/Morwenn/cpp-sort/archive/1.13.2.tar.gz
