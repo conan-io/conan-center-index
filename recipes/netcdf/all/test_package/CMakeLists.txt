@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(test_package C) # if the project is pure C
+project(test_package C)
 
 find_package(netCDF REQUIRED CONFIG)
 
