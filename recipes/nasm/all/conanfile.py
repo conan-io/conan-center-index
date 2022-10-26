@@ -1,8 +1,15 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
 import os
 import shutil
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile, conan_version
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import chdir, copy, get, rmdir, apply_conandata_patches, export_conandata_patches, replace_in_file
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import VCVars, is_msvc
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.52.0"
 
 
 class NASMConan(ConanFile):
@@ -11,85 +18,90 @@ class NASMConan(ConanFile):
     homepage = "http://www.nasm.us"
     description = "The Netwide Assembler, NASM, is an 80x86 and x86-64 assembler"
     license = "BSD-2-Clause"
-    settings = "os", "arch", "compiler", "build_type"
     topics = ("nasm", "installer", "assembler")
 
-    exports_sources = "patches/*"
-    _autotools = None
+    settings = "os", "arch", "compiler", "build_type"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
-            self.build_requires("strawberryperl/5.30.0.1")
+        if self.info.settings.os == "Windows":
+            self.tool_requires("strawberryperl/5.32.1.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def package_id(self):
         del self.info.settings.compiler
 
-    def _build_vs(self):
-        with tools.chdir(self._source_subfolder):
-            with tools.vcvars(self):
-                autotools = AutoToolsBuildEnvironment(self)
-                autotools.flags.append("-nologo")
-                self.run("nmake /f {} {}".format(os.path.join("Mkfiles", "msvc.mak"), " ".join("{}=\"{}\"".format(k, v) for k, v in autotools.vars.items())))
-                shutil.copy("nasm.exe", "nasmw.exe")
-                shutil.copy("ndisasm.exe", "ndisasmw.exe")
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=(self._settings_build.os == "Windows"))
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        if is_msvc(self):
+            VCVars(self).generate()
+            tc.configure_args.append("-nologo")
         if self.settings.arch == "x86":
-            self._autotools.flags.append("-m32")
+            tc.extra_cflags.append("-m32")
         elif self.settings.arch == "x86_64":
-            self._autotools.flags.append("-m64")
-        self._autotools.configure(configure_dir=self._source_subfolder)
+            tc.extra_cflags.append("-m64")
+        tc.generate()
 
-        # GCC9 - "pure" attribute on function returning "void"
-        tools.replace_in_file("Makefile", "-Werror=attributes", "")
+        env = VirtualBuildEnv(self)
+        env.generate()
 
-        # Need "-arch" flag for the linker when cross-compiling.
-        # FIXME: Revisit after https://github.com/conan-io/conan/issues/9069, using new Autotools integration
-        if str(self.version).startswith("2.13"):
-            tools.replace_in_file("Makefile", "$(CC) $(LDFLAGS) -o", "$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o")
-
-        return self._autotools
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        if self.settings.compiler == "Visual Studio":
-            self._build_vs()
+        apply_conandata_patches(self)
+
+        if is_msvc(self):
+            with chdir(self, self.source_folder):
+                self.run("nmake /f {}".format(os.path.join("Mkfiles", "msvc.mak")))
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
+            autotools.configure()
+
+            # GCC9 - "pure" attribute on function returning "void"
+            replace_in_file(self, "Makefile", "-Werror=attributes", "")
+
+            # Need "-arch" flag for the linker when cross-compiling.
+            # FIXME: Revisit after https://github.com/conan-io/conan/issues/9069, using new Autotools integration
+            # TODO it is time to revisit, not sure what to do here though...
+            if str(self.version).startswith("2.13"):
+                replace_in_file(self, "Makefile", "$(CC) $(LDFLAGS) -o", "$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o")
+                replace_in_file(self, "Makefile", "$(INSTALLROOT)", "$(DESTDIR)")
             autotools.make()
 
+
     def package(self):
-        self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
-        if self.settings.compiler == "Visual Studio":
-            self.copy(pattern="*.exe", src=self._source_subfolder, dst="bin", keep_path=False)
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        if is_msvc(self):
+            copy(self, pattern="*.exe", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+            with chdir(self, os.path.join(self.package_folder, "bin")):
+                shutil.copy2("nasm.exe", "nasmw.exe")
+                shutil.copy2("ndisasm.exe", "ndisasmw.exe")
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
             autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "share"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
