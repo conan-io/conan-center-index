@@ -2,12 +2,12 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.scm import Version
-from conans import CMake
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.0"
 
 
 class GlslangConan(ConanFile):
@@ -39,21 +39,9 @@ class GlslangConan(ConanFile):
 
     short_paths = True
 
-    generators = "cmake", "cmake_find_package_multi"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,7 +49,13 @@ class GlslangConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     @property
     def _get_compatible_spirv_tools_version(self):
@@ -96,14 +90,43 @@ class GlslangConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+            destination=self.source_folder, strip_root=True)
 
-    def build(self):
-        self._patches_sources()
-        cmake = self._configure_cmake()
-        cmake.build()
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_EXTERNAL"] = False
+        tc.variables["SKIP_GLSLANG_INSTALL"] = False
+        tc.variables["ENABLE_SPVREMAPPER"] = self.options.spv_remapper
+        tc.variables["ENABLE_GLSLANG_BINARIES"] = self.options.build_executables
+        glslang_version = Version(self.version)
+        if glslang_version < "7.0.0" or glslang_version >= "8.13.3743":
+            tc.variables["ENABLE_GLSLANG_JS"] = False
+            tc.variables["ENABLE_GLSLANG_WEBMIN"] = False
+            tc.variables["ENABLE_GLSLANG_WEBMIN_DEVEL"] = False
+        else:
+            tc.variables["ENABLE_GLSLANG_WEB"] = False
+            tc.variables["ENABLE_GLSLANG_WEB_DEVEL"] = False
+        tc.variables["ENABLE_EMSCRIPTEN_SINGLE_FILE"] = False
+        tc.variables["ENABLE_EMSCRIPTEN_ENVIRONMENT_NODE"] = False
+        tc.variables["ENABLE_HLSL"] = self.options.hlsl
+        if glslang_version < "7.0.0" or glslang_version >= "8.13.3743":
+            tc.variables["ENABLE_RTTI"] = True
+        tc.variables["ENABLE_OPT"] = self.options.enable_optimizer
+        tc.variables["ENABLE_PCH"] = False
+        tc.variables["ENABLE_CTEST"] = False
+        tc.variables["USE_CCACHE"] = False
+        if (glslang_version < "7.0.0" or glslang_version >= "11.6.0") and self.settings.os == "Windows":
+            tc.variables["OVERRIDE_MSVCCRT"] = False
+        if is_apple_os(self):
+            tc.variables["CMAKE_MACOSX_BUNDLE"] = False
+        # Generate a relocatable shared lib on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.generate()
 
-    def _patches_sources(self):
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def _patch_sources(self):
         apply_conandata_patches(self)
         # Do not force PIC if static (but keep it if shared, because OGLCompiler, OSDependent,
         # GenericCodeGen and MachineIndependent are still static and linked to glslang shared)
@@ -118,53 +141,25 @@ class GlslangConan(ConanFile):
             ]
             glslang_version = Version(self.version)
             if glslang_version >= "7.0.0" and glslang_version < "11.0.0":
-                cmake_files_to_fix.append({"target": "glslang"    , "relpath": os.path.join("glslang", "CMakeLists.txt")})
+                cmake_files_to_fix.append({"target": "glslang", "relpath": os.path.join("glslang", "CMakeLists.txt")})
             else:
                 cmake_files_to_fix.append({"target": "glslang-default-resource-limits", "relpath": os.path.join("StandAlone" , "CMakeLists.txt")})
                 cmake_files_to_fix.append({"target": "MachineIndependent", "relpath": os.path.join("glslang", "CMakeLists.txt")})
                 cmake_files_to_fix.append({"target": "GenericCodeGen", "relpath": os.path.join("glslang", "CMakeLists.txt")})
             for cmake_file in cmake_files_to_fix:
-                replace_in_file(self, os.path.join(self.build_folder, self._source_subfolder, cmake_file["relpath"]),
+                replace_in_file(self, os.path.join(self.source_folder, cmake_file["relpath"]),
                                       "set_property(TARGET {} PROPERTY POSITION_INDEPENDENT_CODE ON)".format(cmake_file["target"]),
                                       "")
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_EXTERNAL"] = False
-        self._cmake.definitions["SKIP_GLSLANG_INSTALL"] = False
-        self._cmake.definitions["ENABLE_SPVREMAPPER"] = self.options.spv_remapper
-        self._cmake.definitions["ENABLE_GLSLANG_BINARIES"] = self.options.build_executables
-        glslang_version = Version(self.version)
-        if glslang_version < "7.0.0" or glslang_version >= "8.13.3743":
-            self._cmake.definitions["ENABLE_GLSLANG_JS"] = False
-            self._cmake.definitions["ENABLE_GLSLANG_WEBMIN"] = False
-            self._cmake.definitions["ENABLE_GLSLANG_WEBMIN_DEVEL"] = False
-        else:
-            self._cmake.definitions["ENABLE_GLSLANG_WEB"] = False
-            self._cmake.definitions["ENABLE_GLSLANG_WEB_DEVEL"] = False
-        self._cmake.definitions["ENABLE_EMSCRIPTEN_SINGLE_FILE"] = False
-        self._cmake.definitions["ENABLE_EMSCRIPTEN_ENVIRONMENT_NODE"] = False
-        self._cmake.definitions["ENABLE_HLSL"] = self.options.hlsl
-        if glslang_version < "7.0.0" or glslang_version >= "8.13.3743":
-            self._cmake.definitions["ENABLE_RTTI"] = True
-        self._cmake.definitions["ENABLE_OPT"] = self.options.enable_optimizer
-        self._cmake.definitions["ENABLE_PCH"] = False
-        self._cmake.definitions["ENABLE_CTEST"] = False
-        self._cmake.definitions["USE_CCACHE"] = False
-        if (glslang_version < "7.0.0" or glslang_version >= "11.6.0") and self.settings.os == "Windows":
-            self._cmake.definitions["OVERRIDE_MSVCCRT"] = False
-        if is_apple_os(self):
-            self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
-            # Generate a relocatable shared lib on Macos
-            self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def build(self):
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        cmake.build()
 
     def package(self):
-        copy(self, "LICENSE.txt", src=os.path.join(self.build_folder, self._source_subfolder), dst=os.path.join(self.package_folder, "licenses"))
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
@@ -244,6 +239,4 @@ class GlslangConan(ConanFile):
             self.cpp_info.components["spvremapper"].libs = ["SPVRemapper" + lib_suffix]
 
         if self.options.build_executables:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info(f"Appending PATH environment variable: {bin_path}")
-            self.env_info.PATH.append(bin_path)
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
