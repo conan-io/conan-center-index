@@ -547,6 +547,12 @@ class FFMpegConan(ConanFile):
         env = tc.environment()
         env.define("PKG_CONFIG_PATH", self.build_folder)
         tc.generate(env)
+
+        # FIXME: Due to an autotoolstoolchain automatic setting this needs to be removed
+        invalid_apple_arg = "--host=aarch64-apple-darwin"
+        if invalid_apple_arg in tc.configure_args:
+            tc.configure_args.remove(invalid_apple_arg)
+
         tc = PkgConfigDeps(self)
         tc.generate()
         tc = AutotoolsDeps(self)
