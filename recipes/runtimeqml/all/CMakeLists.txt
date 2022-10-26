@@ -21,7 +21,7 @@ else()
     message(FATAL_ERROR "Qt was not found")
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE qt::qt)
+target_link_libraries(${PROJECT_NAME} PUBLIC qt::qt)
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS}" C_VISIBILITY_PRESET hidden)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
