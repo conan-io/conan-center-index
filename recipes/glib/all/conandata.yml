@@ -27,8 +27,8 @@ sources:
     url: "https://gitlab.gnome.org/GNOME/glib/-/archive/2.69.3/glib-2.69.3.tar.gz"
     sha256: "290f05eb5affd1bac142010d6511c7a3de361e5f69addc677cf6b3c92a757b44"
   "2.68.3":
-    url: "https://gitlab.gnome.org/GNOME/glib/-/archive/2.68.3/glib-2.68.3.tar.gz"
-    sha256: "465c0727dd5505e998ebb1dae7c38683440dc6d6beffbca6bbf3eaabdb4f6ac7"
+    url: "https://download.gnome.org/sources/glib/2.68/glib-2.68.3.tar.xz"
+    sha256: "e7e1a3c20c026109c45c9ec4a31d8dcebc22e86c69486993e565817d64be3138"
 patches:
   "2.74.0":
     - patch_file: "patches/0001-2.74.0-clang-static-assert.patch"
