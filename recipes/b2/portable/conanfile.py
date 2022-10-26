@@ -1,12 +1,11 @@
 import os
 from contextlib import contextmanager
-import conan.tools.env
 import conan.tools.files
 import conan.tools.layout
-from conan import ConanFile, tools
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.52.0"
 
 
 class B2Conan(ConanFile):
@@ -58,10 +57,10 @@ class B2Conan(ConanFile):
                 "Option toolset 'cxx' and 'cross-cxx' requires 'use_cxx_env=True'")
 
     def layout(self):
-        tools.layout.basic_layout(self, src_folder="source")
+        conan.tools.layout.basic_layout(self, src_folder="source")
 
     def source(self):
-        tools.files.get(
+        conan.tools.files.get(
             self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
@@ -126,13 +125,13 @@ class B2Conan(ConanFile):
         self.run(full_command)
 
     def package(self):
-        tools.files.copy(
+        conan.tools.files.copy(
             self, "LICENSE.txt", dst=self.pkg_licenses_dir, src=self.source_folder)
-        tools.files.copy(
+        conan.tools.files.copy(
             self, "*b2", dst=self.pkg_bin_dir, src=self.b2_output_dir)
-        tools.files.copy(
+        conan.tools.files.copy(
             self, "*b2.exe", dst=self.pkg_bin_dir, src=self.b2_output_dir)
-        tools.files.copy(
+        conan.tools.files.copy(
             self, "*.jam", dst=self.pkg_bin_dir, src=self.b2_output_dir)
 
     def package_info(self):
