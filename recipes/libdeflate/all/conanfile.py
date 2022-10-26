@@ -3,6 +3,7 @@ from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, unix_path, VC
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, chdir, rmdir, copy, rm
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.layout import basic_layout
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 # from conans import MSBuild, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 # from conans.tools import vcvars, environment_append
 import os
@@ -73,7 +74,7 @@ class LibdeflateConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
 
-        if is_msvc(self) or self._is_clang_cl:
+        if is_msvc(self) or self._is_clangcl:
             vc = VCVars(self)
             vc.generate()
             env = Environment()
@@ -82,17 +83,19 @@ class LibdeflateConan(ConanFile):
             # env.define("NODEBUG", None)
             env.vars(self).save_script("conanbuildenv_nmake")
         else:
+            pass
+        # there is no configure, just make
             tc = AutotoolsToolchain(self)
-            # yes_no = lambda v: "yes" if v else "no"
-            # tc.configure_args.extend([
-                # f"--with-foobar={yes_no(self.options.with_foobar)}",
-                # "--enable-tools=no",
-                # "--enable-manpages=no",
-            # ])
+#            # yes_no = lambda v: "yes" if v else "no"
+#            # tc.configure_args.extend([
+#                # f"--with-foobar={yes_no(self.options.with_foobar)}",
+#                # "--enable-tools=no",
+#                # "--enable-manpages=no",
+#            # ])
             tc.generate()
-            # generate pkg-config files of dependencies (useless if upstream configure.ac doesn't rely on PKG_CHECK_MODULES macro)
-            tc = PkgConfigDeps(self)
-            tc.generate()
+#            # generate pkg-config files of dependencies (useless if upstream configure.ac doesn't rely on PKG_CHECK_MODULES macro)
+#            tc = PkgConfigDeps(self)
+#            tc.generate()
 
 #        # If Visual Studio is supported
 #        if is_msvc(self):
@@ -123,9 +126,11 @@ class LibdeflateConan(ConanFile):
         # with chdir(self, self._source_subfolder):
             # autotools.make()
         autotools = Autotools(self)
-        autotools.autoreconf()
-        autotools.configure()
-        autotools.make()
+        with chdir(self, self.source_folder):
+            # there is no configure, just make
+            # autotools.autoreconf()
+            # autotools.configure()
+            autotools.make()
 
     def build(self):
         apply_conandata_patches(self)
@@ -143,9 +148,9 @@ class LibdeflateConan(ConanFile):
             copy(self, "*deflatestatic.lib", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder)
 
     def _package_make(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=(self._settings_build.os == "Windows"))
-        with chdir(self, self._source_subfolder):
-            autotools.install(args=["PREFIX={}".format(self.package_folder)])
+        autotools = Autotools(self)
+        with chdir(self, self.source_folder):
+            autotools.install(args=[f"PREFIX={self.package_folder}"])
         rmdir(self, os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.a" if self.options.shared else "*.[so|dylib]*", os.path.join(self.package_folder, "lib") )
@@ -164,6 +169,6 @@ class LibdeflateConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libdeflate")
         prefix = "lib" if self.settings.os == "Windows" else ""
         suffix = "static" if self.settings.os == "Windows" and not self.options.shared else ""
-        self.cpp_info.libs = ["{0}deflate{1}".format(prefix, suffix)]
+        self.cpp_info.libs = [f"{prefix}deflate{suffix}"]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines = ["LIBDEFLATE_DLL"]
