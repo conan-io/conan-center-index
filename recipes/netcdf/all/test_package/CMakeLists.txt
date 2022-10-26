@@ -4,5 +4,5 @@ project(test_package C) # if the project is pure C
 
 find_package(netCDF REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
+add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} PRIVATE netCDF::netcdf)
