@@ -305,7 +305,6 @@ class Libxml2Conan(ConanFile):
     def build(self):
         self._patch_sources()
         if is_msvc(self):
-            pass
             self._build_msvc()
 #        elif self._is_mingw_windows:
 #            self._build_mingw()
