@@ -1,5 +1,4 @@
 import re
-from email.mime import base
 from pylint.checkers import BaseChecker
 from pylint.interfaces import IAstroidChecker
 from astroid import nodes, Const, AssignName
