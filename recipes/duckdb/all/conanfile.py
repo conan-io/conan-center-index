@@ -136,6 +136,7 @@ class DuckdbConan(ConanFile):
             rm(self, "*.lib", os.path.join(self.package_folder, "lib"))
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
         if self.options.shared:
