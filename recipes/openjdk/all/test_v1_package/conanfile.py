@@ -2,7 +2,6 @@ from conans import ConanFile, tools
 from conans.errors import ConanException
 from io import StringIO
 
-required_conan_version = ">=1.36.0"
 
 
 class TestPackage(ConanFile):
@@ -20,7 +19,5 @@ class TestPackage(ConanFile):
             self.run("java --version", output=output, run_environment=True)
             print(output.getvalue)
             version_info = output.getvalue()
-            if "openjdk" in version_info:
-                pass
-            else:
+            if "openjdk" not in version_info:
                 raise ConanException("java call seems not use the openjdk bin")

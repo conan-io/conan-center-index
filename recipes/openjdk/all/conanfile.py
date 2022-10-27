@@ -13,10 +13,10 @@ class OpenJDK(ConanFile):
     homepage = "https://jdk.java.net"
     license = "GPL-2.0-with-classpath-exception"
     topics = ("java", "jdk", "openjdk")
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    def configure(self):
+    def validate(self):
         if self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Unsupported Architecture.  This package currently only supports x86_64.")
         if self.settings.os not in ["Windows", "Macos", "Linux"]:
