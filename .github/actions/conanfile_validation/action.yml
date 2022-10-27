@@ -36,7 +36,8 @@ runs:
       shell: bash
       run: |
         echo "::add-matcher::linter/recipe_linter.json"
-        if [ -z ${{ inputs.report_name }} ] then
+        if [ -z ${{ inputs.report_name }} ]
+        then
           format="--output-format=parseable"
         else
           format="--output-format=json --output=${{ inputs.report_name }}.json --score=y --fail-under=${{ env.SCORE_THRESHOLD }}"
