@@ -1,12 +1,22 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild, VCVars
+
 from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conans import tools as tools_legacy
 import os
 import re
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 
 class LibVPXConan(ConanFile):
@@ -33,16 +43,11 @@ class LibVPXConan(ConanFile):
     default_options.update({name: 'avx' not in name for name in _arch_options})
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -53,7 +58,10 @@ class LibVPXConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
@@ -63,57 +71,55 @@ class LibVPXConan(ConanFile):
         if self.settings.os == "Macos" and self.settings.arch == "armv8" and tools.Version(self.version) < "1.10.0":
             raise ConanInvalidConfiguration("M1 only supported since 1.10, please upgrade")
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.build_requires("yasm/1.3.0")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        self.tool_requires("yasm/1.3.0")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         # relocatable shared lib on macOS
-        tools.replace_in_file(os.path.join(self._source_subfolder, "build", "make", "Makefile"),
+# FIXME is this still needed?
+        replace_in_file(self, os.path.join(self.source_folder, "build", "make", "Makefile"),
                               "-dynamiclib",
                               "-dynamiclib -install_name @rpath/$$(LIBVPX_SO)")
         # Disable LTO for Visual Studio when CFLAGS doesn't contain -GL
-        if self._is_msvc:
+        if is_msvc(self):
+# FIXME what is the proper way to do this?
             lto = any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", "")))
             if not lto:
-                tools.replace_in_file(
-                    os.path.join(self._source_subfolder, "build", "make", "gen_msvs_vcxproj.sh"),
+                replace_in_file(self,
+                    os.path.join(self.source_folder, "build", "make", "gen_msvs_vcxproj.sh"),
                     "tag_content WholeProgramOptimization true",
                     "tag_content WholeProgramOptimization false",
                 )
 
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        args = [
-            "--prefix={}".format(tools.unix_path(self.package_folder)),
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
+        tc = AutotoolsToolchain(self)
+
+        tc.configure_args.extend([
+            # "--prefix={}".format(unix_path(self, self.package_folder)),
             "--disable-examples",
             "--disable-unit-tests",
             "--disable-tools",
             "--disable-docs",
             "--enable-vp9-highbitdepth",
             "--as=yasm",
-        ]
-        if self.options.shared:
-            args.extend(['--disable-static', '--enable-shared'])
-        else:
-            args.extend(['--disable-shared', '--enable-static'])
-        if self.settings.os != 'Windows' and self.options.get_safe("fPIC", True):
-            args.append('--enable-pic')
-        if self.settings.build_type == "Debug":
-            args.append('--enable-debug')
-        if self._is_msvc and "MT" in msvc_runtime_flag(self):
-            args.append('--enable-static-msvcrt')
+        ])
+# FIXME is this handled by toolchain?
+        if is_msvc(self) and "MT" in msvc_runtime_flag(self):
+            tc.configure_args.append('--enable-static-msvcrt')
 
         arch = {'x86': 'x86',
                 'x86_64': 'x86_64',
@@ -122,7 +128,7 @@ class LibVPXConan(ConanFile):
                 'mips': 'mips32',
                 'mips64': 'mips64',
                 'sparc': 'sparc'}.get(str(self.settings.arch))
-        if self._is_msvc:
+        if is_msvc(self):
             if self.settings.compiler == "Visual Studio":
                 vc_version = self.settings.compiler.version
             else:
@@ -134,7 +140,7 @@ class LibVPXConan(ConanFile):
         host_os = str(self.settings.os)
         if host_os == 'Windows':
             os_name = 'win32' if self.settings.arch == 'x86' else 'win64'
-        elif tools.is_apple_os(host_os):
+        elif is_apple_os(self):
             if self.settings.arch in ["x86", "x86_64"]:
                 os_name = 'darwin11'
             elif self.settings.arch == "armv8" and self.settings.os == "Macos":
@@ -149,50 +155,58 @@ class LibVPXConan(ConanFile):
         elif host_os == 'Android':
             os_name = 'android'
         target = "%s-%s-%s" % (arch, os_name, compiler)
-        args.append('--target=%s' % target)
+        tc.configure_args.append('--target=%s' % target)
         if str(self.settings.arch) in ["x86", "x86_64"]:
             for name in self._arch_options:
                 if not self.options.get_safe(name):
-                    args.append('--disable-%s' % name)
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if self._is_msvc:
+                    tc.configure_args.append('--disable-%s' % name)
+
+        if is_msvc(self):
             # gen_msvs_vcxproj.sh doesn't like custom flags
+# FIXME what to do
             autotools.cxxflags = []
             autotools.flags = []
-        if tools.is_apple_os(self.settings.os) and self.settings.get_safe("compiler.libcxx") == "libc++":
+        if is_apple_os(self) and self.settings.get_safe("compiler.libcxx") == "libc++":
             # special case, as gcc/g++ is hard-coded in makefile, it implicitly assumes -lstdc++
+# FIXME what to do
             autotools.link_flags.append("-stdlib=libc++")
-        autotools.configure(args=args, configure_dir=self._source_subfolder, host=False, build=False, target=False)
-        return autotools
+
+        tc.generate()
+
+        if is_msvc(self):
+            tc = VCVars(self)
+            tc.generate()
+
 
     def build(self):
         self._patch_sources()
-        with tools.vcvars(self) if self._is_msvc else tools.no_op():
-            autotools = self._configure_autotools()
-            autotools.make()
+
+        autotools = Autotools(self)
+        autotools.configure()
+        # autotools.configure(args=args, configure_dir=self._source_subfolder, host=False, build=False, target=False)
+        autotools.make()
 
     def package(self):
-        self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
-        with tools.vcvars(self) if self._is_msvc else tools.no_op():
-            autotools = self._configure_autotools()
-            autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        autotools.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
-        if self._is_msvc:
+        if is_msvc(self):
             # don't trust install target
-            tools.rmdir(os.path.join(self.package_folder, "lib"))
+            rmdir(self, os.path.join(self.package_folder, "lib"))
             libdir = os.path.join(
                 "Win32" if self.settings.arch == "x86" else "x64",
                 "Debug" if self.settings.build_type == "Debug" else "Release",
             )
-            self.copy("vpx*.lib", src=libdir, dst="lib")
+            copy(self, "vpx*.lib", src=os.path.join(self.source_folder, libdir), dst=os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "vpx")
-        suffix = msvc_runtime_flag(self).lower() if self._is_msvc else ""
+        suffix = msvc_runtime_flag(self).lower() if is_msvc(self) else ""
         self.cpp_info.libs = [f"vpx{suffix}"]
         if not self.options.shared:
-            libcxx = tools.stdcpp_library(self)
+            libcxx = legacy_tools.stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
 
