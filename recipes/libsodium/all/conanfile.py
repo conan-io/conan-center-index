@@ -1,12 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc, VCVars, unix_path, msvc_runtime_flag
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, chdir, rmdir, copy, rm, replace_in_file
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.layout import basic_layout, vs_layout
-from conan.tools.microsoft import is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild, VCVars
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, rmdir, copy, rm
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.apple import is_apple_os
+from conan.tools.layout import basic_layout, vs_layout
+from conan.tools.microsoft import is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild, VCVars, unix_path, msvc_runtime_flag
 import os
 
 required_conan_version = ">=1.52.0"
@@ -111,7 +109,8 @@ class LibsodiumConan(ConanFile):
 
             if self._is_mingw:
                 # add libssp (gcc support library) for some missing symbols (e.g. __strcpy_chk)
-                autotools.libs.append("ssp")
+                # FIXME how do I do this in conan v2?
+                # autotools.libs.append("ssp")
 
             if self.settings.os == "Emscripten":
                 # FIXME: this is an old comment/test, has not been re-tested with conan2 upgrade
@@ -163,7 +162,8 @@ class LibsodiumConan(ConanFile):
 
     def _build_msvc(self):
         msvc_sln_folder = self._msvc_sln_folder or ("vs2022" if self.version != "1.0.18" else "vs2019")
-        upgrade_project = self._msvc_sln_folder is None
+        # FIXME how do I upgrade the SLN in conan 2?
+        # upgrade_project = self._msvc_sln_folder is None
         sln_path = os.path.join(self.build_folder, self.source_folder, "builds", "msvc", msvc_sln_folder, "libsodium.sln")
 
         build_type = "{}{}".format(
