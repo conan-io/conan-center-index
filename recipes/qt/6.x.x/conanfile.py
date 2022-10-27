@@ -253,7 +253,7 @@ class QtConan(ConanFile):
                 _enablemodule(module)
 
     def validate(self):
-        if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) == 11:
+        if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) == "11":
             raise ConanInvalidConfiguration("qt is not supported on gcc11 on C3I until conan-io/conan-center-index#13472 is fixed")
             
         # C++ minimum standard required
