@@ -282,35 +282,34 @@ class LibcurlConan(ConanFile):
         replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
         replace_in_file(self, top_makefile, "include src/Makefile.inc", "")
 
-        if self._is_mingw:
-            # patch for zlib naming in mingw
-            if self.options.with_zlib:
-                configure_ac = os.path.join(self.source_folder, "configure.ac")
-                zlib_name = self.dependencies["zlib"].cpp_info.libs[0]
-                replace_in_file(self, configure_ac,
-                                      "AC_CHECK_LIB(z,",
-                                      f"AC_CHECK_LIB({zlib_name},")
-                replace_in_file(self, configure_ac,
-                                      "-lz ",
-                                      f"-l{zlib_name} ")
+        # zlib naming is not always very consistent
+        if self.options.with_zlib:
+            configure_ac = os.path.join(self.source_folder, "configure.ac")
+            zlib_name = self.dependencies["zlib"].cpp_info.libs[0]
+            replace_in_file(self, configure_ac,
+                                  "AC_CHECK_LIB(z,",
+                                  f"AC_CHECK_LIB({zlib_name},")
+            replace_in_file(self, configure_ac,
+                                  "-lz ",
+                                  f"-l{zlib_name} ")
 
-            if self.options.shared:
-                # patch for shared mingw build
-                lib_makefile = os.path.join(self.source_folder, "lib", "Makefile.am")
-                replace_in_file(self, lib_makefile,
-                                      "noinst_LTLIBRARIES = libcurlu.la",
-                                      "")
-                replace_in_file(self, lib_makefile,
-                                      "noinst_LTLIBRARIES =",
-                                      "")
-                replace_in_file(self, lib_makefile,
-                                      "lib_LTLIBRARIES = libcurl.la",
-                                      "noinst_LTLIBRARIES = libcurl.la")
-                # add directives to build dll
-                # used only for native mingw-make
-                if not cross_building(self):
-                    added_content = load(self, "lib_Makefile_add.am")
-                    save(self, lib_makefile, added_content, append=True)
+        if self._is_mingw and self.options.shared:
+            # patch for shared mingw build
+            lib_makefile = os.path.join(self.source_folder, "lib", "Makefile.am")
+            replace_in_file(self, lib_makefile,
+                                  "noinst_LTLIBRARIES = libcurlu.la",
+                                  "")
+            replace_in_file(self, lib_makefile,
+                                  "noinst_LTLIBRARIES =",
+                                  "")
+            replace_in_file(self, lib_makefile,
+                                  "lib_LTLIBRARIES = libcurl.la",
+                                  "noinst_LTLIBRARIES = libcurl.la")
+            # add directives to build dll
+            # used only for native mingw-make
+            if not cross_building(self):
+                added_content = load(self, "lib_Makefile_add.am")
+                save(self, lib_makefile, added_content, append=True)
 
     def _patch_cmake(self):
         if not self._is_using_cmake_build:
