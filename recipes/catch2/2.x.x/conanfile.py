@@ -1,8 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.scm import Version
 import os
 
@@ -36,9 +35,6 @@ class Catch2Conan(ConanFile):
     @property
     def _default_reporter_str(self):
         return '"{}"'.format(str(self.options.default_reporter).strip('"'))
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -109,7 +105,7 @@ class Catch2Conan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Catch2")
         self.cpp_info.set_property("cmake_target_name", "Catch2::Catch2{}".format("WithMain" if self.options.with_main else ""))
-        self.cpp_info.set_property("pkg_config_name", "catch2".format("-with-main" if self.options.with_main else ""))
+        self.cpp_info.set_property("pkg_config_name", "catch2{}".format("-with-main" if self.options.with_main else ""))
 
         if self.options.with_main:
             self.cpp_info.components["_catch2"].set_property("cmake_target_name", "Catch2::Catch2")
