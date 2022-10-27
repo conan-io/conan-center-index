@@ -1,4 +1,7 @@
 sources:
+  "1.2.0":
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.2.0.tar.gz"
+    sha256: "6e7af2dad0530b2b404480dbe437ca4670c6615cc2ec6cf6a20ed04d9d75e0bd"
   "1.1.11":
     url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.1.11.tar.gz"
     sha256: "938ea0ba13c6538b0ee505ab391a3020f206ab9d29c869f20dd19318a4ee8997"
@@ -27,6 +30,12 @@ sources:
     url: "https://github.com/KhronosGroup/MoltenVK/archive/v1.1.0.tar.gz"
     sha256: "0538fa1c23ddae495c7f82ccd0db90790a90b7017a258ca7575fbae8021f3058"
 patches:
+  "1.2.0":
+    - patch_file: "patches/1.2.0-0001-fix-version-number-icd-json.patch"
+      patch_description: "Fix api_version in MoltenVK_icd.json"
+      patch_type: "backport"
+      patch_source: "https://github.com/KhronosGroup/MoltenVK/pull/1747"
+      sha256: "80387a47d24c12b538bdcb60d6aa7c402af0800519ce55385abdfbf3d304ee07"
   "1.1.11":
     - patch_file: "patches/0003-vulkan-alias-private-extern-1.1.11.patch"
       patch_description: "Fix vulkan alias symbols when vulkan symbols are hidden"
