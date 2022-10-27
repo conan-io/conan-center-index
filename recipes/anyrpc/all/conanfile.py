@@ -66,7 +66,7 @@ class AnyRPCConan(ConanFile):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
 
-        if self.options.with_log4cplus and self.options.with_wchar:
+        if self.info.options.with_log4cplus and self.info.options.with_wchar:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built with both log4cplus and wchar, see https://github.com/sgieseking/anyrpc/issues/25")
 
     def source(self):
