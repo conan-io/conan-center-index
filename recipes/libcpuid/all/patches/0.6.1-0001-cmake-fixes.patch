@@ -1,0 +1,23 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -24,8 +24,8 @@ set(CMAKE_C_STANDARD 99)
+ # Global variables
+ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+ 
++include(GNUInstallDirs)
+ if(UNIX)
+-  include(GNUInstallDirs)
+   set(prefix "${CMAKE_INSTALL_PREFIX}")
+   set(exec_prefix "\${prefix}")
+   set(libdir "\${exec_prefix}/lib")
+--- a/cpuid_tool/CMakeLists.txt
++++ b/cpuid_tool/CMakeLists.txt
+@@ -2,7 +2,7 @@ add_executable(cpuid_tool cpuid_tool.c)
+ 
+ target_link_libraries(cpuid_tool cpuid)
+ 
+-if(WIN32)
++if(0)
+   install(
+     TARGETS cpuid_tool
+     CONFIGURATIONS Debug

@@ -10,11 +10,13 @@
    set(prefix "${CMAKE_INSTALL_PREFIX}")
    set(exec_prefix "\${prefix}")
    set(libdir "\${exec_prefix}/lib")
-@@ -27,4 +27,3 @@ endif(UNIX)
+@@ -27,4 +27,6 @@ endif(UNIX)
  # Include subdirectories
  add_subdirectory(libcpuid)
  add_subdirectory(cpuid_tool)
--add_subdirectory(tests)
++if(LIBCPUID_TESTS)
+ add_subdirectory(tests)
++endif()
 --- a/cpuid_tool/CMakeLists.txt
 +++ b/cpuid_tool/CMakeLists.txt
 @@ -2,7 +2,7 @@ add_executable(cpuid_tool cpuid_tool.c)
@@ -35,7 +37,7 @@
  endif()
 --- a/libcpuid/CMakeLists.txt
 +++ b/libcpuid/CMakeLists.txt
-@@ -13,7 +13,7 @@ if("${MSVC_CXX_ARCHITECTURE_ID}" MATCHES "x64")
+@@ -13,10 +13,11 @@ if("${MSVC_CXX_ARCHITECTURE_ID}" MATCHES "x64")
  endif()
  
  if(UNIX)
@@ -44,7 +46,11 @@
  else()
    add_library(cpuid ${cpuid_sources})
  endif()
-@@ -67,7 +67,7 @@ include(CMakePackageConfigHelpers)
++set_target_properties(cpuid PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ target_include_directories(cpuid SYSTEM PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+ 
+ target_compile_definitions(cpuid PRIVATE VERSION="${PROJECT_VERSION}")
+@@ -67,7 +68,7 @@ include(CMakePackageConfigHelpers)
  write_basic_package_version_file("${version_config}" COMPATIBILITY SameMajorVersion)
  
  # Configure '<PROJECT-NAME>Config.cmake' Use variables: * TARGETS_EXPORT_NAME * PROJECT_NAME
