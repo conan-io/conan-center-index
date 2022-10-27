@@ -24,7 +24,7 @@ jobs:
             linter/**
       - name: validate conanfile.py files
         uses: ./.github/actions/conanfile_validation
-        if: steps.changed_files.outputs.any_changed == 'true'
+        if: steps.changed_files.outputs.any_changed == 'true' && always()
         with:
           python_version: ${{ env.PYVER }}
           files: recipes/*/*/conanfile.py
@@ -32,7 +32,7 @@ jobs:
           report_name: recipe
       - name: validate test/conanfile.py files
         uses: ./.github/actions/conanfile_validation
-        if: steps.changed_files.outputs.any_changed == 'true'
+        if: steps.changed_files.outputs.any_changed == 'true' && always()
         with:
           python_version: ${{ env.PYVER }}
           files: recipes/*/*/test_*/conanfile.py

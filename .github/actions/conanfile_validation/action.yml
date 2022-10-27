@@ -28,10 +28,12 @@ runs:
       with:
         python-version: ${{ inputs.python_version }}
     - name: Install dependencies
+      shell: bash
       run: |
         pip install pylint==2.14 conan==${{ steps.parse_conan_v1_version.outputs.result }}
     - name: Run linter
       id: linter
+      shell: bash
       run: |
         echo "::add-matcher::linter/recipe_linter.json"
         if [ -z ${{ inputs.report_name }} ] then
@@ -52,6 +54,7 @@ runs:
         path: ${{ inputs.report_name }}.json
     - name: Create report (${{ inputs.report_name }})
       if: always() && inputs.report_name
+      shell: bash
       run: |
         echo '## Linter summary (${{ inputs.report_name }})' >> $GITHUB_STEP_SUMMARY
         jq 'map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length}' ${{ inputs.report_name }}.json > ${{ inputs.report_name }}2.json
