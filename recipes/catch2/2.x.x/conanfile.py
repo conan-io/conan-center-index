@@ -23,7 +23,7 @@ class Catch2Conan(ConanFile):
         "with_main": [True, False],
         "with_benchmark": [True, False],
         "with_prefix": [True, False],
-        "default_reporter": "ANY",
+        "default_reporter": [None, "ANY"],
     }
     default_options = {
         "fPIC": True,
@@ -115,7 +115,7 @@ class Catch2Conan(ConanFile):
             self.cpp_info.components["_catch2"].set_property("cmake_target_name", "Catch2::Catch2")
             self.cpp_info.components["_catch2"].set_property("pkg_config_name", "catch2")
 
-            self.cpp_info.components["catch2_with_main"].builddirs = [os.path.join("lib", "cmake", "Catch2")]
+            self.cpp_info.components["catch2_with_main"].builddirs.append(os.path.join("lib", "cmake", "Catch2"))
             self.cpp_info.components["catch2_with_main"].libs = ["Catch2WithMain"]
             self.cpp_info.components["catch2_with_main"].system_libs = ["log"] if self.settings.os == "Android" else []
             self.cpp_info.components["catch2_with_main"].set_property("cmake_target_name", "Catch2::Catch2WithMain")
