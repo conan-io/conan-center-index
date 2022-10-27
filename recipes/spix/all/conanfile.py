@@ -63,12 +63,6 @@ class SpixConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-        # shadertools and qtdeclarative provide the Quick module
-        if self.options.qt_major == 6:
-            self.options["qt"].qtshadertools = True
-        self.options["qt"].qtdeclarative = True
-        self.options["qt"].gui = True
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -88,6 +82,11 @@ class SpixConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
             )
+
+        if self.info.options.qt_major == 6 and not self.info.options["qt"].qtshadertools:
+            raise ConanInvalidConfiguration(f"{self.ref} requires qt:qtshadertools to get the Quick module")
+        if not (self.info.options["qt"].gui and self.info.options["qt"].qtdeclarative):
+            raise ConanInvalidConfiguration(f"{self.ref} requires qt:gui and qt:qtdeclarative to get the Quick module")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
