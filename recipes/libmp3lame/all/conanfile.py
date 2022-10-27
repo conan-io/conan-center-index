@@ -115,7 +115,7 @@ class LibMP3LameConan(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--disable-frontend")
         if self.settings.compiler == "clang" and self.settings.arch in ["x86", "x86_64"]:
-            tc.extra_cxx_flags.extend(["-mmmx", "-msse"])
+            tc.extra_cxxflags.extend(["-mmmx", "-msse"])
         tc.generate()
 
     def _build_autotools(self):
