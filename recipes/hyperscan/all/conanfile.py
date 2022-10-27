@@ -7,7 +7,7 @@ from conan.tools.build import check_min_cppstd
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.51.1"
 
 class HyperscanConan(ConanFile):
     name = "hyperscan"
@@ -71,7 +71,7 @@ class HyperscanConan(ConanFile):
             self.requires("pcre/8.45")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
+        if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, "11")
 
         minimum_version = self._minimum_compilers_version.get(str(self.info.settings.compiler), False)
