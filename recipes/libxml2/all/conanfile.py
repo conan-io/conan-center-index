@@ -123,9 +123,10 @@ class Libxml2Conan(ConanFile):
 
     def generate(self):
         if is_msvc(self):
-            self._generate_msvc()
+            tc = VCVars(self)
+            tc.generate()
         elif self._is_mingw_windows:
-            self._generate_mingw()
+            pass # nothing to do for mingw?  it calls mingw-make directly
         else:
             env = VirtualBuildEnv(self)
             env.generate()
@@ -154,9 +155,7 @@ class Libxml2Conan(ConanFile):
             tc.generate()
 
 
-    def _generate_msvc(self):
-        tc = VCVars(self)
-        tc.generate()
+    def _build_msvc(self):
         with chdir(self, os.path.join(self.source_folder, 'win32')):
             debug = "yes" if self.settings.build_type == "Debug" else "no"
             static = "no" if self.options.shared else "yes"
@@ -207,9 +206,6 @@ class Libxml2Conan(ConanFile):
             fix_library(self.options.icu, 'icu', 'advapi32.lib sicuuc.lib sicuin.lib sicudt.lib')
             fix_library(self.options.icu, 'icu', 'icuuc.lib icuin.lib icudt.lib')
 
-
-    def _build_msvc(self):
-        with chdir(self, os.path.join(self.source_folder, 'win32')):
             self.run("nmake /f Makefile.msvc libxml libxmla libxmladll")
 
             if self.options.include_utils:
@@ -223,7 +219,7 @@ class Libxml2Conan(ConanFile):
                 self.run("nmake /f Makefile.msvc install-dist")
 
 
-    def _generate_mingw(self):
+    def _build_mingw(self):
         with chdir(self, os.path.join(self.source_folder, "win32")):
             # configuration
             yes_no = lambda v: "yes" if v else "no"
@@ -265,8 +261,6 @@ class Libxml2Conan(ConanFile):
             fix_library(self.options.zlib, "zlib", "z")
             fix_library(self.options.lzma, "xz_utils", "lzma")
 
-    def _build_mingw(self):
-        with chdir(self, os.path.join(self.source_folder, "win32")):
             self.run(f"mingw32-make -j{build_jobs(self)} -f Makefile.mingw libxml libxmla")
             if self.options.include_utils:
                 self.run(f"mingw32-make -j{build_jobs(self)} -f Makefile.mingw utils")
