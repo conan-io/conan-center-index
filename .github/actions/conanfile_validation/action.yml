@@ -1,0 +1,58 @@
+name: 'Validate conanfile.py files'
+description: 'Validate conanfile.py files'
+author: 'ericLemanissier'
+inputs:
+  files:
+    description: "conanfile.py files to check"
+    required: true
+  python_version:
+    description: "python version to use for linting"
+    required: true
+  rcfile:
+    description: "path to pylint rcfile"
+    required: true
+  report_name:
+    description: "name of the report"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get Conan v1 version
+      id: parse_conan_v1_version
+      uses: mikefarah/yq@master
+      with:
+        cmd: yq '.conan.version' '.c3i/config_v1.yml'
+    - uses: actions/setup-python@v4
+      with:
+        python-version: ${{ inputs.python_version }}
+    - name: Install dependencies
+      run: |
+        pip install pylint==2.14 conan==${{ steps.parse_conan_v1_version.outputs.result }}
+    - name: Run linter
+      id: linter
+      run: |
+        echo "::add-matcher::linter/recipe_linter.json"
+        if [ -z ${{ inputs.report_name }} ] then
+          format="--output-format=parseable"
+        else
+          format="--output-format=json --output=${{ inputs.report_name }}.json --score=y --fail-under=${{ env.SCORE_THRESHOLD }}"
+        fi
+        res=0
+        for file in ${{ inputs.files }}; do
+          pylint --rcfile=${{ inputs.rcfile }} --ignore-paths="recipes/[^/]*/[^/]*/test_v1[^/]*/conanfile.py" ${format} ${file} || res=$?
+        done
+        exit $res
+    - name: Archive production artifacts
+      if: always() && inputs.report_name
+      uses: actions/upload-artifact@v3
+      with:
+        name: report_name
+        path: ${{ inputs.report_name }}.json
+    - name: Create report (${{ inputs.report_name }})
+      if: always() && inputs.report_name
+      run: |
+        echo '## Linter summary (${{ inputs.report_name }})' >> $GITHUB_STEP_SUMMARY
+        jq 'map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length}' ${{ inputs.report_name }}.json > ${{ inputs.report_name }}2.json
+        jq -r '" * \(.message): \(.length)"' ${{ inputs.report_name }}2.json >> $GITHUB_STEP_SUMMARY
