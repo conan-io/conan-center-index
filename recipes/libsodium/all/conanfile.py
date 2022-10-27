@@ -107,7 +107,7 @@ class LibsodiumConan(ConanFile):
 
             env = tc.environment()
 
-            if self._is_mingw:
+            # if self._is_mingw:
                 # add libssp (gcc support library) for some missing symbols (e.g. __strcpy_chk)
                 # FIXME how do I do this in conan v2?
                 # autotools.libs.append("ssp")
