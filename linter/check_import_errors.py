@@ -1,7 +1,7 @@
 
 from pylint.checkers import BaseChecker
 from pylint.interfaces import IAstroidChecker
-from astroid import nodes, Const, AssignName
+from astroid import nodes
 
 
 class ImportErrors(BaseChecker):
@@ -74,4 +74,3 @@ class ImportErrorsConanInvalidConfiguration(BaseChecker):
             names = [name for name, _ in node.names]
             if 'ConanInvalidConfiguration' in names:
                 self.add_message("conan-import-error-conaninvalidconfiguration", node=node)
-
