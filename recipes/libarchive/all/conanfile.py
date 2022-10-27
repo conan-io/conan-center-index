@@ -166,8 +166,8 @@ class LibarchiveConan(ConanFile):
         tc.variables["ENABLE_XATTR"] = self.options.with_xattr
 
         if self.settings.os == "Windows" and self.settings.get_safe("os.subsystem") != "cygwin":
-            tc.variables["ZLIB_WINAPI_EXITCODE"] = "0"
-            tc.variables["ZLIB_WINAPI_EXITCODE__TRYRUN_OUTPUT"] = ""
+            tc.cache_variables["ZLIB_WINAPI_EXITCODE"] = "0"
+            tc.cache_variables["ZLIB_WINAPI_EXITCODE__TRYRUN_OUTPUT"] = ""
 
         tc.generate()
 
