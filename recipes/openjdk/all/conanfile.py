@@ -16,6 +16,10 @@ class OpenJDK(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
+    def package_id(self):
+        del self.info.settings.compiler
+        del self.info.settings.build_type
+
     def validate(self):
         if self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Unsupported Architecture.  This package currently only supports x86_64.")
