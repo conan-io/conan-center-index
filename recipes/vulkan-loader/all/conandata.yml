@@ -1,7 +1,7 @@
 sources:
-  "1.3.231.0":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.231.0.tar.gz"
-    sha256: "5253f2145114a5da95be6c88a724f782242b26c59d8394fe4e0a640225e0044c"
+  "1.3.231.1":
+    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.231.1.tar.gz"
+    sha256: "5226fbc6a90e4405200c8cfdd5733d5e0c6a64e64dcc614c485ea06e03d66578"
   "1.3.231":
     url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/v1.3.231.tar.gz"
     sha256: "02e185b939635167ea8f8815f8daab76af36923a3b995951fe6a5d3e25c55bf7"
@@ -48,8 +48,8 @@ sources:
     url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/sdk-1.2.154.0.tar.gz"
     sha256: "418017d7bab907e72291476df231dd0e7dc7fe20b97e55389c975bcfc48d6433"
 patches:
-  "1.3.231.0":
-    - patch_file: "patches/1.3.231.0-0001-no-find-package-wayland.patch"
+  "1.3.231.1":
+    - patch_file: "patches/1.3.231.1-0001-no-find-package-wayland.patch"
       patch_description: "CMake: remove attempt to find Wayland"
       patch_type: "portability"
       patch_source: "https://github.com/KhronosGroup/Vulkan-Loader/pull/1020"
