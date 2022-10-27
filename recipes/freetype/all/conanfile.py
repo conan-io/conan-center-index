@@ -260,6 +260,7 @@ class FreetypeConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "freetype2"))
 
         libtool_version = load(self, self._libtool_version_txt).strip()
+        self.conf_info.define("user.freetype:libtool_version", libtool_version)
         # FIXME: need to do override the pkg_config version (pkg_config_custom_content does not work)
         # self.cpp_info.version["pkg_config"] = pkg_config_version
 
