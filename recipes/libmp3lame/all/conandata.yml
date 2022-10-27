@@ -5,8 +5,5 @@ sources:
 patches:
   "3.100":
     - patch_file: "patches/6410.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/6416.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/android.patch"
-      base_path: "source_subfolder"
