@@ -289,10 +289,10 @@ class LibcurlConan(ConanFile):
                 zlib_name = self.deps_cpp_info["zlib"].libs[0]
                 replace_in_file(self, configure_ac,
                                       "AC_CHECK_LIB(z,",
-                                      f"AC_CHECK_LIB({zlib_name}")
+                                      f"AC_CHECK_LIB({zlib_name},")
                 replace_in_file(self, configure_ac,
                                       "-lz ",
-                                      f"-l{zlib_name}")
+                                      f"-l{zlib_name} ")
 
             if self.options.shared:
                 # patch for shared mingw build
