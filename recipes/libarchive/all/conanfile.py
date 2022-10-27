@@ -174,6 +174,10 @@ class LibarchiveConan(ConanFile):
         apply_conandata_patches(self)
         cmakelists_path = os.path.join(self.source_folder, "CMakeLists.txt")
 
+        replace_in_file(self, cmakelists_path,
+                        "CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12 FATAL_ERROR)",
+                        "CMAKE_MINIMUM_REQUIRED(VERSION 3.1)")
+
         # it can possibly override CMAKE_MODULE_PATH provided by generator
         replace_in_file(self, cmakelists_path,
                         "SET(CMAKE_MODULE_PATH",
