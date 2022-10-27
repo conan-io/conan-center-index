@@ -1,11 +1,9 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, collect_libs
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, collect_libs
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
@@ -203,7 +201,7 @@ class ProjConan(ConanFile):
         if self.options.get_safe("with_curl"):
             self.cpp_info.components["projlib"].requires.append("libcurl::libcurl")
         if Version(self.version) < "8.2.0":
-            if self.options.shared and self._is_msvc:
+            if self.options.shared and is_msvc(self):
                 self.cpp_info.components["projlib"].defines.append("PROJ_MSVC_DLL_IMPORT")
         else:
             if not self.options.shared:
