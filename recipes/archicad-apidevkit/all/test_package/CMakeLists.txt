@@ -35,9 +35,6 @@ conan_basic_setup(TARGETS)
 set(API_DEVKIT_DIR ${CONAN_ARCHICAD-APIDEVKIT_ROOT}/bin)
 set(AC_API_DEVKIT_DIR ${API_DEVKIT_DIR} CACHE PATH "API DevKit directory.")
 
-# Test components
-find_package(archicad-apidevkit COMPONENTS GSRoot CONFIG)
-
 set(ACAPINC_FILE_LOCATION ${AC_API_DEVKIT_DIR}/Inc/ACAPinc.h)
 
 if(EXISTS ${ACAPINC_FILE_LOCATION})
