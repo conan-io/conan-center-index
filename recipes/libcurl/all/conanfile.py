@@ -286,7 +286,7 @@ class LibcurlConan(ConanFile):
             # patch for zlib naming in mingw
             if self.options.with_zlib:
                 configure_ac = os.path.join(self.source_folder, "configure.ac")
-                zlib_name = self.deps_cpp_info["zlib"].libs[0]
+                zlib_name = self.dependencies["zlib"].cpp_info.libs[0]
                 replace_in_file(self, configure_ac,
                                       "AC_CHECK_LIB(z,",
                                       f"AC_CHECK_LIB({zlib_name},")
@@ -398,30 +398,30 @@ class LibcurlConan(ConanFile):
             f"--enable-unix-sockets={self._yes_no(self.options.with_unix_sockets)}",
         ])
         if self.options.with_ssl == "openssl":
-            path = unix_path(self, self.deps_cpp_info["openssl"].rootpath)
+            path = unix_path(self, self.dependencies["openssl"].package_folder)
             tc.configure_args.append(f"--with-ssl={path}")
         else:
             tc.configure_args.append("--without-ssl")
         if self.options.with_ssl == "wolfssl":
-            path = unix_path(self, self.deps_cpp_info["wolfssl"].rootpath)
+            path = unix_path(self, self.dependencies["wolfssl"].package_folder)
             tc.configure_args.append(f"--with-wolfssl={path}")
         else:
             tc.configure_args.append("--without-wolfssl")
 
         if self.options.with_libssh2:
-            path = unix_path(self, self.deps_cpp_info["libssh2"].rootpath)
+            path = unix_path(self, self.dependencies["libssh2"].package_folder)
             tc.configure_args.append(f"--with-libssh2={path}")
         else:
             tc.configure_args.append("--without-libssh2")
 
         if self.options.with_nghttp2:
-            path = unix_path(self, self.deps_cpp_info["libnghttp2"].rootpath)
+            path = unix_path(self, self.dependencies["libnghttp2"].package_folder)
             tc.configure_args.append(f"--with-nghttp2={path}")
         else:
             tc.configure_args.append("--without-nghttp2")
 
         if self.options.with_zlib:
-            path = unix_path(self, self.deps_cpp_info["zlib"].rootpath)
+            path = unix_path(self, self.dependencies["zlib"].package_folder)
             tc.configure_args.append(f"--with-zlib={path}")
         else:
             tc.configure_args.append("--without-zlib")
