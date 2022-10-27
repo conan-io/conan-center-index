@@ -1,22 +1,26 @@
 --- a/src/lib_proj.cmake
 +++ b/src/lib_proj.cmake
-@@ -394,21 +394,18 @@ if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+@@ -394,21 +394,22 @@ if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
    target_link_libraries(proj PRIVATE ${CMAKE_THREAD_LIBS_INIT})
  endif()
  
 -target_include_directories(proj PRIVATE ${SQLITE3_INCLUDE_DIR})
 -target_link_libraries(proj PRIVATE ${SQLITE3_LIBRARY})
-+target_link_libraries(proj PUBLIC CONAN_PKG::nlohmann_json PRIVATE CONAN_PKG::sqlite3)
++find_package(nlohmann_json REQUIRED CONFIG)
++find_package(SQLite3 REQUIRED)
++target_link_libraries(proj PUBLIC nlohmann_json::nlohmann_json PRIVATE SQLite::SQLite3)
  
  if(TIFF_ENABLED)
    target_compile_definitions(proj PRIVATE -DTIFF_ENABLED)
 -  target_include_directories(proj PRIVATE ${TIFF_INCLUDE_DIR})
 -  target_link_libraries(proj PRIVATE ${TIFF_LIBRARY})
++  find_package(TIFF REQUIRED)
 +  target_link_libraries(proj PRIVATE TIFF::TIFF)
  endif()
  
  if(CURL_ENABLED)
    target_compile_definitions(proj PRIVATE -DCURL_ENABLED)
++  find_package(CURL REQUIRED)
 -  target_include_directories(proj PRIVATE ${CURL_INCLUDE_DIR})
    target_link_libraries(proj
      PRIVATE
