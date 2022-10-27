@@ -1,14 +1,16 @@
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 
 class LibCpuidConan(ConanFile):
     name = "libcpuid"
     description = "libcpuid  is a small C library for x86 CPU detection and feature extraction"
-    topics = ("libcpuid", "detec", "cpu", "intel", "amd", "x86_64")
+    topics = ("detec", "cpu", "intel", "amd", "x86_64")
     license = "https://github.com/anrieff/libcpuid"
     homepage = "https://github.com/anrieff/libcpuid"
     url = "https://github.com/conan-io/conan-center-index"
@@ -23,21 +25,8 @@ class LibCpuidConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,38 +34,48 @@ class LibCpuidConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.arch not in ("x86", "x86_64"):
-            raise ConanInvalidConfiguration("libcpuid is only available for x86 and x86_64 architecture")
+        if self.info.settings.arch not in ("x86", "x86_64"):
+            raise ConanInvalidConfiguration(f"{self.ref} is only available for x86 and x86_64 architecture")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["ENABLE_DOCS"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["ENABLE_DOCS"] = False
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "cpuid")
@@ -84,10 +83,7 @@ class LibCpuidConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libcpuid")
         self.cpp_info.libs = ["cpuid"]
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
-
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "cpuid"
         self.cpp_info.names["cmake_find_package_multi"] = "cpuid"
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

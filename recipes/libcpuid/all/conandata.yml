@@ -7,8 +7,6 @@ sources:
     sha256: "49893f31475510aa0ebe2ad3a29fad95e2a592cc5f48451c95271c536f89a157"
 patches:
   "0.5.1":
-    - patch_file: "patches/0.5.0-cmake-fixes.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0.5.0-0001-cmake-fixes.patch"
   "0.5.0":
-    - patch_file: "patches/0.5.0-cmake-fixes.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0.5.0-0001-cmake-fixes.patch"
