@@ -1384,7 +1384,7 @@ class QtConan(ConanFile):
                 if "::" in req: # not a qt component                   
                     continue
                 _add_build_modules_for_component(req)
-            build_modules_list.append(build_modules.get(component, []))
+            build_modules_list.extend(build_modules.get(component, []))
             build_modules[component] = []
         
         for c in self.cpp_info.components:
