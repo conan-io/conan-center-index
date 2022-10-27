@@ -105,3 +105,8 @@ class NASMConan(ConanFile):
     def package_info(self):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
+
+        # remove later once all recipes upgraded to conan v2
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info(f"Appending PATH environment variable: {bin_path}")
+        self.env_info.PATH.append(bin_path)
