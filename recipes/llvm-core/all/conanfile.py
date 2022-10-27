@@ -178,14 +178,15 @@ class LLVMCoreConan(ConanFile):
         cmake.definitions['LLVM_ENABLE_LIBPFM'] = False
         cmake.definitions['LLVM_ENABLE_LIBEDIT'] = False
         cmake.definitions['LLVM_ENABLE_FFI'] = self.options.with_ffi
-        cmake.definitions['LLVM_ENABLE_ZLIB'] = \
-            self.options.get_safe('with_zlib', False)
+        cmake.definitions['LLVM_ENABLE_ZLIB'] = "FORCE_ON" if \
+            self.options.get_safe('with_zlib', False) else False
         cmake.definitions['LLVM_ENABLE_LIBXML2'] = \
             self.options.get_safe('with_xml2', False)
         return cmake
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
+        self.copy("*", src="cmake", dst="cmake")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
