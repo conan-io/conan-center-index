@@ -394,6 +394,8 @@ class Libxml2Conan(ConanFile):
             self.cpp_info.system_libs.append("m")
             if self.options.threads and self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.append("pthread")
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.system_libs.append("dl")
         elif self.settings.os == "Windows":
             if self.options.ftp or self.options.http:
                 self.cpp_info.system_libs.extend(["ws2_32", "wsock32"])
