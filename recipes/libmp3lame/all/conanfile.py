@@ -124,7 +124,6 @@ class LibMP3LameConan(ConanFile):
         copy(self, "config.guess", self._user_info_build["gnu-config"].CONFIG_GUESS,
                     os.path.join(self.source_folder))
         autotools = Autotools(self)
-        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
