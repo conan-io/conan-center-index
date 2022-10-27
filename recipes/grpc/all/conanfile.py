@@ -84,7 +84,7 @@ class grpcConan(ConanFile):
         if self.options.shared:
             try:
                 del self.options.fPIC
-            except:
+            except Exception:
                 pass
             self.options["protobuf"].shared = True
             self.options["googleapis"].shared = True
