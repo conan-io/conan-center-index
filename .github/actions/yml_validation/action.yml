@@ -1,0 +1,38 @@
+name: 'Validate yml files'
+description: ' Validate yml files'
+author: 'ericLemanissier'
+inputs:
+  files:
+    description: "yml files to check"
+    required: true
+  python_version:
+    description: "python version to use for linting"
+    required: true
+  python_linter:
+    description: "path to python linter script"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v4
+      with:
+        python-version: ${{ inputs.python_version }}
+
+    - name: Install dependencies
+      run: pip install yamllint strictyaml argparse
+
+    - name: Run linter
+      if: always()
+      run: |
+        echo "::add-matcher::linter/yamllint_matcher.json"
+        for file in ${{ inputs.files }}; do
+          yamllint --config-file linter/yamllint_rules.yml -f standard ${file}
+        done
+        echo "::remove-matcher owner=yamllint_matcher::"
+    - name: Run schema check
+      if: always()
+      run: |
+        for file in ${{ inputs.files }}; do
+          python3 linter/${{ inputs.python_linter }}.py ${file}
+        done

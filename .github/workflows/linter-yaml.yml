@@ -26,42 +26,21 @@ jobs:
           files: |
             linter/**
 
-      - uses: actions/setup-python@v4
+      - name: validate conandata files
+        uses: ./.github/actions/yml_validation
         if: steps.changed_files.outputs.any_changed == 'true'
         with:
-          python-version: ${{ env.PYVER }}
+          python_version: ${{ env.PYVER }}
+          files: ${{ env.CONANDATA_FILES_PATH }}
+          python_linter: linter/conandata_yaml_linter.py
 
-      - name: Install dependencies
+      - name: validate config files
+        uses: ./.github/actions/yml_validation
         if: steps.changed_files.outputs.any_changed == 'true'
-        run: pip install yamllint strictyaml argparse
-
-      - name: Run linter (config.yml)
-        if: steps.changed_files.outputs.any_changed == 'true' && always()
-        run: |
-          echo "::add-matcher::linter/yamllint_matcher.json"
-          yamllint --config-file linter/yamllint_rules.yml -f standard ${{ env.CONFIG_FILES_PATH }}
-          echo "::remove-matcher owner=yamllint_matcher::"
-
-      - name: Run schema check (config.yml)
-        if: steps.changed_files.outputs.any_changed == 'true' && always()
-        run: |
-          for file in ${{ env.CONFIG_FILES_PATH }}; do
-            python3 linter/config_yaml_linter.py ${file}
-          done
-
-      - name: Run linter (conandata.yml)
-        if: steps.changed_files.outputs.any_changed == 'true' && always()
-        run: |
-          echo "::add-matcher::linter/yamllint_matcher.json"
-          yamllint --config-file linter/yamllint_rules.yml -f standard ${{ env.CONANDATA_FILES_PATH }}
-          echo "::remove-matcher owner=yamllint_matcher::"
-
-      - name: Run schema check (conandata.yml)
-        if: steps.changed_files.outputs.any_changed == 'true' && always()
-        run: |
-          for file in ${{ env.CONANDATA_FILES_PATH }}; do
-            python3 linter/conandata_yaml_linter.py ${file}
-          done
+        with:
+          python_version: ${{ env.PYVER }}
+          files: ${{ env.CONFIG_FILES_PATH }}
+          python_linter: linter/config_yaml_linter.py
 
   lint_pr_files:
     # Lint files modified in the pull_request
@@ -72,13 +51,6 @@ jobs:
         with:
           fetch-depth: 2
 
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYVER }}
-
-      - name: Install dependencies
-        run: pip install yamllint strictyaml argparse
-
       ## Work on config.yml files
       - name: Get changed files (config)
         id: changed_files_config
@@ -88,18 +60,13 @@ jobs:
           files: |
             ${{ env.CONFIG_FILES_PATH }}
 
-      - name: Run linter (config.yml)
-        if: steps.changed_files_config.outputs.any_changed == 'true' && always()
-        run: |
-          echo "::add-matcher::linter/yamllint_matcher.json"
-          for file in ${{ steps.changed_files_config.outputs.all_changed_files }}; do
-            yamllint --config-file linter/yamllint_rules.yml -f standard ${file}
-          done
-          echo "::remove-matcher owner=yamllint_matcher::"
-
-          for file in ${{ steps.changed_files_conandata.outputs.all_changed_files }}; do
-            python3 linter/config_yaml_linter.py ${file}
-          done
+      - name: validate config files
+        uses: ./.github/actions/yml_validation
+        if: steps.changed_files.outputs.any_changed == 'true'
+        with:
+          python_version: ${{ env.PYVER }}
+          files: ${{ steps.changed_files_config.outputs.all_changed_files }}
+          python_linter: linter/config_yaml_linter.py
 
       ## Work on conandata.yml files
       - name: Get changed files (conandata)
@@ -110,15 +77,10 @@ jobs:
           files: |
             ${{ env.CONANDATA_FILES_PATH }}
 
-      - name: Run linter (conandata.yml)
-        if: steps.changed_files_conandata.outputs.any_changed == 'true' && always()
-        run: |
-          echo "::add-matcher::linter/yamllint_matcher.json"
-          for file in ${{ steps.changed_files_conandata.outputs.all_changed_files }}; do
-            yamllint --config-file linter/yamllint_rules.yml -f standard ${file}
-          done
-          echo "::remove-matcher owner=yamllint_matcher::"
-
-          for file in ${{ steps.changed_files_conandata.outputs.all_changed_files }}; do
-            python3 linter/conandata_yaml_linter.py ${file}
-          done
+      - name: validate conandata files
+        uses: ./.github/actions/validation
+        if: steps.changed_files.outputs.any_changed == 'true'
+        with:
+          python_version: ${{ env.PYVER }}
+          files: ${{ steps.changed_files_conandata_outputs.all_changed_files }}
+          python_linter: linter/conandata_yaml_linter.py
