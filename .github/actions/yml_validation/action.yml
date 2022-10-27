@@ -20,10 +20,12 @@ runs:
         python-version: ${{ inputs.python_version }}
 
     - name: Install dependencies
+      shell: bash
       run: pip install yamllint strictyaml argparse
 
     - name: Run linter
       if: always()
+      shell: bash
       run: |
         echo "::add-matcher::linter/yamllint_matcher.json"
         for file in ${{ inputs.files }}; do
@@ -32,6 +34,7 @@ runs:
         echo "::remove-matcher owner=yamllint_matcher::"
     - name: Run schema check
       if: always()
+      shell: bash
       run: |
         for file in ${{ inputs.files }}; do
           python3 linter/${{ inputs.python_linter }}.py ${file}
