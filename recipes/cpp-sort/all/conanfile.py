@@ -34,10 +34,10 @@ class CppSortConan(ConanFile):
         }
 
     def validate(self):
-        if self.info.settings.get_safe("compiler.cppstd"):
+        if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
 
-        compiler = self.info.settings.compiler
+        compiler = self.settings.compiler
         try:
             min_version = self._minimum_compilers_version[str(compiler)]
             if Version(compiler.version) < min_version:
@@ -87,4 +87,4 @@ class CppSortConan(ConanFile):
             self.cpp_info.cxxflags = ["/permissive-"]
 
     def package_id(self):
-        self.info.clear()  # Header-only
+        self.info.clear()
