@@ -1,9 +1,11 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import get
+from conan.tools.files import get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
+
+import os
 
 required_conan_version = ">=1.50"
 
@@ -92,8 +94,18 @@ class WaveletBufferConan(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+
         cmake = CMake(self)
         cmake.install()
+
+        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = ["wavelet_buffer", "sf_compressor"]
