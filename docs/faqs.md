@@ -409,3 +409,9 @@ merging to the master branch. Feel free to contribute to a new Github Action tha
 
 No. The [pylint](v2_linter.md) has an important role of keeping any recipe prepared for [Conan v2 migration](v2_migration.md). In case you are having
 difficult to understand [linter errors](linters.md), please comment on your pull request about the problem to receive help from the community.
+
+## How long can I be inactive before being removed from the authorized users list?
+
+For now, it's configured for 4 months. It's computed based on your last commit, not comments or issues.
+After that time, the CI bot will ask to remove your user name from the authorized users' list through the access request PR, which occurs a few times every week.
+In case you are interested in coming back, please, ask again to be included in the issue [#4](https://github.com/conan-io/conan-center-index/issues/4), the process will be precise like for newcomers.
