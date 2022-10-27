@@ -51,7 +51,6 @@ class RuntimeQml(ConanFile):
                 del self.options.fPIC
             except Exception:
                 pass
-        self.options["qt"].qtdeclarative = True
 
     def layout(self):
         cmake_layout(self)
