@@ -28,14 +28,18 @@ runs:
       shell: bash
       run: |
         echo "::add-matcher::linter/yamllint_matcher.json"
+        res=0
         for file in ${{ inputs.files }}; do
-          yamllint --config-file linter/yamllint_rules.yml -f standard ${file}
+          yamllint --config-file linter/yamllint_rules.yml -f standard ${file} || res=$?
         done
         echo "::remove-matcher owner=yamllint_matcher::"
+        exit $res
     - name: Run schema check
       if: always()
       shell: bash
       run: |
+        res=0
         for file in ${{ inputs.files }}; do
-          python3 linter/${{ inputs.python_linter }}.py ${file}
+          python3 ${{ inputs.python_linter }} ${file} || res=$?
         done
+        exit $res
