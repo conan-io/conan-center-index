@@ -207,9 +207,7 @@ class FreetypeConan(ConanFile):
 
     def _create_cmake_module_variables(self, module_file):
         content = textwrap.dedent("""\
-            if(DEFINED Freetype_FOUND)
-                set(FREETYPE_FOUND ${Freetype_FOUND})
-            endif()
+            set(FREETYPE_FOUND TRUE)
             if(DEFINED Freetype_INCLUDE_DIRS)
                 set(FREETYPE_INCLUDE_DIRS ${Freetype_INCLUDE_DIRS})
             endif()
