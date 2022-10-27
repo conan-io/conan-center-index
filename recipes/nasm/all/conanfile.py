@@ -106,7 +106,10 @@ class NASMConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
 
-        # remove later once all recipes upgraded to conan v2
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
-        self.env_info.PATH.append(bin_path)
+        bin_folder = os.path.join(self.package_folder, "bin")
+        # In case need to find packaged tools when building a package
+        self.buildenv_info.append("PATH", bin_folder)
+        # In case need to find packaged tools at runtime
+        self.runenv_info.append("PATH", bin_folder)
+        # TODO: Legacy, to be removed on Conan 2.0
+        self.env_info.PATH.append(bin_folder)
