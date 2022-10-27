@@ -90,6 +90,9 @@ class grpcConan(ConanFile):
             self.options["googleapis"].shared = True
             self.options["grpc-proto"].shared = True
 
+    def layout(self):
+        pass
+
     def requirements(self):
         if is_msvc(self) and Version(self.version) < "1.47":
             self.requires("abseil/20211102.0")
@@ -401,6 +404,7 @@ class grpcConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "gRPC")
+        self.cpp_info.resdirs = ["res"]
         ssl_roots_file_path = os.path.join(self.package_folder, "res", "grpc", "roots.pem")
         self.runenv_info.define_path("GRPC_DEFAULT_SSL_ROOTS_FILE_PATH", ssl_roots_file_path)
         self.env_info.GRPC_DEFAULT_SSL_ROOTS_FILE_PATH = ssl_roots_file_path # remove in conan v2?
