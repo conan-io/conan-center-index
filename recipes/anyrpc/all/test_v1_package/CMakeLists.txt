@@ -1,12 +1,6 @@
-cmake_minimum_required(VERSION 3.8)
-
-project(test_anyrpc CXX)
-
+cmake_minimum_required(VERSION 3.1)
+project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
-
-find_package(anyrpc REQUIRED CONFIG)
-
-add_executable(${PROJECT_NAME} ../test_package/test_anyrpc.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE anyrpc::anyrpc)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package/
+                 ${CMAKE_CURRENT_BINARY_DIR}/test_package/)
