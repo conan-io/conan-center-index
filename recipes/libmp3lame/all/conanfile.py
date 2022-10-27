@@ -68,9 +68,10 @@ class LibMP3LameConan(ConanFile):
     def build_requirements(self):
         if not is_msvc(self) and not self._is_clang_cl:
             self.build_requires("gnu-config/cci.20201022")
-            self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
-                self.tool_requires("msys2/cci.latest")
+            if self.settings.os == "Windows":
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
@@ -115,6 +116,7 @@ class LibMP3LameConan(ConanFile):
         tc.configure_args.append("--disable-frontend")
         if self.settings.compiler == "clang" and self.settings.arch in ["x86", "x86_64"]:
             tc.extra_cxx_flags.extend(["-mmmx", "-msse"])
+        tc.generate()
 
     def _build_autotools(self):
         copy(self, "config.sub", self._user_info_build["gnu-config"].CONFIG_SUB,
@@ -156,7 +158,7 @@ class LibMP3LameConan(ConanFile):
             # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
             autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
             rmdir(self, os.path.join(self.package_folder, "share"))
-            rm(self, os.path.join(self.package_folder, "lib"), "*.la")
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["mp3lame"]
