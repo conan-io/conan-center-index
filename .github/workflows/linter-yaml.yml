@@ -28,7 +28,7 @@ jobs:
 
       - name: validate conandata files
         uses: ./.github/actions/yml_validation
-        if: steps.changed_files.outputs.any_changed == 'true'
+        if: steps.changed_files.outputs.any_changed == 'true' && always()
         with:
           python_version: ${{ env.PYVER }}
           files: ${{ env.CONANDATA_FILES_PATH }}
@@ -36,7 +36,7 @@ jobs:
 
       - name: validate config files
         uses: ./.github/actions/yml_validation
-        if: steps.changed_files.outputs.any_changed == 'true'
+        if: steps.changed_files.outputs.any_changed == 'true' && always()
         with:
           python_version: ${{ env.PYVER }}
           files: ${{ env.CONFIG_FILES_PATH }}
@@ -62,7 +62,7 @@ jobs:
 
       - name: validate config files
         uses: ./.github/actions/yml_validation
-        if: steps.changed_files.outputs.any_changed == 'true'
+        if: steps.changed_files.outputs.any_changed == 'true' && always()
         with:
           python_version: ${{ env.PYVER }}
           files: ${{ steps.changed_files_config.outputs.all_changed_files }}
@@ -79,7 +79,7 @@ jobs:
 
       - name: validate conandata files
         uses: ./.github/actions/validation
-        if: steps.changed_files.outputs.any_changed == 'true'
+        if: steps.changed_files.outputs.any_changed == 'true' && always()
         with:
           python_version: ${{ env.PYVER }}
           files: ${{ steps.changed_files_conandata_outputs.all_changed_files }}
