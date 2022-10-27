@@ -23,7 +23,7 @@ jobs:
           files: |
             linter/**
       - name: validate conanfile.py files
-        uses: ./.github/actions/yml_validation
+        uses: ./.github/actions/conanfile_validation
         if: steps.changed_files.outputs.any_changed == 'true'
         with:
           python_version: ${{ env.PYVER }}
@@ -31,7 +31,7 @@ jobs:
           rcfile: linter/pylintrc_recipe
           report_name: recipe
       - name: validate test/conanfile.py files
-        uses: ./.github/actions/yml_validation
+        uses: ./.github/actions/conanfile_validation
         if: steps.changed_files.outputs.any_changed == 'true'
         with:
           python_version: ${{ env.PYVER }}
@@ -58,7 +58,7 @@ jobs:
           files: |
             recipes/*/*/conanfile.py
       - name: validate conanfile.py files
-        uses: ./.github/actions/yml_validation
+        uses: ./.github/actions/conanfile_validation
         if: steps.changed-files.outputs.any_changed == 'true'
         with:
           python_version: ${{ env.PYVER }}
@@ -79,7 +79,7 @@ jobs:
           files: |
             recipes/*/*/test_*/conanfile.py
       - name: validate test/conanfile.py files
-        uses: ./.github/actions/yml_validation
+        uses: ./.github/actions/conanfile_validation
         if: steps.changed-files.outputs.any_changed == 'true'
         with:
           python_version: ${{ env.PYVER }}
