@@ -53,7 +53,7 @@ class Catch2Conan(ConanFile):
 
     def package_id(self):
         if not self.options.with_main:
-            self.info.header_only()
+            self.info.clear()
 
     def layout(self):
         cmake_layout(self, src_folder="src")
