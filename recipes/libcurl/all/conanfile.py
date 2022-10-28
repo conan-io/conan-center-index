@@ -475,12 +475,11 @@ class LibcurlConan(ConanFile):
             rcflags = "-O COFF"
             if self.settings.arch == "x86":
                 rcflags += " --target=pe-i386"
-            else:
+            elif self.settings.arch == "x86_64":
                 rcflags += " --target=pe-x86-64"
+                tc.extra_defines.append("_AMD64_")
             env = tc.environment()
             env.define("RCFLAGS", rcflags)
-
-            tc.extra_defines.append("_AMD64_")
 
         if self.settings.os != "Windows":
             tc.fpic = self.options.get_safe("fPIC", True)
