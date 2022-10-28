@@ -1,16 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version, Git
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 import os
 
-
 required_conan_version = ">=1.52.0"
-
 
 class DBCpppConan(ConanFile):
     name = "dbcppp"
@@ -38,9 +35,9 @@ class DBCpppConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "7",
+            "gcc": "8",
             "clang": "7",
-            "apple-clang": "10",
+            "apple-clang": "11",
         }
 
     def export_sources(self):
