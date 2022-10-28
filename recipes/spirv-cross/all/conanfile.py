@@ -5,7 +5,7 @@ from conans import CMake, tools as tools_legacy
 import os
 import textwrap
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class SpirvCrossConan(ConanFile):
