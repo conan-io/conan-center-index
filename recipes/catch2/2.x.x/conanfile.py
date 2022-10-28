@@ -34,7 +34,7 @@ class Catch2Conan(ConanFile):
 
     @property
     def _default_reporter_str(self):
-        return '"{}"'.format(str(self.options.default_reporter).strip('"'))
+        return str(self.options.default_reporter).strip('"')
 
     def config_options(self):
         if self.settings.os == "Windows":
