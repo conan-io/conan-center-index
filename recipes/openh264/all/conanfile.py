@@ -170,6 +170,8 @@ class OpenH264Conan(ConanFile):
         elif self.settings.compiler in ("apple-clang",):
             if self.settings.arch in ("armv8",):
                 tc.extra_ldflags.append("-arch arm64")
+        if self.settings.os != "Windows" and self.options.shared:
+            tc.fpic = True # Needs fPIC when shared and not on windows
         tc.generate()
 
     def build(self):
