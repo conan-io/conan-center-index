@@ -81,12 +81,21 @@ class WaveletBufferConan(ConanFile):
 
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
-                self.name, self.settings.compiler))
+            self.output.warn(
+                "{} recipe lacks information about the {} compiler support.".format(
+                    self.name, self.settings.compiler
+                )
+            )
         else:
             if Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+                raise ConanInvalidConfiguration(
+                    "{} requires C++{} support. The current compiler {} {} does not support it.".format(
+                        self.name,
+                        self._minimum_cpp_standard,
+                        self.settings.compiler,
+                        self.settings.compiler.version,
+                    )
+                )
 
     def build(self):
         cmake = CMake(self)
@@ -94,7 +103,12 @@ class WaveletBufferConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(
+            self,
+            pattern="LICENSE",
+            dst=os.path.join(self.package_folder, "licenses"),
+            src=self.source_folder,
+        )
 
         cmake = CMake(self)
         cmake.install()
