@@ -1,13 +1,15 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.52.0"
 
 
 class NinjaConan(ConanFile):
     name = "ninja"
+    package_type = "application"
     description = "Ninja is a small build system with a focus on speed"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
@@ -47,5 +49,6 @@ class NinjaConan(ConanFile):
         self.conf_info.define("tools.cmake.cmaketoolchain:generator", "Ninja")
 
         # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.env_info.CONAN_CMAKE_GENERATOR = "Ninja"
+        if Version(conan_version).major < 2:
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+            self.env_info.CONAN_CMAKE_GENERATOR = "Ninja"

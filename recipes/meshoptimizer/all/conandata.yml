@@ -14,4 +14,3 @@ sources:
 patches:
   "0.14":
     - patch_file: "patches/0.14/0001-fix-build-on-old-AppleClang-versions.patch"
-      base_path: "source_subfolder"

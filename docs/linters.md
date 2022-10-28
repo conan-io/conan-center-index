@@ -1,20 +1,19 @@
 # ConanCenterIndex Linters
 
-Some linter configuration files are available in the folder [linter](../linter), which are executed by Github Actions to improve recipe quality.
-They consume python scripts which are executed to fit CCI rules. Those scripts use [astroid](https://github.com/PyCQA/astroid) and
-[pylint](https://pylint.pycqa.org/en/latest/) classes to parse Conan recipe files and manage their warnings and errors.
+Some linter configuration files are available in the folder [linter](../linter), which are executed by Github Actions
+and are displayed during [code review](https://github.com/features/code-review) as annotations, to improve recipe quality.
+They consume python scripts which are executed to fit CCI rules. Those scripts use [astroid](https://github.com/PyCQA/astroid)
+and [pylint](https://pylint.pycqa.org/en/latest/) classes to parse Conan recipe files and manage their warnings and errors.
 
-Pylint by itself is not able to find ConanCenterIndex rules, so astroid is used to iterate over conanfiles content and
-validate CCI conditions. Also, pylint uses [rcfile](https://pylint.pycqa.org/en/latest/user_guide/configuration/index.html)
-(a configuration file based on [toml](https://toml.io/en/) format) to configure plugins, warnings and errors which should be enabled or disabled.
-
-Also, the Github [code review](https://github.com/features/code-review) is integrated with the pylint output,
-parsed by [recipe_linter.json](../linter/recipe_linter.json), then presented to all users on the tab `Files changed`.
+Pylint by itself is not able to find ConanCenterIndex rules, so astroid is used to iterate over a conanfile's content and
+validate CCI requirements. Pylint uses an [rcfile](https://pylint.pycqa.org/en/latest/user_guide/configuration/index.html)
+to configure plugins, warnings and errors which should be enabled or disabled.
 
 <!-- toc -->
 ## Contents
 
-  * [Running the linter locally](#running-the-linter-locally)
+  * [Understanding the different linters](#understanding-the-different-linters)
+  * [Running the linters locally](#running-the-linters-locally)
   * [Pylint configuration files](#pylint-configuration-files)
   * [Linter Warning and Errors](#linter-warning-and-errors)
     * [E9006 - conan-import-conanfile: ConanFile should be imported from conan](#e9006---conan-import-conanfile-conanfile-should-be-imported-from-conan)
@@ -26,9 +25,17 @@ parsed by [recipe_linter.json](../linter/recipe_linter.json), then presented to 
     * [E9010 - conan-import-error-conaninvalidconfiguration: conans.errors is deprecated and conan.errors should be used instead](#e9010---conan-import-error-conaninvalidconfiguration-conanserrors-is-deprecated-and-conanerrors-should-be-used-instead)
     * [E9011 - conan-import-tools: Importing conan.tools or conan.tools.xxx.zzz.yyy should be considered as private](#e9011---conan-import-tools-importing-conantools-or-conantoolsxxxzzzyyy-should-be-considered-as-private)<!-- endToc -->
 
-## Running the linter locally
+## Understanding the different linters
 
-Check the [Developing Recipes](developing_recipes_locally.md#running-the-python-linters) page for details.
+There's a three classes of linters currently in place for ConanCenterIndex
+
+- ConanCenter Hook - these are responsible for validating the structure of the recipes and packages.
+- Pylint Linter - these are used to ensure the code quality and conventions of a recipes (i.e `conanfile.py`)
+- Yaml Checks - stylistic guidance and schema validation check for support files and best practices
+
+## Running the linters locally
+
+Check the [Developing Recipes](developing_recipes_locally.md) for more information on each of the three linters.
 
 ## Pylint configuration files
 
