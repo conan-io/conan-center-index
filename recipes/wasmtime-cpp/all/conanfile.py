@@ -20,7 +20,7 @@ class WasmtimeCppConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 14
+        return 17
 
     @property
     def _compilers_minimum_version(self):
