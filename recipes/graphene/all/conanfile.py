@@ -63,7 +63,7 @@ class LibnameConan(ConanFile):
 
     def validate(self):
         if self.info.options.with_glib:
-            glib_is_shared = self.dependencies.direct_host["glib"].options.shared
+            glib_is_shared = self.dependencies["glib"].options.shared
             if self.info.options.shared and not glib_is_shared:
                 raise ConanInvalidConfiguration(
                     "Linking a shared library against static glib can cause unexpected behaviour."
