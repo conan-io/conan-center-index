@@ -110,5 +110,4 @@ class DBCpppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["libdbcppp"]
-        self.cpp_info.system_libs = ["ws2_32"]
         self.env_info.path.append(os.path.join(self.package_folder, "bin"))
