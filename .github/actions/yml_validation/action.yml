@@ -28,6 +28,7 @@ runs:
       shell: bash
       run: |
         echo "::add-matcher::linter/yamllint_matcher.json"
+        set -o noglob
         res=0
         for file in ${{ inputs.files }}; do
           yamllint --config-file linter/yamllint_rules.yml -f standard ${file} || res=$?
