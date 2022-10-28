@@ -163,10 +163,10 @@ index 462af2e..9ce93a6 100644
          if (vm.count("help"))
          {
 diff --git a/src/libdbcppp/CMakeLists.txt b/src/libdbcppp/CMakeLists.txt
-index 9a69748..7c77b01 100644
+index 9a69748..843ba4e 100644
 --- a/src/libdbcppp/CMakeLists.txt
 +++ b/src/libdbcppp/CMakeLists.txt
-@@ -2,12 +2,21 @@
+@@ -2,12 +2,10 @@
  include(GNUInstallDirs)
  include(TestBigEndian)
  
@@ -175,23 +175,13 @@ index 9a69748..7c77b01 100644
  set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
  
 -target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${LIBXML2_LIBRARIES} "libxmlmm")
-+try_compile(HAS_FS "${CMAKE_BINARY_DIR}/temp" 
-+"${CMAKE_SOURCE_DIR}/tests/has_filesystem.cc" 
-+            CMAKE_FLAGS -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON
-+            LINK_LIBRARIES stdc++fs)
-+if(HAS_FS)
-+    message(STATUS "Compiler has filesystem support")
-+else()
-+#   .... You could also try searching for boost::filesystem here.
-+    message(FATAL_ERROR "Compiler is missing filesystem capabilities")
-+endif(HAS_FS)
- 
+-
 -add_compile_definitions(DBCPPP_EXPORT)
-+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} std)
++target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
  
  include_directories(
      ${CMAKE_SOURCE_DIR}/src
-@@ -45,9 +54,6 @@ target_sources(${PROJECT_NAME}
+@@ -45,9 +43,6 @@ target_sources(${PROJECT_NAME}
  )
  set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${header_interface}")
  
@@ -201,7 +191,7 @@ index 9a69748..7c77b01 100644
  # install
  install(
      TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
-@@ -57,35 +63,3 @@ install(
+@@ -57,35 +52,3 @@ install(
      FILES
      $<TARGET_PROPERTY:${PROJECT_NAME},INTERFACE_SOURCES>
  	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dbcppp)
