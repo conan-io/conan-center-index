@@ -3,8 +3,8 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, rmdir, copy, rm
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.layout import basic_layout, vs_layout
-from conan.tools.microsoft import is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild, VCVars, unix_path, msvc_runtime_flag
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild, VCVars, unix_path, msvc_runtime_flag, vs_layout
 import os
 
 required_conan_version = ">=1.52.0"
