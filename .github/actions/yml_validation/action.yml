@@ -31,6 +31,7 @@ runs:
         set -o noglob
         res=0
         for file in ${{ inputs.files }}; do
+          set +o noglob
           yamllint --config-file linter/yamllint_rules.yml -f standard ${file} || res=$?
         done
         echo "::remove-matcher owner=yamllint_matcher::"
@@ -40,7 +41,9 @@ runs:
       shell: bash
       run: |
         res=0
+        set -o noglob
         for file in ${{ inputs.files }}; do
+          set +o noglob
           python3 ${{ inputs.python_linter }} ${file} || res=$?
         done
         exit $res
