@@ -24,11 +24,21 @@ patches:
       patch_description: Install just aom library without aom_static.
   "3.4.0":
     - patch_file: "patches/0001-3.4.0-fix-install.patch"
+      patch_type: conan
+      patch_description: Install just aom library without aom_static.
   "3.3.0":
     - patch_file: "patches/0001-3.3.0-fix-install.patch"
+      patch_type: conan
+      patch_description: Install just aom library without aom_static.
   "3.1.2":
     - patch_file: "patches/0001-3.1.1-fix-install.patch"
+      patch_type: conan
+      patch_description: Install just aom library without aom_static.
   "3.1.1":
     - patch_file: "patches/0001-3.1.1-fix-install.patch"
+      patch_type: conan
+      patch_description: Install just aom library without aom_static.
   "2.0.1":
     - patch_file: "patches/0001-2.0.1-fix-install.patch"
+      patch_type: conan
+      patch_description: Install just aom library without aom_static.
