@@ -22,7 +22,7 @@ special meaning:
 
 Label [`Bump dependencies`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22Bump+dependencies%22+)
 is assigned by the bot to pull-requests that are just upgrading the version of the requirements that were already in the
-recipe.
+recipe. For now, only [SEMVER](https://semver.org/#semantic-versioning-200) and `<MAJOR.MINOR>` are acceptable version formats.
 
 > These pull-requests will be merged right away without requiring any approval (CI and CLA checks must have passed).
 
