@@ -123,5 +123,6 @@ class AnyRPCConan(ConanFile):
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs.append("ws2_32")
                 
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
+            self.cpp_info.system_libs.append("pthread")
