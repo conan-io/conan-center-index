@@ -1,7 +1,7 @@
 from conans import tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from contextlib import contextmanager
 from conan import ConanFile
-from conan.tools.files import rename, get, chdir, replace_in_file, rm, rmdir, save
+from conan.tools.files import rename, get, chdir, replace_in_file, rm, rmdir, save, mkdir
 import functools
 import itertools
 import os
@@ -321,8 +321,7 @@ class Libxml2Conan(ConanFile):
             os.path.join(self.package_folder, self._module_file_rel_path)
         )
 
-    @staticmethod
-    def _create_cmake_module_variables(module_file):
+    def _create_cmake_module_variables(self, module_file):
         # FIXME: also define LIBXML2_XMLLINT_EXECUTABLE variable
         content = textwrap.dedent("""\
             if(DEFINED LibXml2_FOUND)
