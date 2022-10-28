@@ -80,6 +80,8 @@ class FlacConan(ConanFile):
         copy(self, "*.h", src=os.path.join(self.source_folder, "include", "share", "grabbag"),
                           dst=os.path.join(self.package_folder, "include", "share", "grabbag"), keep_path=False)
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "flac")
