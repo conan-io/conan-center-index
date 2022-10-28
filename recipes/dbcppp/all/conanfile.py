@@ -36,8 +36,8 @@ class DBCpppConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "9",
-            "clang": "7",
-            "apple-clang": "11",
+            "clang": "12",
+            "apple-clang": "12",
         }
 
     def export_sources(self):
