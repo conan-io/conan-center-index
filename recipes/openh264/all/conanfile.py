@@ -1,4 +1,3 @@
-from conans import tools # now only required for tools.stdcpp_standard (Will be replaced in conan 1.54)
 from conan import ConanFile, Version
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.env import VirtualBuildEnv
@@ -9,6 +8,19 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path, msvc_runtime_flag
 
 import os
+
+# Temporary duplication until conan 1.54, at which conan.tools.build.stdcpp_library will replace this.
+def _stdcpp_library(conanfile):
+    libcxx = conanfile.settings.get_safe("compiler.libcxx")
+    if libcxx in ["libstdc++", "libstdc++11"]:
+        return "stdc++"
+    elif libcxx in ["libc++"]:
+        return "c++"
+    elif libcxx in ["c++_shared"]:
+        return "c++_shared"
+    elif libcxx in ["c++_static"]:
+        return "c++_static"
+    return None
 
 required_conan_version = ">=1.52.0"
 
@@ -184,6 +196,6 @@ class OpenH264Conan(ConanFile):
             self.cpp_info.system_libs.extend(["m", "pthread"])
         if self.settings.os == "Android":
             self.cpp_info.system_libs.append("m")
-        libcxx = tools.stdcpp_library(self) # switch to conan.tools.build.stdcpp_library in conan 1.54
+        libcxx = _stdcpp_library(self) # switch to conan.tools.build.stdcpp_library in conan 1.54
         if libcxx:
             self.cpp_info.system_libs.append(libcxx)
