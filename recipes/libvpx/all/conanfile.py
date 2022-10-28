@@ -4,7 +4,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file, rename
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -74,6 +74,12 @@ class LibVPXConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+        # libvpx configure is unusual and requires a workaround,
+        # look for "output_goes_here" below for more in this thread.
+        self.cpp.package.bindirs = []
+        self.cpp.package.includedirs = []
+        self.cpp.package.libdirs = []
+
     def build_requirements(self):
         self.tool_requires("yasm/1.3.0")
         if self._settings_build.os == "Windows":
@@ -108,8 +114,12 @@ class LibVPXConan(ConanFile):
 
         tc = AutotoolsToolchain(self)
 
+        # Note the output_goes_here workaround, libvpx does not like --prefix=/
+        # as it fails the test for "libdir must be a subfolder of prefix"
+        # libvpx src/build/make/configure.sh:683
         tc.configure_args.extend([
-            # "--prefix={}".format(unix_path(self, self.package_folder)),
+            "--prefix=/output_goes_here",
+            "--libdir=/output_goes_here/lib",
             "--disable-examples",
             "--disable-unit-tests",
             "--disable-tools",
@@ -183,13 +193,24 @@ class LibVPXConan(ConanFile):
 
         autotools = Autotools(self)
         autotools.configure()
-        # autotools.configure(args=args, configure_dir=self._source_subfolder, host=False, build=False, target=False)
         autotools.make()
 
     def package(self):
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
+
+        # The workaround requires us to move the outputs into place now
+        rename(self,
+                os.path.join(self.package_folder, "output_goes_here", "include"),
+                os.path.join(self.package_folder, "include")
+                )
+        rename(self,
+                os.path.join(self.package_folder, "output_goes_here", "lib"),
+                os.path.join(self.package_folder, "lib")
+                )
+        rmdir(self, os.path.join(self.package_folder, "output_goes_here"))
+
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         if is_msvc(self):
@@ -206,7 +227,7 @@ class LibVPXConan(ConanFile):
         suffix = msvc_runtime_flag(self).lower() if is_msvc(self) else ""
         self.cpp_info.libs = [f"vpx{suffix}"]
         if not self.options.shared:
-            libcxx = legacy_tools.stdcpp_library(self)
+            libcxx = tools_legacy.stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
 
