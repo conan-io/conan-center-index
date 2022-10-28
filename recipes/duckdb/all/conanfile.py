@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
 import os
@@ -115,6 +116,8 @@ class DuckdbConan(ConanFile):
         tc.variables["EXTENSION_STATIC_BUILD"] = not self.options.shared
         tc.variables["ENABLE_SANITIZER"] = False
         tc.variables["ENABLE_UBSAN"] = False
+        if is_msvc(self) and not self.options.shared:
+            tc.preprocessor_definitions["DUCKDB_API"] = ""
         tc.generate()
 
         dpes = CMakeDeps(self)
