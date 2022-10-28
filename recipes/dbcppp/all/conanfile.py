@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version, Git
+from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
@@ -59,7 +59,7 @@ class DBCpppConan(ConanFile):
 
     def requirements(self):
         if self.options.with_tools:
-            self.requires("cxxopts/2.2.1")
+            self.requires("cxxopts/3.0.0")
 
     def validate(self):
         if self.options.shared:
@@ -77,7 +77,6 @@ class DBCpppConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)],destination=self.source_folder, strip_root=True)
-        rm(self, "KCD2Network.cpp", self.source_folder, recursive=True) # Cannot support KCD because of weird dll issues
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -92,6 +91,7 @@ class DBCpppConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        rm(self, "KCD2Network.cpp", self.source_folder, recursive=True) # Cannot support KCD because of weird dll issues
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
