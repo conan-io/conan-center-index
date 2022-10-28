@@ -9,14 +9,14 @@ import textwrap
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, check_min_cppstd, build_jobs
-from conan.tools.files import get, replace_in_file, apply_conandata_patches, save, load, rm, rmdir
+from conan.tools.files import get, replace_in_file, apply_conandata_patches, save, load, rm, rmdir, export_conandata_patches
 from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
 from conans import RunEnvironment, CMake, tools
 from conan.errors import ConanInvalidConfiguration
 from conans.model import Generator
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.0"
 
 
 class qt(Generator):
@@ -185,8 +185,7 @@ class QtConan(ConanFile):
         return self._submodules_tree
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def export(self):
         self.copy("qtmodules%s.conf" % self.version)
