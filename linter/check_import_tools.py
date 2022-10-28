@@ -23,8 +23,7 @@ class ImportTools(BaseChecker):
 
     def visit_importfrom(self, node: nodes.ImportFrom) -> None:
         basename = node.modname
-        names = [name for name, _ in node.names]
-        if basename == 'conan' and 'tools' in names:
+        if basename == 'conan' and any(name == 'tools' for name, _ in node.names):
             self.add_message("conan-import-tools", node=node)
         elif re.match(r'conan\.tools\.[^.]+\..+', basename):
             self.add_message("conan-import-tools", node=node)

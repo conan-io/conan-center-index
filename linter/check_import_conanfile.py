@@ -23,6 +23,5 @@ class ImportConanFile(BaseChecker):
     def visit_importfrom(self, node: nodes.ImportFrom) -> None:
         basename = node.modname
         if basename == 'conans':
-            names = [name for name, _ in node.names]
-            if 'ConanFile' in names:
+            if any(name == 'ConanFile' for name, _ in node.names):
                 self.add_message("conan-import-conanfile", node=node)

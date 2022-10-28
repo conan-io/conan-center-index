@@ -71,7 +71,6 @@ class ImportErrorsConanInvalidConfiguration(BaseChecker):
     def visit_importfrom(self, node: nodes.ImportFrom) -> None:
         basename = node.modname
         if basename == 'conans.errors':
-            names = [name for name, _ in node.names]
-            if 'ConanInvalidConfiguration' in names:
+            if any(name == 'ConanInvalidConfiguration' for name, _ in node.names):
                 self.add_message("conan-import-error-conaninvalidconfiguration", node=node)
 

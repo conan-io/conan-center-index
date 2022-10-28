@@ -20,14 +20,10 @@ def register(linter: PyLinter):
 
 def transform_tools(module):
     """ Transform import module """
-    if 'get' in module.locals:
-        del module.locals['get']
-    if 'cross_building' in module.locals:
-        del module.locals['cross_building']
-    if 'rmdir' in module.locals:
-        del module.locals['rmdir']
-    if 'Version' in module.locals:
-        del module.locals['Version']
+    module.locals.pop('get', None)
+    module.locals.pop('cross_building', None)
+    module.locals.pop('rmdir', None)
+    module.locals.pop('Version', None)
 
 def transform_errors(module):
     pass
