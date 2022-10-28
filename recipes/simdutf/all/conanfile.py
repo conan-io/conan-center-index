@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 
 import os
 
@@ -56,6 +57,8 @@ class SimdutfConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["SIMDUTF_BENCHMARKS"] = False
         tc.variables["BUILD_TESTING"] = False
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "8":
+            tc.variables["CMAKE_CXX_FLAGS"] = " -mavx512f"
         tc.generate()
 
         deps = CMakeDeps(self)
