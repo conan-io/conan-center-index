@@ -8,6 +8,7 @@ from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.50.0"
 
+
 class RuntimeQml(ConanFile):
     name = "runtimeqml"
     homepage = "https://github.com/GIPdA/runtimeqml"
@@ -39,7 +40,8 @@ class RuntimeQml(ConanFile):
         }
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        copy(self, "CMakeLists.txt", self.recipe_folder,
+             self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,7 +56,7 @@ class RuntimeQml(ConanFile):
 
     def layout(self):
         cmake_layout(self)
-            
+
     def requirements(self):
         if Version(self.version) <= "cci.20211220":
             self.requires("qt/5.15.5")
@@ -66,14 +68,16 @@ class RuntimeQml(ConanFile):
             check_min_cppstd(self, self._minimum_cpp_standard)
         check_min_vs(self, 191)
         if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+            minimum_version = self._compilers_minimum_version.get(
+                str(self.info.settings.compiler), False)
             if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
                 )
         qt = self.dependencies["qt"]
         if not qt.options.qtdeclarative:
-            raise ConanInvalidConfiguration(f"{self.ref} requires option qt:qtdeclarative=True")
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires option qt:qtdeclarative=True")
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)],
@@ -91,8 +95,8 @@ class RuntimeQml(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", src=self.source_folder,
-                  dst="licenses", keep_path=False)
+        copy(self, pattern="LICENSE", src=self.source_folder,
+             dst=os.path.join(self.package_folder, "licenses"), keep_path=False)
         cmake = CMake(self)
         cmake.install()
 
