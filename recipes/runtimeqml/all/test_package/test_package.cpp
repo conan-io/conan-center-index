@@ -7,6 +7,6 @@ int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
-    RuntimeQml* rt = new RuntimeQml(&engine);
+    RuntimeQml rt{ &engine };
     return app.exec();
 }
