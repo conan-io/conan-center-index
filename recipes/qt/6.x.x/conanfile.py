@@ -254,8 +254,8 @@ class QtConan(ConanFile):
 
     def validate(self):
         if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) >= "11" or \
-            self.info.settings.compiler == "clang" and Version(self.info.settings.compiler.version) >= "13":
-            raise ConanInvalidConfiguration("qt is not supported on gcc11 and clang 13 on C3I until conan-io/conan-center-index#13472 is fixed")
+            self.info.settings.compiler == "clang" and Version(self.info.settings.compiler.version) >= "12":
+            raise ConanInvalidConfiguration("qt is not supported on gcc11 and clang >= 12 on C3I until conan-io/conan-center-index#13472 is fixed")
             
         # C++ minimum standard required
         if self.settings.compiler.get_safe("cppstd"):
