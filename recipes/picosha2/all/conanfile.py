@@ -1,6 +1,6 @@
 from conan import ConanFile, conan_version
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, load, save
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
@@ -43,7 +43,15 @@ class PicoSHA2Conan(ConanFile):
 
     # copy all files to the package folder
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        if Version(self.version) == "1.0.0":
+            filename = os.path.join(self.source_folder, self.source_folder, "picosha2.h")
+            file_content = load(save, filename)
+            license_start = "/*"
+            license_end = "*/"
+            license_contents = file_content[file_content.find(license_start)+len(license_start):file_content.find(license_end)]
+            save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
+        else:
+            copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(
             self,
             pattern="*.h",
