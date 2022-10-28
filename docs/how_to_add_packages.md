@@ -49,7 +49,7 @@ You can view your signed CLA's by going to <https://cla-assistant.io/> and signi
 ## Inactivity and user removal
 
 For security reasons related to the CI, when a user no longer contributes for a long period, it will be considered inactive and removed from the authorized user's list.
-For now, it's configured for **4 months**, and it's computed based on the lastest commit, not comments or opened issues.
+For now, it's configured for **4 months**, and it's computed based on the latest commit, not comments or opened issues.
 After that time, the CI bot will ask to remove the user name from the authorized users' list through the access request PR, which occurs a few times every week.
 In case you are interested in coming back, please, ask again to be included in the issue [#4](https://github.com/conan-io/conan-center-index/issues/4), the process will be precise like for newcomers.
 
