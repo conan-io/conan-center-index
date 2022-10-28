@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.scm import Version
 from conan.tools.build import cross_building, build_jobs
