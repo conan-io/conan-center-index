@@ -10,6 +10,9 @@ patches:
     - patch_file: "patches/2.0.0-0001-fix-cmake.patch"
       patch_description: "remove static build, stop to link static libc++ and enable rpath on macOS"
       patch_type: "conan"
+    - patch_file: "patches/2.0.0-0002-add-workaround-gcc9.patch"
+      patch_description: "apply gcc8 workaround to gcc9"
+      patch_type: "conan"
   "1.0.1":
     - patch_file: "patches/1.0.1-0001-fix-cmake.patch"
       patch_description: "disable test and benchmark build and enable rpath on macOS"
