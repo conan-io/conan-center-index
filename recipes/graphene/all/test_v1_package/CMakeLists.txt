@@ -6,5 +6,5 @@ conan_basic_setup(TARGETS)
 
 find_package(graphene CONFIG REQUIRED)
 
-add_executable(${PROJECT_NAME} ../test_package/test_package.c)
-target_link_libraries(${PROJECT_NAME} PRIVATE graphene::graphene)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package/
+  ${CMAKE_CURRENT_BINARY_DIR}/test_package/)
