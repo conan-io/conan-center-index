@@ -45,6 +45,7 @@ runs:
         set -o noglob
         res=0
         for file in ${{ inputs.files }}; do
+          set +o noglob
           pylint --rcfile=${{ inputs.rcfile }} --ignore-paths="recipes/[^/]*/[^/]*/test_v1[^/]*/conanfile.py" ${format} ${file} || res=$?
         done
         exit $res
