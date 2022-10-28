@@ -42,6 +42,7 @@ runs:
         else
           format="--output-format=json --output=${{ inputs.report_name }}.json --score=y --fail-under=${{ env.SCORE_THRESHOLD }}"
         fi
+        set -o noglob
         res=0
         for file in ${{ inputs.files }}; do
           pylint --rcfile=${{ inputs.rcfile }} --ignore-paths="recipes/[^/]*/[^/]*/test_v1[^/]*/conanfile.py" ${format} ${file} || res=$?
@@ -51,7 +52,7 @@ runs:
       if: always() && inputs.report_name
       uses: actions/upload-artifact@v3
       with:
-        name: report_name
+        name: linter-output
         path: ${{ inputs.report_name }}.json
     - name: Create report (${{ inputs.report_name }})
       if: always() && inputs.report_name
