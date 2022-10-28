@@ -51,7 +51,7 @@ class CLI11Conan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_id(self):
-        self.info.clear()   # header only
+        self.info.clear()
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CLI11")
