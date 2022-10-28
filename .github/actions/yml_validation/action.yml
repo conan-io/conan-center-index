@@ -41,9 +41,7 @@ runs:
       shell: bash
       run: |
         res=0
-        set -o noglob
         for file in ${{ inputs.files }}; do
-          set +o noglob
           python3 ${{ inputs.python_linter }} ${file} || res=$?
         done
         exit $res
