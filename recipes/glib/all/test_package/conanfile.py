@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.build import can_run
+from conan.tools.build import can_run, cross_building
 from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.gnu import PkgConfig, PkgConfigDeps
@@ -42,7 +42,6 @@ class TestPackageConan(ConanFile):
             pkg_config_deps.generate()
             cmake_deps = CMakeDeps(self)
             cmake_deps.generate()
-
 
     def build(self):
         cmake = CMake(self)
