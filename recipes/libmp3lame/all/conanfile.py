@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc, VCVars, unix_path
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, chdir, rmdir, copy, rm, replace_in_file, rename
 from conan.tools.layout import basic_layout
