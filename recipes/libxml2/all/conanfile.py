@@ -112,7 +112,7 @@ class Libxml2Conan(ConanFile):
     def build_requirements(self):
         if not (is_msvc(self) or self._is_mingw_windows):
             if self.options.zlib or self.options.lzma or self.options.icu:
-                self.build_requires("pkgconf/1.9.3")
+                self.tool_requires("pkgconf/1.9.3")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
