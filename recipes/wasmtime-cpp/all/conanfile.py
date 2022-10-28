@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd
@@ -19,8 +19,8 @@ class WasmtimeCppConan(ConanFile):
     no_copy_source = True
 
     @property
-    def _minimum_cpp_standard(self):
-        return 17
+    def _min_cppstd(self):
+        return 14
 
     @property
     def _compilers_minimum_version(self):
@@ -47,23 +47,31 @@ class WasmtimeCppConan(ConanFile):
     def package_id(self):
         self.info.clear()
 
+    @property
+    def _info(self):
+        return self if Version(conan_version).major < 2 else self.info
+
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.get_safe("compiler.version")) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
+        if self._info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self._info.settings.compiler), False)
+        if minimum_version and Version(self._info.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
     def package(self):
-        copy(self, pattern="*.hh", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
-        self.copy('LICENSE', dst='licenses', src=self.source_folder)
+        copy(self, pattern='LICENSE', dst='licenses', src=self.source_folder)
+        copy(self,
+            pattern="*.hh",
+            dst=os.path.join(self.package_folder, "include"),
+            src=os.path.join(self.source_folder, "include")
+        )
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
