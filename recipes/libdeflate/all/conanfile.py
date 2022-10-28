@@ -1,8 +1,12 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
+from conan import ConanFile
 from conan.tools.microsoft import is_msvc
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, chdir, rmdir, copy, rm
+from conan.tools.env import Environment
+from conans import MSBuild, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
+from conans.tools import vcvars, environment_append
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
 
 
 class LibdeflateConan(ConanFile):
@@ -35,8 +39,7 @@ class LibdeflateConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,34 +47,40 @@ class LibdeflateConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not is_msvc(self) and \
-           not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        if self._settings_build.os == "Windows" and not is_msvc(self):
+            if "CONAN_BASH_PATH" not in Environment().vars(self, scope="build").keys():
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _build_msvc(self):
-        with tools.chdir(self._source_subfolder):
-            with tools.vcvars(self):
-                with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                    target = "libdeflate.dll" if self.options.shared else "libdeflatestatic.lib"
-                    self.run("nmake /f Makefile.msc {}".format(target))
+        with chdir(self, self._source_subfolder):
+            with vcvars(self), environment_append(VisualStudioBuildEnvironment(self).vars):
+                target = "libdeflate.dll" if self.options.shared else "libdeflatestatic.lib"
+                self.run("nmake /f Makefile.msc {}".format(target))
 
     def _build_make(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        with tools.chdir(self._source_subfolder):
+        autotools = AutoToolsBuildEnvironment(self, win_bash=(self._settings_build.os == "Windows"))
+        with chdir(self, self._source_subfolder):
             autotools.make()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         if is_msvc(self) or self._is_clangcl:
             self._build_msvc()
         else:
@@ -86,18 +95,18 @@ class LibdeflateConan(ConanFile):
             self.copy("*deflatestatic.lib", dst="lib", src=self._source_subfolder)
 
     def _package_make(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        with tools.chdir(self._source_subfolder):
+        autotools = AutoToolsBuildEnvironment(self, win_bash=(self._settings_build.os == "Windows"))
+        with chdir(self, self._source_subfolder):
             autotools.install(args=["PREFIX={}".format(self.package_folder)])
-        tools.rmdir(os.path.join(self.package_folder, "bin"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(
-            os.path.join(self.package_folder, "lib"),
-            "*.a" if self.options.shared else "*.[so|dylib]*",
-        )
+        rmdir(self, os.path.join(self.package_folder, "bin"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.a" if self.options.shared else "*.[so|dylib]*", os.path.join(self.package_folder, "lib") )
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
+        copy(self, "COPYING", 
+            src=os.path.join(self.source_folder, self._source_subfolder), 
+            dst=os.path.join(self.package_folder, "licenses"
+        ))
         if self.settings.os == "Windows":
             self._package_windows()
         else:

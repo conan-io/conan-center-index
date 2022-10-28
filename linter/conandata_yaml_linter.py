@@ -62,18 +62,18 @@ def main():
                     ):
                         print(
                             f"::warning file={args.path},line={type.start_line},endline={type.end_line},"
-                            f"title='patch_type' should have 'patch_source'"
-                            "::As per https://github.com/conan-io/conan-center-index/blob/master/docs/conandata_yml_format.md#patches-fields"
+                            f"title=conandata.yml schema warning"
+                            "::'patch_type' should have 'patch_source' as per https://github.com/conan-io/conan-center-index/blob/master/docs/conandata_yml_format.md#patches-fields"
                             " it is expected to have a source (e.g. a URL) to where it originates from to help with reviewing and consumers to evaluate patches\n"
                         )
     except YAMLValidationError as error:
         e = error.__str__().replace("\n", "%0A")
         print(
             f"::error file={args.path},line={error.context_mark.line},endline={error.problem_mark.line},"
-            f"title=config.yml schema error"
+            f"title=conandata.yml schema error"
             f"::{e}\n"
         )
-    except error:
+    except BaseException as error:
         e = error.__str__().replace("\n", "%0A")
         print(f"::error ::{e}")
 
