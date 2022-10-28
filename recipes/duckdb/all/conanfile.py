@@ -133,7 +133,7 @@ class DuckdbConan(ConanFile):
 
         if self.options.shared:
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.lib", os.path.join(self.package_folder, "lib"))
+            rm(self, "duckdb_*.lib", os.path.join(self.package_folder, "lib"))
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))
