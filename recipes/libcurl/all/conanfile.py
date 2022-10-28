@@ -282,35 +282,34 @@ class LibcurlConan(ConanFile):
         replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
         replace_in_file(self, top_makefile, "include src/Makefile.inc", "")
 
-        if self._is_mingw:
-            # patch for zlib naming in mingw
-            if self.options.with_zlib:
-                configure_ac = os.path.join(self.source_folder, "configure.ac")
-                zlib_name = self.deps_cpp_info["zlib"].libs[0]
-                replace_in_file(self, configure_ac,
-                                      "AC_CHECK_LIB(z,",
-                                      f"AC_CHECK_LIB({zlib_name}")
-                replace_in_file(self, configure_ac,
-                                      "-lz ",
-                                      f"-l{zlib_name}")
+        # zlib naming is not always very consistent
+        if self.options.with_zlib:
+            configure_ac = os.path.join(self.source_folder, "configure.ac")
+            zlib_name = self.dependencies["zlib"].cpp_info.libs[0]
+            replace_in_file(self, configure_ac,
+                                  "AC_CHECK_LIB(z,",
+                                  f"AC_CHECK_LIB({zlib_name},")
+            replace_in_file(self, configure_ac,
+                                  "-lz ",
+                                  f"-l{zlib_name} ")
 
-            if self.options.shared:
-                # patch for shared mingw build
-                lib_makefile = os.path.join(self.source_folder, "lib", "Makefile.am")
-                replace_in_file(self, lib_makefile,
-                                      "noinst_LTLIBRARIES = libcurlu.la",
-                                      "")
-                replace_in_file(self, lib_makefile,
-                                      "noinst_LTLIBRARIES =",
-                                      "")
-                replace_in_file(self, lib_makefile,
-                                      "lib_LTLIBRARIES = libcurl.la",
-                                      "noinst_LTLIBRARIES = libcurl.la")
-                # add directives to build dll
-                # used only for native mingw-make
-                if not cross_building(self):
-                    added_content = load(self, "lib_Makefile_add.am")
-                    save(self, lib_makefile, added_content, append=True)
+        if self._is_mingw and self.options.shared:
+            # patch for shared mingw build
+            lib_makefile = os.path.join(self.source_folder, "lib", "Makefile.am")
+            replace_in_file(self, lib_makefile,
+                                  "noinst_LTLIBRARIES = libcurlu.la",
+                                  "")
+            replace_in_file(self, lib_makefile,
+                                  "noinst_LTLIBRARIES =",
+                                  "")
+            replace_in_file(self, lib_makefile,
+                                  "lib_LTLIBRARIES = libcurl.la",
+                                  "noinst_LTLIBRARIES = libcurl.la")
+            # add directives to build dll
+            # used only for native mingw-make
+            if not cross_building(self):
+                added_content = load(self, "lib_Makefile_add.am")
+                save(self, lib_makefile, added_content, append=True)
 
     def _patch_cmake(self):
         if not self._is_using_cmake_build:
@@ -398,30 +397,30 @@ class LibcurlConan(ConanFile):
             f"--enable-unix-sockets={self._yes_no(self.options.with_unix_sockets)}",
         ])
         if self.options.with_ssl == "openssl":
-            path = unix_path(self, self.deps_cpp_info["openssl"].rootpath)
+            path = unix_path(self, self.dependencies["openssl"].package_folder)
             tc.configure_args.append(f"--with-ssl={path}")
         else:
             tc.configure_args.append("--without-ssl")
         if self.options.with_ssl == "wolfssl":
-            path = unix_path(self, self.deps_cpp_info["wolfssl"].rootpath)
+            path = unix_path(self, self.dependencies["wolfssl"].package_folder)
             tc.configure_args.append(f"--with-wolfssl={path}")
         else:
             tc.configure_args.append("--without-wolfssl")
 
         if self.options.with_libssh2:
-            path = unix_path(self, self.deps_cpp_info["libssh2"].rootpath)
+            path = unix_path(self, self.dependencies["libssh2"].package_folder)
             tc.configure_args.append(f"--with-libssh2={path}")
         else:
             tc.configure_args.append("--without-libssh2")
 
         if self.options.with_nghttp2:
-            path = unix_path(self, self.deps_cpp_info["libnghttp2"].rootpath)
+            path = unix_path(self, self.dependencies["libnghttp2"].package_folder)
             tc.configure_args.append(f"--with-nghttp2={path}")
         else:
             tc.configure_args.append("--without-nghttp2")
 
         if self.options.with_zlib:
-            path = unix_path(self, self.deps_cpp_info["zlib"].rootpath)
+            path = unix_path(self, self.dependencies["zlib"].package_folder)
             tc.configure_args.append(f"--with-zlib={path}")
         else:
             tc.configure_args.append("--without-zlib")
@@ -476,12 +475,11 @@ class LibcurlConan(ConanFile):
             rcflags = "-O COFF"
             if self.settings.arch == "x86":
                 rcflags += " --target=pe-i386"
-            else:
+            elif self.settings.arch == "x86_64":
                 rcflags += " --target=pe-x86-64"
+                tc.extra_defines.append("_AMD64_")
             env = tc.environment()
             env.define("RCFLAGS", rcflags)
-
-            tc.extra_defines.append("_AMD64_")
 
         if self.settings.os != "Windows":
             tc.fpic = self.options.get_safe("fPIC", True)
