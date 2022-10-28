@@ -1,13 +1,12 @@
 import os
 import shutil
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, copy, get, rmdir, apply_conandata_patches, export_conandata_patches, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import VCVars, is_msvc
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
 
@@ -105,3 +104,7 @@ class NASMConan(ConanFile):
     def package_info(self):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
+
+        bin_folder = os.path.join(self.package_folder, "bin")
+        # TODO: Legacy, to be removed on Conan 2.0
+        self.env_info.PATH.append(bin_folder)
