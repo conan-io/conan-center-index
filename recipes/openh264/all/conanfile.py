@@ -1,8 +1,18 @@
-from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans import tools, AutoToolsBuildEnvironment
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.apple import is_apple_os
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path, msvc_runtime_flag, VCVars
+
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
 
 
 class OpenH264Conan(ConanFile):
@@ -24,10 +34,6 @@ class OpenH264Conan(ConanFile):
     }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
@@ -40,8 +46,7 @@ class OpenH264Conan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -49,33 +54,39 @@ class OpenH264Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+    
+    def layout(self):
+        # src_folder must use the same source folder name the project
+        basic_layout(self, src_folder="src")
 
     def build_requirements(self):
         if self.settings.arch in ("x86", "x86_64"):
             self.build_requires("nasm/2.15.05")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path"):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+                  destination=self.source_folder, strip_root=True)
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         if self._is_msvc:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "build", "platform-msvc.mk"),
+            tools.replace_in_file(os.path.join(self.source_folder, "build", "platform-msvc.mk"),
                                   "CFLAGS_OPT += -MT",
                                   "CFLAGS_OPT += -{}".format(msvc_runtime_flag(self)))
-            tools.replace_in_file(os.path.join(self._source_subfolder, "build", "platform-msvc.mk"),
+            tools.replace_in_file(os.path.join(self.source_folder, "build", "platform-msvc.mk"),
                                   "CFLAGS_DEBUG += -MTd -Gm",
                                   "CFLAGS_DEBUG += -{} -Gm".format(msvc_runtime_flag(self)))
         if self.settings.os == "Android":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "codec", "build", "android", "dec", "jni", "Application.mk"),
+            tools.replace_in_file(os.path.join(self.source_folder, "codec", "build", "android", "dec", "jni", "Application.mk"),
                                   "APP_STL := stlport_shared",
                                   "APP_STL := {}".format(self.settings.compiler.libcxx))
-            tools.replace_in_file(os.path.join(self._source_subfolder, "codec", "build", "android", "dec", "jni", "Application.mk"),
+            tools.replace_in_file(os.path.join(self.source_folder, "codec", "build", "android", "dec", "jni", "Application.mk"),
                                   "APP_PLATFORM := android-12",
                                   "APP_PLATFORM := {}".format(self._android_target))
 
@@ -155,18 +166,18 @@ class OpenH264Conan(ConanFile):
     def build(self):
         self._patch_sources()
         with tools.vcvars(self) if (self._is_msvc or self._is_clang_cl) else tools.no_op():
-            with tools.chdir(self._source_subfolder):
+            with tools.chdir(self.source_folder):
                 env_build = AutoToolsBuildEnvironment(self)
                 env_build.make(args=self._make_args, target=self._library_filename)
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="LICENSE", dst="licenses", src=self.source_folder)
         with tools.vcvars(self) if (self._is_msvc or self._is_clang_cl) else tools.no_op():
-            with tools.chdir(self._source_subfolder):
+            with tools.chdir(self.source_folder):
                 env_build = AutoToolsBuildEnvironment(self)
                 env_build.make(args=self._make_args, target="install-" + ("shared" if self.options.shared else "static-lib"))
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "openh264")

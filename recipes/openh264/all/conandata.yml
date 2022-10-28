@@ -8,19 +8,11 @@ sources:
 patches:
   "2.1.1":
     - patch_file: "patches/2.1.1-0001-platform-android.mk.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/2.1.1-0002-macos-relocatable-shared.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/2.1.1-0003-no-fpic.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.7.0-0004-mingw-override-CC-CXX-AR-from-env.patch"
-      base_path: "source_subfolder"
   "1.7.0":
     - patch_file: "patches/1.7.0-0001-platform-android.mk.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.7.0-0002-macos-relocatable-shared.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.7.0-0003-no-fpic.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.7.0-0004-mingw-override-CC-CXX-AR-from-env.patch"
-      base_path: "source_subfolder"
