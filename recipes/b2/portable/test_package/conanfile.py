@@ -1,7 +1,5 @@
 from conan import ConanFile
 
-required_conan_version = ">=1.52.0"
-
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch"
