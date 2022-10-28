@@ -197,7 +197,6 @@ class LibsodiumConan(ConanFile):
 # FIXME needed?                    "-install_name @rpath/"
 # FIXME needed?                )
             autotools = Autotools(self)
-            autotools.autoreconf()
             autotools.configure()
             autotools.make()
 
