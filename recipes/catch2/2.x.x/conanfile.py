@@ -72,7 +72,7 @@ class Catch2Conan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         tc.cache_variables["CATCH_INSTALL_DOCS"] = False    # these are cmake options, so use cache_variables
         tc.cache_variables["CATCH_INSTALL_HELPERS"] = "ON"  # these are cmake options, so use cache_variables
-        tc.cache_variables["CATCH_BUILD_STATIC_LIBRARY"] = self.options.with_main   # these are cmake options, so use cache_variables
+        tc.cache_variables["CATCH_BUILD_STATIC_LIBRARY"] = str(self.options.with_main)   # these are cmake options, so use cache_variables (str() is required for conan 1.52)
         if self.options.with_prefix:
             tc.preprocessor_definitions["CATCH_CONFIG_PREFIX_ALL"] = 1
         if self.options.get_safe("with_benchmark", False):
