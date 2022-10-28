@@ -127,10 +127,18 @@ index 371cbbf..aa4ce9c 100644
  install(
      TARGETS dbcppp
 diff --git a/src/dbcppp/main.cpp b/src/dbcppp/main.cpp
-index 462af2e..b5c1037 100644
+index 462af2e..9ce93a6 100644
 --- a/src/dbcppp/main.cpp
 +++ b/src/dbcppp/main.cpp
-@@ -35,11 +35,7 @@ int main(int argc, char** argv)
+@@ -6,6 +6,7 @@
+ #include <sstream>
+ #include <iostream>
+ #include <filesystem>
++#include <algorithm>
+ #include <memory>
+ 
+ #include <cxxopts.hpp>
+@@ -35,11 +36,7 @@ int main(int argc, char** argv)
              ("f,format", "Output format (C, DBC, human)", cxxopts::value<std::string>())
              ("dbc", "List of DBC files", cxxopts::value<std::vector<std::string>>());
  
@@ -143,7 +151,7 @@ index 462af2e..b5c1037 100644
  
          if (vm.count("help"))
          {
-@@ -89,10 +85,6 @@ int main(int argc, char** argv)
+@@ -89,10 +86,6 @@ int main(int argc, char** argv)
          options.add_options()
              ("h,help", "Produce help message")
              ("bus", "List of buses in format <<bus name>:<DBC filename>>", cxxopts::value<std::vector<std::string>>());
@@ -155,10 +163,10 @@ index 462af2e..b5c1037 100644
          if (vm.count("help"))
          {
 diff --git a/src/libdbcppp/CMakeLists.txt b/src/libdbcppp/CMakeLists.txt
-index 9a69748..843ba4e 100644
+index 9a69748..7c77b01 100644
 --- a/src/libdbcppp/CMakeLists.txt
 +++ b/src/libdbcppp/CMakeLists.txt
-@@ -2,12 +2,10 @@
+@@ -2,12 +2,21 @@
  include(GNUInstallDirs)
  include(TestBigEndian)
  
@@ -167,13 +175,23 @@ index 9a69748..843ba4e 100644
  set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
  
 -target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${LIBXML2_LIBRARIES} "libxmlmm")
--
++try_compile(HAS_FS "${CMAKE_BINARY_DIR}/temp" 
++"${CMAKE_SOURCE_DIR}/tests/has_filesystem.cc" 
++            CMAKE_FLAGS -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON
++            LINK_LIBRARIES stdc++fs)
++if(HAS_FS)
++    message(STATUS "Compiler has filesystem support")
++else()
++#   .... You could also try searching for boost::filesystem here.
++    message(FATAL_ERROR "Compiler is missing filesystem capabilities")
++endif(HAS_FS)
+ 
 -add_compile_definitions(DBCPPP_EXPORT)
-+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
++target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} std)
  
  include_directories(
      ${CMAKE_SOURCE_DIR}/src
-@@ -45,9 +43,6 @@ target_sources(${PROJECT_NAME}
+@@ -45,9 +54,6 @@ target_sources(${PROJECT_NAME}
  )
  set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${header_interface}")
  
@@ -183,7 +201,7 @@ index 9a69748..843ba4e 100644
  # install
  install(
      TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
-@@ -57,35 +52,3 @@ install(
+@@ -57,35 +63,3 @@ install(
      FILES
      $<TARGET_PROPERTY:${PROJECT_NAME},INTERFACE_SOURCES>
  	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dbcppp)
@@ -220,6 +238,18 @@ index 9a69748..843ba4e 100644
 -    Devel
 -)
 \ No newline at end of file
+diff --git a/src/libdbcppp/DBCAST2Network.cpp b/src/libdbcppp/DBCAST2Network.cpp
+index fbbf155..d2fb973 100644
+--- a/src/libdbcppp/DBCAST2Network.cpp
++++ b/src/libdbcppp/DBCAST2Network.cpp
+@@ -3,6 +3,7 @@
+ #include <fstream>
+ #include <variant>
+ #include <sstream>
++#include <algorithm>
+ 
+ #include <boost/variant.hpp>
+ 
 diff --git a/src/libdbcppp/Export.h b/src/libdbcppp/Export.h
 index 00dac6a..2ebe898 100644
 --- a/src/libdbcppp/Export.h
@@ -238,11 +268,41 @@ index 00dac6a..2ebe898 100644
 -#   define DBCPPP_API
 -#endif
 +#define DBCPPP_API
+diff --git a/src/libdbcppp/Network2DBC.cpp b/src/libdbcppp/Network2DBC.cpp
+index 3de0623..2fc7caa 100644
+--- a/src/libdbcppp/Network2DBC.cpp
++++ b/src/libdbcppp/Network2DBC.cpp
+@@ -1,5 +1,6 @@
+ #include "../../include/dbcppp/Network2Functions.h"
+ #include "NetworkImpl.h"
++#include <algorithm>
+ 
+ using namespace dbcppp;
+ using namespace dbcppp::Network2DBC;
+diff --git a/src/libdbcppp/Network2Human.cpp b/src/libdbcppp/Network2Human.cpp
+index d61ee14..3110f2f 100644
+--- a/src/libdbcppp/Network2Human.cpp
++++ b/src/libdbcppp/Network2Human.cpp
+@@ -1,6 +1,7 @@
+ 
+ #include <boost/format.hpp>
+ #include "../../include/dbcppp/Network2Functions.h"
++#include <algorithm>
+ 
+ using namespace dbcppp;
+ 
 diff --git a/src/libdbcppp/NetworkImpl.cpp b/src/libdbcppp/NetworkImpl.cpp
-index 04ce841..d31e75f 100644
+index 04ce841..eab54e5 100644
 --- a/src/libdbcppp/NetworkImpl.cpp
 +++ b/src/libdbcppp/NetworkImpl.cpp
-@@ -339,9 +339,5 @@ std::map<std::string, std::unique_ptr<INetwork>> INetwork::LoadNetworkFromFile(c
+@@ -1,5 +1,6 @@
+ #include <fstream>
+ #include <iomanip>
++#include <algorithm>
+ #include "../../include/dbcppp/Network.h"
+ #include "NetworkImpl.h"
+ 
+@@ -339,9 +340,5 @@ std::map<std::string, std::unique_ptr<INetwork>> INetwork::LoadNetworkFromFile(c
              result.insert(std::make_pair("", std::move(net)));
          }
      }
@@ -253,3 +313,14 @@ index 04ce841..d31e75f 100644
      return std::move(result);
  }
 \ No newline at end of file
+diff --git a/src/libdbcppp/SignalMultiplexerValueImpl.cpp b/src/libdbcppp/SignalMultiplexerValueImpl.cpp
+index 9c9a601..fea0544 100644
+--- a/src/libdbcppp/SignalMultiplexerValueImpl.cpp
++++ b/src/libdbcppp/SignalMultiplexerValueImpl.cpp
+@@ -1,5 +1,6 @@
+ 
+ #include "SignalMultiplexerValueImpl.h"
++#include <algorithm>
+ 
+ using namespace dbcppp;
+ 
