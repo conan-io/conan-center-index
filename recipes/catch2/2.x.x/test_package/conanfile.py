@@ -16,17 +16,18 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["WITH_PREFIX"]    = self.dependencies[self.tested_reference_str].options.with_prefix
-        tc.variables["WITH_MAIN"]      = self.dependencies[self.tested_reference_str].options.with_main
-        tc.variables["WITH_BENCHMARK"] = self.dependencies[self.tested_reference_str].options.with_main and self.dependencies[self.tested_reference_str].options.with_benchmark
+        catch_opts = self.dependencies[self.tested_reference_str].options
+        tc.variables["WITH_PREFIX"]    = catch_opts.with_prefix
+        tc.variables["WITH_MAIN"]      = catch_opts.with_main
+        tc.variables["WITH_BENCHMARK"] = not catch_opts.with_prefix and catch_opts.with_main and catch_opts.with_benchmark
         tc.generate()
 
         # note: this is required as self.dependencies is not available in test()
         self._tests_todo.append("test_package")
-        if self.dependencies[self.tested_reference_str].options.with_main:
+        if catch_opts.with_main:
             self._tests_todo.append("standalone")
-            if self.dependencies[self.tested_reference_str].options.with_benchmark:
-                self._tests_todo.append("benchmark")
+        if not catch_opts.with_prefix and catch_opts.with_main and catch_opts.with_benchmark:
+            self._tests_todo.append("benchmark")
 
     def layout(self):
         cmake_layout(self)
