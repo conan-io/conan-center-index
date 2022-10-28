@@ -4,6 +4,7 @@ import conan.tools.files
 import conan.tools.layout
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from six import StringIO
 
 required_conan_version = ">=1.47.0"
 
@@ -86,7 +87,10 @@ class B2Conan(ConanFile):
     @contextmanager
     def _bootstrap_env(self):
         saved_env = dict(os.environ)
-        os.environ.update({"VSCMD_START_DIR": self._b2_dir})
+        # Vcvars will change the directory after it runs in the situation when
+        # the user has previously run the VS command console inits. In that
+        # context it remembers the dir and resets it at each vcvars invocation.
+        os.environ.update({"VSCMD_START_DIR": os.getcwd()})
         if not self.options.use_cxx_env:
             # To avoid using the CXX env vars we clear them out for the build.
             os.environ.update({
@@ -99,11 +103,37 @@ class B2Conan(ConanFile):
             os.environ.update(saved_env)
 
     def build(self):
+        # The order of the with:with: below is important. The first one changes
+        # the current dir. While the second does env changes that guarantees
+        # that dir doesn't change if/when vsvars runs to set the msvc compile
+        # env.
         self.output.info("Build engine..")
+        command = ""
+        b2_toolset = self.options.toolset
         use_windows_commands = os.name == 'nt'
-        command = "build" if use_windows_commands else "./build.sh"
-        if self.options.toolset != 'auto':
-            command += " "+str(self.options.toolset)
+        if b2_toolset == 'auto':
+            if use_windows_commands:
+                # For windows auto detection it can evaluate to a msvc version
+                # that it's not aware of. Most likely because it's a future one
+                # that didn't exist when the build was written. This turns that
+                # into a generic msvc toolset build assuming it could work,
+                # since it's a better version.
+                with conan.tools.files.chdir(self, self._b2_engine_dir):
+                    with self._bootstrap_env():
+                        buf = StringIO()
+                        self.run('guess_toolset && set', output=buf)
+                        vars = map(
+                            lambda x: x.strip(), buf.getvalue().split("\n"))
+                        if "B2_TOOLSET=vcunk" in vars:
+                            b2_toolset = 'msvc'
+                            for kv in vars:
+                                if kv.startswith("B2_TOOLSET_ROOT="):
+                                    b2_vcvars = os.path.join(
+                                        kv.split('=')[1].strip(), 'Auxiliary', 'Build', 'vcvars32.bat')
+                                    command += '"'+b2_vcvars+'" && '
+        command += "build" if use_windows_commands else "./build.sh"
+        if b2_toolset != 'auto':
+            command += " "+str(b2_toolset)
         with conan.tools.files.chdir(self, self._b2_engine_dir):
             with self._bootstrap_env():
                 self.run(command)
@@ -111,10 +141,6 @@ class B2Conan(ConanFile):
         self.output.info("Install..")
         command = os.path.join(
             self._b2_engine_dir, "b2.exe" if use_windows_commands else "b2")
-        # auto, cxx, and cross-cxx aren't toolsets in b2; they're only used to affect
-        # the way build.sh builds b2. Don't pass them to b2 itself.
-        if self.options.toolset not in ['auto', 'cxx', 'cross-cxx']:
-            command += " toolset=" + str(self.options.toolset)
         full_command = \
             ("{0} --ignore-site-config " +
              "--prefix={1} " +
