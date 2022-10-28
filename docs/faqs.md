@@ -412,6 +412,4 @@ difficult to understand [linter errors](linters.md), please comment on your pull
 
 ## How long can I be inactive before being removed from the authorized users list?
 
-For now, it's configured for 4 months. It's computed based on your last commit, not comments or issues.
-After that time, the CI bot will ask to remove your user name from the authorized users' list through the access request PR, which occurs a few times every week.
-In case you are interested in coming back, please, ask again to be included in the issue [#4](https://github.com/conan-io/conan-center-index/issues/4), the process will be precise like for newcomers.
+Please, read [Inactivity and user removal section](how_to_add_packages.md#inactivity-and-user-removal).
