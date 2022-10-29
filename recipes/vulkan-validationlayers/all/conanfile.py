@@ -154,7 +154,7 @@ class VulkanValidationLayersConan(ConanFile):
         if self._needs_wayland_for_build:
             replace_in_file(self, cmakelists,
                                   "find_package(Wayland REQUIRED)",
-                                  "find_package(Wayland REQUIRED) MODULE")
+                                  "find_package(Wayland REQUIRED MODULE)")
         # Useless and may fail
         if Version(self.version) >= "1.3.231":
             replace_in_file(self, cmakelists, "include(VVLGenerateSourceCode)", "")
