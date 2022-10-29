@@ -1,8 +1,10 @@
 from conan import ConanFile
-from conan.tools.microsoft import is_msvc, VCVars, unix_path
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, chdir, rmdir, copy, rm, replace_in_file, rename
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.microsoft import is_msvc, unix_path, VCVars
+from conans import VisualStudioBuildEnvironment
 import os
 import shutil
 
@@ -75,10 +77,31 @@ class LibMP3LameConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-
     def _generate_vs(self):
         tc = VCVars(self)
         tc.generate()
+        # TODO: no conan v2 build helper for NMake yet (see https://github.com/conan-io/conan/issues/12188)
+        #       Better than nothing: rely on legacy VisualStudioBuildEnvironment to inject CL & LIB env vars
+        #       in order to honor build_type & runtime from profile
+        env = Environment()
+        for var, value in VisualStudioBuildEnvironment(self).vars.items():
+            env.define(var, value)
+        env.vars(self).save_script("buildenv_nmake")
+
+    def _generate_autotools(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.append("--disable-frontend")
+        if self.settings.compiler == "clang" and self.settings.arch in ["x86", "x86_64"]:
+            tc.extra_cxxflags.extend(["-mmmx", "-msse"])
+        tc.generate()
+
+    def generate(self):
+        if is_msvc(self) or self._is_clang_cl:
+            self._generate_vs()
+        else:
+            self._generate_autotools()
 
     def _build_vs(self):
         with chdir(self, self.source_folder):
@@ -110,13 +133,6 @@ class LibMP3LameConan(ConanFile):
             command += " libmp3lame.dll" if self.options.shared else " libmp3lame-static.lib"
             self.run(command)
 
-    def _generate_autotools(self):
-        tc = AutotoolsToolchain(self)
-        tc.configure_args.append("--disable-frontend")
-        if self.settings.compiler == "clang" and self.settings.arch in ["x86", "x86_64"]:
-            tc.extra_cxxflags.extend(["-mmmx", "-msse"])
-        tc.generate()
-
     def _build_autotools(self):
         copy(self, "config.sub", self._user_info_build["gnu-config"].CONFIG_SUB,
                     os.path.join(self.source_folder))
@@ -125,12 +141,6 @@ class LibMP3LameConan(ConanFile):
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
-
-    def generate(self):
-        if is_msvc(self) or self._is_clang_cl:
-            self._generate_vs()
-        else:
-            self._generate_autotools()
 
     def build(self):
         apply_conandata_patches(self)
