@@ -1,7 +1,6 @@
 from conan import ConanFile, Version
-from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file, chdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.layout import basic_layout
@@ -163,15 +162,12 @@ class OpenH264Conan(ConanFile):
         tc.make_args.extend(self._make_args)
         
         if is_msvc(self):
-            tc.extra_cxxflags.extend(["-nologo"])
-            tc.extra_ldflags.append("-link")
+            tc.extra_cxxflags.append("-nologo")
             if not (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "12"):
                 tc.extra_cxxflags.append("-FS")
         elif self.settings.compiler in ("apple-clang",):
             if self.settings.arch in ("armv8",):
                 tc.extra_ldflags.append("-arch arm64")
-        if self.settings.os != "Windows" and self.options.shared:
-            tc.fpic = True # Needs fPIC when shared and not on windows
         tc.generate()
 
     def build(self):
@@ -182,7 +178,7 @@ class OpenH264Conan(ConanFile):
             autotools.make(target=self._library_filename)
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self.source_folder)
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         autotools = Autotools(self)
         with chdir(self, self.source_folder):
             autotools.make(target=f'install-{"shared" if self.options.shared else "static-lib"}')
