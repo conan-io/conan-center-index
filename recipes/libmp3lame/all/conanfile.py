@@ -114,14 +114,14 @@ class LibMP3LameConan(ConanFile):
             replace_in_file(self, "Makefile.MSVC", "ADDL_OBJ = bufferoverflowU.lib", "")
             command = "nmake -f Makefile.MSVC comp=msvc"
             if self._is_clang_cl:
-                cl = os.environ.get('CC', "clang-cl")
-                link = os.environ.get("LD", 'lld-link')
-                replace_in_file(self, 'Makefile.MSVC', 'CC = cl', 'CC = %s' % cl)
-                replace_in_file(self, 'Makefile.MSVC', 'LN = link', 'LN = %s' % link)
+                cl = os.environ.get("CC", "clang-cl")
+                link = os.environ.get("LD", "lld-link")
+                replace_in_file(self, "Makefile.MSVC", "CC = cl", f"CC = {cl}")
+                replace_in_file(self, "Makefile.MSVC", "LN = link", f"LN = {link}")
                 # what is /GAy? MSDN doesn't know it
                 # clang-cl: error: no such file or directory: '/GAy'
                 # https://docs.microsoft.com/en-us/cpp/build/reference/ga-optimize-for-windows-application?view=msvc-170
-                replace_in_file(self, 'Makefile.MSVC', '/GAy', '/GA')
+                replace_in_file(self, "Makefile.MSVC", "/GAy", "/GA")
             if self.settings.arch == "x86_64":
                 replace_in_file(self, "Makefile.MSVC", "MACHINE = /machine:I386", "MACHINE =/machine:X64")
                 command += " MSVCVER=Win64 asm=yes"
