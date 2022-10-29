@@ -2,7 +2,9 @@ from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import functools
 import glob
@@ -48,6 +50,16 @@ class VulkanValidationLayersConan(ConanFile):
         cached_dependencies = yaml.safe_load(open(dependencies_filepath))
         return cached_dependencies
 
+    @property
+    def _needs_wayland_for_build(self):
+        return self.options.get_safe("with_wsi_wayland") and Version(self.version) < "1.3.231"
+
+    @property
+    def _needs_pkg_config(self):
+        return self.options.get_safe("with_wsi_xcb") or \
+               self.options.get_safe("with_wsi_xlib") or \
+               self._needs_wayland_for_build
+
     def export(self):
         copy(self, f"dependencies/{self._dependencies_filename}", self.recipe_folder, self.export_folder)
 
@@ -73,7 +85,7 @@ class VulkanValidationLayersConan(ConanFile):
             self.requires("robin-hood-hashing/3.11.5")
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
-        if self.options.get_safe("with_wsi_wayland"):
+        if self._needs_wayland_for_build:
             self.requires("wayland/1.21.0")
 
     def _require(self, recipe_name):
@@ -91,11 +103,18 @@ class VulkanValidationLayersConan(ConanFile):
         if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("gcc < 5 is not supported")
 
+    def build_requirements(self):
+        if self._needs_pkg_config and not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         tc = CMakeToolchain(self)
         tc.variables["VULKAN_HEADERS_INSTALL_DIR"] = self.dependencies["vulkan-headers"].package_folder.replace("\\", "/")
         tc.variables["USE_CCACHE"] = False
@@ -113,6 +132,14 @@ class VulkanValidationLayersConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
+        if self._needs_pkg_config:
+            deps = PkgConfigDeps(self)
+            deps.generate()
+            # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
+            env = Environment()
+            env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
+            env.vars(self).save_script("conanbuildenv_pkg_config_path")
+
     def _patch_sources(self):
         apply_conandata_patches(self)
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
@@ -123,6 +150,11 @@ class VulkanValidationLayersConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "FindVulkanHeaders.cmake"),
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
+        # Ensure to use upstream FindWayland.cmake
+        if self._needs_wayland_for_build:
+            replace_in_file(self, cmakelists,
+                                  "find_package(Wayland REQUIRED)",
+                                  "find_package(Wayland REQUIRED) MODULE")
         # Useless and may fail
         if Version(self.version) >= "1.3.231":
             replace_in_file(self, cmakelists, "include(VVLGenerateSourceCode)", "")
