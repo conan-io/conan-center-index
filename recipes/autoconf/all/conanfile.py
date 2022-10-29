@@ -40,7 +40,7 @@ class AutoconfConan(ConanFile):
         self.info.clear()
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
+        if self._settings_build.os == "Windows" and self.conf.get("tools.microsoft.bash:path", default="", check_type=str) == "":
             self.tool_requires("msys2/cci.latest")
         self.tool_requires("m4/1.4.19")
 
