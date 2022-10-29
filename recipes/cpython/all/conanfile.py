@@ -331,7 +331,7 @@ class CPythonConan(ConanFile):
             tc = AutotoolsToolchain(self)
             yes_no = lambda v: "yes" if v else "no"
             tc.configure_args = [
-                f"--prefix={self._install_path}",
+                f"--prefix={self.package_path}",
                 f"--enable-shared={yes_no(self.options.get_safe('shared', False))}",
                 f"--with-doc-strings={yes_no(self.options.get_safe('docstrings', False))}",
                 f"--with-pymalloc={yes_no(self.options.get_safe('pymalloc', False))}",
@@ -487,19 +487,19 @@ class CPythonConan(ConanFile):
 
     @property
     def _install_path(self):
-        return self.package_path.joinpath("bin") if is_msvc(self) else self.package_path
+        return self.package_path.joinpath("bin")
 
     @property
     def _lib_path(self):
-        return self._install_path.joinpath("libs") if is_msvc(self) else self._install_path.joinpath("lib")
+        return self._install_path.joinpath("libs") if is_msvc(self) else self.package_path.joinpath("lib")
 
     @property
     def _include_path(self):
-        return self._install_path.joinpath("include") if is_msvc(self) else self._install_path.joinpath("include", f"python{self._version_suffix}{self._abi_suffix}")
+        return self._install_path.joinpath("include") if is_msvc(self) else self.package_path.joinpath("include", f"python{self._version_suffix}{self._abi_suffix}")
 
     @property
     def _modules_path(self):
-        return self._install_path.joinpath("Lib") if is_msvc(self) else self._install_path.joinpath("lib")
+        return self._install_path.joinpath("Lib") if is_msvc(self) else self.package_path.joinpath("lib")
 
     @property
     def _site_packages_path(self):
@@ -508,7 +508,7 @@ class CPythonConan(ConanFile):
     @property
     def _cpython_symlink(self):
         ext = ".exe" if self.settings.os == "Windows" else ""
-        symlink = self._install_path.joinpath(f"python{ext}")
+        symlink = self._install_path.joinpath("Scripts", f"python{ext}") if is_msvc(self) else self._install_path.joinpath(f"python{ext}")
         return symlink
 
     @property
@@ -527,7 +527,7 @@ class CPythonConan(ConanFile):
 
     @property
     def _cpython_interpreter_path(self):
-        return self.package_path.joinpath("bin", self._cpython_interpreter_name)
+        return self._install_path.joinpath("Scripts", self._cpython_interpreter_name) if is_msvc(self) else self._install_path.joinpath(self._cpython_interpreter_name)
 
     @property
     def _abi_suffix(self):
@@ -745,16 +745,17 @@ class CPythonConan(ConanFile):
     def package_info(self):
         py_version = Version(self.version)
 
-        self.cpp_info.set_property("cmake_file_name", "Python")
+        # self.cpp_info.set_property("cmake_file_name", "Python")
         self.cpp_info.names["cmake_build_modules"] = [str(self._cmake_build_module_path)]
         self.cpp_info.set_property("cmake_build_modules", [str(self._cmake_build_module_path)])
 
         self.cpp_info.components["python"].includedirs = [str(self._include_path)]
         self.cpp_info.components["python"].libdirs = [str(self._lib_path)]
+        self.cpp_info.components["python"].bindirs = [str(self._install_path.joinpath("Scripts") if is_msvc(self) else self._install_path)]
         self.cpp_info.components["python"].libs = [self._lib_name]
         self.cpp_info.components["python"].builddirs = [str(self._cmake_build_module_path.parent)]
 
-        self.cpp_info.components["python"].set_property("cmake_target_aliases", ["Python::Python"])
+        self.cpp_info.components["python"].set_property("cmake_target_aliases", ["Python::Python", "cpython::cpython"])
         self.cpp_info.components["python"].set_property("pkg_config", f"python-{py_version.major}.{py_version.minor}")
         self.cpp_info.components["python"].names["pkg_config"] = f"python-{py_version.major}.{py_version.minor}"
 
@@ -824,13 +825,11 @@ class CPythonConan(ConanFile):
         if self.options.env_vars:
             self.output.info(f"Appending PATH environment variable: {self._install_path}")
             self.env_info.PATH.append(str(self._install_path))
-            self.runenv_info.define_path("PATH", str(self._install_path))
-            self.buildenv_info.define_path("PATH", str(self._install_path))
 
         self.output.info(f"Setting userinfo: `python` to: {self._cpython_interpreter_path}")
         self.user_info.python = str(self._cpython_interpreter_path)
-        self.output.info(f"Setting conf: `tools.cpython:python` to: {self._cpython_interpreter_path}")
-        self.conf_info.define("tools.cpython:python", str(self._cpython_interpreter_path))
+        self.output.info(f"Setting conf: `user.cpython:python` to: {self._cpython_interpreter_path}")
+        self.conf_info.define("user.cpython:python", str(self._cpython_interpreter_path))
         if self.options.env_vars:
             self.output.info(f"Setting PYTHON environment variable: {self._cpython_interpreter_path}")
             self.env_info.PYTHON = str(self._cpython_interpreter_path)
@@ -846,8 +845,8 @@ class CPythonConan(ConanFile):
             pythonhome = self._lib_path.joinpath(f"python{version.major}.{version.minor}")
         self.output.info(f"Setting userinfo: `pythonhome` to: {pythonhome}")
         self.user_info.pythonhome = str(pythonhome)
-        self.output.info(f"Setting conf: `tools.cpython:pythonhome` to: {pythonhome}")
-        self.conf_info.define("tools.cpython:pythonhome", str(pythonhome))
+        self.output.info(f"Setting conf: `user.cpython:pythonhome` to: {pythonhome}")
+        self.conf_info.define("user.cpython:pythonhome", str(pythonhome))
 
         if is_msvc(self) and self.options.env_vars:
             self.output.info(f"Setting PYTHONHOME environment variable: {pythonhome}")
@@ -858,14 +857,14 @@ class CPythonConan(ConanFile):
         pythonhome_required = is_msvc(self) or is_apple_os(self)
         self.output.info(f"Setting userinfo: `module_requires_pythonhome` to: {pythonhome_required}")
         self.user_info.module_requires_pythonhome = pythonhome_required
-        self.output.info(f"Setting conf: `tools.cpython:module_requires_pythonhome` to: {pythonhome_required}")
-        self.conf_info.define("tools.cpython:module_requires_pythonhome", pythonhome_required)
+        self.output.info(f"Setting conf: `user.cpython:module_requires_pythonhome` to: {pythonhome_required}")
+        self.conf_info.define("user.cpython:module_requires_pythonhome", pythonhome_required)
 
         python_root = "" if self._is_py2 else self.package_folder
         self.output.info(f"Setting userinfo: `python_root` to: {python_root}")
         self.user_info.python_root = python_root
-        self.output.info(f"Setting conf: `tools.cpython:python_root` to: {python_root}")
-        self.conf_info.define("tools.cpython:python_root", python_root)
+        self.output.info(f"Setting conf: `user.cpython:python_root` to: {python_root}")
+        self.conf_info.define("user.cpython:python_root", python_root)
 
         if self.options.env_vars:
             self.output.info(f"Setting PYTHON_ROOT environment variable: {python_root}")

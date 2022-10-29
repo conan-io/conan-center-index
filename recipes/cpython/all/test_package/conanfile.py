@@ -71,16 +71,16 @@ class TestPackageConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-        if not is_msvc(self) or self.options["cpython"].shared:
-            setup_args = [
-                self.source_path.joinpath("setup.py"),
-                "build",
-                "--build-base", self.build_folder,
-                "--build-platlib", self.build_path,  #.joinpath("lib_setuptools"),
-            ]
-            if self.settings.build_type == "Debug":
-                setup_args.append("--debug")
-            self.run("python {}".format(" ".join("\"{}\"".format(a) for a in setup_args)), env="conanbuild", run_environment=True, cwd=self.source_folder)
+        # if not is_msvc(self) or self.options["cpython"].shared:
+        #     setup_args = [
+        #         self.source_path.joinpath("setup.py"),
+        #         "build",
+        #         "--build-base", self.build_folder,
+        #         "--build-platlib", self.build_path,  #.joinpath("lib_setuptools"),
+        #     ]
+        #     if self.settings.build_type == "Debug":
+        #         setup_args.append("--debug")
+        #     self.run("python {}".format(" ".join("\"{}\"".format(a) for a in setup_args)), env="conanbuild", run_environment=True, cwd=self.source_folder)
 
     def _test_module(self, module, should_work):
         exception = None
@@ -129,13 +129,13 @@ class TestPackageConan(ConanFile):
             if is_apple_os(self) and not self.options["cpython"].shared:
                 self.output.info("Not testing the module, because these seem not to work on apple when cpython is built as a static library")
                 # FIXME: find out why cpython on apple does not allow to use modules linked against a static python
-            else:
-                if self._supports_modules:
-                    self.output.info("Testing module (spam) using cmake built module")
-                    self._test_module("spam", True)
-                    self.output.info("Testing module (spam) using cmake built module python_add_library")
-                    self._test_module("spam2", True)
-                    self.output.info("Testing module (spam) using setup.py built module")
-                    self._test_module("spam3", True)
+            # else:
+            #     if self._supports_modules:
+            #         self.output.info("Testing module (spam) using cmake built module")
+            #         self._test_module("spam", True)
+            #         self.output.info("Testing module (spam) using cmake built module python_add_library")
+            #         self._test_module("spam2", True)
+            #         self.output.info("Testing module (spam) using setup.py built module")
+            #         self._test_module("spam3", True)
 
             self.run(self.build_path.joinpath("test_package"), env = "conanrun")
