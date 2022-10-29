@@ -1,9 +1,10 @@
-from conan import ConanFile, Version
+from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc, unix_path, msvc_runtime_flag
 
 import os
@@ -65,12 +66,11 @@ class OpenH264Conan(ConanFile):
                 pass
     
     def layout(self):
-        # src_folder must use the same source folder name the project
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
         if self.settings.arch in ("x86", "x86_64"):
-            self.build_requires("nasm/2.15.05")
+            self.tool_requires("nasm/2.15.05")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
@@ -165,7 +165,7 @@ class OpenH264Conan(ConanFile):
             tc.extra_cxxflags.append("-nologo")
             if not (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "12"):
                 tc.extra_cxxflags.append("-FS")
-        elif self.settings.compiler in ("apple-clang",):
+        elif self.settings.compiler in ("apple-clang",): # not needed during and after 2.3.1
             if self.settings.arch in ("armv8",):
                 tc.extra_ldflags.append("-arch arm64")
         tc.generate()
