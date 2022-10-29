@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import build_jobs, check_min_cppstd, cross_building
-from conan.tools.files import chdir, get, load, patch, replace_in_file, rm, rmdir, save
+from conan.tools.files import chdir, get, load, replace_in_file, rm, rmdir, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
 from conans import tools, RunEnvironment
@@ -13,7 +13,7 @@ import itertools
 import os
 import textwrap
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.0"
 
 
 class qt(Generator):
@@ -136,7 +136,7 @@ class QtConan(ConanFile):
         "config": None,
         "multiconfiguration": False
     }
-    default_options.update({module: False for module in _submodules})
+    default_options.update({module: (module in ["qttools", "qttranslations"]) for module in _submodules})
 
     no_copy_source = True
     short_paths = True
@@ -154,8 +154,7 @@ class QtConan(ConanFile):
         self.copy("qtmodules%s.conf" % self.version)
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and self._is_msvc:
@@ -271,7 +270,7 @@ class QtConan(ConanFile):
         config = configparser.ConfigParser()
         config.read(os.path.join(self.recipe_folder, "qtmodules%s.conf" % self.version))
         submodules_tree = {}
-        assert config.sections()
+        assert config.sections(), f"no qtmodules.conf file for version {self.version}"
         for s in config.sections():
             section = str(s)
             assert section.startswith("submodule ")
@@ -352,7 +351,7 @@ class QtConan(ConanFile):
             raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         if self.options.openssl:
             self.requires("openssl/1.1.1q")
         if self.options.with_pcre2:
@@ -374,7 +373,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_icu", False):
             self.requires("icu/71.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/5.3.0")
+            self.requires("harfbuzz/5.3.1")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.1.4")
@@ -408,7 +407,7 @@ class QtConan(ConanFile):
             self.requires("opus/1.3.1")
             self.requires("xorg-proto/2022.2")
             self.requires("libxshmfence/1.3")
-            self.requires("nss/3.83")
+            self.requires("nss/3.84")
             self.requires("libdrm/2.4.109")
             self.requires("egl/system")
         if self.options.get_safe("with_gstreamer", False):
@@ -430,8 +429,7 @@ class QtConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
             strip_root=True, destination="qt5")
 
-        for data in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(self, **data)
+        apply_conandata_patches(self)
         for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
             replace_in_file(self, os.path.join(self.source_folder, "qt5", "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
                 "  if (enable_precompiled_headers) {\n    if (is_win) {",
@@ -933,7 +931,13 @@ Examples = bin/datadir/examples""")
         self.cpp_info.names["cmake_find_package"] = "Qt5"
         self.cpp_info.names["cmake_find_package_multi"] = "Qt5"
 
-        build_modules = []
+        build_modules = {}
+        def _add_build_module(component, module):
+            if component not in build_modules:
+                build_modules[component] = []
+            build_modules[component].append(module)
+            self.cpp_info.components[component].build_modules["cmake_find_package"].append(module)
+            self.cpp_info.components[component].build_modules["cmake_find_package_multi"].append(module)
 
         libsuffix = ""
         if not self.options.multiconfiguration:
@@ -1031,9 +1035,7 @@ Examples = bin/datadir/examples""")
             if self.options.with_md4c:
                 gui_reqs.append("md4c::md4c")
             _create_module("Gui", gui_reqs)
-            build_modules.append(self._cmake_qt5_private_file("Gui"))
-            self.cpp_info.components["qtGui"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Gui"))
-            self.cpp_info.components["qtGui"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Gui"))
+            _add_build_module("qtGui", self._cmake_qt5_private_file("Gui"))
 
             event_dispatcher_reqs = ["Core", "Gui"]
             if self.options.with_glib:
@@ -1136,9 +1138,7 @@ Examples = bin/datadir/examples""")
         _create_module("Test")
         if self.options.widgets:
             _create_module("Widgets", ["Gui"])
-            build_modules.append(self._cmake_qt5_private_file("Widgets"))
-            self.cpp_info.components["qtWidgets"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Widgets"))
-            self.cpp_info.components["qtWidgets"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Widgets"))
+            _add_build_module("qtWidgets", self._cmake_qt5_private_file("Widgets"))
         if self.options.gui and self.options.widgets and not self.settings.os in ["iOS", "watchOS", "tvOS"]:
             _create_module("PrintSupport", ["Gui", "Widgets"])
             if self.settings.os == "Macos" and not self.options.shared:
@@ -1154,9 +1154,7 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtdeclarative:
             _create_module("Qml", ["Network"])
-            build_modules.append(self._cmake_qt5_private_file("Qml"))
-            self.cpp_info.components["qtQml"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Qml"))
-            self.cpp_info.components["qtQml"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Qml"))
+            _add_build_module("qtQml", self._cmake_qt5_private_file("Qml"))
             _create_module("QmlModels", ["Qml"])
             self.cpp_info.components["qtQmlImportScanner"].set_property("cmake_target_name", "Qt5::QmlImportScanner")
             self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package"] = "QmlImportScanner" # this is an alias for Qml and there to integrate with existing consumers
@@ -1407,20 +1405,14 @@ Examples = bin/datadir/examples""")
                 self.cpp_info.components["qtCore"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
 
         self.cpp_info.components["qtCore"].builddirs.append(os.path.join("bin","archdatadir","bin"))
-        build_modules.append(self._cmake_core_extras_file)
-        self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_core_extras_file)
-        self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_core_extras_file)
-        build_modules.append(self._cmake_qt5_private_file("Core"))
-        self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Core"))
-        self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Core"))
+        _add_build_module("qtCore", self._cmake_core_extras_file)
+        _add_build_module("qtCore", self._cmake_qt5_private_file("Core"))
 
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
             component_name = m.replace("Qt5", "qt")
             if os.path.isfile(module):
-                build_modules.append(module)
-                self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
-                self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
+                _add_build_module(component_name, module)
             self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
 
         qt5core_config_extras_mkspec_dir_cmake = load(self,
@@ -1445,7 +1437,19 @@ Examples = bin/datadir/examples""")
                     self.cpp_info.components[component].exelinkflags.extend(obj_files)
                     self.cpp_info.components[component].sharedlinkflags.extend(obj_files)
 
-        self.cpp_info.set_property("cmake_build_modules", build_modules)
+        build_modules_list = []
+
+        def _add_build_modules_for_component(component):
+            for req in self.cpp_info.components[component].requires:
+                if "::" in req: # not a qt component                   
+                    continue
+                _add_build_modules_for_component(req)
+            build_modules_list.extend(build_modules.pop(component, []))
+
+        for c in self.cpp_info.components:
+            _add_build_modules_for_component(c)
+
+        self.cpp_info.set_property("cmake_build_modules", build_modules_list)
 
     @staticmethod
     def _remove_duplicate(l):
