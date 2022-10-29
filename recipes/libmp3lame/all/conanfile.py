@@ -59,7 +59,7 @@ class LibMP3LameConan(ConanFile):
 
     def build_requirements(self):
         if not is_msvc(self) and not self._is_clang_cl:
-            self.build_requires("gnu-config/cci.20201022")
+            self.tool_requires("gnu-config/cci.20201022")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
