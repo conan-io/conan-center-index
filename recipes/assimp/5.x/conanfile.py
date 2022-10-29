@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
+required_conan_version = ">=1.51.2"
 
 
 class AssimpConan(ConanFile):
@@ -282,28 +282,3 @@ class AssimpConan(ConanFile):
             stdcpp_library = tools_legacy.stdcpp_library(self)
             if stdcpp_library:
                 self.cpp_info.system_libs.append(stdcpp_library)
-
-        # FIXME: shouldn't be necessary.
-        # It's a workaround to support conan v1 generators
-        self.cpp_info.requires.append("minizip::minizip")
-        self.cpp_info.requires.append("utfcpp::utfcpp")
-        if Version(self.version) < "5.1.0":
-            self.cpp_info.requires.append("irrxml::irrxml")
-        else:
-            self.cpp_info.requires.append("pugixml::pugixml")
-        if self._depends_on_kuba_zip:
-            self.cpp_info.requires.append("kuba-zip::kuba-zip")
-        if self._depends_on_poly2tri:
-            self.cpp_info.requires.append("poly2tri::poly2tri")
-        if self._depends_on_rapidjson:
-            self.cpp_info.requires.append("rapidjson::rapidjson")
-        if self._depends_on_zlib:
-            self.cpp_info.requires.append("zlib::zlib")
-        if self._depends_on_draco:
-            self.cpp_info.requires.append("draco::draco")
-        if self._depends_on_clipper:
-            self.cpp_info.requires.append("clipper::clipper")
-        if self._depends_on_stb:
-            self.cpp_info.requires.append("stb::stb")
-        if self._depends_on_openddlparser:
-            self.cpp_info.requires.append("openddl-parser::openddl-parser")

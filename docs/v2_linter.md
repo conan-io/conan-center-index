@@ -1,9 +1,9 @@
-Linter to help migration to Conan v2
-====================================
+# Linter to help migration to Conan v2
 
 <!-- toc -->
 ## Contents
 
+  * [Running the linter locally](#running-the-linter-locally)
   * [Import ConanFile from `conan`](#import-conanfile-from-conan)
   * [Import tools from `conan`](#import-tools-from-conan)<!-- endToc -->
 
@@ -12,14 +12,18 @@ linter will run for every pull-request that is submitted to the repository and w
 raise some warnings and errors that should be addressed in order to migrate the
 recipes to Conan v2.
 
-It is important to note that these rules are targetting Conan v2 compatibility layer, their
+It is important to note that these rules are targeting Conan v2 compatibility layer, their
 purpose is to fail for v1 syntax that will be no longer available in v2. Even if the syntax
 if perfectly valid in Conan v1, the recipe might fail here because it is not v2-compliant.
 
-> **Note.-** Some of the errored checks might be just plain Python syntax errors, while
+> **Note** Some of the errored checks might be just plain Python syntax errors, while
 > others might be related to the custom rules added by us.
 
 Here you can find some examples of the extra rules we are adding:
+
+## Running the linter locally
+
+Check the [Developing Recipes](developing_recipes_locally.md#running-the-python-linters) for details.
 
 ## Import ConanFile from `conan`
 
@@ -64,15 +68,4 @@ Here is a list of different imports and their new equivalent (note that the inte
 | conans.errors.ConanInvalidConfiguration | [conan.errors.ConanInvalidConfiguration](https://docs.conan.io/en/latest/migrating_to_2.0/recipes.html#migrating-the-recipes) | 1.47.0 |
 | conans.errors.ConanException | [conan.errors.ConanException](https://docs.conan.io/en/latest/migrating_to_2.0/recipes.html#migrating-the-recipes) | 1.47.0 |
 
-
-# Disable linter for a specific conanfile
-
-If for some reason a conanfile of a recipe or a test_package is not yet prepared to pass
-all the checks of the linter, it can be skipped from `pylint` adding the following comment to the file:
-
-**`conanfile.py`**
-```python
-# pylint: skip-file
-from conans import ConanFile, CMake, tools
-...
-```
+---

@@ -7,8 +7,8 @@ index 1552937ce..73c77158e 100644
      PRIVATE
          ../GraphicsEngineVulkan/include
 -        ../../ThirdParty/Vulkan-Headers/include
-+        ${CONAN_INCLUDE_DIRS_VULKAN-HEADERS}/include/
-+        ${CONAN_INCLUDE_DIRS_VOLK}/
++        ${VulkanHeaders_INCLUDE_DIR}
++        ${volk_INCLUDE_DIR}/
      )
  endif()
  

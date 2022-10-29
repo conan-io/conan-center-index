@@ -37,7 +37,7 @@ set(MAX_BLOB_SIZE CACHE STRING "Set the maximum number of bytes in a string or B
 option(DISABLE_DEFAULT_VFS "Disable default VFS implementation")
 option(ENABLE_DBPAGE_VTAB "The SQLITE_DBPAGE extension implements an eponymous-only virtual table that provides direct access to the underlying database file by interacting with the pager. SQLITE_DBPAGE is capable of both reading and writing any page of the database. Because interaction is through the pager layer, all changes are transactional.")
 
-add_library(${PROJECT_NAME} src/sqlite3.c)
+add_library(${PROJECT_NAME} ${SQLITE3_SRC_DIR}/sqlite3.c)
 set_target_properties(${PROJECT_NAME} PROPERTIES C_VISIBILITY_PRESET hidden)
 if(BUILD_SHARED_LIBS)
     if(WIN32)
@@ -150,9 +150,14 @@ if(NOT OMIT_LOAD_EXTENSION)
 endif()
 
 if(ENABLE_FTS5 OR ENABLE_MATH_FUNCTIONS)
-    find_library(MATH_LIBRARY m)
-    if(MATH_LIBRARY)
-        target_link_libraries(${PROJECT_NAME}  PRIVATE ${MATH_LIBRARY})
+    include(CheckLibraryExists)
+    # Check if math functionality is on the separate 'libm' library,
+    # otherwise assume that it is already part of the C runtime.
+    # The `m` library is part of the compiler toolchain, this checks
+    # if the compiler can successfully link against the library.
+    check_library_exists(m log "" HAVE_MATH_LIBRARY)    
+    if(HAVE_MATH_LIBRARY)
+        target_link_libraries(${PROJECT_NAME} PRIVATE m)
     endif()
 endif()
 
@@ -162,11 +167,11 @@ install(TARGETS ${PROJECT_NAME}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(DIRECTORY src/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+install(DIRECTORY ${SQLITE3_SRC_DIR}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         FILES_MATCHING PATTERN "*.h")
 
 if(SQLITE3_BUILD_EXECUTABLE)
-    add_executable(sqlite3-bin src/shell.c)
+    add_executable(sqlite3-bin ${SQLITE3_SRC_DIR}/shell.c)
     target_link_libraries(sqlite3-bin PRIVATE ${PROJECT_NAME})
     if(ENABLE_DBPAGE_VTAB)
         target_compile_definitions(sqlite3-bin PRIVATE SQLITE_ENABLE_DBPAGE_VTAB)
@@ -177,8 +182,5 @@ if(SQLITE3_BUILD_EXECUTABLE)
     if(NOT HAVE_SYSTEM)
         target_compile_definitions(sqlite3-bin PRIVATE SQLITE_NOHAVE_SYSTEM)
     endif()
-    install(TARGETS sqlite3-bin
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
-    )
+    install(TARGETS sqlite3-bin DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()

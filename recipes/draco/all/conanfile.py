@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class DracoConan(ConanFile):
@@ -43,26 +43,28 @@ class DracoConan(ConanFile):
     short_paths = True
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         if not self.options.enable_mesh_compression:
             del self.options.enable_standard_edgebreaker
             del self.options.enable_predictive_edgebreaker
-        if self.options.shared:
-            del self.options.fPIC
-
-    def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

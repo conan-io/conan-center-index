@@ -81,7 +81,7 @@ class HarfbuzzConan(ConanFile):
             if self.settings.compiler == "gcc" and scm.Version(self.settings.compiler.version) < "7":
                 raise ConanInvalidConfiguration("New versions of harfbuzz require at least gcc 7")
 
-        if self.options["glib"].shared and microsoft.is_msvc_static_runtime(self):
+        if self.options.with_glib and self.options["glib"].shared and microsoft.is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(
                 "Linking shared glib with the MSVC static runtime is not supported"
             )
@@ -92,7 +92,7 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_icu:
             self.requires("icu/71.1")
         if self.options.with_glib:
-            self.requires("glib/2.73.1")
+            self.requires("glib/2.73.3")
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version],
@@ -133,10 +133,12 @@ class HarfbuzzConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "harfbuzz"
         self.cpp_info.names["cmake_find_package_multi"] = "harfbuzz"
+        self.cpp_info.set_property("pkg_config_name", "harfbuzz")
         if self.options.with_icu:
             self.cpp_info.libs.append("harfbuzz-icu")
         if self.options.with_subset:
@@ -156,7 +158,7 @@ class HarfbuzzConan(ConanFile):
             if self.options.with_directwrite:
                 self.cpp_info.system_libs.append("dwrite")
         if tools.is_apple_os(self.settings.os):
-            self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText"])
+            self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText", "ApplicationServices"])
         if not self.options.shared:
             libcxx = tools.stdcpp_library(self)
             if libcxx:

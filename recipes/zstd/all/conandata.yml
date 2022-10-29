@@ -33,12 +33,11 @@ sources:
     sha256: f7de13462f7a82c29ab865820149e778cbfe01087b3a55b5332707abf9db4a6e
     url: https://github.com/facebook/zstd/archive/v1.5.2.tar.gz
 patches:
+  "1.3.5":
+    - patch_file: "patches/1.3.5-cmake-project.patch"
   "1.4.5":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.4.5-cmake-install-dll.patch"
+    - patch_file: "patches/1.4.5-cmake-install-dll.patch"
   "1.5.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.5.1-cmake-remove-asm-except-x86_64.patch"
+    - patch_file: "patches/1.5.1-cmake-remove-asm-except-x86_64.patch"
   "1.5.2":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.5.2-cmake-remove-asm-except-x86_64.patch"
+    - patch_file: "patches/1.5.2-cmake-remove-asm-except-x86_64.patch"

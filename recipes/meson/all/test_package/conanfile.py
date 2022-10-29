@@ -1,21 +1,28 @@
-from conans import ConanFile, Meson, tools
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson
 import os
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "pkg_config"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "MesonToolchain", "VirtualBuildEnv", "VirtualRunEnv"
+    test_type = "explicit"
+
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
+
+    def layout(self):
+        basic_layout(self)
 
     def build(self):
-        if not tools.cross_building(self):
-            with tools.environment_append(tools.RunEnvironment(self).vars):
-                meson = Meson(self)
-                meson.configure(build_folder="build")
-                meson.build()
+        meson = Meson(self)
+        meson.configure()
+        meson.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            bin_path = os.path.join("build", "test_package")
-            self.run(bin_path, run_environment=True)
-
-            self.run("meson --version", run_environment=True)
+        self.run("meson --version")
+        if can_run(self):
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run(bin_path, env="conanrun")

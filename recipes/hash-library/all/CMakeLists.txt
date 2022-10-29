@@ -1,8 +1,5 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(hash-library CXX)
-
-include(conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
 
 add_library(${CMAKE_PROJECT_NAME}
     source_subfolder/crc32.cpp
@@ -26,7 +23,7 @@ set(HEADERS
     source_subfolder/sha3.h
 )
 
-set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES 
+set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
     PUBLIC_HEADER "${HEADERS}"
 )
 

@@ -1,9 +1,14 @@
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
-import functools
+from conan.tools.files import get, copy
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
-required_conan_version = ">=1.45.0"
+import os
+
+required_conan_version = ">=1.52.0"
 
 class ArsenalgearConan(ConanFile):
     name = "arsenalgear"
@@ -21,30 +26,13 @@ class ArsenalgearConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
-    def requirements(self):
-        self.requires("boost/1.79.0")
-        if self.settings.os in ["Linux", "Macos"]:
-            self.requires("exprtk/0.0.1")
+    def _minimum_cpp_standard(self):
+        return 17
 
     @property
-    def _compiler_required_cpp17(self):
+    def _compilers_minimum_version(self):
         return {
             "Visual Studio": "16",
             "gcc": "8",
@@ -52,38 +40,60 @@ class ArsenalgearConan(ConanFile):
             "apple-clang": "12.0",
         }
 
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        if Version(self.version) < "2.0.0":
+            self.requires("boost/1.80.0")
+            if self.settings.os in ["Linux", "Macos"]:
+                self.requires("exprtk/0.0.1")
+
     def validate(self):
-        # In 1.2.2, arsenalgear doesn't support Visual Studio.
+        # arsenalgear doesn't support Visual Studio(yet).
         if is_msvc(self):
-            raise ConanInvalidConfiguration("{} doesn't support Visual Studio(yet)".format(self.name))
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Visual Studio(yet)")
 
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 17)
-
-        minimum_version = self._compiler_required_cpp17.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
-        else:
-            self.output.warn("{0} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
+        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["ARSENALGEAR_VERSION"] = str(self.version)
+        tc.variables["ARSENALGEAR_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
