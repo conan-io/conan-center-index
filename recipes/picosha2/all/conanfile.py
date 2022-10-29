@@ -27,10 +27,6 @@ class PicoSHA2Conan(ConanFile):
     def package_id(self):
         self.info.clear()
 
-    @property
-    def _info(self):
-        return self if Version(conan_version).major < 2 else self.info
-
     def validate(self):
         if self._info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
