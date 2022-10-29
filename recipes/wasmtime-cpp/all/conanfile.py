@@ -65,7 +65,7 @@ class WasmtimeCppConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def package(self):
-        copy(self, pattern='LICENSE', dst='licenses', src=self.source_folder)
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self,
             pattern="*.hh",
             dst=os.path.join(self.package_folder, "include"),
