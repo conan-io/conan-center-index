@@ -3,12 +3,12 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, replace_in_file, rm, rmdir
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.52.0"
 
 
 class GTestConan(ConanFile):
@@ -56,14 +56,18 @@ class GTestConan(ConanFile):
 
     def export_sources(self):
         if Version(self.version) < "1.12.0":
-            for patch in self.conan_data.get("patches", {}).get(self.version, []):
-                copy(self, patch["patch_file"], self.recipe_folder, self.export_sources_folder)
+            export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if Version(self.version) < "1.12.0" and self.settings.build_type != "Debug":
             del self.options.debug_postfix
+
+        if Version(self.version) < "1.12.0" and self.settings.build_type == "Debug":
+            if self.options.debug_postfix == "deprecated":
+                # in 1.10.0,  use 'd' as default
+                self.default_options["debug_postfix"] = "d"
 
     def configure(self):
         if self.options.shared:
@@ -74,11 +78,6 @@ class GTestConan(ConanFile):
         if Version(self.version) >= "1.12.0":
             if self.options.debug_postfix != "deprecated":
                 self.output.warn("gtest/*:debug_postfix is deprecated in 1.12.0.")
-
-        if Version(self.version) < "1.12.0" and self.settings.build_type == "Debug":
-            if self.options.debug_postfix == "deprecated":
-                # in 1.10.0,  use 'd' as default
-                self.options.debug_postfix = "d"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -132,8 +131,8 @@ class GTestConan(ConanFile):
     def _patch_sources(self):
         internal_utils = os.path.join(self.source_folder, "googletest",
                                       "cmake", "internal_utils.cmake")
+        apply_conandata_patches(self)
         if Version(self.version) < "1.12.0":
-            apply_conandata_patches(self)
             replace_in_file(self, internal_utils, "-Werror", "")
 
         if is_msvc(self) or self._is_clang_cl:

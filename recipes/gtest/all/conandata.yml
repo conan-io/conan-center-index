@@ -8,4 +8,9 @@ sources:
 patches:
   "1.10.0":
     - patch_file: "patches/gtest-1.10.0.patch"
+      patch_description: "correct the order of cmake min and project"
+      patch_type: "conan"
     - patch_file: "patches/gtest-1.10.0-override.patch"
+      patch_description: "correct the order of cmake min and project"
+      patch_type: "backport"
+      patch_source: "https://github.com/google/googletest/pull/2507"
