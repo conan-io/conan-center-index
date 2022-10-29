@@ -39,10 +39,6 @@ class FontconfigConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -62,14 +58,11 @@ class FontconfigConan(ConanFile):
         if self.settings.os == "Linux":
             self.requires("libuuid/1.0.3")
 
-    def validate(self):
-        if is_msvc(self) and Version(self.version) < "2.13.93":
-            raise ConanInvalidConfiguration("fontconfig does not support Visual Studio for versions < 2.13.93.")
-
     def build_requirements(self):
         self.tool_requires("gperf/3.1")
-        self.tool_requires("pkgconf/1.9.3")
         self.tool_requires("meson/0.63.3")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
