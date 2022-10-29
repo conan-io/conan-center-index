@@ -28,7 +28,7 @@ class PicoSHA2Conan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
@@ -37,7 +37,6 @@ class PicoSHA2Conan(ConanFile):
     def build(self):
         pass
 
-    # copy all files to the package folder
     def package(self):
         if Version(self.version) == "1.0.0":
             filename = os.path.join(self.source_folder, self.source_folder, "picosha2.h")
