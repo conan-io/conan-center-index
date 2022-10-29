@@ -41,13 +41,11 @@ class LibnameConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.compiler == "gcc":
-            if Version(self.settings.compiler.version) < "5.0":
-                raise ConanInvalidConfiguration("graphene does not support GCC before 5.0")
 
     def build_requirements(self):
         self.tool_requires("meson/0.63.3")
-        self.tool_requires("pkgconf/1.9.3")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
 
     def requirements(self):
         if self.options.with_glib:
@@ -62,6 +60,10 @@ class LibnameConan(ConanFile):
             self.options["glib"].shared = True
 
     def validate(self):
+        if self.settings.compiler == "gcc":
+            if Version(self.settings.compiler.version) < "5.0":
+                raise ConanInvalidConfiguration("graphene does not support GCC before 5.0")
+
         if self.info.options.with_glib:
             glib_is_shared = self.dependencies["glib"].options.shared
             if self.info.options.shared and not glib_is_shared:
