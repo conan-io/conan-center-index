@@ -137,7 +137,7 @@ class PocoConan(ConanFile):
         if self.options.get_safe("enable_data_postgresql"):
             self.requires("libpq/14.2")
         if self.options.get_safe("enable_data_mysql"):
-            self.requires("libmysqlclient/8.0.29")
+            self.requires("libmysqlclient/8.0.30")
 
     def package_id(self):
         del self.info.options.enable_active_record
