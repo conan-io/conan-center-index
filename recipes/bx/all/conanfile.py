@@ -99,10 +99,10 @@ class bxConan(ConanFile):
             # gcc-multilib and g++-multilib required for 32bit cross-compilation, should see if we can check and install through conan
             
             # Generate projects through genie
-            genieGen = f"{self.gccOsToGenie[str(self.settings.os)]} "
+            genieGen = f"{self.gccOsToGenie[str(self.settings.os)]}"
             if self.osToUseArchConfigSuffix[str(self.settings.os)]:
-                genieGen += F"{self.gmakeArchToGenieSuffix[str(self.settings.arch)]} "
-            genieGen += "gmake"
+                genieGen += F"{self.gmakeArchToGenieSuffix[str(self.settings.arch)]}"
+            genieGen += " gmake"
             self.run(f"{genie} {genieGen}", cwd=self.bxPath)
 
             # Build project folder and path from given settings
