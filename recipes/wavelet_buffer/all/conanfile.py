@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.files import get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -34,8 +34,6 @@ class WaveletBufferConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
 
-    generators = "CMakeDeps"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -58,6 +56,9 @@ class WaveletBufferConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CONAN_EXPORTED"] = True
+        tc.generate()
+
+        tc = CMakeDeps(self)
         tc.generate()
 
     @property
