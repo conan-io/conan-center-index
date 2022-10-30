@@ -12,5 +12,7 @@ endif()
 if(redis++_VERSION VERSION_GREATER_EQUAL "1.3.0")
     target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 else()
-    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+    # no target_compile_features here because redis-plus-plus < 1.3.0 is built
+    # with C++11 by default and is not ABI compatible if consumed with C++17...
+    set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
 endif()

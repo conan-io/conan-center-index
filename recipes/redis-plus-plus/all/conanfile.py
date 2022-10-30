@@ -90,6 +90,11 @@ class RedisPlusPlusConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if self.settings.compiler.get_safe("cppstd"):
+            cppstd = str(self.settings.compiler.cppstd)
+            if cppstd.startswith("gnu"):
+                cppstd = cppstd[3:]
+            tc.cache_variables["REDIS_PLUS_PLUS_CXX_STANDARD"] = cppstd
         tc.variables["REDIS_PLUS_PLUS_USE_TLS"] = self.options.with_tls
         if self.options.get_safe("build_async"):
             tc.cache_variables["REDIS_PLUS_PLUS_BUILD_ASYNC"] = "libuv"
