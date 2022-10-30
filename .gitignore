@@ -129,3 +129,10 @@ venv.bak/
 
 # scons build files
 *.dblite
+
+# user temp files
+.*.sw?
+.sw?
+Session.vim
+*~
+.undodir
