@@ -58,7 +58,7 @@ class B2Conan(ConanFile):
                 "Option toolset 'cxx' and 'cross-cxx' requires 'use_cxx_env=True'")
 
     def layout(self):
-        conan.tools.layout.basic_layout(self, src_folder="source")
+        conan.tools.layout.basic_layout(self, src_folder="root")
 
     def source(self):
         conan.tools.files.get(
@@ -122,11 +122,11 @@ class B2Conan(ConanFile):
                     with self._bootstrap_env():
                         buf = StringIO()
                         self.run('guess_toolset && set', output=buf)
-                        vars = map(
+                        guess_vars = map(
                             lambda x: x.strip(), buf.getvalue().split("\n"))
-                        if "B2_TOOLSET=vcunk" in vars:
+                        if "B2_TOOLSET=vcunk" in guess_vars:
                             b2_toolset = 'msvc'
-                            for kv in vars:
+                            for kv in guess_vars:
                                 if kv.startswith("B2_TOOLSET_ROOT="):
                                     b2_vcvars = os.path.join(
                                         kv.split('=')[1].strip(), 'Auxiliary', 'Build', 'vcvars32.bat')
@@ -165,6 +165,7 @@ class B2Conan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.bindirs = ["bin"]
         self.buildenv_info.prepend_path("PATH", self._pkg_bin_dir)
+        self.env_info.path = self._pkg_bin_dir
 
     def package_id(self):
         del self.info.options.use_cxx_env
