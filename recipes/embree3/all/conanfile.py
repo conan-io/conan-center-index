@@ -39,6 +39,7 @@ class EmbreeConan(ConanFile):
         "ray_masking": [True, False],
         "backface_culling": [True, False],
         "ignore_invalid_rays": [True, False],
+        "with_tbb": [True, False],
     }
 
     default_options = {
@@ -60,7 +61,10 @@ class EmbreeConan(ConanFile):
         "ray_masking": False,
         "backface_culling": False,
         "ignore_invalid_rays": False,
+        "with_tbb": False,
     }
+
+    generators = "CMakeDeps"
 
     @property
     def _has_sse_avx(self):
@@ -107,6 +111,10 @@ class EmbreeConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        if self.options.with_tbb:
+            self.requires("onetbb/2021.6.0")
+
     def validate(self):
         if not (self._has_sse_avx or (self._embree_has_neon_support and self._has_neon)):
             raise ConanInvalidConfiguration("Embree {} doesn't support {}".format(self.version, self.settings.arch))
@@ -147,7 +155,7 @@ class EmbreeConan(ConanFile):
         tc.variables["EMBREE_BACKFACE_CULLING"] = self.options.backface_culling
         tc.variables["EMBREE_IGNORE_INVALID_RAYS"] = self.options.ignore_invalid_rays
         tc.variables["EMBREE_ISPC_SUPPORT"] = False
-        tc.variables["EMBREE_TASKING_SYSTEM"] = "INTERNAL"
+        tc.variables["EMBREE_TASKING_SYSTEM"] = "TBB" if self.options.with_tbb else "INTERNAL"
         tc.variables["EMBREE_MAX_ISA"] = "NONE"
         if self._embree_has_neon_support:
             tc.variables["EMBREE_ISA_NEON"] = self._has_neon
