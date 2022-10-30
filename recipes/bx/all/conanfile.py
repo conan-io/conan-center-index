@@ -29,7 +29,7 @@ class bxConan(ConanFile):
                     "193": "2022", "192": "2019", "191": "2017"}
 
     gccOsToGenie = {"Windows": "--gcc=mingw-gcc", "Linux": "--gcc=linux-gcc", "Macos": "--gcc=osx", "Android": "--gcc=android", "iOS": "--gcc=ios"}
-    gmakeOsToProj = {"Windows": "mingw", "Linux": "linux", "Macos": "osx", "Android": "android", "iOS": "ios"}
+    gmakeOsToProj = {"Windows": "mingw-gcc", "Linux": "linux", "Macos": "osx", "Android": "android", "iOS": "ios"}
     gmakeArchToGenieSuffix = {"x86": "-x86", "x86_64": "-x64", "armv8": "-arm64", "armv7": "-arm"}
     osToUseArchConfigSuffix = {"Windows": False, "Linux": False, "Macos": True, "Android": True, "iOS": True}
 
@@ -99,7 +99,10 @@ class bxConan(ConanFile):
             # gcc-multilib and g++-multilib required for 32bit cross-compilation, should see if we can check and install through conan
             
             # Generate projects through genie
-            genieGen = f"{self.gccOsToGenie[str(self.settings.os)]} gmake"
+            genieGen = f"{self.gccOsToGenie[str(self.settings.os)]} "
+            if self.osToUseArchConfigSuffix[str(self.settings.os)]:
+                genieGen += F"{self.gmakeArchToGenieSuffix[str(self.settings.arch)]} "
+            genieGen += "gmake"
             self.run(f"{genie} {genieGen}", cwd=self.bxPath)
 
             # Build project folder and path from given settings
