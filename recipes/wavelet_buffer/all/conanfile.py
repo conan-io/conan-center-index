@@ -40,8 +40,6 @@ class WaveletBufferConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        self.settings.build_type = "Release"
-
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
