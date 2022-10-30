@@ -8,10 +8,13 @@ from conan.tools.layout import cmake_layout
 
 class HelloTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    # VirtualBuildEnv and VirtualRunEnv can be avoided if "tools.env.virtualenv:auto_use" is defined
-    # (it will be defined in Conan 2.0)
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualBuildEnv", "VirtualRunEnv"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
     apply_env = False
+
+    test_type = "explicit"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def build(self):
         cmake = CMake(self)
