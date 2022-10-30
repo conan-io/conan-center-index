@@ -4,7 +4,6 @@ try:
 except ImportError:
     from conans.tools import check_min_cppstd  # FIXME : not in 1.49
 from conan.tools.files import get
-from conan.tools.cmake import CMake
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
