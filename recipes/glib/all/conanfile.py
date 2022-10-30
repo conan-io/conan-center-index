@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
-from conan.tools.gnu import PkgConfigDeps, AutotoolsDeps
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
@@ -21,8 +21,7 @@ class GLibConan(ConanFile):
     topics = ("gobject", "gio", "gmodule")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.gnome.org/GNOME/glib"
-    license = "LGPL-2.1"
-
+    license = "LGPL-2.1-or-later"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -40,7 +39,6 @@ class GLibConan(ConanFile):
         "with_mount": True,
         "with_selinux": True,
     }
-
     short_paths = True
 
     def export_sources(self):
@@ -109,31 +107,20 @@ class GLibConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/0.63.3")
-        self.tool_requires("pkgconf/1.9.3")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
-        tc = AutotoolsDeps(self)
-        # bug? meson toolchain doesn't read CPPFLAGS
-        cppflags = tc.vars().get("CPPFLAGS")
-        tc.environment.append('CFLAGS', cppflags)
-        tc.environment.append('CXXFLAGS', cppflags)
-        # conan or meson bug? LIBPATH is ignored
-        ldflags = tc.vars().get("LDFLAGS")
-        ldflags = ldflags.replace("-LIBPATH", "/LIBPATH")
-        tc.environment.define('LDFLAGS', ldflags)
-        tc.generate()
-        # it's needed so MesonToolchain reads from AutotoolsDeps, should it be automatic?
-        self.buildenv.compose_env(tc.environment)
-
         tc = MesonToolchain(self)
+
         if is_apple_os(self):
             tc.project_options["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
         tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
@@ -308,6 +295,7 @@ class GLibConan(ConanFile):
             'datadir': '${prefix}/res',
             'schemasdir': '${datadir}/glib-2.0/schemas',
             'bindir': '${prefix}/bin',
+            # Can't use libdir here as it is libdir1 when using the PkgConfigDeps generator.
             'giomoduledir': '${prefix}/lib/gio/modules',
             'gio': '${bindir}/gio',
             'gio_querymodules': '${bindir}/gio-querymodules',
