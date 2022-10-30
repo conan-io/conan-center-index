@@ -53,6 +53,8 @@ class RedisPlusPlusConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "1.3.0":
+            del self.options.build_async
 
     def configure(self):
         if self.options.shared:
@@ -66,7 +68,7 @@ class RedisPlusPlusConan(ConanFile):
 
     def requirements(self):
         self.requires("hiredis/1.0.2")
-        if self.options.build_async:
+        if self.options.get_safe("build_async"):
             self.requires("libuv/1.44.2")
 
     def validate(self):
@@ -89,8 +91,8 @@ class RedisPlusPlusConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["REDIS_PLUS_PLUS_USE_TLS"] = self.options.with_tls
-        if self.options.build_async:
-            tc.variables["REDIS_PLUS_PLUS_BUILD_ASYNC"] = "libuv"
+        if self.options.get_safe("build_async"):
+            tc.cache_variables["REDIS_PLUS_PLUS_BUILD_ASYNC"] = "libuv"
         tc.variables["REDIS_PLUS_PLUS_BUILD_TEST"] = False
         tc.variables["REDIS_PLUS_PLUS_BUILD_STATIC"] = not self.options.shared
         tc.variables["REDIS_PLUS_PLUS_BUILD_SHARED"] = self.options.shared
@@ -131,7 +133,7 @@ class RedisPlusPlusConan(ConanFile):
         self.cpp_info.components["redis++lib"].requires = ["hiredis::hiredis"]
         if self.options.with_tls:
             self.cpp_info.components["redis++lib"].requires.append("hiredis::hiredis_ssl")
-        if self.options.build_async:
+        if self.options.get_safe("build_async"):
             self.cpp_info.components["redis++lib"].requires.append("libuv::libuv")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["redis++lib"].system_libs.append("pthread")
