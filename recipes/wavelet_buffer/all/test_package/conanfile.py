@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.build import cross_building
+from conan.tools.build import can_run
 from conan.tools.cmake import CMake
 from conan.tools.layout import cmake_layout
 
@@ -22,6 +22,6 @@ class HelloTestConan(ConanFile):
         cmake_layout(self)
 
     def test(self):
-        if not cross_building(self):
+        if can_run(self):
             cmd = os.path.join(self.cpp.build.bindirs[0], "example")
             self.run(cmd, env="conanrun")
