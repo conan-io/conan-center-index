@@ -28,3 +28,6 @@ patches:
     - patch_file: "patches/1.2.1-0001-fix-hiredis-consumption.patch"
       patch_description: "Robust discovery & injection of dependencies"
       patch_type: "conan"
+    - patch_file: "patches/1.2.1-0002-cmake-minimum-required.patch"
+      patch_description: "CMake: move cmake_minimum_required() before project()"
+      patch_type: "conan"
