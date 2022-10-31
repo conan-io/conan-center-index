@@ -1,33 +1,64 @@
+diff --git a/lib/jxl.cmake b/lib/jxl.cmake
+index c0290ab..b3f63d6 100644
 --- a/lib/jxl.cmake
 +++ b/lib/jxl.cmake
-@@ -334,7 +334,7 @@ if (JPEGXL_ENABLE_SKCMS)
+@@ -300,10 +300,12 @@ set(JPEGXL_INTERNAL_SOURCES_ENC
+   jxl/progressive_split.h
+ )
+ 
++find_package(highway REQUIRED CONFIG)
++find_package(brotli REQUIRED CONFIG)
++
+ set(JPEGXL_DEC_INTERNAL_LIBS
+-  brotlidec-static
+-  brotlicommon-static
+-  hwy
++  brotli::brotli
++  highway::highway
+ )
+ 
+ if(JPEGXL_ENABLE_PROFILER)
+@@ -312,7 +314,6 @@ endif()
+ 
+ set(JPEGXL_INTERNAL_LIBS
+   ${JPEGXL_DEC_INTERNAL_LIBS}
+-  brotlienc-static
+   Threads::Threads
+ )
+ 
+@@ -334,7 +335,8 @@ if (JPEGXL_ENABLE_SKCMS)
      list(APPEND JPEGXL_INTERNAL_LIBS skcms)
    endif ()
  else ()
 -  list(APPEND JPEGXL_INTERNAL_LIBS lcms2)
-+  list(APPEND JPEGXL_INTERNAL_LIBS ${CONAN_LIBS_LCMS})
++  find_package(lcms REQUIRED CONFIG)
++  list(APPEND JPEGXL_INTERNAL_LIBS lcms::lcms)
  endif ()
  
  if (NOT JPEGXL_ENABLE_TRANSCODE_JPEG)
-@@ -359,8 +359,6 @@ set_property(TARGET jxl_dec-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
+@@ -359,8 +361,8 @@ set_property(TARGET jxl_dec-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
  target_include_directories(jxl_dec-obj PUBLIC
    ${PROJECT_SOURCE_DIR}
    ${CMAKE_CURRENT_SOURCE_DIR}/include
 -  $<TARGET_PROPERTY:hwy,INTERFACE_INCLUDE_DIRECTORIES>
 -  $<TARGET_PROPERTY:brotlicommon-static,INTERFACE_INCLUDE_DIRECTORIES>
++  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:highway::highway,INTERFACE_INCLUDE_DIRECTORIES>>"
++  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:brotli::brotli,INTERFACE_INCLUDE_DIRECTORIES>>"
  )
  target_compile_definitions(jxl_dec-obj PUBLIC
    ${OBJ_COMPILE_DEFINITIONS}
-@@ -377,8 +375,6 @@ set_property(TARGET jxl_enc-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
+@@ -377,8 +379,8 @@ set_property(TARGET jxl_enc-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
  target_include_directories(jxl_enc-obj PUBLIC
    ${PROJECT_SOURCE_DIR}
    ${CMAKE_CURRENT_SOURCE_DIR}/include
 -  $<TARGET_PROPERTY:hwy,INTERFACE_INCLUDE_DIRECTORIES>
 -  $<TARGET_PROPERTY:brotlicommon-static,INTERFACE_INCLUDE_DIRECTORIES>
++  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:highway::highway,INTERFACE_INCLUDE_DIRECTORIES>>"
++  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:lcms::lcms,INTERFACE_INCLUDE_DIRECTORIES>>"
  )
  target_compile_definitions(jxl_enc-obj PUBLIC
    ${OBJ_COMPILE_DEFINITIONS}
-@@ -387,17 +383,6 @@ if (JPEGXL_ENABLE_PROFILER)
+@@ -387,17 +389,6 @@ if (JPEGXL_ENABLE_PROFILER)
  target_link_libraries(jxl_enc-obj PUBLIC jxl_profiler)
  endif()
  
@@ -45,7 +76,7 @@
  # Headers for exporting/importing public headers
  include(GenerateExportHeader)
  set_target_properties(jxl_dec-obj PROPERTIES
-@@ -413,9 +398,6 @@ set_target_properties(jxl_enc-obj PROPERTIES
+@@ -413,9 +404,6 @@ set_target_properties(jxl_enc-obj PROPERTIES
    VISIBILITY_INLINES_HIDDEN 1
    DEFINE_SYMBOL JXL_INTERNAL_LIBRARY_BUILD
  )
@@ -55,7 +86,7 @@
  target_include_directories(jxl_enc-obj PUBLIC
      ${CMAKE_CURRENT_BINARY_DIR}/include)
  
-@@ -495,9 +477,8 @@ if (((NOT DEFINED "${TARGET_SUPPORTS_SHARED_LIBS}") OR
+@@ -495,9 +483,8 @@ if (((NOT DEFINED "${TARGET_SUPPORTS_SHARED_LIBS}") OR
  
  # Public shared library.
  add_library(jxl SHARED ${JPEGXL_INTERNAL_OBJECTS})
@@ -66,7 +97,7 @@
  # Shared library include path contains only the "include/" paths.
  target_include_directories(jxl PUBLIC
    "${CMAKE_CURRENT_SOURCE_DIR}/include"
-@@ -506,13 +487,13 @@ set_target_properties(jxl PROPERTIES
+@@ -506,13 +493,13 @@ set_target_properties(jxl PROPERTIES
    VERSION ${JPEGXL_LIBRARY_VERSION}
    SOVERSION ${JPEGXL_LIBRARY_SOVERSION}
    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
@@ -83,7 +114,7 @@
  # Shared library include path contains only the "include/" paths.
  target_include_directories(jxl_dec PUBLIC
    "${CMAKE_CURRENT_SOURCE_DIR}/include"
-@@ -523,6 +504,12 @@ set_target_properties(jxl_dec PROPERTIES
+@@ -523,6 +510,12 @@ set_target_properties(jxl_dec PROPERTIES
    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
  
@@ -96,7 +127,7 @@
  # Add a jxl.version file as a version script to tag symbols with the
  # appropriate version number. This script is also used to limit what's exposed
  # in the shared library from the static dependencies bundled here.
-@@ -541,8 +528,10 @@ foreach(target IN ITEMS jxl jxl_dec)
+@@ -541,8 +534,10 @@ foreach(target IN ITEMS jxl jxl_dec)
    # This hides the default visibility symbols from static libraries bundled into
    # the shared library. In particular this prevents exposing symbols from hwy
    # and skcms in the shared library.
@@ -109,7 +140,7 @@
  endforeach()
  
  # Only install libjxl shared library. The libjxl_dec is not installed since it
-@@ -553,8 +542,14 @@ install(TARGETS jxl
+@@ -553,13 +548,21 @@ install(TARGETS jxl
  else()
  add_library(jxl ALIAS jxl-static)
  add_library(jxl_dec ALIAS jxl_dec-static)
@@ -124,3 +155,34 @@
  # Add a pkg-config file for libjxl.
  set(JPEGXL_LIBRARY_REQUIRES
      "libhwy libbrotlicommon libbrotlienc libbrotlidec")
+ if(NOT JPEGXL_ENABLE_SKCMS)
+-  set(JPEGXL_LIBRARY_REQUIRES "${JPEGXL_LIBRARY_REQUIRES} lcms2")
++  find_package(lcms REQUIRED CONFIG)
++  list(APPEND JPEGXL_INTERNAL_LIBS )
++  set(JPEGXL_LIBRARY_REQUIRES "${JPEGXL_LIBRARY_REQUIRES} lcms::lcms")
+ endif()
+ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/jxl/libjxl.pc.in"
+                "libjxl.pc" @ONLY)
+diff --git a/lib/jxl_profiler.cmake b/lib/jxl_profiler.cmake
+index 8faa626..5e55aa3 100644
+--- a/lib/jxl_profiler.cmake
++++ b/lib/jxl_profiler.cmake
+@@ -11,14 +11,16 @@ set(JPEGXL_PROFILER_SOURCES
+ 
+ ### Static library.
+ add_library(jxl_profiler STATIC ${JPEGXL_PROFILER_SOURCES})
+-target_link_libraries(jxl_profiler PUBLIC hwy)
++target_link_libraries(jxl_profiler PUBLIC highway::highway)
+ 
+ target_compile_options(jxl_profiler PRIVATE ${JPEGXL_INTERNAL_FLAGS})
+ target_compile_options(jxl_profiler PUBLIC ${JPEGXL_COVERAGE_FLAGS})
+ set_property(TARGET jxl_profiler PROPERTY POSITION_INDEPENDENT_CODE ON)
+ 
+ target_include_directories(jxl_profiler
+-  PRIVATE "${PROJECT_SOURCE_DIR}")
++  PRIVATE
++  "${PROJECT_SOURCE_DIR}"
++)
+ 
+ set_target_properties(jxl_profiler PROPERTIES
+   CXX_VISIBILITY_PRESET hidden

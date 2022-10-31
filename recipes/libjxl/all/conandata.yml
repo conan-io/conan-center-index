@@ -11,11 +11,22 @@ sources:
 patches:
   "0.7.0":
     - patch_file: "patches/0001-clean-targets-v0.7.patch"
+      patch_description: "remove several targets not used in conan recipe"
+      patch_type: "conan"
     - patch_file: "patches/0002-fix-dependencies-v0.7.patch"
+      patch_description: "use find_package for third party libraries"
+      patch_type: "conan"
   "0.6.1":
     - patch_file: "patches/0001-clean-targets-v0.6.patch"
+      patch_description: "remove several targets not used in conan recipe"
+      patch_type: "conan"
     - patch_file: "patches/0002-fix-dependencies-v0.6.patch"
+      patch_description: "use find_package for third party libraries"
+      patch_type: "conan"
   "0.5.0":
     - patch_file: "patches/0001-clean-targets-v0.5.patch"
+      patch_description: "remove several targets not used in conan recipe"
+      patch_type: "conan"
     - patch_file: "patches/0002-fix-dependencies-v0.5.patch"
-    - patch_file: "patches/0003-use-find-package-v0.5.patch"
+      patch_description: "use find_package for third party libraries"
+      patch_type: "conan"
