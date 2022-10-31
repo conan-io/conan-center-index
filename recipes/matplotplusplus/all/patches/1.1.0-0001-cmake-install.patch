@@ -1,0 +1,30 @@
+--- a/source/matplot/CMakeLists.txt
++++ b/source/matplot/CMakeLists.txt
+@@ -236,7 +239,7 @@ if (BUILD_EXPERIMENTAL_OPENGL_BACKEND)
+             backend/opengl.h
+             backend/opengl.cpp
+             )
+-    target_include_directories(matplot_opengl PUBLIC matplot)
++    target_include_directories(matplot_opengl PUBLIC $<BUILD_INTERFACE:${MATPLOT_ROOT_DIR}/source>)
+     target_link_libraries(matplot_opengl PUBLIC matplot glad glfw ${CMAKE_DL_LIBS})
+ endif()
+ 
+@@ -249,7 +252,18 @@ if (BUILD_INSTALLER)
+             EXPORT Matplot++Targets
+             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+             )
++    if(BUILD_EXPERIMENTAL_OPENGL_BACKEND)
++        install(
++            TARGETS matplot_opengl
++            EXPORT Matplot++Targets
++            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++            INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
++        )
++    endif()
+ 
+     # Install headers
+     install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

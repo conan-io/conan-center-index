@@ -1,0 +1,62 @@
+--- a/source/CMakeLists.txt
++++ b/source/CMakeLists.txt
+@@ -1,2 +1,3 @@
+-add_subdirectory(3rd_party)
++find_package(cimg REQUIRED CONFIG)
++find_package(nodesoup REQUIRED CONFIG)
+ add_subdirectory(matplot)
+\ No newline at end of file
+--- a/source/matplot/CMakeLists.txt
++++ b/source/matplot/CMakeLists.txt
+@@ -97,9 +97,14 @@ target_include_directories(matplot
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+ 
+ # Dependencies
+-target_link_libraries_system(matplot
+-  PRIVATE cimg nodesoup std::filesystem)
+-
++target_link_libraries(matplot
++  PRIVATE cimg::cimg nodesoup::nodesoup std::filesystem)
++if(WIN32)
++    target_compile_definitions(matplot PRIVATE cimg_display=2)
++    target_link_libraries(matplot PRIVATE gdi32)
++else()
++    target_compile_definitions(matplot PRIVATE cimg_display=0)
++endif()
+ # Required compiler features required
+ # https://cmake.org/cmake/help/v3.14/manual/cmake-compile-features.7.html#requiring-language-standards
+ target_compile_features(matplot PUBLIC cxx_std_17)
+@@ -203,11 +208,10 @@ if (BUILD_EXPERIMENTAL_OPENGL_BACKEND)
+     # The biggest con of the OpenGL backend is that it cannot open a window
+     #     in another thread. All it can do is get in the middle of the render
+     #     loop and draw the plot.
+-    find_package(OpenGL REQUIRED)
+ 
+     # https://github.com/Dav1dde/glad
+-    find_package(GLAD QUIET)
+-    if (NOT GLAD_FOUND AND NOT TARGET glad)
++    find_package(glad REQUIRED CONFIG)
++    if (0)
+         # Use CPM only if not found, to avoid ODR violations
+         # find_package(GLAD REQUIRE) would suffice if it worked well
+         FetchContent_Declare(glad GIT_REPOSITORY https://github.com/Dav1dde/glad.git GIT_TAG df8e9e16110b305479a875399cee13daa0ccadd9)
+@@ -215,15 +219,14 @@ if (BUILD_EXPERIMENTAL_OPENGL_BACKEND)
+     else ()
+         # FindGLAD does not usually create a target, so we create an interface target
+         if (NOT TARGET glad)
+-            add_library(glad INTERFACE)
+-            target_include_directories(glad INTERFACE ${GLAD_INCLUDE_PATH})
+-            target_link_libraries(glad INTERFACE ${GLAD_LIBRARIES})
++            add_library(glad INTERFACE IMPORTED)
++            set_target_properties(glad PROPERTIES INTERFACE_LINK_LIBRARIES glad::glad)
+         endif ()
+     endif ()
+ 
+     # https://github.com/glfw/glfw
+-    find_package(glfw3 QUIET)
+-    if (NOT GLFW3_FOUND AND NOT TARGET glfw)
++    find_package(glfw3 REQUIRED CONFIG)
++    if (0)
+         # Use CPM only if not found, to avoid ODR violations
+         # find_package(glfw3 REQUIRE) would suffice if it worked well
+         FetchContent_Declare(glfw3 GIT_REPOSITORY https://github.com/glfw/glfw.git GIT_TAG 3.3.2)

@@ -1,0 +1,15 @@
+sources:
+  "1.1.0":
+    url: "https://github.com/alandefreitas/matplotplusplus/archive/refs/tags/v1.1.0.tar.gz"
+    sha256: "5c3a1bdfee12f5c11fd194361040fe4760f57e334523ac125ec22b2cb03f27bb"
+patches:
+  "1.1.0":
+    - patch_file: "patches/1.1.0-0001-cmake-install.patch"
+      patch_description: "Install dll & matplot_opengl"
+      patch_type: "conan"
+    - patch_file: "patches/1.1.0-0002-cmake-dependencies.patch"
+      patch_description: "Robust dependencies handling"
+      patch_type: "conan"
+    - patch_file: "patches/1.1.0-0003-cmake-flags.patch"
+      patch_description: "Honor default build type flags"
+      patch_type: "conan"

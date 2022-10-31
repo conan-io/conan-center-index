@@ -1,0 +1,10 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -31,7 +31,6 @@ include(cmake/functions.cmake)
+ # Set variables with project properties
+ set_master_project_booleans() # detect if master project / dev mode
+ set_debug_booleans() # detect if debug
+-set_optimization_flags() # detect and set default optimization flags
+ set_compiler_booleans() # detect compiler
+ 
+ # What to build
