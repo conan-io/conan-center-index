@@ -28,7 +28,7 @@ diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
 index f3ede1e..91a1bdd 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -3,7 +3,7 @@ target_include_directories(simdutf-include-source INTERFACE $<BUILD_INTERFACE:${
+@@ -3,7 +3,7 @@ target_include_directories(simdutf-include-source▽g INTERFACE $<BUILD_INTERFACE:${
  add_library(simdutf-source INTERFACE)
  target_sources(simdutf-source INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/simdutf.cpp)
  target_link_libraries(simdutf-source INTERFACE simdutf-include-source)

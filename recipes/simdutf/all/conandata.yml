@@ -7,9 +7,12 @@ sources:
     sha256: "e7832ba58fb95fe00de76dbbb2f17d844a7ad02a6f5e3e9e5ce9520e820049a0"
 patches:
   "2.0.2":
-    - patch_file: "patches/2.0.0-0001-fix-cmake.patch"
+    - patch_file: "patches/2.0.2-0001-fix-cmake.patch"
       patch_description: "remove static build, stop to link static libc++ and enable rpath on macOS"
       patch_type: "conan"
+    - patch_file: "patches/2.0.2-0002-add-workaround-gcc9.patch"
+      patch_description: "apply gcc8 workaround to gcc9"
+      patch_type: "portability"
   "1.0.1":
     - patch_file: "patches/1.0.1-0001-fix-cmake.patch"
       patch_description: "disable test and benchmark build and enable rpath on macOS"
