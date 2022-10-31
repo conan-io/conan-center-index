@@ -80,6 +80,11 @@ class WaveletBufferConan(ConanFile):
         }
 
     def validate(self):
+        if self.options.shared:
+            raise ConanInvalidConfiguration(
+                "{} requires static linking".format(self.name)
+            )
+
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
 
