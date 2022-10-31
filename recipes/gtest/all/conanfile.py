@@ -55,8 +55,7 @@ class GTestConan(ConanFile):
         return self.settings.os == "Windows" and self.settings.compiler == "clang"
 
     def export_sources(self):
-        if Version(self.version) < "1.12.0":
-            export_conandata_patches(self)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -77,7 +76,7 @@ class GTestConan(ConanFile):
                 pass
         if Version(self.version) >= "1.12.0":
             if self.options.debug_postfix != "deprecated":
-                self.output.warn("gtest/*:debug_postfix is deprecated in 1.12.0.")
+                self.output.warn(f"{self.ref}:debug_postfix is deprecated in 1.12.0.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
