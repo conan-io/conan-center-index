@@ -22,6 +22,7 @@ def _stdcpp_library(conanfile):
         return "c++_static"
     return None
 
+
 required_conan_version = ">=1.52.0"
 
 
@@ -64,7 +65,7 @@ class OpenH264Conan(ConanFile):
                 del self.options.fPIC
             except Exception:
                 pass
-    
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -79,23 +80,24 @@ class OpenH264Conan(ConanFile):
             self.tool_requires("automake/1.16.5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def _patch_sources(self):
         if is_msvc(self):
             replace_in_file(self, os.path.join(self.source_folder, "build", "platform-msvc.mk"),
-                                  "CFLAGS_OPT += -MT",
-                                  f"CFLAGS_OPT += -{msvc_runtime_flag(self)}")
+                            "CFLAGS_OPT += -MT",
+                            f"CFLAGS_OPT += -{msvc_runtime_flag(self)}")
             replace_in_file(self, os.path.join(self.source_folder, "build", "platform-msvc.mk"),
-                                  "CFLAGS_DEBUG += -MTd -Gm",
-                                  f"CFLAGS_DEBUG += -{msvc_runtime_flag(self)} -Gm")
+                            "CFLAGS_DEBUG += -MTd -Gm",
+                            f"CFLAGS_DEBUG += -{msvc_runtime_flag(self)} -Gm")
         if self.settings.os == "Android":
             replace_in_file(self, os.path.join(self.source_folder, "codec", "build", "android", "dec", "jni", "Application.mk"),
-                                  "APP_STL := stlport_shared",
-                                  f"APP_STL := {self.settings.compiler.libcxx}")
+                            "APP_STL := stlport_shared",
+                            f"APP_STL := {self.settings.compiler.libcxx}")
             replace_in_file(self, os.path.join(self.source_folder, "codec", "build", "android", "dec", "jni", "Application.mk"),
-                                  "APP_PLATFORM := android-12",
-                                  f"APP_PLATFORM := {self._android_target}")
+                            "APP_PLATFORM := android-12",
+                            f"APP_PLATFORM := {self._android_target}")
 
     @property
     def _library_filename(self):
@@ -160,12 +162,13 @@ class OpenH264Conan(ConanFile):
         env.generate()
         tc = AutotoolsToolchain(self)
         tc.make_args.extend(self._make_args)
-        
+
         if is_msvc(self):
             tc.extra_cxxflags.append("-nologo")
             if not (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "12"):
                 tc.extra_cxxflags.append("-FS")
-        elif self.settings.compiler in ("apple-clang",): # not needed during and after 2.3.1
+        # not needed during and after 2.3.1
+        elif self.settings.compiler in ("apple-clang",):
             if self.settings.arch in ("armv8",):
                 tc.extra_ldflags.append("-arch arm64")
         tc.generate()
@@ -178,22 +181,26 @@ class OpenH264Conan(ConanFile):
             autotools.make(target=self._library_filename)
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="LICENSE", dst=os.path.join(
+            self.package_folder, "licenses"), src=self.source_folder)
         autotools = Autotools(self)
         with chdir(self, self.source_folder):
-            autotools.make(target=f'install-{"shared" if self.options.shared else "static-lib"}')
+            autotools.make(
+                target=f'install-{"shared" if self.options.shared else "static-lib"}')
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "openh264")
-        suffix = "_dll" if (is_msvc(self) or self._is_clang_cl) and self.options.shared else ""
+        suffix = "_dll" if (
+            is_msvc(self) or self._is_clang_cl) and self.options.shared else ""
         self.cpp_info.libs = [f"openh264{suffix}"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs.extend(["m", "pthread"])
         if self.settings.os == "Android":
             self.cpp_info.system_libs.append("m")
-        libcxx = _stdcpp_library(self) # switch to conan.tools.build.stdcpp_library in conan 1.54
+        # switch to conan.tools.build.stdcpp_library in conan 1.54
+        libcxx = _stdcpp_library(self)
         if libcxx:
             self.cpp_info.system_libs.append(libcxx)
