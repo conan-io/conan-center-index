@@ -258,7 +258,6 @@ class ICUBase(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "man"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rmdir(self, os.path.join(self.package_folder, "config"))
 
     @property
     def _data_path(self):
