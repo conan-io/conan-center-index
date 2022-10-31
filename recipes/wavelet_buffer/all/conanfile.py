@@ -18,13 +18,13 @@ class WaveletBufferConan(ConanFile):
     homepage = "https://github.com/panda-official/WaveletBuffer"
     url = "https://github.com/conan-io/conan-center-index/recipes/wavelet_buffer"
     default_options = {
-        "cimg:enable_fftw": False,
-        "cimg:enable_jpeg": False,
-        "cimg:enable_openexr": False,
-        "cimg:enable_png": False,
-        "cimg:enable_tiff": False,
-        "cimg:enable_ffmpeg": False,
-        "cimg:enable_opencv": False,
+        "cimg/*:enable_fftw": False,
+        "cimg/*:enable_jpeg": False,
+        "cimg/*:enable_openexr": False,
+        "cimg/*:enable_png": False,
+        "cimg/*:enable_tiff": False,
+        "cimg/*:enable_ffmpeg": False,
+        "cimg/*:enable_opencv": False,
         "shared": False,
         "fPIC": True,
     }
