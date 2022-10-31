@@ -1,8 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools import files, scm, microsoft
+from conan.tools import files, microsoft
 from conans import tools, AutoToolsBuildEnvironment
-import contextlib
+
 import functools
 import os
 
