@@ -73,7 +73,7 @@ class WaveletBufferConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "19",
+            "Visual Studio": "16",
             "gcc": "8",
             "clang": "13",
             "apple-clang": "13",
