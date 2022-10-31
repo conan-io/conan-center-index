@@ -1,4 +1,7 @@
 sources:
+  "10.0.1":
+    url: "https://github.com/AcademySoftwareFoundation/openvdb/archive/refs/tags/v10.0.1.tar.gz"
+    sha256: "887a3391fbd96b20c77914f4fb3ab4b33d26e5fc479aa036d395def5523c622f"
   "8.0.1":
     url: "https://github.com/AcademySoftwareFoundation/openvdb/archive/refs/tags/v8.0.1.tar.gz"
     sha256: "a6845da7c604d2c72e4141c898930ac8a2375521e535f696c2cd92bebbe43c4f"

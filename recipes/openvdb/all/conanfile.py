@@ -31,6 +31,7 @@ class OpenVDBConan(ConanFile):
         "with_zlib": [True, False],
         "with_log4cplus": [True, False],
         "simd": [None, "SSE42", "AVX"],
+        "delayed_load": [True,False]
     }
     default_options = {
         "shared": False,
@@ -39,6 +40,7 @@ class OpenVDBConan(ConanFile):
         "with_zlib": True,
         "with_log4cplus": False,
         "simd": None,
+        "delayed_load": True,
     }
 
     @property
@@ -47,7 +49,9 @@ class OpenVDBConan(ConanFile):
 
     @property
     def _needs_boost(self):
-        return Version(self.version) < "10.0.0"
+        return True
+        # Will be fixed from upstream
+        # return Version(self.version) < "10.0.0" or self.options.delayed_load
 
     @property
     def _needs_openexr(self):
@@ -130,6 +134,8 @@ class OpenVDBConan(ConanFile):
         tc.variables["USE_ZLIB"] = self.options.with_zlib
         tc.variables["USE_LOG4CPLUS"] = self.options.with_log4cplus
         tc.variables["OPENVDB_SIMD"] = self.options.simd
+        if Version(self.version) >= "10.0.0":
+            tc.variables["OPENVDB_USE_DELAYED_LOADING"] = self.options.delayed_load
 
         tc.variables["OPENVDB_CORE_SHARED"] = self.options.shared
         tc.variables["OPENVDB_CORE_STATIC"] = not self.options.shared
@@ -199,17 +205,20 @@ class OpenVDBConan(ConanFile):
             self.cpp_info.components["openvdb-core"].defines.append("_WIN32")
             self.cpp_info.components["openvdb-core"].defines.append("NOMINMAX")
 
-        if not self.options["openexr"].shared:
+        if self._needs_openexr and not self.options["openexr"].shared:
             self.cpp_info.components["openvdb-core"].defines.append("OPENVDB_OPENEXR_STATICLIB")
         if self.options.with_log4cplus:
             self.cpp_info.components["openvdb-core"].defines.append("OPENVDB_USE_LOG4CPLUS")
 
-        self.cpp_info.components["openvdb-core"].requires = [
-            "boost::iostreams",
-            "boost::system",
-            "onetbb::onetbb",
-            "openexr::openexr",  # should be "openexr::Half",
-        ]
+        self.cpp_info.components["openvdb-core"].requires = ["onetbb::onetbb"]
+
+        if self._needs_boost:
+            self.cpp_info.components["openvdb-core"].requires.append("boost::iostreams")
+            self.cpp_info.components["openvdb-core"].requires.append("boost::system")
+
+        if self._needs_openexr:
+            self.cpp_info.components["openvdb-core"].requires.append("openexr::openexr")  # should be "openexr::Half"
+
         if self.settings.os == "Windows":
             self.cpp_info.components["openvdb-core"].requires.append("boost::disable_autolinking")
 
