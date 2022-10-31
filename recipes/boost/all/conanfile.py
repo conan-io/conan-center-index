@@ -1056,6 +1056,9 @@ class BoostConan(ConanFile):
             elif self._is_msvc:
                 cxx_flags.append("/Z7")
 
+        # Set headerpad on apple systems to allow rpath modifications
+        if tools.is_apple_os(self.settings.os) and self.options.shared:
+            link_flags.append('-headerpad_max_install_names')
 
         # Standalone toolchain fails when declare the std lib
         if self.settings.os not in ("Android", "Emscripten"):
