@@ -7,7 +7,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path, is_msvc
 
-required_conan_version = ">=1.52"
+required_conan_version = ">=1.52.0"
 
 
 class AutoconfConan(ConanFile):
