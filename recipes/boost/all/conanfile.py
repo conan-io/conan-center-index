@@ -532,7 +532,7 @@ class BoostConan(ConanFile):
 
     def requirements(self):
         if self._with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self._with_bzip2:
             self.requires("bzip2/1.0.8")
         if self._with_lzma:
