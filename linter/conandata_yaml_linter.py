@@ -45,7 +45,7 @@ def main():
         }
     )
 
-    with open(args.path) as f:
+    with open(args.path, encoding="utf-8") as f:
         content = f.read()
 
     try:
@@ -69,9 +69,9 @@ def main():
     except YAMLValidationError as error:
         e = error.__str__().replace("\n", "%0A")
         print(
-            f"::error file={args.path},line={error.context_mark.line},endline={error.problem_mark.line},"
+            f"::error file={args.path},line={error.context_mark.line},endline={error.problem_mark.line+1},"
             f"title=conandata.yml schema error"
-            f"::{e}\n"
+            f"::{error.problem} in %0A```yml%0A{error.context_mark.get_snippet()}%0A```\n"
         )
     except BaseException as error:
         e = error.__str__().replace("\n", "%0A")
