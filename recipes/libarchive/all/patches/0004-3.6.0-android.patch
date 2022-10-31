@@ -1,5 +1,5 @@
 diff --git a/libarchive/CMakeLists.txt b/libarchive/CMakeLists.txt
-index e1d76a5..e4a83e7 100644
+index 792b26b3..713c6496 100644
 --- a/libarchive/CMakeLists.txt
 +++ b/libarchive/CMakeLists.txt
 @@ -5,6 +5,10 @@

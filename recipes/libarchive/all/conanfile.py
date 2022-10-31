@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
 from conan.tools.layout import cmake_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -166,54 +166,8 @@ class LibarchiveConan(ConanFile):
         tc.variables["ENABLE_XATTR"] = self.options.with_xattr
         tc.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        cmakelists_path = os.path.join(self.source_folder, "CMakeLists.txt")
-
-        replace_in_file(self, cmakelists_path,
-                        "LIST(APPEND ADDITIONAL_LIBS ${ZLIB_LIBRARIES})",
-                        "LIST(APPEND ADDITIONAL_LIBS ZLIB::ZLIB)")
-
-        # it can possibly override CMAKE_MODULE_PATH provided by generator
-        replace_in_file(self, cmakelists_path,
-                        "SET(CMAKE_MODULE_PATH",
-                        "LIST(APPEND CMAKE_MODULE_PATH")
-        # allow openssl on macOS
-        if self.options.with_openssl:
-            replace_in_file(self, cmakelists_path,
-                            "IF(ENABLE_OPENSSL AND NOT CMAKE_SYSTEM_NAME MATCHES \"Darwin\")",
-                            "IF(ENABLE_OPENSSL)")
-        # wrong lzma cmake var name
-        if self.options.with_lzma:
-            replace_in_file(self, cmakelists_path, "LIBLZMA_INCLUDE_DIR", "LIBLZMA_INCLUDE_DIRS")
-        # add possible names for lz4 library
-        if not self.options.shared:
-            replace_in_file(self, cmakelists_path,
-                            "FIND_LIBRARY(LZ4_LIBRARY NAMES lz4 liblz4)",
-                            "FIND_LIBRARY(LZ4_LIBRARY NAMES lz4 liblz4 lz4_static liblz4_static)")
-
-        # Exclude static/shared targets from build
-        if self.options.shared:
-            save(self, os.path.join(self.source_folder, "libarchive", "CMakeLists.txt"),
-                "set_target_properties(archive_static PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)",
-                append=True)
-        else:
-            save(self, os.path.join(self.source_folder, "libarchive", "CMakeLists.txt"),
-                "set_target_properties(archive PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)",
-                append=True)
-
-        # Exclude static/shared targets from install
-        if self.options.shared:
-            replace_in_file(self, os.path.join(self.source_folder, "libarchive", "CMakeLists.txt"),
-                            "INSTALL(TARGETS archive archive_static",
-                            "INSTALL(TARGETS archive")
-        else:
-            replace_in_file(self, os.path.join(self.source_folder, "libarchive", "CMakeLists.txt"),
-                            "INSTALL(TARGETS archive archive_static",
-                            "INSTALL(TARGETS archive_static")
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
