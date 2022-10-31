@@ -3,6 +3,6 @@ project(WaveletBufferTest CXX)
 
 find_package(wavelet_buffer CONFIG REQUIRED)
 
-add_executable(example src/example.cpp)
-target_compile_features(example PUBLIC cxx_std_20)
-target_link_libraries(example wavelet_buffer::wavelet_buffer)
+add_executable(test_package test_package.cpp)
+target_compile_features(test_package PUBLIC cxx_std_20)
+target_link_libraries(test_package wavelet_buffer::wavelet_buffer)
