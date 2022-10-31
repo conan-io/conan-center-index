@@ -164,10 +164,6 @@ class LibarchiveConan(ConanFile):
         if Version(self.version) >= "3.4.2":
             tc.variables["ENABLE_MBEDTLS"] = self.options.with_mbedtls
         tc.variables["ENABLE_XATTR"] = self.options.with_xattr
-
-        if self.settings.os == "Windows" and self.settings.get_safe("os.subsystem") != "cygwin":
-            tc.cache_variables["ZLIB_WINAPI"] = "yes"
-
         tc.generate()
 
     def _patch_sources(self):
