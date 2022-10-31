@@ -25,7 +25,7 @@ class CppSortConan(ConanFile):
         return 14
 
     @property
-    def _minimum_compilers_version(self):
+    def _compilers_minimum_version(self):
         return {
             "apple-clang": "9.4",
             "clang": "3.8",
@@ -33,13 +33,16 @@ class CppSortConan(ConanFile):
             "Visual Studio": "16"
         }
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
 
         compiler = self.settings.compiler
         try:
-            min_version = self._minimum_compilers_version[str(compiler)]
+            min_version = self._compilers_minimum_version[str(compiler)]
             if Version(compiler.version) < min_version:
                 msg = (
                     "{} requires C++{} features which are not supported by compiler {} {}."
@@ -52,11 +55,8 @@ class CppSortConan(ConanFile):
             ).format(self.name, compiler, self._minimum_cpp_standard)
             self.output.warn(msg)
 
-    def layout(self):
-        cmake_layout(self, src_folder="source")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -75,7 +75,7 @@ class CppSortConan(ConanFile):
         else:
             license_files = ["LICENSE.txt", "NOTICE.txt"]
         for license_file in license_files:
-            copy(self, license_file, self.source_folder, os.path.join(self.package_folder, "licenses"))
+            copy(self, license_file, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
         # Remove CMake config files (only files in lib)
         rmdir(self, os.path.join(self.package_folder, "lib"))
