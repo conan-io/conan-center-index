@@ -47,15 +47,11 @@ class WasmtimeCppConan(ConanFile):
     def package_id(self):
         self.info.clear()
 
-    @property
-    def _info(self):
-        return self if Version(conan_version).major < 2 else self.info
-
     def validate(self):
-        if self._info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self._info.settings.compiler), False)
-        if minimum_version and Version(self._info.settings.compiler.version) < minimum_version:
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
