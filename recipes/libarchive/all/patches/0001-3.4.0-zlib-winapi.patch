@@ -14,7 +14,7 @@ index 4fd93d04..922efd15 100644
 -      RUNS
 -      "#include <zlib.h>\nint main() {uLong f = zlibCompileFlags(); return (f&(1U<<10))?0:-1; }"
 -      ZLIB_WINAPI)
-+    set(ZLIB_WINAPI OFF)
++    set(ZLIB_WINAPI yes)
      IF(ZLIB_WINAPI)
        ADD_DEFINITIONS(-DZLIB_WINAPI)
      ELSE(ZLIB_WINAPI)
