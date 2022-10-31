@@ -8,7 +8,7 @@ required_conan_version = ">=1.52.0"
 
 
 class PackageConan(ConanFile):
-    name = "gmtl"
+    name = "psyinf-gmtl"
     description = "The Generic Math Template Library. A math library designed to be high-performance, extensible, and generic."
     license = "LGPL-2.1-only"
     url = "https://github.com/conan-io/conan-center-index"
