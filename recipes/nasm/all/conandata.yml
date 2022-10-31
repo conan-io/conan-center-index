@@ -14,4 +14,3 @@ sources:
 patches:
   "2.15.05":
     - patch_file: "patches/2.15.05-0001-disable-newly-integrated-dependency-tracking.patch"
-      base_path: "source_subfolder"

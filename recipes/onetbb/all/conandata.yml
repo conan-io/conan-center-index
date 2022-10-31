@@ -1,4 +1,18 @@
 sources:
+  "2021.6.0":
+    url: "https://github.com/oneapi-src/oneTBB/archive/v2021.6.0.tar.gz"
+    sha256: "4897dd106d573e9dacda8509ca5af1a0e008755bf9c383ef6777ac490223031f"
   "2021.3.0":
     url: "https://github.com/oneapi-src/oneTBB/archive/v2021.3.0.tar.gz"
     sha256: "8f616561603695bbb83871875d2c6051ea28f8187dbe59299961369904d1d49e"
+patches:
+  "2021.6.0":
+    - patch_description: "cherry-pick upstream patch: avoid android compile errors for current NDKs on releases <= 2021.6.0"
+      patch_type: "backport"
+      patch_source: "https://github.com/oneapi-src/oneTBB/pull/716.diff"
+      patch_file: "patches/fix-overeager-stripping-of-compile-flag.diff"
+  "2021.3.0":
+    - patch_description: "cherry-pick upstream patch: avoid android compile errors for current NDKs on releases <= 2021.6.0"
+      patch_type: "backport"
+      patch_source: "https://github.com/oneapi-src/oneTBB/pull/716.diff"
+      patch_file: "patches/fix-overeager-stripping-of-compile-flag.diff"

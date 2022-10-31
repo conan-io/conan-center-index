@@ -1,0 +1,10 @@
+sources:
+  "17.1.439":
+    url: "https://github.com/smasherprog/screen_capture_lite/archive/refs/tags/17.1.439.tar.gz"
+    sha256: "c6e6eead72114dc7ba9f3fb17eeff01b4b53bb3ad3b71a55ebe08b61bbff9dea"
+
+patches:
+  "17.1.439":
+    - patch_file: "patches/0001-fix-cmake.patch"
+      patch_description: "specify build library static or shared"
+      patch_type: "conan"

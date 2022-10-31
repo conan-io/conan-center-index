@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
     std::cerr << "Could not write: " << outfilename << std::endl;
     return 1;
   }
-
+  std::cout << "GDCM test: success\n";
   return 0;
 }
 

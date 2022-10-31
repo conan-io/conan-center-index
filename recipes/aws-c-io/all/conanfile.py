@@ -1,17 +1,18 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.files import get, copy, rmdir
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.43.0"
-
+required_conan_version = ">=1.52.0"
 
 class AwsCIO(ConanFile):
     name = "aws-c-io"
     description = "IO and TLS for application protocols"
-    topics = ("aws", "amazon", "cloud", "io", "tls",)
+    license = "Apache-2.0",
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/awslabs/aws-c-io"
-    license = "Apache-2.0",
-
+    topics = ("aws", "amazon", "cloud", "io", "tls",)
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,58 +23,63 @@ class AwsCIO(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         # the versions of aws-c-common and aws-c-io are tied since aws-c-common/0.6.12 and aws-c-io/0.10.10
         # Please refer https://github.com/conan-io/conan-center-index/issues/7763
-        if tools.Version(self.version) <= "0.10.9":
+        if Version(self.version) <= "0.10.9":
             self.requires("aws-c-common/0.6.11")
             self.requires("aws-c-cal/0.5.11")
         else:
-            self.requires("aws-c-common/0.6.19")
+            self.requires("aws-c-common/0.8.2")
             self.requires("aws-c-cal/0.5.13")
 
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
-            self.requires("s2n/1.3.9")
+            self.requires("s2n/1.3.15")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"] = False
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "aws-c-io"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "aws-c-io"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "aws-c-io")
