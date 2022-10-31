@@ -17,7 +17,6 @@ class WaveletBufferConan(ConanFile):
     topics = ("compression", "signal-processing", "wavelet")
     homepage = "https://github.com/panda-official/WaveletBuffer"
     url = "https://github.com/conan-io/conan-center-index/recipes/wavelet_buffer"
-    requires = "openblas/0.3.20", "blaze/3.8", "libjpeg-turbo/2.1.2", "cimg/3.0.2"
     default_options = {
         "cimg:enable_fftw": False,
         "cimg:enable_jpeg": False,
@@ -34,6 +33,12 @@ class WaveletBufferConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
 
+    def requirements(self):
+        self.requires("openblas/0.3.20")
+        self.requires("blaze/3.8")
+        self.requires("libjpeg-turbo/2.1.2")
+        self.requires("cimg/3.0.2")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -47,7 +52,7 @@ class WaveletBufferConan(ConanFile):
             self,
             **self.conan_data["sources"][self.version],
             destination=self.source_folder,
-            strip_root=True
+            strip_root=True,
         )
 
     def layout(self):
@@ -95,6 +100,12 @@ class WaveletBufferConan(ConanFile):
                         self.settings.compiler.version,
                     )
                 )
+
+        cimg = self.dependencies["cimg"]
+        if cimg.options.enable_fftw:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires the option 'cimg:enable_fftw=False'"
+            )
 
     def build(self):
         cmake = CMake(self)

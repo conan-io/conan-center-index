@@ -9,7 +9,6 @@ from conan.tools.layout import cmake_layout
 class HelloTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
-    apply_env = False
 
     test_type = "explicit"
 
