@@ -46,3 +46,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0001-67.1-fix-mingw.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0001-71.1-fix-emscripten.patch"
+      base_path: "source_subfolder"
