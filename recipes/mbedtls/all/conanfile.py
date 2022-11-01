@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.50.0"
 
 
 class MBedTLSConan(ConanFile):
@@ -17,7 +17,7 @@ class MBedTLSConan(ConanFile):
     topics = ("polarssl", "tls", "security")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tls.mbed.org"
-    license = ("GPL-2.0", "Apache-2.0",)
+    license = "Apache-2.0"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -31,13 +31,7 @@ class MBedTLSConan(ConanFile):
         "with_zlib": True,
     }
 
-    @property
-    def _license(self):
-        return self.version.rsplit("-", 1)[1]
-
-    def export_sources(self):
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
-        export_conandata_patches(self)
+    exports_sources = "CMakeLists.txt"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -60,8 +54,6 @@ class MBedTLSConan(ConanFile):
             del self.settings.compiler.libcxx
         except Exception:
             pass
-        if Version(self.version) >= "2.23.0":
-            self.license = "Apache-2.0"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -71,15 +63,14 @@ class MBedTLSConan(ConanFile):
             self.requires("zlib/1.2.13")
 
     def validate(self):
-        if Version(self.version) >= "2.23.0":
-            if self.info.settings.os == "Windows" and self.info.options.shared:
-                raise ConanInvalidConfiguration(f"{self.ref} does not support shared build on Windows")
+        if self.info.settings.os == "Windows" and self.info.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} does not support shared build on Windows")
 
-            if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < "5":
-                # The command line flags set are not supported on older versions of gcc
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} does not support {self.info.settings.compiler}-{self.info.settings.compiler.version}"
-                )
+        if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < "5":
+            # The command line flags set are not supported on older versions of gcc
+            raise ConanInvalidConfiguration(
+                f"{self.ref} does not support {self.info.settings.compiler}-{self.info.settings.compiler.version}"
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -92,33 +83,20 @@ class MBedTLSConan(ConanFile):
         if Version(self.version) < "3.0.0":
             tc.variables["ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
         tc.variables["ENABLE_PROGRAMS"] = False
-        if Version(self.version) >= "2.23.0":
-            tc.variables["MBEDTLS_FATAL_WARNINGS"] = False
+        tc.variables["MBEDTLS_FATAL_WARNINGS"] = False
         tc.variables["ENABLE_TESTING"] = False
         if Version(self.version) < "3.0.0":
             # relocatable shared libs on macOS
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        if Version(self.version) < "2.23.0":
-            # No warnings as errors
-            cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-            replace_in_file(self, cmakelists, "-Werror", "")
-            replace_in_file(self, cmakelists, "/WX", "")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        if Version(self.version) < "2.23.0": # less then 2.23 is multi-licensed
-            license = "gpl-2.0.txt" if self._license == "gpl" else "apache-2.0.txt"
-            copy(self, license, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "cmake"))
