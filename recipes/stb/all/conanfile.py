@@ -63,3 +63,5 @@ class StbConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.defines.append("STB_TEXTEDIT_KEYTYPE=unsigned")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
