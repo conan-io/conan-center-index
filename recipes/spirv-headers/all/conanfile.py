@@ -15,11 +15,11 @@ class SpirvheadersConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
 
-    def package_id(self):
-        self.info.clear()
-
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def package_id(self):
+        self.info.clear()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -47,9 +47,7 @@ class SpirvheadersConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "SPIRV-Headers::SPIRV-Headers")
         self.cpp_info.set_property("pkg_config_name", "SPIRV-Headers")
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "SPIRV-Headers"

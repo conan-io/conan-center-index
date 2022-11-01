@@ -1,4 +1,7 @@
 sources:
+  "0.2.6":
+    url: "https://github.com/kuba--/zip/archive/v0.2.6.tar.gz"
+    sha256: "6a00e10dc5242f614f76f1bd1d814726a41ee6e3856ef3caf7c73de0b63acf0b"
   "0.2.5":
     url: "https://github.com/kuba--/zip/archive/v0.2.5.tar.gz"
     sha256: "e052f6cbe6713f69f8caec61214fda4e5ae5150d1fcba02c9e79f1a05d939305"

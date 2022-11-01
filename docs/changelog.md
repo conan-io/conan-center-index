@@ -1,5 +1,15 @@
 # Changelog
 
+### 27-October-2022 - 15:18 CEST
+
+- [feature] Add under maintenance check to AccessRequest and ScheduledExportCheck jobs.
+- [feature] AccessRequest: Remove inactive users.
+- [feature] Accept Major.Minor as bump version.
+- [feature] Add message title to gihtub comments.
+- [fix] Update maintainers list and fix output.
+- [fix] Remove dummy files from tests.
+- [fix] Make sure contributors are not removed in Access request PR.
+
 ### 17-October-2022 - 10:33 CEST
 
 - [feature] Improve management of GitHub labels on pull requests.

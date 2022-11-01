@@ -1,6 +1,4 @@
 sources:
   "1.1.1":
-    - url: "http://downloads.xiph.org/releases/theora/libtheora-1.1.1.zip"
-      sha256: "f644fef154f7a80e7258c8baec5c510f594d720835855cddce322b924934ba36"
-    - url: "https://raw.githubusercontent.com/xiph/theora/v1.1.1/lib/theora.def"
-      sha256: "56362ca0cc73172c06b53866ba52fad941d02fc72084d292c705a1134913e806"
+    url: "http://downloads.xiph.org/releases/theora/libtheora-1.1.1.zip"
+    sha256: "f644fef154f7a80e7258c8baec5c510f594d720835855cddce322b924934ba36"
