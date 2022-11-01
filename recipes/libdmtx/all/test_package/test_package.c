@@ -1,19 +1,3 @@
-/**
- * libdmtx - Data Matrix Encoding/Decoding Library
- * Copyright 2008, 2009 Mike Laughton. All rights reserved.
- * Copyright 2010-2016 Vadim A. Misbakh-Soloviov. All rights reserved.
- * Copyright 2016 Tim Zaman. All rights reserved.
- *
- * See LICENSE file in the main project directory for full
- * terms of use and distribution.
- *
- * Contact:
- * Vadim A. Misbakh-Soloviov <dmtx@mva.name>
- * Mike Laughton <mike@dragonflylogic.com>
- *
- * \file simple_test.c
- */
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -38,13 +22,6 @@ main(int argc, char *argv[])
    /* 1) ENCODE a new Data Matrix barcode image (in memory only) */
 
    enc = dmtxEncodeCreate();
-
-   /*
-    dmtxEncodeSetProp( enc, DmtxPropPixelPacking, DmtxPack16bppRGB );
-    dmtxEncodeSetProp( enc, DmtxPropPixelPacking, DmtxPack32bppRGB );
-    dmtxEncodeSetProp( enc, DmtxPropWidth, 160 );
-    dmtxEncodeSetProp( enc, DmtxPropHeight, 160 );
-   */
 
    assert(enc != NULL);
    dmtxEncodeDataMatrix(enc, strlen((const char *)str), str);
