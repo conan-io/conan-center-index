@@ -8,7 +8,5 @@ conan_basic_setup(TARGETS)
 
 find_package(psyinf-gmtl REQUIRED CONFIG)
 
-# Re-use the same source file from test_package folder
 add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
-# don't link to ${CONAN_LIBS} or CONAN_PKG::package
 target_link_libraries(${PROJECT_NAME} PRIVATE psyinf-gmtl::psyinf-gmtl)
