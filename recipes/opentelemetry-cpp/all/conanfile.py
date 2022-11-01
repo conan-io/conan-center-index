@@ -64,7 +64,6 @@ class OpenTelemetryCppConan(ConanFile):
         self.requires("thrift/0.17.0")
         if Version(self.version) >= "1.3.0":
             self.requires("boost/1.80.0")
-        self.requires("zlib/1.2.13")
 
     def validate(self):
         if self.info.settings.arch != "x86_64":
