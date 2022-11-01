@@ -79,6 +79,7 @@ class DuckdbConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        # FIXME: duckdb vendors a bunch of deps by modify the source code to have their own namespace 
         if self.options.with_odbc:
             self.requires("odbc/2.3.11")
         if self.options.with_httpfs:
