@@ -20,19 +20,25 @@ sources:
 patches:
   "3.2.0":
     - patch_file: "patches/icu-3.0.x.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "disable custom logic for finding ICU"
   "4.4.1":
     - patch_file: "patches/icu-4.0.x.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "disable custom logic for finding ICU"
   "5.1.0":
     - patch_file: "patches/icu-5.1.x.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "disable custom logic for finding ICU"
   "5.2.0":
     - patch_file: "patches/icu-5.2.x.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "disable custom logic for finding ICU"
   "5.3.0":
     - patch_file: "patches/icu-5.2.x.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "disable custom logic for finding ICU"
   "5.3.1":
     - patch_file: "patches/icu-5.2.x.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "disable custom logic for finding ICU"
