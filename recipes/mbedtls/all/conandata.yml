@@ -26,7 +26,5 @@ sources:
 patches:
   "2.16.3-apache":
     - patch_file: "patches/0001-visual-studio-shared-apache.patch"
-      base_path: "source_subfolder"
   "2.16.3-gpl":
     - patch_file: "patches/0001-visual-studio-shared-gpl.patch"
-      base_path: "source_subfolder"
