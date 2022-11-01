@@ -38,7 +38,7 @@ class PtexConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
