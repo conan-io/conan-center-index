@@ -1,6 +1,6 @@
 versions:
   # 3.0.x releases
-  3.0.6:
+  3.0.7:
     folder: "3.x.x"
   3.0.5:
     folder: "3.x.x"

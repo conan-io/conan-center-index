@@ -1,6 +1,6 @@
 sources:
-  3.0.6:
-    url: https://www.openssl.org/source/openssl-3.0.6.tar.gz
+  3.0.7:
+    url: https://www.openssl.org/source/openssl-3.0.7.tar.gz
     sha256: 83049d042a260e696f62406ac5c08bf706fd84383f945cf21bd61e9ed95c396e
   3.0.5:
     url: https://www.openssl.org/source/openssl-3.0.5.tar.gz
