@@ -115,13 +115,13 @@ in this direction. However, there are a couple of options that have a special me
 
 ### Recommended Names
 
-It's often needed to add options to toggle specific library features on/off. Regardless of the default, there is a strong preference for using positive naming for options. In order to avoid the fragmentation, we recommend to use the following naming conventions for such options:
+Adding options is often needed to toggle specific library features on/off. Regardless of the default, there is a strong preference for using positive naming for options. In order to avoid the fragmentation, we recommend using the following naming conventions for such options:
 
 - enable_<feature> / disable_<feature>
 - with_<dependency> / without_<dependency>
 - use_<feature>
 
-the actual recipe code then may look like:
+The actual recipe code then may look like:
 
 ```py
     options = {"enable_locales": [True, False]} # Changes which files are compiled in to the library
@@ -138,7 +138,7 @@ the actual recipe code then may look like:
     default_options = {"use_tzdb": True}
 ```
 
-having the same naming conventions for the options may help consumers, e.g. they will be able to specify options with wildcards: `-o *:with_threads=True`, therefore, `with_threads` options will be enabled for all packages in the graph that support it.
+Having the same naming conventions for the options helps consumers. It allows users to specify options with wildcards: `-o *:with_threads=True`. Therefore, the `with_threads` options will be enabled for all packages in the graph that support it.
 
 ### Predefined Options and Known Defaults
 
