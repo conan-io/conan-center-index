@@ -27,7 +27,7 @@ class PangoConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Internationalized text layout and rendering library"
     homepage = "https://www.pango.org/"
-    topics = ("conan", "fontconfig", "fonts", "freedesktop")
+    topics = ("fontconfig", "fonts", "freedesktop")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
