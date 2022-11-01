@@ -12,7 +12,7 @@ class PackageConan(ConanFile):
     description = "The Generic Math Template Library. A math library designed to be high-performance, extensible, and generic."
     license = "LGPL-2.1-only"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://ggt.sourceforge.net/html/main.html"
+    homepage = "https://github.com/psyinf/gmtl"
     topics = ("linear-algebra", "collision", "vector", "matrix", "template", "math", "header-only")
     settings = "os", "arch", "compiler", "build_type" 
     no_copy_source = True 
