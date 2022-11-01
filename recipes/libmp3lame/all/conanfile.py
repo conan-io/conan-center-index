@@ -4,7 +4,6 @@ from conan.tools.files import export_conandata_patches, apply_conandata_patches,
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path, VCVars
-from conans import VisualStudioBuildEnvironment
 import os
 import shutil
 
@@ -80,13 +79,13 @@ class LibMP3LameConan(ConanFile):
     def _generate_vs(self):
         tc = VCVars(self)
         tc.generate()
-        # TODO: no conan v2 build helper for NMake yet (see https://github.com/conan-io/conan/issues/12188)
-        #       Better than nothing: rely on legacy VisualStudioBuildEnvironment to inject CL & LIB env vars
-        #       in order to honor build_type & runtime from profile
-        env = Environment()
-        for var, value in VisualStudioBuildEnvironment(self).vars.items():
-            env.define(var, value)
-        env.vars(self).save_script("buildenv_nmake")
+        # FIXME: no conan v2 build helper for NMake yet (see https://github.com/conan-io/conan/issues/12188)
+        #        So populate CL with AutotoolsToolchain cflags
+        c_flags = AutotoolsToolchain(self).cflags
+        if c_flags:
+            env = Environment()
+            env.define("CL", c_flags)
+            env.vars(self).save_script("conanbuildenv_nmake")
 
     def _generate_autotools(self):
         env = VirtualBuildEnv(self)
