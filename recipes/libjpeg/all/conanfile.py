@@ -66,7 +66,7 @@ class LibjpegConan(ConanFile):
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not (is_msvc(self) or self. _is_clang_cl):
-            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
             self.win_bash = True
 
@@ -91,11 +91,11 @@ class LibjpegConan(ConanFile):
             # TODO: there is probably something missing here
             # Do we really honor everything from profile (build_type, tools.build:cflags etc)?
         else:
+            env = VirtualBuildEnv(self)
+            env.generate()
             tc = AutotoolsToolchain(self)
             tc.extra_defines.append("LIBJPEG_BUILDING")
             tc.generate()
-            env = VirtualBuildEnv(self)
-            env.generate()
 
     def _build_nmake(self):
         copy(self, "Win32.Mak", src=os.path.join(self.source_folder, os.pardir), dst=self.source_folder)
