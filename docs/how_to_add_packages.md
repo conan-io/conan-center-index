@@ -11,6 +11,7 @@ You can follow the three steps (:one: :two: :three:) described below! :tada:
 ## Contents
 
   * [Request access](#request-access)
+  * [Inactivity and user removal](#inactivity-and-user-removal)
   * [Submitting a Package](#submitting-a-package)
     * [The Build Service](#the-build-service)
   * [Recipe files structure](#recipe-files-structure)
