@@ -1,9 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
+from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd
 import os
+
+
+required_conan_version = ">=1.50.0"
 
 
 class Rangev3Conan(ConanFile):
@@ -30,8 +34,14 @@ class Rangev3Conan(ConanFile):
             return "17"
         else:
             return "14"
+    
+    def layout(self):
+        basic_layout(self)
 
-    def configure(self):
+    def package_id(self):
+        self.info.clear()
+
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(
@@ -43,8 +53,6 @@ class Rangev3Conan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"range-v3 {self.version} requires C++{self._min_cppstd} with {self.settings.compiler}, which is not supported by {self.settings.compiler} {self.settings.compiler.version}")
 
-    def package_id(self):
-        self.info.header_only()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
