@@ -82,6 +82,11 @@ class LibjpegConan(ConanFile):
             env.define("PROFILE", None)
             env.define("TUNE", None)
             env.define("NODEBUG", None)
+            # FIXME: no conan v2 build helper for NMake yet (see https://github.com/conan-io/conan/issues/12188)
+            #        So populate CL with AutotoolsToolchain cflags
+            c_flags = AutotoolsToolchain(self).cflags
+            if c_flags:
+                env.define("CL", c_flags)
             env.vars(self).save_script("conanbuildenv_nmake")
             # TODO: there is probably something missing here
             # Do we really honor everything from profile (build_type, tools.build:cflags etc)?
