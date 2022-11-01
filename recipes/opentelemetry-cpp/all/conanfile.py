@@ -162,21 +162,28 @@ class OpenTelemetryCppConan(ConanFile):
         libraries = [
             self._http_client_name,
             "opentelemetry_common",
-            "opentelemetry_exporter_otlp_http_client",
             "opentelemetry_exporter_in_memory",
             "opentelemetry_exporter_jaeger_trace",
             "opentelemetry_exporter_ostream_span",
-            "opentelemetry_exporter_ostream_metrics",
             "opentelemetry_exporter_otlp_grpc",
             "opentelemetry_exporter_otlp_http",
             "opentelemetry_exporter_zipkin_trace",
             "opentelemetry_otlp_recordable",
-            "opentelemetry_metrics",
             "opentelemetry_proto",
             "opentelemetry_resources",
             "opentelemetry_trace",
             "opentelemetry_version",
         ]
+
+        if Version(self.version) >= "1.1.0":
+            libraries.append("opentelemetry_exporter_otlp_http_client")
+
+        if Version(self.version) >= "1.2.0":
+            libraries.append("opentelemetry_metrics")
+
+        if Version(self.version) >= "1.4.0":
+            libraries.append("opentelemetry_exporter_ostream_metrics")
+
         if Version(self.version) >= "1.5.0":
             libraries.append("opentelemetry_exporter_otlp_grpc_metrics")
             libraries.append("opentelemetry_exporter_otlp_http_metric")
