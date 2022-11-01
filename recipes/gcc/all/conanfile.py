@@ -46,7 +46,7 @@ class GccConan(ConanFile):
     def validate(self):
         if self.info.settings.os == "Windows":
             raise ConanInvalidConfiguration(
-                "Windows builds aren't supported (yet), sorry"
+                "Windows builds aren't currently supported - please contribute if you'd to improve this recipe"
             )
         if cross_building(self):
             raise ConanInvalidConfiguration("no cross-building support (yet), sorry")
@@ -134,8 +134,6 @@ class GccConan(ConanFile):
             self.cpp_info.system_libs.append("dl")
 
         bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Prepending PATH env var with: " + bindir)
-        self.buildenv_info.prepend_path("PATH", bindir)
 
         cc = os.path.join(bindir, f"gcc-{self.version}")
         self.output.info("Creating CC env var with: " + cc)
