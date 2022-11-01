@@ -5,6 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.50.0"
@@ -13,7 +14,7 @@ required_conan_version = ">=1.50.0"
 class CppSortConan(ConanFile):
     name = "cpp-sort"
     description = "Additional sorting algorithms & related tools"
-    topics = "conan", "cpp-sort", "sorting", "algorithms"
+    topics = "cpp-sort", "sorting", "algorithms"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Morwenn/cpp-sort"
     license = "MIT"
@@ -29,8 +30,7 @@ class CppSortConan(ConanFile):
         return {
             "apple-clang": "9.4",
             "clang": "3.8",
-            "gcc": "5.5",
-            "Visual Studio": "16"
+            "gcc": "5.5"
         }
 
     def layout(self):
@@ -39,6 +39,10 @@ class CppSortConan(ConanFile):
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
+
+        if is_msvc(self):
+            check_min_vs(self, 192)
+            return
 
         compiler = self.settings.compiler
         try:
