@@ -44,7 +44,7 @@ class OpenTelemetryCppConan(ConanFile):
         if self.options.shared:
             try:
                 del self.options.fPIC
-            except AttributeError:
+            except Exception:
                 pass
 
     def layout(self):
