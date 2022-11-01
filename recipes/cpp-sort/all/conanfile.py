@@ -41,6 +41,8 @@ class CppSortConan(ConanFile):
             check_min_cppstd(self, self._minimum_cpp_standard)
 
         if is_msvc(self):
+            if Version(self.version) < "1.10.0":
+                raise ConanInvalidConfiguration("cpp-sort versions older than 1.10.0 do not support MSVC")
             check_min_vs(self, 192)
             return
 
