@@ -1,5 +1,6 @@
 #include <range/v3/all.hpp>
 #include <iostream>
+#include <cassert>
 
 using namespace ranges;
 
