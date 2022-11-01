@@ -1,16 +1,18 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 import os
-import shutil
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.51.1"
 
 
 class CImgConan(ConanFile):
     name = "cimg"
     description = "The CImg Library is a small and open-source C++ toolkit for image processing"
     homepage = "http://cimg.eu"
-    topics = ("cimg", "physics", "simulation", "robotics", "kinematics", "engine")
+    topics = ("physics", "simulation", "robotics", "kinematics", "engine")
     license = "CeCILL V2"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -43,10 +45,6 @@ class CImgConan(ConanFile):
     no_copy_source = True
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
     def _cimg_defines(self):
         return [
             ("enable_fftw",    "cimg_use_fftw"),
@@ -60,6 +58,9 @@ class CImgConan(ConanFile):
             ("enable_xrandr",  "cimg_use_xrandr"),
             ("enable_xshm",    "cimg_use_xshm"),
         ]
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.enable_fftw:
@@ -79,30 +80,35 @@ class CImgConan(ConanFile):
         if self.options.enable_magick:
             self.requires("imagemagick/7.0.11-14")
 
+    def package_id(self):
+        self.info.clear()
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "11")
+            check_min_cppstd(self, "11")
         # TODO: Update requirements when available in CCI
         if self.options.enable_xrandr:
             raise ConanInvalidConfiguration("xrandr not available in CCI yet")
         if self.options.enable_xshm:
             raise ConanInvalidConfiguration("xshm not available in CCI yet")
 
-    def package_id(self):
-        self.info.header_only()
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
-        self.copy("Licence*", src=self._source_subfolder, dst="licenses")
-        self.copy("CImg.h", src=self._source_subfolder, dst="include")
-        shutil.copytree(os.path.join(self.source_folder, self._source_subfolder, "plugins"),
+        copy(self, "Licence*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "CImg.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
+        copy(self, "*", os.path.join(self.source_folder, "plugins"),
                         os.path.join(self.package_folder, "include", "plugins"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "CImg")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
         for option, define in self._cimg_defines:
             if getattr(self.options, option):
                 self.cpp_info.defines.append(define)
@@ -111,4 +117,3 @@ class CImgConan(ConanFile):
         #       do not use this name in CMakeDeps, it was a mistake, there is no offical CMake config file
         self.cpp_info.names["cmake_find_package"] = "CImg"
         self.cpp_info.names["cmake_find_package_multi"] = "CImg"
-        self.cpp_info.names["pkg_config"] = "CImg"
