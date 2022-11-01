@@ -409,3 +409,7 @@ merging to the master branch. Feel free to contribute to a new Github Action tha
 
 No. The [pylint](v2_linter.md) has an important role of keeping any recipe prepared for [Conan v2 migration](v2_migration.md). In case you are having
 difficult to understand [linter errors](linters.md), please comment on your pull request about the problem to receive help from the community.
+
+## How long can I be inactive before being removed from the authorized users list?
+
+Please, read [Inactivity and user removal section](how_to_add_packages.md#inactivity-and-user-removal).
