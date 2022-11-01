@@ -124,6 +124,8 @@ class LibSELinuxConan(ConanFile):
         self.cpp_info.components["selinux"].names["pkg_config"] = "libselinux"
         self.cpp_info.components["selinux"].libs = ["selinux"]
         self.cpp_info.components["selinux"].requires = ["sepol", "pcre2::pcre2"]
+        if self.options.shared:
+            self.cpp_info.components["selinux"].system_libs = ["dl"]
 
         self.cpp_info.components["sepol"].set_property("pkg_config_name", "libsepol")
         self.cpp_info.components["sepol"].names["pkg_config"] = "libsepol"
