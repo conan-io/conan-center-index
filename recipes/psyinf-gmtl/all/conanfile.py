@@ -17,9 +17,6 @@ class PackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type" 
     no_copy_source = True 
    
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
