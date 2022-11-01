@@ -65,17 +65,17 @@ class CImgConan(ConanFile):
         if self.options.enable_fftw:
             self.requires("fftw/3.3.9")
         if self.options.enable_jpeg:
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         if self.options.enable_openexr:
             self.requires("openexr/2.5.7")
         if self.options.enable_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.38")
         if self.options.enable_tiff:
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.4.0")
         if self.options.enable_ffmpeg:
-            self.requires("ffmpeg/4.4")
+            self.requires("ffmpeg/5.0")
         if self.options.enable_opencv:
-            self.requires("opencv/4.5.3")
+            self.requires("opencv/4.5.5")
         if self.options.enable_magick:
             self.requires("imagemagick/7.0.11-14")
 
