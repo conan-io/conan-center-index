@@ -37,7 +37,8 @@ This section gathers the most common questions from the community related to pac
   * [Why are version ranges not allowed?](#why-are-version-ranges-not-allowed)
   * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)
   * [How to watch only specific recipes?](#how-to-watch-only-specific-recipes)
-  * [Is it possible to disable Pylint?](#is-it-possible-to-disable-pylint)<!-- endToc -->
+  * [Is it possible to disable Pylint?](#is-it-possible-to-disable-pylint)
+  * [How long can I be inactive before being removed from the authorized users list?](#how-long-can-i-be-inactive-before-being-removed-from-the-authorized-users-list)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
