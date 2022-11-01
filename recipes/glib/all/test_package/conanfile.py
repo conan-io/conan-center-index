@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.build import can_run, cross_building
+from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.gnu import PkgConfig, PkgConfigDeps
@@ -53,4 +53,3 @@ class TestPackageConan(ConanFile):
                 pkg_config = PkgConfig(self, "gio-2.0", pkg_config_path=self.generators_folder)
                 gdbus_codegen = pkg_config.variables["gdbus_codegen"]
                 self.run(f"{gdbus_codegen} -h", env="conanrun")
-
