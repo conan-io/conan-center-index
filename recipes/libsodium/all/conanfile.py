@@ -4,7 +4,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, rmdir, copy, rm, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild, VCVars, unix_path, msvc_runtime_flag, vs_layout
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, MSBuildDeps, MSBuildToolchain, MSBuild, VCVars, unix_path, msvc_runtime_flag, vs_layout
 import os
 
 required_conan_version = ">=1.52.0"
@@ -69,7 +69,7 @@ class LibsodiumConan(ConanFile):
             basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.options.shared and is_msvc(self) and "MT" in msvc_runtime_flag(self):
+        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Cannot build shared libsodium libraries with static runtime")
 
     def build_requirements(self):
