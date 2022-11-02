@@ -80,11 +80,11 @@ class LibMysqlClientCConan(ConanFile):
         
     def requirements(self):
         self.requires("openssl/1.1.1q")
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         if self._with_zstd:
             self.requires("zstd/1.5.2")
         if self._with_lz4:
-            self.requires("lz4/1.9.3")
+            self.requires("lz4/1.9.4")
         if self.settings.os == "FreeBSD":
             self.requires("libunwind/1.6.2")
 
@@ -126,7 +126,7 @@ class LibMysqlClientCConan(ConanFile):
             # CMake 3.18 or higher is required if Apple, but CI of CCI may run CMake 3.15
             self.build_requires("cmake/3.22.5")
         if self.settings.os == "FreeBSD":
-            self.build_requires("pkgconf/1.7.4")
+            self.build_requires("pkgconf/1.9.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
