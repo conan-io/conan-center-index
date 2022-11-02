@@ -4,8 +4,6 @@ project(easyexif)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_STANDARD 11)
 
-find_package(easyexif)
-
 if(WIN32 AND BUILD_SHARED_LIBS)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()

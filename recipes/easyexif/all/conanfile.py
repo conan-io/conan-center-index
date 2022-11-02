@@ -4,6 +4,8 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 
+required_conan_version = ">=1.53.0"
+
 
 class EasyExifConan(ConanFile):
     name = "easyexif"
@@ -27,7 +29,9 @@ class EasyExifConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.settings.compiler.cppstd:
+
+    def validate(self):
+        if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, 11)
 
     def layout(self):
