@@ -1,5 +1,8 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
+from conan.tools.files import get, rmdir, rm
+from conans import AutoToolsBuildEnvironment
 import functools
 import os
 
@@ -29,15 +32,15 @@ class FlexConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def requirements(self):
         self.requires("m4/1.4.19")
 
     def build_requirements(self):
         self.build_requires("m4/1.4.19")
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and cross_building(self):
             self.build_requires(f"{self.name}/{self.version}")
 
     def config_options(self):
@@ -80,8 +83,8 @@ class FlexConan(ConanFile):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         autotools = self._configure_autotools()
         autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["fl"]
