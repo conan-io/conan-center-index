@@ -60,9 +60,9 @@ class LibrdkafkaConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("lz4/1.9.3")
+        self.requires("lz4/1.9.4'")
         if self.options.zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.zstd:
             self.requires("zstd/1.5.2")
         if self.options.ssl:
@@ -70,11 +70,11 @@ class LibrdkafkaConan(ConanFile):
         if self._depends_on_cyrus_sasl:
             self.requires("cyrus-sasl/2.1.27")
         if self.options.get_safe("curl", False):
-            self.requires("libcurl/7.84.0")
+            self.requires("libcurl/7.85.0")
 
     def build_requirements(self):
         if self._depends_on_cyrus_sasl:
-            self.tool_requires("pkgconf/1.7.4")
+            self.tool_requires("pkgconf/1.9.3")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
