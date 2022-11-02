@@ -1,6 +1,7 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
+from conans import tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from contextlib import contextmanager
-from conan.tools.files import rename
+from conan import ConanFile
+from conan.tools.files import rename, get, chdir, replace_in_file, rm, rmdir, save, mkdir
 import functools
 import itertools
 import os
@@ -88,7 +89,7 @@ class Libxml2Conan(ConanFile):
 
     def requirements(self):
         if self.options.zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.iconv:
@@ -99,19 +100,19 @@ class Libxml2Conan(ConanFile):
     def build_requirements(self):
         if not (self._is_msvc or self._is_mingw_windows):
             if self.options.zlib or self.options.lzma or self.options.icu:
-                self.build_requires("pkgconf/1.7.4")
+                self.build_requires("pkgconf/1.9.3")
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
         # can't use strip_root here because if fails since 2.9.10 with:
         # KeyError: "linkname 'libxml2-2.9.1x/test/relaxng/ambig_name-class.xml' not found"
-        tools.get(**self.conan_data["sources"][self.version])
+        get(self, **self.conan_data["sources"][self.version])
         rename(self, "libxml2-{}".format(self.version), self._source_subfolder)
 
     @contextmanager
     def _msvc_build_environment(self):
-        with tools.chdir(os.path.join(self._source_subfolder, 'win32')):
+        with chdir(self, os.path.join(self._source_subfolder, 'win32')):
             with tools.vcvars(self.settings):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     yield
@@ -156,7 +157,7 @@ class Libxml2Conan(ConanFile):
                         if not libname.endswith('.lib'):
                             libname += '.lib'
                         libs.append(libname)
-                    tools.replace_in_file("Makefile.msvc",
+                    replace_in_file(self, "Makefile.msvc",
                                           "LIBS = $(LIBS) %s" % old_libname,
                                           "LIBS = $(LIBS) %s" % ' '.join(libs))
 
@@ -180,7 +181,7 @@ class Libxml2Conan(ConanFile):
 
     @contextmanager
     def _mingw_build_environment(self):
-        with tools.chdir(os.path.join(self._source_subfolder, "win32")):
+        with chdir(self, os.path.join(self._source_subfolder, "win32")):
             with tools.environment_append(AutoToolsBuildEnvironment(self).vars):
                 yield
 
@@ -215,7 +216,7 @@ class Libxml2Conan(ConanFile):
             # build
             def fix_library(option, package, old_libname):
                 if option:
-                    tools.replace_in_file(
+                    replace_in_file(self,
                         "Makefile.mingw",
                         "LIBS += -l{}".format(old_libname),
                         "LIBS += -l{}".format(" -l".join(self.deps_cpp_info[package].libs)),
@@ -231,7 +232,7 @@ class Libxml2Conan(ConanFile):
 
     def _package_mingw(self):
         with self._mingw_build_environment():
-            tools.mkdir(os.path.join(self.package_folder, "include", "libxml2"))
+            mkdir(self, os.path.join(self.package_folder, "include", "libxml2"))
             self.run("mingw32-make -f Makefile.mingw install-libs")
             if self.options.include_utils:
                 self.run("mingw32-make -f Makefile.mingw install-dist")
@@ -255,11 +256,11 @@ class Libxml2Conan(ConanFile):
     def _patch_sources(self):
         # Break dependency of install on build
         for makefile in ("Makefile.mingw", "Makefile.msvc"):
-            tools.replace_in_file(os.path.join(self._source_subfolder, "win32", makefile),
+            replace_in_file(self, os.path.join(self._source_subfolder, "win32", makefile),
                                                "install-libs : all",
                                                "install-libs :")
         # relocatable shared lib on macOS
-        tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+        replace_in_file(self, os.path.join(self._source_subfolder, "configure"),
                               "-install_name \\$rpath/",
                               "-install_name @rpath/")
 
@@ -287,12 +288,12 @@ class Libxml2Conan(ConanFile):
                 os.remove(os.path.join(self.package_folder, "bin", "libxml2.dll"))
             os.remove(os.path.join(self.package_folder, "lib", "libxml2_a_dll.lib"))
             os.remove(os.path.join(self.package_folder, "lib", "libxml2_a.lib" if self.options.shared else "libxml2.lib"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+            rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         elif self._is_mingw_windows:
             self._package_mingw()
             if self.options.shared:
                 os.remove(os.path.join(self.package_folder, "lib", "libxml2.a"))
-                tools.rename(os.path.join(self.package_folder, "lib", "libxml2.lib"),
+                rename(self, os.path.join(self.package_folder, "lib", "libxml2.lib"),
                              os.path.join(self.package_folder, "lib", "libxml2.dll.a"))
             else:
                 os.remove(os.path.join(self.package_folder, "bin", "libxml2.dll"))
@@ -304,13 +305,13 @@ class Libxml2Conan(ConanFile):
             if self.options.include_utils:
                 autotools.make(["install", "xmllint", "xmlcatalog", "xml2-config"])
 
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.sh")
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.sh", os.path.join(self.package_folder, "lib"))
             for prefix in ["run", "test"]:
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), prefix + "*")
-            tools.rmdir(os.path.join(self.package_folder, "share"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+                rm(self, prefix + "*", os.path.join(self.package_folder, "bin"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         for header in ["win32config.h", "wsockcompat.h"]:
             self.copy(pattern=header, src=os.path.join(self._source_subfolder, "include"),
@@ -320,8 +321,7 @@ class Libxml2Conan(ConanFile):
             os.path.join(self.package_folder, self._module_file_rel_path)
         )
 
-    @staticmethod
-    def _create_cmake_module_variables(module_file):
+    def _create_cmake_module_variables(self, module_file):
         # FIXME: also define LIBXML2_XMLLINT_EXECUTABLE variable
         content = textwrap.dedent("""\
             if(DEFINED LibXml2_FOUND)
@@ -342,7 +342,7 @@ class Libxml2Conan(ConanFile):
                 set(LIBXML2_VERSION_STRING ${LibXml2_VERSION})
             endif()
         """)
-        tools.save(module_file, content)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):

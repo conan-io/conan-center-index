@@ -2,15 +2,15 @@ from conan import ConanFile
 from conan.errors import ConanException
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
 from conan.tools.scm import Version
-from conans import tools as tools_legacy
+from conans.tools import stdcpp_library # TODO: import from conan.tools.build in conan 1.54.0 (https://github.com/conan-io/conan/pull/12269)
 import functools
 import os
 import textwrap
 import yaml
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class SpirvtoolsConan(ConanFile):
@@ -74,8 +74,7 @@ class SpirvtoolsConan(ConanFile):
         copy(self, f"dependencies/{self._dependencies_filename}", self.recipe_folder, self.export_folder)
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -83,7 +82,13 @@ class SpirvtoolsConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def _require(self, recipe_name):
         if recipe_name not in self._dependencies_versions:
@@ -94,11 +99,8 @@ class SpirvtoolsConan(ConanFile):
         self.requires(self._require("spirv-headers"))
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -237,7 +239,7 @@ class SpirvtoolsConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["spirv-tools-core"].system_libs.extend(["m", "rt"])
         if not self.options.shared:
-            libcxx = tools_legacy.stdcpp_library(self)
+            libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.components["spirv-tools-core"].system_libs.append(libcxx)
 
