@@ -2,9 +2,12 @@ cmake_minimum_required(VERSION 3.10)
 
 project(test_package CXX)
 
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
+
 find_package(function2 REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
+add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE function2::function2)
 
