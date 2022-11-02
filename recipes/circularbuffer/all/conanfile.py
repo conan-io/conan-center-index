@@ -1,7 +1,7 @@
-from conans import ConanFile, tools
-
+from conan import ConanFile
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
+from conan.tools.cmake import CMakeToolchain
 
 import os
 
@@ -16,9 +16,6 @@ class CircularBufferConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/rlogiacco/CircularBuffer"
     no_copy_source = True
-
-    def package_id(self):
-        self.info.header_only()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -37,6 +34,10 @@ class CircularBufferConan(ConanFile):
 
     def package_id(self):
         self.info.clear()
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CircularBuffer")
