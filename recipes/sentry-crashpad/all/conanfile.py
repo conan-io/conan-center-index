@@ -8,7 +8,7 @@ from conan.errors import ConanInvalidConfiguration
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.51.3"
 
 
 class SentryCrashpadConan(ConanFile):
@@ -54,10 +54,6 @@ class SentryCrashpadConan(ConanFile):
             del self.options.fPIC
         if self.settings.os not in ("Linux", "Android") or Version(self.version) < "0.4":
             del self.options.with_tls
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def build_requirements(self):
         if self._is_mingw:
