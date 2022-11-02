@@ -1,7 +1,8 @@
-from conans import ConanFile, tools
-from conans.tools import Version, ConanInvalidConfiguration
-from conan.tools.files import rename
-
+from conan import ConanFile
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import check_sha256, copy, download, rename
+import os
 
 required_conan_version = ">=1.43.0"
 
@@ -58,21 +59,24 @@ class ApprovalTestsCppConan(ConanFile):
             self.requires("cpputest/4.0")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def source(self):
         for source in self.conan_data["sources"][self.version]:
             url = source["url"]
             filename = url[url.rfind("/") + 1:]
-            tools.download(url, filename)
-            tools.check_sha256(filename, source["sha256"])
-        rename(self, "ApprovalTests.v.{}.hpp".format(self.version), self._header_file)
+            download(self, url, filename)
+            check_sha256(self, filename, source["sha256"])
+        rename(self, f"ApprovalTests.v.{self.version}.hpp", self._header_file)
 
     def package(self):
-        self.copy(self._header_file, dst="include")
-        self.copy("LICENSE", dst="licenses")
+        copy(self, self._header_file, src=self.source_folder, dst=os.path.join(self.package_folder, "include"), keep_path=False)
+        copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "ApprovalTests")
+        self.cpp_info.set_property("cmake_target_name", "ApprovalTests::ApprovalTests")
+
         self.cpp_info.names["cmake_find_package"] = "ApprovalTests"
         self.cpp_info.names["cmake_find_package_multi"] = "ApprovalTests"
 
@@ -90,7 +94,6 @@ class ApprovalTestsCppConan(ConanFile):
             self._require_at_least_compiler_version("gcc", 5)
 
     def _require_at_least_compiler_version(self, compiler, compiler_version):
-        if self.settings.compiler == compiler and tools.Version(self.settings.compiler.version) < compiler_version:
+        if self.info.settings.compiler == compiler and Version(self.info.settings.compiler.version) < compiler_version:
             raise ConanInvalidConfiguration(
-                "{}/{} with compiler {} requires at least compiler version {}".
-                    format(self.name, self.version, compiler, compiler_version))
+                f"{self.name}/{self.version} with compiler {compiler} requires at least compiler version {compiler_version}")
