@@ -796,14 +796,14 @@ class VtkConan(ConanFile):
 
             self.output.info("All module keys: {}".format(vtkmods["modules"].keys()))
 
-            self.output.info("Found libs: {}".format(existing_libs))
+            self.output.info(f"Found libs: {existing_libs}")
             self.output.info("Processing modules")
             for module_name in vtkmods["modules"]:
                 comp = module_name.split(':')[2]
                 comp_libname = vtkmods["modules"][module_name]["library_name"]
 
                 if comp_libname in existing_libs:
-                    self.output.info("Processing module {}".format(module_name))
+                    self.output.info(f"Processing module {module_name}")
                     self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
                     self.cpp_info.components[comp].libs          = [comp_libname]
                     self.cpp_info.components[comp].libdirs       = ["lib"]
@@ -816,7 +816,7 @@ class VtkConan(ConanFile):
                     self.cpp_info.components[comp].requires.append(thirds[module_name])
 
                 else:
-                    self.output.warning("Skipping module (lib file does not exist) {}".format(module_name))
+                    self.output.warning(f"Skipping module (lib file does not exist) {module_name}")
 
                 # this is how we used to add ALL the requires at once
                 # self.cpp_info.components[comp].requires      = all_requires.copy() # else, []
@@ -830,25 +830,23 @@ class VtkConan(ConanFile):
                     # which also includes the cmake extra file definitions (declared afterwards)
                     self.cpp_info.components[comp].requires.append("headers")
 
-                    # these are the public depends
-                    for dep in vtkmods["modules"][module_name]["depends"]:
-                        dep_libname = vtkmods["modules"][dep]["library_name"]
-                        if dep_libname in existing_libs:
-                            depname = dep.split(':')[2]
-                            self.output.info("   depends on {}".format(depname))
-                            self.cpp_info.components[comp].requires.append(depname)
-                        elif dep in thirds:
-                            extern = thirds[dep]
-                            self.output.info("   depends on external {} --> {}".format(dep, extern))
-                            self.cpp_info.components[comp].requires.append(extern)
-                        else:
-                            self.output.info("   skipping depends (lib file does not exist): {}".format(dep))
+                    # these are the public depends + private depends
+                    # FIXME should private be added as a different kind of private-requires?
+                    for section in ["depends", "private_depends"]:
+                        for dep in vtkmods["modules"][module_name][section]:
+                            dep_libname = vtkmods["modules"][dep]["library_name"]
+                            if dep_libname in existing_libs:
+                                depname = dep.split(':')[2]
+                                self.output.info(f"{comp}   depends on {depname}")
+                                self.cpp_info.components[comp].requires.append(depname)
+                            elif dep in thirds:
+                                extern = thirds[dep]
+                                self.output.info(f"{comp}   depends on external {dep} --> {extern}")
+                                self.cpp_info.components[comp].requires.append(extern)
+                            else:
+                                self.output.info(f"{comp}   skipping depends (lib file does not exist): {dep}")
 
                     # DEBUG # self.output.info("  Final deps: {}".format(self.cpp_info.components[comp].requires))
-
-                    # these are the private depends, not sure if we need these
-                    # for dep in vtkmods["modules"][module_name]["private_depends"]:
-                        # self.cpp_info.components[comp].requires.append(dep)
 
                     if self.settings.os == "Linux":
                         self.cpp_info.components[comp].system_libs = ["m"]
