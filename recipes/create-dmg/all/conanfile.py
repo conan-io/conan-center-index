@@ -42,7 +42,10 @@ class CreateDmgConan(ConanFile):
         self.info.clear()
 
     def package_info(self):
-        binpath = os.path.join(self.package_folder, "bin")
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
-        self.output.info(f"Adding to PATH: {binpath}")
+
+        binpath = os.path.join(self.package_folder, "bin")
         self.env_info.PATH.append(binpath)
