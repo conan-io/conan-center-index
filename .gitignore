@@ -130,7 +130,7 @@ venv.bak/
 # scons build files
 *.dblite
 
-# user temp files
+# vim temp files
 .*.sw?
 .sw?
 Session.vim
