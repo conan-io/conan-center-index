@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, rmdir, copy, rm, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -184,13 +184,13 @@ class LibsodiumConan(ConanFile):
         )
 
     def _build_msvc(self):
-        msvc_ver_folder = self._msvc_sln_folder or ("vs2022" if self.version != "1.0.18" else "vs2019")
-        msvc_sln_folder = os.path.join(self.build_folder, self.source_folder, "builds", "msvc", msvc_ver_folder)
+        msvc_ver_subfolder = self._msvc_sln_folder or ("vs2022" if self.version != "1.0.18" else "vs2019")
+        msvc_sln_folder = os.path.join(self.build_folder, self.source_folder, "builds", "msvc", msvc_ver_subfolder)
 
         msvc_sln_path = os.path.join(msvc_sln_folder, "libsodium.sln")
 
         # 1.0.18 only supported up to vs2019. Add support for newer toolsets.
-        if self.version == "1.0.18" and msvc_sln_folder == "vs2019":
+        if self.version == "1.0.18" and msvc_ver_subfolder == "vs2019":
             vcxproj_path = os.path.join(msvc_sln_folder, "libsodium", "libsodium.vcxproj")
             self._fix_msvc_platform_toolset(vcxproj_path, "v142")
 
