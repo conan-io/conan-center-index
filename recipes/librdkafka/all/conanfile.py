@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.52.0"
 
 
 class LibrdkafkaConan(ConanFile):
@@ -46,8 +46,7 @@ class LibrdkafkaConan(ConanFile):
         return self.options.sasl and self.settings.os != "Windows"
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -57,7 +56,13 @@ class LibrdkafkaConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("lz4/1.9.4'")
@@ -75,9 +80,6 @@ class LibrdkafkaConan(ConanFile):
     def build_requirements(self):
         if self._depends_on_cyrus_sasl:
             self.tool_requires("pkgconf/1.9.3")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
