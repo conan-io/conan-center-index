@@ -1,8 +1,10 @@
-# pylint: skip-file
 import os
-from conans import ConanFile, CMake, tools
-from conans.tools import Version
+from conan import ConanFile
+from conan.tools.scm import Version
+from conan.tools.build import can_run
+from conans import CMake
 
+required_conan_version = ">=1.46.0"
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
@@ -27,7 +29,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if tools.cross_building(self):
+        if not can_run(self):
             self.output.warn("Skipping run cross built package")
             return
 
