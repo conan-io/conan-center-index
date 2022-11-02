@@ -32,25 +32,20 @@ class LibsodiumConan(ConanFile):
         "PIE": False,
     }
 
-
     @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
-
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-
     def export_sources(self):
         export_conandata_patches(self)
-
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
 
     def configure(self):
         if self.options.shared:
@@ -67,18 +62,15 @@ class LibsodiumConan(ConanFile):
         except Exception:
             pass
 
-
     def layout(self):
         if is_msvc(self):
             vs_layout(self)
         else:
             basic_layout(self, src_folder="src")
 
-
     def validate(self):
         if self.options.shared and is_msvc(self) and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration("Cannot build shared libsodium libraries with static runtime")
-
 
     def build_requirements(self):
         if not is_msvc(self):
@@ -88,7 +80,6 @@ class LibsodiumConan(ConanFile):
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
                     self.tool_requires("msys2/cci.latest")
-
 
     def generate(self):
         if is_msvc(self):
@@ -122,10 +113,8 @@ class LibsodiumConan(ConanFile):
             env = VirtualBuildEnv(self)
             env.generate()
 
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-
 
     @property
     def _msvc_sln_folder(self):
@@ -199,7 +188,6 @@ class LibsodiumConan(ConanFile):
             autotools = Autotools(self)
             autotools.configure()
             autotools.make()
-
 
     def package(self):
         copy(self, "*LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"), keep_path=False)
