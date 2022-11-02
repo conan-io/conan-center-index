@@ -7,7 +7,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgCon
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.53.0"
 
 
 class KModConan(ConanFile):
@@ -38,14 +38,8 @@ class KModConan(ConanFile):
     }
 
     def configure(self):
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -58,7 +52,7 @@ class KModConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.with_openssl:
-            self.requires("openssl/3.0.5")
+            self.requires("openssl/3.0.7")
 
     def validate(self):
         if self.info.settings.os != "Linux":
