@@ -108,7 +108,8 @@ class LibdeflateConan(ConanFile):
         autotools = Autotools(self)
         with chdir(self, self.source_folder):
             # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-            autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+            # Note that PREFIX=/ also appears to be required on Linux.
+            autotools.install(args=["PREFIX=/", f"DESTDIR={unix_path(self, self.package_folder)}"])
         rmdir(self, os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.a" if self.options.shared else "*.[so|dylib]*", os.path.join(self.package_folder, "lib") )
