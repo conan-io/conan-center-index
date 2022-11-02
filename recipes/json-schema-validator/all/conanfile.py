@@ -47,7 +47,7 @@ class JsonSchemaValidatorConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("nlohmann_json/3.10.5")
+        self.requires("nlohmann_json/3.11.2")
 
     def validate(self):
         version = tools.Version(self.version)
