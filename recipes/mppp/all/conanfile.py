@@ -112,6 +112,9 @@ class MpppConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "mp++")
         self.cpp_info.set_property("cmake_target_name", "mp++::mp++")
 
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
+
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "mp++"
         self.cpp_info.filenames["cmake_find_package_multi"] = "mp++"
