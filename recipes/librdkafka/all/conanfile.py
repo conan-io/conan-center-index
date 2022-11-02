@@ -65,7 +65,7 @@ class LibrdkafkaConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("lz4/1.9.4'")
+        self.requires("lz4/1.9.4")
         if self.options.zlib:
             self.requires("zlib/1.2.13")
         if self.options.zstd:
