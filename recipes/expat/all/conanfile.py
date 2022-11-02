@@ -114,3 +114,6 @@ class ExpatConan(ConanFile):
             self.cpp_info.defines.append("XML_UNICODE")
         elif self.options.get_safe("char_type") == "wchar_t":
             self.cpp_info.defines.append("XML_UNICODE_WCHAR_T")
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
