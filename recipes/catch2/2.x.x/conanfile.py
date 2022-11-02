@@ -60,9 +60,9 @@ class Catch2Conan(ConanFile):
 
     def validate(self):
         if Version(self.version) < "2.13.1" and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("ARMv8 is supported by 2.13.1+ only! give up!")
+            raise ConanInvalidConfiguration("ARMv8 is not supported by versions < 2.13.1+")
         if self.options.with_main and Version(self.version) < "2.13.4":
-            raise ConanInvalidConfiguration("Option with_main not supported with versions < 2.13.4")
+            raise ConanInvalidConfiguration("Option with_main not supported by versions < 2.13.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
