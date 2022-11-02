@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.microsoft import is_msvc, VCVars
+from conan.tools.microsoft import is_msvc, VCVars, unix_path
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, chdir, rmdir, copy, rm
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.layout import basic_layout
