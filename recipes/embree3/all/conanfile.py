@@ -119,16 +119,16 @@ class EmbreeConan(ConanFile):
         if not (self._has_sse_avx or (self._embree_has_neon_support and self._has_neon)):
             raise ConanInvalidConfiguration("Embree {} doesn't support {}".format(self.version, self.settings.arch))
 
-        compiler_version = Version(self.info.settings.compiler.version)
-        if self.info.settings.compiler == "clang" and compiler_version < "4":
+        compiler_version = Version(self.settings.compiler.version)
+        if self.settings.compiler == "clang" and compiler_version < "4":
             raise ConanInvalidConfiguration("Clang < 4 is not supported")
 
         check_min_vs(self, 191)
 
-        if self.info.settings.os == "Linux" and self.info.settings.compiler == "clang" and self.info.settings.compiler.libcxx == "libc++":
+        if self.settings.os == "Linux" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
             raise ConanInvalidConfiguration(f"{self.ref} cannot be built with clang libc++, use libstdc++ instead")
 
-        if self.info.settings.compiler == "apple-clang" and not self.info.options.shared and compiler_version >= "9.0" and self._num_isa > 1:
+        if self.settings.compiler == "apple-clang" and not self.options.shared and compiler_version >= "9.0" and self._num_isa > 1:
             raise ConanInvalidConfiguration("Embree static with apple-clang >=9 and multiple ISA (simd) is not supported")
 
         if self._num_isa == 0:
@@ -230,7 +230,7 @@ class EmbreeConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "embree")
 
         def _lib_exists(name):
-            return True if glob.glob(os.path.join(self.package_folder, "lib", f"*{name}.*")) else False
+            return bool(glob.glob(os.path.join(self.package_folder, "lib", f"*{name}.*")))
 
         self.cpp_info.libs = ["embree3"]
         if not self.options.shared:
