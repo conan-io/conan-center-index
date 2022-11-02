@@ -121,7 +121,7 @@ class Libxml2Conan(ConanFile):
                 env.define(var, value)
             # TODO: no conan v2 build helper for NMake yet (see https://github.com/conan-io/conan/issues/12188)
             #       So populate CL with AutotoolsToolchain cflags
-            cflags = AutotoolsToolchain(self).cflags
+            c_flags = AutotoolsToolchain(self).cflags
             if c_flags:
                 env.define("CL", c_flags)
             env.vars(self).save_script("conanbuildenv_nmake")
