@@ -37,7 +37,7 @@ class NuRaftConan(ConanFile):
             self.requires("boost/1.79.0")
         else:
             self.requires("asio/1.22.1")
-        self.requires("openssl/1.1.1q")
+        self.requires("openssl/1.1.1s")
 
     def validate(self):
         if self.info.settings.os in ["Windows"]:

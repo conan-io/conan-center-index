@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 87685ff..efbc7fb 100644
+index 980d466..9258209 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,5 +1,6 @@
@@ -78,7 +78,7 @@ index 87685ff..efbc7fb 100644
  endif ()
  
  # === Disable SSL ===
-@@ -242,6 +214,7 @@ set(RAFT_CORE
+@@ -250,6 +223,7 @@ set(RAFT_CORE
      ${ROOT_SRC}/stat_mgr.cxx
      )
  add_library(RAFT_CORE_OBJ OBJECT ${RAFT_CORE})
@@ -86,7 +86,7 @@ index 87685ff..efbc7fb 100644
  
  set(STATIC_LIB_SRC
      $<TARGET_OBJECTS:RAFT_CORE_OBJ>)
-@@ -249,54 +222,11 @@ set(STATIC_LIB_SRC
+@@ -257,54 +231,11 @@ set(STATIC_LIB_SRC
  # === Executables ===
  set(LIBRARY_NAME "nuraft")
  
