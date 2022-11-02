@@ -135,9 +135,9 @@ class bxConan(ConanFile):
 
     def package(self):
         # Get build bin folder
-        for dir in os.listdir(os.path.join(self.bxPath, ".build")):
-            if not dir=="projects":
-                buildBin = os.path.join(self.bxPath, ".build", dir, "bin")
+        for bxdir in os.listdir(os.path.join(self.bxPath, ".build")):
+            if not bxdir=="projects":
+                buildBin = os.path.join(self.bxPath, ".build", bxdir, "bin")
                 break
 
         # Copy license
@@ -149,8 +149,8 @@ class bxConan(ConanFile):
         copy(self, pattern=self.libExt, dst=os.path.join(self.package_folder, "lib"), src=buildBin, keep_path=False)
         # Copy tools
         if self.options.tools:
-            copy(self, pattern=f"bin2c*", dst=os.path.join(self.package_folder, "bin"), src=buildBin, keep_path=False)
-            copy(self, pattern=f"lemon*", dst=os.path.join(self.package_folder, "bin"), src=buildBin, keep_path=False)
+            copy(self, pattern="bin2c*", dst=os.path.join(self.package_folder, "bin"), src=buildBin, keep_path=False)
+            copy(self, pattern="lemon*", dst=os.path.join(self.package_folder, "bin"), src=buildBin, keep_path=False)
         
         # Rename for consistency across platforms and configs
         for bxFile in Path(os.path.join(self.package_folder, "lib")).glob("*bx*"):
@@ -178,7 +178,7 @@ class bxConan(ConanFile):
         
         if self.settings.os == "Windows":
             if self.settings.arch == "x86":
-                    self.cpp_info.system_libs.extend(["psapi"])
+                self.cpp_info.system_libs.extend(["psapi"])
             if is_msvc(self):
                 self.cpp_info.includedirs.extend(["include/compat/msvc"])
                 self.cpp_info.cxxflags.extend(["/Zc:__cplusplus"])
