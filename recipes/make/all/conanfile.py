@@ -5,7 +5,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class MakeConan(ConanFile):
@@ -28,14 +28,8 @@ class MakeConan(ConanFile):
         export_conandata_patches(self)
 
     def configure(self):
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
