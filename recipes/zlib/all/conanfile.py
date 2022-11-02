@@ -9,6 +9,7 @@ required_conan_version = ">=1.53.0"
 
 class ZlibConan(ConanFile):
     name = "zlib"
+    package_type = "library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://zlib.net"
     license = "Zlib"
