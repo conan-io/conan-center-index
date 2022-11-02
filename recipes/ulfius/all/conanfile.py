@@ -43,7 +43,7 @@ class UlfiusConan(ConanFile):
 
     def validate(self):
         if self.options.with_gnutls:
-            raise ConanInvalidConfiguration("with_gnutls=True is not yet implemented due to mossing gnutls CCI recipe")
+            raise ConanInvalidConfiguration("with_gnutls=True is not yet implemented due to missing gnutls CCI recipe")
         if self.settings.os == "Windows" and self.options.enable_websockets:
             raise ConanInvalidConfiguration("ulfius does not support with_websockets=True is not supported on Windows")
 
@@ -93,42 +93,45 @@ class UlfiusConan(ConanFile):
         tc.variables["WITH_JANSSON"] = self.options.with_jansson
         tc.generate()
 
-        generator_dir = os.path.join(self.build_folder, "generators")
-        self.dependencies["libmicrohttpd"].cpp_info.set_property("cmake_file_name", "MHD")
-        self.dependencies["libmicrohttpd"].cpp_info.set_property("cmake_target_name", "MHD::MHD")
-        self.dependencies["libmicrohttpd"].cpp_info.set_property("cmake_module_file_name", "MHD")
-        self.dependencies["libmicrohttpd"].cpp_info.set_property("cmake_module_target_name", "MHD::MHD")
-        mhd_version_cmake = os.path.join(generator_dir, "mhd_version.cmake")
-        self.dependencies["libmicrohttpd"].cpp_info.set_property("cmake_build_modules", [mhd_version_cmake])
-        save(self, mhd_version_cmake, textwrap.dedent(f"""
+        deps = CMakeDeps(self)
+        deps.generate()
+
+        # https://github.com/conan-io/conan/issues/12367 + move this before running CMakeDeps.generate()
+        save(self, os.path.join(self.generators_folder, "MHDConfig.cmake"), textwrap.dedent(f"""\
+            include(CMakeFindDependencyMacro)
+            find_dependency(libmicrohttpd)
+
+            set(MHD_FOUND TRUE)
+            add_library(MHD::MHD INTERFACE IMPORTED)
+            set_target_properties(MHD::MHD PROPERTIES INTERFACE_LINK_LIBRARIES "libmicrohttpd::libmicrohttpd")
             set(MHD_VERSION_STRING {self.dependencies['libmicrohttpd'].ref.version})
         """))
 
+        # Shared ulfius looks for Orcania::Orcania and Yder::Yder
+        # Static ulfius looks for Orcania::Orcania-static and Yder::Yder-static
         if self.options.shared:
-            self.dependencies["orcania"].cpp_info.set_property("cmake_target_name", "Orcania::Orcania")
-            self.dependencies["orcania"].cpp_info.set_property("cmake_module_target_name", "Orcania::Orcania")
-            if self.options.with_yder:
-                self.dependencies["yder"].cpp_info.set_property("cmake_target_name", "Yder::Yder")
-                self.dependencies["yder"].cpp_info.set_property("cmake_module_target_name", "Yder::Yder")
+            if not self.dependencies["orcania"].options.shared:
+                save(self, os.path.join(self.generators_folder, "OrcaniaConfig.cmake"), textwrap.dedent("""\
+                    add_library(Orcania::Orcania INTERFACE IMPORTED)
+                    set_target_properties(Orcania::Orcania PROPERTIES INTERFACE_LINK_LIBRARIES "Orcania::Orcania-static")
+                """), append=True)
+            if self.options.with_yder and not self.dependencies["yder"].options.shared:
+                save(self, os.path.join(self.generators_folder, "YderConfig.cmake"), textwrap.dedent("""\
+                    add_library(Yder::Yder INTERFACE IMPORTED)
+                    set_target_properties(Yder::Yder PROPERTIES INTERFACE_LINK_LIBRARIES "Yder::Yder-static")
+                """), append=True)
 
+        # Create Jansson::Jansson
         if self.options.with_jansson:
-            self.dependencies["jansson"].cpp_info.set_property("cmake_file_name", "Jansson")
-            self.dependencies["jansson"].cpp_info.set_property("cmake_target_name", "Jansson::Jansson")
-            self.dependencies["jansson"].cpp_info.set_property("cmake_module_file_name", "Jansson")
-            self.dependencies["jansson"].cpp_info.set_property("cmake_module_target_name", "Jansson::Jansson")
+            save(self, os.path.join(self.generators_folder, "jansson-config.cmake"), textwrap.dedent(f"""\
+                add_library(Jansson::Jansson INTERFACE IMPORTED)
+                set_target_properties(Jansson::Jansson PROPERTIES INTERFACE_LINK_LIBRARIES "jansson::jansson")
+                set(JANSSON_VERSION_STRING {self.dependencies['jansson'].ref.version})
+            """), append=True)
 
         if self.options.with_gnutls:
-            self.dependencies["gnutls"].cpp_info.set_property("cmake_file_name", "GnuTLS")
-            self.dependencies["gnutls"].cpp_info.set_property("cmake_target_name", "GnuTLS::GnuTLS")
-            self.dependencies["gnutls"].cpp_info.set_property("cmake_module_file_name", "GnuTLS")
-            self.dependencies["gnutls"].cpp_info.set_property("cmake_module_target_name", "GnuTLS::GnuTLS")
-            gnutls_version_cmake = os.path.join(generator_dir, "gnutls_version.cmake")
-            self.dependencies["gnutls"].cpp_info.set_property("cmake_build_modules", [gnutls_version_cmake])
-            save(self, gnutls_version_cmake, textwrap.dedent(f"""
-                set(GNUTLS_VERSION_STRING {self.dependencies['gnutls'].ref.version})
-            """))
-        deps = CMakeDeps(self)
-        deps.generate()
+            # FIXME: make sure gnutls creates GnuTLSCOnfig.cmake + GnuTLS::GnuTLS target + GNUTLS_VERSION_STRING
+            pass
 
     def _patch_sources(self):
         apply_conandata_patches(self)
