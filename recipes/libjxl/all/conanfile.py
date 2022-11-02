@@ -47,7 +47,6 @@ class LibjxlConan(ConanFile):
             except Exception:
                 pass
 
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -107,12 +106,12 @@ class LibjxlConan(ConanFile):
             rm(self, pattern="*-static.lib", folder=libs_dir)
 
             if self.settings.os == "Windows":
-                copy(self, "jxl_dec.dll", src="bin", dst="bin")
-                copy(self, "jxl_dec.lib", src="lib", dst="lib")
+                copy(self, "jxl_dec.dll", src=os.path.join(self.build_folder, "bin"), dst=os.path.join(self.package_folder,"bin"))
+                copy(self, "jxl_dec.lib", src=os.path.join(self.build_folder, "lib"), dst=os.path.join(self.package_folder,"lib"))
                 for dll_path in glob.glob(os.path.join(libs_dir, "*.dll")):
                     rename(self, src=dll_path, dst=os.path.join(self.package_folder, "bin", os.path.basename(dll_path)))
             else:
-                copy(self, "libjxl_dec.*", src="lib", dst="lib")
+                copy(self, "libjxl_dec.*", src=os.path.join(self.build_folder, "lib"), dst=os.path.join(self.package_folder, "lib"))
 
     def _lib_name(self, name):
         if not self.options.shared and self.settings.os == "Windows":
