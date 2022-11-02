@@ -36,7 +36,7 @@ class TestPackageConan(ConanFile):
         for src in self.exports_sources:
             shutil.copy(path.join(self.source_folder, src), self.build_folder)
 
-        self.run(f"autoconf --verbose", env="conanbuild")
+        self.run("autoconf --verbose")
 
         autotools = Autotools(self)
         autotools.configure(build_script_folder=self.build_folder)
