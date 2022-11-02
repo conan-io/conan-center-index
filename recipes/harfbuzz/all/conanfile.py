@@ -1,7 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.files import (
     apply_conandata_patches,
     copy,
@@ -91,46 +94,47 @@ class HarfbuzzConan(ConanFile):
             self.requires("glib/2.74.1")
 
     def layout(self):
-        cmake_layout(self)
+        basic_layout(self, src_folder="src")
 
     def generate(self):
-        deps = CMakeDeps(self)
-        deps.generate()
+        def is_enabled(value):
+            return "enabled" if value else "disabled"
 
-        tc = CMakeToolchain(self)
-        tc.variables["HB_HAVE_FREETYPE"] = self.options.with_freetype
-        tc.variables["HB_HAVE_GRAPHITE2"] = False
-        tc.variables["HB_HAVE_GLIB"] = self.options.with_glib
-        tc.variables["HB_HAVE_ICU"] = self.options.with_icu
-        if is_apple_os(self):
-            tc.variables["HB_HAVE_CORETEXT"] = True
-        elif self.settings.os == "Windows":
-            tc.variables["HB_HAVE_GDI"] = self.options.with_gdi
-            tc.variables["HB_HAVE_UNISCRIBE"] = self.options.with_uniscribe
-            tc.variables["HB_HAVE_DIRECTWRITE"] = self.options.with_directwrite
-        tc.variables["HB_BUILD_UTILS"] = False
-        tc.variables["HB_BUILD_SUBSET"] = self.options.with_subset
-        tc.variables["HB_HAVE_GOBJECT"] = False
-        tc.variables["HB_HAVE_INTROSPECTION"] = False
-        # fix for MinGW debug build
-        if self.settings.compiler == "gcc" and self.settings.os == "Windows":
-            tc.variables["CMAKE_C_FLAGS"] = "-Wa,-mbig-obj"
-            tc.variables["CMAKE_CXX_FLAGS"] = "-Wa,-mbig-obj"
+        PkgConfigDeps(self).generate()
+
+        tc = MesonToolchain(self)
+        tc.project_options.update({
+            "glib": is_enabled(self.options.with_glib),
+            "icu": is_enabled(self.options.with_icu),
+            "freetype": is_enabled(self.options.with_freetype),
+            "gdi": is_enabled(self.options.get_safe("with_gdi")),
+            "directwrite": is_enabled(self.options.get_safe("with_directwrite")),
+            "tests": "disabled",
+            "docs": "disabled",
+            "benchmark": "disabled",
+            "icu_builtin": "false"
+        })
         tc.generate()
+
+        VirtualBuildEnv(self).generate()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
 
+    def build_requirements(self):
+        self.tool_requires("meson/0.63.3")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
+
     def build(self):
-        apply_conandata_patches(self)
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        meson = Meson(self)
+        meson.configure()
+        meson.build()
 
     def package(self):
-        cmake = CMake(self)
-        cmake.install()
+        meson = Meson(self)
+        meson.install()
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
