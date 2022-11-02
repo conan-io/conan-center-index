@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, rmdir, copy, rm
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, rmdir, copy, rm, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild, VCVars, unix_path, msvc_runtime_flag, vs_layout
@@ -149,11 +149,50 @@ class LibsodiumConan(ConanFile):
             "x86_64": "x64",
         }[str(self.settings.arch)]
 
+    # Method copied from xz_utils
+    def _fix_msvc_platform_toolset(self, vcxproj_file, old_toolset):
+        platform_toolset = {
+            "Visual Studio": {
+                "8": "v80",
+                "9": "v90",
+                "10": "v100",
+                "11": "v110",
+                "12": "v120",
+                "14": "v140",
+                "15": "v141",
+                "16": "v142",
+                "17": "v143",
+            },
+            "msvc": {
+                "170": "v110",
+                "180": "v120",
+                "190": "v140",
+                "191": "v141",
+                "192": "v142",
+                "193": "v143",
+            }
+        }.get(str(self.settings.compiler), {}).get(str(self.settings.compiler.version))
+        if not platform_toolset:
+            raise ConanException(
+                f"Unknown platform toolset for {self.settings.compiler} {self.settings.compiler.version}",
+            )
+        replace_in_file(
+            self,
+            vcxproj_file,
+            f"<PlatformToolset>{old_toolset}</PlatformToolset>",
+            f"<PlatformToolset>{platform_toolset}</PlatformToolset>",
+        )
+
     def _build_msvc(self):
-        msvc_sln_folder = self._msvc_sln_folder or ("vs2022" if self.version != "1.0.18" else "vs2019")
-        # FIXME how do I upgrade the SLN in conan 2?
-        # upgrade_project = self._msvc_sln_folder is None
-        sln_path = os.path.join(self.build_folder, self.source_folder, "builds", "msvc", msvc_sln_folder, "libsodium.sln")
+        msvc_ver_folder = self._msvc_sln_folder or ("vs2022" if self.version != "1.0.18" else "vs2019")
+        msvc_sln_folder = os.path.join(self.build_folder, self.source_folder, "builds", "msvc", msvc_ver_folder)
+
+        msvc_sln_path = os.path.join(msvc_sln_folder, "libsodium.sln")
+
+        # 1.0.18 only supported up to vs2019. Add support for newer toolsets.
+        if self.version == "1.0.18" and msvc_sln_folder == "vs2019":
+            vcxproj_path = os.path.join(msvc_sln_folder, "libsodium", "libsodium.vcxproj")
+            self._fix_msvc_platform_toolset(vcxproj_path, "v142")
 
         build_type = "{}{}".format(
             "Dyn" if self.options.shared else "Static",
@@ -168,7 +207,7 @@ class LibsodiumConan(ConanFile):
         msbuild = MSBuild(self)
         msbuild.build_type = build_type
         msbuild.platform = platform
-        msbuild.build(sln_path) # , platforms={"x86": "Win32"}) # , build_type=build_type)
+        msbuild.build(msvc_sln_path)
 
 
     def build(self):
@@ -176,15 +215,6 @@ class LibsodiumConan(ConanFile):
         if is_msvc(self):
             self._build_msvc()
         else:
-# FIXME needed?            if self._is_mingw:
-# FIXME needed?                self.run("{} -fiv".format(tools.get_env("AUTORECONF")), cwd=self.source_folder, win_bash=tools.os_info.is_windows)
-# FIXME needed?            if is_apple_os(self):
-# FIXME needed?                # Relocatable shared lib for Apple platforms
-# FIXME needed?                replace_in_file(self,
-# FIXME needed?                    os.path.join(self.source_folder, "configure"),
-# FIXME needed?                    "-install_name \\$rpath/",
-# FIXME needed?                    "-install_name @rpath/"
-# FIXME needed?                )
             autotools = Autotools(self)
             autotools.configure()
             autotools.make()
