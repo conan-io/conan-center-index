@@ -6,7 +6,6 @@ import os
 
 
 class TestPackageConan(ConanFile):
-    name = "test-circularbuffer"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake_find_package", "cmake_find_package_multi"
 
