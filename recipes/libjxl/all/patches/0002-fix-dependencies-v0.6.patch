@@ -47,7 +47,7 @@ index c0290ab..b3f63d6 100644
  )
  target_compile_definitions(jxl_dec-obj PUBLIC
    ${OBJ_COMPILE_DEFINITIONS}
-@@ -377,8 +379,8 @@ set_property(TARGET jxl_enc-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
+@@ -377,8 +379,9 @@ set_property(TARGET jxl_enc-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
  target_include_directories(jxl_enc-obj PUBLIC
    ${PROJECT_SOURCE_DIR}
    ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -55,10 +55,11 @@ index c0290ab..b3f63d6 100644
 -  $<TARGET_PROPERTY:brotlicommon-static,INTERFACE_INCLUDE_DIRECTORIES>
 +  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:highway::highway,INTERFACE_INCLUDE_DIRECTORIES>>"
 +  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:lcms::lcms,INTERFACE_INCLUDE_DIRECTORIES>>"
++  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:brotli::brotli,INTERFACE_INCLUDE_DIRECTORIES>>"
  )
  target_compile_definitions(jxl_enc-obj PUBLIC
    ${OBJ_COMPILE_DEFINITIONS}
-@@ -387,17 +389,6 @@ if (JPEGXL_ENABLE_PROFILER)
+@@ -387,17 +390,6 @@ if (JPEGXL_ENABLE_PROFILER)
  target_link_libraries(jxl_enc-obj PUBLIC jxl_profiler)
  endif()
  
@@ -76,7 +77,7 @@ index c0290ab..b3f63d6 100644
  # Headers for exporting/importing public headers
  include(GenerateExportHeader)
  set_target_properties(jxl_dec-obj PROPERTIES
-@@ -413,9 +404,6 @@ set_target_properties(jxl_enc-obj PROPERTIES
+@@ -413,9 +405,6 @@ set_target_properties(jxl_enc-obj PROPERTIES
    VISIBILITY_INLINES_HIDDEN 1
    DEFINE_SYMBOL JXL_INTERNAL_LIBRARY_BUILD
  )
@@ -86,7 +87,7 @@ index c0290ab..b3f63d6 100644
  target_include_directories(jxl_enc-obj PUBLIC
      ${CMAKE_CURRENT_BINARY_DIR}/include)
  
-@@ -495,9 +483,8 @@ if (((NOT DEFINED "${TARGET_SUPPORTS_SHARED_LIBS}") OR
+@@ -495,9 +484,8 @@ if (((NOT DEFINED "${TARGET_SUPPORTS_SHARED_LIBS}") OR
  
  # Public shared library.
  add_library(jxl SHARED ${JPEGXL_INTERNAL_OBJECTS})
@@ -97,7 +98,7 @@ index c0290ab..b3f63d6 100644
  # Shared library include path contains only the "include/" paths.
  target_include_directories(jxl PUBLIC
    "${CMAKE_CURRENT_SOURCE_DIR}/include"
-@@ -506,13 +493,13 @@ set_target_properties(jxl PROPERTIES
+@@ -506,13 +494,13 @@ set_target_properties(jxl PROPERTIES
    VERSION ${JPEGXL_LIBRARY_VERSION}
    SOVERSION ${JPEGXL_LIBRARY_SOVERSION}
    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
@@ -114,7 +115,7 @@ index c0290ab..b3f63d6 100644
  # Shared library include path contains only the "include/" paths.
  target_include_directories(jxl_dec PUBLIC
    "${CMAKE_CURRENT_SOURCE_DIR}/include"
-@@ -523,6 +510,12 @@ set_target_properties(jxl_dec PROPERTIES
+@@ -523,6 +511,12 @@ set_target_properties(jxl_dec PROPERTIES
    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
  
@@ -127,7 +128,7 @@ index c0290ab..b3f63d6 100644
  # Add a jxl.version file as a version script to tag symbols with the
  # appropriate version number. This script is also used to limit what's exposed
  # in the shared library from the static dependencies bundled here.
-@@ -541,8 +534,10 @@ foreach(target IN ITEMS jxl jxl_dec)
+@@ -541,8 +535,10 @@ foreach(target IN ITEMS jxl jxl_dec)
    # This hides the default visibility symbols from static libraries bundled into
    # the shared library. In particular this prevents exposing symbols from hwy
    # and skcms in the shared library.
@@ -140,7 +141,7 @@ index c0290ab..b3f63d6 100644
  endforeach()
  
  # Only install libjxl shared library. The libjxl_dec is not installed since it
-@@ -553,13 +548,21 @@ install(TARGETS jxl
+@@ -553,13 +549,21 @@ install(TARGETS jxl
  else()
  add_library(jxl ALIAS jxl-static)
  add_library(jxl_dec ALIAS jxl_dec-static)
