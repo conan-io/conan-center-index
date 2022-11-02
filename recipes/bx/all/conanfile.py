@@ -23,20 +23,10 @@ class bxConan(ConanFile):
     options = {"fPIC": [True, False], "tools": [True, False]}
     default_options = {"fPIC": True, "tools": False}
 
-    bxFolder = "bx"
+    @property
+    def _bx_folder(self):
+        return "bx"
    
-    vsVerToGenie = {"17": "2022", "16": "2019", "15": "2017",
-                    "193": "2022", "192": "2019", "191": "2017"}
-
-    gccOsToGenie = {"Windows": "--gcc=mingw-gcc", "Linux": "--gcc=linux-gcc", "Macos": "--gcc=osx", "Android": "--gcc=android", "iOS": "--gcc=ios"}
-    gmakeOsToProj = {"Windows": "mingw-gcc", "Linux": "linux", "Macos": "osx", "Android": "android", "iOS": "ios"}
-    gmakeArchToGenieSuffix = {"x86": "-x86", "x86_64": "-x64", "armv8": "-arm64", "armv7": "-arm"}
-    osToUseArchConfigSuffix = {"Windows": False, "Linux": False, "Macos": True, "Android": True, "iOS": True}
-
-    buildTypeToMakeConfig = {"Debug": "config=debug", "Release": "config=release"}
-    archToMakeConfigSuffix = {"x86": "32", "x86_64": "64"}
-    osToUseMakeConfigSuffix = {"Windows": True, "Linux": True, "Macos": False, "Android": False, "iOS": False}
-
     def layout(self):
         basic_layout(self, src_folder=".")
 
@@ -68,7 +58,7 @@ class bxConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True,
-                    destination=os.path.join(self.source_folder, self.bxFolder))
+                    destination=os.path.join(self.source_folder, self._bx_folder))
 
     def generate(self):
         if is_msvc(self):
@@ -79,12 +69,17 @@ class bxConan(ConanFile):
             tc.generate()
 
     def build(self):
-        # Map conan compilers to genie input
-        self.bxPath = os.path.join(self.source_folder, self.bxFolder)
+        # Figure out genie path
+        self.bxPath = os.path.join(self.source_folder, self._bx_folder)
         genie = os.path.join(self.bxPath, "tools", "bin", self.binFolder, "genie")
+
         if is_msvc(self):
+            # Conan to Genie translation maps
+            vsVerToGenie = {"17": "2022", "16": "2019", "15": "2017",
+                            "193": "2022", "192": "2019", "191": "2017"}
+
             # Use genie directly, then msbuild on specific projects based on requirements
-            genieVS = f"vs{self.vsVerToGenie[str(self.settings.compiler.version)]}"
+            genieVS = f"vs{vsVerToGenie[str(self.settings.compiler.version)]}"
             self.run(f"{genie} {genieVS}", cwd=self.bxPath)
 
             msbuild = MSBuild(self)
@@ -98,27 +93,45 @@ class bxConan(ConanFile):
             # Use genie with gmake gen, then make on specific projects based on requirements
             # gcc-multilib and g++-multilib required for 32bit cross-compilation, should see if we can check and install through conan
             
+            # Conan to Genie translation maps
+            gccOsToGenie = {"Windows": "--gcc=mingw-", "Linux": "--gcc=linux-gcc", "Macos": "--gcc=osx", "Android": "--gcc=android", "iOS": "--gcc=ios"}
+            gmakeOsToProj = {"Windows": "mingw-", "Linux": "linux", "Macos": "osx", "Android": "android", "iOS": "ios"}
+            gmakeArchToGenieSuffix = {"x86": "-x86", "x86_64": "-x64", "armv8": "-arm64", "armv7": "-arm"}
+            osToUseArchConfigSuffix = {"Windows": False, "Linux": False, "Macos": True, "Android": True, "iOS": True}
+
+            buildTypeToMakeConfig = {"Debug": "config=debug", "Release": "config=release"}
+            archToMakeConfigSuffix = {"x86": "32", "x86_64": "64"}
+            osToUseMakeConfigSuffix = {"Windows": True, "Linux": True, "Macos": False, "Android": False, "iOS": False}
+
             # Generate projects through genie
-            genieGen = f"{self.gccOsToGenie[str(self.settings.os)]}"
-            if self.osToUseArchConfigSuffix[str(self.settings.os)]:
-                genieGen += F"{self.gmakeArchToGenieSuffix[str(self.settings.arch)]}"
+            genieGen = f"{gccOsToGenie[str(self.settings.os)]}"
+            if self.settings.os == "Windows":
+                genieGen += str(self.settings.compiler) #mingw-gcc or mingw-clang
+            if osToUseArchConfigSuffix[str(self.settings.os)]:
+                genieGen += F"{gmakeArchToGenieSuffix[str(self.settings.arch)]}"
             genieGen += " gmake"
             self.run(f"{genie} {genieGen}", cwd=self.bxPath)
 
             # Build project folder and path from given settings
-            projFolder = f"gmake-{self.gmakeOsToProj[str(self.settings.os)]}"
-            if self.osToUseArchConfigSuffix[str(self.settings.os)]:
-                projFolder += self.gmakeArchToGenieSuffix[str(self.settings.arch)]
+            projFolder = f"gmake-{gmakeOsToProj[str(self.settings.os)]}"
+            if self.settings.os == "Windows":
+                projFolder += str(self.settings.compiler) #mingw-gcc or mingw-clang
+            if osToUseArchConfigSuffix[str(self.settings.os)]:
+                projFolder += gmakeArchToGenieSuffix[str(self.settings.arch)]
             projPath = os.path.sep.join([self.bxPath, ".build", "projects", projFolder])
 
             # Build make args from settings
-            conf = self.buildTypeToMakeConfig[str(self.settings.build_type)]
-            if self.osToUseMakeConfigSuffix[str(self.settings.os)]:
-                conf += self.archToMakeConfigSuffix[str(self.settings.arch)]
+            conf = buildTypeToMakeConfig[str(self.settings.build_type)]
+            if osToUseMakeConfigSuffix[str(self.settings.os)]:
+                conf += archToMakeConfigSuffix[str(self.settings.arch)]
+            if self.settings.os == "Windows":
+                mingw = "MINGW=$MINGW_PREFIX"
+            else:
+                mingw = ""
             autotools = Autotools(self)
             # Build with make
             for proj in self.projs:
-                autotools.make(target=proj, args=["-R", f"-C {projPath}", conf])
+                autotools.make(target=proj, args=["-R", f"-C {projPath}", mingw, conf])
 
     def package(self):
         # Get build bin folder
