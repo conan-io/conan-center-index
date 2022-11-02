@@ -55,6 +55,17 @@ When different build tools are use, at least one layout needs to be set.
 The `src_folder` must be the same when using different layouts and should
 not depend on settings or options.
 
+## CMakeToolchain
+
+The old `CMake.definition` should be replaced by `CMakeToolchain.variables` and move to the `generate` method.
+However, there are two main cases to use `cache_variables`:
+
+- When a definition is configured before project()
+- When an option uses CACHE. Need to check project's CMakeLists.txt
+
+For more information refere to the [CMakeToolchain docs](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmaketoolchain.html)
+or check out the converstaion in conan-io/conan#11937 for the brave.
+
 ## New conf_info properties
 
 As described in the documentation `self.user_info` has been depreated and you are now required to use
