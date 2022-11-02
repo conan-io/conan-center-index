@@ -76,19 +76,19 @@ class SpixConan(ConanFile):
         else:
             self.requires("qt/6.3.1")
         self.requires("expat/2.4.9", override=True)
-
-    def validate(self):
-        if self.info.settings.compiler.cppstd:
+        
+    def validate_build(self):
+        if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
             )
 
-        if self.info.options.qt_major == 6 and not self.info.options["qt"].qtshadertools:
+        if self.options.qt_major == 6 and not self.options["qt"].qtshadertools:
             raise ConanInvalidConfiguration(f"{self.ref} requires qt:qtshadertools to get the Quick module")
-        if not (self.info.options["qt"].gui and self.info.options["qt"].qtdeclarative):
+        if not (self.options["qt"].gui and self.options["qt"].qtdeclarative):
             raise ConanInvalidConfiguration(f"{self.ref} requires qt:gui and qt:qtdeclarative to get the Quick module")
 
     def source(self):
