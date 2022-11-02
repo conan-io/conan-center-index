@@ -30,6 +30,9 @@ class EasyExifConan(ConanFile):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
 
+    def layout(self):
+        cmake_layout(self)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
@@ -49,6 +52,3 @@ class EasyExifConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["easyexif"]
-
-    def layout(self):
-        cmake_layout(self)
