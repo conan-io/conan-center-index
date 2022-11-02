@@ -77,11 +77,11 @@ class SpixConan(ConanFile):
             self.requires("qt/6.3.1")
         self.requires("expat/2.4.9", override=True)
         
-    def validate_build(self):
-        if self.settings.compiler.cppstd:
+    def validate(self):
+        if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
             )
