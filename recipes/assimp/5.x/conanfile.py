@@ -1,13 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.51.2"
+required_conan_version = ">=1.53.0"
 
 
 class AssimpConan(ConanFile):
@@ -104,8 +104,7 @@ class AssimpConan(ConanFile):
     default_options.update(dict.fromkeys(_format_option_map, True))
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -117,7 +116,10 @@ class AssimpConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     @property
     def _depends_on_kuba_zip(self):
@@ -189,9 +191,6 @@ class AssimpConan(ConanFile):
     def validate(self):
         if self._depends_on_clipper and Version(self.dependencies["clipper"].ref.version).major != "4":
             raise ConanInvalidConfiguration("Only 'clipper/4.x' is supported")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
