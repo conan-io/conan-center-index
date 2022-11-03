@@ -17,7 +17,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ULFIUS_SHARED"] = self.options["ulfius"].shared
+        tc.variables["ULFIUS_SHARED"] = self.dependencies["ulfius"].options.shared
         tc.generate()
 
     def build(self):

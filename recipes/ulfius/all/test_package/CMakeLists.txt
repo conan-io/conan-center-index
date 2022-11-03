@@ -3,7 +3,7 @@ project(test_package LANGUAGES C)
 
 find_package(Ulfius REQUIRED CONFIG)
 
-option(YDER_SHARED "Ulfius is built as a shared library")
+option(ULFIUS_SHARED "Ulfius is built as a shared library")
 
 add_executable(${PROJECT_NAME} test_package.c)
 if(ULFIUS_SHARED)

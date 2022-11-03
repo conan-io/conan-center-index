@@ -8,7 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["ULFIUS"] = self.options["ulfius"].shared
+        cmake.definitions["ULFIUS_SHARED"] = self.options["ulfius"].shared
         cmake.configure()
         cmake.build()
 
