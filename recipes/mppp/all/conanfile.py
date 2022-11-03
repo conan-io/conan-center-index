@@ -70,7 +70,7 @@ class MpppConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
         if self.options.with_arb:
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't supported arb (yet)")
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support arb (yet)")
         if self.options.with_quadmath:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't supported libquadmath (yet)")
         if self.options.with_boost and self.options["boost"].without_serialization:
