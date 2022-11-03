@@ -136,8 +136,3 @@ class CMakeConan(ConanFile):
             raise ConanException("Module path not found: %s" % mod_path)
 
         self.cpp_info.includedirs = []
-
-        # TODO remove once conan v2 is the only support and recipes have been migrated
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.runenv_info.append_path("PATH", bindir)
