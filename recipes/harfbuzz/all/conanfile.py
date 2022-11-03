@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
+from conan.tools.build import can_run
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.files import (
-    apply_conandata_patches,
     copy,
     export_conandata_patches,
     get,
@@ -109,6 +109,7 @@ class HarfbuzzConan(ConanFile):
             "freetype": is_enabled(self.options.with_freetype),
             "gdi": is_enabled(self.options.get_safe("with_gdi")),
             "directwrite": is_enabled(self.options.get_safe("with_directwrite")),
+            "gobject": is_enabled(can_run(self)),
             "tests": "disabled",
             "docs": "disabled",
             "benchmark": "disabled",
