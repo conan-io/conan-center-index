@@ -1,6 +1,6 @@
 import os
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
@@ -34,22 +34,24 @@ class PolymorphictValueConan(ConanFile):
         }
 
     def validate(self):
-        if self.info.settings.get_safe("compiler.cppstd"):
+        # FIXME: workaround https://github.com/conan-io/conan/issues/12210
+        info = self if Version(conan_version).major < 2 else self.info
+        if info.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
-            str(self.info.settings.compiler))
+            str(info.settings.compiler))
         if not min_version:
             self.output.warning("{} recipe lacks information about the {} "
                                 "compiler support.".format(
-                                    self.name, self.info.settings.compiler))
+                                    self.name, info.settings.compiler))
         else:
-            if Version(self.info.settings.compiler.version) < min_version:
+            if Version(info.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(
                     "{} requires C++{} support. "
                     "The current compiler {} {} does not support it.".format(
                         self.name, self._minimum_cpp_standard,
-                        self.info.settings.compiler,
-                        self.info.settings.compiler.version))
+                        info.settings.compiler,
+                        info.settings.compiler.version))
 
     def package_id(self):
         self.info.clear()
