@@ -8,6 +8,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.files import (
     copy,
+    apply_conandata_patches,
     export_conandata_patches,
     get,
     rename,
@@ -131,6 +132,7 @@ class HarfbuzzConan(ConanFile):
             self.tool_requires("pkgconf/1.9.3")
 
     def build(self):
+        apply_conandata_patches(self)
         meson = Meson(self)
         meson.configure()
         meson.build()
