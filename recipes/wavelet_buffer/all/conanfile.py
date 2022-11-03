@@ -120,6 +120,30 @@ class WaveletBufferConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires the option 'cimg:enable_fftw=False'"
             )
+        if cimg.options.enable_jpeg:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires the option 'cimg:enable_jpeg=False'"
+            )
+        if cimg.options.enable_openexr:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires the option 'cimg:enable_openexr=False'"
+            )
+        if cimg.options.enable_tiff:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires the option 'cimg:enable_tiff=False'"
+            )
+        if cimg.options.enable_png:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires the option 'cimg:enable_png=False'"
+            )
+        if cimg.options.enable_ffmpeg:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires the option 'cimg:enable_ffmpeg=False'"
+            )
+        if cimg.options.enable_opencv:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires the option 'cimg:enable_opencv=False'"
+            )
 
     def build(self):
         cmake = CMake(self)
