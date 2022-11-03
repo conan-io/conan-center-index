@@ -27,13 +27,9 @@ class FlexConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+            destination=self.source_folder, strip_root=True)
 
     def requirements(self):
         self.requires("m4/1.4.19")
@@ -80,8 +76,8 @@ class FlexConan(ConanFile):
         autotools.make()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
+        self.copy("COPYING", src=self.source_folder, dst="licenses")
+        autotools = Autotools(self)
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
