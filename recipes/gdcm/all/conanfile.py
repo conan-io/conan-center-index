@@ -31,7 +31,7 @@ class GDCMConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 11
 
     def export_sources(self):
@@ -55,7 +55,7 @@ class GDCMConan(ConanFile):
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._min_cppstd)
         if is_msvc_static_runtime(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared and static runtime together.")
 
@@ -71,8 +71,8 @@ class GDCMConan(ConanFile):
         tc.variables["GDCM_USE_SYSTEM_EXPAT"] = True
         tc.variables["GDCM_USE_SYSTEM_OPENJPEG"] = True
         tc.variables["GDCM_USE_SYSTEM_ZLIB"] = True
-        if not valid_min_cppstd(self, self._minimum_cpp_standard):
-            tc.variables["CMAKE_CXX_STANDARD"] = self._minimum_cpp_standard
+        if not valid_min_cppstd(self, self._min_cppstd):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
