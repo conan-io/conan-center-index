@@ -92,9 +92,10 @@ class LibharuConan(ConanFile):
             copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
     def package_info(self):
-        libprefix = "lib" if is_msvc(self) else ""
+        libprefix = ""
         libsuffix = ""
         if Version(self.version) == "2.3.0":
+            libprefix = "lib" if is_msvc(self) else ""
             libsuffix = "{}{}".format(
                 "" if self.options.shared else "s",
                 "d" if is_msvc(self) and self.settings.build_type == "Debug" else "",
