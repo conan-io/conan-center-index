@@ -172,8 +172,8 @@ class Libxml2Conan(ConanFile):
 
             incdirs = [incdir for dep in self.dependencies.values() for incdir in dep.cpp_info.includedirs]
             libdirs = [libdir for dep in self.dependencies.values() for libdir in dep.cpp_info.libdirs]
-            args.append("include=\"{}\"".format(";".join(incdirs)))
-            args.append("lib=\"{}\"".format(";".join(libdirs)))
+            args.append(f"include=\"{';'.join(incdirs)}\"")
+            args.append(f"lib=\"{';'.join(libdirs)}\"")
 
             for name in self._option_names:
                 cname = {"mem-debug": "mem_debug",
@@ -234,8 +234,8 @@ class Libxml2Conan(ConanFile):
 
             incdirs = [incdir for dep in self.dependencies.values() for incdir in dep.cpp_info.includedirs]
             libdirs = [libdir for dep in self.dependencies.values() for libdir in dep.cpp_info.libdirs]
-            args.append("include=\"{' -I'.join(incdirs)}\"")
-            args.append("lib=\"{' -L'.join(libdirs)}\"")
+            args.append(f"include=\"{' -I'.join(incdirs)}\"")
+            args.append(f"lib=\"{' -L'.join(libdirs)}\"")
 
             for name in self._option_names:
                 cname = {
@@ -253,8 +253,8 @@ class Libxml2Conan(ConanFile):
                 if option:
                     replace_in_file(self,
                         "Makefile.mingw",
-                        "LIBS += -l{old_libname}",
-                        "LIBS += -l{' -l'.join(self.dependencies[package].cpp_info.libs)}",
+                        f"LIBS += -l{old_libname}",
+                        f"LIBS += -l{' -l'.join(self.dependencies[package].cpp_info.libs)}",
                     )
 
             fix_library(self.options.iconv, "libiconv", "iconv")
