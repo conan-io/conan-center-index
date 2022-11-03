@@ -54,7 +54,7 @@ class GDCMConan(ConanFile):
     def requirements(self):
         self.requires("expat/2.4.9")
         self.requires("openjpeg/2.5.0")
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
