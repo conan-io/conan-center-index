@@ -1,9 +1,11 @@
 import os
 
-from conan import ConanFile, tools
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.50.0"
 
@@ -33,7 +35,7 @@ class PolymorphictValueConan(ConanFile):
 
     def validate(self):
         if self.info.settings.get_safe("compiler.cppstd"):
-            tools.build.check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
             str(self.info.settings.compiler))
         if not min_version:
@@ -41,7 +43,7 @@ class PolymorphictValueConan(ConanFile):
                                 "compiler support.".format(
                                     self.name, self.info.settings.compiler))
         else:
-            if tools.Version(self.info.settings.compiler.version) < min_version:
+            if Version(self.info.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(
                     "{} requires C++{} support. "
                     "The current compiler {} {} does not support it.".format(
@@ -53,7 +55,7 @@ class PolymorphictValueConan(ConanFile):
         self.info.clear()
 
     def layout(self):
-        basic_layout(self, src_folder="source")
+        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
