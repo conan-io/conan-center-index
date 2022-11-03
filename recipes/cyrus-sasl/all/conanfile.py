@@ -76,21 +76,22 @@ class CyrusSaslConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
         if self.options.with_postgresql:
             self.requires("libpq/14.5")
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.0.30")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.39.4")
-        if self.options.with_gssapi:
-            raise ConanInvalidConfiguration("with_gssapi requires krb5 recipe, not yet available in CCI")
-            self.requires("krb5/1.18.3")
 
     def validate(self):
         if self.info.settings.os == "Windows":
             raise ConanInvalidConfiguration(
                 "Cyrus SASL package is not compatible with Windows yet."
+            )
+        if self.options.with_gssapi:
+            raise ConanInvalidConfiguration(
+                f"{self.name}:with_gssapi=True requires krb5 recipe, not yet available in conan-center",
             )
 
     def build_requirements(self):
