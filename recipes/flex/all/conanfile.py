@@ -2,8 +2,8 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.files import get, rmdir, rm
-from conans import AutoToolsBuildEnvironment
-import functools
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.env import VirtualBuildEnv
 import os
 
 required_conan_version = ">=1.33.0"
@@ -51,11 +51,10 @@ class FlexConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Flex package is not compatible with Windows. Consider using winflexbison instead.")
 
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self)
+    def generate(self):
+        tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
-        configure_args = [
+        tc.configure_args.extend([
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(not yes_no(self.options.shared)),
             "--disable-nls",
@@ -66,13 +65,17 @@ class FlexConan(ConanFile):
             "ac_cv_func_malloc_0_nonnull=yes", "ac_cv_func_realloc_0_nonnull=yes",
             # https://github.com/easybuilders/easybuild-easyconfigs/pull/5792
             "ac_cv_func_reallocarray=no",
-        ]
+        ])
+        tc.generate()
+        tc = AutotoolsDeps(self)
+        tc.generate()
 
-        autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
-        return autotools
+        tc = VirtualBuildEnv(self)
+        tc.generate(scope="build")
 
     def build(self):
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
+        autotools.configure()
         autotools.make()
 
     def package(self):
