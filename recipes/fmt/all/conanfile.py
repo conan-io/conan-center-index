@@ -1,9 +1,10 @@
 import os
 
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.layout import basic_layout, cmake_layout
+from conan.tools.layout import basic_layout
+from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
@@ -86,6 +87,10 @@ class FmtConan(ConanFile):
             self.info.clear()
         else:
             del self.info.options.with_fmt_alias
+
+    def validate(self):
+        if self.info.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
