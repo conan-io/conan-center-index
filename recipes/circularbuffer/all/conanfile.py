@@ -22,7 +22,7 @@ class CircularBufferConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def package(self):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder,
