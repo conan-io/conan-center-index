@@ -204,8 +204,8 @@ class Libxml2Conan(ConanFile):
                             libname += '.lib'
                         libs.append(libname)
                     replace_in_file(self, "Makefile.msvc",
-                                          "LIBS = $(LIBS) %s" % old_libname,
-                                          "LIBS = $(LIBS) %s" % ' '.join(libs))
+                                          f"LIBS = $(LIBS) {old_libname}",
+                                          f"LIBS = $(LIBS) {' '.join(libs)}")
 
             fix_library(self.options.zlib, 'zlib', 'zlib.lib')
             fix_library(self.options.lzma, "xz_utils", "liblzma.lib")
@@ -234,15 +234,15 @@ class Libxml2Conan(ConanFile):
                 "cscript",
                 "configure.js",
                 "compiler=mingw",
-                "prefix={}".format(self.package_folder),
-                "debug={}".format(yes_no(self.settings.build_type == "Debug")),
-                "static={}".format(yes_no(not self.options.shared)),
+                f"prefix={self.package_folder}",
+                f"debug={yes_no(self.settings.build_type == 'Debug')}",
+                f"static={yes_no(not self.options.shared)}",
             ]
 
             incdirs = [incdir for dep in self.dependencies.values() for incdir in dep.cpp_info.includedirs]
             libdirs = [libdir for dep in self.dependencies.values() for libdir in dep.cpp_info.libdirs]
-            args.append("include=\"{}\"".format(" -I".join(incdirs)))
-            args.append("lib=\"{}\"".format(" -L".join(libdirs)))
+            args.append("include=\"{' -I'.join(incdirs)}\"")
+            args.append("lib=\"{' -L'.join(libdirs)}\"")
 
             for name in self._option_names:
                 cname = {
@@ -250,7 +250,7 @@ class Libxml2Conan(ConanFile):
                     "run-debug": "run_debug",
                     "docbook": "docb",
                 }.get(name, name)
-                args.append("{}={}".format(cname, yes_no(getattr(self.options, name))))
+                args.append(f"{cname}={yes_no(getattr(self.options, name))}")
             configure_command = " ".join(args)
             self.output.info(configure_command)
             self.run(configure_command)
@@ -260,8 +260,8 @@ class Libxml2Conan(ConanFile):
                 if option:
                     replace_in_file(self,
                         "Makefile.mingw",
-                        "LIBS += -l{}".format(old_libname),
-                        "LIBS += -l{}".format(" -l".join(self.dependencies[package].cpp_info.libs)),
+                        "LIBS += -l{old_libname}",
+                        "LIBS += -l{' -l'.join(self.dependencies[package].cpp_info.libs)}",
                     )
 
             fix_library(self.options.iconv, "libiconv", "iconv")
