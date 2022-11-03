@@ -2,9 +2,9 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class EigenConan(ConanFile):
@@ -13,8 +13,7 @@ class EigenConan(ConanFile):
     homepage = "http://eigen.tuxfamily.org"
     description = "Eigen is a C++ template library for linear algebra: matrices, vectors," \
                   " numerical solvers, and related algorithms."
-    topics = ("eigen", "algebra", "linear-algebra", "vector", "numerical")
-
+    topics = ("algebra", "linear-algebra", "matrix", "vector", "numerical")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "MPL2_only": [True, False],
@@ -31,14 +30,14 @@ class EigenConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, patch["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def package_id(self):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

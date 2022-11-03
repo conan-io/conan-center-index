@@ -37,7 +37,8 @@ This section gathers the most common questions from the community related to pac
   * [Why are version ranges not allowed?](#why-are-version-ranges-not-allowed)
   * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)
   * [How to watch only specific recipes?](#how-to-watch-only-specific-recipes)
-  * [Is it possible to disable Pylint?](#is-it-possible-to-disable-pylint)<!-- endToc -->
+  * [Is it possible to disable Pylint?](#is-it-possible-to-disable-pylint)
+  * [How long can I be inactive before being removed from the authorized users list?](#how-long-can-i-be-inactive-before-being-removed-from-the-authorized-users-list)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -409,3 +410,7 @@ merging to the master branch. Feel free to contribute to a new Github Action tha
 
 No. The [pylint](v2_linter.md) has an important role of keeping any recipe prepared for [Conan v2 migration](v2_migration.md). In case you are having
 difficult to understand [linter errors](linters.md), please comment on your pull request about the problem to receive help from the community.
+
+## How long can I be inactive before being removed from the authorized users list?
+
+Please, read [Inactivity and user removal section](how_to_add_packages.md#inactivity-and-user-removal).

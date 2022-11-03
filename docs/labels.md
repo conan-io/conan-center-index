@@ -32,8 +32,8 @@ If the pull request modifies anything else, the label won't be assigned, we need
 
 Label [`Bump version`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22Bump+version%22)
 is assigned by the bot to pull-requests that are just adding a new version of the library. The new version should satisfy
-some extra conditions: sources should provide from the same URL domain as previous versions and the version itself should
-be valid semver.
+some extra conditions: sources should provide from the same URL domain as previous versions.
+For now, only [SEMVER](https://semver.org/#semantic-versioning-200) and `<MAJOR.MINOR>` are acceptable version formats.
 
 > These pull-requests will be merged right away without requiring any approval (CI and CLA checks must have passed).
 

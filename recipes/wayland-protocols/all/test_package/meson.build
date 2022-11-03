@@ -4,14 +4,20 @@ wayland_client_dep = dependency('wayland-client', version: '>=1.2.0', required: 
 wayland_protocols_dep = dependency('wayland-protocols', required: true)
 wayland_protocols_datadir = wayland_protocols_dep.get_pkgconfig_variable('pkgdatadir')
 
-wayland_scanner = find_program('wayland-scanner')
+if get_option('has_build_profile')
+    wayland_scanner_dep = dependency('wayland-scanner_BUILD', native: true)
+    wayland_scanner_for_build = find_program(wayland_scanner_dep.get_variable(pkgconfig: 'wayland_scanner'))
+else
+    wayland_scanner_for_build = find_program('wayland-scanner')
+endif
+
 wayland_scanner_code_gen = generator(
-    wayland_scanner,
+    wayland_scanner_for_build,
     output: '@BASENAME@-protocol.c',
     arguments: ['code', '@INPUT@', '@OUTPUT@'],
 )
 wayland_scanner_client_header_gen = generator(
-    wayland_scanner,
+    wayland_scanner_for_build,
     output: '@BASENAME@-client-protocol.h',
     arguments: ['client-header', '@INPUT@', '@OUTPUT@'],
 )
