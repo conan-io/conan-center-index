@@ -60,7 +60,16 @@ class NetcdfConan(ConanFile):
 
     def requirements(self):
         if self._with_hdf5:
-            self.requires("hdf5/1.13.1")
+            if self.version == "4.7.4" and self.options.byterange:
+                # 4.7.4 was built and tested with hdf5/1.12.0
+                # It would be nice to upgrade to 1.12.1,
+                # but when the byterange feature is enabled,
+                # it triggers a compile error that was later patched in 4.8.x
+                # So we will require the older hdf5 to keep the older behaviour.
+                self.requires("hdf5/1.12.0")
+            else:
+                self.requires("hdf5/1.13.1")
+
         if self.options.dap or self.options.byterange:
             self.requires("libcurl/7.85.0")
 
