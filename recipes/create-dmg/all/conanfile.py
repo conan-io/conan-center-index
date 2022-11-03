@@ -13,11 +13,11 @@ class CreateDmgConan(ConanFile):
     topics = "command-line", "dmg"
     homepage = "https://github.com/create-dmg/create-dmg"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os"
+    settings = "os", "arch", "compiler", "build_type"
     exports_sources = 'patches/**'
 
     def layout(self):
-        pass
+        basic_layout(self)
 
     def validate(self):
         if self.settings.os != "Macos":
@@ -39,7 +39,8 @@ class CreateDmgConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_id(self):
-        self.info.clear()
+        del self.settings.compiler
+        del self.settings.build_type
 
     def package_info(self):
         self.cpp_info.frameworkdirs = []
