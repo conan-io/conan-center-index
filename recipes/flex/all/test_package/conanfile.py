@@ -4,6 +4,7 @@ from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 import os
+import shutil
 
 
 class TestPackageConan(ConanFile):
@@ -31,7 +32,7 @@ class TestPackageConan(ConanFile):
     def build(self):
         if not hasattr(self, "settings_build"):
             # Only test location of flex executable when not cross building
-            flex_bin = tools.which("flex")
+            flex_bin = shutil.which("flex")
             if not flex_bin.startswith(self.deps_cpp_info["flex"].rootpath):
                 raise ConanException("Wrong flex executable captured")
 
@@ -47,7 +48,7 @@ class TestPackageConan(ConanFile):
         if not cross_building(self, skip_x64_x86=True):
             bin_path = os.path.join("bin", "test_package")
             src = os.path.join(self.source_folder, "basic_nr.txt")
-            self.run("{} {}".format(bin_path, src), run_environment=True)
+            self.run(f"{bin_path} {src}", run_environment=True)
 
             test_yywrap = os.path.join("bin", "test_yywrap")
             self.run(test_yywrap, run_environment=True)
