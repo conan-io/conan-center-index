@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.files import get, copy, rmdir
+from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
@@ -73,39 +74,44 @@ class WaveletBufferConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "16",
             "gcc": "8",
             "clang": "13",
             "apple-clang": "13",
         }
 
     def validate(self):
-        if self.options.shared:
-            raise ConanInvalidConfiguration(
-                "{} requires static linking".format(self.name)
-            )
-
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
 
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warn(
-                "{} recipe lacks information about the {} compiler support.".format(
-                    self.name, self.settings.compiler
-                )
+        # Compiler version check
+        check_min_vs(self, 192)
+        if not is_msvc(self):
+            minimum_version = self._minimum_compilers_version.get(
+                str(self.info.settings.compiler), False
             )
-        else:
-            if Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration(
-                    "{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                        self.name,
-                        self._minimum_cpp_standard,
-                        self.settings.compiler,
-                        self.settings.compiler.version,
+            if not minimum_version:
+                self.output.warn(
+                    "{} recipe lacks information about the {} compiler support.".format(
+                        self.name, self.settings.compiler
                     )
                 )
+            else:
+                if Version(self.info.settings.compiler.version) < minimum_version:
+                    raise ConanInvalidConfiguration(
+                        "{} requires C++{} support. The current compiler {} {} does not support it.".format(
+                            self.ref,
+                            self._minimum_cpp_standard,
+                            self.settings.compiler,
+                            self.settings.compiler.version,
+                        )
+                    )
 
+        if is_msvc(self) and self.info.options.shared:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} can not be built as shared on Visual Studio and msvc."
+            )
+
+        # Dependency options check
         cimg = self.dependencies["cimg"]
         if cimg.options.enable_fftw:
             raise ConanInvalidConfiguration(
