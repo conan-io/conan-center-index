@@ -1,4 +1,4 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.tools.files import chdir, copy, rmdir, get, replace_in_file
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -42,7 +42,7 @@ class CMakeConan(ConanFile):
         if self.info.settings.os == "Macos" and self.info.settings.arch == "x86":
             raise ConanInvalidConfiguration("CMake does not support x86 for macOS")
 
-        if self.info.settings.os == "Windows" and self.info.options.bootstrap:
+        if self.info.settings.os == "Windows" and self.options.bootstrap:
             raise ConanInvalidConfiguration("CMake does not support bootstrapping on Windows")
 
         minimal_cpp_standard = "11"
@@ -80,7 +80,7 @@ class CMakeConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        if self.info.options.bootstrap:
+        if self.options.bootstrap:
             tc = AutotoolsToolchain(self)
             tc.generate()
         else:
@@ -99,7 +99,7 @@ class CMakeConan(ConanFile):
             tc.generate()
 
     def build(self):
-        if self.info.options.bootstrap:
+        if self.options.bootstrap:
             with chdir(self, self.source_folder):
                 self.run('./bootstrap --prefix="" --parallel={}'.format(build_jobs(self)))
                 autotools = Autotools(self)
@@ -123,6 +123,7 @@ class CMakeConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.compiler
+        del self.info.options.bootstrap
 
     def package_info(self):
         self.buildenv_info.prepend_path("CMAKE_ROOT", self.package_folder)
@@ -137,7 +138,6 @@ class CMakeConan(ConanFile):
         self.cpp_info.includedirs = []
 
         # TODO remove once conan v2 is the only support and recipes have been migrated
-        if Version(conan_version).major < 2:
-            bindir = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bindir))
-            self.runenv_info.append_path("PATH", bindir)
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.runenv_info.append_path("PATH", bindir)
