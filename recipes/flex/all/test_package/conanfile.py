@@ -1,11 +1,13 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanException
+from conan import ConanFile
+from conan.errors import ConanException
+from conan.tools.build import cross_building
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake"
     test_type = "explicit"
 
     def requirements(self):
@@ -14,6 +16,18 @@ class TestPackageConan(ConanFile):
     def build_requirements(self):
         self.build_requires(self.tested_reference_str)
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        # tc.variables["FLEX_ROOT"] = self.deps_cpp_info["flex"].rootpath
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+        tc = VirtualBuildEnv(self)
+        tc.generate(scope="build")
+
+    def layout(self):
+        cmake_layout(self)
+
     def build(self):
         if not hasattr(self, "settings_build"):
             # Only test location of flex executable when not cross building
@@ -21,17 +35,16 @@ class TestPackageConan(ConanFile):
             if not flex_bin.startswith(self.deps_cpp_info["flex"].rootpath):
                 raise ConanException("Wrong flex executable captured")
 
-        if not tools.cross_building(self, skip_x64_x86=True) or hasattr(self, "settings_build"):
+        if not cross_building(self, skip_x64_x86=True) or hasattr(self, "settings_build"):
             self.run("flex --version", run_environment=not hasattr(self, "settings_build"))
 
             print(os.environ["PATH"])
             cmake = CMake(self)
-            cmake.definitions["FLEX_ROOT"] = self.deps_cpp_info["flex"].rootpath
             cmake.configure()
             cmake.build()
 
     def test(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not cross_building(self, skip_x64_x86=True):
             bin_path = os.path.join("bin", "test_package")
             src = os.path.join(self.source_folder, "basic_nr.txt")
             self.run("{} {}".format(bin_path, src), run_environment=True)
