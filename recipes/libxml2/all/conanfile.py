@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.scm import Version
 from conan.tools.build import cross_building, build_jobs
 from conan.tools.files import copy, get, rename, rm, rmdir, replace_in_file, save, chdir, mkdir
