@@ -10,12 +10,14 @@ from conan.tools.files import (
     copy,
     export_conandata_patches,
     get,
+    rename,
     rmdir
 )
-from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.scm import Version
 from conans.tools import stdcpp_library
 
+import glob
 import os
 
 required_conan_version = ">=1.52.0"
@@ -134,8 +136,23 @@ class HarfbuzzConan(ConanFile):
         meson.build()
 
     def package(self):
+        def fix_msvc_libname(remove_lib_prefix=True):
+            """remove lib prefix & change extension to .lib"""
+            if not is_msvc(self):
+                return
+            libdirs = getattr(self.cpp.package, "libdirs")
+            for libdir in libdirs:
+                for ext in [".dll.a", ".dll.lib", ".a"]:
+                    full_folder = os.path.join(self.package_folder, libdir)
+                    for filepath in glob.glob(os.path.join(full_folder, f"*{ext}")):
+                        libname = os.path.basename(filepath)[0:-len(ext)]
+                        if remove_lib_prefix and libname[0:3] == "lib":
+                            libname = libname[3:]
+                        rename(self, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))
+
         meson = Meson(self)
         meson.install()
+        fix_msvc_libname()
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
