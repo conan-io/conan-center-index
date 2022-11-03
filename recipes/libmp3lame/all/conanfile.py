@@ -36,10 +36,6 @@ class LibMP3LameConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -133,10 +129,12 @@ class LibMP3LameConan(ConanFile):
             self.run(command)
 
     def _build_autotools(self):
-        copy(self, "config.sub", self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self.source_folder))
-        copy(self, "config.guess", self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self.source_folder))
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            if gnu_config:
+                copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
