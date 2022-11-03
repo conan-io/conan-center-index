@@ -31,7 +31,7 @@ class EasyExifConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
+        if self.info.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, 11)
 
     def layout(self):
