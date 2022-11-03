@@ -116,13 +116,15 @@ class Libxml2Conan(ConanFile):
         if is_msvc(self):
             tc = VCVars(self)
             tc.generate()
-            # TODO: no conan v2 build helper for NMake yet (see https://github.com/conan-io/conan/issues/12188)
-            #       Better than nothing: rely on legacy VisualStudioBuildEnvironment to inject CL & LIB env vars
-            #       in order to honor build_type & runtime from profile
             env = Environment()
             for var, value in VisualStudioBuildEnvironment(self).vars.items():
                 env.define(var, value)
-            env.vars(self).save_script("buildenv_nmake")
+            # TODO: no conan v2 build helper for NMake yet (see https://github.com/conan-io/conan/issues/12188)
+            #       So populate CL with AutotoolsToolchain cflags
+            cflags = AutotoolsToolchain(self).cflags
+            if c_flags:
+                env.define("CL", c_flags)
+            env.vars(self).save_script("conanbuildenv_nmake")
         elif self._is_mingw_windows:
             pass # nothing to do for mingw?  it calls mingw-make directly
         else:
