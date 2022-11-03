@@ -8,5 +8,11 @@ sources:
 patches:
   "2.3.0":
     - patch_file: "patches/0001-allow-cmake-subproject.patch"
+      patch_type: "conan"
+      patch_description: "Allow cmake subproject"
     - patch_file: "patches/0002-linux-add-m-system-library.patch"
+      patch_type: "conan"
+      patch_description: "Linux: add m system library"
     - patch_file: "patches/0003-rename-tiff-symbols.patch"
+      patch_type: "conan"
+      patch_description: "Rename TIFF symbols"
