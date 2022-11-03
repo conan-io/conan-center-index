@@ -13,6 +13,10 @@ patches:
     - patch_file: "patches/0.12.3-001_link_to_conan.patch"
       patch_description: "find conan package and link these"
       patch_type: "conan"
+    - patch_file: "patches/0.12.2-002_support_older_gcc.patch"
+      patch_description: "fix name look up issue"
+      patch_type: "portability"
+      patch_source: "https://github.com/lief-project/LIEF/pull/815"
   "0.12.2":
     - patch_file: "patches/0.12.2-001_link_to_conan.patch"
       patch_description: "find conan package and link these"
