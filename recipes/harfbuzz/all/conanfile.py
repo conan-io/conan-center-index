@@ -12,6 +12,7 @@ from conan.tools.files import (
     export_conandata_patches,
     get,
     rename,
+    rm,
     rmdir
 )
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
@@ -156,6 +157,7 @@ class HarfbuzzConan(ConanFile):
         meson.install()
         fix_msvc_libname()
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
