@@ -61,5 +61,6 @@ class OpenJDK(ConanFile):
 
     def package_info(self):
         self.output.info(f"Creating JAVA_HOME environment variable with : {self.package_folder}")
+        self.env_info.JAVA_HOME = self.package_folder
         self.buildenv_info.append("JAVA_HOME", self.package_folder)
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
