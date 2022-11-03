@@ -106,18 +106,18 @@ class UlfiusConan(ConanFile):
             set_target_properties(MHD::MHD PROPERTIES INTERFACE_LINK_LIBRARIES "libmicrohttpd::libmicrohttpd")
             set(MHD_VERSION_STRING {self.dependencies['libmicrohttpd'].ref.version})
         """))
-    save(self, os.path.join(self.generators_folder, "MHDConfigVersion.cmake"), textwrap.dedent(f"""\
-        set(PACKAGE_VERSION "{ self.dependencies['libmicrohttpd'].ref.version }")
+        save(self, os.path.join(self.generators_folder, "MHDConfigVersion.cmake"), textwrap.dedent(f"""\
+            set(PACKAGE_VERSION "{ self.dependencies['libmicrohttpd'].ref.version }")
 
-        if(PACKAGE_VERSION VERSION_LESS PACKAGE_FIND_VERSION)
-          set(PACKAGE_VERSION_COMPATIBLE FALSE)
-        else()
-          set(PACKAGE_VERSION_COMPATIBLE TRUE)
-          if(PACKAGE_FIND_VERSION STREQUAL PACKAGE_VERSION)
-            set(PACKAGE_VERSION_EXACT TRUE)
-          endif()
-        endif()
-    """))
+            if(PACKAGE_VERSION VERSION_LESS PACKAGE_FIND_VERSION)
+                set(PACKAGE_VERSION_COMPATIBLE FALSE)
+            else()
+                set(PACKAGE_VERSION_COMPATIBLE TRUE)
+                if(PACKAGE_FIND_VERSION STREQUAL PACKAGE_VERSION)
+                    set(PACKAGE_VERSION_EXACT TRUE)
+                endif()
+            endif()
+        """))
 
         # Shared ulfius looks for Orcania::Orcania and Yder::Yder
         # Static ulfius looks for Orcania::Orcania-static and Yder::Yder-static
