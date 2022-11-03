@@ -338,8 +338,8 @@ class Libxml2Conan(ConanFile):
 
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
             rm(self, "*.sh", os.path.join(self.package_folder, "lib"))
-            for prefix in ["run", "test"]:
-                rm(self, prefix + "*", os.path.join(self.package_folder, "bin"))
+            rm(self, "run*", os.path.join(self.package_folder, "bin"))
+            rm(self, "test*", os.path.join(self.package_folder, "bin"))
             rmdir(self, os.path.join(self.package_folder, "share"))
             rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
