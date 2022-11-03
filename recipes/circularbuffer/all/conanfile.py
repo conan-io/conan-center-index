@@ -5,7 +5,7 @@ from conan.tools.cmake import CMakeToolchain
 
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.47.0"
 
 
 class CircularBufferConan(ConanFile):
