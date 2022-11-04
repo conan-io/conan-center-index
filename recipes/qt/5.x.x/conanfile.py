@@ -350,6 +350,10 @@ class QtConan(ConanFile):
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
 
+        if cross_building(self) and self.options.cross_compile == "None":
+            raise ConanInvalidConfiguration("option cross_compile must be set for cross compilation "
+                                            "cf https://doc.qt.io/qt-5/configure-options.html#cross-compilation-options")
+
     def requirements(self):
         self.requires("zlib/1.2.13")
         if self.options.openssl:
@@ -823,7 +827,7 @@ Examples = bin/datadir/examples""")
                 rmdir(self, os.path.join(self.package_folder, "lib", "cmake", m))
 
         extension = ""
-        if self.settings.os == "Windows":
+        if self._settings_build.os == "Windows":
             extension = ".exe"
         v = Version(self.version)
         filecontents = textwrap.dedent("""\
