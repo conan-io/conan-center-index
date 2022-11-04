@@ -444,7 +444,7 @@ class QtConan(ConanFile):
     def _make_program(self):
         if is_msvc(self):
             return "jom"
-        elif tools.os_info.is_windows:
+        elif self._settings_build.os == "Windows":
             return "mingw32-make"
         else:
             return "make"
@@ -729,7 +729,7 @@ class QtConan(ConanFile):
 
         def _getenvpath(var):
             val = os.getenv(var)
-            if val and tools.os_info.is_windows:
+            if val and self._settings_build.os == "Windows":
                 val = val.replace("\\", "/")
                 os.environ[var] = val
             return val
@@ -747,7 +747,7 @@ class QtConan(ConanFile):
                          'QMAKE_LINK="' + value + '"',
                          'QMAKE_LINK_SHLIB="' + value + '"']
 
-        if tools.os_info.is_linux and self.settings.compiler == "clang":
+        if self._settings_build.os == "Linux" and self.settings.compiler == "clang":
             args += ['QMAKE_CXXFLAGS+="-ftemplate-depth=1024"']
 
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
@@ -767,16 +767,16 @@ class QtConan(ConanFile):
 
                 with tools.environment_append(build_env):
 
-                    if tools.os_info.is_macos:
+                    if self._settings_build.os == "Macos":
                         save(self, ".qmake.stash" , "")
                         save(self, ".qmake.super" , "")
 
                     self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)), run_environment=True)
-                    if tools.os_info.is_macos:
+                    if self._settings_build.os == "Macos":
                         save(self, "bash_env", 'export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
                     with tools.environment_append({
                         "BASH_ENV": os.path.abspath("bash_env")
-                    }) if tools.os_info.is_macos else tools.no_op():
+                    }) if self._settings_build.os == "Macos" else tools.no_op():
                         self.run(self._make_program(), run_environment=True)
 
     @property
