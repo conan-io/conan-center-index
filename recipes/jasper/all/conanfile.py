@@ -92,6 +92,7 @@ class JasperConan(ConanFile):
             os.path.join(self.package_folder, self._module_file_rel_path)
         )
 
+    # FIXME: Missing CMake alias variables. See https://github.com/conan-io/conan/issues/7691
     @staticmethod
     def _create_cmake_module_variables(conanfile, module_file):
         content = textwrap.dedent("""\
