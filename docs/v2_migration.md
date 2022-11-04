@@ -72,6 +72,8 @@ as there are a few cases to look out for:
 - When an variable is declared with `CACHE`.
 
   ```cmake
+  cmake_minimum_required(3.1)
+  project(foobar)
   set(USE_JPEG ON CACHE BOOL "include jpeg support?")
   ```
 
