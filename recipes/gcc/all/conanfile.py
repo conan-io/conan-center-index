@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
@@ -6,6 +6,7 @@ from conan.tools.apple import XCRun
 from conan.tools.files import copy, get, replace_in_file, rmdir, rm
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -161,3 +162,12 @@ class GccConan(ConanFile):
         ranlib = os.path.join(bindir, f"gcc-ranlib-{self.version}")
         self.output.info("Creating RANLIB env var with: " + ranlib)
         self.buildenv_info.define("RANLIB", ranlib)
+
+        # TODO: Remove after conan 2.0 is released
+        if Version(conan_version).major < 2:
+            self.env_info.CC = cc
+            self.env_info.CXX = cxx
+            self.env_info.FC = fc
+            self.env_info.AR = ar
+            self.env_info.NM = nm
+            self.env_info.RANLIB = ranlib
