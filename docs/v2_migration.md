@@ -57,11 +57,23 @@ not depend on settings or options.
 
 ## CMakeToolchain
 
-The old `CMake.definition` should be replaced by `CMakeToolchain.variables` and move to the `generate` method.
-However, there are two main cases to use `cache_variables`:
+The old `CMake.definition` should be replaced by `CMakeToolchain.variables` and moved to the `generate` method.
+However, certain options need to be passed as `cache_variables`. You'll need to check project's `CMakeLists.txt`
+as there are a few cases to look out for: 
 
-- When a definition is configured before project()
-- When an option uses CACHE. Need to check project's CMakeLists.txt
+- When an `option` is configured before `project()` is called.
+
+  ```cmake
+  cmake_minimum_required(3.1)
+  option(BUILD_EXAMPLES "Build examples using foorbar")
+  project(foobar)
+  ```
+
+- When an variable is declared with `CACHE`.
+
+  ```cmake
+  set(USE_JPEG ON CACHE BOOL "include jpeg support?")
+  ```
 
 For more information refere to the [CMakeToolchain docs](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmaketoolchain.html)
 or check out the converstaion in conan-io/conan#11937 for the brave.
