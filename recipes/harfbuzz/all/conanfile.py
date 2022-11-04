@@ -119,6 +119,9 @@ class HarfbuzzConan(ConanFile):
             "benchmark": "disabled",
             "icu_builtin": "false"
         })
+        if is_msvc(self) and Version(self.settings.compiler.version) == "15" and self.settings.build_type == "Debug":
+            # Mitigate https://learn.microsoft.com/en-us/cpp/build/reference/zf?view=msvc-170
+            tc.cpp_args += ["/Z7"]
         tc.generate()
 
         VirtualBuildEnv(self).generate()
