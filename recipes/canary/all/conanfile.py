@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conan.tools.files import copy, get, rmdir
 
@@ -17,6 +18,10 @@ class SocketcanCanaryConan(ConanFile):
 
     settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
 
     def requirements(self):
         self.requires("boost/1.74.0", transitive_headers=True)
