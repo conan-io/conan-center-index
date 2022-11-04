@@ -104,9 +104,16 @@ class HarfbuzzConan(ConanFile):
         def is_enabled(value):
             return "enabled" if value else "disabled"
 
+        def meson_backend_and_flags():
+            if is_msvc(self) and Version(self.settings.compiler.version) == "15" and self.settings.build_type == "Debug":
+                # Mitigate https://learn.microsoft.com/en-us/cpp/build/reference/zf?view=msvc-170
+                return "vs", ["/bigobj"]
+            return "ninja", []
+
         PkgConfigDeps(self).generate()
 
-        tc = MesonToolchain(self)
+        backend, cxxflags = meson_backend_and_flags()
+        tc = MesonToolchain(self, backend=backend)
         tc.project_options.update({
             "glib": is_enabled(self.options.with_glib),
             "icu": is_enabled(self.options.with_icu),
@@ -119,9 +126,7 @@ class HarfbuzzConan(ConanFile):
             "benchmark": "disabled",
             "icu_builtin": "false"
         })
-        if is_msvc(self) and Version(self.settings.compiler.version) == "15" and self.settings.build_type == "Debug":
-            # Mitigate https://learn.microsoft.com/en-us/cpp/build/reference/zf?view=msvc-170
-            tc.cpp_args += ["/Z7"]
+        tc.cpp_args += cxxflags
         tc.generate()
 
         VirtualBuildEnv(self).generate()
@@ -136,6 +141,8 @@ class HarfbuzzConan(ConanFile):
             self.tool_requires("pkgconf/1.9.3")
 
     def build(self):
+
+
         apply_conandata_patches(self)
         meson = Meson(self)
         meson.configure()
