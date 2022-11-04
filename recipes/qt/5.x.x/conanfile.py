@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import build_jobs, check_min_cppstd, cross_building
 from conan.tools.files import chdir, get, load, replace_in_file, rm, rmdir, save, export_conandata_patches, apply_conandata_patches
-from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
 from conans import tools, RunEnvironment
 from conans.model import Generator
@@ -143,10 +143,6 @@ class QtConan(ConanFile):
     generators = "pkg_config"
 
     @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
@@ -157,7 +153,7 @@ class QtConan(ConanFile):
         export_conandata_patches(self)
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and self._is_msvc:
+        if self._settings_build.os == "Windows" and is_msvc(self):
             self.build_requires("jom/1.1.3")
         if self.options.qtwebengine:
             self.build_requires("ninja/1.11.1")
@@ -446,7 +442,7 @@ class QtConan(ConanFile):
         open(os.path.join(self.source_folder, "qt5", "qtbase", "mkspecs", "features", "uikit", "bitcode.prf"), "w").close()
 
     def _make_program(self):
-        if self._is_msvc:
+        if is_msvc(self):
             return "jom"
         elif tools.os_info.is_windows:
             return "mingw32-make"
@@ -497,7 +493,7 @@ class QtConan(ConanFile):
             }.get(str(self.settings.compiler))
 
         elif self.settings.os == "WindowsStore":
-            if self._is_msvc:
+            if is_msvc(self):
                 if self.settings.compiler == "Visual Studio":
                     msvc_version = str(self.settings.compiler.version)
                 else:
@@ -568,7 +564,7 @@ class QtConan(ConanFile):
             args.append("-no-widgets")
         if not self.options.shared:
             args.insert(0, "-static")
-            if self._is_msvc and "MT" in msvc_runtime_flag(self):
+            if is_msvc(self) and "MT" in msvc_runtime_flag(self):
                 args.append("-static-runtime")
         else:
             args.insert(0, "-shared")
@@ -689,7 +685,7 @@ class QtConan(ConanFile):
             args += ["-I \"%s\"" % s for s in self.deps_cpp_info[package].include_paths]
             args += ["-D %s" % s for s in self.deps_cpp_info[package].defines]
         args.append("QMAKE_LIBDIR+=\"%s\"" % " ".join(l for package in self.deps_cpp_info.deps for l in self.deps_cpp_info[package].lib_paths))
-        if not self._is_msvc:
+        if not is_msvc(self):
             args.append("QMAKE_RPATHLINKDIR+=\"%s\"" % ":".join(l for package in self.deps_cpp_info.deps for l in self.deps_cpp_info[package].lib_paths))
 
         if "libmysqlclient" in self.deps_cpp_info.deps:
@@ -738,7 +734,7 @@ class QtConan(ConanFile):
                 os.environ[var] = val
             return val
 
-        if not self._is_msvc:
+        if not is_msvc(self):
             value = _getenvpath("CC")
             if value:
                 args += ['QMAKE_CC="' + value + '"',
@@ -764,7 +760,7 @@ class QtConan(ConanFile):
 
         os.mkdir("build_folder")
         with chdir(self, "build_folder"):
-            with tools.vcvars(self) if self._is_msvc else tools.no_op():
+            with tools.vcvars(self) if is_msvc(self) else tools.no_op():
                 build_env = {"MAKEFLAGS": "j%d" % build_jobs(self), "PKG_CONFIG_PATH": [self.build_folder]}
                 if self.settings.os == "Windows":
                     build_env["PATH"] = [os.path.join(self.source_folder, "qt5", "gnuwin32", "bin")]
@@ -920,7 +916,7 @@ Examples = bin/datadir/examples""")
     def package_id(self):
         del self.info.options.cross_compile
         del self.info.options.sysroot
-        if self.options.multiconfiguration and self._is_msvc:
+        if self.options.multiconfiguration and is_msvc(self):
             if self.settings.compiler == "Visual Studio":
                 if "MD" in self.settings.compiler.runtime:
                     self.info.settings.compiler.runtime = "MD/MDd"
@@ -946,7 +942,7 @@ Examples = bin/datadir/examples""")
         libsuffix = ""
         if not self.options.multiconfiguration:
             if self.settings.build_type == "Debug":
-                if self.settings.os == "Windows" and self._is_msvc:
+                if self.settings.os == "Windows" and is_msvc(self):
                     libsuffix = "d"
                 elif is_apple_os(self):
                     libsuffix = "_debug"
