@@ -1,44 +1,33 @@
-diff --git a/API.md b/API.md
-index 0697257..649976c 100644
---- a/API.md
-+++ b/API.md
-@@ -534,7 +534,12 @@ int ulfius_start_secure_ca_trust_framework(struct _u_instance * u_instance, cons
- int ulfius_start_framework_with_mhd_options(struct _u_instance * u_instance, unsigned int mhd_flags, struct MHD_OptionItem * options);
- ```
+--- src/CMakeLists.txt	2022-10-15 16:33:21.000000000 +0200
++++ CMakeLists.txt	2022-11-04 17:47:35.458046726 +0100
+@@ -20,11 +20,11 @@
  
--In your program, where you want to start the web server, execute the function `ulfius_start_framework(struct _u_instance * u_instance)` for a non-secure http connection. Use the function `ulfius_start_secure_framework(struct _u_instance * u_instance, const char * key_pem, const char * cert_pem)` for a secure https connection, using a valid private key and a valid corresponding server certificate, see GnuTLS documentation for certificate generation. Finally, use the function `int ulfius_start_secure_ca_trust_framework(struct _u_instance * u_instance, const char * key_pem, const char * cert_pem, const char * root_ca_pem)` to start a secure https connection and be able to authenticate clients with a certificate.
-+In your program, where you want to start the web server, execute the function `ulfius_start_framework(struct _u_instance * u_instance)` for a non-secure http connection.
-+
-+Use the function `ulfius_start_secure_framework(struct _u_instance * u_instance, const char * key_pem, const char * cert_pem)` for a secure https connection, using a valid private key and a valid corresponding server certificate, see GnuTLS documentation for certificate generation.
-+
-+Finally, use the function `int ulfius_start_secure_ca_trust_framework(struct _u_instance * u_instance, const char * key_pem, const char * cert_pem, const char * root_ca_pem)` to start a secure https connection and be able to authenticate clients with a certificate.
-+
- Those function accept the previously declared `instance` as first parameter. You can reuse the same callback function as much as you want for different endpoints. On success, these functions returns `U_OK`, otherwise an error code.
- 
- Note: for security concerns, after running `ulfius_start_secure_framework` or `ulfius_start_secure_ca_trust_framework`, you can free the parameters `key_pem`, `cert_pem` and `root_ca_pem` if you want to.
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 7b30153..6d6390e 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -25,6 +25,8 @@ endif()
+ set(CMAKE_C_STANDARD 99)
+ if (NOT MSVC)
+-    set(CMAKE_C_FLAGS "-Wall -Werror ${CMAKE_C_FLAGS}")
++    set(CMAKE_C_FLAGS "-Wall -Werror ${CMAKE_C_FLAGS}")
+ endif()
  
  # library info
- 
+-
 +set(ULFIUS_LIBS )
-+
  set(PROJECT_DESCRIPTION "Web Framework to build REST APIs, Webservices or any HTTP endpoint in C language. Can stream large amount of data, integrate JSON data with Jansson, and create websocket services")
  set(PROJECT_HOMEPAGE_URL "https://github.com/babelouest/ulfius/")
  set(PROJECT_BUGREPORT_PATH "https://github.com/babelouest/ulfius/issues")
-@@ -67,6 +69,8 @@ list(APPEND CMAKE_MODULE_PATH "${U_CMAKE_MODULE_PATH}")
+@@ -64,10 +64,10 @@
  
+ set(U_CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
+ list(APPEND CMAKE_MODULE_PATH "${U_CMAKE_MODULE_PATH}")
+-
  include(GNUInstallDirs)
  include(CheckSymbolExists)
+-
 +include(CMakeDependentOption)
 +include(CMakePackageConfigHelpers)
- 
  # check if _GNU_SOURCE is available
  
-@@ -105,32 +109,20 @@ set(LIB_SRC
+ if (NOT _GNU_SOURCE)
+@@ -105,32 +105,32 @@
  
  # pthread libraries
  find_package (Threads)
@@ -50,36 +39,47 @@ index 7b30153..6d6390e 100644
  
  if (WITH_GNUTLS)
 -    include(FindGnuTLS)
++    #include(FindGnuTLS)
      find_package(GnuTLS REQUIRED)
--    if (GNUTLS_FOUND)
++    list(APPEND ULFIUS_LIBS GnuTLS::GnuTLS)
+     if (GNUTLS_FOUND)
 -        set(LIBS ${LIBS} ${GNUTLS_LIBRARIES})
 -        include_directories(${GNUTLS_INCLUDE_DIRS})
 -    endif ()
-+    list(APPEND ULFIUS_LIBS GnuTLS::GnuTLS)
++        #include_directories(${GNUTLS_INCLUDE_DIRS})
++    endif()
  endif ()
  
- # websocket support
+-# websocket support
++# current websocket implementation depends on GNU TLS, and is not supported on Windows
  
 -option(WITH_WEBSOCKET "Websocket support" ON)
 -
 -if (WIN32)
 -    set(WITH_WEBSOCKET OFF)
 -endif ()
--
--# current websocket implementation depends on GNU TLS
++cmake_dependent_option(WITH_WEBSOCKET "Websocket support" ON "NOT WIN32;WITH_GNUTLS" OFF)
+ 
++#if (WIN32)
++#    set(WITH_WEBSOCKET OFF)
++#endif ()
++#
+ # current websocket implementation depends on GNU TLS
 -if (NOT WITH_GNUTLS)
 -    set(WITH_WEBSOCKET OFF)
 -endif ()
-+# current websocket implementation depends on GNU TLS, and is not supported on Windows
-+cmake_dependent_option(WITH_WEBSOCKET "Websocket support" ON "NOT WIN32;WITH_GNUTLS" OFF)
++#if (NOT WITH_GNUTLS)
++#    set(WITH_WEBSOCKET OFF)
++#endif ()
  
  if (WITH_WEBSOCKET AND NOT ${RELEASE_CODENAME} STREQUAL "stretch")
      set(MHD_MIN_VERSION 0.9.53)
-@@ -144,24 +136,17 @@ else ()
+@@ -144,24 +144,23 @@
      set(U_DISABLE_GNUTLS ON)
  endif ()
  
 -include(FindMHD)
++#include(FindMHD)
  find_package(MHD ${MHD_MIN_VERSION} REQUIRED)
 -if (MHD_FOUND)
 -    set(LIBS ${LIBS} ${MHD_LIBRARIES})
@@ -87,8 +87,10 @@ index 7b30153..6d6390e 100644
 -    if (MHD_VERSION_STRING VERSION_LESS "0.9.53")
 -        set(WITH_WEBSOCKET OFF)
 -    endif ()
-+list(APPEND ULFIUS_LIBS MHD::MHD)
-+include_directories(${MHD_INCLUDE_DIRS})
++#if (MHD_FOUND)
++#endif()
++#list(APPEND ULFIUS_LIBS MHD::MHD)
++#include_directories(${MHD_INCLUDE_DIRS})
 +if (MHD_VERSION_STRING VERSION_LESS "0.9.53")
 +    set(WITH_WEBSOCKET OFF)
  endif ()
@@ -102,10 +104,13 @@ index 7b30153..6d6390e 100644
 -        include_directories(${ZLIB_INCLUDE_DIRS})
 -    endif ()
 +    list(APPEND ULFIUS_LIBS ZLIB::ZLIB)
++    #if (ZLIB_FOUND)
++        #set(LIBS ${LIBS} ${ZLIB_LIBRARIES})
++    #endif ()
  else ()
      set(U_DISABLE_WEBSOCKET ON)
  endif ()
-@@ -169,13 +154,16 @@ endif ()
+@@ -169,13 +168,13 @@
  option(WITH_CURL "Use Curl library" ON)
  
  if (WITH_CURL)
@@ -115,19 +120,16 @@ index 7b30153..6d6390e 100644
 -        set(LIBS ${LIBS} ${CURL_LIBRARIES})
 -        include_directories(${CURL_INCLUDE_DIRS})
 -        set(U_DISABLE_CURL OFF)
-+    # FIXME: CMake 3.12.4 creates CURL::libcurl
 +    if (NOT TARGET CURL::libcurl)
 +        add_library(CURL::libcurl INTERFACE IMPORTED)
-+        set_target_properties(CURL::libcurl PROPERTIES
-+                INTERFACE_LINK_LIBRARIES "${CURL_LIBRARIES}"
-+                INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIRS}")
++        set_target_properties(CURL::libcurl PROPERTIES INTERFACE_LINK_LIBRARIES "${CURL_LIBRARIES}"INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIRS}")
      endif ()
 +    list(APPEND ULFIUS_LIBS CURL::libcurl)
 +    set(U_DISABLE_CURL OFF)
  else ()
      set(U_DISABLE_CURL ON)
  endif ()
-@@ -183,18 +171,21 @@ endif ()
+@@ -183,14 +182,14 @@
  option(WITH_JANSSON "Use jansson library" ON)
  
  if (WITH_JANSSON)
@@ -141,64 +143,43 @@ index 7b30153..6d6390e 100644
 -    endif ()
 +    list(APPEND ULFIUS_LIBS Jansson::Jansson)
 +    set(U_DISABLE_JANSSON OFF)
++    #if (JANSSON_FOUND)
++        #include_directories(${JANSSON_INCLUDE_DIRS})
++        #set(LIBS ${LIBS} ${JANSSON_LIBRARIES})
++    #endif ()
  else ()
      set(U_DISABLE_JANSSON ON)
  endif ()
- 
-+option(BUILD_SHARED "Build shared library." ON)
-+option(BUILD_STATIC "Build static library." OFF)
-+
-+if (NOT BUILD_STATIC AND NOT BUILD_SHARED)
-+    message(FATAL_ERROR "BUILD_SHARED and BUILD_STATIC cannot be both disabled")
-+endif ()
-+
- # TO MY FUTURE SELF
+@@ -199,32 +198,31 @@
  # The following 2 blocks are put BEFORE searching for Orcania and Yder by design
  # Otherwise it will lead to cmake errors
-@@ -202,41 +193,66 @@ endif ()
- 
+ # DON'T MOVE IT BELOW PLEASE!
+-
  # static library
- 
--option(BUILD_STATIC "Build static library." OFF)
+-
++option(BUILD_SHARED "Build shared library." ON)
+ option(BUILD_STATIC "Build static library." OFF)
 -
  if (BUILD_STATIC)
      add_library(ulfius_static STATIC ${LIB_SRC})
 -    target_compile_definitions(ulfius_static PUBLIC -DO_STATIC_LIBRARY)
-+    add_library(Ulfius::Ulfius-static ALIAS ulfius_static)
-+    target_include_directories(ulfius_static
-+        PUBLIC "$<BUILD_INTERFACE:${INC_DIR}>"
-+        PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>"
-+        PUBLIC "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
+-    set_target_properties(ulfius_static PROPERTIES
+-                          OUTPUT_NAME ulfius)
++    target_include_directories(ulfius_static PUBLIC "$<BUILD_INTERFACE:${INC_DIR}>" PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>" PUBLIC "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 +    target_link_libraries(ulfius_static PUBLIC ${ULFIUS_LIBS})
 +    target_compile_definitions(ulfius_static PUBLIC O_STATIC_LIBRARY)
-     set_target_properties(ulfius_static PROPERTIES
--                          OUTPUT_NAME ulfius)
-+            PUBLIC_HEADER "${INC_DIR}/ulfius.h;${PROJECT_BINARY_DIR}/ulfius-cfg.h"
-+            OUTPUT_NAME ulfius
-+            EXPORT_NAME Ulfius-static)
++    set_target_properties(ulfius_static PROPERTIES PUBLIC_HEADER "${INC_DIR}/ulfius.h;${PROJECT_BINARY_DIR}/ulfius-cfg.h" OUTPUT_NAME ulfius EXPORT_NAME Ulfius-static)
 +    if (MSVC)
-+        set_target_properties(ulfius_static PROPERTIES
-+                OUTPUT_NAME ulfius-static)
-+    endif ()
-+    if (NOT MSVC)
-+        target_compile_options(ulfius_static PRIVATE -Wextra)
++        set_target_properties(ulfius_static PROPERTIES OUTPUT_NAME ulfius-static)
 +    endif ()
 +    set(ulfius_lib ulfius_static)
  endif ()
- 
+-
  # shared library
- 
+-
 -add_library(ulfius SHARED ${LIB_SRC})
 -if (NOT MSVC)
-+if (BUILD_SHARED)
-+    add_library(ulfius SHARED ${LIB_SRC})
-+    add_library(Ulfius::Ulfius ALIAS ulfius)
-+    target_include_directories(ulfius
-+        PUBLIC "$<BUILD_INTERFACE:${INC_DIR}>"
-+        PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>"
-+        PUBLIC "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
-+    target_link_libraries(ulfius PUBLIC ${ULFIUS_LIBS})
-     set_target_properties(ulfius PROPERTIES
+-    set_target_properties(ulfius PROPERTIES
 -        COMPILE_OPTIONS -Wextra
 -        PUBLIC_HEADER "${INC_DIR}/ulfius.h;${PROJECT_BINARY_DIR}/ulfius-cfg.h"
 -        VERSION "${LIBRARY_VERSION}"
@@ -206,92 +187,45 @@ index 7b30153..6d6390e 100644
 -endif()
 -if (WIN32)
 -    set_target_properties(ulfius PROPERTIES SUFFIX "-${LIBRARY_VERSION_MAJOR}.dll")
-+            PUBLIC_HEADER "${INC_DIR}/ulfius.h;${PROJECT_BINARY_DIR}/ulfius-cfg.h"
-+            VERSION "${LIBRARY_VERSION}"
-+            SOVERSION "${LIBRARY_SOVERSION}"
-+            WINDOWS_EXPORT_ALL_SYMBOLS TRUE
-+            EXPORT_NAME Ulfius)
++if (BUILD_SHARED)
++    add_library(ulfius SHARED ${LIB_SRC})
++    target_include_directories(ulfius PUBLIC "$<BUILD_INTERFACE:${INC_DIR}>" PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>" PUBLIC "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
++    target_link_libraries(ulfius PUBLIC ${ULFIUS_LIBS})
++    set_target_properties(ulfius PROPERTIES PUBLIC_HEADER "${INC_DIR}/ulfius.h;${PROJECT_BINARY_DIR}/ulfius-cfg.h" VERSION "${LIBRARY_VERSION}" SOVERSION "${LIBRARY_SOVERSION}" WINDOWS_EXPORT_ALL_SYMBOLS TRUE EXPORT_NAME Ulfius)
 +    if (WIN32)
 +        set_target_properties(ulfius PROPERTIES SUFFIX "-${LIBRARY_VERSION_MAJOR}.dll")
 +    endif ()
-+    if (NOT MSVC)
-+        set_target_properties(ulfius PROPERTIES
-+            COMPILE_OPTIONS -Wextra)
-+    endif()
 +    set(ulfius_lib ulfius)
  endif ()
 -target_link_libraries(ulfius ${LIBS})
  
  # documentation
  
- option(BUILD_ULFIUS_DOCUMENTATION "Build the documentation." OFF)
- if (BUILD_ULFIUS_DOCUMENTATION)
--    find_package(Doxygen)
-+    find_package(Doxygen REQUIRED)
-     if (DOXYGEN_FOUND)
-         set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen.cfg)
-         set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/doxyfile)
--        
-+
-         configure_file(${doxyfile_in} ${doxyfile} @ONLY)
--        
-+
-         add_custom_target(doc
-                           COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile_in}
-                           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-@@ -255,62 +271,110 @@ option(DOWNLOAD_DEPENDENCIES "Download required dependencies" ON)
+@@ -255,9 +253,9 @@
  option(SEARCH_ORCANIA_U "Search for ORCANIA library" ON)
  if (SEARCH_ORCANIA_U)
      set(Orcania_FIND_QUIETLY ON) # force to find Orcania quietly
 -    include(FindOrcania)
-     find_package(Orcania ${ORCANIA_VERSION_REQUIRED} QUIET) # try to find orcania
+-    find_package(Orcania ${ORCANIA_VERSION_REQUIRED} QUIET) # try to find orcania
 -    if (NOT ORCANIA_FOUND)
++    #include(FindOrcania)
++    find_package(Orcania ${ORCANIA_VERSION_REQUIRED} REQUIRED) # try to find orcania
 +    if (NOT Orcania_FOUND)
          if (DOWNLOAD_DEPENDENCIES)
              include(DownloadProject)
              download_project(PROJ orcania # ... otherwise, download archive
--                URL "https://github.com/babelouest/orcania/archive/v${ORCANIA_VERSION_REQUIRED}.tar.gz"
--                QUIET)
-+                             URL "https://github.com/babelouest/orcania/archive/v${ORCANIA_VERSION_REQUIRED}.tar.gz"
-+                             QUIET)
-             add_subdirectory(${orcania_SOURCE_DIR} ${orcania_BINARY_DIR})
--            include_directories(${orcania_SOURCE_DIR}/include)
--            add_dependencies(ulfius orcania)
--            set(ORCANIA_LIBRARIES orcania)
--            set(LIBS ${LIBS} ${ORCANIA_LIBRARIES})
--            include_directories(${orcania_BINARY_DIR})
-+            # The following lines can be removed once Orcania has full target support
-+            if (TARGET orcania)
-+                if (NOT TARGET Orcania::Orcania)
-+                    add_library(Orcania::Orcania INTERFACE IMPORTED)
-+                    set_target_properties(Orcania::Orcania PROPERTIES
-+                            INTERFACE_INCLUDE_DIRECTORIES "${orcania_SOURCE_DIR};${orcania_SOURCE_DIR}/include;${orcania_BINARY_DIR}"
-+                            INTERFACE_LINK_LIBRARIES orcania)
-+                endif ()
-+            endif ()
-+            if (TARGET orcania_static)
-+                if (NOT TARGET Orcania::Orcania-static)
-+                    add_library(Orcania::Orcania-static INTERFACE IMPORTED)
-+                    set_target_properties(Orcania::Orcania-static PROPERTIES
-+                        INTERFACE_INCLUDE_DIRECTORIES "${orcania_SOURCE_DIR};${orcania_SOURCE_DIR}/include;${orcania_BINARY_DIR}"
-+                        INTERFACE_LINK_LIBRARIES orcania-_static)
-+                endif ()
-+            endif ()
-         else ()
+@@ -273,26 +271,33 @@
              message( FATAL_ERROR "Orcania not found")
          endif ()
      else()
 -        set(LIBS ${LIBS} ${ORCANIA_LIBRARIES})
 -        include_directories(${ORCANIA_INCLUDE_DIRS})
-+        if ("${ORCANIA_VERSION_STRING}" VERSION_GREATER_EQUAL "${ORCANIA_VERSION_REQUIRED}")
-+            message(STATUS "Orcania found: ${ORCANIA_VERSION_STRING}")
-+        else ()
++        if (NOT ("${ORCANIA_VERSION_STRING}" VERSION_GREATER_EQUAL "${ORCANIA_VERSION_REQUIRED}"))
 +            message( FATAL_ERROR "Orcania version required: ${ORCANIA_VERSION_REQUIRED} - version installed: ${ORCANIA_VERSION_STRING}")
 +        endif ()
      endif ()
 -    target_link_libraries(ulfius ${LIBS} ${ORCANIA_LIBRARIES})
 +endif ()
-+
 +if (BUILD_SHARED)
 +    target_link_libraries(ulfius PUBLIC $<TARGET_NAME:Orcania::Orcania>)
 +endif ()
@@ -321,40 +255,13 @@ index 7b30153..6d6390e 100644
              if (DOWNLOAD_DEPENDENCIES)
                  include(DownloadProject)
                  download_project(PROJ yder # ... otherwise, download archive
-                                   URL "https://github.com/babelouest/yder/archive/v${YDER_VERSION_REQUIRED}.tar.gz"
-                                   QUIET)
-                 add_subdirectory(${yder_SOURCE_DIR} ${yder_BINARY_DIR})
--                include_directories(${yder_SOURCE_DIR}/include)
--                add_dependencies(ulfius yder)
--                set(YDER_LIBRARIES yder orcania)
--                include_directories(${yder_BINARY_DIR})
-+                # The following lines can be removed once Yver has full target support
-+                if (TARGET yder)
-+                    target_include_directories(yder PRIVATE "${orcania_SOURCE_DIR};${orcania_SOURCE_DIR}/include;${orcania_BINARY_DIR}")
-+                    if (NOT TARGET Yder::Yder)
-+                        add_library(Yder::Yder INTERFACE IMPORTED)
-+                        set_target_properties(Yder::Yder PROPERTIES
-+                            INTERFACE_INCLUDE_DIRECTORIES "${yder_SOURCE_DIR};${yder_SOURCE_DIR}/include;${yder_BINARY_DIR}"
-+                            INTERFACE_LINK_LIBRARIES yder)
-+                    endif ()
-+                endif ()
-+                if (TARGET yder_static)
-+                    target_include_directories(yder_static PRIVATE "${orcania_SOURCE_DIR};${orcania_SOURCE_DIR}/include;${orcania_BINARY_DIR}")
-+                    if (NOT TARGET Yder::Yder-static)
-+                        add_library(Yder::Yder-static INTERFACE IMPORTED)
-+                        set_target_properties(Yder::Yder-static PROPERTIES
-+                            INTERFACE_INCLUDE_DIRECTORIES "${yder_SOURCE_DIR};${yder_SOURCE_DIR}/include;${yder_BINARY_DIR}"
-+                            INTERFACE_LINK_LIBRARIES yder_static)
-+                    endif ()
-+                endif ()
-             else ()
+@@ -307,10 +312,21 @@
                  message( FATAL_ERROR "Yder not found")
              endif ()
          else()
 -            set(LIBS ${LIBS} ${YDER_LIBRARIES})
 -            include_directories(${YDER_INCLUDE_DIRS})
 +            if ("${YDER_VERSION_STRING}" VERSION_GREATER_EQUAL "${YDER_VERSION_REQUIRED}")
-+                message(STATUS "Yder found: ${YDER_VERSION_STRING}")
 +            else ()
 +                message( FATAL_ERROR "Yder version required: ${YDER_VERSION_REQUIRED} - version installed: ${YDER_VERSION_STRING}")
 +            endif ()
@@ -373,7 +280,7 @@ index 7b30153..6d6390e 100644
      endif ()
  else ()
      set(U_DISABLE_YDER ON)
-@@ -318,17 +382,13 @@ endif ()
+@@ -318,17 +334,13 @@
  
  # build uwsc
  
@@ -393,503 +300,24 @@ index 7b30153..6d6390e 100644
      install(TARGETS uwsc RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
      INSTALL(FILES ${UWSC_DIR}/uwsc.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1 COMPONENT runtime)
  endif ()
-@@ -353,18 +413,15 @@ endif ()
+@@ -353,7 +365,7 @@
  # build ulfius-cfg.h file
  configure_file(${INC_DIR}/ulfius-cfg.h.in ${PROJECT_BINARY_DIR}/ulfius-cfg.h)
  set (CMAKE_EXTRA_INCLUDE_FILES ${PROJECT_BINARY_DIR})
 -include_directories(${PROJECT_BINARY_DIR})
++#include_directories(${PROJECT_BINARY_DIR})
  
  # tests
  
- option(BUILD_ULFIUS_TESTING "Build the testing tree." OFF) # because we do not use include(CTest)
- 
- if (BUILD_ULFIUS_TESTING)
--    include(FindCheck)
-     find_package(Check REQUIRED)
-     if (CHECK_FOUND)
-         if (NOT WIN32 AND NOT APPLE)
--            include(FindSubunit)
-             find_package(Subunit REQUIRED)
-         endif ()
- 
-@@ -375,17 +432,16 @@ if (BUILD_ULFIUS_TESTING)
-         set(TST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/test)
-         set(EXAMPLE_CALLBACK_COMPRESSION_DIR ${CMAKE_CURRENT_SOURCE_DIR}/example_callbacks/http_compression/)
-         set(EXAMPLE_CALLBACK_STATIC_FILE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/example_callbacks/static_compressed_inmemory_website/)
--        set(LIBS ulfius ${LIBS} ${CHECK_LIBRARIES})
--        include_directories(${CHECK_INCLUDE_DIRS})
-+        set(TEST_LIBS Ulfius::Ulfius Check::Check)
-         if (NOT WIN32)
-             find_package(Threads REQUIRED)
--            set(LIBS ${LIBS} ${CMAKE_THREAD_LIBS_INIT} m)
-+            list(APPEND TEST_LIBS ${CMAKE_THREAD_LIBS_INIT} m)
-         endif ()
--        if (NOT APPLE)
--            set(LIBS ${LIBS} rt)
-+        if (NOT APPLE AND NOT WIN32)
-+            list(APPEND TEST_LIBS rt)
-         endif ()
-         if (NOT WIN32 AND NOT APPLE)
--            set(LIBS ${LIBS} ${SUBUNIT_LIBRARIES} rt)
-+            list(APPEND TEST_LIBS Subunit::Subunit)
-         endif ()
-         
-         set(TESTS core u_map framework example_callbacks)
-@@ -404,8 +460,8 @@ if (BUILD_ULFIUS_TESTING)
-                                                  ${EXAMPLE_CALLBACK_COMPRESSION_DIR}/http_compression_callback.h
-                                                  ${EXAMPLE_CALLBACK_STATIC_FILE_DIR}/static_compressed_inmemory_website_callback.c
-                                                  ${EXAMPLE_CALLBACK_STATIC_FILE_DIR}/static_compressed_inmemory_website_callback.h )
--            target_include_directories(${t} PUBLIC ${TST_DIR} ${EXAMPLE_CALLBACK_COMPRESSION_DIR} ${EXAMPLE_CALLBACK_STATIC_FILE_DIR})
--            target_link_libraries(${t} PUBLIC ${LIBS})
-+            target_include_directories(${t} PRIVATE ${TST_DIR} ${EXAMPLE_CALLBACK_COMPRESSION_DIR} ${EXAMPLE_CALLBACK_STATIC_FILE_DIR})
-+            target_link_libraries(${t} PRIVATE ${TEST_LIBS})
-             add_test(NAME ${t}
-                      WORKING_DIRECTORY ${TST_DIR}
-                      COMMAND ${t})
-@@ -435,13 +491,16 @@ configure_file(libulfius.pc.in libulfius.pc @ONLY)
+@@ -435,9 +447,9 @@
  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libulfius.pc
          DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
  
 -SET (TARGETS ulfius)
-+set(TARGETS )
-+if (BUILD_SHARED)
-+    list(APPEND TARGETS ulfius)
-+endif ()
++SET (TARGETS ${ulfius_lib})
  if (BUILD_STATIC)
 -    SET (TARGETS ${TARGETS} ulfius_static)
-+    list(APPEND TARGETS ulfius_static)
++    #SET (TARGETS ${TARGETS} ulfius_static)
  endif ()
  
  if (INSTALL_HEADER)
--	install(TARGETS ${TARGETS}
-+	install(TARGETS ${TARGETS} EXPORT UlfiusExports
-         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-@@ -459,12 +518,35 @@ if (INSTALL_HEADER)
-     install(FILES API.md
-             DESTINATION ${CMAKE_INSTALL_DOCDIR} COMPONENT runtime)
- else ()
--install(TARGETS ${TARGETS}
-+install(TARGETS ${TARGETS} EXPORT UlfiusExports
-         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
- endif ()
- 
-+set(ULFIUS_INSTALL_CMAKEDIR_DEFAULT "${CMAKE_INSTALL_LIBDIR}/cmake/Ulfius")
-+if (WIN32 AND NOT MINGW)
-+    set(ULFIUS_INSTALL_CMAKEDIR_DEFAULT "cmake")
-+endif ()
-+set(ULFIUS_INSTALL_CMAKEDIR ${ULFIUS_INSTALL_CMAKEDIR_DEFAULT} CACHE STRING "Location where to install the cmake config files")
-+
-+install(EXPORT UlfiusExports DESTINATION "${ULFIUS_INSTALL_CMAKEDIR}"
-+    NAMESPACE "Ulfius::"
-+    FILE "UlfiusTargets.cmake")
-+
-+configure_package_config_file(cmake-modules/UlfiusConfig.cmake.in UlfiusConfig.cmake
-+    INSTALL_DESTINATION "${ULFIUS_INSTALL_CMAKEDIR}")
-+write_basic_package_version_file(UlfiusConfigVersion.cmake
-+    COMPATIBILITY AnyNewerVersion)
-+
-+install(FILES
-+            cmake-modules/FindGnuTLS.cmake
-+            cmake-modules/FindJansson.cmake
-+            cmake-modules/FindMHD.cmake
-+            "${PROJECT_BINARY_DIR}/UlfiusConfig.cmake"
-+            "${PROJECT_BINARY_DIR}/UlfiusConfigVersion.cmake"
-+        DESTINATION "${ULFIUS_INSTALL_CMAKEDIR}")
-+
- # uninstall target
- 
- if (NOT TARGET uninstall)
-@@ -563,6 +645,7 @@ message(STATUS "Outgoing requests support: ${WITH_CURL}")
- message(STATUS "Jansson library support:   ${WITH_JANSSON}")
- message(STATUS "Yder support:              ${WITH_YDER}")
- message(STATUS "Build uwsc application:    ${BUILD_UWSC}")
-+message(STATUS "Build shared library:      ${BUILD_SHARED}")
- message(STATUS "Build static library:      ${BUILD_STATIC}")
- message(STATUS "Build testing tree:        ${BUILD_ULFIUS_TESTING}")
- message(STATUS "Install the header files:  ${INSTALL_HEADER}")
-diff --git a/cmake-modules/FindCheck.cmake b/cmake-modules/FindCheck.cmake
-index 4aad6bc..30221fc 100644
---- a/cmake-modules/FindCheck.cmake
-+++ b/cmake-modules/FindCheck.cmake
-@@ -68,6 +68,12 @@ find_package_handle_standard_args(Check
- if (CHECK_FOUND)
-     set(CHECK_LIBRARIES ${CHECK_LIBRARY})
-     set(CHECK_INCLUDE_DIRS ${CHECK_INCLUDE_DIR})
-+    if (NOT TARGET Check::Check)
-+        add_library(Check::Check UNKNOWN IMPORTED)
-+        set_target_properties(Check::Check PROPERTIES
-+                IMPORTED_LOCATION "${CHECK_LIBRARY}"
-+                INTERFACE_INCLUDE_DIRECTORIES "${CHECK_INCLUDE_DIR}")
-+    endif ()
- endif ()
- 
--mark_as_advanced(CHECK_INCLUDE_DIR CHECK_LIBRARY)
-\ No newline at end of file
-+mark_as_advanced(CHECK_INCLUDE_DIR CHECK_LIBRARY)
-diff --git a/cmake-modules/FindGnuTLS.cmake b/cmake-modules/FindGnuTLS.cmake
-new file mode 100644
-index 0000000..aa97c86
---- /dev/null
-+++ b/cmake-modules/FindGnuTLS.cmake
-@@ -0,0 +1,75 @@
-+#.rst:
-+# FindGnuTLS
-+# -----------
-+#
-+# Find GnuTLS
-+#
-+# Find Yder headers and libraries.
-+#
-+# ::
-+#
-+#   GNUTLS_FOUND          - True if GnuTLS found.
-+#   GNUTLS_INCLUDE_DIRS   - Where to find gnutls/gnutls.h.
-+#   GNUTLS_LIBRARIES      - List of libraries when using GnuTLS.
-+#   GNUTLS_VERSION_STRING - The version of GnuTLS found.
-+
-+#=============================================================================
-+# Copyright 2022 Nicolas Mora <mail@babelouest.org>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU Lesser General Public License
-+# as published by the Free Software Foundation;
-+# version 2.1 of the License.
-+#
-+# This library is distributed in the hope that it will be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
-+# GNU GENERAL PUBLIC LICENSE for more details.
-+#
-+# You should have received a copy of the GNU General Public
-+# License along with this library.	If not, see <http://www.gnu.org/licenses/>.
-+#=============================================================================
-+
-+find_package(PkgConfig QUIET)
-+pkg_check_modules(PC_GNUTLS QUIET gnutls)
-+
-+find_path(GNUTLS_INCLUDE_DIR
-+        NAMES gnutls/gnutls.h
-+        HINTS ${PC_GNUTLS_INCLUDEDIR} ${PC_GNUTLS_INCLUDE_DIRS})
-+
-+find_library(GNUTLS_LIBRARY
-+        NAMES gnutls libgnutls
-+        HINTS ${PC_GNUTLS_LIBDIR} ${PC_GNUTLS_LIBRARY_DIRS})
-+
-+set(GNUTLS_VERSION_STRING 0.0.0)
-+if (PC_GNUTLS_VERSION)
-+    set(GNUTLS_VERSION_STRING ${PC_GNUTLS_VERSION})
-+elseif (GNUTLS_INCLUDE_DIR AND EXISTS "${GNUTLS_INCLUDE_DIR}/gnutls/gnutls.h")
-+    set(regex_gnutls_version "^#define[ \t]+GNUTLS_VERSION[ \t]+([^\"]+).*")
-+    file(STRINGS "${GNUTLS_INCLUDE_DIR}/gnutls/gnutls.h" gnutls_version REGEX "${regex_gnutls_version}")
-+    string(REGEX REPLACE "${regex_gnutls_version}" "\\1" GNUTLS_VERSION_STRING "${gnutls_version}")
-+    unset(regex_gnutls_version)
-+    unset(gnutls_version)
-+endif ()
-+
-+include(FindPackageHandleStandardArgs)
-+find_package_handle_standard_args(GnuTLS
-+        REQUIRED_VARS GNUTLS_LIBRARY GNUTLS_INCLUDE_DIR
-+        VERSION_VAR GNUTLS_VERSION_STRING)
-+
-+if (PC_GNUTLS_FOUND)
-+    set(GNUTLS_FOUND 1)
-+endif ()
-+
-+if (GNUTLS_FOUND)
-+    set(GNUTLS_LIBRARIES ${GNUTLS_LIBRARY})
-+    set(GNUTLS_INCLUDE_DIRS ${GNUTLS_INCLUDE_DIR})
-+    if (NOT TARGET GnuTLS::GnuTLS)
-+        add_library(GnuTLS::GnuTLS UNKNOWN IMPORTED)
-+        set_target_properties(GnuTLS::GnuTLS PROPERTIES
-+                IMPORTED_LOCATION "${GNUTLS_LIBRARY}"
-+                INTERFACE_INCLUDE_DIRECTORIES "${GNUTLS_INCLUDE_DIR}")
-+    endif ()
-+endif ()
-+
-+mark_as_advanced(GNUTLS_INCLUDE_DIR GNUTLS_LIBRARY)
-diff --git a/cmake-modules/FindJansson.cmake b/cmake-modules/FindJansson.cmake
-index 10eea48..640d5ad 100644
---- a/cmake-modules/FindJansson.cmake
-+++ b/cmake-modules/FindJansson.cmake
-@@ -61,6 +61,12 @@ find_package_handle_standard_args(Jansson
- if (JANSSON_FOUND)
-     set(JANSSON_LIBRARIES ${JANSSON_LIBRARY})
-     set(JANSSON_INCLUDE_DIRS ${JANSSON_INCLUDE_DIR})
-+    if (NOT TARGET Jansson::Jansson)
-+        add_library(Jansson::Jansson UNKNOWN IMPORTED)
-+        set_target_properties(Jansson::Jansson PROPERTIES
-+                IMPORTED_LOCATION "${JANSSON_LIBRARY}"
-+                INTERFACE_INCLUDE_DIRECTORIES "${JANSSON_INCLUDE_DIR}")
-+    endif ()
- endif ()
- 
--mark_as_advanced(JANSSON_INCLUDE_DIR JANSSON_LIBRARY)
-\ No newline at end of file
-+mark_as_advanced(JANSSON_INCLUDE_DIR JANSSON_LIBRARY)
-diff --git a/cmake-modules/FindMHD.cmake b/cmake-modules/FindMHD.cmake
-index 17cc20e..7515efa 100644
---- a/cmake-modules/FindMHD.cmake
-+++ b/cmake-modules/FindMHD.cmake
-@@ -65,6 +65,12 @@ find_package_handle_standard_args(MHD
- if (MHD_FOUND)
-     set(MHD_LIBRARIES ${MHD_LIBRARY})
-     set(MHD_INCLUDE_DIRS ${MHD_INCLUDE_DIR})
-+    if (NOT TARGET MHD::MHD)
-+        add_library(MHD::MHD UNKNOWN IMPORTED)
-+        set_target_properties(MHD::MHD PROPERTIES
-+                IMPORTED_LOCATION "${MHD_LIBRARY}"
-+                INTERFACE_INCLUDE_DIRECTORIES "${MHD_INCLUDE_DIRS}")
-+    endif ()
- endif ()
- 
- mark_as_advanced(MHD_INCLUDE_DIR MHD_LIBRARY)
-diff --git a/cmake-modules/FindOrcania.cmake b/cmake-modules/FindOrcania.cmake
-deleted file mode 100644
-index 0d40a07..0000000
---- a/cmake-modules/FindOrcania.cmake
-+++ /dev/null
-@@ -1,77 +0,0 @@
--#.rst:
--# FindOrcania
--# -----------
--#
--# Find Orcania
--#
--# Find Orcania headers and libraries.
--#
--# ::
--#
--#   ORCANIA_FOUND          - True if Orcania found.
--#   ORCANIA_INCLUDE_DIRS   - Where to find orcania.h.
--#   ORCANIA_LIBRARIES      - List of libraries when using Orcania.
--#   ORCANIA_VERSION_STRING - The version of Orcania found.
--
--#=============================================================================
--# Copyright 2018 Silvio Clecio <silvioprog@gmail.com>
--# Copyright 2018 Nicolas Mora <mail@babelouest.org>
--#
--# This program is free software; you can redistribute it and/or
--# modify it under the terms of the GNU Lesser General Public License
--# as published by the Free Software Foundation;
--# version 2.1 of the License.
--#
--# This library is distributed in the hope that it will be useful,
--# but WITHOUT ANY WARRANTY; without even the implied warranty of
--# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
--# GNU GENERAL PUBLIC LICENSE for more details.
--#
--# You should have received a copy of the GNU General Public
--# License along with this library.	If not, see <http://www.gnu.org/licenses/>.
--#=============================================================================
--
--find_package(PkgConfig QUIET)
--pkg_check_modules(PC_ORCANIA QUIET liborcania)
--
--find_path(ORCANIA_INCLUDE_DIR
--        NAMES orcania.h
--        HINTS ${PC_ORCANIA_INCLUDEDIR} ${PC_ORCANIA_INCLUDE_DIRS})
--
--find_library(ORCANIA_LIBRARY
--        NAMES orcania liborcania
--        HINTS ${PC_ORCANIA_LIBDIR} ${PC_ORCANIA_LIBRARY_DIRS})
--
--set(ORCANIA_VERSION_STRING 0.0.0)
--if (PC_ORCANIA_VERSION)
--    set(ORCANIA_VERSION_STRING ${PC_ORCANIA_VERSION})
--elseif (ORCANIA_INCLUDE_DIR AND EXISTS "${ORCANIA_INCLUDE_DIR}/orcania.h")
--    set(regex_orcania_version "^#define[ \t]+ORCANIA_VERSION[ \t]+([^\"]+).*")
--    file(STRINGS "${ORCANIA_INCLUDE_DIR}/orcania.h" orcania_version REGEX "${regex_orcania_version}")
--    string(REGEX REPLACE "${regex_orcania_version}" "\\1" ORCANIA_VERSION_STRING "${orcania_version}")
--    unset(regex_orcania_version)
--    unset(orcania_version)
--    if (NOT ORCANIA_VERSION_STRING)
--       set(regex_orcania_version "^#define[ \t]+ORCANIA_VERSION[ \t]+([^\"]+).*")
--        file(STRINGS "${ORCANIA_INCLUDE_DIR}/orcania-cfg.h" orcania_version REGEX "${regex_orcania_version}")
--        string(REGEX REPLACE "${regex_orcania_version}" "\\1" ORCANIA_VERSION_STRING "${orcania_version}")
--        unset(regex_orcania_version)
--        unset(orcania_version)
--    endif ()
--endif ()
--
--include(FindPackageHandleStandardArgs)
--find_package_handle_standard_args(Orcania
--        REQUIRED_VARS ORCANIA_LIBRARY ORCANIA_INCLUDE_DIR
--        VERSION_VAR ORCANIA_VERSION_STRING)
--
--if (PC_ORCANIA_FOUND)
--    set(ORCANIA_FOUND 1)
--endif ()
--
--if (ORCANIA_FOUND)
--    set(ORCANIA_LIBRARIES ${ORCANIA_LIBRARY})
--    set(ORCANIA_INCLUDE_DIRS ${ORCANIA_INCLUDE_DIR})
--endif ()
--
--mark_as_advanced(ORCANIA_INCLUDE_DIR ORCANIA_LIBRARY)
-diff --git a/cmake-modules/FindSubunit.cmake b/cmake-modules/FindSubunit.cmake
-index 4ce3a24..554b333 100644
---- a/cmake-modules/FindSubunit.cmake
-+++ b/cmake-modules/FindSubunit.cmake
-@@ -54,6 +54,12 @@ find_package_handle_standard_args(Subunit
- if (SUBUNIT_FOUND)
-     set(SUBUNIT_LIBRARIES ${SUBUNIT_LIBRARY})
-     set(SUBUNIT_INCLUDE_DIRS ${SUBUNIT_INCLUDE_DIR})
-+    if (NOT TARGET Subunit::Subunit)
-+        add_library(Subunit::Subunit UNKNOWN IMPORTED)
-+        set_target_properties(Subunit:Subunit PROPERTIES
-+                IMPORTED_LOCATION "${SUBUNIT_LIBRARY}"
-+                INTERFACE_INCLUDE_DIRECTORIES "${SUBUNIT_INCLUDE_DIR}")
-+    endif ()
- endif ()
- 
--mark_as_advanced(SUBUNIT_INCLUDE_DIR SUBUNIT_LIBRARY)
-\ No newline at end of file
-+mark_as_advanced(SUBUNIT_INCLUDE_DIR SUBUNIT_LIBRARY)
-diff --git a/cmake-modules/FindYder.cmake b/cmake-modules/FindYder.cmake
-deleted file mode 100644
-index 88262a8..0000000
---- a/cmake-modules/FindYder.cmake
-+++ /dev/null
-@@ -1,77 +0,0 @@
--#.rst:
--# FindYder
--# -----------
--#
--# Find Yder
--#
--# Find Yder headers and libraries.
--#
--# ::
--#
--#   YDER_FOUND          - True if Yder found.
--#   YDER_INCLUDE_DIRS   - Where to find yder.h.
--#   YDER_LIBRARIES      - List of libraries when using Yder.
--#   YDER_VERSION_STRING - The version of Yder found.
--
--#=============================================================================
--# Copyright 2018 Nicolas Mora <mail@babelouest.org>
--# Copyright 2018 Silvio Clecio <silvioprog@gmail.com>
--#
--# This program is free software; you can redistribute it and/or
--# modify it under the terms of the GNU Lesser General Public License
--# as published by the Free Software Foundation;
--# version 2.1 of the License.
--#
--# This library is distributed in the hope that it will be useful,
--# but WITHOUT ANY WARRANTY; without even the implied warranty of
--# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
--# GNU GENERAL PUBLIC LICENSE for more details.
--#
--# You should have received a copy of the GNU General Public
--# License along with this library.	If not, see <http://www.gnu.org/licenses/>.
--#=============================================================================
--
--find_package(PkgConfig QUIET)
--pkg_check_modules(PC_YDER QUIET libyder)
--
--find_path(YDER_INCLUDE_DIR
--        NAMES yder.h
--        HINTS ${PC_YDER_INCLUDEDIR} ${PC_YDER_INCLUDE_DIRS})
--
--find_library(YDER_LIBRARY
--        NAMES yder libyder
--        HINTS ${PC_YDER_LIBDIR} ${PC_YDER_LIBRARY_DIRS})
--
--set(YDER_VERSION_STRING 0.0.0)
--if (PC_YDER_VERSION)
--    set(YDER_VERSION_STRING ${PC_YDER_VERSION})
--elseif (YDER_INCLUDE_DIR AND EXISTS "${YDER_INCLUDE_DIR}/yder.h")
--    set(regex_yder_version "^#define[ \t]+YDER_VERSION[ \t]+([^\"]+).*")
--    file(STRINGS "${YDER_INCLUDE_DIR}/yder.h" yder_version REGEX "${regex_yder_version}")
--    string(REGEX REPLACE "${regex_yder_version}" "\\1" YDER_VERSION_STRING "${yder_version}")
--    unset(regex_yder_version)
--    unset(yder_version)
--    if (NOT YDER_VERSION_STRING)
--        set(regex_yder_version "^#define[ \t]+YDER_VERSION[ \t]+([^\"]+).*")
--        file(STRINGS "${YDER_INCLUDE_DIR}/yder-cfg.h" yder_version REGEX "${regex_yder_version}")
--        string(REGEX REPLACE "${regex_yder_version}" "\\1" YDER_VERSION_STRING "${yder_version}")
--        unset(regex_yder_version)
--        unset(yder_version)
--    endif ()
--endif ()
--
--include(FindPackageHandleStandardArgs)
--find_package_handle_standard_args(Yder
--        REQUIRED_VARS YDER_LIBRARY YDER_INCLUDE_DIR
--        VERSION_VAR YDER_VERSION_STRING)
--
--if (PC_YDER_FOUND)
--    set(YDER_FOUND 1)
--endif ()
--
--if (YDER_FOUND)
--    set(YDER_LIBRARIES ${YDER_LIBRARY})
--    set(YDER_INCLUDE_DIRS ${YDER_INCLUDE_DIR})
--endif ()
--
--mark_as_advanced(YDER_INCLUDE_DIR YDER_LIBRARY)
-diff --git a/cmake-modules/UlfiusConfig.cmake.in b/cmake-modules/UlfiusConfig.cmake.in
-new file mode 100644
-index 0000000..4dd0ad3
---- /dev/null
-+++ b/cmake-modules/UlfiusConfig.cmake.in
-@@ -0,0 +1,55 @@
-+@PACKAGE_INIT@
-+
-+include("${CMAKE_CURRENT_LIST_DIR}/UlfiusTargets.cmake")
-+
-+set(ULFIUS_GNUTLS       @WITH_GNUTLS@)
-+set(ULFIUS_WEBSOCKET    @WITH_WEBSOCKET@)
-+set(ULFIUS_YDER         @WITH_YDER@)
-+set(ULFIUS_JANSSON      @WITH_JANSSON@)
-+set(ULFIUS_CURL         @WITH_CURL@)
-+
-+set(CMAKE_CURRENT_LIST_DIR ${_original_cmake_module_path})
-+
-+if(TARGET Yder::Yder-static)
-+    set(ORCANIA_INCLUDE_DIRS $<TARGET_PROPERTY:Yder::Yder-static,INTERFACE_INCLUDE_DIRECTORIES>)
-+    set(ORCANIA_LIBRARIES Yder::Yder-static)
-+endif()
-+
-+if(TARGET Yder::Yder)
-+    set(ORCANIA_INCLUDE_DIRS $<TARGET_PROPERTY:Yder::Yder,INTERFACE_INCLUDE_DIRECTORIES>)
-+    set(ORCANIA_LIBRARIES Yder::Yder)
-+endif()
-+
-+include(CMakeFindDependencyMacro)
-+
-+set(_original_cmake_module_path ${CMAKE_MODULE_PATH})
-+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
-+
-+find_dependency(Orcania)
-+find_dependency(MHD)
-+if(ULFIUS_WEBSOCKET)
-+    find_dependency(ZLIB)
-+endif()
-+if(ULFIUS_GNUTLS)
-+    find_dependency(GnuTLS)
-+endif()
-+if(ULFIUS_YDER)
-+    find_dependency(Yder)
-+endif()
-+if(ULFIUS_JANSSON)
-+    find_dependency(Jansson)
-+endif()
-+if(ULFIUS_CURL)
-+    find_dependency(CURL)
-+    if(CURL_FOUND AND NOT TARGET CURL::libcurl)
-+        add_library(CURL::libcurl UNKNOWN IMPORTED)
-+        set_target_properties(CURL::libcurl PROPERTIES
-+            INTERFACE_LINK_LIBRARIES "${CURL_LIBRARIES}"
-+            INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIRS}")
-+    endif()
-+endif()
-+
-+set(CMAKE_MODULE_PATH ${_original_cmake_module_path})
-+
-+set(ULFIUS_VERSION_STRING "@PROJECT_VERSION@")
-+set(Ulfius_FOUND TRUE)
