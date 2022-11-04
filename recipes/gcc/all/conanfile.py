@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
 from conan.tools.apple import XCRun
@@ -55,7 +55,8 @@ class GccConan(ConanFile):
         basic_layout(self, src_folder="source")
 
     def generate(self):
-        # Ensure binutils and flex are on the path
+        # Ensure binutils and flex are on the path.
+        # TODO: Remove when conan 2.0 is released as this will be default behaviour
         buildenv = VirtualBuildEnv(self)
         buildenv.generate()
 
@@ -64,8 +65,9 @@ class GccConan(ConanFile):
         tc.configure_args.append("--disable-nls")
         tc.configure_args.append("--disable-multilib")
         tc.configure_args.append("--disable-bootstrap")
-        tc.configure_args.append("--with-system-zlib")
         tc.configure_args.append(f"--prefix={self.package_folder}")
+        tc.configure_args.append(f"--libexecdir={os.path.join(self.package_folder, 'bin', 'libexec')}")
+        tc.configure_args.append(f"--with-zlib={self.deps_cpp_info['zlib'].rootpath}")
         tc.configure_args.append(f"--with-isl={self.deps_cpp_info['isl'].rootpath}")
         tc.configure_args.append(f"--with-gmp={self.deps_cpp_info['gmp'].rootpath}")
         tc.configure_args.append(f"--with-mpc={self.deps_cpp_info['mpc'].rootpath}")
@@ -82,8 +84,9 @@ class GccConan(ConanFile):
             tc.make_args.append("-headerpad_max_install_names")
         tc.generate()
 
-        deps = AutotoolsDeps(self)
-        deps.generate()
+        # Don't use AutotoolsDeps here - deps are passed directly in configure_args.
+        # Using AutotoolsDeps causes the compiler tests to fail by erroneously adding 
+        # additional $LIBS to the test compilation
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
