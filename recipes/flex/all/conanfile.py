@@ -53,10 +53,11 @@ class FlexConan(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
-        yes_no = lambda v: "yes" if v else "no"
+        def yes_no(v):
+            return "yes" if v else "no"
         tc.configure_args.extend([
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(not yes_no(self.options.shared)),
+            f"--enable-shared={yes_no(self.options.shared)}",
+            f"--enable-static={yes_no(not self.options.shared)}",
             "--disable-nls",
             "--disable-bootstrap",
             "HELP2MAN=/bin/true",
@@ -89,11 +90,11 @@ class FlexConan(ConanFile):
         self.cpp_info.libs = ["fl"]
 
         bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.output.info(f"Appending PATH environment variable: {bindir}")
         self.env_info.PATH.append(bindir)
 
         lex_path = os.path.join(bindir, "flex").replace("\\", "/")
-        self.output.info("Setting LEX environment variable: {}".format(lex_path))
+        self.output.info(f"Setting LEX environment variable: {lex_path}")
         self.env_info.LEX = lex_path
 
         # Don't produce files in CMakeDeps. Instead set FLEX_ROOT, and the built-in FindFLEX
@@ -104,5 +105,5 @@ class FlexConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "_FLEX"  # Don't replace CMake's built-in
         self.cpp_info.names["cmake_find_package_multi"] = "_FLEX"
         flex_root = self.package_folder
-        self.output.info("Setting FLEX_ROOT environment variable: {}".format(flex_root))
+        self.output.info("Setting FLEX_ROOT environment variable: {flex_root}")
         self.env_info.FLEX_ROOT = flex_root

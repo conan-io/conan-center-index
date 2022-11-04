@@ -34,7 +34,7 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self, skip_x64_x86=True):
             bin_path = os.path.join("bin", "test_package")
             src = os.path.join(self.source_folder, "basic_nr.txt")
-            self.run("{} {}".format(bin_path, src), run_environment=True)
+            self.run(f"{bin_path} {src}", run_environment=True)
 
             test_yywrap = os.path.join("bin", "test_yywrap")
             self.run(test_yywrap, run_environment=True)
