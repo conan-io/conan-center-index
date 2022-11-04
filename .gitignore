@@ -12,6 +12,7 @@ CMakeUserPresets.json
 
 # IDEs
 .idea
+.vs
 .vscode
 .project
 .pydevproject
