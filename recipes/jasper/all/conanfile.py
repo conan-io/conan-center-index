@@ -28,10 +28,6 @@ class JasperConan(ConanFile):
         "with_libjpeg": "libjpeg",
     }
 
-    @property
-    def _cmake_gen(self):
-        self.conf.get("tools.cmake.cmaketoolchain:generator", check_type=str, default="Ninja")
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -54,16 +50,12 @@ class JasperConan(ConanFile):
         elif self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
 
-    def build_requirements(self):
-        self.tool_requires("ninja/1.11.0")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        generator = self.conf.get("tools.cmake.cmaketoolchain:generator", check_type=str, default="Ninja")
-        tc = CMakeToolchain(self, generator=generator)
+        tc = CMakeToolchain(self)
         tc.variables["JAS_ENABLE_DOC"] = False
         tc.variables["JAS_ENABLE_LATEX"] = False
         tc.variables["JAS_ENABLE_PROGRAMS"] = False
