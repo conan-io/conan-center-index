@@ -54,7 +54,7 @@ class XapianCoreConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
 
