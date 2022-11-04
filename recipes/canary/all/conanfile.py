@@ -30,6 +30,9 @@ class SocketcanCanaryConan(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
 
+    def build(self):
+        pass
+
     def package(self):
         copy(self, "LICENSE_1_0.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
