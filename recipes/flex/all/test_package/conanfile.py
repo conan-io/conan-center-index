@@ -19,7 +19,6 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # tc.variables["FLEX_ROOT"] = self.deps_cpp_info["flex"].rootpath
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -46,9 +45,9 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not cross_building(self, skip_x64_x86=True):
-            bin_path = os.path.join("bin", "test_package")
+            bin_path = os.path.join(self.build_folder, "test_package")
             src = os.path.join(self.source_folder, "basic_nr.txt")
             self.run(f"{bin_path} {src}", run_environment=True)
 
-            test_yywrap = os.path.join("bin", "test_yywrap")
+            test_yywrap = os.path.join(self.build_folder, "test_yywrap")
             self.run(test_yywrap, run_environment=True)
