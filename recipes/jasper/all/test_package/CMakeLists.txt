@@ -11,6 +11,10 @@ set(_custom_vars
     Jasper_VERSION_MINOR
     Jasper_VERSION_PATCH
     Jasper_VERSION_STRING
+    JASPER_FOUND
+    JASPER_INCLUDE_DIR
+    JASPER_LIBRARIES
+    JASPER_VERSION_STRING
 )
 foreach(_custom_var ${_custom_vars})
 if(DEFINED _custom_var)
