@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import rename, apply_conandata_patches, replace_in_file, rmdir, save, rm, get
-from conan.tools.microsoft import is_msvc visual.msvc_version_to_vs_ide_version
+from conan.tools.microsoft import check_min_vs, is_msvc 
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conans import AutoToolsBuildEnvironment, tools
@@ -53,7 +53,7 @@ class XapianCoreConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/1.2.12")
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
 
@@ -101,12 +101,8 @@ class XapianCoreConan(ConanFile):
         autotools.library_paths = []
         if is_msvc(self):
             autotools.cxx_flags.append("-EHsc")
-            if self.settings.compiler == "Visual Studio":
-                vs_ide_version = self.settings.compiler.version
-            else:
-                vs_ide_version = visual.msvc_version_to_vs_ide_version(self.settings.compiler.version)
-            if Version(vs_ide_version) >= "12":
-                autotools.flags.append("-FS")
+            check_min_vs(self, "180")
+            autotools.flags.append("-FS")
         conf_args = [
             "--datarootdir={}".format(self._datarootdir.replace("\\", "/")),
             "--disable-documentation",
