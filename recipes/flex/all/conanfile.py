@@ -95,3 +95,14 @@ class FlexConan(ConanFile):
         lex_path = os.path.join(bindir, "flex").replace("\\", "/")
         self.output.info("Setting LEX environment variable: {}".format(lex_path))
         self.env_info.LEX = lex_path
+
+        # Don't produce files in CMakeDeps. Instead set FLEX_ROOT, and the built-in FindFLEX
+        # will find the executable, includes, and libraries. Important because the built-in
+        # defines a flex_target macro.
+        # <PackageName>_ROOT variables are available starting in CMake 3.12
+        self.cpp_info.set_property("cmake_find_mode", "none")
+        self.cpp_info.names["cmake_find_package"] = "_FLEX"  # Don't replace CMake's built-in
+        self.cpp_info.names["cmake_find_package_multi"] = "_FLEX"
+        flex_root = self.package_folder
+        self.output.info("Setting FLEX_ROOT environment variable: {}".format(flex_root))
+        self.env_info.FLEX_ROOT = flex_root
