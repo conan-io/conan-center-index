@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools import build, files, scm
-from conans import CMake
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 import textwrap
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class JsonSchemaValidatorConan(ConanFile):
@@ -28,17 +28,9 @@ class JsonSchemaValidatorConan(ConanFile):
     }
 
     short_paths = True
-    generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt"]
-    _cmake = None
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        files.copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -71,33 +63,36 @@ class JsonSchemaValidatorConan(ConanFile):
             if scm.Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(f"{self.name} requires c++{min_cppstd} support. The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+                  destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_EXAMPLES"] = False
         if scm.Version(self.version) < "2.1.0":
-            self._cmake.definitions["NLOHMANN_JSON_DIR"] = ";".join(self.deps_cpp_info["nlohmann_json"].include_paths)
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+            tc.variables["NLOHMANN_JSON_DIR"] = ";".join(self.deps_cpp_info["nlohmann_json"].include_paths)
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        files.copy(self, "LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        files.copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
         if scm.Version(self.version) < "2.1.0":
             files.copy(self, "json-schema.hpp",
-                       dst=os.path.join("include", "nlohmann"),
-                       src=os.path.join(self._source_subfolder, "src"))
+                       dst=os.path.join(self.package_folder, "include", "nlohmann"),
+                       src=os.path.join(self.source_folder, "src"))
         files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
