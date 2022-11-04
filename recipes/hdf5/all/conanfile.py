@@ -80,9 +80,6 @@ class Hdf5Conan(ConanFile):
             self.requires("openmpi/4.1.0")
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
-            # While building it runs some executables like H5detect
-            raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
         if self.options.parallel:
             if self.options.enable_cxx:
                 raise ConanInvalidConfiguration("Parallel and C++ options are mutually exclusive")
@@ -91,6 +88,11 @@ class Hdf5Conan(ConanFile):
         if self.options.szip_support == "with_szip" and self.options.szip_encoding and \
            not self.options["szip"].enable_encoding:
             raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
+
+    def validate_build(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+            # While building it runs some executables like H5detect
+            raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
