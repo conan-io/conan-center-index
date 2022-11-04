@@ -4,13 +4,6 @@ project(test_package C)
 find_package(Jasper REQUIRED CONFIG)
 
 set(_custom_vars
-    Jasper_FOUND
-    Jasper_INCLUDE_DIRS
-    Jasper_LIBRARIES
-    Jasper_VERSION_MAJOR
-    Jasper_VERSION_MINOR
-    Jasper_VERSION_PATCH
-    Jasper_VERSION_STRING
     JASPER_FOUND
     JASPER_INCLUDE_DIR
     JASPER_LIBRARIES
