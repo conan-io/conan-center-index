@@ -6,7 +6,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.env import VirtualBuildEnv
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.47.0"
 
 
 class FlexConan(ConanFile):
