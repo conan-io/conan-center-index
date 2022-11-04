@@ -128,6 +128,7 @@ class CairoConan(ConanFile):
         return [
             "--directory", unix_path(self, self.source_folder),
             "-f", "Makefile.win32",
+            "-n",
             f"CFG={str(self.settings.build_type).lower()}",
             "CAIRO_HAS_FC_FONT=0",
             f"ZLIB_PATH={dep_path('zlib')}",
@@ -173,8 +174,10 @@ class CairoConan(ConanFile):
             deps.environment.append('CFLAGS', cppflags.replace("/I", "-I"))
             ldflags = deps.vars().get("LDFLAGS")
             deps.environment.define('LDFLAGS', ldflags.replace("/LIBPATH:", "-LIBPATH:"))
+            deps.environment.append('LDFLAGS', deps.vars().get("LIBS"))
 
         deps.generate()
+
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -211,10 +214,7 @@ class CairoConan(ConanFile):
             win32_common = os.path.join(self.source_folder, "build", "Makefile.win32.common")
             replace_in_file(self, win32_common, "-MD ", f"-{self.settings.compiler.runtime} ")
             replace_in_file(self, win32_common, "-MDd ", f"-{self.settings.compiler.runtime} ")
-            replace_in_file(self, win32_common, "$(ZLIB_PATH)/lib/zlib1.lib",
-                            self.deps_cpp_info["zlib"].libs[0] + ".lib")
-            replace_in_file(self, win32_common, "$(LIBPNG_PATH)/lib/libpng16.lib",
-                            self.deps_cpp_info["libpng"].libs[0] + ".lib")
+            replace_in_file(self, win32_common, "# Some generic rules",'CAIRO_LIBS = ""')
 
     def build(self):
         self._patch_sources()
