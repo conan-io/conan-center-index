@@ -191,7 +191,7 @@ class Hdf5Conan(ConanFile):
     @property
     def _module_file_rel_path(self):
         return os.path.join("lib", "cmake",
-                            "conan-official-{}-targets.cmake".format(self.name))
+                            f"conan-official-{self.name}-targets.cmake")
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -206,7 +206,7 @@ class Hdf5Conan(ConanFile):
         components = self._components()
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            {"hdf5::{}".format(component["alias_target"]): "HDF5::{}".format(component["component"]) for component in components.values()},
+            {f"hdf5::{component['alias_target']}": f"HDF5::{component['component']}" for component in components.values()},
             self.options.get_safe("parallel", False)
         )
 
