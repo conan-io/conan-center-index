@@ -127,12 +127,14 @@ class LibsodiumConan(ConanFile):
                 "15": "vs2017",
                 "16": "vs2019",
             }
-        else:
+        elif self.settings.compiler == "msvc":
             folder = {
                 "190": "vs2015",
                 "191": "vs2017",
                 "192": "vs2019",
             }
+        else:
+            raise ConanException("Should not call this function with any other compiler")
 
         if self.version != "1.0.18":
             if self.settings.compiler == "Visual Studio":
