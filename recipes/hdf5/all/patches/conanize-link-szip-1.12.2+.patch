@@ -2,14 +2,6 @@ diff --git a/CMakeFilters.cmake b/CMakeFilters.cmake
 index 725390b31b..085b18051e 100644
 --- a/CMakeFilters.cmake
 +++ b/CMakeFilters.cmake
-@@ -9,7 +9,6 @@
- # If you do not have access to either file, you may request a copy from
- # help@hdfgroup.org.
- #
--option (USE_LIBAEC "Use AEC library as SZip Filter" OFF)
- option (USE_LIBAEC_STATIC "Use static AEC library " OFF)
- 
- include (ExternalProject)
 @@ -63,9 +62,9 @@
        find_package (ZLIB NAMES ${ZLIB_PACKAGE_NAME}${HDF_PACKAGE_EXT} COMPONENTS static shared)
        if (NOT ZLIB_FOUND)
