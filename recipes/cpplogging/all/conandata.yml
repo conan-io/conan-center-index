@@ -1,0 +1,30 @@
+sources:
+  "1.0.0.0":
+    url: "https://github.com/chronoxor/CppLogging/archive/refs/tags/1.0.0.0.tar.gz"
+    sha256: "c19843a7e6cbe828f8ceb01a3e2289f0e12ac528762e91175051f762325217ea"
+  "1.0.1.0":
+    url: "https://github.com/chronoxor/CppLogging/archive/refs/tags/1.0.1.0.tar.gz"
+    sha256: "46247873f8137ff1511222a85f34a8d54d5f804a93e3f04c6476bf61d8db7113"
+  "1.0.3.0":
+    url: "https://github.com/chronoxor/CppLogging/archive/refs/tags/1.0.3.0.tar.gz"
+    sha256: "5aceac3951430535e542ab7ffb42eb32f90c52b1d16130ae3f8bb56074aca589"
+patches:
+  "1.0.0.0":
+    - patch_file: "patches/0001-cmake-clean-up-1-0-0-0.patch"
+      base_path: "source_subfolder"
+  "1.0.1.0":
+    - patch_file: "patches/0001-cmake-clean-up-1-0-0-0.patch"
+      base_path: "source_subfolder"
+  "1.0.3.0":
+    - patch_file: "patches/0001-cmake-clean-up-1-0-0-0.patch"
+      base_path: "source_subfolder"
+requirements:
+  "1.0.0.0":
+    - zlib/1.2.13
+    - cppcommon/1.0.2.0
+  "1.0.1.0":
+    - zlib/1.2.13
+    - cppcommon/1.0.2.0
+  "1.0.3.0":
+    - zlib/1.2.13
+    - cppcommon/1.0.3.0
