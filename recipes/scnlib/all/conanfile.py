@@ -124,6 +124,9 @@ class ScnlibConan(ConanFile):
         if Version(self.version) >= "1.0":
             self.cpp_info.components["_scnlib"].requires = ["fast_float::fast_float"]
 
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["_scnlib"].system_libs.append("m")
+
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "scn"
         self.cpp_info.names["cmake_find_package_multi"] = "scn"
