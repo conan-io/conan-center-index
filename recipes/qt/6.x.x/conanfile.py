@@ -344,7 +344,7 @@ class QtConan(ConanFile):
             raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         if self.options.openssl:
             self.requires("openssl/1.1.1s")
         if self.options.with_pcre2:
