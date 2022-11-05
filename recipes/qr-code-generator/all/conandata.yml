@@ -35,6 +35,7 @@ patches:
     - patch_file: "patches/001-qrcode-1_4.patch"
       patch_description: "add missing include"
       patch_type: backport
+      patch_source: "https://github.com/nayuki/QR-Code-generator/commit/ec729bf2695300691f4b3a96ba5eaba083ebec00"
     - patch_file: "patches/002-cmake-pre-1.6.patch"
       patch_description: "add library name and list of source files"
       patch_type: conan
