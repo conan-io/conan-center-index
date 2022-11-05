@@ -31,7 +31,9 @@ class GccConan(ConanFile):
             del self.settings.compiler.libcxx
 
     def build_requirements(self):
-        self.tool_requires("binutils/2.38")
+        if self.info.settings.os != "Macos":
+            # binutils recipe is broken for Macos
+            self.tool_requires("binutils/2.38")
         self.tool_requires("flex/2.6.4")
 
     def requirements(self):
@@ -78,11 +80,12 @@ class GccConan(ConanFile):
         tc.configure_args.append(f"--with-bugurl={self.url}/issues")
 
         if self.info.settings.os == "Macos":
-            xcrun = XCRun(self.settings)
-            tc.configure_args.append("--with-native-system-header-dir=/usr/include")
+            xcrun = XCRun(self)
             tc.configure_args.append(f"--with-sysroot={xcrun.sdk_path}")
-            tc.make_args.append("BOOT_LDFLAGS=-Wl")
-            tc.make_args.append("-headerpad_max_install_names")
+            # Set native system header dir to ${{sysroot}}/usr/include to
+            # isolate installation from the system as much as possible
+            tc.configure_args.append("--with-native-system-header-dir=/usr/include")
+            tc.make_args.append("BOOT_LDFLAGS=-Wl,-headerpad_max_install_names")
         tc.generate()
 
         # Don't use AutotoolsDeps here - deps are passed directly in configure_args.
