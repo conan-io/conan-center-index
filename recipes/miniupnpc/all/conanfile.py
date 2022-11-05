@@ -1,16 +1,16 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class MiniupnpcConan(ConanFile):
     name = "miniupnpc"
     description = "UPnP client library/tool to access Internet Gateway Devices."
     license = "BSD-3-Clause"
-    topics = ("miniupnpc", "upnp", "networking", "internet-gateway")
+    topics = ("upnp", "networking", "internet-gateway")
     homepage = "https://github.com/miniupnp/miniupnp"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -25,8 +25,7 @@ class MiniupnpcConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -34,15 +33,9 @@ class MiniupnpcConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-           del self.settings.compiler.libcxx
-        except Exception:
-           pass
-        try:
-           del self.settings.compiler.cppstd
-        except Exception:
-           pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
