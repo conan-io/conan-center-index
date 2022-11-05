@@ -117,8 +117,6 @@ class Libxml2Conan(ConanFile):
             tc = VCVars(self)
             tc.generate()
             env = Environment()
-            for var, value in VisualStudioBuildEnvironment(self).vars.items():
-                env.define(var, value)
             # TODO: no conan v2 build helper for NMake yet (see https://github.com/conan-io/conan/issues/12188)
             #       So populate CL with AutotoolsToolchain cflags
             c_flags = AutotoolsToolchain(self).cflags
