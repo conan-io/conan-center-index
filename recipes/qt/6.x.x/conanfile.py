@@ -255,7 +255,7 @@ class QtConan(ConanFile):
         if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) >= "11" or \
             self.info.settings.compiler == "clang" and Version(self.info.settings.compiler.version) >= "12":
             raise ConanInvalidConfiguration("qt is not supported on gcc11 and clang >= 12 on C3I until conan-io/conan-center-index#13472 is fixed")
-            
+
         # C++ minimum standard required
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 17)
@@ -1379,16 +1379,16 @@ class QtConan(ConanFile):
                     obj_files = [os.path.join(submodule_dir, file) for file in os.listdir(submodule_dir)]
                     self.cpp_info.components[component].exelinkflags.extend(obj_files)
                     self.cpp_info.components[component].sharedlinkflags.extend(obj_files)
-                    
+
         build_modules_list = []
-                    
+
         def _add_build_modules_for_component(component):
             for req in self.cpp_info.components[component].requires:
-                if "::" in req: # not a qt component                   
+                if "::" in req: # not a qt component
                     continue
                 _add_build_modules_for_component(req)
             build_modules_list.extend(build_modules.pop(component, []))
-        
+
         for c in self.cpp_info.components:
             _add_build_modules_for_component(c)
 
