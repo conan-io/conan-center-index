@@ -22,7 +22,7 @@ class TestGsoapConan(ConanFile):
             calc_wsdl = os.path.join(self.source_folder, "calc.wsdl")
             self.output.info(f"Generating code from WSDL '{calc_wsdl}'")
             self.run(f"wsdl2h -o calc.h {calc_wsdl}", env="conanrun")
-            import_dir = os.path.join(self.dependencies["gsoap"].package_folder, "bin", "import")
+            import_dir = os.path.join(self.deps_cpp_info["gsoap"].rootpath, "bin", "import")
             self.run(f"soapcpp2 -j -CL -I{import_dir} calc.h", env="conanrun")
 
             cmake = CMake(self)
