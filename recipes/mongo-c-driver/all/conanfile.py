@@ -69,7 +69,7 @@ class MongoCDriverConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
         elif self.options.with_ssl == "libressl":
             self.requires("libressl/3.5.3")
         if self.options.with_sasl == "cyrus":
@@ -77,7 +77,7 @@ class MongoCDriverConan(ConanFile):
         if self.options.with_snappy:
             self.requires("snappy/1.1.9")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
         if self.options.with_icu:
@@ -93,7 +93,8 @@ class MongoCDriverConan(ConanFile):
 
     def build_requirements(self):
         if self.options.with_ssl == "libressl" or self.options.with_zstd:
-            self.tool_requires("pkgconf/1.7.4")
+            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                self.tool_requires("pkgconf/1.9.3")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
