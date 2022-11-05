@@ -6,7 +6,6 @@ from conan.tools.files import copy, get, rename, rm, rmdir, replace_in_file, sav
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, VCVars
-from conans import VisualStudioBuildEnvironment
 import os
 
 import itertools
