@@ -116,7 +116,7 @@ class UnivalueConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.set_property("pkg_config_name", "univalue")
+        self.cpp_info.set_property("pkg_config_name", "libunivalue")
         self.cpp_info.libs = ["univalue"]
         if self.options.shared:
             self.cpp_info.defines = ["UNIVALUE_SHARED"]
