@@ -31,8 +31,9 @@ class GccConan(ConanFile):
             del self.settings.compiler.libcxx
 
     def build_requirements(self):
-        if self.info.settings.os != "Macos":
-            # binutils recipe is broken for Macos
+        if self.info.settings.os == "Linux":
+            # binutils recipe is broken for Macos, and Windows uses tools
+            # distributed with msys/mingw
             self.tool_requires("binutils/2.38")
         self.tool_requires("flex/2.6.4")
 
@@ -46,13 +47,27 @@ class GccConan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
 
+    def validate_build(self):
+        if self.settings.compiler in ["Visual Studio", "msvc"]:
+            raise ConanInvalidConfiguration("GCC can't be built with MSVC")
+
     def validate(self):
         if self.info.settings.os == "Windows":
             raise ConanInvalidConfiguration(
-                "Windows builds aren't currently supported - please contribute if you'd to improve this recipe"
+                "Windows builds aren't currently supported. Contributions to support this are welcome."
+            )
+        if self.info.settings.os == "Macos":
+            # This recipe should largely support Macos, however the following
+            # errors are present when building using the c3i CI:
+            # clang: error: unsupported option '-print-multi-os-directory'
+            # clang: error: no input files
+            raise ConanInvalidConfiguration(
+                "Macos builds aren't currently supported. Contributions to support this are welcome."
             )
         if cross_building(self):
-            raise ConanInvalidConfiguration("no cross-building support (yet), sorry")
+            raise ConanInvalidConfiguration(
+                "Cross builds are not current supported. Contributions to support this are welcome"
+            )
 
     def layout(self):
         basic_layout(self, src_folder="source")
@@ -69,7 +84,9 @@ class GccConan(ConanFile):
         tc.configure_args.append("--disable-multilib")
         tc.configure_args.append("--disable-bootstrap")
         tc.configure_args.append(f"--prefix={self.package_folder}")
-        tc.configure_args.append(f"--libexecdir={os.path.join(self.package_folder, 'bin', 'libexec')}")
+        tc.configure_args.append(
+            f"--libexecdir={os.path.join(self.package_folder, 'bin', 'libexec')}"
+        )
         tc.configure_args.append(f"--with-zlib={self.deps_cpp_info['zlib'].rootpath}")
         tc.configure_args.append(f"--with-isl={self.deps_cpp_info['isl'].rootpath}")
         tc.configure_args.append(f"--with-gmp={self.deps_cpp_info['gmp'].rootpath}")
@@ -89,7 +106,7 @@ class GccConan(ConanFile):
         tc.generate()
 
         # Don't use AutotoolsDeps here - deps are passed directly in configure_args.
-        # Using AutotoolsDeps causes the compiler tests to fail by erroneously adding 
+        # Using AutotoolsDeps causes the compiler tests to fail by erroneously adding
         # additional $LIBS to the test compilation
 
     def source(self):
