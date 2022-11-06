@@ -256,7 +256,7 @@ class OpenSSLConan(ConanFile):
         # 1.1.0 era Makefiles don't do well with parallel installs
         if not self._use_nmake and self._full_version >= "1.1.0" and self._full_version < "1.1.1":
             tc.make_args = ["-j1"]
-        if self.settings_build.get_safe('os') == "Macos" and not cross_building(self):
+        if self.settings.os == "Macos" and not cross_building(self):
             tc.extra_cflags = ["-isysroot {}".format(XCRun(self).sdk_path)]
             tc.extra_cxxflags = ["-isysroot {}".format(XCRun(self).sdk_path)]
             tc.extra_ldflags = ["-isysroot {}".format(XCRun(self).sdk_path)]
