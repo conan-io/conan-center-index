@@ -1,9 +1,9 @@
 from conan import ConanFile, conan_version
 from conan.tools.env import Environment
-from conan.tools.build import build_jobs, cross_building
+from conan.tools.build import cross_building
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, VCVars
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
 from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
@@ -697,7 +697,7 @@ class OpenSSLConan(ConanFile):
             def sanitize_env_var(var):
                 return '"{}"'.format(var).replace('/', '\\') if '"' not in var else var
             env = Environment()
-            {env.define(key, sanitize_env_var(os.getenv(key))) for key in ("CC", "RC") if os.getenv(key)}
+            (env.define(key, sanitize_env_var(os.getenv(key))) for key in ("CC", "RC") if os.getenv(key))
             with env.vars(self).apply():
                 yield
         else:
