@@ -18,7 +18,7 @@ from conan.tools.gnu import PkgConfigDeps
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class FontconfigConan(ConanFile):
