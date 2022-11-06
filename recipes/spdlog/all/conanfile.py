@@ -52,7 +52,9 @@ class SpdlogConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "1.10.0":
+        if Version(self.version) >= "1.11.0":
+            self.requires("fmt/9.1.0", transitive_headers=True)
+        elif Version(self.version) >= "1.10.0":
             self.requires("fmt/8.1.1", transitive_headers=True)
         elif Version(self.version) >= "1.9.0":
             self.requires("fmt/8.0.1", transitive_headers=True)

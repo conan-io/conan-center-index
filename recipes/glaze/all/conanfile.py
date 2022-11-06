@@ -37,7 +37,7 @@ class GlazeConan(ConanFile):
 
     def requirements(self):
         self.requires("fmt/9.1.0")
-        self.requires("fast_float/3.5.1")
+        self.requires("fast_float/3.6.0")
         self.requires("frozen/1.1.1")
         self.requires("nanorange/20200505")
 
