@@ -4,5 +4,15 @@ project(test_package C)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_cmake_module_package
-                 ${CMAKE_CURRENT_BINARY_DIR}/test_cmake_module_package)
+find_package(LibXml2 REQUIRED)
+
+message("LIBXML2_FOUND: ${LIBXML2_FOUND}")
+message("LIBXML2_INCLUDE_DIR: ${LIBXML2_INCLUDE_DIR}")
+message("LIBXML2_INCLUDE_DIRS: ${LIBXML2_INCLUDE_DIRS}")
+message("LIBXML2_LIBRARIES: ${LIBXML2_LIBRARIES}")
+message("LIBXML2_LIBRARY: ${LIBXML2_LIBRARY}")
+message("LIBXML2_DEFINITIONS: ${LIBXML2_DEFINITIONS}")
+message("LIBXML2_VERSION_STRING: ${LIBXML2_VERSION_STRING}")
+
+add_executable(${PROJECT_NAME} ../test_package/test_package.c)
+target_link_libraries(${PROJECT_NAME} LibXml2::LibXml2)
