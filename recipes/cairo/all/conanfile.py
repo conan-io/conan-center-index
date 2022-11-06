@@ -1,11 +1,10 @@
 import os
-import shutil
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import (
     apply_conandata_patches,
     copy,
@@ -60,7 +59,7 @@ class CairoConan(ConanFile):
 
     @property
     def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)     
+        return getattr(self, "user_info_build", self.deps_user_info)
 
     def config_options(self):
         del self.settings.compiler.libcxx
@@ -158,7 +157,7 @@ class CairoConan(ConanFile):
             tc.extra_cflags.append("-Wno-enum-conversion")
 
         return tc
-           
+
 
     def generate(self):
         VirtualBuildEnv(self).generate()
@@ -239,7 +238,7 @@ class CairoConan(ConanFile):
         else:
             autotools.autoreconf()
             autotools.configure()
-            autotolls.make()
+            autotools.make()
 
     def package(self):
         copy(self, pattern="LICENSE", dst="licenses", src=self.source_folder)
@@ -274,7 +273,7 @@ class CairoConan(ConanFile):
                 copy(self, "cairo-gobject.lib", cairo_gobject_src_path, lib_dest_path)
                 rename(self, os.path.join(lib_dest_path, "cairo-static.lib"), os.path.join(lib_dest_path, "cairo.lib"))
         else:
-            autotools = Autotools(self)
+            autotools = Autotools(self, namespace="main")
             autotools.install()
 
         copy(self, "COPYING*", self.source_folder, os.path.join(self.package_folder, "licenses"))
