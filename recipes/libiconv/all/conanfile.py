@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches,
     copy,
@@ -88,12 +88,14 @@ class LibiconvConan(ConanFile):
             # order of setting flags and environment vars is important
             # See https://github.com/conan-io/conan/issues/12228
             tc.extra_cflags.append("-FS")
+        tc.generate()
+
         if is_msvc(self) or self._is_clang_cl:
+            env = Environment()
             cc, lib, link = self._msvc_tools
             build_aux_path = os.path.join(self.source_folder, "build-aux")
             lt_compile = unix_path(self, os.path.join(build_aux_path, "compile"))
             lt_ar = unix_path(self, os.path.join(build_aux_path, "ar-lib"))
-            env = tc.environment()
             env.define("CC", f"{lt_compile} {cc} -nologo")
             env.define("CXX", f"{lt_compile} {cc} -nologo")
             env.define("LD", link)
@@ -102,7 +104,7 @@ class LibiconvConan(ConanFile):
             env.define("RANLIB", ":")
             env.define("NM", "dumpbin -symbols")
             env.define("win32_target", "_WIN32_WINNT_VISTA")
-        tc.generate(env)
+            env.vars(self).save_script("conanbuild_libiconv_msvc")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
