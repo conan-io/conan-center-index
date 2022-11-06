@@ -23,12 +23,14 @@ class LuauConan(ConanFile):
         "fPIC": [True, False],
         "with_cli": [True, False],
         "with_web": [True, False],
+        "native_code_gen": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_cli": False,
         "with_web": False,
+        "native_code_gen": False,
     }
 
     @property
@@ -57,6 +59,8 @@ class LuauConan(ConanFile):
                 del self.options.fPIC
             except Exception:
                 pass
+        if Version(self.version) < "0.549":
+            del self.options.native_code_gen
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -84,6 +88,8 @@ class LuauConan(ConanFile):
         tc.variables["LUAU_BUILD_WEB"] = self.options.with_web
         tc.variables["LUAU_WERROR"] = False
         tc.variables["LUAU_STATIC_CRT"] = False
+        if Version(self.version) >= "0.549":
+            tc.variables["LUAU_NATIVE"] = self.options.native_code_gen
         tc.variables["LUAU_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.generate()
 
