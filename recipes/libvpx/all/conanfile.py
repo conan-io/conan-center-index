@@ -55,7 +55,7 @@ class LibVPXConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            self.options.safe_rm("fPIC")
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
