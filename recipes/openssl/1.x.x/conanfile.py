@@ -16,7 +16,7 @@ import os
 import shutil
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 @total_ordering
 class OpenSSLVersion(object):
@@ -72,6 +72,7 @@ class OpenSSLVersion(object):
 
 class OpenSSLConan(ConanFile):
     name = "openssl"
+    package_type = "library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/openssl/openssl"
     license = "OpenSSL"
@@ -255,7 +256,7 @@ class OpenSSLConan(ConanFile):
         # 1.1.0 era Makefiles don't do well with parallel installs
         if self._full_version >= "1.1.0" and self._full_version < "1.1.1":
             tc.make_args = ["-j1"]
-        if self.settings.os == "Macos" and not cross_building(self):
+        if self.settings_build.get_safe('os') == "Macos" and not cross_building(self):
             tc.extra_cflags = ["-isysroot {}".format(XCRun(self).sdk_path)]
             tc.extra_cxxflags = ["-isysroot {}".format(XCRun(self).sdk_path)]
             tc.extra_ldflags = ["-isysroot {}".format(XCRun(self).sdk_path)]
