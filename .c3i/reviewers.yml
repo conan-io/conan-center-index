@@ -30,6 +30,9 @@ reviewers:
   - user: "SpaceIm"
     type: "community"
     request_reviews: false
+  - user: "theirix"
+    type: "community"
+    request_reviews: false
   - user: "ericLemanissier"
     type: "community"
     request_reviews: false
