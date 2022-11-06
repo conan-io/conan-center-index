@@ -10,7 +10,7 @@ import os
 from conans import tools as tools_legacy
 
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class ProjConan(ConanFile):
@@ -56,13 +56,9 @@ class ProjConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
