@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, collect_libs
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, collect_libs, rm
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -87,6 +87,12 @@ class ProjConan(ConanFile):
 
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         replace_in_file(self, cmakelists, "/W4", "")
+
+        # Fix up usage of SQLite3 finder outputs
+        rm(self, "FindSqlite3.cmake", os.path.join(self.source_folder, "cmake"))
+        replace_in_file(self, cmakelists, "SQLITE3_FOUND", "SQLite3_FOUND")
+        replace_in_file(self, cmakelists, "SQLITE3_VERSION", "SQLite3_VERSION")
+        replace_in_file(self, cmakelists, "find_package(Sqlite3 REQUIRED)", "find_package(SQLite3 REQUIRED MODULE)")
 
         # Let CMake install shared lib with a clean rpath !
         if Version(self.version) >= "7.1.0" and Version(self.version) < "9.0.0":
