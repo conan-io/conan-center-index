@@ -220,6 +220,10 @@ class LibVPXConan(ConanFile):
             libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.append("m")
+
         # reset the paths we cleared in layout()
         self.cpp_info.includedirs = ['include']
         self.cpp_info.libdirs = ['lib']
