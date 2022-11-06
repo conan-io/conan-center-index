@@ -70,11 +70,11 @@ class LibVPXConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-        # libvpx configure is unusual and requires a workaround,
+        # libvpx configure is unusual and requires a workaround, otherwise it will fail with an error.
         # look for "output_goes_here" below for more in this thread.
         self.cpp.package.bindirs = []
         self.cpp.package.includedirs = []
-        self.cpp.package.libdirs = []
+        self.cpp.package.libdirs = []   # not strictly necessary, but lets do all as a group
 
     def build_requirements(self):
         self.tool_requires("yasm/1.3.0")
@@ -222,6 +222,10 @@ class LibVPXConan(ConanFile):
             libcxx = tools_legacy.stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
+        # reset the paths we cleared in layout()
+        self.cpp_info.includedirs = ['include']
+        self.cpp_info.libdirs = ['lib']
+        self.cpp_info.bindirs = ['bin']
 
         # TODO: to remove in conan v2 once pkg_config generator removed
         self.cpp_info.names["pkg_config"] = "vpx"
