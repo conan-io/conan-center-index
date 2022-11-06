@@ -1,4 +1,5 @@
-from conan import ConanFile
+from six import StringIO
+from conan import ConanFile, conan_version
 from conan.tools.scm import Version
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
@@ -53,4 +54,7 @@ class TestPackageConan(ConanFile):
         if not self._skip_test and can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "digest")
             self.run(bin_path, env="conanrun")
-        assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE"))
+        if Version(conan_version).major >= 2:
+            assert os.path.exists(os.path.join(self.dependencies["openssl"].package_folder, "licenses", "LICENSE"))
+        else:
+            assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE"))

@@ -27,13 +27,9 @@ sources:
 patches:
   1.0.2u:
     - patch_file: patches/1.0.2u-darwin-arm64.patch
-      base_path: source_subfolder
   1.1.1p:
     - patch_file: patches/1.1.1-tvos-watchos.patch
-      base_path: source_subfolder
   1.1.1q:
     - patch_file: patches/1.1.1-tvos-watchos.patch
-      base_path: source_subfolder
   1.1.1s:
     - patch_file: patches/1.1.1-tvos-watchos.patch
-      base_path: source_subfolder
