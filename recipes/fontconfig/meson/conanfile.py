@@ -47,7 +47,7 @@ class FontconfigConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.safe_rm("fPIC")
         self.settings.safe_rm("compiler.libcxx")
         self.settings.safe_rm("compiler.cppstd")
 
