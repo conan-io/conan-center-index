@@ -7,6 +7,7 @@ from conan.tools.scm import Version
 
 import os
 
+required_conan_version = ">=1.50.0"
 
 class DbgMacroConan(ConanFile):
     name = "dbg-macro"
