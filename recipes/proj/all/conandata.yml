@@ -32,22 +32,44 @@ sources:
 patches:
   "9.0.1":
     - patch_file: "patches/0001-use-cmake-targets-9.0.1.patch"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
   "9.0.0":
     - patch_file: "patches/0001-use-cmake-targets-9.0.0.patch"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
     - patch_file: "patches/0002-cmake-configure-proj-pc.patch"
+      patch_type: "conan"
+      patch_description: "cmake configure proj pc (fixed by https://github.com/OSGeo/PROJ/pull/3087)"
   "8.2.1":
     - patch_file: "patches/0001-use-cmake-targets-8.2.0.patch"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
   "8.2.0":
     - patch_file: "patches/0001-use-cmake-targets-8.2.0.patch"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
   "8.1.1":
     - patch_file: "patches/0001-use-cmake-targets-8.1.1.patch"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
   "8.1.0":
     - patch_file: "patches/0001-use-cmake-targets-8.1.0.patch"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
   "8.0.1":
     - patch_file: "patches/0001-use-cmake-targets-8.0.0.patch"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
   "8.0.0":
     - patch_file: "patches/0001-use-cmake-targets-8.0.0.patch"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
   "7.2.1":
     - patch_file: "patches/0001-use-cmake-targets-7.2.1.patch"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
   "6.3.1":
     - patch_file: "patches/0001-use-cmake-targets-6.x.x.patch"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
