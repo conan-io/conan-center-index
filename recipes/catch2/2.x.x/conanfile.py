@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, replace_in_file
+from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -42,14 +42,8 @@ class Catch2Conan(ConanFile):
 
     def configure(self):
         if not self.options.with_main:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-            try:
-                del self.options.with_benchmark
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
+            self.options.rm_safe("with_benchmark")
 
     def package_id(self):
         if not self.options.with_main:
