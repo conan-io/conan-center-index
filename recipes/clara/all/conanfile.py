@@ -29,4 +29,4 @@ class ClaraConan(ConanFile):
              dst=os.path.join(self.package_folder, "include"), keep_path=True)
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
