@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 3.8)
-project(test_package LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.1.0)
+project(test_package)
 
-find_package(pfr REQUIRED CONFIG)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
 
-add_executable(${PROJECT_NAME} test_package_${PfrMajorVersion}.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE pfr::pfr)
+add_executable(${PROJECT_NAME} ../test_package/test_package_${PfrMajorVersion}.cpp)
+target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
 
 # PFR 1.0.4 doesn't support Visual Studio in C++14 mode, requires C++17.
 # Otherwise, at least C++14 is required.
