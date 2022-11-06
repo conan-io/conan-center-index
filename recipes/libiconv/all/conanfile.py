@@ -66,40 +66,6 @@ class LibiconvConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def generate(self):
-        def requires_fs_flag():
-            # See https://github.com/conan-io/conan/issues/11158
-            return (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-                    (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180")
-
-        tc = AutotoolsToolchain(self)
-        if requires_fs_flag():
-            # order of setting flags and environment vars is important
-            # See https://github.com/conan-io/conan/issues/12228
-            tc.extra_cflags.append("-FS")
-
-        env = tc.environment()
-
-        if is_msvc(self) or self._is_clang_cl:
-            cc, lib, link = self._msvc_tools
-            build_aux_path = os.path.join(self.source_folder, "build-aux")
-            lt_compile = unix_path(self, os.path.join(build_aux_path, "compile"))
-            lt_ar = unix_path(self, os.path.join(build_aux_path, "ar-lib"))
-            env.define("CC", f"{lt_compile} {cc} -nologo")
-            env.define("CXX", f"{lt_compile} {cc} -nologo")
-            env.define("LD", f"{link}")
-            env.define("STRIP", ":")
-            env.define("AR", f"{lt_ar} {lib}")
-            env.define("RANLIB", ":")
-            env.define("NM", "dumpbin -symbols")
-            env.define("win32_target", "_WIN32_WINNT_VISTA")
-
-
-        tc.generate(env)
-
-        env = VirtualBuildEnv(self)
-        env.generate()
-
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
@@ -108,6 +74,36 @@ class LibiconvConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        def requires_fs_flag():
+            # See https://github.com/conan-io/conan/issues/11158
+            return (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
+                    (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180")
+
+        env = VirtualBuildEnv(self)
+        env.generate()
+
+        tc = AutotoolsToolchain(self)
+        if requires_fs_flag():
+            # order of setting flags and environment vars is important
+            # See https://github.com/conan-io/conan/issues/12228
+            tc.extra_cflags.append("-FS")
+        if is_msvc(self) or self._is_clang_cl:
+            cc, lib, link = self._msvc_tools
+            build_aux_path = os.path.join(self.source_folder, "build-aux")
+            lt_compile = unix_path(self, os.path.join(build_aux_path, "compile"))
+            lt_ar = unix_path(self, os.path.join(build_aux_path, "ar-lib"))
+            env = tc.environment()
+            env.define("CC", f"{lt_compile} {cc} -nologo")
+            env.define("CXX", f"{lt_compile} {cc} -nologo")
+            env.define("LD", f"{link}")
+            env.define("STRIP", ":")
+            env.define("AR", f"{lt_ar} {lib}")
+            env.define("RANLIB", ":")
+            env.define("NM", "dumpbin -symbols")
+            env.define("win32_target", "_WIN32_WINNT_VISTA")
+        tc.generate(env)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
