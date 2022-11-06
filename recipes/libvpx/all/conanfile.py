@@ -146,19 +146,19 @@ class LibVPXConan(ConanFile):
                 if not self.options.get_safe(name):
                     tc.configure_args.append(f"--disable-{name}")
 
-# FIXME not possible ?....        if is_msvc(self):
-# FIXME not possible ?....            # gen_msvs_vcxproj.sh doesn't like custom flags
-# FIXME not possible ?....            autotools.cxxflags = []
-# FIXME not possible ?....            autotools.flags = []
         if is_apple_os(self) and self.settings.get_safe("compiler.libcxx") == "libc++":
             # special case, as gcc/g++ is hard-coded in makefile, it implicitly assumes -lstdc++
 # FIXME what to do
             tc.extra_ldflags.append("-stdlib=libc++")
 
         env = Environment()
-        env.define("CC", "")
-        env.define("CFLAGS", "")
-        env.define("CXXFLAGS", "")
+
+        if is_msvc(self):
+            # gen_msvs_vcxproj.sh doesn't like custom flags
+            env.define("CC", "")
+            # FIXME can we leave these alone?
+            # env.define("CFLAGS", "")
+            # env.define("CXXFLAGS", "")
 
         tc.generate(env=env)
 
