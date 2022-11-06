@@ -55,8 +55,6 @@ class LibUnistringConan(ConanFile):
     def validate(self):
         if is_msvc(self):
             raise ConanInvalidConfiguration("Visual Studio is unsupported")
-        if self.info.settings.os == "Windows" and self.info.options.shared:
-            raise ConanInvalidConfiguration("Shared build on Windows is not supported")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
