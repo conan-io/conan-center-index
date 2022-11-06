@@ -48,8 +48,8 @@ class FontconfigConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.safe_rm("compiler.libcxx")
+        self.settings.safe_rm("compiler.cppstd")
 
     def requirements(self):
         self.requires("freetype/2.12.1")
