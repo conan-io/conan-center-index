@@ -67,7 +67,7 @@ class FontconfigConan(ConanFile):
     def build_requirements(self):
         self.build_requires("gperf/3.1")
         self.build_requires("pkgconf/1.7.4")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", check_type=str):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
