@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file, rename
@@ -16,7 +15,7 @@ from conans import tools as tools_legacy
 import os
 import re
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibVPXConan(ConanFile):
@@ -24,7 +23,7 @@ class LibVPXConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.webmproject.org/code"
     description = "WebM VP8/VP9 Codec SDK"
-    topics = ("vpx", "codec", "web", "VP8", "VP9")
+    topics = "vpx", "codec", "web", "VP8", "VP9"
     license = "BSD-3-Clause"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -58,10 +57,7 @@ class LibVPXConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.safe_rm("fPIC")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
@@ -89,24 +85,6 @@ class LibVPXConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        # relocatable shared lib on macOS
-# FIXME is this still needed?
-        replace_in_file(self, os.path.join(self.source_folder, "build", "make", "Makefile"),
-                              "-dynamiclib",
-                              "-dynamiclib -install_name @rpath/$$(LIBVPX_SO)")
-        # Disable LTO for Visual Studio when CFLAGS doesn't contain -GL
-        if is_msvc(self):
-# FIXME what is the proper way to do this?
-            lto = any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", "")))
-            if not lto:
-                replace_in_file(self,
-                    os.path.join(self.source_folder, "build", "make", "gen_msvs_vcxproj.sh"),
-                    "tag_content WholeProgramOptimization true",
-                    "tag_content WholeProgramOptimization false",
-                )
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -171,25 +149,41 @@ class LibVPXConan(ConanFile):
                 if not self.options.get_safe(name):
                     tc.configure_args.append('--disable-%s' % name)
 
-        if is_msvc(self):
-            # gen_msvs_vcxproj.sh doesn't like custom flags
-# FIXME what to do
-            autotools.cxxflags = []
-            autotools.flags = []
+# FIXME not possible ?....        if is_msvc(self):
+# FIXME not possible ?....            # gen_msvs_vcxproj.sh doesn't like custom flags
+# FIXME not possible ?....            autotools.cxxflags = []
+# FIXME not possible ?....            autotools.flags = []
         if is_apple_os(self) and self.settings.get_safe("compiler.libcxx") == "libc++":
             # special case, as gcc/g++ is hard-coded in makefile, it implicitly assumes -lstdc++
 # FIXME what to do
-            autotools.link_flags.append("-stdlib=libc++")
+            tc.extra_ldflags.append("-stdlib=libc++")
 
-        tc.generate()
+        env = Environment()
+        env.define("CC", "")
+        env.define("CFLAGS", "")
+        env.define("CXXFLAGS", "")
+
+        tc.generate(env=env)
 
         if is_msvc(self):
             tc = VCVars(self)
             tc.generate()
 
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
+        # Disable LTO for Visual Studio when CFLAGS doesn't contain -GL
+        if is_msvc(self):
+            self.output.info(f"CFLAGS = {tools_legacy.get_env('CFLAGS', '')}")
+            lto = any(re.finditer("(^| )[/-]GL($| )", tools_legacy.get_env("CFLAGS", "")))
+            if not lto:
+                self.output.info("Disabling LTO")
+                replace_in_file(self,
+                    os.path.join(self.source_folder, "build", "make", "gen_msvs_vcxproj.sh"),
+                    "tag_content WholeProgramOptimization true",
+                    "tag_content WholeProgramOptimization false",
+                )
+            else:
+                self.output.info("Enabling LTO")
 
         autotools = Autotools(self)
         autotools.configure()
@@ -198,29 +192,27 @@ class LibVPXConan(ConanFile):
     def package(self):
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        autotools.install()
+        # FIXME must use DESTDIR=unix_path, otherwise the install fails with messages about
+        # "unable to install ..." and then every letter of the path split into a separate argument.
+        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
 
         # The workaround requires us to move the outputs into place now
         rename(self,
                 os.path.join(self.package_folder, "output_goes_here", "include"),
                 os.path.join(self.package_folder, "include")
                 )
-        rename(self,
-                os.path.join(self.package_folder, "output_goes_here", "lib"),
-                os.path.join(self.package_folder, "lib")
-                )
-        rmdir(self, os.path.join(self.package_folder, "output_goes_here"))
 
+        libs_from = os.path.join(self.package_folder, "output_goes_here", "lib")
+        if is_msvc(self):
+            # Libs may be in subfolders with lib folder
+            libs_from = os.path.join(libs_from, "Win32" if self.settings.arch == "x86" else "x64")
+        rename(self, libs_from, os.path.join(self.package_folder, "lib"))
+
+        rmdir(self, os.path.join(self.package_folder, "output_goes_here"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
-        if is_msvc(self):
-            # don't trust install target
-            rmdir(self, os.path.join(self.package_folder, "lib"))
-            libdir = os.path.join(
-                "Win32" if self.settings.arch == "x86" else "x64",
-                "Debug" if self.settings.build_type == "Debug" else "Release",
-            )
-            copy(self, "vpx*.lib", src=os.path.join(self.source_folder, libdir), dst=os.path.join(self.package_folder, "lib"))
+        fix_apple_shared_install_name(self)
+
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "vpx")
