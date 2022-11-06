@@ -75,6 +75,7 @@ class CppunitConan(ConanFile):
             if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
                (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
                 tc.extra_cflags.append("-FS")
+                tc.extra_cxxflags.append("-FS")
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args.extend([
             "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
