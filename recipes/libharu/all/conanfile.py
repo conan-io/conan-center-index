@@ -78,15 +78,16 @@ class LibharuConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        rm(self, "CHANGES", os.path.join(self.package_folder))
-        rm(self, "INSTALL", os.path.join(self.package_folder))
-        rm(self, "README", os.path.join(self.package_folder))
-
         if Version(self.version) == "2.3.0":
+            rm(self, "CHANGES", os.path.join(self.package_folder))
+            rm(self, "INSTALL", os.path.join(self.package_folder))
+            rm(self, "README", os.path.join(self.package_folder))
+
             rmdir(self, os.path.join(self.package_folder, "if"))
             save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._v230_extract_license())
         else:
             copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+            rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         libprefix = ""
