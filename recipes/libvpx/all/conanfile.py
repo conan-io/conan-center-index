@@ -60,7 +60,7 @@ class LibVPXConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Windows shared builds are not supported")
         if str(self.settings.compiler) not in ["Visual Studio", "msvc", "gcc", "clang", "apple-clang"]:
-            raise ConanInvalidConfiguration("Unsupported compiler {}.".format(self.settings.compiler))
+            raise ConanInvalidConfiguration(f"Unsupported compiler {self.settings.compiler}")
         if self.settings.os == "Macos" and self.settings.arch == "armv8" and Version(self.version) < "1.10.0":
             raise ConanInvalidConfiguration("M1 only supported since 1.10, please upgrade")
 
@@ -118,7 +118,7 @@ class LibVPXConan(ConanFile):
                 vc_version = self.settings.compiler.version
             else:
                 vc_version = msvc_version_to_vs_ide_version(self.settings.compiler.version)
-            compiler = "vs{}".format(vc_version)
+            compiler = f"vs{vc_version}"
         elif self.settings.compiler in ["gcc", "clang", "apple-clang"]:
             compiler = 'gcc'
 
@@ -139,12 +139,12 @@ class LibVPXConan(ConanFile):
             os_name = 'solaris'
         elif host_os == 'Android':
             os_name = 'android'
-        target = "%s-%s-%s" % (arch, os_name, compiler)
-        tc.configure_args.append('--target=%s' % target)
+        target = f"{arch}-{os_name}-{compiler}"
+        tc.configure_args.append(f"--target={target}")
         if str(self.settings.arch) in ["x86", "x86_64"]:
             for name in self._arch_options:
                 if not self.options.get_safe(name):
-                    tc.configure_args.append('--disable-%s' % name)
+                    tc.configure_args.append(f"--disable-{name}")
 
 # FIXME not possible ?....        if is_msvc(self):
 # FIXME not possible ?....            # gen_msvs_vcxproj.sh doesn't like custom flags
