@@ -8,7 +8,8 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars, unix_path, msvc_runtime_flag
 from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
 from conan.tools.scm import Version
-from conans import tools as tools_legacy
+from conans.tools import get_env # FIXME how to port this?
+from conans.tools import stdcpp_library # TODO: import from conan.tools.build in conan 1.54.0 (https://github.com/conan-io/conan/pull/12269)
 import os
 import re
 
@@ -170,8 +171,8 @@ class LibVPXConan(ConanFile):
         apply_conandata_patches(self)
         # Disable LTO for Visual Studio when CFLAGS doesn't contain -GL
         if is_msvc(self):
-            self.output.info(f"CFLAGS = {tools_legacy.get_env('CFLAGS', '')}")
-            lto = any(re.finditer("(^| )[/-]GL($| )", tools_legacy.get_env("CFLAGS", "")))
+            self.output.info(f"CFLAGS = {get_env('CFLAGS', '')}")
+            lto = any(re.finditer("(^| )[/-]GL($| )", get_env("CFLAGS", "")))
             if not lto:
                 self.output.info("Disabling LTO")
                 replace_in_file(self,
@@ -216,7 +217,7 @@ class LibVPXConan(ConanFile):
         suffix = msvc_runtime_flag(self).lower() if is_msvc(self) else ""
         self.cpp_info.libs = [f"vpx{suffix}"]
         if not self.options.shared:
-            libcxx = tools_legacy.stdcpp_library(self)
+            libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
         # reset the paths we cleared in layout()
