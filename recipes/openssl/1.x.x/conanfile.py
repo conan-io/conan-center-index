@@ -697,7 +697,9 @@ class OpenSSLConan(ConanFile):
             def sanitize_env_var(var):
                 return '"{}"'.format(var).replace('/', '\\') if '"' not in var else var
             env = Environment()
-            (env.define(key, sanitize_env_var(os.getenv(key))) for key in ("CC", "RC") if os.getenv(key))
+            for key in ("CC", "RC"):
+                if os.getenv(key):
+                    env.define(key, sanitize_env_var(os.getenv(key)))
             with env.vars(self).apply():
                 yield
         else:
