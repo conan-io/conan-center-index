@@ -16,6 +16,9 @@ class FastPRNGConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
+    def layout(self):
+        basic_layout(self)
+
     def package_id(self):
         self.info.clear()
 
