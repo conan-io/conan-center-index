@@ -1,5 +1,5 @@
-import os
-
+from conan import ConanFile
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches,
     copy,
@@ -10,14 +10,13 @@ from conan.tools.files import (
     rm,
     rmdir
 )
-from conan import ConanFile
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
+import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibiconvConan(ConanFile):
@@ -46,6 +45,10 @@ class LibiconvConan(ConanFile):
     def _msvc_tools(self):
         return ("clang-cl", "llvm-lib", "lld-link") if self._is_clang_cl else ("cl", "lib", "link")
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -55,20 +58,16 @@ class LibiconvConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
-            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
             self.win_bash = True
 
@@ -97,7 +96,7 @@ class LibiconvConan(ConanFile):
             env = tc.environment()
             env.define("CC", f"{lt_compile} {cc} -nologo")
             env.define("CXX", f"{lt_compile} {cc} -nologo")
-            env.define("LD", f"{link}")
+            env.define("LD", link)
             env.define("STRIP", ":")
             env.define("AR", f"{lt_ar} {lib}")
             env.define("RANLIB", ":")
@@ -128,19 +127,16 @@ class LibiconvConan(ConanFile):
 
         if (is_msvc(self) or self._is_clang_cl) and self.options.shared:
             for import_lib in ["iconv", "charset"]:
-                rename(self, os.path.join(self.package_folder, "lib", "{}.dll.lib".format(import_lib)),
-                             os.path.join(self.package_folder, "lib", "{}.lib".format(import_lib)))
+                rename(self, os.path.join(self.package_folder, "lib", f"{import_lib}.dll.lib"),
+                             os.path.join(self.package_folder, "lib", f"{import_lib}.lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "Iconv")
         self.cpp_info.set_property("cmake_target_name", "Iconv::Iconv")
-
-        self.cpp_info.names["cmake_find_package"] = "Iconv"
-        self.cpp_info.names["cmake_find_package_multi"] = "Iconv"
-
         self.cpp_info.libs = ["iconv", "charset"]
 
-        binpath = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment var: {}".format(binpath))
-        self.env_info.path.append(binpath)
+        # TODO: to remove in conan v2
+        self.cpp_info.names["cmake_find_package"] = "Iconv"
+        self.cpp_info.names["cmake_find_package_multi"] = "Iconv"
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
