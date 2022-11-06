@@ -482,23 +482,21 @@ class OpenSSLConan(ConanFile):
         # https://wiki.openssl.org/index.php/Compilation_and_Installation#Modifying_Build_Settings
         # its often easier to modify Configure and Makefile.org rather than trying to add targets to the configure scripts
         makefile_org = os.path.join(self.source_folder, "Makefile.org")
-        env_build = self.buildenv_info.vars(self)
-        with env_build.apply():
-            if not "CROSS_COMPILE" in os.environ:
-                cc = os.environ.get("CC", "cc")
-                gen_info = json.loads(load(self, os.path.join(self.generators_folder, "gen_info.conf")))
-                replace_in_file(self, makefile_org, "CC= cc\n", "CC= %s %s\n" % (self._adjust_path(cc), gen_info["CFLAGS"]))
-                if "AR" in os.environ:
-                    replace_in_file(self, makefile_org, "AR=ar $(ARFLAGS) r\n", "AR=%s $(ARFLAGS) r\n" % self._adjust_path(os.environ["AR"]))
-                if "RANLIB" in os.environ:
-                    replace_in_file(self, makefile_org, "RANLIB= ranlib\n", "RANLIB= %s\n" % self._adjust_path(os.environ["RANLIB"]))
-                rc = os.environ.get("WINDRES", os.environ.get("RC"))
-                if rc:
-                    replace_in_file(self, makefile_org, "RC= windres\n", "RC= %s\n" % self._adjust_path(rc))
-                if "NM" in os.environ:
-                    replace_in_file(self, makefile_org, "NM= nm\n", "NM= %s\n" % self._adjust_path(os.environ["NM"]))
-                if "AS" in os.environ:
-                    replace_in_file(self, makefile_org, "AS=$(CC) -c\n", "AS=%s\n" % self._adjust_path(os.environ["AS"]))
+        if not "CROSS_COMPILE" in os.environ:
+            cc = os.environ.get("CC", "cc")
+            gen_info = json.loads(load(self, os.path.join(self.generators_folder, "gen_info.conf")))
+            replace_in_file(self, makefile_org, "CC= cc\n", "CC= %s %s\n" % (self._adjust_path(cc), gen_info["CFLAGS"]))
+            if "AR" in os.environ:
+                replace_in_file(self, makefile_org, "AR=ar $(ARFLAGS) r\n", "AR=%s $(ARFLAGS) r\n" % self._adjust_path(os.environ["AR"]))
+            if "RANLIB" in os.environ:
+                replace_in_file(self, makefile_org, "RANLIB= ranlib\n", "RANLIB= %s\n" % self._adjust_path(os.environ["RANLIB"]))
+            rc = os.environ.get("WINDRES", os.environ.get("RC"))
+            if rc:
+                replace_in_file(self, makefile_org, "RC= windres\n", "RC= %s\n" % self._adjust_path(rc))
+            if "NM" in os.environ:
+                replace_in_file(self, makefile_org, "NM= nm\n", "NM= %s\n" % self._adjust_path(os.environ["NM"]))
+            if "AS" in os.environ:
+                replace_in_file(self, makefile_org, "AS=$(CC) -c\n", "AS=%s\n" % self._adjust_path(os.environ["AS"]))
 
     def _get_default_openssl_dir(self):
         if self.settings.os == "Linux" and self._full_version >= "1.1.0":
