@@ -176,7 +176,7 @@ class FollyConan(ConanFile):
         cxx_std_flag = tools.cppstd_flag(self.settings)
         cxx_std_value = cxx_std_flag.split('=')[1] if cxx_std_flag else "c++{}".format(self._minimum_cpp_standard)
         tc.variables["CXX_STD"] = cxx_std_value
-        if is_msvc:
+        if is_msvc(self):
             tc.variables["MSVC_LANGUAGE_VERSION"] = cxx_std_value
             tc.variables["MSVC_ENABLE_ALL_WARNINGS"] = False
             tc.variables["MSVC_USE_STATIC_RUNTIME"] = "MT" in msvc_runtime_flag(self)
