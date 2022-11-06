@@ -12,6 +12,7 @@ from conan.tools.files import (
     export_conandata_patches,
     get,
     replace_in_file,
+    rename,
     rm,
     rmdir
 )
@@ -121,33 +122,14 @@ class CairoConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def _msvc_make_args(self):
-        def dep_path(dependency):
-            return unix_path(self, self.deps_cpp_info[dependency].rootpath)
-
-        return [
-            "--directory", unix_path(self, self.source_folder),
-            "-f", "Makefile.win32",
-            "-n",
-            f"CFG={str(self.settings.build_type).lower()}",
-            "CAIRO_HAS_FC_FONT=0",
-            f"ZLIB_PATH={dep_path('zlib')}",
-            f"LIBPNG_PATH={dep_path('libpng')}",
-            f"PIXMAN_PATH={dep_path('pixman')}",
-            f"FREETYPE_PATH={dep_path('freetype')}",
-            f"GOBJECT_PATH={dep_path('glib')}"
-        ]
-
-    def generate(self):
+    def _create_toolchain(self, namespace, directory):
         def is_enabled(value):
             return "yes" if value else "no"
 
-        VirtualBuildEnv(self).generate()
+        def dep_path(dependency):
+            return unix_path(self, self.deps_cpp_info[dependency].rootpath)
 
-        if not cross_building(self):
-            VirtualRunEnv(self).generate(scope="build")
-
-        tc = AutotoolsToolchain(self)
+        tc = AutotoolsToolchain(self, namespace=namespace)
         tc.configure_args += [
             f"--datarootdir={unix_path(self, os.path.join(self.package_folder, 'res'))}",
             f"--enable-ft={is_enabled(self.options.get_safe('with_freetype', True))}",
@@ -159,13 +141,37 @@ class CairoConan(ConanFile):
             "--disable-gtk-doc"
         ]
         if is_msvc(self):
-            tc.make_args += self._msvc_make_args()
+            tc.make_args +=  [
+                "--directory", directory,
+                "-f", "Makefile.win32",
+                f"CFG={str(self.settings.build_type).lower()}",
+                "CAIRO_HAS_FC_FONT=0",
+                f"ZLIB_PATH={dep_path('zlib')}",
+                f"LIBPNG_PATH={dep_path('libpng')}",
+                f"PIXMAN_PATH={dep_path('pixman')}",
+                f"FREETYPE_PATH={dep_path('freetype')}",
+                f"GOBJECT_PATH={dep_path('glib')}"
+            ]
             tc.extra_cflags += ["-FS"]
 
         if self.settings.compiler in ["gcc", "clang", "apple-clang"]:
             tc.extra_cflags.append("-Wno-enum-conversion")
 
-        tc.generate()
+        return tc
+           
+
+    def generate(self):
+        VirtualBuildEnv(self).generate()
+
+        if not cross_building(self):
+            VirtualRunEnv(self).generate(scope="build")
+
+        tc_main = self._create_toolchain("main", unix_path(self, self.source_folder))
+        tc_main.generate()
+
+        if is_msvc(self):
+            tc_gobject = self._create_toolchain("gobject", unix_path(self, os.path.join(self.source_folder, "util", "cairo-gobject")))
+            tc_gobject.generate()
 
         PkgConfigDeps(self).generate()
         deps = AutotoolsDeps(self)
@@ -214,22 +220,32 @@ class CairoConan(ConanFile):
             win32_common = os.path.join(self.source_folder, "build", "Makefile.win32.common")
             replace_in_file(self, win32_common, "-MD ", f"-{self.settings.compiler.runtime} ")
             replace_in_file(self, win32_common, "-MDd ", f"-{self.settings.compiler.runtime} ")
-            replace_in_file(self, win32_common, "# Some generic rules",'CAIRO_LIBS = ""')
+            replace_in_file(self, win32_common, "$(PIXMAN_PATH)/lib/pixman-1.lib",
+                            self.deps_cpp_info["pixman"].libs[0] + ".lib")
+            replace_in_file(self, win32_common, "$(FREETYPE_PATH)/lib/freetype.lib",
+                            self.deps_cpp_info["freetype"].libs[0] + ".lib")
+            replace_in_file(self, win32_common, "$(ZLIB_PATH)/lib/zlib1.lib",
+                            self.deps_cpp_info["zlib"].libs[0] + ".lib")
+            replace_in_file(self, win32_common, "$(LIBPNG_PATH)/lib/libpng16.lib",
+                            self.deps_cpp_info["libpng"].libs[0] + ".lib")
 
     def build(self):
         self._patch_sources()
-        autotools = Autotools(self)
-        if not is_msvc(self):
+        autotools = Autotools(self, namespace="main")
+        if is_msvc(self):
+            autotools.make()
+            autotools_gobject = Autotools(self, namespace="gobject")
+            autotools_gobject.make()
+        else:
             autotools.autoreconf()
             autotools.configure()
-        autotools.make()
+            autotolls.make()
 
     def package(self):
         copy(self, pattern="LICENSE", dst="licenses", src=self.source_folder)
         if is_msvc(self):
             src = os.path.join(self.source_folder, "src")
-            cairo_gobject = os.path.join(self.source_folder, "util", "cairo-gobject")
-            inc = os.path.join("include", "cairo")
+            inc = os.path.join(self.package_folder, "include", "cairo")
             copy(self, "cairo-version.h", (src if Version(self.version) >= "1.17.4" else self.source_folder), inc)
             copy(self, "cairo-features.h", src, inc)
             copy(self, "cairo.h", src, inc)
@@ -240,17 +256,23 @@ class CairoConan(ConanFile):
             copy(self, "cairo-ps.h", src, inc)
             copy(self, "cairo-pdf.h", src, inc)
             copy(self, "cairo-svg.h", src, inc)
-            copy(self, "cairo-gobject.h", inc, cairo_gobject)
+            copy(self, "cairo-gobject.h", inc, os.path.join(self.source_folder, "util", "cairo-gobject"))
+
+            config = str(self.settings.build_type).lower()
+            lib_src_path = os.path.join(self.source_folder, "src", config)
+            cairo_gobject_src_path = os.path.join(self.source_folder, "util", "cairo-gobject", config)
+            lib_dest_path = os.path.join(self.package_folder, "lib")
+            runtime_dest_path = os.path.join(self.package_folder, "bin")
+
             if self.options.shared:
-                copy(self, "*cairo.lib", src, keep_path=False)
-                copy(self, "*cairo.dll", src, keep_path=False)
-                copy(self, "*cairo-gobject.lib", cairo_gobject, os.path.join(self.package_folder, "lib"), keep_path=False)
-                copy(self, "*cairo-gobject.dll", cairo_gobject, os.path.join(self.package_folder, "bin"), keep_path=False)
+                copy(self, "*cairo.lib", lib_src_path, lib_dest_path)
+                copy(self, "*cairo.dll", lib_src_path, runtime_dest_path)
+                copy(self, "*cairo-gobject.lib", cairo_gobject_src_path, lib_dest_path)
+                copy(self, "*cairo-gobject.dll", cairo_gobject_src_path, runtime_dest_path)
             else:
-                copy(self, "*cairo-static.lib", dst="lib", src=src, keep_path=False)
-                copy(self, "*cairo-gobject.lib", dst="lib", src=cairo_gobject, keep_path=False)
-                shutil.move(os.path.join(self.package_folder, "lib", "cairo-static.lib"),
-                            os.path.join(self.package_folder, "lib", "cairo.lib"))
+                copy(self, "cairo-static.lib", lib_src_path, lib_dest_path)
+                copy(self, "cairo-gobject.lib", cairo_gobject_src_path, lib_dest_path)
+                rename(self, os.path.join(lib_dest_path, "cairo-static.lib"), os.path.join(lib_dest_path, "cairo.lib"))
         else:
             autotools = Autotools(self)
             autotools.install()
