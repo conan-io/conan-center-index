@@ -1,14 +1,10 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, rename
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 
 import os
-import glob
 
 required_conan_version = ">=1.52.0"
 
@@ -46,6 +42,8 @@ class LibjxlConan(ConanFile):
                 del self.options.fPIC
             except Exception:
                 pass
+            # prevent hidden symbols of highway which are referenced by DSO
+            self.options["highway"].shared = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -80,8 +78,6 @@ class LibjxlConan(ConanFile):
             tc.variables["CMAKE_SYSTEM_PROCESSOR"] = \
                 str(self.settings.arch)
         tc.variables["JPEGXL_ENABLE_TOOLS"] = False
-        # tc.cache_variables["JXL_HWY_DISABLED_TARGETS_FORCED"]=False
-        # tc.cache_variables["JPEGXL_ENABLE_SIZELESS_VECTORS"]=False
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -104,14 +100,6 @@ class LibjxlConan(ConanFile):
             libs_dir = os.path.join(self.package_folder, "lib")
             rm(self, pattern="*.a", folder=libs_dir)
             rm(self, pattern="*-static.lib", folder=libs_dir)
-
-            if self.settings.os == "Windows":
-                copy(self, "jxl_dec.dll", src=os.path.join(self.build_folder, "bin"), dst=os.path.join(self.package_folder,"bin"))
-                copy(self, "jxl_dec.lib", src=os.path.join(self.build_folder, "lib"), dst=os.path.join(self.package_folder,"lib"))
-                for dll_path in glob.glob(os.path.join(libs_dir, "*.dll")):
-                    rename(self, src=dll_path, dst=os.path.join(self.package_folder, "bin", os.path.basename(dll_path)))
-            else:
-                copy(self, "libjxl_dec.*", src=os.path.join(self.build_folder, "lib"), dst=os.path.join(self.package_folder, "lib"))
 
     def _lib_name(self, name):
         if not self.options.shared and self.settings.os == "Windows":
@@ -138,9 +126,12 @@ class LibjxlConan(ConanFile):
                                                     "highway::highway",
                                                     "lcms::lcms"]
         # jxl_dec
-        self.cpp_info.components["jxl_dec"].names["pkg_config"] = "libjxl_dec"
-        self.cpp_info.components["jxl_dec"].libs = [self._lib_name("jxl_dec")]
-        self.cpp_info.components["jxl_dec"].requires = ["brotli::brotli",
+        # in shared build, install jxl only.
+        # https://github.com/libjxl/libjxl/blob/v0.5.0/lib/jxl.cmake#L544-L546
+        if not self.options.shared:
+            self.cpp_info.components["jxl_dec"].names["pkg_config"] = "libjxl_dec"
+            self.cpp_info.components["jxl_dec"].libs = [self._lib_name("jxl_dec")]
+            self.cpp_info.components["jxl_dec"].requires = ["brotli::brotli",
                                                         "highway::highway",
                                                         "lcms::lcms"]
         # jxl_threads
