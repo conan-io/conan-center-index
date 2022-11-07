@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools import files
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 
 class WebsocketPPConan(ConanFile):
@@ -30,8 +30,7 @@ class WebsocketPPConan(ConanFile):
         return "source_subfolder"
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        files.export_conandata_patches(self)
 
     def requirements(self):
         if self.options.with_openssl:
@@ -53,8 +52,7 @@ class WebsocketPPConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            files.patch(self, **patch)
+        files.apply_conandata_patches(self)
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
