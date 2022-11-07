@@ -40,7 +40,7 @@ class LuauConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "8",
+            "gcc": "8" if Version(self.version) < "0.549" else "9",
             "clang": "7",
             "apple-clang": "12",
         }
