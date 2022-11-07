@@ -104,8 +104,15 @@ class LibpngConan(ConanFile):
                                         'OUTPUT_NAME "${PNG_LIB_NAME}_static',
                                         'OUTPUT_NAME "${PNG_LIB_NAME}')
             else:
+                if Version(self.version) < "1.6.38":
+                    src_text = 'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}'
+                else:
+                    src_text = '''COMMAND "${CMAKE_COMMAND}"
+                                 -E copy_if_different
+                                 $<TARGET_LINKER_FILE_NAME:${S_TARGET}>
+                                 $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE})'''
                 replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                      'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}',
+                                      src_text,
                                       'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/$<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}')
 
     @property
