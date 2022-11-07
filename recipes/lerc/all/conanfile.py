@@ -67,6 +67,3 @@ class LercConan(ConanFile):
         self.cpp_info.libs = ["LercLib"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
-
-        if not self.options.shared:
-            self.cpp_info.defines.append("LERC_STATIC")
