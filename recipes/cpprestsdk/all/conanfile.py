@@ -3,7 +3,7 @@ from conan.tools import files
 from conans import CMake
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.52.0"
 
 
 class CppRestSDKConan(ConanFile):
@@ -48,8 +48,7 @@ class CppRestSDKConan(ConanFile):
 
     def export_sources(self):
         files.copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            files.copy(self, patch["patch_file"], src=self.recipe_folder, dst=self.export_sources_folder)
+        files.export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -103,8 +102,7 @@ class CppRestSDKConan(ConanFile):
                                   'libc++', 'libstdc++')
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, {}):
-            files.patch(self, **patch)
+        files.apply_conandata_patches(self)
         self._patch_clang_libcxx()
         cmake = self._configure_cmake()
         cmake.build()
