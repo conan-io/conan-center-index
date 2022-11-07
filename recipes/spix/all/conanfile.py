@@ -29,20 +29,10 @@ class SpixConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
-        # Qt6 requires C++17
-        if Version(self.deps_cpp_info["qt"].version).major == 6:
-            return 17
         return 14
 
     @property
     def _compilers_minimum_version(self):
-        if Version(self.deps_cpp_info["qt"].version).major == 6:
-            return {
-                "Visual Studio": "16",
-                "gcc": "8",
-                "clang": "9",
-                "apple-clang": "11"
-            }
         return {
             "Visual Studio": "14",
             "gcc": "5",
@@ -81,7 +71,7 @@ class SpixConan(ConanFile):
                 f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
             )
 
-        if Version(self.deps_cpp_info["qt"].version).major == 6 and not self.options["qt"].qtshadertools:
+        if Version(self.dependencies["qt"].ref.version).major == 6 and not self.options["qt"].qtshadertools:
             raise ConanInvalidConfiguration(f"{self.ref} requires qt:qtshadertools to get the Quick module")
         if not (self.options["qt"].gui and self.options["qt"].qtdeclarative):
             raise ConanInvalidConfiguration(f"{self.ref} requires qt:gui and qt:qtdeclarative to get the Quick module")
@@ -93,7 +83,7 @@ class SpixConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["SPIX_BUILD_EXAMPLES"] = False
         tc.variables["SPIX_BUILD_TESTS"] = False
-        tc.variables["SPIX_QT_MAJOR"] = Version(self.deps_cpp_info["qt"].version).major
+        tc.variables["SPIX_QT_MAJOR"] = Version(self.dependencies["qt"].ref.version).major
         tc.generate()
 
         deps = CMakeDeps(self)
