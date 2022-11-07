@@ -1,5 +1,5 @@
 diff --git a/CMake/folly-deps.cmake b/CMake/folly-deps.cmake
-index 989259a87..3296754aa 100644
+index 989259a87..156d2d861 100644
 --- a/CMake/folly-deps.cmake
 +++ b/CMake/folly-deps.cmake
 @@ -35,7 +35,7 @@ else()
@@ -148,7 +148,7 @@ index 989259a87..3296754aa 100644
  
  list(APPEND FOLLY_LINK_LIBRARIES ${CMAKE_DL_LIBS})
  list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_DL_LIBS})
-@@ -153,11 +153,11 @@ if (PYTHON_EXTENSIONS)
+@@ -153,10 +153,10 @@ if (PYTHON_EXTENSIONS)
    find_package(Cython 0.26 REQUIRED)
  endif ()
  
@@ -156,15 +156,13 @@ index 989259a87..3296754aa 100644
 -list(APPEND FOLLY_LINK_LIBRARIES ${LIBUNWIND_LIBRARIES})
 -list(APPEND FOLLY_INCLUDE_DIRECTORIES ${LIBUNWIND_INCLUDE_DIRS})
 -if (LIBUNWIND_FOUND)
--  set(FOLLY_HAVE_LIBUNWIND ON)
-+find_package(Liblibunwind)
-+list(APPEND FOLLY_LINK_LIBRARIES ${LIBlibunwind_LIBRARIES})
-+list(APPEND FOLLY_INCLUDE_DIRECTORIES ${LIBlibunwind_INCLUDE_DIRS})
-+if (LIBlibunwind_FOUND)
-+  set(FOLLY_HAVE_LIBlibunwind ON)
++find_package(libunwind)
++list(APPEND FOLLY_LINK_LIBRARIES ${libunwind_LIBRARIES})
++list(APPEND FOLLY_INCLUDE_DIRECTORIES ${libunwind_INCLUDE_DIRS})
++if (libunwind_FOUND)
+   set(FOLLY_HAVE_LIBUNWIND ON)
  endif()
  if (CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
-   list(APPEND FOLLY_LINK_LIBRARIES "execinfo")
 @@ -173,7 +173,7 @@ CHECK_INCLUDE_FILE_CXX(elf.h FOLLY_HAVE_ELF)
  find_package(Backtrace)
  
