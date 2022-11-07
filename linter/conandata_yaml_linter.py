@@ -68,10 +68,11 @@ def main():
                         )
     except YAMLValidationError as error:
         e = error.__str__().replace("\n", "%0A")
+        snippet = error.context_mark.get_snippet().replace("\n", "%0A")
         print(
             f"::error file={args.path},line={error.context_mark.line},endline={error.problem_mark.line+1},"
             f"title=conandata.yml schema error"
-            f"::{error.problem} in %0A%60%60%60yml%0A{error.context_mark.get_snippet().replace("\n", "%0A")}%0A%60%60%60\n"
+            f"::{error.problem} in %0A%60%60%60yml%0A{snippet}%0A%60%60%60\n"
         )
     except BaseException as error:
         e = error.__str__().replace("\n", "%0A")
