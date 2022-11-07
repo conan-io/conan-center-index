@@ -71,6 +71,10 @@ class YASMConan(ConanFile):
     def _generate_cmake(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["YASM_BUILD_TESTS"] = False
+        # Don't build shared libraries because:
+        # 1. autotools doesn't build shared libs either
+        # 2. the shared libs don't support static libc runtime (MT and such)
+        tc.cache_variables["BUILD_SHARED_LIBS"] = False
         tc.generate()
 
     def generate(self):
