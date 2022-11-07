@@ -29,6 +29,7 @@ class GperfConan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="src")
+        self.folders.build = self.folders.source
 
     def package_id(self):
         del self.info.settings.compiler
