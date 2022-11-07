@@ -107,6 +107,7 @@ class YASMConan(ConanFile):
             # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
             autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
             rmdir(self, os.path.join(self.package_folder, "share"))
+            rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.includedirs = []
