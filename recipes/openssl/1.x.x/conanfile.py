@@ -648,7 +648,7 @@ class OpenSSLConan(ConanFile):
         shared_target = ''
         if self.settings.os == 'Neutrino':
             if self.options.shared:
-                shared_extension = 'shared_extension => r".so.\$(SHLIB_VERSION_NUMBER)",'
+                shared_extension = r'shared_extension => ".so.\$(SHLIB_VERSION_NUMBER)",'
                 shared_target = 'shared_target  => "gnu-shared",'
             if self.options.get_safe("fPIC", True):
                 shared_cflag='shared_cflag => "-fPIC",'
