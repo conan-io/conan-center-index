@@ -346,5 +346,6 @@ class FollyConan(ConanFile):
     #     sed -i 's/LIBDWARF_/libdwarf_/g' CMake/folly-deps.cmake
     #     sed -i 's/Libiberty/libiberty/g' CMake/folly-deps.cmake
     #     sed -i 's/Libsodium/libsodium/ig' CMake/folly-deps.cmake
-    #     sed -i 's/UNWIND/libunwind/ig' CMake/folly-deps.cmake
+    #     sed -i 's/LibUnwind/libunwind/g' CMake/folly-deps.cmake
+    #     sed -i 's/LibUnwind_/libunwind_/ig' CMake/folly-deps.cmake
     #     ```
