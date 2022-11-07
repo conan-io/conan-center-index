@@ -1,7 +1,9 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools import files
+from conans import CMake
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.47.0"
 
 
 class CppRestSDKConan(ConanFile):
@@ -45,9 +47,9 @@ class CppRestSDKConan(ConanFile):
         return "build_subfolder"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
+        files.copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+            files.copy(self, patch["patch_file"], src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -73,7 +75,7 @@ class CppRestSDKConan(ConanFile):
         self.info.requires["boost"].minor_mode()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -97,22 +99,22 @@ class CppRestSDKConan(ConanFile):
 
     def _patch_clang_libcxx(self):
         if self.settings.compiler == 'clang' and str(self.settings.compiler.libcxx) in ['libstdc++', 'libstdc++11']:
-            tools.replace_in_file(os.path.join(self._source_subfolder, 'Release', 'CMakeLists.txt'),
+            files.replace_in_file(self, os.path.join(self._source_subfolder, 'Release', 'CMakeLists.txt'),
                                   'libc++', 'libstdc++')
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, {}):
-            tools.patch(**patch)
+            files.patch(self, **patch)
         self._patch_clang_libcxx()
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy("license.txt", dst="licenses", src=self._source_subfolder)
+        files.copy(self, "license.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cpprestsdk"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "cpprestsdk"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "cpprestsdk")
@@ -127,7 +129,7 @@ class CppRestSDKConan(ConanFile):
         self.cpp_info.components["cpprestsdk_openssl_internal"].requires = ["openssl::openssl"]
         # cpprest
         self.cpp_info.components["cpprest"].set_property("cmake_target_name", "cpprestsdk::cpprest")
-        self.cpp_info.components["cpprest"].libs = tools.collect_libs(self)
+        self.cpp_info.components["cpprest"].libs = files.collect_libs(self)
         self.cpp_info.components["cpprest"].requires = ["cpprestsdk_boost_internal", "cpprestsdk_openssl_internal"]
         if self.settings.os == "Linux":
             self.cpp_info.components["cpprest"].system_libs.append("pthread")
