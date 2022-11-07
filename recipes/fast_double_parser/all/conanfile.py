@@ -4,7 +4,7 @@ from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class FastDoubleParserConan(ConanFile):
@@ -22,7 +22,6 @@ class FastDoubleParserConan(ConanFile):
         basic_layout(self)
 
     def validate(self):
-        print(self.info.__dict__)
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
