@@ -1,0 +1,131 @@
+diff --git a/Directory.Build.Props b/Directory.Build.Props
+--- Directory.Build.Props
++++ Directory.Build.Props
+@@ -1,14 +1,10 @@
+ <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+ 
+   <!-- Set common MSBuild properties and item metadata for CppWinRT tool and tests -->
++  
++  <Import Project="conan/conantoolchain.props" />
+ 
+-  <PropertyGroup>
+-    <PlatformToolset>v143</PlatformToolset>
+-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+-    <WindowsTargetPlatformMinVersion>10.0.18362.0</WindowsTargetPlatformMinVersion>
+-  </PropertyGroup>
+-
+   <!--
+     Can be used as follows.
+ 
+     Compile with Visual C++:
+
+diff --git a/cppwinrt/cppwinrt.vcxproj b/cppwinrt/cppwinrt.vcxproj
+--- cppwinrt/cppwinrt.vcxproj
++++ cppwinrt/cppwinrt.vcxproj
+@@ -1,7 +1,7 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+-  <Import Project="..\packages\Microsoft.Windows.WinMD.1.0.210629.2\build\native\Microsoft.Windows.WinMD.props" Condition="Exists('..\packages\Microsoft.Windows.WinMD.1.0.210629.2\build\native\Microsoft.Windows.WinMD.props')" />
++  <Import Project="..\\conan\\conan_winmd.props" Condition="Exists('..\\conan\\conan_winmd.props')" />
+   <ItemGroup Label="ProjectConfigurations">
+     <ProjectConfiguration Include="Debug|ARM">
+       <Configuration>Debug</Configuration>
+       <Platform>ARM</Platform>
+@@ -195,9 +195,9 @@
+   <PropertyGroup Label="UserMacros" />
+   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+     <ClCompile>
+       <Optimization>Disabled</Optimization>
+-      <AdditionalIncludeDirectories>..\inc;$(OutputPath);$(WinMDPackageDir);</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories>..\inc;$(OutputPath);$(ConanwinmdIncludeDirectories);</AdditionalIncludeDirectories>
+       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+     </ClCompile>
+     <Link>
+       <SubSystem>Console</SubSystem>
+@@ -212,9 +212,9 @@
+   </ItemDefinitionGroup>
+   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+     <ClCompile>
+       <Optimization>Disabled</Optimization>
+-      <AdditionalIncludeDirectories>..\inc;$(OutputPath);$(WinMDPackageDir);</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories>..\inc;$(OutputPath);$(ConanwinmdIncludeDirectories);</AdditionalIncludeDirectories>
+       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+     </ClCompile>
+     <Link>
+       <SubSystem>Console</SubSystem>
+@@ -229,9 +229,9 @@
+   </ItemDefinitionGroup>
+   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+     <ClCompile>
+       <Optimization>Disabled</Optimization>
+-      <AdditionalIncludeDirectories>..\inc;$(OutputPath);$(WinMDPackageDir);</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories>..\inc;$(OutputPath);$(ConanwinmdIncludeDirectories);</AdditionalIncludeDirectories>
+       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+     </ClCompile>
+     <Link>
+       <SubSystem>Console</SubSystem>
+@@ -246,9 +246,9 @@
+   </ItemDefinitionGroup>
+   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+     <ClCompile>
+       <Optimization>Disabled</Optimization>
+-      <AdditionalIncludeDirectories>..\inc;$(OutputPath);$(WinMDPackageDir);</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories>..\inc;$(OutputPath);$(ConanwinmdIncludeDirectories);</AdditionalIncludeDirectories>
+       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+     </ClCompile>
+     <Link>
+       <SubSystem>Console</SubSystem>
+@@ -265,9 +265,9 @@
+     <ClCompile>
+       <Optimization>MaxSpeed</Optimization>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
+       <IntrinsicFunctions>true</IntrinsicFunctions>
+-      <AdditionalIncludeDirectories>..\inc;$(OutputPath);$(WinMDPackageDir);</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories>..\inc;$(OutputPath);$(ConanwinmdIncludeDirectories);</AdditionalIncludeDirectories>
+       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+     </ClCompile>
+     <Link>
+       <SubSystem>Console</SubSystem>
+@@ -287,9 +287,9 @@
+     <ClCompile>
+       <Optimization>MaxSpeed</Optimization>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
+       <IntrinsicFunctions>true</IntrinsicFunctions>
+-      <AdditionalIncludeDirectories>..\inc;$(OutputPath);$(WinMDPackageDir);</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories>..\inc;$(OutputPath);$(ConanwinmdIncludeDirectories);</AdditionalIncludeDirectories>
+       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+     </ClCompile>
+     <Link>
+       <SubSystem>Console</SubSystem>
+@@ -309,9 +309,9 @@
+     <ClCompile>
+       <Optimization>MaxSpeed</Optimization>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
+       <IntrinsicFunctions>true</IntrinsicFunctions>
+-      <AdditionalIncludeDirectories>..\inc;$(OutputPath);$(WinMDPackageDir);</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories>..\inc;$(OutputPath);$(ConanwinmdIncludeDirectories);</AdditionalIncludeDirectories>
+       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+     </ClCompile>
+     <Link>
+       <SubSystem>Console</SubSystem>
+@@ -331,9 +331,9 @@
+     <ClCompile>
+       <Optimization>MaxSpeed</Optimization>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
+       <IntrinsicFunctions>true</IntrinsicFunctions>
+-      <AdditionalIncludeDirectories>..\inc;$(OutputPath);$(WinMDPackageDir);</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories>..\inc;$(OutputPath);$(ConanwinmdIncludeDirectories);</AdditionalIncludeDirectories>
+       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+     </ClCompile>
+     <Link>
+       <SubSystem>Console</SubSystem>
+@@ -354,7 +354,7 @@
+   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+     <PropertyGroup>
+       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+     </PropertyGroup>
+-    <Error Condition="!Exists('..\packages\Microsoft.Windows.WinMD.1.0.210629.2\build\native\Microsoft.Windows.WinMD.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Windows.WinMD.1.0.210629.2\build\native\Microsoft.Windows.WinMD.props'))" />
++    <Error Condition="!Exists('..\\conan\\conan_winmd.props')" Text="$([System.String]::Format('$(ErrorText)', '..\\conan\\conan_winmd.props'))" />
+   </Target>
+ </Project>
+\ No newline at end of file

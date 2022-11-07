@@ -1,0 +1,11 @@
+sources:
+  # Newer versions at the top
+  "2.0.221101.3":
+    url: "https://github.com/microsoft/cppwinrt/archive/refs/tags/2.0.221101.3.tar.gz"
+    sha256: "68b716cf474f67d04d9e5f970495fd8b1a5f187489d9e5fc89c20ec062b7cc84"
+patches:
+  # Newer versions at the top
+  "2.0.221101.3":
+    - patch_file: "patches/001-conan-deps.patch"
+      patch_description: "take conan dependencies"
+      patch_type: "conan"
