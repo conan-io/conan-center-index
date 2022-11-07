@@ -60,6 +60,8 @@ patches:
       patch_type: "conan"
     - patch_file: "patches/0009-ill-formed-atomic-copy.patch"
       base_path: "source_subfolder"
+      patch_description: "fix ill-formed-atomic"
+      patch_type: "conan"
     - patch_file: "patches/0010-duplicate-hash.patch"
       base_path: "source_subfolder"
       patch_description: "fix code"
