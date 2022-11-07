@@ -60,14 +60,19 @@ class FollyConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
-
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         if str(self.settings.arch) not in ['x86', 'x86_64']:
             del self.options.use_sse4_2
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
 
     def requirements(self):
         self.requires("boost/1.78.0")
@@ -121,7 +126,7 @@ class FollyConan(ConanFile):
         if self.settings.os in ["Macos", "Windows"] and self.options.shared:
             raise ConanInvalidConfiguration("Folly could not be built on {} as shared library".format(self.settings.os))
 
-        if Version(self.version) == "2020.08.10.00" and self.settings.compiler == "clang" and self.options.shared:
+        if Version(self.version) >= "2020.08.10.00" and self.settings.compiler == "clang" and self.options.shared:
             raise ConanInvalidConfiguration("Folly could not be built by clang as a shared library")
 
         if self.options["boost"].header_only:
@@ -172,6 +177,10 @@ class FollyConan(ConanFile):
                 tc.variables["CMAKE_CXX_FLAGS"] = "/arch:FMA"
 
         tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+        # Relocatable shared lib on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
         cxx_std_flag = tools.cppstd_flag(self.settings)
         cxx_std_value = cxx_std_flag.split('=')[1] if cxx_std_flag else "c++{}".format(self._minimum_cpp_standard)
