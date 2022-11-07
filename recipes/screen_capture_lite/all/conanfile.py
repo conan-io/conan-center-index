@@ -74,9 +74,10 @@ class ScreenCaptureLiteConan(ConanFile):
         if self.info.settings.compiler == "clang" and self.info.settings.compiler.get_safe("libcxx") == "libstdc++":
             raise ConanInvalidConfiguration(f"{self.ref} does not support clang with libstdc++")
 
-        # Since 17.1.451, screen_capture_lite uses CGPreflightScreenCaptureAccess which is provided by macOS SDK 11 above.
-        if Version(self.version) >= "17.1.451" and is_apple_os(self) and Version(self.settings.get_safe("os.sdk.version")) < "11":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support macOS < 11 SDK.")
+        # Since 17.1.451, screen_capture_lite uses CGPreflightScreenCaptureAccess which is provided by macOS SDK 11 later.
+        if Version(self.version) >= "17.1.451" and \
+            is_apple_os(self) and Version(self.info.settings.compiler.version) <= "11":
+            raise ConanInvalidConfiguration(f"{self.ref} requires CGPreflightScreenCaptureAccess which support macOS SDK 11 later.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
