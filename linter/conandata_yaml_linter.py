@@ -72,7 +72,7 @@ def main():
         print(
             f"::error file={args.path},line={error.context_mark.line},endline={error.problem_mark.line+1},"
             f"title=conandata.yml schema error"
-            f"::{error.problem} in %0A<pre><span class="pl-s">{snippet}</span></pre>\n"
+            f"::{error.problem} in %0A<pre><span class=\"pl-s\">{snippet}</span></pre>\n"
         )
     except BaseException as error:
         e = error.__str__().replace("\n", "%0A")
