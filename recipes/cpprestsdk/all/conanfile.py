@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools import files
-from conans import CMake
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
 required_conan_version = ">=1.52.0"
@@ -35,17 +35,6 @@ class CppRestSDKConan(ConanFile):
         "http_listener_impl": "httpsys",
     }
 
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
         files.copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
         files.export_conandata_patches(self)
@@ -73,43 +62,45 @@ class CppRestSDKConan(ConanFile):
     def package_id(self):
         self.info.requires["boost"].minor_mode()
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self, set_cmake_flags=True)
-        self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.definitions["BUILD_SAMPLES"] = False
-        self._cmake.definitions["WERROR"] = False
-        self._cmake.definitions["CPPREST_EXCLUDE_WEBSOCKETS"] = not self.options.with_websockets
-        self._cmake.definitions["CPPREST_EXCLUDE_COMPRESSION"] = not self.options.with_compression
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_SAMPLES"] = False
+        tc.variables["WERROR"] = False
+        tc.variables["CPPREST_EXCLUDE_WEBSOCKETS"] = not self.options.with_websockets
+        tc.variables["CPPREST_EXCLUDE_COMPRESSION"] = not self.options.with_compression
         if self.options.get_safe("pplx_impl"):
-            self._cmake.definitions["CPPREST_PPLX_IMPL"] = self.options.pplx_impl
+            tc.variables["CPPREST_PPLX_IMPL"] = self.options.pplx_impl
         if self.options.get_safe("http_client_impl"):
-            self._cmake.definitions["CPPREST_HTTP_CLIENT_IMPL"] = self.options.http_client_impl
+            tc.variables["CPPREST_HTTP_CLIENT_IMPL"] = self.options.http_client_impl
         if self.options.get_safe("http_listener_impl"):
-            self._cmake.definitions["CPPREST_HTTP_LISTENER_IMPL"] = self.options.http_listener_impl
-
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+            tc.variables["CPPREST_HTTP_LISTENER_IMPL"] = self.options.http_listener_impl
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_clang_libcxx(self):
         if self.settings.compiler == 'clang' and str(self.settings.compiler.libcxx) in ['libstdc++', 'libstdc++11']:
-            files.replace_in_file(self, os.path.join(self._source_subfolder, 'Release', 'CMakeLists.txt'),
+            files.replace_in_file(self, os.path.join(self.source_folder, 'Release', 'CMakeLists.txt'),
                                   'libc++', 'libstdc++')
 
     def build(self):
         files.apply_conandata_patches(self)
         self._patch_clang_libcxx()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        files.copy(self, "license.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        files.copy(self, "license.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
         files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         files.rmdir(self, os.path.join(self.package_folder, "lib", "cpprestsdk"))
