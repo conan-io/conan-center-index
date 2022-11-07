@@ -110,7 +110,7 @@ class LibpngConan(ConanFile):
                     src_text = '''COMMAND "${CMAKE_COMMAND}"
                                  -E copy_if_different
                                  $<TARGET_LINKER_FILE_NAME:${S_TARGET}>
-                                 $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE})'''
+                                 $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}'''
                 replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                       src_text,
                                       'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/$<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}')
