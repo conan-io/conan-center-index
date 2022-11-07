@@ -77,3 +77,5 @@ class LercConan(ConanFile):
 
         if Version(self.version) >= "3.0":
             self.cpp_info.set_property("pkg_config_name", "Lerc")
+            if not self.options.shared:
+                self.cpp_info.defines = ["LERC_STATIC"]
