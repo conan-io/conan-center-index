@@ -30,6 +30,10 @@ class bxConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder=".")
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         if self.settings.os == "Windows":
             self.libExt = "*.lib"
@@ -46,13 +50,24 @@ class bxConan(ConanFile):
             self.binExt = ""
             self.packageLibPrefix = "lib"
             self.binFolder = "darwin"
+        
+        self.genieExtra = ""
         self.projs = ["bx"]
         if self.options.tools:
             self.projs.extend(["bin2c", "lemon"])
+        if is_msvc(self):
+            # TODO Gotta support old "Visual Studio" compiler until 2.0, then we can remove it
+            if self.settings.compiler == "Visual Studio":
+                if self.settings.runtime in ["MD", "MDd"]:
+                    self.genieExtra += " --with-dynamic-runtime"
+            elif self.settings.compiler == "msvc":
+                if self.settings.runtime == "dynamic":
+                    self.genieExtra += " --with-dynamic-runtime"
 
     def validate(self):
-        if not self.options.fPIC:
-            raise ConanInvalidConfiguration("This package does not support builds without fPIC.")
+        if not self.settings.os == "Windows":
+            if not self.options.fPIC:
+                raise ConanInvalidConfiguration("This package does not support builds without fPIC.")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 14)
 
@@ -80,7 +95,8 @@ class bxConan(ConanFile):
 
             # Use genie directly, then msbuild on specific projects based on requirements
             genieVS = f"vs{vsVerToGenie[str(self.settings.compiler.version)]}"
-            self.run(f"{genie} {genieVS}", cwd=self.bxPath)
+            genieGen = f"{self.genieExtra} {genieVS}"
+            self.run(f"{genie} {genieGen}", cwd=self.bxPath)
 
             msbuild = MSBuild(self)
             # customize to Release when RelWithDebInfo
@@ -104,7 +120,7 @@ class bxConan(ConanFile):
             osToUseMakeConfigSuffix = {"Windows": True, "Linux": True, "Macos": False, "Android": False, "iOS": False}
 
             # Generate projects through genie
-            genieGen = f"{gccOsToGenie[str(self.settings.os)]}"
+            genieGen = f"{self.genieExtra} {gccOsToGenie[str(self.settings.os)]}"
             if self.settings.os == "Windows":
                 genieGen += str(self.settings.compiler) #mingw-gcc or mingw-clang
             if osToUseArchConfigSuffix[str(self.settings.os)]:
