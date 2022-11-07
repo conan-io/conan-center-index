@@ -1,11 +1,12 @@
 diff --git a/lib/jxl.cmake b/lib/jxl.cmake
-index 72c07f4..51f3b8c 100644
+index 72c07f4..01d1d2b 100644
 --- a/lib/jxl.cmake
 +++ b/lib/jxl.cmake
-@@ -348,10 +348,12 @@ set(JPEGXL_INTERNAL_SOURCES_ENC
+@@ -348,10 +348,13 @@ set(JPEGXL_INTERNAL_SOURCES_ENC
    jxl/progressive_split.h
  )
  
++set(CMAKE_VERBOSE_MAKEFILE ON)
 +find_package(highway REQUIRED CONFIG)
 +find_package(brotli REQUIRED CONFIG)
 +
@@ -18,7 +19,7 @@ index 72c07f4..51f3b8c 100644
    Threads::Threads
    ${ATOMICS_LIBRARIES}
  )
-@@ -362,7 +364,6 @@ endif()
+@@ -362,7 +365,6 @@ endif()
  
  set(JPEGXL_INTERNAL_LIBS
    ${JPEGXL_DEC_INTERNAL_LIBS}
@@ -26,7 +27,7 @@ index 72c07f4..51f3b8c 100644
  )
  
  # strips the -static suffix from all the elements in LIST
-@@ -383,7 +384,10 @@ if (JPEGXL_ENABLE_SKCMS)
+@@ -383,7 +385,10 @@ if (JPEGXL_ENABLE_SKCMS)
      list(APPEND JPEGXL_INTERNAL_LIBS skcms)
    endif ()
  else ()
@@ -38,7 +39,7 @@ index 72c07f4..51f3b8c 100644
  endif ()
  
  if (NOT JPEGXL_ENABLE_TRANSCODE_JPEG)
-@@ -408,8 +412,8 @@ set_property(TARGET jxl_dec-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
+@@ -408,8 +413,8 @@ set_property(TARGET jxl_dec-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
  target_include_directories(jxl_dec-obj PUBLIC
    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
@@ -49,7 +50,7 @@ index 72c07f4..51f3b8c 100644
  )
  target_compile_definitions(jxl_dec-obj PUBLIC
    ${OBJ_COMPILE_DEFINITIONS}
-@@ -426,8 +430,9 @@ set_property(TARGET jxl_enc-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
+@@ -426,8 +431,9 @@ set_property(TARGET jxl_enc-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
  target_include_directories(jxl_enc-obj PUBLIC
    ${PROJECT_SOURCE_DIR}
    ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -61,7 +62,7 @@ index 72c07f4..51f3b8c 100644
  )
  target_compile_definitions(jxl_enc-obj PUBLIC
    ${OBJ_COMPILE_DEFINITIONS}
-@@ -436,17 +441,6 @@ if (JPEGXL_ENABLE_PROFILER)
+@@ -436,17 +442,6 @@ if (JPEGXL_ENABLE_PROFILER)
  target_link_libraries(jxl_enc-obj PUBLIC jxl_profiler)
  endif()
  
@@ -79,7 +80,7 @@ index 72c07f4..51f3b8c 100644
  # Generate version.h
  configure_file("jxl/version.h.in" "include/jxl/version.h")
  
-@@ -465,9 +459,6 @@ set_target_properties(jxl_enc-obj PROPERTIES
+@@ -465,9 +460,6 @@ set_target_properties(jxl_enc-obj PROPERTIES
    VISIBILITY_INLINES_HIDDEN 1
    DEFINE_SYMBOL JXL_INTERNAL_LIBRARY_BUILD
  )
@@ -89,34 +90,52 @@ index 72c07f4..51f3b8c 100644
  target_include_directories(jxl_enc-obj PUBLIC
      ${CMAKE_CURRENT_BINARY_DIR}/include)
  
-@@ -546,9 +537,7 @@ if (BUILD_SHARED_LIBS)
+@@ -546,9 +538,7 @@ if (BUILD_SHARED_LIBS)
  
  # Public shared library.
  add_library(jxl SHARED ${JPEGXL_INTERNAL_OBJECTS})
 -strip_static(JPEGXL_INTERNAL_SHARED_LIBS JPEGXL_INTERNAL_LIBS)
- target_link_libraries(jxl PUBLIC ${JPEGXL_COVERAGE_FLAGS})
+-target_link_libraries(jxl PUBLIC ${JPEGXL_COVERAGE_FLAGS})
 -target_link_libraries(jxl PRIVATE ${JPEGXL_INTERNAL_SHARED_LIBS})
++target_link_libraries(jxl PUBLIC ${JPEGXL_COVERAGE_FLAGS} ${JPEGXL_INTERNAL_LIBS})
  # Shared library include path contains only the "include/" paths.
  target_include_directories(jxl PUBLIC
    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-@@ -557,13 +546,13 @@ set_target_properties(jxl PROPERTIES
+@@ -557,22 +547,8 @@ set_target_properties(jxl PROPERTIES
    VERSION ${JPEGXL_LIBRARY_VERSION}
    SOVERSION ${JPEGXL_LIBRARY_SOVERSION}
    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
 -  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+-
+-# Public shared decoder library.
+-add_library(jxl_dec SHARED $<TARGET_OBJECTS:jxl_dec-obj>)
+-strip_static(JPEGXL_DEC_INTERNAL_SHARED_LIBS JPEGXL_DEC_INTERNAL_LIBS)
+-target_link_libraries(jxl_dec PUBLIC ${JPEGXL_COVERAGE_FLAGS})
+-target_link_libraries(jxl_dec PRIVATE ${JPEGXL_DEC_INTERNAL_SHARED_LIBS})
+-# Shared library include path contains only the "include/" paths.
+-target_include_directories(jxl_dec PUBLIC
+-  "${CMAKE_CURRENT_SOURCE_DIR}/include"
+-  "${CMAKE_CURRENT_BINARY_DIR}/include")
+-set_target_properties(jxl_dec PROPERTIES
+-  VERSION ${JPEGXL_LIBRARY_VERSION}
+-  SOVERSION ${JPEGXL_LIBRARY_SOVERSION}
+-  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+-  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 +  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
 +  DEFINE_SYMBOL JXL_INTERNAL_LIBRARY_BUILD)
  
- # Public shared decoder library.
- add_library(jxl_dec SHARED $<TARGET_OBJECTS:jxl_dec-obj>)
--strip_static(JPEGXL_DEC_INTERNAL_SHARED_LIBS JPEGXL_DEC_INTERNAL_LIBS)
- target_link_libraries(jxl_dec PUBLIC ${JPEGXL_COVERAGE_FLAGS})
--target_link_libraries(jxl_dec PRIVATE ${JPEGXL_DEC_INTERNAL_SHARED_LIBS})
-+target_link_libraries(jxl_dec PRIVATE ${JPEGXL_DEC_INTERNAL_LIBS})
- # Shared library include path contains only the "include/" paths.
- target_include_directories(jxl_dec PUBLIC
-   "${CMAKE_CURRENT_SOURCE_DIR}/include"
-@@ -615,8 +604,14 @@ install(TARGETS jxl
+ # Check whether the linker support excluding libs
+ set(LINKER_EXCLUDE_LIBS_FLAG "-Wl,--exclude-libs=ALL")
+@@ -584,7 +560,7 @@ list(REMOVE_ITEM CMAKE_EXE_LINKER_FLAGS ${LINKER_EXCLUDE_LIBS_FLAG})
+ # Add a jxl.version file as a version script to tag symbols with the
+ # appropriate version number. This script is also used to limit what's exposed
+ # in the shared library from the static dependencies bundled here.
+-foreach(target IN ITEMS jxl jxl_dec)
++foreach(target IN ITEMS jxl)
+   set_target_properties(${target} PROPERTIES
+       LINK_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/jxl/jxl.version)
+   if(APPLE)
+@@ -615,8 +591,14 @@ install(TARGETS jxl
  else()
  add_library(jxl ALIAS jxl-static)
  add_library(jxl_dec ALIAS jxl_dec-static)

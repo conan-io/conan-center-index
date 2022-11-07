@@ -132,8 +132,8 @@ class LibjxlConan(ConanFile):
             self.cpp_info.components["jxl_dec"].names["pkg_config"] = "libjxl_dec"
             self.cpp_info.components["jxl_dec"].libs = [self._lib_name("jxl_dec")]
             self.cpp_info.components["jxl_dec"].requires = ["brotli::brotli",
-                                                        "highway::highway",
-                                                        "lcms::lcms"]
+                                                            "highway::highway",
+                                                            "lcms::lcms"]
         # jxl_threads
         self.cpp_info.components["jxl_threads"].names["pkg_config"] = \
             "libjxl_threads"
