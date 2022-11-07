@@ -1,4 +1,3 @@
-from six import StringIO
 from conan import ConanFile, conan_version
 from conan.tools.scm import Version
 from conan.tools.build import can_run
