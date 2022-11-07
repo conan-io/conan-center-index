@@ -58,10 +58,10 @@ class bxConan(ConanFile):
         if is_msvc(self):
             # TODO Gotta support old "Visual Studio" compiler until 2.0, then we can remove it
             if self.settings.compiler == "Visual Studio":
-                if self.settings.runtime in ["MD", "MDd"]:
+                if self.settings.compiler.runtime in ["MD", "MDd"]:
                     self.genieExtra += " --with-dynamic-runtime"
             elif self.settings.compiler == "msvc":
-                if self.settings.runtime == "dynamic":
+                if self.settings.compiler.runtime == "dynamic":
                     self.genieExtra += " --with-dynamic-runtime"
 
     def validate(self):
