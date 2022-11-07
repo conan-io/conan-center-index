@@ -64,7 +64,7 @@ class OpenSSLVersion(object):
             other = OpenSSLVersion(other)
         if self.as_list == other.as_list:
             return 0
-        elif self.as_list < other.as_list:
+        if self.as_list < other.as_list:
             return -1
         else:
             return 1
@@ -303,7 +303,7 @@ class OpenSSLConan(ConanFile):
                     "armv8_32": "ios64",
                     "armv8.3": "ios64",
                     "armv7k": "ios32"}.get(the_arch, None)
-        elif the_os == "Android":
+        if the_os == "Android":
             return {"armv7": "void",
                     "armv8": "linux64",
                     "mips": "o32",
@@ -681,7 +681,7 @@ class OpenSSLConan(ConanFile):
             build_deps = (dependency.ref.name for require, dependency in self.dependencies.build.items())
             if "strawberryperl" in build_deps:
                 return os.path.join(self.dependencies.build["strawberryperl"].package_folder, "bin", "perl.exe")
-            elif hasattr(self, "user_info_build") and "strawberryperl" in self.user_info_build:
+            if hasattr(self, "user_info_build") and "strawberryperl" in self.user_info_build:
                 return self.user_info_build["strawberryperl"].perl
         return "perl"
 
