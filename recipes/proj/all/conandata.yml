@@ -33,6 +33,9 @@ sources:
     url: "https://github.com/OSGeo/PROJ/releases/download/6.3.1/proj-6.3.1.tar.gz"
     sha256: "6de0112778438dcae30fcc6942dee472ce31399b9e5a2b67e8642529868c86f8"
 patches:
+  "9.1.0":
+    - patch_file: "patches/0001-use-cmake-targets-9.1.0.patch"
+      base_path: "source_subfolder"
   "9.0.1":
     - patch_file: "patches/0001-use-cmake-targets-9.0.1.patch"
       base_path: "source_subfolder"
