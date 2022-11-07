@@ -46,8 +46,7 @@ class PackageConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
-        # src_folder must use the same source folder name the project
-        vs_layout(self, src_folder="src")
+        vs_layout(self)
 
     def requirements(self):
         # prefer self.requires method instead of requires attribute
