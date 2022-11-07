@@ -124,3 +124,9 @@ class SpixConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["Spix"]
+        self.cpp_info.set_property("cmake_file_name", "Spix") 
+        self.cpp_info.set_property("cmake_target_name", "Spix::Spix")
+        
+        # TODO remove once conan v2 removed cmake_find_package_*
+        self.cpp_info.names["cmake_find_package"] = "Spix"
+        self.cpp_info.names["cmake_find_package_multi"] = "Spix"
