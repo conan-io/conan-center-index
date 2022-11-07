@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake
 from conan.tools.build import cross_building
 from conan.tools.files import replace_in_file
+from conan.tools.scm import Version
 import os
 
 
@@ -9,7 +10,7 @@ class TestSpixV1Conan(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
 
     def _patch_sources(self):
-        if self.options["spix"].qt_major == 6:
+        if Version(self.deps_cpp_info["qt"].version).major == 6:
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "cxx_std_14", "cxx_std_17")
 
     def build(self):
