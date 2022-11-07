@@ -7,9 +7,8 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path
 import os
-import shutil
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibelfConan(ConanFile):
@@ -36,28 +35,15 @@ class LibelfConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         if self.settings.os == "Windows":
@@ -75,7 +61,7 @@ class LibelfConan(ConanFile):
             self.tool_requires("gnu-config/cci.20210814")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
-                if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                     self.tool_requires("msys2/cci.latest")
 
     def source(self):
@@ -93,7 +79,7 @@ class LibelfConan(ConanFile):
             tc = AutotoolsToolchain(self)
             tc.configure_args.extend([
                 # it's required, libelf doesnt seem to understand DESTDIR
-                f"--prefix={self.package_folder}",
+                f"--prefix={unix_path(self, self.package_folder)}",
             ])
             tc.generate()
 
@@ -108,10 +94,12 @@ class LibelfConan(ConanFile):
                                   "$(LINK_SHLIB) $(LDFLAGS)")
             # libelf sources contains really outdated 'config.sub' and
             # 'config.guess' files. It not allows to build libelf for armv8 arch.
-            shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                        os.path.join(self.source_folder, "config.sub"))
-            shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                        os.path.join(self.source_folder, "config.guess"))
+            for gnu_config in [
+                self.conf.get("user.gnu-config:config_guess", check_type=str),
+                self.conf.get("user.gnu-config:config_sub", check_type=str),
+            ]:
+                if gnu_config:
+                    copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
             autotools = Autotools(self)
             autotools.autoreconf()
             autotools.configure()
