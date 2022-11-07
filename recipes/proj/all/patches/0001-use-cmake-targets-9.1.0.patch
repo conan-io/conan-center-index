@@ -1,6 +1,6 @@
 --- a/src/lib_proj.cmake
 +++ b/src/lib_proj.cmake
-@@ -444,8 +444,7 @@ if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+@@ -446,8 +446,7 @@ if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
    target_link_libraries(proj PRIVATE ${CMAKE_THREAD_LIBS_INIT})
  endif()
  
@@ -10,7 +10,7 @@
  
  if(NLOHMANN_JSON STREQUAL "external")
    target_compile_definitions(proj PRIVATE EXTERNAL_NLOHMANN_JSON)
-@@ -455,16 +454,14 @@ endif()
+@@ -456,16 +455,14 @@ endif()
  
  if(TIFF_ENABLED)
    target_compile_definitions(proj PRIVATE -DTIFF_ENABLED)
