@@ -10,6 +10,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 
 import os
+import shutil
 
 required_conan_version = ">=1.53.0"
 
@@ -115,8 +116,7 @@ class LiunwindConan(ConanFile):
         symlink_path = os.path.join(self.package_folder, "lib", f"libunwind-generic.{lib_ext}")
         source_path =  os.path.realpath(symlink_path)
         rm(self, os.path.basename(symlink_path), os.path.dirname(symlink_path))
-        rename(self, source_path, symlink_path)
-        remove_broken_symlinks(self, os.path.dirname(symlink_path))
+        shutil.copy(source_path, symlink_path)
 
 
     def package_info(self):
