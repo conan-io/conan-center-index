@@ -3,8 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, rename
-from conan.tools.files.symlinks import remove_broken_symlinks
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, rename, symlinks
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -117,7 +116,6 @@ class LiunwindConan(ConanFile):
         source_path =  os.path.realpath(symlink_path)
         rm(self, os.path.basename(symlink_path), os.path.dirname(symlink_path))
         shutil.copy(source_path, symlink_path)
-
 
     def package_info(self):
         self.cpp_info.components["unwind"].names["pkg_config"] = "libunwind"
