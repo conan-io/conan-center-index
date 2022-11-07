@@ -1,5 +1,5 @@
 diff --git a/lib/jxl.cmake b/lib/jxl.cmake
-index 72c07f4..0120b16 100644
+index 72c07f4..51f3b8c 100644
 --- a/lib/jxl.cmake
 +++ b/lib/jxl.cmake
 @@ -348,10 +348,12 @@ set(JPEGXL_INTERNAL_SOURCES_ENC
