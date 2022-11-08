@@ -70,7 +70,7 @@ class GccConan(ConanFile):
             )
 
     def layout(self):
-        basic_layout(self, src_folder="source")
+        basic_layout(self, src_folder="src")
 
     def generate(self):
         # Ensure binutils and flex are on the path.
