@@ -1,5 +1,12 @@
 # Changelog
 
+### 07-November-2022 - 11:17 CET
+
+- [feature] Improve Access Request's pull-request description mentioning users.
+- [fix] Access Request should not remove reviewers and maintainers.
+- [fix] Access Request should count requests done on the same day as the pull request.
+- [fix] Avoid posting pipeline title in GitHub messages if feedback is empty.
+
 ### 27-October-2022 - 15:18 CEST
 
 - [feature] Add under maintenance check to AccessRequest and ScheduledExportCheck jobs.
