@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import rmdir, copy, save, get, replace_in_file
+from conan.tools.files import rmdir, copy, save, get, replace_in_file, apply_conandata_patches
 from conan.tools.build import cross_building
 from conan.tools.scm import Version
 from conans import CMake
@@ -106,8 +106,7 @@ class Hdf5Conan(ConanFile):
         cmake.build()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(**patch)
+        apply_conandata_patches(self)
         # Do not force PIC
         replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "set (CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
