@@ -257,9 +257,9 @@ class OpenSSLConan(ConanFile):
         if not self._use_nmake and self._full_version >= "1.1.0" and self._full_version < "1.1.1":
             tc.make_args = ["-j1"]
         if self.settings.os == "Macos" and not cross_building(self):
-            tc.extra_cflags = ["-isysroot {}".format(XCRun(self).sdk_path)]
-            tc.extra_cxxflags = ["-isysroot {}".format(XCRun(self).sdk_path)]
-            tc.extra_ldflags = ["-isysroot {}".format(XCRun(self).sdk_path)]
+            tc.extra_cflags = [f"-isysroot {XCRun(self).sdk_path}"]
+            tc.extra_cxxflags = [f"-isysroot {XCRun(self).sdk_path}"]
+            tc.extra_ldflags = [f"-isysroot {XCRun(self).sdk_path}"]
         env = tc.environment()
         env.define("PERL", self._perl)
         tc.generate(env)
@@ -725,7 +725,7 @@ class OpenSSLConan(ConanFile):
                 if self._use_nmake and self._full_version >= "1.1.0":
                     self._replace_runtime_in_file(os.path.join("Configurations", "10-main.conf"))
 
-                self.run('{perl} ./Configure {args}'.format(perl=self._perl, args=args))
+                self.run(f'{self._perl} ./Configure {args}')
 
                 self._patch_install_name()
 
@@ -870,7 +870,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
