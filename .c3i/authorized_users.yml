@@ -1,6 +1,7 @@
 authorized_users:
 - conan-center-bot
 - c3i-dev
+- github-actions[bot]
 - uilianries
 - SSE4
 - Croydon
