@@ -72,7 +72,7 @@ class MpppConan(ConanFile):
         if self.options.with_arb:
             raise ConanInvalidConfiguration(f"{self.ref}:with_arb=True is not supported because `fredrik-johansson/arb` is not packaged in CCI. (yet)")
         if self.options.with_quadmath:
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support libquadmath (yet)")
+            raise ConanInvalidConfiguration(f"{self.ref}:with_quadmath=True is not supported because   `libquadmath` is not available from CCI. (yet)")
         if self.options.with_boost and self.options["boost"].without_serialization:
             raise ConanInvalidConfiguration(f"{self.name}:with_boost=True requires boost::without_serialization=False")
 
