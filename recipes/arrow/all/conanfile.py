@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, get, copy, rm, rmdir
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -114,8 +114,7 @@ class ArrowConan(ConanFile):
     short_paths = True
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -136,10 +135,7 @@ class ArrowConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC # once removed by config_options, need try..except for a second del
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         if self.info.settings.compiler == "clang" and self.info.settings.compiler.version <= Version("3.9"):
@@ -323,11 +319,11 @@ class ArrowConan(ConanFile):
         if self._with_openssl():
             # aws-sdk-cpp requires openssl/1.1.1. it uses deprecated functions in openssl/3.0.0
             if self.options.with_s3:
-                self.requires("openssl/1.1.1q")
+                self.requires("openssl/1.1.1s")
             else:
-                self.requires("openssl/3.0.5")
+                self.requires("openssl/1.1.1s")
         if self.options.get_safe("with_opentelemetry"):
-            self.requires("opentelemetry-cpp/1.6.1")
+            self.requires("opentelemetry-cpp/1.7.0")
         if self.options.with_s3:
             self.requires("aws-sdk-cpp/1.9.234")
         if self.options.with_brotli:
@@ -341,7 +337,7 @@ class ArrowConan(ConanFile):
         if Version(self.version) >= "6.0.0" and \
             self.options.get_safe("simd_level") != None or \
             self.options.get_safe("runtime_simd_level") != None:
-            self.requires("xsimd/8.1.0")
+            self.requires("xsimd/9.0.1")
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.with_zstd:
@@ -349,7 +345,7 @@ class ArrowConan(ConanFile):
         if self._with_re2():
             self.requires("re2/20220601")
         if self._with_utf8proc():
-            self.requires("utf8proc/2.7.0")
+            self.requires("utf8proc/2.8.0")
         if self.options.with_backtrace:
             self.requires("libbacktrace/cci.20210118")
 
