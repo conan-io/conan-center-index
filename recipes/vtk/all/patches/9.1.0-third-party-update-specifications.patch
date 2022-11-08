@@ -191,6 +191,27 @@ index 610e0d3c25..ef3f224957 100644
      STANDARD_INCLUDE_DIRS)
  
  configure_file(
+--- a/ThirdParty/libharu/CMakeLists.txt
++++ b/ThirdParty/libharu/CMakeLists.txt
+@@ -5,15 +5,12 @@
+     STANDARD_INCLUDE_DIRS
+   EXTERNAL
+     PACKAGE LibHaru
+-    # Unreleased. Requires these PRs:
+-    # https://github.com/libharu/libharu/pull/157
+-    # https://github.com/libharu/libharu/pull/187
+-    VERSION 2.4.0
+-    TARGETS LibHaru::LibHaru
++    VERSION 2.4.3
++    TARGETS libharu::libharu
+     STANDARD_INCLUDE_DIRS)
+ 
+ include(vtkDetectLibraryType)
+-vtk_detect_library_shared(vtklibharu LibHaru::LibHaru)
++vtk_detect_library_shared(vtklibharu libharu::libharu)
+ 
+ set(HPDF_DLL 0)
+ if (WIN32 AND vtklibharu_is_shared)
 diff --git a/Rendering/OpenVR/CMakeLists.txt b/Rendering/OpenVR/CMakeLists.txt
 index de0f21e0fa..7f8d28c975 100644
 --- a/Rendering/OpenVR/CMakeLists.txt
