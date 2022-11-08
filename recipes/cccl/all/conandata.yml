@@ -2,3 +2,6 @@ sources:
   "1.1":
     url: https://github.com/swig/cccl/archive/cccl-1.1.tar.gz
     sha256: 03ed67d04e8b1e165b8f8d42546ab62ff6c42b3623a2358a7c8255ced144ce28
+  "1.2":
+    url: https://github.com/swig/cccl/archive/cccl-1.2.tar.gz
+    sha256: 1936206FAAACA61C4FFA062DF1D760775B89A82FDF222EF3D4A24C604A64B036
