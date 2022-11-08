@@ -56,10 +56,11 @@ class TermcapConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        to_cmake_paths = lambda paths: ";".join([p.replace("\\", "/") for p in paths])
         sources, headers, optional_headers = self._extract_sources()
-        tc.cache_variables["TERMCAP_SOURCES"] = ";".join(sources)
-        tc.cache_variables["TERMCAP_HEADERS"] = ";".join(headers)
-        tc.cache_variables["TERMCAP_INC_OPTS"] = ";".join(optional_headers)
+        tc.cache_variables["TERMCAP_SOURCES"] = to_cmake_paths(sources)
+        tc.cache_variables["TERMCAP_HEADERS"] = to_cmake_paths(headers)
+        tc.cache_variables["TERMCAP_INC_OPTS"] = to_cmake_paths(optional_headers)
         tc.cache_variables["TERMCAP_CAP_FILE"] = os.path.join(self.source_folder, "termcap.src").replace("\\", "/")
         tc.cache_variables["CMAKE_INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "bin", "etc").replace("\\", "/")
         tc.generate()
