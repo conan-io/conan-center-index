@@ -44,7 +44,6 @@ class ProjConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
         export_conandata_patches(self)
 
     def config_options(self):
@@ -167,6 +166,9 @@ class ProjConan(ConanFile):
         copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        # recover the proj.db file from 9.1.0's destination: share/proj/
+        copy(self, "proj.db", dst=os.path.join(self.package_folder, "res"), src=os.path.join(self.package_folder, "share", "proj"))
+        # delete the rest of the deployed data
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
