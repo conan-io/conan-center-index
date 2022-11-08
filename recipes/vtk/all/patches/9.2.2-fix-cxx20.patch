@@ -1,0 +1,146 @@
+diff -ru a/Common/Core/vtkSMPTools.h b/Common/Core/vtkSMPTools.h
+--- a/Common/Core/vtkSMPTools.h	2022-11-08 21:35:20.594032199 +0800
++++ b/Common/Core/vtkSMPTools.h	2022-11-08 21:44:00.668497642 +0800
+@@ -102,7 +102,7 @@
+   }
+   vtkSMPTools_FunctorInternal<Functor, false>& operator=(
+     const vtkSMPTools_FunctorInternal<Functor, false>&);
+-  vtkSMPTools_FunctorInternal<Functor, false>(const vtkSMPTools_FunctorInternal<Functor, false>&);
++  vtkSMPTools_FunctorInternal(const vtkSMPTools_FunctorInternal<Functor, false>&);
+ };
+ 
+ template <typename Functor>
+@@ -133,7 +133,7 @@
+   }
+   vtkSMPTools_FunctorInternal<Functor, true>& operator=(
+     const vtkSMPTools_FunctorInternal<Functor, true>&);
+-  vtkSMPTools_FunctorInternal<Functor, true>(const vtkSMPTools_FunctorInternal<Functor, true>&);
++  vtkSMPTools_FunctorInternal(const vtkSMPTools_FunctorInternal<Functor, true>&);
+ };
+ 
+ template <typename Functor>
+diff -ru a/Filters/Extraction/vtkValueSelector.cxx b/Filters/Extraction/vtkValueSelector.cxx
+--- a/Filters/Extraction/vtkValueSelector.cxx	2022-11-08 21:35:18.582194958 +0800
++++ b/Filters/Extraction/vtkValueSelector.cxx	2022-11-08 21:44:00.672497694 +0800
+@@ -180,7 +180,7 @@
+ 
+     if (comp >= 0)
+     {
+-      vtkSMPTools::For(0, fArray->GetNumberOfTuples(), [=](vtkIdType begin, vtkIdType end) {
++      vtkSMPTools::For(0, fArray->GetNumberOfTuples(), [=, this](vtkIdType begin, vtkIdType end) {
+         const auto fRange = vtk::DataArrayTupleRange(fArray, begin, end);
+         const auto selRange = vtk::DataArrayTupleRange<2>(selList);
+         auto insideRange = vtk::DataArrayValueRange<1>(this->InsidednessArray, begin, end);
+@@ -201,7 +201,7 @@
+     else
+     {
+       // compare vector magnitude.
+-      vtkSMPTools::For(0, fArray->GetNumberOfTuples(), [=](vtkIdType begin, vtkIdType end) {
++      vtkSMPTools::For(0, fArray->GetNumberOfTuples(), [=, this](vtkIdType begin, vtkIdType end) {
+         const auto fRange = vtk::DataArrayTupleRange(fArray, begin, end);
+         const auto selRange = vtk::DataArrayTupleRange<2>(selList);
+         auto insideRange = vtk::DataArrayValueRange<1>(this->InsidednessArray, begin, end);
+diff -ru a/Filters/General/vtkDeflectNormals.cxx b/Filters/General/vtkDeflectNormals.cxx
+--- a/Filters/General/vtkDeflectNormals.cxx	2022-11-08 21:35:18.606193014 +0800
++++ b/Filters/General/vtkDeflectNormals.cxx	2022-11-08 21:44:00.672497694 +0800
+@@ -70,7 +70,7 @@
+   void operator()(VectorArrayT* vectors)
+   {
+     const double* normal = this->Self->GetUserNormal();
+-    vtkSMPTools::For(0, vectors->GetNumberOfTuples(), [=](vtkIdType begin, vtkIdType end) {
++    vtkSMPTools::For(0, vectors->GetNumberOfTuples(), [=, this](vtkIdType begin, vtkIdType end) {
+       for (vtkIdType t = begin; t < end; ++t)
+       {
+         typename VectorArrayT::ValueType vec[3];
+@@ -83,7 +83,7 @@
+   template <typename VectorArrayT, typename NormalArrayT>
+   void operator()(VectorArrayT* vectors, NormalArrayT* normals)
+   {
+-    vtkSMPTools::For(0, vectors->GetNumberOfTuples(), [=](vtkIdType begin, vtkIdType end) {
++    vtkSMPTools::For(0, vectors->GetNumberOfTuples(), [=, this](vtkIdType begin, vtkIdType end) {
+       for (vtkIdType t = begin; t < end; ++t)
+       {
+         typename VectorArrayT::ValueType vec[3];
+diff -ru a/Filters/General/vtkMergeTimeFilter.cxx b/Filters/General/vtkMergeTimeFilter.cxx
+--- a/Filters/General/vtkMergeTimeFilter.cxx	2022-11-08 21:35:20.674025735 +0800
++++ b/Filters/General/vtkMergeTimeFilter.cxx	2022-11-08 21:44:00.672497694 +0800
+@@ -100,7 +100,7 @@
+   for (double newTime : timeSteps)
+   {
+     // lambda to find TimeStep in the list, depending on Tolerance.
+-    auto insideTolerance = [=](double outputTime) {
++    auto insideTolerance = [=, this](double outputTime) {
+       return this->AreTimesWithinTolerance(outputTime, newTime);
+     };
+ 
+diff -ru a/IO/Legacy/vtkDataReader.cxx b/IO/Legacy/vtkDataReader.cxx
+--- a/IO/Legacy/vtkDataReader.cxx	2022-11-08 21:35:20.738020563 +0800
++++ b/IO/Legacy/vtkDataReader.cxx	2022-11-08 21:44:00.680497797 +0800
+@@ -291,7 +291,7 @@
+ //------------------------------------------------------------------------------
+ // Internal function to read in a string up to 256 characters.
+ // Returns zero if there was an error.
+-int vtkDataReader::ReadString(char result[256])
++int vtkDataReader::ReadString(char (&result)[256])
+ {
+   // Force the parameter to be seen as a 256-byte array rather than a decayed
+   // pointer.
+diff -ru a/IO/Legacy/vtkDataReader.h b/IO/Legacy/vtkDataReader.h
+--- a/IO/Legacy/vtkDataReader.h	2022-11-08 21:35:18.818175844 +0800
++++ b/IO/Legacy/vtkDataReader.h	2022-11-08 21:44:00.684497850 +0800
+@@ -468,7 +468,7 @@
+    * Internal function to read in a string up to 256 characters.
+    * Returns zero if there was an error.
+    */
+-  int ReadString(char result[256]);
++  int ReadString(char (&result)[256]);
+ 
+   /**
+    * Helper method for reading in data.
+diff -ru a/IO/XML/vtkXMLPHyperTreeGridReader.cxx b/IO/XML/vtkXMLPHyperTreeGridReader.cxx
+--- a/IO/XML/vtkXMLPHyperTreeGridReader.cxx	2022-11-08 21:35:18.858172604 +0800
++++ b/IO/XML/vtkXMLPHyperTreeGridReader.cxx	2022-11-08 21:44:00.684497850 +0800
+@@ -201,7 +201,7 @@
+ 
+   if (!output)
+   {
+-    vtkErrorMacro("Incorrect type of output: " << output->GetClassName());
++    vtkErrorMacro("Incorrect type of output: " << this->GetClassName());
+     return 0;
+   }
+ 
+diff -ru a/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.cxx b/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.cxx
+--- a/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.cxx	2022-11-08 21:35:19.134150262 +0800
++++ b/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.cxx	2022-11-08 21:44:00.684497850 +0800
+@@ -538,14 +538,14 @@
+ 
+   for (int gammafi = 0; gammafi < PSI_TABLE_SIZE; gammafi++)
+   {
+-    float gammaf = ((float)gammafi + 0.0f) / PSI_TABLE_SIZE;
++    float gammaf = ((float)gammafi + 0.0f) / static_cast<int>(PSI_TABLE_SIZE);
+     float taufD = gammaf / (1 - gammaf);
+     for (int gammabi = 0; gammabi < PSI_TABLE_SIZE; gammabi++)
+     {
+-      float gammab = ((float)gammabi + 0.0f) / PSI_TABLE_SIZE;
++      float gammab = ((float)gammabi + 0.0f) / static_cast<int>(PSI_TABLE_SIZE);
+       float taubD = gammab / (1 - gammab);
+ 
+-      PsiTable[gammafi * PSI_TABLE_SIZE + gammabi] =
++      PsiTable[gammafi * static_cast<int>(PSI_TABLE_SIZE) + gammabi] =
+         vtkUnstructuredGridLinearRayIntegrator::Psi(1, taufD, taubD);
+     }
+   }
+diff -ru a/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.h b/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.h
+--- a/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.h	2022-11-08 21:35:19.134150262 +0800
++++ b/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.h	2022-11-08 21:44:00.684497850 +0800
+@@ -113,8 +113,8 @@
+ {
+   float gammaf = taufD / (taufD + 1);
+   float gammab = taubD / (taubD + 1);
+-  int gammafi = vtkMath::Floor(gammaf * PSI_TABLE_SIZE);
+-  int gammabi = vtkMath::Floor(gammab * PSI_TABLE_SIZE);
++  int gammafi = vtkMath::Floor(gammaf * static_cast<int>(PSI_TABLE_SIZE));
++  int gammabi = vtkMath::Floor(gammab * static_cast<int>(PSI_TABLE_SIZE));
+   return PsiTable[gammafi * PSI_TABLE_SIZE + gammabi];
+ }
+ 
