@@ -78,7 +78,7 @@ class LibVPXConan(ConanFile):
         self.tool_requires("yasm/1.3.0")
         if self._settings_build.os == "Windows":
             self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
