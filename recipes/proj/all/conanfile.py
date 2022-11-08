@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, collect_libs, rm
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, collect_libs, rm, rename
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -134,7 +134,8 @@ class ProjConan(ConanFile):
         tc.variables["BUILD_GIE"] = self.options.build_executables
         tc.variables["BUILD_PROJ"] = self.options.build_executables
         tc.variables["BUILD_PROJINFO"] = self.options.build_executables
-        tc.variables["PROJ_DATA_SUBDIR"] = "res"
+        if Version(self.version) < "9.1.0":
+            tc.variables["PROJ_DATA_SUBDIR"] = "res"
         if Version(self.version) < "7.0.0":
             tc.variables["PROJ_TESTS"] = False
             tc.variables["BUILD_LIBPROJ_SHARED"] = self.options.shared
@@ -166,8 +167,10 @@ class ProjConan(ConanFile):
         copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        # recover the proj.db file from 9.1.0's destination: share/proj/
-        copy(self, "proj.db", dst=os.path.join(self.package_folder, "res"), src=os.path.join(self.package_folder, "share", "proj"))
+        # recover the data ... 9.1.0 saves into share/proj rather than res directly
+        # the new PROJ_DATA_PATH can't seem to be controlled from conan.
+        if Version(self.version) >= "9.1.0":
+            rename(self, src=os.path.join(self.package_folder, "share", "proj"), dst=os.path.join(self.package_folder, "res"))
         # delete the rest of the deployed data
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
