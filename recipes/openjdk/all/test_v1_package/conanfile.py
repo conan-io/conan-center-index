@@ -1,9 +1,7 @@
-from conan import ConanFile
-from conan.tools.build import can_run
-from conan.errors import ConanException
+from conans import ConanFile, tools
+from conans.errors import ConanException
 from io import StringIO
 
-required_conan_version = ">=1.47.0"
 
 
 class TestPackage(ConanFile):
@@ -16,12 +14,10 @@ class TestPackage(ConanFile):
         pass  # nothing to build, but tests should not warn
 
     def test(self):
-        if can_run(self):
+        if not tools.cross_building(self):
             output = StringIO()
             self.run("java --version", output=output, run_environment=True)
             print(output.getvalue)
             version_info = output.getvalue()
-            if "openjdk" in version_info:
-                pass
-            else:
+            if "openjdk" not in version_info:
                 raise ConanException("java call seems not use the openjdk bin")
