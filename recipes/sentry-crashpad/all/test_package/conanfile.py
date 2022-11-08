@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import can_run
+from conan.tools.files import mkdir
 from conan.tools.cmake import cmake_layout, CMake
 import os
 
@@ -22,5 +23,8 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
+            test_env_dir = "test_env"
+            mkdir(self, test_env_dir)
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            self.run(bin_path, env="conanrun")
+            handler_bin_path = os.path.join(self.deps_cpp_info["sentry-crashpad"].rootpath, "bin", "crashpad_handler")
+            self.run(f"{bin_path} {test_env_dir} {handler_bin_path}", run_environment=True)

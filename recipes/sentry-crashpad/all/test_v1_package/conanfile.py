@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake
 from conan.tools.build import cross_building
+from conan.tools.files import mkdir
 import os
 
 
@@ -14,5 +15,8 @@ class TestPackageV1Conan(ConanFile):
 
     def test(self):
         if not cross_building(self):
+            test_env_dir = "test_env"
+            mkdir(self, test_env_dir)
             bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+            handler_bin_path = os.path.join(self.deps_cpp_info["sentry-crashpad"].rootpath, "bin", "crashpad_handler")
+            self.run(f"{bin_path} {test_env_dir} {handler_bin_path}", run_environment=True)
