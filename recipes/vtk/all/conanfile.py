@@ -22,9 +22,11 @@
 import os
 import textwrap
 from conan import ConanFile
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.files import apply_conandata_patches
 from conan.tools.system.package_manager import Apt
+from conan.tools.build import check_min_cppstd
+from conan.tools.microsoft import check_min_vs, is_msvc
 
 # TODO upgrade to new conan.* imports
 from conans import RunEnvironment
@@ -36,6 +38,8 @@ import json
 
 # Enable to keep VTK-generated cmake files, to check contents
 _debug_packaging = False
+
+required_conan_version = ">=1.53.0"
 
 
 class VtkConan(ConanFile):
@@ -51,8 +55,6 @@ class VtkConan(ConanFile):
 
     short_paths = True
     no_copy_source = False
-
-    generators = "CMakeDeps"
 
     # Alternative method: can use git directly - helpful when hacking VTK
     # TODO allow user to set the git_url from the command line, during conan install
@@ -276,10 +278,6 @@ class VtkConan(ConanFile):
             }
 
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
 
 
     def _patch_source(self):
@@ -302,14 +300,14 @@ class VtkConan(ConanFile):
         #####
 
         # DELETE any of the third party finders, before we build - see note above
-# ALLOW FINDERS #        remove_files_by_mask(os.path.join(self._source_subfolder,"CMake"), "Find*.cmake")
+# ALLOW FINDERS #        remove_files_by_mask(os.path.join(self.source_folder,"CMake"), "Find*.cmake")
 
         # Delete VTK's cmake patches (these support older cmake programs).
         # We do not have to support old cmake: we require an updated cmake instead.
 # ALLOW FINDERS #        if _support_old_ci_20220514:
-# ALLOW FINDERS #            rmdir(os.path.join(self._source_subfolder,"CMake","patches"))
+# ALLOW FINDERS #            rmdir(os.path.join(self.source_folder,"CMake","patches"))
 # ALLOW FINDERS #        else:
-# ALLOW FINDERS #            rmdir(self, os.path.join(self._source_subfolder,"CMake","patches"))
+# ALLOW FINDERS #            rmdir(self, os.path.join(self.source_folder,"CMake","patches"))
 
         # And apply our patches.  I do it here rather than in build, so I can repeatedly call build without applying patches.
         apply_conandata_patches(self)
@@ -318,15 +316,15 @@ class VtkConan(ConanFile):
 
     def source(self):
         if self.options.use_source_from_git:
-            self.run("git clone -b release --single-branch " + self.git_url + " " + self._source_subfolder)
+            self.run("git clone -b release --single-branch " + self.git_url + " " + self.source_folder)
             # note: we give the branch a name so we don't have detached heads
             # TODO change to standard git and python chdir
             git_hash = "v" + self.version
-            self.run("cd " + self._source_subfolder + " && git checkout -b branch-" + git_hash + " " + git_hash)
+            self.run("cd " + self.source_folder + " && git checkout -b branch-" + git_hash + " " + git_hash)
         else:
             get(**self.conan_data["sources"][self.version],
                     strip_root=True,
-                    destination=self._source_subfolder)
+                    destination=self.source_folder)
 
         if self.no_copy_source:
             self._patch_source()
@@ -384,10 +382,7 @@ class VtkConan(ConanFile):
                 or self.options.module_enable_GUISupportQtSQL
                 or self.options.module_enable_RenderingQt
                 or self.options.module_enable_ViewsQt):
-            parties["qt"] = "qt/6.2.4"
-
-            # NOTE: could also try QT's offical QT
-            # self.requires("qtbase/6.2.4@qt/everywhere")
+            parties["qt"] = "qt/6.3.1"
 
         return parties
 
@@ -401,27 +396,18 @@ class VtkConan(ConanFile):
         for pack in self._third_party().values():
             self.requires(pack)
 
-        # Cmake requires an older openssl than libcurl, so override here
-        # We don't need openssl on windows. Shouldn't need this line at all.
-        if self.settings.os != "Windows":
-            self.requires("openssl/1.1.1o", override=True)
-
-
-    def build_requirements(self):
-        # Recipe Maintainers:
-        # Check the CMake/patches folder, and use the most recent cmake
-        # that matches the largest major version in the list.
-        # That should be the last cmake that was tested by VTK.
-        # Also adjust our CMakeLists.txt to match this number.
-        # TODO automate this?  Put this version number in conandata.yml?
-
-        # Note that 3.22.4 may have been the last version that Kitware tested, so we'll use that.
-        # Should be ok to use the latest CMake always though...
-        # TODO SHOULD BE HERE, but doesn't work
-        # self.tool_requires("cmake/3.22.4")
-        pass
 
     def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        check_min_vs(self, 191)
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
+
         if not self.options.shared and self.options.enable_kits:
             raise ConanInvalidConfiguration("KITS can only be enabled with shared")
 
@@ -448,41 +434,31 @@ class VtkConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    @property
+    def _min_cppstd(self):
+        return 17
 
-    def _ensure_cpp17(self):
-        compilers_minimum_version = {
-                "gcc": "9",
-                "Visual Studio": "15.7",
-                "clang": "7",
-                "apple-clang": "11",
-            }
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "9",
+            "Visual Studio": "15.7",
+            "clang": "7",
+            "apple-clang": "11",
+        }
 
         # TODO for debugging weird behaviour on mac on CCI
         #if str(self.settings.compiler) != "apple-clang":
             #raise ConanInvalidConfiguration("Not building, just want to focus on apple-clang for now")
 
-        # VTK needs C++17 to compile
-        # This code was copied from p-ranav-glob
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 17)
-        minimum_version = compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
-        else:
-            self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
-
-
-
 
     def configure(self):
-        self._ensure_cpp17()
         if self.options.shared:
             del self.options.fPIC
 
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
         # WTF resdirs # self.cpp.package.resdirs = ["res"]
 
 
@@ -581,7 +557,6 @@ class VtkConan(ConanFile):
         # for Qt, can also use the more specific MODULE options below
         tc.variables["VTK_GROUP_ENABLE_Qt"] = _yesno(self.options.group_enable_Qt)
 
-
         ##### QT ######
         # QT has a few modules, we'll be specific
         tc.variables["VTK_QT_VERSION"]                          = self.options.qt_version
@@ -591,7 +566,7 @@ class VtkConan(ConanFile):
         tc.variables["VTK_MODULE_ENABLE_VTK_RenderingQt"]       = _yesno(self.options.module_enable_RenderingQt)
         tc.variables["VTK_MODULE_ENABLE_VTK_ViewsQt"]           = _yesno(self.options.module_enable_ViewsQt)
 
-
+        ### Other stuff ###
         tc.variables["VTK_MODULE_ENABLE_VTK_IOPDAL"]            = _yesno(self.options.module_IOPDAL)
         tc.variables["VTK_MODULE_ENABLE_VTK_IOPostgreSQL"]      = _yesno(self.options.module_IOPostgreSQL)
         tc.variables["VTK_MODULE_ENABLE_VTK_IOOpenVDB"]         = _yesno(self.options.module_IOOpenVDB)
@@ -604,7 +579,6 @@ class VtkConan(ConanFile):
         tc.variables["VTK_MODULE_ENABLE_VTK_DomainsMicroscopy"] = _yesno(self.options.module_DomainsMicroscopy)
         tc.variables["VTK_MODULE_ENABLE_VTK_CommonArchive"]     = _yesno(self.options.module_CommonArchive)
         # TODO if true (or all) then system has to install postgres dev package
-
 
         ##### SMP parallelism ####  Sequential  STDThread  OpenMP  TBB
         # Note that STDThread seems to be available by default
@@ -638,7 +612,6 @@ class VtkConan(ConanFile):
         for lib in missing_from_cci:
             tc.variables["VTK_MODULE_USE_EXTERNAL_VTK_" + lib] = False
 
-
         # Everything else should come from conan.
         # TODO check if anything is coming from the system CMake,
         # and change it to conan or add as a build_requirement for the system to install.
@@ -646,12 +619,13 @@ class VtkConan(ConanFile):
         # not be appropriate to use externally.
         tc.variables["VTK_USE_EXTERNAL"] = True
 
-
         # TODO these dependencies modules aren't available in CCI or internally
         # this one was used for RenderingRayTracing
         tc.variables["VTK_ENABLE_OSPRAY"] = False
 
+        tc.generate()
 
+        tc = CMakeDeps(self)
         tc.generate()
 
 
@@ -660,11 +634,12 @@ class VtkConan(ConanFile):
             self._patch_source()
 
         # RunEnvironment needed to build shared version with ALL modules
-        env_build = RunEnvironment(self)
-        with environment_append(env_build.vars):
-            cmake = CMake(self)
-            cmake.configure(build_script_folder=self._source_subfolder)
-            cmake.build()
+        # Still needed with 1.53.0 ? # env_build = RunEnvironment(self)
+        # Still needed with 1.53.0 ? # with environment_append(env_build.vars):
+        cmake = CMake(self)
+            # Still needed with 1.53.0 ? # cmake.configure(build_script_folder=self.source_folder)
+        cmake.configure()
+        cmake.build()
 
 
     @property
@@ -676,47 +651,35 @@ class VtkConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-<<<<<<< HEAD
         # VTK installs the licenses under the share/licenses/VTK directory, move it
-=======
-        # VTK installs the licenses under the res/licenses/VTK directory, move it
-        # TODO hack due to Conan 1.50.0 bug #11597 ... change "None" to "res" when fixed.
->>>>>>> vtk - fixes for copying modules.json into the right spot
-        rename( os.path.join(self.package_folder,"share","licenses","VTK"),
+        rename( self, os.path.join(self.package_folder,"share","licenses","VTK"),
                 os.path.join(self.package_folder,"licenses"))
 
-        rmdir(os.path.join(self.package_folder,"share","licenses"))
-        rmdir(os.path.join(self.package_folder,"share"))
+        rmdir(self, os.path.join(self.package_folder,"share","licenses"))
+        rmdir(self, os.path.join(self.package_folder,"share"))
 
         # keep copy of generated VTK cmake files, for inspection
         if _debug_packaging:
-            rename( os.path.join(self.package_folder,"lib","cmake"),
+            rename( self, os.path.join(self.package_folder,"lib","cmake"),
                     os.path.join(self.package_folder,"vtk-cmake-backup"))
         else:
             # delete VTK-installed cmake files
-            rmdir(os.path.join(self.package_folder,"lib","cmake"))
+            rmdir(self, os.path.join(self.package_folder,"lib","cmake"))
 
         # make a copy of the modules.json, we use that in package_info
         # TODO where should this file live?  perhaps just in the base package folder?
-<<<<<<< HEAD
-        self.copy("modules.json", src=self.build_folder, dst=self.package_folder, keep_path=False)
-=======
-        self.copy("modules.json",
+        copy(self, pattern="modules.json",
                 dst=self.package_folder, # dst=os.path.join(self.package_folder), # ,"lib","conan"))
-                src=self.build_folder,   # src=os.path.join(self.build_folder,"modules.json"),
+                src=self.build_folder,
                 keep_path=False
                 )
->>>>>>> vtk - fixes for copying modules.json into the right spot
 
         # create a cmake file with our special variables
-        content = textwrap.dedent("""\
-                set (VTK_ENABLE_KITS {})
+        content = textwrap.dedent(f"""\
+                set (VTK_ENABLE_KITS {self.options.enable_kits})
                 """
-                .format(self.options.enable_kits)
                 )
-        save(os.path.join(self.package_folder, self._module_file_rel_path),
-                content
-                )
+        save(self, os.path.join(self.package_folder, self._module_file_rel_path), content)
 
 
     def package_info(self):
@@ -763,8 +726,8 @@ class VtkConan(ConanFile):
                 comp = libname[3:]
                 self.cpp_info.components[comp].set_property("cmake_target_name", "VTK::" + comp)
                 self.cpp_info.components[comp].libs          = ["vtk" + comp]
-                self.cpp_info.components[comp].libdirs       = ["lib"]
-                # WTF resdirs # self.cpp_info.components[comp].resdirs       = ["res"]
+                # NEEDED with 1.53? # self.cpp_info.components[comp].libdirs       = ["lib"]
+                # NEEDED with 1.53? # # WTF resdirs # self.cpp_info.components[comp].resdirs       = ["res"]
                 self.cpp_info.components[comp].requires      = all_requires
                 self.cpp_info.components[comp].set_property("cmake_build_modules", vtk_cmake_build_modules)
                 if self.settings.os == "Linux":
@@ -828,8 +791,8 @@ class VtkConan(ConanFile):
                     self.output.info(f"Processing module {module_name}")
                     self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
                     self.cpp_info.components[comp].libs          = [comp_libname]
-                    self.cpp_info.components[comp].libdirs       = ["lib"]
-                    # WTF resdirs # self.cpp_info.components[comp].resdirs       = ["res"]
+                    # NEEDED with 1.53? # self.cpp_info.components[comp].libdirs       = ["lib"]
+                    # NEEDED with 1.53? # # WTF resdirs # self.cpp_info.components[comp].resdirs       = ["res"]
 
                     # not sure how to be more specific here, the modules.json doesn't specify which other modules are required
                 elif module_name in thirds:
