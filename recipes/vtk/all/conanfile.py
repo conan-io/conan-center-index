@@ -19,22 +19,19 @@
 # - Also read vtk's Documentation/build.md for information about build settings and flags
 # - Modify build_requirements() to match the version of CMake that VTK tested with that release.
 
-import os
-import textwrap
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches
-from conan.tools.system.package_manager import Apt
 from conan.tools.build import check_min_cppstd
 from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, save, rename, collect_libs, load
+from conan.tools.scm import Version
 
-# TODO upgrade to new conan.* imports
-from conans import RunEnvironment
-from conans.errors import ConanInvalidConfiguration
-from conans.tools import get, remove_files_by_mask, save, rmdir, rename, collect_libs, check_min_cppstd, Version, environment_append, load
+import os
+import textwrap
 
-# for auto-component generation
-import json
+import json # for auto-component generation
 
 # Enable to keep VTK-generated cmake files, to check contents
 _debug_packaging = False
@@ -44,14 +41,14 @@ required_conan_version = ">=1.53.0"
 
 class VtkConan(ConanFile):
     name = "vtk"
-    settings = "os", "compiler", "build_type", "arch"
     description = "The Visualization Toolkit (VTK) by Kitware is an open-source, \
         freely available software system for 3D computer graphics, \
         image processing, and visualization."
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.vtk.org/"
-    license = "BSD-3-Clause"
-    topics = ("vtk", "scientific", "image", "processing", "visualization")
+    topics = ("scientific", "image", "processing", "visualization")
+    settings = "os", "compiler", "build_type", "arch"
 
     short_paths = True
     no_copy_source = False
@@ -300,18 +297,17 @@ class VtkConan(ConanFile):
         #####
 
         # DELETE any of the third party finders, before we build - see note above
-# ALLOW FINDERS #        remove_files_by_mask(os.path.join(self.source_folder,"CMake"), "Find*.cmake")
+# ALLOW FINDERS #        rm(self, "Find*.cmake", os.path.join(self.source_folder,"CMake"))
 
         # Delete VTK's cmake patches (these support older cmake programs).
         # We do not have to support old cmake: we require an updated cmake instead.
 # ALLOW FINDERS #        if _support_old_ci_20220514:
-# ALLOW FINDERS #            rmdir(os.path.join(self.source_folder,"CMake","patches"))
+# ALLOW FINDERS #            rmdir(self, os.path.join(self.source_folder,"CMake","patches"))
 # ALLOW FINDERS #        else:
 # ALLOW FINDERS #            rmdir(self, os.path.join(self.source_folder,"CMake","patches"))
 
         # And apply our patches.  I do it here rather than in build, so I can repeatedly call build without applying patches.
         apply_conandata_patches(self)
-
 
 
     def source(self):
@@ -453,7 +449,7 @@ class VtkConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
 
     def layout(self):
@@ -668,7 +664,7 @@ class VtkConan(ConanFile):
         # make a copy of the modules.json, we use that in package_info
         # TODO where should this file live?  perhaps just in the base package folder?
         copy(self, pattern="modules.json",
-                dst=self.package_folder, # dst=os.path.join(self.package_folder), # ,"lib","conan"))
+                dst=os.path.join(self.package_folder,"lib","conan"),
                 src=self.build_folder,
                 keep_path=False
                 )
@@ -700,18 +696,14 @@ class VtkConan(ConanFile):
         vtk_cmake_build_modules = [self._module_file_rel_path]
 
 
-        # Needed?
-        # if self.settings.os == "Linux":
-        #     self.cpp_info.system_libs += ["dl","pthread"]
-
         # Just generate 'config' version, FindVTK.cmake hasn't existed since CMake 3.1, according to:
         # https://cmake.org/cmake/help/latest/module/FindVTK.html
 
         self.cpp_info.set_property("cmake_file_name", "VTK")
         self.cpp_info.set_property("cmake_target_name", "VTK::VTK")
 
-        # Dont set this, the hook is wrong... already set the build_modules...
-        # self.cpp_info.builddirs = [os.path.join("lib", "cmake", "vtk")]
+        self.cpp_info.builddirs = [os.path.join("lib", "cmake", "vtk")]
+        self.cpp_info.set_property("cmake_build_modules", vtk_cmake_build_modules)
 
         # Should not be added to the VTK::VTK target... right?
         # self.cpp_info.libdirs   = ["lib"]
@@ -729,8 +721,8 @@ class VtkConan(ConanFile):
                 # NEEDED with 1.53? # # WTF resdirs # self.cpp_info.components[comp].resdirs       = ["res"]
                 self.cpp_info.components[comp].requires      = all_requires
                 self.cpp_info.components[comp].set_property("cmake_build_modules", vtk_cmake_build_modules)
-                if self.settings.os == "Linux":
-                    self.cpp_info.components[comp].system_libs = ["m"]
+                if self.settings.os in ("FreeBSD", "Linux"):
+                    self.cpp_info.system_libs.extend(["dl","pthread","m"])
 
         else:
             # hard code the replacement 3rd party targets we are supplying,
@@ -744,6 +736,7 @@ class VtkConan(ConanFile):
                     "VTK::freetype": "freetype::freetype",
                     "VTK::jpeg":     "libjpeg-turbo::jpeg",
                     "VTK::jsoncpp":  "jsoncpp::jsoncpp",
+                    "VTK::libharu":  "libharu::libharu",
                     "VTK::libproj":  "proj::proj",
                     "VTK::lz4":      "lz4::lz4",
                     "VTK::lzma":     "xz_utils::xz_utils",
@@ -765,7 +758,7 @@ class VtkConan(ConanFile):
             # TODO check out abseil recipe, it parses the generated cmake-targets file for extra info.
 
             # new way - parse the modules.json file and generate a list of components
-            modfile = load(os.path.join(self.package_folder,"modules.json"))
+            modfile = load(self, os.path.join(self.package_folder,"lib","conan","modules.json"))
             vtkmods = json.loads(modfile)
 
             # VTK::QtOpenGL doesn't currently exist in VTK, I have added this.
@@ -832,8 +825,9 @@ class VtkConan(ConanFile):
 
                     # DEBUG # self.output.info("  Final deps: {}".format(self.cpp_info.components[comp].requires))
 
-                    if self.settings.os == "Linux":
-                        self.cpp_info.components[comp].system_libs = ["m"]
+                    self.cpp_info.components[comp].set_property("cmake_build_modules", vtk_cmake_build_modules)
+                    if self.settings.os in ("FreeBSD", "Linux"):
+                        self.cpp_info.components[comp].system_libs.extend(["dl","pthread","m"])
                 else:
                     self.output.warning("Skipping module, did not become a component: {}".format(module_name))
 
