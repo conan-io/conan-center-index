@@ -12,7 +12,7 @@ class CanvasItyConan(ConanFile):
     description = "A tiny, single-header <canvas>-like 2D rasterizer for C++"
     license = "ISC"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/project/package"
+    homepage = "https://github.com/a-e-k/canvas_ity"
     topics = ("rasterizer", "canvas", "2d", "header-only")
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
