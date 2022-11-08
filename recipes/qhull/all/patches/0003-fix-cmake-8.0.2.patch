@@ -1,0 +1,54 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2a25615..74505c5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -369,7 +369,7 @@ set_target_properties(${qhull_SHAREDR} PROPERTIES
+ 
+ if(UNIX)
+     target_link_libraries(${qhull_SHAREDR} m)
+-    if(APPLE)
++    if(0)
+         set_target_properties(${qhull_SHAREDR} PROPERTIES 
+             INSTALL_NAME_DIR "${LIB_INSTALL_DIR}")
+     else()
+@@ -396,7 +396,7 @@ set_target_properties(${qhull_SHARED} PROPERTIES
+ 
+ if(UNIX)
+     target_link_libraries(${qhull_SHARED} m)
+-    if(APPLE)
++    if(0)
+         set_target_properties(${qhull_SHARED} PROPERTIES 
+             INSTALL_NAME_DIR "${LIB_INSTALL_DIR}")
+     else()
+@@ -424,7 +424,7 @@ set_target_properties(${qhull_SHAREDP} PROPERTIES
+ 
+ if(UNIX)
+     target_link_libraries(${qhull_SHAREDP} m)
+-    if(APPLE)
++    if(0)
+         set_target_properties(${qhull_SHAREDP} PROPERTIES 
+             INSTALL_NAME_DIR "${LIB_INSTALL_DIR}")
+     else()
+@@ -687,6 +687,7 @@ endif()
+ 
+ install(TARGETS ${qhull_TARGETS_INSTALL} EXPORT QhullTargets
+         RUNTIME DESTINATION ${BIN_INSTALL_DIR}
++        BUNDLE DESTINATION ${BIN_INSTALL_DIR}
+         LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+         ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+         INCLUDES DESTINATION include)
+@@ -747,14 +748,8 @@ foreach(pkgconfig IN ITEMS "${qhull_SHAREDR};Qhull reentrant shared library"
+ endforeach()
+ 
+ install(FILES ${libqhull_HEADERS}    DESTINATION ${INCLUDE_INSTALL_DIR}/libqhull)
+-install(FILES src/libqhull/DEPRECATED.txt DESTINATION ${INCLUDE_INSTALL_DIR}/libqhull)
+ install(FILES ${libqhullr_HEADERS}    DESTINATION ${INCLUDE_INSTALL_DIR}/libqhull_r)
+ install(FILES ${libqhullcpp_HEADERS} DESTINATION ${INCLUDE_INSTALL_DIR}/libqhullcpp)
+-install(FILES html/qhull.man         DESTINATION ${MAN_INSTALL_DIR} RENAME qhull.1)
+-install(FILES html/rbox.man          DESTINATION ${MAN_INSTALL_DIR} RENAME rbox.1)
+-install(FILES ${doc_FILES}           DESTINATION ${DOC_INSTALL_DIR})
+-install(DIRECTORY html/              DESTINATION ${DOC_INSTALL_DIR}/html)
+-install(FILES src/Changes.txt        DESTINATION ${DOC_INSTALL_DIR}/src)
+ 
+ add_custom_target(uninstall
+     COMMENT "uninstall Qhull by deleting files in install_manifest.txt"
