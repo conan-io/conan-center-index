@@ -28,8 +28,7 @@ In the context of ConanCenterIndex, this file is mandatory and consists of two m
         * [portability](#portability)
         * [conan](#conan)
       * [patch_source](#patch_source)
-      * [base_path](#base_path)
-      * [sha256](#sha256-1)<!-- endToc -->
+      * [base_path](#base_path)<!-- endToc -->
 
 ## sources
 
