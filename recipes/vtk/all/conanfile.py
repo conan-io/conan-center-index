@@ -96,7 +96,7 @@ class VtkConan(ConanFile):
     # jpeg:             conan (I'm trying libjpeg-turbo)
     # jsoncpp:          conan (jsoncpp)
     # kissfft:          conan (kissfft)
-    # libharu:          VTK (heavily patched)
+    # libharu:          conan (libharu)
     # libproj:          conan (proj)
     # libxml2:          conan (libxml2)
     # loguru:           internal (not available in CCI - TODO)
@@ -345,7 +345,7 @@ class VtkConan(ConanFile):
                 "freetype":          "freetype/2.12.1",
                 "glew":              "glew/2.2.0",
                 "jsoncpp":           "jsoncpp/1.9.5",
-                # "libharu": "libharu/2.3.0", -- use VTK's bundled version - heavily patched
+                "libharu":           "libharu/2.4.3",
                 "kissfft":           "kissfft/131.1.0",
                 "lz4":               "lz4/1.9.3",
                 "libpng":            "libpng/1.6.37",
@@ -615,15 +615,10 @@ class VtkConan(ConanFile):
         tc.variables["VTK_SMP_ENABLE_OpenMP"]       = self.options.smp_enable_OpenMP
         tc.variables["VTK_SMP_ENABLE_TBB"]          = self.options.smp_enable_TBB
 
-
         #### Use the Internal VTK bundled libraries for these Third Party dependencies ...
         # Ask VTK to use their bundled versions for these:
-        #
-        # VTK uses a heavily-forked version they call 2.4.0.  Upstream libharu is currently unmaintained.
-        tc.variables["VTK_MODULE_USE_EXTERNAL_VTK_libharu"] = False
-
-
-        # these are missing in CCI, could probably use if they become available
+        # These are missing in CCI, could probably use if they become available.
+        # Note that we may need to use bundled versions if they are heavily patched.
         missing_from_cci = [
                 "diy2",
                 "exodusII",
@@ -648,7 +643,7 @@ class VtkConan(ConanFile):
         # TODO check if anything is coming from the system CMake,
         # and change it to conan or add as a build_requirement for the system to install.
         # SOME of VTK's bundled Third Party libs are heavily forked and patched, so system versions may
-        # not be appropriate to use externally (like libharu).
+        # not be appropriate to use externally.
         tc.variables["VTK_USE_EXTERNAL"] = True
 
 
