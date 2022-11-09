@@ -910,3 +910,13 @@ class OpenSSLConan(ConanFile):
         elif self.settings.os == "Neutrino":
             self.cpp_info.components["crypto"].system_libs.append("atomic")
             self.cpp_info.components["ssl"].system_libs.append("atomic")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "OpenSSL"
+        self.cpp_info.names["cmake_find_package_multi"] = "OpenSSL"
+        #self.cpp_info.components["ssl"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        #self.cpp_info.components["crypto"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["crypto"].names["cmake_find_package"] = "Crypto"
+        self.cpp_info.components["crypto"].names["cmake_find_package_multi"] = "Crypto"
+        self.cpp_info.components["ssl"].names["cmake_find_package"] = "SSL"
+        self.cpp_info.components["ssl"].names["cmake_find_package_multi"] = "SSL"
