@@ -54,6 +54,7 @@ class TestPackageConan(ConanFile):
             cmake.build()
 
     def test(self):
+        self.win_bash = None
         if can_run(self) and self.options["pkgconf"].enable_lib:
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
