@@ -67,8 +67,8 @@ class LibcurlConan(ConanFile):
         "with_symbol_hiding": [True, False],
         "with_unix_sockets": [True, False],
         "with_verbose_strings": [True, False],
-        "with_ca_bundle": [None, "ANY"],
-        "with_ca_path": [None, "ANY"],
+        "with_ca_bundle": [False, "auto", "ANY"],
+        "with_ca_path": [False, "auto", "ANY"],
     }
     default_options = {
         "shared": False,
@@ -111,8 +111,8 @@ class LibcurlConan(ConanFile):
         "with_symbol_hiding": False,
         "with_unix_sockets": True,
         "with_verbose_strings": True,
-        "with_ca_bundle": None,
-        "with_ca_path": None,
+        "with_ca_bundle": "auto",
+        "with_ca_path": "auto",
     }
 
     @property
@@ -179,11 +179,11 @@ class LibcurlConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
         elif self.options.with_ssl == "wolfssl":
             self.requires("wolfssl/5.5.1")
         if self.options.with_nghttp2:
-            self.requires("libnghttp2/1.49.0")
+            self.requires("libnghttp2/1.50.0")
         if self.options.with_libssh2:
             self.requires("libssh2/1.10.0")
         if self.options.with_zlib:
@@ -450,15 +450,15 @@ class LibcurlConan(ConanFile):
         if not self.options.with_ntlm_wb:
             tc.configure_args.append("--disable-ntlm-wb")
 
-        if self.options.with_ca_bundle:
-            tc.configure_args.append(f"--with-ca-bundle={str(self.options.with_ca_bundle)}")
-        else:
+        if not self.options.with_ca_bundle:
             tc.configure_args.append("--without-ca-bundle")
+        elif self.options.with_ca_bundle != "auto":
+            tc.configure_args.append(f"--with-ca-bundle={str(self.options.with_ca_bundle)}")
 
-        if self.options.with_ca_path:
-            tc.configure_args.append(f"--with-ca-path={str(self.options.with_ca_path)}")
-        else:
+        if not self.options.with_ca_path:
             tc.configure_args.append("--without-ca-path")
+        elif self.options.with_ca_path != "auto":
+            tc.configure_args.append(f"--with-ca-path={str(self.options.with_ca_path)}")
 
         # Cross building flags
         if cross_building(self):

@@ -28,8 +28,7 @@ In the context of ConanCenterIndex, this file is mandatory and consists of two m
         * [portability](#portability)
         * [conan](#conan)
       * [patch_source](#patch_source)
-      * [base_path](#base_path)
-      * [sha256](#sha256-1)<!-- endToc -->
+      * [base_path](#base_path)<!-- endToc -->
 
 ## sources
 
@@ -138,7 +137,6 @@ patches:
       patch_description: "Link CoreFoundation and CoreServices with find_library"
       patch_type: "portability"
       patch_source: "https://a-url-to-a-pull-request-mail-list-topic-issue-or-question"
-      sha256: "qafe4rq54533qa43esdaq53ewqa5"
 ```
 
 ### Patches fields
@@ -233,9 +231,3 @@ For the `patch_type: conan`, it doesn't make sense to submit patch upstream, so 
 _Optional_
 
 Specifies a sub-directory in project's sources to apply patch. This directory is relative to the [source_folder](https://docs.conan.io/en/latest/reference/conanfile/attributes.html?highlight=source_folder#source-folder). Usually, it would be a `source_subfolder`, but could be a lower-level sub-directory (e.g. if it's a patch for a submodule).
-
-#### sha256
-
-_Optional_
-
-This is the hash for the patch itself, in the same way this field is used in the `sources` section.

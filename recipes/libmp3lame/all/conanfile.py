@@ -1,12 +1,13 @@
 from conan import ConanFile
-from conan.tools.microsoft import is_msvc, VCVars, unix_path
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, chdir, rmdir, copy, rm, replace_in_file, rename
-from conan.tools.layout import basic_layout
+from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path, VCVars
 import os
 import shutil
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibMP3LameConan(ConanFile):
@@ -35,10 +36,6 @@ class LibMP3LameConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -48,37 +45,49 @@ class LibMP3LameConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
         if not is_msvc(self) and not self._is_clang_cl:
-            self.build_requires("gnu-config/cci.20201022")
-            if self.settings.os == "Windows":
+            self.tool_requires("gnu-config/cci.20210814")
+            if self._settings_build.os == "Windows":
                 self.win_bash = True
-                if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                     self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-
     def _generate_vs(self):
         tc = VCVars(self)
         tc.generate()
+        # FIXME: no conan v2 build helper for NMake yet (see https://github.com/conan-io/conan/issues/12188)
+        #        So populate CL with AutotoolsToolchain cflags
+        c_flags = AutotoolsToolchain(self).cflags
+        if c_flags:
+            env = Environment()
+            env.define("CL", c_flags)
+            env.vars(self).save_script("conanbuildenv_nmake")
+
+    def _generate_autotools(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.append("--disable-frontend")
+        if self.settings.compiler == "clang" and self.settings.arch in ["x86", "x86_64"]:
+            tc.extra_cxxflags.extend(["-mmmx", "-msse"])
+        tc.generate()
+
+    def generate(self):
+        if is_msvc(self) or self._is_clang_cl:
+            self._generate_vs()
+        else:
+            self._generate_autotools()
 
     def _build_vs(self):
         with chdir(self, self.source_folder):
@@ -91,14 +100,14 @@ class LibMP3LameConan(ConanFile):
             replace_in_file(self, "Makefile.MSVC", "ADDL_OBJ = bufferoverflowU.lib", "")
             command = "nmake -f Makefile.MSVC comp=msvc"
             if self._is_clang_cl:
-                cl = os.environ.get('CC', "clang-cl")
-                link = os.environ.get("LD", 'lld-link')
-                replace_in_file(self, 'Makefile.MSVC', 'CC = cl', 'CC = %s' % cl)
-                replace_in_file(self, 'Makefile.MSVC', 'LN = link', 'LN = %s' % link)
+                cl = os.environ.get("CC", "clang-cl")
+                link = os.environ.get("LD", "lld-link")
+                replace_in_file(self, "Makefile.MSVC", "CC = cl", f"CC = {cl}")
+                replace_in_file(self, "Makefile.MSVC", "LN = link", f"LN = {link}")
                 # what is /GAy? MSDN doesn't know it
                 # clang-cl: error: no such file or directory: '/GAy'
                 # https://docs.microsoft.com/en-us/cpp/build/reference/ga-optimize-for-windows-application?view=msvc-170
-                replace_in_file(self, 'Makefile.MSVC', '/GAy', '/GA')
+                replace_in_file(self, "Makefile.MSVC", "/GAy", "/GA")
             if self.settings.arch == "x86_64":
                 replace_in_file(self, "Makefile.MSVC", "MACHINE = /machine:I386", "MACHINE =/machine:X64")
                 command += " MSVCVER=Win64 asm=yes"
@@ -110,27 +119,16 @@ class LibMP3LameConan(ConanFile):
             command += " libmp3lame.dll" if self.options.shared else " libmp3lame-static.lib"
             self.run(command)
 
-    def _generate_autotools(self):
-        tc = AutotoolsToolchain(self)
-        tc.configure_args.append("--disable-frontend")
-        if self.settings.compiler == "clang" and self.settings.arch in ["x86", "x86_64"]:
-            tc.extra_cxxflags.extend(["-mmmx", "-msse"])
-        tc.generate()
-
     def _build_autotools(self):
-        copy(self, "config.sub", self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self.source_folder))
-        copy(self, "config.guess", self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self.source_folder))
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            if gnu_config:
+                copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
-
-    def generate(self):
-        if is_msvc(self) or self._is_clang_cl:
-            self._generate_vs()
-        else:
-            self._generate_autotools()
 
     def build(self):
         apply_conandata_patches(self)
