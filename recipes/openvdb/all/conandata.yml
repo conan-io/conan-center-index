@@ -6,7 +6,9 @@ patches:
   "8.0.1":
     - patch_file: "patches/FindIlmBase.patch"
       patch_description: "Update FindIlmBase.cmake"
-      patch_type: "backport"
+      patch_type: "conan"
+      patch_source: "https://github.com/AcademySoftwareFoundation/openvdb/tree/v10.0.0/cmake/FindIlmBase.cmake"
     - patch_file: "patches/FindTBB.patch"
       patch_description: "Update FindTBB.cmake"
-      patch_type: "backport"
+      patch_type: "conan"
+      patch_source: "https://github.com/AcademySoftwareFoundation/openvdb/tree/v10.0.0/cmake/FindTBB.cmake"
