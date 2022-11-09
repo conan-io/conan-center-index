@@ -33,8 +33,6 @@ class ExpatConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "2.2.8":
-            del self.options.char_type
 
     def configure(self):
         if self.options.shared:
@@ -59,27 +57,15 @@ class ExpatConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) < "2.2.8":
-            tc.variables["BUILD_doc"] = False
-            tc.variables["BUILD_examples"] = False
-            tc.variables["BUILD_shared"] = self.options.shared
-            tc.variables["BUILD_tests"] = False
-            tc.variables["BUILD_tools"] = False
-            # Generate a relocatable shared lib on Macos
-            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        else:
-            # These options were renamed in 2.2.8 to be more consistent
-            tc.variables["EXPAT_BUILD_DOCS"] = False
-            tc.variables["EXPAT_BUILD_EXAMPLES"] = False
-            tc.variables["EXPAT_SHARED_LIBS"] = self.options.shared
-            tc.variables["EXPAT_BUILD_TESTS"] = False
-            tc.variables["EXPAT_BUILD_TOOLS"] = False
-            # EXPAT_CHAR_TYPE was added in 2.2.8
-            tc.variables["EXPAT_CHAR_TYPE"] = self.options.char_type
-            if is_msvc(self):
-                tc.variables["EXPAT_MSVC_STATIC_CRT"] = is_msvc_static_runtime(self)
-        if Version(self.version) >= "2.2.10":
-            tc.variables["EXPAT_BUILD_PKGCONFIG"] = False
+        tc.variables["EXPAT_BUILD_DOCS"] = False
+        tc.variables["EXPAT_BUILD_EXAMPLES"] = False
+        tc.variables["EXPAT_SHARED_LIBS"] = self.options.shared
+        tc.variables["EXPAT_BUILD_TESTS"] = False
+        tc.variables["EXPAT_BUILD_TOOLS"] = False
+        tc.variables["EXPAT_CHAR_TYPE"] = self.options.char_type
+        if is_msvc(self):
+            tc.variables["EXPAT_MSVC_STATIC_CRT"] = is_msvc_static_runtime(self)
+        tc.variables["EXPAT_BUILD_PKGCONFIG"] = False
         tc.generate()
 
     def build(self):
