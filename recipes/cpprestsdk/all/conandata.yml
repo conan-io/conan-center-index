@@ -17,6 +17,8 @@ patches:
       patch_type: "conan"
       patch_description: "CMake: internal targets"
     - patch_file: "patches/0002-remove-wconversion.patch"
+      patch_type: "conan"
+      patch_description: "fix warnings"
   "2.10.16":
     - patch_file: "patches/0003-find-cmake-targets.patch"
       patch_type: "conan"
