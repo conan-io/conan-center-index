@@ -6,7 +6,7 @@ index d905b29..ea94456 100644
  
  option(build_tests "Build tests" ON)
  option(build_examples "Build examples" ON)
-+option(build_tools "Build examples" ON)
++option(build_tools "Build tools" ON)
  
 -set(CMAKE_CXX_STANDARD 17)
 -set(CMAKE_STATIC_LIBRARY_PREFIX "")
