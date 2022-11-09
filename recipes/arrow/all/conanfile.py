@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rm, rmdir
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc, check_min_vs
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -113,6 +113,20 @@ class ArrowConan(ConanFile):
     }
     short_paths = True
 
+    @property
+    def _minimum_cpp_standard(self):
+        # arrow >= 10.0.0 requires C++17.
+        # https://github.com/apache/arrow/pull/13991
+        return 11 if Version(self.version) < "10.0.0" else 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "clang": "7",
+            "apple-clang": "10",
+        }
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -138,8 +152,20 @@ class ArrowConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def validate(self):
-        if self.info.settings.compiler == "clang" and self.info.settings.compiler.version <= Version("3.9"):
-            raise ConanInvalidConfiguration("This recipe does not support this compiler version")
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
+
+        if self._minimum_cpp_standard == 11:
+            if self.info.settings.compiler == "clang" and self.info.settings.compiler.version <= Version("3.9"):
+                raise ConanInvalidConfiguration("This recipe does not support this compiler version")
+        else:
+            check_min_vs(self, 191)
+            if not is_msvc(self):
+                minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+                if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+                    raise ConanInvalidConfiguration(
+                        f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
+                    )
 
         if self.options.shared:
             del self.options.fPIC
@@ -184,6 +210,9 @@ class ArrowConan(ConanFile):
 
         if Version(self.version) < "6.0.0" and self.options.get_safe("simd_level") == "default":
             raise ConanInvalidConfiguration(f"In {self.ref}, simd_level options is not supported `default` value.")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def _compute(self, required=False):
         if required or self.options.compute == "auto":
