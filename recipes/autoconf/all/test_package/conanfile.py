@@ -4,7 +4,7 @@ from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import copy
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import is_msvc
 import os
 
 
@@ -45,7 +45,7 @@ class TestPackageConan(ConanFile):
         autotools.make()
 
     def test(self):
+        self.win_bash = None
         if can_run(self):
-            ext = ".exe" if self.settings.os == "Windows" else ""
-            bin_path = unix_path(self, os.path.join(self.build_folder, f"test_package{ext}"))
+            bin_path = os.path.join(self.build_folder, "test_package")
             self.run(bin_path, env="conanrun")
