@@ -1,12 +1,12 @@
 from conan import ConanFile
-from conan.tools.microsoft import is_msvc, VCVars, unix_path
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, chdir, rmdir, copy, rm
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.layout import basic_layout
+from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path, VCVars
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibdeflateConan(ConanFile):
@@ -15,7 +15,7 @@ class LibdeflateConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ebiggers/libdeflate"
-    topics = ("libdeflate", "compression", "decompression", "deflate", "zlib", "gzip")
+    topics = ("compression", "decompression", "deflate", "zlib", "gzip")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -43,26 +43,17 @@ class LibdeflateConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not is_msvc(self):
+        if self._settings_build.os == "Windows" and not (is_msvc(self) or self._is_clangcl):
             self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
@@ -75,6 +66,13 @@ class LibdeflateConan(ConanFile):
         if is_msvc(self) or self._is_clangcl:
             vc = VCVars(self)
             vc.generate()
+            # FIXME: no conan v2 build helper for NMake yet (see https://github.com/conan-io/conan/issues/12188)
+            #        So populate CL with AutotoolsToolchain cflags
+            env = Environment()
+            c_flags = AutotoolsToolchain(self).cflags
+            if c_flags:
+                env.define("CL", c_flags)
+            env.vars(self).save_script("conanbuildenv_nmake")
         else:
             tc = AutotoolsToolchain(self)
             tc.generate()
@@ -114,10 +112,7 @@ class LibdeflateConan(ConanFile):
         rm(self, "*.a" if self.options.shared else "*.[so|dylib]*", os.path.join(self.package_folder, "lib") )
 
     def package(self):
-        copy(self, "COPYING", 
-            src=os.path.join(self.source_folder, self.source_folder), 
-            dst=os.path.join(self.package_folder, "licenses"
-        ))
+        copy(self, "COPYING", self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if self.settings.os == "Windows":
             self._package_windows()
         else:
