@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conans import tools
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -9,21 +10,8 @@ from conan.tools.microsoft import is_msvc, unix_path, msvc_runtime_flag
 
 import os
 
-# Temporary duplication until conan 1.54, at which conan.tools.build.stdcpp_library will replace this.
-def _stdcpp_library(conanfile):
-    libcxx = conanfile.settings.get_safe("compiler.libcxx")
-    if libcxx in ["libstdc++", "libstdc++11"]:
-        return "stdc++"
-    elif libcxx in ["libc++"]:
-        return "c++"
-    elif libcxx in ["c++_shared"]:
-        return "c++_shared"
-    elif libcxx in ["c++_static"]:
-        return "c++_static"
-    return None
 
-
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class OpenH264Conan(ConanFile):
@@ -61,10 +49,7 @@ class OpenH264Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -200,7 +185,7 @@ class OpenH264Conan(ConanFile):
             self.cpp_info.system_libs.extend(["m", "pthread"])
         if self.settings.os == "Android":
             self.cpp_info.system_libs.append("m")
-        # switch to conan.tools.build.stdcpp_library in conan 1.54
-        libcxx = _stdcpp_library(self)
+        # TODO: switch to conan.tools.build.stdcpp_library in conan 1.54
+        libcxx = tools.stdcpp_library(self)
         if libcxx:
             self.cpp_info.system_libs.append(libcxx)
