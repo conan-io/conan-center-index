@@ -102,7 +102,7 @@ class LibpngConan(ConanFile):
                 replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                     'OUTPUT_NAME "${PNG_LIB_NAME}_static',
                                     'OUTPUT_NAME "${PNG_LIB_NAME}')
-            if not is_msvc(self)::
+            if not is_msvc(self):
                 if Version(self.version) < "1.6.38":
                     src_text = 'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}'
                 else:
