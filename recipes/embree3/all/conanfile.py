@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, rm, rmdir, save
 from conan.tools.microsoft import check_min_vs
 from conan.tools.apple import is_apple_os
@@ -68,8 +68,6 @@ class EmbreeConan(ConanFile):
         "ignore_invalid_rays": False,
         "with_tbb": False,
     }
-
-    generators = "CMakeDeps"
 
     @property
     def _has_sse_avx(self):
@@ -197,6 +195,9 @@ class EmbreeConan(ConanFile):
         else:
             tc.variables["EMBREE_ISA_AVX512"] = self.options.get_safe("avx512", False)
         tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
