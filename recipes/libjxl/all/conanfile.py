@@ -74,6 +74,9 @@ class LibjxlConan(ConanFile):
         tc.variables["JPEGXL_ENABLE_OPENEXR"] = False
         tc.variables["JPEGXL_ENABLE_SKCMS"] = False
         tc.variables["JPEGXL_ENABLE_TCMALLOC"] = False
+        tc.variables["JPEGXL_FORCE_SYSTEM_BROTLI"] = True
+        tc.variables["JPEGXL_FORCE_SYSTEM_HWY"] = True
+        tc.variables["JPEGXL_FORCE_SYSTEM_LCMS2"] = True
         if cross_building(self):
             tc.variables["CMAKE_SYSTEM_PROCESSOR"] = \
                 str(self.settings.arch)
