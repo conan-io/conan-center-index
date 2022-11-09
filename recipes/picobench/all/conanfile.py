@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
-from conan.tools.files import copy, get, apply_conandata_patches
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
 from conan.tools.build import check_min_cppstd
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class PicobenchConan(ConanFile):
@@ -21,8 +21,9 @@ class PicobenchConan(ConanFile):
     default_options = {
         "with_cli": False,
     }
-    generators = "CMakeToolchain"
-    exports_sources = ["CMakeList.txt", "patches/*"]
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -37,7 +38,10 @@ class PicobenchConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def package_id(self):
-        self.info.clear()
+        if self.options.with_cli:
+            del self.info.settings.compiler
+        else:
+            self.info.clear()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
