@@ -1,0 +1,12 @@
+sources:
+  "11.1.1":
+    url: "https://github.com/qpdf/qpdf/archive/refs/tags/v11.1.1.tar.gz"
+    sha256: "785edab622a1bc7e25e1537ad2c325005d48c5c7957f7abedff405deb80fa59a"
+patches:
+  "11.1.1":
+    - patch_file: "patches/0001-libqpdf-cmake-deps-jpeg-zlib.patch"
+      patch_description: "Inject Conan Deps, disable qpdf-dep handling: update libqpdf/CMakeLists.txt by disabling cmake fails, caused by pkg_config fail to find dependencies. Add conan generated cmake dependencies instead."
+      patch_type: "conan"
+    - patch_file: "patches/0002-exclude-unnecessary-cmake-subprojects.patch"
+      patch_description: "Exclude unnecessary targets: update CMakeLists.txt removing subdir includes for binaries, tests, examples, docs and fuzzing"
+      patch_type: "conan"

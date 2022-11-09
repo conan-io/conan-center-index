@@ -1,13 +1,17 @@
 # Adding Packages to ConanCenter
 
-The [conan-center-index](https://github.com/conan-io/conan-center-index) (this repository) contains recipes for the remote [JFrog ConanCenter](https://conan.io/center/).
-This remote is added by default to a clean installation of the Conan client. Recipes are contributed by opening pull requests as explained in the sections below.
-When pull requests are merged, the CI will upload the generated packages to the [conancenter](https://conan.io/center/) remote.
+ConanCenterIndex aims to provide the best quality packages of any open source project.
+Any C/C++ project can be made available by contributing a "recipe".
+
+Getting started is easy. Try building an existing package with our [developing recipes](developing_recipes_locally.md) tutorial.
+To deepen you understanding, start with the [How to provide a good recipe](#how-to-provide-a-good-recipe) section.
+You can follow the three steps (:one: :two: :three:) described below! :tada:
 
 <!-- toc -->
 ## Contents
 
   * [Request access](#request-access)
+  * [Inactivity and user removal](#inactivity-and-user-removal)
   * [Submitting a Package](#submitting-a-package)
     * [The Build Service](#the-build-service)
   * [Recipe files structure](#recipe-files-structure)
@@ -27,9 +31,7 @@ When pull requests are merged, the CI will upload the generated packages to the 
     * [Verifying Dependency Options](#verifying-dependency-options)
   * [Test the recipe locally](#test-the-recipe-locally)
     * [Hooks](#hooks)
-    * [Updating conan hooks on your machine](#updating-conan-hooks-on-your-machine)
-    * [Linters](#linters)
-  * [Debugging failed builds](#debugging-failed-builds)<!-- endToc -->
+    * [Linters](#linters)<!-- endToc -->
 
 ## Request access
 
@@ -41,11 +43,23 @@ This process helps conan-center-index against spam and malicious code. The proce
 
 > :warning: The requests are reviewed manually, checking the GitHub profile activity of the requester to avoid a misuse of the service. In case of detecting a misuse or inappropriate behavior, the requester will be dropped from the authorized users list and at last instance even banned from the repository.
 
+When submitting a pull request for the first time, you will be prompted to sign the [CLA](CONTRIBUTOR_LICENSE_AGREEMENT.md) for your code contributions.
+You can view your signed CLA's by going to <https://cla-assistant.io/> and signing in.
+
+
+## Inactivity and user removal
+
+For security reasons related to the CI, when a user no longer contributes for a long period, it will be considered inactive and removed from the authorized user's list.
+For now, it's configured for **4 months**, and it's computed based on the latest commit, not comments or opened issues.
+After that time, the CI bot will ask to remove the user name from the authorized users' list through the access request PR, which occurs a few times every week.
+In case you are interested in coming back, please, ask again to be included in the issue [#4](https://github.com/conan-io/conan-center-index/issues/4), the process will be precise like for newcomers.
+
 ## Submitting a Package
 
 :two: To contribute a package, you can submit a [Pull Request](https://github.com/conan-io/conan-center-index/pulls) to this GitHub repository https://github.com/conan-io/conan-center-index.
 
 The specific steps to add new packages are:
+
 * Fork the [conan-center-index](https://github.com/conan-io/conan-center-index) git repository, and then clone it locally.
 * Copy a template from [package_templates](package_templates) folder in the recipes/ folder and rename it to the project name (it should be lower-case). Read templates [documentation](package_templates/README.md) to find more information.
 * Make sure you are using the latest [Conan client](https://conan.io/downloads) version, as recipes might evolve introducing features of the newer Conan releases.
@@ -154,14 +168,14 @@ Also, **every `conanfile.py` should be accompanied by one or several folder to t
 
 All the packages in this repository need to be tested before they join ConanCenter. A `test_package` folder with its corresponding `conanfile.py` and
 a minimal project to test the package is strictly required. You can read about it in the
+[Conan documentation](https://docs.conan.io/en/latest/creating_packages/getting_started.html).
 
-# FIXME: This link no longet exist and there is no dedicated section about test package in docs.
-[Conan documentation](https://docs.conan.io/en/latest/creating_packages/getting_started.html#the-test-package-folder).
 
 Sometimes it is useful to test the package using different build systems (CMake, Autotools,...). Instead of adding complex logic to one
 `test_package/conanfile.py` file, it is better to add another `test_<something>/conanfile.py` file with a minimal example for that build system. That
 way the examples will be short and easy to understand and maintain. In some other situations it could be useful to test different Conan generators
-(`cmake_find_package`, `CMakeDeps`,...) using different folders and `conanfile.py` files ([see example](https://github.com/conan-io/conan-center-index/tree/master/recipes/fmt/all)).
+(`cmake_find_package`, `CMakeDeps`,...) using different folders and `conanfile.py` files
+([see example](https://github.com/conan-io/conan-center-index/tree/master/recipes/fmt/all)).
 
 When using more than one `test_<something>` folder, create a different project for each of them to keep the content of the `conanfile.py` and the
 project files as simple as possible, without the need of extra logic to handle different scenarios.
@@ -261,46 +275,17 @@ An example of this can be found in the [sdl_image recipe](https://github.com/con
 
 ### Hooks
 
-The system will use the [conan-center hook](https://github.com/conan-io/hooks) to perform some quality checks. You can install the hook running:
+The system will use the [conan-center hook](https://github.com/conan-io/hooks) to perform some quality checks. These are required for the
+the CI to merge any pull request.
 
-```sh
-conan config install https://github.com/conan-io/hooks.git -sf hooks -tf hooks
-conan config set hooks.conan-center
-```
+Follow the [Developing Recipes Locally](developing_recipes_locally.md#installing-the-conancenter-hooks) guide for instructions.
 
-The hook will show error messages but the `conan create` won’t fail unless you export the environment variable `CONAN_HOOK_ERROR_LEVEL=40`.
-All hook checks will print a similar message:
-
-```
-[HOOK - conan-center.py] post_source(): [LIBCXX MANAGEMENT (KB-H011)] OK
-[HOOK - conan-center.py] post_package(): ERROR: [PACKAGE LICENSE] No package licenses found
-```
-
-Call `conan create . lib/1.0@ -pr:b=default -pr:h=default` in the folder of the recipe using the profile you want to test. For instance:
-
-```sh
-cd conan-center-index/recipes/boost/all
-conan create conanfile.py boost/1.77.0@ -pr:b=default -pr:h=default
-```
-
-### Updating conan hooks on your machine
-
-The hooks are updated from time to time, so it's worth keeping your own copy of the hooks updated regularly. To do this:
-
-```sh
-conan config install
-```
+Go to the [Error Knowledge Base](error_knowledge_base.md) page to know more about Conan Center hook errors.
+Some common errors related to Conan can be found on the [troubleshooting](https://docs.conan.io/en/latest/faq/troubleshooting.html) section.
 
 ### Linters
 
 Linters are always executed by Github actions to validate parts of your recipe, for instance, if it uses migrated Conan tools imports.
 All executed linters are documented in [linters.md](linters.md).
-To understand how to run linters locally, read [V2 linter](v2_linter.md) documentation.
-
-## Debugging failed builds
-
-Go to the [Error Knowledge Base](error_knowledge_base.md) page to know more about Conan Center hook errors.
-
-Some common errors related to Conan can be found on [troubleshooting](https://docs.conan.io/en/latest/faq/troubleshooting.html) section.
-
-To test with the same enviroment, the [build images](supported_platforms_and_configurations.md#build-images) are available.
+Check the [Developing Recipes](developing_recipes_locally.md#running-the-python-linters) page for running them locally.
+Check the [Developing Recipes](developing_recipes_locally.md#running-the-python-linters) for running them locally.

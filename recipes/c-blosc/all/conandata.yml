@@ -23,22 +23,15 @@ sources:
 patches:
   "1.21.1":
     - patch_file: "patches/cmake-dependencies-1.21.1+.patch"
-      base_path: "source_subfolder"
   "1.21.0":
     - patch_file: "patches/cmake-dependencies-1.20.0+.patch"
-      base_path: "source_subfolder"
   "1.20.1":
     - patch_file: "patches/cmake-dependencies-1.20.0+.patch"
-      base_path: "source_subfolder"
   "1.20.0":
     - patch_file: "patches/cmake-dependencies-1.20.0+.patch"
-      base_path: "source_subfolder"
   "1.19.0":
     - patch_file: "patches/cmake-dependencies-1.19.0.patch"
-      base_path: "source_subfolder"
   "1.18.1":
     - patch_file: "patches/cmake-dependencies-1.18.1-.patch"
-      base_path: "source_subfolder"
   "1.17.1":
     - patch_file: "patches/cmake-dependencies-1.18.1-.patch"
-      base_path: "source_subfolder"

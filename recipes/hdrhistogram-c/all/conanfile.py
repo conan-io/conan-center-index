@@ -50,7 +50,7 @@ class HdrhistogramcConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

@@ -135,17 +135,6 @@ Usage of each option should follow the rules:
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-   ```
-
-   Starting with Conan 1.53 this can be simplified to
-
-   ```py
    def configure(self):
       if self.options.shared:
          self.options.rm_safe("fPIC")

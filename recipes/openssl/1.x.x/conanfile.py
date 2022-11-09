@@ -227,6 +227,9 @@ class OpenSSLConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def layout(self):
+        pass
+
     def requirements(self):
         if self._full_version < "1.1.0" and self.options.get_safe("no_zlib") == False:
             self.requires("zlib/1.2.12")
@@ -821,8 +824,7 @@ class OpenSSLConan(ConanFile):
             os.path.join(self.package_folder, self._module_file_rel_path)
         )
 
-    @staticmethod
-    def _create_cmake_module_variables(module_file):
+    def _create_cmake_module_variables(self, module_file):
         content = textwrap.dedent("""\
             set(OPENSSL_FOUND TRUE)
             if(DEFINED OpenSSL_INCLUDE_DIR)
@@ -834,6 +836,12 @@ class OpenSSLConan(ConanFile):
                                              ${OpenSSL_Crypto_DEPENDENCIES}
                                              ${OpenSSL_Crypto_FRAMEWORKS}
                                              ${OpenSSL_Crypto_SYSTEM_LIBS})
+            elseif(DEFINED openssl_OpenSSL_Crypto_LIBS_%(config)s)
+                set(OPENSSL_CRYPTO_LIBRARY ${openssl_OpenSSL_Crypto_LIBS_%(config)s})
+                set(OPENSSL_CRYPTO_LIBRARIES ${openssl_OpenSSL_Crypto_LIBS_%(config)s}
+                                             ${openssl_OpenSSL_Crypto_DEPENDENCIES_%(config)s}
+                                             ${openssl_OpenSSL_Crypto_FRAMEWORKS_%(config)s}
+                                             ${openssl_OpenSSL_Crypto_SYSTEM_LIBS_%(config)s})
             endif()
             if(DEFINED OpenSSL_SSL_LIBS)
                 set(OPENSSL_SSL_LIBRARY ${OpenSSL_SSL_LIBS})
@@ -841,6 +849,12 @@ class OpenSSLConan(ConanFile):
                                           ${OpenSSL_SSL_DEPENDENCIES}
                                           ${OpenSSL_SSL_FRAMEWORKS}
                                           ${OpenSSL_SSL_SYSTEM_LIBS})
+            elseif(DEFINED openssl_OpenSSL_SSL_LIBS_%(config)s)
+                set(OPENSSL_SSL_LIBRARY ${openssl_OpenSSL_SSL_LIBS_%(config)s})
+                set(OPENSSL_SSL_LIBRARIES ${openssl_OpenSSL_SSL_LIBS_%(config)s}
+                                          ${openssl_OpenSSL_SSL_DEPENDENCIES_%(config)s}
+                                          ${openssl_OpenSSL_SSL_FRAMEWORKS_%(config)s}
+                                          ${openssl_OpenSSL_SSL_SYSTEM_LIBS_%(config)s})
             endif()
             if(DEFINED OpenSSL_LIBRARIES)
                 set(OPENSSL_LIBRARIES ${OpenSSL_LIBRARIES})
@@ -848,7 +862,7 @@ class OpenSSLConan(ConanFile):
             if(DEFINED OpenSSL_VERSION)
                 set(OPENSSL_VERSION ${OpenSSL_VERSION})
             endif()
-        """)
+        """ % {"config":str(self.settings.build_type).upper()})
         tools.save(module_file, content)
 
     @property

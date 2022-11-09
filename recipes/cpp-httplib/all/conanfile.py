@@ -36,9 +36,9 @@ class CpphttplibConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.get_safe("with_brotli"):
             self.requires("brotli/1.0.9")
 

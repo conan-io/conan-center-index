@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.52.0"
 
 
 class LibyuvConan(ConanFile):
@@ -28,8 +28,7 @@ class LibyuvConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -37,14 +36,17 @@ class LibyuvConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.0.5")
 

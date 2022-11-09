@@ -54,26 +54,9 @@ def _build_subfolder(self):
 
 Prefer the following order of documented methods in python code (`conanfile.py`, `test_package/conanfile.py`):
 
-- init
-- set_name
-- set_version
-- export
-- export_sources
-- config_options
-- configure
-- layout
-- requirements
-- package_id
-- validate
-- build_id
-- build_requirements
-- system_requirements
-- source
-- generate
-- imports
-- build
-- package
-- package_info
+For `conan create` the order is listed [here](https://docs.conan.io/en/latest/reference/commands/creator/create.html#methods-execution-order)
+test packages recipes should append the following methods:
+
 - deploy
 - test
 

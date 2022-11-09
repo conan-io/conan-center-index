@@ -55,6 +55,9 @@ class ConcurrencppConan(ConanFile):
             raise ConanInvalidConfiguration("concurrencpp does not support shared builds with Visual Studio")
         if self.info.settings.compiler == "gcc":
             raise ConanInvalidConfiguration("gcc is not supported by concurrencpp")
+        if Version(self.version) >= "0.1.5" and self.info.settings.compiler == "apple-clang":
+            # apple-clang does not seem to support the C++20 synchronization library which concurrencpp 0.1.5 depends on
+            raise ConanInvalidConfiguration("apple-clang is not supported by concurrencpp 0.1.5 and higher")
 
         minimum_version = self._minimum_compilers_version.get(
             str(self.info.settings.compiler), False

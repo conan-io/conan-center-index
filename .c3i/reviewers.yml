@@ -10,8 +10,8 @@ reviewers:
     type: "team"
     request_reviews: false
   - user: "jgsogo"
-    type: "team"
-    request_reviews: true
+    type: "community"
+    request_reviews: false
   - user: "czoido"
     type: "team"
     request_reviews: false
@@ -73,5 +73,8 @@ reviewers:
     type: "team"
     request_reviews: true
   - user: "paulocoutinhox"
+    type: "community"
+    request_reviews: false
+  - user: "jwillikers"
     type: "community"
     request_reviews: false
