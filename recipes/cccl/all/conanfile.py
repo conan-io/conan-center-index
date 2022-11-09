@@ -27,10 +27,6 @@ class CcclConan(ConanFile):
     def _cccl_dir(self):
         return os.path.join(self.package_folder, "bin")
 
-    def validate(self):
-        if not is_msvc(self):
-            raise ConanInvalidConfiguration("This recipe only supports msvc/Visual Studio.")
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -39,7 +35,14 @@ class CcclConan(ConanFile):
         del self.info.options.verbose
         self.info.settings.clear()
 
+    def validate(self):
+        if not is_msvc(self):
+            raise ConanInvalidConfiguration("This recipe only supports msvc/Visual Studio.")
+
     def source(self):
+        pass
+
+    def build(self):
         get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self.source_folder)
 
@@ -67,7 +70,6 @@ class CcclConan(ConanFile):
     def package_info(self):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
-        self.cpp_info.resdirs = []
 
         cccl_args = [
             "sh",
