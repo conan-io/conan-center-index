@@ -94,16 +94,15 @@ class LibpngConan(ConanFile):
 
     def _patch_source(self):
         if self.settings.os == "Windows":
-            if is_msvc(self):
-                if Version(self.version) <= "1.5.2":
-                    replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                          'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME}_static)',
-                                          'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME})')
-                else:
-                    replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                        'OUTPUT_NAME "${PNG_LIB_NAME}_static',
-                                        'OUTPUT_NAME "${PNG_LIB_NAME}')
+            if Version(self.version) <= "1.5.2":
+                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                      'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME}_static)',
+                                      'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME})')
             else:
+                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                    'OUTPUT_NAME "${PNG_LIB_NAME}_static',
+                                    'OUTPUT_NAME "${PNG_LIB_NAME}')
+            if not is_msvc(self)::
                 if Version(self.version) < "1.6.38":
                     src_text = 'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}'
                 else:
