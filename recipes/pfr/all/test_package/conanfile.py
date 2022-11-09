@@ -5,7 +5,6 @@ from conan.tools.scm import Version
 import os
 
 
-# It will become the standard on Conan 2.x
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
@@ -16,8 +15,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         ct = CMakeToolchain(self)
-        ct.variables["PfrMajorVersion"] = Version(
-            self.deps_cpp_info["pfr"].version).major
+        ct.variables["PfrMajorVersion"] = Version(self.dependencies["pfr"].ref.version).major
         ct.generate()
 
     def requirements(self):

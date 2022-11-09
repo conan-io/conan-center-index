@@ -1,13 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get, apply_conandata_patches
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
+
 
 class PfrConan(ConanFile):
     name = "pfr"
@@ -17,7 +18,6 @@ class PfrConan(ConanFile):
     homepage = "https://github.com/boostorg/pfr"
     license = "BSL-1.0"
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = "patches/**"
 
     @property
     def _minimum_cpp_standard(self):
@@ -31,6 +31,9 @@ class PfrConan(ConanFile):
             "gcc": "5.5",
             "Visual Studio": "14",
         }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self)
