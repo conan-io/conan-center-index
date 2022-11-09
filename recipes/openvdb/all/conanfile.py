@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.microsoft import is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
@@ -165,6 +165,9 @@ class OpenVDBConan(ConanFile):
             tc.variables["OPENEXR_USE_STATIC_LIBS"] = not self.options["openexr"].shared
 
         tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
