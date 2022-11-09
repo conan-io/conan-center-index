@@ -1,9 +1,8 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import copy
+from conan.tools.env import Environment
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conans import tools as tools_legacy
 import os
 
 
@@ -27,7 +26,7 @@ class TestPackageConan(ConanFile):
         self.tool_requires(self.tested_reference_str)
         self.tool_requires("automake/1.16.5")
         if self._settings_build.os == "Windows" and \
-           not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
+           not self.conf.get("tools.microsoft.bash:path", check_type=str):
             self.tool_requires("msys2/cci.latest")
 
     def generate(self):
@@ -37,11 +36,14 @@ class TestPackageConan(ConanFile):
         if self.dependencies["pkgconf"].options.enable_lib:
             tc = CMakeToolchain(self)
             tc.generate()
-            cd = CMakeDeps(self)
-            cd.generate()
+            deps = CMakeDeps(self)
+            deps.generate()
+
+        env = Environment()
+        env.prepend_path("PKG_CONFIG_PATH", self.source_folder)
+        env.vars(self).save_script("env_test_libexample1")
 
     def build(self):
-        copy(self, "libexample1.pc", src=self.source_folder, dst=self.generators_folder)
         autotools = Autotools(self)
         autotools.autoreconf()
         autotools.configure()
@@ -56,6 +58,6 @@ class TestPackageConan(ConanFile):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
 
-        pkg_config = tools_legacy.get_env("PKG_CONFIG")
+        pkg_config = self.conf.get("tools.gnu:pkg_config", check_type=str)
         self.run(f"{pkg_config} libexample1 --libs")
         self.run(f"{pkg_config} libexample1 --cflags")
