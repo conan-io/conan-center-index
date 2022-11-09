@@ -1,5 +1,7 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conans import CMake
+from conan import ConanFile
+from conan.tools import scm, build, files
+from conan.errors import ConanInvalidConfiguration
 import os
 import glob
 
@@ -57,17 +59,17 @@ class CpploggingConan(ConanFile):
             del self.options.fPIC
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
+            build.check_min_cppstd(self, "17")
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
 
         if not minimum_version:
             self.output.warn("cpplogging requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-        elif tools.Version(self.settings.compiler.version) < minimum_version:
+        elif scm.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("cpplogging requires a compiler that supports at least C++17")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        files.get(self, **self.conan_data["sources"][self.version])
         extracted_dir = glob.glob("CppLogging-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
@@ -77,7 +79,7 @@ class CpploggingConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            files.patch(self, **patch)
 
         cmake = self._configure_cmake()
         cmake.build()
@@ -90,6 +92,6 @@ class CpploggingConan(ConanFile):
         self.copy(pattern="*.inl", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = files.collect_libs(self)
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32", "crypt32", "mswsock"]
