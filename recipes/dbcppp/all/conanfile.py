@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class DBCpppConan(ConanFile):
     name = "dbcppp"
@@ -49,10 +49,7 @@ class DBCpppConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self)
@@ -86,8 +83,9 @@ class DBCpppConan(ConanFile):
         tc.variables["build_examples"] = False
         tc.variables["build_tools"] = self.options.with_tools
         tc.generate()
-        deps = CMakeDeps(self)
-        deps.generate()
+        if self.options.with_tools:
+            deps = CMakeDeps(self)
+            deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -102,7 +100,6 @@ class DBCpppConan(ConanFile):
         cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
