@@ -78,12 +78,12 @@ class WaveletBufferConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "gcc": "8",
-            "clang": "13",
-            "apple-clang": "13",
+            "clang": "12",
+            "apple-clang": "12",
         }
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
+        if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
 
         # Compiler version check
@@ -165,3 +165,13 @@ class WaveletBufferConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["wavelet_buffer", "sf_compressor"]
+        self.cpp_info.set_property("cmake_file_name", "wavelet_buffer")
+        self.cpp_info.set_property(
+            "cmake_target_name", "wavelet_buffer::wavelet_buffer"
+        )
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "wavelet_buffer"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "wavelet_buffer"
+        self.cpp_info.names["cmake_find_package"] = "wavelet_buffer"
+        self.cpp_info.names["cmake_find_package_multi"] = "wavelet_buffer"
