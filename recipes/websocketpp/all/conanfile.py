@@ -25,10 +25,6 @@ class WebsocketPPConan(ConanFile):
         "with_zlib": True,
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def export_sources(self):
         files.export_conandata_patches(self)
 
@@ -49,15 +45,15 @@ class WebsocketPPConan(ConanFile):
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+                  destination=self.source_folder, strip_root=True)
 
     def build(self):
         files.apply_conandata_patches(self)
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
+        files.copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         # We have to copy the headers manually, since the upstream cmake.install() step doesn't do so.
-        self.copy(pattern=os.path.join("websocketpp","*.hpp"), dst="include", src=self._source_subfolder)
+        files.copy(self, pattern=os.path.join("websocketpp","*.hpp"), dst=os.path.join(self.package_folder, "include"), src=self.source_folder)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "websocketpp")
