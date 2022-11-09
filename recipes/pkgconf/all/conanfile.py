@@ -9,7 +9,7 @@ from conan.tools.scm import Version
 from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class PkgConfConan(ConanFile):
@@ -41,24 +41,12 @@ class PkgConfConan(ConanFile):
 
     def configure(self):
         if not self.options.enable_lib:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
             del self.options.shared
         elif self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -68,7 +56,7 @@ class PkgConfConan(ConanFile):
             del self.info.settings.compiler
 
     def build_requirements(self):
-        self.tool_requires("meson/0.63.2")
+        self.tool_requires("meson/0.64.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -79,15 +67,15 @@ class PkgConfConan(ConanFile):
         return os.path.join(self.package_folder, "bin", "share")
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         tc = MesonToolchain(self)
         tc.project_options["tests"] = False
         tc.project_options["sharedstatedir"] = self._sharedstatedir
         if not self.options.enable_lib:
             tc.project_options["default_library"] = "static"
         tc.generate()
-
-        env = VirtualBuildEnv(self)
-        env.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
