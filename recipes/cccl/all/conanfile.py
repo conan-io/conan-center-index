@@ -13,7 +13,7 @@ class CcclConan(ConanFile):
     homepage = "https://github.com/swig/cccl/"
     url = "https://github.com/conan-io/conan-center-index"
     license = "GPL-3.0-or-later"
-    settings = "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "muffle": [True, False],
         "verbose": [True, False],
@@ -27,17 +27,17 @@ class CcclConan(ConanFile):
     def _cccl_dir(self):
         return os.path.join(self.package_folder, "bin")
 
-    def configure(self):
+    def validate(self):
         if not is_msvc(self):
             raise ConanInvalidConfiguration("This recipe only supports msvc/Visual Studio.")
-        del self.settings.compiler
 
     def layout(self):
-        basic_layout(self, src_folder="source_subfolder")
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         del self.info.options.muffle
         del self.info.options.verbose
+        self.info.settings.clear()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -68,9 +68,6 @@ class CcclConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
         self.cpp_info.resdirs = []
-
-        self.cpp_info.bindirs.append(self._cccl_dir)
-        self.buildenv_info.prepend_path("PATH", self._cccl_dir)
 
         cccl_args = [
             "sh",
