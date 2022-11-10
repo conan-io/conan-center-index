@@ -7,6 +7,7 @@ from conan.tools.files import copy, get, replace_in_file, rmdir, rm
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -41,14 +42,14 @@ class GccConan(ConanFile):
         self.requires("mpc/1.2.0")
         self.requires("mpfr/4.1.0")
         self.requires("gmp/6.2.1")
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         self.requires("isl/0.24")
 
     def package_id(self):
         del self.info.settings.compiler
 
     def validate_build(self):
-        if self.settings.compiler in ["Visual Studio", "msvc"]:
+        if is_msvc(self):
             raise ConanInvalidConfiguration("GCC can't be built with MSVC")
 
     def validate(self):
@@ -57,7 +58,7 @@ class GccConan(ConanFile):
                 "Windows builds aren't currently supported. Contributions to support this are welcome."
             )
         if self.info.settings.os == "Macos":
-            # This recipe should largely support Macos, however the following
+            # FIXME: This recipe should largely support Macos, however the following
             # errors are present when building using the c3i CI:
             # clang: error: unsupported option '-print-multi-os-directory'
             # clang: error: no input files
@@ -184,10 +185,9 @@ class GccConan(ConanFile):
         self.buildenv_info.define("RANLIB", ranlib)
 
         # TODO: Remove after conan 2.0 is released
-        if Version(conan_version).major < 2:
-            self.env_info.CC = cc
-            self.env_info.CXX = cxx
-            self.env_info.FC = fc
-            self.env_info.AR = ar
-            self.env_info.NM = nm
-            self.env_info.RANLIB = ranlib
+        self.env_info.CC = cc
+        self.env_info.CXX = cxx
+        self.env_info.FC = fc
+        self.env_info.AR = ar
+        self.env_info.NM = nm
+        self.env_info.RANLIB = ranlib
