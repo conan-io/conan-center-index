@@ -59,6 +59,9 @@ class LibjxlConan(ConanFile):
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
+        highway = self.dependencies["highway"]
+        if not highway.options.shared and self.options.shared:
+            raise ConanInvalidConfigution(f"{self.ref}:shared=True requires -o highway:shared=True")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
