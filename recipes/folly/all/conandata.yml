@@ -105,7 +105,7 @@ patches:
       patch_type: "conan"
     - patch_file: "patches/0022-fix-windows-minmax.patch"
       base_path: "source_subfolder"
-      patch_description: "fix code"
+      patch_description: "fix cmake script on window"
       patch_type: "conan"
   "2022.10.31.00":
     - patch_file: "patches/0017-compiler-flags.patch"
@@ -119,4 +119,8 @@ patches:
     - patch_file: "patches/0025-find-packages.patch"
       base_path: "source_subfolder"
       patch_description: "fix cmake find_package"
+      patch_type: "conan"
+    - patch_file: "patches/0026-fix-windows-minmax.patch"
+      base_path: "source_subfolder"
+      patch_description: "fix cmake script on window"
       patch_type: "conan"
