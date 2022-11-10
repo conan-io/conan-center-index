@@ -36,4 +36,4 @@ class FastPRNGConan(ConanFile):
 
     def package(self):
         copy(self, "*.h", self.source_folder, self.package_folder + "/include")
-        copy(self, "license.txt", self.source_folder, self.package_folder + "/licenses")
+        copy(self, "license.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
