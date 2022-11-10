@@ -23,7 +23,7 @@ class FastPRNGConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.info.settings.get_safe("compiler.cppstd"):
+        if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, "11")
 
     def source(self):
