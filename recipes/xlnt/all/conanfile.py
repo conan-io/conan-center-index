@@ -1,0 +1,102 @@
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+import os
+
+required_conan_version = ">=1.53.0"
+
+
+class XlntConan(ConanFile):
+    name = "xlnt"
+    description = "Cross-platform user-friendly xlsx library for C++11+"
+    license = "MIT"
+    topics = ("excel", "xlsx", "spreadsheet", "reader", "writer")
+    homepage = "https://github.com/tfussell/xlnt"
+    url = "https://github.com/conan-io/conan-center-index"
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("miniz/3.0.1")
+        self.requires("utfcpp/3.2.2")
+        # TODO: unvendor libstudxml (needs libstudxml >= 1.1.0 in conan-center)
+        self.requires("expat/2.4.9") # dependency of libstudxml actually
+
+    def validate(self):
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["STATIC"] = not self.options.shared
+        tc.variables["TESTS"] = False
+        tc.variables["SAMPLES"] = False
+        tc.variables["BENCHMARKS"] = False
+        tc.variables["PYTHON"] = False
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        # For some reason this useless file can break compilation
+        rm(self, "version", os.path.join(self.source_folder, "third-party", "libstudxml"))
+        # Remove unvendored third party libs
+        for third_party in (os.path.join("libstudxml", "libstudxml", "details", "expat"), "miniz", "utfcpp"):
+            rmdir(self, os.path.join(self.source_folder, "third-party", third_party))
+
+    def build(self):
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "Xlnt")
+        self.cpp_info.set_property("cmake_target_name", "xlnt::xlnt")
+        self.cpp_info.set_property("pkg_config_name", "xlnt")
+        suffix = "d" if self.settings.build_type == "Debug" else ""
+        self.cpp_info.libs = [f"xlnt{suffix}"]
+        if not self.options.shared:
+            self.cpp_info.defines.append("XLNT_STATIC")
+
+        # TODO: to remove in conan v2
+        self.cpp_info.filenames["cmake_find_package"] = "Xlnt"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Xlnt"
+        self.cpp_info.names["cmake_find_package"] = "xlnt"
+        self.cpp_info.names["cmake_find_package_multi"] = "xlnt"
