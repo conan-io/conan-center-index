@@ -1,7 +1,9 @@
 versions:
   "21.05":
-    folder: all
+    folder: 22.05
   "21.11":
-    folder: all
+    folder: 22.05
   "22.05":
-    folder: all
+    folder: 22.05
+  "22.11":
+    folder: 22.11
