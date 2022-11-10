@@ -24,9 +24,9 @@ In the context of ConanCenterIndex, this file is mandatory and consists of two m
       * [patch_type](#patch_type)
         * [official](#official)
         * [vulnerability](#vulnerability)
-        * [backport](#backport)
         * [portability](#portability)
         * [conan](#conan)
+        * [bugfix](#bugfix)
       * [patch_source](#patch_source)
       * [base_path](#base_path)<!-- endToc -->
 
