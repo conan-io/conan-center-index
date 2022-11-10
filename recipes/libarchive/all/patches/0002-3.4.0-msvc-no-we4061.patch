@@ -1,3 +1,5 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 922efd15..4ffd0930 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -157,7 +157,6 @@ IF (MSVC)
