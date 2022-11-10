@@ -28,8 +28,7 @@ In the context of ConanCenterIndex, this file is mandatory and consists of two m
         * [portability](#portability)
         * [conan](#conan)
       * [patch_source](#patch_source)
-      * [base_path](#base_path)
-      * [sha256](#sha256-1)<!-- endToc -->
+      * [base_path](#base_path)<!-- endToc -->
 
 ## sources
 
@@ -138,7 +137,6 @@ patches:
       patch_description: "Link CoreFoundation and CoreServices with find_library"
       patch_type: "portability"
       patch_source: "https://a-url-to-a-pull-request-mail-list-topic-issue-or-question"
-      sha256: "qafe4rq54533qa43esdaq53ewqa5"
 ```
 
 ### Patches fields
@@ -172,33 +170,16 @@ The `patch_type` field specifies the type of the patch. In ConanCenterIndex we c
 
 ##### official
 
-`patch_type: official` indicates the patch is distributed with source code itself. usually, this happens if release managers failed to include a critical fix to the release, but it's too much burden for them to make a new release just because of that single fix.
-[example](https://www.boost.org/users/history/version_1_72_0.html) (notice the `coroutine` patch)
+`patch_type: official` indicates the patch is distributed with source code itself. usually, this happens if release managers
+failed to include a critical fix to the release, but it's too much burden for them to make a new release just because of that single fix.
+[example](https://www.boost.org/users/history/version_1_72_0.html) (notice the `coroutine` patch). The [`patch_source`](#patch_source)
+field shall point to the official distribution of the patch.
 
 ##### vulnerability
 
-`patch_type: vulnerability`: Indicates a patch that addresses the security issue. The patch description
-should include the index of CVE or CWE the patch addresses.
-Usually, original library projects do new releases fixing vulnerabilities for this kind of issues, but in some cases they are either abandoned or inactive.
-
-##### backport
-
-> **Note**: These are likely to undergo extra scrutiny during review as they may modify the source code.
-
-`patch_type: backport`: Indicates a patch that backports an existing bug fix from the newer release or master branch (or equivalent, such as main/develop/trunk/etc). The [`patch_source`](#patch_source) may be a pull request, or bug within the project's issue tracker.
-Backports are accepted only for bugs that break normal execution flow, never for feature requests.
-Usually, the following kind of problems are good candidates for backports:
-
-* Program doesn't start at all.
-* Crash (segmentation fault or access violation).
-* Hang up or deadlock.
-* Memory leak or resource leak in general.
-* Garbage output.
-* Abnormal termination without a crash (e.g. just exit code 1 at very beginning of the execution).
-* Data corruption.
-* Use of outdated or deprecated API or library.
-
-As sources with backports don't act exactly the same as the version officially released, it may be a source of confusion for the consumers who are relying on the buggy behavior (even if it's completely wrong). Therefore, it's required to introduce a new `cci.<YYYYMMDD>` version for such backports, so consumers may choose to use either official version, or modified version with backport(s) included.
+`patch_type: vulnerability`: Indicates a patch that addresses the security issue. The patch description should include the index of CVE
+or CWE the patch addresses. Usually, original library projects do new releases fixing vulnerabilities for this kind of issues, but in some
+cases they are either abandoned or inactive. The [`patch_source`](#patch_source) must be a commit to the official fix of the vulnerability.
 
 ##### portability
 
@@ -212,6 +193,25 @@ Some projects simply do not accept patches for platforms they don't have a build
 `patch_type: conan`: Indicates a patch that is Conan-specific, patches of such kind are usually not welcomed upstream at all, because they provide zero value outside of Conan.
 Examples of such a patches may include modifications of build system files to allow dependencies provided by Conan instead of dependencies provided by projects themselves (e.g. as submodule or just 3rd-party sub-directory) or by the system package manager (rpm/deb).
 Such patches may contain variables and targets generated only by Conan, but not generated normally by the build system (e.g. `CONAN_INCLUDE_DIRS`).
+
+##### bugfix
+
+> **Warning**: These will undergo extra scrutiny during review as they may modify the source code.
+
+`patch_type: bugfix`: Indicates a patch that backports an existing bug fix from the newer release or master branch (or equivalent, such as main/develop/trunk/etc). The [`patch_source`](#patch_source) may be a pull request, or bug within the project's issue tracker.
+Backports are accepted only for bugs that break normal execution flow, never for feature requests.
+Usually, the following kind of problems are good candidates for backports:
+
+* Program doesn't start at all.
+* Crash (segmentation fault or access violation).
+* Hang up or deadlock.
+* Memory leak or resource leak in general.
+* Garbage output.
+* Abnormal termination without a crash (e.g. just exit code 1 at very beginning of the execution).
+* Data corruption.
+* Use of outdated or deprecated API or library.
+
+As sources with backports don't act exactly the same as the version officially released, it may be a source of confusion for the consumers who are relying on the buggy behavior (even if it's completely wrong). Therefore, it's required to introduce a new `cci.<YYYYMMDD>` version for such backports, so consumers may choose to use either official version, or modified version with backport(s) included.
 
 #### patch_source
 
@@ -233,9 +233,3 @@ For the `patch_type: conan`, it doesn't make sense to submit patch upstream, so 
 _Optional_
 
 Specifies a sub-directory in project's sources to apply patch. This directory is relative to the [source_folder](https://docs.conan.io/en/latest/reference/conanfile/attributes.html?highlight=source_folder#source-folder). Usually, it would be a `source_subfolder`, but could be a lower-level sub-directory (e.g. if it's a patch for a submodule).
-
-#### sha256
-
-_Optional_
-
-This is the hash for the patch itself, in the same way this field is used in the `sources` section.

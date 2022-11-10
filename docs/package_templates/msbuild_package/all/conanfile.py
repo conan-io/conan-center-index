@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild, VCVars
-from conan.tools.layout import vs_layout
+from conan.tools.microsoft import is_msvc, vs_layout, MSBuildDeps, MSBuildToolchain, MSBuild, VCVars
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, replace_in_file
 import os
 
@@ -46,8 +45,7 @@ class PackageConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
-        # src_folder must use the same source folder name the project
-        vs_layout(self, src_folder="src")
+        vs_layout(self)
 
     def requirements(self):
         # prefer self.requires method instead of requires attribute
