@@ -90,8 +90,11 @@ class ExpatConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "expat::expat")
         self.cpp_info.set_property("pkg_config_name", "expat")
 
+        self.cpp_info.filenames["cmake_find_package"] = "EXPAT"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "expat"
         self.cpp_info.names["cmake_find_package"] = "EXPAT"
         self.cpp_info.names["cmake_find_package_multi"] = "expat"
+        self.cpp_info.names["pkg_config_name"] = "expat"
 
         self.cpp_info.libs = collect_libs(self)
         if not self.options.shared:
