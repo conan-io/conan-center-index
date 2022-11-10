@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index d905b29..ea94456 100644
+index d905b29..d35d486 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -5,53 +5,17 @@ project("libdbcppp" VERSION 0.1.0)
+@@ -5,53 +5,16 @@ project("libdbcppp" VERSION 0.1.0)
  
  option(build_tests "Build tests" ON)
  option(build_examples "Build examples" ON)
@@ -21,7 +21,7 @@ index d905b29..ea94456 100644
  include_directories("include")
 -include_directories("third-party/libxml2/include")
 -include_directories("third-party/libxmlmm/libxmlmm")
- include_directories("third-party/boost")
+-include_directories("third-party/boost")
 -include_directories("third-party/cxxopts/include")
  
 -set(LIBXML2_WITH_ICONV OFF)
@@ -58,7 +58,7 @@ index d905b29..ea94456 100644
  add_subdirectory(src)
  if (build_tests)
    add_subdirectory(tests)
-@@ -59,7 +23,3 @@ endif()
+@@ -59,7 +22,3 @@ endif()
  if (build_examples)
    add_subdirectory(examples)
  endif()
@@ -97,7 +97,7 @@ index 34459e9..f36084b 100644
          virtual std::unique_ptr<INetwork> Clone() const = 0;
  
 diff --git a/src/dbcppp/CMakeLists.txt b/src/dbcppp/CMakeLists.txt
-index 371cbbf..aa4ce9c 100644
+index 371cbbf..6d56ae9 100644
 --- a/src/dbcppp/CMakeLists.txt
 +++ b/src/dbcppp/CMakeLists.txt
 @@ -1,8 +1,6 @@
@@ -122,7 +122,7 @@ index 371cbbf..aa4ce9c 100644
  set_property(TARGET dbcppp PROPERTY CXX_STANDARD 17)
  add_dependencies(dbcppp ${PROJECT_NAME})
 -target_link_libraries(dbcppp ${PROJECT_NAME} ${Boost_LIBRARIES})
-+target_link_libraries(dbcppp ${PROJECT_NAME} ${Boost_LIBRARIES} cxxopts::cxxopts)
++target_link_libraries(dbcppp ${PROJECT_NAME} cxxopts::cxxopts)
  
  install(
      TARGETS dbcppp
@@ -163,10 +163,10 @@ index 462af2e..9ce93a6 100644
          if (vm.count("help"))
          {
 diff --git a/src/libdbcppp/CMakeLists.txt b/src/libdbcppp/CMakeLists.txt
-index 9a69748..843ba4e 100644
+index 9a69748..0ced933 100644
 --- a/src/libdbcppp/CMakeLists.txt
 +++ b/src/libdbcppp/CMakeLists.txt
-@@ -2,12 +2,10 @@
+@@ -2,12 +2,11 @@
  include(GNUInstallDirs)
  include(TestBigEndian)
  
@@ -177,11 +177,12 @@ index 9a69748..843ba4e 100644
 -target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${LIBXML2_LIBRARIES} "libxmlmm")
 -
 -add_compile_definitions(DBCPPP_EXPORT)
-+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
++find_package(Boost CONFIG REQUIRED)
++target_link_libraries(${PROJECT_NAME} boost::boost)
  
  include_directories(
      ${CMAKE_SOURCE_DIR}/src
-@@ -45,9 +43,6 @@ target_sources(${PROJECT_NAME}
+@@ -45,9 +44,6 @@ target_sources(${PROJECT_NAME}
  )
  set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${header_interface}")
  
@@ -191,7 +192,7 @@ index 9a69748..843ba4e 100644
  # install
  install(
      TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
-@@ -57,35 +52,3 @@ install(
+@@ -57,35 +53,3 @@ install(
      FILES
      $<TARGET_PROPERTY:${PROJECT_NAME},INTERFACE_SOURCES>
  	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dbcppp)

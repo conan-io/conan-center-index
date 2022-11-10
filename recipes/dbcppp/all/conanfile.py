@@ -50,6 +50,7 @@ class DBCpppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.options["boost"].header_only = True
 
     def layout(self):
         cmake_layout(self)
@@ -57,6 +58,7 @@ class DBCpppConan(ConanFile):
     def requirements(self):
         if self.options.with_tools:
             self.requires("cxxopts/3.0.0")
+        self.requires("boost/1.80.0")
 
     def validate(self):
         if self.options.shared:
@@ -83,9 +85,8 @@ class DBCpppConan(ConanFile):
         tc.variables["build_examples"] = False
         tc.variables["build_tools"] = self.options.with_tools
         tc.generate()
-        if self.options.with_tools:
-            deps = CMakeDeps(self)
-            deps.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
