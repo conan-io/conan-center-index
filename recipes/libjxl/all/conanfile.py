@@ -60,7 +60,7 @@ class LibjxlConan(ConanFile):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
         highway = self.dependencies["highway"]
-        if not highway.options.shared and self.options.shared:
+        if hasattr(highway, "options.shared") and not highway.options.shared and self.options.shared:
             raise ConanInvalidConfigution(f"{self.ref}:shared=True requires -o highway:shared=True")
 
     def source(self):
