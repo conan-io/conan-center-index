@@ -130,7 +130,7 @@ class BinutilsConan(ConanFile):
             self.build_requires("msys2/cci.latest")
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
