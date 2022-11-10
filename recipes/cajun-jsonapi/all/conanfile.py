@@ -14,7 +14,7 @@ class CajunJsonApiConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/cajun-jsonapi/cajun-jsonapi"
     license = "BSD-3-Clause"
-    settings = "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     def source(self):
