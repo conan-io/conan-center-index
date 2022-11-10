@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools import build, files, scm
+from conan.tools import build, files, microsoft, scm
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class JsonSchemaValidatorConan(ConanFile):
@@ -30,7 +30,6 @@ class JsonSchemaValidatorConan(ConanFile):
     short_paths = True
 
     def export_sources(self):
-        files.copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
         files.export_conandata_patches(self)
 
     def config_options(self):
@@ -39,7 +38,7 @@ class JsonSchemaValidatorConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.2")
@@ -47,8 +46,8 @@ class JsonSchemaValidatorConan(ConanFile):
     def validate(self):
         version = scm.Version(self.version)
         min_vs_version = "16" if version < "2.1.0" else "14"
-        min_cppstd = "17" if self.settings.compiler == "Visual Studio" and version < "2.1.0" else "11"
-        if self.settings.get_safe("compiler.cppstd"):
+        min_cppstd = "17" if microsoft.is_msvc(self) and version < "2.1.0" else "11"
+        if self.info.settings.get_safe("compiler.cppstd"):
             build.check_min_cppstd(self, min_cppstd)
             min_vs_version = "15" if version < "2.1.0" else "14"
 
@@ -57,12 +56,12 @@ class JsonSchemaValidatorConan(ConanFile):
             "gcc": "5" if version < "2.1.0" else "4.9",
             "clang": "4",
             "apple-clang": "9"}
-        min_version = compilers.get(str(self.settings.compiler))
+        min_version = compilers.get(str(self.info.settings.compiler))
         if not min_version:
-            self.output.warn(f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
+            self.output.warn(f"{self.name} recipe lacks information about the {self.info.settings.compiler} compiler support.")
         else:
-            if scm.Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration(f"{self.name} requires c++{min_cppstd} support. The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
+            if scm.Version(self.info.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration(f"{self.name} requires c++{min_cppstd} support. The current compiler {self.info.settings.compiler} {self.info.settings.compiler.version} does not support it.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
