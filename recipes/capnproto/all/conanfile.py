@@ -6,7 +6,7 @@ from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 import glob
 import os
@@ -51,6 +51,10 @@ class CapnprotoConan(ConanFile):
             "apple-clang": "5.1",
         }
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -92,6 +96,10 @@ class CapnprotoConan(ConanFile):
     def build_requirements(self):
         if self.settings.os != "Windows":
             self.tool_requires("libtool/2.4.7")
+            if self._settings_build.os == "Windows":
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -156,7 +164,8 @@ class CapnprotoConan(ConanFile):
         else:
             with chdir(self, os.path.join(self.source_folder, "c++")):
                 autotools = Autotools(self)
-                autotools.install()
+                # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
+                autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         for cmake_file in glob.glob(os.path.join(self.package_folder, self._cmake_folder, "*")):
