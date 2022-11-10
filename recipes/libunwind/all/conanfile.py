@@ -57,7 +57,7 @@ class LiunwindConan(ConanFile):
             self.requires("zlib/1.2.13")
 
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
+        if self.info.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("libunwind is only supported on Linux and FreeBSD")
 
     def source(self):
