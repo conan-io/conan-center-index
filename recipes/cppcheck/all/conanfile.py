@@ -1,7 +1,6 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile,
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, patch, replace_in_file, rmdir
-from conan.tools.scm import Version
+from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
 import os
 
 required_conan_version = ">=1.33.0"
@@ -45,19 +44,19 @@ class CppcheckConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         apply_conandata_patches(self)
-        replace_in_file(os.path.join(self.source_folder, "cli", "CMakeLists.txt"),
+        replace_in_file(self, os.path.join(self.source_folder, "cli", "CMakeLists.txt"),
                               "RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}",
                               "DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}")
         cmake.configure()
         cmake.build()
 
     def package(self):
-        copy("COPYING", dst="licenses", src=self.source_folder)
-        copy("*", dst=os.path.join("bin", "cfg"), src=os.path.join(self.source_folder, "cfg"))
-        copy("cppcheck-htmlreport", dst=os.path.join("bin"), src=os.path.join(self.source_folder, "htmlreport"))
+        copy(self, "COPYING", dst="licenses", src=self.source_folder)
+        copy(self, "*", dst=os.path.join("bin", "cfg"), src=os.path.join(self.source_folder, "cfg"))
+        copy(self, "cppcheck-htmlreport", dst=os.path.join("bin"), src=os.path.join(self.source_folder, "htmlreport"))
         cmake = CMake(self)
         cmake.install()
-        rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.includedirs = []
