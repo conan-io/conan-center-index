@@ -9,7 +9,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 import glob
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.53.0"
 
 class ArrowConan(ConanFile):
     name = "arrow"
