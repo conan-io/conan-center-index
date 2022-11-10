@@ -1,10 +1,10 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, get, copy, rmdir
-from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class CreateDmgConan(ConanFile):
@@ -15,39 +15,38 @@ class CreateDmgConan(ConanFile):
     homepage = "https://github.com/create-dmg/create-dmg"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = 'patches/**'
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        self.info.clear()
 
     def validate(self):
         if self.settings.os != "Macos":
             raise ConanInvalidConfiguration(f"{self.name} works only on MacOS")
 
     def source(self):
-        pass
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def build(self):
-        get(self, **self.conan_data["sources"][self.version],
-                strip_root=True, destination=self.source_folder)
         apply_conandata_patches(self)
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, pattern="create-dmg", dst=os.path.join(self.package_folder, "bin"), src=self.source_folder)
-        copy(self, pattern="*", dst=os.path.join(self.package_folder, "res", "create-dmg", "support"), src=os.path.join(self.source_folder,"support"))
+        copy(self, pattern="*", dst=os.path.join(self.package_folder, "res", "create-dmg", "support"), src=os.path.join(self.source_folder, "support"))
 
         rmdir(self, os.path.join(self.package_folder, "share"))
 
-    def package_id(self):
-        del self.settings.compiler
-        del self.settings.build_type
-
     def package_info(self):
-        self.cpp_info.frameworkdirs = []
-        self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = ["res"]
 
-        binpath = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(binpath)
+        # TODO: to remove in conan v2
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
