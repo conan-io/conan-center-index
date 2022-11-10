@@ -1,15 +1,12 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.files import copy
+from conan.tools.microsoft import is_msvc
 import contextlib
 import os
-import shutil
-
-required_conan_version = ">=1.45.0"
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    exports_sources = "../test_package/configure.ac", "../test_package/config.h.in", "../test_package/Makefile.in", "../test_package/test_package_c.c", "../test_package/test_package_cpp.cpp",
+    settings = "os", "arch", "compiler", "build_type"
     test_type = "explicit"
 
     @property
@@ -31,12 +28,11 @@ class TestPackageConan(ConanFile):
             yield
 
     def build(self):
-        for src in self.exports_sources:
-            shutil.copy(os.path.join(self.source_folder, src), self.build_folder)
-        self.run("autoconf --verbose",
-                 win_bash=tools.os_info.is_windows, run_environment=True)
+        for src in ("configure.ac", "config.h.in", "Makefile.in", "test_package_c.c", "test_package_cpp.cpp"):
+            copy(self, src, os.path.join(self.source_folder, os.pardir, "test_package"), self.build_folder)
+        self.run("autoconf --verbose", win_bash=tools.os_info.is_windows)
         self.run("{} --help".format(os.path.join(self.build_folder, "configure").replace("\\", "/")),
-                 win_bash=tools.os_info.is_windows, run_environment=True)
+                 win_bash=tools.os_info.is_windows)
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         with self._build_context():
             autotools.configure()
