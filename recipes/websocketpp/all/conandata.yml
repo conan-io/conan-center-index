@@ -8,4 +8,5 @@ sources:
 patches:
   "0.8.1":
     - patch_file: "patches/websocket_boost_support_1_7_x.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Boost 1.70+ support: Mostly captures zaphoyd/websocketpp#814"

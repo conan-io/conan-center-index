@@ -1,7 +1,8 @@
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools import files
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 
 class WebsocketPPConan(ConanFile):
@@ -24,41 +25,35 @@ class WebsocketPPConan(ConanFile):
         "with_zlib": True,
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        files.export_conandata_patches(self)
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1o")
+            self.requires("openssl/1.1.1s")
 
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
 
         if self.options.asio == "standalone":
-            self.requires("asio/1.22.1")
+            self.requires("asio/1.24.0")
         elif self.options.asio == "boost":
-            self.requires("boost/1.79.0")
+            self.requires("boost/1.80.0")
 
     def package_id(self):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        files.get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        files.apply_conandata_patches(self)
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
+        files.copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         # We have to copy the headers manually, since the upstream cmake.install() step doesn't do so.
-        self.copy(pattern=os.path.join("websocketpp","*.hpp"), dst="include", src=self._source_subfolder)
+        files.copy(self, pattern=os.path.join("websocketpp","*.hpp"), dst=os.path.join(self.package_folder, "include"), src=self.source_folder)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "websocketpp")
