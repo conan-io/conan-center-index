@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy
+import os
 
 required_conan_version = ">=1.50.0"
 
@@ -23,7 +24,7 @@ class FastPRNGConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
+        if self.info.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, "11")
 
     def source(self):
