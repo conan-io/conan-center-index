@@ -36,7 +36,6 @@ class CppRestSDKConan(ConanFile):
     }
 
     def export_sources(self):
-        files.copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
         files.export_conandata_patches(self)
 
     def config_options(self):
