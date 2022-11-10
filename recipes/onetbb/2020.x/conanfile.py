@@ -139,7 +139,9 @@ class OneTBBConan(ConanFile):
             "x86": "ia32",
             "x86_64": "intel64",
             "armv7": "armv7",
-            "armv8": "aarch64" if self.settings.os != "iOS" else "arm64"
+            "armv8": "arm64"
+            if (self.settings.os == "iOS" or self.settings.os == "Macos")
+            else "aarch64",
         }[str(self.settings.arch)]
         extra += " arch=%s" % arch
 
