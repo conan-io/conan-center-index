@@ -8,7 +8,7 @@ import functools
 import os
 import yaml
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class MoltenVKConan(ConanFile):
@@ -75,7 +75,7 @@ class MoltenVKConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         elif self._has_hide_vulkan_symbols_option:
-            del self.options.hide_vulkan_symbols
+            self.options.rm_safe("hide_vulkan_symbols")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
