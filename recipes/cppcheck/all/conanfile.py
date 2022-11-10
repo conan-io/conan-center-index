@@ -1,5 +1,7 @@
-from conans import ConanFile, CMake, tools
-import functools
+from conan import ConanFile, conan_version
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, patch, replace_in_file, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.33.0"
@@ -12,26 +14,13 @@ class CppcheckConan(ConanFile):
     topics = ("Cpp Check", "static analyzer")
     description = "Cppcheck is an analysis tool for C/C++ code."
     license = "GPL-3.0-or-later"
-    generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"with_z3": [True, False], "have_rules": [True, False]}
     default_options = {"with_z3": True, "have_rules": True}
     exports_sources = ["CMakeLists.txt", "patches/**"]
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cli", "CMakeLists.txt"),
-                              "RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}",
-                              "DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}")
+    def layout(self):
+        cmake_layout(self)
 
     def requirements(self):
         if self.options.with_z3:
@@ -40,35 +29,41 @@ class CppcheckConan(ConanFile):
             self.requires("pcre/8.45")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(**self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["USE_Z3"] = self.options.with_z3
-        cmake.definitions["HAVE_RULES"] = self.options.have_rules
-        cmake.definitions["USE_MATCHCOMPILER"] = "Auto"
-        cmake.definitions["ENABLE_OSS_FUZZ"] = False
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["USE_Z3"] = self.options.with_z3
+        tc.variables["HAVE_RULES"] = self.options.have_rules
+        tc.variables["USE_MATCHCOMPILER"] = "Auto"
+        tc.variables["ENABLE_OSS_FUZZ"] = False
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        apply_conandata_patches(self)
+        replace_in_file(os.path.join(self.source_folder, "cli", "CMakeLists.txt"),
+                              "RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}",
+                              "DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}")
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        self.copy("*", dst=os.path.join("bin","cfg"), src=os.path.join(self._source_subfolder,"cfg"))
-        self.copy("cppcheck-htmlreport", dst=os.path.join("bin"), src=os.path.join(self._source_subfolder,"htmlreport"))
-        cmake = self._configure_cmake()
+        copy("COPYING", dst="licenses", src=self.source_folder)
+        copy("*", dst=os.path.join("bin", "cfg"), src=os.path.join(self.source_folder, "cfg"))
+        copy("cppcheck-htmlreport", dst=os.path.join("bin"), src=os.path.join(self.source_folder, "htmlreport"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
+
         bin_folder = os.path.join(self.package_folder, "bin")
         self.output.info("Append %s to environment variable PATH" % bin_folder)
-        self.env_info.PATH.append(bin_folder)
-        # This is required to run the python script on windows, as we cannot simply add it to the PATH
-        self.env_info.CPPCHECK_HTMLREPORT = os.path.join(bin_folder, "cppcheck-htmlreport")
+        self.buildenv_info.prepend_path("PATH", self.package_folder)
+        self.buildenv_info.define_path("CPPCHECK_HTMLREPORT", os.path.join(bin_folder, "cppcheck-htmlreport"))
