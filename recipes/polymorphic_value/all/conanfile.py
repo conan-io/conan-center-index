@@ -34,22 +34,22 @@ class PolymorphictValueConan(ConanFile):
         }
 
     def validate(self):
-        if self.info.settings.get_safe("compiler.cppstd"):
+        if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
-            str(self.info.settings.compiler))
+            str(self.settings.compiler))
         if not min_version:
             self.output.warning("{} recipe lacks information about the {} "
                                 "compiler support.".format(
-                                    self.name, self.info.settings.compiler))
+                                    self.name, self.settings.compiler))
         else:
-            if Version(self.info.settings.compiler.version) < min_version:
+            if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(
                     "{} requires C++{} support. "
                     "The current compiler {} {} does not support it.".format(
                         self.name, self._minimum_cpp_standard,
-                        self.info.settings.compiler,
-                        self.info.settings.compiler.version))
+                        self.settings.compiler,
+                        self.settings.compiler.version))
 
     def package_id(self):
         self.info.clear()
