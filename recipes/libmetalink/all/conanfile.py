@@ -7,9 +7,8 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 import os
-import shutil
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.53.0"
 
 
 class LibmetalinkConan(ConanFile):
@@ -19,7 +18,7 @@ class LibmetalinkConan(ConanFile):
         "It supports both Metalink version 3 and Metalink version 4 (RFC 5854)."
     )
     license = "MIT"
-    topics = ("libmetalink", "metalink", "xml")
+    topics = ("metalink", "xml")
     homepage = "https://launchpad.net/libmetalink"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -39,28 +38,15 @@ class LibmetalinkConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -73,14 +59,14 @@ class LibmetalinkConan(ConanFile):
 
     def validate(self):
         if is_msvc(self):
-            raise ConanInvalidConfiguration("libmetalink does not support Visual Studio yet")
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Visual Studio yet")
 
     def build_requirements(self):
         self.tool_requires("gnu-config/cci.20210814")
         self.tool_requires("pkgconf/1.9.3")
         if self._settings_build.os == "Windows":
             self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
@@ -100,15 +86,17 @@ class LibmetalinkConan(ConanFile):
         ])
         tc.generate()
 
-        pkg = PkgConfigDeps(self)
-        pkg.generate()
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         # Support more configurations
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self.source_folder, "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self.source_folder, "config.guess"))
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            if gnu_config:
+                copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
 
     def build(self):
         self._patch_sources()
