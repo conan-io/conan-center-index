@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class EnttConan(ConanFile):
@@ -15,7 +15,6 @@ class EnttConan(ConanFile):
     homepage = "https://github.com/skypjack/entt"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    no_copy_source = True
     settings = "os", "arch", "compiler", "build_type"
 
     @property
@@ -31,6 +30,9 @@ class EnttConan(ConanFile):
             "clang": "5",
             "apple-clang": "10",
         }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -60,7 +62,7 @@ class EnttConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def build(self):
-        pass
+        apply_conandata_patches(self)
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
