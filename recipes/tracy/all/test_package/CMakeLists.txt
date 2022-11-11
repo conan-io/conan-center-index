@@ -4,7 +4,7 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(tracy REQUIRED)
+find_package(Tracy REQUIRED CONFIG)
 
 add_executable(test_package example.cpp)
-target_link_libraries(test_package tracy::tracy)
+target_link_libraries(test_package PRIVATE Tracy::TracyClient)

@@ -88,8 +88,18 @@ class TracyConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["TracyClient"]
+        self.cpp_info.set_property("cmake_file_name", "Tracy")
+        self.cpp_info.set_property("cmake_target_name", "Tracy::TracyClient")
+        # TODO: back to global scope in conan v2
+        self.cpp_info.components["tracyclient"].libs = ["TracyClient"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.components["tracyclient"].system_libs.append("pthread")
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("dl")
+            self.cpp_info.components["tracyclient"].system_libs.append("dl")
+
+        # TODO: to remove in conan v2
+        self.cpp_info.names["cmake_find_package"] = "Tracy"
+        self.cpp_info.names["cmake_find_package_multi"] = "Tracy"
+        self.cpp_info.components["tracyclient"].names["cmake_find_package"] = "TracyClient"
+        self.cpp_info.components["tracyclient"].names["cmake_find_package_multi"] = "TracyClient"
+        self.cpp_info.components["tracyclient"].set_property("cmake_target_name", "Tracy::TracyClient")
