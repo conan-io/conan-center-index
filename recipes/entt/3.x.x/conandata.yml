@@ -1,4 +1,7 @@
 sources:
+  "3.11.0":
+    url: "https://github.com/skypjack/entt/archive/refs/tags/v3.11.0.tar.gz"
+    sha256: "7cca2bd4d4aeef6c5bdbe06b9e047e7f2519ebaff901207cc81ac71a2bbe185e"
   "3.10.3":
     url: "https://github.com/skypjack/entt/archive/refs/tags/v3.10.3.tar.gz"
     sha256: "315918fc678e89a326ce1c13b0e9d3e53882dd9c58a63fef413325917a5c753b"
