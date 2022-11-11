@@ -1,7 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 
 import os
@@ -36,14 +38,6 @@ class LiunwindConan(ConanFile):
         "zlibdebuginfo": True,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -63,18 +57,20 @@ class LiunwindConan(ConanFile):
             self.requires("zlib/1.2.13")
 
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
+        if self.info.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("libunwind is only supported on Linux and FreeBSD")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args.extend([
-            f"--enable-shared={yes_no(self.options.shared)}",
-            f"--enable-static={yes_no(not self.options.shared)}",
             f"--enable-coredump={yes_no(self.options.coredump)}",
             f"--enable-ptrace={yes_no(self.options.ptrace)}",
             f"--enable-setjmp={yes_no(self.options.setjmp)}",
@@ -83,9 +79,6 @@ class LiunwindConan(ConanFile):
             "--disable-tests",
             "--disable-documentation",
         ])
-        tc.generate()
-
-        tc = PkgConfigDeps(self)
         tc.generate()
 
         tc = AutotoolsDeps(self)
