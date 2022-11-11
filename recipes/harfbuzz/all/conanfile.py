@@ -71,7 +71,7 @@ class HarfbuzzConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if self.options.shared and self.options.with_glib:
             self.options["glib"].shared = True
 
