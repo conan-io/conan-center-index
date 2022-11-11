@@ -4,6 +4,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir
 from conan.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.53.0"
 
 class BacnetStackConan(ConanFile):
     name = "bacnet-stack"
