@@ -254,7 +254,7 @@ class FFMpegConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
@@ -274,9 +274,9 @@ class FFMpegConan(ConanFile):
         if self.options.with_zeromq:
             self.requires("zeromq/4.3.4")
         if self.options.with_sdl:
-            self.requires("sdl/2.0.20")
+            self.requires("sdl/2.24.1")
         if self.options.with_libx264:
-            self.requires("libx264/20191217")
+            self.requires("libx264/cci.20220602")
         if self.options.with_libx265:
             self.requires("libx265/3.4")
         if self.options.with_libvpx:
@@ -286,9 +286,9 @@ class FFMpegConan(ConanFile):
         if self.options.with_libfdk_aac:
             self.requires("libfdk_aac/2.0.2")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.2.3")
+            self.requires("libwebp/1.2.4")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.7.2")
         if self.options.get_safe("with_xcb") or self.options.get_safe("with_vaapi"):
@@ -300,7 +300,7 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_vdpau"):
             self.requires("vdpau/system")
         if self._version_supports_vulkan() and self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.221")
+            self.requires("vulkan-loader/1.3.231.1")
 
     def validate(self):
         if self.info.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -320,7 +320,7 @@ class FFMpegConan(ConanFile):
     def build_requirements(self):
         if self.settings.arch in ("x86", "x86_64"):
             self.tool_requires("yasm/1.3.0")
-        self.tool_requires("pkgconf/1.7.4")
+        self.tool_requires("pkgconf/1.9.3")
         if self._settings_build.os == "Windows" and not self.win_bash:
             self.tool_requires("msys2/cci.latest")
 

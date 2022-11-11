@@ -106,6 +106,7 @@ class BoostConan(ConanFile):
         "buildid": "ANY",
         "python_buildid": "ANY",
         "system_use_utf8": [True, False],
+        "embed_bitcode": [True, False], # enables embedding bitcode for iOS
     }
     options.update({f"without_{_name}": [True, False] for _name in CONFIGURE_OPTIONS})
 
@@ -144,6 +145,7 @@ class BoostConan(ConanFile):
         "buildid": None,
         "python_buildid": None,
         "system_use_utf8": False,
+        "embed_bitcode": True,
     }
     default_options.update({f"without_{_name}": False for _name in CONFIGURE_OPTIONS})
     default_options.update({f"without_{_name}": True for _name in ("graph_parallel", "mpi", "python")})
@@ -288,6 +290,11 @@ class BoostConan(ConanFile):
                 self.options.without_fiber = True
                 self.options.without_json = True
                 self.options.without_nowide = True
+
+        # bitcode is deprecated in Xcode 14, and the AppStore will not accept submissions from Xcode 14 with bitcode enabled
+        # https://developer.apple.com/documentation/xcode-release-notes/xcode-14-release-notes
+        if not is_apple_os(self) or Version(self.settings.compiler.version) >= 14.0:
+            del self.options.embed_bitcode
 
         # iconv is off by default on Windows and Solaris
         if self._is_windows_platform or self.settings.os == "SunOS":
@@ -532,7 +539,7 @@ class BoostConan(ConanFile):
 
     def requirements(self):
         if self._with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self._with_bzip2:
             self.requires("bzip2/1.0.8")
         if self._with_lzma:
@@ -1109,7 +1116,8 @@ class BoostConan(ConanFile):
             if self.options.multithreading:
                 cxx_flags.append("-DBOOST_SP_USE_SPINLOCK")
 
-            cxx_flags.append("-fembed-bitcode")
+            if "embed_bitcode" in self.options and self.options.embed_bitcode:
+                cxx_flags.append("-fembed-bitcode")
 
         if self._with_iconv:
             flags.append(f"-sICONV_PATH={self.deps_cpp_info['libiconv'].rootpath}")

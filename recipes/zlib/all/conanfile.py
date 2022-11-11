@@ -4,11 +4,12 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class ZlibConan(ConanFile):
     name = "zlib"
+    package_type = "library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://zlib.net"
     license = "Zlib"
@@ -39,18 +40,9 @@ class ZlibConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -65,6 +57,9 @@ class ZlibConan(ConanFile):
         tc.variables["SKIP_INSTALL_LIBRARIES"] = False
         tc.variables["SKIP_INSTALL_HEADERS"] = False
         tc.variables["SKIP_INSTALL_FILES"] = True
+        # Correct for misuse of "${CMAKE_INSTALL_PREFIX}/" in CMakeLists.txt
+        tc.variables["INSTALL_LIB_DIR"] = "lib"
+        tc.variables["INSTALL_INC_DIR"] = "include"
         tc.generate()
 
     def _patch_sources(self):

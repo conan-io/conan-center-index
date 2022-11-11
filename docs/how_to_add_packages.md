@@ -11,6 +11,7 @@ You can follow the three steps (:one: :two: :three:) described below! :tada:
 ## Contents
 
   * [Request access](#request-access)
+  * [Inactivity and user removal](#inactivity-and-user-removal)
   * [Submitting a Package](#submitting-a-package)
     * [The Build Service](#the-build-service)
   * [Recipe files structure](#recipe-files-structure)
@@ -44,6 +45,14 @@ This process helps conan-center-index against spam and malicious code. The proce
 
 When submitting a pull request for the first time, you will be prompted to sign the [CLA](CONTRIBUTOR_LICENSE_AGREEMENT.md) for your code contributions.
 You can view your signed CLA's by going to <https://cla-assistant.io/> and signing in.
+
+
+## Inactivity and user removal
+
+For security reasons related to the CI, when a user no longer contributes for a long period, it will be considered inactive and removed from the authorized user's list.
+For now, it's configured for **4 months**, and it's computed based on the latest commit, not comments or opened issues.
+After that time, the CI bot will ask to remove the user name from the authorized users' list through the access request PR, which occurs a few times every week.
+In case you are interested in coming back, please, ask again to be included in the issue [#4](https://github.com/conan-io/conan-center-index/issues/4), the process will be precise like for newcomers.
 
 ## Submitting a Package
 
