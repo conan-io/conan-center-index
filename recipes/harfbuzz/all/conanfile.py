@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import can_run
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import PkgConfigDeps
@@ -145,8 +145,6 @@ class HarfbuzzConan(ConanFile):
             self.tool_requires("pkgconf/1.9.3")
 
     def build(self):
-
-
         apply_conandata_patches(self)
         meson = Meson(self)
         meson.configure()
@@ -170,6 +168,7 @@ class HarfbuzzConan(ConanFile):
         meson = Meson(self)
         meson.install()
         fix_msvc_libname()
+        fix_apple_shared_install_name(self)
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
