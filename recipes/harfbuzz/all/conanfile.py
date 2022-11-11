@@ -105,7 +105,11 @@ class HarfbuzzConan(ConanFile):
             return "enabled" if value else "disabled"
 
         def meson_backend_and_flags():
-            if is_msvc(self) and Version(self.settings.compiler.version) == "15" and self.settings.build_type == "Debug":
+            def is_vs_2017():
+                version = Version(self.settings.compiler.version)
+                return version == "15" or version == "191"
+
+            if is_msvc(self) and is_vs_2017() and self.settings.build_type == "Debug":
                 # Mitigate https://learn.microsoft.com/en-us/cpp/build/reference/zf?view=msvc-170
                 return "vs", ["/bigobj"]
             return "ninja", []
