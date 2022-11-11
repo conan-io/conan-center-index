@@ -18,3 +18,6 @@ sources:
   "cci.20220620":
     url: "https://github.com/sony/nmos-cpp/archive/3a904a3fcc39057a8db74656a697f0d97d8a3651.tar.gz"
     sha256: "49a16ad5c8b1cf45cd519b96c880340b369a737c6814f8c533fff1cf49439fda"
+  "cci.20221111":
+    url: "https://github.com/sony/nmos-cpp/archive/293fa3bdc86d94b2e7bf001e3af4d5f3fce1c300.tar.gz"
+    sha256: "e8171d2847fca1e9476ec1682f57b182ca3ed8496fc0983962a75d4c86a7a981"
