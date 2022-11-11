@@ -188,10 +188,7 @@ class LibpngConan(ConanFile):
     def package_info(self):
         major_min_version = f"{Version(self.version).major}{Version(self.version).minor}"
 
-        # TODO: Remove after Conan 2.0
-        self.cpp_info.names["cmake_find_package"] = "PNG"
-        self.cpp_info.names["cmake_find_package_multi"] = "PNG"
-
+        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "PNG")
         self.cpp_info.set_property("cmake_target_name", "PNG::PNG")
         self.cpp_info.set_property("pkg_config_name", "libpng")
@@ -203,3 +200,7 @@ class LibpngConan(ConanFile):
         self.cpp_info.libs = [f"{prefix}png{suffix}"]
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
+
+        # TODO: Remove after Conan 2.0
+        self.cpp_info.names["cmake_find_package"] = "PNG"
+        self.cpp_info.names["cmake_find_package_multi"] = "PNG"
