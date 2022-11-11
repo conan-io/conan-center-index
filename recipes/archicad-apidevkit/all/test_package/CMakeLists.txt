@@ -6,9 +6,7 @@ function(SetCompilerOptions target ac_version)
     else()
         target_compile_features(${target} PUBLIC cxx_std_14)
     endif()
-
     target_compile_options(${target} PUBLIC "$<$<CONFIG:Debug>:-DDEBUG>")
-
     if(WIN32)
         target_compile_options(${target} PUBLIC /W4 /WX
             /Zc:wchar_t-
@@ -45,4 +43,20 @@ if(EXISTS ${ACAPINC_FILE_LOCATION})
 else()
     message(FATAL_ERROR "Failed to detect Archicad version, please check the value of the AC_API_DEVKIT_DIR variable.")
 endif()
+
+if(WIN32)
+    add_definitions(-DUNICODE -D_UNICODE)
+else()
+    add_definitions(-Dmacintosh=1)
+endif()
+
+add_definitions(-DACExtension)
+
+project("test_package")
+
+add_executable(test_package test_gsroot.cpp)
+SetCompilerOptions(test_package ARCHICAD_VERSION)
+
+target_include_directories(test_package PUBLIC ${AC_API_DEVKIT_DIR}/Modules/GSRoot)
+
 

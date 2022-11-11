@@ -9,7 +9,7 @@ sources:
     Windows:
       "x86_64":
         - url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/220529.v2022Release.3000.FULL.FIN.WIN64.DevKitAPI.zip"
-          sha256: "32b86cfbf66dd915f53944af0b34cab7f4eedd034d622a523fd4f01bdf3e3e26"
+          sha256: "588c411b8bb8263bd417c271bb5a8d01136a802cb60116732ab5c1e2fbbf0558"
         - url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/licenses.zip"
           sha256: "ad798e4760d784a84d2708be77b3c8d7562a88ac8cddbc3177f21a6d6e91772a"
 
