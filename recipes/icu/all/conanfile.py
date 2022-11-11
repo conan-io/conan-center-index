@@ -64,7 +64,7 @@ class ICUBase(ConanFile):
 
     @property
     def _enable_icu_tools(self):
-        return self.settings.os not in ["iOS", "tvOS", "watchOS"]
+        return self.settings.os not in ["iOS", "tvOS", "watchOS", "Emscripten"]
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -191,6 +191,8 @@ class ICUBase(ConanFile):
                 args.append("--host={}".format(get_gnu_triplet("Macos", str(self.settings.arch))))
             elif env_build.host:
                 args.append("--host={}".format(env_build.host))
+            if env_build.build:
+                args.append("--build={}".format(env_build.build))
             bin_path = self.deps_env_info["icu"].PATH[0].replace("\\", "/")
             base_path, _ = bin_path.rsplit('/', 1)
             args.append("--with-cross-build={}".format(base_path))
