@@ -1,11 +1,10 @@
 from conan import ConanFile
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.files import get, rmdir, rm, copy, patch
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.layout import basic_layout
 
-import functools
 import os
 import re
 import typing
@@ -60,8 +59,8 @@ class BinutilsConan(ConanFile):
         return getattr(self, "settings_target", None) or self.settings
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for _patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(_patch["patch_file"])
 
     def config_options(self):
         del self.settings.compiler.cppstd
@@ -147,7 +146,7 @@ class BinutilsConan(ConanFile):
     def generate(self):
         yes_no = lambda tf : "yes" if tf else "no"
         tc = AutotoolsToolchain(self)
-        tc.configure_args.append(f"--disable-nls")
+        tc.configure_args.append("--disable-nls")
         tc.configure_args.append(f"--target={self.options.target_triplet}")
         tc.configure_args.append(f"--enable-multilib={yes_no(self.options.multilib)}")
         tc.configure_args.append(f"--with-zlib={self.deps_cpp_info['zlib'].rootpath}")
@@ -252,10 +251,10 @@ class _ArchOs:
     @classmethod
     def from_triplet(cls, triplet: "_GNUTriplet") -> "_ArchOs":
         archs = cls.calculate_archs(triplet)
-        os = cls.calculate_os(triplet)
+        _os = cls.calculate_os(triplet)
         extra = {}
 
-        if os == "Android" and triplet.abi:
+        if _os == "Android" and triplet.abi:
             m = re.match(".*([0-9]+)", triplet.abi)
             if m:
                 extra["os.api_level"] = m.group(1)
