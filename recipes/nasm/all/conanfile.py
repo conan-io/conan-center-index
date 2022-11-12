@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -12,6 +11,7 @@ required_conan_version = ">=1.53.0"
 
 class NASMConan(ConanFile):
     name = "nasm"
+    package_type = "application"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.nasm.us"
     description = "The Netwide Assembler, NASM, is an 80x86 and x86-64 assembler"
@@ -30,6 +30,8 @@ class NASMConan(ConanFile):
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+        if is_msvc(self, build_context=True):
+            self.conf.define("tools.gnu:make_program", "nmake")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -49,12 +51,8 @@ class NASMConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = AutotoolsToolchain(self)
         if is_msvc(self):
-            VCVars(self).generate()
             tc.configure_args.append("-nologo")
         if self.settings.arch == "x86":
             tc.extra_cflags.append("-m32")
@@ -64,12 +62,11 @@ class NASMConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-
+        autotools = Autotools(self)
         if is_msvc(self):
             with chdir(self, self.source_folder):
-                self.run("nmake /f {}".format(os.path.join("Mkfiles", "msvc.mak")))
+                autotools.make(f'/f {os.path.join("Mkfiles", "msvc.mak")}')
         else:
-            autotools = Autotools(self)
             autotools.configure()
 
             # GCC9 - "pure" attribute on function returning "void"
@@ -92,8 +89,7 @@ class NASMConan(ConanFile):
                 shutil.copy2("ndisasm.exe", "ndisasmw.exe")
         else:
             autotools = Autotools(self)
-            # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-            autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+            autotools.install()
             rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
@@ -101,4 +97,4 @@ class NASMConan(ConanFile):
         self.cpp_info.includedirs = []
 
         # TODO: Legacy, to be removed on Conan 2.0
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        self.runenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
