@@ -8,7 +8,3 @@ patches:
       patch_description: Pass CXXFLAGS and CPPFLAGS when-compiling 3rd party source
       patch_type: conan
       base_path: "source_subfolder"
-    - patch_file: patches/0006-Fix-md5-include.patch
-      patch_description: Fix md5 include configuration
-      patch_type: conan
-      base_path: source_subfolder
