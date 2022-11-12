@@ -260,7 +260,7 @@ class _ArchOs:
                 extra["os.api_level"] = m.group(1)
 
         # Assume first architecture
-        return cls(arch=archs[0], os=os, extra=extra)
+        return cls(arch=archs[0], os=_os, extra=extra)
 
     def __eq__(self, other) -> bool:
         if type(self) != type(other):
