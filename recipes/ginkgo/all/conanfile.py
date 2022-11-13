@@ -23,12 +23,14 @@ class GinkgoConan(ConanFile):
         "fPIC": [True, False],
         "openmp": [True, False],
         "cuda": [True, False],
+        "mpi": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": False,
         "openmp": False,
         "cuda": False,
+        "mpi": False,
     }
 
     generators = "cmake"
@@ -112,6 +114,7 @@ class GinkgoConan(ConanFile):
         self._cmake.definitions["GINKGO_BUILD_REFERENCE"] = True
         self._cmake.definitions["GINKGO_BUILD_OMP"] = self.options.openmp
         self._cmake.definitions["GINKGO_BUILD_CUDA"] = self.options.cuda
+        self._cmake.definitions["GINKGO_BUILD_MPI"] = self.options.mpi
         self._cmake.definitions["GINKGO_BUILD_HIP"] = False
         self._cmake.definitions["GINKGO_BUILD_DPCPP"] = False
         self._cmake.definitions["GINKGO_BUILD_HWLOC"] = False
