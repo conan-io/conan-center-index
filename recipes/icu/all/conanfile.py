@@ -49,10 +49,6 @@ class ICUConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     @property
-    def _is_mingw(self):
-        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
-
-    @property
     def _enable_icu_tools(self):
         return self.settings.os not in ["iOS", "tvOS", "watchOS", "Emscripten"]
 
@@ -102,21 +98,20 @@ class ICUConan(ConanFile):
             tc.extra_defines.append("U_STATIC_IMPLEMENTATION")
         if is_apple_os(self):
             tc.extra_defines.append("_DARWIN_C_SOURCE")
+        yes_no = lambda v: "yes" if v else "no"
         tc.configure_args.extend([
             "--datarootdir=${prefix}/lib", # do not use share
-            "--disable-samples",
-            "--disable-layout",
+            f"--enable-release={yes_no(self.settings.build_type != 'Debug')}",
+            f"--enable-debug={yes_no(self.settings.build_type == 'Debug')}",
+            f"--enable-dyload={yes_no(self.options.with_dyload)}",
+            f"--enable-extras={yes_no(self.options.with_extras)}",
+            f"--enable-icuio={yes_no(self.options.with_icuio)}",
             "--disable-layoutex",
+            "--disable-layout",
+            f"--enable-tools={yes_no(self._enable_icu_tools)}",
             "--disable-tests",
+            "--disable-samples",
         ])
-        if not self.options.with_dyload:
-            tc.configure_args.append("--disable-dyload")
-        if not self._enable_icu_tools:
-            tc.configure_args.append("--disable-tools")
-        if not self.options.with_icuio:
-            tc.configure_args.append("--disable-icuio")
-        if not self.options.with_extras:
-            tc.configure_args.append("--disable-extras")
         if cross_building(self, skip_x64_x86=True):
             base_path = unix_path(self, self.dependencies.build["icu"].package_folder)
             tc.configure_args.append(f"--with-cross-build={base_path}")
@@ -131,11 +126,6 @@ class ICUConan(ConanFile):
             # http://userguide.icu-project.org/icudata
             # This is the only directly supported behavior on Windows builds.
             tc.configure_args.append(f"--with-data-packaging={self.options.data_packaging}")
-        if self._is_mingw:
-            mingw_chost = "i686-w64-mingw32" if self.settings.arch == "x86" else "x86_64-w64-mingw32"
-            tc.configure_args.extend([f"--build={mingw_chost}", f"--host={mingw_chost}"])
-        if self.settings.build_type == "Debug":
-            tc.configure_args.extend(["--disable-release", "--enable-debug"])
         env = tc.environment()
         msys2_bin = VirtualBuildEnv(self).vars().get("MSYS_BIN")
         if msys2_bin:
@@ -153,8 +143,7 @@ class ICUConan(ConanFile):
 
         if self._settings_build.os == "Windows":
             # https://unicode-org.atlassian.net/projects/ICU/issues/ICU-20545
-            srcdir = os.path.join(self.source_folder, "source")
-            makeconv_cpp = os.path.join(srcdir, "tools", "makeconv", "makeconv.cpp")
+            makeconv_cpp = os.path.join(self.source_folder, "source", "tools", "makeconv", "makeconv.cpp")
             replace_in_file(self, makeconv_cpp,
                             "pathBuf.appendPathPart(arg, localError);",
                             "pathBuf.append(\"/\", localError); pathBuf.append(arg, localError);")
@@ -235,7 +224,6 @@ class ICUConan(ConanFile):
         self.cpp_info.components["icu-data"].set_property("cmake_target_name", "ICU::data")
         icudata_libname = "icudt" if self.settings.os == "Windows" else "icudata"
         self.cpp_info.components["icu-data"].libs = [f"{prefix}{icudata_libname}{suffix}"]
-        self.cpp_info.components["icu-data"].resdirs = ["res"]
         if not self.options.shared:
             self.cpp_info.components["icu-data"].defines.append("U_STATIC_IMPLEMENTATION")
             # icu uses c++, so add the c++ runtime
@@ -280,6 +268,7 @@ class ICUConan(ConanFile):
             self.cpp_info.components["icu-io"].requires = ["icu-i18n", "icu-uc"]
 
         if self.settings.os != "Windows" and self.options.data_packaging in ["files", "archive"]:
+            self.cpp_info.components["icu-data"].resdirs = ["res"]
             data_path = os.path.join(self.package_folder, "res", self._data_filename).replace("\\", "/")
             self.runenv_info.prepend_path("ICU_DATA", data_path)
             if self._enable_icu_tools or self.options.with_extras:
