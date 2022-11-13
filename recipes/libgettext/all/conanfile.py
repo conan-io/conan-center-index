@@ -40,7 +40,7 @@ class GetTextConan(ConanFile):
 
     @property
     def _is_clang_cl(self):
-        return str(self.settings.compiler) in ["clang"] and str(self.settings.os) in ["Windows"] or \
+        return (str(self.settings.compiler) in ["clang"] and str(self.settings.os) in ["Windows"]) or \
                self.settings.get_safe("compiler.toolset") == "ClangCL"
 
     @property
@@ -111,16 +111,42 @@ class GetTextConan(ConanFile):
         ]
         tc.generate()
 
-        AutotoolsDeps(self).generate()
+        deps = AutotoolsDeps(self)
 
         if is_msvc(self) or self._is_clang_cl:
+            # Attempt to workaround the following issues:
+            # * Include and Library paths are passed with /I and /LIBPATH which configure thinks are file paths
+            # * -LIBPATH requires -link when passed to cl, but the compiler wrapper thinks -link is a request to
+            #   link a library called 'ink', so we can't use LIBPATH. Instead we just use the absolute paths to the
+            #   dependent libraries
+            def libs():
+                for dep in self.deps_cpp_info.deps:
+                    dep_info = self.deps_cpp_info[dep]
+                    if len(dep_info.lib_paths) != 0:
+                        lib_path = dep_info.lib_paths[0]
+                        for lib in dep_info.libs:
+                            yield unix_path(self, os.path.join(lib_path, f"{lib}.lib"))
+
+            fixed_cppflags_args = deps.vars().get("CPPFLAGS").replace("/I", "-I")
+            deps.environment.define("CPPFLAGS", fixed_cppflags_args)
+            deps.environment.define("LIBS", " ".join(lib for lib in libs()))
+            deps.environment.unset("LDFLAGS")
+
+        deps.generate()
+
+        if is_msvc(self) or self._is_clang_cl:
+            def programs():
+                if is_msvc(self):
+                    return "cl -nologo", "lib -nologo", "link -nologo"
+                return os.environ.get("CC", "clang-cl"), os.environ.get("AR", "llvm-lib"), os.environ.get("LD", "lld-link")
             env = Environment()
             compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
             ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
-            env.define("CC", f"{compile_wrapper} cl -nologo")
-            env.define("CXX", f"{compile_wrapper} cl -nologo")
-            env.define("LD", "link -nologo")
-            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
+            cc, ar, link = programs()
+            env.define("CC", f"{compile_wrapper} {cc}")
+            env.define("CXX", f"{compile_wrapper} {cc}")
+            env.define("LD", link)
+            env.define("AR", f"{ar_wrapper} \"{ar}\"")
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
