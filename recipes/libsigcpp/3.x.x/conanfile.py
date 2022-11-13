@@ -1,8 +1,18 @@
 from conan import ConanFile
-from conan.tools import build, files
-from conan.tools.cmake import CMake, CMakeToolchain
-from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.files import (
+    apply_conandata_patches,
+    collect_libs,
+    copy,
+    export_conandata_patches,
+    get,
+    replace_in_file,
+    rmdir,
+    save
+)
+from conan.tools.layout import cmake_layout
 
 import glob
 import os
@@ -32,15 +42,15 @@ class LibSigCppConan(ConanFile):
     short_paths = True
 
     def export_sources(self):
-        files.export_conandata_patches(self)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     @property
     def _minimum_compilers_version(self):
@@ -53,7 +63,7 @@ class LibSigCppConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            build.check_min_cppstd(self, 17)
+            check_min_cppstd(self, 17)
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -68,20 +78,20 @@ class LibSigCppConan(ConanFile):
             raise ConanInvalidConfiguration("libsigcpp requires C++17, which your compiler does not support.")
 
     def layout(self):
-        return basic_layout(self, src_folder="src")
+        return cmake_layout(self, src_folder="src")
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.generate()
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
 
     def build(self):
-        files.apply_conandata_patches(self)
+        apply_conandata_patches(self)
         if not self.options.shared:
-            files.replace_in_file(self, os.path.join(self.source_folder, "sigc++config.h.cmake"),
+            replace_in_file(self, os.path.join(self.source_folder, "sigc++config.h.cmake"),
                                   "define SIGC_DLL 1", "undef SIGC_DLL")
         cmake = CMake(self)
         cmake.configure()
@@ -90,14 +100,14 @@ class LibSigCppConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        files.copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         for header_file in glob.glob(os.path.join(self.package_folder, "lib", "sigc++-3.0", "include", "*.h")):
             shutil.move(
                 header_file,
                 os.path.join(self.package_folder, "include", "sigc++-3.0", os.path.basename(header_file))
             )
         for dir_to_remove in ["cmake", "pkgconfig", "sigc++-3.0"]:
-            files.rmdir(self, os.path.join(self.package_folder, "lib", dir_to_remove))
+            rmdir(self, os.path.join(self.package_folder, "lib", dir_to_remove))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
@@ -114,7 +124,7 @@ class LibSigCppConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """)
-        files.save(self, module_file, content)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
@@ -127,7 +137,7 @@ class LibSigCppConan(ConanFile):
 
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["sigc++"].includedirs = [os.path.join("include", "sigc++-3.0")]
-        self.cpp_info.components["sigc++"].libs = files.collect_libs(self)
+        self.cpp_info.components["sigc++"].libs = collect_libs(self)
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["sigc++"].system_libs.append("m")
 

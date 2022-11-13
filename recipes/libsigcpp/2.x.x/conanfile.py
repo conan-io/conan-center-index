@@ -1,16 +1,23 @@
 from conan import ConanFile
-from conan.tools import build, files
+from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import (
+    get,
+    rename,
+    replace_in_file,
+    rm,
+    rmdir
+)
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.gnu import PkgConfigDeps
-from conan.tools.env import VirtualBuildEnv
 from conan.errors import ConanInvalidConfiguration
 
 import glob
 import os
 import shutil
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class LibSigCppConanV2(ConanFile):
@@ -34,18 +41,18 @@ class LibSigCppConanV2(ConanFile):
     short_paths = True
 
     def validate(self):
-        if hasattr(self, "settings_build") and build.cross_building(self):
+        if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("Cross-building not implemented")
         if self.settings.compiler.get_safe("cppstd"):
-            build.check_min_cppstd(self, 11)
+            check_min_cppstd(self, 11)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def build_requirements(self):
         self.tool_requires("meson/0.63.3")
@@ -70,7 +77,7 @@ class LibSigCppConanV2(ConanFile):
         env.generate()
 
     def source(self):
-        files.get(self,
+        get(self,
             **self.conan_data["sources"][self.version],
             strip_root=True,
             destination=self.source_folder
@@ -78,10 +85,10 @@ class LibSigCppConanV2(ConanFile):
 
     def build(self):
         if not self.options.shared:
-            files.replace_in_file(self,
+            replace_in_file(self,
                 os.path.join(self.source_folder, "sigc++config.h.meson"),
                 "define SIGC_DLL 1", "undef SIGC_DLL")
-        files.replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('tests')", "")
+        replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('tests')", "")
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -91,9 +98,9 @@ class LibSigCppConanV2(ConanFile):
         meson = Meson(self)
         meson.install()
         if self.settings.compiler == "Visual Studio":
-            files.rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+            rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
             if not self.options.shared:
-                files.rename(self,
+                rename(self,
                        os.path.join(self.package_folder, "lib", "libsigc-2.0.a"),
                        os.path.join(self.package_folder, "lib", "sigc-2.0.lib"))
 
@@ -105,7 +112,7 @@ class LibSigCppConanV2(ConanFile):
             )
 
         for dir_to_remove in ["pkgconfig", "sigc++-2.0"]:
-            files.rmdir(self, os.path.join(self.package_folder, "lib", dir_to_remove))
+            rmdir(self, os.path.join(self.package_folder, "lib", dir_to_remove))
 
     def package_info(self):
         self.cpp_info.components["sigc++-2.0"].set_property("pkg_config_name", "sigc++-2.0")
