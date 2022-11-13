@@ -126,11 +126,7 @@ class ICUConan(ConanFile):
             # http://userguide.icu-project.org/icudata
             # This is the only directly supported behavior on Windows builds.
             tc.configure_args.append(f"--with-data-packaging={self.options.data_packaging}")
-        env = tc.environment()
-        msys2_bin = VirtualBuildEnv(self).vars().get("MSYS_BIN")
-        if msys2_bin:
-            env.define_path("PYTHON", unix_path(self, os.path.join(msys2_bin, "python")))
-        tc.generate(env)
+        tc.generate()
 
         if is_msvc(self):
             env = Environment()
@@ -140,6 +136,14 @@ class ICUConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+
+        # Prevent any call to python during configuration
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "source", "configure"),
+            "if test -z \"$PYTHON\"",
+            "if true",
+        )
 
         if self._settings_build.os == "Windows":
             # https://unicode-org.atlassian.net/projects/ICU/issues/ICU-20545
