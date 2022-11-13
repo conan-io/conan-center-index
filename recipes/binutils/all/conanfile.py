@@ -97,9 +97,6 @@ class BinutilsConan(ConanFile):
         if is_msvc(self):
             raise ConanInvalidConfiguration("This recipe does not support building binutils by this compiler")
 
-        if self.options.target_os == "Macos":
-            raise ConanInvalidConfiguration("cci does not support building binutils for Macos since binutils is degraded there (no as/ld + armv8 does not build)")
-
         # Check whether the actual target_arch and target_os option are valid (they should be in settings.yml)
         # FIXME: does there exist a stable Conan API to accomplish this?
         if self.options.target_arch not in self.settings.arch.values_range:
@@ -180,11 +177,18 @@ class BinutilsConan(ConanFile):
         self.output.info("Prepending PATH environment variable: {}".format(target_bindir))
         self.buildenv_info.prepend_path("PATH", target_bindir)
 
-        binaries = ["ar", "as", "ld", "nm", "objcopy", "objdump", "ranlib", "readelf", "strip"]
+        binaries = os.listdir(target_bindir)
+        self.output.info(f"Binaries built: {', '.join(binaries)}")
         for binary_name in binaries:
             binary = os.path.join(target_bindir, binary_name)
-            self.output.info(f"Setting {binary_name.upper()}={binary}")
-            self.buildenv_info.define(f"{binary_name.upper()}", binary)
+            if os.path.isfile(binary):
+                self.output.info(f"Setting {binary_name.upper()}={binary}")
+                self.buildenv_info.define(f"{binary_name.upper()}", binary)
+        if self.settings.os == "Macos":
+            self.output.warn("Binutils does not support an assembler or "
+                             + "linker for macOS. LD and AS were not generated. "
+                             + "Refer to the native Xcode toolchain or cctools "
+                             + "for an assembler and linker.")
 
         # v1 exports
         bindir = os.path.join(self.package_folder, "bin")
