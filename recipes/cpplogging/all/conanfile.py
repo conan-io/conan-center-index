@@ -51,8 +51,11 @@ class CpploggingConan(ConanFile):
         }
 
     def requirements(self):
-        for req in self.conan_data["requirements"][self.version]:
-            self.requires(req)
+        self.requires("zlib/1.2.13")
+        if self.version < "1.0.3.0" :
+            self.requires("cppcommon/1.0.2.0")
+        else:
+            self.requires("cppcommon/1.0.3.0")
 
     def configure(self):
         if self.options.shared:
