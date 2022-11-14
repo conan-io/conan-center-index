@@ -60,7 +60,7 @@ class BacnetStackConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["bacnet-stack"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
