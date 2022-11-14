@@ -8,13 +8,3 @@ sources:
   "2.7.5":
     url: "https://github.com/danmar/cppcheck/archive/2.7.5.tar.gz"
     sha256: "6c7ac29e57fa8b3ac7be224510200e579d5a90217e2152591ef46ffc947d8f78"
-patches:
-  "2.9.1":
-    - patch_file: "patches/0001-cmake-source-dir-2.5.patch"
-    - patch_file: "patches/0002-htmlreport-python3.patch"
-  "2.8.2":
-    - patch_file: "patches/0001-cmake-source-dir-2.5.patch"
-    - patch_file: "patches/0002-htmlreport-python3.patch"
-  "2.7.5":
-    - patch_file: "patches/0001-cmake-source-dir-2.5.patch"
-    - patch_file: "patches/0002-htmlreport-python3.patch"
