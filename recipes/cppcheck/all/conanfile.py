@@ -1,9 +1,9 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
+from conan.tools.files import copy, get, replace_in_file
 import os
 
-required_conan_version = ">=1.35.0"
+required_conan_version = ">=1.46.0"
 
 
 class CppcheckConan(ConanFile):
@@ -43,7 +43,8 @@ class CppcheckConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "tools", "CMakeLists.txt"), "CMAKE_SOURCE_DIR", "PROJECT_SOURCE_DIR")
+        replace_in_file(self, os.path.join(self.source_folder, "htmlreport", "cppcheck-htmlreport"), "#!/usr/bin/env python", "#!/usr/bin/env python3")
         replace_in_file(self, os.path.join(self.source_folder, "cli", "CMakeLists.txt"),
                               "RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}",
                               "DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}")
@@ -51,12 +52,10 @@ class CppcheckConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "COPYING", dst="licenses", src=self.source_folder)
-        copy(self, "*", dst=os.path.join("bin", "cfg"), src=os.path.join(self.source_folder, "cfg"))
-        copy(self, "cppcheck-htmlreport", dst=os.path.join("bin"), src=os.path.join(self.source_folder, "htmlreport"))
+        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder))
+        copy(self, "cppcheck-htmlreport", dst=os.path.join(self.package_folder, "bin"), src=os.path.join(self.source_folder, "htmlreport"))
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.includedirs = []
@@ -64,5 +63,5 @@ class CppcheckConan(ConanFile):
 
         bin_folder = os.path.join(self.package_folder, "bin")
         self.output.info("Append %s to environment variable PATH" % bin_folder)
-        self.buildenv_info.prepend_path("PATH", self.package_folder)
+        self.buildenv_info.prepend_path("PATH", bin_folder)
         self.buildenv_info.define_path("CPPCHECK_HTMLREPORT", os.path.join(bin_folder, "cppcheck-htmlreport"))
