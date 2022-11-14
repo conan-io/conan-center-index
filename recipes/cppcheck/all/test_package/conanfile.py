@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.build import can_run
 
 
 class TestPackageConan(ConanFile):
@@ -7,7 +8,7 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def test(self):
-        if not cross_building(self):
+        if not can_run(self):
             self.run("cppcheck --enable=warning,style,performance --std=c++11 .",
                      cwd=self.source_folder, env="conanbuild")
             if self.settings.os == 'Windows':
