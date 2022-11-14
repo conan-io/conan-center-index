@@ -166,6 +166,12 @@ class ICUConan(ConanFile):
             "-install_name @rpath/$(notdir $(MIDDLE_SO_TARGET))",
         )
 
+        # workaround for https://unicode-org.atlassian.net/browse/ICU-20531
+        mkdir(self, os.path.join(self.build_folder, "data", "out", "tmp"))
+
+        # workaround for "No rule to make target 'out/tmp/dirs.timestamp'"
+        save(self, os.path.join(self.build_folder, "data", "out", "tmp", "dirs.timestamp"), "")
+
     def build(self):
         self._patch_sources()
 
@@ -173,11 +179,6 @@ class ICUConan(ConanFile):
             dat_package_file = glob.glob(os.path.join(self.source_folder, "source", "data", "in", "*.dat"))
             if dat_package_file:
                 shutil.copy(str(self.options.dat_package_file), dat_package_file[0])
-
-        # workaround for https://unicode-org.atlassian.net/browse/ICU-20531
-        os.makedirs(os.path.join(self.build_folder, "data", "out", "tmp"))
-        # workaround for "No rule to make target 'out/tmp/dirs.timestamp'"
-        save(self, os.path.join(self.build_folder, "data", "out", "tmp", "dirs.timestamp"), "")
 
         autotools = Autotools(self)
         autotools.configure(build_script_folder=os.path.join(self.source_folder, "source"))
