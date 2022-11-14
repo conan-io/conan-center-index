@@ -334,7 +334,7 @@ class FFMpegConan(ConanFile):
             str(self.settings.arch),
             str(self.settings.compiler) if self.settings.os == "Windows" else None,
         )
-        target_arch = triplet[0]
+        target_arch = triplet.split("-")[0]
         return target_arch
 
     @property
@@ -347,7 +347,7 @@ class FFMpegConan(ConanFile):
                 str(self.settings.arch),
                 str(self.settings.compiler) if self.settings.os == "Windows" else None,
             )
-            target_os = triplet[2]
+            target_os = triplet.split("-")[2]
             if target_os == "gnueabihf":
                 target_os = "gnu" # could also be "linux"
             return target_os
