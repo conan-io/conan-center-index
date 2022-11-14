@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 project(cmake_wrapper)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
-
 # TODO:
 # - It should be find_package(SPIRV-Tools-opt REQUIRED CONFIG), but it can't be
 #   modeled yet in spirv-tools recipe.
@@ -16,4 +13,4 @@ if(ENABLE_OPT)
     find_package(SPIRV-Tools REQUIRED CONFIG)
 endif()
 
-add_subdirectory(source_subfolder)
+add_subdirectory(src)

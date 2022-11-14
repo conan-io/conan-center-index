@@ -1,4 +1,13 @@
 sources:
+  "12.2.0":
+    posix:
+      seh:
+        url: "https://github.com/niXman/mingw-builds-binaries/releases/download/12.2.0-rt_v10-rev1/x86_64-12.2.0-release-posix-seh-rt_v10-rev1.7z"
+        sha256: "077e1857ad2ea5e29d57127b0b9137d01bbae31b5bc65e18a7b98f4b866fd09d"
+    win32:
+      seh:
+        url: "https://github.com/niXman/mingw-builds-binaries/releases/download/12.2.0-rt_v10-rev1/x86_64-12.2.0-release-win32-seh-rt_v10-rev1.7z"
+        sha256: "774916c4403c5219f8af3a3ee3012de6c017c034895c2c92bc4de99895c2c924"
   "12.1.0":
     posix:
       seh:

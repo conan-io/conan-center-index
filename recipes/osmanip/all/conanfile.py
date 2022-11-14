@@ -7,7 +7,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class OsmanipConan(ConanFile):
     name = "osmanip"
@@ -36,10 +36,7 @@ class OsmanipConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         self.requires("boost/1.80.0")
