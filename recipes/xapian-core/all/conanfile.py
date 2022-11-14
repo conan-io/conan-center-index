@@ -100,7 +100,6 @@ class XapianCoreConan(ConanFile):
         autotools.library_paths = []
         if is_msvc(self):
             autotools.cxx_flags.append("-EHsc")
-            check_min_vs(self, "180")
             autotools.flags.append("-FS")
         conf_args = [
             "--datarootdir={}".format(self._datarootdir.replace("\\", "/")),
