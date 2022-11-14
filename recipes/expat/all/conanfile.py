@@ -1,11 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, collect_libs, copy, rmdir, get
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class ExpatConan(ConanFile):
@@ -36,18 +35,9 @@ class ExpatConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-           del self.settings.compiler.libcxx
-        except Exception:
-           pass
-        try:
-           del self.settings.compiler.cppstd
-        except Exception:
-           pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -90,12 +80,6 @@ class ExpatConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "expat::expat")
         self.cpp_info.set_property("pkg_config_name", "expat")
 
-        self.cpp_info.filenames["cmake_find_package"] = "EXPAT"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "expat"
-        self.cpp_info.names["cmake_find_package"] = "EXPAT"
-        self.cpp_info.names["cmake_find_package_multi"] = "expat"
-        self.cpp_info.names["pkg_config_name"] = "expat"
-
         self.cpp_info.libs = collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines = ["XML_STATIC"]
@@ -106,3 +90,7 @@ class ExpatConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+
+        # TODO: to remove in conan v2
+        self.cpp_info.names["cmake_find_package"] = "EXPAT"
+        self.cpp_info.names["cmake_find_package_multi"] = "expat"

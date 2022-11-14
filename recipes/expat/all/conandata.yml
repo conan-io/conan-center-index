@@ -35,7 +35,6 @@ sources:
   "2.2.10":
     sha256: "bf42d1f52371d23684de36cc6d2f0f1acd02de264d1105bdc17792bbeb7e7ceb"
     url: "https://github.com/libexpat/libexpat/releases/download/R_2_2_10/expat-2.2.10.tar.gz"
-
 patches:
   "2.3.0":
     - patch_file: "patches/0001-2.3.0-relax-vs-restriction.patch"
