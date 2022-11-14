@@ -81,8 +81,23 @@ class LibStudXmlConan(ConanFile):
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
+    @property
+    def _vc_ver(self):
+        if self.settings.compiler == "Visual Studio":
+            return str(Version(self.settings.compiler.version).major)
+        elif self.settings.compiler == "msvc":
+            return {
+                "170": "11",
+                "180": "12",
+                "190": "14",
+                "191": "15",
+                "192": "16",
+                "193": "17",
+            }[str(self.settings.compiler.version)]
+        return None
+
     def _build_vs(self):
-        vc_ver = int(str(Version(self.settings.compiler.version).major))
+        vc_ver = int(self._vc_ver)
         sln_path = None
         def get_sln_path():
             return os.path.join(self.source_folder, self._source_subfolder, f"libstudxml-vc{vc_ver}.sln")
