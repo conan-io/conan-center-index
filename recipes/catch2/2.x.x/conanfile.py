@@ -46,7 +46,7 @@ class Catch2Conan(ConanFile):
             self.options.rm_safe("with_benchmark")
 
     def package_id(self):
-        if not self.options.with_main:
+        if not self.info.options.with_main:
             self.info.clear()
 
     def layout(self):
@@ -55,7 +55,7 @@ class Catch2Conan(ConanFile):
     def validate(self):
         if Version(self.version) < "2.13.1" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("ARMv8 is not supported by versions < 2.13.1+")
-        if self.options.with_main and Version(self.version) < "2.13.4":
+        if self.info.options.get_safe("with_main") and Version(self.version) < "2.13.4":
             raise ConanInvalidConfiguration("Option with_main not supported by versions < 2.13.4")
 
     def source(self):
