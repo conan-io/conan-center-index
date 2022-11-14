@@ -2,7 +2,6 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir
-from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
 
@@ -35,8 +34,6 @@ class BacnetStackConan(ConanFile):
 
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Windows shared builds are not supported right now, see issue https://github.com/bacnet-stack/bacnet-stack/issues/49")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
