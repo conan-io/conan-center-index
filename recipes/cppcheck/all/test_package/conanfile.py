@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.build import cross_building
+from conan.tools.build import can_build
 import os
 import sys
 
