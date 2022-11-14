@@ -28,7 +28,7 @@ class CppcheckConan(ConanFile):
             self.requires("pcre/8.45")
 
     def source(self):
-        get(**self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
