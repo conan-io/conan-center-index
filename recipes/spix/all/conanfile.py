@@ -60,7 +60,7 @@ class SpixConan(ConanFile):
     def requirements(self):
         self.requires("anyrpc/1.0.2")
         self.requires("qt/6.3.1")
-        self.requires("expat/2.4.9", override=True)
+        self.requires("expat/2.4.9")
         
     def validate(self):
         if self.info.settings.compiler.cppstd:
