@@ -24,9 +24,9 @@ class NmosCppTestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            with open("registry-config.json", "w") as config:
+            with open("registry-config.json", "w", encoding="utf-8") as config:
                 config.write('{"http_port": 10000, "domain": "local.", "pri": 51967}')
-            with open("node-config.json", "w") as config:
+            with open("node-config.json", "w", encoding="utf-8") as config:
                 config.write('{"http_port": 20000, "domain": "local.", "highest_pri": 51967, "lowest_pri": 51967}')
 
             # start up the installed nmos-cpp-registry to check it works
