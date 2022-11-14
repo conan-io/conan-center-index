@@ -47,6 +47,7 @@ class NmosCppConan(ConanFile):
         self.requires("websocketpp/0.8.2")
         self.requires("openssl/1.1.1s")
         self.requires("json-schema-validator/2.1.0")
+        self.requires("zlib/1.2.13")
 
         if self.options.get_safe("with_dnssd") == "mdnsresponder":
             self.requires("mdnsresponder/878.200.35")
