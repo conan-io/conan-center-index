@@ -1,9 +1,11 @@
-#include "Color.hpp"
-#include "assert.h"
+#include <cstdlib>
 
-int main () {
-    Gfx::Color someColor;
-    someColor.SetRed (176);
+#include <Color.hpp>
 
-    assert (someColor.GetRed () == 176);
+int main ()
+{
+	Gfx::Color someColor;
+	someColor.SetRed (176);
+
+	return someColor.GetRed () == 176 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.8)
 
 project(test_package CXX)
 
@@ -34,11 +34,13 @@ function(SetCompilerOptions target ac_version)
     endif()
 endfunction()
 
-set(AC_API_DEVKIT_DIR "$ENV{AC_API_DEVKIT_DIR}" CACHE PATH "API DevKit directory.")
+include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+conan_basic_setup(TARGETS KEEP_RPATHS)
 
+set(AC_API_DEVKIT_DIR "${CONAN_ARCHICAD-APIDEVKIT_ROOT}/bin" CACHE PATH "API DevKit directory.")
 find_package(archicad-apidevkit REQUIRED CONFIG)
 
-add_executable(test_package test_gsroot.cpp)
+add_executable(test_package ../test_package/test_gsroot.cpp)
 SetCompilerOptions(test_package "${archicad-apidevkit_VERSION}")
 
 if(WIN32)

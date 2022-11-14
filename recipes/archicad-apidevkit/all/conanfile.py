@@ -3,7 +3,7 @@ from conan.tools.files import copy, get
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.52.0"
 
 
 class ArchicadApidevkitConan (ConanFile):
@@ -30,6 +30,11 @@ class ArchicadApidevkitConan (ConanFile):
         self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
+
+        devkit_dir = os.path.join(self.package_folder, "bin")
+        self.output.info(f"Setting AC_API_DEVKIT_DIR environment variable: {devkit_dir}")
+        self.env_info.AC_API_DEVKIT_DIR = devkit_dir
+        self.buildenv_info.define("AC_API_DEVKIT_DIR", devkit_dir)
 
     def validate(self):
         if not self.info.settings.os in ("Macos", "Windows"):
