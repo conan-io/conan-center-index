@@ -41,7 +41,7 @@ class LibStudXmlConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("expat/2.4.1")
+        self.requires("expat/2.5.0")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio":
@@ -54,8 +54,8 @@ class LibStudXmlConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
-            self.build_requires("gnu-config/cci.20201022")
-            self.build_requires("libtool/2.4.6")
+            self.build_requires("gnu-config/cci.20210814")
+            self.build_requires("libtool/2.4.7")
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
