@@ -1,7 +1,9 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -40,14 +42,17 @@ class XlntConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("libstudxml/1.1.0-b.10+1")
         self.requires("miniz/3.0.1")
         self.requires("utfcpp/3.2.2")
-        # TODO: unvendor libstudxml (needs libstudxml >= 1.1.0 in conan-center)
-        self.requires("expat/2.4.9") # dependency of libstudxml actually
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
+        libstudxml_version = Version(self.dependencies["libstudxml"].ref.version)
+        libstudxml_major_minor = f"{libstudxml_version.major}.{libstudxml_version.minor}"
+        if Version(libstudxml_major_minor) < "1.1":
+            raise ConanInvalidConfiguration(f"{self.ref} not compatible with libstudxml < 1.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -66,10 +71,8 @@ class XlntConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # For some reason this useless file can break compilation
-        rm(self, "version", os.path.join(self.source_folder, "third-party", "libstudxml"))
         # Remove unvendored third party libs
-        for third_party in (os.path.join("libstudxml", "libstudxml", "details", "expat"), "miniz", "utfcpp"):
+        for third_party in ("libstudxml", "miniz", "utfcpp"):
             rmdir(self, os.path.join(self.source_folder, "third-party", third_party))
 
     def build(self):
