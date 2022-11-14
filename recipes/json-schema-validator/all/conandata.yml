@@ -5,3 +5,12 @@ sources:
   "2.0.0":
     url: "https://github.com/pboettch/json-schema-validator/archive/refs/tags/2.0.0.tar.gz"
     sha256: "ca8e4ca5a88c49ea52b5f5c2a08a293dbf02b2fc66cb8c09d4cce5810ee98b57"
+patches:
+  "2.1.0":
+    - patch_file: "patches/2.1.0-cmake_minimum_version.patch"
+      patch_type: "conan"
+      patch_description: "CMake: cmake_minimum_version() before project()"
+  "2.0.0":
+    - patch_file: "patches/2.0.0-cmake_minimum_version.patch"
+      patch_type: "conan"
+      patch_description: "CMake: cmake_minimum_version() before project()"

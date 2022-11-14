@@ -1109,7 +1109,8 @@ class BoostConan(ConanFile):
             if self.options.multithreading:
                 cxx_flags.append("-DBOOST_SP_USE_SPINLOCK")
 
-            cxx_flags.append("-fembed-bitcode")
+            if self.conf.get("tools.apple:enable_bitcode", check_type=bool):
+                cxx_flags.append("-fembed-bitcode")
 
         if self._with_iconv:
             flags.append(f"-sICONV_PATH={self.deps_cpp_info['libiconv'].rootpath}")

@@ -1,4 +1,7 @@
 sources:
+  "4.0.0":
+    url: "https://github.com/Esri/lerc/archive/refs/tags/v4.0.0.tar.gz"
+    sha256: "91431c2b16d0e3de6cbaea188603359f87caed08259a645fd5a3805784ee30a0"
   "2.2":
     url: "https://github.com/Esri/lerc/archive/v2.2.tar.gz"
     sha256: "abc0c5c149144d39a8b351ff5a9a5940c0f66ba908ecf717d58f8f71065d11fe"
@@ -6,7 +9,15 @@ sources:
     url: "https://github.com/Esri/lerc/archive/v2.1.tar.gz"
     sha256: "7c48de40cd5f09319de4b39c417ff4eec4ad4b6aa5d6144f6ffa9b10d18ec94e"
 patches:
+  "4.0.0":
+    - patch_file: "patches/4.0.0-include-algorithm.patch"
+      patch_description: "include algorithm header for std::min/max"
+      patch_type: "portability"
   "2.2":
-    - patch_file: "patches/add-CMakeLists-and-static.patch"
+    - patch_file: "patches/2.1-add-CMakeLists-and-static.patch"
+      patch_description: "create CMakeLists.txt, redefine LERCDLL_API for static build"
+      patch_type: "conan"
   "2.1":
-    - patch_file: "patches/add-CMakeLists-and-static.patch"
+    - patch_file: "patches/2.1-add-CMakeLists-and-static.patch"
+      patch_description: "create CMakeLists.txt, redefine LERCDLL_API for static build"
+      patch_type: "conan"
