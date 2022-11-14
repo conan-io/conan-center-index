@@ -98,7 +98,7 @@ class MsixConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Linux" and not self.options.skip_bundles:
-            self.requires("icu/71.1")
+            self.requires("icu/72.1")
         if self.options.crypto_lib == "openssl":
             self.requires("openssl/1.1.1q")
         if self.options.use_external_zlib:
