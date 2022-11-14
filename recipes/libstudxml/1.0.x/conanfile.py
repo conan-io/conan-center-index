@@ -82,7 +82,7 @@ class LibStudXmlConan(ConanFile):
         return self._autotools
 
     def _build_vs(self):
-        vc_ver = int(Version(self.settings.compiler.version).major)
+        vc_ver = int(str(Version(self.settings.compiler.version).major))
         sln_path = None
         def get_sln_path():
             return os.path.join(self.source_folder, self._source_subfolder, f"libstudxml-vc{vc_ver}.sln")
