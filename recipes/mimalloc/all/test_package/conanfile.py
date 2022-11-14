@@ -66,10 +66,8 @@ class MimallocTestConan(ConanFile):
         if self.settings.os == "Linux":
             env.define("LD_PRELOAD", f"{self._lib_name}.so")
         elif self.settings.os == "Macos":
-            envvars = env.vars(self, scope="run")
-            insert_library = os.path.join(envvars["DYLD_LIBRARY_PATH"][0], self._lib_name +".dylib")
-
             env.define("DYLD_FORCE_FLAT_NAMESPACE", "1")
+            insert_library = os.path.join(self.deps_cpp_info["mimalloc"].libdirs[0], self._lib_name +".dylib")
             env.define("DYLD_INSERT_LIBRARIES", insert_library)
 
         envvars = env.vars(self, scope="run")
