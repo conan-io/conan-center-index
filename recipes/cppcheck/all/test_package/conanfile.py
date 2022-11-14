@@ -7,6 +7,7 @@ import sys
 class TestPackageConan(ConanFile):
     settings = "os", "arch"
     generators = "VirtualBuildEnv"
+    test_type = "explicit"
 
     def test(self):
         if not cross_building(self):
