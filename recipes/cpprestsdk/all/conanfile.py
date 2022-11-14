@@ -3,7 +3,7 @@ from conan.tools import files
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.53.0"
 
 
 class CppRestSDKConan(ConanFile):
@@ -70,6 +70,9 @@ class CppRestSDKConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        # upstream CMakeLists.txt sets BUILD_SHARED_LIBS as a CACHE variable
+        # remove for conan >=1.54.0
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0126"] = "NEW"
         tc.variables["BUILD_TESTS"] = False
         tc.variables["BUILD_SAMPLES"] = False
         tc.variables["WERROR"] = False
