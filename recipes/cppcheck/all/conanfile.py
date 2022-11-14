@@ -1,4 +1,4 @@
-from conan import ConanFile,
+from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
 import os
