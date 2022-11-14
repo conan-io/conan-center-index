@@ -14,6 +14,9 @@ patches:
     - patch_file: "patches/3.0.6-0002-find-libjpeg.patch"
       patch_description: "check_c_source_compilers does not work with conan gens. See https://github.com/conan-io/conan/issues/12180"
       patch_type: "conan"
+    - patch_file: "patches/3.0.6-0003-deterministic-libname.patch"
+      patch_description: "No generator dependent libname"
+      patch_type: "conan"
   "2.0.33":
     - patch_file: "patches/2.0.33-0001-skip-rpath.patch"
       patch_description: "Do not enforce rpath configuration"
