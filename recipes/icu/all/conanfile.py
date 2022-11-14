@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -199,9 +199,12 @@ class ICUConan(ConanFile):
 
         dll_files = glob.glob(os.path.join(self.package_folder, "lib", "*.dll"))
         if dll_files:
-            mkdir(self, os.path.join(self.package_folder, "bin"))
+            bin_dir = os.path.join(self.package_folder, "bin")
+            mkdir(self, bin_dir)
             for dll in dll_files:
-                rename(self, src=dll, dst=os.path.join(self.package_folder, "bin", os.path.basename(dll)))
+                dll_name = os.path.basename(dll)
+                rm(self, dll_name, bin_dir)
+                rename(self, src=dll, dst=os.path.join(bin_dir, dll_name))
 
         if self.settings.os != "Windows" and self.options.data_packaging in ["files", "archive"]:
             mkdir(self, os.path.join(self.package_folder, "res"))
