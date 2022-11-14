@@ -8,7 +8,7 @@ function(SetCompilerOptions target ac_version)
     else()
         target_compile_features("${target}" PUBLIC cxx_std_14)
     endif()
-    target_compile_options("${target}" PUBLIC "$<$<CONFIG:Debug>:-DDEBUG>")
+    target_compile_definitions("${target}" PUBLIC "\$<\$<CONFIG:Debug>:DEBUG>")
     if(WIN32)
         target_compile_options(
             "${target}" PRIVATE
