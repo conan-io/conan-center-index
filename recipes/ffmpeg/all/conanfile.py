@@ -329,11 +329,12 @@ class FFMpegConan(ConanFile):
 
     @property
     def _target_arch(self):
-        target_arch, _, _ = tools.get_gnu_triplet(
+        triplet = tools.get_gnu_triplet(
             "Macos" if is_apple_os(self) else str(self.settings.os),
             str(self.settings.arch),
             str(self.settings.compiler) if self.settings.os == "Windows" else None,
-        ).split("-")
+        )
+        target_arch = triplet[0]
         return target_arch
 
     @property
@@ -341,11 +342,12 @@ class FFMpegConan(ConanFile):
         if self._is_msvc:
             return "win32"
         else:
-            _, _, target_os = tools.get_gnu_triplet(
+            triplet = tools.get_gnu_triplet(
                 "Macos" if is_apple_os(self) else str(self.settings.os),
                 str(self.settings.arch),
                 str(self.settings.compiler) if self.settings.os == "Windows" else None,
-            ).split("-")
+            )
+            target_os = triplet[2]
             if target_os == "gnueabihf":
                 target_os = "gnu" # could also be "linux"
             return target_os
