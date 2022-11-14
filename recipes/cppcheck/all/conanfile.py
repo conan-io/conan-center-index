@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.35.0"
 
 
 class CppcheckConan(ConanFile):
