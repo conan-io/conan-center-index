@@ -1,8 +1,7 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir, rm, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save
 import os
 import textwrap
 
@@ -52,7 +51,7 @@ class JasperConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+            destination=self.source_folder, strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -69,8 +68,6 @@ class JasperConan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
-        env = VirtualBuildEnv(self)
-        env.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -87,18 +84,13 @@ class JasperConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.settings.os == "Windows":
             for dll_prefix in ["concrt", "msvcp", "vcruntime"]:
-                rm(self, "{}*.dll".format(dll_prefix), os.path.join(self.package_folder, "bin"))
-        self._create_cmake_module_variables(self,
-            os.path.join(self.package_folder, self._module_file_rel_path)
-        )
+                rm(self, f"{dll_prefix}*.dll", os.path.join(self.package_folder, "bin"))
+        self._create_cmake_module_variables(os.path.join(self.package_folder, self._module_file_rel_path))
 
     # FIXME: Missing CMake alias variables. See https://github.com/conan-io/conan/issues/7691
-    @staticmethod
-    def _create_cmake_module_variables(conanfile, module_file):
+    def _create_cmake_module_variables(self, module_file):
         content = textwrap.dedent("""\
-            if(DEFINED Jasper_FOUND)
-                set(JASPER_FOUND ${Jasper_FOUND})
-            endif()
+            set(JASPER_FOUND TRUE)
             if(DEFINED Jasper_INCLUDE_DIR)
                 set(JASPER_INCLUDE_DIR ${Jasper_INCLUDE_DIR})
             endif()
@@ -109,22 +101,23 @@ class JasperConan(ConanFile):
                 set(JASPER_VERSION_STRING ${Jasper_VERSION})
             endif()
         """)
-        save(conanfile, module_file, content)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "Jasper")
         self.cpp_info.set_property("cmake_target_name", "Jasper::Jasper")
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.set_property("pkg_config_name", "jasper")
-
-        self.cpp_info.names["cmake_find_package"] = "Jasper"
-        self.cpp_info.names["cmake_find_package_multi"] = "Jasper"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-
         self.cpp_info.libs = ["jasper"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
+
+        # TODO: to remove in conan v2
+        self.cpp_info.names["cmake_find_package"] = "Jasper"
+        self.cpp_info.names["cmake_find_package_multi"] = "Jasper"
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]

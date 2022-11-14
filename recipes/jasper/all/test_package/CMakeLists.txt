@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
-project(test_package C)
+project(test_package LANGUAGES C)
 
-find_package(Jasper REQUIRED CONFIG)
+find_package(Jasper REQUIRED)
 
 set(_custom_vars
     JASPER_FOUND
