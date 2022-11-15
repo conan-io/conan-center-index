@@ -29,6 +29,9 @@ class NmosCppConan(ConanFile):
 
     short_paths = True
 
+    def export_sources(self):
+        files.export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -94,6 +97,7 @@ class NmosCppConan(ConanFile):
         deps.generate()
 
     def build(self):
+        files.apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure(build_script_folder="Development")
         cmake.build()
@@ -149,14 +153,15 @@ class NmosCppConan(ConanFile):
                             match_private = re.fullmatch(r"\$<LINK_ONLY:(.+)>", dependency)
                             if match_private:
                                 dependency = match_private.group(1)
-                            if "::" in dependency:
+                            # target dependencies can be treated fairly consistently
+                            if "::" in dependency or dependency in ["nlohmann_json_schema_validator"]:
                                 dependency = dependency.replace("nmos-cpp::", "")
                                 # Conan component name cannot be the same as the package name
                                 if dependency == "nmos-cpp":
                                     dependency = "nmos-cpp-lib"
                                 # Conan packages for Boost, cpprestsdk, websocketpp, OpenSSL and Avahi have component names that (except for being lowercase) match the CMake targets
-                                # json-schema-validator overrides cmake_find_package[_multi] names
-                                elif dependency == "nlohmann_json_schema_validator::nlohmann_json_schema_validator":
+                                # json-schema-validator overrides cmake_find_package[_multi] names and v2 cmake_target_name
+                                elif dependency == "nlohmann_json_schema_validator":
                                     dependency = "json-schema-validator::json-schema-validator"
                                 # mdnsresponder overrides cmake_find_package[_multi] names
                                 elif dependency == "DNSSD::DNSSD":

@@ -1,0 +1,13 @@
+diff --git a/Development/cmake/NmosCppDependencies.cmake b/Development/cmake/NmosCppDependencies.cmake
+index 9e976aae..58bf1e3c 100644
+--- a/Development/cmake/NmosCppDependencies.cmake
++++ b/Development/cmake/NmosCppDependencies.cmake
+@@ -197,7 +197,7 @@ if(NMOS_CPP_USE_CONAN)
+     endif()
+ 
+     add_library(json_schema_validator INTERFACE)
+-    target_link_libraries(json_schema_validator INTERFACE nlohmann_json_schema_validator::nlohmann_json_schema_validator)
++    target_link_libraries(json_schema_validator INTERFACE nlohmann_json_schema_validator)
+ else()
+     set(JSON_SCHEMA_VALIDATOR_SOURCES
+         third_party/nlohmann/json-patch.cpp
