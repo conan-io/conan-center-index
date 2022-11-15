@@ -343,6 +343,10 @@ class QtConan(ConanFile):
 
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
+        
+        if cross_building(self):
+            raise ConanInvalidConfiguration("cross compiling qt 6 is not yet supported. Contributions are welcome")
+        
 
     def requirements(self):
         self.requires("zlib/1.2.13")
