@@ -14,15 +14,13 @@ class CppcheckConan(ConanFile):
     description = "Cppcheck is an analysis tool for C/C++ code."
     license = "GPL-3.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"with_z3": [True, False], "have_rules": [True, False]}
-    default_options = {"with_z3": True, "have_rules": True}
+    options = {"have_rules": [True, False]}
+    default_options = {"have_rules": True}
 
     def layout(self):
         cmake_layout(self)
 
     def requirements(self):
-        if self.options.with_z3:
-            self.requires("z3/4.8.8")
         if self.options.have_rules:
             self.requires("pcre/8.45")
 
@@ -31,7 +29,6 @@ class CppcheckConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["USE_Z3"] = self.options.with_z3
         tc.variables["HAVE_RULES"] = self.options.have_rules
         tc.variables["USE_MATCHCOMPILER"] = "Auto"
         tc.variables["ENABLE_OSS_FUZZ"] = False
