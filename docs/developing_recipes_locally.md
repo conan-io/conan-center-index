@@ -133,8 +133,8 @@ It is possible to run the linter locally the same way it is being run [using Git
 
 There's two levels of YAML validation, first is syntax and the second is schema.
 The style rules are located in [`linter/yamllint_rules.yml`](../linter/yamllint_rules.yml) and are used to ensure consistence.
-The [`config.yml](how_to_add_packages.md#configyml) is required for the build infrastructure and the
-[`conandata.yml` patch fields](conandata_yml_format.md#patches-fields) have required elements that are enforced with
+The [`config.yml`](adding_packages/README.md#configyml) is required for the build infrastructure and the
+[`conandata.yml` patch fields](adding_packages/conandata_yml_format.md#patches-fields) have required elements that are enforced with
 schema validation. There's are to encourage the best possible quality of recipes and make reviewing faster.
 
 ### Yamllint
