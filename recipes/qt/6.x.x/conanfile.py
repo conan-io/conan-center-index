@@ -483,8 +483,9 @@ class QtConan(ConanFile):
             replace_in_file(self, os.path.join("qt6", "qtbase", "configure.cmake"),
                 "set_property(TARGET ZLIB::ZLIB PROPERTY IMPORTED_GLOBAL TRUE)",
                 "")
-        # use official variable name https://cmake.org/cmake/help/latest/module/FindFontconfig.html
-        replace_in_file(self, os.path.join("qt6", "qtbase", "src", "gui", "configure.cmake"), "FONTCONFIG_FOUND", "Fontconfig_FOUND")
+        if Version(self.version) <= "6.4.0":
+            # use official variable name https://cmake.org/cmake/help/latest/module/FindFontconfig.html
+            replace_in_file(self, os.path.join("qt6", "qtbase", "src", "gui", "configure.cmake"), "FONTCONFIG_FOUND", "Fontconfig_FOUND")
 
     def _xplatform(self):
         if self.settings.os == "Linux":
