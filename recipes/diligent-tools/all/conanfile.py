@@ -20,11 +20,13 @@ class DiligentToolsConan(ConanFile):
                "fPIC": [True, False],
                "jpeg": [False, "libjpeg-turbo", "libjpeg"],
                "with_render_state_packager": [True, False],
+               "with_archiver": [True, False],
               }
     default_options = {"shared": False, 
                        "fPIC": True,
                        "jpeg": "libjpeg",
-                       "with_render_state_packager": False
+                       "with_render_state_packager": False,
+                       "with_archiver": True,
                       }
 
     generators = "cmake_find_package", "cmake_find_package_multi", "cmake"
@@ -120,13 +122,13 @@ class DiligentToolsConan(ConanFile):
         self._cmake.definitions["DILIGENT_BUILD_TOOLS_TESTS"] = False
         self._cmake.definitions["DILIGENT_BUILD_TOOLS_INCLUDE_TEST"] = False
         self._cmake.definitions["DILIGENT_NO_RENDER_STATE_PACKAGER"] = not self.options.with_render_state_packager
+        self._cmake.definitions["ARCHIVER_SUPPORTED"] = not self.options.with_archiver
 
         if self.version != "cci.20211009":
             self._cmake.definitions["GL_SUPPORTED"] = True
             self._cmake.definitions["GLES_SUPPORTED"] = True
             self._cmake.definitions["VULKAN_SUPPORTED"] = True
             self._cmake.definitions["METAL_SUPPORTED"] = True
-            self._cmake.definitions["ARCHIVER_SUPPORTED"] = True
 
         self._cmake.definitions[self._diligent_platform] = True
         self._cmake.configure(build_folder=self._build_subfolder)
