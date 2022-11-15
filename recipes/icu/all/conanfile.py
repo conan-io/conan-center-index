@@ -82,7 +82,7 @@ class ICUConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
-        if cross_building(self, skip_x64_x86=True) and hasattr(self, "settings_build"):
+        if cross_building(self) and hasattr(self, "settings_build"):
             self.tool_requires(self.ref)
 
     def source(self):
@@ -116,14 +116,9 @@ class ICUConan(ConanFile):
             f"--enable-tests={yes_no(self._with_unit_tests)}",
             "--disable-samples",
         ])
-        if cross_building(self, skip_x64_x86=True):
+        if cross_building(self):
             base_path = unix_path(self, self.dependencies.build["icu"].package_folder)
             tc.configure_args.append(f"--with-cross-build={base_path}")
-        else:
-            arch64 = ["x86_64", "sparcv9", "ppc64", "ppc64le", "armv8", "armv8.3", "mips64"]
-            bits = "64" if self.settings.arch in arch64 else "32"
-            tc.configure_args.append(f"--with-library-bits={bits}")
-        if cross_building(self):
             if self.settings.os in ["iOS", "tvOS", "watchOS"]:
                 gnu_triplet = get_gnu_triplet("Macos", str(self.settings.arch))
                 tc.configure_args.append(f"--host={gnu_triplet}")
@@ -135,6 +130,10 @@ class ICUConan(ConanFile):
                     f"--host={host}",
                     f"--build={build}",
                 ])
+        else:
+            arch64 = ["x86_64", "sparcv9", "ppc64", "ppc64le", "armv8", "armv8.3", "mips64"]
+            bits = "64" if self.settings.arch in arch64 else "32"
+            tc.configure_args.append(f"--with-library-bits={bits}")
         if self.settings.os != "Windows":
             # http://userguide.icu-project.org/icudata
             # This is the only directly supported behavior on Windows builds.
