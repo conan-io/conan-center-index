@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import rename, apply_conandata_patches, replace_in_file, rmdir, save, rm, get
-from conan.tools.microsoft import check_min_vs, is_msvc 
+from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
 from conans import AutoToolsBuildEnvironment, tools
 from contextlib import contextmanager
