@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.files import get, rmdir, rm, copy, patch
+from conan.tools.files import get, rmdir, rm, copy, apply_conandata_patches, export_conandata_patches
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.layout import basic_layout
@@ -59,8 +59,7 @@ class BinutilsConan(ConanFile):
         return getattr(self, "settings_target", None) or self.settings
 
     def export_sources(self):
-        for _patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(_patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         del self.settings.compiler.cppstd
@@ -151,12 +150,11 @@ class BinutilsConan(ConanFile):
         tc.configure_args.append(f"--enable-multilib={yes_no(self.options.multilib)}")
         tc.configure_args.append(f"--with-zlib={self.deps_cpp_info['zlib'].rootpath}")
         tc.configure_args.append(f"--program-prefix={self.options.prefix}")
-        tc.configure_args.append(f"--exec_prefix={unix_path(self, os.path.join('/','bin', 'exec_prefix'))}")
+        tc.configure_args.append(f"--exec_prefix=/bin/exec_prefix")
         tc.generate()
 
     def build(self):
-        for _patch in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(self, **_patch)
+        apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
