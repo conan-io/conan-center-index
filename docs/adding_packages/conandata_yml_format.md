@@ -1,8 +1,11 @@
 # conandata.yml
 
-[conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html) is a [YAML](https://yaml.org/) file to provide declarative data for the recipe (which is imperative). `conandata.yml` is a built-in Conan feature (available since 1.22.0) without a fixed structure, but ConanCenterIndex uses it for its own purposes and imposes some requirements.
+[conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html) is a [YAML](https://yaml.org/)
+file to provide declarative data for the recipe (which is imperative). This is a built-in Conan feature (available since
+1.22.0) without a fixed structure, but ConanCenter has a specific format to ensure quality of recipes.
 
-In the context of ConanCenterIndex, this file is mandatory and consists of two main sections that we will explain in the next sections with more detail:
+In the context of ConanCenterIndex, this file is _mandatory_ and consists of two main sections that will be explained in the
+next sections with more detail:
 
 * `sources`: Library sources origin with their verification checksums. Freeform structure specific to a recipe.
 * `patches`: Details about the different patches the library needs along with details for traceability.
@@ -128,7 +131,10 @@ Also, you may use [sha256sum](https://linux.die.net/man/1/sha256sum) command ([w
 
 Sometimes sources provided by project require patching for various reasons. The `conandata.yml` file is the right place to indicate this information as well.
 
-This section follows the same pattern as the `sources` above: one entry per version with a list of patches to apply.
+> **Note**: Under our mission to ensure quality, patches undergo extra scrutiny. **Make sure to review** our
+> [Patching Policy](policy_patching.md) to understand the requirements before adding any.
+
+This section follows the same pattern as the `sources` above - one entry per version with a list of patches to apply.
 
 ```yaml
 patches:
@@ -215,7 +221,7 @@ As sources with backports don't act exactly the same as the version officially r
 
 #### patch_source
 
-_Optional_
+_Recommended_
 
 `patch_source` is the URL from where patch was taken from. https scheme is preferred, but other URLs (e.g. git/svn/hg) are also accepted if there is no alternative. Types of patch sources are:
 
