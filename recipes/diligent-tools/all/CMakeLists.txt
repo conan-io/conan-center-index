@@ -28,5 +28,6 @@ add_library(Diligent-Archiver-static             ALIAS diligent-core::diligent-c
 add_library(Diligent-HLSL2GLSLConverterLib       ALIAS diligent-core::diligent-core)
 add_library(Diligent-TargetPlatform              ALIAS diligent-core::diligent-core)
 add_library(Diligent-GraphicsEngineOpenGL-static ALIAS diligent-core::diligent-core)
+add_library(imgui ALIAS imgui::imgui)
 
 add_subdirectory(source_subfolder)
