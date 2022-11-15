@@ -9,6 +9,7 @@ import textwrap
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, check_min_cppstd, build_jobs
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, replace_in_file, apply_conandata_patches, save, load, rm, rmdir, export_conandata_patches
 from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
@@ -434,6 +435,12 @@ class QtConan(ConanFile):
 
         if self.options.qtwayland:
             self.build_requires("wayland/1.21.0")
+        if cross_building(self):
+            self.tool_requires(f"qt/{self.version}")
+
+    def generate(self):
+        ms = VirtualBuildEnv(self)
+        ms.generate()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -918,6 +925,8 @@ class QtConan(ConanFile):
         # consumers will need the QT_PLUGIN_PATH defined in runenv
         self.runenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "res", "archdatadir", "plugins"))
         self.buildenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "res", "archdatadir", "plugins"))
+        
+        self.buildenv_info.define("QT_HOST_PATH", self.package_folder)
 
         build_modules = {}
         def _add_build_module(component, module):
