@@ -14,10 +14,8 @@ class CppcheckConan(ConanFile):
     description = "Cppcheck is an analysis tool for C/C++ code."
     license = "GPL-3.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake"
     options = {"with_z3": [True, False], "have_rules": [True, False]}
     default_options = {"with_z3": True, "have_rules": True}
-    exports_sources = ["CMakeLists.txt", "patches/**"]
 
     def layout(self):
         cmake_layout(self)
