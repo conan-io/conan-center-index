@@ -84,7 +84,7 @@ class CcclConan(ConanFile):
         self.buildenv_info.define("LD", cccl)
 
         # TODO: Legacy, to be removed on Conan 2.0
-        self.env_info.path = [self._cccl_dir]
+        self.env_info.PATH.append(self._cccl_dir)
 
         self.output.info(f"Setting CC to '{cccl}'")
         self.env_info.CC = cccl
