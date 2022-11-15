@@ -387,11 +387,13 @@ class LibcurlConan(ConanFile):
             f"--enable-symbol-hiding={self._yes_no(self.options.with_symbol_hiding)}",
             f"--enable-unix-sockets={self._yes_no(self.options.with_unix_sockets)}",
         ])
+
         if self.options.with_ssl == "openssl":
             path = unix_path(self, self.dependencies["openssl"].package_folder)
             tc.configure_args.append(f"--with-ssl={path}")
-        else:
+        elif not self.options.with_ssl:
             tc.configure_args.append("--without-ssl")
+
         if self.options.with_ssl == "wolfssl":
             path = unix_path(self, self.dependencies["wolfssl"].package_folder)
             tc.configure_args.append(f"--with-wolfssl={path}")
