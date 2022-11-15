@@ -2,11 +2,12 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.scm import Version
 import os
+import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class Catch2Conan(ConanFile):
@@ -57,10 +58,7 @@ class Catch2Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -108,6 +106,30 @@ class Catch2Conan(ConanFile):
                 dst=os.path.join(self.package_folder, "lib", "cmake", "Catch2"),
             )
 
+        # TODO: to remove in conan v2 once legacy generators removed
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {
+                "Catch2::Catch2": "catch2::_catch2",
+                "Catch2::Catch2WithMain": "catch2::catch2_with_main",
+            }
+        )
+
+    def _create_cmake_module_alias_targets(self, module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent(f"""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """)
+        save(self, module_file, content)
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Catch2")
         self.cpp_info.set_property("cmake_target_name", "Catch2::Catch2WithMain")
@@ -131,9 +153,11 @@ class Catch2Conan(ConanFile):
             defines.append(f"CATCH_CONFIG_DEFAULT_REPORTER={self._default_reporter_str}")
 
         # TODO: to remove in conan v2 once legacy generators removed
-        self.cpp_info.names["cmake_find_package"] = "Catch2"
-        self.cpp_info.names["cmake_find_package_multi"] = "Catch2"
-        self.cpp_info.components["_catch2"].names["cmake_find_package"] = "Catch2"
-        self.cpp_info.components["_catch2"].names["cmake_find_package_multi"] = "Catch2"
-        self.cpp_info.components["catch2_with_main"].names["cmake_find_package"] = "Catch2WithMain"
-        self.cpp_info.components["catch2_with_main"].names["cmake_find_package_multi"] = "Catch2WithMain"
+        self.cpp_info.filenames["cmake_find_package"] = "Catch2"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Catch2"
+        self.cpp_info.names["cmake_find_package"] = "catch2"
+        self.cpp_info.names["cmake_find_package_multi"] = "catch2"
+        self.cpp_info.components["_catch2"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["_catch2"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.components["catch2_with_main"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["catch2_with_main"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

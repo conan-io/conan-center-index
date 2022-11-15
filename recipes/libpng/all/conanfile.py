@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.scm import Version
-from conan.tools.files import apply_conandata_patches, get, rmdir, replace_in_file, copy, rm
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, rmdir, replace_in_file, copy, rm
 from conan.tools.microsoft import is_msvc
 from conan.tools.build import cross_building
 from conan.tools.apple import is_apple_os
@@ -9,7 +9,7 @@ from conan.errors import ConanInvalidConfiguration
 import os
 
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.0"
 
 
 class LibpngConan(ConanFile):
@@ -56,8 +56,7 @@ class LibpngConan(ConanFile):
         return "ppc" in self.settings.arch
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -87,7 +86,7 @@ class LibpngConan(ConanFile):
             pass
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -95,18 +94,24 @@ class LibpngConan(ConanFile):
 
     def _patch_source(self):
         if self.settings.os == "Windows":
-            if is_msvc(self):
-                if Version(self.version) <= "1.5.2":
-                    replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                          'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME}_static)',
-                                          'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME})')
-                else:
-                    replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                        'OUTPUT_NAME "${PNG_LIB_NAME}_static',
-                                        'OUTPUT_NAME "${PNG_LIB_NAME}')
+            if Version(self.version) <= "1.5.2":
+                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                      'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME}_static)',
+                                      'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME})')
             else:
                 replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                      'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}',
+                                    'OUTPUT_NAME "${PNG_LIB_NAME}_static',
+                                    'OUTPUT_NAME "${PNG_LIB_NAME}')
+            if not is_msvc(self):
+                if Version(self.version) < "1.6.38":
+                    src_text = 'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}'
+                else:
+                    src_text = '''COMMAND "${CMAKE_COMMAND}"
+                                 -E copy_if_different
+                                 $<TARGET_LINKER_FILE_NAME:${S_TARGET}>
+                                 $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}'''
+                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                      src_text,
                                       'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/$<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}')
 
     @property
@@ -193,8 +198,8 @@ class LibpngConan(ConanFile):
         self.cpp_info.set_property("pkg_config_aliases", [f"libpng{major_min_version}"])
 
         prefix = "lib" if is_msvc(self) else ""
-        suffix = major_min_version if is_msvc(self) else ""
-        suffix += "d" if is_msvc(self) and self.settings.build_type == "Debug" else ""
+        suffix = major_min_version if self.settings.os == "Windows" else ""
+        suffix += "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = [f"{prefix}png{suffix}"]
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")

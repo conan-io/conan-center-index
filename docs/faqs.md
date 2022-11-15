@@ -37,7 +37,8 @@ This section gathers the most common questions from the community related to pac
   * [Why are version ranges not allowed?](#why-are-version-ranges-not-allowed)
   * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)
   * [How to watch only specific recipes?](#how-to-watch-only-specific-recipes)
-  * [Is it possible to disable Pylint?](#is-it-possible-to-disable-pylint)<!-- endToc -->
+  * [Is it possible to disable Pylint?](#is-it-possible-to-disable-pylint)
+  * [How long can I be inactive before being removed from the authorized users list?](#how-long-can-i-be-inactive-before-being-removed-from-the-authorized-users-list)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -51,7 +52,7 @@ For example, `GSL` is the name of `Guidelines Support Library` from Microsoft an
 
 ## What is the policy on creating packages from pre-compiled binaries?
 
-The policy is that in the general case [recipes should build packages from sources](packaging_policy.md), because of reproducibility and security concerns. The implication is that the sources must be publicly available, and in a format that can be consumed programmatically.
+The policy is that in the general case [recipes should build packages from sources](adding_packages/packaging_policy.md), because of reproducibility and security concerns. The implication is that the sources must be publicly available, and in a format that can be consumed programmatically.
 
 Check the link for further details.
 
@@ -131,7 +132,7 @@ We often receive new fixes and improvements to the recipes already available for
 
 ## Do static libraries tend to be compiled as PIC by default?
 
-Yes! You can learn more about default options in [Packaging Policy](packaging_policy.md#options).
+Yes! You can learn more about default options in [Packaging Policy](adding_packages/packaging_policy.md#options).
 
 ## Why PDB files are not allowed?
 
@@ -188,7 +189,7 @@ No. Some projects provide more than a simple library, but also applications. For
 ## What license should I use for a custom project specific license?
 
 When a non standard open-source license is used, we have decided to use `LicenseRef-` as a prefix, followed by the name of the file which contains a custom license.
-See [the reviewing guidlines](reviewing.md#license-attribute) for more details.
+See [the reviewing guidlines](adding_packages/reviewing.md#license-attribute) for more details.
 
 ## How do I flag a problem to a recipe consumer?
 
@@ -236,7 +237,7 @@ Older versions can be removed from packages given the considerations below. When
 that is specific to them: logic from the recipe and references in `config.yml` and `conandata.yml`. In any case, packages
 are never removed from ConanCenter remote.
 
-When removing older versions, please take into account [these considerations](reviewing.md#supported-versions).
+When removing older versions, please take into account [these considerations](adding_packages/reviewing.md#supported-versions).
 
 ## Can I install packages from the system package manager?
 
@@ -247,7 +248,7 @@ The hook [KB-H032](error_knowledge_base.md#KB-H032) does not allow `system_requi
 system packages at same recipe.
 
 There are exceptions where some projects are closer to system drivers or hardware and packaging as a regular library could result
-in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, see the [How-to](how_to_add_packages.md#system-packages) for more.
+in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, see the [How-to](adding_packages/README.md#system-packages) for more.
 
 ## Why ConanCenter does **not** build and execute tests in recipes
 
@@ -260,7 +261,7 @@ There are different motivations
 ## Why not add an option to build unit tests
 
 - Adding a testing option will change the package ID, but will not provide different packaged binaries
-- Use the configuration [skip_test](packaging_policy.md#options-to-avoid) to define the testing behavior.
+- Use the configuration [skip_test](adding_packages/packaging_policy.md#options-to-avoid) to define the testing behavior.
 
 ## What is the policy for supported python versions?
 
@@ -402,10 +403,15 @@ Conan will build from sources all the packages and use the shared libraries when
 
 The [Code Owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) feature requires
 write permission for any listed user in the file `.github/CODEOWNERS`, which makes it impossible to be accepted by Conan. However, that file is still important as it can be re-used in
-a future Github Action to parse and communicate users. Meanwhile, there is the project https://app.github-file-watcher.com/, which is able to notify users, but only after
-merging to the master branch. Feel free to contribute to a new Github Action that implements a file watcher feature.
+a future Github Action to parse and communicate users. Meanwhile, there is the project https://app.github-file-watcher.com/,
+which is able to notify users, but only after merging to the master branch. Feel free to contribute to a new Github Action that
+implements a file watcher feature.
 
 ## Is it possible to disable Pylint?
 
 No. The [pylint](v2_linter.md) has an important role of keeping any recipe prepared for [Conan v2 migration](v2_migration.md). In case you are having
 difficult to understand [linter errors](linters.md), please comment on your pull request about the problem to receive help from the community.
+
+## How long can I be inactive before being removed from the authorized users list?
+
+Please, read [Inactivity and user removal section](how_to_add_packages.md#inactivity-and-user-removal).

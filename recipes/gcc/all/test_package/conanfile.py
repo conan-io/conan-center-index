@@ -11,8 +11,8 @@ class TestPackageConan(ConanFile):
             if os.name == 'posix':
                 os.chmod(name, os.stat(name).st_mode | 0o111)
 
-        cc = os.environ["CC"]
-        cxx = os.environ["CXX"]
+        cc = self.deps_env_info["gcc"].CC
+        cxx = self.deps_env_info["gcc"].CXX
         hello_c = os.path.join(self.source_folder, "hello.c")
         hello_cpp = os.path.join(self.source_folder, "hello.cpp")
         self.run("%s --version" % cc, run_environment=True)

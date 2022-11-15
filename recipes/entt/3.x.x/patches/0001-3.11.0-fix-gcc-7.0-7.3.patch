@@ -1,0 +1,20 @@
+--- a/src/entt/meta/meta.hpp
++++ b/src/entt/meta/meta.hpp
+@@ -1613,7 +1613,7 @@ public:
+     using reference = value_type;
+     using iterator_category = std::input_iterator_tag;
+ 
+-    constexpr meta_iterator() noexcept
++    meta_iterator() noexcept
+         : ctx{},
+           vtable{},
+           handle{} {}
+@@ -1707,7 +1707,7 @@ public:
+     using reference = value_type;
+     using iterator_category = std::input_iterator_tag;
+ 
+-    constexpr meta_iterator() noexcept
++    meta_iterator() noexcept
+         : ctx{},
+           vtable{},
+           handle{} {}
