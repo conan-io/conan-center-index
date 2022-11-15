@@ -1,0 +1,12 @@
+diff --git a/extension/jemalloc/jemalloc/include/jemalloc/internal/jemalloc_preamble.h b/extension/jemalloc/jemalloc/include/jemalloc/internal/jemalloc_preamble.h
+index 47455cb..cfd73bc 100644
+--- a/extension/jemalloc/jemalloc/include/jemalloc/internal/jemalloc_preamble.h
++++ b/extension/jemalloc/jemalloc/include/jemalloc/internal/jemalloc_preamble.h
+@@ -4,6 +4,7 @@
+ #include <cstdint>
+ #include <cstdarg>
+ #include <cstdbool>
++#include <cstdlib>
+ 
+ #include "jemalloc/internal/jemalloc_internal_defs.h"
+ #include "jemalloc/internal/jemalloc_internal_decls.h"

@@ -28,7 +28,6 @@ class DuckdbConan(ConanFile):
         "with_httpfs": [True, False],
         "with_visualizer": [True, False],
         "with_json": [True, False],
-        "with_jemalloc": [True, False],
         "with_excel": [True, False],
         "with_sqlsmith": [True, False],
         "with_odbc": [True, False],
@@ -48,7 +47,6 @@ class DuckdbConan(ConanFile):
         "with_httpfs": False,
         "with_visualizer": False,
         "with_json": False,
-        "with_jemalloc": False,
         "with_excel": False,
         "with_sqlsmith": False,
         "with_odbc": False,
@@ -69,8 +67,6 @@ class DuckdbConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "0.6.0":
-            del self.options.with_jemalloc
 
     def configure(self):
         if self.options.shared:
@@ -88,8 +84,6 @@ class DuckdbConan(ConanFile):
             self.requires("odbc/2.3.11")
         if self.options.with_httpfs:
             self.requires("openssl/3.0.5")
-        if self.options.get_safe("with_jemalloc"):
-            self.requires("jemalloc/5.3.0")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -112,8 +106,6 @@ class DuckdbConan(ConanFile):
         tc.variables["BUILD_HTTPFS_EXTENSION"] = self.options.with_httpfs
         tc.variables["BUILD_VISUALIZER_EXTENSION"] = self.options.with_visualizer
         tc.variables["BUILD_JSON_EXTENSION"] = self.options.with_json
-        if Version(self.version) >= "0.6.0":
-            tc.variables["BUILD_JEMALLOC_EXTENSION"] = self.options.with_jemalloc
         tc.variables["BUILD_EXCEL_EXTENSION"] = self.options.with_excel
         tc.variables["BUILD_SQLSMITH_EXTENSION"] = self.options.with_sqlsmith
         tc.variables["BUILD_ODBC_DRIVER"] = self.options.with_odbc
