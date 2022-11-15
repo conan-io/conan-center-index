@@ -36,7 +36,7 @@ If possible, try to avoid mixing single quotes (`'`) and double quotes (`"`) in 
 When extracting sources or performing out-of-source builds, it is preferable to use a _subfolder_ attribute, `_source_subfolder` and `_build_subfolder` respectively.
 
 > **Note**: These are only required when using the legacy generator such as `cmake`. For the new generators like `CMakeToolchain` see
-> the [2.0 Migration Guide](v2_migration.md#using-layout-with-new-generators) for more information.
+> the [2.0 Migration Guide](../v2_migration.md#using-layout-with-new-generators) for more information.
 
 For example doing this with property attributes for these variables:
 
@@ -69,7 +69,7 @@ The mandatory license attribute of each recipe **should** be a [SPDX license](ht
 
 Where the SPDX guidelines do not apply, packages should do the following:
 
-- When no license is provided or when it's given to the "public domain", the value should be set to [Unlicense](https://spdx.org/licenses/Unlicense) as per [KB-H056](error_knowledge_base.md#kb-h056-license-public-domain) and [FAQ](faqs.md#what-license-should-i-use-for-public-domain).
+- When no license is provided or when it's given to the "public domain", the value should be set to [Unlicense](https://spdx.org/licenses/Unlicense) as per [KB-H056](../error_knowledge_base.md#kb-h056-license-public-domain) and [FAQ](../faqs.md#what-license-should-i-use-for-public-domain).
 - When a custom (e.g. project specific) license is given, the value should be set to `LicenseRef-` as a prefix, followed by the name of the file which contains a custom license. See [this example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/fft/all/conanfile.py#L8). For more details, [read this conversation](https://github.com/conan-io/conan-center-index/pull/4928/files#r596216206)
 
 ## Exporting Patches
