@@ -622,12 +622,17 @@ class LibcurlConan(ConanFile):
             if self.options.with_ssl == "schannel":
                 self.cpp_info.components["curl"].system_libs.append("crypt32")
         elif is_apple_os(self):
-            if Version(self.version) >= "7.77.0":
+            if Version(self.version) >= "7.78.0":
+                self.cpp_info.components["curl"].frameworks.extend(["CoreFoundation", "SystemConfiguration"])
+            elif Version(self.version) >= "7.77.0":
                 self.cpp_info.components["curl"].frameworks.append("SystemConfiguration")
             if self.options.with_ldap:
                 self.cpp_info.components["curl"].system_libs.append("ldap")
             if self.options.with_ssl == "darwinssl":
-                self.cpp_info.components["curl"].frameworks.extend(["CoreFoundation", "Security"])
+                if Version(self.version) >= "7.78.0":
+                    self.cpp_info.components["curl"].frameworks.append("Security")
+                else:
+                    self.cpp_info.components["curl"].frameworks.extend(["CoreFoundation", "Security"])
 
         if self._is_mingw:
             # provide pthread for dependent packages
