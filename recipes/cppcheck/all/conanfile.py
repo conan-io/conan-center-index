@@ -1,4 +1,6 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
 import os
@@ -16,6 +18,10 @@ class CppcheckConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"have_rules": [True, False]}
     default_options = {"have_rules": True}
+
+    def validate(self):
+        if not can_run(self):
+            raise ConanInvalidConfiguration("Cross build not possible")
 
     def layout(self):
         cmake_layout(self)
