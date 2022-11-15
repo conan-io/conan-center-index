@@ -5,6 +5,3 @@ sources:
   "2.8.2":
     url: "https://github.com/danmar/cppcheck/archive/2.8.2.tar.gz"
     sha256: "30ba99ab54089c44b83f02e2453da046a7edff5237950d4A0eb1eba4afcb4f45"
-  "2.7.5":
-    url: "https://github.com/danmar/cppcheck/archive/2.7.5.tar.gz"
-    sha256: "6c7ac29e57fa8b3ac7be224510200e579d5a90217e2152591ef46ffc947d8f78"
