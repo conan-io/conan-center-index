@@ -41,8 +41,8 @@ class SocketcanCanaryConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(f"{self.ref} can not be used on Windows.")
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux.")
 
     def requirements(self):
         self.requires("boost/1.74.0", transitive_headers=True)
