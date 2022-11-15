@@ -31,9 +31,7 @@ class CcclConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def package_id(self):
-        del self.info.options.muffle
-        del self.info.options.verbose
-        self.info.settings.clear()
+        self.info.clear()
 
     def validate(self):
         if not is_msvc(self):
