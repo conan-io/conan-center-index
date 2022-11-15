@@ -129,6 +129,8 @@ class LibtiffConan(ConanFile):
         if Version(self.version) >= "4.3.0":
             tc.variables["lerc"] = False # TODO: add lerc support for libtiff versions >= 4.3.0
         tc.variables["cxx"] = self.options.cxx
+        # Even https://github.com/conan-io/conan/pull/12401 is not sufficient, must be forced in command line
+        tc.cache_variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
