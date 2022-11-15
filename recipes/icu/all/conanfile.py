@@ -119,13 +119,22 @@ class ICUConan(ConanFile):
         if cross_building(self, skip_x64_x86=True):
             base_path = unix_path(self, self.dependencies.build["icu"].package_folder)
             tc.configure_args.append(f"--with-cross-build={base_path}")
-            if self.settings.os in ["iOS", "tvOS", "watchOS"]:
-                gnu_triplet = get_gnu_triplet("Macos", str(self.settings.arch))
-                tc.configure_args.append(f"--host={gnu_triplet}")
         else:
             arch64 = ["x86_64", "sparcv9", "ppc64", "ppc64le", "armv8", "armv8.3", "mips64"]
             bits = "64" if self.settings.arch in arch64 else "32"
             tc.configure_args.append(f"--with-library-bits={bits}")
+        if cross_building(self):
+            if self.settings.os in ["iOS", "tvOS", "watchOS"]:
+                gnu_triplet = get_gnu_triplet("Macos", str(self.settings.arch))
+                tc.configure_args.append(f"--host={gnu_triplet}")
+            elif is_msvc(self):
+                # ICU doesn't like GNU triplet of conan for msvc (see https://github.com/conan-io/conan/issues/12546)
+                host = get_gnu_triplet(str(self.settings.os), str(self.settings.arch), "gcc")
+                build = get_gnu_triplet(str(self._settings_build.os), str(self._settings_build.arch), "gcc")
+                tc.configure_args.extend([
+                    f"--host={host}",
+                    f"--build={build}",
+                ])
         if self.settings.os != "Windows":
             # http://userguide.icu-project.org/icudata
             # This is the only directly supported behavior on Windows builds.
