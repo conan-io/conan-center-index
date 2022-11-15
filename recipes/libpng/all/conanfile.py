@@ -83,7 +83,7 @@ class LibpngConan(ConanFile):
 
     def validate(self):
         if Version(self.version) < "1.6" and self.info.settings.arch == "armv8" and is_apple_os(self):
-            raise ConanInvalidConfiguration(f"{self.ref} could not be cross build on Mac.")
+            raise ConanInvalidConfiguration(f"{self.ref} currently does not building for {self.info.settings.os} {self.info.settings.arch}. Contributions are welcomed")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
