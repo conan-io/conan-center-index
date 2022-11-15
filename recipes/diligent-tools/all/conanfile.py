@@ -124,7 +124,9 @@ class DiligentToolsConan(ConanFile):
         self._cmake.definitions["DILIGENT_NO_RENDER_STATE_PACKAGER"] = not self.options.with_render_state_packager
         self._cmake.definitions["ARCHIVER_SUPPORTED"] = not self.options.with_archiver
 
-        if self.version != "cci.20211009":
+        if self.version != "cci.20211009" and \
+        (self.version.startswith("api") and self.version >= "api.252005") or \
+        (self.version > "2.5.2"):
             self._cmake.definitions["GL_SUPPORTED"] = True
             self._cmake.definitions["GLES_SUPPORTED"] = True
             self._cmake.definitions["VULKAN_SUPPORTED"] = True
