@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class SpdlogConan(ConanFile):
@@ -41,10 +41,7 @@ class SpdlogConan(ConanFile):
 
     def configure(self):
         if self.options.shared or self.options.header_only:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
         if self.options.header_only:
             del self.options.shared
 
@@ -66,7 +63,7 @@ class SpdlogConan(ConanFile):
             self.requires("fmt/6.0.0", transitive_headers=True)
 
     def package_id(self):
-        if self.info.options.header_only:
+        if self.options.header_only:
             self.info.clear()
 
     @property
