@@ -1,12 +1,11 @@
-from conans import tools
 from conan import ConanFile
+from conans import tools
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir, chdir, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain,AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from contextlib import contextmanager
-import functools
 import glob
 import os
 
@@ -53,19 +52,19 @@ class Krb5Conan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.settings.rm_safe("fPIC")
+            self.options.rm_safe("fPIC")
         if self.settings.compiler == "Visual Studio":
-            self.settings.rm_safe("thread")
-            self.settings.rm_safe("with_tls")
-            self.settings.rm_safe("with_tcl")
+            self.options.rm_safe("thread")
+            self.options.rm_safe("with_tls")
+            self.options.rm_safe("with_tcl")
             # Visual Studio only builds shared libraries
-            self.settings.rm_safe("shared")
+            self.options.rm_safe("shared")
         else:
-            self.settings.rm_safe("leash")
+            self.options.rm_safe("leash")
 
     def configure(self):
         if self.options.get_safe("shared"):
-            self.settings.rm_safe("fPIC")
+            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
