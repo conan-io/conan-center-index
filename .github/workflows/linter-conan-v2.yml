@@ -15,10 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
       - name: Get changed files
-        uses: tj-actions/changed-files@v20
+        uses: ./.github/actions/pr_changed_files
         id: changed_files
         with:
           files: |
@@ -83,11 +81,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v20
+        uses: ./.github/actions/pr_changed_files
         with:
           files: |
             recipes/*/*/conanfile.py
@@ -118,11 +114,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v20
+        uses: ./.github/actions/pr_changed_files
         with:
           files: |
             recipes/*/*/test_*/conanfile.py
