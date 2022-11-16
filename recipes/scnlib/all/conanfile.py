@@ -46,8 +46,10 @@ class ScnlibConan(ConanFile):
             del self.options.shared
 
     def layout(self):
-        # src_folder must use the same source folder name the project
-        cmake_layout(self, src_folder="src")
+        if self.options.header_only:
+            basic_layout(self, src_folder="src")
+        else:
+            cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if Version(self.version) >= "1.0":
