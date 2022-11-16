@@ -33,11 +33,7 @@ index 0b49a7e..ed5c24b 100644
 -        "${CMAKE_BINARY_DIR}/../openssl/x86/lib/libcrypto.a"
 -        CACHE INTERNAL ""
 -        )
-+    if(NOT TARGET cpprestsdk_openssl_internal)
-+        add_library(cpprestsdk_openssl_internal INTERFACE)
-+        target_include_directories(cpprestsdk_openssl_internal INTERFACE "${CONAN_INCLUDE_DIRS_OPENSSL}")
-+        target_link_libraries(cpprestsdk_openssl_internal INTERFACE "${CONAN_LIBS_OPENSSL}")
-     endif()
+-    endif()
 -    set(_SSL_LEAK_SUPPRESS_AVAILABLE ON CACHE INTERNAL "")
 -  else()
 -    if(APPLE)
@@ -76,13 +72,17 @@ index 0b49a7e..ed5c24b 100644
 -    # libressl doesn't ship with the cleanup method being used in ws_client_wspp
 -    target_compile_definitions(cpprestsdk_openssl_internal INTERFACE -DCPPREST_NO_SSL_LEAK_SUPPRESS)
 -  endif()
++    if(NOT TARGET cpprestsdk_openssl_internal)
++        add_library(cpprestsdk_openssl_internal INTERFACE)
++        find_package(OpenSSL REQUIRED)
++        target_link_libraries(cpprestsdk_openssl_internal INTERFACE "OpenSSL::SSL")
++    endif()
  endfunction()
-\ No newline at end of file
 diff --git a/Release/cmake/cpprest_find_websocketpp.cmake b/Release/cmake/cpprest_find_websocketpp.cmake
 index 94ea81a..f83a777 100644
 --- a/Release/cmake/cpprest_find_websocketpp.cmake
 +++ b/Release/cmake/cpprest_find_websocketpp.cmake
-@@ -1,27 +1,7 @@
+@@ -1,26 +1,6 @@
  function(cpprest_find_websocketpp)
 -  if(TARGET cpprestsdk_websocketpp_internal)
 -    return()
@@ -109,11 +109,9 @@ index 94ea81a..f83a777 100644
 -      cpprestsdk_boost_internal
 -      cpprestsdk_openssl_internal
 -  )
--endfunction()
 +    if(NOT TARGET cpprestsdk_websocketpp_internal)
 +        add_library(cpprestsdk_websocketpp_internal INTERFACE)
-+        target_include_directories(cpprestsdk_websocketpp_internal INTERFACE "${CONAN_INCLUDE_DIRS_WEBSOCKETPP}")
-+        target_link_libraries(cpprestsdk_websocketpp_internal INTERFACE "${CONAN_LIBS_WEBSOCKETPP}")
++        find_package(websocketpp REQUIRED)
++        target_link_libraries(cpprestsdk_websocketpp_internal INTERFACE "websocketpp::websocketpp")
 +    endif()
-+endfunction()
-\ No newline at end of file
+ endfunction()
