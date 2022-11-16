@@ -32,7 +32,7 @@ class Krb5Conan(ConanFile):
         "with_tcl": [True, False],
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
         "thread": True,
         "use_dns_realms": False,
