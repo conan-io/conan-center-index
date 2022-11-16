@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class SpdlogConan(ConanFile):
@@ -36,24 +36,25 @@ class SpdlogConan(ConanFile):
         "no_exceptions": False,
         "fmt_header_only": False,
     }
-    generators = "CMakeDeps"
 
     def config_options(self):
-        if self.settings.os == "Windows" or self.options.shared or self.options.header_only:
+        if self.settings.os == "Windows":
             del self.options.fPIC
-
-        if self.options.header_only:
-            del self.options.shared
-
-        if self.settings.os != "Windows":
+        else:
             del self.options.wchar_filenames
             del self.options.wchar_support
 
     def configure(self):
+        if self.options.shared or self.options.header_only:
+            self.options.rm_safe("fPIC")
+
+        if self.options.header_only:
+            del self.options.shared
+
         self.options["fmt"].header_only = self.options.fmt_header_only
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if Version(self.version) >= "1.11.0":
@@ -70,7 +71,7 @@ class SpdlogConan(ConanFile):
             self.requires("fmt/6.0.0", transitive_headers=True)
 
     def package_id(self):
-        if self.info.options.header_only:
+        if self.options.header_only:
             self.info.clear()
 
     @property
