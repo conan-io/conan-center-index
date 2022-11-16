@@ -1,4 +1,7 @@
 sources:
+  "0.12.3":
+    url: "https://github.com/lief-project/LIEF/archive/0.12.3.tar.gz"
+    sha256: "762925ad2eed642a6e7ef2cc899bcd3e93a40a2ce1dd2391d9b9ecadfe6438cf"
   "0.12.2":
     url: "https://github.com/lief-project/LIEF/archive/0.12.2.tar.gz"
     sha256: "d779c802ba1f80d0e93765e038e0a198fb5ffe4662afe467e33102cb44a06e99"
@@ -6,12 +9,20 @@ sources:
     url: "https://github.com/lief-project/LIEF/archive/0.10.1.tar.gz"
     sha256: "6f30c98a559f137e08b25bcbb376c0259914b33c307b8b901e01ca952241d00a"
 patches:
+  "0.12.3":
+    - patch_file: "patches/0.12.3-001_link_to_conan.patch"
+      patch_description: "find conan package and link these"
+      patch_type: "conan"
+    - patch_file: "patches/0.12.2-002_support_older_gcc.patch"
+      patch_description: "fix name look up issue"
+      patch_type: "portability"
+      patch_source: "https://github.com/lief-project/LIEF/pull/815"
   "0.12.2":
     - patch_file: "patches/0.12.2-001_link_to_conan.patch"
       patch_description: "find conan package and link these"
       patch_type: "conan"
     - patch_file: "patches/0.12.2-002_support_older_gcc.patch"
-      patch_description: "find conan package and link these"
+      patch_description: "fix name look up issue"
       patch_type: "portability"
       patch_source: "https://github.com/lief-project/LIEF/pull/815"
   "0.10.1":

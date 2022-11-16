@@ -1,17 +1,17 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class TaglibConan(ConanFile):
     name = "taglib"
     description = "TagLib is a library for reading and editing the metadata of several popular audio formats."
     license = ("LGPL-2.1-or-later", "MPL-1.1")
-    topics = ("taglib", "audio", "metadata")
+    topics = ("audio", "metadata")
     homepage = "https://taglib.org"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -28,8 +28,7 @@ class TaglibConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -37,13 +36,13 @@ class TaglibConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-
-    def requirements(self):
-        self.requires("zlib/1.2.12")
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("zlib/1.2.13")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

@@ -1,8 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools import files, scm, microsoft
-from conans import tools, AutoToolsBuildEnvironment, Meson
-import contextlib
+from conan.tools import files, microsoft
+from conans import tools, AutoToolsBuildEnvironment
+
 import functools
 import os
 
@@ -61,15 +61,13 @@ class FontconfigConan(ConanFile):
             self.requires("libuuid/1.0.3")
 
     def validate(self):
-        if microsoft.is_msvc(self) and scm.Version(self.version) < "2.13.93":
+        if microsoft.is_msvc(self):
             raise ConanInvalidConfiguration("fontconfig does not support Visual Studio for versions < 2.13.93.")
 
     def build_requirements(self):
         self.build_requires("gperf/3.1")
         self.build_requires("pkgconf/1.7.4")
-        if microsoft.is_msvc(self):
-            self.build_requires("meson/0.63.1")
-        elif self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", check_type=str):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
@@ -94,16 +92,6 @@ class FontconfigConan(ConanFile):
         files.replace_in_file(self, "Makefile", "po-conf test", "po-conf")
         return autotools
 
-    @functools.lru_cache(1)
-    def _configure_meson(self):
-        meson = Meson(self)
-        meson.options["doc"] = "disabled"
-        meson.options["nls"] = "disabled"
-        meson.options["tests"] = "disabled"
-        meson.options["tools"] = "disabled"
-        meson.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
-        return meson
-
     def _patch_files(self):
         files.apply_conandata_patches(self)
         # fontconfig requires libtool version number, change it for the corresponding freetype one
@@ -117,51 +105,24 @@ class FontconfigConan(ConanFile):
             "RUN_FC_CACHE_TEST=false"
         )
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        if microsoft.is_msvc(self):
-            with tools.vcvars(self):
-                env = {
-                    "CC": "cl",
-                    "CXX": "cl",
-                    "LD": "link",
-                    "AR": "lib",
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
-
     def build(self):
         self._patch_files()
-        if microsoft.is_msvc(self):
-            with self._build_context():
-                meson = self._configure_meson()
-                meson.build()
-        else:
-            # relocatable shared lib on macOS
-            files.replace_in_file(self,
-                os.path.join(self._source_subfolder, "configure"),
-                "-install_name \\$rpath/",
-                "-install_name @rpath/"
-            )
-            with tools.run_environment(self):
-                autotools = self._configure_autotools()
-                autotools.make()
+        # relocatable shared lib on macOS
+        files.replace_in_file(self,
+            os.path.join(self._source_subfolder, "configure"),
+            "-install_name \\$rpath/",
+            "-install_name @rpath/"
+        )
+        with tools.run_environment(self):
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        if microsoft.is_msvc(self):
-            with self._build_context():
-                meson = self._configure_meson()
-                meson.install()
-                if os.path.isfile(os.path.join(self.package_folder, "lib", "libfontconfig.a")):
-                    files.rename(self, os.path.join(self.package_folder, "lib", "libfontconfig.a"),
-                                 os.path.join(self.package_folder, "lib", "fontconfig.lib"))
-        else:
-            with tools.run_environment(self):
-                autotools = self._configure_autotools()
-                autotools.install()
+        with tools.run_environment(self):
+            autotools = self._configure_autotools()
+            autotools.install()
+
         files.rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         files.rm(self, "*.conf", os.path.join(self.package_folder, "bin", "etc", "fonts", "conf.d"))
         files.rm(self, "*.def", os.path.join(self.package_folder, "lib"))
