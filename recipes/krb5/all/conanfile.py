@@ -58,9 +58,8 @@ class Krb5Conan(ConanFile):
             self.settings.rm_safe("thread")
             self.settings.rm_safe("with_tls")
             self.settings.rm_safe("with_tcl")
-            self.settings.rm_safe("shared")
             # Visual Studio only builds shared libraries
-            del self.options.shared
+            self.settings.rm_safe("shared")
         else:
             self.settings.rm_safe("leash")
 
