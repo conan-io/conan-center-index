@@ -48,7 +48,7 @@ class CppRestSDKConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         self.requires("boost/1.80.0")
