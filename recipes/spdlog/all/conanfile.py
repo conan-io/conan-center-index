@@ -25,6 +25,7 @@ class SpdlogConan(ConanFile):
         "wchar_support": [True, False],
         "wchar_filenames": [True, False],
         "no_exceptions": [True, False],
+        "fmt_header_only": [True, False],
     }
     default_options = {
         "shared": False,
@@ -33,23 +34,26 @@ class SpdlogConan(ConanFile):
         "wchar_support": False,
         "wchar_filenames": False,
         "no_exceptions": False,
+        "fmt_header_only": False,
     }
+    generators = "CMakeDeps"
 
     def config_options(self):
-        if self.settings.os == "Windows":
+        if self.settings.os == "Windows" or self.options.shared or self.options.header_only:
             del self.options.fPIC
 
-    def configure(self):
-        if self.options.shared or self.options.header_only:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
         if self.options.header_only:
             del self.options.shared
 
+        if self.settings.os != "Windows":
+            del self.options.wchar_filenames
+            del self.options.wchar_support
+
+    def configure(self):
+        self.options["fmt"].header_only = self.options.fmt_header_only
+
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        cmake_layout(self)
 
     def requirements(self):
         if Version(self.version) >= "1.11.0":
@@ -77,8 +81,6 @@ class SpdlogConan(ConanFile):
     def validate(self):
         if self._info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-        if self._info.settings.os != "Windows" and (self._info.options.wchar_support or self._info.options.wchar_filenames):
-            raise ConanInvalidConfiguration("wchar is only supported under windows")
         if self._info.options.get_safe("shared") and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
@@ -89,31 +91,30 @@ class SpdlogConan(ConanFile):
         if not self.options.header_only:
             fmt = self.dependencies["fmt"]
             tc = CMakeToolchain(self)
+            tc.variables["SPDLOG_BUILD_BENCH"] = False
             tc.variables["SPDLOG_BUILD_EXAMPLE"] = False
             tc.variables["SPDLOG_BUILD_EXAMPLE_HO"] = False
+            tc.variables["SPDLOG_BUILD_SHARED"] = not self.options.header_only and self.options.shared
             tc.variables["SPDLOG_BUILD_TESTS"] = False
             tc.variables["SPDLOG_BUILD_TESTS_HO"] = False
-            tc.variables["SPDLOG_BUILD_BENCH"] = False
-            tc.variables["SPDLOG_FMT_EXTERNAL"] = True
+            tc.variables["SPDLOG_FMT_EXTERNAL"] = not fmt.options.header_only
             tc.variables["SPDLOG_FMT_EXTERNAL_HO"] = fmt.options.header_only
-            tc.variables["SPDLOG_BUILD_SHARED"] = not self.options.header_only and self.options.shared
-            tc.variables["SPDLOG_WCHAR_SUPPORT"] = self.options.wchar_support
-            tc.variables["SPDLOG_WCHAR_FILENAMES"] = self.options.wchar_filenames
             tc.variables["SPDLOG_INSTALL"] = True
             tc.variables["SPDLOG_NO_EXCEPTIONS"] = self.options.no_exceptions
+            if self.settings.os == "Windows":
+                tc.variables["SPDLOG_WCHAR_FILENAMES"] = self.options.wchar_filenames
+                tc.variables["SPDLOG_WCHAR_SUPPORT"] = self.options.wchar_support
             if self.settings.os in ("iOS", "tvOS", "watchOS"):
                 tc.variables["SPDLOG_NO_TLS"] = True
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
             tc.generate()
-        cmake_deps = CMakeDeps(self)
-        cmake_deps.generate()
 
     def _disable_werror(self):
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "utils.cmake"), "/WX", "")
 
     def build(self):
-        self._disable_werror()
         if not self.options.header_only:
+            self._disable_werror()
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
@@ -144,9 +145,9 @@ class SpdlogConan(ConanFile):
             suffix = "d" if self.settings.build_type == "Debug" else ""
             self.cpp_info.components["libspdlog"].libs = [f"spdlog{suffix}"]
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_COMPILED_LIB")
-        if self.options.wchar_support:
+        if self.options.get_safe("wchar_support"):
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_WCHAR_TO_UTF8_SUPPORT")
-        if self.options.wchar_filenames:
+        if self.options.get_safe("wchar_filenames"):
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_WCHAR_FILENAMES")
         if self.options.no_exceptions:
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_NO_EXCEPTIONS")
