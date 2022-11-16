@@ -414,4 +414,4 @@ difficult to understand [linter errors](linters.md), please comment on your pull
 
 ## How long can I be inactive before being removed from the authorized users list?
 
-Please, read [Inactivity and user removal section](how_to_add_packages.md#inactivity-and-user-removal).
+Please, read [Inactivity and user removal section](adding_packages/README.md#inactivity-and-user-removal).
