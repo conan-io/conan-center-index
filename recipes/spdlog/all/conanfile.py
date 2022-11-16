@@ -109,6 +109,8 @@ class SpdlogConan(ConanFile):
                 tc.variables["SPDLOG_NO_TLS"] = True
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
             tc.generate()
+        cmake_deps = CMakeDeps(self)
+        cmake_deps.generate()
 
     def _disable_werror(self):
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "utils.cmake"), "/WX", "")
