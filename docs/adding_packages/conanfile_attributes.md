@@ -1,83 +1,16 @@
-# Packaging Policy
+# `ConanFile` Attributes
 
-This document gathers all the relevant information regarding the general lines to follow while creating new recipes that will eventually be part of this repository.
+The `ConanFile` class has a lot of different properties that can help consumers search for projects, help the client build packages for different configurations
+or are known by ConanCenter's build service and have special meaning.
 
 <!-- toc -->
 ## Contents
 
-  * [Sources](#sources)
-  * [Dependencies](#dependencies)
-  * [Build](#build)
-  * [Package](#package)
   * [Settings](#settings)
   * [Options](#options)
     * [Recommended Names](#recommended-names)
     * [Predefined Options and Known Defaults](#predefined-options-and-known-defaults)
     * [Options to Avoid](#options-to-avoid)<!-- endToc -->
-
-## Sources
-
-**Origin of sources:**
-
-* Library sources should come from an official origin like the library source code repository or the official
-release/download webpage.
-
-* If an official source archive is available, it should be preferred over an auto-generated archive.
-
-**Source immutability:** Downloaded source code stored under `source` folder should not be modified. Any patch should be applied to the copy of this source code when a build is executed (basically in `build()` method).
-
-**Building from sources:** Recipes should always build packages from library sources.
-
-**Sources not accessible:**
-
-* Library sources that are not publicly available will not be allowed in this repository even if the license allows their redistribution.
-
-* If library sources cannot be downloaded from their official origin or cannot be consumed directly due to their
-  format, the recommendation is to contact the publisher and ask them to provide the sources in a way/format that can be consumed
-  programmatically.
-
-* In case of needing those binaries to use them as a "build require" for some library, we will consider following the approach of adding it
-  as a system recipe (`<build_require>/system`) and making those binaries available in the CI machines (if the license allows it).
-
-## Dependencies
-
-* Version range is not allowed.
-
-* Specify explicit RREV (recipe revision) of dependencies is not allowed.
-
-* Vendoring in library source code should be removed (best effort) to avoid potential ODR violations. If upstream takes care to rename symbols, it may be acceptable.
-
-* Only other conan-center recipes are allowed in `requires`/`requirements()` and `build_requires`/`build_requirements()` of a conan-center recipe.
-
-* If a requirement is conditional, this condition must not depend on build context. Build requirements don't have this constraint.
-
-* Forcing options of dependencies inside a conan-center recipe should be avoided, except if it is mandatory for the library.
-
-## Build
-
-* `build()` method should focus on build only, not installation. During the build, nothing should be written in `package` folder. Installation step should only occur in `package()` method.
-
-* The build itself should only rely on local files. Nothing should be downloaded from internet during this step. If external files are required, they should come from `requirements` or `build_requirements`, in addition to source files downloaded in `source()` or coming from recipe itself.
-
-* Except CMake and a working build toolchain (compiler, linker, archiver etc), the recipe should not assume that any other build tool is installed on user build machine (like Meson, autotools or pkg-config). On Windows, recipe should not assume that a shell is available (like MSYS2). Therefore, if the buid requires additional build tools, they should be added to `build_requirements()`.
-
-* It is forbidden to run other conan client commands during build. In other words, if upstream build files call conan under the hood (through `cmake-conan` for example or any other logic), this logic must be neutralized.
-
-* Settings from profile should be honored (`build_type`, `compiler.libcxx`, `compiler.cppstd`, `compiler.runtime` etc).
-
-* These env vars from profile should be honored and properly propagated to underlying build system during the build: `CC`, `CXX`, `CFLAGS`, `CXXFLAGS`, `LDFLAGS`.
-
-## Package
-
-* CMake config files must be removed (they will be generated for consumers by `cmake_find_package`, `cmake_find_package_multi` or `CMakeDeps` generators).
-
-* pkg-config files must be removed (they will be generated for consumers by `pkg_config` or `PkgConfigDeps` generators).
-
-* On *nix systems, executables and shared libraries should have empty `RPATH`/`RUNPATH`/`LC_RPATH`.
-
-* On macOS, install name in `LC_ID_DYLIB` section of shared libs must be `@rpath/<libfilename>`.
-
-* Installed files must not contain absolute paths specific to build machine. Relative paths to other packages is also forbidden since relative paths of dependencies during build may not be the same for consumers. Hardcoded relative paths pointing to a location in the package itself are allowed.
 
 ## Settings
 
