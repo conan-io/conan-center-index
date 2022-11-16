@@ -13,7 +13,6 @@ class TestPackageConan(ConanFile):
                      cwd=self.source_folder, env="conanbuild")
             if self.settings.os == "Windows":
                 # Unable to work with Environment variable CPPCHECK_HTML_REPORT
-                #self.run(f"{sys.executable} %CPPCHECK_HTML_REPORT% -h", run_environment=True)
-                pass
+                self.run(f"{sys.executable} %CPPCHECK_HTML_REPORT% -h", run_environment=True)
             else:
                 self.run("cppcheck-htmlreport -h", run_environment=True)

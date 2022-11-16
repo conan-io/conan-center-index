@@ -1,7 +1,7 @@
 sources:
   "2.9.1":
-    url: "https://github.com/danmar/cppcheck/archive/2.9.1.tar.gz"
-    sha256: "fa4350f48df978dcc02d8769376ff5517d7f1e77d9f79f636c79912f4c0cff9c"
+    url: "https://github.com/danmar/cppcheck/archive/2.9.2.tar.gz"
+    sha256: "93920d24d4442856bf7916ee0e3fc31308bc23948e7029b4fd332e01cac63c3e"
   "2.8.2":
     url: "https://github.com/danmar/cppcheck/archive/2.8.2.tar.gz"
     sha256: "30ba99ab54089c44b83f02e2453da046a7edff5237950d4A0eb1eba4afcb4f45"
