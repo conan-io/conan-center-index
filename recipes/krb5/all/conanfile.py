@@ -1,10 +1,16 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conans import tools
+from conan import ConanFile
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get, rm, rmdir, chdir, replace_in_file, export_conandata_patches, apply_conandata_patches
+from conan.tools.gnu import Autotools, AutotoolsToolchain,AutotoolsDeps, PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path
 from contextlib import contextmanager
 import functools
 import glob
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
 
 
 class Krb5Conan(ConanFile):
@@ -26,7 +32,7 @@ class Krb5Conan(ConanFile):
         "with_tcl": [True, False],
     }
     default_options = {
-        "shared": False,
+        "shared": True,
         "fPIC": True,
         "thread": True,
         "use_dns_realms": False,
@@ -37,11 +43,9 @@ class Krb5Conan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     exports_sources = "patches/*"
-    generators = "pkg_config"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self)
 
     @property
     def _settings_build(self):
@@ -49,25 +53,57 @@ class Krb5Conan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.settings.rm_safe("fPIC")
         if self.settings.compiler == "Visual Studio":
-            del self.options.thread
-            del self.options.with_tls
-            del self.options.with_tcl
+            self.settings.rm_safe("thread")
+            self.settings.rm_safe("with_tls")
+            self.settings.rm_safe("with_tcl")
+            self.settings.rm_safe("shared")
             # Visual Studio only builds shared libraries
             del self.options.shared
         else:
-            del self.options.leash
+            self.settings.rm_safe("leash")
 
     def configure(self):
         if self.options.get_safe("shared"):
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.settings.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        tc = AutotoolsToolchain(self)
+        yes_no = lambda v: "yes" if v else "no"
+        tls_impl = {
+            "openssl": "openssl",
+        }.get(str(self.options.with_tls))
+        tc.configure_args.append("--enable-thread-support={}".format(yes_no(self.options.thread)))
+        tc.configure_args.append("--enable-dns-for-realm={}".format(yes_no(self.options.use_dns_realms)),)
+        tc.configure_args.append("--enable-pkinit={}".format(yes_no(self.options.with_tls)))
+        tc.configure_args.append("--with-crypto-impl={}".format(tls_impl or "builtin"))
+        tc.configure_args.append("--with-tls-impl={}".format(tls_impl or "no"))
+        tc.configure_args.append("--with-spake-openssl={}".format(yes_no(self.options.with_tls == "openssl")))
+        tc.configure_args.append("--disable-nls")
+        tc.configure_args.append("--disable-rpath")
+        tc.configure_args.append("--without-libedit")
+        tc.configure_args.append("--without-readline",)
+        tc.configure_args.append("--with-system-verto")
+        # tc.configure_args.append("--with-system-et")
+        # tc.configure_args.append("--with-system-ss")
+        tc.configure_args.append("--with-tcl={}".format(self.deps_cpp_info["tcl"].rootpath if self.options.with_tcl else "no"))
+        tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
+        pkg = PkgConfigDeps(self)
+        pkg.generate()
 
     def requirements(self):
         # if self.settings.os != "Windows":
@@ -75,53 +111,28 @@ class Krb5Conan(ConanFile):
         if self.settings.compiler != "Visual Studio":
             self.requires("libverto/0.3.2")
         if self.options.get_safe("with_tls") == "openssl":
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1q")
         if self.options.get_safe("with_tcl"):
             self.requires("tcl/8.6.10")
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
             self.build_requires("automake/1.16.4")
-            self.build_requires("bison/3.7.6")
-            self.build_requires("pkgconf/1.7.4")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        autotools.libs = []
-        yes_no = lambda v: "yes" if v else "no"
-        tls_impl = {
-            "openssl": "openssl",
-        }.get(str(self.options.with_tls))
-        conf_args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--enable-thread-support={}".format(yes_no(self.options.thread)),
-            "--enable-dns-for-realm={}".format(yes_no(self.options.use_dns_realms)),
-            "--enable-pkinit={}".format(yes_no(self.options.with_tls)),
-            "--with-crypto-impl={}".format(tls_impl or "builtin"),
-            "--with-tls-impl={}".format(tls_impl or "no"),
-            "--with-spake-openssl={}".format(yes_no(self.options.with_tls == "openssl")),
-            "--disable-nls",
-            "--disable-rpath",
-            "--without-libedit",
-            "--without-readline",
-            # "--with-system-et",
-            # "--with-system-ss",
-            "--with-system-verto",
-            "--with-tcl={}".format(self.deps_cpp_info["tcl"].rootpath if self.options.with_tcl else "no"),
-        ]
-        autotools.configure(args=conf_args, configure_dir=os.path.join(self._source_subfolder, "src"))
-        return autotools
+            self.build_requires("bison/3.8.2")
+            self.build_requires("pkgconf/1.9.3")
+        if self._settings_build.os == "Windows": 
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def _build_autotools(self):
         tools.save("skiptests", "")
-        with tools.chdir(os.path.join(self._source_subfolder, "src")):
-            tools.replace_in_file("aclocal.m4", "AC_CONFIG_AUX_DIR(", "echo \"Hello world\"\n\nAC_CONFIG_AUX_DIR(")
+        
+        with chdir(self, os.path.join(self.source_folder,"src")):
+            replace_in_file(self,"aclocal.m4", "AC_CONFIG_AUX_DIR(", "echo \"Hello world\"\n\nAC_CONFIG_AUX_DIR(")
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
+        autotools.configure(os.path.join(self.source_folder,"src"))
         autotools.make()
 
     @contextmanager
@@ -145,35 +156,34 @@ class Krb5Conan(ConanFile):
         return nmake_args
 
     def _build_msvc(self):
-        with tools.chdir(os.path.join(self._source_subfolder, "src")):
+        with chdir(os.path.join(self.source_folder, "src")):
             with self._msvc_context():
                 self.run("nmake -f Makefile.in prep-windows", run_environment=True, win_bash=tools.os_info.is_windows)
                 self.run("nmake {}".format(" ".join(self._nmake_args)), run_environment=True, win_bash=tools.os_info.is_windows)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         if self.settings.compiler == "Visual Studio":
             self._build_msvc()
         else:
             self._build_autotools()
 
     def package(self):
-        self.copy("NOTICE", src=self._source_subfolder, dst="licenses")
+        copy(self, "NOTICE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if self.settings.compiler == "Visual Studio":
-            with tools.chdir(os.path.join(self._source_subfolder, "src")):
+            with chdir(os.path.join(self.source_folder, "src")):
                 with self._msvc_context():
                     self.run("nmake install {}".format(" ".join(self._nmake_args)), run_environment=True, win_bash=tools.os_info.is_windows)
 
             for pdb in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
                 os.unlink(pdb)
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
             autotools.install()
 
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "share"))
-            tools.rmdir(os.path.join(self.package_folder, "var"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
+            rmdir(self, os.path.join(self.package_folder, "var"))
 
     def package_info(self):
         krb5_lib = "krb5"
