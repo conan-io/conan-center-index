@@ -3,7 +3,7 @@ sources:
     url: "https://kerberos.org/dist/krb5/1.18/krb5-1.18.2.tar.gz"
     sha256: "c6e4c9ec1a98141c3f5d66ddf1a135549050c9fab4e9a4620ee9b22085873ae0"
 patches:
- "1.18.2":
+  "1.18.2":
    - patch_file: "patches/1.18.2-0001-use-PKG_CHECK_MODULES-for-openssl.patch"
    - patch_file: "patches/1.18.2-0002-avoid-conflicting-symbols.patch"
    - patch_file: "patches/1.18.2-0003-no-html+tests.patch"

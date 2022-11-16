@@ -85,20 +85,21 @@ class Krb5Conan(ConanFile):
         tls_impl = {
             "openssl": "openssl",
         }.get(str(self.options.with_tls))
-        tc.configure_args.append("--enable-thread-support={}".format(yes_no(self.options.thread)))
-        tc.configure_args.append("--enable-dns-for-realm={}".format(yes_no(self.options.use_dns_realms)),)
-        tc.configure_args.append("--enable-pkinit={}".format(yes_no(self.options.with_tls)))
-        tc.configure_args.append("--with-crypto-impl={}".format(tls_impl or "builtin"))
-        tc.configure_args.append("--with-tls-impl={}".format(tls_impl or "no"))
-        tc.configure_args.append("--with-spake-openssl={}".format(yes_no(self.options.with_tls == "openssl")))
-        tc.configure_args.append("--disable-nls")
-        tc.configure_args.append("--disable-rpath")
-        tc.configure_args.append("--without-libedit")
-        tc.configure_args.append("--without-readline",)
-        tc.configure_args.append("--with-system-verto")
-        # tc.configure_args.append("--with-system-et")
-        # tc.configure_args.append("--with-system-ss")
-        tc.configure_args.append("--with-tcl={}".format(self.deps_cpp_info["tcl"].rootpath if self.options.with_tcl else "no"))
+        tc.configure_args.extend([
+            f"--enable-thread-support={yes_no(self.options.thread)}",
+            f"--enable-dns-for-realm={yes_no(self.options.use_dns_realms)}",
+            f"--enable-pkinit={yes_no(self.options.with_tls)}",
+            f"--with-crypto-impl={(tls_impl or 'builtin')}",
+            f"--with-spake-openssl={yes_no(self.options.with_tls == 'openssl')}",
+            "--disable-nls",
+            "--disable-rpath",
+            "--without-libedit",
+            "--without-readline",
+            "--with-system-verto",
+            # "--with-system-et}",
+            # "--with-system-ss}",
+            f"--with-tcl={(self.deps_cpp_info['tcl'].rootpath if self.options.with_tcl else 'no')}",
+            ])
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
@@ -120,14 +121,14 @@ class Krb5Conan(ConanFile):
             self.build_requires("automake/1.16.4")
             self.build_requires("bison/3.8.2")
             self.build_requires("pkgconf/1.9.3")
-        if self._settings_build.os == "Windows": 
+        if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def _build_autotools(self):
         tools.save("skiptests", "")
-        
+
         with chdir(self, os.path.join(self.source_folder,"src")):
             replace_in_file(self,"aclocal.m4", "AC_CONFIG_AUX_DIR(", "echo \"Hello world\"\n\nAC_CONFIG_AUX_DIR(")
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
@@ -156,7 +157,7 @@ class Krb5Conan(ConanFile):
         return nmake_args
 
     def _build_msvc(self):
-        with chdir(os.path.join(self.source_folder, "src")):
+        with chdir(self, os.path.join(self.source_folder, "src")):
             with self._msvc_context():
                 self.run("nmake -f Makefile.in prep-windows", run_environment=True, win_bash=tools.os_info.is_windows)
                 self.run("nmake {}".format(" ".join(self._nmake_args)), run_environment=True, win_bash=tools.os_info.is_windows)
@@ -171,7 +172,7 @@ class Krb5Conan(ConanFile):
     def package(self):
         copy(self, "NOTICE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if self.settings.compiler == "Visual Studio":
-            with chdir(os.path.join(self.source_folder, "src")):
+            with chdir(self, os.path.join(self.source_folder, "src")):
                 with self._msvc_context():
                     self.run("nmake install {}".format(" ".join(self._nmake_args)), run_environment=True, win_bash=tools.os_info.is_windows)
 
@@ -252,4 +253,3 @@ class Krb5Conan(ConanFile):
             krb5_config = os.path.join(bin_path, "krb5-config").replace("\\", "/")
             self.output.info("Appending KRB5_CONFIG environment variable: {}".format(krb5_config))
             self.env_info.KRB5_CONFIG = krb5_config
-
