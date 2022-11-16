@@ -94,7 +94,7 @@ class SpdlogConan(ConanFile):
             tc.variables["SPDLOG_BUILD_TESTS"] = False
             tc.variables["SPDLOG_BUILD_TESTS_HO"] = False
             tc.variables["SPDLOG_BUILD_BENCH"] = False
-            tc.variables["SPDLOG_FMT_EXTERNAL"] = True
+            tc.variables["SPDLOG_FMT_EXTERNAL"] = not fmt.options.header_only
             tc.variables["SPDLOG_FMT_EXTERNAL_HO"] = fmt.options.header_only
             tc.variables["SPDLOG_BUILD_SHARED"] = not self.options.header_only and self.options.shared
             tc.variables["SPDLOG_WCHAR_SUPPORT"] = self.options.wchar_support
