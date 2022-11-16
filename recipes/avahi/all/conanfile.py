@@ -91,8 +91,13 @@ class AvahiConan(ConanFile):
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_target_name", "Avahi::Avahi")
+        self.cpp_info.names["cmake_find_package"] = "Avahi"
+        self.cpp_info.names["cmake_find_package_multi"] = "Avahi"
+
         for lib in ("client", "common", "core", "glib", "gobject", "libevent", "compat-libdns_sd"):
             avahi_lib = f"avahi-{lib}"
+            self.cpp_info.components[lib].set_property("cmake_target_name", f"Avahi::{lib}")
             self.cpp_info.components[lib].names["cmake_find_package"] = lib
             self.cpp_info.components[lib].names["cmake_find_package_multi"] = lib
             self.cpp_info.components[lib].names["pkg_config"] = avahi_lib
@@ -110,6 +115,7 @@ class AvahiConan(ConanFile):
 
         for app in ("autoipd", "browse", "daemon", "dnsconfd", "publish", "resolve", "set-host-name"):
             avahi_app = f"avahi-{app}"
+            self.cpp_info.components[app].set_property("cmake_target_name", f"Avahi::{app}")
             self.cpp_info.components[app].names["cmake_find_package"] = app
             self.cpp_info.components[app].names["cmake_find_package_multi"] = app
             self.cpp_info.components[app].names["pkg_config"] = avahi_app
