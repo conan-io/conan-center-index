@@ -15,7 +15,7 @@ class ScnlibConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/eliaskosunen/scnlib"
-    topics = ("scnlib", "parsing", "io", "scanf")
+    topics = ("parsing", "io", "scanf")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "header_only": [True, False],
