@@ -56,9 +56,9 @@ class Libssh2Conan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.crypto_backend == "openssl":
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
         elif self.options.crypto_backend == "mbedtls":
             # libssh2/<=1.10.0 doesn't support mbedtls/3.x.x
             self.requires("mbedtls/2.25.0")
