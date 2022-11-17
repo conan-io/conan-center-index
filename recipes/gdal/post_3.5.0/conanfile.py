@@ -16,7 +16,7 @@ class GdalConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
 
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
     # A list of gdal dependencies can be taken from cmake/helpers/CheckDependentLibraries.cmake
     # within gdal sources with the command:

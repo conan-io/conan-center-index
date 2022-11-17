@@ -532,7 +532,7 @@ class BoostConan(ConanFile):
 
     def requirements(self):
         if self._with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self._with_bzip2:
             self.requires("bzip2/1.0.8")
         if self._with_lzma:
@@ -543,7 +543,7 @@ class BoostConan(ConanFile):
             self.requires("libbacktrace/cci.20210118")
 
         if self._with_icu:
-            self.requires("icu/71.1")
+            self.requires("icu/72.1")
         if self._with_iconv:
             self.requires("libiconv/1.17")
 
@@ -1109,7 +1109,8 @@ class BoostConan(ConanFile):
             if self.options.multithreading:
                 cxx_flags.append("-DBOOST_SP_USE_SPINLOCK")
 
-            cxx_flags.append("-fembed-bitcode")
+            if self.conf.get("tools.apple:enable_bitcode", check_type=bool):
+                cxx_flags.append("-fembed-bitcode")
 
         if self._with_iconv:
             flags.append(f"-sICONV_PATH={self.deps_cpp_info['libiconv'].rootpath}")

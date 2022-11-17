@@ -6,7 +6,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibtiffConan(ConanFile):
@@ -70,26 +70,17 @@ class LibtiffConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
         if not self.options.cxx:
-            try:
-                del self.settings.compiler.libcxx
-            except Exception:
-                pass
-            try:
-                del self.settings.compiler.cppstd
-            except Exception:
-                pass
+            self.settings.rm_safe("compiler.cppstd")
+            self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.get_safe("libdeflate"):
             self.requires("libdeflate/1.12")
         if self.options.lzma:
@@ -129,6 +120,8 @@ class LibtiffConan(ConanFile):
         if Version(self.version) >= "4.3.0":
             tc.variables["lerc"] = False # TODO: add lerc support for libtiff versions >= 4.3.0
         tc.variables["cxx"] = self.options.cxx
+        # BUILD_SHARED_LIBS must be set in command line because defined upstream before project()
+        tc.cache_variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

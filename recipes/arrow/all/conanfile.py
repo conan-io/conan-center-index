@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, get, copy, rm, rmdir
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc, check_min_vs
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -9,7 +9,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 import glob
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.53.0"
 
 class ArrowConan(ConanFile):
     name = "arrow"
@@ -113,9 +113,22 @@ class ArrowConan(ConanFile):
     }
     short_paths = True
 
+    @property
+    def _minimum_cpp_standard(self):
+        # arrow >= 10.0.0 requires C++17.
+        # https://github.com/apache/arrow/pull/13991
+        return 11 if Version(self.version) < "10.0.0" else 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "8",
+            "clang": "7",
+            "apple-clang": "10",
+        }
+
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -136,14 +149,23 @@ class ArrowConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC # once removed by config_options, need try..except for a second del
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def validate(self):
-        if self.info.settings.compiler == "clang" and self.info.settings.compiler.version <= Version("3.9"):
-            raise ConanInvalidConfiguration("This recipe does not support this compiler version")
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
+
+        if self._minimum_cpp_standard == 11:
+            if self.info.settings.compiler == "clang" and self.info.settings.compiler.version <= Version("3.9"):
+                raise ConanInvalidConfiguration("This recipe does not support this compiler version")
+        else:
+            check_min_vs(self, 191)
+            if not is_msvc(self):
+                minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+                if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+                    raise ConanInvalidConfiguration(
+                        f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
+                    )
 
         if self.options.shared:
             del self.options.fPIC
@@ -188,6 +210,9 @@ class ArrowConan(ConanFile):
 
         if Version(self.version) < "6.0.0" and self.options.get_safe("simd_level") == "default":
             raise ConanInvalidConfiguration(f"In {self.ref}, simd_level options is not supported `default` value.")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def _compute(self, required=False):
         if required or self.options.compute == "auto":
@@ -303,7 +328,7 @@ class ArrowConan(ConanFile):
         if self._with_protobuf():
             self.requires("protobuf/3.21.4")
         if self._with_jemalloc():
-            self.requires("jemalloc/5.2.1")
+            self.requires("jemalloc/5.3.0")
         if self.options.with_mimalloc:
             self.requires("mimalloc/1.7.6")
         if self._with_boost():
@@ -315,7 +340,7 @@ class ArrowConan(ConanFile):
         if self.options.get_safe("with_gcs"):
             self.requires("google-cloud-cpp/1.40.1")
         if self._with_grpc():
-            self.requires("grpc/1.48.0")
+            self.requires("grpc/1.50.0")
         if self._with_rapidjson():
             self.requires("rapidjson/1.1.0")
         if self._with_llvm():
@@ -323,11 +348,11 @@ class ArrowConan(ConanFile):
         if self._with_openssl():
             # aws-sdk-cpp requires openssl/1.1.1. it uses deprecated functions in openssl/3.0.0
             if self.options.with_s3:
-                self.requires("openssl/1.1.1q")
+                self.requires("openssl/1.1.1s")
             else:
-                self.requires("openssl/3.0.5")
+                self.requires("openssl/1.1.1s")
         if self.options.get_safe("with_opentelemetry"):
-            self.requires("opentelemetry-cpp/1.4.1")
+            self.requires("opentelemetry-cpp/1.7.0")
         if self.options.with_s3:
             self.requires("aws-sdk-cpp/1.9.234")
         if self.options.with_brotli:
@@ -341,15 +366,15 @@ class ArrowConan(ConanFile):
         if Version(self.version) >= "6.0.0" and \
             self.options.get_safe("simd_level") != None or \
             self.options.get_safe("runtime_simd_level") != None:
-            self.requires("xsimd/8.1.0")
+            self.requires("xsimd/9.0.1")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
         if self._with_re2():
             self.requires("re2/20220601")
         if self._with_utf8proc():
-            self.requires("utf8proc/2.7.0")
+            self.requires("utf8proc/2.8.0")
         if self.options.with_backtrace:
             self.requires("libbacktrace/cci.20210118")
 
@@ -426,7 +451,7 @@ class ArrowConan(ConanFile):
         if self.options.with_snappy:
             tc.variables["ARROW_SNAPPY_USE_SHARED"] = bool(self.options["snappy"].shared)
         tc.variables["ARROW_WITH_ZLIB"] = bool(self.options.with_zlib)
-        tc.variables["RE2_SOURCE"] = "SYSTEM"
+        tc.variables["re2_SOURCE"] = "SYSTEM"
         tc.variables["ZLIB_SOURCE"] = "SYSTEM"
         tc.variables["xsimd_SOURCE"] = "SYSTEM"
         tc.variables["ARROW_WITH_ZSTD"] = bool(self.options.with_zstd)
@@ -449,6 +474,7 @@ class ArrowConan(ConanFile):
             tc.variables["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
             tc.variables["ARROW_OPENSSL_USE_SHARED"] = bool(self.options["openssl"].shared)
         if self._with_boost():
+            tc.variables["ARROW_USE_BOOST"] = True
             tc.variables["ARROW_BOOST_USE_SHARED"] = bool(self.options["boost"].shared)
         tc.variables["ARROW_S3"] = bool(self.options.with_s3)
         tc.variables["AWSSDK_SOURCE"] = "SYSTEM"
@@ -587,7 +613,7 @@ class ArrowConan(ConanFile):
 
         if (self.options.cli and (self.options.with_cuda or self._with_flight_rpc() or self._parquet())) or self.options.plasma:
             binpath = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH env var: {}".format(binpath))
+            self.output.info(f"Appending PATH env var: {binpath}")
             self.env_info.PATH.append(binpath)
 
         if self._with_boost():

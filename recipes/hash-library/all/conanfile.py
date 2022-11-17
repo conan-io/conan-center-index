@@ -1,6 +1,8 @@
+from os.path import join
+
 from conan import ConanFile
 from conan.tools.cmake import CMake
-from conan.tools.files import apply_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, copy, get
 from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.52.0"
@@ -52,7 +54,7 @@ class HashLibraryConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE", self._source_subfolder, join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.configure()
         cmake.install()
@@ -61,5 +63,5 @@ class HashLibraryConan(ConanFile):
         self.cpp_info.libs = ["hash-library"]
 
     def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
+        if self.info.settings.os == "Windows" and self.info.options.shared:
             raise ConanInvalidConfiguration("hash-library does not support shared builds on Windows.")
