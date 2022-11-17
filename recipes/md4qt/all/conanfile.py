@@ -27,7 +27,7 @@ class Md4QtConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "16",
-            "gcc": "7",
+            "gcc": "8",
             "clang": "3.5",
             "apple-clang": "10",
         }
