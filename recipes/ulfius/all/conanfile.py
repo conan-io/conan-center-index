@@ -45,7 +45,7 @@ class UlfiusConan(ConanFile):
         if self.options.with_gnutls:
             raise ConanInvalidConfiguration("with_gnutls=True is not yet implemented due to missing gnutls CCI recipe")
         if self.settings.os == "Windows" and self.options.enable_websockets:
-            raise ConanInvalidConfiguration("ulfius does not support with_websockets=True is not supported on Windows")
+            raise ConanInvalidConfiguration("ulfius does not support with_websockets=True on Windows")
 
     def configure(self):
         if self.options.shared:
@@ -203,8 +203,6 @@ class UlfiusConan(ConanFile):
         target_name = "Ulfius::Ulfius" if self.options.shared else "Ulfius::Ulfius-static"
         self.cpp_info.set_property("cmake_file_name", "Ulfius")
         self.cpp_info.set_property("cmake_target_name", target_name)
-        self.cpp_info.set_property("cmake_module_file_name", "Ulfius")
-        self.cpp_info.set_property("cmake_module_target_name", target_name)
         self.cpp_info.set_property("pkg_config_name", "libulfius")
         self.cpp_info.set_property("cmake_build_modules", [self._variable_file_rel_path])
 
