@@ -16,8 +16,8 @@ class CppcheckConan(ConanFile):
     description = "Cppcheck is an analysis tool for C/C++ code."
     license = "GPL-3.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"have_rules": [True, False]}
-    default_options = {"have_rules": True}
+    options = {"with_z3": [True, False, "deprecated"], "have_rules": [True, False]}
+    default_options = {"with_z3": "deprecated", "have_rules": True}
 
     def validate(self):
         if not can_run(self):
@@ -25,6 +25,13 @@ class CppcheckConan(ConanFile):
 
     def layout(self):
         cmake_layout(self)
+        
+    def configure(self):
+        if self.options.with_z3 != "deprecated":
+            self.output.warn("with_z3 option is deprecated, do not use anymore.")
+            
+    def package_id(self):
+        del self.info.options.with_z3
 
     def requirements(self):
         if self.options.have_rules:
