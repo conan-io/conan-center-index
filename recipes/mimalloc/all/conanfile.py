@@ -89,7 +89,7 @@ class MimallocConan(ConanFile):
     def validate(self):
         # Currently, mimalloc/1.7.6,2.0.6 does not work properly with shared MD builds.
         # https://github.com/conan-io/conan-center-index/pull/10333#issuecomment-1114110046
-        if  self.version in ["1.7.6", "2.0.6"] and \
+        if  self.version in ["1.7.6", "1.7.7", "2.0.6", "2.0.7"] and \
             self.options.shared and \
             is_msvc(self) and \
             "MD" in msvc_runtime_flag(self):
