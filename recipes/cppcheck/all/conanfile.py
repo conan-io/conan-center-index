@@ -12,24 +12,20 @@ class CppcheckConan(ConanFile):
     name = "cppcheck"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/danmar/cppcheck"
-    topics = ("Cpp Check", "static analyzer")
+    topics = ("cpp check", "static analyzer")
     description = "Cppcheck is an analysis tool for C/C++ code."
     license = "GPL-3.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
     options = {"with_z3": [True, False, "deprecated"], "have_rules": [True, False]}
     default_options = {"with_z3": "deprecated", "have_rules": True}
 
-    def validate(self):
-        if not can_run(self):
-            raise ConanInvalidConfiguration("Cross build not possible")
-
     def layout(self):
         cmake_layout(self)
-        
+
     def configure(self):
         if self.options.with_z3 != "deprecated":
             self.output.warn("with_z3 option is deprecated, do not use anymore.")
-            
+
     def package_id(self):
         del self.info.options.with_z3
 
@@ -58,6 +54,8 @@ class CppcheckConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cli", "CMakeLists.txt"),
                               "RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}",
                               "DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}")
+        replace_in_file(self, os.path.join(self.source_folder, "cli", "CMakeLists.txt"), "add_dependencies(cppcheck run-dmake)", "")
+
         cmake.configure()
         cmake.build()
 
