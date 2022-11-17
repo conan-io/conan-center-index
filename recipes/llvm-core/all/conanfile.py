@@ -1,5 +1,8 @@
 from conan.errors import ConanInvalidConfiguration
-from conan import ConanFile, tools
+from conan import ConanFile
+from conan.tools.build import cross_building
+from conan.tools.files import chdir, collect_libs, get, load, patch, rename, replace_in_file, rm, rmdir, save
+from conan.tools.scm import Version
 from conans import CMake
 from collections import defaultdict
 import json
@@ -86,7 +89,7 @@ class LLVMCoreConan(ConanFile):
 
     def _supports_compiler(self):
         compiler = self.settings.compiler.value
-        version = tools.scm.Version(self.settings.compiler.version)
+        version = Version(self.settings.compiler.version)
         major_rev, minor_rev = version.major, (version.minor or 0)
 
         unsupported_combinations = [
@@ -101,12 +104,12 @@ class LLVMCoreConan(ConanFile):
             raise ConanInvalidConfiguration(message.format(compiler, version))
 
     def _patch_sources(self):
-        for patch in self.conan_data.get('patches', {}).get(self.version, []):
-            tools.files.patch(self, **patch)
+        for current_patch in self.conan_data.get('patches', {}).get(self.version, []):
+            patch(self, **current_patch)
 
     def _patch_build(self):
         if os.path.exists('FindIconv.cmake'):
-            tools.files.replace_in_file(self, 'FindIconv.cmake', 'iconv charset', 'iconv')
+            replace_in_file(self, 'FindIconv.cmake', 'iconv charset', 'iconv')
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -219,12 +222,12 @@ class LLVMCoreConan(ConanFile):
             message = 'Cannot enable exceptions without rtti support'
             raise ConanInvalidConfiguration(message)
         self._supports_compiler()
-        if tools.build.cross_building(self, skip_x64_x86=True):
+        if cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration('Cross-building not implemented')
 
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True,
-                  destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True,
+            destination=self._source_subfolder)
         self._patch_sources()
 
     def build(self):
@@ -254,7 +257,7 @@ class LLVMCoreConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.files.save(self, module_file, content)
+        save(self, module_file, content)
 
     def package(self):
         self.copy('LICENSE.TXT', dst='licenses', src=self._source_subfolder)
@@ -271,8 +274,8 @@ class LLVMCoreConan(ConanFile):
                 self.copy(lib, dst='lib', src='lib')
 
             CMake(self).configure(args=['--graphviz=graph/llvm.dot'], source_dir='.', build_dir='.')
-            with tools.files.chdir(self, 'graph'):
-                dot_text = tools.files.load(self, 'llvm.dot').replace('\r\n', '\n')
+            with chdir(self, 'graph'):
+                dot_text = load(self, 'llvm.dot').replace('\r\n', '\n')
 
             dep_regex = re.compile(r'//\s(.+)\s->\s(.+)$', re.MULTILINE)
             deps = re.findall(dep_regex, dot_text)
@@ -327,23 +330,23 @@ class LLVMCoreConan(ConanFile):
                 old_alias_targets
             )
 
-        tools.files.rmdir(self, os.path.join(self.package_folder, 'share'))
+        rmdir(self, os.path.join(self.package_folder, 'share'))
 
-        tools.files.rm(self, "LLVMExports*.cmake", self.package_folder, recursive=True)
-        tools.files.rename(self, os.path.join(self.package_folder, self._module_subfolder, 'LLVM-Config.cmake'),
-                           os.path.join(self.package_folder, self._module_subfolder, 'LLVM-ConfigInternal.cmake'))
-        tools.files.rename(self, os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfig.cmake'),
-                           os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfigInternal.cmake'))
+        rm(self, "LLVMExports*.cmake", self.package_folder, recursive=True)
+        rename(self, os.path.join(self.package_folder, self._module_subfolder, 'LLVM-Config.cmake'),
+               os.path.join(self.package_folder, self._module_subfolder, 'LLVM-ConfigInternal.cmake'))
+        rename(self, os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfig.cmake'),
+               os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfigInternal.cmake'))
 
-        tools.files.replace_in_file(self, os.path.join(self.package_folder, self._module_subfolder, 'AddLLVM.cmake'),
-                                    "include(LLVM-Config)",
-                                    "include(LLVM-ConfigInternal)")
-        tools.files.replace_in_file(self, os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfigInternal.cmake'),
-                                    "LLVM-Config.cmake",
-                                    "LLVM-ConfigInternal.cmake")
+        replace_in_file(self, os.path.join(self.package_folder, self._module_subfolder, 'AddLLVM.cmake'),
+                        "include(LLVM-Config)",
+                        "include(LLVM-ConfigInternal)")
+        replace_in_file(self, os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfigInternal.cmake'),
+                        "LLVM-Config.cmake",
+                        "LLVM-ConfigInternal.cmake")
 
         for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
-            tools.files.rm(self, mask, self.package_folder, recursive=True)
+            rm(self, mask, self.package_folder, recursive=True)
 
         for name in os.listdir(lib_path):
             fullname = os.path.join(lib_path, name)
@@ -368,7 +371,7 @@ class LLVMCoreConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "LLVM")
 
         if self.options.shared:
-            self.cpp_info.libs = tools.files.collect_libs(self)
+            self.cpp_info.libs = collect_libs(self)
             if self.settings.os == 'Linux':
                 self.cpp_info.system_libs = ['pthread', 'rt', 'dl', 'm']
             elif self.settings.os == 'Macos':
