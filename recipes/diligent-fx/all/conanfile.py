@@ -1,8 +1,8 @@
 import os
 from conan import ConanFile
-from conans import tools, CMake
+from conans import CMake
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import get, rmdir, rm, collect_libs, patches, export_conandata_patches, apply_conandata_patches, rename
 import shutil
 
 required_conan_version = ">=1.53.0"
@@ -98,7 +98,7 @@ class DiligentFxConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
-        tools.rename(src=os.path.join(self.package_folder, "include", "source_subfolder"),
+        rename(self, src=os.path.join(self.package_folder, "include", "source_subfolder"),
                      dst=os.path.join(self.package_folder, "include", "DiligentFx"))
         shutil.move(os.path.join(self.package_folder, "Shaders"), 
                     os.path.join(self.package_folder, "res", "Shaders"))
@@ -109,7 +109,7 @@ class DiligentFxConan(ConanFile):
         self.copy(pattern="*.a", src=self._build_subfolder, dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx", "Components", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx", "GLTF_PBR_Renderer", "interface"))
