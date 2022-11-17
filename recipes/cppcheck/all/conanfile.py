@@ -46,7 +46,6 @@ class CppcheckConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        replace_in_file(self, os.path.join(self.source_folder, "tools", "CMakeLists.txt"), "CMAKE_SOURCE_DIR", "PROJECT_SOURCE_DIR")
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "findDependencies.cmake"), "PCRE_LIBRARY pcre", "PCRE_LIBRARY NAMES pcre pcred")
         replace_in_file(self, os.path.join(self.source_folder, "htmlreport", "cppcheck-htmlreport"), "#!/usr/bin/env python", "#!/usr/bin/env python3")
         replace_in_file(self, os.path.join(self.source_folder, "cli", "CMakeLists.txt"),
