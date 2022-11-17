@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conans import tools
 from conan.tools.env import VirtualBuildEnv
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get, rm, rmdir, chdir, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain,AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -50,15 +51,17 @@ class Krb5Conan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def validate(self):
+        if is_msvc(self) and not self.options.shared:
+            raise ConanInvalidConfiguration("Visual Studio only builds shared libraries")
+
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             self.options.rm_safe("thread")
             self.options.rm_safe("with_tls")
             self.options.rm_safe("with_tcl")
-            # Visual Studio only builds shared libraries
-            self.options.rm_safe("shared")
         else:
             self.options.rm_safe("leash")
 
@@ -82,13 +85,13 @@ class Krb5Conan(ConanFile):
         yes_no = lambda v: "yes" if v else "no"
         tls_impl = {
             "openssl": "openssl",
-        }.get(str(self.options.with_tls))
+        }.get(str(self.options.get_safe('with_tls')))
         tc.configure_args.extend([
-            f"--enable-thread-support={yes_no(self.options.thread)}",
+            f"--enable-thread-support={yes_no(self.options.get_safe('thread'))}",
             f"--enable-dns-for-realm={yes_no(self.options.use_dns_realms)}",
-            f"--enable-pkinit={yes_no(self.options.with_tls)}",
+            f"--enable-pkinit={yes_no(self.options.get_safe('with_tls'))}",
             f"--with-crypto-impl={(tls_impl or 'builtin')}",
-            f"--with-spake-openssl={yes_no(self.options.with_tls == 'openssl')}",
+            f"--with-spake-openssl={yes_no(self.options.get_safe('with_tls') == 'openssl')}",
             "--disable-nls",
             "--disable-rpath",
             "--without-libedit",
@@ -96,7 +99,7 @@ class Krb5Conan(ConanFile):
             "--with-system-verto",
             # "--with-system-et}",
             # "--with-system-ss}",
-            f"--with-tcl={(self.deps_cpp_info['tcl'].rootpath if self.options.with_tcl else 'no')}",
+            f"--with-tcl={(self.deps_cpp_info['tcl'].rootpath if self.options.get_safe('with_tcl') else 'no')}",
             ])
         tc.generate()
         deps = AutotoolsDeps(self)
@@ -107,7 +110,7 @@ class Krb5Conan(ConanFile):
     def requirements(self):
         # if self.settings.os != "Windows":
         #     self.requires("e2fsprogs/1.45.6")
-        if self.settings.compiler != "Visual Studio":
+        if not is_msvc(self):
             self.requires("libverto/0.3.2")
         if self.options.get_safe("with_tls") == "openssl":
             self.requires("openssl/1.1.1q")
@@ -115,7 +118,7 @@ class Krb5Conan(ConanFile):
             self.requires("tcl/8.6.10")
 
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
+        if not is_msvc(self):
             self.build_requires("automake/1.16.4")
             self.build_requires("bison/3.8.2")
             self.build_requires("pkgconf/1.9.3")
@@ -162,14 +165,14 @@ class Krb5Conan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             self._build_msvc()
         else:
             self._build_autotools()
 
     def package(self):
         copy(self, "NOTICE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             with chdir(self, os.path.join(self.source_folder, "src")):
                 with self._msvc_context():
                     self.run("nmake install {}".format(" ".join(self._nmake_args)), run_environment=True, win_bash=tools.os_info.is_windows)
@@ -189,7 +192,7 @@ class Krb5Conan(ConanFile):
         krb5support = "krb5support"
         crypto_libs = []
         gssapi_lib = "gssapi_krb5"
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             suffix = {
                 "x86_64": "64",
                 "x86": "32",
@@ -202,10 +205,11 @@ class Krb5Conan(ConanFile):
             crypto_libs.append("k5crypto")
 
         self.cpp_info.components["mit-krb5"].libs = [krb5_lib] + crypto_libs + [krb5support]
-        if self.settings.compiler != "Visual Studio":
+        if not is_msvc(self):
             self.cpp_info.components["mit-krb5"].libs.append("com_err")  # is a common library, that can potentially be packaged (but I don't know who "owns" it)
-            if self.options.with_tls == "openssl":
-                self.cpp_info.components["mit-krb5"].requires.append("openssl::ssl")
+            
+        if self.options.get_safe('with_tls') == "openssl":
+            self.cpp_info.components["mit-krb5"].requires.append("openssl::ssl")
         self.cpp_info.components["mit-krb5"].names["pkg_config"] = "mit-krb5"
         if self.settings.os == "Linux":
             self.cpp_info.components["mit-krb5"].system_libs = ["resolv"]
@@ -217,7 +221,7 @@ class Krb5Conan(ConanFile):
         self.cpp_info.components["mit-krb5-gssapi"].libs = [gssapi_lib]
         self.cpp_info.components["mit-krb5-gssapi"].requires = ["mit-krb5"]
         self.cpp_info.components["mit-krb5-gssapi"].names["pkg_config"] = "mit-krb5-gssapi"
-        if self.settings.compiler != "Visual Studio" and self.settings.os == "Windows" and self.options.get_safe("shared"):
+        if not is_msvc(self) and self.settings.os == "Windows" and self.options.get_safe("shared"):
             self.cpp_info.components["mit-krb5-gssapi"].defines.append("GSS_DLL_FILE")
 
         self.cpp_info.components["krb5-gssapi"].libs = []
@@ -228,7 +232,7 @@ class Krb5Conan(ConanFile):
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
-        if self.settings.compiler != "Visual Studio":
+        if not is_msvc(self):
             self.cpp_info.components["gssrpc"].libs = ["gssrpc"]
             self.cpp_info.components["gssrpc"].requires = ["mit-krb5-gssapi"]
             self.cpp_info.components["gssrpc"].names["pkg_config"] = "gssrpc"
