@@ -164,6 +164,28 @@ class Krb5Conan(ConanFile):
                 self.run("nmake {}".format(" ".join(self._nmake_args)), run_environment=True, win_bash=tools.os_info.is_windows)
 
     def build(self):
+        if not self.options.shared:
+            with chdir(self, os.path.join(self.source_folder,"src", "kadmin", "dbutil")):
+                replace_in_file(self, "kdb5_util.c",
+                                "krb5_keyblock master_keyblock;",
+                                "extern krb5_keyblock master_keyblock;")
+            with chdir(self, os.path.join(self.source_folder,"src", "tests", "create")):                    
+                replace_in_file(self, "kdb5_mkdums.c",
+                                "krb5_keyblock master_keyblock;",
+                                "extern krb5_keyblock master_keyblock;")
+                replace_in_file(self, "kdb5_mkdums.c",
+                                "krb5_principal master_princ;",
+                                "static krb5_principal master_princ;")
+                replace_in_file(self, "kdb5_mkdums.c",
+                                "krb5_pointer master_random;",
+                                "static krb5_pointer master_random;")                                                
+            with chdir(self, os.path.join(self.source_folder,"src", "tests", "verify")):
+                replace_in_file(self, "kdb5_verify.c",
+                                "krb5_keyblock master_keyblock;",
+                                "extern krb5_keyblock master_keyblock;")
+                replace_in_file(self, "kdb5_verify.c",
+                                "krb5_principal master_princ;",
+                                "static krb5_principal master_princ;")                                                    
         apply_conandata_patches(self)
         if is_msvc(self):
             self._build_msvc()
