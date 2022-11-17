@@ -57,7 +57,7 @@ def main():
                 for i, patch in enumerate(patches):
                     type = parsed["patches"][version][i]["patch_type"]
                     if (
-                        type in ["official", "backport", "vulnerability"]
+                        type in ["official", "bugfix", "vulnerability"]
                         and not "patch_source" in patch
                     ):
                         print(

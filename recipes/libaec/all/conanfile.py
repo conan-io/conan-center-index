@@ -100,7 +100,7 @@ class LibaecConan(ConanFile):
                 szip_name = "szip" if self.options.shared else "szip_static"
             elif self.options.shared:
                 szip_name = "szip"
-        self.cpp_info.libs = [aec_name, szip_name,]
+        self.cpp_info.libs = [szip_name, aec_name]
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
