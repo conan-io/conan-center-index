@@ -40,7 +40,7 @@ runs:
             if len(pattern) != len(filename):
               continue
             if all(fnmatch.fnmatch(filename[i], pattern[i]) for i in range(len(pattern))):
-              files.append(filename)
+              files.append(f["filename"])
               break
         with open(os.getenv("GITHUB_OUTPUT"), "a") as output_file:
             output_file.write(f"any_changed={'true' if files else 'false'}\n")
