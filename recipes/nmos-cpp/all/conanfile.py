@@ -211,6 +211,8 @@ class NmosCppConan(ConanFile):
             config_install_dir = "Debug" if self.settings.build_type == "Debug" else "Release"
             bindir = os.path.join(bindir, config_install_dir)
             libdir = os.path.join(libdir, config_install_dir)
+        self.cpp_info.bindirs = [bindir]
+        self.cpp_info.libdirs = [libdir]
 
         def _register_components():
             components_json_file = files.load(self, self._components_helper_filepath)
@@ -237,4 +239,5 @@ class NmosCppConan(ConanFile):
         # add nmos-cpp-registry and nmos-cpp-node to the path
         bin_path = os.path.join(self.package_folder, bindir)
         self.output.info(f"Appending PATH environment variable: {bin_path}")
+        self.runenv_info.prepend_path("PATH", bin_path)
         self.env_info.PATH.append(bin_path)
