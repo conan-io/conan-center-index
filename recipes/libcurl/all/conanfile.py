@@ -388,11 +388,16 @@ class LibcurlConan(ConanFile):
             f"--enable-unix-sockets={self._yes_no(self.options.with_unix_sockets)}",
         ])
 
+        # Since 7.77.0, disabling TLS must be explicitly requested otherwise it fails
+        if Version(self.version) >= "7.77.0" and not self.options.with_ssl:
+            tc.configure_args.append("--without-ssl")
+
+        openssl_option = "ssl" if Version(self.version) < "7.77.0" else "openssl"
         if self.options.with_ssl == "openssl":
             path = unix_path(self, self.dependencies["openssl"].package_folder)
-            tc.configure_args.append(f"--with-ssl={path}")
-        elif not self.options.with_ssl:
-            tc.configure_args.append("--without-ssl")
+            tc.configure_args.append(f"--with-{openssl_option}={path}")
+        else:
+            tc.configure_args.append(f"--without-{openssl_option}")
 
         if self.options.with_ssl == "wolfssl":
             path = unix_path(self, self.dependencies["wolfssl"].package_folder)
@@ -622,17 +627,14 @@ class LibcurlConan(ConanFile):
             if self.options.with_ssl == "schannel":
                 self.cpp_info.components["curl"].system_libs.append("crypt32")
         elif is_apple_os(self):
-            if Version(self.version) >= "7.78.0":
-                self.cpp_info.components["curl"].frameworks.extend(["CoreFoundation", "SystemConfiguration"])
-            elif Version(self.version) >= "7.77.0":
+            if Version(self.version) >= "7.78.0" or self.options.with_ssl == "darwinssl":
+                self.cpp_info.components["curl"].frameworks.append("CoreFoundation")
+            if Version(self.version) >= "7.77.0":
                 self.cpp_info.components["curl"].frameworks.append("SystemConfiguration")
             if self.options.with_ldap:
                 self.cpp_info.components["curl"].system_libs.append("ldap")
             if self.options.with_ssl == "darwinssl":
-                if Version(self.version) >= "7.78.0":
-                    self.cpp_info.components["curl"].frameworks.append("Security")
-                else:
-                    self.cpp_info.components["curl"].frameworks.extend(["CoreFoundation", "Security"])
+                self.cpp_info.components["curl"].frameworks.append("Security")
 
         if self._is_mingw:
             # provide pthread for dependent packages
