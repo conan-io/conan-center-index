@@ -1,7 +1,11 @@
 import os
-from conans import ConanFile, tools, CMake
+from conan import ConanFile
+from conans import tools, CMake
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 import shutil
+
+required_conan_version = ">=1.53.0"
 
 class DiligentFxConan(ConanFile):
     name = "diligent-fx"
@@ -30,8 +34,14 @@ class DiligentFxConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        export_conandata_patches(self)
+        self.copy("CMakeLists.txt")
+        self.copy("BuildUtils.cmake")
+        self.copy("script.py")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def validate(self):
         if self.options.shared:
@@ -46,8 +56,7 @@ class DiligentFxConan(ConanFile):
             del self.options.fPIC
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
     def requirements(self):
         self.requires("diligent-tools/{}".format(self.version))
