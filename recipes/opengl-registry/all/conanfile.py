@@ -6,11 +6,11 @@ import os
 required_conan_version = ">=1.50.0"
 
 
-class OpenGLHeadersConan(ConanFile):
-    name = "opengl-headers"
-    description = "OpenGL Header files."
+class OpenGLRegistryConan(ConanFile):
+    name = "opengl-registry"
+    description = "OpenGL, OpenGL ES, and OpenGL ES-SC API and Extension Registry."
     license = "Apache-2.0"
-    topics = ("opengl-headers", "opengl")
+    topics = ("opengl-registry", "opengl")
     homepage = "https://github.com/KhronosGroup/OpenGL-Registry"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
