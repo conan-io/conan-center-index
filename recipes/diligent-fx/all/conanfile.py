@@ -1,6 +1,6 @@
 import os
 from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 import shutil
 
 class DiligentFxConan(ConanFile):
@@ -50,7 +50,7 @@ class DiligentFxConan(ConanFile):
             tools.patch(**patch)
 
     def requirements(self):
-        self.requires("diligent-tools/2.5.2")
+        self.requires("diligent-tools/{}".format(self.version))
 
     @property
     def _diligent_platform(self):
