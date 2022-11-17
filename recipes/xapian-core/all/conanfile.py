@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import rename, apply_conandata_patches, replace_in_file, rmdir, save, rm, get
 from conan.tools.microsoft import is_msvc
-from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conans import AutoToolsBuildEnvironment, tools
@@ -54,7 +53,7 @@ class XapianCoreConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
 
@@ -102,12 +101,9 @@ class XapianCoreConan(ConanFile):
         autotools.library_paths = []
         if is_msvc(self):
             autotools.cxx_flags.append("-EHsc")
-            if self.settings.compiler == "Visual Studio":
-                vs_ide_version = self.settings.compiler.version
-            else:
-                vs_ide_version = msvc_version_to_vs_ide_version(self.settings.compiler.version)
-            if Version(vs_ide_version) >= "12":
-                autotools.flags.append("-FS")
+        if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
+           (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+            autotools.flags.append("-FS")
         conf_args = [
             "--datarootdir={}".format(self._datarootdir.replace("\\", "/")),
             "--disable-documentation",
@@ -180,7 +176,7 @@ class XapianCoreConan(ConanFile):
         self.cpp_info.libs = ["xapian"]
         if not self.options.shared:
             if self.settings.os in ("Linux", "FreeBSD"):
-                self.cpp_info.system_libs = ["rt"]
+                self.cpp_info.system_libs = ["rt", "m"]
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["rpcrt4", "ws2_32"]
             elif self.settings.os == "SunOS":
