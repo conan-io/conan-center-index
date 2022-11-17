@@ -71,17 +71,6 @@ class FoonathanLexyConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-        file_content = """
-# Copyright (C) 2020-2022 Jonathan Müller and lexy contributors
-# SPDX-License-Identifier: BSL-1.0
-
-# lexy CMake configuration file.
-
-@PACKAGE_INIT@
-
-include ("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")"""
-        save(self, os.path.join(self.source_folder, "cmake", "lexyConfig.cmake.in"), file_content)
-
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
