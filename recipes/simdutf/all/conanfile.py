@@ -59,6 +59,8 @@ class SimdutfConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "8":
             tc.variables["CMAKE_CXX_FLAGS"] = " -mavx512f"
+        if Version(self.version) >= "2.0.3":
+            tc.variables["SIMDUTF_TOOLS"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
