@@ -11,6 +11,9 @@ sources:
   "1.0.2.0":
     url: "https://github.com/chronoxor/CppCommon/archive/1.0.2.0.tar.gz"
     sha256: "1a748159ab5d0eb74a6c7b110606718caa779cdf17b3e91bf0dbd0e297823dec"
+  "1.0.3.0":
+    url: "https://github.com/chronoxor/CppCommon/archive/1.0.3.0.tar.gz"
+    sha256: "af530d3550a050d4ed73a680b016e043ea6f4f56e11163226f2a6e24d9eae4ca"
 
 patches:
   "1.0.0.0":
@@ -30,6 +33,11 @@ patches:
       base_path: "source_subfolder"
   "1.0.2.0":
     - patch_file: "patches/0001-update-cmakelists-1-0-1-0.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-define-win32-winnt-1-0-1-0.patch"
+      base_path: "source_subfolder"
+  "1.0.3.0":
+    - patch_file: "patches/0001-update-cmakelists-1-0-3-0.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0003-define-win32-winnt-1-0-1-0.patch"
       base_path: "source_subfolder"
