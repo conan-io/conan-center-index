@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake
 import os
+import shutil
 import subprocess
 from six import StringIO
 
@@ -29,8 +30,9 @@ class NmosCppTestPackageConan(ConanFile):
             with open("node-config.json", "w", encoding="utf-8") as config:
                 config.write('{"http_port": 20000, "domain": "local.", "highest_pri": 51967, "lowest_pri": 51967}')
 
-            # start up the installed nmos-cpp-registry to check it works
-            registry = subprocess.Popen(["nmos-cpp-registry", "registry-config.json"],
+            # find and start up the installed nmos-cpp-registry to check it works
+            registry_path = shutil.which("nmos-cpp-registry", path=os.pathsep.join(self.env["PATH"]))
+            registry = subprocess.Popen([registry_path, "registry-config.json"],
                                         stdout=subprocess.PIPE,
                                         stderr=subprocess.STDOUT,
                                         universal_newlines=True)
