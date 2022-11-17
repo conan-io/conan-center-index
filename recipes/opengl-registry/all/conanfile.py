@@ -41,6 +41,7 @@ class OpenGLRegistryConan(ConanFile):
         save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_data)
 
         copy(self, "*", src=os.path.join(self.source_folder, "api"), dst=os.path.join(self.package_folder, "include"))
+        copy(self, "*", src=os.path.join(self.source_folder, "xml"), dst=os.path.join(self.package_folder, "res", "xml"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
