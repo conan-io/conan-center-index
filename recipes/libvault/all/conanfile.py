@@ -1,7 +1,9 @@
-from conans import ConanFile, tools, CMake
+import os
+
+from conan.tools.files import apply_conandata_patches
+from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
-import os
 
 required_conan_version = ">=1.33.0"
 
@@ -93,8 +95,7 @@ class LibvaultConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 

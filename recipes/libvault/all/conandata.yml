@@ -9,6 +9,10 @@ patches:
   "0.51.0":
     - patch_file: "patches/fix-cmake-0.51.0.patch"
       base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "use libcurl from conan center"
   "0.48.0":
     - patch_file: "patches/fix-cmake-0.48.0.patch"
       base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "use libcurl from conan center"
