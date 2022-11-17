@@ -38,12 +38,10 @@ class CcclConan(ConanFile):
             raise ConanInvalidConfiguration("This recipe only supports msvc/Visual Studio.")
 
     def source(self):
-        pass
-
-    def build(self):
         get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self.source_folder)
 
+    def build(self):
         cccl_path = os.path.join(self.source_folder, self.source_folder, "cccl")
         replace_in_file(self, cccl_path,
                               "    --help)",
