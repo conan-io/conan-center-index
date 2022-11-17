@@ -1,7 +1,7 @@
 from conan.errors import ConanInvalidConfiguration
 from conan import ConanFile
 from conan.tools.build import cross_building
-from conan.tools.files import chdir, collect_libs, get, load, patch, rename, replace_in_file, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, chdir, collect_libs, get, load, rename, replace_in_file, rm, rmdir, save
 from conan.tools.scm import Version
 from conans import CMake
 from collections import defaultdict
@@ -104,8 +104,7 @@ class LLVMCoreConan(ConanFile):
             raise ConanInvalidConfiguration(message.format(compiler, version))
 
     def _patch_sources(self):
-        for current_patch in self.conan_data.get('patches', {}).get(self.version, []):
-            patch(self, **current_patch)
+        apply_conandata_patches(self)
 
     def _patch_build(self):
         if os.path.exists('FindIconv.cmake'):
