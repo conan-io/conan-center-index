@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.52.0"
@@ -86,12 +87,17 @@ class HiredisConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "hiredis")
 
+        if Version(self.version) >= "1.1.0" and self.info.settings.build_type == "Debug":
+            suffix = "d"
+        else:
+            suffix = ""
+
         # hiredis
         self.cpp_info.components["hiredislib"].set_property("cmake_target_name", "hiredis::hiredis")
         self.cpp_info.components["hiredislib"].set_property("pkg_config_name", "hiredis")
         self.cpp_info.components["hiredislib"].names["cmake_find_package"] = "hiredis"
         self.cpp_info.components["hiredislib"].names["cmake_find_package_multi"] = "hiredis"
-        self.cpp_info.components["hiredislib"].libs = ["hiredis"]
+        self.cpp_info.components["hiredislib"].libs = [f"hiredis{suffix}"]
         if self.settings.os == "Windows":
             self.cpp_info.components["hiredislib"].system_libs = ["ws2_32"]
         # hiredis_ssl
@@ -100,7 +106,7 @@ class HiredisConan(ConanFile):
             self.cpp_info.components["hiredis_ssl"].set_property("pkg_config_name", "hiredis_ssl")
             self.cpp_info.components["hiredis_ssl"].names["cmake_find_package"] = "hiredis_ssl"
             self.cpp_info.components["hiredis_ssl"].names["cmake_find_package_multi"] = "hiredis_ssl"
-            self.cpp_info.components["hiredis_ssl"].libs = ["hiredis_ssl"]
+            self.cpp_info.components["hiredis_ssl"].libs = [f"hiredis_ssl{suffix}"]
             self.cpp_info.components["hiredis_ssl"].requires = ["openssl::ssl"]
             if self.settings.os == "Windows":
                 self.cpp_info.components["hiredis_ssl"].requires.append("hiredislib")
