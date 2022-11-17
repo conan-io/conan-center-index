@@ -100,6 +100,8 @@ class XapianCoreConan(ConanFile):
         autotools.library_paths = []
         if is_msvc(self):
             autotools.cxx_flags.append("-EHsc")
+        if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
+           (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
             autotools.flags.append("-FS")
         conf_args = [
             "--datarootdir={}".format(self._datarootdir.replace("\\", "/")),
