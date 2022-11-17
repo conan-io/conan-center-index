@@ -43,4 +43,5 @@ class OpenGLHeadersConan(ConanFile):
         copy(self, "*", src=os.path.join(self.source_folder, "api"), dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
-        pass
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
