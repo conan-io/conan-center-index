@@ -120,6 +120,7 @@ class HarfbuzzConan(ConanFile):
         tc = MesonToolchain(self, backend=backend)
         tc.project_options.update({
             "glib": is_enabled(self.options.with_glib),
+            "gobject": is_enabled(self.options.with_glib),
             "icu": is_enabled(self.options.with_icu),
             "freetype": is_enabled(self.options.with_freetype),
             "gdi": is_enabled(self.options.get_safe("with_gdi")),
