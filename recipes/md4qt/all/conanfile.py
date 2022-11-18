@@ -28,7 +28,7 @@ class Md4QtConan(ConanFile):
         return {
             "Visual Studio": "16",
             "gcc": "9",
-            "clang": "9",
+            "clang": "12",
             "apple-clang": "10",
         }
 
