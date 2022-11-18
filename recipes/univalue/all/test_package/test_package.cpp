@@ -1,4 +1,4 @@
-#include "univalue.h"
+#include <univalue.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -16,6 +16,6 @@ int main(int argc, char *argv[])
     parents.pushKV("p1", package1);
     parents.pushKV("p2", package2);
 
-    std::cout << parents.write(2);
+    std::cout << parents.write(2) << std::endl;
     return EXIT_SUCCESS;
 }
