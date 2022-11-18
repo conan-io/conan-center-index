@@ -1,0 +1,36 @@
+diff --git a/cli/CMakeLists.txt b/cli/CMakeLists.txt
+index aee67e6..bb5ade2 100644
+--- a/cli/CMakeLists.txt
++++ b/cli/CMakeLists.txt
+@@ -7,6 +7,8 @@ add_library(cli_objs OBJECT ${hdrs} ${srcs})
+ target_include_directories(cli_objs PRIVATE ${PROJECT_SOURCE_DIR}/lib/)
+ if(USE_BUNDLED_TINYXML2)
+     target_include_directories(cli_objs PRIVATE ${PROJECT_SOURCE_DIR}/externals/tinyxml2/)
++else()
++    target_include_directories(cli_objs PRIVATE ${tinyxml2_INCLUDE_DIRS})
+ endif()
+ target_include_directories(cli_objs PRIVATE ${PROJECT_SOURCE_DIR}/externals/simplecpp/)
+ 
+@@ -29,6 +31,9 @@ target_include_directories(cppcheck PRIVATE ${PROJECT_SOURCE_DIR}/externals/simp
+ if (HAVE_RULES)
+     target_link_libraries(cppcheck ${PCRE_LIBRARY})
+ endif()
++if(NOT USE_BUNDLED_TINYXML2)
++    target_link_libraries(cppcheck ${tinyxml2_LIBRARIES})
++endif()
+ if (WIN32 AND NOT BORLAND)
+     if(NOT MINGW)
+         target_link_libraries(cppcheck Shlwapi.lib)
+diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
+index 44af140..bb4ce5e 100644
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -36,6 +36,8 @@ add_library(lib_objs OBJECT ${srcs_lib} ${hdrs})
+ target_include_directories(lib_objs SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/externals/)
+ if(USE_BUNDLED_TINYXML2)
+     target_include_directories(lib_objs SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/externals/tinyxml2/)
++else()
++    target_include_directories(lib_objs SYSTEM PRIVATE ${tinyxml2_INCLUDE_DIRS})
+ endif()
+ target_include_directories(lib_objs SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/externals/picojson/)
+ target_include_directories(lib_objs SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/externals/simplecpp/)

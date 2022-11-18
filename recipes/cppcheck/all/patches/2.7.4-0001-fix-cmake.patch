@@ -1,0 +1,49 @@
+diff --git a/cli/CMakeLists.txt b/cli/CMakeLists.txt
+index 6293540..bb40aba 100644
+--- a/cli/CMakeLists.txt
++++ b/cli/CMakeLists.txt
+@@ -7,6 +7,8 @@ add_library(cli_objs OBJECT ${hdrs} ${srcs})
+ target_include_directories(cli_objs PRIVATE ${PROJECT_SOURCE_DIR}/lib/)
+ if(USE_BUNDLED_TINYXML2)
+     target_include_directories(cli_objs PRIVATE ${PROJECT_SOURCE_DIR}/externals/tinyxml2/)
++else()
++    target_include_directories(cli_objs PRIVATE ${tinyxml2_INCLUDE_DIRS})
+ endif()
+ target_include_directories(cli_objs PRIVATE ${PROJECT_SOURCE_DIR}/externals/simplecpp/)
+ 
+@@ -27,6 +29,10 @@ endif()
+ if (USE_Z3)
+     target_link_libraries(cppcheck ${Z3_LIBRARIES})
+ endif()
++if(NOT USE_BUNDLED_TINYXML2)
++    target_link_libraries(cppcheck ${tinyxml2_LIBRARIES})
++endif()
++
+ if (WIN32 AND NOT BORLAND)
+     if(NOT MINGW)
+         target_link_libraries(cppcheck Shlwapi.lib)
+diff --git a/cmake/findDependencies.cmake b/cmake/findDependencies.cmake
+index b8c1817..206a4ae 100644
+--- a/cmake/findDependencies.cmake
++++ b/cmake/findDependencies.cmake
+@@ -34,6 +34,7 @@ if (USE_Z3)
+             message(FATAL_ERROR "z3++.h has not been found")
+         endif()
+     endif()
++    set(Z3_CXX_INCLUDE_DIRS "${Z3_INCLUDE_DIRS}")
+ endif()
+ 
+ set(CMAKE_INCLUDE_CURRENT_DIR ON)
+diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
+index 48c70ec..e79df4a 100644
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -36,6 +36,8 @@ add_library(lib_objs OBJECT ${srcs_lib} ${hdrs})
+ target_include_directories(lib_objs PRIVATE ${PROJECT_SOURCE_DIR}/externals/)
+ if(USE_BUNDLED_TINYXML2)
+     target_include_directories(lib_objs PRIVATE ${PROJECT_SOURCE_DIR}/externals/tinyxml2/)
++else()
++    target_include_directories(lib_objs PRIVATE ${tinyxml2_INCLUDE_DIRS})
+ endif()
+ target_include_directories(lib_objs PRIVATE ${PROJECT_SOURCE_DIR}/externals/picojson/)
+ target_include_directories(lib_objs PRIVATE ${PROJECT_SOURCE_DIR}/externals/simplecpp/)
