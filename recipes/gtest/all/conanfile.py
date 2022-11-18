@@ -83,7 +83,10 @@ class GTestConan(ConanFile):
 
     def package_id(self):
         del self.info.options.no_main # Only used to expose more targets
-        del self.info.options.debug_postfix # deprecated option that no longer exist
+        if Version(self.version) < "1.12.0" and self.settings.build_type != "Debug":
+            del self.info.options.debug_postfix # unused option
+        if Version(self.version) >= "1.12.0":
+            del self.info.options.debug_postfix # deprecated option that no longer exist
 
     def validate(self):
         if self.info.options.shared and (is_msvc(self) or self._is_clang_cl) and is_msvc_static_runtime(self):
