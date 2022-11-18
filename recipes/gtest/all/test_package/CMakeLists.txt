@@ -20,5 +20,9 @@ else()
         target_link_libraries(${PROJECT_NAME} PRIVATE GTest::gmock)
     endif()
 endif()
+if(WITH_GMOCK)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE WITH_GMOCK)
+endif()
+
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
