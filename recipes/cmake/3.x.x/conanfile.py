@@ -9,6 +9,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.errors import ConanException
 import os
 
+
 required_conan_version = ">=1.53.0"
 
 class CMakeConan(ConanFile):
@@ -42,11 +43,12 @@ class CMakeConan(ConanFile):
         if self.info.settings.os == "Macos" and self.info.settings.arch == "x86":
             raise ConanInvalidConfiguration("CMake does not support x86 for macOS")
 
-        if self.info.settings.os == "Windows" and self.info.options.bootstrap:
+    def validate_build(self):
+        if self.settings.os == "Windows" and self.options.bootstrap:
             raise ConanInvalidConfiguration("CMake does not support bootstrapping on Windows")
 
         minimal_cpp_standard = "11"
-        if self.info.settings.get_safe("compiler.cppstd"):
+        if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, minimal_cpp_standard)
 
         minimal_version = {
@@ -56,7 +58,7 @@ class CMakeConan(ConanFile):
             "Visual Studio": "14",
         }
 
-        compiler = str(self.info.settings.compiler)
+        compiler = str(self.settings.compiler)
         if compiler not in minimal_version:
             self.output.warning(
                 "{} recipe lacks information about the {} compiler standard version support".format(self.name, compiler))
@@ -64,7 +66,7 @@ class CMakeConan(ConanFile):
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
             return
 
-        version = Version(self.info.settings.compiler.version)
+        version = Version(self.settings.compiler.version)
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
