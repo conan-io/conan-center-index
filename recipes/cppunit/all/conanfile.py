@@ -1,14 +1,24 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-import contextlib
+from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.files import copy, get, rename, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.scm import Version
+from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class CppunitConan(ConanFile):
     name = "cppunit"
-    description = "CppUnit is the C++ port of the famous JUnit framework for unit testing. Test output is in XML for automatic testing and GUI based for supervised tests."
-    topics = ("conan", "cppunit", "unit-test", "tdd")
+    description = (
+        "CppUnit is the C++ port of the famous JUnit framework for unit testing. "
+        "Test output is in XML for automatic testing and GUI based for supervised tests."
+    )
+    topics = ("unit-test", "tdd")
     license = " LGPL-2.1-or-later"
     homepage = "https://freedesktop.org/wiki/Software/cppunit/"
     url = "https://github.com/conan-io/conan-center-index"
@@ -22,17 +32,13 @@ class CppunitConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "pkg_config"
-
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,85 +46,86 @@ class CppunitConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.3")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+        if is_msvc(self):
+            self.tool_requires("automake/1.16.5")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                env = {
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "NM": "dumpbin -symbols",
-                    "OBJDUMP": ":",
-                    "RANLIB": ":",
-                    "STRIP": ":",
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        tc = AutotoolsToolchain(self)
         if self.settings.os == "Windows" and self.options.shared:
-            self._autotools.defines.append("CPPUNIT_BUILD_DLL")
-        if self.settings.compiler == "Visual Studio":
-            self._autotools.flags.append("-FS")
-            self._autotools.cxx_flags.append("-EHsc")
+            tc.extra_defines.append("CPPUNIT_BUILD_DLL")
+        if is_msvc(self):
+            tc.extra_cxxflags.append("-EHsc")
+            if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
+               (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+                tc.extra_cflags.append("-FS")
+                tc.extra_cxxflags.append("-FS")
         yes_no = lambda v: "yes" if v else "no"
-        conf_args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
+        tc.configure_args.extend([
             "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
             "--enable-doxygen=no",
             "--enable-dot=no",
             "--enable-werror=no",
             "--enable-html-docs=no",
-        ]
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
+        ])
+        tc.generate()
+
+        if is_msvc(self):
+            env = Environment()
+            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
+            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.define("LD", "link -nologo")
+            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
+            env.define("NM", "dumpbin -symbols")
+            env.define("OBJDUMP", ":")
+            env.define("RANLIB", ":")
+            env.define("STRIP", ":")
+            env.vars(self).save_script("conanbuild_cppunit_msvc")
 
     def build(self):
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make()
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
-
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            os.rename(os.path.join(self.package_folder, "lib", "cppunit.dll.lib"),
-                      os.path.join(self.package_folder, "lib", "cppunit.lib"))
-
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
+        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        if is_msvc(self) and self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", "cppunit.dll.lib"),
+                         os.path.join(self.package_folder, "lib", "cppunit.lib"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "cppunit")
         self.cpp_info.libs = ["cppunit"]
         if not self.options.shared:
-            stdlib = tools.stdcpp_library(self)
-            if stdlib:
-                self.cpp_info.system_libs.append(stdlib)
-            if self.settings.os == "Linux":
+            libcxx = tools_legacy.stdcpp_library(self)
+            if libcxx:
+                self.cpp_info.system_libs.append(libcxx)
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.append("dl")
         if self.options.shared and self.settings.os == "Windows":
             self.cpp_info.defines.append("CPPUNIT_DLL")
-        self.cpp_info.filenames["pkg_config"] = "cppunit"
