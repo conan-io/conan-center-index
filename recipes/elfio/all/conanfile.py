@@ -7,6 +7,7 @@ class ElfioConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://elfio.sourceforge.net"
     description = "A header-only C++ library that provides a simple interface for reading and generating files in ELF binary format."
+    author = "Serge Lamikhov-Center"
     topics = ("conan", "elfio", "elf")
     license = "MIT"
     settings = "compiler"
@@ -18,7 +19,7 @@ class ElfioConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+            tools.check_min_cppstd(self, 14)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
