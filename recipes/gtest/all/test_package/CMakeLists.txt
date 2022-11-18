@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.15)
-project(test_package CXX)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
 find_package(GTest REQUIRED)
 
@@ -10,15 +10,15 @@ else()
 endif()
 
 if(WITH_MAIN)
-    target_link_libraries(${PROJECT_NAME} GTest::gtest GTest::gtest_main)
+    target_link_libraries(${PROJECT_NAME} PRIVATE GTest::gtest GTest::gtest_main)
     if(WITH_GMOCK)
-        target_link_libraries(${PROJECT_NAME} GTest::gmock GTest::gmock_main)
+        target_link_libraries(${PROJECT_NAME} PRIVATE GTest::gmock GTest::gmock_main)
     endif()
 else()
-    target_link_libraries(${PROJECT_NAME} GTest::gtest)
+    target_link_libraries(${PROJECT_NAME} PRIVATE GTest::gtest)
     if(WITH_GMOCK)
-        target_link_libraries(${PROJECT_NAME} GTest::gmock)
+        target_link_libraries(${PROJECT_NAME} PRIVATE GTest::gmock)
     endif()
 endif()
 
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
