@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.files import copy
 import os
-
+import sys
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
@@ -19,6 +19,6 @@ class TestPackageConan(ConanFile):
 
             # On windows we need to explicitly use python to run the python script
             if self.settings.os == 'Windows':
-                self.run("{} {} -h".format(sys.executable, os.get_env("CPPCHECK_HTMLREPORT")), env="conanrun")
+                self.run("{} {} -h".format(sys.executable, os.getenv("CPPCHECK_HTMLREPORT")), env="conanrun")
             else:
                 self.run("cppcheck-htmlreport -h", env="conanrun")
