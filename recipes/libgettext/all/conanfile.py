@@ -137,9 +137,11 @@ class GetTextConan(ConanFile):
 
         if is_msvc(self) or self._is_clang_cl:
             def programs():
+                if self._is_clang_cl:
+                    return os.environ.get("CC", "clang-cl"), os.environ.get("AR", "llvm-lib"), os.environ.get("LD", "lld-link")
                 if is_msvc(self):
                     return "cl -nologo", "lib -nologo", "link -nologo"
-                return os.environ.get("CC", "clang-cl"), os.environ.get("AR", "llvm-lib"), os.environ.get("LD", "lld-link")
+                    
             env = Environment()
             compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
             ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
