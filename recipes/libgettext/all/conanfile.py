@@ -109,6 +109,12 @@ class GetTextConan(ConanFile):
             "--disable-threads" if self.options.threads == "disabled" else ("--enable-threads=" + str(self.options.threads)),
             f"--with-libiconv-prefix={unix_path(self, self.deps_cpp_info['libiconv'].rootpath)}"
         ]
+        if is_msvc(self) or self._is_clang_cl:
+            if self.settings.arch == "x86_64":
+                tc.configure_args += ["--host=x86_64-w64-mingw32"]
+            elif self.settings.arch == "x86":
+                tc.configure_args += ["--host=i686-w64-mingw32"]
+
         tc.make_args += ["-C", "intl"]
         tc.generate()
 
@@ -117,43 +123,42 @@ class GetTextConan(ConanFile):
         if is_msvc(self) or self._is_clang_cl:
             # Attempt to workaround the following issues:
             # * Include and Library paths are passed with /I and /LIBPATH which configure thinks are file paths
-            # * -LIBPATH requires -link when passed to cl, but the compiler wrapper thinks -link is a request to
-            #   link a library called 'ink', so we can't use LIBPATH. Instead we just use the absolute paths to the
-            #   dependent libraries
-            def libs():
-                for dep in self.deps_cpp_info.deps:
-                    dep_info = self.deps_cpp_info[dep]
-                    if len(dep_info.lib_paths) != 0:
-                        lib_path = dep_info.lib_paths[0]
-                        for lib in dep_info.libs:
-                            yield unix_path(self, os.path.join(lib_path, f"{lib}.lib"))
-
+            # * -LIBPATH requires -link when passed to cl, but when used with the wrapper this becomes the GCC 
+            #   flag -Wl
             fixed_cppflags_args = deps.vars().get("CPPFLAGS").replace("/I", "-I")
             deps.environment.define("CPPFLAGS", fixed_cppflags_args)
-            deps.environment.define("LIBS", " ".join(lib for lib in libs()))
-            deps.environment.unset("LDFLAGS")
+            fixed_ldflags_args = deps.vars().get("LDFLAGS").replace("/LIBPATH", "-Wl,-LIBPATH")
+            deps.environment.define("LDFLAGS", fixed_ldflags_args)
 
         deps.generate()
 
         if is_msvc(self) or self._is_clang_cl:
             def programs():
+                rc = None
+                if self.settings.arch == "x86_64":
+                    rc = "windres --target=pe-x86-64"
+                elif self.settings.arch == "x86":
+                    rc = "windres --target=pe-i386"
                 if self._is_clang_cl:
-                    return os.environ.get("CC", "clang-cl"), os.environ.get("AR", "llvm-lib"), os.environ.get("LD", "lld-link")
+                    return os.environ.get("CC", "clang-cl"), os.environ.get("AR", "llvm-lib"), os.environ.get("LD", "lld-link"), rc
                 if is_msvc(self):
-                    return "cl -nologo", "lib -nologo", "link -nologo"
+                    return "cl -nologo", "lib", "link", rc
                     
             env = Environment()
             compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
             ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
-            cc, ar, link = programs()
+            cc, ar, link, rc = programs()
             env.define("CC", f"{compile_wrapper} {cc}")
             env.define("CXX", f"{compile_wrapper} {cc}")
             env.define("LD", link)
-            env.define("AR", f"{ar_wrapper} \"{ar}\"")
+            env.define("AR", f"{ar_wrapper} {ar}")
             env.define("NM", "dumpbin -symbols")
-            env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
+            if rc is not None:
+                env.define("RC", rc)
+                env.define("WINDRES", rc)
+
             env.vars(self).save_script("conanbuild_msvc")
 
     def build(self):
