@@ -1,33 +1,8 @@
-cmake_minimum_required(VERSION 3.8)
-project(test_package LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.1)
+project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(OpenCV REQUIRED imgcodecs highgui objdetect CONFIG)
-
-option(built_with_ade "Enabled if opencv is built with ade" OFF)
-if(built_with_ade)
-    add_definitions(-DBUILT_WITH_ADE)
-endif()
-
-option(built_with_ffmpeg "Enabled if opencv is built with ffmpeg" OFF)
-if(built_with_ffmpeg)
-    add_definitions(-DBUILT_WITH_FFMPEG)
-endif()
-
-option(built_contrib_sfm "Enabled if opencv is built contrib sfm" OFF)
-if(built_contrib_sfm)
-    add_definitions(-DBUILT_CONTRIB_SFM)
-endif()
-
-add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    opencv_imgcodecs
-    opencv_highgui
-    opencv_objdetect
-    $<TARGET_NAME_IF_EXISTS:opencv_gapi>
-    $<TARGET_NAME_IF_EXISTS:opencv_videoio>
-    $<TARGET_NAME_IF_EXISTS:opencv_sfm>
-)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package
+                 ${CMAKE_CURRENT_BINARY_DIR}/test_package)

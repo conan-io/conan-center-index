@@ -8,7 +8,7 @@ from conans import CMake, tools as tools_legacy
 import os
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class OpenCVConan(ConanFile):
@@ -153,10 +153,7 @@ class OpenCVConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
         if not self.options.contrib:
             del self.options.contrib_freetype
             del self.options.contrib_sfm
