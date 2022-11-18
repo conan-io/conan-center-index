@@ -87,7 +87,7 @@ class OpenCVConan(ConanFile):
         pass
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
@@ -109,7 +109,7 @@ class OpenCVConan(ConanFile):
             self.requires("libwebp/1.2.4")
         if self.options.contrib:
             self.requires("freetype/2.12.1")
-            self.requires("harfbuzz/5.3.0")
+            self.requires("harfbuzz/5.3.1")
             self.requires("gflags/2.2.2")
             self.requires("glog/0.6.0")
         if self.options.get_safe("with_gtk"):

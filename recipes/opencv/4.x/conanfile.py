@@ -181,7 +181,7 @@ class OpenCVConan(ConanFile):
         pass
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
@@ -202,14 +202,14 @@ class OpenCVConan(ConanFile):
             # opencv doesn't support ffmpeg >= 5.0.0 for the moment (until 4.5.5 at least)
             self.requires("ffmpeg/4.4")
         if self.options.parallel == "tbb":
-            self.requires("onetbb/2021.3.0")
+            self.requires("onetbb/2021.7.0")
         if self.options.with_ipp == "intel-ipp":
             self.requires("intel-ipp/2020")
         if self.options.with_webp:
             self.requires("libwebp/1.2.4")
         if self.options.get_safe("contrib_freetype"):
             self.requires("freetype/2.12.1")
-            self.requires("harfbuzz/5.3.0")
+            self.requires("harfbuzz/5.3.1")
         if self.options.get_safe("contrib_sfm"):
             self.requires("gflags/2.2.2")
             self.requires("glog/0.6.0")

@@ -77,7 +77,7 @@ class OpenCVConan(ConanFile):
         pass
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         if self.options.with_jpeg:
             self.requires("libjpeg/9e")
         if self.options.with_png:
