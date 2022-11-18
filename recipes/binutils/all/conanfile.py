@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.files import get, rmdir, rm, copy, apply_conandata_patches, export_conandata_patches
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import is_msvc
 from conan.tools.layout import basic_layout
 
 import os
@@ -150,7 +150,7 @@ class BinutilsConan(ConanFile):
         tc.configure_args.append(f"--enable-multilib={yes_no(self.options.multilib)}")
         tc.configure_args.append(f"--with-zlib={self.deps_cpp_info['zlib'].rootpath}")
         tc.configure_args.append(f"--program-prefix={self.options.prefix}")
-        tc.configure_args.append(f"--exec_prefix=/bin/exec_prefix")
+        tc.configure_args.append("--exec_prefix=/bin/exec_prefix")
         tc.generate()
 
     def build(self):
@@ -183,6 +183,7 @@ class BinutilsConan(ConanFile):
         for binary_name in binaries:
             binary = os.path.join(absolute_target_bindir, binary_name)
             if os.path.isfile(binary):
+                # See https://github.com/conan-io/conan-center-index/pull/14137/files/7ed7a48e2c993bb7e748570ee7ab9d021790c7dc..e93ea8d3d318b0ef8be84816cef615043b5f7fa9#r1022730130 for details
                 self.output.info(f"Setting {binary_name.upper()}={binary}")
                 self.buildenv_info.define(f"{binary_name.upper()}", binary)
         if self.settings.os == "Macos":
