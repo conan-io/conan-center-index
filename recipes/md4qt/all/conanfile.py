@@ -29,7 +29,7 @@ class Md4QtConan(ConanFile):
             "Visual Studio": "16",
             "gcc": "9",
             "clang": "12",
-            "apple-clang": "10",
+            "apple-clang": "12",
         }
 
     def package_id(self):
