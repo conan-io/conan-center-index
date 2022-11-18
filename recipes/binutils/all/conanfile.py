@@ -140,7 +140,7 @@ class BinutilsConan(ConanFile):
 
     @property
     def _exec_prefix(self):
-        return os.path.join(self.package_folder, "bin", "exec_prefix")
+        return os.path.join("bin", "exec_prefix")
 
     def generate(self):
         yes_no = lambda tf : "yes" if tf else "no"
@@ -175,13 +175,13 @@ class BinutilsConan(ConanFile):
 
     def package_info(self):
         target_bindir = os.path.join(self._exec_prefix, str(self.options.target_triplet), "bin")
-        self.output.info("Prepending PATH environment variable: {}".format(target_bindir))
-        self.buildenv_info.prepend_path("PATH", target_bindir)
+        self.cpp_info.bindirs = ["bin", target_bindir]
 
-        binaries = os.listdir(target_bindir)
+        absolute_target_bindir = os.path.join(self.package_folder, target_bindir)
+        binaries = os.listdir(absolute_target_bindir)
         self.output.info(f"Binaries built: {', '.join(binaries)}")
         for binary_name in binaries:
-            binary = os.path.join(target_bindir, binary_name)
+            binary = os.path.join(absolute_target_bindir, binary_name)
             if os.path.isfile(binary):
                 self.output.info(f"Setting {binary_name.upper()}={binary}")
                 self.buildenv_info.define(f"{binary_name.upper()}", binary)
@@ -194,7 +194,7 @@ class BinutilsConan(ConanFile):
         # v1 exports
         bindir = os.path.join(self.package_folder, "bin")
         self.env_info.PATH.append(bindir)
-        self.env_info.PATH.append(target_bindir)
+        self.env_info.PATH.append(absolute_target_bindir)
         self.output.info(f"GNU triplet={self.options.target_triplet}")
         self.user_info.gnu_triplet = self.options.target_triplet
         self.user_info.prefix = self.options.prefix
