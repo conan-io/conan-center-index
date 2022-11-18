@@ -109,6 +109,7 @@ class GetTextConan(ConanFile):
             "--disable-threads" if self.options.threads == "disabled" else ("--enable-threads=" + str(self.options.threads)),
             f"--with-libiconv-prefix={unix_path(self, self.deps_cpp_info['libiconv'].rootpath)}"
         ]
+        tc.make_args += ["-C", "intl"]
         tc.generate()
 
         deps = AutotoolsDeps(self)
@@ -156,22 +157,20 @@ class GetTextConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         autotools = Autotools(self)
-        autotools.configure()
+        autotools.configure("gettext-tools")
         autotools.make()
 
     def package(self):
-        src_intl_dir = os.path.join(self.build_folder, "gettext-runtime", "intl")
-        src_lib_dir = os.path.join(src_intl_dir, ".libs")
         dest_lib_dir = os.path.join(self.package_folder, "lib")
         dest_runtime_dir = os.path.join(self.package_folder, "bin")
         dest_include_dir = os.path.join(self.package_folder, "include")
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        copy(self, "*gnuintl*.dll", src_lib_dir, dest_runtime_dir)
-        copy(self, "*gnuintl*.lib", src_lib_dir, dest_lib_dir)
-        copy(self, "*gnuintl*.a", src_lib_dir, dest_lib_dir)
-        copy(self, "*gnuintl*.so*", src_lib_dir, dest_lib_dir)
-        copy(self, "*gnuintl*.dylib", src_lib_dir, dest_lib_dir)
-        copy(self, "*libgnuintl.h", src_intl_dir, dest_include_dir)
+        copy(self, "*gnuintl*.dll", self.build_folder, dest_runtime_dir, keep_path=False)
+        copy(self, "*gnuintl*.lib", self.build_folder, dest_lib_dir, keep_path=False)
+        copy(self, "*gnuintl*.a", self.build_folder, dest_lib_dir, keep_path=False)
+        copy(self, "*gnuintl*.so*", self.build_folder, dest_lib_dir, keep_path=False)
+        copy(self, "*gnuintl*.dylib", self.build_folder, dest_lib_dir, keep_path=False)
+        copy(self, "*libgnuintl.h", self.build_folder, dest_include_dir, keep_path=False)
         rename(self, os.path.join(dest_include_dir, "libgnuintl.h"), os.path.join(dest_include_dir, "libintl.h"))
         if (is_msvc(self) or self._is_clang_cl) and self.options.shared:
             rename(self, os.path.join(dest_lib_dir, "gnuintl.dll.lib"), os.path.join(dest_lib_dir, "gnuintl.lib"))
