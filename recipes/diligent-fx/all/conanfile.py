@@ -2,7 +2,7 @@ import os
 from conan import ConanFile
 from conans import CMake
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, rmdir, rm, collect_libs, patches, export_conandata_patches, apply_conandata_patches, rename
+from conan.tools.files import get, collect_libs, export_conandata_patches, apply_conandata_patches, rename
 import shutil
 
 required_conan_version = ">=1.53.0"
