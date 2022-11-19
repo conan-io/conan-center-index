@@ -113,7 +113,7 @@ class Krb5Conan(ConanFile):
         if not is_msvc(self):
             self.requires("libverto/0.3.2")
         if self.options.get_safe("with_tls") == "openssl":
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
         if self.options.get_safe("with_tcl"):
             self.requires("tcl/8.6.10")
 
@@ -169,7 +169,7 @@ class Krb5Conan(ConanFile):
                 replace_in_file(self, "kdb5_util.c",
                                 "krb5_keyblock master_keyblock;",
                                 "extern krb5_keyblock master_keyblock;")
-            with chdir(self, os.path.join(self.source_folder,"src", "tests", "create")):                    
+            with chdir(self, os.path.join(self.source_folder,"src", "tests", "create")):
                 replace_in_file(self, "kdb5_mkdums.c",
                                 "krb5_keyblock master_keyblock;",
                                 "extern krb5_keyblock master_keyblock;")
@@ -178,14 +178,14 @@ class Krb5Conan(ConanFile):
                                 "static krb5_principal master_princ;")
                 replace_in_file(self, "kdb5_mkdums.c",
                                 "krb5_pointer master_random;",
-                                "static krb5_pointer master_random;")                                                
+                                "static krb5_pointer master_random;")
             with chdir(self, os.path.join(self.source_folder,"src", "tests", "verify")):
                 replace_in_file(self, "kdb5_verify.c",
                                 "krb5_keyblock master_keyblock;",
                                 "extern krb5_keyblock master_keyblock;")
                 replace_in_file(self, "kdb5_verify.c",
                                 "krb5_principal master_princ;",
-                                "static krb5_principal master_princ;")                                                    
+                                "static krb5_principal master_princ;")
         apply_conandata_patches(self)
         if is_msvc(self):
             self._build_msvc()
@@ -229,7 +229,7 @@ class Krb5Conan(ConanFile):
         self.cpp_info.components["mit-krb5"].libs = [krb5_lib] + crypto_libs + [krb5support]
         if not is_msvc(self):
             self.cpp_info.components["mit-krb5"].libs.append("com_err")  # is a common library, that can potentially be packaged (but I don't know who "owns" it)
-            
+
         if self.options.get_safe('with_tls') == "openssl":
             self.cpp_info.components["mit-krb5"].requires.append("openssl::ssl")
         self.cpp_info.components["mit-krb5"].names["pkg_config"] = "mit-krb5"
