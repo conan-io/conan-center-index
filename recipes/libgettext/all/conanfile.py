@@ -129,12 +129,25 @@ class GetTextConan(ConanFile):
         deps = AutotoolsDeps(self)
 
         if is_msvc(self) or self._is_clang_cl:
+            # This mimics the v1 recipe, on the basis that it works and the defaults do not.
+            def lib_paths():
+                for dep in self.deps_cpp_info.deps:
+                    dep_info = self.deps_cpp_info[dep]
+                    for lib_path in dep_info.lib_paths:
+                        yield unix_path(self, lib_path)
+
             fixed_cppflags_args = deps.vars().get("CPPFLAGS").replace("/I", "-I")
             deps.environment.define("CPPFLAGS", f"$CPPFLAGS {fixed_cppflags_args}")
 
             fixed_ldflags_args = deps.vars().get("LDFLAGS").replace("/LIBPATH:", "-L")
             deps.environment.define("LDFLAGS", f"$LDFLAGS {fixed_ldflags_args}")
+
+            libs = deps.vars().get("LIBS")
+            deps.environment.define("_LINK_", libs)
             deps.environment.unset("LIBS")
+
+            for lib_path in lib_paths():
+                deps.environment.prepend_path("LIB", lib_path)
 
         deps.generate()
 

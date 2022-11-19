@@ -25,7 +25,7 @@ class TestPackageConan(ConanFile):
             env.define("LANG", lang)
             env.vars(self, scope=f"run_{locale}").save_script(f"locale_{locale}")
 
-        VirtualRunEnv(self).generate(scope=f"run_{locale}")
+            VirtualRunEnv(self).generate(scope=f"run_{locale}")
 
     def build(self):
         cmake = CMake(self)
