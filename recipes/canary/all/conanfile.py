@@ -16,7 +16,7 @@ class SocketcanCanaryConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSL-1.0"
     homepage = "https://github.com/djarek/canary"
-    topics = ("socketcan", "canary")
+    topics = ("socketcan", "can-bus", "can")
 
     settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
