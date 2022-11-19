@@ -96,7 +96,7 @@ class LibVertoConan(ConanFile):
 
     def requirements(self):
         if self.options.with_glib:
-            self.requires("glib/2.69.2")
+            self.requires("glib/2.74.21")
         if self.options.with_libevent:
             self.requires("libevent/2.1.12")
         if self.options.with_libev:
@@ -106,8 +106,8 @@ class LibVertoConan(ConanFile):
             raise ConanInvalidConfiguration("tevent is not (yet) available on conan-center")
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.4")
-        self.build_requires("libtool/2.4.6")
+        self.build_requires("pkgconf/1.9.3")
+        self.build_requires("libtool/2.4.7")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
