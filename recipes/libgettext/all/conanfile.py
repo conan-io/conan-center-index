@@ -14,6 +14,7 @@ from conan.tools.files import (
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -110,10 +111,17 @@ class GetTextConan(ConanFile):
             f"--with-libiconv-prefix={unix_path(self, self.deps_cpp_info['libiconv'].rootpath)}"
         ]
         if is_msvc(self) or self._is_clang_cl:
+            target = None
             if self.settings.arch == "x86_64":
-                tc.configure_args += ["--host=x86_64-w64-mingw32"]
+                target = "x86_64-w64-mingw32"
             elif self.settings.arch == "x86":
-                tc.configure_args += ["--host=i686-w64-mingw32"]
+                target = "i686-w64-mingw32"
+
+            if target is not None:
+                tc.configure_args += [f"--host={target}", f"--build={target}"]
+
+            if self.settings.build_type == "Debug" and Version(self.settings.compiler.version) >= "12":
+                tc.extra_cflags += ["-FS"]
 
         tc.make_args += ["-C", "intl"]
         tc.generate()
@@ -121,14 +129,12 @@ class GetTextConan(ConanFile):
         deps = AutotoolsDeps(self)
 
         if is_msvc(self) or self._is_clang_cl:
-            # Attempt to workaround the following issues:
-            # * Include and Library paths are passed with /I and /LIBPATH which configure thinks are file paths
-            # * -LIBPATH requires -link when passed to cl, but when used with the wrapper this becomes the GCC 
-            #   flag -Wl
             fixed_cppflags_args = deps.vars().get("CPPFLAGS").replace("/I", "-I")
-            deps.environment.define("CPPFLAGS", fixed_cppflags_args)
-            fixed_ldflags_args = deps.vars().get("LDFLAGS").replace("/LIBPATH", "-Wl,-LIBPATH")
-            deps.environment.define("LDFLAGS", fixed_ldflags_args)
+            deps.environment.define("CPPFLAGS", f"$CPPFLAGS {fixed_cppflags_args}")
+
+            fixed_ldflags_args = deps.vars().get("LDFLAGS").replace("/LIBPATH:", "-L")
+            deps.environment.define("LDFLAGS", f"$LDFLAGS {fixed_ldflags_args}")
+            deps.environment.unset("LIBS")
 
         deps.generate()
 
@@ -140,7 +146,7 @@ class GetTextConan(ConanFile):
                 elif self.settings.arch == "x86":
                     rc = "windres --target=pe-i386"
                 if self._is_clang_cl:
-                    return os.environ.get("CC", "clang-cl"), os.environ.get("AR", "llvm-lib"), os.environ.get("LD", "lld-link"), rc
+                    return os.environ.get("CC", "clang"), os.environ.get("AR", "llvm-lib"), os.environ.get("LD", "lld-link"), rc
                 if is_msvc(self):
                     return "cl -nologo", "lib", "link", rc
                     
