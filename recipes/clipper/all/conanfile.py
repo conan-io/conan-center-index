@@ -47,6 +47,8 @@ class ClipperConan(ConanFile):
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         # To install relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        # TODO: can be removed if required_conan_version bumped to at least 1.54.0
+        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.generate()
 
     def build(self):
