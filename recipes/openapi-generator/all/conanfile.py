@@ -52,7 +52,7 @@ class OpenApiGeneratorConan(ConanFile):
             save(self,
                  path=os.path.join(self.package_folder, "bin", "openapi-generator.bat"),
                  content="""\
-                         java -classpath %CLASSPATH% org.openapitools.codegen.OpenAPIGenerator $@
+                         java -classpath %CLASSPATH% org.openapitools.codegen.OpenAPIGenerator %*
                          """
                  )
         else:
