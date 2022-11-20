@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class ClipperConan(ConanFile):
@@ -33,16 +33,13 @@ class ClipperConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder)
 
     def generate(self):
         tc = CMakeToolchain(self)
