@@ -57,7 +57,7 @@ class TrantorConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openssl/1.1.1q")
+        self.requires("openssl/1.1.1s")
         if self.options.with_c_ares:
             self.requires("c-ares/1.18.1")
 

@@ -184,6 +184,7 @@ pod_size:
   large:
     - "pcl"
     - "duckdb"
+    - "cppfront"
   xlarge:
     - "llvm"
     - "opengv"

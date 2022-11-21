@@ -6,7 +6,7 @@
 
 static void Init_Service_Handlers(void)
 {
-    Device_Init(nullptr);
+    Device_Init(NULL);
     apdu_set_unconfirmed_handler(SERVICE_UNCONFIRMED_WHO_IS, handler_who_is);
     apdu_set_unrecognized_service_handler_handler(handler_unrecognized_service);
     apdu_set_confirmed_handler(
