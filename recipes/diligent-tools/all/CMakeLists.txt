@@ -3,9 +3,6 @@ project(cmake_wrapper)
 
 include(BuildUtils.cmake)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
 find_package(imgui REQUIRED)
 find_package(PNG REQUIRED)
 find_package(TIFF REQUIRED)
@@ -15,8 +12,8 @@ find_package(args CONFIG)
 find_package(diligent-core REQUIRED)
 
 set(Diligent-GraphicsEngine_SOURCE_DIR ${CONAN_DILIGENT-CORE_ROOT}/include/DiligentCore/Graphics/GraphicsEngine/)
-set(DILIGENT_ARGS_DIR ${CONAN_INCLUDE_DIRS_TAYWEE-ARGS})
-set(DILIGENT_DEAR_IMGUI_PATH ${CONAN_INCLUDE_DIRS_IMGUI})
+set(DILIGENT_ARGS_DIR ${args_INCLUDE_DIR})
+set(DILIGENT_DEAR_IMGUI_PATH ${imgui_INCLUDE_DIR})
 
 add_library(Diligent-BuildSettings               ALIAS diligent-core::diligent-core)
 add_library(Diligent-Common                      ALIAS diligent-core::diligent-core)

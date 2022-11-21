@@ -1,9 +1,9 @@
 import os
 from conan import ConanFile
-from conans import CMake
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, rmdir, rm, collect_libs, patches, export_conandata_patches
+from conan.tools.files import get, rmdir, rm, collect_libs, patches, export_conandata_patches, copy, apply_conandata_patches
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
@@ -29,25 +29,18 @@ class DiligentToolsConan(ConanFile):
                        "with_archiver": True,
                       }
 
-    generators = "cmake_find_package", "cmake_find_package_multi", "cmake"
+    generators = "cmake_find_package", "cmake_find_package_multi"
     _cmake = None
     short_paths = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder, keep_path=False)
+        copy(self, "BuildUtils.cmake", src=self.recipe_folder, dst=self.export_sources_folder, keep_path=False)
         export_conandata_patches(self)
-        self.copy("CMakeLists.txt")
-        self.copy("BuildUtils.cmake")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=os.path.join(self.source_folder, "source_subfolder"), strip_root=True)
 
     def package_id(self):
         if self.settings.compiler == "Visual Studio":
@@ -56,6 +49,29 @@ class DiligentToolsConan(ConanFile):
             else:
                 self.info.settings.compiler.runtime = "MT/MTd"
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["DILIGENT_INSTALL_TOOLS"] = False
+        tc.variables["DILIGENT_BUILD_SAMPLES"] = False
+        tc.variables["DILIGENT_NO_FORMAT_VALIDATION"] = True
+        tc.variables["DILIGENT_BUILD_TESTS"] = False
+        tc.variables["DILIGENT_BUILD_TOOLS_TESTS"] = False
+        tc.variables["DILIGENT_BUILD_TOOLS_INCLUDE_TEST"] = False
+        tc.variables["DILIGENT_NO_RENDER_STATE_PACKAGER"] = not self.options.with_render_state_packager
+        tc.variables["ARCHIVER_SUPPORTED"] = not self.options.with_archiver
+        tc.variables["DILIGENT_CLANG_COMPILE_OPTIONS"] = ""
+        tc.variables["DILIGENT_MSVC_COMPILE_OPTIONS"] = ""
+        tc.variables["ENABLE_RTTI"] = True
+        tc.variables["ENABLE_EXCEPTIONS"] = True
+        platform = self._diligent_platform()
+        tc.variables[platform] = True
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def layout(self):
+        cmake_layout(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -63,9 +79,6 @@ class DiligentToolsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-
-    def _patch_sources(self):
-        patches.apply_conandata_patches(self)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -91,9 +104,8 @@ class DiligentToolsConan(ConanFile):
             self.requires("libjpeg-turbo/2.1.4")
         self.requires("libpng/1.6.37")
         self.requires("libtiff/4.3.0")
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
 
-    @property
     def _diligent_platform(self):
         if self.settings.os == "Windows":
             return "PLATFORM_WIN32"
@@ -109,36 +121,12 @@ class DiligentToolsConan(ConanFile):
             return "PLATFORM_EMSCRIPTEN"
         elif self.settings.os == "watchOS":
             return "PLATFORM_TVOS"
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-
-        self._cmake.definitions["DILIGENT_INSTALL_TOOLS"] = False
-        self._cmake.definitions["DILIGENT_BUILD_SAMPLES"] = False
-        self._cmake.definitions["DILIGENT_NO_FORMAT_VALIDATION"] = True
-        self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
-        self._cmake.definitions["DILIGENT_BUILD_TOOLS_TESTS"] = False
-        self._cmake.definitions["DILIGENT_BUILD_TOOLS_INCLUDE_TEST"] = False
-        self._cmake.definitions["DILIGENT_NO_RENDER_STATE_PACKAGER"] = not self.options.with_render_state_packager
-        self._cmake.definitions["ARCHIVER_SUPPORTED"] = not self.options.with_archiver
-
-        if self.version != "cci.20211009" and \
-        (self.version.startswith("api") and self.version >= "api.252005") or \
-        (self.version > "2.5.2"):
-            self._cmake.definitions["GL_SUPPORTED"] = True
-            self._cmake.definitions["GLES_SUPPORTED"] = True
-            self._cmake.definitions["VULKAN_SUPPORTED"] = True
-            self._cmake.definitions["METAL_SUPPORTED"] = True
-
-        self._cmake.definitions[self._diligent_platform] = True
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        raise ConanInvalidConfiguration("Can't build for {}".format(self.settings.os))
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
