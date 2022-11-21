@@ -84,6 +84,9 @@ class NmosCppConan(ConanFile):
         # prefer config-file packages created by cmake_find_package_multi
         # over any system-installed find-module packages
         tc.cache_variables["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = True
+        # disable cmake-conan, consume conan packages in local cache to avoid incompatible requirements
+        # between this recipe and project's conanfile.txt
+        tc.cache_variables["CONAN_EXPORTED"] = True
         # (on Linux) select Avahi or mDNSResponder
         tc.variables["NMOS_CPP_USE_AVAHI"] = self.options.get_safe("with_dnssd") == "avahi"
         # (on Windows) use the Conan package for DNSSD (mdnsresponder), not the project's own DLL stub library
