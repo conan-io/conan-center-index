@@ -4,7 +4,7 @@ This is also a good place to share with all of us **why you are submitting this 
 
 ---
 
-- [ ] I've read the [guidelines](https://github.com/conan-io/conan-center-index/blob/master/docs/adding_packages/README.md) for contributing.
+- [ ] I've read the [contributing guidelines](https://github.com/conan-io/conan-center-index/blob/master/CONTRIBUTING.md).
 - [ ] I've followed the [PEP8](https://www.python.org/dev/peps/pep-0008/) style guides for Python code in the recipes.
 - [ ] I've used the [latest](https://github.com/conan-io/conan/releases/latest) Conan client version.
 - [ ] I've tried at least one configuration locally with the [conan-center hook](https://github.com/conan-io/hooks.git) activated.
