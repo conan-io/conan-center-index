@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, collect_libs, export_conandata_patches, apply_conandata_patches, rename
 import shutil
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.52.0"
 
 class DiligentFxConan(ConanFile):
     name = "diligent-fx"
@@ -23,7 +23,6 @@ class DiligentFxConan(ConanFile):
     }
     generators = "cmake_find_package", "cmake"
     _cmake = None
-    exports_sources = ["CMakeLists.txt", "BuildUtils.cmake", "script.py", "patches/**"]
     short_paths = True
 
     @property
@@ -60,7 +59,7 @@ class DiligentFxConan(ConanFile):
 
     def requirements(self):
         if self.version == "cci.20220219" or self.version == "cci.20211112":
-            self.requires("diligent-tools/2.5.2".format(self.version))        
+            self.requires("diligent-tools/2.5.2")
         else:
             self.requires("diligent-tools/{}".format(self.version))
 
