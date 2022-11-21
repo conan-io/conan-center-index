@@ -9,8 +9,7 @@ from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.apple import is_apple_os
 import os
 
-required_conan_version = ">=1.33.0"
-
+required_conan_version = ">=1.51.3"
 
 class GenieConan(ConanFile):
     name = "genie"
