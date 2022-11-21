@@ -66,7 +66,7 @@ class NmosCppConan(ConanFile):
         self.build_requires("cmake/3.24.2")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
+        if self.info.settings.compiler.get_safe("cppstd"):
             build.check_min_cppstd(self, 11)
 
     def package_id(self):
