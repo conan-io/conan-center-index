@@ -169,7 +169,7 @@ class MimallocConan(ConanFile):
                 copy(self, "mimalloc-redirect.dll", src=os.path.join(self.source_folder, "bin"),
                           dst="bin")
             elif self.settings.arch == "x86":
-                self.copy("mimalloc-redirect32.dll", src=os.path.join(self.source_folder, "bin"),
+                copy(self, "mimalloc-redirect32.dll", src=os.path.join(self.source_folder, "bin"),
                           dst="bin")
 
         rmdir(self, os.path.join(self.package_folder, "share"))
