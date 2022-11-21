@@ -27,6 +27,16 @@ class GenieConan(ConanFile):
         # TODO: Remove for Conan v2
         return getattr(self, "settings_build", self.settings)
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        del self.info.settings.compiler
+
+    def validate(self):
+        if hasattr(self, "settings_build") and cross_building(self):
+            raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
+
     def build_requirements(self):
         if is_msvc(self):
             self.build_requires("cccl/1.3")
@@ -37,16 +47,6 @@ class GenieConan(ConanFile):
 
             if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
                 self.build_requires("msys2/cci.latest")
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
-    def package_id(self):
-        del self.info.settings.compiler
-
-    def validate(self):
-        if hasattr(self, "settings_build") and cross_building(self):
-            raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
