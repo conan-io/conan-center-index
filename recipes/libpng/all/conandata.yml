@@ -12,8 +12,8 @@ patches:
   "1.6.37":
     - patch_file: "patches/0001-1.6.37-cmakefile-zlib.patch"
       patch_description: "Update ZLib include and library paths for conan to provide lib. Remove Zlib dll definition."
-      patch_type: "backport"
+      patch_type: "conan"
   "1.5.30":
     - patch_file: "patches/0001-1.5.30-cmakefile-zlib.patch"
       patch_description: "Update ZLib include and library paths for conan to provide lib. Remove Zlib dll definition."
-      patch_type: "backport"
+      patch_type: "conan"

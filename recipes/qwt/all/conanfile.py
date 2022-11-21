@@ -47,8 +47,8 @@ class QwtConan(ConanFile):
     }
 
     tool_requires  = (
-        "cmake/3.23.2",
-        "ninja/1.11.0"
+        "cmake/3.24.2",
+        "ninja/1.11.1"
     )
 
     def _patch_sources(self):
@@ -60,12 +60,12 @@ class QwtConan(ConanFile):
 
 
     def requirements(self):
-        self.requires("qt/5.15.5")
+        self.requires("qt/5.15.7")
 
     def build_requirements(self):
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             self.build_requires("jom/1.1.3")
-        self.tool_requires("qt/5.15.5") 
+        self.tool_requires("qt/5.15.7") 
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
