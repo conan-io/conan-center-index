@@ -56,6 +56,9 @@ class LibUSBConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def layout(self):
+        pass
+
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not is_msvc(self) and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
