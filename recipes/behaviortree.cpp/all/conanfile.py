@@ -85,6 +85,9 @@ class BehaviorTreeCPPConan(ConanFile):
                 raise ConanInvalidConfiguration("BehaviorTree.CPP requires C++{}, which your compiler does not support."
                                                 .format(self._minimum_cppstd_required))
 
+        if self.settings.compiler == "clang" and str(self.settings .compiler.libcxx) == "libstdc++":
+            raise ConanInvalidConfiguration(f"{self.ref} needs recent libstdc++ with charconv. please switch to gcc, or to libc++")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
