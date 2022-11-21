@@ -10,15 +10,17 @@ required_conan_version = ">=1.53.0"
 class Libb64Conan(ConanFile):
     name = "libb64"    
     description = "A library of ANSI C routines for fast encoding/decoding data into and from a base64-encoded format."
-    author = "Chris Venter"
     license = "CC0-1.0"
-    url = "https://github.com/KGrzeg/libb64-conan"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libb64.sourceforge.net/"
     topics = ("base64", "codec", "encoder", "decoder")
     settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def package_id(self):
+        self.info.clear()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
