@@ -138,8 +138,10 @@ class GetTextConan(ConanFile):
 
             fixed_cppflags_args = deps.vars().get("CPPFLAGS").replace("/I", "-I")
             deps.environment.define("CPPFLAGS", f"$CPPFLAGS {fixed_cppflags_args}")
-
-            fixed_ldflags_args = deps.vars().get("LDFLAGS").replace("/LIBPATH:", "-L")
+            if self._is_clang_cl:
+                fixed_ldflags_args = deps.vars().get("LDFLAGS").replace("/LIBPATH:", "-LIBPATH:")
+            else:
+                fixed_ldflags_args = deps.vars().get("LDFLAGS").replace("/LIBPATH:", "-L")
             deps.environment.define("LDFLAGS", f"$LDFLAGS {fixed_ldflags_args}")
 
             libs = deps.vars().get("LIBS")
@@ -159,7 +161,7 @@ class GetTextConan(ConanFile):
                 elif self.settings.arch == "x86":
                     rc = "windres --target=pe-i386"
                 if self._is_clang_cl:
-                    return os.environ.get("CC", "clang"), os.environ.get("AR", "llvm-lib"), os.environ.get("LD", "lld-link"), rc
+                    return os.environ.get("CC", "clang-cl"), os.environ.get("AR", "llvm-lib"), os.environ.get("LD", "lld-link"), rc
                 if is_msvc(self):
                     return "cl -nologo", "lib", "link", rc
                     
