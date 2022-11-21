@@ -5,13 +5,13 @@ import sys
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch"
-    generators = "VirtualBuildEnv"
+    generators = "VirtualRunEnv"
     test_type = "explicit"
 
     def test(self):
         if can_run(self):
             self.run("cppcheck --enable=warning,style,performance --std=c++11 .",
-                     cwd=self.source_folder, env="conanbuild")
+                     cwd=self.source_folder, env="conanrun")
             if self.settings.os == "Windows":
                 # Unable to work with Environment variable CPPCHECK_HTML_REPORT
                 self.run(f"{sys.executable} %CPPCHECK_HTML_REPORT% -h", run_environment=True)
