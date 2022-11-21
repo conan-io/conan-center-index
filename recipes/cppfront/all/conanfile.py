@@ -58,7 +58,7 @@ class CppfrontConan(ConanFile):
             elif _lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
                 raise ConanInvalidConfiguration(f"{self.name} {self.version} requires C++20, which your compiler does not support.")
             if self.info.settings.compiler == "clang" and str(self.info.settings.compiler.version) in ("13", "14"):
-                raise ConanInvalidConfiguration(f"{self.ref} curretny does not work with Clang {self.info.settings.compiler.version} on CCI, it enters in an infinite build loop (smells like a compiler bug). Contributions are welcomed!")
+                raise ConanInvalidConfiguration(f"{self.ref} currently does not work with Clang {self.info.settings.compiler.version} on CCI, it enters in an infinite build loop (smells like a compiler bug). Contributions are welcomed!")
 
     def generate(self):
         tc = CMakeToolchain(self)
