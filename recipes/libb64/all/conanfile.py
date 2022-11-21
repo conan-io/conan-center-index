@@ -7,8 +7,9 @@ import os
 
 required_conan_version = ">=1.53.0"
 
+
 class Libb64Conan(ConanFile):
-    name = "libb64"    
+    name = "libb64"
     description = "A library of ANSI C routines for fast encoding/decoding data into and from a base64-encoded format."
     license = "CC0-1.0"
     url = "https://github.com/conan-io/conan-center-index"
@@ -23,7 +24,8 @@ class Libb64Conan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -35,7 +37,8 @@ class Libb64Conan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="LICENSE", dst=os.path.join(
+            self.package_folder, "licenses"), src=self.source_folder)
         copy(
             self,
             pattern="*.h",
