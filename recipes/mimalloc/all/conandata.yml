@@ -29,21 +29,43 @@ sources:
 patches:
   "2.0.7":
     - patch_file: "patches/2.0.7-0001-change-install-paths.patch"
+      patch_description: "fix install paths"
+      patch_type: "conan"
   "2.0.6":
     - patch_file: "patches/2.0.6-0001-change-install-paths.patch"
+      patch_description: "fix install paths"
+      patch_type: "conan"
   "2.0.5":
     - patch_file: "patches/2.0.6-0001-change-install-paths.patch"
+      patch_description: "fix install paths"
+      patch_type: "conan"
   "2.0.3":
     - patch_file: "patches/2.0.3-0001-change-install-paths-avoid-symlink.patch"
+      patch_description: "fix install paths, disable creating symlink"
+      patch_type: "conan"
   "2.0.2":
     - patch_file: "patches/2.0.2-0001-change-install-paths-avoid-symlink.patch"
+      patch_description: "fix install paths, disable creating symlink"
+      patch_type: "conan"
     - patch_file: "patches/2.0.2-0002-include-cstddef-to-get-std-size-t.patch"
+      patch_description: "include stddef"
+      patch_type: "portability"
   "1.7.7":
-    - patch_file: "patches/1.7.7-0001-change-install-paths-avoid-symlink.patch"
+    - patch_file: "patches/1.7.7-0001-change-install-paths.patch"
+      patch_description: "fix install paths"
+      patch_type: "conan"
   "1.7.6":
-    - patch_file: "patches/1.7.6-0001-change-install-paths-avoid-symlink.patch"
+    - patch_file: "patches/1.7.5-0001-change-install-paths.patch"
+      patch_description: "fix install paths"
+      patch_type: "conan"
   "1.7.5":
-    - patch_file: "patches/1.7.5-0001-change-install-paths-avoid-symlink.patch"
+    - patch_file: "patches/1.7.5-0001-change-install-paths.patch"
+      patch_description: "fix install paths"
+      patch_type: "conan"
   "1.6.7":
     - patch_file: "patches/1.6.7-0001-change-install-paths-avoid-symlink.patch"
+      patch_description: "fix install paths, disable creating symlink"
+      patch_type: "conan"
     - patch_file: "patches/1.6.7-0002-include-cstddef-to-get-std-size-t.patch"
+      patch_description: "include stddef"
+      patch_type: "portability"
