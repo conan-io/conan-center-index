@@ -87,7 +87,7 @@ class MimallocConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        # Currently, mimalloc/1.7.6,2.0.6 does not work properly with shared MD builds.
+        # Currently, mimalloc some version do not work properly with shared MD builds.
         # https://github.com/conan-io/conan-center-index/pull/10333#issuecomment-1114110046
         if  self.version in ["1.7.6", "1.7.7", "2.0.6", "2.0.7"] and \
             self.options.shared and \
