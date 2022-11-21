@@ -19,7 +19,6 @@ class GenieConan(ConanFile):
     description = "Project generator tool"
     topics = ("genie", "project", "generator", "build", "build-systems")
     settings = "os", "arch", "compiler", "build_type"
-    win_bash = True
 
     @property
     def _settings_build(self):
@@ -37,15 +36,12 @@ class GenieConan(ConanFile):
             raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
 
     def build_requirements(self):
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+                self.tool_requires("msys2/cci.latest")
         if is_msvc(self):
-            self.build_requires("cccl/1.3")
-
-        if self.settings.os == "Windows" and self._settings_build.os == "Windows":
-            if "make" not in os.environ.get("CONAN_MAKE_PROGRAM", ""):
-                self.build_requires("make/4.3")
-
-            if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
-                self.build_requires("msys2/cci.latest")
+            self.tool_requires("cccl/1.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
