@@ -1,9 +1,7 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 
 import os
 
@@ -23,6 +21,9 @@ class CpplazyConan(ConanFile):
     def _min_cppstd(self):
         return 11
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -33,13 +34,11 @@ class CpplazyConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6.0":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 6.0.")
-        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "12.0":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support apple-clang < 12.0.")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder)
+
+    def build(self):
+        apply_conandata_patches(self)
 
     def package(self):
         copy(self, pattern="LICENSE.md", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
