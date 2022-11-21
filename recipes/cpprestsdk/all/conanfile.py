@@ -48,7 +48,7 @@ class CppRestSDKConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         self.requires("boost/1.80.0")
@@ -71,8 +71,8 @@ class CppRestSDKConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         # upstream CMakeLists.txt sets BUILD_SHARED_LIBS as a CACHE variable
-        # remove for conan >=1.54.0
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0126"] = "NEW"
+        # TODO: remove if required_conan_version = ">=1.54.0"
+        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_TESTS"] = False
         tc.variables["BUILD_SAMPLES"] = False
         tc.variables["WERROR"] = False
