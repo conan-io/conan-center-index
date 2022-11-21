@@ -1,7 +1,9 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 
 import os
 
@@ -33,6 +35,9 @@ class CpplazyConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "12.0":
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support apple-clang < 12.0.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder)
