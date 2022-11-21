@@ -2,7 +2,7 @@ from conans import CMake
 from conan import ConanFile
 from conan.tools.files import get, rmdir, rm, replace_in_file, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Version
-from conan.error import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
