@@ -52,6 +52,7 @@ class MiniaudioConan(ConanFile):
             return
 
         tc = CMakeToolchain(self)
+        tc.variables["MINIAUDIO_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.variables["MINIAUDIO_VERSION_STRING"] = self.version
         tc.generate()
 
@@ -75,7 +76,7 @@ class MiniaudioConan(ConanFile):
         if self.options.header_only:
             copy(
                 self,
-                pattern="miniaudio.h", 
+                pattern="miniaudio.h",
                 dst=os.path.join(self.package_folder, "include"),
                 src=self.source_folder)
             copy(
