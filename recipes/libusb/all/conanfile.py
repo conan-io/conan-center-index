@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.microsoft import is_msvc
 from conan.tools.files import get, chdir, rmdir, rm, replace_in_file
 from conan.tools.scm import Version
@@ -146,6 +147,7 @@ class LibUSBConan(ConanFile):
             autotools.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libusb-1.0")
