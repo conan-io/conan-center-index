@@ -94,7 +94,7 @@ class MimallocConan(ConanFile):
             is_msvc(self) and \
             "MD" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration(
-                f"Currently, {self.ref} doesn't work properly with shared MD builds.")
+                f"Currently, {self.ref} doesn't work properly with shared MD builds in CCI. Contributions welcomed")
 
         # Shared overriding requires dynamic runtime for MSVC:
         if self.options.override and \
