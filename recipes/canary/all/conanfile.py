@@ -57,6 +57,6 @@ class SocketcanCanaryConan(ConanFile):
         self.info.clear()
 
     def package_info(self):
-        self.cpp_info.requires = ["boost::headers"]
+        self.cpp_info.requires = ["boost::headers", "boost::system"]
         self.cpp_info.set_property("cmake_file_name", "canary")
         self.cpp_info.set_property("cmake_target_name", "canary::canary")
