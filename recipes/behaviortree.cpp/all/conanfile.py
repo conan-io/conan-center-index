@@ -33,15 +33,22 @@ class BehaviorTreeCPPConan(ConanFile):
 
     @property
     def _minimum_cppstd_required(self):
-        return 14
+        return 14 if Version(self.version) < "4.0" else 17
 
     @property
     def _minimum_compilers_version(self):
-        return {
-            "gcc": "5",
-            "clang": "5",
-            "apple-clang": "12",
-        }
+        if Version(self.version) < "4.0":
+            return {
+                "gcc": "5",
+                "clang": "5",
+                "apple-clang": "12",
+            }
+        else:
+            return {
+                "gcc": "8",
+                "clang": "7",
+                "apple-clang": "12",
+            }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -69,7 +76,7 @@ class BehaviorTreeCPPConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Windows.")
         if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cppstd_required)
-        check_min_vs(self, 191)
+        check_min_vs(self, 191 if Version(self.version) < "4.0" else 192)
         if not is_msvc(self):
             minimum_version = self._minimum_compilers_version.get(str(self.info.settings.compiler), False)
             if not minimum_version:
