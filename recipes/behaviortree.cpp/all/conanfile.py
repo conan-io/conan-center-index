@@ -138,15 +138,14 @@ class BehaviorTreeCPPConan(ConanFile):
             self.cpp_info.components[libname].requires.append("boost::coroutine")
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components[libname].system_libs.append("pthread")
+        if Version(self.version) >= "4.0" and \
+            self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
+            self.cpp_info.components[libname].system_libs.append("stdc++fs")
 
         if self.options.with_tools:
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH env var with : {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
-
-        if Version(self.version) >= "4.0" and \
-            self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
-            self.cpp_info.system_libs.append("stdc++fs")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         if Version(self.version) < "4.0":
