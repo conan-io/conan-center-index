@@ -9,7 +9,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibvaultConan(ConanFile):
