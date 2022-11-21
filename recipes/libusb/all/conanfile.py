@@ -145,7 +145,7 @@ class LibUSBConan(ConanFile):
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libusb-1.0"
+        self.cpp_info.set_property("pkg_config_name", "libusb-1.0")
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "libusb-1.0"))
         if self.settings.os in ["Linux", "FreeBSD"]:
