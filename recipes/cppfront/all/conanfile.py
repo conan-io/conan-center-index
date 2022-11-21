@@ -27,7 +27,7 @@ class CppfrontConan(ConanFile):
     def _compilers_minimum_version(self):
         return {"gcc": "11",
                 "Visual Studio": "16.9",
-                "clang": "13",
+                "clang": "12",
                 "apple-clang": "13",
                 }
 
