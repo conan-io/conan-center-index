@@ -52,9 +52,9 @@ For example, `GSL` is the name of `Guidelines Support Library` from Microsoft an
 
 ## What is the policy on creating packages from pre-compiled binaries?
 
-The policy is that in the general case [recipes should build packages from sources](adding_packages/sources_and_patches.md), because of reproducibility and security concerns. The implication is that the sources must be publicly available, and in a format that can be consumed programmatically.
+The policy is that in the general case [recipes should build packages from sources](adding_packages/sources_and_patches.md#picking-the-sources), because of reproducibility and security concerns. The implication is that the sources must be publicly available, and in a format that can be consumed programmatically.
 
-Check the link for further details.
+See [Picking Sources](adding_packages/sources_and_patches.md#picking-the-sources) for more information.
 
 ## Should reference names use `-` or `_`?
 

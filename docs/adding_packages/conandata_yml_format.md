@@ -7,8 +7,8 @@ file to provide declarative data for the recipe (which is imperative). This is a
 In the context of ConanCenterIndex, this file is _mandatory_ and consists of two main sections that will be explained in the
 next sections with more detail:
 
-* `sources`: Library sources origin with their verification checksums. Freeform structure specific to a recipe.
-* `patches`: Details about the different patches the library needs along with details for traceability.
+* `sources`: Library sources origin with their verification checksums.
+* `patches`: Details about the any patches the may library need, see the [Patching Policy](sources_and_patches.md#policy-about-patching) for the criteria.
 
 <!-- toc -->
 ## Contents
@@ -38,6 +38,8 @@ next sections with more detail:
 `sources` is a top level dictionary, containing entries of sources and checksums for each of the supported versions.
 
 This is the entry that contains all the items that are downloaded from the internet and used in a recipe. This section contains one entry per version and each version should declare its own sources.
+
+> **Note**: For deciding which source to pick, see [Picking Sources](sources_and_patches.md#picking-the-sources) guide.
 
 This is a basic example of a regular library, it should satisfy most of the use cases:
 
