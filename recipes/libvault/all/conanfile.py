@@ -97,7 +97,7 @@ class LibvaultConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", "licenses", self.source_folder)
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
