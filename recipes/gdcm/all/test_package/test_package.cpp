@@ -21,6 +21,23 @@
 
 #include <iostream>
 
+#ifdef GDCM_USE_SYSTEM_OPENSSL
+#include "gdcmCryptoFactory.h"
+void test_openssl_link()
+{
+  (void)gdcm::CryptoFactory::GetFactoryInstance(gdcm::CryptoFactory::OPENSSL);
+}
+#endif
+
+#ifdef GDCM_USE_SYSTEM_JSON
+#include "gdcmJSON.h"
+void test_json_link()
+{
+  gdcm::JSON json;
+  json.PrettyPrintOn();
+}
+#endif
+
 int main(int argc, char* argv[])
 {
   if (argc < 3)
