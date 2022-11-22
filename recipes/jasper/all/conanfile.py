@@ -1,6 +1,6 @@
 from conans import CMake
 from conan import ConanFile
-from conan.tools.files import get, rmdir, rm, replace_in_file, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import get, save, rmdir, rm, replace_in_file, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -110,8 +110,7 @@ class JasperConan(ConanFile):
             os.path.join(self.package_folder, self._module_file_rel_path)
         )
 
-    @staticmethod
-    def _create_cmake_module_variables(module_file):
+    def _create_cmake_module_variables(self, module_file):
         content = textwrap.dedent("""\
             if(DEFINED Jasper_FOUND)
                 set(JASPER_FOUND ${Jasper_FOUND})
@@ -126,7 +125,7 @@ class JasperConan(ConanFile):
                 set(JASPER_VERSION_STRING ${Jasper_VERSION})
             endif()
         """)
-        tools.save(module_file, content)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
