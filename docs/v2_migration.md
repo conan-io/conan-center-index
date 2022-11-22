@@ -10,6 +10,7 @@ Conan v2 in pull requests.
   * [Using Layout](#using-layout)
     * [With New Generators](#with-new-generators)
     * [With Multiple Build Helpers](#with-multiple-build-helpers)
+  * [CMakeToolchain](#cmaketoolchain)
   * [New conf_info properties](#new-conf_info-properties)
   * [New cpp_info set_property model](#new-cpp_info-set_property-model)
     * [CMakeDeps](#cmakedeps)
