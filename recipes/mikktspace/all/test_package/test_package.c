@@ -1,15 +1,9 @@
-#include <assert.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-
 #include <mikktspace.h>
+#include <stdlib.h>
 
 static int GetNumFaces(const SMikkTSpaceContext *pContext)
 {
-	return 0;
+    return 0;
 }
 
 int main()
