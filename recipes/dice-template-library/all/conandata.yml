@@ -5,3 +5,6 @@ sources:
   "0.2.0":
     url: "https://github.com/dice-group/dice-template-library/archive/refs/tags/v0.2.0.tar.gz"
     sha256: "0f981aeb5604eb305a190d3aef6625032bbb2a34a0bcd17f17ae0cef19fac384"
+  "0.3.0":
+    url: "https://github.com/dice-group/dice-template-library/archive/refs/tags/v0.3.0.tar.gz"
+    sha256: "2c02278f86c7b5fe1c684f5126f30529952a03784fa7c883cc4fd44965b3c33e"
