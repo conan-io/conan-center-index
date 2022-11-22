@@ -27,6 +27,7 @@ class Md4QtConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "16",
+            "msvc": "191",
             "gcc": "9",
             "clang": "12",
             "apple-clang": "14",
@@ -65,7 +66,6 @@ class Md4QtConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "md4qt")
         self.cpp_info.set_property("cmake_target_name", "md4qt::md4qt")
-        self.cpp_info.includedirs.append(os.path.join("include", "md4qt"))
         self.cpp_info.bindirs = []
         self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
