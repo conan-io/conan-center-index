@@ -60,6 +60,7 @@ class LibFtdiConan(ConanFile):
             "FTDIPP" : self.options.enable_cpp_wrapper,
             "STATICLIBS": not self.options.shared,
             "ENABLE_STREAMING": self.options.use_streaming,
+            "LIB_SUFFIX": "",
         }
         self._cmake.definitions.update(options)
         self._cmake.configure()
