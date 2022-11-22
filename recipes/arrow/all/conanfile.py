@@ -572,6 +572,8 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libparquet"].names["cmake_find_package_multi"] = "parquet"
             self.cpp_info.components["libparquet"].names["pkg_config"] = "parquet"
             self.cpp_info.components["libparquet"].requires = ["libarrow"]
+            if not self.options.shared:
+                self.cpp_info.components["libparquet"].defines = ["PARQUET_STATIC"]            
 
         if self.options.get_safe("substrait", False):
             self.cpp_info.components["libarrow_substrait"].libs = [self._lib_name("arrow_substrait")]
@@ -593,6 +595,8 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libgandiva"].names["cmake_find_package_multi"] = "gandiva"
             self.cpp_info.components["libgandiva"].names["pkg_config"] = "gandiva"
             self.cpp_info.components["libgandiva"].requires = ["libarrow"]
+            if not self.options.shared:
+                self.cpp_info.components["libgandiva"].defines = ["GANDIVA_STATIC"]            
 
         if self._with_flight_rpc():
             self.cpp_info.components["libarrow_flight"].libs = [self._lib_name("arrow_flight")]
