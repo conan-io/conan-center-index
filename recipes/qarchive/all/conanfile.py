@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import get, apply_conandata_patches, rmdir, save, export_conandata_patches
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -27,6 +28,10 @@ class QarchiveConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    @property
+    def _qt_major(self):
+        return Version(self.deps_cpp_info["qt"].version).major
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -55,6 +60,7 @@ class QarchiveConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["QARCHIVE_QT_VERSION_MAJOR"] = self._qt_major
         tc.generate()
 
         cd = CMakeDeps(self)
