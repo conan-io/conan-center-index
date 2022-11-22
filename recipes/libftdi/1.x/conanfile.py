@@ -103,4 +103,3 @@ class LibFtdiConan(ConanFile):
             self.cpp_info.components["ftdipp"].names["pkg_config"] = "libftdi1pp"
             self.cpp_info.components["ftdipp"].libs = ["ftdipp1"]
             self.cpp_info.components["ftdipp"].requires = ["ftdi", "boost::headers"]
-            self.cpp_info.components["ftdipp"].includedirs.append(os.path.join("include", "libftdipp1"))
