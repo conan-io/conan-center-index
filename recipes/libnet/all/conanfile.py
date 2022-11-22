@@ -1,6 +1,7 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -66,6 +67,18 @@ class LibnetConan(ConanFile):
         env.generate()
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--disable-doxygen-doc")
+        if cross_building(self):
+            if self.settings.os == "Linux":
+                link_layer = "linux"
+            elif self.settings.os == "Windows":
+                link_layer = "win32"
+            elif is_apple_os(self):
+                link_layer = "bpf"
+            else:
+                raise ConanException(
+                    f"link-layer unknown for {self.settings.os}, feel free to contribute to libnet recipe",
+                )
+            tc.configure_args.append(f"--with-link-layer={link_layer}")
         tc.generate()
 
     def build(self):
