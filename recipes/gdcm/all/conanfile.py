@@ -24,10 +24,14 @@ class GDCMConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_json": [True, False],
+        "with_openssl": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_json": True,
+        "with_openssl": True,
     }
 
     @property
@@ -54,9 +58,10 @@ class GDCMConan(ConanFile):
         self.requires("zlib/1.2.13")
         if self.settings.os != "Windows" and Version(self.version) >= Version("3.0.20"):
             self.requires("libiconv/1.17")
-        # TODO: json and openssl can be made optional
-        self.requires("json-c/0.16")
-        self.requires("openssl/1.1.1s")
+        if self.options.with_json:
+            self.requires("json-c/0.16")
+        if self.options.with_openssl:
+            self.requires("openssl/1.1.1s")
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
@@ -74,12 +79,10 @@ class GDCMConan(ConanFile):
         tc.variables["GDCM_BUILD_SHARED_LIBS"] = bool(self.options.shared)
         # FIXME: unvendor deps https://github.com/conan-io/conan-center-index/pull/5705#discussion_r647224146
         tc.variables["GDCM_USE_SYSTEM_EXPAT"] = True
+        tc.variables["GDCM_USE_SYSTEM_JSON"] = self.options.with_json
         tc.variables["GDCM_USE_SYSTEM_OPENJPEG"] = True
+        tc.variables["GDCM_USE_SYSTEM_OPENSSL"] = self.options.with_openssl
         tc.variables["GDCM_USE_SYSTEM_ZLIB"] = True
-
-        # TODO: json and openssl can be made optional
-        tc.variables["GDCM_USE_SYSTEM_JSON"] = True
-        tc.variables["GDCM_USE_SYSTEM_OPENSSL"] = True
 
         if not valid_min_cppstd(self, self._min_cppstd):
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
@@ -212,10 +215,13 @@ class GDCMConan(ConanFile):
             self.cpp_info.components[lib].build_modules["cmake_find_package"] = self._gdcm_build_modules
             self.cpp_info.components[lib].build_modules["cmake_find_package_multi"] = self._gdcm_build_modules
 
-        self.cpp_info.components["gdcmCommon"].requires.extend(["openssl::openssl"])
+        if self.options.with_openssl:
+            self.cpp_info.components["gdcmCommon"].requires.extend(["openssl::openssl"])
         self.cpp_info.components["gdcmDSED"].requires.extend(["gdcmCommon", "zlib::zlib"])
         self.cpp_info.components["gdcmIOD"].requires.extend(["gdcmDSED", "gdcmCommon", "expat::expat"])
-        self.cpp_info.components["gdcmMSFF"].requires.extend(["gdcmIOD", "gdcmDSED", "gdcmDICT", "openjpeg::openjpeg", "json-c::json-c"])
+        self.cpp_info.components["gdcmMSFF"].requires.extend(["gdcmIOD", "gdcmDSED", "gdcmDICT", "openjpeg::openjpeg"])
+        if self.options.with_json:
+            self.cpp_info.components["gdcmMSFF"].requires.extend(["json-c::json-c"])
         if self.settings.os != "Windows" and Version(self.version) >= Version("3.0.20"):
             self.cpp_info.components["gdcmMSFF"].requires.extend(["libiconv::libiconv"])
         if not self.options.shared:
