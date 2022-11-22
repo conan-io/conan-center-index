@@ -7,12 +7,13 @@ These are a very important aspects and it helps us to establish the quality of t
 ## Contents
 
   * [Picking the Sources](#picking-the-sources)
-    * [Supported Versions](#supported-versions)
-      * [Removing old versions](#removing-old-versions)
-      * [Adding old versions](#adding-old-versions)
+    * [Source immutability](#source-immutability)
+    * [Sources not accessible](#sources-not-accessible)
+  * [Supported Versions](#supported-versions)
+    * [Removing old versions](#removing-old-versions)
+    * [Adding old versions](#adding-old-versions)
   * [Policy about patching](#policy-about-patching)
-  * [Patches: format and conventions](#patches-format-and-conventions)
-    * [Location in the recipe folder](#location-in-the-recipe-folder)
+  * [Format and Conventions](#format-and-conventions)
     * [Exporting Patches](#exporting-patches)
     * [Applying Patches](#applying-patches)
     * [Rules](#rules)
