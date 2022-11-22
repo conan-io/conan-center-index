@@ -68,7 +68,8 @@ class LibFtdiConan(ConanFile):
 
     def requirements(self):
         self.requires("libusb/1.0.24")
-        self.requires("boost/1.75.0")
+        if self.options.enable_cpp_wrapper:
+            self.requires("boost/1.75.0")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio" and self.options.use_streaming:
@@ -98,7 +99,8 @@ class LibFtdiConan(ConanFile):
         self.cpp_info.components["ftdi"].requires = ["libusb::libusb"]
         self.cpp_info.components["ftdi"].includedirs.append(os.path.join("include", "libftdi1"))
 
-        self.cpp_info.components["ftdipp"].names["pkg_config"] = "libftdi1pp"
-        self.cpp_info.components["ftdipp"].libs = ["ftdipp1"]
-        self.cpp_info.components["ftdipp"].requires = ["ftdi", "boost::headers"]
-        self.cpp_info.components["ftdipp"].includedirs.append(os.path.join("include", "libftdipp1"))
+        if self.options.enable_cpp_wrapper:
+            self.cpp_info.components["ftdipp"].names["pkg_config"] = "libftdi1pp"
+            self.cpp_info.components["ftdipp"].libs = ["ftdipp1"]
+            self.cpp_info.components["ftdipp"].requires = ["ftdi", "boost::headers"]
+            self.cpp_info.components["ftdipp"].includedirs.append(os.path.join("include", "libftdipp1"))
