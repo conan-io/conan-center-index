@@ -16,6 +16,7 @@
  */
 
 #include "gdcmReader.h"
+#include "gdcmUIDGenerator.h"
 #include "gdcmWriter.h"
 #include "gdcmAttribute.h"
 
@@ -37,6 +38,14 @@ void test_json_link()
   json.PrettyPrintOn();
 }
 #endif
+
+bool test_uid()
+{
+  gdcm::UIDGenerator uid;
+  uid.SetRoot( "1.2.3.4.0.0.1" );
+  const char *s = uid.Generate();
+  return gdcm::UIDGenerator::IsValid(s);
+}
 
 int main(int argc, char* argv[])
 {
