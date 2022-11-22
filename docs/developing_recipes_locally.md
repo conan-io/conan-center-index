@@ -98,7 +98,8 @@ To test with the same environment, the [build images](supported_platforms_and_co
 Instructions for using these images can be found in [Testing more environments](#testing-more-environments) section.
 
 In ConanCenterIndex, the most common failure point is upstream
-build script that are tailored to their specific use cases. It's not uncommon to [patch build scripts](adding_packages/policy_patching.md#policy-about-patching) but make sure to read the [patch policy](adding_packages/policy_patching.md). You are encouraged to submit pull requests upstream.
+build script that are tailored to their specific use cases. It's not uncommon to [patch build scripts](adding_packages/sources_and_patches.md#policy-about-patching)
+but make sure to read the [patch policy](adding_packages/sources_and_patches.md#policy-about-patching). You are encouraged to submit pull requests upstream.
 
 ## Running the Python Linters
 
