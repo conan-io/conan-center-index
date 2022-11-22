@@ -13,7 +13,7 @@ These are a very important aspects and it helps us to establish the quality of t
     * [Removing old versions](#removing-old-versions)
     * [Adding old versions](#adding-old-versions)
   * [Policy about patching](#policy-about-patching)
-  * [Format and Conventions](#format-and-conventions)
+    * [Format and Conventions](#format-and-conventions)
     * [Exporting Patches](#exporting-patches)
     * [Applying Patches](#applying-patches)
     * [Rules](#rules)
@@ -84,7 +84,7 @@ The main guideline in ConanCenter is to provide already compiled binaries for a 
 can be plugged into existing projects trying to minimize the modifications needed. Packages from Conan Center should fulfill the expectations of anyone
 reading the changelog of the library, the documentation, or any statement by the library maintainers.
 
-## Format and Conventions
+### Format and Conventions
 
 Patch files are preferred over programmatic `replace_in_file` statements. This makes it easier to review and prevent
 unwanted side effects when new versions are added. They will be listed in [`conandata.yml`](conandata_yml_format.md)
