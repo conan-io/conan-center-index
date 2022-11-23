@@ -1,0 +1,4 @@
+sources:
+  "2.7":
+    url: "https://github.com/winsoft666/teemo/archive/refs/tags/v2.7.tar.gz"
+    sha256: "97be8ae62cd3e2e92ed0ff405dfaf5e6cb6e323b21c53e798adfa5872a2f7084"
