@@ -49,10 +49,6 @@ class BenchmarkConan(ConanFile):
         if Version(self.version) < "1.7.0" and is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support msvc shared builds")
 
-    # TODO: it is required for several CI environment(ex. linux gcc 11)
-    def build_requirements(self):
-        self.tool_requires("cmake/3.16.3")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
