@@ -77,4 +77,4 @@ class AsmjitConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines = ["ASMJIT_STATIC"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread", "rt"]
+            self.cpp_info.system_libs = ["pthread", "rt", "m"]
