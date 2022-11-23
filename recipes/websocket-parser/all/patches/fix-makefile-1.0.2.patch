@@ -1,0 +1,12 @@
+--- a/Makefile	2019-05-08 20:34:12
++++ b/Makefile	2022-11-23 15:02:51
+@@ -5,7 +5,7 @@
+ websocket_parser.o: websocket_parser.c websocket_parser.h
+ 
+ solib: websocket_parser.o
+-	$(CC) -shared -Wl,-soname,libwebsocket_parser.so -o libwebsocket_parser.so websocket_parser.o
++	$(CC) -shared -Wl -o libwebsocket_parser.so websocket_parser.o
+ 
+ alib: websocket_parser.o
+ 	ar rcu libwebsocket_parser.a $<
+

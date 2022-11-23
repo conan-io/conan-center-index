@@ -1,0 +1,7 @@
+sources:
+  "1.0.2":
+    url: "https://github.com/php-ion/websocket-parser/archive/refs/tags/1.0.2.tar.gz"
+    sha256: "3a26e41cf6c7947a4e09d333b5a2dcd0fe8bc25479b4fcd74db8f7d79e9da977"
+patches:
+  "1.0.2":
+    - patch_file: "patches/fix-makefile-1.0.2.patch"
