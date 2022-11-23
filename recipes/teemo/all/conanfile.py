@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.microsoft import is_msvc_static_runtime
-from conan.tools.files import get, copy, rm, rmdir, replace_in_file
+from conan.tools.files import get, copy, rm, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
@@ -29,6 +29,9 @@ class TeemoConan(ConanFile):
     @property
     def _min_cppstd(self):
         return 11
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -62,10 +65,7 @@ class TeemoConan(ConanFile):
         deps.generate()
 
     def build(self):
-        replace_in_file(self, os.path.join(self.source_folder, "src", "entry_handler.cpp"),
-            "#include <functional>",
-            """#include <functional>
-#include <thread>""")
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
