@@ -25,8 +25,8 @@ This is one of the most important steps when contributing and the quality of the
 The **origin of sources** should come from an official origin like the library source code repository or the official
 release/download webpage. If an official source archive is available, it should be preferred over an auto-generated archive.
 
-Recipes should always **build from library sources** the aim is to provide packages the respect the complete setting model of Conan.
-Where ever possible, downloading source files and compiling is mandated. Downloading pre-compiled binaries should be avoid.
+Recipes should always be **built from library sources**. It aims to provide packages that respect the complete setting model of Conan.
+Where ever possible, downloading source files and compiling is mandated. Downloading pre-compiled binaries should be avoided.
 
 ### Source immutability
 
@@ -45,7 +45,7 @@ If library sources cannot be downloaded from their official origin or cannot be 
 format, the recommendation is to contact the publisher and ask them to provide the sources in a way/format that can be consumed
 programmatically.
 
-As a final options, In case of needing those binaries to use them as a "build require" for some library, we will consider following the approach of adding it
+As a final option, in case you need to use those binaries as a "build require" for some library, we will consider adding it
 as a system recipe (`<build_require>/system`) and making those binaries available in the CI machines (if the license allows it).
 
 ## Supported Versions
@@ -64,7 +64,7 @@ The Conan Team may ask you to remove more if they are taking a lot of resources.
 * keep one version for every major release
 * for the latest major release, at least three versions should be available (latest three minor versions)
 
-Logic associated to removed revisions, and entries in `config.yml` and `conandata.yml` files should be removed as well. If anyone needs to
+Logic associated with removed revisions implies that entries in the `config.yml` and `conandata.yml` files should also be removed. If anyone needs to
 recover them in the future, Git contains the full history and changes can be recovered from it.
 
 Please, note that even if those versions are removed from this repository, **the packages will always be accessible in ConanCenter remote**
@@ -99,13 +99,13 @@ There are a few recommendations about naming patches:
 * number them so they can be re-used
 * note the specific version
 
-By clearly indicating what the patch does, when it's applied, and how it relates to existing patches- you can
+By clearly indicating what the patch does, when it's applied, and how it relates to existing patches, you can
 help make the [review process](../review_process.md) easier for readers and help speed up your pull requests.
 
 ### Exporting Patches
 
 It's ideal to minimize the number of files in a package to exactly what's required. When recipes support multiple
-versions with differing patches it's strongly encouraged to only export the patches that are being used for that given recipe.
+versions with differing patches, it's strongly encouraged to only export the patches used for that given recipe.
 
 Make sure the `export_sources` attribute is replaced by
 [`conan.tools.files.export_conandata_patches`](https://docs.conan.io/en/latest/reference/conanfile/tools/files/patches.html?highlight=export_conandata_patches)
@@ -130,7 +130,7 @@ def build(self):
 For more complicated cases,
 [`conan.tools.files.rm`](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-rm)
 or [`conan.tools.files.replace_in_file`](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-replace-in-file)
-good choices.
+are good choices.
 
 ```py
 def _patch_sources(self):
@@ -141,7 +141,7 @@ def _patch_sources(self):
 
 ### Rules
 
-These are the rules that apply to regular version of Conan packages:
+These are the rules that apply to regular versions of Conan packages:
 
 **Build system patches.** In order to add libraries into ConanCenter sometimes
 it is NEEDED to apply patches so they can consume existing packages
@@ -186,7 +186,7 @@ waiting for the next release, or because the library is no longer maintained. Th
 are the rules for this exceptional scenario:
 
 * **new release**, based on some official release and clearly identifiable will
- be create to apply these patches to: <<PLACEHOLDER_FOR_RELEASE_FORMAT>>.
+ be created to apply these patches to: <<PLACEHOLDER_FOR_RELEASE_FORMAT>>.
 * **only patches backporting bugfixes** will be accepted after they have
  been submitted to the upstream and there is a consensus that it's a bug and the patch is the solution.
 
@@ -195,6 +195,6 @@ any other Conan reference.
 
 Notice that these <<PLACEHOLDER_FOR_RELEASE_FORMAT>> releases are unique to ConanCenter
 and they can get new patches or discard existing ones according to upstream
-considerations. It means that these releases will modify its behavior without previous
+considerations. It means that these releases will modify their behavior without previous
 notice, the documentation or changelog for these specific releases won't exist. Use
 them carefully in your projects.

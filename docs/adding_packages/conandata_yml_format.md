@@ -8,7 +8,7 @@ In the context of ConanCenterIndex, this file is _mandatory_ and consists of two
 next sections with more detail:
 
 * `sources`: Library sources origin with their verification checksums.
-* `patches`: List of patches the library requires, see the [Patching Policy](sources_and_patches.md#policy-about-patching) for the criteria.
+* `patches`: A list of patches to apply and supporting information. See the [Patching Policy](sources_and_patches.md#policy-about-patching) for the criteria.
 
 <!-- toc -->
 ## Contents
