@@ -66,9 +66,6 @@ class JsoncppConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                              "${jsoncpp_SOURCE_DIR}",
-                              "${JSONCPP_SOURCE_DIR}")
         if self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "11":
             replace_in_file(self, os.path.join(self.source_folder, "include", "json", "value.h"),
                                   "explicit operator bool()",
