@@ -73,6 +73,13 @@ class JsoncppConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "include", "json", "value.h"),
                                   "explicit operator bool()",
                                   "operator bool()")
+        # No opt-out of ccache
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        if Version(self.version) < "1.9.3":
+            replace_in_file(self, cmakelists, "endif(CCACHE_FOUND)", "endif()")
+            replace_in_file(self, cmakelists, "if(CCACHE_FOUND)", "if(0)")
+        else:
+            replace_in_file(self, cmakelists, "if(CCACHE_EXECUTABLE)", "if(0)")
 
     def build(self):
         self._patch_sources()
