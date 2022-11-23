@@ -19,7 +19,7 @@ runs:
   steps:
     - uses: actions/setup-python@v4
       with:
-        python-version: '3.10' 
+        python-version: ${{ env.PYVER }}
     - name: Get changed files
       id: changed-files
       shell: python
