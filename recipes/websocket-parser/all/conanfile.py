@@ -10,6 +10,7 @@ class WebsocketParserConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/php-ion/websocket-parser"
     description = "Streaming websocket frame parser and frame builder for c"
+    topics = "websockets", "parser"
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = ["patches/**"]
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -45,3 +46,6 @@ class WebsocketParserConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.names["cmake_find_package"] = "websocket_parser"
+        self.cpp_info.names["cmake_find_package_multi"] = "websocket_parser"
+        self.cpp_info.names["pkg_config"] = "websocket_parser"
