@@ -134,6 +134,8 @@ class LibpqxxConan(ConanFile):
         self.cpp_info.components["pqxx"].libs = ["pqxx"]
         if self.settings.os == "Windows":
             self.cpp_info.components["pqxx"].system_libs = ["wsock32", "ws2_32"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["pqxx"].set_property("cmake_target_name", "libpqxx::pqxx")
