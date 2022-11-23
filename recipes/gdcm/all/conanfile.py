@@ -84,7 +84,7 @@ class GDCMConan(ConanFile):
         tc.variables["GDCM_USE_SYSTEM_JSON"] = self.options.with_json
         tc.variables["GDCM_USE_SYSTEM_OPENJPEG"] = True
         tc.variables["GDCM_USE_SYSTEM_OPENSSL"] = self.options.with_openssl
-        tc.variables["GDCM_USE_SYSTEM_UUID"] = True
+        tc.variables["GDCM_USE_SYSTEM_UUID"] = self.settings.os != "Windows"
         tc.variables["GDCM_USE_SYSTEM_ZLIB"] = True
 
         if not valid_min_cppstd(self, self._min_cppstd):
