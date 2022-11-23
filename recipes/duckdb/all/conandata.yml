@@ -1,0 +1,10 @@
+sources:
+  "0.5.1":
+    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.5.1.tar.gz"
+    sha256: "3dab7ba0d0f8d024d3c73fd3d4fb8834203c31d7b0ddb1e8539ee266e11b0e9b"
+
+patches:
+  "0.5.1":
+    - patch_file: "patches/0.5.1-0001-fix-cmake.patch"
+      patch_description: "install static of shared library, add installation for odbc extention"
+      patch_type: "portability"

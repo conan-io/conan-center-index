@@ -11,7 +11,7 @@ class TestPackageConan(ConanFile):
             self.build_requires("pkgconf/1.9.3")
 
     def build(self):
-        if not tools.cross_building(self) and self.settings.os != "Windows":
+        if self.settings.os != "Windows":
             with tools.environment_append({'PKG_CONFIG_PATH': "."}):
                 pkg_config = tools.PkgConfig("gio-2.0")
                 self.run(f"{pkg_config.variables['gdbus_codegen']} -h", run_environment=True)

@@ -1,15 +1,25 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -35,7 +35,7 @@
- cmake_minimum_required(VERSION 2.4.8 FATAL_ERROR)
+@@ -1,3 +1,5 @@
++cmake_minimum_required(VERSION 3.10)
++
+ # CMakeLists.txt
+ #
+ # Copyright (C) 2008  Werner Smekal
+@@ -31,11 +33,8 @@
+ set(LIBHPDF_DESCRIPTION "libHaru is a free, cross platform, open source library for generating PDF files.")
+ set(LIBHPDF_PACKAGE_NAME "libHaru-${LIBHPDF_VERSION}-${COMPILER_LABEL}")
  
+-# we want cmake version 2.4.8 at least
+-cmake_minimum_required(VERSION 2.4.8 FATAL_ERROR)
+-
  # Location where the haru cmake build system first looks for cmake modules
 -set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 +list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
  
  # set library name, msvc does not append 'lib' automatically
  if(MSVC)
-@@ -110,7 +110,7 @@ endif(PNG_FOUND)
+@@ -110,7 +109,7 @@
  if(MSVC_VERSION GREATER 1399)
    add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE)
  endif(MSVC_VERSION GREATER 1399)
@@ -18,7 +28,7 @@
  
  
  # these are options
-@@ -149,16 +149,16 @@ endif (NOT ZLIB_FOUND)
+@@ -149,16 +148,16 @@
  
  # create hpdf_config.h
  configure_file(
@@ -40,7 +50,7 @@
    )
  endif(DEVPAK)
  # =======================================================================
-@@ -203,7 +203,7 @@ set(
+@@ -203,7 +202,7 @@
      include/hpdf_pdfa.h
      include/hpdf_3dmeasure.h
      include/hpdf_exdata.h
@@ -49,7 +59,7 @@
  )
  
  # install header files
-@@ -215,7 +215,7 @@ if(NOT DEVPAK)
+@@ -215,7 +214,7 @@
    install(DIRECTORY if DESTINATION .)
  endif(NOT DEVPAK)
  if(DEVPAK)

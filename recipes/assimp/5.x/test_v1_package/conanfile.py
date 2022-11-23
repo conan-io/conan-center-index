@@ -1,4 +1,3 @@
-# pylint: skip-file
 from conans import ConanFile, CMake, tools
 import os
 
@@ -17,7 +16,7 @@ class TestPackageConan(ConanFile):
             obj_path = os.path.join(self.source_folder, os.pardir, "test_package", "box.obj")
 
             bin_path = os.path.join("bin", "test_package")
-            self.run("{0} {1}".format(bin_path, obj_path), run_environment=True)
+            self.run(f"{bin_path} {obj_path}", run_environment=True)
 
             bin_c_path = os.path.join("bin", "test_package_c")
-            self.run("{0} {1}".format(bin_c_path, obj_path), run_environment=True)
+            self.run(f"{bin_c_path} {obj_path}", run_environment=True)
