@@ -61,6 +61,11 @@ class JsoncppConan(ConanFile):
         if jsoncpp_version < "1.9.0":
             # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        # No opt-out of ccache
+        if Version(self.version) < "1.9.3":
+            tc.cache_variables["CCACHE_FOUND"] = ""
+        else:
+            tc.cache_variables["CCACHE_EXECUTABLE"] = ""
         tc.generate()
 
     def _patch_sources(self):
@@ -69,13 +74,6 @@ class JsoncppConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "include", "json", "value.h"),
                                   "explicit operator bool()",
                                   "operator bool()")
-        # No opt-out of ccache
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        if Version(self.version) < "1.9.3":
-            replace_in_file(self, cmakelists, "endif(CCACHE_FOUND)", "endif()")
-            replace_in_file(self, cmakelists, "if(CCACHE_FOUND)", "if(0)")
-        else:
-            replace_in_file(self, cmakelists, "if(CCACHE_EXECUTABLE)", "if(0)")
 
     def build(self):
         self._patch_sources()
