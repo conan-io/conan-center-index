@@ -1,7 +1,7 @@
 sources:
   "2.6.2":
     url: "https://github.com/BlueBrain/HighFive/archive/refs/tags/v2.6.2.tar.gz"
-    sha256: "b5002c1221cf1821e02fb2ab891b0160bac88b43f56655bd844a472106ca3397"
+    sha256: "ab51b9fbb49e877dd1aa7b53b4b26875f41e4e0b8ee0fc2f1d735e0d1e43d708"
   "2.5.1":
     url: "https://github.com/BlueBrain/HighFive/archive/refs/tags/v2.5.1.tar.gz"
     sha256: "1ba05aa31cdeda03d013094eebc10f932783e4e071e253e9eaa8889120f241c7"
