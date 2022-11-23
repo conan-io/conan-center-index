@@ -8,12 +8,6 @@ class TestPackageV1Conan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
 
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()

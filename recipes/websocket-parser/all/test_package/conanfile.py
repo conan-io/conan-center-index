@@ -10,13 +10,9 @@ class TestPackageConan(ConanFile):
     generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
     test_type = "explicit"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
 
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+    def config_options(self):
+        self.options.fPIC = not self.options.shared
 
     def layout(self):
         cmake_layout(self)
