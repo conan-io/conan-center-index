@@ -4,9 +4,8 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 import os
-import shutil
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class OdbcConan(ConanFile):
@@ -29,27 +28,14 @@ class OdbcConan(ConanFile):
         "with_libiconv": True,
     }
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -89,10 +75,12 @@ class OdbcConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         # support more triplets
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self.source_folder, "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self.source_folder, "config.guess"))
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            if gnu_config:
+                copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
         # allow external libtdl (in libtool recipe)
         replace_in_file(
             self,

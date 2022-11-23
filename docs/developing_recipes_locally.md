@@ -47,6 +47,8 @@ conan config install https://github.com/conan-io/hooks.git -sf hooks -tf hooks
 conan config set hooks.conan-center
 ```
 
+> **Note**: Hooks are generally for package correctness and the pylinters are for the recipe syntax
+
 The hooks will show error messages but the `conan create` won’t fail unless you export the environment variable `CONAN_HOOK_ERROR_LEVEL=40`.
 All hooks checks will print a similar message:
 
@@ -65,9 +67,9 @@ conan config install
 
 ## Basic Commands
 
-We recommend working from the `recipes/project` folder itself. You can learn about the [recipe file structure](how_to_add_packages.md#recipe-files-structure) to understand the folder and files located there.
+We recommend working from the `recipes/project` folder itself. You can learn about the [recipe file structure](adding_packages/README.md#recipe-files-structure) to understand the folder and files located there.
 
-> **Note**: You can only change one recipe per pull request, and working from the [_recipe folder_](how_to_add_packages.md#the-recipe-folder-conanfilepy) will help prevent making a few mistakes. The default for this folder is `all`, follow the link above to learn more.
+> **Note**: You can only change one recipe per pull request, and working from the [_recipe folder_](adding_packages/README.md#the-recipe-folder-conanfilepy) will help prevent making a few mistakes. The default for this folder is `all`, follow the link above to learn more.
 
 The [entire workflow of a recipe](https://docs.conan.io/en/latest/developing_packages/package_dev_flow.html) can be execute with the [`conan create`](https://docs.conan.io/en/latest/reference/commands/creator/create.html). This should look like:
 
@@ -96,11 +98,11 @@ To test with the same environment, the [build images](supported_platforms_and_co
 Instructions for using these images can be found in [Testing more environments](#testing-more-environments) section.
 
 In ConanCenterIndex, the most common failure point is upstream
-build script that are tailored to their specific use cases. It's not uncommon to [patch build scripts](policy_patching.md#policy-about-patching) but make sure to read the [patch policy](policy_patching.md). You are encouraged to submit pull requests upstream.
+build script that are tailored to their specific use cases. It's not uncommon to [patch build scripts](adding_packages/policy_patching.md#policy-about-patching) but make sure to read the [patch policy](adding_packages/policy_patching.md). You are encouraged to submit pull requests upstream.
 
 ## Running the Python Linters
 
-Linters are always executed by Github actions to validate parts of your recipe, for instance, if it uses migrated Conan tools imports.
+Linters are always executed by GitHub Actions to validate parts of your recipe, for instance, if it uses migrated Conan tools imports.
 
 It is possible to run the linter locally the same way it is being run [using Github actions](../.github/workflows/linter-conan-v2.yml) by:
 
@@ -131,8 +133,8 @@ It is possible to run the linter locally the same way it is being run [using Git
 
 There's two levels of YAML validation, first is syntax and the second is schema.
 The style rules are located in [`linter/yamllint_rules.yml`](../linter/yamllint_rules.yml) and are used to ensure consistence.
-The [`config.yml](how_to_add_packages.md#configyml) is required for the build infrastructure and the
-[`conandata.yml` patch fields](conandata_yml_format.md#patches-fields) have required elements that are enforced with
+The [`config.yml`](adding_packages/README.md#configyml) is required for the build infrastructure and the
+[`conandata.yml` patch fields](adding_packages/conandata_yml_format.md#patches-fields) have required elements that are enforced with
 schema validation. There's are to encourage the best possible quality of recipes and make reviewing faster.
 
 ### Yamllint

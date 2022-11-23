@@ -16,7 +16,7 @@ class TestPackageV1Conan(ConanFile):
     def test(self):
         if not cross_building(self):
             bin_path = os.path.join("bin", "test_package")
-            input_file = os.path.join(self.source_folder, "..", "test_package", "DCMTK_JPEGExt_12Bits.dcm")
+            input_file = os.path.join(self.source_folder, os.pardir, "test_package", "DCMTK_JPEGExt_12Bits.dcm")
             test_dir = "test_dir"
             mkdir(self, test_dir)
             output_file = os.path.join(test_dir, "output.dcm")
