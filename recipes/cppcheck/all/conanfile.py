@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.46.0"
@@ -14,15 +15,18 @@ class CppcheckConan(ConanFile):
     description = "Cppcheck is an analysis tool for C/C++ code."
     license = "GPL-3.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"with_z3": [True, False, "deprecated"], "have_rules": [True, False]}
-    default_options = {"with_z3": "deprecated", "have_rules": True}
+    options = {"with_z3": [True, False], "have_rules": [True, False]}
+    default_options = {"with_z3": True, "have_rules": True}
 
     def layout(self):
         cmake_layout(self)
 
-    def configure(self):
-        if self.options.with_z3 != "deprecated":
-            self.output.warn("with_z3 option is deprecated, do not use anymore.")
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def config_options(self):
+        if Version(self.version) >= Version("2.8.0"):
+            del self.options.with_z3
 
     def package_id(self):
         del self.info.options.with_z3
@@ -46,12 +50,7 @@ class CppcheckConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "findDependencies.cmake"), "PCRE_LIBRARY pcre", "PCRE_LIBRARY NAMES pcre pcred")
-        replace_in_file(self, os.path.join(self.source_folder, "htmlreport", "cppcheck-htmlreport"), "#!/usr/bin/env python", "#!/usr/bin/env python3")
-        replace_in_file(self, os.path.join(self.source_folder, "cli", "CMakeLists.txt"),
-                              "RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}",
-                              "DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}")
-        replace_in_file(self, os.path.join(self.source_folder, "cli", "CMakeLists.txt"), "add_dependencies(cppcheck run-dmake)", "")
+        apply_conandata_patches(self)
 
         cmake.configure()
         cmake.build()
