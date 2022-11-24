@@ -252,11 +252,11 @@ class GLibConan(ConanFile):
             self.cpp_info.components["gio-2.0"].system_libs.extend(["iphlpapi", "dnsapi", "shlwapi"])
             self.cpp_info.components["gio-windows-2.0"].set_property("pkg_config_name", "gio-windows-2.0")
             self.cpp_info.components["gio-windows-2.0"].requires = ["gobject-2.0", "gmodule-no-export-2.0", "gio-2.0"]
-            self.cpp_info.components["gio-windows-2.0"].includedirs = [os.path.join("include", "gio-win32-2.0")]
+            self.cpp_info.components["gio-windows-2.0"].includedirs += [os.path.join("include", "gio-win32-2.0")]
         else:
             self.cpp_info.components["gio-unix-2.0"].set_property("pkg_config_name", "gio-unix-2.0")
             self.cpp_info.components["gio-unix-2.0"].requires += ["gobject-2.0", "gio-2.0"]
-            self.cpp_info.components["gio-unix-2.0"].includedirs = [os.path.join("include", "gio-unix-2.0")]
+            self.cpp_info.components["gio-unix-2.0"].includedirs += [os.path.join("include", "gio-unix-2.0")]
 
         if self.settings.os == "Macos":
             self.cpp_info.components["glib-2.0"].system_libs.append("resolv")
