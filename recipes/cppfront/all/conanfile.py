@@ -90,12 +90,11 @@ class CppfrontConan(ConanFile):
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
         cppfront_bin = os.path.join(self.package_folder, "bin", "cppfront{}".format(bin_ext)).replace("\\", "/")
 
-        # CppFront environment variable is used by a lot of scripts as a way to override a hard-coded embedded m4 path
         self.output.info("Setting CppFront environment variable: {}".format(cppfront_bin))
         self.env_info.cppfront = cppfront_bin
 
         self.cpp_info.frameworkdirs = []
-        self.cpp_info.includedirs = []
+        self.cpp_info.includedirs = [os.path.join(self.package_folder, "include")]
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
 
