@@ -447,8 +447,12 @@ class QtConan(ConanFile):
         ms.generate()
 
     def source(self):
+        destination = "qt6"
+        if self.settings.os == "Windows":
+            # Don't use os.path.join, or it removes the \\?\ prefix, which enables long paths
+            destination = f"\\\\?\\{self.source_folder}\\{destination}"
         get(self, **self.conan_data["sources"][self.version],
-                  strip_root=True, destination="qt6")
+                  strip_root=True, destination=destination)
 
         # patching in source method because of no_copy_source attribute
 
