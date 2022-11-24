@@ -105,6 +105,8 @@ class LibvaultConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
+            self.cpp_info.system_libs.append("stdc++fs")
         self.cpp_info.names["cmake_find_package"] = "libvault"
         self.cpp_info.names["cmake_find_package_multi"] = "libvault"
         self.cpp_info.names["pkg_config"] = "vault"
