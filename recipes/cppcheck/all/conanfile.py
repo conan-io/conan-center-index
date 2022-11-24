@@ -31,17 +31,19 @@ class CppcheckConan(ConanFile):
     def package_id(self):
         del self.info.options.with_z3
 
-    def build_requirements(self):
+    def requirements(self):
         if Version(self.version) < Version("2.8.0") and self.options.with_z3:
-            self.tool_requires("z3/4.8.8")
+            self.requires("z3/4.8.8")
         if self.options.have_rules:
-            self.tool_requires("pcre/8.45")
+            self.requires("pcre/8.45")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if Version(self.version) < Version("2.8.0"):
+            tc.variables["USE_Z3"] = self.options.with_z3
         tc.variables["HAVE_RULES"] = self.options.have_rules
         tc.variables["USE_MATCHCOMPILER"] = "Auto"
         tc.variables["ENABLE_OSS_FUZZ"] = False
@@ -53,7 +55,6 @@ class CppcheckConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         apply_conandata_patches(self)
-
         cmake.configure()
         cmake.build()
 
