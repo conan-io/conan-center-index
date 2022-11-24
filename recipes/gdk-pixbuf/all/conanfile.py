@@ -19,7 +19,7 @@ from conan.errors import ConanInvalidConfiguration
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class GdkPixbufConan(ConanFile):
@@ -51,13 +51,13 @@ class GdkPixbufConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
         if self.options.shared:
             self.options["glib"].shared = True
 
@@ -65,7 +65,7 @@ class GdkPixbufConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.options.shared and not self.dependencies.direct_host["glib"].options.shared:
+        if self.info.options.shared and not self.dependencies["glib"].options.shared:
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
@@ -73,7 +73,7 @@ class GdkPixbufConan(ConanFile):
             # when running gdk-pixbuf-query-loaders
             # dyld: malformed mach-o: load commands size (97560) > 32768
             raise ConanInvalidConfiguration("This package does not support Macos currently")
-        if self.dependencies.direct_host["glib"].options.shared and is_msvc_static_runtime(self):
+        if self.dependencies["glib"].options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(
                 "Linking shared glib with the MSVC static runtime is not supported"
             )
