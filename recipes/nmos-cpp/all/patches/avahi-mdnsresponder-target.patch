@@ -1,0 +1,93 @@
+diff --git a/Development/cmake/NmosCppDependencies.cmake b/Development/cmake/NmosCppDependencies.cmake
+index 58bf1e3c..c0a54295 100644
+--- a/Development/cmake/NmosCppDependencies.cmake
++++ b/Development/cmake/NmosCppDependencies.cmake
+@@ -257,6 +257,10 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+     # find Bonjour or Avahi compatibility library for the mDNS support library (mdns)
+     set(NMOS_CPP_USE_AVAHI ON CACHE BOOL "Use Avahi compatibility library rather than mDNSResponder")
+     if(NMOS_CPP_USE_AVAHI)
++        # third_party/cmake/FindAvahi.cmake uses the package name and target namespace 'Avahi'
++        # but some revisions of the 'avahi' conan recipe do not override the conan default
++        # for cmake package name and target namespace, which is the conan package name lower-cased
++        # (luckily find_package is case-insensitive)
+         find_package(Avahi REQUIRED)
+         if(NOT Avahi_VERSION)
+             message(STATUS "Found Avahi unknown version")
+@@ -264,16 +268,34 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+             message(STATUS "Found Avahi version " ${Avahi_VERSION})
+         endif()
+ 
+-        target_link_libraries(DNSSD INTERFACE Avahi::compat-libdns_sd)
++        if(TARGET Avahi::compat-libdns_sd)
++            target_link_libraries(DNSSD INTERFACE Avahi::compat-libdns_sd)
++        else()
++            target_link_libraries(DNSSD INTERFACE avahi::compat-libdns_sd)
++        endif()
+     else()
+-        find_package(DNSSD REQUIRED)
+-        if(NOT DNSSD_VERSION)
+-            message(STATUS "Found DNSSD unknown version")
++        # third_party/cmake/FindDNSSD.cmake uses the package name and target namespace 'DNSSD'
++        # but some revisions of the 'mdnsresponder' conan recipe do not override the conan default
++        # for cmake package name and target namespace, which is the conan package name lower-cased
++        find_package(DNSSD)
++        if(DNSSD_FOUND)
++            if(NOT DNSSD_VERSION)
++                message(STATUS "Found DNSSD unknown version")
++            else()
++                message(STATUS "Found DNSSD version " ${DNSSD_VERSION})
++            endif()
++
++            target_link_libraries(DNSSD INTERFACE DNSSD::DNSSD)
+         else()
+-            message(STATUS "Found DNSSD version " ${DNSSD_VERSION})
++            find_package(mdnsresponder REQUIRED)
++            if(NOT mdnsresponder_VERSION)
++                message(STATUS "Found mdnsresponder unknown version")
++            else()
++                message(STATUS "Found mdnsresponder version " ${mdnsresponder_VERSION})
++            endif()
++
++            target_link_libraries(DNSSD INTERFACE mdnsresponder::mdnsresponder)
+         endif()
+-
+-        target_link_libraries(DNSSD INTERFACE DNSSD::DNSSD)
+     endif()
+ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+     # find Bonjour for the mDNS support library (mdns)
+@@ -286,15 +308,29 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+     set(NMOS_CPP_USE_BONJOUR_SDK OFF CACHE BOOL "Use dnssd.lib from the installed Bonjour SDK")
+     mark_as_advanced(FORCE NMOS_CPP_USE_BONJOUR_SDK)
+     if(NMOS_CPP_USE_BONJOUR_SDK)
+-        find_package(DNSSD REQUIRED)
+-        if(NOT DNSSD_VERSION)
+-            message(STATUS "Found DNSSD unknown version")
++        # third_party/cmake/FindDNSSD.cmake uses the package name and target namespace 'DNSSD'
++        # but some revisions of the 'mdnsresponder' conan recipe do not override the conan default
++        # for cmake package name and target namespace, which is the conan package name lower-cased
++        find_package(DNSSD)
++        if(DNSSD_FOUND)
++            if(NOT DNSSD_VERSION)
++                message(STATUS "Found DNSSD unknown version")
++            else()
++                message(STATUS "Found DNSSD version " ${DNSSD_VERSION})
++            endif()
++
++            target_link_libraries(DNSSD INTERFACE DNSSD::DNSSD)
+         else()
+-            message(STATUS "Found DNSSD version " ${DNSSD_VERSION})
++            find_package(mdnsresponder REQUIRED)
++            if(NOT mdnsresponder_VERSION)
++                message(STATUS "Found mdnsresponder unknown version")
++            else()
++                message(STATUS "Found mdnsresponder version " ${mdnsresponder_VERSION})
++            endif()
++
++            target_link_libraries(DNSSD INTERFACE mdnsresponder::mdnsresponder)
+         endif()
+ 
+-        target_link_libraries(DNSSD INTERFACE DNSSD::DNSSD)
+-
+         # dnssd.lib is built with /MT, so exclude libcmt if we're building nmos-cpp with the dynamically-linked runtime library
+         # default is "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+         # see https://cmake.org/cmake/help/latest/policy/CMP0091.html
