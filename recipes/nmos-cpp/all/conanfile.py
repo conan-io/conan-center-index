@@ -80,6 +80,7 @@ class NmosCppConan(ConanFile):
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
+        files.rm(self, "conanfile.txt", os.path.join(self.source_folder, "Development"))
 
     def generate(self):
         tc = CMakeToolchain(self)
