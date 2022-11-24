@@ -26,7 +26,10 @@ class WebsocketParserConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         buildenv = AutoToolsBuildEnvironment(self)
-        buildenv.flags = ["-std=gnu99", "-pedantic"]
+        buildenv.flags = ["-std=c99", "-pedantic", "-Wno-newline-eof"]
+        build_type = self.settings.get_safe("build_type", default="Release")
+        if build_type == "Release":
+            buildenv.flags += ["-O2"]
         buildenv.fpic = True
         if not self.options.shared:
             buildenv.make(target="alib")
@@ -37,7 +40,7 @@ class WebsocketParserConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", keep_path=False)
-        self.copy("*.h", dst="include", keep_path=False)
+        self.copy("*.h", dst="include/websocket_parser")
         self.copy("*.so", dst="lib", keep_path=False)
         self.copy("*.dylib", dst="lib", keep_path=False)
         self.copy("*.a", dst="lib", keep_path=False)

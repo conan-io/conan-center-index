@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "websocket_parser.h"
+#include <websocket_parser/websocket_parser.h>
 
 int main(void) {
     websocket_parser_settings settings = {};
