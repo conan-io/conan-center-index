@@ -16,6 +16,7 @@ import os
 
 required_conan_version = ">=1.53.0"
 
+
 class GobjectIntrospectionConan(ConanFile):
     name = "gobject-introspection"
     description = "GObject introspection is a middleware layer between C libraries (using GObject) and language bindings"
@@ -116,6 +117,8 @@ class GobjectIntrospectionConan(ConanFile):
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with: {}".format(bin_path))
+        self.buildenv_info.append_path("PATH", bin_path)
+        # TODO: Legacy, to be removed on Conan 2.0
         self.env_info.PATH.append(bin_path)
 
         exe_ext = ".exe" if self.settings.os == "Windows" else ""

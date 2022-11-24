@@ -1,26 +1,33 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.cmake import CMake, cmake_layout
+
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package", "pkg_config"
+    generators = "CMakeToolchain", "CMakeDeps", "VirtualBuildEnv", "VirtualRunEnv"
+    test_type = "explicit"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
         if self.settings.os != 'Windows':
-            with tools.environment_append({'PKG_CONFIG_PATH': "."}):
-                pkg_config = tools.PkgConfig("gobject-introspection-1.0")
-                for tool in ["g_ir_compiler", "g_ir_generate", "g_ir_scanner"]:
-                    self.run('%s --version' % pkg_config.variables[tool], run_environment=True)
-                self.run('g-ir-annotation-tool --version', run_environment=True)
-                self.run('g-ir-inspect -h', run_environment=True)
+            for tool in ["g-ir-compiler", "g-ir-generate", "g-ir-scanner"]:
+                self.run(f'{tool} --version', env="conanbuild")
+            self.run('g-ir-annotation-tool --version', env="conanbuild")
+            self.run('g-ir-inspect -h', env="conanbuild")
 
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
-
+        if can_run(self):
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run(bin_path, env="conanrun")
