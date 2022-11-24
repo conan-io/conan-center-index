@@ -14,7 +14,7 @@
              message(FATAL_ERROR "z3 dependency has not been found")
          endif()
 -        find_path(Z3_CXX_INCLUDE_DIRS z3++.h PATH_SUFFIXES "z3")
-+		 set(Z3_CXX_INCLUDE_DIRS ${Z3_INCLUDE_DIRS})
++        set(Z3_CXX_INCLUDE_DIRS z3::libz3)
          if (NOT Z3_CXX_INCLUDE_DIRS)
              message(FATAL_ERROR "z3++.h has not been found")
          endif()
