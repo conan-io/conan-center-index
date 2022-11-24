@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 3d52d0c..0034dc4 100644
+index 3d52d0c..59f9e7a 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,9 +1,5 @@
@@ -97,7 +97,7 @@ index 3d52d0c..0034dc4 100644
  
  CONFIGURE_FILE(hiredis.pc.in hiredis.pc @ONLY)
  
-@@ -103,11 +113,19 @@ set(CPACK_RPM_PACKAGE_AUTOREQPROV ON)
+@@ -103,13 +113,21 @@ set(CPACK_RPM_PACKAGE_AUTOREQPROV ON)
  
  include(CPack)
  
@@ -120,9 +120,12 @@ index 3d52d0c..0034dc4 100644
 +        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 +endif()
  
- if (MSVC)
+-if (MSVC)
++if (0)
      INSTALL(FILES $<TARGET_PDB_FILE:hiredis>
-@@ -161,43 +179,55 @@ IF(ENABLE_SSL)
+         DESTINATION ${CMAKE_INSTALL_BINDIR}
+         CONFIGURATIONS Debug RelWithDebInfo)
+@@ -161,45 +179,57 @@ IF(ENABLE_SSL)
      FIND_PACKAGE(OpenSSL REQUIRED)
      SET(hiredis_ssl_sources
          ssl.c)
@@ -209,5 +212,8 @@ index 3d52d0c..0034dc4 100644
 +            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 +    endif()
  
-     if (MSVC)
+-    if (MSVC)
++    if (0)
          INSTALL(FILES $<TARGET_PDB_FILE:hiredis_ssl>
+             DESTINATION ${CMAKE_INSTALL_BINDIR}
+             CONFIGURATIONS Debug RelWithDebInfo)

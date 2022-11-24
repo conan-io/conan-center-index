@@ -1,7 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.52.0"
@@ -87,10 +88,12 @@ class HiredisConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "hiredis")
 
-        if Version(self.version) >= "1.1.0" and self.info.settings.build_type == "Debug":
-            suffix = "d"
-        else:
-            suffix = ""
+        suffix = ""
+        if Version(self.version) >= "1.1.0":
+            if is_msvc(self) and not self.options.shared:
+                suffix += "_static"
+            if self.info.settings.build_type == "Debug":
+                suffix += "d"
 
         # hiredis
         self.cpp_info.components["hiredislib"].set_property("cmake_target_name", "hiredis::hiredis")
