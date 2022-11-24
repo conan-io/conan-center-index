@@ -117,9 +117,9 @@ class GdkPixbufConan(ConanFile):
         venv.generate()
 
     def requirements(self):
-        self.requires("glib/2.74.0")
+        self.requires("glib/2.75.0")
         if self.options.with_libpng:
-            self.requires("libpng/1.6.38")
+            self.requires("libpng/1.6.39")
         if self.options.with_libtiff:
             self.requires("libtiff/4.4.0")
         if self.options.with_libjpeg == "libjpeg-turbo":
@@ -128,7 +128,7 @@ class GdkPixbufConan(ConanFile):
             self.requires("libjpeg/9e")
 
     def build_requirements(self):
-        self.tool_requires("meson/0.63.2")
+        self.tool_requires("meson/0.64.1")
         self.tool_requires("pkgconf/1.9.3")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
