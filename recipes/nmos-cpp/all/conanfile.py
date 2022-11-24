@@ -50,6 +50,7 @@ class NmosCppConan(ConanFile):
         self.requires("websocketpp/0.8.2")
         self.requires("openssl/1.1.1s")
         self.requires("json-schema-validator/2.1.0")
+        self.requires("nlohmann_json/3.11.2")
         self.requires("zlib/1.2.13")
 
         if self.options.get_safe("with_dnssd") == "mdnsresponder":
@@ -71,6 +72,7 @@ class NmosCppConan(ConanFile):
 
     def package_id(self):
         self.info.requires["boost"].minor_mode()
+        self.info.requires["nlohmann_json"].patch_mode()
 
     def layout(self):
         cmake_layout(self, src_folder="src")
