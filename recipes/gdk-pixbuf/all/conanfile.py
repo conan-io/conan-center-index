@@ -2,8 +2,19 @@ from conan import ConanFile
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import (
+    apply_conandata_patches,
+    copy,
+    export_conandata_patches,
+    get,
+    rename,
+    replace_in_file,
+    rm,
+    rmdir
+)
 from conan.tools.layout import basic_layout
-from conan.tools import files, scm, microsoft
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
 import os
@@ -62,14 +73,14 @@ class GdkPixbufConan(ConanFile):
             # when running gdk-pixbuf-query-loaders
             # dyld: malformed mach-o: load commands size (97560) > 32768
             raise ConanInvalidConfiguration("This package does not support Macos currently")
-        if self.dependencies.direct_host["glib"].options.shared and microsoft.is_msvc_static_runtime(self):
+        if self.dependencies.direct_host["glib"].options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(
                 "Linking shared glib with the MSVC static runtime is not supported"
             )
 
     @property
     def _requires_compiler_rt(self):
-        return self.settings.compiler == "clang" and scm.Version(self.settings.compiler.version) <= "12" and self.settings.build_type == "Debug"
+        return self.settings.compiler == "clang" and Version(self.settings.compiler.version) <= "12" and self.settings.build_type == "Debug"
 
     def generate(self):
         def is_enabled(value):
@@ -90,10 +101,10 @@ class GdkPixbufConan(ConanFile):
             "man": "false",
             "installed_tests": "false"
         })
-        if scm.Version(self.version) < "2.42.0":
+        if Version(self.version) < "2.42.0":
             tc.project_options["gir"] = "false"
 
-        if scm.Version(self.version) >= "2.42.8":
+        if Version(self.version) >= "2.42.8":
             tc.project_options.update({
                 "png": is_enabled(self.options.with_libpng),
                 "tiff": is_enabled(self.options.with_libtiff),
@@ -134,28 +145,28 @@ class GdkPixbufConan(ConanFile):
             self.tool_requires("gobject-introspection/1.72.0")
 
     def export_sources(self):
-        files.export_conandata_patches(self)
+        export_conandata_patches(self)
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
-        files.apply_conandata_patches(self)
+        apply_conandata_patches(self)
 
         meson_build = os.path.join(self.source_folder, "meson.build")
-        files.replace_in_file(self, meson_build, "subdir('tests')", "#subdir('tests')")
-        files.replace_in_file(self, meson_build, "subdir('thumbnailer')", "#subdir('thumbnailer')")
-        files.replace_in_file(self, meson_build,
-                              "gmodule_dep.get_variable(pkgconfig: 'gmodule_supported')" if scm.Version(self.version) >= "2.42.6"
+        replace_in_file(self, meson_build, "subdir('tests')", "#subdir('tests')")
+        replace_in_file(self, meson_build, "subdir('thumbnailer')", "#subdir('thumbnailer')")
+        replace_in_file(self, meson_build,
+                              "gmodule_dep.get_variable(pkgconfig: 'gmodule_supported')" if Version(self.version) >= "2.42.6"
                               else "gmodule_dep.get_pkgconfig_variable('gmodule_supported')", "'true'")
         # workaround https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/issues/203
-        if scm.Version(self.version) >= "2.42.6":
-            files.replace_in_file(self, os.path.join(self.source_folder, "build-aux", "post-install.py"),
+        if Version(self.version) >= "2.42.6":
+            replace_in_file(self, os.path.join(self.source_folder, "build-aux", "post-install.py"),
                                   "close_fds=True", "close_fds=(sys.platform != 'win32')")
-        if scm.Version(self.version) >= "2.42.9":
-            files.replace_in_file(self, meson_build, "is_msvc_like ? 'png' : 'libpng'", "'libpng'")
-            files.replace_in_file(self, meson_build, "is_msvc_like ? 'jpeg' : 'libjpeg'", "'libjpeg'")
-            files.replace_in_file(self, meson_build, "is_msvc_like ? 'tiff' : 'libtiff-4'", "'libtiff-4'")
+        if Version(self.version) >= "2.42.9":
+            replace_in_file(self, meson_build, "is_msvc_like ? 'png' : 'libpng'", "'libpng'")
+            replace_in_file(self, meson_build, "is_msvc_like ? 'jpeg' : 'libjpeg'", "'libjpeg'")
+            replace_in_file(self, meson_build, "is_msvc_like ? 'tiff' : 'libtiff-4'", "'libtiff-4'")
 
     def build(self):
         self._patch_sources()
@@ -167,12 +178,12 @@ class GdkPixbufConan(ConanFile):
         meson = Meson(self)
         meson.install()
 
-        files.copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        if microsoft.is_msvc(self) and not self.options.shared:
-            files.rename(self, os.path.join(self.package_folder, "lib", "libgdk_pixbuf-2.0.a"), os.path.join(self.package_folder, "lib", "gdk_pixbuf-2.0.lib"))
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        files.rmdir(self, os.path.join(self.package_folder, "share"))
-        files.rm(self, "*.pdb", self.package_folder, recursive=True)
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        if is_msvc(self) and not self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", "libgdk_pixbuf-2.0.a"), os.path.join(self.package_folder, "lib", "gdk_pixbuf-2.0.lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "gdk-pixbuf-2.0")
