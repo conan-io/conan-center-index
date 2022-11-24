@@ -1,5 +1,5 @@
 --- a/cmake/findDependencies.cmake	2022-04-15 20:23:30.000000000 +0200
-+++ b/cmake/findDependencies.cmake	2022-11-24 10:19:11.665236500 +0100
++++ b/cmake/findDependencies.cmake	2022-11-24 12:06:28.533888200 +0100
 @@ -16,7 +16,7 @@
  
  if (HAVE_RULES)
@@ -9,3 +9,12 @@
      if (NOT PCRE_LIBRARY OR NOT PCRE_INCLUDE)
          message(FATAL_ERROR "pcre dependency for RULES has not been found")
      endif()
+@@ -29,7 +29,7 @@
+         if (NOT Z3_LIBRARIES)
+             message(FATAL_ERROR "z3 dependency has not been found")
+         endif()
+-        find_path(Z3_CXX_INCLUDE_DIRS z3++.h PATH_SUFFIXES "z3")
++		 set(Z3_CXX_INCLUDE_DIRS Z3_INCLUDE_DIRS)
+         if (NOT Z3_CXX_INCLUDE_DIRS)
+             message(FATAL_ERROR "z3++.h has not been found")
+         endif()
