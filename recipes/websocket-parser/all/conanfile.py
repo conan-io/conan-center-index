@@ -13,12 +13,10 @@ class WebsocketParserConan(ConanFile):
     topics = "websockets", "parser"
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = ["patches/**"]
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False]}
+    default_options = {"shared": False}
 
     def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -29,8 +27,8 @@ class WebsocketParserConan(ConanFile):
         apply_conandata_patches(self)
         buildenv = AutoToolsBuildEnvironment(self)
         buildenv.flags = ["-std=gnu99", "-pedantic"]
+        buildenv.fpic = True
         if not self.options.shared:
-            buildenv.fpic = self.options.fPIC
             buildenv.make(target="alib")
         elif is_apple_os(self):
             buildenv.make(target="dylib")
