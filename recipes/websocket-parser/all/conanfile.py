@@ -1,4 +1,4 @@
-from conan import ConanFile, tools
+from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.files import apply_conandata_patches, collect_libs, get
 from conans import AutoToolsBuildEnvironment
