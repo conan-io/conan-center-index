@@ -250,5 +250,4 @@ class NmosCppConan(ConanFile):
         # add nmos-cpp-registry and nmos-cpp-node to the path
         bin_path = os.path.join(self.package_folder, bindir)
         self.output.info(f"Appending PATH environment variable: {bin_path}")
-        self.runenv_info.prepend_path("PATH", bin_path)
         self.env_info.PATH.append(bin_path)
