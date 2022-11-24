@@ -12,7 +12,7 @@ class NativefiledialogConan(ConanFile):
     topics = ("conan", "dialog", "gui")
     settings = "os", "compiler", "build_type", "arch"
     generators = "pkg_config",
-    
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -38,7 +38,8 @@ class NativefiledialogConan(ConanFile):
 
     def build(self):
         if self.settings.compiler == "Visual Studio":
-            generator = "vs" + {"16": "2019",
+            generator = "vs" + {"17": "2019", # premake does not know about current compilers...
+                                "16": "2019",
                                 "15": "2017",
                                 "14": "2015",
                                 "12": "2013",
