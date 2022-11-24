@@ -73,12 +73,13 @@ class GobjectIntrospectionConan(ConanFile):
 
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('tests')", "#subdir('tests')")
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "meson.build"),
-            "if meson.version().version_compare('>=0.54.0')",
-            "if false"
-        )
+        if Version(self.version) <= "1.72.0":
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "meson.build"),
+                "if meson.version().version_compare('>=0.54.0')",
+                "if false"
+            )
 
     def _patch_pkgconfig_files(self, files):
         # remove when https://github.com/conan-io/conan/issues/12279 is fixed

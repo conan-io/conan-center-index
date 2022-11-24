@@ -1,4 +1,7 @@
 sources:
+  "1.74.0":
+    sha256: "347b3a719e68ba4c69ff2d57ee2689233ea8c07fc492205e573386779e42d653"
+    url: "https://download.gnome.org/sources/gobject-introspection/1.74/gobject-introspection-1.74.0.tar.xz"
   "1.72.0":
     sha256: "02fe8e590861d88f83060dd39cda5ccaa60b2da1d21d0f95499301b186beaabc"
     url: "https://download.gnome.org/sources/gobject-introspection/1.72/gobject-introspection-1.72.0.tar.xz"
