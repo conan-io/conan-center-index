@@ -1,8 +1,10 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.files import get, copy, rm, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import os
 
 
@@ -50,6 +52,8 @@ class TeemoConan(ConanFile):
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
+        if self.info.settings.compiler == "apple-clang" and Version(self.info.settings.compiler.version) < "12.0":
+            raise ConanInvalidConfiguration(f"{self.ref} can not build on apple-clang < 12.0.") 
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
