@@ -43,6 +43,10 @@ class Stlab(ConanFile):
 
     short_paths = True
 
+    @property
+    def _minimum_cpp_standard(self):
+        return 17
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -133,6 +137,9 @@ class Stlab(ConanFile):
         # if self.info.settings.compiler.cppstd:
         #     check_min_cppstd(self, 17)
 
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
+
         if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < "9":
             raise ConanInvalidConfiguration("Need GCC >= 9")
 
@@ -144,7 +151,7 @@ class Stlab(ConanFile):
 
         # Actually, we want *at least* 15.8 (MSVC 19.15), but we cannot check this for now with Conan.
         if self.info.settings.compiler == "msvc" and Version(self.info.settings.compiler.version) < "19.15":
-            raise ConanInvalidConfiguration("Need msvc >= 19.15")
+            raise ConanInvalidConfiguration("Need MSVC >= 19.15")
 
         self._validate_task_system()
         self._validate_thread_system()
@@ -200,7 +207,9 @@ class Stlab(ConanFile):
 
     def package_id(self):
         #TODO: is header only but needs a header modified by cmake
-        self.info.settings.clear()
+        # self.info.settings.clear()
+        self.info.header_only()
+
         # self.info.options.with_boost = "ANY"
         # self.info.options.test = "ANY"
 
