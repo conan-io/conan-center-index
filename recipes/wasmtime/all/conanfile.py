@@ -62,25 +62,21 @@ class WasmtimeConan(ConanFile):
         try:
             if Version(compiler.version) < min_version:
                 msg = (
-                    "{} requires C{} features which are not supported by compiler {} {} !!"
-                ).format(self.name, self._minimum_cpp_standard, compiler, compiler.version)
+                    f"{self.name} requires C{self._minimum_cpp_standard} features "
+                    f"which are not supported by compiler {compiler} {compiler.version} !!"
+                )
                 raise ConanInvalidConfiguration(msg)
         except KeyError:
             msg = (
-                "{} recipe lacks information about the {} compiler, "
-                "support for the required C{} features is assumed"
-            ).format(self.name, compiler, self._minimum_cpp_standard)
+                f"{self.name} recipe lacks information about the {compiler} compiler, "
+                f"support for the required C{self._minimum_cpp_standard} features is assumed"
+            )
             self.output.warn(msg)
 
         try:
             self.conan_data["sources"][self.version][self._sources_os_key][str(self.settings.arch)]
         except KeyError:
             raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os are not available")
-
-        if Version(self.version) <= "0.29.0":
-            if (self.settings.compiler, self.settings.os) == ("gcc", "Windows") and self.options.shared:
-                # https://github.com/bytecodealliance/wasmtime/issues/3168
-                raise ConanInvalidConfiguration("Shared mingw is currently not possible")
 
     def build(self):
         # This is packaging binaries so the download needs to be in build
@@ -117,6 +113,6 @@ class WasmtimeConan(ConanFile):
             self.cpp_info.libs = ["wasmtime"]
 
         if self.settings.os == "Windows":
-                self.cpp_info.system_libs = ["ws2_32", "bcrypt", "advapi32", "userenv", "ntdll", "shell32", "ole32"]
+            self.cpp_info.system_libs = ["ws2_32", "bcrypt", "advapi32", "userenv", "ntdll", "shell32", "ole32"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "dl", "m", "rt"]
