@@ -355,11 +355,11 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.37") # needs to be < 10.38 or qt fails to detect visual studio static library
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.224.0")
+            self.requires("vulkan-loader/1.3.231.0")
             if is_apple_os(self):
-                self.requires("moltenvk/1.1.10")
+                self.requires("moltenvk/1.2.0")
         if self.options.with_glib:
-            self.requires("glib/2.73.2")
+            self.requires("glib/2.75.0")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.2.1")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
@@ -367,23 +367,23 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/71.1")
+            self.requires("icu/72.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/5.2.0")
+            self.requires("harfbuzz/5.3.1")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.1.4")
             else:
                 self.requires("libjpeg/9e")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
-            self.requires("libpng/1.6.38")
+            self.requires("libpng/1.6.39")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.39.3")
+            self.requires("sqlite3/3.40.0")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.30")
         if self.options.with_pq:
-            self.requires("libpq/14.2")
+            self.requires("libpq/14.5")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.11")
@@ -403,18 +403,18 @@ class QtConan(ConanFile):
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
-            self.requires("expat/2.4.9")
+            self.requires("expat/2.5.0")
             self.requires("opus/1.3.1")
             self.requires("xorg-proto/2022.2")
             self.requires("libxshmfence/1.3")
-            self.requires("nss/3.77")
+            self.requires("nss/3.85")
             self.requires("libdrm/2.4.109")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.2")
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
-            self.requires("dbus/1.15.0")
+            self.requires("dbus/1.15.2")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_md4c", False):
@@ -422,7 +422,7 @@ class QtConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("cmake/3.25.0")
-        self.build_requires("ninja/1.11.0")
+        self.build_requires("ninja/1.11.1")
         self.build_requires("pkgconf/1.9.3")
         if self.settings.os == "Windows":
             self.build_requires('strawberryperl/5.32.1.1')
