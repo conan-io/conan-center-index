@@ -13,4 +13,4 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            self.run(f"genie ninja --scripts=\"{self.source_folder}\"")
+            self.run("genie ninja")
