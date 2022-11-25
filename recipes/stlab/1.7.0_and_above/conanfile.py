@@ -4,6 +4,7 @@ from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import check_min_vs, is_msvc
 
 import os
 
@@ -46,6 +47,14 @@ class Stlab(ConanFile):
     @property
     def _minimum_cpp_standard(self):
         return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {"gcc": "9",
+                "Visual Studio": "15.8",
+                "clang": "8",
+                "apple-clang": "13",
+                }
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -137,21 +146,54 @@ class Stlab(ConanFile):
         # if self.info.settings.compiler.cppstd:
         #     check_min_cppstd(self, 17)
 
-        if self.info.settings.compiler.cppstd:
+        # if self.info.settings.compiler.cppstd:
+        #     check_min_cppstd(self, self._minimum_cpp_standard)
+
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
 
-        if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < "9":
-            raise ConanInvalidConfiguration("Need GCC >= 9")
+        # if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < "9":
+        #     raise ConanInvalidConfiguration("Need GCC >= 9")
 
-        if self.info.settings.compiler == "clang" and Version(self.info.settings.compiler.version) < "8":
-            raise ConanInvalidConfiguration("Need Clang >= 8")
+        # if self.info.settings.compiler == "clang" and Version(self.info.settings.compiler.version) < "8":
+        #     raise ConanInvalidConfiguration("Need Clang >= 8")
 
-        if self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) < "15.8":
-            raise ConanInvalidConfiguration("Need Visual Studio >= 2017 15.8 (MSVC 19.15)")
+        # if self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) < "15.8":
+        #     raise ConanInvalidConfiguration("Need Visual Studio >= 2017 15.8 (MSVC 19.15)")
 
-        # Actually, we want *at least* 15.8 (MSVC 19.15), but we cannot check this for now with Conan.
-        if self.info.settings.compiler == "msvc" and Version(self.info.settings.compiler.version) < "19.15":
-            raise ConanInvalidConfiguration("Need MSVC >= 19.15")
+        # # Actually, we want *at least* 15.8 (MSVC 19.15), but we cannot check this for now with Conan.
+        # if self.info.settings.compiler == "msvc" and Version(self.info.settings.compiler.version) < "19.15":
+        #     raise ConanInvalidConfiguration("Need MSVC >= 19.15")
+
+        # if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9":
+        #     raise ConanInvalidConfiguration("Need GCC >= 9")
+
+        # if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "8":
+        #     raise ConanInvalidConfiguration("Need Clang >= 8")
+
+        # if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "15.8":
+        #     raise ConanInvalidConfiguration("Need Visual Studio >= 2017 15.8 (MSVC 19.15)")
+
+        # # Actually, we want *at least* 15.8 (MSVC 19.15), but we cannot check this for now with Conan.
+        # if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "19.15":
+        #     raise ConanInvalidConfiguration("Need MSVC >= 19.15")
+
+
+        def _lazy_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
+        check_min_vs(self, "192")
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if not minimum_version:
+                self.output.warn(f"{self.name} {self.version} requires C++20. Your compiler is unknown. Assuming it supports C++20.")
+            elif _lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
+                raise ConanInvalidConfiguration(f"{self.name} {self.version} requires C++20, which your compiler does not support.")
+            if self.info.settings.compiler == "clang" and str(self.info.settings.compiler.version) in ("13", "14"):
+                raise ConanInvalidConfiguration(f"{self.ref} currently does not work with Clang {self.info.settings.compiler.version} on CCI, it enters in an infinite build loop (smells like a compiler bug). Contributions are welcomed!")
 
         self._validate_task_system()
         self._validate_thread_system()
