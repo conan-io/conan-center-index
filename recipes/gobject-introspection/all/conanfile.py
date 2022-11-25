@@ -82,18 +82,8 @@ class GobjectIntrospectionConan(ConanFile):
                 "if false"
             )
 
-    def _patch_pkgconfig_files(self, files):
-        # remove when https://github.com/conan-io/conan/issues/12279 is fixed
-        for file in files:
-            src = os.path.join(self.generators_folder, file)
-            if not os.path.exists(src):
-                continue
-            replace_in_file(self, src, "includedir1", "includedir")
-            replace_in_file(self, src, "libdir1", "libdir")
-
     def build(self):
         self._patch_sources()
-        self._patch_pkgconfig_files(["glib-2.0.pc", "gio-unix-2.0.pc"])
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -101,7 +91,7 @@ class GobjectIntrospectionConan(ConanFile):
     def package(self):
         meson = Meson(self)
         meson.install()
-        copy(self, "COPYING", self.source_folder, "licenses")
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         if is_msvc(self):
