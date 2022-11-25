@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
@@ -47,7 +48,8 @@ class CppcheckConan(ConanFile):
         tc.variables["HAVE_RULES"] = self.options.have_rules
         tc.variables["USE_MATCHCOMPILER"] = "Auto"
         tc.variables["ENABLE_OSS_FUZZ"] = False
-        tc.variables["FILESDIR"] = os.path.join(self.package_folder, "bin", "cfg")
+        if is_apple_os(self):
+            tc.variables["FILESDIR"] = os.path.join(self.package_folder, "bin", "cfg")
         tc.generate()
 
         deps = CMakeDeps(self)
