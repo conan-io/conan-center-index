@@ -5,7 +5,8 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.50.0"
+
 
 class BertrandConan(ConanFile):
     name = "bertrand"
