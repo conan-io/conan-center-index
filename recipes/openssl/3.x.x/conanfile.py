@@ -660,11 +660,11 @@ class OpenSSLConan(ConanFile):
         if not self.options.no_fips:
             provdir = os.path.join(self._source_subfolder, "providers")
             if self.settings.os == "Macos":
-                self.copy("fips.dylib", src=provdir,dst="lib/ossl-modules")
+                self.copy("fips.dylib", src=provdir, dst="lib/ossl-modules")
             elif self.settings.os == "Windows":
-                self.copy("fips.dll", src=provdir,dst="lib/ossl-modules")
+                self.copy("fips.dll", src=provdir, dst="lib/ossl-modules")
             else:
-                self.copy("fips.so", src=provdir,dst="lib/ossl-modules")
+                self.copy("fips.so", src=provdir, dst="lib/ossl-modules")
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
@@ -672,8 +672,7 @@ class OpenSSLConan(ConanFile):
             os.path.join(self.package_folder, self._module_file_rel_path)
         )
 
-    @staticmethod
-    def _create_cmake_module_variables(module_file):
+    def _create_cmake_module_variables(self, module_file):
         content = textwrap.dedent("""\
             set(OPENSSL_FOUND TRUE)
             if(DEFINED OpenSSL_INCLUDE_DIR)
@@ -685,6 +684,12 @@ class OpenSSLConan(ConanFile):
                                              ${OpenSSL_Crypto_DEPENDENCIES}
                                              ${OpenSSL_Crypto_FRAMEWORKS}
                                              ${OpenSSL_Crypto_SYSTEM_LIBS})
+            elseif(DEFINED openssl_OpenSSL_Crypto_LIBS_%(config)s)
+                set(OPENSSL_CRYPTO_LIBRARY ${openssl_OpenSSL_Crypto_LIBS_%(config)s})
+                set(OPENSSL_CRYPTO_LIBRARIES ${openssl_OpenSSL_Crypto_LIBS_%(config)s}
+                                             ${openssl_OpenSSL_Crypto_DEPENDENCIES_%(config)s}
+                                             ${openssl_OpenSSL_Crypto_FRAMEWORKS_%(config)s}
+                                             ${openssl_OpenSSL_Crypto_SYSTEM_LIBS_%(config)s})
             endif()
             if(DEFINED OpenSSL_SSL_LIBS)
                 set(OPENSSL_SSL_LIBRARY ${OpenSSL_SSL_LIBS})
@@ -692,6 +697,12 @@ class OpenSSLConan(ConanFile):
                                           ${OpenSSL_SSL_DEPENDENCIES}
                                           ${OpenSSL_SSL_FRAMEWORKS}
                                           ${OpenSSL_SSL_SYSTEM_LIBS})
+            elseif(DEFINED openssl_OpenSSL_SSL_LIBS_%(config)s)
+                set(OPENSSL_SSL_LIBRARY ${openssl_OpenSSL_SSL_LIBS_%(config)s})
+                set(OPENSSL_SSL_LIBRARIES ${openssl_OpenSSL_SSL_LIBS_%(config)s}
+                                          ${openssl_OpenSSL_SSL_DEPENDENCIES_%(config)s}
+                                          ${openssl_OpenSSL_SSL_FRAMEWORKS_%(config)s}
+                                          ${openssl_OpenSSL_SSL_SYSTEM_LIBS_%(config)s})
             endif()
             if(DEFINED OpenSSL_LIBRARIES)
                 set(OPENSSL_LIBRARIES ${OpenSSL_LIBRARIES})
@@ -699,7 +710,7 @@ class OpenSSLConan(ConanFile):
             if(DEFINED OpenSSL_VERSION)
                 set(OPENSSL_VERSION ${OpenSSL_VERSION})
             endif()
-        """)
+        """ % {"config":str(self.settings.build_type).upper()})
         tools.save(module_file, content)
 
     @property
@@ -714,6 +725,7 @@ class OpenSSLConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenSSL")
         self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.set_property("pkg_config_name", "openssl")
         self.cpp_info.names["cmake_find_package"] = "OpenSSL"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenSSL"

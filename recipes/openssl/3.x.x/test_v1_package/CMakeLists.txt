@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.1)
 project(test_package C)
 
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
+
 option(OPENSSL_WITH_ZLIB "OpenSSL with zlib support" ON)
 option(OPENSSL_WITH_LEGACY "OpenSSL with support for the legacy provider" ON)
 option(OPENSSL_WITH_MD4 "OpenSSL with MD4 support (needs legacy provider)" ON)
@@ -29,14 +32,14 @@ foreach(_custom_var ${_custom_vars})
     endif()
 endforeach()
 
-add_executable(digest digest.c)
+add_executable(digest ../test_package/digest.c)
 if(OPENSSL_WITH_ZLIB)
     target_compile_definitions(digest PRIVATE WITH_ZLIB)
 endif()
 target_link_libraries(digest OpenSSL::Crypto)
 
 if(OPENSSL_WITH_LEGACY)
-    add_executable(digest_legacy digest_legacy.c)
+    add_executable(digest_legacy ../test_package/digest_legacy.c)
     # do now show deperecation warnings
     target_compile_definitions(digest_legacy PRIVATE OPENSSL_SUPPRESS_DEPRECATED)
     if(OPENSSL_WITH_MD4)

@@ -1,40 +1,67 @@
-from conans import CMake, tools, ConanFile
-from conan.tools.build import cross_building
+from conan import ConanFile
+from conan.tools.scm import Version
+from conan.tools.build import can_run
+from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
 import os
+
+required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake", "cmake_find_package", "pkg_config"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeDeps", "VirtualRunEnv"
+    test_type = "explicit"
 
+    @property
+    def _skip_test(self):
+        # Attempting to use @rpath without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being
+        # set. This could be because you are using a Mac OS X version less than 10.5
+        # or because CMake's platform configuration is corrupt.
+        # FIXME: Remove once CMake on macOS/M1 CI runners is upgraded.
+        # Actually the workaround should be to add cmake/3.22.0 to build requires,
+        # but for the specific case of openssl it fails because it is also a requirement of cmake.
+        # see https://github.com/conan-io/conan/pull/9839
+        return self.settings.os == "Macos" and self.settings.arch == "armv8" \
+               and self.options["openssl"].shared
+
+    @property
     def _with_legacy(self):
-        return (not self.options["openssl"].no_legacy and
-            ((not self.options["openssl"].no_md4) or
-              (not self.options["openssl"].no_rmd160)))
+        openssl = self.dependencies["openssl"]
+        return (not openssl.options.no_legacy and
+            ((not openssl.options.no_md4) or
+              (not openssl.options.no_rmd160)))
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if self.settings.os == "Android":
+            tc.cache_variables["CONAN_LIBCXX"] = ""
+        openssl = self.dependencies["openssl"]
+        openssl_version = Version(openssl.ref.version)
+        tc.cache_variables["OPENSSL_WITH_ZLIB"] = not openssl.options.no_zlib
+        tc.cache_variables["OPENSSL_WITH_LEGACY"] = self._with_legacy
+        tc.cache_variables["OPENSSL_WITH_MD4"] = not openssl.options.no_md4
+        tc.cache_variables["OPENSSL_WITH_RIPEMD160"] = not openssl.options.no_rmd160
+        tc.generate()
+
 
     def build(self):
-        cmake = CMake(self)
-        cmake.definitions["OPENSSL_WITH_ZLIB"] = not self.options["openssl"].no_zlib
-        cmake.definitions["OPENSSL_WITH_LEGACY"] = self._with_legacy()
-        cmake.definitions["OPENSSL_WITH_MD4"] = not self.options["openssl"].no_md4
-        cmake.definitions["OPENSSL_WITH_RIPEMD160"] = not self.options["openssl"].no_rmd160
-        if self.settings.os == "Android":
-            cmake.definitions["CONAN_LIBCXX"] = ""
-        cmake.configure()
-        cmake.build()
+        if not self._skip_test:
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
     def test(self):
-        if not cross_building(self):
-            bin_path = os.path.join("bin", "digest")
-            self.run(bin_path, run_environment=True)
+        if not self._skip_test and can_run(self):
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "digest")
+            self.run(bin_path, env="conanrun")
 
-            if not self.options["openssl"].no_legacy:
-                bin_legacy_path = os.path.join("bin", "digest_legacy")
+            bin_legacy_path = os.path.join("bin", "digest_legacy")
+            if os.path.exists(bin_legacy_path):
                 self.run(bin_legacy_path, run_environment=True)
-
-            if not self.options["openssl"].no_stdio:
-                self.run("openssl version", run_environment=True)
         assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE.txt"))
-
-        for fn in ("libcrypto.pc", "libssl.pc", "openssl.pc",):
-            assert os.path.isfile(os.path.join(self.build_folder, fn))
