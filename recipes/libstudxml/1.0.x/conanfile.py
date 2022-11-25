@@ -1,9 +1,12 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, chdir, collect_libs, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
+from conans import AutoToolsBuildEnvironment, MSBuild, tools
 import os
-import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibStudXmlConan(ConanFile):
@@ -13,10 +16,8 @@ class LibStudXmlConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.codesynthesis.com/projects/libstudxml/"
     license = "MIT"
-    settings = "os", "compiler", "build_type", "arch"
 
-    exports_sources = "patches/*"
-
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -32,36 +33,41 @@ class LibStudXmlConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        pass
 
     def requirements(self):
-        self.requires("expat/2.4.1")
+        self.requires("expat/2.5.0", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio":
-            if tools.Version(self.settings.compiler.version) < "9":
-                raise ConanInvalidConfiguration("Visual Studio {} is not supported.".format(self.settings.compiler.version))
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+        if self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) < "9":
+            raise ConanInvalidConfiguration(f"Visual Studio {self.info.settings.compiler.version} is not supported.")
 
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
-            self.build_requires("gnu-config/cci.20201022")
-            self.build_requires("libtool/2.4.6")
+        if not is_msvc(self):
+            self.tool_requires("gnu-config/cci.20210814")
+            self.tool_requires("libtool/2.4.7")
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/cci.latest")
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if not self._autotools:
@@ -75,59 +81,75 @@ class LibStudXmlConan(ConanFile):
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
+    @property
+    def _vc_ver(self):
+        if self.settings.compiler == "Visual Studio":
+            return str(Version(self.settings.compiler.version).major)
+        elif self.settings.compiler == "msvc":
+            return {
+                "170": "11",
+                "180": "12",
+                "190": "14",
+                "191": "15",
+                "192": "16",
+                "193": "17",
+            }[str(self.settings.compiler.version)]
+        return None
+
     def _build_vs(self):
-        vc_ver = int(tools.Version(self.settings.compiler.version).major)
+        vc_ver = int(self._vc_ver)
         sln_path = None
         def get_sln_path():
-            return os.path.join(self._source_subfolder, "libstudxml-vc{}.sln".format(vc_ver))
+            return os.path.join(self.source_folder, self._source_subfolder, f"libstudxml-vc{vc_ver}.sln")
 
         sln_path = get_sln_path()
         while not os.path.exists(sln_path):
             vc_ver -= 1
             sln_path = get_sln_path()
 
-        proj_path = os.path.join(self._source_subfolder, "xml", "libstudxml-vc{}.vcxproj".format(vc_ver))
+        proj_path = os.path.join(self.source_folder, self._source_subfolder, "xml", f"libstudxml-vc{vc_ver}.vcxproj")
 
         if not self.options.shared:
-            tools.replace_in_file(proj_path, "DynamicLibrary", "StaticLibrary")
-            tools.replace_in_file(proj_path, "LIBSTUDXML_DYNAMIC_LIB", "LIBSTUDXML_STATIC_LIB")
+            replace_in_file(self, proj_path, "DynamicLibrary", "StaticLibrary")
+            replace_in_file(self, proj_path, "LIBSTUDXML_DYNAMIC_LIB", "LIBSTUDXML_STATIC_LIB")
 
         msbuild = MSBuild(self)
         msbuild.build(sln_path, platforms={"x86": "Win32"})
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def _build_autotools(self):
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "config", "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "config", "config.guess"))
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            if gnu_config:
+                copy(
+                    self,
+                    os.path.basename(gnu_config),
+                    src=os.path.dirname(gnu_config),
+                    dst=os.path.join(self.source_folder, self._source_subfolder, "config"),
+                )
 
         if self.settings.compiler.get_safe("libcxx") == "libc++":
             # libc++ includes a file called 'version', and since libstudxml adds source_subfolder as an
             # include dir, libc++ ends up including their 'version' file instead, causing a compile error
-            tools.remove_files_by_mask(self._source_subfolder, "version")
+            rm(self, "version", os.path.join(self.source_folder, self._source_subfolder))
 
-        with tools.chdir(self._source_subfolder):
+        with chdir(self, os.path.join(self.source_folder, self._source_subfolder)):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
 
         autotools = self._configure_autotools()
         autotools.make()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-        if self.settings.compiler == "Visual Studio":
+        apply_conandata_patches(self)
+        if is_msvc(self):
             self._build_vs()
         else:
             self._build_autotools()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        if self.settings.compiler == "Visual Studio":
+        copy(self, "LICENSE", src=os.path.join(self.source_folder, self._source_subfolder), dst=os.path.join(self.package_folder, "licenses"))
+        if is_msvc(self):
             self.copy("xml/value-traits", dst="include", src=self._source_subfolder)
             self.copy("xml/serializer", dst="include", src=self._source_subfolder)
             self.copy("xml/qname", dst="include", src=self._source_subfolder)
@@ -151,14 +173,14 @@ class LibStudXmlConan(ConanFile):
         else:
             autotools = self._configure_autotools()
             autotools.install()
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libstudxml.la")
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "share"))
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.names["pkg_config"] = "libstudxml"
+        self.cpp_info.set_property("pkg_config_name", "libstudxml")
+        self.cpp_info.libs = collect_libs(self)
 
         # If built with makefile, static library mechanism is provided by their buildsystem already
-        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+        if is_msvc(self) and not self.options.shared:
             self.cpp_info.defines = ["LIBSTUDXML_STATIC_LIB=1"]
