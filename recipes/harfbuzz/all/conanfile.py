@@ -144,6 +144,7 @@ class HarfbuzzConan(ConanFile):
         self.tool_requires("meson/0.64.1")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
+        self.tool_requires("glib/2.75.0")
 
     def build(self):
         apply_conandata_patches(self)
