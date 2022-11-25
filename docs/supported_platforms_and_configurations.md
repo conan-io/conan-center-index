@@ -39,6 +39,8 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 - Python: 3.7.9
 - CMake: 3.21.6
 - WinSDK: 10.0.20348
+    > WinSDK version is rolled periodically as [discussed previously](https://github.com/conan-io/conan-center-index/issues/4450).
+    > Please open an issue in case it needs to be updated.
 - Compilers: Visual Studio:
   
   - 2017 (19.16.27048)

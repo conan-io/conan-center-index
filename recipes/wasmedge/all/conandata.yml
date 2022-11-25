@@ -1,4 +1,25 @@
 sources:
+  "0.11.1":
+    Windows:
+      "x86_64":
+        Visual Studio:
+          - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.11.1/WasmEdge-0.11.1-windows.zip"
+            sha256: "c86f6384555a0484a5dd81faba5636bba78f5e3d6eaf627d880e34843f9e24bf"
+          - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.11.1/LICENSE"
+            sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    Linux:
+      "x86_64":
+        "gcc":
+          - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.11.1/WasmEdge-0.11.1-manylinux2014_x86_64.tar.gz"
+            sha256: "76ce4ea0eb86adfa52c73f6c6b44383626d94990e0923cae8b1e6f060ef2bf5b"
+          - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.11.1/LICENSE"
+            sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      "armv8":
+        "gcc":
+          - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.11.1/WasmEdge-0.11.1-manylinux2014_aarch64.tar.gz"
+            sha256: "cb9ea32932360463991cfda80e09879b2cf6c69737f12f3f2b371cd0af4e9ce8"
+          - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.11.1/LICENSE"
+            sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
   "0.10.0":
     Windows:
       "x86_64":

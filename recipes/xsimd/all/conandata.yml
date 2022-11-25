@@ -1,4 +1,7 @@
 sources:
+  "9.0.1":
+    url: "https://github.com/xtensor-stack/xsimd/archive/9.0.1.tar.gz"
+    sha256: "b1bb5f92167fd3a4f25749db0be7e61ed37e0a5d943490f3accdcd2cd2918cc0"
   "8.1.0":
     url: "https://github.com/xtensor-stack/xsimd/archive/8.1.0.tar.gz"
     sha256: "d52551360d37709675237d2a0418e28f70995b5b7cdad7c674626bcfbbf48328"
@@ -14,18 +17,3 @@ sources:
   "7.4.10":
     url: "https://github.com/xtensor-stack/xsimd/archive/7.4.10.tar.gz"
     sha256: "df00f476dea0c52ffebad60924e3f0db2a016b80d508f8d5a2399a74c0d134cd"
-  "7.4.9":
-    url: "https://github.com/xtensor-stack/xsimd/archive/7.4.9.tar.gz"
-    sha256: "f6601ffb002864ec0dc6013efd9f7a72d756418857c2d893be0644a2f041874e"
-  "7.4.8":
-    sha256: 318676faae48d2082440df9f161a95303a3f29c3f0b03ff32ca24063b12f5699
-    url: https://github.com/xtensor-stack/xsimd/archive/7.4.8.tar.gz
-  "7.4.6":
-    sha256: 0e70411a9fff76ac17c6ef642465d4f0d1f29d3f3a70e5ece4cfc522bd4fcd0b
-    url: https://github.com/xtensor-stack/xsimd/archive/7.4.6.tar.gz
-  "7.4.5":
-    sha256: 854c0506fb6f0c90a98b30a9407af1d06870338d6c7e63d21ddbbf8b7ce1dd42
-    url: https://github.com/xtensor-stack/xsimd/archive/7.4.5.tar.gz
-  "7.4.4":
-    sha256: a60d49f638b68117ae5aea73cf2d5586f4afda4de2435962de4310b11214de6a
-    url: https://github.com/xtensor-stack/xsimd/archive/7.4.4.tar.gz

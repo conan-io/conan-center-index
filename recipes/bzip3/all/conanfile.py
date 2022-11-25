@@ -1,9 +1,9 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.52.0"
 
 
 class BZip3Conan(ConanFile):
@@ -29,8 +29,7 @@ class BZip3Conan(ConanFile):
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,7 +42,10 @@ class BZip3Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         try:
             del self.settings.compiler.libcxx
         except Exception:
@@ -65,7 +67,7 @@ class BZip3Conan(ConanFile):
         tc.variables["BZIP3_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.variables["BZIP3_WITH_PTHREAD"] = self.options.get_safe("with_thread", False)
         tc.variables["BZIP3_WITH_UTIL"] = self.options.with_util
-        tc.variables["VERSION"] = self.version
+        tc.variables["BZIP3_VERSION"] = self.version
         tc.generate()
 
     def build(self):
@@ -75,7 +77,7 @@ class BZip3Conan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 

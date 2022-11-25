@@ -36,7 +36,7 @@ class LibsystemdConan(ConanFile):
         "with_xz": True,
         "with_zstd": True,
     }
-    generators = "PkgConfigDeps"
+    generators = "PkgConfigDeps", "VirtualBuildEnv"
     exports_sources = "patches/**"
 
     def configure(self):

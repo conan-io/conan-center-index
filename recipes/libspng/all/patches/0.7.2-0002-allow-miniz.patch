@@ -1,0 +1,62 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.0)
++cmake_minimum_required(VERSION 3.1)
+ 
+ project(libspng C)
+ 
+@@ -10,19 +10,24 @@ set(SPNG_VERSION ${SPNG_MAJOR}.${SPNG_MINOR}.${SPNG_REVISION})
+ option(ENABLE_OPT "Enable architecture-specific optimizations" ON)
+ option(SPNG_SHARED "Build shared lib" ON)
+ option(SPNG_STATIC "Build static lib" ON)
++option(SPNG_USE_MINIZ "Use Miniz instead of zlib" OFF)
+ option(BUILD_EXAMPLES "Build examples" ON)
+ 
+ include(GNUInstallDirs)
+ 
+-find_package(ZLIB REQUIRED)
+-include_directories(${ZLIB_INCLUDE_DIRS})
++if(SPNG_USE_MINIZ)
++    find_package(miniz REQUIRED)
++    set(spng_LIBS miniz::miniz)
++else()
++    find_package(ZLIB REQUIRED)
++    set(spng_LIBS ZLIB::ZLIB)
++endif()
+ 
+ set(spng_SOURCES spng/spng.c)
+ 
+-if(NOT CMAKE_HOST_WIN32)
+-    set(spng_LIBS -lm ${ZLIB_LIBRARIES})
+-else()
+-    set(spng_LIBS ${ZLIB_LIBRARIES})
++find_library(LIBM NAMES m)
++if(LIBM)
++    list(APPEND spng_LIBS ${LIBM})
+ endif()
+ 
+ if(NOT ENABLE_OPT)
+@@ -31,7 +36,10 @@ endif()
+ 
+ if(SPNG_SHARED)
+     add_library(spng SHARED ${spng_SOURCES})
+-    target_link_libraries(spng ${spng_LIBS})
++    target_link_libraries(spng PRIVATE ${spng_LIBS})
++    if(SPNG_USE_MINIZ)
++        target_compile_definitions(spng PRIVATE SPNG_USE_MINIZ)
++    endif()
+     install(
+         TARGETS spng
+         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+@@ -48,6 +56,10 @@ endif()
+ 
+ if(SPNG_STATIC)
+     add_library(spng_static STATIC ${spng_SOURCES})
++    target_link_libraries(spng_static PRIVATE ${spng_LIBS})
++    if(SPNG_USE_MINIZ)
++        target_compile_definitions(spng_static PRIVATE SPNG_USE_MINIZ)
++    endif()
+     target_compile_definitions(spng_static PUBLIC SPNG_STATIC)
+     install(TARGETS spng_static DESTINATION lib)
+ endif()

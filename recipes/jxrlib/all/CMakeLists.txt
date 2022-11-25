@@ -1,16 +1,13 @@
-cmake_minimum_required(VERSION 2.8.12)
-project(jxrlib C)
+cmake_minimum_required(VERSION 3.1)
+project(jxrlib LANGUAGES C)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
-
-set(JPEGXR_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
+include(GNUInstallDirs)
+include(TestBigEndian)
 
 if(NOT MSVC)
     add_definitions(-D__ANSI__)
 endif()
 
-include(TestBigEndian)
 test_big_endian(ISBIGENDIAN)
 if(ISBIGENDIAN)
     set(DEF_ENDIAN _BIG__ENDIAN_)
@@ -80,8 +77,6 @@ install(TARGETS jxrglue
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
-
-
 install(FILES
     ${JPEGXR_FOLDER}/jxrgluelib/JXRGlue.h
     ${JPEGXR_FOLDER}/jxrgluelib/JXRMeta.h

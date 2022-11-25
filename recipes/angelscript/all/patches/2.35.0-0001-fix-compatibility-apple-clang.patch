@@ -1,0 +1,30 @@
+--- a/angelscript/projects/cmake/CMakeLists.txt
++++ b/angelscript/projects/cmake/CMakeLists.txt
+@@ -110,7 +110,9 @@ if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm")
+     enable_language(ASM)
+     if(CMAKE_ASM_COMPILER_WORKS)
+         set(ANGELSCRIPT_SOURCE ${ANGELSCRIPT_SOURCE} ../../source/as_callfunc_arm.cpp ../../source/as_callfunc_arm_gcc.S)
++        if (NOT APPLE)
+         set_property(SOURCE ../../source/as_callfunc_arm_gcc.S APPEND PROPERTY COMPILE_FLAGS " -Wa,-mimplicit-it=always")
++        endif()
+     else()
+         message(FATAL ERROR "ARM target requires a working assembler")
+     endif()
+--- a/angelscript/source/as_callfunc_arm64_gcc.S
++++ b/angelscript/source/as_callfunc_arm64_gcc.S
+@@ -46,6 +46,7 @@
+ .global CallARM64Float
+ .global CallARM64
+ 
++#if !defined(__MACH__)
+ .type GetHFAReturnDouble, %function
+ .type GetHFAReturnFloat, %function
+ .type CallARM64Ret128, %function
+@@ -53,6 +54,7 @@
+ .type CallARM64Double, %function
+ .type CallARM64Float, %function
+ .type CallARM64, %function
++#endif
+ 
+ .align  2
+ GetHFAReturnDouble:

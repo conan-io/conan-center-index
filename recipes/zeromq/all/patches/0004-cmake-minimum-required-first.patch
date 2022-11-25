@@ -1,0 +1,15 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,11 +1,11 @@
+ # CMake build script for ZeroMQ
+-project(ZeroMQ)
+ 
+ if(1)
+   cmake_minimum_required(VERSION 3.0.2)
+ else()
+   cmake_minimum_required(VERSION 2.8.12)
+ endif()
++project(ZeroMQ)
+ 
+ include(CheckIncludeFiles)
+ include(CheckCCompilerFlag)

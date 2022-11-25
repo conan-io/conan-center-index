@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.15)
-project(test_package CXX)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
 find_package(spdlog REQUIRED CONFIG)
 
@@ -9,4 +9,4 @@ if(SPDLOG_HEADER_ONLY)
 else()
     target_link_libraries(${PROJECT_NAME} PUBLIC spdlog::spdlog)
 endif()
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)

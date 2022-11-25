@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(test_package LANGUAGES CXX)
 
-find_package(Flatbuffers REQUIRED CONFIG)
+find_package(FlatBuffers REQUIRED CONFIG)
 if(TARGET flatbuffers::flatbuffers_shared)
     set(FLATBUFFERS_TARGET flatbuffers::flatbuffers_shared)
 else()

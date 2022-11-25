@@ -1,64 +1,82 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conan import ConanFile
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, VCVars
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class MakeConan(ConanFile):
     name = "make"
-    description = "GNU Make is a tool which controls the generation of executables and other non-source files of a program from the program's source files"
-    topics = ("conan", "make", "build", "makefile")
+    description = (
+        "GNU Make is a tool which controls the generation of executables and "
+        "other non-source files of a program from the program's source files"
+    )
+    topics = ("make", "build", "makefile")
     homepage = "https://www.gnu.org/software/make/"
     url = "https://github.com/conan-io/conan-center-index"
     license = "GPL-3.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
 
-    exports_sources = "patches/*"
-
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         del self.info.settings.compiler
 
-    def build(self):
-        for patch in self.conan_data.get("patches").get(self.version, []):
-            tools.patch(**patch)
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-        with tools.chdir(self._source_subfolder):
+    def generate(self):
+        if is_msvc(self):
+            vcvars = VCVars(self)
+            vcvars.generate()
+        if self._settings_build.os != "Windows":
+            tc = AutotoolsToolchain(self)
+            tc.generate()
+
+    def build(self):
+        apply_conandata_patches(self)
+        with chdir(self, self.source_folder):
             # README.W32
-            if tools.os_info.is_windows:
-                if self.settings.compiler == "Visual Studio":
+            if self._settings_build.os == "Windows":
+                if is_msvc(self):
                     command = "build_w32.bat --without-guile"
                 else:
                     command = "build_w32.bat --without-guile gcc"
             else:
-                env_build = AutoToolsBuildEnvironment(self)
-                env_build.configure()
+                autotools = Autotools(self)
+                autotools.configure()
                 command = "./build.sh"
-            with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-                self.run(command)
+            self.run(command)
 
     def package(self):
-        self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
-        self.copy(pattern="make", src=self._source_subfolder, dst="bin", keep_path=False)
-        self.copy(pattern="*gnumake.exe", src=self._source_subfolder, dst="bin", keep_path=False)
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        for make_exe in ("make", "*gnumake.exe"):
+            copy(self, make_exe, src=self.source_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
 
     def package_info(self):
+        self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
 
         make = os.path.join(self.package_folder, "bin", "gnumake.exe" if self.settings.os == "Windows" else "make")
+        self.conf_info.define("tools.gnu:make_program", make)
 
+        # TODO: to remove in conan v2
         self.user_info.make = make
-
-        self.output.info('Creating CONAN_MAKE_PROGRAM environment variable: %s' % make)
         self.env_info.CONAN_MAKE_PROGRAM = make
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

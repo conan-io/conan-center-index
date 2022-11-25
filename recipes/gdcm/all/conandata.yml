@@ -5,6 +5,11 @@ sources:
 patches:
   "3.0.9":
     - patch_file: "patches/0001-charls-linking.patch"
-      base_path: "src"
     - patch_file: "patches/0002-openjpeg-integration.patch"
-      base_path: "src"
+    - patch_file: "patches/0003-gcc-11-compilation.patch"
+      patch_description: "add missing includes for GCC 11"
+      patch_type: "backport"
+      patch_source: "https://github.com/malaterre/GDCM/commit/4404b770be337bd0d5d3c2289abfd34426433db2"
+    - patch_file: "patches/0004-find-expat.patch"
+      patch_description: "enforce usage of FindEXPAT.cmake"
+      patch_type: "conan"

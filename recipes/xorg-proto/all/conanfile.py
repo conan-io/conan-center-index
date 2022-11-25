@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import rmdir, mkdir, save, load
+from conan.tools.files import rmdir, mkdir, save, load, get, apply_conandata_patches
 from conans import AutoToolsBuildEnvironment, tools
 import contextlib
 import glob
@@ -7,7 +7,7 @@ import os
 import re
 import yaml
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.41.0"
 
 
 class XorgProtoConan(ConanFile):
@@ -54,7 +54,7 @@ class XorgProtoConan(ConanFile):
         del self.info.settings.compiler
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     @contextlib.contextmanager
@@ -78,8 +78,7 @@ class XorgProtoConan(ConanFile):
         return self._autotools
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()

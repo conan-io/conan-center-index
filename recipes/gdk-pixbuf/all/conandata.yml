@@ -12,4 +12,3 @@ sources:
 patches:
   "2.42.8":
     - patch_file: "patches/define_dllmain_only_when_shared.patch"
-      base_path: "source_subfolder"

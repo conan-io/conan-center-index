@@ -1,0 +1,13 @@
+--- CMakeLists.txt	2020-08-06 09:02:15.000000000 -0300
++++ CMakeLists.txt	2022-10-06 12:32:08.838766142 -0300
+@@ -54,8 +54,8 @@
+ ENDIF()
+ 
+ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/modules/")
+-find_package(Eigen REQUIRED)
+-set(ADDITIONAL_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIR}/unsupported)
++find_package(Eigen3 REQUIRED)
++set(ADDITIONAL_INCLUDE_DIRS ${Eigen3_INCLUDE_DIRS} ${Eigen3_INCLUDE_DIR}/unsupported)
+ 
+ set( OPENGV_SOURCE_FILES
+   src/absolute_pose/modules/main.cpp

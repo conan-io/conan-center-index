@@ -1,11 +1,9 @@
-#define CLOVE_IMPLEMENTATION
 #include <clove-unit.h>
 
-char * __clove_exec_path;
-char * __clove_exec_base_path;
 int main() {
-    __clove_report_console_setup_ansi();
-    return 0;
+    const char* version = __CLOVE_VERSION;
+    if (version) return 0;
+    return 1;
 }
 
 

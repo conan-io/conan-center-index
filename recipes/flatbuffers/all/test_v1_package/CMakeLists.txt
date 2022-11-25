@@ -4,7 +4,7 @@ project(test_package LANGUAGES CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(Flatbuffers REQUIRED CONFIG)
+find_package(FlatBuffers REQUIRED CONFIG)
 if(TARGET flatbuffers::flatbuffers_shared)
     set(FLATBUFFERS_TARGET flatbuffers::flatbuffers_shared)
 else()

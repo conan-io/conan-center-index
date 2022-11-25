@@ -1,4 +1,7 @@
 sources:
+  "0.1.2a":
+    url: "https://github.com/opencv/ade/archive/refs/tags/v0.1.2a.tar.gz"
+    sha256: "c022a688b0554017e46e1cbdeb0105e625ca090fc3755c15df8c4451a304e084"
   "0.1.1f":
     url: "https://github.com/opencv/ade/archive/refs/tags/v0.1.1f.tar.gz"
     sha256: "c316680efbb5dd3ac4e10bb8cea345cf26a6a25ebc22418f8f0b8ca931a550e9"

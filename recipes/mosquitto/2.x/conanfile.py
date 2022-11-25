@@ -26,6 +26,7 @@ class Mosquitto(ConanFile):
         "cjson": [True, False],
         "build_cpp": [True, False],
         "websockets": [True, False],
+        "threading": [True, False],
     }
     default_options = {
         "shared": False,
@@ -37,6 +38,7 @@ class Mosquitto(ConanFile):
         "cjson": True, # https://github.com/eclipse/mosquitto/commit/bbe0afbfbe7bb392361de41e275759ee4ef06b1c
         "build_cpp": True,
         "websockets": False,
+        "threading": True,
     }
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
@@ -93,7 +95,7 @@ class Mosquitto(ConanFile):
         self._cmake.definitions["WITH_APPS"] = self.options.apps
         self._cmake.definitions["WITH_PLUGINS"] = False
         self._cmake.definitions["WITH_LIB_CPP"] = self.options.build_cpp
-        self._cmake.definitions["WITH_THREADING"] = self.settings.compiler != "Visual Studio"
+        self._cmake.definitions["WITH_THREADING"] = self.settings.compiler != "Visual Studio" and self.options.threading
         self._cmake.definitions["WITH_WEBSOCKETS"] = self.options.get_safe("websockets", False)
         self._cmake.definitions["STATIC_WEBSOCKETS"] = self.options.get_safe("websockets", False) and not self.options["libwebsockets"].shared
         self._cmake.definitions["DOCUMENTATION"] = False

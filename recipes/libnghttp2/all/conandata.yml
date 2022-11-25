@@ -1,4 +1,10 @@
 sources:
+  "1.51.0":
+    url: "https://github.com/nghttp2/nghttp2/archive/v1.51.0.tar.gz"
+    sha256: "dfcf41e0b093765a79c9f1fc0ba6dc3d524555e94483ea9ba8b87a6d454971ba"
+  "1.50.0":
+    url: "https://github.com/nghttp2/nghttp2/archive/v1.50.0.tar.gz"
+    sha256: "6de469efc8e9d47059327a6736aebe0a7d73f57e5e37ab4c4f838fb1eebd7889"
   "1.49.0":
     url: "https://github.com/nghttp2/nghttp2/archive/v1.49.0.tar.gz"
     sha256: "744f38f8d6e400a424bf62df449c91e3ffacbae11b5fab99e44a480f5c735ab9"
@@ -29,48 +35,29 @@ sources:
 patches:
   "1.49.0":
     - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
   "1.48.0":
     - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
   "1.47.0":
     - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
   "1.46.0":
     - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
   "1.45.1":
     - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
   "1.43.0":
     - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
   "1.42.0":
     - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
   "1.40.0":
     - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
   "1.39.2":
     - patch_file: "patches/fix-addNghttp2IncludesPathCMake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"

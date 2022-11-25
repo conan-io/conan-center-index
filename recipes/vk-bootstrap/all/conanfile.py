@@ -2,13 +2,13 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class VkBootstrapConan(ConanFile):
@@ -44,8 +44,7 @@ class VkBootstrapConan(ConanFile):
         }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,13 +52,19 @@ class VkBootstrapConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("vulkan-headers/1.3.224.0")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
         def loose_lt_semver(v1, v2):
@@ -71,14 +76,11 @@ class VkBootstrapConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
         if minimum_version and loose_lt_semver(str(self.info.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration(
-                f"{self.name} {self.version} requires C++{self._min_cppstd}, which your compiler does not support.",
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
 
         if is_msvc(self) and self.info.options.shared:
-            raise ConanInvalidConfiguration("vk-boostrap shared not supported with Visual Studio")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+            raise ConanInvalidConfiguration(f"{self.ref} shared not supported with Visual Studio")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

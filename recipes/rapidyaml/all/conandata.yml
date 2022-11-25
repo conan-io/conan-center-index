@@ -11,10 +11,13 @@ sources:
 patches:
   "0.4.1":
     - patch_file: "patches/0.4.1-001-remove-internal-c4core.patch"
-      base_path: "source_subfolder"
+      patch_description: "disable using internal c4core"
+      patch_type: "conan"
   "0.4.0":
     - patch_file: "patches/0.4.0-001-remove-internal-c4core.patch"
-      base_path: "source_subfolder"
+      patch_description: "disable using internal c4core"
+      patch_type: "conan"
   "0.3.0":
     - patch_file: "patches/0.3.0-001-remove-internal-c4core.patch"
-      base_path: "source_subfolder"
+      patch_description: "disable using internal c4core"
+      patch_type: "conan"

@@ -1,0 +1,92 @@
+--- a/cmake/DeflateCodec.cmake
++++ b/cmake/DeflateCodec.cmake
+@@ -35,7 +35,10 @@ set(ZIP_SUPPORT ${ZLIB_SUPPORT})
+ 
+ # libdeflate
+ set(LIBDEFLATE_SUPPORT FALSE)
+-find_package(Deflate)
++find_package(libdeflate CONFIG)
++if(libdeflate_FOUND)
++    set(Deflate_FOUND TRUE)
++endif()
+ option(libdeflate "use libdeflate (optional for faster Deflate support, still requires zlib)" ${Deflate_FOUND})
+ if (libdeflate AND Deflate_FOUND AND ZIP_SUPPORT)
+     set(LIBDEFLATE_SUPPORT TRUE)
+--- a/cmake/JBIGCodec.cmake
++++ b/cmake/JBIGCodec.cmake
+@@ -27,14 +27,17 @@
+ # JBIG-KIT
+ set(JBIG_SUPPORT FALSE)
+ 
+-find_package(JBIG)
++find_package(jbig CONFIG)
++if(jbig_FOUND)
++    set(JBIG_FOUND TRUE)
++endif()
+ 
+ if(JBIG_FOUND)
+     set(CMAKE_REQUIRED_INCLUDES_SAVE ${CMAKE_REQUIRED_INCLUDES})
+     set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${JBIG_INCLUDE_DIRS})
+     set(CMAKE_REQUIRED_LIBRARIES_SAVE ${CMAKE_REQUIRED_LIBRARIES})
+     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${JBIG_LIBRARIES})
+-    check_symbol_exists(jbg_newlen "jbig.h" HAVE_JBG_NEWLEN)
++    set(HAVE_JBG_NEWLEN TRUE)
+     set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_SAVE})
+     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_SAVE})
+ endif()
+--- a/cmake/ZSTDCodec.cmake
++++ b/cmake/ZSTDCodec.cmake
+@@ -28,14 +28,17 @@
+ set(ZSTD_SUPPORT FALSE)
+ set(ZSTD_USABLE FALSE)
+ 
+-find_package(ZSTD)
++find_package(zstd CONFIG)
++if(zstd_FOUND)
++    set(ZSTD_FOUND TRUE)
++endif()
+ 
+ if(ZSTD_FOUND)
+     set(CMAKE_REQUIRED_INCLUDES_SAVE ${CMAKE_REQUIRED_INCLUDES})
+     set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${ZSTD_INCLUDE_DIRS})
+     set(CMAKE_REQUIRED_LIBRARIES_SAVE ${CMAKE_REQUIRED_LIBRARIES})
+     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${ZSTD_LIBRARIES})
+-    check_symbol_exists(ZSTD_decompressStream "zstd.h" ZSTD_RECENT_ENOUGH)
++    set(ZSTD_RECENT_ENOUGH TRUE)
+     set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_SAVE})
+     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_SAVE})
+ 
+--- a/libtiff/CMakeLists.txt
++++ b/libtiff/CMakeLists.txt
+@@ -114,7 +114,7 @@ if(ZIP_SUPPORT)
+   string(APPEND tiff_requires_private " zlib")
+ endif()
+ if(ZIP_SUPPORT AND LIBDEFLATE_SUPPORT)
+-  target_link_libraries(tiff PRIVATE Deflate::Deflate)
++  target_link_libraries(tiff PRIVATE libdeflate::libdeflate)
+   list(APPEND tiff_libs_private_list "${Deflate_LIBRARY}")
+ endif()
+ if(JPEG_SUPPORT)
+@@ -126,7 +126,7 @@ if(JPEG_SUPPORT)
+   endif()
+ endif()
+ if(JBIG_SUPPORT)
+-  target_link_libraries(tiff PRIVATE JBIG::JBIG)
++  target_link_libraries(tiff PRIVATE jbig::jbig)
+   list(APPEND tiff_libs_private_list "${JBIG_LIBRARY}")
+ endif()
+ if(LERC_SUPPORT)
+@@ -141,11 +141,11 @@ if(LZMA_SUPPORT)
+   string(APPEND tiff_requires_private " liblzma")
+ endif()
+ if(ZSTD_SUPPORT)
+-  target_link_libraries(tiff PRIVATE ZSTD::ZSTD)
++  target_link_libraries(tiff PRIVATE $<IF:$<TARGET_EXISTS:zstd::libzstd_shared>,zstd::libzstd_shared,zstd::libzstd_static>)
+   string(APPEND tiff_requires_private " libzstd")
+ endif()
+ if(WEBP_SUPPORT)
+-  target_link_libraries(tiff PRIVATE WebP::WebP)
++  target_link_libraries(tiff PRIVATE WebP::webp)
+   string(APPEND tiff_requires_private " libwebp")
+ endif()
+ target_link_libraries(tiff PRIVATE CMath::CMath)
