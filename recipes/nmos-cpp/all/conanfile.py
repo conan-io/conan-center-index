@@ -6,7 +6,7 @@ import json
 import os
 import re
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 class NmosCppConan(ConanFile):
     name = "nmos-cpp"
