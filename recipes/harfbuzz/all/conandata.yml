@@ -14,19 +14,17 @@ sources:
   "5.3.0":
     url: "https://github.com/harfbuzz/harfbuzz/archive/5.3.0.tar.gz"
     sha256: "94712b8cdae68f0b585ec8e3cd8c5160fdc241218119572236497a62dae770de"
+  "5.3.1":
+    url: "https://github.com/harfbuzz/harfbuzz/archive/5.3.1.tar.gz"
+    sha256: "77c8c903f4539b050a6d3a5be79705c7ccf7b1cb66d68152a651486e261edbd2"
 patches:
-  "3.2.0":
-    - patch_file: "patches/icu-3.0.x.patch"
-      base_path: "source_subfolder"
   "4.4.1":
-    - patch_file: "patches/icu-4.0.x.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0000-fix-freetype-lookup-4.4.1.patch"
+      patch_type: "portability"
+      patch_description: "fix fretype and icu dependency lookup"
+      patch_source: "https://github.com/harfbuzz/harfbuzz/pull/3811"
   "5.1.0":
-    - patch_file: "patches/icu-5.1.x.patch"
-      base_path: "source_subfolder"
-  "5.2.0":
-    - patch_file: "patches/icu-5.2.x.patch"
-      base_path: "source_subfolder"
-  "5.3.0":
-    - patch_file: "patches/icu-5.2.x.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0000-fix-freetype-lookup-5.1.0.patch"
+      patch_type: "portability"
+      patch_description: "fix fretype and icu dependency lookup"
+      patch_source: "https://github.com/harfbuzz/harfbuzz/pull/3811"

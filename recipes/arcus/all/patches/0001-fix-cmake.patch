@@ -1,0 +1,62 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,5 +1,5 @@
++cmake_minimum_required(VERSION 3.8)
+ project(arcus)
+-cmake_minimum_required(VERSION 3.6)
+ 
+ include(GNUInstallDirs)
+ include(CMakePackageConfigHelpers)
+@@ -19,7 +19,6 @@ endif()
+ set(protobuf_MODULE_COMPATIBLE ON CACHE INTERNAL "" FORCE)
+ find_package(Protobuf 3.0.0 REQUIRED)
+ 
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON) #Required if a patch to libArcus needs to be made via templates.
+ 
+ if(BUILD_PYTHON)
+     list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+@@ -37,11 +36,7 @@ if(BUILD_PYTHON)
+     include_directories(python/ src/ ${SIP_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS})
+ endif()
+ 
+-set(CMAKE_CXX_STANDARD 11)
+ 
+-if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+-endif()
+ 
+ set(arcus_SRCS
+     src/Socket.cpp
+@@ -63,17 +58,16 @@ set(arcus_HDRS
+ set(ARCUS_VERSION 1.1.0)
+ set(ARCUS_SOVERSION 3)
+ 
+-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_FULL_LIBDIR}")
+ 
+ if(BUILD_STATIC)
+     add_library(Arcus STATIC ${arcus_SRCS})
+     if(NOT WIN32 OR CMAKE_COMPILER_IS_GNUCXX)
+         target_link_libraries(Arcus PRIVATE pthread)
+-        set_target_properties(Arcus PROPERTIES COMPILE_FLAGS -fPIC)
+     endif()
+ else()
+     add_library(Arcus SHARED ${arcus_SRCS})
+ endif()
++target_compile_features(Arcus PUBLIC cxx_std_11)
+ 
+ if(MSVC_STATIC_RUNTIME)
+     foreach(flag_var
+@@ -97,11 +91,11 @@ target_include_directories(Arcus PUBLIC
+     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+     ${PROTOBUF_INCLUDE_DIR}
+ )
+-target_link_libraries(Arcus PUBLIC ${PROTOBUF_LIBRARIES})
++target_link_libraries(Arcus PUBLIC protobuf::libprotobuf)
+ 
+ if(WIN32)
+     add_definitions(-D_WIN32_WINNT=0x0600) # Declare we require Vista or higher, this allows us to use IPv6 functions.
+-    target_link_libraries(Arcus PUBLIC Ws2_32)
++    target_link_libraries(Arcus PUBLIC ws2_32)
+ endif()
+ 
+ if(${CMAKE_BUILD_TYPE})

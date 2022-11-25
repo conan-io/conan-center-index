@@ -1,0 +1,23 @@
+diff -r -u a/src/CMakeLists.txt b/src/CMakeLists.txt
+--- a/src/CMakeLists.txt	2022-05-31 16:13:29.855723400 +0800
++++ b/src/CMakeLists.txt	2022-05-31 16:40:39.332447379 +0800
+@@ -576,7 +576,7 @@
+ add_library(CGNS::cgns-static ALIAS cgns_static)
+ # Needed to work around a CMake > 3.8 bug on Windows with MSVS and Intel Fortran
+ set_property(TARGET cgns_static PROPERTY LINKER_LANGUAGE C)
+-target_link_libraries(cgns_static PRIVATE $<$<BOOL:${CGNS_ENABLE_HDF5}>:hdf5::hdf5-${CG_HDF5_LINK_TYPE}>)
++target_link_libraries(cgns_static PRIVATE $<$<BOOL:${CGNS_ENABLE_HDF5}>:HDF5::HDF5>)
+ 
+ # Build a shared version of the library
+ if(CGNS_BUILD_SHARED)
+@@ -592,8 +592,8 @@
+     target_compile_definitions(cgns_shared PRIVATE -DBUILD_DLL)
+     target_compile_definitions(cgns_shared INTERFACE -DUSE_DLL)
+   endif ()
+-  if (CGNS_ENABLE_HDF5 AND HDF5_LIBRARY)
+-    target_link_libraries(cgns_shared PUBLIC hdf5::hdf5-${CG_HDF5_LINK_TYPE} $<$<NOT:$<PLATFORM_ID:Windows>>:${CMAKE_DL_LIBS}>)
++  if (CGNS_ENABLE_HDF5)
++    target_link_libraries(cgns_shared PUBLIC HDF5::HDF5 $<$<NOT:$<PLATFORM_ID:Windows>>:${CMAKE_DL_LIBS}>)
+     if(HDF5_NEED_ZLIB AND ZLIB_LIBRARY)
+       target_link_libraries(cgns_shared PUBLIC ${ZLIB_LIBRARY})
+     endif()

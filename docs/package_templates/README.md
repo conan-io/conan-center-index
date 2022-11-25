@@ -21,3 +21,7 @@ It's listed under [msbuild_package](msbuild_package) folder. It fits projects wh
 #### Prebuilt tool package
 
 It's listed under [prebuilt_tool_package](prebuilt_tool_package) folder. It fits projects which only copy generated binaries (executables and libraries).
+
+#### Meson package
+
+It's listed under [meson_package](meson_package) folder. It fits projects which use `Meson` to be built.

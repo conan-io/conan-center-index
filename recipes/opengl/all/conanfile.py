@@ -1,6 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanException
+from conan.tools.system import package_manager
 from conans import tools
+
+required_conan_version = ">=1.47"
 
 
 class SysConfigOpenGLConan(ConanFile):
@@ -11,7 +14,7 @@ class SysConfigOpenGLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.opengl.org/"
     license = "MIT"
-    settings = "os"
+    settings = "os", "arch", "compiler", "build_type"
 
     def package_id(self):
         self.info.header_only()
@@ -37,33 +40,32 @@ class SysConfigOpenGLConan(ConanFile):
         self.cpp_info.cxxflags.extend(cflags)
 
     def system_requirements(self):
-        packages = []
-        if tools.os_info.is_linux and self.settings.os == "Linux":
-            if tools.os_info.with_yum:
-                if tools.os_info.linux_distro == "fedora" and tools.os_info.os_version >= "32":
-                    packages = ["libglvnd-devel"]
-                else:
-                    packages = ["mesa-libGL-devel"]
-            elif tools.os_info.with_apt:
-                ubuntu_20_or_later = tools.os_info.linux_distro == "ubuntu" and tools.os_info.os_version >= "20"
-                debian_11_or_later = tools.os_info.linux_distro == "debian" and tools.os_info.os_version >= "11"
-                pop_os_20_or_later = tools.os_info.linux_distro == "pop" and tools.os_info.os_version >= "20"
-                if ubuntu_20_or_later or debian_11_or_later or pop_os_20_or_later:
-                    packages = ["libgl-dev"]
-                else:
-                    packages = ["libgl1-mesa-dev"]
-            elif tools.os_info.with_pacman:
-                packages = ["libglvnd"]
-            elif tools.os_info.with_zypper:
-                packages = ["Mesa-libGL-devel"]
-            else:
-                self.output.warn("Don't know how to install OpenGL for your distro.")
-        elif tools.os_info.is_freebsd and self.settings.os == "FreeBSD":
-            packages = ["libglvnd"]
-        if packages:
-            package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
-            for p in packages:
-                package_tool.install(update=True, packages=p)
+        dnf = package_manager.Dnf(self)
+        if tools.os_info.linux_distro == "fedora" and tools.os_info.os_version >= "32":
+            dnf.install(["libglvnd-devel"], update=True, check=True)
+        else:
+            dnf.install(["mesa-libGL-devel"], update=True, check=True)
+
+        yum = package_manager.Yum(self)
+        yum.install(["mesa-libGL-devel"], update=True, check=True)
+
+        apt = package_manager.Apt(self)
+        ubuntu_20_or_later = tools.os_info.linux_distro == "ubuntu" and tools.os_info.os_version >= "20"
+        debian_11_or_later = tools.os_info.linux_distro == "debian" and tools.os_info.os_version >= "11"
+        pop_os_20_or_later = tools.os_info.linux_distro == "pop" and tools.os_info.os_version >= "20"
+        if ubuntu_20_or_later or debian_11_or_later or pop_os_20_or_later:
+            apt.install(["libgl-dev"], update=True, check=True)
+        else:
+            apt.install(["libgl1-mesa-dev"], update=True, check=True)
+
+        pacman = package_manager.PacMan(self)
+        pacman.install(["libglvnd"], update=True, check=True)
+
+        zypper = package_manager.Zypper(self)
+        zypper.install(["Mesa-libGL-devel"], update=True, check=True)
+
+        pkg = package_manager.Pkg(self)
+        pkg.install(["libglvnd"], update=True, check=True)
 
     def package_info(self):
         # TODO: Workaround for #2311 until a better solution can be found

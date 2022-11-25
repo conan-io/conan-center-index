@@ -49,8 +49,12 @@ class AwsCAuth(ConanFile):
     def requirements(self):
         self.requires("aws-c-common/0.8.2")
         self.requires("aws-c-cal/0.5.13")
-        self.requires("aws-c-io/0.13.4")
-        self.requires("aws-c-http/0.6.22")
+        if Version(self.version) < "0.6.17":
+            self.requires("aws-c-io/0.10.20")
+            self.requires("aws-c-http/0.6.13")
+        else:
+            self.requires("aws-c-io/0.13.4")
+            self.requires("aws-c-http/0.6.22")
         if Version(self.version) >= "0.6.5":
             self.requires("aws-c-sdkutils/0.1.3")
 
@@ -80,10 +84,6 @@ class AwsCAuth(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "aws-c-auth")
         self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-auth")
 
-        self.cpp_info.filenames["cmake_find_package"] = "aws-c-auth"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-auth"
-        self.cpp_info.names["cmake_find_package"] = "AWS"
-        self.cpp_info.names["cmake_find_package_multi"] = "AWS"
         self.cpp_info.components["aws-c-auth-lib"].names["cmake_find_package"] = "aws-c-auth"
         self.cpp_info.components["aws-c-auth-lib"].names["cmake_find_package_multi"] = "aws-c-auth"
         self.cpp_info.components["aws-c-auth-lib"].set_property("cmake_target_name", "AWS::aws-c-auth")
@@ -93,7 +93,13 @@ class AwsCAuth(ConanFile):
             "aws-c-common::aws-c-common-lib",
             "aws-c-cal::aws-c-cal-lib",
             "aws-c-io::aws-c-io-lib",
-            "aws-c-http::aws-c-http-lib"
+            "aws-c-http::aws-c-http-lib",
         ]
         if Version(self.version) >= "0.6.5":
             self.cpp_info.components["aws-c-auth-lib"].requires.append("aws-c-sdkutils::aws-c-sdkutils-lib")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "aws-c-auth"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-auth"
+        self.cpp_info.names["cmake_find_package"] = "AWS"
+        self.cpp_info.names["cmake_find_package_multi"] = "AWS"

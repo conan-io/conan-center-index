@@ -11,4 +11,3 @@ sources:
 patches:
   "1.7":
     - patch_file: "patches/0001-declare-is-upsert-clause.patch"
-      base_path: "source_subfolder"
