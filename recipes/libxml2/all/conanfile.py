@@ -86,6 +86,9 @@ class Libxml2Conan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
         if self.options.zlib:
             self.requires("zlib/1.2.13")
@@ -94,10 +97,7 @@ class Libxml2Conan(ConanFile):
         if self.options.iconv:
             self.requires("libiconv/1.17")
         if self.options.icu:
-            self.requires("icu/71.1")
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
+            self.requires("icu/72.1")
 
     def build_requirements(self):
         if not (is_msvc(self) or self._is_mingw_windows):
