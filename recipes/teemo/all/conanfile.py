@@ -96,3 +96,6 @@ class TeemoConan(ConanFile):
             self.cpp_info.defines.append("TEEMO_EXPORTS")
         else:
             self.cpp_info.defines.append("TEEMO_STATIC")
+            
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
