@@ -38,7 +38,7 @@ class PfrConan(ConanFile):
     def layout(self):
         basic_layout(self)
 
-    def configure(self):
+    def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
 
