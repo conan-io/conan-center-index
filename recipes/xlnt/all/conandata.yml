@@ -5,7 +5,7 @@ sources:
 patches:
   "1.5.0":
     - patch_file: "patches/0001-fix-cmake-and-unvendor-deps.patch"
-      patch_description: "Fix CMakeLists and unvendor miniz & utfcpp"
+      patch_description: "Fix CMakeLists and unvendor dependencies"
       patch_type: "conan"
     - patch_file: "patches/0002-include-limits.patch"
       patch_description: "Add missing includes"
