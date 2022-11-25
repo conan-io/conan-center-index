@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -26,7 +27,7 @@ class GobjectIntrospectionConan(ConanFile):
     license = "LGPL-2.1"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    default_options = {"shared": True, "fPIC": True}
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -37,6 +38,10 @@ class GobjectIntrospectionConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+
+    def validate(self):
+        if not self.options.shared:
+            raise ConanInvalidConfiguration("gobject-introspection static libraries are not supported")
 
     def build_requirements(self):
         if Version(self.version) >= "1.71.0":
