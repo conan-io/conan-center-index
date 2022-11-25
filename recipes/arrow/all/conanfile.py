@@ -376,7 +376,7 @@ class ArrowConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+                  filename=f"apache-arrow-{self.version}.tar.gz", destination=self.source_folder, strip_root=True)
 
     def generate(self):
         # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
