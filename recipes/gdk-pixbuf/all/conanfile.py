@@ -185,6 +185,8 @@ class GdkPixbufConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
+
+
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "gdk-pixbuf-2.0")
         self.cpp_info.libs = ["gdk_pixbuf-2.0"]
@@ -197,6 +199,20 @@ class GdkPixbufConan(ConanFile):
             ldflags = ["-rtlib=compiler-rt"]
             self.cpp_info.exelinkflags = ldflags
             self.cpp_info.sharedlinkflags = ldflags
+
+        pkgconfig_variables = {
+            "bindir": "${prefix}/bin",
+            "gdk_pixbuf_binary_version": "2.10.0",
+            "gdk_pixbuf_binarydir": "${libdir1}/gdk-pixbuf-2.0/2.10",
+            "gdk_pixbuf_moduledir": "${gdk_pixbuf_binarydir}/loaders",
+            "gdk_pixbuf_cache_file": "${gdk_pixbuf_binarydir}/loaders.cache",
+            "gdk_pixbuf_csource": "${bindir}/gdk-pixbuf-csource",
+            "gdk_pixbuf_pixdata": "${bindir}/gdk-pixbuf-pixdata",
+            "gdk_pixbuf_query_loaders": "${bindir}/gdk-pixbuf-query-loaders"
+        }
+        self.cpp_info.set_property(
+            "pkg_config_custom_content",
+            "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items()))
 
         gdk_pixbuf_pixdata = os.path.join(self.package_folder, "bin", "gdk-pixbuf-pixdata")
         self.runenv_info.define_path("GDK_PIXBUF_PIXDATA", gdk_pixbuf_pixdata)
