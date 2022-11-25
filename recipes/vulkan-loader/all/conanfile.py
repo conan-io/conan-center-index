@@ -127,6 +127,8 @@ class VulkanLoaderConan(ConanFile):
         tc.variables["BUILD_LOADER"] = True
         if self.settings.os == "Windows":
             tc.variables["USE_MASM"] = True
+        if Version(self.version) >= "1.3.212":
+            tc.variables["ENABLE_WERROR"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -151,7 +153,8 @@ class VulkanLoaderConan(ConanFile):
 
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         # No warnings as errors
-        replace_in_file(self, cmakelists, "/WX", "")
+        if Version(self.version) < "1.3.212":
+            replace_in_file(self, cmakelists, "/WX", "")
         # This fix is needed due to CMAKE_FIND_PACKAGE_PREFER_CONFIG ON in CMakeToolchain (see https://github.com/conan-io/conan/issues/10387).
         # Indeed we want to use upstream Find modules of xcb, x11, wayland and directfb. There are properly using pkgconfig under the hood.
         replace_in_file(self, cmakelists, "find_package(XCB REQUIRED)", "find_package(XCB REQUIRED MODULE)")
