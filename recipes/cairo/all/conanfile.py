@@ -20,7 +20,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, unix_path
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class CairoConan(ConanFile):
@@ -77,9 +77,9 @@ class CairoConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def validate(self):
         if is_msvc(self):
@@ -100,10 +100,10 @@ class CairoConan(ConanFile):
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system")
         if self.options.get_safe("with_glib", True):
-            self.requires("glib/2.74.1")
+            self.requires("glib/2.75.0")
         self.requires("zlib/1.2.13")
         self.requires("pixman/0.40.0")
-        self.requires("libpng/1.6.38")
+        self.requires("libpng/1.6.39")
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
