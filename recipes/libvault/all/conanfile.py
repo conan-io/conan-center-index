@@ -6,7 +6,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 
 required_conan_version = ">=1.53.0"
@@ -34,14 +34,14 @@ class LibvaultConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         self.requires("libcurl/7.86.0")
         self.requires("catch2/3.2.0")
 
     def validate(self):
-        compiler = str(self.settings.compiler)
+        compiler = str(self.info.settings.compiler)
         compiler_version = Version(self.settings.compiler.version.value)
 
         minimum_compiler_version = {
@@ -56,14 +56,14 @@ class LibvaultConan(ConanFile):
         if compiler in minimum_compiler_version and \
            compiler_version < minimum_compiler_version[compiler]:
             raise ConanInvalidConfiguration(
-                "{self.name} requires a compiler that supports at least C++{minimum_cpp_standard}. "
-                "{compiler} {compiler_version} is not supported.")
+                f"{self.name} requires a compiler that supports at least C++{minimum_cpp_standard}. "
+                f"{compiler} {compiler_version} is not supported.")
 
         if compiler == "clang" and self.settings.compiler.libcxx in ["libstdc++", "libstdc++11"] and self.settings.compiler.version == "11":
             raise ConanInvalidConfiguration("clang 11 with libstdc++ is not supported due to old libstdc++ missing C++17 support")
 
         if is_apple_os(self):
-            os_version = self.settings.get_safe("os.version")
+            os_version = self.info.settings.get_safe("os.version")
             if os_version and Version(os_version) < self._mac_os_minimum_required_version:
                 raise ConanInvalidConfiguration(
                     "Macos Mojave (10.14) and earlier cannot to be built because C++ standard library too old.")
@@ -104,9 +104,13 @@ class LibvaultConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["vault"]
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
             self.cpp_info.system_libs.append("stdc++fs")
+        # TODO: Remove after Conan 2.0
         self.cpp_info.names["cmake_find_package"] = "libvault"
         self.cpp_info.names["cmake_find_package_multi"] = "libvault"
-        self.cpp_info.names["pkg_config"] = "vault"
+
+        self.cpp_info.set_property("pkg_config_name", "vault")
+        self.cpp_info.set_property("cmake_file_name", "libvault")
+        self.cpp_info.set_property("cmake_target_name", "libvault::libvault")
