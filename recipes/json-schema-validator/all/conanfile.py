@@ -72,8 +72,12 @@ class JsonSchemaValidatorConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_TESTS"] = False
-        tc.variables["BUILD_EXAMPLES"] = False
+        if scm.Version(self.version) < "2.2.0":
+            tc.variables["BUILD_TESTS"] = False
+            tc.variables["BUILD_EXAMPLES"] = False
+        else:
+            tc.variables["JSON_VALIDATOR_BUILD_TESTS"] = False
+            tc.variables["JSON_VALIDATOR_BUILD_EXAMPLES"] = False
         if scm.Version(self.version) < "2.1.0":
             tc.variables["NLOHMANN_JSON_DIR"] = ";".join(self.deps_cpp_info["nlohmann_json"].include_paths).replace("\\", "/")
         tc.generate()
