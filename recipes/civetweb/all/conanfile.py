@@ -74,10 +74,7 @@ class CivetwebConan(ConanFile):
             self.options.rm_safe("fPIC")
         if not self.options.with_cxx:
             self.settings.rm_safe("compiler.libcxx")
-            try:
-                del self.settings.compiler.cppstd
-            except Exception:
-                pass
+            self.settings.rm_safe("compiler.cppstd")
         if not self.options.with_ssl:
             self.options.rm_safe("ssl_dynamic_loading")
 
