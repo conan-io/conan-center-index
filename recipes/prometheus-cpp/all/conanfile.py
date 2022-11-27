@@ -75,6 +75,7 @@ class PrometheusCppConan(ConanFile):
         tc.variables["ENABLE_PUSH"] = self.options.with_push
         if self.options.with_pull:
             tc.variables["ENABLE_COMPRESSION"] = self.options.with_compression
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
