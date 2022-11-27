@@ -1,7 +1,10 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc, check_min_vs
 
 import os
 
@@ -33,7 +36,15 @@ class PrometheusCppConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        return 11 if Version(self.version) < "1.1.0" else 14
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "clang": "7",
+            "apple-clang": "10",
+        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -62,6 +73,15 @@ class PrometheusCppConan(ConanFile):
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
+        if Version(self.version) < "1.1.0":
+            return
+        check_min_vs(self, 191)
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
@@ -70,7 +90,7 @@ class PrometheusCppConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["USE_THIRDPARTY_LIBRARIES"] = False
         tc.variables["ENABLE_TESTING"] = False
-        tc.variables["OVERRIDE_CXX_STANDARD_FLAGS"] = not valid_min_cppstd(self, 11)
+        tc.variables["OVERRIDE_CXX_STANDARD_FLAGS"] = not valid_min_cppstd(self, self._min_cppstd)
         tc.variables["ENABLE_PULL"] = self.options.with_pull
         tc.variables["ENABLE_PUSH"] = self.options.with_push
         if self.options.with_pull:
