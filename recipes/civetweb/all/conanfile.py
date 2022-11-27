@@ -73,7 +73,7 @@ class CivetwebConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         if not self.options.with_cxx:
-            self.options.rm_safe("libcxx")
+            self.settings.rm_safe("compiler.libcxx")
             try:
                 del self.settings.compiler.cppstd
             except Exception:
