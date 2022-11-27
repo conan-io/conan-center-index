@@ -43,7 +43,7 @@ class CppcheckConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) < Version("2.8.0"):
+        if Version(self.version) < "2.8.0":
             tc.variables["USE_Z3"] = self.options.with_z3
         tc.variables["HAVE_RULES"] = self.options.have_rules
         tc.variables["USE_MATCHCOMPILER"] = "Auto"
