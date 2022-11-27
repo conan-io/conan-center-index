@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -31,6 +31,9 @@ class BenchmarkConan(ConanFile):
         "enable_lto": False,
         "enable_exceptions": True,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -73,6 +76,7 @@ class BenchmarkConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
