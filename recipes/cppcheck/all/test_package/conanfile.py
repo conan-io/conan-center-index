@@ -8,8 +8,8 @@ class TestPackageConan(ConanFile):
     generators = "VirtualRunEnv"
     test_type = "explicit"
 
-    def requirements(self):
-        self.requires(self.tested_reference_str)
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
 
     def test(self):
         if can_run(self):

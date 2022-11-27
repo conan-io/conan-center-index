@@ -29,11 +29,8 @@ class CppcheckConan(ConanFile):
         if Version(self.version) >= Version("2.8.0"):
             del self.options.with_z3
 
-    def package_id(self):
-        del self.info.options.with_z3
-
     def requirements(self):
-        if self.options.get_safe(with_z3, False):
+        if self.options.get_safe("with_z3", default=False):
             self.requires("z3/4.8.8")
         if self.options.have_rules:
             self.requires("pcre/8.45")
