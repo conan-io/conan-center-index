@@ -126,6 +126,9 @@ class JsonSchemaValidatorConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "nlohmann_json_schema_validator")
         self.cpp_info.libs = ["json-schema-validator" if scm.Version(self.version) < "2.1.0" else "nlohmann_json_schema_validator"]
 
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
+
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "nlohmann_json_schema_validator"
         self.cpp_info.names["cmake_find_package_multi"] = "nlohmann_json_schema_validator"
