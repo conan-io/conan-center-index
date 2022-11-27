@@ -33,6 +33,9 @@ class Homog2dConan(ConanFile):
             "apple-clang": "5.1",
         }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -52,6 +55,9 @@ class Homog2dConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+
+    def build(self):
+        apply_conandata_patches(self)
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
