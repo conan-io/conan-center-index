@@ -54,7 +54,7 @@ class Homog2dConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="LICENCE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(
             self,
             pattern="homog2d.hpp",
