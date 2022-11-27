@@ -5,7 +5,7 @@ from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class CivetwebConan(ConanFile):
@@ -28,6 +28,7 @@ class CivetwebConan(ConanFile):
         "with_ipv6": [True, False],
         "with_lua": [True, False],
         "with_server_stats": [True, False],
+        "with_server_executable": [True, False],
         "with_ssl": [True, False],
         "with_static_files": [True, False],
         "with_third_party_output": [True, False],
@@ -45,6 +46,7 @@ class CivetwebConan(ConanFile):
         "with_ipv6": True,
         "with_lua": False,
         "with_server_stats": False,
+        "with_server_executable": False,
         "with_ssl": True,
         "with_static_files": True,
         "with_third_party_output": False,
@@ -69,21 +71,15 @@ class CivetwebConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
         if not self.options.with_cxx:
-            try:
-                del self.settings.compiler.libcxx
-            except Exception:
-                pass
+            self.options.rm_safe("libcxx")
             try:
                 del self.settings.compiler.cppstd
             except Exception:
                 pass
         if not self.options.with_ssl:
-            del self.options.ssl_dynamic_loading
+            self.options.rm_safe("ssl_dynamic_loading")
 
     def requirements(self):
         if self.options.with_ssl:
@@ -122,9 +118,11 @@ class CivetwebConan(ConanFile):
         tc.variables["CIVETWEB_ENABLE_IPV6"] = self.options.with_ipv6
         tc.variables["CIVETWEB_ENABLE_LUA"] = self.options.with_lua
         tc.variables["CIVETWEB_ENABLE_SERVER_STATS"] = self.options.with_server_stats
+        tc.variables["CIVETWEB_ENABLE_SERVER_EXECUTABLE"] = self.options.with_server_executable
         tc.variables["CIVETWEB_ENABLE_THIRD_PARTY_OUTPUT"] = self.options.with_third_party_output
         tc.variables["CIVETWEB_ENABLE_WEBSOCKETS"] = self.options.with_websockets
         tc.variables["CIVETWEB_SERVE_NO_FILES"] = not self.options.with_static_files
+        tc.variables["CIVETWEB_ENABLE_LUA_SHARED"] = False
 
         if self._has_zlib_option:
             tc.variables["CIVETWEB_ENABLE_ZLIB"] = self.options.with_zlib
@@ -147,9 +145,10 @@ class CivetwebConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         bin_folder = os.path.join(self.package_folder, "bin")
-        for bin_file in os.listdir(bin_folder):
-            if not bin_file.startswith("civetweb"):
-                os.remove(os.path.join(bin_folder, bin_file))
+        if self.options.with_server_executable:
+            for bin_file in os.listdir(bin_folder):
+                if not bin_file.startswith("civetweb"):
+                    os.remove(os.path.join(bin_folder, bin_file))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "civetweb"
