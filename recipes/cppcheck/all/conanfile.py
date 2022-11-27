@@ -56,8 +56,8 @@ class CppcheckConan(ConanFile):
         deps.generate()
 
     def build(self):
-        cmake = CMake(self)
         apply_conandata_patches(self)
+        cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
