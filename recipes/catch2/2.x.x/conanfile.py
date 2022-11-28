@@ -46,7 +46,7 @@ class Catch2Conan(ConanFile):
             self.options.rm_safe("with_benchmark")
 
     def package_id(self):
-        if not self.info.options.with_main:
+        if not self.options.with_main:
             self.info.clear()
 
     def layout(self):
