@@ -1,31 +1,31 @@
 sources:
-  "3.0.1":
+  "3.0.2":
     Windows:
       "x86_64":
         "Visual Studio":
-          url: "https://github.com/wasmerio/wasmer/releases/download/v3.0.1/wasmer-windows-amd64.tar.gz"
-          sha256: "452f4327503d665ab4ba08be7c64233078f00a1fcf0b6cb3fecff38a1872bf92"
+          url: "https://github.com/wasmerio/wasmer/releases/download/v3.0.2/wasmer-windows-amd64.tar.gz"
+          sha256: "f8ecb5aa78e2f9c3b734dbbcfe05be51ad33fd99e0b9684d1531ad2d663306af"
         "gcc":
-          url: "https://github.com/wasmerio/wasmer/releases/download/v3.0.1/wasmer-windows-gnu64.tar.gz"
-          sha256: "6789a15318c2679bce0ffff9481363d7259805516c9ef350c3be9390a1382fdb"
+          url: "https://github.com/wasmerio/wasmer/releases/download/v3.0.2/wasmer-windows-gnu64.tar.gz"
+          sha256: "a59377cf710d330d47b81bbdeaa0bc18bae16196fb9e2d2251d9f4535d6d9ee5"
     Linux:
       "x86_64":
         "gcc":
-          url: "https://github.com/wasmerio/wasmer/releases/download/v3.0.1/wasmer-linux-amd64.tar.gz"
-          sha256: "d59b133f701f744264b9b6648071704efd5cc1bd2ebe36e20731bedb9af81bcd"
+          url: "https://github.com/wasmerio/wasmer/releases/download/v3.0.2/wasmer-linux-amd64.tar.gz"
+          sha256: "3567d46a1832b0d3672e2ead4ca088e8fa27f8730407af7bc72350d54da38950"
       "armv8":
         "gcc":
-          url: "https://github.com/wasmerio/wasmer/releases/download/v3.0.1/wasmer-linux-aarch64.tar.gz"
-          sha256: "cf57c1a6d37c436cea6a27045f12bc25103529251ba603d00c9c1712219af65e"
+          url: "https://github.com/wasmerio/wasmer/releases/download/v3.0.2/wasmer-linux-aarch64.tar.gz"
+          sha256: "90bd5b6610fa225ee0c7ec25ef3fdcde39bbab00cf42a6dddb544ee361ee4108"
     Macos:
       "x86_64":
         "gcc":
-          url: "https://github.com/wasmerio/wasmer/releases/download/v3.0.1/wasmer-darwin-amd64.tar.gz"
-          sha256: "3bddf0778d23870fcd0392f9a917b80b209cf85ec240fec387ba8647686c4d1b"
+          url: "https://github.com/wasmerio/wasmer/releases/download/v3.0.2/wasmer-darwin-amd64.tar.gz"
+          sha256: "44a858dab2ac74c464f3a2fc80bb6958125a9b4611199f83a5d4bf20e021b6d9"
       "armv8":
         "gcc":
-          url: "https://github.com/wasmerio/wasmer/releases/download/v3.0.1/wasmer-darwin-arm64.tar.gz"
-          sha256: "a115ab08b84226a92f4bf2797ea53bfe68b7191665d96c3d17188edb4c5cbef3"
+          url: "https://github.com/wasmerio/wasmer/releases/download/v3.0.2/wasmer-darwin-arm64.tar.gz"
+          sha256: "70e63ab808e502527e7e36f03f98bc4debb7d532b6093292f4cb50f9b3a3dfae"
   "2.3.0":
     Windows:
       "x86_64":
