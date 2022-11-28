@@ -97,14 +97,17 @@ class LibtoolConan(ConanFile):
         for key, value in self._libtool_relocatable_env.items():
             env.define_path(key, value)
         if is_msvc(self):
-            env.define("CC", "cl -nologo")
-            env.define("CXX", " cl -nologo")
-            #env.define("LD", "link -nologo")
-            #env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
-            #env.define("NM", "dumpbin -symbols")
-            #env.define("OBJDUMP", ":")
-            #env.define("RANLIB", ":")
-            #env.define("STRIP", ":")
+            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
+            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.define("LD", "link -nologo")
+            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
+            env.define("NM", "dumpbin -symbols")
+            env.define("OBJDUMP", ":")
+            env.define("RANLIB", ":")
+            env.define("STRIP", ":")
+
         env.vars(self).save_script("conanbuild_libtool")
 
     @property
