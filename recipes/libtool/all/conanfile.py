@@ -102,11 +102,14 @@ class LibtoolConan(ConanFile):
             env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
-            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
+            env.define("AR", f"{ar_wrapper} lib")
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
+            env.define("F77", "no")
+            env.define("FC", "no")
+            env.define("GCJ", "no")
 
         env.vars(self).save_script("conanbuild_libtool")
 
@@ -124,7 +127,7 @@ class LibtoolConan(ConanFile):
         self._patch_sources()
         autotools = Autotools(self)
         autotools.configure()
-        autotools.make()
+        autotools.make(args=["V=1"])
 
     @property
     def _shared_ext(self):
