@@ -17,9 +17,3 @@ sources:
   "1.5.6":
     url: "https://github.com/google/benchmark/archive/v1.5.6.tar.gz"
     sha256: "789f85b4810d13ff803834ea75999e41b326405d83d6a538baf01499eda96102"
-
-patches:
-  "1.7.1":
-    - patch_file: "patches/0001-downgrade-cmake-version.patch"
-      patch_description: "downgrade cmake version for CCI CI"
-      patch_type: "conan"
