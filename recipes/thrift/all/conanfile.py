@@ -64,15 +64,15 @@ class ThriftConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.79.0")
+        self.requires("boost/1.80.0")
         if self.options.with_openssl:
             self.requires("openssl/1.1.1q")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.with_libevent:
             self.requires("libevent/2.1.12")
         if self.options.with_qt5:
-            self.requires("qt/5.15.4")
+            self.requires("qt/5.15.7")
 
     def build_requirements(self):
         # TODO: use is_msvc with build_context in conan >=1.52.0 (see https://github.com/conan-io/conan/pull/11949)

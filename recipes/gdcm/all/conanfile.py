@@ -1,16 +1,16 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.microsoft import is_msvc_static_runtime
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, save
-from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, save
+from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 import textwrap
 
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class GDCMConan(ConanFile):
@@ -19,19 +19,23 @@ class GDCMConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://gdcm.sourceforge.net/"
-    topics = ("dicom", "images")
+    topics = ("dicom", "images", "medical-imaging")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_json": [True, False],
+        "with_openssl": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_json": True,
+        "with_openssl": True,
     }
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 11
 
     def export_sources(self):
@@ -43,22 +47,27 @@ class GDCMConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("expat/2.4.9")
+        self.requires("expat/2.5.0")
         self.requires("openjpeg/2.5.0")
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
+        if self.settings.os != "Windows":
+            self.requires("libuuid/1.0.3")
+            if Version(self.version) >= Version("3.0.20"):
+                self.requires("libiconv/1.17")
+        if self.options.with_json:
+            self.requires("json-c/0.16")
+        if self.options.with_openssl:
+            self.requires("openssl/1.1.1s")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
         if is_msvc_static_runtime(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared and static runtime together.")
 
@@ -72,10 +81,14 @@ class GDCMConan(ConanFile):
         tc.variables["GDCM_BUILD_SHARED_LIBS"] = bool(self.options.shared)
         # FIXME: unvendor deps https://github.com/conan-io/conan-center-index/pull/5705#discussion_r647224146
         tc.variables["GDCM_USE_SYSTEM_EXPAT"] = True
+        tc.variables["GDCM_USE_SYSTEM_JSON"] = self.options.with_json
         tc.variables["GDCM_USE_SYSTEM_OPENJPEG"] = True
+        tc.variables["GDCM_USE_SYSTEM_OPENSSL"] = self.options.with_openssl
+        tc.variables["GDCM_USE_SYSTEM_UUID"] = self.settings.os != "Windows"
         tc.variables["GDCM_USE_SYSTEM_ZLIB"] = True
-        if not self.settings.compiler.cppstd:
-            tc.variables["CMAKE_CXX_STANDARD"] = self._minimum_cpp_standard
+
+        if not valid_min_cppstd(self, self._min_cppstd):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -181,8 +194,6 @@ class GDCMConan(ConanFile):
                      "socketxx"]
         if self.settings.os == "Windows":
             gdcm_libs.append("gdcmgetopt")
-        else:
-            gdcm_libs.append("gdcmuuid")
         return gdcm_libs
 
     @property
@@ -205,9 +216,17 @@ class GDCMConan(ConanFile):
             self.cpp_info.components[lib].build_modules["cmake_find_package"] = self._gdcm_build_modules
             self.cpp_info.components[lib].build_modules["cmake_find_package_multi"] = self._gdcm_build_modules
 
+        if self.options.with_openssl:
+            self.cpp_info.components["gdcmCommon"].requires.append("openssl::openssl")
         self.cpp_info.components["gdcmDSED"].requires.extend(["gdcmCommon", "zlib::zlib"])
         self.cpp_info.components["gdcmIOD"].requires.extend(["gdcmDSED", "gdcmCommon", "expat::expat"])
         self.cpp_info.components["gdcmMSFF"].requires.extend(["gdcmIOD", "gdcmDSED", "gdcmDICT", "openjpeg::openjpeg"])
+        if self.options.with_json:
+            self.cpp_info.components["gdcmMSFF"].requires.append("json-c::json-c")
+        if self.settings.os != "Windows":
+            self.cpp_info.components["gdcmMSFF"].requires.append("libuuid::libuuid")
+            if Version(self.version) >= Version("3.0.20"):
+                self.cpp_info.components["gdcmMSFF"].requires.append("libiconv::libiconv")
         if not self.options.shared:
             self.cpp_info.components["gdcmDICT"].requires.extend(["gdcmDSED", "gdcmIOD"])
             self.cpp_info.components["gdcmMEXD"].requires.extend(["gdcmMSFF", "gdcmDICT", "gdcmDSED", "gdcmIOD", "socketxx"])
@@ -218,8 +237,6 @@ class GDCMConan(ConanFile):
                 self.cpp_info.components["gdcmMSFF"].system_libs = ["rpcrt4"]
                 self.cpp_info.components["socketxx"].system_libs = ["ws2_32"]
             else:
-                self.cpp_info.components["gdcmMSFF"].requires.append("gdcmuuid")
-
                 self.cpp_info.components["gdcmCommon"].system_libs = ["dl"]
                 if is_apple_os(self):
                     self.cpp_info.components["gdcmCommon"].frameworks = ["CoreFoundation"]

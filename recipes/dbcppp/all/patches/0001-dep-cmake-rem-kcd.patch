@@ -1,0 +1,317 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d905b29..d35d486 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -5,53 +5,16 @@ project("libdbcppp" VERSION 0.1.0)
+ 
+ option(build_tests "Build tests" ON)
+ option(build_examples "Build examples" ON)
++option(build_tools "Build tools" ON)
+ 
+-set(CMAKE_CXX_STANDARD 17)
+-set(CMAKE_STATIC_LIBRARY_PREFIX "")
+-set(CMAKE_SHARED_LIBRARY_PREFIX "")
+-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
++set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ 
+ if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+ 	add_definitions("/bigobj")
+ endif()
+ 
+ include_directories("include")
+-include_directories("third-party/libxml2/include")
+-include_directories("third-party/libxmlmm/libxmlmm")
+-include_directories("third-party/boost")
+-include_directories("third-party/cxxopts/include")
+ 
+-set(LIBXML2_WITH_ICONV OFF)
+-set(LIBXML2_WITH_LZMA OFF)
+-set(LIBXML2_WITH_PYTHON OFF)
+-set(LIBXML2_WITH_ZLIB OFF)
+-set(LIBXML2_WITH_TESTS OFF)
+-
+-add_subdirectory(third-party/libxml2)
+-
+-file(GLOB libxmlmm_header
+-    "third-party/libxmlmm/libxmlmm/*.h"
+-)
+-file(GLOB libxmlmm_src
+-    "third-party/libxmlmm/libxmlmm/*.cpp"
+-)
+-
+-add_library(libxmlmm SHARED "")
+-target_link_libraries(libxmlmm LibXml2)
+-
+-target_sources("libxmlmm"
+-    PRIVATE ${libxmlmm_header}
+-    PRIVATE ${libxmlmm_src}
+-)
+-
+-install(
+-    TARGETS "libxmlmm" "LibXml2" EXPORT ${PROJECT_NAME}Targets
+-    DESTINATION ${CMAKE_INSTALL_LIBDIR})
+-install(
+-    DIRECTORY "libxmlmm"
+-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libxmlmm
+-    FILES_MATCHING PATTERN "*.h")
+-    
+ add_subdirectory(src)
+ if (build_tests)
+   add_subdirectory(tests)
+@@ -59,7 +22,3 @@ endif()
+ if (build_examples)
+   add_subdirectory(examples)
+ endif()
+-
+-set(CMAKE_STATIC_LIBRARY_PREFIX "")
+-set(CMAKE_SHARED_LIBRARY_PREFIX "")
+-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+diff --git a/include/dbcppp/Export.h b/include/dbcppp/Export.h
+index 00dac6a..2ebe898 100644
+--- a/include/dbcppp/Export.h
++++ b/include/dbcppp/Export.h
+@@ -1,12 +1,4 @@
+ 
+ #pragma once
+ 
+-#ifdef _WIN32
+-#    ifdef DBCPPP_EXPORT
+-#        define DBCPPP_API __declspec(dllexport)
+-#    else
+-#        define DBCPPP_API __declspec(dllimport)
+-#    endif
+-#else
+-#   define DBCPPP_API
+-#endif
++#define DBCPPP_API
+diff --git a/include/dbcppp/Network.h b/include/dbcppp/Network.h
+index 34459e9..f36084b 100644
+--- a/include/dbcppp/Network.h
++++ b/include/dbcppp/Network.h
+@@ -39,7 +39,6 @@ namespace dbcppp
+             , std::string&& comment);
+         static std::map<std::string, std::unique_ptr<INetwork>> LoadNetworkFromFile(const std::filesystem::path& filename);
+         static std::unique_ptr<INetwork> LoadDBCFromIs(std::istream& is);
+-        static std::map<std::string, std::unique_ptr<INetwork>> LoadKCDFromIs(std::istream& is);
+         
+         virtual std::unique_ptr<INetwork> Clone() const = 0;
+ 
+diff --git a/src/dbcppp/CMakeLists.txt b/src/dbcppp/CMakeLists.txt
+index 371cbbf..6d56ae9 100644
+--- a/src/dbcppp/CMakeLists.txt
++++ b/src/dbcppp/CMakeLists.txt
+@@ -1,8 +1,6 @@
+-
+-include_directories(
+-    ${CMAKE_SOURCE_DIR}/src
+-    ${CMAKE_BINARY_DIR}/src
+-)
++if(NOT build_tools)
++    return()
++endif()
+ 
+ file(GLOB header
+     "*.h"
+@@ -11,10 +9,12 @@ file(GLOB src
+     "*.cpp"
+ )
+ 
++find_package(cxxopts CONFIG REQUIRED)
++
+ add_executable(dbcppp ${header} ${src})
+ set_property(TARGET dbcppp PROPERTY CXX_STANDARD 17)
+ add_dependencies(dbcppp ${PROJECT_NAME})
+-target_link_libraries(dbcppp ${PROJECT_NAME} ${Boost_LIBRARIES})
++target_link_libraries(dbcppp ${PROJECT_NAME} cxxopts::cxxopts)
+ 
+ install(
+     TARGETS dbcppp
+diff --git a/src/dbcppp/main.cpp b/src/dbcppp/main.cpp
+index 462af2e..9ce93a6 100644
+--- a/src/dbcppp/main.cpp
++++ b/src/dbcppp/main.cpp
+@@ -6,6 +6,7 @@
+ #include <sstream>
+ #include <iostream>
+ #include <filesystem>
++#include <algorithm>
+ #include <memory>
+ 
+ #include <cxxopts.hpp>
+@@ -35,11 +36,7 @@ int main(int argc, char** argv)
+             ("f,format", "Output format (C, DBC, human)", cxxopts::value<std::string>())
+             ("dbc", "List of DBC files", cxxopts::value<std::vector<std::string>>());
+ 
+-        for (std::size_t i = 1; i < argc - 1; i++)
+-        {
+-            argv[i] = argv[i + 1];
+-        }
+-        auto vm = options.parse(argc - 1, argv);
++        auto vm = options.parse(argc, argv);
+ 
+         if (vm.count("help"))
+         {
+@@ -89,10 +86,6 @@ int main(int argc, char** argv)
+         options.add_options()
+             ("h,help", "Produce help message")
+             ("bus", "List of buses in format <<bus name>:<DBC filename>>", cxxopts::value<std::vector<std::string>>());
+-        for (std::size_t i = 1; i < argc - 1; i++)
+-        {
+-            argv[i] = argv[i + 1];
+-        }
+         auto vm = options.parse(argc, argv);
+         if (vm.count("help"))
+         {
+diff --git a/src/libdbcppp/CMakeLists.txt b/src/libdbcppp/CMakeLists.txt
+index 9a69748..0ced933 100644
+--- a/src/libdbcppp/CMakeLists.txt
++++ b/src/libdbcppp/CMakeLists.txt
+@@ -2,12 +2,11 @@
+ include(GNUInstallDirs)
+ include(TestBigEndian)
+ 
+-add_library(${PROJECT_NAME} SHARED "")
++add_library(${PROJECT_NAME} "")
+ set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+ 
+-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${LIBXML2_LIBRARIES} "libxmlmm")
+-
+-add_compile_definitions(DBCPPP_EXPORT)
++find_package(Boost CONFIG REQUIRED)
++target_link_libraries(${PROJECT_NAME} boost::boost)
+ 
+ include_directories(
+     ${CMAKE_SOURCE_DIR}/src
+@@ -45,9 +44,6 @@ target_sources(${PROJECT_NAME}
+ )
+ set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${header_interface}")
+ 
+-include(GenerateExportHeader)
+-generate_export_header(${PROJECT_NAME})
+-
+ # install
+ install(
+     TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
+@@ -57,35 +53,3 @@ install(
+     FILES
+     $<TARGET_PROPERTY:${PROJECT_NAME},INTERFACE_SOURCES>
+ 	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dbcppp)
+-	
+-include(CMakePackageConfigHelpers)
+-write_basic_package_version_file(
+-  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
+-  VERSION ${Upstream_VERSION}
+-  COMPATIBILITY AnyNewerVersion
+-)
+-
+-export(EXPORT ${PROJECT_NAME}Targets
+-  FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Targets.cmake"
+-)
+-configure_file(cmake/${PROJECT_NAME}Config.cmake
+-  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake"
+-  @ONLY
+-)
+-
+-set(ConfigPackageLocation ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+-install(EXPORT ${PROJECT_NAME}Targets
+-  FILE
+-    ${PROJECT_NAME}Targets.cmake
+-  DESTINATION
+-    ${ConfigPackageLocation}
+-)
+-install(
+-  FILES
+-    cmake/${PROJECT_NAME}Config.cmake
+-    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
+-  DESTINATION
+-    ${ConfigPackageLocation}
+-  COMPONENT
+-    Devel
+-)
+\ No newline at end of file
+diff --git a/src/libdbcppp/DBCAST2Network.cpp b/src/libdbcppp/DBCAST2Network.cpp
+index fbbf155..d2fb973 100644
+--- a/src/libdbcppp/DBCAST2Network.cpp
++++ b/src/libdbcppp/DBCAST2Network.cpp
+@@ -3,6 +3,7 @@
+ #include <fstream>
+ #include <variant>
+ #include <sstream>
++#include <algorithm>
+ 
+ #include <boost/variant.hpp>
+ 
+diff --git a/src/libdbcppp/Export.h b/src/libdbcppp/Export.h
+index 00dac6a..2ebe898 100644
+--- a/src/libdbcppp/Export.h
++++ b/src/libdbcppp/Export.h
+@@ -1,12 +1,4 @@
+ 
+ #pragma once
+ 
+-#ifdef _WIN32
+-#    ifdef DBCPPP_EXPORT
+-#        define DBCPPP_API __declspec(dllexport)
+-#    else
+-#        define DBCPPP_API __declspec(dllimport)
+-#    endif
+-#else
+-#   define DBCPPP_API
+-#endif
++#define DBCPPP_API
+diff --git a/src/libdbcppp/Network2DBC.cpp b/src/libdbcppp/Network2DBC.cpp
+index 3de0623..2fc7caa 100644
+--- a/src/libdbcppp/Network2DBC.cpp
++++ b/src/libdbcppp/Network2DBC.cpp
+@@ -1,5 +1,6 @@
+ #include "../../include/dbcppp/Network2Functions.h"
+ #include "NetworkImpl.h"
++#include <algorithm>
+ 
+ using namespace dbcppp;
+ using namespace dbcppp::Network2DBC;
+diff --git a/src/libdbcppp/Network2Human.cpp b/src/libdbcppp/Network2Human.cpp
+index d61ee14..3110f2f 100644
+--- a/src/libdbcppp/Network2Human.cpp
++++ b/src/libdbcppp/Network2Human.cpp
+@@ -1,6 +1,7 @@
+ 
+ #include <boost/format.hpp>
+ #include "../../include/dbcppp/Network2Functions.h"
++#include <algorithm>
+ 
+ using namespace dbcppp;
+ 
+diff --git a/src/libdbcppp/NetworkImpl.cpp b/src/libdbcppp/NetworkImpl.cpp
+index 04ce841..eab54e5 100644
+--- a/src/libdbcppp/NetworkImpl.cpp
++++ b/src/libdbcppp/NetworkImpl.cpp
+@@ -1,5 +1,6 @@
+ #include <fstream>
+ #include <iomanip>
++#include <algorithm>
+ #include "../../include/dbcppp/Network.h"
+ #include "NetworkImpl.h"
+ 
+@@ -339,9 +340,5 @@ std::map<std::string, std::unique_ptr<INetwork>> INetwork::LoadNetworkFromFile(c
+             result.insert(std::make_pair("", std::move(net)));
+         }
+     }
+-    else if (filename.extension() == ".kcd")
+-    {
+-        result = LoadKCDFromIs(is);
+-    }
+     return std::move(result);
+ }
+\ No newline at end of file
+diff --git a/src/libdbcppp/SignalMultiplexerValueImpl.cpp b/src/libdbcppp/SignalMultiplexerValueImpl.cpp
+index 9c9a601..fea0544 100644
+--- a/src/libdbcppp/SignalMultiplexerValueImpl.cpp
++++ b/src/libdbcppp/SignalMultiplexerValueImpl.cpp
+@@ -1,5 +1,6 @@
+ 
+ #include "SignalMultiplexerValueImpl.h"
++#include <algorithm>
+ 
+ using namespace dbcppp;
+ 

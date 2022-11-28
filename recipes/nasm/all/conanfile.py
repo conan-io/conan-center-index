@@ -1,14 +1,13 @@
+from conan import ConanFile
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path, VCVars
 import os
 import shutil
 
-from conan import ConanFile
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import chdir, copy, get, rmdir, apply_conandata_patches, export_conandata_patches, replace_in_file
-from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.layout import basic_layout
-from conan.tools.microsoft import VCVars, is_msvc
-
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class NASMConan(ConanFile):
@@ -21,38 +20,38 @@ class NASMConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
         export_conandata_patches(self)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def build_requirements(self):
-        if self.info.settings.os == "Windows":
+        if self._settings_build.os == "Windows":
             self.tool_requires("strawberryperl/5.32.1.1")
+            if not is_msvc(self):
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    def package_id(self):
-        del self.info.settings.compiler
-
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         tc = AutotoolsToolchain(self)
         if is_msvc(self):
             VCVars(self).generate()
@@ -62,10 +61,6 @@ class NASMConan(ConanFile):
         elif self.settings.arch == "x86_64":
             tc.extra_cflags.append("-m64")
         tc.generate()
-
-        env = VirtualBuildEnv(self)
-        env.generate()
-
 
     def build(self):
         apply_conandata_patches(self)
@@ -88,7 +83,6 @@ class NASMConan(ConanFile):
                 replace_in_file(self, "Makefile", "$(INSTALLROOT)", "$(DESTDIR)")
             autotools.make()
 
-
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         if is_msvc(self):
@@ -98,13 +92,13 @@ class NASMConan(ConanFile):
                 shutil.copy2("ndisasm.exe", "ndisasmw.exe")
         else:
             autotools = Autotools(self)
-            autotools.install()
+            # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
+            autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
             rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
 
-        bin_folder = os.path.join(self.package_folder, "bin")
         # TODO: Legacy, to be removed on Conan 2.0
-        self.env_info.PATH.append(bin_folder)
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
