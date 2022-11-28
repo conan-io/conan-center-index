@@ -76,8 +76,6 @@ class Catch2Conan(ConanFile):
         tc.generate()
 
     def build(self):
-        # Catch2 does skip install if included as subproject:
-        # https://github.com/catchorg/Catch2/blob/79a5cd795c387e2da58c13e9dcbfd9ea7a2cfb30/CMakeLists.txt#L100-L102
         cmake = CMake(self)
         cmake.configure()
         if self.options.with_main:
