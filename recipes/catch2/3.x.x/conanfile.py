@@ -23,12 +23,14 @@ class Catch2Conan(ConanFile):
         "fPIC": [True, False],
         "with_prefix": [True, False],
         "default_reporter": [None, "ANY"],
+        "console_width": range(80, 1000),
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_prefix": False,
         "default_reporter": None,
+        "console_width": 80,
     }
 
     @property
@@ -82,6 +84,7 @@ class Catch2Conan(ConanFile):
         tc.cache_variables["CATCH_INSTALL_EXTRAS"] = True
         tc.cache_variables["CATCH_DEVELOPMENT_BUILD"] = False
         tc.variables["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
+        tc.variables["CATCH_CONFIG_CONSOLE_WIDTH"] = f"{self.options.console_width}"
         if self.options.default_reporter:
             tc.variables["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
         tc.generate()
