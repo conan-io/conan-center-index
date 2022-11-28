@@ -72,12 +72,12 @@ class Opene57Conan(ConanFile):
 
     def requirements(self):
         if self.options.with_tools:
-            self.requires("boost/1.78.0")
+            self.requires("boost/1.80.0")
 
         if self.settings.os == "Linux" or tools.is_apple_os(self.settings.os):
-            self.requires("icu/70.1")
+            self.requires("icu/72.1")
 
-        self.requires("xerces-c/3.2.3")
+        self.requires("xerces-c/3.2.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
