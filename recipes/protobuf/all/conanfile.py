@@ -114,10 +114,11 @@ class ProtobufConan(ConanFile):
         cmake.definitions["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
         cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
         cmake.definitions["protobuf_BUILD_TESTS"] = False
-        cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = True
+        if self.settings.os == "tvOS":
+            cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = False
         if not self.options.debug_suffix:
             cmake.definitions["protobuf_DEBUG_POSTFIX"] = ""
-        if Version(self.version) >= "3.14.0":
+        if Version(self.version) >= "3.14.0" and self.settings.os != "tvOS":
             cmake.definitions["protobuf_BUILD_LIBPROTOC"] = True
         if self._can_disable_rtti:
             cmake.definitions["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
@@ -128,6 +129,10 @@ class ProtobufConan(ConanFile):
             cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in runtime
         if Version(self.version) < "3.18.0" and self._is_clang_cl:
             cmake.definitions["CMAKE_RC_COMPILER"] = os.environ.get("RC", "llvm-rc")
+        if is_apple_os(self) and self.settings.os in ["iOS", "tvOS"] and self.conf.get("tools.apple:enable_bitcode", check_type=bool):
+            cmake.definitions["CONAN_C_FLAGS"] = "-fembed-bitcode"
+            cmake.definitions["CONAN_CXX_FLAGS"] = "-fembed-bitcode"
+            cmake.definitions["CONAN_LDFLAGS"] = "-fembed-bitcode"
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
@@ -262,9 +267,10 @@ class ProtobufConan(ConanFile):
                 self.cpp_info.components["libprotobuf"].defines = ["PROTOBUF_USE_DLLS"]
 
         # libprotoc
-        self.cpp_info.components["libprotoc"].set_property("cmake_target_name", "protobuf::libprotoc")
-        self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
-        self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
+        if Version(self.version) >= "3.14.0" and self.settings.os != "tvOS":
+            self.cpp_info.components["libprotoc"].set_property("cmake_target_name", "protobuf::libprotoc")
+            self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
+            self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
 
         # libprotobuf-lite
         if self.options.lite:
