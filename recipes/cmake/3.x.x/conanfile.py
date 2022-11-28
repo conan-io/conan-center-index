@@ -80,6 +80,7 @@ class CMakeConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
+        rmdir(self, os.path.join(self.source_folder, "Tests", "RunCMake", "find_package"))
 
     def generate(self):
         if self.options.bootstrap:

@@ -52,9 +52,9 @@ For example, `GSL` is the name of `Guidelines Support Library` from Microsoft an
 
 ## What is the policy on creating packages from pre-compiled binaries?
 
-The policy is that in the general case [recipes should build packages from sources](adding_packages/packaging_policy.md), because of reproducibility and security concerns. The implication is that the sources must be publicly available, and in a format that can be consumed programmatically.
+The policy is that in the general case [recipes should build packages from sources](adding_packages/sources_and_patches.md#picking-the-sources), because of reproducibility and security concerns. The implication is that the sources must be publicly available, and in a format that can be consumed programmatically.
 
-Check the link for further details.
+See [Picking Sources](adding_packages/sources_and_patches.md#picking-the-sources) for more information.
 
 ## Should reference names use `-` or `_`?
 
@@ -132,7 +132,7 @@ We often receive new fixes and improvements to the recipes already available for
 
 ## Do static libraries tend to be compiled as PIC by default?
 
-Yes! You can learn more about default options in [Packaging Policy](adding_packages/packaging_policy.md#options).
+Yes! You can learn more about default options in [Packaging Policy](adding_packages/conanfile_attributes.md#predefined-options-and-known-defaults).
 
 ## Why PDB files are not allowed?
 
@@ -254,14 +254,15 @@ in an incompatible Conan package. To deal with those cases, you are allowed to p
 
 <!-- ref https://github.com/conan-io/conan-center-index/pull/5405#issuecomment-854618305 -->
 
-There are different motivations
+There are different motivations:
+
 - time and resources: adding the build time required by the test suite plus execution time can increase our building times significantly across the 100+ configurations.
 - ConanCenter is a service that builds binaries for the community for existing library versions, this is not an integration system to test the libraries.
 
 ## Why not add an option to build unit tests
 
 - Adding a testing option will change the package ID, but will not provide different packaged binaries
-- Use the configuration [skip_test](adding_packages/packaging_policy.md#options-to-avoid) to define the testing behavior.
+- Use the configuration [skip_test](adding_packages/conanfile_attributes.md#options-to-avoid) to define the testing behavior.
 
 ## What is the policy for supported python versions?
 
@@ -414,4 +415,4 @@ difficult to understand [linter errors](linters.md), please comment on your pull
 
 ## How long can I be inactive before being removed from the authorized users list?
 
-Please, read [Inactivity and user removal section](how_to_add_packages.md#inactivity-and-user-removal).
+Please, read [Inactivity and user removal section](adding_packages/README.md#inactivity-and-user-removal).
