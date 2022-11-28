@@ -62,7 +62,7 @@ class IMGUIConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         m = re.match(r'cci\.\d{8}\+(?P<version>\d+\.\d+)\.docking', str(self.version))
         version = Version(m.group('version')) if m else Version(self.version)
         backends_folder = os.path.join(
