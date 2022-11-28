@@ -1,4 +1,7 @@
 sources:
+  "1.3.231.1":
+    url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/refs/tags/sdk-1.3.231.1.tar.gz"
+    sha256: "ea40af0f499e7e97a86ee54410c5c78e7f7bac40f65ae09a1549773b6501bf4d"
   "1.3.224.1":
     url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/refs/tags/sdk-1.3.224.1.tar.gz"
     sha256: "49c00e0119e3bc11e13c0c740e57c76b582b14f754f3779b85508c4d90d9df85"
@@ -24,21 +27,19 @@ sources:
     url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/sdk-1.2.154.0.tar.gz"
     sha256: "8898ab05d0d8dec04fbba03d0ed2e79a1eb5c0382e5c89d4c737b45a6648f7f9"
 patches:
+  "1.3.231.1":
+    - patch_file: "patches/1.3.231.1-cmake-no-werror.patch"
+      patch_description: "Allow to disable Werror for old gcc/clang versions"
+      patch_type: "portability"
+      sha256: "14678800b649c54dee25ee06d8c379f7abca2ae8a580a7fa64d4eb06b5080ecd"
   "1.2.198.0":
     - patch_file: "patches/0005-fix-cmake-1.2.198.0.patch"
-      base_path: "source_subfolder"
   "1.2.189.2":
     - patch_file: "patches/0005-fix-cmake-1.2.189.2.patch"
-      base_path: "source_subfolder"
   "1.2.182":
     - patch_file: "patches/0005-fix-cmake-1.2.182.patch"
-      base_path: "source_subfolder"
   "1.2.154.0":
     - patch_file: "patches/0001-duplicated-declaration.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-fix-mingw.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-disable-nortti-and-warnings-as-errors.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0004-fix-installation.patch"
-      base_path: "source_subfolder"

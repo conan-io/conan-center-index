@@ -1,8 +1,7 @@
-import os
-
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
+import os
 
 required_conan_version = ">=1.52.0"
 
@@ -14,6 +13,8 @@ class EigenConan(ConanFile):
     description = "Eigen is a C++ template library for linear algebra: matrices, vectors," \
                   " numerical solvers, and related algorithms."
     topics = ("algebra", "linear-algebra", "matrix", "vector", "numerical")
+    license = ("MPL-2.0", "LGPL-3.0-or-later")  # Taking into account the default value of MPL2_only option
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "MPL2_only": [True, False],
@@ -21,16 +22,15 @@ class EigenConan(ConanFile):
     default_options = {
         "MPL2_only": False,
     }
-    license = ("MPL-2.0", "LGPL-3.0-or-later")  # Taking into account the default value of MPL2_only option
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
         self.license = "MPL-2.0" if self.options.MPL2_only else ("MPL-2.0", "LGPL-3.0-or-later")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def package_id(self):
         self.info.clear()
@@ -49,6 +49,7 @@ class EigenConan(ConanFile):
         apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
+        cmake.build()
 
     def package(self):
         cmake = CMake(self)
@@ -62,6 +63,8 @@ class EigenConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "Eigen3::Eigen")
         self.cpp_info.set_property("pkg_config_name", "eigen3")
         # TODO: back to global scope once cmake_find_package* generators removed
+        self.cpp_info.components["eigen3"].bindirs = []
+        self.cpp_info.components["eigen3"].libdirs = []
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["eigen3"].system_libs = ["m"]
         if self.options.MPL2_only:

@@ -17,16 +17,3 @@ sources:
   "2.23.0":
     url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.23.0.tar.gz"
     sha256: "5c8998217402aa1fc734f4afaeac38fad2421470fac4b3abc112bd46391054fe"
-  "2.16.3-apache":
-    url: "https://tls.mbed.org/download/mbedtls-2.16.3-apache.tgz"
-    sha256: "ec1bee6d82090ed6ea2690784ea4b294ab576a65d428da9fe8750f932d2da661"
-  "2.16.3-gpl":
-    url: "https://tls.mbed.org/download/mbedtls-2.16.3-gpl.tgz"
-    sha256: "fd01fe4b289116df7781d05e1ef712b6c98823c5334f4a27404f13a8d066ef6a"
-patches:
-  "2.16.3-apache":
-    - patch_file: "patches/0001-visual-studio-shared-apache.patch"
-      base_path: "source_subfolder"
-  "2.16.3-gpl":
-    - patch_file: "patches/0001-visual-studio-shared-gpl.patch"
-      base_path: "source_subfolder"

@@ -8,7 +8,5 @@ sources:
 patches:
   "0.6.0":
     - patch_file: "patches/0.6.0/001-build-system.patch"
-      base_path: "source_subfolder"
   "0.5.3":
     - patch_file: "patches/0.5.3/001-build-system.patch"
-      base_path: "source_subfolder"
