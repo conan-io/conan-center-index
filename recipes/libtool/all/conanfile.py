@@ -1,19 +1,19 @@
 from conan import ConanFile
 from conan.errors import ConanException
-from conan.tools.build import cross_building
 from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
-from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.files import (
-copy,
-rmdir,
-replace_in_file,
-rename,
-get,
-apply_conandata_patches,
-export_conandata_patches
+    apply_conandata_patches,
+    copy,
+    export_conandata_patches,
+    get,
+    rename,
+    replace_in_file,
+    rmdir
 )
+from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 
 import os
@@ -30,7 +30,6 @@ class LibtoolConan(ConanFile):
     description = "GNU libtool is a generic library support script. "
     topics = ("conan", "libtool", "configure", "library", "shared", "static")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -40,7 +39,7 @@ class LibtoolConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    #short_paths = True
+    short_paths = True
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -96,6 +95,7 @@ class LibtoolConan(ConanFile):
         env = Environment()
         for key, value in self._libtool_relocatable_env.items():
             env.define_path(key, value)
+
         if is_msvc(self):
             compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
             ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
@@ -165,9 +165,8 @@ class LibtoolConan(ConanFile):
         autotools.install()
         copy(self, "COPYING*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
-        res_dir = os.path.join(self.package_folder, "res")
-        rmdir(self, os.path.join(res_dir, "info"))
-        rmdir(self, os.path.join(res_dir, "man"))
+        rmdir(self, os.path.join(self._datarootdir, "info"))
+        rmdir(self, os.path.join(self._datarootdir, "man"))
 
         os.unlink(os.path.join(self.package_folder, "lib", "libltdl.la"))
         if self.options.shared:
