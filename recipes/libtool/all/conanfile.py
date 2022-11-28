@@ -3,6 +3,7 @@ from conan.errors import ConanException
 from conan.tools.build import cross_building
 from conan.tools.apple import is_apple_os
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
+from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.files import (
 copy,
@@ -39,6 +40,7 @@ class LibtoolConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    #short_paths = True
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -72,6 +74,9 @@ class LibtoolConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def generate(self):
         env = VirtualBuildEnv(self)
