@@ -14,7 +14,7 @@ class TestPackageConan(ConanFile):
 
     @property
     def _todos_filename(self):
-        return os.path.join(self.recipe_folder, self.folders.test_output, self.folders.generators,"catch2_test_to_do.yml")
+        return os.path.join(self.recipe_folder, self.folders.generators, "catch2_test_to_do.yml")
 
     def requirements(self):
         self.requires(self.tested_reference_str)
@@ -34,7 +34,7 @@ class TestPackageConan(ConanFile):
         if not catch_opts.with_prefix and catch_opts.with_main and catch_opts.with_benchmark:
             self._tests_todo.append("benchmark")
 
-        with open(self._todos_filename, "w") as file:
+        with open(self._todos_filename, "w", encoding="utf-8") as file:
             yaml.dump(self._tests_todo, file)
 
     def layout(self):
@@ -46,7 +46,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        with open(self._todos_filename, "r") as file:
+        with open(self._todos_filename, "r", encoding="utf-8") as file:
             self._tests_todo = yaml.safe_load(file)
         if can_run(self):
             for test_name in self._tests_todo:
