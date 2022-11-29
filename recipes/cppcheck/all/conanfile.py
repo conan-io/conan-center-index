@@ -29,11 +29,11 @@ class CppcheckConan(ConanFile):
         if Version(self.version) >= Version("2.8.0"):
             del self.options.with_z3
 
-    def requirements(self):
+    def build_requirements(self):
         if self.options.get_safe("with_z3", default=False):
-            self.requires("z3/4.8.8")
+            self.tool_requires("z3/4.8.8")
         if self.options.have_rules:
-            self.requires("pcre/8.45")
+            self.tool_requires("pcre/8.45")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
