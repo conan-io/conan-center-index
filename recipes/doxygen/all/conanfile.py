@@ -58,14 +58,14 @@ class DoxygenConan(ConanFile):
     def requirements(self):
         if self.options.enable_search:
             self.requires("xapian-core/1.4.19")
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             self.build_requires("winflexbison/2.5.24")
         else:
             self.build_requires("flex/2.6.4")
-            self.build_requires("bison/3.7.1")
+            self.build_requires("bison/3.8.2")
 
     def validate(self):
         minimum_compiler_version = self._minimum_compiler_version()
