@@ -1,5 +1,6 @@
 import os
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake
 
 class TestOpenE57Conan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
@@ -11,6 +12,6 @@ class TestOpenE57Conan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not conan.tools.build.cross_building(self):
             bin_path = os.path.join("bin", "opene57_example")
             self.run(bin_path, run_environment=True)
