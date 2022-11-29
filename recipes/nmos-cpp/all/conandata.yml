@@ -24,10 +24,10 @@ patches:
     - patch_file: "patches/avahi-mdnsresponder-target.patch"
       patch_type: "conan"
       patch_description: "CMakeDeps uses lowercase target namespace"
-      patch_source:
-        - "https://github.com/sony/nmos-cpp/pull/299"
-        - "https://github.com/sony/nmos-cpp/pull/300"
-        - "https://github.com/sony/nmos-cpp/pull/302"
+      patch_source: |
+        https://github.com/sony/nmos-cpp/pull/299
+        https://github.com/sony/nmos-cpp/pull/300
+        https://github.com/sony/nmos-cpp/pull/302
   "cci.20220428":
     - patch_file: "patches/json-schema-validator-target.patch"
       patch_type: "conan"
@@ -36,10 +36,10 @@ patches:
     - patch_file: "patches/avahi-mdnsresponder-target.patch"
       patch_type: "conan"
       patch_description: "CMakeDeps uses lowercase target namespace"
-      patch_source:
-        - "https://github.com/sony/nmos-cpp/pull/299"
-        - "https://github.com/sony/nmos-cpp/pull/300"
-        - "https://github.com/sony/nmos-cpp/pull/302"
+      patch_source: |
+        https://github.com/sony/nmos-cpp/pull/299
+        https://github.com/sony/nmos-cpp/pull/300
+        https://github.com/sony/nmos-cpp/pull/302
   "cci.20220208":
     - patch_file: "patches/json-schema-validator-target.patch"
       patch_type: "conan"
@@ -48,10 +48,10 @@ patches:
     - patch_file: "patches/avahi-mdnsresponder-target.patch"
       patch_type: "conan"
       patch_description: "CMakeDeps uses lowercase target namespace"
-      patch_source:
-        - "https://github.com/sony/nmos-cpp/pull/299"
-        - "https://github.com/sony/nmos-cpp/pull/300"
-        - "https://github.com/sony/nmos-cpp/pull/302"
+      patch_source: |
+        https://github.com/sony/nmos-cpp/pull/299
+        https://github.com/sony/nmos-cpp/pull/300
+        https://github.com/sony/nmos-cpp/pull/302
   "cci.20220120":
     - patch_file: "patches/json-schema-validator-target.patch"
       patch_type: "conan"
@@ -60,7 +60,7 @@ patches:
     - patch_file: "patches/avahi-mdnsresponder-target.patch"
       patch_type: "conan"
       patch_description: "CMakeDeps uses lowercase target namespace"
-      patch_source:
-        - "https://github.com/sony/nmos-cpp/pull/299"
-        - "https://github.com/sony/nmos-cpp/pull/300"
-        - "https://github.com/sony/nmos-cpp/pull/302"
+      patch_source: |
+        https://github.com/sony/nmos-cpp/pull/299
+        https://github.com/sony/nmos-cpp/pull/300
+        https://github.com/sony/nmos-cpp/pull/302
