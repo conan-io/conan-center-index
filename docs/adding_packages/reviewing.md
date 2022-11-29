@@ -9,7 +9,6 @@ The following policies are preferred during the review, but not mandatory:
   - [Contents](#contents)
   - [Trailing white-spaces](#trailing-white-spaces)
   - [Quotes](#quotes)
-  - [Subfolder Properties](#subfolder-properties)
   - [Order of methods and attributes](#order-of-methods-and-attributes)
   - [License Attribute](#license-attribute)
   - [CMake](#cmake)
@@ -27,25 +26,6 @@ Avoid trailing white-space characters, if possible
 ## Quotes
 
 If possible, try to avoid mixing single quotes (`'`) and double quotes (`"`) in python code (`conanfile.py`, `test_package/conanfile.py`). Consistency is preferred.
-
-## Subfolder Properties
-
-When extracting sources or performing out-of-source builds, it is preferable to use a _subfolder_ attribute, `_source_subfolder` and `_build_subfolder` respectively.
-
-> **Note**: These are only required when using the legacy generator such as `cmake`. For the new generators like `CMakeToolchain` see
-> the [2.0 Migration Guide](../v2_migration.md#using-layout-with-new-generators) for more information.
-
-For example doing this with property attributes for these variables:
-
-```py
-@property
-def _source_subfolder(self):
-    return "source_subfolder"
-
-@property
-def _build_subfolder(self):
-    return "build_subfolder"
-```
 
 ## Order of methods and attributes
 
