@@ -113,9 +113,8 @@ class ProjConan(ConanFile):
                 lib_paths = self.dependencies["sqlite3"].cpp_info.libdirs
                 replace_in_file(self,
                     os.path.join(self.source_folder, "data", cmake_sqlite_call),
-                    "COMMAND {}".format(pattern),
-                    "COMMAND ${{CMAKE_COMMAND}} -E env \"DYLD_LIBRARY_PATH={}\" {}".format(
-                        ":".join(lib_paths), pattern
+                    f"COMMAND {pattern}",
+                    f"COMMAND ${{CMAKE_COMMAND}} -E env \"DYLD_LIBRARY_PATH={':'.join(lib_paths)}\" {pattern}"
                     ),
                 )
 
@@ -181,9 +180,9 @@ class ProjConan(ConanFile):
         cmake_config_filename = "proj" if proj_version >= "7.0.0" else "proj4"
         cmake_namespace = "PROJ" if proj_version >= "7.0.0" else "PROJ4"
         self.cpp_info.set_property("cmake_file_name", cmake_config_filename)
-        self.cpp_info.set_property("cmake_target_name", "{}::proj".format(cmake_namespace))
+        self.cpp_info.set_property("cmake_target_name", f"{cmake_namespace}::proj")
         self.cpp_info.set_property("pkg_config_name", "proj")
-        self.cpp_info.components["projlib"].set_property("cmake_target_name", "{}::proj".format(cmake_namespace))
+        self.cpp_info.components["projlib"].set_property("cmake_target_name", f"{cmake_namespace}::proj")
         self.cpp_info.components["projlib"].set_property("pkg_config_name", "proj")
 
         self.cpp_info.filenames["cmake_find_package"] = cmake_config_filename
@@ -214,7 +213,7 @@ class ProjConan(ConanFile):
                 self.cpp_info.components["projlib"].defines.append("PROJ_DLL=")
 
         res_path = os.path.join(self.package_folder, "res")
-        self.output.info("Prepending to PROJ_LIB environment variable: {}".format(res_path))
+        self.output.info(f"Prepending to PROJ_LIB environment variable: {res_path}")
         self.runenv_info.prepend_path("PROJ_LIB", res_path)
 
         # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
@@ -223,7 +222,7 @@ class ProjConan(ConanFile):
         if self.options.build_executables:
             self.buildenv_info.prepend_path("PROJ_LIB", res_path)
             bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.output.info(f"Appending PATH environment variable: {bin_path}")
             self.env_info.PATH.append(bin_path)
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
