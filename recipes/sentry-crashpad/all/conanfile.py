@@ -80,7 +80,7 @@ class SentryCrashpadConan(ConanFile):
             raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="external/crashpad")
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)])
