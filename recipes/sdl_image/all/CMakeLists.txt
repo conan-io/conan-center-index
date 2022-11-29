@@ -5,7 +5,7 @@ find_package(SDL2 REQUIRED CONFIG)
 
 macro(add_image_option type)
     option(SDL2IMAGE_${type} "${type} images support" ON)
-    if(${type})
+    if(SDL2IMAGE_${type})
         add_definitions("-DLOAD_${type}")
         if(SDL2IMAGE_${type}_SHARED)
             add_definitions("-DLOAD_${type}_DYNAMIC")
