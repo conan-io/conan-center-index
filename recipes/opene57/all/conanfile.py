@@ -1,6 +1,6 @@
-from conans import ConanFile, tools, CMake
+from conan import ConanFile
+from conan.tools.cmake import CMake
 from conan.tools.microsoft import msvc_runtime_flag
-from conans.errors import ConanInvalidConfiguration
 import os
 
 class Opene57Conan(ConanFile):
@@ -59,28 +59,28 @@ class Opene57Conan(ConanFile):
 
     def validate(self):
         if self.options.shared:
-            raise ConanInvalidConfiguration("OpenE57 cannot be built as shared library yet")
+            raise conan.errors.ConanInvalidConfiguration("OpenE57 cannot be built as shared library yet")
             
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 17)
+            conan.tools.build.check_min_cppstd(self, 17)
 
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn("C++17 support required. Your compiler is unknown. Assuming it supports C++17.")
-        elif tools.Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
+        elif conan.tools.scm.Version(self.settings.compiler.version) < minimum_version:
+            raise conan.errors.ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
 
     def requirements(self):
         if self.options.with_tools:
             self.requires("boost/1.80.0")
 
-        if self.settings.os == "Linux" or tools.is_apple_os(self.settings.os):
+        if self.settings.os == "Linux" or conan.tools.apple.is_apple_os(self.settings.os):
             self.requires("icu/72.1")
 
         self.requires("xerces-c/3.2.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        conan.tools.files.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -107,7 +107,7 @@ class Opene57Conan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         os.remove(os.path.join(self.package_folder, "CHANGELOG.md"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.dll")
+        conan.tools.files.rm(os.path.join(self.package_folder, "bin"), "*.dll")
 
     def package_info(self):
         if self.options.with_tools:
