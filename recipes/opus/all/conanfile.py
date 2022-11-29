@@ -1,11 +1,10 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
-from conan.tools.scm import Version
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.microsoft import check_min_vs
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class OpusConan(ConanFile):
@@ -29,32 +28,23 @@ class OpusConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
-             del self.options.fPIC
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-             del self.options.fPIC
-        try:
-           del self.settings.compiler.libcxx
-        except Exception:
-           pass
-        try:
-           del self.settings.compiler.cppstd
-        except Exception:
-           pass
-
-    def validate(self):
-        if self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) < "14":
-            raise ConanInvalidConfiguration("On Windows, the opus package can only be built with "
-                                            "Visual Studio 2015 or higher.")
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        check_min_vs(self, 190)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

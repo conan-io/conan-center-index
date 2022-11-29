@@ -16,11 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
-
       - name: Get changed files
-        uses: tj-actions/changed-files@v20
+        uses: ./.github/actions/pr_changed_files
         id: changed_files
         with:
           files: |
@@ -69,9 +66,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
-
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYVER }}
@@ -83,7 +77,7 @@ jobs:
       - name: Get changed files (config)
         id: changed_files_config
         if: always()
-        uses: tj-actions/changed-files@v20
+        uses: ./.github/actions/pr_changed_files
         with:
           files: |
             ${{ env.CONFIG_FILES_PATH }}
@@ -105,7 +99,7 @@ jobs:
       - name: Get changed files (conandata)
         id: changed_files_conandata
         if: always()
-        uses: tj-actions/changed-files@v20
+        uses: ./.github/actions/pr_changed_files
         with:
           files: |
             ${{ env.CONANDATA_FILES_PATH }}

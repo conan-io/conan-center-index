@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.53.0"
 
 
 class Sqlite3Conan(ConanFile):
@@ -40,9 +40,9 @@ class Sqlite3Conan(ConanFile):
         "enable_unlock_notify": [True, False],
         "enable_default_secure_delete": [True, False],
         "disable_gethostuuid": [True, False],
-        "max_column": "ANY",
-        "max_variable_number": "ANY",
-        "max_blob_size": "ANY",
+        "max_column": [None, "ANY"],
+        "max_variable_number": [None, "ANY"],
+        "max_blob_size": [None, "ANY"],
         "build_executable": [True, False],
         "enable_default_vfs": [True, False],
         "enable_dbpage_vtab": [True, False],
@@ -91,15 +91,12 @@ class Sqlite3Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         if self.info.options.build_executable:
@@ -108,9 +105,6 @@ class Sqlite3Conan(ConanFile):
                 raise ConanInvalidConfiguration("build_executable=True cannot be combined with enable_default_vfs=False")
             if self.info.options.omit_load_extension:
                 raise ConanInvalidConfiguration("build_executable=True requires omit_load_extension=True")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

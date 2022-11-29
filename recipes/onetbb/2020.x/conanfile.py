@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
-from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.files import get, replace_in_file, save, chdir, copy
+from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
 from conans import tools as legacy_tools
 import os
@@ -197,6 +197,17 @@ class OneTBBConan(ConanFile):
                 extra += " compiler=icl"
             else:
                 extra += " compiler=cl"
+        cxx_std_flag = tools.cppstd_flag(self.settings)
+        if cxx_std_flag:
+            cxx_std_value = (
+                cxx_std_flag.split("=")[1]
+                if "=" in cxx_std_flag
+                else cxx_std_flag.split(":")[1]
+                if ":" in cxx_std_flag
+                else None
+            )
+            if cxx_std_value:
+                extra += f" stdver={cxx_std_value}"
 
         make = legacy_tools.get_env("CONAN_MAKE_PROGRAM", legacy_tools.which("make") or legacy_tools.which("mingw32-make"))
         if not make:
@@ -222,7 +233,7 @@ class OneTBBConan(ConanFile):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self._source_subfolder)
         copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self._source_subfolder, "include"))
         copy(self, pattern="*", dst=os.path.join(self.package_folder, "include", "tbb", "compat"), src=os.path.join(self._source_subfolder, "include", "tbb", "compat"))
-        build_folder = "%s/build/" % self._source_subfolder
+        build_folder = os.path.join(self._source_subfolder, "build")
         build_type = "debug" if self.settings.build_type == "Debug" else "release"
         copy(self, pattern=f"*{build_type}*.lib", dst=os.path.join(self.package_folder, "lib"), src=build_folder, keep_path=False)
         copy(self, pattern=f"*{build_type}*.a", dst=os.path.join(self.package_folder, "lib"), src=build_folder, keep_path=False)
@@ -230,7 +241,7 @@ class OneTBBConan(ConanFile):
         copy(self, pattern=f"*{build_type}*.dylib", dst=os.path.join(self.package_folder, "lib"), src=build_folder, keep_path=False)
         # Copy also .dlls to lib folder so consumers can link against them directly when using MinGW
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-            copy(self, f"*{build_type}*.dll" % build_type, dst=os.path.join(self.package_folder, "lib"), src=build_folder, keep_path=False)
+            copy(self, f"*{build_type}*.dll", dst=os.path.join(self.package_folder, "lib"), src=build_folder, keep_path=False)
 
         if self.settings.os == "Linux":
             extension = "so"
@@ -239,8 +250,8 @@ class OneTBBConan(ConanFile):
                 outputlibdir = os.path.join(self.package_folder, "lib")
                 with chdir(self, outputlibdir):
                     for fpath in os.listdir(outputlibdir):
-                        fpathpath = fpath[0:fpath.rfind("." + extension) + len(extension) + 1]
-                        self.run(f'ln -s "{fpath}" "{fpathpath}"')
+                        filepath = fpath[0:fpath.rfind("." + extension) + len(extension) + 1]
+                        self.run(f'ln -s "{fpath}" "{filepath}"', run_environment=True)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "TBB")
