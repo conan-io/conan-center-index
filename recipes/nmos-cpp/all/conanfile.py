@@ -69,7 +69,7 @@ class NmosCppConan(ConanFile):
 
     def validate(self):
         if self.info.settings.os in ["Macos"]:
-            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.info.settings.os}.")
+            raise ConanInvalidConfiguration(f"{self.ref} is not currently supported on {self.info.settings.os}. Contributions welcomed.")
         if self.info.settings.compiler.get_safe("cppstd"):
             build.check_min_cppstd(self, 11)
 
