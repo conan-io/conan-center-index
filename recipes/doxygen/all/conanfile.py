@@ -1,11 +1,11 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake
-from conan.tools.files import apply_conandata_patches, get
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.50.2"
+required_conan_version = ">=1.52.0"
 
 
 class DoxygenConan(ConanFile):
@@ -25,23 +25,11 @@ class DoxygenConan(ConanFile):
         "enable_search": True,
     }
 
-    exports_sources = "CMakeLists.txt", "patches/*"
-    generators = "cmake", "cmake_find_package"
-    short_paths = True
+    def layout(self):
+        cmake_layout(self)
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def _minimum_compiler_version(self):
         if Version(self.version) <= "1.9.1":
@@ -55,17 +43,18 @@ class DoxygenConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.cppstd
+
     def requirements(self):
         if self.options.enable_search:
             self.requires("xapian-core/1.4.19")
             self.requires("zlib/1.2.13")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
-            self.build_requires("winflexbison/2.5.24")
+        if self.settings.os == "Windows":
+            self.tool_requires("winflexbison/2.5.24")
         else:
-            self.build_requires("flex/2.6.4")
-            self.build_requires("bison/3.8.2")
+            self.tool_requires("flex/2.6.4")
+            self.tool_requires("bison/3.8.2")
 
     def validate(self):
         minimum_compiler_version = self._minimum_compiler_version()
@@ -88,32 +77,27 @@ class DoxygenConan(ConanFile):
         self.compatible_packages.append(compatible_pkg)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["build_parse"] = self.options.enable_parse
-        self._cmake.definitions["build_search"] = self.options.enable_search
-        self._cmake.definitions["use_libc++"] = self.settings.compiler.get_safe("libcxx") == "libc++"
-        self._cmake.definitions["win_static"] = "MT" in self.settings.compiler.get_safe("runtime", "")
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["build_parse"] = self.options.enable_parse
+        tc.variables["build_search"] = self.options.enable_search
+        tc.variables["use_libc++"] = self.settings.compiler.get_safe("libcxx") == "libc++"
+        tc.variables["win_static"] = "MT" in self.settings.compiler.get_safe("runtime", "")
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        if os.path.isfile("Findflex.cmake"):
-            os.unlink("Findflex.cmake")
-        if os.path.isfile("Findbison.cmake"):
-            os.unlink("Findbison.cmake")
         apply_conandata_patches(self)
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        self.copy("LICENSE", src=self.source_folder, dst="licenses")
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
