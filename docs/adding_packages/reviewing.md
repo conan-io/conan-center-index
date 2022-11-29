@@ -5,20 +5,20 @@ The following policies are preferred during the review, but not mandatory:
 <!-- toc -->
 ## Contents
 
-  * [Trailing white-spaces](#trailing-white-spaces)
-  * [Quotes](#quotes)
-  * [Subfolder Properties](#subfolder-properties)
-  * [Order of methods and attributes](#order-of-methods-and-attributes)
-  * [License Attribute](#license-attribute)
-  * [Exporting Patches](#exporting-patches)
-  * [Applying Patches](#applying-patches)
-  * [CMake](#cmake)
-    * [Caching Helper](#caching-helper)
-    * [Build Folder](#build-folder)
-    * [CMake Configure Method](#cmake-configure-method)
-  * [Test Package](#test-package)
-    * [Minimalistic Source Code](#minimalistic-source-code)
-    * [CMake targets](#cmake-targets)<!-- endToc -->
+- [Reviewing policies](#reviewing-policies)
+  - [Contents](#contents)
+  - [Trailing white-spaces](#trailing-white-spaces)
+  - [Quotes](#quotes)
+  - [Subfolder Properties](#subfolder-properties)
+  - [Order of methods and attributes](#order-of-methods-and-attributes)
+  - [License Attribute](#license-attribute)
+  - [CMake](#cmake)
+    - [Caching Helper](#caching-helper)
+    - [Build Folder](#build-folder)
+    - [CMake Configure Method](#cmake-configure-method)
+  - [Test Package](#test-package)
+    - [Minimalistic Source Code](#minimalistic-source-code)
+    - [CMake targets](#cmake-targets)
 
 ## Trailing white-spaces
 
@@ -68,31 +68,6 @@ Where the SPDX guidelines do not apply, packages should do the following:
 
 - When no license is provided or when it's given to the "public domain", the value should be set to [Unlicense](https://spdx.org/licenses/Unlicense) as per [KB-H056](../error_knowledge_base.md#kb-h056-license-public-domain) and [FAQ](../faqs.md#what-license-should-i-use-for-public-domain).
 - When a custom (e.g. project specific) license is given, the value should be set to `LicenseRef-` as a prefix, followed by the name of the file which contains a custom license. See [this example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/fft/all/conanfile.py#L8). For more details, [read this conversation](https://github.com/conan-io/conan-center-index/pull/4928/files#r596216206)
-
-## Exporting Patches
-
-It's ideal to minimize the number of files in a package the exactly whats required. When recipes support multiple versions with differing patches it's strongly encouraged to only export the patches that are being used for that given recipe.
-
-Make sure the `export_sources` attribute is replaced by the following:
-
-```py
-def export_sources(self):
-    self.copy("CMakeLists.txt")
-    export_conandata_patches(self)
-```
-
-## Applying Patches
-
-Patches can be applied in a different protected method, the pattern name is `_patch_sources`. When applying patch files, `tools.patch` is the best option.
-For simple cases, `tools.replace_in_file` is allowed.
-
-```py
-def _patch_sources(self):
-    files.apply_conandata_patches(self)
-    # remove bundled xxhash
-    tools.remove_files_by_mask(os.path.join(self._source_subfolder, "lib"), "whateer.*")
-    tools.replace_in_file(os.path.join(self._cmakelists_subfolder, "CMakeLists.txt"), "...", "")
-```
 
 ## CMake
 
