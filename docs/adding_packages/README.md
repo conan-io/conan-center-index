@@ -152,8 +152,6 @@ def build(self):
     [...]
 ```
 
-More details can be found in the [reviewing preference](reviewing.md) documentation
-
 ### The _recipe folder_: `conanfile.py`
 
 The main files in this repository are the `conanfile.py` ones that contain the logic to build the libraries from sources for all the configurations,

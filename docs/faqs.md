@@ -227,16 +227,11 @@ As a result, all calls to `build.check_min_cppstd` must be guarded by a check fo
 
 ## What is the policy for adding older versions of a package?
 
-We defer adding older versions without a direct requirement. We love to hear why in the opening description of the PR.
-Adding versions that are not used by consumer only requires more resources and time from the CI servers.
+See [Adding older versions](adding_packages/sources_and_patches.md#adding-old-versions) for details.
 
 ## What is the policy for removing older versions of a package?
 
-Older versions can be removed from packages given the considerations below. When removing those version, remove everything
-that is specific to them: logic from the recipe and references in `config.yml` and `conandata.yml`. In any case, packages
-are never removed from ConanCenter remote.
-
-When removing older versions, please take into account [these considerations](adding_packages/reviewing.md#supported-versions).
+See [Removing older versions](adding_packages/sources_and_patches.md#removing-old-versions) for details.
 
 ## Can I install packages from the system package manager?
 
