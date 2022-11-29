@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index b702300..d739857 100644
+index 2bc0f76..f40e272 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -319,7 +319,7 @@ if(MI_BUILD_SHARED)
+@@ -360,7 +360,7 @@ if(MI_BUILD_SHARED)
      install(FILES "$<TARGET_FILE_DIR:mimalloc>/mimalloc-redirect${MIMALLOC_REDIRECT_SUFFIX}.dll" DESTINATION ${mi_install_libdir})
    endif()
  
@@ -11,7 +11,7 @@ index b702300..d739857 100644
    install(EXPORT mimalloc DESTINATION ${mi_install_cmakedir})
  endif()
  
-@@ -343,7 +343,7 @@ if (MI_BUILD_STATIC)
+@@ -384,7 +384,7 @@ if (MI_BUILD_STATIC)
      set_target_properties(mimalloc-static PROPERTIES OUTPUT_NAME ${mi_basename})
    endif()
  
