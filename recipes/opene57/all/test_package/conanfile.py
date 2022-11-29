@@ -1,10 +1,10 @@
 import os
 from conan import ConanFile
-from conan.tools.cmake import CMake
+from conan.tools.cmake import CMake, cmake_layout
 
 class TestOpenE57Conan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "CMakeToolchain", "CMakeDeps"
 
     def build(self):
         cmake = CMake(self)
