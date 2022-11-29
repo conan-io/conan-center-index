@@ -70,12 +70,11 @@ class YACLibConan(ConanFile):
         tc.generate()
 
     def config_options(self):
+        # Yaclib can only be static
+        del self.options.shared
+
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
