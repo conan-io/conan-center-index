@@ -29,11 +29,15 @@ patches:
       patch_file: "patches/qt6-pri-helpers-fix.diff"
     - patch_file: "patches/c72097e.diff"
       base_path: "qt6/qtwebengine"
+    - patch_file: "patches/d13958d.diff"
+      base_path: "qt6/qtbase"
   "6.3.2":
     - base_path: "qt6/qtbase/cmake"
       patch_file: "patches/qt6-pri-helpers-fix.diff"
     - patch_file: "patches/c72097e.diff"
       base_path: "qt6/qtwebengine"
+    - patch_file: "patches/d13958d.diff"
+      base_path: "qt6/qtbase"
   "6.2.4":
     - base_path: "qt6/qtdeclarative"
       patch_file: "patches/32451d5.diff"
@@ -48,4 +52,6 @@ patches:
     - patch_file: "patches/CVE-2022-25255-qprocess6-2.diff"
       base_path: "qt6/qtbase"
     - patch_file: "patches/CVE-2022-25643-6.2.diff"
+      base_path: "qt6/qtbase"
+    - patch_file: "patches/d13958d_.diff"
       base_path: "qt6/qtbase"
