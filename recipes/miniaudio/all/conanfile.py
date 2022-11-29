@@ -49,8 +49,6 @@ class MiniaudioConan(ConanFile):
     def package_id(self):
         if self.options.header_only:
             self.info.clear()
-            # TODO: for KB-H014. It must be removed when latest hooks/conan-center.py
-            self.info.header_only()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
