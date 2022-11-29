@@ -31,9 +31,13 @@ class SDLImageConan(ConanFile):
         "xpm": [True, False],
         "xv": [True, False],
         "with_libjpeg": [True, False],
+        "with_libjpeg_dynamic_load": [True, False],
         "with_libtiff": [True, False],
+        "with_libtiff_dynamic_load": [True, False],
         "with_libpng": [True, False],
+        "with_libpng_dynamic_load": [True, False],
         "with_libwebp": [True, False],
+        "with_libwebp_dynamic_load": [True, False],
         "imageio": [True, False],
     }
     default_options = {
@@ -50,9 +54,13 @@ class SDLImageConan(ConanFile):
         "xpm": True,
         "xv": True,
         "with_libjpeg": True,
+        "with_libjpeg_dynamic_load": False,
         "with_libtiff": True,
+        "with_libtiff_dynamic_load": False,
         "with_libpng": True,
+        "with_libpng_dynamic_load": False,
         "with_libwebp": True,
+        "with_libwebp_dynamic_load": False,
         "imageio": False,
     }
 
@@ -69,6 +77,14 @@ class SDLImageConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+        if not self.options.with_libjpeg:
+            del self.options.with_libjpeg_dynamic_load
+        if not self.options.with_libtiff:
+            del self.options.with_libtiff_dynamic_load
+        if not self.options.with_libpng:
+            del self.options.with_libpng_dynamic_load
+        if not self.options.with_libwebp:
+            del self.options.with_libwebp_dynamic_load
         if self.options.shared:
             # sdl static into sdl_image shared is not allowed
             self.options["sdl"].shared = True
@@ -90,6 +106,14 @@ class SDLImageConan(ConanFile):
     def validate(self):
         if self.info.options.shared and not self.dependencies["sdl"].options.shared:
             raise ConanInvalidConfiguration("sdl_image shared requires sdl shared")
+        if self.info.options.get_safe("with_libjpeg_dynamic_load") and self.dependencies["libjpeg"].options.shared:
+            raise ConanInvalidConfiguration("with_libjpeg_dynamic_load=True requires libjpeg:shared=True")
+        if self.info.options.get_safe("with_libtiff_dynamic_load") and self.dependencies["libtiff"].options.shared:
+            raise ConanInvalidConfiguration("with_libtiff_dynamic_load requires libtiff:shared=True")
+        if self.info.options.get_safe("with_libpng_dynamic_load") and self.dependencies["libpng"].options.shared:
+            raise ConanInvalidConfiguration("with_libpng_dynamic_load requires libpng:shared=True")
+        if self.info.options.get_safe("with_libwebp_dynamic_load") and self.dependencies["libwebp"].options.shared:
+            raise ConanInvalidConfiguration("with_libwebp_dynamic_load requires libwebp:shared=True")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -114,10 +138,10 @@ class SDLImageConan(ConanFile):
         tc.variables["XPM"] = self.options.xpm
         tc.variables["XV"] = self.options.xv
         # TODO: https://github.com/bincrafters/community/pull/1317#pullrequestreview-584847138
-        tc.variables["TIF_DYNAMIC"] = self.dependencies["libtiff"].options.shared if self.options.with_libtiff else False
-        tc.variables["JPG_DYNAMIC"] = self.dependencies["libjpeg"].options.shared if self.options.with_libjpeg else False
-        tc.variables["PNG_DYNAMIC"] = self.dependencies["libpng"].options.shared if self.options.with_libpng else False
-        tc.variables["WEBP_DYNAMIC"] = self.dependencies["libwebp"].options.shared if self.options.with_libwebp else False
+        tc.variables["TIF_DYNAMIC"] = self.options.get_safe("with_libtiff_dynamic_load", False)
+        tc.variables["JPG_DYNAMIC"] = self.options.get_safe("with_libjpeg_dynamic_load", False)
+        tc.variables["PNG_DYNAMIC"] = self.options.get_safe("with_libpng_dynamic_load", False)
+        tc.variables["WEBP_DYNAMIC"] = self.options.get_safe("with_libwebp_dynamic_load", False)
         tc.variables["SDL_IS_SHARED"] = self.dependencies["sdl"].options.shared
         tc.generate()
         cd = CMakeDeps(self)
