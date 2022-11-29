@@ -15,34 +15,6 @@ The following policies are preferred during the review, but not mandatory:
     - [Minimalistic Source Code](#minimalistic-source-code)
     - [CMake targets](#cmake-targets)
 
-## CMake
-
-When working with CMake based upstream projects it is prefered to follow these principals. They are not applicable to all projects so they can not be enforced.
-
-### Caching Helper
-
-Due to build times and the lenght to configure CMake multiple times, there is a strong motivation to cache the `CMake` build helper from Conan between the `build()` and `package()` methods.
-
-This can be done by adding a `_cmake` attribute to the `ConanFile` class, but consider it as outdated. The current option is using `@functools.lru_cache(1)` decorator.
-As example, take a look on [miniz](https://github.com/conan-io/conan-center-index/blob/16780f87ad3db3be81323ddafc668145e4348513/recipes/miniz/all/conanfile.py#L57) recipe.
-
-### Build Folder
-
-Ideally use out-of-source builds by calling `cmake.configure(build_folder=self._build_subfolder)` when ever possible.
-
-### CMake Configure Method
-
-Use a seperate method to handle the common patterns with using CMake based projects. This method is `_configure_cmake` and looks like the follow in the most basic cases:
-
-```py
-@functools.lru_cache(1)
-def _configure_cmake(self):
-    cmake = CMake(self)
-    cmake.definitions["BUILD_STATIC"] = not self.options.shared
-    cmake.configure(build_folder=self._build_subfolder)
-    return cmake
-```
-
 ## Test Package
 
 ### Minimalistic Source Code
