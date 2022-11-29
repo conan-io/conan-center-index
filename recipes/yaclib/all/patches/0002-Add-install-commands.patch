@@ -1,0 +1,26 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d58e394..b2df0a3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -32,6 +32,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+ list(APPEND CMAKE_MODULE_PATH "${YACLIB_SOURCE_DIR}/cmake")
+ include(yaclib_flags)
+ 
++include(GNUInstallDirs)
++install(DIRECTORY ${YACLIB_SOURCE_DIR}/include/yaclib TYPE INCLUDE)
++install(DIRECTORY ${YACLIB_SOURCE_DIR}/include/yaclib_std TYPE INCLUDE)
++install(DIRECTORY ${YACLIB_BINARY_DIR}/include/yaclib TYPE INCLUDE)
++
+ add_subdirectory(src) # Create static library
+ 
+ if (YACLIB_TEST)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index c3d624f..d8fefa3 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -56,3 +56,5 @@ target_include_directories(yaclib
+   PUBLIC ${YACLIB_BINARY_DIR}/include # for config.hpp
+   PRIVATE ${YACLIB_SOURCE_DIR}/src
+   )
++
++install(TARGETS yaclib)
