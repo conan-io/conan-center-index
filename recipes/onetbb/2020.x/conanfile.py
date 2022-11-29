@@ -1,14 +1,13 @@
 from conan import ConanFile
-from conan.tools.microsoft import msvc_runtime_flag, is_msvc
-from conan.tools.build import cross_building
-from conan.tools.files import get, replace_in_file, save, chdir, copy
-from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration, ConanException
-from conans import tools
+from conan.tools.files import get, replace_in_file, save, chdir, copy
+from conan.tools.microsoft import msvc_runtime_flag, is_msvc
+from conan.tools.scm import Version
+from conans import tools as legacy_tools
 import os
 import textwrap
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class OneTBBConan(ConanFile):
@@ -62,11 +61,11 @@ class OneTBBConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         if self.settings.os == "Macos":
-            if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "8.0":
+            if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "8.0":
                 raise ConanInvalidConfiguration("%s %s couldn't be built by apple-clang < 8.0" % (self.name, self.version))
         if not self.options.shared:
             self.output.warn("oneTBB strongly discourages usage of static linkage")
@@ -81,8 +80,8 @@ class OneTBBConan(ConanFile):
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
-            if "CONAN_MAKE_PROGRAM" not in os.environ and not tools.which("make"):
-                self.build_requires("make/4.2.1")
+            if "CONAN_MAKE_PROGRAM" not in os.environ and not legacy_tools.which("make"):
+                self.tool_requires("make/4.2.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -197,7 +196,7 @@ class OneTBBConan(ConanFile):
                 extra += " compiler=icl"
             else:
                 extra += " compiler=cl"
-        cxx_std_flag = tools.cppstd_flag(self.settings)
+        cxx_std_flag = legacy_tools.cppstd_flag(self.settings)
         if cxx_std_flag:
             cxx_std_value = (
                 cxx_std_flag.split("=")[1]
@@ -209,7 +208,7 @@ class OneTBBConan(ConanFile):
             if cxx_std_value:
                 extra += f" stdver={cxx_std_value}"
 
-        make = tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make") or tools.which("mingw32-make"))
+        make = legacy_tools.get_env("CONAN_MAKE_PROGRAM", legacy_tools.which("make") or legacy_tools.which("mingw32-make"))
         if not make:
             raise ConanException("This package needs 'make' in the path to build")
 
@@ -220,12 +219,12 @@ class OneTBBConan(ConanFile):
                 add_flag("CXXFLAGS", "-mrtm")
 
             targets = ["tbb", "tbbmalloc", "tbbproxy"]
-            context = tools.no_op()
+            context = legacy_tools.no_op()
             if self.settings.compiler == "intel":
-                context = tools.intel_compilervars(self)
+                context = legacy_tools.intel_compilervars(self)
             elif is_msvc(self):
                 # intentionally not using vcvars for clang-cl yet
-                context = tools.vcvars(self)
+                context = legacy_tools.vcvars(self)
             with context:
                 self.run("%s %s %s" % (make, extra, " ".join(targets)))
 
