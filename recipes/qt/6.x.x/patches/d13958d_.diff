@@ -11,7 +11,7 @@ diff --git a/cmake/FindWrapSystemPCRE2.cmake b/cmake/FindWrapSystemPCRE2.cmake
 index f8516d3..3ac04b8 100644
 --- a/cmake/FindWrapSystemPCRE2.cmake
 +++ b/cmake/FindWrapSystemPCRE2.cmake
-@@ -6,17 +6,7 @@
+@@ -6,7 +6,7 @@
  
  find_package(PCRE2 ${${CMAKE_FIND_PACKAGE_NAME}_FIND_VERSION} COMPONENTS 16BIT QUIET)
  
