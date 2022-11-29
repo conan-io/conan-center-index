@@ -56,13 +56,13 @@ class Hdf5Conan(ConanFile):
             raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
         if self.info.options.parallel:
             if self.info.options.enable_cxx:
-                raise ConanInvalidConfiguration("Parallel and C++ options are mutually exclusive")
+                raise ConanInvalidConfiguration(f"{self.name}:parallel and {self.name}:enable_cxx options are mutually exclusive.")
             if self.info.options.get_safe("threadsafe"): # FIXME why can't I define the default valid as False?
-                raise ConanInvalidConfiguration("Parallel and Threadsafe options are mutually exclusive")
+                raise ConanInvalidConfiguration(f"{self.name}:parallel and {self.name}:threadsafe options are mutually exclusive")
         if self.info.options.szip_support == "with_szip" and \
                 self.info.options.szip_encoding and \
                 not self.dependencies["szip"].options.enable_encoding:
-            raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
+            raise ConanInvalidConfiguration(f"The option {self.name}:szip_encoding=True requires the option szip:enable_encoding=True")
 
     def configure(self):
         if self.options.shared:
