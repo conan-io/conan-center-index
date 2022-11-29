@@ -7,8 +7,7 @@ from conans import tools as legacy_tools
 import os
 import textwrap
 
-
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class OneTBBConan(ConanFile):
@@ -62,7 +61,7 @@ class OneTBBConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         if self.settings.os == "Macos":
@@ -197,7 +196,7 @@ class OneTBBConan(ConanFile):
                 extra += " compiler=icl"
             else:
                 extra += " compiler=cl"
-        cxx_std_flag = tools.cppstd_flag(self.settings)
+        cxx_std_flag = legacy_tools.cppstd_flag(self.settings)
         if cxx_std_flag:
             cxx_std_value = (
                 cxx_std_flag.split("=")[1]
