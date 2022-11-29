@@ -5,7 +5,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.53.0"
 
 
 class SDLImageConan(ConanFile):
@@ -66,18 +66,15 @@ class SDLImageConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
         if self.options.shared:
             # sdl static into sdl_image shared is not allowed
             self.options["sdl"].shared = True
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("sdl/2.0.20")
@@ -93,9 +90,6 @@ class SDLImageConan(ConanFile):
     def validate(self):
         if self.info.options.shared and not self.dependencies["sdl"].options.shared:
             raise ConanInvalidConfiguration("sdl_image shared requires sdl shared")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
