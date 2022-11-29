@@ -7,8 +7,6 @@ The following policies are preferred during the review, but not mandatory:
 
 - [Reviewing policies](#reviewing-policies)
   - [Contents](#contents)
-  - [Trailing white-spaces](#trailing-white-spaces)
-  - [Quotes](#quotes)
   - [Order of methods and attributes](#order-of-methods-and-attributes)
   - [License Attribute](#license-attribute)
   - [CMake](#cmake)
@@ -18,14 +16,6 @@ The following policies are preferred during the review, but not mandatory:
   - [Test Package](#test-package)
     - [Minimalistic Source Code](#minimalistic-source-code)
     - [CMake targets](#cmake-targets)
-
-## Trailing white-spaces
-
-Avoid trailing white-space characters, if possible
-
-## Quotes
-
-If possible, try to avoid mixing single quotes (`'`) and double quotes (`"`) in python code (`conanfile.py`, `test_package/conanfile.py`). Consistency is preferred.
 
 ## Order of methods and attributes
 
