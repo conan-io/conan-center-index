@@ -1,9 +1,14 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.files import get, copy, replace_in_file, save
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.53.0"
 
 
 class SentryBreakpadConan(ConanFile):
@@ -21,16 +26,17 @@ class SentryBreakpadConan(ConanFile):
     default_options = {
         "fPIC": True,
     }
-    exports_sources = "CMakeLists.txt", "patches/*"
-    generators = "cmake"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return 11
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.settings.os in ("FreeBSD", "Linux"):
@@ -38,28 +44,27 @@ class SentryBreakpadConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
 
-        if tools.Version(self.version) <= "0.4.1":
-            if self.settings.os == "Android" or tools.is_apple_os(self.settings.os):
+        if Version(self.version) <= "0.4.1":
+            if self.settings.os == "Android" or is_apple_os(self):
                 raise ConanInvalidConfiguration("Versions <=0.4.1 do not support Apple or Android")
-        if tools.Version(self.version) <= "0.2.6":
+        if Version(self.version) <= "0.2.6":
             if self.settings.os == "Windows":
                 raise ConanInvalidConfiguration("Versions <=0.2.6 do not support Windows")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
+        tc = VirtualBuildEnv(self)
+        tc.generate(scope="build")
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
         # FIXME: convert to patches
         import textwrap
 
@@ -86,13 +91,13 @@ class SentryBreakpadConan(ConanFile):
         ]
 
         for file in files_to_patch:
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "external", "breakpad", file),
+            replace_in_file(self,
+                os.path.join(self.source_folder, "external", "breakpad", file),
                 "#include \"third_party/lss/linux_syscall_support.h\"",
                 "#include <linux_syscall_support.h>"
             )
 
-        tools.save(os.path.join(self._source_subfolder, "external", "CMakeLists.txt"),
+        save(self, os.path.join(self.source_folder, "external", "CMakeLists.txt"),
                    textwrap.dedent("""\
                     install(TARGETS breakpad_client
                         ARCHIVE DESTINATION lib
@@ -131,20 +136,23 @@ class SentryBreakpadConan(ConanFile):
                    """), append=True)
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        self._patch_sources()  # It can be apply_conandata_patches(self) only in case no more patches are needed
+        cmake = CMake(self)
+        cmake.configure(build_script_folder="external")
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=os.path.join(self._source_subfolder, "external", "breakpad"))
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=os.path.join(self.source_folder, "external", "breakpad"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "breakpad-client"
         self.cpp_info.libs = ["breakpad_client"]
         self.cpp_info.includedirs.append(os.path.join("include", "breakpad"))
-        if tools.is_apple_os(self.settings.os):
+        if is_apple_os(self):
             self.cpp_info.frameworks.append("CoreFoundation")
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
