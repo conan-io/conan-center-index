@@ -7,8 +7,6 @@ The following policies are preferred during the review, but not mandatory:
 
 - [Reviewing policies](#reviewing-policies)
   - [Contents](#contents)
-  - [Order of methods and attributes](#order-of-methods-and-attributes)
-  - [License Attribute](#license-attribute)
   - [CMake](#cmake)
     - [Caching Helper](#caching-helper)
     - [Build Folder](#build-folder)
@@ -16,28 +14,6 @@ The following policies are preferred during the review, but not mandatory:
   - [Test Package](#test-package)
     - [Minimalistic Source Code](#minimalistic-source-code)
     - [CMake targets](#cmake-targets)
-
-## Order of methods and attributes
-
-Prefer the following order of documented methods in python code (`conanfile.py`, `test_package/conanfile.py`):
-
-For `conan create` the order is listed [here](https://docs.conan.io/en/latest/reference/commands/creator/create.html#methods-execution-order)
-test packages recipes should append the following methods:
-
-- deploy
-- test
-
-the order above resembles the execution order of methods on CI. therefore, for instance, `build` is always executed before `package` method, so `build` should appear before the
-`package` in `conanfile.py`.
-
-## License Attribute
-
-The mandatory license attribute of each recipe **should** be a [SPDX license](https://spdx.org/licenses/) [short Identifiers](https://spdx.dev/ids/) when applicable.
-
-Where the SPDX guidelines do not apply, packages should do the following:
-
-- When no license is provided or when it's given to the "public domain", the value should be set to [Unlicense](https://spdx.org/licenses/Unlicense) as per [KB-H056](../error_knowledge_base.md#kb-h056-license-public-domain) and [FAQ](../faqs.md#what-license-should-i-use-for-public-domain).
-- When a custom (e.g. project specific) license is given, the value should be set to `LicenseRef-` as a prefix, followed by the name of the file which contains a custom license. See [this example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/fft/all/conanfile.py#L8). For more details, [read this conversation](https://github.com/conan-io/conan-center-index/pull/4928/files#r596216206)
 
 ## CMake
 

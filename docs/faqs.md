@@ -73,7 +73,7 @@ Conan has an abstraction over the packages build system and description by using
 In the past, we have found that the logic of some of the CMake's find/config or pkg-config files can lead to broken scenarios due to issues with:
 
 - Transitive dependencies: The find logic of CMake can lead to link libraries with system libraries instead of the ones specified in the conanfile.
-- Different build type configurations: Usually those files are not prepared to handle multiconfiguration development while switching between release/debug build types for example.
+- Different build type configurations: Usually those files are not prepared to handle multi-configuration development while switching between release/debug build types for example.
 - Absolute paths: Usually, those files include absolute paths that would make the package broken when shared and consumed.
 - Hardcoded versions of dependencies as well as build options that make overriding dependencies from the consumer not possible.
 
@@ -172,7 +172,7 @@ def package_id(self):
 ```
 
 This is the safest way, users will be warned of deprecation and their projects will not risk breaking.
-As aditional examples, take a look on follow recipes: [dcmtk](https://github.com/conan-io/conan-center-index/blob/5e6089005f0bb66cd16db7b0e5f37f5081c7820c/recipes/dcmtk/all/conanfile.py#L24), [gtsam](https://github.com/conan-io/conan-center-index/blob/f7f18ab050e5d97fac70932b0ba4c115a930958c/recipes/gtsam/all/conanfile.py#L40)
+As additional examples, take a look on follow recipes: [dcmtk](https://github.com/conan-io/conan-center-index/blob/5e6089005f0bb66cd16db7b0e5f37f5081c7820c/recipes/dcmtk/all/conanfile.py#L24), [gtsam](https://github.com/conan-io/conan-center-index/blob/f7f18ab050e5d97fac70932b0ba4c115a930958c/recipes/gtsam/all/conanfile.py#L40)
 and [libcurl](https://github.com/conan-io/conan-center-index/blob/f834ee1c82564199fdd9ca2f95231693c1a7136a/recipes/libcurl/all/conanfile.py#L24).
 
 However, if logic is too complex (this is subjective and depends on the Conan review team) then just remove the option.
@@ -184,17 +184,16 @@ No. Some projects provide more than a simple library, but also applications. For
 
 ## What license should I use for Public Domain?
 
-[The Public Domain](https://fairuse.stanford.edu/overview/public-domain/welcome/) is not a license by itself. Thus, we have [equivalent licenses](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) to be used instead. By default, if a project uses Public Domain and there is no official license listed, you should use [Unlicense](https://spdx.org/licenses/Unlicense).
+See [License Attribute](adding_packages/conanfile_attributes.md#license-attribute) for details.
 
 ## What license should I use for a custom project specific license?
 
-When a non standard open-source license is used, we have decided to use `LicenseRef-` as a prefix, followed by the name of the file which contains a custom license.
-See [the reviewing guidlines](adding_packages/reviewing.md#license-attribute) for more details.
+See [License Attribute](adding_packages/conanfile_attributes.md#license-attribute) for details.
 
 ## How do I flag a problem to a recipe consumer?
 
 Regardless of why, if the recipe detects a problem where binaries might not be generated correctly, an exception must be raised. This to prevent the publishing
-incorrect packages which do not work as intented. Use `ConanInvalidConfiguration` which is specially support in ConanCenter.
+incorrect packages which do not work as intended. Use `ConanInvalidConfiguration` which is specially support in ConanCenter.
 
 ```py
 raise ConanInvalidConfiguration(f"The project {self.ref} requires liba.enable_feature=True.")
@@ -306,7 +305,7 @@ these Intel libraries are widely used by various well-known open-source projects
 Unfortunately, these Intel libraries cannot be accepted into ConanCenter due to several important reasons:
 
 * they are closed-source and commercial products, ConanCenter cannot redistribute their binaries due to the license restrictions
-* registration on the Intel portal is required in order to dowload the libraries, there are no permanent public direct download links
+* registration on the Intel portal is required in order to download the libraries, there are no permanent public direct download links
 * they use graphical installers which are hard to automate within conan recipe
 
 instead, the libraries that depend on *MKL*, *IPP* or *DNN* should use the following references:
@@ -347,7 +346,7 @@ intel-mkl/2021@mycompany/stable
 
 ## How to protect my project from breaking changes in recipes?
 
-This repository and the CI building recipes is continuosly pushing to new Conan versions,
+This repository and the CI building recipes is continuously pushing to new Conan versions,
 sometimes adopting new features as soon as they are released
 ([Conan client changelog](https://docs.conan.io/en/latest/changelog.html)).
 
@@ -362,7 +361,7 @@ Keep reading in the [consuming recipes section](consuming_recipes.md#isolate-you
 
 Version ranges are a useful Conan feature, find the documentation [here](https://docs.conan.io/en/latest/versioning/version_ranges.html). However, in the context of ConanCenter they pose a few key challenges, most notably:
 
-- Non-Determinstic `package-id`
+- Non-Deterministic `package-id`
 
 With version ranges the newest compatible package may yield a different package-id than the one built and published by ConanCenter resulting in frustrating error "no binaries found". For more context see [this excellent explanation](https://github.com/conan-io/conan-center-index/pull/8831#issuecomment-1024526780).
 

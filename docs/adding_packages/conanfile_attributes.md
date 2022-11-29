@@ -12,6 +12,29 @@ or are known by ConanCenter's build service and have special meaning.
     * [Predefined Options and Known Defaults](#predefined-options-and-known-defaults)
     * [Options to Avoid](#options-to-avoid)<!-- endToc -->
 
+## Order of methods and attributes
+
+Prefer the following order of documented methods in python code (`conanfile.py`, `test_package/conanfile.py`):
+
+For `conan create` the order is listed [here](https://docs.conan.io/en/latest/reference/commands/creator/create.html#methods-execution-order)
+test packages recipes should append the following methods:
+
+- deploy
+- test
+
+the order above resembles the execution order of methods on CI. therefore, for instance, `build` is always executed before `package` method, so `build` should appear before the
+`package` in `conanfile.py`.
+
+## License Attribute
+
+The mandatory license attribute of each recipe **should** be a [SPDX license](https://spdx.org/licenses/) [short Identifiers](https://spdx.dev/ids/) when applicable.
+
+Where the SPDX guidelines do not apply, packages should do the following:
+
+- When no license is provided or it's under the ["public domain"](https://fairuse.stanford.edu/overview/public-domain/welcome/) - these are not a license by itself. Thus, we have [equivalent licenses](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) that should be used instead. If a project fall under these criteria it should be identified as the [Unlicense](https://spdx.org/licenses/Unlicense) license.
+- When a custom (e.g. project specific) license is given, the value should be set to `LicenseRef-` as a prefix, followed by the name of the file which contains the custom license. See [this example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/fft/all/conanfile.py#L8). For more details, [read this conversation](https://github.com/conan-io/conan-center-index/pull/4928/files#r596216206).
+
+
 ## Settings
 
 All recipes should list the four settings `os`, `arch`, `compiler` and `build_type` so Conan will compute a different package ID
