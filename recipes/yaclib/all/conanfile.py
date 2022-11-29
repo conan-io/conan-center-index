@@ -7,7 +7,7 @@ from conan.tools.layout import cmake_layout
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class YACLibConan(ConanFile):
