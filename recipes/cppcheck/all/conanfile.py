@@ -31,9 +31,9 @@ class CppcheckConan(ConanFile):
 
     def build_requirements(self):
         if self.options.get_safe("with_z3", default=False):
-            self.tool_requires("z3/4.8.8")
+            self.requires("z3/4.8.8")
         if self.options.have_rules:
-            self.tool_requires("pcre/8.45")
+            self.requires("pcre/8.45")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
