@@ -81,9 +81,13 @@ class YACLibConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 17)
+            check_min_cppstd(self, 20 if self.options.coro else 17)
         else:
             if self._compilers_minimum_version.get(str(self.settings.compiler)):
                 if Version(self.settings.compiler.version) < self._compilers_minimum_version.get(str(self.settings.compiler)):
