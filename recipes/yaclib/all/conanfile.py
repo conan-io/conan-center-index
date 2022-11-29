@@ -21,12 +21,6 @@ class YACLibConan(ConanFile):
 
     _yaclib_flags = {
         "warn": [True, False],
-        "asan": [True, False],
-        "tsan": [True, False],
-        "ubsan": [True, False],
-        "lsan": [True, False],
-        "memsan": [True, False],
-        "coverage": [True, False],
         "coro": [True, False],
         "disable_futex": [True, False],
         "disable_unsafe_futex": [True, False],
@@ -36,13 +30,11 @@ class YACLibConan(ConanFile):
 
     options = {
         "fPIC": [True, False],
-        "fault": [None, "thread", "fiber"],
         **_yaclib_flags,
     }
 
     default_options = {
         "fPIC": True,
-        "fault": None,
         **{k: False for k in _yaclib_flags},
     }
 
