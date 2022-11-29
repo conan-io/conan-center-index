@@ -61,7 +61,7 @@ class TeemoConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTS"] = False
-        tc.variables["USE_STATIC_CRT "] = is_msvc_static_runtime(self)
+        tc.variables["USE_STATIC_CRT"] = is_msvc_static_runtime(self)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
