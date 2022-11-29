@@ -6,11 +6,54 @@ or are known by ConanCenter's build service and have special meaning.
 <!-- toc -->
 ## Contents
 
+  * [Attributes](#attributes)
+    * [Name](#name)
+    * [Version](#version)
+    * [ConanCenter specific releases format](#conancenter-specific-releases-format)
+    * [License](#license)
   * [Settings](#settings)
   * [Options](#options)
     * [Recommended Names](#recommended-names)
     * [Predefined Options and Known Defaults](#predefined-options-and-known-defaults)
     * [Options to Avoid](#options-to-avoid)<!-- endToc -->
+
+## Attributes
+
+There's are a [key features](https://docs.conan.io/en/latest/reference/conanfile/attributes.html) which allow the Conan client to understand,
+identify, and expose recipes and which project they expose.
+
+In ConanCenter, there are a few conventions that need to be respected to ensure recipes can be discovered there `conan search` command
+of through the web UI. Many of which are enforces with the [hooks](../error_knowledge_base.md).
+
+### Name
+
+Same as the _recipe folder_ and always lowercase.
+
+Please see the FAQs for:
+
+- [name collisions](../faqs.md#what-is-the-policy-on-recipe-name-collisions)
+- [space and symbols](../faqs.md#should-reference-names-use---or-_)
+
+### Version
+
+ConanCenter is geared towards quickly added new release, the build service always pass the version it it currently building to the recipe.
+The `version` attribute MUST NOT be added to any recipe - with except to "system packages".
+
+### ConanCenter specific releases format
+
+The notation shown below is used for publishing packages which do not match the original library's official releases. This format which includes the "datestamp" corresponding to the date of a commit: `cci.<YEAR MONTH DAY>`.
+
+In order to create reproducible builds, we also "commit-lock" to the latest commit on that day. Otherwise, users would get inconsistent results over time when rebuilding the package. An example of this is the [RapidJSON](https://github.com/Tencent/rapidjson) library, where its package reference is `rapidjson/cci.20200410` and its sources are locked the latest commit on that date in [config.yml](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidjson/config.yml#L4). The prefix `cci.` is mandatory to distinguish as a virtual version provided by CCI. If you are interested to know about the origin, please, read [here](https://github.com/conan-io/conan-center-index/pull/1464).
+### License
+
+The mandatory license attribute of each recipe **should** be a [SPDX license](https://spdx.org/licenses/) [short Identifiers](https://spdx.dev/ids/) when applicable.
+
+Where the SPDX guidelines do not apply, packages should do the following:
+
+- When no license is provided or when it's given to the "public domain", the value should be set to [Unlicense](https://spdx.org/licenses/Unlicense)
+  as per [KB-H056](../error_knowledge_base.md#kb-h056-license-public-domain) and [FAQs](../faqs.md#what-license-should-i-use-for-public-domain).
+- When a custom (e.g. project specific) license is given, the value should be set to `LicenseRef-` as a prefix, followed by the name of the file
+  which contains a custom license. See [this example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/fft/all/conanfile.py#L8). For more details, [read this conversation](https://github.com/conan-io/conan-center-index/pull/4928/files#r596216206) and our [FAQs](../faqs.md#what-license-should-i-use-for-a-custom-project-specific-license)
 
 ## Settings
 

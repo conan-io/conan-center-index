@@ -109,7 +109,8 @@ Unless they are a general and extended utility in recipes (in which case, we sho
 
 ## What version should packages use for libraries without official releases?
 
-The notation shown below is used for publishing packages where the original library does not make official releases. Thus, we use a format which includes the datestamp corresponding to the date of a commit: `cci.<YYYYMMDD>`. In order to create reproducible builds, we also "commit-lock" to the latest commit on that day (use UTC+00). Otherwise, users would get inconsistent results over time when rebuilding the package. An example of this is the [RapidJSON](https://github.com/Tencent/rapidjson) library, where its package reference is `rapidjson/cci.20200410` and its sources are locked the latest commit on that date in [conandata.yml](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidjson/all/conandata.yml#L5). The prefix `cci.` is mandatory to distinguish as a virtual version provided by CCI. If you are interested to know about the origin, please, read [here](https://github.com/conan-io/conan-center-index/pull/1464).
+This happens for a number of reasons, some have a "live on main" others are less maintained but still merge pull requests.
+Read about the [ConanCenter specific version format](adding_packages/conanfile_attributes.md#conancenter-specific-releases-format) for more information.
 
 ## Is the Jenkins orchestration library publicly available?
 
@@ -189,7 +190,7 @@ No. Some projects provide more than a simple library, but also applications. For
 ## What license should I use for a custom project specific license?
 
 When a non standard open-source license is used, we have decided to use `LicenseRef-` as a prefix, followed by the name of the file which contains a custom license.
-See [the reviewing guidlines](adding_packages/reviewing.md#license-attribute) for more details.
+See the [`ConanFile` Attributes guidelines](adding_packages/conanfile_attributes.md#license) for more details.
 
 ## How do I flag a problem to a recipe consumer?
 
@@ -228,16 +229,11 @@ As a result, all calls to `build.check_min_cppstd` must be guarded by a check fo
 
 ## What is the policy for adding older versions of a package?
 
-We defer adding older versions without a direct requirement. We love to hear why in the opening description of the PR.
-Adding versions that are not used by consumer only requires more resources and time from the CI servers.
+See [Sources and Patches](adding_packages/sources_and_patches.md#adding-old-versions) for details.
 
 ## What is the policy for removing older versions of a package?
 
-Older versions can be removed from packages given the considerations below. When removing those version, remove everything
-that is specific to them: logic from the recipe and references in `config.yml` and `conandata.yml`. In any case, packages
-are never removed from ConanCenter remote.
-
-When removing older versions, please take into account [these considerations](adding_packages/reviewing.md#supported-versions).
+See [Sources and Patches](adding_packages/sources_and_patches.md#removing-old-versions) for details.
 
 ## Can I install packages from the system package manager?
 
@@ -248,7 +244,7 @@ The hook [KB-H032](error_knowledge_base.md#KB-H032) does not allow `system_requi
 system packages at same recipe.
 
 There are exceptions where some projects are closer to system drivers or hardware and packaging as a regular library could result
-in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, see the [How-to](adding_packages/README.md#system-packages) for more.
+in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, see the [How-to](adding_packages/build_and_package.md#system-packages) for more.
 
 ## Why ConanCenter does **not** build and execute tests in recipes
 
