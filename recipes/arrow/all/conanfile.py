@@ -212,7 +212,7 @@ class ArrowConan(ConanFile):
 
     def _compute(self, required=False):
         if required or self.options.compute == "auto":
-            return bool(self._dataset_modules()) or bool(self.options.get_safe("substrait", False))
+            return bool(self._parquet() or self._dataset_modules()) or bool(self.options.get_safe("substrait", False))
         else:
             return bool(self.options.compute)
 
