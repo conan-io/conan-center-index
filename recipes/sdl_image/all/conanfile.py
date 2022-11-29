@@ -122,26 +122,26 @@ class SDLImageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["SDL_IMAGE_SRC_DIR"] = self.source_folder.replace("\\", "/")
-        tc.variables["BMP"] = self.options.bmp
-        tc.variables["GIF"] = self.options.gif
-        tc.variables["IMAGEIO"] = self.options.get_safe("imageio")
-        tc.variables["JPG"] = self.options.with_libjpeg
-        tc.variables["LBM"] = self.options.lbm
-        tc.variables["PCX"] = self.options.pcx
-        tc.variables["PNG"] = self.options.with_libpng
-        tc.variables["PNM"] = self.options.pnm
-        tc.variables["SVG"] = self.options.svg
-        tc.variables["TGA"] = self.options.tga
-        tc.variables["TIF"] = self.options.with_libtiff
-        tc.variables["WEBP"] = self.options.with_libwebp
-        tc.variables["XCF"] = self.options.xcf
-        tc.variables["XPM"] = self.options.xpm
-        tc.variables["XV"] = self.options.xv
+        tc.variables["SDL2IMAGE_BMP"] = self.options.bmp
+        tc.variables["SDL2IMAGE_GIF"] = self.options.gif
+        tc.variables["SDL2IMAGE_BACKEND_IMAGEIO"] = self.options.get_safe("imageio", False)
+        tc.variables["SDL2IMAGE_JPG"] = self.options.with_libjpeg
+        tc.variables["SDL2IMAGE_LBM"] = self.options.lbm
+        tc.variables["SDL2IMAGE_PCX"] = self.options.pcx
+        tc.variables["SDL2IMAGE_PNG"] = self.options.with_libpng
+        tc.variables["SDL2IMAGE_PNM"] = self.options.pnm
+        tc.variables["SDL2IMAGE_SVG"] = self.options.svg
+        tc.variables["SDL2IMAGE_TGA"] = self.options.tga
+        tc.variables["SDL2IMAGE_TIF"] = self.options.with_libtiff
+        tc.variables["SDL2IMAGE_WEBP"] = self.options.with_libwebp
+        tc.variables["SDL2IMAGE_XCF"] = self.options.xcf
+        tc.variables["SDL2IMAGE_XPM"] = self.options.xpm
+        tc.variables["SDL2IMAGE_XV"] = self.options.xv
         # TODO: https://github.com/bincrafters/community/pull/1317#pullrequestreview-584847138
-        tc.variables["TIF_DYNAMIC"] = self.options.get_safe("with_libtiff_dynamic_load", False)
-        tc.variables["JPG_DYNAMIC"] = self.options.get_safe("with_libjpeg_dynamic_load", False)
-        tc.variables["PNG_DYNAMIC"] = self.options.get_safe("with_libpng_dynamic_load", False)
-        tc.variables["WEBP_DYNAMIC"] = self.options.get_safe("with_libwebp_dynamic_load", False)
+        tc.variables["SDL2IMAGE_TIF_SHARED"] = self.options.get_safe("with_libtiff_dynamic_load", False)
+        tc.variables["SDL2IMAGE_JPG_SHARED"] = self.options.get_safe("with_libjpeg_dynamic_load", False)
+        tc.variables["SDL2IMAGE_PNG_SHARED"] = self.options.get_safe("with_libpng_dynamic_load", False)
+        tc.variables["SDL2IMAGE_WEBP_SHARED"] = self.options.get_safe("with_libwebp_dynamic_load", False)
         tc.variables["SDL_IS_SHARED"] = self.dependencies["sdl"].options.shared
         tc.generate()
         cd = CMakeDeps(self)
