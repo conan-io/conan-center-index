@@ -1,7 +1,9 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
 from conan.tools.microsoft import msvc_runtime_flag
 import os
+
+required_conan_version = ">=1.53.0"
 
 class Opene57Conan(ConanFile):
     name = "opene57"
@@ -85,26 +87,33 @@ class Opene57Conan(ConanFile):
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["PROJECT_VERSION"] = self.version
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
-        self._cmake.definitions["BUILD_TOOLS"] = self.options.with_tools
-        self._cmake.definitions["BUILD_TESTS"] = False
+        self._cmake = CMakeToolchain(self)
+        self._cmake.variables["PROJECT_VERSION"] = self.version
+        self._cmake.variables["BUILD_EXAMPLES"] = False
+        self._cmake.variables["BUILD_TOOLS"] = self.options.with_tools
+        self._cmake.variables["BUILD_TESTS"] = False
         if self.settings.compiler == "Visual Studio":
-            self._cmake.definitions["BUILD_WITH_MT"] = "MT" in msvc_runtime_flag(self)
+            self._cmake.variables["BUILD_WITH_MT"] = "MT" in msvc_runtime_flag(self)
         else:
-            self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+            self._cmake.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
+    
+    def generate(self):
+        deps = CMakeDeps(self)
+        deps.generate()
+        cmake = self._configure_cmake()
+        cmake.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_folder=self._build_subfolder)
         cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="LICENSE.libE57", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
         os.remove(os.path.join(self.package_folder, "CHANGELOG.md"))
         conan.tools.files.rm(os.path.join(self.package_folder, "bin"), "*.dll")
