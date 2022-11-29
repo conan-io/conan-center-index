@@ -77,13 +77,13 @@ class SDLImageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("sdl/2.0.20")
+        self.requires("sdl/2.26.0")
         if self.options.with_libtiff:
             self.requires("libtiff/4.4.0")
         if self.options.with_libjpeg:
             self.requires("libjpeg/9e")
         if self.options.with_libpng:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.39")
         if self.options.with_libwebp:
             self.requires("libwebp/1.2.4")
 
