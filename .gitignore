@@ -12,6 +12,7 @@ CMakeUserPresets.json
 
 # IDEs
 .idea
+.vs
 .vscode
 .project
 .pydevproject
@@ -129,3 +130,10 @@ venv.bak/
 
 # scons build files
 *.dblite
+
+# vim temp files
+.*.sw?
+.sw?
+Session.vim
+*~
+.undodir

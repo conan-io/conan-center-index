@@ -1,34 +1,27 @@
-cmake_minimum_required(VERSION 3.4)
-project(heatshrink C)
+cmake_minimum_required(VERSION 3.8)
+project(heatshrink LANGUAGES C)
 
-include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup()
+add_library(heatshrink
+    ${HEATSHRINK_SRC_DIR}/heatshrink_decoder.c
+    ${HEATSHRINK_SRC_DIR}/heatshrink_encoder.c
+)
+target_include_directories(heatshrink PUBLIC ${HEATSHRINK_SRC_DIR})
+set_target_properties(heatshrink PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+target_compile_features(heatshrink PRIVATE c_std_99)
 
-if (WIN32)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif()
-
-SET(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder")
-
-SET (CMAKE_C_STANDARD 99)
-LIST(APPEND SRC_HEATSHRINK
-    "${SOURCE_DIR}/heatshrink_decoder.c"
-    "${SOURCE_DIR}/heatshrink_encoder.c")
-
-include_directories(${SOURCE_DIR})
-
-add_library(heatshrink ${SRC_HEATSHRINK})
-
+include(GNUInstallDirs)
 install(
     FILES
-        ${SOURCE_DIR}/heatshrink_common.h
-        ${SOURCE_DIR}/heatshrink_config.h
-        ${SOURCE_DIR}/heatshrink_decoder.h
-        ${SOURCE_DIR}/heatshrink_encoder.h
+        ${HEATSHRINK_SRC_DIR}/heatshrink_common.h
+        ${HEATSHRINK_SRC_DIR}/heatshrink_config.h
+        ${HEATSHRINK_SRC_DIR}/heatshrink_decoder.h
+        ${HEATSHRINK_SRC_DIR}/heatshrink_encoder.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(
+    TARGETS heatshrink
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)

@@ -48,21 +48,20 @@ class OpenApiGeneratorConan(ConanFile):
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, pattern="openapi-generator.jar", dst=os.path.join(self.package_folder, "res"), src=self.source_folder)
-        jar = os.path.join(self.package_folder, "res", "openapi-generator.jar")
         if self.info.settings.os == "Windows":
             save(self,
                  path=os.path.join(self.package_folder, "bin", "openapi-generator.bat"),
-                 content=f"""\
-                         java -jar {jar} %*
+                 content="""\
+                         java -classpath %CLASSPATH% org.openapitools.codegen.OpenAPIGenerator %*
                          """
                  )
         else:
             bin_path = os.path.join(self.package_folder, "bin", "openapi-generator")
             save(self,
                  path=bin_path,
-                 content=f"""\
+                 content="""\
                          #!/bin/bash
-                         java -jar {jar} $@
+                         java -classpath $CLASSPATH org.openapitools.codegen.OpenAPIGenerator $@
                          """
                  )
             st = os.stat(bin_path)
@@ -74,3 +73,8 @@ class OpenApiGeneratorConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
+        jar = os.path.join(self.package_folder, "res", "openapi-generator.jar")
+        self.runenv_info.prepend_path("CLASSPATH", jar)
+
+        # TODO: Legacy, to be removed on Conan 2.0
+        self.env_info.CLASSPATH.append(jar)

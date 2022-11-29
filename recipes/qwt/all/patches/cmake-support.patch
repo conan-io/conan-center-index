@@ -104,7 +104,7 @@ index 0000000..004d4a3
 --- /dev/null
 +++ b/CMakeLists.txt
 @@ -0,0 +1,127 @@
-+cmake_minimum_required(VERSION 3.16)
++cmake_minimum_required(VERSION 3.15)
 +
 +project(Qwt
 +  VERSION 6.2.0
