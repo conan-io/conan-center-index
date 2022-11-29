@@ -31,7 +31,7 @@ class QarchiveConan(ConanFile):
 
     @property
     def _qt_major(self):
-        return Version(self.deps_cpp_info["qt"].version).major
+        return Version(self.dependencies["qt"].ref.version).major
 
     def export_sources(self):
         export_conandata_patches(self)
