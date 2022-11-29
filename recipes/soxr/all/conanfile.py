@@ -61,6 +61,10 @@ class SoxrConan(ConanFile):
         cmake = CMake(self)
         if is_msvc(self):
             cmake.definitions["BUILD_SHARED_RUNTIME"] = msvc_runtime_flag(self) == "MD"
+        # Disable SIMD based resample engines for Apple Silicon architecture
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            cmake.definitions["WITH_CR32S"] = False
+            cmake.definitions["WITH_CR64S"] = False
         cmake.definitions["BUILD_TESTS"] = False
         cmake.definitions["WITH_OPENMP"] = self.options.with_openmp
         cmake.definitions["WITH_LSR_BINDINGS"] = self.options.with_lsr_bindings
