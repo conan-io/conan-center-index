@@ -1,9 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
 
@@ -25,7 +25,7 @@ class PackageConan(ConanFile):
     no_copy_source = True  # do not copy sources to build folder for header only projects, unless, need to apply patches
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 14
 
     # in case the project requires C++14/17/20/... the minimum compiler version should be listed
@@ -50,29 +50,27 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         # prefer self.requires method instead of requires attribute
-        self.requires("dependency/0.8.1")
+        # direct dependencies of header only libs are always transitive since they are included in public headers
+        self.requires("dependency/0.8.1", transitive_headers=True)
 
     # same package ID for any package
     def package_id(self):
         self.info.clear()
 
     def validate(self):
-        # compiler subsettings are not available when building with self.info.clear()
-        if self.info.settings.get_safe("compiler.cppstd"):
+        # FIXME: `self.settings` is not available in 2.0 but there are plenty of open issues about
+        # the migration point. For now we are only going to write valid 1.x recipes until we have a proper answer
+        if self.settings.compiler.get_safe("cppstd"):
             # validate the minimum cpp standard supported when installing the package. For C++ projects only
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.get_safe("compiler.version")) < minimum_version:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
         # in case it does not work in another configuration, it should validated here too
-        if self.info.settings.os == "Windows":
+        if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} can not be used on Windows.")
-
-    # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
-    def build_requirements(self):
-        self.tool_requires("tool/x.y.z")
 
     def source(self):
         # download source package and extract to source folder
@@ -96,9 +94,7 @@ class PackageConan(ConanFile):
     def package_info(self):
         # folders not used for header-only
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # if package has an official FindPACKAGE.cmake listed in https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules
         # examples: bzip2, freetype, gdal, icu, libcurl, libjpeg, libpng, libtiff, openssl, sqlite3, zlib...
@@ -112,9 +108,7 @@ class PackageConan(ConanFile):
 
         # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("pthread")
-            self.cpp_info.system_libs.append("dl")
+            self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "PACKAGE"

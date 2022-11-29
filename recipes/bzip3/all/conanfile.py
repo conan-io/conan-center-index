@@ -67,7 +67,7 @@ class BZip3Conan(ConanFile):
         tc.variables["BZIP3_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.variables["BZIP3_WITH_PTHREAD"] = self.options.get_safe("with_thread", False)
         tc.variables["BZIP3_WITH_UTIL"] = self.options.with_util
-        tc.variables["VERSION"] = self.version
+        tc.variables["BZIP3_VERSION"] = self.version
         tc.generate()
 
     def build(self):
@@ -77,7 +77,7 @@ class BZip3Conan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 

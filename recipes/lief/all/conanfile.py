@@ -89,6 +89,19 @@ class LiefConan(ConanFile):
         if self.options.with_frozen:
             self.requires("frozen/1.1.1")
 
+        if Version(self.version) < "0.12.2":
+            self.requires("rang/3.2")
+        self.requires("mbedtls/3.2.1")
+        if self.options.with_json:
+            self.requires("nlohmann_json/3.11.2")
+        if self.options.with_frozen:
+            self.requires("frozen/1.1.1")
+        if Version(self.version) >= "0.12.2":
+            self.requires("utfcpp/3.2.1")
+            self.requires("spdlog/1.10.0")
+            self.requires("boost/1.80.0")
+            self.requires("tcb-span/cci.20220616")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
@@ -109,6 +122,15 @@ class LiefConan(ConanFile):
         tc.variables["LIEF_DOC"] = False
         tc.variables["LIEF_LOGGING"] = False
         tc.variables["LIEF_PYTHON_API"] = False
+        if Version(self.version) >= "0.12.2":
+            tc.variables["LIEF_USE_CCACHE"] = False
+            tc.variables["LIEF_OPT_MBEDTLS_EXTERNAL"] = True
+            tc.variables["LIEF_OPT_NLOHMANN_JSON_EXTERNAL"] = True
+            tc.variables["LIEF_OPT_FROZEN_EXTERNAL"] = True
+            tc.variables["LIEF_OPT_UTFCPP_EXTERNAL"] = True
+            tc.variables["LIEF_EXTERNAL_SPDLOG"] = True
+            tc.variables["LIEF_OPT_EXTERNAL_LEAF"] = True
+            tc.variables["LIEF_OPT_EXTERNAL_SPAN"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -125,6 +147,7 @@ class LiefConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = ["LIEF"]

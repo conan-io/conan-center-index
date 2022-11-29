@@ -59,10 +59,6 @@ class PackageConan(ConanFile):
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
 
-        bin_folder = os.path.join(self.package_folder, "bin")
-        # In case need to find packaged tools when building a package
-        self.buildenv_info.append("PATH", bin_folder)
-        # In case need to find packaged tools at runtime
-        self.runenv_info.append("PATH", bin_folder)
         # TODO: Legacy, to be removed on Conan 2.0
+        bin_folder = os.path.join(self.package_folder, "bin")
         self.env_info.PATH.append(bin_folder)

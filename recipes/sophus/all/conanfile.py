@@ -26,7 +26,9 @@ class SophusConan(ConanFile):
 
     def requirements(self):
         self.requires("eigen/3.4.0")
-        if self.options.with_fmt and Version(self.version) >= Version("22.04.1"):
+        if self.options.with_fmt and Version(self.version) >= Version("22.10"):
+            self.requires("fmt/9.1.0")
+        elif self.options.with_fmt and Version(self.version) >= Version("22.04.1"):
             self.requires("fmt/8.1.1")
 
     def package_id(self):

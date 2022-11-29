@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.files import get, copy, replace_in_file, rm
+from conan.tools.files import get, copy, replace_in_file, rm, rmdir
 import os
 
 
@@ -42,6 +42,9 @@ class PyBind11Conan(ConanFile):
         cmake.install()
         for filename in ["pybind11Targets.cmake", "pybind11Config.cmake", "pybind11ConfigVersion.cmake"]:
             rm(self, filename, os.path.join(self.package_folder, "lib", "cmake", "pybind11"))
+
+        rmdir(self, os.path.join(self.package_folder, "share"))
+
         replace_in_file(self, os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Common.cmake"),
                               "if(TARGET pybind11::lto)",
                               "if(FALSE)")

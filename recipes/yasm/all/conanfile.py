@@ -71,6 +71,10 @@ class YASMConan(ConanFile):
     def _generate_cmake(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["YASM_BUILD_TESTS"] = False
+        # Don't build shared libraries because:
+        # 1. autotools doesn't build shared libs either
+        # 2. the shared libs don't support static libc runtime (MT and such)
+        tc.cache_variables["BUILD_SHARED_LIBS"] = False
         tc.generate()
 
     def generate(self):
@@ -103,6 +107,7 @@ class YASMConan(ConanFile):
             # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
             autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
             rmdir(self, os.path.join(self.package_folder, "share"))
+            rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.includedirs = []

@@ -6,4 +6,3 @@ sources:
 patches:
   "2.01":
     - patch_file: "patches/2.01-0001-add-install.patch"
-      base_path: "source_subfolder"

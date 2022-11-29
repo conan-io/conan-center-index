@@ -15,6 +15,9 @@ This file is intended to provide all the commands you need to run in order to be
     * [Try it yourself](#try-it-yourself)
   * [Debugging Failed Builds](#debugging-failed-builds)
   * [Running the Python Linters](#running-the-python-linters)
+  * [Running the YAML Linters](#running-the-yaml-linters)
+    * [Yamllint](#yamllint)
+    * [Yamlschema](#yamlschema)
   * [Testing the different `test__package`](#testing-the-different-test__package)
   * [Testing more environments](#testing-more-environments)
   * [Using Conan 2.0](#using-conan-20)
@@ -44,6 +47,8 @@ conan config install https://github.com/conan-io/hooks.git -sf hooks -tf hooks
 conan config set hooks.conan-center
 ```
 
+> **Note**: Hooks are generally for package correctness and the pylinters are for the recipe syntax
+
 The hooks will show error messages but the `conan create` won’t fail unless you export the environment variable `CONAN_HOOK_ERROR_LEVEL=40`.
 All hooks checks will print a similar message:
 
@@ -62,9 +67,9 @@ conan config install
 
 ## Basic Commands
 
-We recommend working from the `recipes/project` folder itself. You can learn about the [recipe file structure](how_to_add_packages.md#recipe-files-structure) to understand the folder and files located there.
+We recommend working from the `recipes/project` folder itself. You can learn about the [recipe file structure](adding_packages/README.md#recipe-files-structure) to understand the folder and files located there.
 
-> **Note**: You can only change one recipe per pull request, and working from the [_recipe folder_](how_to_add_packages.md#the-recipe-folder-conanfilepy) will help prevent making a few mistakes. The default for this folder is `all`, follow the link above to learn more.
+> **Note**: You can only change one recipe per pull request, and working from the [_recipe folder_](adding_packages/README.md#the-recipe-folder-conanfilepy) will help prevent making a few mistakes. The default for this folder is `all`, follow the link above to learn more.
 
 The [entire workflow of a recipe](https://docs.conan.io/en/latest/developing_packages/package_dev_flow.html) can be execute with the [`conan create`](https://docs.conan.io/en/latest/reference/commands/creator/create.html). This should look like:
 
@@ -92,12 +97,13 @@ For ConanCenter Hook errors, go to the [Error Knowledge Base](error_knowledge_ba
 To test with the same environment, the [build images](supported_platforms_and_configurations.md#build-images) are available.
 Instructions for using these images can be found in [Testing more environments](#testing-more-environments) section.
 
-In ConanCenterIndex, the most common failure point is upstream
-build script that are tailored to their specific use cases. It's not uncommon to [patch build scripts](policy_patching.md#policy-about-patching) but make sure to read the [patch policy](policy_patching.md). You are encouraged to submit pull requests upstream.
+In ConanCenterIndex, the most common failure point is upstream build scripts tailored to their specific use cases.
+It's not uncommon to [patch build scripts](adding_packages/sources_and_patches.md#rules) but make sure to read the
+[patch policy](adding_packages/sources_and_patches.md#policy-about-patching). You are encouraged to submit pull requests upstream.
 
 ## Running the Python Linters
 
-Linters are always executed by Github actions to validate parts of your recipe, for instance, if it uses migrated Conan tools imports.
+Linters are always executed by GitHub Actions to validate parts of your recipe, for instance, if it uses migrated Conan tools imports.
 
 It is possible to run the linter locally the same way it is being run [using Github actions](../.github/workflows/linter-conan-v2.yml) by:
 
@@ -122,6 +128,52 @@ It is possible to run the linter locally the same way it is being run [using Git
 
   # Lint the test_package
   pylint --rcfile=linter/pylintrc_testpackage recipes/fmt/all/test_package/conanfile.py
+  ```
+
+## Running the YAML Linters
+
+There's two levels of YAML validation, first is syntax and the second is schema.
+The style rules are located in [`linter/yamllint_rules.yml`](../linter/yamllint_rules.yml) and are used to ensure consistence.
+The [`config.yml`](adding_packages/README.md#configyml) is required for the build infrastructure and the
+[`conandata.yml` patch fields](adding_packages/conandata_yml_format.md#patches-fields) have required elements that are enforced with
+schema validation. There's are to encourage the best possible quality of recipes and make reviewing faster.
+
+### Yamllint
+
+* (Recommended) Use a dedicated Python virtualenv.
+* Ensure you have required tools installed: `yamllint` (better to uses fixed versions)
+
+  ```sh
+  pip install yamllint==1.28
+  ```
+
+* Now you just need to execute the `yamllint` commands:
+
+  ```sh
+  # Lint a recipe:
+  yamllint --config-file linter/yamllint_rules.yml -f standard recipes/fmt/all/conanfile.py
+
+  # Lint the test_package (same command)
+  yamllint --config-file linter/yamllint_rules.yml -f standard recipes/fmt/all/test_package/conanfile.py
+  ```
+
+### Yamlschema
+
+* (Recommended) Use a dedicated Python virtualenv.
+* Ensure you have required tools installed: `strictyaml` and `argparse` (better to uses fixed versions)
+
+  ```sh
+  pip install strictyaml==1.16 argparse==1.4
+  ```
+
+* Now you just need to execute the validation scripts:
+
+  ```sh
+  # Lint a config.yml:
+  python3 linter/config_yaml_linter.py recipes/fmt/config.yml
+
+  # Lint a conandata.yml
+  python3 linter/conandata_yaml_linter.py recipes/fmt/all/conandata.yml
   ```
 
 ## Testing the different `test_*_package`

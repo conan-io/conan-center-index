@@ -1,15 +1,14 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.scm import Version
-from conan.tools.files import apply_conandata_patches, get, rmdir, replace_in_file, copy, rm
-from conan.tools.microsoft import is_msvc
-from conan.tools.build import cross_building
-from conan.tools.apple import is_apple_os
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
-
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.53.0"
 
 
 class LibpngConan(ConanFile):
@@ -56,8 +55,7 @@ class LibpngConan(ConanFile):
         return "ppc" in self.settings.arch
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -73,41 +71,23 @@ class LibpngConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
+
+    def validate(self):
+        if Version(self.version) < "1.6" and self.info.settings.arch == "armv8" and is_apple_os(self):
+            raise ConanInvalidConfiguration(f"{self.ref} currently does not building for {self.info.settings.os} {self.info.settings.arch}. Contributions are welcomed")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
-
-    def _patch_source(self):
-        if self.settings.os == "Windows":
-            if is_msvc(self):
-                if Version(self.version) <= "1.5.2":
-                    replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                          'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME}_static)',
-                                          'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME})')
-                else:
-                    replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                        'OUTPUT_NAME "${PNG_LIB_NAME}_static',
-                                        'OUTPUT_NAME "${PNG_LIB_NAME}')
-            else:
-                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                      'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}',
-                                      'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/$<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}')
 
     @property
     def _neon_msa_sse_vsx_mapping(self):
@@ -126,9 +106,6 @@ class LibpngConan(ConanFile):
         if "ppc" in self.settings.arch:
             return "powerpc"
         return str(self.settings.arch)
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -157,13 +134,31 @@ class LibpngConan(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
 
-    def validate(self):
-        if Version(self.version) < "1.6" and self.info.settings.arch == "armv8" and is_apple_os(self):
-            raise ConanInvalidConfiguration(f"{self.ref} could not be cross build on Mac.")
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        if self.settings.os == "Windows":
+            if Version(self.version) <= "1.5.2":
+                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                      'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME}_static)',
+                                      'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME})')
+            else:
+                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                    'OUTPUT_NAME "${PNG_LIB_NAME}_static',
+                                    'OUTPUT_NAME "${PNG_LIB_NAME}')
+            if not is_msvc(self):
+                if Version(self.version) < "1.6.38":
+                    src_text = 'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}'
+                else:
+                    src_text = '''COMMAND "${CMAKE_COMMAND}"
+                                 -E copy_if_different
+                                 $<TARGET_LINKER_FILE_NAME:${S_TARGET}>
+                                 $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}'''
+                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                      src_text,
+                                      'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/$<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}')
 
     def build(self):
-        apply_conandata_patches(self)
-        self._patch_source()
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -183,18 +178,19 @@ class LibpngConan(ConanFile):
     def package_info(self):
         major_min_version = f"{Version(self.version).major}{Version(self.version).minor}"
 
-        # TODO: Remove after Conan 2.0
-        self.cpp_info.names["cmake_find_package"] = "PNG"
-        self.cpp_info.names["cmake_find_package_multi"] = "PNG"
-
+        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "PNG")
         self.cpp_info.set_property("cmake_target_name", "PNG::PNG")
         self.cpp_info.set_property("pkg_config_name", "libpng")
         self.cpp_info.set_property("pkg_config_aliases", [f"libpng{major_min_version}"])
 
         prefix = "lib" if is_msvc(self) else ""
-        suffix = major_min_version if is_msvc(self) else ""
-        suffix += "d" if is_msvc(self) and self.settings.build_type == "Debug" else ""
+        suffix = major_min_version if self.settings.os == "Windows" else ""
+        suffix += "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = [f"{prefix}png{suffix}"]
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
+
+        # TODO: Remove after Conan 2.0
+        self.cpp_info.names["cmake_find_package"] = "PNG"
+        self.cpp_info.names["cmake_find_package_multi"] = "PNG"

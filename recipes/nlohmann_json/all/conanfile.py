@@ -11,11 +11,15 @@ class NlohmannJsonConan(ConanFile):
     name = "nlohmann_json"
     homepage = "https://github.com/nlohmann/json"
     description = "JSON for Modern C++ parser and generator."
-    topics = ("jsonformoderncpp", "nlohmann_json", "json", "header-only")
+    topics = "json", "header-only"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+
+    @property
+    def _minimum_cpp_standard(self):
+        return 11
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -24,12 +28,15 @@ class NlohmannJsonConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        pass
 
     def build(self):
         pass

@@ -1,10 +1,11 @@
 import os
 
 from conan import ConanFile
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, apply_conandata_patches, copy, rmdir, export_conandata_patches
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.layout import basic_layout
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
 
@@ -13,7 +14,7 @@ class FmtConan(ConanFile):
     name = "fmt"
     homepage = "https://github.com/fmtlib/fmt"
     description = "A safe and fast alternative to printf and IOStreams."
-    topics = ("fmt", "format", "iostream", "printf")
+    topics = ("format", "iostream", "printf")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
@@ -34,7 +35,7 @@ class FmtConan(ConanFile):
 
     @property
     def _has_with_os_api_option(self):
-        return Version(str(self.version)) >= "7.0.0"
+        return Version(self.version) >= "7.0.0"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -66,11 +67,20 @@ class FmtConan(ConanFile):
 
     def configure(self):
         if self.options.header_only:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
             del self.options.shared
-            del self.options.with_os_api
+            try:
+                del self.options.with_os_api
+            except Exception:
+                pass
         elif self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
 
     def package_id(self):
         if self.info.options.header_only:
@@ -78,8 +88,12 @@ class FmtConan(ConanFile):
         else:
             del self.info.options.with_fmt_alias
 
+    def validate(self):
+        if self.info.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, 11)
+
     def source(self):
-        get(self, **self.conan_data["sources"][str(self.version)],
+        get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
     def build(self):
