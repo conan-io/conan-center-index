@@ -21,7 +21,7 @@ Both methods often use build helpers to build binaries and install them into the
 
 * Settings from profile should be honored (`build_type`, `compiler.libcxx`, `compiler.cppstd`, `compiler.runtime` etc).
 
-* These env vars from profile (`[env]` for conan v1 recipes, `[buildenv]` for conan v2 recipes) should be honored and properly propagated to underlying build system during the build: `CC`, `CXX`, `AR` `LD`. They should be curated on the fly if underlying build system expects a specific format (no spaces in path, forward slashes instead of back slash, etc).
+* These env vars from profile (`[env]` for conan v1 recipes, `[buildenv]` for conan v2 recipes) should be honored and properly propagated to underlying build system during the build: `CC`, `CXX`, `AR` `LD`. They should be curated on the fly if underlying build system expects a specific format (no spaces in path, forward slash instead of back slash, etc).
 
 * These compiler and linker conf from profile should be honored and propagated to underlying build system during the build:
   * `tools.build:cflags`
