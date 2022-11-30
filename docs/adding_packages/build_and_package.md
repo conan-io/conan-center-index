@@ -40,9 +40,9 @@ Both methods often use build helpers to build binaries and install them into the
 
 ## Package
 
-* CMake config files must be removed (they will be generated for consumers by `cmake_find_package`, `cmake_find_package_multi`, or `CMakeDeps` generators). Use `rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))` or `rm(self, "*.cmake", os.path.join(self.package_folder, "lib"))`.
+* CMake config files must be removed (they will be generated for consumers by `cmake_find_package`, `cmake_find_package_multi`, or `CMakeDeps` generators).
 
-* pkg-config files must be removed (they will be generated for consumers by `pkg_config` or `PkgConfigDeps` generators). Use `rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))` or `rm(self, "*.pc", os.path.join(self.package_folder, "lib"))`.
+* pkg-config files must be removed (they will be generated for consumers by `pkg_config` or `PkgConfigDeps` generators).
 
 * On *nix systems, executables and shared libraries should have empty `RPATH`/`RUNPATH`/`LC_RPATH`.
 
