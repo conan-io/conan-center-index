@@ -30,6 +30,8 @@ Both methods often use build helpers to build binaries and install them into the
   * `tools.build:sharedlinklags`
   * `tools.build:exelinkflags`
 
+* `tools.build:jobs` conf from profile should be honored, except if it leads to race conditions.
+
 ## Package
 
 * CMake config files must be removed (they will be generated for consumers by `cmake_find_package`, `cmake_find_package_multi`, or `CMakeDeps` generators). Use `rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))` or `rm(self, "*.cmake", os.path.join(self.package_folder, "lib"))`.
