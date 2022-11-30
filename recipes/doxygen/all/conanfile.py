@@ -90,6 +90,10 @@ class DoxygenConan(ConanFile):
         deps.generate()
 
     def build(self):
+        if os.path.isfile("Findflex.cmake"):
+            os.unlink("Findflex.cmake")
+        if os.path.isfile("Findbison.cmake"):
+            os.unlink("Findbison.cmake")
         apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
