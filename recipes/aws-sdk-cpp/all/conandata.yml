@@ -1,29 +1,37 @@
 sources:
-  "1.9.234":
-    url: "https://github.com/aws/aws-sdk-cpp/archive/1.9.234.tar.gz"
-    sha256: "52e36cf568fe0b2a0fc82a9333c0b31ba843db16670f4ccbb7b9fd142f1b00a5"
-  "1.9.100":
-    url: "https://github.com/aws/aws-sdk-cpp/archive/1.9.100.tar.gz"
-    sha256: "f0930d14ec92b9ddf1e3c966d9a3fe70d2a01b80e79e3e76da78d108bb81e5c4"
-  "1.8.130":
-    url: "https://github.com/aws/aws-sdk-cpp/archive/1.8.130.tar.gz"
-    sha256: "5dd09baa28d3f6f4fb03fbba1a4269724d79bcca3d47752cd3e15caf97276bda"
+  '1.10.17':
+    url: 'https://github.com/aws/aws-sdk-cpp/archive/refs/tags/1.10.17.tar.gz'
+    sha256: '0fdd3cf9f8f95ca8f82da6f05af8e5a2dfaf9814d2bb689341283cc0627a48b6'
+  '1.9.234':
+    url: 'https://github.com/aws/aws-sdk-cpp/archive/1.9.234.tar.gz'
+    sha256: '52e36cf568fe0b2a0fc82a9333c0b31ba843db16670f4ccbb7b9fd142f1b00a5'
+  '1.9.100':
+    url: 'https://github.com/aws/aws-sdk-cpp/archive/1.9.100.tar.gz'
+    sha256: 'f0930d14ec92b9ddf1e3c966d9a3fe70d2a01b80e79e3e76da78d108bb81e5c4'
+  '1.8.130':
+    url: 'https://github.com/aws/aws-sdk-cpp/archive/1.8.130.tar.gz'
+    sha256: '5dd09baa28d3f6f4fb03fbba1a4269724d79bcca3d47752cd3e15caf97276bda'
 patches:
-  "1.9.234":
+  '1.10.17':
+    - base_path: source_subfolder
+      patch_file: patches/1.10.17-0001-disable-sort-links.patch
+    - base_path: source_subfolder
+      patch_file: patches/1.9.100-0002-aws-plugin-conf.patch
+  '1.9.234':
     - base_path: source_subfolder
       patch_file: patches/1.9.234-0001-issue-1816.patch
     - base_path: source_subfolder
       patch_file: patches/1.9.234-0002-disable-sort-links.patch
     - base_path: source_subfolder
       patch_file: patches/1.9.100-0002-aws-plugin-conf.patch
-  "1.9.100":
+  '1.9.100':
     - base_path: source_subfolder
       patch_file: patches/1.9.100-0001-disable-sort-links.patch
     - base_path: source_subfolder
       patch_file: patches/1.9.100-0002-aws-plugin-conf.patch
     - base_path: source_subfolder
       patch_file: patches/1.9.100-0003-issue-1816.patch
-  "1.8.130":
+  '1.8.130':
     - base_path: source_subfolder
       patch_file: patches/1.8.130-0001-disable-sort-links.patch
     - base_path: source_subfolder
