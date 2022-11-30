@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, patch
+from conan.tools.files import get, apply_conandata_patches
 from conan.tools.scm import Version
 from conans import CMake
 from conan.errors import ConanInvalidConfiguration
@@ -55,17 +55,18 @@ class DoxygenConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.cppstd
+
     def requirements(self):
         if self.options.enable_search:
             self.requires("xapian-core/1.4.19")
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             self.build_requires("winflexbison/2.5.24")
         else:
             self.build_requires("flex/2.6.4")
-            self.build_requires("bison/3.7.1")
+            self.build_requires("bison/3.8.2")
 
     def validate(self):
         minimum_compiler_version = self._minimum_compiler_version()
@@ -106,8 +107,7 @@ class DoxygenConan(ConanFile):
             os.unlink("Findflex.cmake")
         if os.path.isfile("Findbison.cmake"):
             os.unlink("Findbison.cmake")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(self, **patch)
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 
