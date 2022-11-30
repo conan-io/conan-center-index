@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conan.tools.build import stdcpp_library
+from conans.tools import stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, collect_libs, rm, rename
@@ -110,7 +110,7 @@ class ProjConan(ConanFile):
                 else:
                     cmake_sqlite_call = "generate_proj_db.cmake"
                     pattern = "\"${EXE_SQLITE3}\""
-                lib_paths = self.dependencies["sqlite3"].cpp_info.libdirs
+                lib_paths = self.dependencies.build["sqlite3"].cpp_info.libdirs
                 replace_in_file(self,
                     os.path.join(self.source_folder, "data", cmake_sqlite_call),
                     f"COMMAND {pattern}",
