@@ -65,7 +65,7 @@ Both methods often use build helpers to build binaries and install them into the
   lib/
     - static libs
     - shared libs (not Windows)
-    - import libs of dll (Windows only))
+    - import libs of dll (Windows only)
   res/
     - resource files
   ```
