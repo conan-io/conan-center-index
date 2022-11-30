@@ -175,7 +175,10 @@ class VerilatorConan(ConanFile):
         shutil.move(os.path.join(self.package_folder, "bin", "share", "verilator", "include"), 
                     os.path.join(self.package_folder))
 
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin", "share", "verilator", "bin"), "*")
+        shutil.move(os.path.join(self.package_folder, "bin", "share", "verilator", "bin", "verilator_ccache_report"), 
+                    os.path.join(self.package_folder, "bin", "verilator_ccache_report"))
+        shutil.move(os.path.join(self.package_folder, "bin", "share", "verilator", "bin", "verilator_includer"), 
+                    os.path.join(self.package_folder, "bin", "verilator_includer"))
         rmdir(self, os.path.join(self.package_folder, "bin", "share", "verilator", "bin"))
 
     def package_id(self):
