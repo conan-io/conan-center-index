@@ -98,26 +98,6 @@ class ProjConan(ConanFile):
                                   "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)",
                                   "")
 
-        # Aggressive workaround against SIP on macOS, to handle sqlite3 executable
-        # linked to shared sqlite3 lib
-        if is_apple_os(self):
-            # TODO: no hope for 2 profiles, wait for stable self.dependencies
-            #       because we want absolute lib paths of build profile actually
-            if not hasattr(self, "settings_build"):
-                if Version(self.version) < "8.1.0":
-                    cmake_sqlite_call = "CMakeLists.txt"
-                    pattern = "${EXE_SQLITE3}"
-                else:
-                    cmake_sqlite_call = "generate_proj_db.cmake"
-                    pattern = "\"${EXE_SQLITE3}\""
-                lib_paths = self.dependencies.build["sqlite3"].cpp_info.libdirs
-                replace_in_file(self,
-                    os.path.join(self.source_folder, "data", cmake_sqlite_call),
-                    f"COMMAND {pattern}",
-                    f"COMMAND ${{CMAKE_COMMAND}} -E env \"DYLD_LIBRARY_PATH={':'.join(lib_paths)}\" {pattern}"
-                    ),
-                )
-
         # unvendor nlohmann_json
         if Version(self.version) < "8.1.0":
             rmdir(self, os.path.join(self.source_folder, "include", "proj", "internal", "nlohmann"))
