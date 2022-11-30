@@ -21,9 +21,9 @@ Both methods often use build helpers to build binaries and install them into the
 
 * Settings from profile should be honored (`build_type`, `compiler.libcxx`, `compiler.cppstd`, `compiler.runtime` etc).
 
-* These env vars from profile (`[env]` for conan v1 recipes, `[buildenv]` for conan v2 recipes) should be honored and properly propagated to underlying build system during the build: `CC`, `CXX`, `AR` `LD`. They should be curated on the fly if underlying build system expects a specific format (no spaces in path, forward slash instead of back slash, etc).
+* These env vars from host profile (`[env]` for conan v1 recipes, `[buildenv]` for conan v2 recipes) should be honored and properly propagated to underlying build system during the build: `CC`, `CXX`, `AR` `LD`. They should be curated on the fly if underlying build system expects a specific format (no spaces in path, forward slash instead of back slash, etc).
 
-* These compiler and linker conf from profile should be honored and propagated to underlying build system during the build:
+* These compiler and linker conf from host profile should be honored and propagated to underlying build system during the build:
   * `tools.build:cflags`
   * `tools.build:cxxflags`
   * `tools.build:defines`
@@ -33,7 +33,9 @@ Both methods often use build helpers to build binaries and install them into the
 
 * If host OS is Apple OS family (`macOS`/`iOS`/`watchOS`/`tvOS`), `-headerpad_max_install_names` flag should be passed to linker, except if host OS is `iOS`/`watchOS`/`tvOS` and `tools.apple:enable_bitcode` is enabled.
 
-* `tools.build:jobs` conf from profile should be honored, except if it leads to race conditions (build robustness has precedence over build speed).
+* Multithread build (if supported by underlying build system):
+  * if some steps are sensitive to race conditions, monothread should be enforced.
+  * otherwise multithreaded build should be enabled with a number of cores controlled by `tools.build:jobs` conf from host profile if it is set, otherwise to all cores of build machine.
 
 ## Package
 
