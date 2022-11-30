@@ -100,7 +100,7 @@ class DoxygenConan(ConanFile):
         self._cmake.definitions["use_libc++"] = self.settings.compiler.get_safe("libcxx") == "libc++"
         self._cmake.definitions["win_static"] = "MT" in self.settings.compiler.get_safe("runtime", "")
         self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        return self._cmake 
 
     def build(self):
         if os.path.isfile("Findflex.cmake"):
