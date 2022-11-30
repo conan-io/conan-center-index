@@ -33,7 +33,7 @@ Both methods often use build helpers to build binaries and install them into the
 
 * If host OS is Apple OS family (`macOS`/`iOS`/`watchOS`/`tvOS`), `-headerpad_max_install_names` flag should be passed to linker, except if host OS is `iOS`/`watchOS`/`tvOS` and `tools.apple:enable_bitcode` is enabled.
 
-* `tools.build:jobs` conf from profile should be honored, except if it leads to race conditions.
+* `tools.build:jobs` conf from profile should be honored, except if it leads to race conditions (build robustness has precedence over build speed).
 
 ## Package
 
