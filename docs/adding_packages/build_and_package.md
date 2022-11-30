@@ -22,7 +22,19 @@ Both methods often use build helpers to build binaries and install them into the
 
 * Settings from profile should be honored (`build_type`, `compiler.libcxx`, `compiler.cppstd`, `compiler.runtime` etc).
 
-* These env vars from host profile (`[env]` for conan v1 recipes, `[buildenv]` for conan v2 recipes) should be honored and properly propagated to underlying build system during the build: `CC`, `CXX`, `AR` `LD`. They should be curated on the fly if underlying build system expects a specific format (no spaces in path, forward slash instead of back slash, etc).
+* Compiler paths from host profile should be honored and properly propagated to underlying build system during the build:
+
+  | compiler type | conf / env var |
+  |---------------|----------------|
+  | C compiler | `cc` key of `tools.build:compiler_executables`, otherwise `CC` environment variable |
+  | C++ compiler | `cxx` key of `tools.build:compiler_executables`, otherwise `CXX` environment variable |
+  | Objective-C compiler | `objc` key of `tools.build:compiler_executables` |
+  | Objective-C++ compiler | `objcxx` key of `tools.build:compiler_executables` |
+  | Resource files compiler | `rc` key of `tools.build:compiler_executables`, otherwise `RC` environment variable |
+  | Archiver | `AR` environment variable |
+  | Linker | `LD` environment variable |
+
+  They should be curated on the fly if underlying build system expects a specific format (no spaces in path, forward slash instead of back slash, etc).
 
 * These compiler and linker conf from host profile should be honored and propagated to underlying build system during the build:
   * `tools.build:cflags`
