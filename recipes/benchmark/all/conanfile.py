@@ -61,7 +61,7 @@ class BenchmarkConan(ConanFile):
             return False
 
     def build_requirements(self):
-        if Version(self.version) >= "1.7.0" and not self._cmake_new_enough("3.16.3"):
+        if Version(self.version) >= "1.7.1" and not self._cmake_new_enough("3.16.3"):
             self.tool_requires("cmake/3.25.0")
 
     def source(self):
