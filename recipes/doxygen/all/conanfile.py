@@ -55,6 +55,7 @@ class DoxygenConan(ConanFile):
         else:
             self.tool_requires("flex/2.6.4")
             self.tool_requires("bison/3.8.2")
+            self.tool_requires("m4/1.4.19")
 
     def validate(self):
         minimum_compiler_version = self._minimum_compiler_version()
@@ -90,10 +91,6 @@ class DoxygenConan(ConanFile):
         deps.generate()
 
     def build(self):
-        if os.path.isfile("Findflex.cmake"):
-            os.unlink("Findflex.cmake")
-        if os.path.isfile("Findbison.cmake"):
-            os.unlink("Findbison.cmake")
         apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
