@@ -90,6 +90,8 @@ class LibtoolConan(ConanFile):
             "--enable-ltdl-install",
             "--datarootdir=/res"
         ]
+        if is_msvc(self) and self.settings.build_type == "Debug":
+            tc.extra_cflags.append("-FS")
         tc.generate()
 
         env = Environment()
