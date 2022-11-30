@@ -53,3 +53,19 @@ Both methods often use build helpers to build binaries and install them into the
 * Installed files must not contain absolute paths specific to build machine. Relative paths to other packages is also forbidden since relative paths of dependencies during build may not be the same for consumers. Hardcoded relative paths pointing to a location in the package itself are allowed.
 
 * Static and shared flavors of the same library must not be packaged together.
+
+* Usual package layout should be:
+
+  ```
+  bin/
+    - dll (Windows only)
+    - executables
+  include/
+    - headers
+  lib/
+    - static libs
+    - shared libs (not Windows)
+    - import libs of dll (Windows only))
+  res/
+    - resource files
+  ```
