@@ -13,9 +13,10 @@ Both methods often use build helpers to build binaries and install them into the
 
 * `build()` method should focus on build only, not installation. During the build, nothing should be written in `package` folder. Installation step should only occur in `package()` method.
 
-* The build itself should only rely on local files. Nothing should be downloaded from the internet during this step. If external files are required, they should come from `requirements` or `build_requirements` in addition to source files downloaded in `source()` or coming from the recipe itself.
+* The build itself should only rely on local files. Nothing should be downloaded from the internet during this step. If external files are required, they should come from `requirements` or `build_requirements` in addition to source files downloaded in `source()` or coming from the recipe itself through `export()` or `export_sources()`.
 
-* Except for CMake and a working build toolchain (compiler, linker, archiver, etc.), the recipe should not assume that any other build tool is installed on the user-build machine (like Meson, autotools, or pkg-config). On Windows, the recipe should not assume that a shell is available (like MSYS2). Therefore, if the build method requires additional tools, they should be added to `build_requirements()`.
+* Except for CMake, a working build toolchain (compiler, linker, archiver, etc.), and a "native generator" (`make` on *nix platforms, `mingw32-make` for MinGW, `MSBuild`/`NMake` for Visual Studio), the recipe should not assume that any other build tool is installed on the user-build machine (like Meson, autotools, or pkg-config). On Windows, the recipe should not assume that a shell is available (like MSYS2). Therefore, if the build method requires additional tools, they should be added to `build_requirements()`.
+  Tools explicitly marked as available by users through conf like `tools.gnu:make_program`, `tools.gnu:pkg_config`, `tools.microsoft.bash:path`, `tools.microsoft.bash:subsystem` should be taken into account to conditionally inject a build requirement (these conf should have precedence over build requirement equivalent hardcoded in the recipe).
 
 * It is forbidden to run other conan client commands during build. In other words, if upstream build files call conan under the hood (through `cmake-conan` for example or any other logic), this logic must be removed.
 
