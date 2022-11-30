@@ -51,3 +51,5 @@ Both methods often use build helpers to build binaries and install them into the
   * shared libs & executables: name field of each `LC_LOAD_DYLIB` load command should be `@rpath/<libdependencyfilename>` (except those refering to system libs or frameworks).
 
 * Installed files must not contain absolute paths specific to build machine. Relative paths to other packages is also forbidden since relative paths of dependencies during build may not be the same for consumers. Hardcoded relative paths pointing to a location in the package itself are allowed.
+
+* Static and shared flavors of the same library must not be packaged together.
