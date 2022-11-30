@@ -30,6 +30,10 @@ class PerfettoConan(ConanFile):
 
     short_paths = True
 
+    @property
+    def _minimum_cpp_standard(self):
+        return 11 if Version(self.version) < "31.0" else 17
+
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
         export_conandata_patches(self)
@@ -49,7 +53,7 @@ class PerfettoConan(ConanFile):
         if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < 7:
             raise ConanInvalidConfiguration ("perfetto requires gcc >= 7")
         if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._minimum_cpp_standard)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -59,6 +63,7 @@ class PerfettoConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["PERFETTO_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.variables["PERFETTO_DISABLE_LOGGING"] = self.options.disable_logging
+        tc.variables["PERFETTO_CXX_STANDARD"] = f"cxx_std_{self._minimum_cpp_standard}"
         tc.generate()
 
     def build(self):
