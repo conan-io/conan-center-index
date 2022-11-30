@@ -78,6 +78,7 @@ class BoostConan(ConanFile):
         "system_no_deprecated": [True, False],
         "asio_no_deprecated": [True, False],
         "filesystem_no_deprecated": [True, False],
+        "filesystem_use_std_fs": [True, False],
         "filesystem_version": [None, "3", "4"],
         "fPIC": [True, False],
         "layout": ["system", "versioned", "tagged", "b2-default"],
@@ -116,6 +117,7 @@ class BoostConan(ConanFile):
         "system_no_deprecated": False,
         "asio_no_deprecated": False,
         "filesystem_no_deprecated": False,
+        "filesystem_use_std_fs": False,
         "filesystem_version": None,
         "fPIC": True,
         "layout": "system",
@@ -1080,6 +1082,8 @@ class BoostConan(ConanFile):
             flags.append("define=BOOST_ASIO_NO_DEPRECATED=1")
         if self.options.filesystem_no_deprecated:
             flags.append("define=BOOST_FILESYSTEM_NO_DEPRECATED=1")
+        if self.options.filesystem_use_std_fs:
+            flags.append("define=BOOST_DLL_USE_STD_FS=1")
         if self.options.system_use_utf8:
             flags.append("define=BOOST_SYSTEM_USE_UTF8=1")
         if self.options.segmented_stacks:
@@ -1448,6 +1452,9 @@ class BoostConan(ConanFile):
 
         if self.options.filesystem_no_deprecated:
             self.cpp_info.components["headers"].defines.append("BOOST_FILESYSTEM_NO_DEPRECATED")
+
+        if self.options.filesystem_use_std_fs:
+            self.cpp_info.components["headers"].defines.append("BOOST_DLL_USE_STD_FS")
 
         if self.options.filesystem_version:
             self.cpp_info.components["headers"].defines.append(f"BOOST_FILESYSTEM_VERSION={self.options.filesystem_version}")
