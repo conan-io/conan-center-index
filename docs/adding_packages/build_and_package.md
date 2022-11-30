@@ -40,12 +40,14 @@ Both methods often use build helpers to build binaries and install them into the
 
 ## Package
 
-* CMake config files must be removed (they will be generated for consumers by `cmake_find_package`, `cmake_find_package_multi`, or `CMakeDeps` generators).
+* CMake config files must be removed. They will be generated for consumers by `CMakeDeps` generator (or legacy `cmake_find_package`/`cmake_find_package_multi` generators).
 
-* pkg-config files must be removed (they will be generated for consumers by `pkg_config` or `PkgConfigDeps` generators).
+* pkg-config files must be removed. They will be generated for consumers by `PkgConfigDeps` generators (or legacy `pkg_config` generator).
 
-* On *nix systems, executables and shared libraries should have empty `RPATH`/`RUNPATH`/`LC_RPATH`.
+* On *nix systems, executables and shared libraries should have empty `RPATH`/`RUNPATH`/`LC_RPATH`. Though, a relative path pointing inside package itself is allowed.
 
-* On macOS, install name in `LC_ID_DYLIB` section of shared libs must be `@rpath/<libfilename>`.
+* On Apple OS family:
+  * shared libs: name field of `LC_ID_DYLIB` load command must be `@rpath/<libfilename>`.
+  * shared libs & executables: name field of each `LC_LOAD_DYLIB` load command should be `@rpath/<libdependencyfilename>` (except if they refer to system libs or frameworks).
 
 * Installed files must not contain absolute paths specific to build machine. Relative paths to other packages is also forbidden since relative paths of dependencies during build may not be the same for consumers. Hardcoded relative paths pointing to a location in the package itself are allowed.
