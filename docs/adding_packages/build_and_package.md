@@ -32,7 +32,7 @@ Both methods often use build helpers to build binaries and install them into the
   * `tools.build:exelinkflags`
   * `tools.apple:enable_bitcode` (only if host OS is `iOS`/`watchOS`/`tvOS`)
 
-* If host OS is Apple OS family (`macOS`/`iOS`/`watchOS`/`tvOS`), `-headerpad_max_install_names` flag should be passed to linker, except if host OS is `iOS`/`watchOS`/`tvOS` and `tools.apple:enable_bitcode` is enabled.
+* If host OS is Apple OS family (`macOS`/`iOS`/`watchOS`/`tvOS`), `-headerpad_max_install_names` flag should be passed to linker, unless host OS is `iOS`/`watchOS`/`tvOS` and `tools.apple:enable_bitcode` is enabled.
 
 * Multithread build (if supported by underlying build system):
   * if some steps are sensitive to race conditions, monothread should be enforced.
@@ -48,6 +48,6 @@ Both methods often use build helpers to build binaries and install them into the
 
 * On Apple OS family:
   * shared libs: name field of `LC_ID_DYLIB` load command must be `@rpath/<libfilename>`.
-  * shared libs & executables: name field of each `LC_LOAD_DYLIB` load command should be `@rpath/<libdependencyfilename>` (except if they refer to system libs or frameworks).
+  * shared libs & executables: name field of each `LC_LOAD_DYLIB` load command should be `@rpath/<libdependencyfilename>` (except those refering to system libs or frameworks).
 
 * Installed files must not contain absolute paths specific to build machine. Relative paths to other packages is also forbidden since relative paths of dependencies during build may not be the same for consumers. Hardcoded relative paths pointing to a location in the package itself are allowed.
