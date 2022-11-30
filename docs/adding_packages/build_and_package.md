@@ -42,7 +42,7 @@ Both methods often use build helpers to build binaries and install them into the
 
 * CMake config files must be removed. They will be generated for consumers by `CMakeDeps` generator (or legacy `cmake_find_package`/`cmake_find_package_multi` generators).
 
-* pkg-config files must be removed. They will be generated for consumers by `PkgConfigDeps` generators (or legacy `pkg_config` generator).
+* pkg-config files must be removed. They will be generated for consumers by `PkgConfigDeps` generator (or legacy `pkg_config` generator).
 
 * On *nix systems, executables and shared libraries should have empty `RPATH`/`RUNPATH`/`LC_RPATH`. Though, a relative path pointing inside package itself is allowed.
 
