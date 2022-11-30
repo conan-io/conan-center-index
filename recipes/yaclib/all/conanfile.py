@@ -106,7 +106,7 @@ class YACLibConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "yaclib")
         self.cpp_info.set_property("cmake_target_name", "yaclib")
         self.cpp_info.set_property("pkg_config_name", "yaclib")
-        self.cpp_info.libs = ["libyaclib.a"]
+        self.cpp_info.libs = ["yaclib"]
         if self.options.get_safe("coro"):
             if self.settings.libcxx == 'libstdc++11':
                 self.cpp_info.cxxflags.append("-fcoroutines")
