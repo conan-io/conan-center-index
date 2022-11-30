@@ -55,7 +55,6 @@ class DoxygenConan(ConanFile):
         else:
             self.tool_requires("flex/2.6.4")
             self.tool_requires("bison/3.8.2")
-            self.tool_requires("m4/1.4.19")
 
     def validate(self):
         minimum_compiler_version = self._minimum_compiler_version()
@@ -87,8 +86,6 @@ class DoxygenConan(ConanFile):
         tc.variables["use_libc++"] = self.settings.compiler.get_safe("libcxx") == "libc++"
         tc.variables["win_static"] = "MT" in self.settings.compiler.get_safe("runtime", "")
         tc.generate()
-        deps = CMakeDeps(self)
-        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
