@@ -79,6 +79,8 @@ class IMGUIConan(ConanFile):
         self.cpp_info.libs = ["imgui"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("imm32")
         self.cpp_info.srcdirs = [os.path.join("res", "bindings")]
 
         bin_path = os.path.join(self.package_folder, "bin")
