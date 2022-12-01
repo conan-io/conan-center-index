@@ -26,11 +26,6 @@ class Stlab(ConanFile):
         "future_coroutines": [True, False],
         "task_system": ["portable", "libdispatch", "emscripten", "pnacl", "windows", "auto"],
         "thread_system": ["win32", "pthread", "pthread-emscripten", "pthread-apple", "none", "auto"],
-
-        # TODO
-        # "main_executor": ["qt", "libdispatch", "emscripten", "none", "auto"],
-
-        # "test": [True, False],
     }
 
     default_options = {
@@ -39,7 +34,6 @@ class Stlab(ConanFile):
         "future_coroutines": False,
         "task_system": "auto",
         "thread_system": "auto",
-        # "test": False,
     }
 
     short_paths = True
@@ -152,33 +146,6 @@ class Stlab(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
 
-        # if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < "9":
-        #     raise ConanInvalidConfiguration("Need GCC >= 9")
-
-        # if self.info.settings.compiler == "clang" and Version(self.info.settings.compiler.version) < "8":
-        #     raise ConanInvalidConfiguration("Need Clang >= 8")
-
-        # if self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) < "15.8":
-        #     raise ConanInvalidConfiguration("Need Visual Studio >= 2017 15.8 (MSVC 19.15)")
-
-        # # Actually, we want *at least* 15.8 (MSVC 19.15), but we cannot check this for now with Conan.
-        # if self.info.settings.compiler == "msvc" and Version(self.info.settings.compiler.version) < "19.15":
-        #     raise ConanInvalidConfiguration("Need MSVC >= 19.15")
-
-        # if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9":
-        #     raise ConanInvalidConfiguration("Need GCC >= 9")
-
-        # if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "8":
-        #     raise ConanInvalidConfiguration("Need Clang >= 8")
-
-        # if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "15.8":
-        #     raise ConanInvalidConfiguration("Need Visual Studio >= 2017 15.8 (MSVC 19.15)")
-
-        # # Actually, we want *at least* 15.8 (MSVC 19.15), but we cannot check this for now with Conan.
-        # if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "19.15":
-        #     raise ConanInvalidConfiguration("Need MSVC >= 19.15")
-
-
         def _lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
             lv2 = [int(v) for v in v2.split(".")]
@@ -215,19 +182,11 @@ class Stlab(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
-
-        # tc.variables["BUILD_TESTING"] = self.options.test
         tc.variables['BUILD_TESTING'] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
-
         tc.variables["STLAB_USE_BOOST_CPP17_SHIMS"] = self.options.with_boost
         tc.variables["STLAB_NO_STD_COROUTINES"] = self.options.no_std_coroutines
         tc.variables["STLAB_THREAD_SYSTEM"] = self.options.thread_system
         tc.variables["STLAB_TASK_SYSTEM"] = self.options.task_system
-
-        # TODO
-        # # If main_executor == "auto" it will be detected by CMake scripts
-        # if self.options.main_executor != "auto":
-        #     tc.variables["STLAB_MAIN_EXECUTOR"] = self.options.main_executor
 
         tc.generate()
 
@@ -251,9 +210,6 @@ class Stlab(ConanFile):
         #TODO: is header only but needs a header modified by cmake
         # self.info.settings.clear()
         # self.info.header_only()
-
-        # self.info.options.with_boost = "ANY"
-        # self.info.options.test = "ANY"
         pass
 
     def package_info(self):
