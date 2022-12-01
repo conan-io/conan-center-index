@@ -11,6 +11,8 @@ themselves. It's possible to have ConanCenter run `conan test` on more then one 
     * [Files and Structure](#files-and-structure)
     * [CMake targets](#cmake-targets)
     * [Testing more generators with `test_<something>`](#testing-more-generators-with-test_something)
+    * [Testing CMake variables from FindModules](#testing-cmake-variables-from-findmodules)
+    * [How it works](#how-it-works)
     * [Minimalist Source Code](#minimalist-source-code)<!-- endToc -->
 
 ### Files and Structure

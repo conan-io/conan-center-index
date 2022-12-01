@@ -6,6 +6,8 @@ or are known by ConanCenter's build service and have special meaning.
 <!-- toc -->
 ## Contents
 
+  * [Order of methods and attributes](#order-of-methods-and-attributes)
+  * [License Attribute](#license-attribute)
   * [Settings](#settings)
   * [Options](#options)
     * [Recommended Names](#recommended-names)

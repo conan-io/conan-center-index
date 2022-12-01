@@ -18,7 +18,7 @@ You can follow the three steps (:one: :two: :three:) described below! :tada:
     * [`config.yml`](#configyml)
     * [`conandata.yml`](#conandatayml)
     * [The _recipe folder_: `conanfile.py`](#the-_recipe-folder_-conanfilepy)
-    * [The test package folders: `test_package` and `test_<something>`](#the-test-package-folders-test_package-and-test_something)
+    * [Test Folders](#test-folders)
   * [How to provide a good recipe](#how-to-provide-a-good-recipe)
     * [Header Only](#header-only)
     * [CMake](#cmake)
