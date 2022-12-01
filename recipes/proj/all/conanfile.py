@@ -38,10 +38,6 @@ class ProjConan(ConanFile):
         "build_executables": True,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -61,15 +57,14 @@ class ProjConan(ConanFile):
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.2")
-        self.requires("sqlite3/3.39.4")
+        self.requires("sqlite3/3.40.0")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.4.0")
         if self.options.get_safe("with_curl"):
             self.requires("libcurl/7.85.0")
 
     def build_requirements(self):
-        if hasattr(self, "settings_build"):
-            self.tool_requires("sqlite3/3.39.4")
+        self.tool_requires("sqlite3/3.40.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
