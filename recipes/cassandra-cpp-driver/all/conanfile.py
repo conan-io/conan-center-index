@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.build import check_min_cppstd
 import os
 
 required_conan_version = ">=1.53.0"
@@ -36,6 +37,10 @@ class CassandraCppDriverConan(ConanFile):
     }
     short_paths = True
 
+    @property
+    def _min_cppstd(self):
+        return 11
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -67,6 +72,9 @@ class CassandraCppDriverConan(ConanFile):
             self.requires("boost/1.80.0")
 
     def validate(self):
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+
         if self.options.use_atomic == "boost":
             # Compilation error on Linux
             if self.settings.os == "Linux":
@@ -137,7 +145,7 @@ class CassandraCppDriverConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["cassandra"]
+        self.cpp_info.libs = ["cassandra" if self.options.shared else "cassandra_static"]
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["iphlpapi", "psapi", "wsock32",
