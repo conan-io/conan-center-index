@@ -297,9 +297,9 @@ There are no guarantees that recipes will work correctly in future Python versio
 
 There are several popular software libraries provided by Intel:
 
-* [Intel Math Kernel Library (MKL)](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/onemkl.html)
-* [Intel Integrated Performance Primitives (IPP)](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/ipp.html)
-* [Intel Deep Neural Networking Library (DNN)](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/onednn.html)
+* [Intel Math Kernel Library (MKL)](https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl.html)
+* [Intel Integrated Performance Primitives (IPP)](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ipp.html)
+* [Intel Deep Neural Networking Library (DNN)](https://www.intel.com/content/www/us/en/developer/tools/oneapi/onednn.html)
 
 these Intel libraries are widely used by various well-known open-source projects (e.g. [OpenCV](https://opencv.org/) or [TensorFlow](https://www.tensorflow.org/)).
 
