@@ -1,0 +1,29 @@
+sources:
+  "1.0.0":
+    sha256: "4f4f874706763b3a6e3d6dfff666a1e850ca1d92fd9240b2a14365c5864a0057"
+    url: "https://github.com/richgel999/lzham_codec/archive/refs/tags/v1_0_stable1.tar.gz"
+patches:
+  "1.0.0":
+    - patch_file: "patches/commits-1.0.0.patch"
+      patch_description: 'Updates code to latest commit for the repo
+        https://github.com/richgel999/lzham_codec'
+      patch_type: official
+
+    - patch_file: "patches/aarch64-yield-1.0.0.patch"
+      patch_description: 'Uses "yield" rather than "pause" mneumonic to fix
+        aarch64 build'
+      patch_type: portability
+
+    - patch_file: "patches/cmake-min-req-swap-1.0.0.patch"
+      patch_description: 'Puts cmake_minimum_required before project in all
+        CMakeLists'
+      patch_type: portability
+
+    - patch_file: "patches/fix-osx-1.0.0.patch"
+      patch_description: "Fixes building on OSX"
+      patch_type: portability
+
+    - patch_file: "patches/use-lzham-types-1.0.0.patch"
+      patch_description: 'Uses typedefs prefixed with LZHAM to fix linux build
+        errors'
+      patch_type: portability
