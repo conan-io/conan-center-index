@@ -276,6 +276,10 @@ class VtkConan(ConanFile):
 
 
 
+    # for self.options.group_* and self.options.
+    def _is_module_enabled(flag):
+        return flag in ["YES", "WANT"]
+
 
     def _patch_source(self):
         # Note that VTK's cmake will insert its own CMAKE_MODULE_PATH at the
@@ -318,7 +322,7 @@ class VtkConan(ConanFile):
             git_hash = "v" + self.version
             self.run("cd " + self.source_folder + " && git checkout -b branch-" + git_hash + " " + git_hash)
         else:
-            get(**self.conan_data["sources"][self.version],
+            get(self, **self.conan_data["sources"][self.version],
                     strip_root=True,
                     destination=self.source_folder)
 
@@ -353,8 +357,8 @@ class VtkConan(ConanFile):
                 "TIFF":              "libtiff/4.3.0",
                 }
 
-        if (self.options.build_all_modules
-                or self.options.group_enable_StandAlone):
+
+        if self.options.build_all_modules or _is_module_enabled(self.options.group_enable_StandAlone):
             parties["hdf5"]    = "hdf5/1.13.1"
             parties["theora"]  = "theora/1.1.1"
             parties["ogg"]     = "ogg/1.3.5"
@@ -372,19 +376,19 @@ class VtkConan(ConanFile):
             parties["odbc"]   = "odbc/2.3.9"
 
         if (self.options.build_all_modules
-                or self.options.group_enable_Qt
-                or self.options.module_enable_GUISupportQt
-                or self.options.module_enable_GUISupportQtQuick
-                or self.options.module_enable_GUISupportQtSQL
-                or self.options.module_enable_RenderingQt
-                or self.options.module_enable_ViewsQt):
+                or _is_module_enabled(self.options.group_enable_Qt)
+                or _is_module_enabled(self.options.module_enable_GUISupportQt)
+                or _is_module_enabled(self.options.module_enable_GUISupportQtQuick)
+                or _is_module_enabled(self.options.module_enable_GUISupportQtSQL)
+                or _is_module_enabled(self.options.module_enable_RenderingQt)
+                or _is_module_enabled(self.options.module_enable_ViewsQt)):
             parties["qt"] = "qt/6.3.1"
 
         return parties
 
 
     def requirements(self):
-        if self.options.group_enable_Rendering:
+        if _is_module_enabled(self.options.group_enable_Rendering):
             self.requires("opengl/system")
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.requires("xorg/system")
@@ -407,9 +411,7 @@ class VtkConan(ConanFile):
         if not self.options.shared and self.options.enable_kits:
             raise ConanInvalidConfiguration("KITS can only be enabled with shared")
 
-        if ((self.options.group_enable_Web == "WANT"
-            or self.options.group_enable_Web == "YES")
-            and not self.options.wrap_python):
+        if _is_module_enabled(self.options.group_enable_Web) and not self.options.wrap_python:
             raise ConanInvalidConfiguration("group_enable_Web can only be enabled with wrap_python")
 
         if self.options.wrap_python and not self.options.enable_wrapping:
@@ -685,7 +687,7 @@ class VtkConan(ConanFile):
         # get keys as a list and make a list of target::target
         all_requires = [k + "::" + k for k in self._third_party().keys()]
 
-        if self.options.group_enable_Rendering:
+        if _is_module_enabled(self.options.group_enable_Rendering):
             all_requires += [ "opengl::opengl" ]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 all_requires += [ "xorg::xorg" ]
@@ -752,7 +754,7 @@ class VtkConan(ConanFile):
                     "VTK::QtOpenGL": "qt::qtOpenGL",
                     }
 
-            if self.options.group_enable_Rendering:
+            if _is_module_enabled(self.options.group_enable_Rendering):
                 thirds["VTK::opengl"] = "opengl::opengl"
 
             # TODO check out abseil recipe, it parses the generated cmake-targets file for extra info.
