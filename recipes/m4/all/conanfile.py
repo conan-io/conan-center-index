@@ -52,9 +52,10 @@ class M4Conan(ConanFile):
 
         if is_msvc(self):
             env = Environment()
+            ar_wrapper = unix_path(self, os.path.join(self.source_folder, "build-aux", "ar-lib"))
             env.define("CC", "cl -nologo")
             env.define("CXX", "cl -nologo")
-            env.define("AR", f"{unix_path(self, self.source_folder)}/build-aux/ar-lib lib")
+            env.define("AR", f"{ar_wrapper} lib")
             env.define("LD", "link")
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
