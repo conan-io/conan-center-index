@@ -109,7 +109,7 @@ class DoxygenConan(ConanFile):
             os.unlink("Findbison.cmake")
         apply_conandata_patches(self)
         cmake = self._configure_cmake()
-        cmake.build()
+        cmake.build() 
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
