@@ -1,21 +1,5 @@
- src/CMakeLists.txt | 1 -
- src/json.hpp       | 8 ++++----
- 2 files changed, 4 insertions(+), 5 deletions(-)
-
-diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 7e81b2a06..2f3229292 100644
---- a/src/CMakeLists.txt
-+++ b/src/CMakeLists.txt
-@@ -89,7 +89,6 @@ list(APPEND INCLUDE_DIRS
-   third_party/hdr_histogram # FIXME: Use conan package
-   third_party/mt19937_64 # FIXME: Use conan package
-   third_party/sparsehash/src) # FIXME: Use conan package
--  third_party/rapidjson/rapidjson
- 
- list(APPEND INCLUDE_DIRS ${CASS_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
- 
 diff --git a/src/json.hpp b/src/json.hpp
-index 620536e55..6003f2521 100644
+index 620536e..6003f25 100644
 --- a/src/json.hpp
 +++ b/src/json.hpp
 @@ -48,13 +48,13 @@ static void delete_(T* ptr) {

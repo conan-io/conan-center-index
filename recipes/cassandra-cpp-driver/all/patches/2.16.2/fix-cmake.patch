@@ -1,5 +1,5 @@
 diff --git a/cmake/Dependencies.cmake b/cmake/Dependencies.cmake
-index 9052472..347430b 100644
+index 9052472..4701133 100644
 --- a/cmake/Dependencies.cmake
 +++ b/cmake/Dependencies.cmake
 @@ -21,28 +21,28 @@ if(NOT LIBUV_ROOT_DIR)
@@ -20,7 +20,7 @@ index 9052472..347430b 100644
 -if(LIBUV_VERSION VERSION_LESS "1.0")
 -  message(FATAL_ERROR "Libuv version ${LIBUV_VERSION} is not "
 +if(libuv_VERSION VERSION_LESS "1.0")
-+  message(FATAL_ERROR "libuv version ${libuv_VERSION} is not "
++  message(FATAL_ERROR "Libuv version ${libuv_VERSION} is not "
      " supported. Please updgrade to libuv version 1.0 or greater in order to "
      "utilize the driver.")
  endif()
@@ -28,7 +28,7 @@ index 9052472..347430b 100644
 -if(LIBUV_VERSION VERSION_LESS "1.6")
 -  message(WARNING "Libuv version ${LIBUV_VERSION} does not support custom "
 +if(libuv_VERSION VERSION_LESS "1.6")
-+  message(WARNING "libuv version ${libuv_VERSION} does not support custom "
++  message(WARNING "Libuv version ${libuv_VERSION} does not support custom "
      "memory allocators (version 1.6 or greater required)")
  endif()
  
@@ -62,10 +62,10 @@ index 9052472..347430b 100644
 +find_package(minizip REQUIRED CONFIG)
 +set(CASS_LIBS ${CASS_LIBS} minizip::minizip)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 06b84b7..c0bce58 100644
+index d662718..14f6459 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -1,6 +1,50 @@
+@@ -1,6 +1,51 @@
  include(CheckSymbolExists)
  include(CheckCXXSourceCompiles)
  
@@ -113,10 +113,11 @@ index 06b84b7..c0bce58 100644
 +  endif()
 +endif()
 +
++
  file(GLOB SOURCES *.cpp *.hpp)
  
  if(APPLE)
-@@ -38,18 +82,14 @@ endif()
+@@ -38,18 +83,14 @@ endif()
  
  add_subdirectory(third_party/curl)
  add_subdirectory(third_party/hdr_histogram)
@@ -140,12 +141,13 @@ index 06b84b7..c0bce58 100644
  
  list(APPEND INCLUDE_DIRS ${CASS_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
  
-@@ -69,12 +109,6 @@ if(WIN32)
+@@ -69,13 +110,6 @@ if(WIN32)
    endif()
  endif()
  
 -if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 -  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32 -Wno-undefined-var-template -Werror")
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-implicit-int-float-conversion")
 -elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # To many superfluous warnings generated with GCC when using -Wconversion (see: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=40752)
 -  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
 -endif()
@@ -153,7 +155,7 @@ index 06b84b7..c0bce58 100644
  #------------------------------
  # Build configured header
  #------------------------------
-@@ -131,10 +165,9 @@ if(CASS_BUILD_SHARED)
+@@ -132,10 +166,9 @@ if(CASS_BUILD_SHARED)
      ${SOURCES}
      $<TARGET_OBJECTS:curl_hostcheck>
      $<TARGET_OBJECTS:hdr_histogram>
@@ -166,7 +168,7 @@ index 06b84b7..c0bce58 100644
  
    set_target_properties(cassandra PROPERTIES OUTPUT_NAME cassandra)
    set_target_properties(cassandra PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
-@@ -168,10 +201,9 @@ if(CASS_BUILD_STATIC)
+@@ -169,10 +202,9 @@ if(CASS_BUILD_STATIC)
      ${SOURCES}
      $<TARGET_OBJECTS:curl_hostcheck_static>
      $<TARGET_OBJECTS:hdr_histogram_static>
@@ -179,7 +181,7 @@ index 06b84b7..c0bce58 100644
  
    set_target_properties(cassandra_static PROPERTIES OUTPUT_NAME cassandra_static)
    set_target_properties(cassandra_static PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
-@@ -274,11 +306,6 @@ if(CASS_BUILD_SHARED)
+@@ -275,11 +307,6 @@ if(CASS_BUILD_SHARED)
        endif()
      endif()
    endif()
@@ -191,4 +193,3 @@ index 06b84b7..c0bce58 100644
  endif()
  
  if(CASS_BUILD_STATIC)
-
