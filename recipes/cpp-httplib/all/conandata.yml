@@ -1,4 +1,7 @@
 sources:
+  "0.11.3":
+    url: "https://github.com/yhirose/cpp-httplib/archive/v0.11.3.tar.gz"
+    sha256: "799b2daa0441d207f6cd1179ae3a34869722084a434da6614978be1682c1e12d"
   "0.11.2":
     url: "https://github.com/yhirose/cpp-httplib/archive/v0.11.2.tar.gz"
     sha256: "e620d030215733c4831fdc7813d5eb37a6fd599f8192a730662662e1748a741b"
