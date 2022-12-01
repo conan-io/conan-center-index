@@ -22,10 +22,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, save, rename, collect_libs, load
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, save, rename, collect_libs, load
 from conan.tools.scm import Version
 
 import os
@@ -37,6 +36,12 @@ import json # for auto-component generation
 _debug_packaging = False
 
 required_conan_version = ">=1.53.0"
+
+
+# for self.options.group_* and self.options.
+def _is_module_enabled(flag):
+    return flag in ["YES", "WANT"]
+
 
 
 class VtkConan(ConanFile):
@@ -274,11 +279,6 @@ class VtkConan(ConanFile):
             "kissfft:datatype": "double",
             }
 
-
-
-    # for self.options.group_* and self.options.
-    def _is_module_enabled(flag):
-        return flag in ["YES", "WANT"]
 
 
     def _patch_source(self):
