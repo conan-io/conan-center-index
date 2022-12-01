@@ -12,7 +12,7 @@ required_conan_version = ">=1.53.0"
 
 class LibalsaConan(ConanFile):
     name = "libalsa"
-    license = "LGPL-2.1-or-later"
+    license = "LGPL-2.1-only"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/alsa-project/alsa-lib"
     topics = ("alsa", "sound", "audio", "midi")
