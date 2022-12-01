@@ -69,11 +69,43 @@ class ProjConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    def build(self):
-        self._patch_sources()
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["USE_THREAD"] = self.options.threadsafe
+        tc.variables["BUILD_CCT"] = self.options.build_executables
+        tc.variables["BUILD_CS2CS"] = self.options.build_executables
+        tc.variables["BUILD_GEOD"] = self.options.build_executables
+        tc.variables["BUILD_GIE"] = self.options.build_executables
+        tc.variables["BUILD_PROJ"] = self.options.build_executables
+        tc.variables["BUILD_PROJINFO"] = self.options.build_executables
+        if Version(self.version) < "9.1.0":
+            tc.variables["PROJ_DATA_SUBDIR"] = "res"
+        if Version(self.version) < "7.0.0":
+            tc.variables["PROJ_TESTS"] = False
+            tc.variables["BUILD_LIBPROJ_SHARED"] = self.options.shared
+            tc.variables["ENABLE_LTO"] = False
+            tc.variables["JNI_SUPPORT"] = False
+        else:
+            tc.variables["ENABLE_TIFF"] = self.options.with_tiff
+            tc.variables["ENABLE_CURL"] = self.options.with_curl
+            tc.variables["BUILD_TESTING"] = False
+            tc.variables["ENABLE_IPO"] = False
+            tc.variables["BUILD_PROJSYNC"] = self.options.build_executables and self.options.with_curl
+        if Version(self.version) >= "8.1.0":
+            tc.variables["NLOHMANN_JSON_ORIGIN"] = "external"
+        tc.variables["CMAKE_MACOSX_BUNDLE"] = False
+
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+
+        tc.generate()
+
+        tc = CMakeDeps(self)
+        tc.generate()
+
+        tc = VirtualBuildEnv(self)
+        tc.generate(scope="build")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -114,43 +146,11 @@ class ProjConan(ConanFile):
             rmdir(self, os.path.join(self.source_folder, "include", "proj", "internal", "nlohmann"))
 
 
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["USE_THREAD"] = self.options.threadsafe
-        tc.variables["BUILD_CCT"] = self.options.build_executables
-        tc.variables["BUILD_CS2CS"] = self.options.build_executables
-        tc.variables["BUILD_GEOD"] = self.options.build_executables
-        tc.variables["BUILD_GIE"] = self.options.build_executables
-        tc.variables["BUILD_PROJ"] = self.options.build_executables
-        tc.variables["BUILD_PROJINFO"] = self.options.build_executables
-        if Version(self.version) < "9.1.0":
-            tc.variables["PROJ_DATA_SUBDIR"] = "res"
-        if Version(self.version) < "7.0.0":
-            tc.variables["PROJ_TESTS"] = False
-            tc.variables["BUILD_LIBPROJ_SHARED"] = self.options.shared
-            tc.variables["ENABLE_LTO"] = False
-            tc.variables["JNI_SUPPORT"] = False
-        else:
-            tc.variables["ENABLE_TIFF"] = self.options.with_tiff
-            tc.variables["ENABLE_CURL"] = self.options.with_curl
-            tc.variables["BUILD_TESTING"] = False
-            tc.variables["ENABLE_IPO"] = False
-            tc.variables["BUILD_PROJSYNC"] = self.options.build_executables and self.options.with_curl
-        if Version(self.version) >= "8.1.0":
-            tc.variables["NLOHMANN_JSON_ORIGIN"] = "external"
-        tc.variables["CMAKE_MACOSX_BUNDLE"] = False
-
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-
-        tc.generate()
-
-        tc = CMakeDeps(self)
-        tc.generate()
-
-        tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
-
+    def build(self):
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
         copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
