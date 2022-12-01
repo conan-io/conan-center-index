@@ -27,8 +27,18 @@ Please refer to the [Package Templates](../package_templates/) for the current p
 When using CMake to test a package, the information should be consumed using the
 [`CMakeDeps` generator](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html?highlight=cmakedeps).
 
+This typicall will look like a `CMakeLists.txt` which contain lines similar to
+
+```cmake
+find_package(fmt REQUIRED CONFIG)
+# ...
+target_link_libraries(test_ranges PRIVATE fmt::fmt)
+```
+
+Refere to the [package template](https://github.com/conan-io/conan-center-index/blob/master/docs/package_templates/cmake_package/all/test_package/CMakeLists.txt) for more examples.
+
 > **Notes** It's still important to test targets provided by `cmake_find_package[_multi]` generators.
-> It should help in the migration (and compatibility) with Conan v2. See [v1 test package](#v1-cmakeliststxt) section for details.
+> It should help in the migration (and compatibility) with Conan v2. See [v1 test package template](https://github.com/conan-io/conan-center-index/blob/master/docs/package_templates/cmake_package/all/test_v1_package/CMakeLists.txt) for details.
 > You can see read [this conversation](https://github.com/conan-io/conan-center-index/issues/12888#issuecomment-1290817799) for more context.
 
 In ConanCenter we try to accurately represent the names of the targets and the information provided by CMake's modules and config files that some libraries
@@ -70,12 +80,14 @@ project files as simple as possible, without the need of extra logic to handle d
 
 ### Testing CMake variables from FindModules
 
-@prince-chrism write docs here.
+Recipes which provide [Find Modules](https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules) are strongly encouraged to
+module the file name, targets and or variables.
 
-Convo: https://github.com/conan-io/conan-center-index/pull/13511
-early example: https://github.com/conan-io/conan-center-index/tree/master/recipes/libxml2/all/test_cmake_module_package
+**We will provide better docs in the near future**, for now here are a few references:
 
-Best reference: https://github.com/conan-io/conan-center-index/blob/master/recipes/expat/all/test_package_module/CMakeLists.txt#L9
+- Convo: https://github.com/conan-io/conan-center-index/pull/13511
+- early example: https://github.com/conan-io/conan-center-index/tree/master/recipes/libxml2/all/test_cmake_module_package
+- Best reference: https://github.com/conan-io/conan-center-index/blob/master/recipes/expat/all/test_package_module/CMakeLists.txt#L9
 
 ### How it works
 
