@@ -19,6 +19,8 @@ patches:
   "7.1.0-49":
     - patch_file: "patches/remove-unnecessary-dependencies.patch"
       base_path: "VisualMagick"
+      patch_type: "conan"
   "7.0.11-14":
     - patch_file: "patches/remove-unnecessary-dependencies.patch"
       base_path: "VisualMagick"
+      patch_type: "conan"
