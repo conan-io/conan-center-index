@@ -925,6 +925,11 @@ class QtConan(ConanFile):
             else:
                 self.info.settings.compiler.runtime_type = "Release/Debug"
 
+    @property
+    def _has_positioning(self):
+        return (self.options.get_safe("qtlocation") and Version(self.version) < "6.2.2") or \
+            (self.options.get_safe("qtpositioning") and Version(self.version) >= "6.2.2")
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Qt6")
 
@@ -955,7 +960,12 @@ class QtConan(ConanFile):
         def _get_corrected_reqs(requires):
             reqs = []
             for r in requires:
-                reqs.append(r if "::" in r else "qt%s" % r)
+                if "::" in r:
+                    corrected_req = r 
+                else:
+                    corrected_req = f"qt{r}"
+                    assert corrected_req in self.cpp_info.components, f"{corrected_req} required but not yet present in self.cpp_info.components"
+                reqs.append(corrected_req)
             return reqs
 
         def _create_module(module, requires=[], has_include_dir=True):
@@ -1264,8 +1274,7 @@ class QtConan(ConanFile):
                 _create_plugin("AVFServicePlugin", "qavfcamera", "mediaservice", [])
                 _create_plugin("CoreAudioPlugin", "qtaudio_coreaudio", "audio", [])
 
-        if (self.options.get_safe("qtlocation") and Version(self.version) < "6.2.2") or \
-            (self.options.get_safe("qtpositioning") and Version(self.version) >= "6.2.2"):
+        if self._has_positioning:
             _create_module("Positioning")
             _create_plugin("QGeoPositionInfoSourceFactoryGeoclue2", "qtposition_geoclue2", "position", [])
             _create_plugin("QGeoPositionInfoSourceFactoryPoll", "qtposition_positionpoll", "position", [])
@@ -1301,7 +1310,9 @@ class QtConan(ConanFile):
             _create_module("WebChannel", ["Qml"])
 
         if self.options.get_safe("qtwebengine") and qt_quick_enabled:
-            webenginereqs = ["Gui", "Quick", "WebChannel", "Positioning"]
+            webenginereqs = ["Gui", "Quick", "WebChannel"]
+            if self._has_positioning:
+                webenginereqs.append("Positioning")
             if self.settings.os == "Linux":
                 webenginereqs.extend(["expat::expat", "opus::libopus", "xorg-proto::xorg-proto", "libxshmfence::libxshmfence", \
                                       "nss::nss", "libdrm::libdrm"])
