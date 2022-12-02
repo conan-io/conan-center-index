@@ -25,7 +25,7 @@ index f6e2c6b..087d021 100644
  endif
  # Create a static library (try windows, then unix)
 -	lib.exe /out:uSockets.a *.o || $(AR) rvs uSockets.a *.o
-+	lib.exe /out:libuSockets.a *.o || $(AR) rvs libuSockets.a *.o
++	lib.exe /out:uSockets.lib *.obj || $(AR) rvs libuSockets.a *.o
  
  # BoringSSL needs cmake and golang
  .PHONY: boringssl

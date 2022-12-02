@@ -161,6 +161,10 @@ class UsocketsConan(ConanFile):
                     "AR": "{} lib".format(unix_path(self.deps_user_info["automake"].ar_lib)),
                     "RANLIB": ":",
                 }
+
+                if self.options.eventloop == "libuv":
+                    env["CPPFLAGS"] = "-I" + unix_path(self.deps_cpp_info["libuv"].include_paths[0]) + " "
+
                 with environment_append(env):
                     yield
         else:
@@ -170,7 +174,7 @@ class UsocketsConan(ConanFile):
         autotools = AutoToolsBuildEnvironment(self)
         autotools.fpic = self.options.get_safe("fPIC", False)
         with chdir(self, self._source_subfolder):
-            args = []
+            args = ["WITH_LTO=0"]
             if self.options.with_ssl == "openssl":
                 args.append("WITH_OPENSSL=1")
             elif self.options.with_ssl == "wolfssl":
@@ -197,8 +201,8 @@ class UsocketsConan(ConanFile):
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self._source_subfolder)
         copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self._source_subfolder, "src"), keep_path=True)
-        copy(self, pattern="*.a", dst=os.path.join(self.package_folder, "lib"), src=self._source_subfolder, keep_path=False)
-        copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self._source_subfolder, keep_path=False)
+        copy(self, pattern="*.a", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
+        copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
         # drop internal headers
         rmdir(self, os.path.join(self.package_folder, "include", "internal"))
 
