@@ -177,6 +177,8 @@ class bxConan(ConanFile):
             autotools = Autotools(self)
             # Build with make
             for proj in self.projs:
+                if self.settings.os == "Windows":
+                    projPath = projPath.replace("\\", "/") # Fix path for msys...
                 autotools.make(target=proj, args=["-R", f"-C {projPath}", mingw, conf])
 
     def package(self):
