@@ -79,6 +79,7 @@ class Libxml2Conan(ConanFile):
             del self.options.fPIC
         if Version(self.version) >= "2.10.3":
             del self.options.docbook
+            del self.default_options.docbook
 
     def configure(self):
         if self.options.shared:
