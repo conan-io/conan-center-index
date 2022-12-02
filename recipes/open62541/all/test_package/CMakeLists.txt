@@ -3,8 +3,6 @@ project(test_package LANGUAGES C)
 
 find_package(open62541 REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} PRIVATE open62541::open62541)
 
 find_package(Python3 REQUIRED)
 set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
