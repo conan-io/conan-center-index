@@ -2,10 +2,13 @@ from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, chdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
 from conans import MSBuild, AutoToolsBuildEnvironment
+from conans.tools import vcvars, environment_append, unix_path, get_env
 
 import os
+import contextlib
 
 required_conan_version = ">=1.52.0"
 
@@ -60,6 +63,10 @@ class UsocketsConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -123,6 +130,12 @@ class UsocketsConan(ConanFile):
         elif self.options.eventloop == "boost":
             self.requires("boost/1.80.0")
 
+    def build_requirements(self):
+        if self._settings_build.os == "Windows" and not get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+        if self.settings.compiler == "Visual Studio":
+            self.build_requires("automake/1.16.5")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
@@ -133,6 +146,25 @@ class UsocketsConan(ConanFile):
         with chdir(self, os.path.join(self._source_subfolder)):
             msbuild = MSBuild(self)
             msbuild.build(project_file="uSockets.vcxproj", platforms={"x86": "Win32"})
+
+    @contextlib.contextmanager
+    def _build_context(self):
+        if is_msvc(self):
+            with vcvars(self):
+                env = {
+                    "CC": "{} cl -nologo".format(unix_path(self.deps_user_info["automake"].compile)),
+                    "CXX": "{} cl -nologo".format(unix_path(self.deps_user_info["automake"].compile)),
+                    "CFLAGS": "-{}".format(self.settings.compiler.runtime),
+                    "LD": "link",
+                    "NM": "dumpbin -symbols",
+                    "STRIP": ":",
+                    "AR": "{} lib".format(unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "RANLIB": ":",
+                }
+                with environment_append(env):
+                    yield
+        else:
+            yield
 
     def _build_configure(self):
         autotools = AutoToolsBuildEnvironment(self)
@@ -156,10 +188,11 @@ class UsocketsConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        if self.settings.compiler == "Visual Studio":
+        if Version(self.version) < "0.8.3" and is_msvc(self):
             self._build_msvc()
         else:
-            self._build_configure()
+            with self._build_context():
+                self._build_configure()
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self._source_subfolder)
