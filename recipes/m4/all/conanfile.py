@@ -1,17 +1,19 @@
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, chdir, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 import os
+import shutil
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class M4Conan(ConanFile):
     name = "m4"
+    package_type = "application"
     description = "GNU M4 is an implementation of the traditional Unix macro processor"
     topics = ("macro", "preprocessor")
     homepage = "https://www.gnu.org/software/m4/"
@@ -87,20 +89,32 @@ class M4Conan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # dummy file for configure
-        help2man = os.path.join(self.source_folder, "help2man")
-        save(self, help2man, "#!/usr/bin/env bash\n:")
-        if os.name == "posix":
-            os.chmod(help2man, os.stat(help2man).st_mode | 0o111)
+        if shutil.which("help2man") == None:
+            # dummy file for configure
+            help2man = os.path.join(self.source_folder, "help2man")
+            save(self, help2man, "#!/usr/bin/env bash\n:")
+            if os.name == "posix":
+                os.chmod(help2man, os.stat(help2man).st_mode | 0o111)
 
     def build(self):
+        # Support building with source from Git reop
+        with chdir(self, self.source_folder):
+            command = "./bootstrap"
+            if os.path.exists(command) and not os.path.exists("configure"):
+                self.run(command)
         self._patch_sources()
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if os.path.islink(os.path.join(self.source_folder, "COPYING")):
+            # Use mkdir and copyfile when "COPYING" is a symlink as it is when building with source from Git repo
+            os.mkdir(os.path.join(self.package_folder, "licenses"))
+            shutil.copyfile(os.path.join(self.source_folder, os.readlink(os.path.join(self.source_folder, "COPYING"))),
+                         os.path.join(self.package_folder, "licenses", "COPYING"))
+        else:
+            copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
         autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
@@ -116,8 +130,3 @@ class M4Conan(ConanFile):
         self.runenv_info.define_path("M4", m4_bin)
         self.buildenv_info.define_path("M4", m4_bin)
 
-        # TODO: to remove in conan v2
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
-        self.env_info.PATH.append(bin_path)
-        self.env_info.M4 = m4_bin
