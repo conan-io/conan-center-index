@@ -123,7 +123,7 @@ class OpenCVConan(ConanFile):
 
     @property
     def _protobuf_version(self):
-        return "3.21.4"
+        return "3.21.9"
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
@@ -188,7 +188,7 @@ class OpenCVConan(ConanFile):
         elif self.options.get_safe("with_jpeg2000") == "openjpeg":
             self.requires("openjpeg/2.5.0")
         if self.options.with_png:
-            self.requires("libpng/1.6.38")
+            self.requires("libpng/1.6.39")
         if self.options.with_openexr:
             self.requires("openexr/2.5.7")
         if self.options.get_safe("with_tiff"):
