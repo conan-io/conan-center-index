@@ -132,9 +132,9 @@ class bxConan(ConanFile):
             
             # Conan to Genie translation maps
             compilerStr = str(self.settings.compiler)
-            compilerAndOsToGenie = {"Windows": f"--{compilerStr}=mingw-{compilerStr}", "Linux": f"--{compilerStr}=linux-{compilerStr}",
-                                    "FreeBSD": f"--{compilerStr}=freebsd", "Macos": f"--{compilerStr}=osx",
-                                    "Android": f"--{compilerStr}=android", "iOS": f"--{compilerStr}=ios"}
+            compilerAndOsToGenie = {"Windows": f"--gcc=mingw-{compilerStr}", "Linux": f"--gcc=linux-{compilerStr}",
+                                    "FreeBSD": f"--gcc=freebsd", "Macos": f"--gcc=osx",
+                                    "Android": f"--gcc=android", "iOS": f"--gcc=ios"}
             gmakeOsToProj = {"Windows": "mingw-", "Linux": "linux", "FreeBSD": "freebsd", "Macos": "osx", "Android": "android", "iOS": "ios"}
             gmakeArchToGenieSuffix = {"x86": "-x86", "x86_64": "-x64", "armv8": "-arm64", "armv7": "-arm"}
             osToUseArchConfigSuffix = {"Windows": False, "Linux": False, "FreeBSD": False, "Macos": True, "Android": True, "iOS": True}
