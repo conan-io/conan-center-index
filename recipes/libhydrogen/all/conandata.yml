@@ -5,5 +5,5 @@ sources:
 patches:
   "cci.20221115":
     - patch_file: "patches/0001-fix-cmake.patch"
-      patch_description: "Use C99 or higher, avoid to inject arch specific flags & don't build tests"
+      patch_description: "CMake: Use C99 or higher, avoid to inject arch specific flags, fix dll install & don't build tests"
       patch_type: "portability"
