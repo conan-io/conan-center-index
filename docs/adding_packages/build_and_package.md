@@ -44,8 +44,6 @@ Both methods often use build helpers to build binaries and install them into the
   * `tools.build:exelinkflags`
   * `tools.apple:enable_bitcode` (only if host OS is `iOS`/`watchOS`/`tvOS`)
 
-* If host OS is Apple OS family (`macOS`/`iOS`/`watchOS`/`tvOS`), `-headerpad_max_install_names` flag should be passed to linker, unless host OS is `iOS`/`watchOS`/`tvOS` and `tools.apple:enable_bitcode` is enabled.
-
 * Multithread build (if supported by underlying build system):
   * if some steps are sensitive to race conditions, monothread should be enforced.
   * otherwise multithreaded build should be enabled with a number of cores controlled by `tools.build:jobs` conf from host profile if it is set, otherwise to all cores of build machine.
