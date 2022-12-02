@@ -3,6 +3,7 @@ project(test_package LANGUAGES C)
 
 find_package(open62541 REQUIRED CONFIG)
 
+include(open62541Macros)
 
 find_package(Python3 REQUIRED)
 set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
