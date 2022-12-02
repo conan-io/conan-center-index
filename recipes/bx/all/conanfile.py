@@ -154,7 +154,7 @@ class bxConan(ConanFile):
             # Generate projects through genie
             genieGen = f"{self.genieExtra} {compilerAndOsToGenie[str(self.settings.os)]}"
             if osToUseArchConfigSuffix[str(self.settings.os)]:
-                genieGen += F"{gmakeArchToGenieSuffix[str(self.settings.arch)]}"
+                genieGen += f"{gmakeArchToGenieSuffix[str(self.settings.arch)]}"
             genieGen += " gmake"
             self.run(f"genie {genieGen}", cwd=self.bxPath)
 
@@ -239,12 +239,12 @@ class bxConan(ConanFile):
             else:
                 self.cpp_info.includedirs.extend(["include/compat/freebsd"])
         elif self.settings.os in ["Macos", "iOS"]:
-            self.cpp_info.system_libs.extend(["Foundation", "Cocoa"])
+            self.cpp_info.frameworks.extend(["Foundation", "Cocoa"])
             if self.settings.os == "Macos":
                 self.cpp_info.includedirs.extend(["include/compat/osx"])
             else:
                 self.cpp_info.includedirs.extend(["include/compat/ios"])
-        
+
         #  TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "bx"
         self.cpp_info.filenames["cmake_find_package_multi"] = "bx"
