@@ -1,4 +1,7 @@
 sources:
+  "1.3.4":
+    url: "https://github.com/open62541/open62541/archive/v1.3.4.tar.gz"
+    sha256: "3489cfa2f98c52df252adc8e641a9e59cb675bdfd5ef413b0d947e667cddd16d"
   "1.3.1":
     url: "https://github.com/open62541/open62541/archive/v1.3.1.tar.gz"
     sha256: "f54d10325fd08fc1505aea37d83daa085912a269521e6d018bfc41a744ba57aa"
