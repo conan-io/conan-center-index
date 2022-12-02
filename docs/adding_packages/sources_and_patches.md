@@ -73,10 +73,9 @@ associated to the recipe revision used to build them.
 ### Adding old versions
 
 We love to hear why in the opening description of the pull requests you need this exact version.
-We usually don't add old versions unless there is a specific request for it.
+We usually don't add old versions unless there is a specific request for it. Adding versions that are not used by author of the pull request reduces overall resources and time from [the build services](README.md#the-build-service).
 
-Take into account that the version might be removed in future pull requests according to the guidelines above.
-Adding versions that are not used by author of the pull request reduces overall resources and time from [the build services](README.md#the-build-service).
+Take into account that the version might be removed in future pull requests according to the [guidelines above](#removing-old-versions).
 
 ## Policy about patching
 
