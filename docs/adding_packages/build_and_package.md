@@ -26,10 +26,13 @@ Both methods often use build helpers to build binaries and install them into the
 
   | compiler type | conf / env var |
   |---------------|----------------|
-  | C compiler | `cc` key of `tools.build:compiler_executables`, otherwise `CC` environment variable |
-  | C++ compiler | `cxx` key of `tools.build:compiler_executables`, otherwise `CXX` environment variable |
+  | C compiler | `c` key of `tools.build:compiler_executables`, otherwise `CC` environment variable |
+  | C++ compiler | `cpp` key of `tools.build:compiler_executables`, otherwise `CXX` environment variable |
+  | ASM compiler | `asm` key of `tools.build:compiler_executables`, otherwise `CCAS` environment variable |
+  | CUDA compiler | `cuda` key of `tools.build:compiler_executables` |
+  | Fortran compiler | `fortran` key of `tools.build:compiler_executables`, otherwise `FC` environment variable |
   | Objective-C compiler | `objc` key of `tools.build:compiler_executables` |
-  | Objective-C++ compiler | `objcxx` key of `tools.build:compiler_executables` |
+  | Objective-C++ compiler | `objcpp` key of `tools.build:compiler_executables` |
   | Resource files compiler | `rc` key of `tools.build:compiler_executables`, otherwise `RC` environment variable |
   | Archiver | `AR` environment variable |
   | Linker | `LD` environment variable |
