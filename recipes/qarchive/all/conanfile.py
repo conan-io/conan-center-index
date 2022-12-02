@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import get, apply_conandata_patches, rmdir, save, export_conandata_patches
-from conans import CMake
-import functools
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -29,14 +29,11 @@ class QarchiveConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake", "cmake_find_package"
-
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _qt_major(self):
+        return Version(self.dependencies["qt"].ref.version).major
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
         export_conandata_patches(self)
 
     def config_options(self):
@@ -49,29 +46,35 @@ class QarchiveConan(ConanFile):
 
     def requirements(self):
         self.requires("libarchive/3.6.1")
-        self.requires("qt/5.15.6")
+        self.requires("qt/5.15.7")
 
     def build_requirements(self):
-        self.build_requires("cmake/3.24.2")
+        self.tool_requires("cmake/3.24.2")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+                  destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["QARCHIVE_QT_VERSION_MAJOR"] = self._qt_major
+        tc.generate()
+
+        cd = CMakeDeps(self)
+        cd.generate()
 
     def build(self):
         apply_conandata_patches(self)
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        self.copy("LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
