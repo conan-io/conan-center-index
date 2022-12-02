@@ -72,8 +72,6 @@ class SoundTouchConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "SoundTouch")
-        # to avoid to create an unwanted target, since we can't allow SoundTouch::SoundTouch to be the global target here
-        self.cpp_info.set_property("cmake_target_name", "SoundTouch::SoundTouchDLL")
 
         self.cpp_info.components["_soundtouch"].set_property("cmake_target_name", "SoundTouch::SoundTouch")
         self.cpp_info.components["_soundtouch"].set_property("pkg_config_name", "SoundTouch")
@@ -91,9 +89,10 @@ class SoundTouchConan(ConanFile):
             self.cpp_info.components["_soundtouch"].sharedlinkflags = openmp_flags
             self.cpp_info.components["_soundtouch"].exelinkflags = openmp_flags
 
-        self.cpp_info.components["SoundTouchDLL"].set_property("cmake_target_name", "SoundTouch::SoundTouchDLL")
-        self.cpp_info.components["SoundTouchDLL"].libs = ["SoundTouchDLL"]
-        self.cpp_info.components["SoundTouchDLL"].requires = ["_soundtouch"]
+        if self.options.with_dll:
+            self.cpp_info.components["SoundTouchDLL"].set_property("cmake_target_name", "SoundTouch::SoundTouchDLL")
+            self.cpp_info.components["SoundTouchDLL"].libs = ["SoundTouchDLL"]
+            self.cpp_info.components["SoundTouchDLL"].requires = ["_soundtouch"]
 
         if self.options.with_util:
             bin_path = os.path.join(self.package_folder, "bin")
@@ -106,3 +105,6 @@ class SoundTouchConan(ConanFile):
         self.cpp_info.components["_soundtouch"].names["cmake_find_package"] = "SoundTouch"
         self.cpp_info.components["_soundtouch"].names["cmake_find_package_multi"] = "SoundTouch"
         self.cpp_info.names["pkg_config"] = "SoundTouch"
+        if self.options.with_dll:
+            self.cpp_info.components["SoundTouchDLL"].names["cmake_find_package"] = "SoundTouchDLL"
+            self.cpp_info.components["SoundTouchDLL"].names["cmake_find_package_multi"] = "SoundTouchDLL"
