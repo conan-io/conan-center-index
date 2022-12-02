@@ -6,6 +6,7 @@ from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import MSBuild, VCVars
 from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.env import VirtualBuildEnv
 from pathlib import Path
 import os
 
@@ -27,9 +28,6 @@ class bxConan(ConanFile):
     def _bx_folder(self):
         return "bx"
    
-    def layout(self):
-        basic_layout(self, src_folder=".")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -64,6 +62,9 @@ class bxConan(ConanFile):
                 if self.settings.compiler.runtime == "dynamic":
                     self.genieExtra += " --with-dynamic-runtime"
 
+    def layout(self):
+        basic_layout(self, src_folder=".")
+
     def validate(self):
         if not self.settings.os == "Windows":
             if not self.options.fPIC:
@@ -71,11 +72,16 @@ class bxConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 14)
 
+    def build_requirements(self):
+        self.tool_requires("genie/1170")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True,
                     destination=os.path.join(self.source_folder, self._bx_folder))
 
     def generate(self):
+        vbe = VirtualBuildEnv(self)
+        vbe.generate()
         if is_msvc(self):
             tc = VCVars(self)
             tc.generate()
@@ -84,9 +90,8 @@ class bxConan(ConanFile):
             tc.generate()
 
     def build(self):
-        # Figure out genie path
+        # Save bx path for convencience
         self.bxPath = os.path.join(self.source_folder, self._bx_folder)
-        genie = os.path.join(self.bxPath, "tools", "bin", self.binFolder, "genie")
 
         if is_msvc(self):
             # Conan to Genie translation maps
@@ -96,7 +101,7 @@ class bxConan(ConanFile):
             # Use genie directly, then msbuild on specific projects based on requirements
             genieVS = f"vs{vsVerToGenie[str(self.settings.compiler.version)]}"
             genieGen = f"{self.genieExtra} {genieVS}"
-            self.run(f"{genie} {genieGen}", cwd=self.bxPath)
+            self.run(f"genie {genieGen}", cwd=self.bxPath)
 
             msbuild = MSBuild(self)
             # customize to Release when RelWithDebInfo
@@ -106,7 +111,6 @@ class bxConan(ConanFile):
             msbuild.build(os.path.join(self.bxPath, ".build", "projects", genieVS, "bx.sln"), targets=self.projs)
         else:
             # Not sure if XCode can be spefically handled by conan for building through, so assume everything not VS is make
-            # Use genie with gmake gen, then make on specific projects based on requirements
             # gcc-multilib and g++-multilib required for 32bit cross-compilation, should see if we can check and install through conan
             
             # Conan to Genie translation maps
@@ -126,7 +130,7 @@ class bxConan(ConanFile):
             if osToUseArchConfigSuffix[str(self.settings.os)]:
                 genieGen += F"{gmakeArchToGenieSuffix[str(self.settings.arch)]}"
             genieGen += " gmake"
-            self.run(f"{genie} {genieGen}", cwd=self.bxPath)
+            self.run(f"genie {genieGen}", cwd=self.bxPath)
 
             # Build project folder and path from given settings
             projFolder = f"gmake-{gmakeOsToProj[str(self.settings.os)]}"
@@ -172,12 +176,13 @@ class bxConan(ConanFile):
         for bxFile in Path(os.path.join(self.package_folder, "lib")).glob("*bx*"):
             rename(self, os.path.join(self.package_folder, "lib", bxFile.name), 
                     os.path.join(self.package_folder, "lib", f"{self.packageLibPrefix}bx{bxFile.suffix}"))
-        for bxFile in Path(os.path.join(self.package_folder, "bin")).glob("*bin2c*"):
-            rename(self, os.path.join(self.package_folder, "bin", bxFile.name), 
-                    os.path.join(self.package_folder, "bin", f"bin2c{bxFile.suffix}"))
-        for bxFile in Path(os.path.join(self.package_folder, "bin")).glob("*lemon*"):
-            rename(self, os.path.join(self.package_folder, "bin", bxFile.name), 
-                    os.path.join(self.package_folder, "bin", f"lemon{bxFile.suffix}"))
+        if self.options.tools:
+            for bxFile in Path(os.path.join(self.package_folder, "bin")).glob("*bin2c*"):
+                rename(self, os.path.join(self.package_folder, "bin", bxFile.name), 
+                        os.path.join(self.package_folder, "bin", f"bin2c{bxFile.suffix}"))
+            for bxFile in Path(os.path.join(self.package_folder, "bin")).glob("*lemon*"):
+                rename(self, os.path.join(self.package_folder, "bin", bxFile.name), 
+                        os.path.join(self.package_folder, "bin", f"lemon{bxFile.suffix}"))
 
     def package_info(self):
         self.cpp_info.includedirs = ["include"]
