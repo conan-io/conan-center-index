@@ -120,7 +120,8 @@ class GetTextConan(ConanFile):
             if target is not None:
                 tc.configure_args += [f"--host={target}", f"--build={target}"]
 
-            if self.settings.build_type == "Debug" and Version(self.settings.compiler.version) >= "12":
+            if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
+               (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
                 tc.extra_cflags += ["-FS"]
 
         tc.make_args += ["-C", "intl"]
