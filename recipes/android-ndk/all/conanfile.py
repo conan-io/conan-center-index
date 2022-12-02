@@ -285,9 +285,9 @@ class AndroidNDKConan(ConanFile):
             "c": self._define_tool_var("CC", "clang"),
             "cpp": self._define_tool_var("CXX", "clang++"),
         }
-        self.conf_info.define("tools.build:compiler_executables", compiler_executables)
-        self.buildenv_info.define_path("CC", compiler_executables.get("c"))
-        self.buildenv_info.define_path("CXX", compiler_executables.get("cpp"))
+        self.conf_info.update("tools.build:compiler_executables", compiler_executables)
+        self.buildenv_info.define_path("CC", compiler_executables["c"])
+        self.buildenv_info.define_path("CXX", compiler_executables["cpp"])
 
         # Versions greater than 23 had the naming convention
         # changed to no longer include the triplet.
@@ -337,8 +337,8 @@ class AndroidNDKConan(ConanFile):
             cmake_wrapper = os.path.join(self.package_folder, "bin", cmake_wrapper)
             self.env_info.CONAN_CMAKE_PROGRAM = cmake_wrapper
             self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = os.path.join(self.package_folder, "bin", "build", "cmake", "android.toolchain.cmake")
-            self.env_info.CC = compiler_executables.get("c")
-            self.env_info.CXX = compiler_executables.get("cpp")
+            self.env_info.CC = compiler_executables["c"]
+            self.env_info.CXX = compiler_executables["cpp"]
             self.env_info.AR = self._define_tool_var("AR", "ar", bare)
             self.env_info.AS = self._define_tool_var("AS", "as", bare)
             self.env_info.RANLIB = self._define_tool_var("RANLIB", "ranlib", bare)
