@@ -1,12 +1,20 @@
 from conan import ConanFile
-from conan.tools.build import cross_building
-from conans import CMake
+from conan.tools.build import can_run, cross_building
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+
+    def layout(self):
+        cmake_layout(self)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["protobuf_LITE"] = self.options["protobuf"].lite
+        tc.generate()
 
     def build_requirements(self):
         if hasattr(self, "settings_build") and cross_building(self):
@@ -14,11 +22,11 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["protobuf_LITE"] = self.options["protobuf"].lite
         cmake.configure()
         cmake.build()
 
     def test(self):
-        if not cross_building(self):
-            self.run("protoc --version", run_environment=True)
-            self.run(os.path.join("bin", "test_package"), run_environment=True)
+        if can_run(self):
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run("protoc --version", env="conanrun")
+            self.run(bin_path, env="conanrun")
