@@ -36,7 +36,11 @@ class bxConan(ConanFile):
             "clang": "3.3",
             "apple-clang": "5",
         }
-   
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -91,6 +95,10 @@ class bxConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("genie/1170")
+        if not is_msvc(self) and self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True,
@@ -133,8 +141,8 @@ class bxConan(ConanFile):
             # Conan to Genie translation maps
             compilerStr = str(self.settings.compiler)
             compilerAndOsToGenie = {"Windows": f"--gcc=mingw-{compilerStr}", "Linux": f"--gcc=linux-{compilerStr}",
-                                    "FreeBSD": f"--gcc=freebsd", "Macos": f"--gcc=osx",
-                                    "Android": f"--gcc=android", "iOS": f"--gcc=ios"}
+                                    "FreeBSD": "--gcc=freebsd", "Macos": "--gcc=osx",
+                                    "Android": "--gcc=android", "iOS": "--gcc=ios"}
             gmakeOsToProj = {"Windows": "mingw", "Linux": "linux", "FreeBSD": "freebsd", "Macos": "osx", "Android": "android", "iOS": "ios"}
             gmakeArchToGenieSuffix = {"x86": "-x86", "x86_64": "-x64", "armv8": "-arm64", "armv7": "-arm"}
             osToUseArchConfigSuffix = {"Windows": False, "Linux": False, "FreeBSD": False, "Macos": True, "Android": True, "iOS": True}
