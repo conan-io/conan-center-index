@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 project(test_package LANGUAGES C)
 
 find_package(open62541 REQUIRED CONFIG)
+find_package(Threads REQUIRED)
 
 include(open62541Macros)
 
