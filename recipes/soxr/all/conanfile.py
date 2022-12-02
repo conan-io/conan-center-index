@@ -29,8 +29,6 @@ class SoxrConan(ConanFile):
         "with_lsr_bindings": True
     }
 
-    exports_sources = "CMakeLists.txt"
-
     def export_sources(self):
         export_conandata_patches(self)
 
