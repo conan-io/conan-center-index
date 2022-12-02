@@ -172,13 +172,12 @@ class bxConan(ConanFile):
                 conf += archToMakeConfigSuffix[str(self.settings.arch)]
             if self.settings.os == "Windows":
                 mingw = "MINGW=$MINGW_PREFIX"
+                projPath = projPath.replace("\\", "/") # Fix path for msys...
             else:
                 mingw = ""
             autotools = Autotools(self)
             # Build with make
             for proj in self.projs:
-                if self.settings.os == "Windows":
-                    projPath = projPath.replace("\\", "/") # Fix path for msys...
                 autotools.make(target=proj, args=["-R", f"-C {projPath}", mingw, conf])
 
     def package(self):
