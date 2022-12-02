@@ -114,8 +114,7 @@ class ProtobufConan(ConanFile):
         cmake.definitions["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
         cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
         cmake.definitions["protobuf_BUILD_TESTS"] = False
-        if self.settings.os == "tvOS":
-            cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = False
+        cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = self.settings.os != "tvOS"
         if not self.options.debug_suffix:
             cmake.definitions["protobuf_DEBUG_POSTFIX"] = ""
         if Version(self.version) >= "3.14.0" and self.settings.os != "tvOS":
