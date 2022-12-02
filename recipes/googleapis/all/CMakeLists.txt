@@ -9,3 +9,7 @@ conan_basic_setup(TARGETS)
 find_package(Protobuf REQUIRED CONFIG)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+if(APPLE)
+    set(CMAKE_CXX_FLAGS "-D_ANSI_SOURCE")
+endif()
