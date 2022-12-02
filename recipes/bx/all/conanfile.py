@@ -135,7 +135,7 @@ class bxConan(ConanFile):
             compilerAndOsToGenie = {"Windows": f"--gcc=mingw-{compilerStr}", "Linux": f"--gcc=linux-{compilerStr}",
                                     "FreeBSD": f"--gcc=freebsd", "Macos": f"--gcc=osx",
                                     "Android": f"--gcc=android", "iOS": f"--gcc=ios"}
-            gmakeOsToProj = {"Windows": "mingw-", "Linux": "linux", "FreeBSD": "freebsd", "Macos": "osx", "Android": "android", "iOS": "ios"}
+            gmakeOsToProj = {"Windows": "mingw", "Linux": "linux", "FreeBSD": "freebsd", "Macos": "osx", "Android": "android", "iOS": "ios"}
             gmakeArchToGenieSuffix = {"x86": "-x86", "x86_64": "-x64", "armv8": "-arm64", "armv7": "-arm"}
             osToUseArchConfigSuffix = {"Windows": False, "Linux": False, "FreeBSD": False, "Macos": True, "Android": True, "iOS": True}
 
@@ -152,8 +152,8 @@ class bxConan(ConanFile):
 
             # Build project folder and path from given settings
             projFolder = f"gmake-{gmakeOsToProj[str(self.settings.os)]}"
-            if self.settings.os == "Windows":
-                projFolder += str(self.settings.compiler) #mingw-gcc or mingw-clang
+            if self.settings.os == "Windows" or compilerStr != "gcc":
+                projFolder += f"-{compilerStr}" #mingw-gcc or mingw-clang for windows; -clang for linux (where gcc on linux has no extra)
             if osToUseArchConfigSuffix[str(self.settings.os)]:
                 projFolder += gmakeArchToGenieSuffix[str(self.settings.arch)]
             projPath = os.path.sep.join([self.bxPath, ".build", "projects", projFolder])
