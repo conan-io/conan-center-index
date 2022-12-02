@@ -10,7 +10,9 @@ sources:
 patches:
   "1.0.18":
     - patch_file: "patches/0001-1.0.18-msvc_props.patch"
-      base_path: "source_subfolder"
+      patch_type: "portability"
+      patch_description: "Switch MSVC to use PDB"
   "cci.20220430":
     - patch_file: "patches/0001-1.0.18-msvc_props.patch"
-      base_path: "source_subfolder"
+      patch_type: "portability"
+      patch_description: "Switch MSVC to use PDB"
