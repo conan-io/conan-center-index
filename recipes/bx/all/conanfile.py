@@ -160,7 +160,7 @@ class bxConan(ConanFile):
 
             # Build project folder and path from given settings
             projFolder = f"gmake-{gmakeOsToProj[str(self.settings.os)]}"
-            if self.settings.os == "Windows" or compilerStr != "gcc":
+            if self.settings.os == "Windows" or compilerStr not in ["gcc", "apple-clang"]:
                 projFolder += f"-{compilerStr}" #mingw-gcc or mingw-clang for windows; -clang for linux (where gcc on linux has no extra)
             if osToUseArchConfigSuffix[str(self.settings.os)]:
                 projFolder += gmakeArchToGenieSuffix[str(self.settings.arch)]
