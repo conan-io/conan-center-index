@@ -131,19 +131,20 @@ class bxConan(ConanFile):
             # gcc-multilib and g++-multilib required for 32bit cross-compilation, should see if we can check and install through conan
             
             # Conan to Genie translation maps
-            gccOsToGenie = {"Windows": "--gcc=mingw-", "Linux": "--gcc=linux-gcc", "Macos": "--gcc=osx", "Android": "--gcc=android", "iOS": "--gcc=ios"}
-            gmakeOsToProj = {"Windows": "mingw-", "Linux": "linux", "Macos": "osx", "Android": "android", "iOS": "ios"}
+            compilerStr = str(self.settings.compiler)
+            compilerAndOsToGenie = {"Windows": f"--{compilerStr}=mingw-{compilerStr}", "Linux": f"--{compilerStr}=linux-{compilerStr}",
+                                    "FreeBSD": f"--{compilerStr}=freebsd", "Macos": f"--{compilerStr}=osx",
+                                    "Android": f"--{compilerStr}=android", "iOS": f"--{compilerStr}=ios"}
+            gmakeOsToProj = {"Windows": "mingw-", "Linux": "linux", "FreeBSD": "freebsd", "Macos": "osx", "Android": "android", "iOS": "ios"}
             gmakeArchToGenieSuffix = {"x86": "-x86", "x86_64": "-x64", "armv8": "-arm64", "armv7": "-arm"}
-            osToUseArchConfigSuffix = {"Windows": False, "Linux": False, "Macos": True, "Android": True, "iOS": True}
+            osToUseArchConfigSuffix = {"Windows": False, "Linux": False, "FreeBSD": False, "Macos": True, "Android": True, "iOS": True}
 
             buildTypeToMakeConfig = {"Debug": "config=debug", "Release": "config=release"}
             archToMakeConfigSuffix = {"x86": "32", "x86_64": "64"}
-            osToUseMakeConfigSuffix = {"Windows": True, "Linux": True, "Macos": False, "Android": False, "iOS": False}
+            osToUseMakeConfigSuffix = {"Windows": True, "Linux": True, "FreeBSD": True, "Macos": False, "Android": False, "iOS": False}
 
             # Generate projects through genie
-            genieGen = f"{self.genieExtra} {gccOsToGenie[str(self.settings.os)]}"
-            if self.settings.os == "Windows":
-                genieGen += str(self.settings.compiler) #mingw-gcc or mingw-clang
+            genieGen = f"{self.genieExtra} {compilerAndOsToGenie[str(self.settings.os)]}"
             if osToUseArchConfigSuffix[str(self.settings.os)]:
                 genieGen += F"{gmakeArchToGenieSuffix[str(self.settings.arch)]}"
             genieGen += " gmake"
