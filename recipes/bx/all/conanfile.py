@@ -2,7 +2,8 @@ from conan import ConanFile
 from conan.tools.files import copy, get, rename
 from conan.tools.build import check_min_cppstd
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, check_min_vs
+from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import MSBuild, VCVars
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -27,6 +28,14 @@ class bxConan(ConanFile):
     @property
     def _bx_folder(self):
         return "bx"
+
+    @property
+    def _compiler_required(self):
+        return {
+            "gcc": "8",
+            "clang": "3.3",
+            "apple-clang": "5",
+        }
    
     def config_options(self):
         if self.settings.os == "Windows":
@@ -71,6 +80,14 @@ class bxConan(ConanFile):
                 raise ConanInvalidConfiguration("This package does not support builds without fPIC.")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 14)
+        check_min_vs(self, 191)
+        if not is_msvc(self):
+            try:
+                minimum_required_compiler_version = self._compiler_required[str(self.settings.compiler)]
+                if Version(self.settings.compiler.version) < minimum_required_compiler_version:
+                    raise ConanInvalidConfiguration("This package requires C++14 support. The current compiler does not support it.")
+            except KeyError:
+                self.output.warn("This recipe has no checking for the current compiler. Please consider adding it.")
 
     def build_requirements(self):
         self.tool_requires("genie/1170")
@@ -206,7 +223,7 @@ class bxConan(ConanFile):
             else:
                 self.cpp_info.includedirs.extend(["include/compat/mingw"])
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread"])
+            self.cpp_info.system_libs.extend(["dl", "pthread"])
             if self.settings.os == "Linux":
                 self.cpp_info.includedirs.extend(["include/compat/linux"])
             else:
