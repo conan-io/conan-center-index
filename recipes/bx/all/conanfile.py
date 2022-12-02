@@ -238,11 +238,13 @@ class bxConan(ConanFile):
                 self.cpp_info.includedirs.extend(["include/compat/linux"])
             else:
                 self.cpp_info.includedirs.extend(["include/compat/freebsd"])
-        elif self.settings.os == "Macos":
-            self.cpp_info.includedirs.extend(["include/compat/osx"])
-        elif self.settings.os == "iOS":
-            self.cpp_info.includedirs.extend(["include/compat/ios"])
-
+        elif self.settings.os in ["Macos", "iOS"]:
+            self.cpp_info.system_libs.extend(["Foundation", "Cocoa"])
+            if self.settings.os == "Macos":
+                self.cpp_info.includedirs.extend(["include/compat/osx"])
+            else:
+                self.cpp_info.includedirs.extend(["include/compat/ios"])
+        
         #  TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "bx"
         self.cpp_info.filenames["cmake_find_package_multi"] = "bx"
