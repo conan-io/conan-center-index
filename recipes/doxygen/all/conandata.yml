@@ -20,14 +20,3 @@ sources:
   "1.8.17":
     url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.8.17.src.tar.gz"
     sha256: "2cba988af2d495541cbbe5541b3bee0ee11144dcb23a81eada19f5501fd8b599"
-patches:
-  "1.9.2":
-    - patch_file: "patches/1.9.2-0001-imported-target.patch"
-  "1.9.1":
-    - patch_file: "patches/1.9.1-0001-imported-target.patch"
-  "1.8.20":
-    - patch_file: "patches/1.8.20-0001-relocatable-cmake.patch"
-  "1.8.18":
-    - patch_file: "patches/1.8.18-0001-relocatable-cmake.patch"
-  "1.8.17":
-    - patch_file: "patches/1.8.17-0001-relocatable-cmake.patch"
