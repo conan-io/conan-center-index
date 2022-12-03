@@ -7,7 +7,6 @@ from conan.tools.layout import basic_layout
 from conan.tools.build import build_jobs, cross_building, check_min_cppstd
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
-from conan.errors import ConanException
 import os
 
 
