@@ -1,7 +1,7 @@
 import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-from conan.tools.files import rename
+from conan.tools.files import get, rename, rmdir
 
 required_conan_version = ">=1.30.0"
 
@@ -59,7 +59,7 @@ class HimalayaConan(ConanFile):
         self.requires("eigen/3.3.9")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        get(self, **self.conan_data["sources"][self.version])
         rename(self, "Himalaya-{}".format(self.version), self._source_subfolder)
 
     def build(self):
@@ -78,7 +78,7 @@ class HimalayaConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Himalaya"
