@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.files import rename
 
 required_conan_version = ">=1.30.0"
 
@@ -11,7 +12,7 @@ class HimalayaConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Himalaya-Library/Himalaya"
     description = "C++ library to calculate three-loop corrections to the Higgs boson mass in the MSSM"
-    topics = ("conan", "high-energy", "physics", "hep", "Higgs", "mass", "MSSM")
+    topics = ("high-energy", "physics", "hep", "higgs", "mass", "mssm")
     settings = "os", "compiler", "build_type", "arch"
     options = {"fPIC": [True, False], "shared": [True, False]}
     default_options = {"fPIC": True, "shared": False}
@@ -59,7 +60,7 @@ class HimalayaConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("Himalaya-{}".format(self.version), self._source_subfolder)
+        rename(self, "Himalaya-{}".format(self.version), self._source_subfolder)
 
     def build(self):
         cmake = self._configure_cmake()
