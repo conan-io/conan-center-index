@@ -38,6 +38,11 @@ class Catch2Conan(ConanFile):
         return "14"
 
     @property
+    def _min_console_width(self):
+        # Catch2 doesn't build if less than this value
+        return 46
+
+    @property
     def _compilers_minimum_version(self):
         return {
             "gcc": "7",
@@ -73,6 +78,15 @@ class Catch2Conan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler doesn't support",
             )
+
+        try:
+            if int(self.options.console_width) < self._min_console_width:
+                raise ConanInvalidConfiguration(
+                        f"option 'console_width' must be >= {self._min_console_width}, "
+                        f"got {self.options.console_width}")
+        except ValueError:
+            raise ConanInvalidConfiguration(f"option 'console_width' must be an integer, "
+                                            f"got '{self.options.console_width}'")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
