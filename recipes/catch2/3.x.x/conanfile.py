@@ -30,7 +30,7 @@ class Catch2Conan(ConanFile):
         "fPIC": True,
         "with_prefix": False,
         "default_reporter": None,
-        "console_width": 80,
+        "console_width": "80",
     }
 
     @property
