@@ -61,10 +61,12 @@ class Re2Conan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "re2")
         self.cpp_info.set_property("cmake_target_name", "re2::re2")
+        self.cpp_info.set_property("pkg_config_name", "re2")
         self.cpp_info.libs = ["re2"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "pthread"]
