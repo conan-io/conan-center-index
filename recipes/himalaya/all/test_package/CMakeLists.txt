@@ -1,9 +1,8 @@
-cmake_minimum_required(VERSION 3.1)
-project(PackageTest CXX)
+cmake_minimum_required(VERSION 3.1.2)
+project(test_package CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+find_package(himalaya REQUIRED CONFIG)
 
-add_executable(test_package test_package.cpp)
-target_link_libraries(test_package CONAN_PKG::himalaya)
-set_property(TARGET test_package PROPERTY CXX_STANDARD 14)
+add_executable(${PROJECT_NAME} ${PROJECT_NAME}.cpp)
+target_link_libraries(${PROJECT_NAME} himalaya::himalaya)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
