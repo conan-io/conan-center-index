@@ -20,7 +20,7 @@ class GStreamerConan(ConanFile):
     topics = ("multimedia", "video", "audio", "broadcasting", "framework", "media")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gstreamer.freedesktop.org/"
-    license = "GPL-2.0-only"
+    license = "LGPL-2.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
