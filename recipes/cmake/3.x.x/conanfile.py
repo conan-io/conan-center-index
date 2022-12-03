@@ -1,9 +1,10 @@
 from conan import ConanFile
 from conan.tools.files import chdir, copy, rmdir, get
+from conan.tools.files.files import save_toolchain_args, load_toolchain_args
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.build import build_jobs, cross_building, check_min_cppstd
+from conan.tools.build import build_jobs, cross_building, check_min_cppstd, cmd_args_to_string
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conan.errors import ConanException
@@ -55,7 +56,7 @@ class CMakeConan(ConanFile):
             "gcc": "4.8",
             "clang": "3.3",
             "apple-clang": "9",
-            "Visual Studio": "14",
+            "msvc": "191",
         }
 
         compiler = str(self.settings.compiler)
@@ -86,6 +87,16 @@ class CMakeConan(ConanFile):
         if self.options.bootstrap:
             tc = AutotoolsToolchain(self)
             tc.generate()
+            bootstrap_cmake_options = ["--"]
+            bootstrap_cmake_options.append(f'-DCMAKE_CXX_STANDARD={"11" if not self.settings.compiler.cppstd else self.settings.compiler.cppstd}')
+            if self.settings.os == "Linux":
+                if self.options.with_openssl:
+                    openssl = self.dependencies["openssl"]
+                    bootstrap_cmake_options.append("-DCMAKE_USE_OPENSSL=ON")
+                    bootstrap_cmake_options.append(f'-DOPENSSL_USE_STATIC_LIBS={"FALSE" if openssl.options.shared else "TRUE"}')
+                else:
+                    bootstrap_cmake_options.append("-DCMAKE_USE_OPENSSL=OFF")
+            save_toolchain_args({"bootstrap_cmake_options": cmd_args_to_string(bootstrap_cmake_options)}, namespace="bootstrap")
         else:
             tc = CMakeToolchain(self)
             if not self.settings.compiler.cppstd:
@@ -103,8 +114,10 @@ class CMakeConan(ConanFile):
 
     def build(self):
         if self.options.bootstrap:
+            toolchain_file_content = load_toolchain_args(self.generators_folder, namespace="bootstrap")
+            bootstrap_cmake_options = toolchain_file_content.get("bootstrap_cmake_options")
             with chdir(self, self.source_folder):
-                self.run('./bootstrap --prefix="" --parallel={}'.format(build_jobs(self)))
+                self.run(f'./bootstrap --prefix="" --parallel={build_jobs(self)} {bootstrap_cmake_options}')
                 autotools = Autotools(self)
                 autotools.make()
         else:
@@ -120,7 +133,6 @@ class CMakeConan(ConanFile):
                 autotools.install()
         else:
             cmake = CMake(self)
-            cmake.configure()
             cmake.install()
         rmdir(self, os.path.join(self.package_folder, "doc"))
 
@@ -129,13 +141,4 @@ class CMakeConan(ConanFile):
         del self.info.options.bootstrap
 
     def package_info(self):
-        self.buildenv_info.prepend_path("CMAKE_ROOT", self.package_folder)
-        self.runenv_info.define_path("CMAKE_ROOT", self.package_folder)
-        module_version = "{}.{}".format(Version(self.version).major, Version(self.version).minor)
-        mod_path = os.path.join(self.package_folder, "share", f"cmake-{module_version}", "Modules")
-        self.buildenv_info.prepend_path("CMAKE_MODULE_PATH", mod_path)
-        self.runenv_info.define_path("CMAKE_MODULE_PATH", mod_path)
-        if not os.path.exists(mod_path):
-            raise ConanException("Module path not found: %s" % mod_path)
-
         self.cpp_info.includedirs = []
