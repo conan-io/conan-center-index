@@ -106,7 +106,7 @@ class LibdeflateConan(ConanFile):
         autotools = Autotools(self)
         with chdir(self, self.source_folder):
             # Note: not actually an autotools project, is a Makefile project.
-            autotools.install(args=[f"PREFIX={unix_path(self, self.package_folder)}"])
+            autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}", "PREFIX=/"])
         rmdir(self, os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.a" if self.options.shared else "*.[so|dylib]*", os.path.join(self.package_folder, "lib") )
