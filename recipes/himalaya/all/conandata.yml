@@ -2,3 +2,9 @@ sources:
   "4.1.1":
     url: "https://github.com/Himalaya-Library/Himalaya/archive/4.1.1.tar.gz"
     sha256: "ee83db85f7be743708dc0e2e04cd2addcbbefca7470c11b18d3d9fedb325d36e"
+  "4.2.1":
+    url: "https://github.com/Himalaya-Library/Himalaya/archive/4.2.1.tar.gz"
+    sha256: "429d31976ab71030ce6f695c6324664c505b23189245c48ae6f0e65f0f105625"
+  "4.2.2":
+    url: "https://github.com/Himalaya-Library/Himalaya/archive/4.2.2.tar.gz"
+    sha256: "2210badc6d86e88bec4238d0894327cf3728abbfa91fd49dc1a74c1f64c553bf"
