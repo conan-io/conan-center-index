@@ -34,6 +34,16 @@ class PerfettoConan(ConanFile):
     def _minimum_cpp_standard(self):
         return 11 if Version(self.version) < "31.0" else 17
 
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "15" if Version(self.version) < "31.0" else "16",
+            "msvc": "190",
+            "gcc": "7",
+            "clang": "3.3" if Version(self.version) < "31.0" else "5",
+            "apple-clang": "5.0" if Version(self.version) < "31.0" else "9.1",
+        }
+
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
         export_conandata_patches(self)
@@ -50,10 +60,21 @@ class PerfettoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < 7:
-            raise ConanInvalidConfiguration ("perfetto requires gcc >= 7")
         if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
+
+        def loose_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
+        compiler = self.info.settings.compiler
+        min_version = self._minimum_compilers_version.get(str(compiler))
+        if min_version and loose_lt_semver(str(compiler.version), min_version):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires {compiler} {min_version}. The current compiler is {compiler} {compiler.version}."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
