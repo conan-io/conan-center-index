@@ -1,6 +1,8 @@
 import os
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conans import CMake, tools
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, rename, rmdir
 
 required_conan_version = ">=1.30.0"
@@ -43,8 +45,6 @@ class HimalayaConan(ConanFile):
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False) 
         if not minimum_version: 
             self.output.warn("Himalaya requires C++14. Your compiler is unknown. Assuming it supports C++14.") 
-        elif tools.Version(self.settings.compiler.version) < minimum_version: 
-            raise ConanInvalidConfiguration("Himalaya requires C++14, which your compiler does not support.") 
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("Himalaya does not support {}".format(self.settings.compiler))
 
