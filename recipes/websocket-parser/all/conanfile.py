@@ -47,6 +47,6 @@ class WebsocketParserConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
-        self.cpp_info.names["cmake_find_package"] = "websocket_parser"
-        self.cpp_info.names["cmake_find_package_multi"] = "websocket_parser"
-        self.cpp_info.names["pkg_config"] = "websocket_parser"
+        self.cpp_info.set_property("cmake_file_name", "websocket_parser")
+        self.cpp_info.set_property("cmake_target_name", "websocket_parser::websocket_parser")
+        self.cpp_info.set_property("pkg_config_name", "websocket_parser")
