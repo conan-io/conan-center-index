@@ -23,7 +23,7 @@ class Catch2Conan(ConanFile):
         "fPIC": [True, False],
         "with_prefix": [True, False],
         "default_reporter": [None, "ANY"],
-        "console_width": range(80, 1000),
+        "console_width": [None, "ANY"],
     }
     default_options = {
         "shared": False,
