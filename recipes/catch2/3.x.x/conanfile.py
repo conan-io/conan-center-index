@@ -84,7 +84,7 @@ class Catch2Conan(ConanFile):
         tc.cache_variables["CATCH_INSTALL_EXTRAS"] = True
         tc.cache_variables["CATCH_DEVELOPMENT_BUILD"] = False
         tc.variables["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
-        tc.variables["CATCH_CONFIG_CONSOLE_WIDTH"] = f"{self.options.console_width}"
+        tc.variables["CATCH_CONFIG_CONSOLE_WIDTH"] = self.options.console_width
         if self.options.default_reporter:
             tc.variables["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
         tc.generate()
