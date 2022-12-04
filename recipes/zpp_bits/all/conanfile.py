@@ -52,7 +52,7 @@ class ZppBitsConan(ConanFile):
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
                 raise ConanInvalidConfiguration(
-                    f"{self.name} {self.version} requires C++{self._minimum_cpp_standard}, which your compiler does not support.",
+                    f"{self.name} {self.version} requires C++{self._min_cppstd}, which your compiler does not support.",
                 )
 
     def source(self):
