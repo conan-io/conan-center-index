@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rm, replace_in_file
 from conan.tools.scm import Version
 from conans import CMake
 from conan.errors import ConanInvalidConfiguration
@@ -86,6 +86,7 @@ class DoxygenConan(ConanFile):
         if Version(self.version) < "1.9.0":
             replace_in_file(self, "addon/doxysearch/CMakeLists.txt",
                             "\"uuid.lib rpcrt4.lib ws2_32.lib\"", "uuid.lib rpcrt4.lib ws2_32.lib")
+            rm(self, "FindXapian.cmake", "cmake")
         cmake = CMake(self)
         cmake.definitions["build_parse"] = self.options.enable_parse
         cmake.definitions["build_search"] = self.options.enable_search
