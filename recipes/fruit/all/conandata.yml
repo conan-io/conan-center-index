@@ -8,6 +8,9 @@ sources:
   "3.6.0":
     url: "https://github.com/google/fruit/archive/v3.6.0.tar.gz"
     sha256: "b35b9380f3affe0b3326f387505fa80f3584b0d0a270362df1f4ca9c39094eb5"
+  "3.7.0":
+    url: "https://github.com/google/fruit/archive/refs/tags/v3.7.0.tar.gz"
+    sha256: "134d65c8e6dff204aeb771058c219dcd9a353853e30a3961a5d17a6cff434a09"
 patches:
   "3.4.0":
     - patch_file: "patches/0001-fruit-3.4.0-cmake.patch"
@@ -25,4 +28,7 @@ patches:
     - patch_file: "patches/0003-supports-cmake-multi-configuration-generator.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0004-set-options-for-cmake-target.patch"
+      base_path: "source_subfolder"
+  "3.7.0":
+    - patch_file: "patches/fix-cmakelists-problems.patch"
       base_path: "source_subfolder"
