@@ -80,7 +80,7 @@ class SentryCrashpadConan(ConanFile):
             raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
 
     def layout(self):
-        cmake_layout(self, src_folder="external/crashpad")
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)])
@@ -101,12 +101,13 @@ class SentryCrashpadConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "external", "crashpad", "CMakeLists.txt"),
                                   "find_package(OpenSSL)", openssl_repl)
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder="external/crashpad")
         cmake.build()
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
+        cmake.configure(build_script_folder="external/crashpad")
         cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
