@@ -3,9 +3,10 @@ from conan.tools.build import cross_building
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get
+from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.52.0"
 
 
 class GsoapConan(ConanFile):
@@ -43,24 +44,23 @@ class GsoapConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1q")
-            self.requires("zlib/1.2.12")
+            self.requires("openssl/1.1.1s")
+            self.requires("zlib/1.2.13")
 
     def build_requirements(self):
         if cross_building(self, skip_x64_x86=True) and hasattr(self, "settings_build"):
-            self.tool_requires("gsoap/{}".format(self.version))
+            self.tool_requires(f"gsoap/{self.version}")
 
-        # TODO: use is_msvc with build profile when possible (see https://github.com/conan-io/conan/issues/11926)
-        if str(self._settings_build.compiler) in ["Visual Studio", "msvc"]:
+        if is_msvc(self, build_context=True):
             self.tool_requires("winflexbison/2.5.24")
         else:
             self.tool_requires("bison/3.7.6")
             self.tool_requires("flex/2.6.4")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -110,7 +110,3 @@ class GsoapConan(ConanFile):
         if self.options.with_c_locale:
             defines.append("WITH_C_LOCALE")
         self.cpp_info.defines = defines
-
-        # TODO: remove this block if required_conan_version changed to 1.51.1 or higher
-        #       (see https://github.com/conan-io/conan/pull/11790)
-        self.cpp_info.requires = ["openssl::openssl", "zlib::zlib"]

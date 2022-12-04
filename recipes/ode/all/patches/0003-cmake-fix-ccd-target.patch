@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -572,7 +572,7 @@ if(ODE_WITH_LIBCCD)
+ 	if(ODE_WITH_LIBCCD_SYSTEM)
+ 		find_package(ccd)
+ 		target_compile_definitions(ode PRIVATE -DdLIBCCD_ENABLED -DdLIBCCD_SYSTEM)
+-		target_link_libraries(ODE ccd::ccd)
++		target_link_libraries(ODE PRIVATE ccd)
+ 	else()
+ 		target_compile_definitions(ODE PRIVATE -DdLIBCCD_ENABLED -DdLIBCCD_INTERNAL)
+ 		target_include_directories(

@@ -43,7 +43,7 @@ class Blend2dConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("asmjit/cci.20220210")
+        self.requires("asmjit/cci.20221111")
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):

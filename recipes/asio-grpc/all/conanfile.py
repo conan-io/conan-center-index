@@ -59,7 +59,7 @@ class AsioGrpcConan(ConanFile):
                 (self.settings.compiler == "clang" and compiler_version < "12" and libcxx and str(libcxx) == "libstdc++")
 
     def requirements(self):
-        self.requires("grpc/1.48.0")
+        self.requires("grpc/1.50.0")
         if self.options.use_boost_container or self.options.backend == "boost":
             self.requires("boost/1.80.0")
         if self.options.backend == "asio":

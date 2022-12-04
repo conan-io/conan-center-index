@@ -37,9 +37,11 @@ class GlazeConan(ConanFile):
 
     def requirements(self):
         self.requires("fmt/9.1.0")
-        self.requires("fast_float/3.5.1")
+        self.requires("fast_float/3.8.1")
         self.requires("frozen/1.1.1")
         self.requires("nanorange/20200505")
+        if Version(self.version) >= "0.1.5":
+            self.requires("dragonbox/1.1.3")
 
     def package_id(self):
         self.info.clear()
@@ -59,7 +61,6 @@ class GlazeConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.name} {self.version} requires C++{self._minimum_cpp_standard}, which your compiler does not support.",
             )
-
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)

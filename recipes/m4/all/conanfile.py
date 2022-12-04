@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -46,20 +46,6 @@ class M4Conan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
 
-        env = Environment()
-        env.prepend_path("PATH", self.source_folder)
-        env.vars(self).save_script("m4buildenv_help2man_trick")
-
-        if is_msvc(self):
-            env = Environment()
-            env.define_path("AR", f"{unix_path(self, self.source_folder)}/build-aux/ar-lib lib")
-            env.define("LD", "link")
-            env.define("NM", "dumpbin -symbols")
-            env.define("OBJDUMP", ":")
-            env.define("RANLIB", ":")
-            env.define("STRIP", ":")
-            env.vars(self).save_script("m4buildenv_msvc_for_autotools")
-
         tc = AutotoolsToolchain(self)
         if is_msvc(self):
             tc.extra_cflags.append("-FS")
@@ -83,7 +69,21 @@ class M4Conan(ConanFile):
                 ])
         if self.settings.os == "Windows":
             tc.configure_args.append("ac_cv_func__set_invalid_parameter_handler=yes")
-        tc.generate()
+        env = tc.environment()
+        # help2man trick
+        env.prepend_path("PATH", self.source_folder)
+        # handle msvc
+        if is_msvc(self):
+            ar_wrapper = unix_path(self, os.path.join(self.source_folder, "build-aux", "ar-lib"))
+            env.define("CC", "cl -nologo")
+            env.define("CXX", "cl -nologo")
+            env.define("AR", f"{ar_wrapper} lib")
+            env.define("LD", "link")
+            env.define("NM", "dumpbin -symbols")
+            env.define("OBJDUMP", ":")
+            env.define("RANLIB", ":")
+            env.define("STRIP", ":")
+        tc.generate(env)
 
     def _patch_sources(self):
         apply_conandata_patches(self)

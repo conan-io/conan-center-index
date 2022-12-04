@@ -5,4 +5,3 @@ sources:
 patches:
   "1.1.1r35":
     - patch_file: "patches/0001-install-header.patch"
-      base_path: "source_subfolder"
