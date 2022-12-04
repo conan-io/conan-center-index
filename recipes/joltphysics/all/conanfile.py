@@ -47,7 +47,7 @@ class JoltPhysicsConan(ConanFile):
             "msvc": "191",
             "gcc": "9.3", # due to https://gcc.gnu.org/bugzilla/show_bug.cgi?id=81429
             "clang": "5",
-            "apple-clang": "10",
+            "apple-clang": "12",
         }
 
     @property
