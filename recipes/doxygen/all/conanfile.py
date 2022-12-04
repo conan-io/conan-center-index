@@ -85,6 +85,8 @@ class DoxygenConan(ConanFile):
         apply_conandata_patches(self)
         if Version(self.version) < "1.9.0":
             replace_in_file(self, "addon/doxysearch/CMakeLists.txt",
+                            "find_package(Xapian REQUIRED)", "find_package(xapian REQUIRED)")
+            replace_in_file(self, "addon/doxysearch/CMakeLists.txt",
                             "\"uuid.lib rpcrt4.lib ws2_32.lib\"", "uuid.lib rpcrt4.lib ws2_32.lib")
             rm(self, "FindXapian.cmake", "cmake")
         cmake = CMake(self)
