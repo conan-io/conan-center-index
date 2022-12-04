@@ -26,5 +26,5 @@ class TestPackageConan(ConanFile):
             test_env_dir = "test_env"
             mkdir(self, test_env_dir)
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            handler_bin_path = os.path.join(self.deps_cpp_info["sentry-crashpad"].rootpath, "bin", "crashpad_handler")
+            handler_bin_path = os.path.join(self.deps_cpp_info["sentry-crashpad"].bin_paths[0], "crashpad_handler")
             self.run(f"{bin_path} {test_env_dir} {handler_bin_path}", run_environment=True)
