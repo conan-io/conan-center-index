@@ -35,7 +35,7 @@ patches:
       patch_type: "bugfix"
       patch_source: "https://codereview.qt-project.org/c/qt/qtbase/+/445885"
     - patch_file: "patches/3801bba82.patch"
-      base_path: "qt6/qtwebengine"
+      base_path: "qt6/qtwebengine/src/3rdparty"
       patch_description: "fix qtwebengine with MSVC2022"
       patch_type: "portability"
       patch_source: "https://codereview.qt-project.org/c/qt/qtwebengine-chromium/+/444132"
