@@ -1,7 +1,4 @@
 sources:
-  "cci.20221127":
-    url: "https://github.com/QtExcel/QXlsx/archive/99c2b9d226a7da6b06cde181d28b888b008db667.zip"
-    sha256: "9d80deb17d2c0837445ec9d04558b5535f229e886d6d6607b44b8cf6e9d30335"
   "1.4.4":
     url: "https://github.com/QtExcel/QXlsx/archive/refs/tags/v1.4.4.zip"
     sha256: "3efbd6f63a1ffd521c535dce7b5a5a7e9ebd23db51e6ae8e3e2eb89796e57675"
@@ -9,6 +6,9 @@ sources:
     url: "https://github.com/QtExcel/QXlsx/archive/refs/tags/v1.4.3.zip"
     sha256: "d2f7c6aff71f2f30ade8d8020682e36a3d63f422a5d2f1c5831b55573241bd4a"
 patches:
+  "1.4.4":
+    - patch_file: "patches/1.4.4/0001-disable-strict-iterators-on-windows-builds.patch"
+      patch_source: "https://github.com/QtExcel/QXlsx/pull/241"
   "1.4.3":
-    - patch_file: "patches/0001-allow-shared.patch"
-    - patch_file: "patches/0002-add-install-target.patch"
+    - patch_file: "patches/1/4.3/0001-allow-shared.patch"
+    - patch_file: "patches/1/4.3/0002-add-install-target.patch"
