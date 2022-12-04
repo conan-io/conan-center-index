@@ -53,7 +53,7 @@ class LibTarConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
 
     def validate(self):
         if self.info.settings.os == "Windows":
