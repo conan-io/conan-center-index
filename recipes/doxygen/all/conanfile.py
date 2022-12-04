@@ -25,6 +25,7 @@ class DoxygenConan(ConanFile):
         "enable_search": True,
     }
     generators = "cmake", "cmake_find_package"
+    short_paths = True
 
     def export_sources(self):
         export_conandata_patches(self)
