@@ -25,9 +25,3 @@ patches:
     - patch_file: "patches/1.9.2-0001-imported-target.patch"
   "1.9.1":
     - patch_file: "patches/1.9.1-0001-imported-target.patch"
-  "1.8.20":
-    - patch_file: "patches/1.8.20-0001-relocatable-cmake.patch"
-  "1.8.18":
-    - patch_file: "patches/1.8.18-0001-relocatable-cmake.patch"
-  "1.8.17":
-    - patch_file: "patches/1.8.17-0001-relocatable-cmake.patch"
