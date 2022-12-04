@@ -41,7 +41,7 @@ class ZppBitsConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        check_min_vs(self, 192)
+        check_min_vs(self, 193)
         if not is_msvc(self):
             def loose_lt_semver(v1, v2):
                 lv1 = [int(v) for v in v1.split(".")]
@@ -62,7 +62,7 @@ class ZppBitsConan(ConanFile):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(
             self,
-            pattern="*.h",
+            pattern="zpp_bits.h",
             dst=os.path.join(self.package_folder, "include"),
             src=self.source_folder,
         )
