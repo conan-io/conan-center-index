@@ -58,12 +58,12 @@ class WasmedgeConan(ConanFile):
             copy(self, pattern="wasmedge.lib", src=srclibdir, dst=dstlibdir, keep_path=False)
             copy(self, pattern="wasmedge.dll", src=srcbindir, dst=dstbindir, keep_path=False)
             copy(self, pattern="libwasmedge.so*", src=srclibdir, dst=dstlibdir, keep_path=False)
-            copy(self, pattern="libwasmedge.dylib", src=srclibdir,  dst=dstlibdir, keep_path=False)
+            copy(self, pattern="libwasmedge*.dylib", src=srclibdir,  dst=dstlibdir, keep_path=False)
         else:
             copy(self, pattern="wasmedge_c.lib", src=srclibdir, dst=dstlibdir, keep_path=False)
             copy(self, pattern="wasmedge_c.dll", src=srcbindir, dst=dstbindir, keep_path=False)
             copy(self, pattern="libwasmedge_c.so*", src=srclibdir, dst=dstlibdir, keep_path=False)
-            copy(self, pattern="libwasmedge_c.dylib", src=srclibdir,  dst=dstlibdir, keep_path=False)
+            copy(self, pattern="libwasmedge_c*.dylib", src=srclibdir,  dst=dstlibdir, keep_path=False)
 
         copy(self, pattern="wasmedge*", src=srcbindir, dst=dstbindir, keep_path=False)
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"), keep_path=False)
