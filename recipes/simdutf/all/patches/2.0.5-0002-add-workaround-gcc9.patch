@@ -8,7 +8,7 @@ index 6a62103..f8e736f 100644
      const __m512i rotated = _mm512_permutex2var_epi32(input, movemask, previous);
 -#if SIMDUTF_GCC8
 -    constexpr int shift = 16-N; // workaround for GCC8
-+#if SIMDUTF_GCC8 || SIMDUTF_GCC9src
++#if SIMDUTF_GCC8 || SIMDUTF_GCC9
 +    constexpr int shift = 16-N; // workaround for GCC8,9
      return _mm512_alignr_epi8(input, rotated, shift);
  #else
