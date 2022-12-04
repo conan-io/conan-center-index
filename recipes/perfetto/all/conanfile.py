@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
@@ -104,4 +105,6 @@ class PerfettoConan(ConanFile):
             self.cpp_info.system_libs.append("pthread")
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
+        if is_msvc(self):
+            self.cpp_info.cxxflags.append("/Zc:__cplusplus")
 

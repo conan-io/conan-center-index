@@ -27,6 +27,8 @@ if (MSVC)
   target_compile_options(perfetto PRIVATE "/bigobj")
   # The perfetto library needs permissive flag on MSVC
   target_compile_options(perfetto PRIVATE "/permissive-")
+  # https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
+  target_compile_options(perfetto PRIVATE "/Zc:__cplusplus")
 endif (MSVC)
 
 include(GNUInstallDirs)
