@@ -116,6 +116,7 @@ class JoltPhysicsConan(ConanFile):
         tc.variables["TARGET_PERFORMANCE_TEST"] = False
         tc.variables["TARGET_SAMPLES"] = False
         tc.variables["TARGET_VIEWER"] = False
+        tc.variables["GENERATE_DEBUG_SYMBOLS"] = False
         tc.variables["TARGET_UNIT_TESTS"] = False
         tc.variables["USE_SSE4_1"] = self._has_sse41
         tc.variables["USE_SSE4_2"] = self._has_sse42
