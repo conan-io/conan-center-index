@@ -41,7 +41,7 @@ class WasmedgeConan(ConanFile):
 
     def source(self):
         # This is packaging binaries so the download needs to be in build
-        get(self, **self.conan_data["sources"][self.version][self._sources_os_key][str(self.settings.arch)][self._compiler_alias][0],
+        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)][self._compiler_alias][0],
             destination=self.source_folder, strip_root=True)
         download(self, filename="LICENSE",
                  **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)][self._compiler_alias][1])
