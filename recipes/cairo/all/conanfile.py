@@ -85,7 +85,7 @@ class CairoConan(ConanFile):
         if is_msvc(self):
             if self.settings.build_type not in ["Debug", "Release"]:
                 raise ConanInvalidConfiguration("MSVC build supports only Debug or Release build type")
-            if self.options["glib"].shared and is_msvc_static_runtime(self):
+            if self.dependencies["glib"].options.shared and is_msvc_static_runtime(self):
                 raise ConanInvalidConfiguration(
                     "Linking shared glib with the MSVC static runtime is not supported"
                 )
