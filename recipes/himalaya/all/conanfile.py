@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, rename, rmdir
 
-required_conan_version = ">=1.30.0"
+required_conan_version = ">=1.52.0"
 
 
 class HimalayaConan(ConanFile):
