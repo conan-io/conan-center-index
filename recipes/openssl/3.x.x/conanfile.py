@@ -606,6 +606,8 @@ class OpenSSLConan(ConanFile):
                 xcrun = tools.XCRun(self.settings)
                 env_vars["CROSS_SDK"] = os.path.basename(xcrun.sdk_path)
                 env_vars["CROSS_TOP"] = os.path.dirname(os.path.dirname(xcrun.sdk_path))
+                if self.settings.os in ["iOS", "tvOS"] and self.conf.get("tools.apple:enable_bitcode", check_type=bool):
+                    env_vars["CFLAGS"] = "-fembed-bitcode"
             with tools.environment_append(env_vars):
                 self._create_targets()
                 with self._make_context():
