@@ -28,7 +28,7 @@ class QXlsxConan(ConanFile):
 
     @property
     def _qt_version(self):
-        return Version(self.deps_cpp_info["qt"].version).major
+        return str(Version(self.dependencies["qt"].ref.version).major)
 
     def export_sources(self):
         export_conandata_patches(self)
