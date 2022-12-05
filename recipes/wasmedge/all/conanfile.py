@@ -77,3 +77,14 @@ class WasmedgeConan(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
+
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("ws2_32")
+            self.cpp_info.system_libs.append("wsock32")
+            self.cpp_info.system_libs.append("shlwapi")
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
+            self.cpp_info.system_libs.append("dl")
+            self.cpp_info.system_libs.append("rt")
+            self.cpp_info.system_libs.append("pthread")
