@@ -129,7 +129,7 @@ class GlfwConan(ConanFile):
         libname = "glfw"
         if self.settings.os == "Windows" or not self.options.shared:
             libname += "3"
-        if is_msvc(self) and self.options.shared:
+        if self.settings.os == "Windows" and self.options.shared:
             libname += "dll"
         self.cpp_info.libs = [libname]
         if self.settings.os in ["Linux", "FreeBSD"]:
