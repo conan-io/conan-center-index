@@ -157,4 +157,4 @@ class JoltPhysicsConan(ConanFile):
         if self.options.profile:
             self.cpp_info.defines.append("JPH_PROFILE_ENABLED")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["m", "pthread"])
