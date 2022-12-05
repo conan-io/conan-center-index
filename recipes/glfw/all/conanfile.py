@@ -131,6 +131,7 @@ class GlfwConan(ConanFile):
             libname += "3"
         if self.settings.os == "Windows" and self.options.shared:
             libname += "dll"
+            self.cpp_info.defines.append("GLFW_DLL")
         self.cpp_info.libs = [libname]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl", "rt"])
