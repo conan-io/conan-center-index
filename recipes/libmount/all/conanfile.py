@@ -72,5 +72,6 @@ class LibmountConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["mount", "blkid"]
+        self.cpp_info.system_libs = ["rt"]
         self.cpp_info.includedirs.append(os.path.join("include", "libmount"))
         self.cpp_info.set_property("pkg_config_name", "mount")
