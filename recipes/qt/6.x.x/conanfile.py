@@ -8,6 +8,7 @@ import textwrap
 
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
+from conan.tools.cmake import CMakeDeps
 from conan.tools.build import cross_building, check_min_cppstd, build_jobs
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, replace_in_file, apply_conandata_patches, save, load, rm, rmdir, export_conandata_patches
@@ -62,7 +63,7 @@ class QtConan(ConanFile):
                    "qtremoteobjects", "qtpositioning", "qtlanguageserver",
                    "qtspeech", "qthttpserver", "qtquick3dphysics"]
 
-    generators = "pkg_config", "cmake_find_package", "cmake"
+    generators = "pkg_config", "cmake"
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
     topics = ("qt", "ui")
@@ -441,6 +442,14 @@ class QtConan(ConanFile):
     def generate(self):
         ms = VirtualBuildEnv(self)
         ms.generate()
+        
+        tc = CMakeDeps(self)
+        tc.generate()
+
+        for f in glob.glob("*.cmake"):
+            replace_in_file(self, f,
+                " IMPORTED)\n",
+                " IMPORTED GLOBAL)\n", strict=False)
 
     def source(self):
         destination = "qt6"
@@ -747,26 +756,6 @@ class QtConan(ConanFile):
         return cmake
 
     def build(self):
-        for f in glob.glob("*.cmake"):
-            replace_in_file(self, f,
-                "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,SHARED_LIBRARY>:>",
-                "", strict=False)
-            replace_in_file(self, f,
-                "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,MODULE_LIBRARY>:>",
-                "", strict=False)
-            replace_in_file(self, f,
-                "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:>",
-                "", strict=False)
-            replace_in_file(self, f,
-                "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,SHARED_LIBRARY>:-Wl,--export-dynamic>",
-                "", strict=False)
-            replace_in_file(self, f,
-                "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,MODULE_LIBRARY>:-Wl,--export-dynamic>",
-                "", strict=False)
-            replace_in_file(self, f,
-                " IMPORTED)\n",
-                " IMPORTED GLOBAL)\n", strict=False)
-
         with self._build_context():
             cmake = self._configure_cmake()
             if self.settings.os == "Macos":
