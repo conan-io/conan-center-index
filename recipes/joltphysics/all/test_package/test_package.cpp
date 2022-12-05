@@ -20,12 +20,22 @@ static void TraceImpl(const char *inFMT, ...)
     std::cout << buffer << std::endl;
 }
 
+#ifdef JPH_ENABLE_ASSERTS
+static bool AssertFailedImpl(const char *inExpression, const char *inMessage, const char *inFile, uint inLine)
+{
+    std::cout << inFile << ":" << inLine << ": (" << inExpression << ") " << (inMessage != nullptr? inMessage : "") << std::endl;
+    return true;
+};
+#endif
+
 int main()
 {
     JPH::RegisterDefaultAllocator();
 
     JPH::Trace = TraceImpl;
-    JPH_IF_ENABLE_ASSERTS(AssertFailed = JPH::AssertFailedImpl;)
+#ifdef JPH_ENABLE_ASSERTS
+    JPH::AssertFailed = AssertFailedImpl;
+#endif
 
     JPH::Factory::sInstance = new JPH::Factory();
 
