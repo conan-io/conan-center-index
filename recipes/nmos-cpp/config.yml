@@ -1,13 +1,11 @@
 versions:
-  "cci.20210902":
+  "cci.20221203":
     folder: all
-  "cci.20211015":
-    folder: all
-  "cci.20220120":
-    folder: all
-  "cci.20220208":
+  "cci.20220620":
     folder: all
   "cci.20220428":
     folder: all
-  "cci.20220620":
+  "cci.20220208":
+    folder: all
+  "cci.20220120":
     folder: all
