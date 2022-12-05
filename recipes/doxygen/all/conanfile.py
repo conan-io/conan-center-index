@@ -89,7 +89,7 @@ class DoxygenConan(ConanFile):
             replace_in_file(self, "addon/doxysearch/CMakeLists.txt",
                             "\"uuid.lib rpcrt4.lib ws2_32.lib\"", "uuid.lib rpcrt4.lib ws2_32.lib")
             rm(self, "FindXapian.cmake", "cmake")
-        cmake = CMake(self)
+        cmake = CMake(self, msbuild_verbosity="diagnostic")
         cmake.definitions["build_parse"] = self.options.enable_parse
         cmake.definitions["build_search"] = self.options.enable_search
         cmake.definitions["use_libc++"] = self.settings.compiler.get_safe("libcxx") == "libc++"
