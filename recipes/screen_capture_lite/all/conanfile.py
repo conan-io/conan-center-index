@@ -79,6 +79,21 @@ class ScreenCaptureLiteConan(ConanFile):
             is_apple_os(self) and Version(self.info.settings.compiler.version) <= "11":
             raise ConanInvalidConfiguration(f"{self.ref} requires CGPreflightScreenCaptureAccess which support macOS SDK 11 later.")
 
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output=output)
+            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
+    def build_requirements(self):
+        if Version(self.version) >= "17.1.596" and not self._cmake_new_enough("3.16"):
+            self.tool_requires("cmake/3.25.0")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
@@ -88,6 +103,7 @@ class ScreenCaptureLiteConan(ConanFile):
         if is_msvc(self):
             # fix "error C2039: 'CheckForDuplicateEntries': is not a member of 'Microsoft::WRL::Details'"
             tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0.18362.0"
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
