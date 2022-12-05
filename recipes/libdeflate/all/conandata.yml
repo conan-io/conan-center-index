@@ -20,31 +20,25 @@ sources:
 patches:
   "1.14":
     - patch_file: "patches/1.14-0001-fix-makefiles.patch"
-      base_path: "source_subfolder"
       patch_description: "disable optimization and apply compiler settings on conan recipe"
       patch_type: "conan"
   "1.12":
     - patch_file: "patches/1.12-0001-fix-makefiles.patch"
-      base_path: "source_subfolder"
       patch_description: "disable optimization and apply compiler settings on conan recipe"
       patch_type: "conan"
   "1.10":
     - patch_file: "patches/1.9-0001-fix-makefiles.patch"
-      base_path: "source_subfolder"
       patch_description: "disable optimization and apply compiler settings on conan recipe"
       patch_type: "conan"
   "1.9":
     - patch_file: "patches/1.9-0001-fix-makefiles.patch"
-      base_path: "source_subfolder"
       patch_description: "disable optimization and apply compiler settings on conan recipe"
       patch_type: "conan"
   "1.8":
     - patch_file: "patches/1.7-0001-fix-makefiles.patch"
-      base_path: "source_subfolder"
       patch_description: "disable optimization and apply compiler settings on conan recipe"
       patch_type: "conan"
   "1.7":
     - patch_file: "patches/1.7-0001-fix-makefiles.patch"
-      base_path: "source_subfolder"
       patch_description: "disable optimization and apply compiler settings on conan recipe"
       patch_type: "conan"

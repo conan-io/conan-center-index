@@ -4,7 +4,7 @@ from conan.tools.layout import basic_layout
 import os
 
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.50.0"
 
 
 class PackageConan(ConanFile):
@@ -39,8 +39,11 @@ class PackageConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        self.cpp_info.names["cmake_find_package"] = "gmtl"
+        self.cpp_info.names["cmake_find_package_multi"] = "gmtl"
+        
         self.cpp_info.set_property("cmake_file_name", "gmtl")
-        self.cpp_info.set_property("cmake_target_name", "gmtl")
+        self.cpp_info.set_property("cmake_target_name", "gmtl::gmtl")
         self.cpp_info.set_property("pkg_config_name", "gmtl")
 
   

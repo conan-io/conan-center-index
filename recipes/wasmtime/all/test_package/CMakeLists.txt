@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(test_package C)
+project(test_package LANGUAGES C)
 
 find_package(wasmtime REQUIRED CONFIG)
 
