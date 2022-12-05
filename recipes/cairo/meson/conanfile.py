@@ -132,7 +132,7 @@ class CairoConan(ConanFile):
         if self.options.get_safe("with_xlib_xrender") and not self.options.get_safe("with_xlib"):
             raise ConanInvalidConfiguration("'with_xlib_xrender' option requires 'with_xlib' option to be enabled as well!")
         if self.options.with_glib:
-            if self.options["glib"].shared:
+            if self.dependencies["glib"].options.shared:
                 if is_msvc_static_runtime(self):
                     raise ConanInvalidConfiguration(
                         "Linking shared glib with the MSVC static runtime is not supported"
