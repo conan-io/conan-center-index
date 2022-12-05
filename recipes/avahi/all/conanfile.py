@@ -47,8 +47,8 @@ class AvahiConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.options.rm_safe("compiler.cppstd")
-        self.options.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
