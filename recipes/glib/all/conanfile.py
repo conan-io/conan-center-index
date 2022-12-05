@@ -17,8 +17,8 @@ required_conan_version = ">=1.53.0"
 
 class GLibConan(ConanFile):
     name = "glib"
-    description = "Low-level core library that forms the basis for projects such as GTK+ and GNOME."
-    "It provides data structure handling for C, portability wrappers, and interfaces for such runtime functionality as an event loop, threads, dynamic loading, and an object system."
+    description = ("Low-level core library that forms the basis for projects such as GTK+ and GNOME. "
+                   "It provides data structure handling for C, portability wrappers, and interfaces for such runtime functionality as an event loop, threads, dynamic loading, and an object system.")
     topics = "gio", "gmodule", "gnome", "gobject", "gtk"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.gnome.org/GNOME/glib"
