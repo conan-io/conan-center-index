@@ -56,7 +56,7 @@ class ZppThrowingConan(ConanFile):
                 )
 
         if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "14" and self.settings.compiler.get_safe("libcxx") != "libc++":
-            raise ConanInvalidConfiguration(f"{self.ref} requires libc++ on your compiler.")
+            raise ConanInvalidConfiguration(f"{self.ref} requires libc++ with 'coroutines' supported on your compiler.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
