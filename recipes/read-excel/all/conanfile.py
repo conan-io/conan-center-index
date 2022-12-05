@@ -6,6 +6,8 @@ from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
 
+required_conan_version = ">=1.50.0"
+
 
 class ReadExcelConan(ConanFile):
     name = "read-excel"
@@ -60,6 +62,4 @@ class ReadExcelConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "read-excel")
         self.cpp_info.set_property("cmake_target_name", "read-excel::read-excel")
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
