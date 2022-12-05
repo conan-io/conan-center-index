@@ -7,3 +7,6 @@ patches:
     - patch_file: "patches/0001-fix-cmake.patch"
       patch_description: "Fix CMakeLists: no warnings as errors, allow shared, add install target, and add profile & debug_renderer options"
       patch_type: "conan"
+    - patch_file: "patches/0002-missing-headers.patch"
+      patch_description: "Add missing includes of standard C++ lib headers"
+      patch_type: "portability"

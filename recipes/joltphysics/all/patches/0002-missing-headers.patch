@@ -1,0 +1,13 @@
+--- a/Jolt/Core/Core.h
++++ b/Jolt/Core/Core.h
+@@ -252,6 +252,10 @@ JPH_SUPPRESS_WARNINGS_STD_BEGIN
+ #include <sstream>
+ #include <functional>
+ #include <algorithm>
++#include <limits>
++#include <string>
++#include <string_view>
++#include <type_traits>
+ JPH_SUPPRESS_WARNINGS_STD_END
+ #include <limits.h>
+ #include <float.h>
