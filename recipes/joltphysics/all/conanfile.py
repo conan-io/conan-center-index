@@ -43,9 +43,9 @@ class JoltPhysicsConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "15.9",
-            "msvc": "191",
-            "gcc": "9.3", # due to https://gcc.gnu.org/bugzilla/show_bug.cgi?id=81429
+            "Visual Studio": "16",
+            "msvc": "192",
+            "gcc": "9.2", # due to https://gcc.gnu.org/bugzilla/show_bug.cgi?id=81429
             "clang": "5",
             "apple-clang": "12",
         }
