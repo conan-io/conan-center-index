@@ -11,7 +11,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, check_min_cppstd, build_jobs
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, replace_in_file, apply_conandata_patches, save, load, rm, rmdir, export_conandata_patches
-from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conans import RunEnvironment, CMake, tools
@@ -155,10 +155,6 @@ class QtConan(ConanFile):
     short_paths = True
 
     _submodules_tree = None
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _get_module_tree(self):
@@ -535,7 +531,7 @@ class QtConan(ConanFile):
             }.get(str(self.settings.compiler))
 
         elif self.settings.os == "WindowsStore":
-            if self._is_msvc:
+            if is_msvc(self):
                 if self.settings.compiler == "Visual Studio":
                     msvc_version = str(self.settings.compiler.version)
                 else:
@@ -591,16 +587,16 @@ class QtConan(ConanFile):
 
     @contextmanager
     def _build_context(self):
-        with tools.vcvars(self) if self._is_msvc else tools.no_op():
+        with tools.vcvars(self) if is_msvc(self) else tools.no_op():
             # next lines force cmake package to be in PATH before the one provided by visual studio (vcvars)
-            build_env = tools.RunEnvironment(self).vars if self._is_msvc else {}
+            build_env = tools.RunEnvironment(self).vars if is_msvc(self) else {}
             build_env["MAKEFLAGS"] = "j%d" % build_jobs(self)
             build_env["PKG_CONFIG_PATH"] = [self.build_folder]
             if self.settings.os == "Windows":
                 if "PATH" not in build_env:
                     build_env["PATH"] = []
                 build_env["PATH"].append(os.path.join(self.source_folder, "qt6", "gnuwin32", "bin"))
-            if self._is_msvc:
+            if is_msvc(self):
                 # this avoids cmake using gcc from strawberryperl
                 build_env["CC"] = "cl"
                 build_env["CXX"] = "cl"
@@ -624,7 +620,7 @@ class QtConan(ConanFile):
         cmake.definitions["QT_BUILD_TESTS"] = "OFF"
         cmake.definitions["QT_BUILD_EXAMPLES"] = "OFF"
 
-        if self._is_msvc and "MT" in msvc_runtime_flag(self):
+        if is_msvc(self) and "MT" in msvc_runtime_flag(self):
             cmake.definitions["FEATURE_static_runtime"] = "ON"
 
         if self.options.multiconfiguration:
@@ -916,7 +912,7 @@ class QtConan(ConanFile):
     def package_id(self):
         del self.info.options.cross_compile
         del self.info.options.sysroot
-        if self.options.multiconfiguration and self._is_msvc:
+        if self.options.multiconfiguration and is_msvc(self):
             if self.settings.compiler == "Visual Studio":
                 if "MD" in self.settings.compiler.runtime:
                     self.info.settings.compiler.runtime = "MD/MDd"
@@ -1016,7 +1012,7 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             if Version(self.version) >= "6.3.0":
                 self.cpp_info.components["qtCore"].system_libs.append("authz")
-        if self._is_msvc:
+        if is_msvc(self):
             if Version(self.version) >= "6.3.0":
                 self.cpp_info.components["qtCore"].cxxflags.append("-permissive-")
             if Version(self.version) >= "6.2.0":
