@@ -52,8 +52,11 @@ class ZppThrowingConan(ConanFile):
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
                 raise ConanInvalidConfiguration(
-                    f"{self.name} {self.version} requires C++{self._min_cppstd}, which your compiler does not support.",
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
                 )
+
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "14" and self.settings.compiler.get_safe("libcxx") != "libc++":
+            raise ConanInvalidConfiguration(f"{self.ref} requires libc++ on your compiler.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
@@ -73,5 +76,6 @@ class ZppThrowingConan(ConanFile):
 
         if is_msvc(self):
             self.cpp_info.cxxflags.append("/await")
-        elif self.settings.compiler == "gcc" and self.settings.compiler == "clang" or self.settings.compiler == "apple-clang":
-            self.cpp_info.cxxflags.append("-fcoroutines")
+        if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++":
+            self.cpp_info.cxxflags.append("-fcoroutines-ts")
+
