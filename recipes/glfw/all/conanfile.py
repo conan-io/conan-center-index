@@ -73,6 +73,10 @@ class GlfwConan(ConanFile):
         # don't force PIC
         replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
                               "POSITION_INDEPENDENT_CODE ON", "")
+        # don't force static link to libgcc if MinGW
+        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
+                              "target_link_libraries(glfw PRIVATE \"-static-libgcc\")", "")
+
         # Allow to link vulkan-loader into shared glfw
         if self.options.vulkan_static:
             cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
