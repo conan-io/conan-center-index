@@ -34,10 +34,16 @@ class DoxygenConan(ConanFile):
             return {
                 "gcc": 5,
             }.get(str(self.settings.compiler))
-        return {
-            "gcc": 7,  # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66297
-            "Visual Studio": 16,
-        }.get(str(self.settings.compiler))
+        elif Version(self.version) <= "1.9.4":
+            return {
+                "gcc": 7,  # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66297
+                "Visual Studio": 15,
+            }.get(str(self.settings.compiler))
+        else:
+            return {
+                "gcc": 7,  # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66297
+                "Visual Studio": 16,
+            }.get(str(self.settings.compiler))
 
     def configure(self):
         del self.settings.compiler.cppstd
@@ -92,8 +98,6 @@ class DoxygenConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["build_parse"] = self.options.enable_parse
         cmake.definitions["build_search"] = self.options.enable_search
-        cmake.definitions["use_libc++"] = self.settings.compiler.get_safe("libcxx") == "libc++"
-        cmake.definitions["win_static"] = "MT" in self.settings.compiler.get_safe("runtime", "")
         cmake.configure()
         cmake.build()
 
