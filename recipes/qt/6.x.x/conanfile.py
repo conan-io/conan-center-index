@@ -12,6 +12,7 @@ from conan.tools.cmake import CMakeDeps
 from conan.tools.build import cross_building, check_min_cppstd, build_jobs
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, replace_in_file, apply_conandata_patches, save, load, rm, rmdir, export_conandata_patches
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
@@ -63,7 +64,7 @@ class QtConan(ConanFile):
                    "qtremoteobjects", "qtpositioning", "qtlanguageserver",
                    "qtspeech", "qthttpserver", "qtquick3dphysics"]
 
-    generators = "pkg_config", "cmake"
+    generators = "cmake"
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
     topics = ("qt", "ui")
@@ -340,10 +341,10 @@ class QtConan(ConanFile):
 
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
-        
+
         if cross_building(self):
             raise ConanInvalidConfiguration("cross compiling qt 6 is not yet supported. Contributions are welcome")
-        
+
 
     def requirements(self):
         self.requires("zlib/1.2.13")
@@ -442,7 +443,7 @@ class QtConan(ConanFile):
     def generate(self):
         ms = VirtualBuildEnv(self)
         ms.generate()
-        
+
         tc = CMakeDeps(self)
         tc.generate()
 
@@ -450,6 +451,9 @@ class QtConan(ConanFile):
             replace_in_file(self, f,
                 " IMPORTED)\n",
                 " IMPORTED GLOBAL)\n", strict=False)
+
+        pc = PkgConfigDeps(self)
+        pc.generate()
 
     def source(self):
         destination = "qt6"
@@ -924,7 +928,7 @@ class QtConan(ConanFile):
         # consumers will need the QT_PLUGIN_PATH defined in runenv
         self.runenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "res", "archdatadir", "plugins"))
         self.buildenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "res", "archdatadir", "plugins"))
-        
+
         self.buildenv_info.define("QT_HOST_PATH", self.package_folder)
 
         build_modules = {}
@@ -946,7 +950,7 @@ class QtConan(ConanFile):
             reqs = []
             for r in requires:
                 if "::" in r:
-                    corrected_req = r 
+                    corrected_req = r
                 else:
                     corrected_req = f"qt{r}"
                     assert corrected_req in self.cpp_info.components, f"{corrected_req} required but not yet present in self.cpp_info.components"
