@@ -26,6 +26,7 @@ class MqttCppConan(ConanFile):
         "with_websocket": [True, False],
         "mqtt_always_send_reason_code": [True, False],
         "utf8_string": [True, False],
+        "with_logs": [True, False],
     }
     default_options = {
         "cpp17":  False,
@@ -36,6 +37,7 @@ class MqttCppConan(ConanFile):
         "with_websocket":  False,
         "mqtt_always_send_reason_code":  True,
         "utf8_string":  False,
+        "with_logs": False
     }
 
     def source(self):
@@ -91,6 +93,7 @@ class MqttCppConan(ConanFile):
             tc.variables["MQTT_STD_STRING_VIEW"] = True
             tc.variables["MQTT_STD_ANY"] = True
             tc.variables["MQTT_STD_SHARED_PTR_ARRAY"] = True
+        tc.variables["MQTT_USE_LOG"] = self.options.with_logs
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
