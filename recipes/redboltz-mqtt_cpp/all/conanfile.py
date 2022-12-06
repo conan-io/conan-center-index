@@ -3,6 +3,7 @@ from conan.tools import files
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 from conan.tools.build import check_min_cppstd
+from conan.tools.files import apply_conandata_patches, copy, get
 
 required_conan_version = ">=1.53.0"
 
@@ -39,6 +40,18 @@ class MqttCppConan(ConanFile):
     }
 
     @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    def export_sources(self):
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.source_folder)
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    @property
     def _min_cppstd(self):
         return 11
 
@@ -54,10 +67,6 @@ class MqttCppConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def build(self):
         cmake = CMake(self)
@@ -90,16 +99,16 @@ class MqttCppConan(ConanFile):
         deps.generate()
 
     def package(self):
-        self.copy(pattern="LICENSE_1_0.txt", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        self.copy(pattern="LICENSE_1_0.txt", dst="licenses", src=self.source_folder)
+        self.copy(pattern="*.hpp", dst="include", src=os.path.join(self.source_folder, "include"))
         files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "mqtt_cpp_iface")
+        self.cpp_info.set_property("cmake_file_name", "mqtt_cpp")
         self.cpp_info.set_property("cmake_target_name", "mqtt_cpp_iface::mqtt_cpp_iface")
 
         #  TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "mqtt_cpp_iface"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "mqtt_cpp_iface"
-        self.cpp_info.names["cmake_find_package"] = "mqtt_cpp_iface"
-        self.cpp_info.names["cmake_find_package_multi"] = "mqtt_cpp_iface"
+        self.cpp_info.filenames["cmake_find_package"] = "mqtt_cpp"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "mqtt_cpp"
+        self.cpp_info.names["cmake_find_package"] = "mqtt_cpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "mqtt_cpp"
