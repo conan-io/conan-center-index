@@ -10,7 +10,7 @@ required_conan_version = ">=1.53.0"
 class SoundTouchConan(ConanFile):
     name = "soundtouch"
     description = "an open-source audio processing library that allows changing the sound tempo, pitch and playback rate parameters independently"
-    license = "LGPL-2.1"
+    license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://codeberg.org/soundtouch/soundtouch"
     topics = ("audio", "processing", "tempo", "pitch", "playback")
