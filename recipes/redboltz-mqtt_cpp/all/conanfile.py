@@ -1,9 +1,8 @@
+import os
 from conan import ConanFile
 from conan.tools import files
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-import os
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import apply_conandata_patches, copy, get
 
 required_conan_version = ">=1.53.0"
 
@@ -33,23 +32,15 @@ class MqttCppConan(ConanFile):
         "fPIC":  True,
         "with_static_boost":  False,
         "with_static_openssl":  False,
-        "with_tls":  True,
+        "with_tls":  False,
         "with_websocket":  False,
-        "mqtt_always_send_reason_code":  False,
+        "mqtt_always_send_reason_code":  True,
         "utf8_string":  False,
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.source_folder)
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        files.get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
     @property
     def _min_cppstd(self):
@@ -84,30 +75,38 @@ class MqttCppConan(ConanFile):
         tc.variables["MQTT_BUILD_EXAMPLES"] = False
         tc.variables["MQTT_BUILD_TESTS"] = False
         tc.variables["MQTT_ALWAYS_SEND_REASON_CODE"] = self.options.mqtt_always_send_reason_code
-        tc.variables["MQTT_USE_STATIC_BOOST"] = not self.dependencies.direct_host["boost"].options.get_safe("shared")
+        tc.variables["MQTT_USE_STATIC_BOOST"] = self.options.with_static_boost
+        if self.options.with_static_boost:
+            openssl = self.dependencies["boost"]
+            openssl.shared = True
         tc.variables["MQTT_USE_STATIC_OPENSSL"] = self.options.with_static_openssl
+        if self.options.with_static_openssl:
+            openssl = self.dependencies["openssl"]
+            openssl.shared = False
         tc.variables["MQTT_USE_TLS"] = self.options.with_tls
         tc.variables["MQTT_USE_WS"] = self.options.with_websocket
         if self.options.get_safe("cpp17"):
-            self._cmake.definitions["MQTT_STD_VARIANT"] = True
-            self._cmake.definitions["MQTT_STD_OPTIONAL"] = True
-            self._cmake.definitions["MQTT_STD_STRING_VIEW"] = True
-            self._cmake.definitions["MQTT_STD_ANY"] = True
-            self._cmake.definitions["MQTT_STD_SHARED_PTR_ARRAY"] = True
+            tc.variables["MQTT_STD_VARIANT"] = True
+            tc.variables["MQTT_STD_OPTIONAL"] = True
+            tc.variables["MQTT_STD_STRING_VIEW"] = True
+            tc.variables["MQTT_STD_ANY"] = True
+            tc.variables["MQTT_STD_SHARED_PTR_ARRAY"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
     def package(self):
-        self.copy(pattern="LICENSE_1_0.txt", dst="licenses", src=self.source_folder)
-        self.copy(pattern="*.hpp", dst="include", src=os.path.join(self.source_folder, "include"))
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        self.copy(pattern="LICENSE_1_0.txt",
+                  dst="licenses", src=self.source_folder)
+        self.copy(pattern="*.hpp", dst="include",
+                  src=os.path.join(self.source_folder, "include"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "mqtt_cpp")
-        self.cpp_info.set_property("cmake_target_name", "mqtt_cpp_iface::mqtt_cpp_iface")
+        self.cpp_info.set_property(
+            "cmake_target_name", "mqtt_cpp_iface::mqtt_cpp_iface")
 
-        #  TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "mqtt_cpp"
         self.cpp_info.filenames["cmake_find_package_multi"] = "mqtt_cpp"
         self.cpp_info.names["cmake_find_package"] = "mqtt_cpp"
