@@ -290,9 +290,10 @@ class BoostConan(ConanFile):
             if f"without_{opt_name}" not in self.options:
                 raise ConanException(f"{self._dependency_filename} has the configure options {opt_name} which is not available in conanfile.py")
 
-        # stacktrace_backtrace not supported on Windows
+        # stacktrace_backtrace and syslog switch are not supported on Windows
         if self.settings.os == "Windows":
             del self.options.with_stacktrace_backtrace
+            del self.options.log_without_syslog
 
         # nowide requires a c++11-able compiler + movable std::fstream: change default to not build on compiler with too old default c++ standard or too low compiler.cppstd
         # json requires a c++11-able compiler: change default to not build on compiler with too old default c++ standard or too low compiler.cppstd
