@@ -18,10 +18,12 @@ class LibSafeCConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "strmax": [None, "ANY"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "strmax": "0x1000",
     }
 
     exports_sources = "patches/*"
@@ -84,6 +86,7 @@ class LibSafeCConan(ConanFile):
             "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
             "--disable-doc",
             "--disable-Werror",
+            "--enable-strmax={}".format(self.options.strmax),
         ]
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
