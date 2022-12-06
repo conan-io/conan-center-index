@@ -54,6 +54,7 @@ class CMakeConan(ConanFile):
             "gcc": "4.8",
             "clang": "3.3",
             "apple-clang": "9",
+            "Visual Studio": "14",
             "msvc": "191",
         }
 
@@ -140,3 +141,4 @@ class CMakeConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
