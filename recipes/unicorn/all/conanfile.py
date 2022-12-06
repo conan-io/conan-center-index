@@ -121,8 +121,6 @@ class UnicornConan(ConanFile):
         tc.variables["UNICORN_BUILD_SAMPLES"] = False
         tc.cache_variables["UNICORN_ARCH"] = ";".join(self._supported_archs)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-        # Upstream cmake complains about CMAKE_MSVC_RUNTIME_LIBRARY
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "OLD"
 
         if self._needs_jwasm:
             tc.variables["CMAKE_ASM_MASM_COMPILER"] = self._jwasm_wrapper
