@@ -297,11 +297,13 @@ class BoostConan(ConanFile):
 
         # nowide requires a c++11-able compiler + movable std::fstream: change default to not build on compiler with too old default c++ standard or too low compiler.cppstd
         # json requires a c++11-able compiler: change default to not build on compiler with too old default c++ standard or too low compiler.cppstd
+        # log_use_std_regex requires a c++11-able compiler: change default to not build on compiler with too old default c++ standard or too low compiler.cppstd
         if self.settings.compiler.cppstd:
             if not tools.valid_min_cppstd(self, 11):
                 self.options.without_fiber = True
                 self.options.without_nowide = True
                 self.options.without_json = True
+                self.options.log_use_std_regex = False
         else:
             version_cxx11_standard_json = self._min_compiler_version_default_cxx11
             if version_cxx11_standard_json:
@@ -309,10 +311,12 @@ class BoostConan(ConanFile):
                     self.options.without_fiber = True
                     self.options.without_json = True
                     self.options.without_nowide = True
+                    self.options.log_use_std_regex = False
             else:
                 self.options.without_fiber = True
                 self.options.without_json = True
                 self.options.without_nowide = True
+                self.options.log_use_std_regex = False
 
         # iconv is off by default on Windows and Solaris
         if self._is_windows_platform or self.settings.os == "SunOS":
