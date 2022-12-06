@@ -25,7 +25,6 @@ class DoxygenConan(ConanFile):
         "enable_search": True,
     }
     generators = "cmake", "cmake_find_package"
-    short_paths = True
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -37,7 +36,7 @@ class DoxygenConan(ConanFile):
             }.get(str(self.settings.compiler))
         return {
             "gcc": 7,  # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66297
-            "Visual Studio": 15,
+            "Visual Studio": 16,
         }.get(str(self.settings.compiler))
 
     def configure(self):
@@ -90,7 +89,7 @@ class DoxygenConan(ConanFile):
             replace_in_file(self, "addon/doxysearch/CMakeLists.txt",
                             "\"uuid.lib rpcrt4.lib ws2_32.lib\"", "uuid.lib rpcrt4.lib ws2_32.lib")
             rm(self, "FindXapian.cmake", "cmake")
-        cmake = CMake(self, msbuild_verbosity="diagnostic")
+        cmake = CMake(self)
         cmake.definitions["build_parse"] = self.options.enable_parse
         cmake.definitions["build_search"] = self.options.enable_search
         cmake.definitions["use_libc++"] = self.settings.compiler.get_safe("libcxx") == "libc++"
