@@ -12,7 +12,7 @@ required_conan_version = ">=1.53.0"
 class LibaioConan(ConanFile):
     name = "libaio"
     description = "libaio provides the Linux-native API for async I/O."
-    license = ""
+    license = "LGPL-2.1-only"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://pagure.io/libaio"
     topics = ("asynchronous", "aio", "async")
