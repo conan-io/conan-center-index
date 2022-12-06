@@ -107,6 +107,17 @@ class BoostConan(ConanFile):
         "buildid": "ANY",
         "python_buildid": "ANY",
         "system_use_utf8": [True, False],
+        "log_without_syslog": [True, False],
+        "log_without_debug_output": [True, False],
+        "log_no_asio": [True, False],
+        "log_without_ipc": [True, False],
+        "log_use_std_regex": [True, False],
+        "log_without_wchar_t": [True, False],
+        "log_no_lib": [True, False],
+        "thread_uses_chrono": [True, False],
+        "thread_uses_atomic": [True, False],
+        "thread_uses_move": [True, False],
+        "container_use_std_exceptions": [True, False],
     }
     options.update({f"without_{_name}": [True, False] for _name in CONFIGURE_OPTIONS})
 
@@ -146,6 +157,17 @@ class BoostConan(ConanFile):
         "buildid": None,
         "python_buildid": None,
         "system_use_utf8": False,
+        "log_without_syslog": True,
+        "log_without_debug_output": True,
+        "log_no_asio": True,
+        "log_without_ipc": False,
+        "log_use_std_regex": True,
+        "log_without_wchar_t": True,
+        "log_no_lib": False,
+        "thread_uses_chrono": True,
+        "thread_uses_atomic": True,
+        "thread_uses_move": True,
+        "container_use_std_exceptions": True,
     }
     default_options.update({f"without_{_name}": False for _name in CONFIGURE_OPTIONS})
     default_options.update({f"without_{_name}": True for _name in ("graph_parallel", "mpi", "python")})
@@ -1084,6 +1106,28 @@ class BoostConan(ConanFile):
             flags.append("define=BOOST_FILESYSTEM_NO_DEPRECATED=1")
         if self.options.filesystem_use_std_fs:
             flags.append("define=BOOST_DLL_USE_STD_FS=1")
+        if self.options.log_without_syslog:
+            flags.append("define=BOOST_LOG_WITHOUT_SYSLOG=1")
+        if self.options.log_without_debug_output:
+            flags.append("define=BOOST_LOG_WITHOUT_DEBUG_OUTPUT=1")
+        if self.options.log_no_asio:
+            flags.append("define=BOOST_LOG_NO_ASIO=1")
+        if self.options.log_without_ipc:
+            flags.append("define=BOOST_LOG_WITHOUT_IPC=1")
+        if self.options.log_use_std_regex:
+            flags.append("define=BOOST_LOG_USE_STD_REGEX=1")
+        if self.options.log_without_wchar_t:
+            flags.append("define=BOOST_LOG_WITHOUT_WCHAR_T=1")
+        if self.options.log_no_lib:
+            flags.append("define=BOOST_LOG_NO_LIB=1")
+        if self.options.thread_uses_chrono:
+            flags.append("define=BOOST_THREAD_USES_CHRONO=1")
+        if self.options.thread_uses_atomic:
+            flags.append("define=BOOST_THREAD_USES_ATOMIC=1")
+        if self.options.thread_uses_move:
+            flags.append("define=THREAD_USES_MOVE=1")
+        if self.options.container_use_std_exceptions:
+            flags.append("define=BOOST_CONTAINER_USE_STD_EXCEPTIONS=1")
         if self.options.system_use_utf8:
             flags.append("define=BOOST_SYSTEM_USE_UTF8=1")
         if self.options.segmented_stacks:
@@ -1455,6 +1499,39 @@ class BoostConan(ConanFile):
 
         if self.options.filesystem_use_std_fs:
             self.cpp_info.components["headers"].defines.append("BOOST_DLL_USE_STD_FS")
+
+        if self.options.log_without_syslog:
+            self.cpp_info.components["headers"].defines.append("BOOST_LOG_WITHOUT_SYSLOG")
+
+        if self.options.log_without_debug_output:
+            self.cpp_info.components["headers"].defines.append("BOOST_LOG_WITHOUT_DEBUG_OUTPUT")
+
+        if self.options.log_no_asio:
+            self.cpp_info.components["headers"].defines.append("BOOST_LOG_NO_ASIO")
+
+        if self.options.log_without_ipc:
+            self.cpp_info.components["headers"].defines.append("BOOST_LOG_WITHOUT_IPC")
+
+        if self.options.log_use_std_regex:
+            self.cpp_info.components["headers"].defines.append("BOOST_LOG_USE_STD_REGEX")
+
+        if self.options.log_without_wchar_t:
+            self.cpp_info.components["headers"].defines.append("BOOST_LOG_WITHOUT_WCHAR_T")
+
+        if self.options.log_no_lib:
+            self.cpp_info.components["headers"].defines.append("BOOST_LOG_NO_LIB")
+
+        if self.options.thread_uses_chrono:
+            self.cpp_info.components["headers"].defines.append("BOOST_THREAD_USES_CHRONO")
+
+        if self.options.thread_uses_atomic:
+            self.cpp_info.components["headers"].defines.append("BOOST_THREAD_USES_ATOMIC")
+
+        if self.options.thread_uses_move:
+            self.cpp_info.components["headers"].defines.append("THREAD_USES_MOVE")
+
+        if self.options.container_use_std_exceptions:
+            self.cpp_info.components["headers"].defines.append("BOOST_CONTAINER_USE_STD_EXCEPTIONS")
 
         if self.options.filesystem_version:
             self.cpp_info.components["headers"].defines.append(f"BOOST_FILESYSTEM_VERSION={self.options.filesystem_version}")
