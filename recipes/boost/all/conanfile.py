@@ -1111,7 +1111,7 @@ class BoostConan(ConanFile):
             flags.append("define=BOOST_FILESYSTEM_NO_DEPRECATED=1")
         if self.options.filesystem_use_std_fs:
             flags.append("define=BOOST_DLL_USE_STD_FS=1")
-        if self.options.log_without_syslog:
+        if self.options.get_safe("log_without_syslog", False):
             flags.append("define=BOOST_LOG_WITHOUT_SYSLOG=1")
         if self.options.log_without_debug_output:
             flags.append("define=BOOST_LOG_WITHOUT_DEBUG_OUTPUT=1")
@@ -1505,7 +1505,7 @@ class BoostConan(ConanFile):
         if self.options.filesystem_use_std_fs:
             self.cpp_info.components["headers"].defines.append("BOOST_DLL_USE_STD_FS")
 
-        if self.options.log_without_syslog:
+        if self.options.get_safe("log_without_syslog", False):
             self.cpp_info.components["headers"].defines.append("BOOST_LOG_WITHOUT_SYSLOG")
 
         if self.options.log_without_debug_output:
