@@ -449,7 +449,7 @@ class Open62541Conan(ConanFile):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["pthread", "m", "rt"])
 
-        self.cpp_info.builddirs = [self._module_subfolder]
+        self.cpp_info.builddirs.append(self._module_subfolder)
         # v1 legacy support for open62541Macros.cmake auto-include
         self.cpp_info.build_modules = [self._module_file_rel_path]
         self.cpp_info.set_property("cmake_build_modules", [
