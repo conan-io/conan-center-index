@@ -25,7 +25,7 @@ class Rangev3Conan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "5" if Version(self.version) < "0.10.0" else "6.5",
-            "msvc": "16",
+            "msvc": "192",
             "Visual Studio": "16", # TODO: remove when only Conan2 is supported
             "clang": "3.6" if Version(self.version) < "0.10.0" else "3.9"
         }
