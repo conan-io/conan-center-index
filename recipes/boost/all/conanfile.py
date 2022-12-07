@@ -76,7 +76,11 @@ class BoostConan(ConanFile):
         "header_only": [True, False],
         "error_code_header_only": [True, False],
         "system_no_deprecated": [True, False],
+        "asio_disable_eventfd": [True, False],
+        "asio_disable_serial_port": [True, False],
         "asio_no_deprecated": [True, False],
+        "asio_no_experimental_string_view": [True, False],
+        "beast_use_std_string_view": [True, False],
         "filesystem_no_deprecated": [True, False],
         "filesystem_use_std_fs": [True, False],
         "filesystem_version": [None, "3", "4"],
@@ -115,7 +119,11 @@ class BoostConan(ConanFile):
         "header_only": False,
         "error_code_header_only": False,
         "system_no_deprecated": False,
+        "asio_disable_eventfd": False,
+        "asio_disable_serial_port": False,
         "asio_no_deprecated": False,
+        "asio_no_experimental_string_view": False,
+        "beast_use_std_string_view": False,
         "filesystem_no_deprecated": False,
         "filesystem_use_std_fs": False,
         "filesystem_version": None,
@@ -1078,8 +1086,16 @@ class BoostConan(ConanFile):
             flags.append("define=BOOST_ERROR_CODE_HEADER_ONLY=1")
         if self.options.system_no_deprecated:
             flags.append("define=BOOST_SYSTEM_NO_DEPRECATED=1")
+        if self.options.asio_disable_eventfd:
+            flags.append("define=BOOST_ASIO_DISABLE_EVENTFD=1")
+        if self.options.asio_disable_serial_port:
+            flags.append("define=BOOST_ASIO_DISABLE_SERIAL_PORT=1")
         if self.options.asio_no_deprecated:
             flags.append("define=BOOST_ASIO_NO_DEPRECATED=1")
+        if self.options.asio_no_experimental_string_view:
+            flags.append("define=BOOST_ASIO_DISABLE_STD_EXPERIMENTAL_STRING_VIEW=1")
+        if self.options.beast_use_std_string_view:
+            flags.append("define=BOOST_BEAST_USE_STD_STRING_VIEW=1")
         if self.options.filesystem_no_deprecated:
             flags.append("define=BOOST_FILESYSTEM_NO_DEPRECATED=1")
         if self.options.filesystem_use_std_fs:
@@ -1447,8 +1463,20 @@ class BoostConan(ConanFile):
         if self.options.system_no_deprecated:
             self.cpp_info.components["headers"].defines.append("BOOST_SYSTEM_NO_DEPRECATED")
 
+        if self.options.asio_disable_eventfd:
+            self.cpp_info.components["headers"].defines.append("BOOST_ASIO_DISABLE_EVENTFD")
+
+        if self.options.asio_disable_serial_port:
+            self.cpp_info.components["headers"].defines.append("BOOST_ASIO_DISABLE_SERIAL_PORT")
+
         if self.options.asio_no_deprecated:
             self.cpp_info.components["headers"].defines.append("BOOST_ASIO_NO_DEPRECATED")
+
+        if self.options.asio_no_experimental_string_view:
+            self.cpp_info.components["headers"].defines.append("BOOST_ASIO_DISABLE_STD_EXPERIMENTAL_STRING_VIEW")
+
+        if self.options.beast_use_std_string_view:
+            self.cpp_info.components["headers"].defines.append("BOOST_BEAST_USE_STD_STRING_VIEW")
 
         if self.options.filesystem_no_deprecated:
             self.cpp_info.components["headers"].defines.append("BOOST_FILESYSTEM_NO_DEPRECATED")
