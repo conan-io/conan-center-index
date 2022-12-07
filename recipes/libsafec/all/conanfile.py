@@ -18,7 +18,7 @@ class LibSafeCConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "strmax": [None, "ANY"],
+        "strmax": ["ANY"],
     }
     default_options = {
         "shared": False,
