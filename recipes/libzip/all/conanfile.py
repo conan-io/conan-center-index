@@ -115,7 +115,7 @@ class LibZipConan(ConanFile):
         # Honor zstd enabled
         if self._has_zstd_support:
             lib_cmakelists = os.path.join(self.source_folder, "lib", "CMakeLists.txt")
-            replace_in_file(self, top_cmakelists, "find_package(Zstd)", "find_package(zstd)")
+            replace_in_file(self, top_cmakelists, "find_package(Zstd", "find_package(zstd")
             replace_in_file(self, top_cmakelists, "Zstd_FOUND", "zstd_FOUND")
             replace_in_file(
                 self,
