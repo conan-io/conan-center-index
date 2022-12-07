@@ -9,7 +9,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import cross_building, check_min_cppstd, build_jobs
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, Environment
 from conan.tools.files import get, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
@@ -455,6 +455,10 @@ class QtConan(ConanFile):
         pc = PkgConfigDeps(self)
         pc.generate()
 
+        # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
+        env = Environment()
+        env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
+        env.vars(self).save_script("conanbuildenv_pkg_config_path")
 
         tc = CMakeToolchain(self, generator="Ninja")
 
