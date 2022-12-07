@@ -1,22 +1,21 @@
 from contextlib import contextmanager
 
 import configparser
-import functools
 import glob
 import os
 import textwrap
 
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conan.tools.cmake import CMakeDeps
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import cross_building, check_min_cppstd, build_jobs
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, replace_in_file, apply_conandata_patches, save, load, rm, rmdir, export_conandata_patches
+from conan.tools.files import get, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
-from conans import RunEnvironment, CMake, tools
+from conans import RunEnvironment, tools
 from conans.model import Generator
 
 required_conan_version = ">=1.52.0"
@@ -64,7 +63,6 @@ class QtConan(ConanFile):
                    "qtremoteobjects", "qtpositioning", "qtlanguageserver",
                    "qtspeech", "qthttpserver", "qtquick3dphysics"]
 
-    generators = "cmake"
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
     topics = ("qt", "ui")
@@ -345,6 +343,8 @@ class QtConan(ConanFile):
         if cross_building(self):
             raise ConanInvalidConfiguration("cross compiling qt 6 is not yet supported. Contributions are welcome")
 
+    def layout(self):
+        cmake_layout(self, src_folder="qt6")
 
     def requirements(self):
         self.requires("zlib/1.2.13")
@@ -455,50 +455,173 @@ class QtConan(ConanFile):
         pc = PkgConfigDeps(self)
         pc.generate()
 
+
+        tc = CMakeToolchain(self, generator="Ninja")
+
+        tc.variables["INSTALL_MKSPECSDIR"] = os.path.join(self.package_folder, "res", "archdatadir", "mkspecs")
+        tc.variables["INSTALL_ARCHDATADIR"] = os.path.join(self.package_folder, "res", "archdatadir")
+        tc.variables["INSTALL_LIBEXECDIR"] = os.path.join(self.package_folder, "bin")
+        tc.variables["INSTALL_DATADIR"] = os.path.join(self.package_folder, "res", "datadir")
+        tc.variables["INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res", "sysconfdir")
+
+        tc.variables["QT_BUILD_TESTS"] = "OFF"
+        tc.variables["QT_BUILD_EXAMPLES"] = "OFF"
+
+        if is_msvc(self) and "MT" in msvc_runtime_flag(self):
+            tc.variables["FEATURE_static_runtime"] = "ON"
+
+        if self.options.multiconfiguration:
+            tc.variables["CMAKE_CONFIGURATION_TYPES"] = "Release;Debug"
+        tc.variables["FEATURE_optimize_size"] = ("ON" if self.settings.build_type == "MinSizeRel" else "OFF")
+
+        for module in self._get_module_tree:
+            if module != 'qtbase':
+                tc.variables["BUILD_%s" % module] = ("ON" if self.options.get_safe(module) else "OFF")
+
+        tc.variables["FEATURE_system_zlib"] = "ON"
+
+        tc.variables["INPUT_opengl"] = self.options.get_safe("opengl", "no")
+
+        # openSSL
+        if not self.options.openssl:
+            tc.variables["INPUT_openssl"] = "no"
+        else:
+            tc.variables["HAVE_openssl"] = "ON"
+            if self.options["openssl"].shared:
+                tc.variables["INPUT_openssl"] = "runtime"
+            else:
+                tc.variables["INPUT_openssl"] = "linked"
+
+        if self.options.with_dbus:
+            tc.variables["INPUT_dbus"] = "linked"
+        else:
+            tc.variables["FEATURE_dbus"] = "OFF"
+        tc.variables["CMAKE_FIND_DEBUG_MODE"] = "FALSE"
+
+
+        for opt, conf_arg in [("with_glib", "glib"),
+                              ("with_icu", "icu"),
+                              ("with_fontconfig", "fontconfig"),
+                              ("with_mysql", "sql_mysql"),
+                              ("with_pq", "sql_psql"),
+                              ("with_odbc", "sql_odbc"),
+                              ("gui", "gui"),
+                              ("widgets", "widgets"),
+                              ("with_zstd", "zstd"),
+                              ("with_vulkan", "vulkan"),
+                              ("with_brotli", "brotli"),
+                              ("with_gssapi", "gssapi")]:
+            tc.variables["FEATURE_%s" % conf_arg] = ("ON" if self.options.get_safe(opt, False) else "OFF")
+
+
+        for opt, conf_arg in [
+                              ("with_doubleconversion", "doubleconversion"),
+                              ("with_freetype", "freetype"),
+                              ("with_harfbuzz", "harfbuzz"),
+                              ("with_libjpeg", "jpeg"),
+                              ("with_libpng", "png"),
+                              ("with_sqlite3", "sqlite"),
+                              ("with_pcre2", "pcre2"),]:
+            if self.options.get_safe(opt, False):
+                if self.options.multiconfiguration:
+                    tc.variables["FEATURE_%s" % conf_arg] = "ON"
+                else:
+                    tc.variables["FEATURE_system_%s" % conf_arg] = "ON"
+            else:
+                tc.variables["FEATURE_%s" % conf_arg] = "OFF"
+                tc.variables["FEATURE_system_%s" % conf_arg] = "OFF"
+
+        for opt, conf_arg in [
+                              ("with_doubleconversion", "doubleconversion"),
+                              ("with_freetype", "freetype"),
+                              ("with_harfbuzz", "harfbuzz"),
+                              ("with_libjpeg", "libjpeg"),
+                              ("with_libpng", "libpng"),
+                              ("with_md4c", "libmd4c"),
+                              ("with_pcre2", "pcre"),]:
+            if self.options.get_safe(opt, False):
+                if self.options.multiconfiguration:
+                    tc.variables["INPUT_%s" % conf_arg] = "qt"
+                else:
+                    tc.variables["INPUT_%s" % conf_arg] = "system"
+            else:
+                tc.variables["INPUT_%s" % conf_arg] = "no"
+
+        for feature in str(self.options.disabled_features).split():
+            tc.variables["FEATURE_%s" % feature] = "OFF"
+
+        if self.settings.os == "Macos":
+            tc.variables["FEATURE_framework"] = "OFF"
+        elif self.settings.os == "Android":
+            tc.variables["CMAKE_ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
+            tc.variables["ANDROID_ABI"] =  {"armv7": "armeabi-v7a",
+                                           "armv8": "arm64-v8a",
+                                           "x86": "x86",
+                                           "x86_64": "x86_64"}.get(str(self.settings.arch))
+
+        if self.options.sysroot:
+            tc.variables["CMAKE_SYSROOT"] = self.options.sysroot
+
+        if self.options.device:
+            tc.variables["QT_QMAKE_TARGET_MKSPEC"] = os.path.join("devices", self.options.device)
+        else:
+            xplatform_val = self._xplatform()
+            if xplatform_val:
+                tc.variables["QT_QMAKE_TARGET_MKSPEC"] = xplatform_val
+            else:
+                self.output.warn("host not supported: %s %s %s %s" %
+                                 (self.settings.os, self.settings.compiler,
+                                  self.settings.compiler.version, self.settings.arch))
+        if self.options.cross_compile:
+            tc.variables["QT_QMAKE_DEVICE_OPTIONS"] = "CROSS_COMPILE=%s" % self.options.cross_compile
+
+        tc.variables["FEATURE_pkg_config"] = "ON"
+        if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
+            tc.variables["BUILD_WITH_PCH"]= "OFF" # disabling PCH to save disk space
+
+        if self.settings.os == "Windows":
+            tc.variables["HOST_PERL"] = getattr(self, "user_info_build", self.deps_user_info)["strawberryperl"].perl
+                               #"set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
+                               #"set(QT_EXTRA_DEFINES ${CONAN_DEFINES})\n"
+                               #"set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS})\n"
+        tc.generate()
+
     def source(self):
-        destination = "qt6"
+        destination = self.source_folder
         if self.settings.os == "Windows":
             # Don't use os.path.join, or it removes the \\?\ prefix, which enables long paths
-            destination = f"\\\\?\\{self.source_folder}\\{destination}"
+            destination = f"\\\\?\\{self.source_folder}"
         get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=destination)
 
         # patching in source method because of no_copy_source attribute
 
-        replace_in_file(self, os.path.join("qt6", "CMakeLists.txt"),
-                        "enable_testing()",
-                        "include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)\nconan_basic_setup(KEEP_RPATHS)\n"
-                               "set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
-                               "set(QT_EXTRA_DEFINES ${CONAN_DEFINES})\n"
-                               "set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS})\n"
-                               "enable_testing()")
-
         apply_conandata_patches(self)
         if Version(self.version) >= "6.2.0":
             for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
-                replace_in_file(self, os.path.join(self.source_folder, "qt6", "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
+                replace_in_file(self, os.path.join(self.source_folder, "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
                                       "  if (enable_precompiled_headers) {\n    if (is_win) {",
                                       "  if (enable_precompiled_headers) {\n    if (false) {"
                                       )
 
-        replace_in_file(self, os.path.join("qt6", "qtbase", "cmake", "QtInternalTargets.cmake"),
+        replace_in_file(self, os.path.join(self.source_folder, "qtbase", "cmake", "QtInternalTargets.cmake"),
                               "-Zc:wchar_t",
                               "-Zc:wchar_t -Zc:twoPhase-")
         for f in ["FindPostgreSQL.cmake"]:
-            file = os.path.join("qt6", "qtbase", "cmake", f)
+            file = os.path.join(self.source_folder, "qtbase", "cmake", f)
             if os.path.isfile(file):
                 os.remove(file)
 
         # workaround QTBUG-94356
         if Version(self.version) >= "6.1.1":
             zlib_file_name = "FindWrapSystemZLIB.cmake" if Version(self.version) >= "6.3.1" else "FindWrapZLIB.cmake"
-            replace_in_file(self, os.path.join("qt6", "qtbase", "cmake", zlib_file_name), '"-lz"', 'ZLIB::ZLIB')
-            replace_in_file(self, os.path.join("qt6", "qtbase", "configure.cmake"),
+            replace_in_file(self, os.path.join(self.source_folder, "qtbase", "cmake", zlib_file_name), '"-lz"', 'ZLIB::ZLIB')
+            replace_in_file(self, os.path.join(self.source_folder, "qtbase", "configure.cmake"),
                 "set_property(TARGET ZLIB::ZLIB PROPERTY IMPORTED_GLOBAL TRUE)",
                 "")
         if Version(self.version) <= "6.4.0":
             # use official variable name https://cmake.org/cmake/help/latest/module/FindFontconfig.html
-            replace_in_file(self, os.path.join("qt6", "qtbase", "src", "gui", "configure.cmake"), "FONTCONFIG_FOUND", "Fontconfig_FOUND")
+            replace_in_file(self, os.path.join(self.source_folder, "qtbase", "src", "gui", "configure.cmake"), "FONTCONFIG_FOUND", "Fontconfig_FOUND")
 
     def _xplatform(self):
         if self.settings.os == "Linux":
@@ -608,7 +731,7 @@ class QtConan(ConanFile):
             if self.settings.os == "Windows":
                 if "PATH" not in build_env:
                     build_env["PATH"] = []
-                build_env["PATH"].append(os.path.join(self.source_folder, "qt6", "gnuwin32", "bin"))
+                build_env["PATH"].append(os.path.join(self.source_folder, "gnuwin32", "bin"))
             if is_msvc(self):
                 # this avoids cmake using gcc from strawberryperl
                 build_env["CC"] = "cl"
@@ -620,148 +743,10 @@ class QtConan(ConanFile):
                     save(self, ".qmake.super" , "")
                 yield
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self, generator="Ninja")
-
-        cmake.definitions["INSTALL_MKSPECSDIR"] = os.path.join(self.package_folder, "res", "archdatadir", "mkspecs")
-        cmake.definitions["INSTALL_ARCHDATADIR"] = os.path.join(self.package_folder, "res", "archdatadir")
-        cmake.definitions["INSTALL_LIBEXECDIR"] = os.path.join(self.package_folder, "bin")
-        cmake.definitions["INSTALL_DATADIR"] = os.path.join(self.package_folder, "res", "datadir")
-        cmake.definitions["INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res", "sysconfdir")
-
-        cmake.definitions["QT_BUILD_TESTS"] = "OFF"
-        cmake.definitions["QT_BUILD_EXAMPLES"] = "OFF"
-
-        if is_msvc(self) and "MT" in msvc_runtime_flag(self):
-            cmake.definitions["FEATURE_static_runtime"] = "ON"
-
-        if self.options.multiconfiguration:
-            cmake.generator = "Ninja Multi-Config"
-            cmake.definitions["CMAKE_CONFIGURATION_TYPES"] = "Release;Debug"
-        cmake.definitions["FEATURE_optimize_size"] = ("ON" if self.settings.build_type == "MinSizeRel" else "OFF")
-
-        for module in self._get_module_tree:
-            if module != 'qtbase':
-                cmake.definitions["BUILD_%s" % module] = ("ON" if self.options.get_safe(module) else "OFF")
-
-        cmake.definitions["FEATURE_system_zlib"] = "ON"
-
-        cmake.definitions["INPUT_opengl"] = self.options.get_safe("opengl", "no")
-
-        # openSSL
-        if not self.options.openssl:
-            cmake.definitions["INPUT_openssl"] = "no"
-        else:
-            if self.options["openssl"].shared:
-                cmake.definitions["INPUT_openssl"] = "runtime"
-            else:
-                cmake.definitions["INPUT_openssl"] = "linked"
-
-        if self.options.with_dbus:
-            cmake.definitions["INPUT_dbus"] = "linked"
-        else:
-            cmake.definitions["FEATURE_dbus"] = "OFF"
-
-
-        for opt, conf_arg in [("with_glib", "glib"),
-                              ("with_icu", "icu"),
-                              ("with_fontconfig", "fontconfig"),
-                              ("with_mysql", "sql_mysql"),
-                              ("with_pq", "sql_psql"),
-                              ("with_odbc", "sql_odbc"),
-                              ("gui", "gui"),
-                              ("widgets", "widgets"),
-                              ("with_zstd", "zstd"),
-                              ("with_vulkan", "vulkan"),
-                              ("with_brotli", "brotli"),
-                              ("with_gssapi", "gssapi")]:
-            cmake.definitions["FEATURE_%s" % conf_arg] = ("ON" if self.options.get_safe(opt, False) else "OFF")
-
-
-        for opt, conf_arg in [
-                              ("with_doubleconversion", "doubleconversion"),
-                              ("with_freetype", "freetype"),
-                              ("with_harfbuzz", "harfbuzz"),
-                              ("with_libjpeg", "jpeg"),
-                              ("with_libpng", "png"),
-                              ("with_sqlite3", "sqlite"),
-                              ("with_pcre2", "pcre2"),]:
-            if self.options.get_safe(opt, False):
-                if self.options.multiconfiguration:
-                    cmake.definitions["FEATURE_%s" % conf_arg] = "ON"
-                else:
-                    cmake.definitions["FEATURE_system_%s" % conf_arg] = "ON"
-            else:
-                cmake.definitions["FEATURE_%s" % conf_arg] = "OFF"
-                cmake.definitions["FEATURE_system_%s" % conf_arg] = "OFF"
-
-        for opt, conf_arg in [
-                              ("with_doubleconversion", "doubleconversion"),
-                              ("with_freetype", "freetype"),
-                              ("with_harfbuzz", "harfbuzz"),
-                              ("with_libjpeg", "libjpeg"),
-                              ("with_libpng", "libpng"),
-                              ("with_md4c", "libmd4c"),
-                              ("with_pcre2", "pcre"),]:
-            if self.options.get_safe(opt, False):
-                if self.options.multiconfiguration:
-                    cmake.definitions["INPUT_%s" % conf_arg] = "qt"
-                else:
-                    cmake.definitions["INPUT_%s" % conf_arg] = "system"
-            else:
-                cmake.definitions["INPUT_%s" % conf_arg] = "no"
-
-        for feature in str(self.options.disabled_features).split():
-            cmake.definitions["FEATURE_%s" % feature] = "OFF"
-
-        if self.settings.os == "Macos":
-            cmake.definitions["FEATURE_framework"] = "OFF"
-        elif self.settings.os == "Android":
-            cmake.definitions["CMAKE_ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
-            cmake.definitions["ANDROID_ABI"] =  {"armv7": "armeabi-v7a",
-                                           "armv8": "arm64-v8a",
-                                           "x86": "x86",
-                                           "x86_64": "x86_64"}.get(str(self.settings.arch))
-
-        if self.options.sysroot:
-            cmake.definitions["CMAKE_SYSROOT"] = self.options.sysroot
-
-        if self.options.device:
-            cmake.definitions["QT_QMAKE_TARGET_MKSPEC"] = os.path.join("devices", self.options.device)
-        else:
-            xplatform_val = self._xplatform()
-            if xplatform_val:
-                cmake.definitions["QT_QMAKE_TARGET_MKSPEC"] = xplatform_val
-            else:
-                self.output.warn("host not supported: %s %s %s %s" %
-                                 (self.settings.os, self.settings.compiler,
-                                  self.settings.compiler.version, self.settings.arch))
-        if self.options.cross_compile:
-            cmake.definitions["QT_QMAKE_DEVICE_OPTIONS"] = "CROSS_COMPILE=%s" % self.options.cross_compile
-
-        cmake.definitions["FEATURE_pkg_config"] = "ON"
-        if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
-            cmake.definitions["BUILD_WITH_PCH"]= "OFF" # disabling PCH to save disk space
-
-        if self.settings.os == "Windows":
-            cmake.definitions["HOST_PERL"] = getattr(self, "user_info_build", self.deps_user_info)["strawberryperl"].perl
-
-        try:
-            cmake.configure(source_folder="qt6")
-        except:
-            cmake_err_log = os.path.join(self.build_folder, "CMakeFiles", "CMakeError.log")
-            cmake_out_log = os.path.join(self.build_folder, "CMakeFiles", "CMakeOutput.log")
-            if os.path.isfile(cmake_err_log):
-                self.output.info(load(self, cmake_err_log))
-            if os.path.isfile(cmake_out_log):
-                self.output.info(load(self, cmake_out_log))
-            raise
-        return cmake
-
     def build(self):
         with self._build_context():
-            cmake = self._configure_cmake()
+            cmake = CMake(self)
+            cmake.configure()
             if self.settings.os == "Macos":
                 save(self, "bash_env", 'export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
             with tools.environment_append({
@@ -784,10 +769,10 @@ class QtConan(ConanFile):
 
     def package(self):
         with self._build_context():
-            cmake = self._configure_cmake()
+            cmake = CMake(self)
             cmake.install()
         save(self, os.path.join(self.package_folder, "bin", "qt.conf"), qt.content_template("..", "res", self.settings.os))
-        self.copy("*LICENSE*", src="qt6/", dst="licenses")
+        self.copy("*LICENSE*", src=self.source_folder, dst="licenses")
         for module in self._get_module_tree:
             if module != "qtbase" and not self.options.get_safe(module):
                 rmdir(self, os.path.join(self.package_folder, "licenses", module))
