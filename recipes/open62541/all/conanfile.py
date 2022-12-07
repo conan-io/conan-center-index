@@ -3,7 +3,7 @@ from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, collect_libs, export_conandata_patches, rename, rm, rmdir, mkdir, get
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 import glob
 import os
 import yaml
