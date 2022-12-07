@@ -9,7 +9,7 @@ from conan.errors import ConanInvalidConfiguration
 import os
 import json
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.50.0"
 
 class CMakeConan(ConanFile):
     name = "cmake"
@@ -142,3 +142,8 @@ class CMakeConan(ConanFile):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
 
+        # Needed for compatibility with v1.x - Remmove when 2.0 becomes the default
+        module_version = "{}.{}".format(Version(self.version).major, Version(self.version).minor)
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.env_info.PATH.append(bindir)
