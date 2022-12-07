@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import chdir, copy, rmdir, get, files
+from conan.tools.files import chdir, copy, rmdir, get, save, load
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -7,7 +7,7 @@ from conan.tools.build import build_jobs, cross_building, check_min_cppstd
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
-
+import json
 
 required_conan_version = ">=1.53.0"
 
@@ -95,7 +95,7 @@ class CMakeConan(ConanFile):
                     bootstrap_cmake_options.append(f'-DOPENSSL_USE_STATIC_LIBS={"FALSE" if openssl.options.shared else "TRUE"}')
                 else:
                     bootstrap_cmake_options.append("-DCMAKE_USE_OPENSSL=OFF")
-            files.save_toolchain_args({"bootstrap_cmake_options": ' '.join(arg for arg in bootstrap_cmake_options)}, namespace="bootstrap")
+            save(self,"bootstrap_args", json.dumps({"bootstrap_cmake_options": ' '.join(arg for arg in bootstrap_cmake_options)}))
         else:
             tc = CMakeToolchain(self)
             if not self.settings.compiler.cppstd:
@@ -113,7 +113,7 @@ class CMakeConan(ConanFile):
 
     def build(self):
         if self.options.bootstrap:
-            toolchain_file_content = files.load_toolchain_args(self.generators_folder, namespace="bootstrap")
+            toolchain_file_content = json.loads(load(self, os.path.join(self.generators_folder, "bootstrap_args")))
             bootstrap_cmake_options = toolchain_file_content.get("bootstrap_cmake_options")
             with chdir(self, self.source_folder):
                 self.run(f'./bootstrap --prefix="" --parallel={build_jobs(self)} {bootstrap_cmake_options}')

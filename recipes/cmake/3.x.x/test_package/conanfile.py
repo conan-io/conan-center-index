@@ -8,14 +8,14 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch"
     generators = "VirtualRunEnv"
 
-    def requirements(self):
-        self.requires(self.tested_reference_str)
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
 
     def test(self):
         if can_run(self):
             output = StringIO()
             # Third arg to self.run renamed "stdout" in Conan 2.0 but 1.x linter doesn't like it
-            self.run("cmake --version", output, env="conanrun")
+            self.run("cmake --version", output, env="conanbuild")
             output_str = str(output.getvalue())
             self.output.info("Installed version: {}".format(output_str))
             tokens = re.split('[@#]', self.tested_reference_str)
