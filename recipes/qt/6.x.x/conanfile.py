@@ -462,11 +462,12 @@ class QtConan(ConanFile):
 
         tc = CMakeToolchain(self, generator="Ninja")
 
-        tc.variables["INSTALL_MKSPECSDIR"] = os.path.join(self.package_folder, "res", "archdatadir", "mkspecs")
-        tc.variables["INSTALL_ARCHDATADIR"] = os.path.join(self.package_folder, "res", "archdatadir")
-        tc.variables["INSTALL_LIBEXECDIR"] = os.path.join(self.package_folder, "bin")
-        tc.variables["INSTALL_DATADIR"] = os.path.join(self.package_folder, "res", "datadir")
-        tc.variables["INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res", "sysconfdir")
+        package_folder = self.package_folder.replace('\\', '/')
+        tc.variables["INSTALL_MKSPECSDIR"] = f"{package_folder}/res/archdatadir/mkspecs"
+        tc.variables["INSTALL_ARCHDATADIR"] = f"{package_folder}/res/archdatadir"
+        tc.variables["INSTALL_LIBEXECDIR"] = f"{package_folder}/bin"
+        tc.variables["INSTALL_DATADIR"] = f"{package_folder}/res/datadir"
+        tc.variables["INSTALL_SYSCONFDIR"] = f"{package_folder}/res/sysconfdir"
 
         tc.variables["QT_BUILD_TESTS"] = "OFF"
         tc.variables["QT_BUILD_EXAMPLES"] = "OFF"
@@ -567,7 +568,7 @@ class QtConan(ConanFile):
             tc.variables["CMAKE_SYSROOT"] = self.options.sysroot
 
         if self.options.device:
-            tc.variables["QT_QMAKE_TARGET_MKSPEC"] = os.path.join("devices", self.options.device)
+            tc.variables["QT_QMAKE_TARGET_MKSPEC"] = f"devices/{self.options.device}"
         else:
             xplatform_val = self._xplatform()
             if xplatform_val:
