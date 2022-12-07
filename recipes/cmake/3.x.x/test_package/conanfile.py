@@ -5,7 +5,7 @@ import re
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     generators = "VirtualRunEnv"
 
     def build_requirements(self):

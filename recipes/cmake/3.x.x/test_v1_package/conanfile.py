@@ -6,7 +6,7 @@ import re
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     test_type = "explicit"
 
     def build_requirements(self):
