@@ -496,7 +496,7 @@ class QtConan(ConanFile):
             tc.variables["INPUT_dbus"] = "linked"
         else:
             tc.variables["FEATURE_dbus"] = "OFF"
-        tc.variables["CMAKE_FIND_DEBUG_MODE"] = "FALSE"
+        tc.variables["CMAKE_FIND_DEBUG_MODE"] = "TRUE"
 
 
         for opt, conf_arg in [("with_glib", "glib"),
