@@ -1,0 +1,22 @@
+diff --git a/unit/CMakeLists.txt b/unit/CMakeLists.txt
+index b0706fa..1a25584 100644
+--- a/unit/CMakeLists.txt
++++ b/unit/CMakeLists.txt
+@@ -139,6 +139,8 @@ target_link_libraries(unit-internal hs corpusomatic)
+ endif(NOT (RELEASE_BUILD OR FAT_RUNTIME))
+ 
+ if (BUILD_CHIMERA)
++    find_package(pcre REQUIRED CONFIG)
++
+     # enable Chimera unit tests
+     set(unit_chimera_SOURCES
+         ${gtest_SOURCES}
+@@ -150,7 +152,7 @@ if (BUILD_CHIMERA)
+         chimera/scan.cpp
+         )
+     add_executable(unit-chimera ${unit_chimera_SOURCES})
+-    target_link_libraries(unit-chimera chimera hs pcre)
++    target_link_libraries(unit-chimera chimera hs pcre::pcre)
+     #
+     # build target to run unit tests
+     #
