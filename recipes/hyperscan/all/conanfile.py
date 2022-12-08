@@ -86,6 +86,7 @@ class HyperscanConan(ConanFile):
         tc.variables["BUILD_CHIMERA"] = self.options.build_chimera
         if self.options.dump_support != "auto":
             tc.variables["DUMP_SUPPORT"] = self.options.dump_support
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -140,4 +141,3 @@ class HyperscanConan(ConanFile):
 
                 if self.options.build_chimera:
                     self.cpp_info.components["chimera"].system_libs = ["m"]
-
