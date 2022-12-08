@@ -17,19 +17,19 @@ include_directories("${GENERATE_OUTPUT_DIR}")
 ua_generate_nodeset_and_datatypes(
     NAME "foo_flt"
     TARGET_PREFIX "${PROJECT_NAME}"
-    FILE_CSV "${PROJECT_SOURCE_DIR}/FooFltModel.csv"
-    FILE_BSD "${PROJECT_SOURCE_DIR}/FooFlt.Types.bsd"
+    FILE_CSV "${PROJECT_SOURCE_DIR}/../test_package/FooFltModel.csv"
+    FILE_BSD "${PROJECT_SOURCE_DIR}/../test_package/FooFlt.Types.bsd"
     OUTPUT_DIR "${GENERATE_OUTPUT_DIR}"
     NAMESPACE_IDX 2  # This namespace index must match the order in which you are adding the nodeset in the source code
     NAMESPACE_MAP "2:https://new.foo.com/zebra-compression/flattening-and-subspacefolding/UA/"
-    FILE_NS "${PROJECT_SOURCE_DIR}/FooFlt.NodeSet2.xml"
+    FILE_NS "${PROJECT_SOURCE_DIR}/../test_package/FooFlt.NodeSet2.xml"
     INTERNAL
 )
 # Previous macro automatically sets some variables which hold the generated source code files using the provided NAME
 add_executable(${PROJECT_NAME}
     ${UA_NODESET_FOO_FLT_SOURCES}
     ${UA_TYPES_FOO_FLT_SOURCES}
-    test_package.c
+    ../test_package/test_package.c
 )
 # Make sure the nodeset compiler is executed before compiling the main file
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}-ns-foo_flt)
