@@ -10,6 +10,3 @@ patches:
     - patch_file: "patches/0002-use-ue2-make_unique.patch"
       patch_description: "add ue2:: prefix to make_unique for name collision"
       patch_type: "portability"
-    - patch_file: "patches/0003-use-cci-pcre.patch"
-      patch_description: "use cci pcre"
-      patch_type: "conan"

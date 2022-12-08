@@ -264,15 +264,15 @@ index e0acda5..c68601f 100644
 -    pkg_check_modules(PCRE libpcre>=${PCRE_REQUIRED_VERSION})
 -    if (PCRE_FOUND)
 +    # conan should save us
-+    find_package(PCRE)
-+    if(PCRE_FOUND AND (PCRE_VERSION VERSION_GREATER_EQUAL PCRE_REQUIRED_VERSION))
++    find_package(pcre)
++    if(pcre_FOUND AND (pcre_VERSION VERSION_GREATER_EQUAL PCRE_REQUIRED_VERSION))
          set(CORRECT_PCRE_VERSION TRUE)
 -        message(STATUS "PCRE version ${PCRE_REQUIRED_VERSION} or above")
 -    else ()
 -        message(STATUS "PCRE version ${PCRE_REQUIRED_VERSION} or above not found")
 -        return ()
 -    endif ()
-+        set(PCRE_LDFLAGS "PCRE::libpcre")
++        set(PCRE_LDFLAGS "pcre::pcre")
 +    endif()
  endif (PCRE_BUILD_SOURCE)
 diff --git tools/CMakeLists.txt tools/CMakeLists.txt
