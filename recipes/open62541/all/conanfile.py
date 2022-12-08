@@ -451,6 +451,7 @@ class Open62541Conan(ConanFile):
 
         self.cpp_info.builddirs.append(self._module_subfolder)
         # v1 legacy support for open62541Macros.cmake auto-include
-        self.cpp_info.build_modules = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.set_property("cmake_build_modules", [
                                    self._module_file_rel_path])
