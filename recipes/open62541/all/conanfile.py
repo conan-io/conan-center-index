@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, collect_libs, export_conandata_patches, rename, rm, rmdir, mkdir, get
 from conan.errors import ConanInvalidConfiguration
@@ -365,8 +364,6 @@ class Open62541Conan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
-        tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
