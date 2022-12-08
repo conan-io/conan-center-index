@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.tools.files import get
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.43.0"
@@ -38,14 +39,14 @@ class JsondtoConan(ConanFile):
                 "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
             self.output.warn(
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
-        elif tools.Version(self.settings.compiler.version) < minimal_version[compiler]:
+        elif Version(self.settings.compiler.version) < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
     def package_id(self):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def package(self):
