@@ -162,11 +162,12 @@ class LibspatialiteConan(ConanFile):
     def _build_msvc(self):
         target = "spatialite_i.lib" if self.options.shared else "spatialite.lib"
         optflags = ["-DYY_NO_UNISTD_H"]
-        system_libs = [lib + ".lib" for lib in self.deps_cpp_info.system_libs]
+        # system_libs = [lib + ".lib" for lib in self.deps_cpp_info.system_libs]
         if self.options.shared:
             optflags.append("-DDLL_EXPORT")
         with chdir(self, self.source_folder):
-            self.run(f"nmake /f makefile.vc {target} OPTFLAGS=\"{' '.join(optflags)}\" SYSTEM_LIBS=\"{' '.join(system_libs)}\"")
+            self.run(f"nmake /f makefile.vc {target} OPTFLAGS=\"{' '.join(optflags)}\"")
+            # self.run(f"nmake /f makefile.vc {target} OPTFLAGS=\"{' '.join(optflags)}\" SYSTEM_LIBS=\"{' '.join(system_libs)}\"")
 
     def _build_autotools(self):
         with chdir(self, self.source_folder):

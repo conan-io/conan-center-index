@@ -31,7 +31,7 @@ This patch for msvc build allows to:
 -		C:\OSGeo4w\lib\freexl_i.lib C:\OSGeo4w\lib\iconv.lib \
 -		C:\OSGeo4W\lib\sqlite3_i.lib C:\OSGeo4W\lib\zlib.lib \
 -		C:\OSGeo4W\lib\libxml2.lib C:\OSGeo4W\lib\librttopo.lib
-+		/implib:spatialite_i.lib $(LIBOBJ) $(SYSTEM_LIBS)
++		/implib:spatialite_i.lib $(LIBOBJ) $(LIB) $(_LINK_)
  	if exist $(SPATIALITE_DLL).manifest mt -manifest \
  		$(SPATIALITE_DLL).manifest -outputresource:$(SPATIALITE_DLL);2
  		
