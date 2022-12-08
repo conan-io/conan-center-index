@@ -457,12 +457,13 @@ class BoostConan(ConanFile):
         if any([not self.options.get_safe(f"without_{library}", True) for library in self._cxx11_boost_libraries]):
             if self.settings.compiler.get_safe("cppstd"):
                 check_min_cppstd(self, 11)
-            version_cxx11_standard = self._min_compiler_version_default_cxx11
-            if version_cxx11_standard and Version(self.settings.compiler.version) < version_cxx11_standard:
-                raise ConanInvalidConfiguration(
-                    f"Boost.{{{','.join(self._cxx11_boost_libraries)}}} requires a c++11 compiler "
-                    "(please set compiler.cppstd or use a newer compiler)"
-                )
+            else:
+                version_cxx11_standard = self._min_compiler_version_default_cxx11
+                if version_cxx11_standard and Version(self.settings.compiler.version) < version_cxx11_standard:
+                    raise ConanInvalidConfiguration(
+                        f"Boost.{{{','.join(self._cxx11_boost_libraries)}}} requires a c++11 compiler "
+                        "(please set compiler.cppstd or use a newer compiler)"
+                    )
 
     def _with_dependency(self, dependency):
         """
