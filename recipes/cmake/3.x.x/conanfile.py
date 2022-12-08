@@ -143,7 +143,6 @@ class CMakeConan(ConanFile):
         self.cpp_info.libdirs = []
 
         # Needed for compatibility with v1.x - Remmove when 2.0 becomes the default
-        module_version = "{}.{}".format(Version(self.version).major, Version(self.version).minor)
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
