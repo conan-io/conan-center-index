@@ -6,7 +6,7 @@ from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 
 required_conan_version = ">=1.52.0"
 
@@ -23,6 +23,7 @@ class UTConan(ConanFile):
     no_copy_source = True
     options = { "disable_module": [True, False], }
     default_options = { "disable_module": False, }
+    deprecated = 'boost'
 
     @property
     def _minimum_cpp_standard(self):
@@ -44,6 +45,9 @@ class UTConan(ConanFile):
             del self.options.disable_module
         elif is_msvc(self):
             self.options.disable_module = True
+
+    def configure(self):
+        raise ConanException("This recipe is deprecated in favor of Boost >=1.75.0")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -84,7 +88,7 @@ class UTConan(ConanFile):
         if disable_module:
             tc.cache_variables["BOOST_UT_DISABLE_MODULE"] = disable_module
         tc.generate()
-    
+
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
