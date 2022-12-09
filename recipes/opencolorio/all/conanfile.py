@@ -59,6 +59,10 @@ class OpenColorIOConan(ConanFile):
             self.requires("tinyxml/2.6.2")
         else:
             self.requires("pystring/1.1.3")
+        if tools.Version(self.version) >= "2.2.0":
+            self.requires("imath/3.1.5")
+            self.requires("minizip-ng/3.0.7")
+
         # for tools only
         self.requires("lcms/2.13.1")
         # TODO: add GLUT (needed for ociodisplay tool)

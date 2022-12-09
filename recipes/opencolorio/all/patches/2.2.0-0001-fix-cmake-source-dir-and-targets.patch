@@ -1,0 +1,103 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bb19fd8..0f35045 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -9,9 +9,9 @@ cmake_minimum_required(VERSION 3.12)
+ 
+ set(CMAKE_MODULE_PATH
+     ${CMAKE_MODULE_PATH}
+-    ${CMAKE_SOURCE_DIR}/share/cmake/utils
+-    ${CMAKE_SOURCE_DIR}/share/cmake/macros
+-    ${CMAKE_SOURCE_DIR}/share/cmake/modules
++    ${CMAKE_CURRENT_SOURCE_DIR}/share/cmake/utils
++    ${CMAKE_CURRENT_SOURCE_DIR}/share/cmake/macros
++    ${CMAKE_CURRENT_SOURCE_DIR}/share/cmake/modules
+ )
+ 
+ set(CMAKE_WARN_DEPRECATED ON)
+@@ -282,7 +282,7 @@ else()
+     set(OCIO_SETUP_NAME setup_ocio.sh)
+ endif()
+ 
+-configure_file(${CMAKE_SOURCE_DIR}/share/ocio/${OCIO_SETUP_NAME}.in
++configure_file(${PROJECT_SOURCE_DIR}/share/ocio/${OCIO_SETUP_NAME}.in
+     ${CMAKE_CURRENT_BINARY_DIR}/share/ocio/${OCIO_SETUP_NAME} @ONLY)
+ 
+ INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/ocio/${OCIO_SETUP_NAME} DESTINATION ${CMAKE_INSTALL_DATADIR}/ocio/)
+diff --git a/share/cmake/modules/FindExtPackages.cmake b/share/cmake/modules/FindExtPackages.cmake
+index b777e5b..c597a2e 100644
+--- a/share/cmake/modules/FindExtPackages.cmake
++++ b/share/cmake/modules/FindExtPackages.cmake
+@@ -26,7 +26,7 @@ set(CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY ON CACHE BOOL
+ 
+ # expat
+ # https://github.com/libexpat/libexpat
+-find_package(expat 2.4.1 REQUIRED)
++find_package(EXPAT 2.4.1 REQUIRED)
+ 
+ # yaml-cpp
+ # https://github.com/jbeder/yaml-cpp
+@@ -59,7 +59,7 @@ if(OCIO_BUILD_APPS)
+ 
+     # lcms2
+     # https://github.com/mm2/Little-CMS
+-    find_package(lcms2 2.2 REQUIRED)
++    find_package(lcms 2.2 REQUIRED)
+ endif()
+ 
+ if(OCIO_BUILD_OPENFX)
+diff --git a/share/cmake/utils/CppVersion.cmake b/share/cmake/utils/CppVersion.cmake
+index 175d89c..ac93b87 100644
+--- a/share/cmake/utils/CppVersion.cmake
++++ b/share/cmake/utils/CppVersion.cmake
+@@ -16,7 +16,7 @@ elseif(NOT CMAKE_CXX_STANDARD IN_LIST SUPPORTED_CXX_STANDARDS)
+             "CMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD} is unsupported. Supported standards are: ${SUPPORTED_CXX_STANDARDS_STR}.")
+ endif()
+ 
+-set_property(CACHE CMAKE_CXX_STANDARD PROPERTY STRINGS "${SUPPORTED_CXX_STANDARDS}")
++# set_property(CACHE CMAKE_CXX_STANDARD PROPERTY STRINGS "${SUPPORTED_CXX_STANDARDS}")
+ 
+ include(CheckCXXCompilerFlag)
+ 
+diff --git a/src/OpenColorIO/CMakeLists.txt b/src/OpenColorIO/CMakeLists.txt
+index ab9c048..2ec43a5 100755
+--- a/src/OpenColorIO/CMakeLists.txt
++++ b/src/OpenColorIO/CMakeLists.txt
+@@ -203,13 +203,14 @@ if(BUILD_SHARED_LIBS AND WIN32)
+ endif()
+ 
+ 
+-set(HEADER_LOCATION "${CMAKE_SOURCE_DIR}/include/OpenColorIO")
++set(HEADER_LOCATION "${CMAKE_SOURCE_DIR}/source_subfolder/include/OpenColorIO")
+ file(GLOB_RECURSE INSTALL_HEADERS "${HEADER_LOCATION}/*.h")
+ 
+ # Some part of the build process expect to find the ABI header here,
+ # notably the documentation.
+ set(ABI_HEADER_LOCATION "${CMAKE_BINARY_DIR}/include/OpenColorIO")
+ list(APPEND INSTALL_HEADERS ${ABI_HEADER_LOCATION}/OpenColorABI.h)
++message("aaaaaaaaaaaaaaaaaaaaaaaa ${HEADER_LOCATION}/OpenColorABI.h.in")
+ configure_file("${HEADER_LOCATION}/OpenColorABI.h.in" "${ABI_HEADER_LOCATION}/OpenColorABI.h" @ONLY)
+ 
+ # Built-in configs
+@@ -269,7 +270,7 @@ target_include_directories(OpenColorIO
+ 
+ target_link_libraries(OpenColorIO
+     PRIVATE
+-        expat::expat
++        EXPAT::EXPAT
+         Imath::Imath
+         pystring::pystring
+         "$<BUILD_INTERFACE:sampleicc::sampleicc>"
+diff --git a/src/apps/ociobakelut/CMakeLists.txt b/src/apps/ociobakelut/CMakeLists.txt
+index a50e87e..37174ea 100755
+--- a/src/apps/ociobakelut/CMakeLists.txt
++++ b/src/apps/ociobakelut/CMakeLists.txt
+@@ -28,7 +28,7 @@ set_target_properties(ociobakelut
+ target_link_libraries(ociobakelut 
+     PRIVATE 
+         apputils
+-        lcms2::lcms2
++        lcms::lcms
+         OpenColorIO
+ )
+ 
