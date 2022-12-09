@@ -1,8 +1,8 @@
 diff --git a/src/icelake/icelake_utf8_common.inl.cpp b/src/icelake/icelake_utf8_common.inl.cpp
-index 6a62103..f8e736f 100644
+index 962700b..a192a18 100644
 --- a/src/icelake/icelake_utf8_common.inl.cpp
 +++ b/src/icelake/icelake_utf8_common.inl.cpp
-@@ -451,12 +451,12 @@ __m512i prev(__m512i input, __m512i previous) {
+@@ -448,12 +448,12 @@ __m512i prev(__m512i input, __m512i previous) {
      static_assert(N<=32, "N must be no larger than 32");
      const __m512i movemask = _mm512_setr_epi32(28,29,30,31,0,1,2,3,4,5,6,7,8,9,10,11);
      const __m512i rotated = _mm512_permutex2var_epi32(input, movemask, previous);
@@ -33,3 +33,10 @@ index c71a085..edcd289 100644
  #endif // defined(__GNUC__) && !defined(__clang__)
  
  #if SIMDUTF_GCC8
+@@ -83,4 +85,4 @@ inline __m512i _mm512_set_epi8(uint8_t a0, uint8_t a1, uint8_t a2, uint8_t a3, u
+ }
+ #endif // SIMDUTF_GCC8
+ 
+-#endif // SIMDUTF_HASWELL_INTRINSICS_H
+\ No newline at end of file
++#endif // SIMDUTF_HASWELL_INTRINSICS_H

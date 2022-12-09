@@ -1,7 +1,7 @@
 sources:
-  "2.0.5":
-    url: "https://github.com/simdutf/simdutf/archive/refs/tags/v2.0.5.tar.gz"
-    sha256: "41b564518e02e41607d033e3465491c75c38088cf5bbaf17c1662e342ad6f8bc"
+  "2.0.6":
+    url: "https://github.com/simdutf/simdutf/archive/refs/tags/v2.0.6.tar.gz"
+    sha256: "40f1f9a4403f81c2c3d736ef9c73662835b2241871caa262fcd654e0898f9e4e"
   "2.0.3":
     url: "https://github.com/simdutf/simdutf/archive/refs/tags/v2.0.3.tar.gz"
     sha256: "076bd07f6fd88c5befba28992cd5a9bf033225c5564d8b88559b8059c3c49cfc"
@@ -12,11 +12,11 @@ sources:
     url: "https://github.com/simdutf/simdutf/archive/refs/tags/v1.0.1.tar.gz"
     sha256: "e7832ba58fb95fe00de76dbbb2f17d844a7ad02a6f5e3e9e5ce9520e820049a0"
 patches:
-  "2.0.5":
+  "2.0.6":
     - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
       patch_description: "remove static build, enable rpath on macOS"
       patch_type: "conan"
-    - patch_file: "patches/2.0.5-0002-add-workaround-gcc9.patch"
+    - patch_file: "patches/2.0.6-0002-add-workaround-gcc9.patch"
       patch_description: "apply gcc8 workaround to gcc9"
       patch_type: "portability"
   "2.0.3":
