@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import chdir, copy, rmdir, get, save, load
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.build import build_jobs, cross_building, check_min_cppstd
 from conan.tools.scm import Version
@@ -85,6 +85,8 @@ class CMakeConan(ConanFile):
         if self.options.bootstrap:
             tc = AutotoolsToolchain(self)
             tc.generate()
+            tc = AutotoolsDeps(self)
+            tc.generate()
             bootstrap_cmake_options = ["--"]
             bootstrap_cmake_options.append(f'-DCMAKE_CXX_STANDARD={"11" if not self.settings.compiler.cppstd else self.settings.compiler.cppstd}')
             if self.settings.os == "Linux":
@@ -94,7 +96,7 @@ class CMakeConan(ConanFile):
                     bootstrap_cmake_options.append(f'-DOPENSSL_USE_STATIC_LIBS={"FALSE" if openssl.options.shared else "TRUE"}')
                 else:
                     bootstrap_cmake_options.append("-DCMAKE_USE_OPENSSL=OFF")
-            save(self,"bootstrap_args", json.dumps({"bootstrap_cmake_options": ' '.join(arg for arg in bootstrap_cmake_options)}))
+            save(self, "bootstrap_args", json.dumps({"bootstrap_cmake_options": ' '.join(arg for arg in bootstrap_cmake_options)}))
         else:
             tc = CMakeToolchain(self)
             if not self.settings.compiler.cppstd:
