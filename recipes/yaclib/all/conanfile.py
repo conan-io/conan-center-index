@@ -74,16 +74,17 @@ class YACLibConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
+        required_cpp_standard = 20 if self.options.coro else 17
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 20 if self.options.coro else 17)
+            check_min_cppstd(self, required_cpp_standard)
         else:
             if self._compilers_minimum_version.get(str(self.settings.compiler)):
                 if Version(self.settings.compiler.version) < self._compilers_minimum_version.get(str(self.settings.compiler)):
                     raise ConanInvalidConfiguration(
-                        "yaclib requires a compiler supporting c++17")
+                        f"yaclib requires a compiler supporting c++{required_cpp_standard}")
             else:
                 self.output.warn(
-                    "yaclib recipe does not recognize the compiler. yaclib requires a compiler supporting c++17. Assuming it does.")
+                    f"yaclib recipe does not recognize the compiler. yaclib requires a compiler supporting c++{required_cpp_standard}. Assuming it does.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
