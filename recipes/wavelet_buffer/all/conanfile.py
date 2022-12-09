@@ -77,10 +77,9 @@ class WaveletBufferConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+    def validate_build(self):
         if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} can not be built as shared on Visual Studio and msvc."
-            )
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared with Visual Studio.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
