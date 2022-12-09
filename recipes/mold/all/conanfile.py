@@ -64,6 +64,7 @@ class MoldConan(ConanFile):
         tc.variables["MOLD_USE_MIMALLOC"] = self.options.with_mimalloc
         tc.variables["MOLD_USE_SYSTEM_MIMALLOC"] = True
         tc.variables["MOLD_USE_SYSTEM_TBB"] = True
+        tc.variables["CMAKE_INSTALL_LIBEXECDIR"] = "libexec"
         tc.generate()
 
         cd = CMakeDeps(self)
