@@ -37,35 +37,35 @@ patches:
   "10.40":
     - patch_file: "patches/0001-fix-cmake-1.39.patch"
       patch_description: "correct the order of cmake_minimum_required() and project()"
-      patch_type: "backport"
+      patch_type: "conan"
       patch_source: "https://github.com/PCRE2Project/pcre2/pull/142"
   "10.39":
     - patch_file: "patches/0001-fix-cmake-1.39.patch"
       patch_description: "correct the order of cmake_minimum_required() and project()"
-      patch_type: "backport"
+      patch_type: "conan"
       patch_source: "https://github.com/PCRE2Project/pcre2/pull/142"
   "10.37":
     - patch_file: "patches/0001-fix-cmake-1.36.patch"
       patch_description: "correct the order of cmake_minimum_required() and project()"
-      patch_type: "backport"
+      patch_type: "conan"
       patch_source: "https://github.com/PCRE2Project/pcre2/pull/142"
   "10.36":
     - patch_file: "patches/0001-fix-cmake-1.36.patch"
       patch_description: "correct the order of cmake_minimum_required() and project()"
-      patch_type: "backport"
+      patch_type: "conan"
       patch_source: "https://github.com/PCRE2Project/pcre2/pull/142"
   "10.35":
     - patch_file: "patches/0001-fix-cmake-1.35.patch"
       patch_description: "correct the order of cmake_minimum_required() and project()"
-      patch_type: "backport"
+      patch_type: "conan"
       patch_source: "https://github.com/PCRE2Project/pcre2/pull/142"
   "10.33":
     - patch_file: "patches/0001-fix-cmake-1.33.patch"
       patch_description: "correct the order of cmake_minimum_required() and project()"
-      patch_type: "backport"
+      patch_type: "conan"
       patch_source: "https://github.com/PCRE2Project/pcre2/pull/142"
   "10.32":
     - patch_file: "patches/0001-fix-cmake-1.32.patch"
       patch_description: "correct the order of cmake_minimum_required() and project()"
-      patch_type: "backport"
+      patch_type: "conan"
       patch_source: "https://github.com/PCRE2Project/pcre2/pull/142"
