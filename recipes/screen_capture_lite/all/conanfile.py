@@ -103,6 +103,8 @@ class ScreenCaptureLiteConan(ConanFile):
         if is_msvc(self):
             # fix "error C2039: 'CheckForDuplicateEntries': is not a member of 'Microsoft::WRL::Details'"
             tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0.18362.0"
+        if Version(self.version) >= "17.1.613":
+            tc.variables["BUILD_CSHARP"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 

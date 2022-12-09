@@ -1,7 +1,7 @@
 sources:
-  "17.1.601":
-    url: "https://github.com/smasherprog/screen_capture_lite/archive/refs/tags/17.1.601.tar.gz"
-    sha256: "2df1a29262013bb3b4a495d29b5ff422e18e63060514910143c62557345f29d5"
+  "17.1.613":
+    url: "https://github.com/smasherprog/screen_capture_lite/archive/refs/tags/17.1.613.tar.gz"
+    sha256: "ab111e52379fc4bca852b9a79535329e12dca9b25a0b87a2ef84ab7348a64064"
   "17.1.462":
     url: "https://github.com/smasherprog/screen_capture_lite/archive/refs/tags/17.1.462.tar.gz"
     sha256: "4c7d9b23a458645534c4e2a7315eb12fc7d6dc0fb914f1d6787ee9d5d16e6dfd"
@@ -10,10 +10,6 @@ sources:
     sha256: "c6e6eead72114dc7ba9f3fb17eeff01b4b53bb3ad3b71a55ebe08b61bbff9dea"
 
 patches:
-  "17.1.601":
-    - patch_file: "patches/17.1.601-0001-fix-cmake.patch"
-      patch_description: "specify build library static or shared"
-      patch_type: "conan"
   "17.1.462":
     - patch_file: "patches/17.1.462-0001-fix-cmake.patch"
       patch_description: "specify build library static or shared"
