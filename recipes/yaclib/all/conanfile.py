@@ -16,7 +16,7 @@ class YACLibConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/YACLib/YACLib"
     license = "MIT"
-    topics = "c++", "async", "parallel", "concurrency"
+    topics = ("async", "parallel", "concurrency")
     settings = "os", "arch", "compiler", "build_type"
 
     _yaclib_flags = {
