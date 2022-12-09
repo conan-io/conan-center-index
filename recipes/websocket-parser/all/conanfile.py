@@ -1,7 +1,9 @@
+import os.path
+import textwrap
+
 from conan import ConanFile
-from conan.tools.apple import is_apple_os
-from conan.tools.files import apply_conandata_patches, collect_libs, get
-from conans import AutoToolsBuildEnvironment
+from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.files import collect_libs, get, save
 
 
 class WebsocketParserConan(ConanFile):
@@ -12,9 +14,9 @@ class WebsocketParserConan(ConanFile):
     description = "Streaming websocket frame parser and frame builder for c"
     topics = "websockets", "parser"
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = ["patches/**"]
     options = {"shared": [True, False]}
     default_options = {"shared": False}
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -23,30 +25,39 @@ class WebsocketParserConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
+    def layout(self):
+        cmake_layout(self)
+
     def build(self):
-        apply_conandata_patches(self)
-        buildenv = AutoToolsBuildEnvironment(self)
-        buildenv.flags = ["-std=c99", "-pedantic", "-Wno-newline-eof"]
-        build_type = self.settings.get_safe("build_type", default="Release")
-        if build_type == "Release":
-            buildenv.flags += ["-O2"]
-        buildenv.fpic = True
-        if not self.options.shared:
-            buildenv.make(target="alib")
-        elif is_apple_os(self):
-            buildenv.make(target="dylib")
-        else:
-            buildenv.make(target="solib")
+        save(self, os.path.join(self.source_folder, "CMakeLists.txt"), textwrap.dedent("""\
+            cmake_minimum_required(VERSION 3.17 FATAL_ERROR)
+            project(websocket-parser C)
+
+            add_library(websocket-parser websocket_parser.h websocket_parser.c)
+
+            target_include_directories(websocket-parser PUBLIC
+                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                $<INSTALL_INTERFACE:include/>)
+
+            set_target_properties(websocket-parser PROPERTIES
+                SOVERSION 0
+                PUBLIC_HEADER "websocket_parser.h")
+
+            install(TARGETS websocket-parser
+                LIBRARY DESTINATION ${CMAKE_INSTALL_DIR}
+                PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/websocket_parser)
+            """))
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
         self.copy("LICENSE", dst="licenses", keep_path=False)
-        self.copy("*.h", dst="include/websocket_parser")
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
-        self.cpp_info.set_property("cmake_file_name", "websocket_parser")
-        self.cpp_info.set_property("cmake_target_name", "websocket_parser::websocket_parser")
-        self.cpp_info.set_property("pkg_config_name", "websocket_parser")
+        self.cpp_info.set_property("cmake_file_name", "websocket-parser")
+        self.cpp_info.set_property("cmake_target_name", "websocket-parser::websocket-parser")
+        self.cpp_info.set_property("pkg_config_name", "websocket-parser")
