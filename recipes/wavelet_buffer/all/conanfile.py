@@ -58,7 +58,7 @@ class WaveletBufferConan(ConanFile):
         self.requires("cimg/3.0.2")
         self.requires("libjpeg-turbo/2.1.4")
         self.requires("openblas/0.3.20")
-        # FIXME: unvendor SfCompressor which is currently download at build time :s
+        # FIXME: unvendor SfCompressor which is currently downloaded at build time :s
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
