@@ -56,7 +56,7 @@ class WaveletBufferConan(ConanFile):
     def requirements(self):
         self.requires("blaze/3.8")
         self.requires("cimg/3.0.2")
-        self.requires("libjpeg-turbo/2.1.2")
+        self.requires("libjpeg-turbo/2.1.4")
         self.requires("openblas/0.3.20")
         # FIXME: unvendor SfCompressor which is currently download at build time :s
 
