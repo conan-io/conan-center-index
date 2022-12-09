@@ -30,7 +30,7 @@ class WebsocketParserConan(ConanFile):
 
     def build(self):
         save(self, os.path.join(self.source_folder, "CMakeLists.txt"), textwrap.dedent("""\
-            cmake_minimum_required(VERSION 3.17 FATAL_ERROR)
+            cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
             project(websocket-parser C)
 
             add_library(websocket-parser websocket_parser.h websocket_parser.c)
