@@ -6,7 +6,7 @@ from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.52.0"
 
@@ -47,7 +47,7 @@ class UTConan(ConanFile):
             self.options.disable_module = True
 
     def configure(self):
-        raise ConanException("This recipe is deprecated in favor of Boost >=1.75.0")
+        raise ConanInvalidConfiguration("This recipe is deprecated in favor of Boost >=1.75.0")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
