@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 from conan.tools.env import VirtualBuildEnv
@@ -38,6 +38,9 @@ class MoldConan(ConanFile):
         if self.settings.compiler == "apple-clang" and "armv8" == self.settings.arch :
             raise ConanInvalidConfiguration(f'{self.name} is still not supported by Mac M1.')
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -64,7 +67,6 @@ class MoldConan(ConanFile):
         tc.variables["MOLD_USE_MIMALLOC"] = self.options.with_mimalloc
         tc.variables["MOLD_USE_SYSTEM_MIMALLOC"] = True
         tc.variables["MOLD_USE_SYSTEM_TBB"] = True
-        tc.variables["CMAKE_INSTALL_LIBEXECDIR"] = "libexec"
         tc.generate()
 
         cd = CMakeDeps(self)
@@ -74,6 +76,7 @@ class MoldConan(ConanFile):
         vbe.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -85,7 +88,7 @@ class MoldConan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        
+
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
         mold_location = os.path.join(bindir, "mold")
