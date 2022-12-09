@@ -11,3 +11,6 @@ patches:
       patch_description: "Fix CMakeLists: OpenBLAS is not a dependency"
       patch_type: "conan"
       patch_source: "https://github.com/panda-official/WaveletBuffer/pull/49"
+    - patch_file: "patches/0003-0.4.0-cmake-find-jpeblib.patch"
+      patch_description: "Fix CMakeLists: link to jpeg lib only"
+      patch_type: "conan"

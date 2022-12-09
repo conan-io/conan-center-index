@@ -22,10 +22,12 @@ class WaveletBufferConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "jpeg": ["libjpeg-turbo", "libjpeg"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "jpeg": "libjpeg-turbo",
     }
 
     @property
@@ -59,7 +61,10 @@ class WaveletBufferConan(ConanFile):
     def requirements(self):
         self.requires("blaze/3.8", transitive_headers=True)
         self.requires("cimg/3.0.2")
-        self.requires("libjpeg-turbo/2.1.4")
+        if self.options.jpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.1.4")
+        else:
+            self.requires("libjpeg/9e")
         # FIXME: unvendor SfCompressor which is currently downloaded at build time :s
 
     def validate(self):
@@ -102,6 +107,11 @@ class WaveletBufferConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["wavelet_buffer", "sf_compressor"]
         self.cpp_info.set_property("cmake_file_name", "wavelet_buffer")
         self.cpp_info.set_property("cmake_target_name", "wavelet_buffer::wavelet_buffer")
+        self.cpp_info.libs = ["wavelet_buffer", "sf_compressor"]
+        self.cpp_info.requires = ["blaze::blaze", "cimg::cimg"]
+        if self.options.jpeg == "libjpeg-turbo":
+            self.cpp_info.requires.append("libjpeg-turbo::jpeg")
+        else:
+            self.cpp_info.requires.append("libjpeg::libjpeg")
