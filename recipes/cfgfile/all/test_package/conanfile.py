@@ -9,13 +9,10 @@ class TestPackageConan(ConanFile):
     generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
 
     def requirements(self):
-        self.requires(self.tested_reference_str)
+        self.requires(str(self.requires["cfgfile"]), build=True)
 
     def layout(self):
         cmake_layout(self)
-
-    def requirements(self):
-        self.requires(str(self.requires["cfgfile"]), build=True)
 
     def build(self):
         if not cross_building(self, skip_x64_x86=True):
