@@ -67,10 +67,10 @@ class CfgfileConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_EXAMPLES"] = False
-        tc.variables["BUILD_TESTS"] = False
+        tc.cache_variables["BUILD_EXAMPLES"] = False
+        tc.cache_variables["BUILD_TESTS"] = False
         if Version(self.version) >= "0.2.9":
-            tc.variables["USE_INTERNAL_ARGS_PARSER"] = False
+            tc.cache_variables["USE_INTERNAL_ARGS_PARSER"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
