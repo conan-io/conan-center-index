@@ -22,19 +22,19 @@ class MoldConan(ConanFile):
         "with_mimalloc": False,
     }
 
-    def validate_build(self):
+    def validate(self):
+        #TODO most of these checks should run on validate_build, but the conan-center hooks are broken and fail the PR because they
+        # think we're raising on the build() method
         if self.settings.build_type == "Debug":
             raise ConanInvalidConfiguration('Mold is a build tool, specify mold:build_type=Release in your build profile, see https://github.com/conan-io/conan-center-index/pull/11536#issuecomment-1195607330')
         if self.settings.compiler in ["gcc", "clang", "intel-cc"] and self.settings.compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration('Mold can only be built with libstdc++11; specify mold:compiler.libcxx=libstdc++11 in your build profile')
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration(f'{self.name} can not be built on {self.settings.os}.')
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "10":
             raise ConanInvalidConfiguration("GCC version 10 or higher required")
         if self.settings.compiler in ('clang', 'apple-clang') and Version(self.settings.compiler.version) < "12":
             raise ConanInvalidConfiguration("Clang version 12 or higher required")
-
-    def validate(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(f'{self.name} can not be built on {self.settings.os}.')
         if self.settings.compiler == "apple-clang" and "armv8" == self.settings.arch :
             raise ConanInvalidConfiguration(f'{self.name} is still not supported by Mac M1.')
 
