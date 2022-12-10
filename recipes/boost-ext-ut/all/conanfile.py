@@ -23,7 +23,6 @@ class UTConan(ConanFile):
     no_copy_source = True
     options = { "disable_module": [True, False], }
     default_options = { "disable_module": False, }
-    deprecated = 'boost'
 
     @property
     def _minimum_cpp_standard(self):
@@ -45,9 +44,6 @@ class UTConan(ConanFile):
             del self.options.disable_module
         elif is_msvc(self):
             self.options.disable_module = True
-
-    def configure(self):
-        raise ConanInvalidConfiguration("This recipe is deprecated in favor of Boost >=1.75.0")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -88,7 +84,7 @@ class UTConan(ConanFile):
         if disable_module:
             tc.cache_variables["BOOST_UT_DISABLE_MODULE"] = disable_module
         tc.generate()
-
+    
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
