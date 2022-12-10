@@ -24,6 +24,8 @@ to configure plugins, warnings and errors which should be enabled or disabled.
     * [E9009 - conan-import-error-conanexception: conans.errors is deprecated and conan.errors should be used instead](#e9009---conan-import-error-conanexception-conanserrors-is-deprecated-and-conanerrors-should-be-used-instead)
     * [E9010 - conan-import-error-conaninvalidconfiguration: conans.errors is deprecated and conan.errors should be used instead](#e9010---conan-import-error-conaninvalidconfiguration-conanserrors-is-deprecated-and-conanerrors-should-be-used-instead)
     * [E9011 - conan-import-tools: Importing conan.tools or conan.tools.xxx.zzz.yyy should be considered as private](#e9011---conan-import-tools-importing-conantools-or-conantoolsxxxzzzyyy-should-be-considered-as-private)<!-- endToc -->
+    - [W9012 - conan-cmake-layout-src-folder: Do not add src\_folder to cmake\_layout](#w9012---conan-cmake-layout-src-folder-do-not-add-src_folder-to-cmake_layout)
+<!-- endToc -->
 
 ## Understanding the different linters
 
@@ -158,3 +160,14 @@ Only modules under `conan.tools` and `conan.tools.xxx` are allowed:
 from conan.tools.files import rmdir
 from conan.tools import scm
 ````
+
+### W9012 - conan-cmake-layout-src-folder: Do not add src_folder to cmake_layout
+
+Style warning.
+
+Call to `cmake_layout` does not need `src_folder`. Linter emits a warning for this call:
+
+```python
+cmake_layout(self, src_folder="src")
+```
+
