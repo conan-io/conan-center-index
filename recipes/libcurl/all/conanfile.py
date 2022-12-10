@@ -153,6 +153,12 @@ class LibcurlConan(ConanFile):
             del self.options.with_zstd
         if not self._has_metalink_option:
             del self.options.with_libmetalink
+
+        # Before 7.86.0, enabling unix sockets configure option would fail on windows
+        # It was fixed with this PR: https://github.com/curl/curl/pull/9688
+        if self._is_mingw and Version(self.version) < "7.86.0":
+            del self.options.with_unix_sockets
+
         # Default options
         self.options.with_ssl = "darwinssl" if is_apple_os(self) else "openssl"
 
@@ -354,11 +360,6 @@ class LibcurlConan(ConanFile):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
 
-        # Before 7.86.0, enabling unix sockets configure option would fail on windows
-        # It was fixed with this PR: https://github.com/curl/curl/pull/9688
-        if self._is_mingw and Version(self.version) < "7.86.0":
-            self.options.with_unix_sockets = False
-
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
             f"--with-libidn2={self._yes_no(self.options.with_libidn)}",
@@ -391,7 +392,7 @@ class LibcurlConan(ConanFile):
             f"--enable-manual={self._yes_no(self.options.with_docs)}",
             f"--enable-verbose={self._yes_no(self.options.with_verbose_debug)}",
             f"--enable-symbol-hiding={self._yes_no(self.options.with_symbol_hiding)}",
-            f"--enable-unix-sockets={self._yes_no(self.options.with_unix_sockets)}",
+            f"--enable-unix-sockets={self._yes_no(self.options.get_safe('with_unix_sockets'))}",
         ])
 
         # Since 7.77.0, disabling TLS must be explicitly requested otherwise it fails
