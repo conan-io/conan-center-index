@@ -1,0 +1,18 @@
+--- a/jsmn.h
++++ b/jsmn.h
+@@ -30,10 +30,12 @@
+ extern "C" {
+ #endif
+ 
+-#ifdef JSMN_STATIC
+-#define JSMN_API static
++#ifndef jsmn_EXPORTS
++#define JSMN_API
++#elif defined(_WIN32)
++#define JSMN_API __declspec(dllexport)
+ #else
+-#define JSMN_API extern
++#define JSMN_API __attribute__((visibility("default")))
+ #endif
+ 
+ /**
