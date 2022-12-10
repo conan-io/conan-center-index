@@ -18,6 +18,7 @@ class CfgfileConan(ConanFile):
     description = "Header-only library for reading/saving configuration files with schema defined in sources."
     topics = ("cfgfile", "configuration", "file")
     settings = "os", "arch", "compiler", "build_type"
+    tool_requires = "cmake/3.25.0"
 
     @property
     def _min_cppstd(self):
