@@ -410,3 +410,15 @@ difficult to understand [linter errors](linters.md), please comment on your pull
 ## How long can I be inactive before being removed from the authorized users list?
 
 Please, read [Inactivity and user removal section](adding_packages/README.md#inactivity-and-user-removal).
+
+## Can we add package which are parts of bigger projects like Boost?
+
+Sadly no. There have been many efforts in the past and we feel it's not sustainable given the number of combinations of libraries and version. See #1466 for recent discussions.
+
+There is one main "boost" recipe which many versions maintained.
+
+There are good arguments for permitting some boost libraries but we feel doing so is not fair to the rest.
+
+### Can I add my project which I will submit to Boost?
+
+Yes, but make sure it does not have Boost in the same use the `author-name` convention so there's no conflicts.
