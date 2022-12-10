@@ -27,5 +27,6 @@ class TestPackageConan(ConanFile):
             mkdir(self, test_env_dir)
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             handler_exe = "crashpad_handler.exe" if self.settings.os == "Windows" else "crashpad_handler"
+            print(f"test dump for ci: {self.settings.os} / {handler_exe}")
             handler_bin_path = os.path.join(self.dependencies["sentry-crashpad"].bin_paths[0], handler_exe)
             self.run(f"{bin_path} {test_env_dir} {handler_bin_path}", run_environment=True)
