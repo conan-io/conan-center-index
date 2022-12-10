@@ -474,6 +474,8 @@ class LibcurlConan(ConanFile):
             elif self.settings.os == "Android":
                 pass # this just works, conan is great!
 
+        env = None
+
         # tweaks for mingw
         if self._is_mingw:
             rcflags = "-O COFF"
@@ -492,7 +494,7 @@ class LibcurlConan(ConanFile):
         if cross_building(self) and is_apple_os(self):
             tc.extra_defines.extend(['HAVE_SOCKET', 'HAVE_FCNTL_O_NONBLOCK'])
 
-        tc.generate()
+        tc.generate(env)
         tc = PkgConfigDeps(self)
         tc.generate()
         tc = AutotoolsDeps(self)
