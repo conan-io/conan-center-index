@@ -604,9 +604,9 @@ class LibcurlConan(ConanFile):
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
             if self._is_mingw and self.options.shared:
                 # Handle only mingw libs
-                copy(self, pattern="*.dll", src=self.build_folder, dst="bin", keep_path=False)
-                copy(self, pattern="*.dll.a", src=self.build_folder, dst="lib", keep_path=False)
-                copy(self, pattern="*.lib", src=self.build_folder, dst="lib", keep_path=False)
+                copy(self, pattern="*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+                copy(self, pattern="*.dll.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+                copy(self, pattern="*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
