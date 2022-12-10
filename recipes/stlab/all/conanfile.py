@@ -135,14 +135,6 @@ class Stlab(ConanFile):
         raise ConanInvalidConfiguration(f"Apple-Clang versions less than 12 do not correctly support std::optional or std::variant, so we will use boost::optional and boost::variant instead. Try -o {self.name}:with_boost=True.")
 
     def validate(self):
-        # TODO: No cppstd check until this issue is solved
-        #       https://github.com/conan-io/conan/issues/12210
-        # if self.info.settings.compiler.cppstd:
-        #     check_min_cppstd(self, 17)
-
-        # if self.info.settings.compiler.cppstd:
-        #     check_min_cppstd(self, self._minimum_cpp_standard)
-
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
 
