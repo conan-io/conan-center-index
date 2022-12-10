@@ -21,12 +21,12 @@ class UnicornConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "supported_archs": "ANY",  # comma-separated list of archs
+        "supported_archs": ["ANY"],  # comma-separated list of archs
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "supported_archs": "",  # defaults to all archs supported by the current version. See `config_options`.
+        "supported_archs": ["ANY"],  # defaults to all archs supported by the current version. See `config_options`.
     }
 
     @property
