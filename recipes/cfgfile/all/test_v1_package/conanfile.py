@@ -13,8 +13,8 @@ class TestPackageConan(ConanFile):
             cmake.build()
 
     def build_requirements(self):
--        if hasattr(self, "settings_build"):
--            self.build_requires(str(self.requires["cfgfile"]))
+        if hasattr(self, "settings_build"):
+            self.build_requires(str(self.requires["cfgfile"]))
 
     def test(self):
         if not tools.cross_building(self):
