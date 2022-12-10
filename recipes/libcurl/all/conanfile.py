@@ -475,7 +475,7 @@ class LibcurlConan(ConanFile):
             elif self.settings.os == "Android":
                 pass # this just works, conan is great!
 
-        env = None
+        env = tc.environment()
 
         # tweaks for mingw
         if self._is_mingw:
@@ -485,7 +485,6 @@ class LibcurlConan(ConanFile):
             elif self.settings.arch == "x86_64":
                 rcflags += " --target=pe-x86-64"
                 tc.extra_defines.append("_AMD64_")
-            env = tc.environment()
             env.define("RCFLAGS", rcflags)
 
         if self.settings.os != "Windows":
