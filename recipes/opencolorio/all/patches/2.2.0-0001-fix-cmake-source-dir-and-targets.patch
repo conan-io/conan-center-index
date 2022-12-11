@@ -25,18 +25,18 @@ index bb19fd8..0f35045 100755
  
  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/ocio/${OCIO_SETUP_NAME} DESTINATION ${CMAKE_INSTALL_DATADIR}/ocio/)
 diff --git a/share/cmake/modules/FindExtPackages.cmake b/share/cmake/modules/FindExtPackages.cmake
-index b777e5b..c597a2e 100644
+index b777e5b..5eca384 100644
 --- a/share/cmake/modules/FindExtPackages.cmake
 +++ b/share/cmake/modules/FindExtPackages.cmake
-@@ -26,7 +26,7 @@ set(CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY ON CACHE BOOL
+@@ -48,7 +48,7 @@ find_package(zlib REQUIRED)
  
- # expat
- # https://github.com/libexpat/libexpat
--find_package(expat 2.4.1 REQUIRED)
-+find_package(EXPAT 2.4.1 REQUIRED)
+ # minizip-ng
+ # https://github.com/zlib-ng/minizip-ng
+-find_package(minizip-ng 3.0.6 REQUIRED)
++find_package(minizip 3.0.6 REQUIRED)
  
- # yaml-cpp
- # https://github.com/jbeder/yaml-cpp
+ if(OCIO_BUILD_APPS)
+ 
 @@ -59,7 +59,7 @@ if(OCIO_BUILD_APPS)
  
      # lcms2
@@ -60,18 +60,10 @@ index 175d89c..ac93b87 100644
  include(CheckCXXCompilerFlag)
  
 diff --git a/src/OpenColorIO/CMakeLists.txt b/src/OpenColorIO/CMakeLists.txt
-index ab9c048..2ec43a5 100755
+index ab9c048..bac5cf7 100755
 --- a/src/OpenColorIO/CMakeLists.txt
 +++ b/src/OpenColorIO/CMakeLists.txt
-@@ -203,13 +203,14 @@ if(BUILD_SHARED_LIBS AND WIN32)
- endif()
- 
- 
--set(HEADER_LOCATION "${CMAKE_SOURCE_DIR}/include/OpenColorIO")
-+set(HEADER_LOCATION "${CMAKE_SOURCE_DIR}/source_subfolder/include/OpenColorIO")
- file(GLOB_RECURSE INSTALL_HEADERS "${HEADER_LOCATION}/*.h")
- 
- # Some part of the build process expect to find the ABI header here,
+@@ -210,6 +210,7 @@ file(GLOB_RECURSE INSTALL_HEADERS "${HEADER_LOCATION}/*.h")
  # notably the documentation.
  set(ABI_HEADER_LOCATION "${CMAKE_BINARY_DIR}/include/OpenColorIO")
  list(APPEND INSTALL_HEADERS ${ABI_HEADER_LOCATION}/OpenColorABI.h)
@@ -79,15 +71,28 @@ index ab9c048..2ec43a5 100755
  configure_file("${HEADER_LOCATION}/OpenColorABI.h.in" "${ABI_HEADER_LOCATION}/OpenColorABI.h" @ONLY)
  
  # Built-in configs
-@@ -269,7 +270,7 @@ target_include_directories(OpenColorIO
+@@ -277,7 +278,7 @@ target_link_libraries(OpenColorIO
+         "$<BUILD_INTERFACE:utils::strings>"
+         "$<BUILD_INTERFACE:xxHash>"
+         yaml-cpp
+-        minizip-ng::minizip-ng
++        MINIZIP::minizip
+ )
  
- target_link_libraries(OpenColorIO
+ if(APPLE)
+diff --git a/src/apps/ocioarchive/CMakeLists.txt b/src/apps/ocioarchive/CMakeLists.txt
+index d71d719..820e36c 100644
+--- a/src/apps/ocioarchive/CMakeLists.txt
++++ b/src/apps/ocioarchive/CMakeLists.txt
+@@ -19,7 +19,7 @@ target_link_libraries(ocioarchive
      PRIVATE
--        expat::expat
-+        EXPAT::EXPAT
-         Imath::Imath
-         pystring::pystring
-         "$<BUILD_INTERFACE:sampleicc::sampleicc>"
+         apputils
+         OpenColorIO
+-        minizip-ng::minizip-ng
++        MINIZIP::minizip
+ )
+ 
+ install(TARGETS ocioarchive
 diff --git a/src/apps/ociobakelut/CMakeLists.txt b/src/apps/ociobakelut/CMakeLists.txt
 index a50e87e..37174ea 100755
 --- a/src/apps/ociobakelut/CMakeLists.txt

@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e4f31196..b73396b4 100644
+index e4f3119..3ea1955 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -4,11 +4,13 @@ set(OCIO_VERSION_MINOR 1)
@@ -38,7 +38,7 @@ index e4f31196..b73396b4 100644
 -    find_package(TinyXML)
 +    find_package(TinyXML REQUIRED)
 +    set(TINYXML_FOUND ${TinyXML_FOUND})
-+    set(TINYXML_LIBRARIES TinyXML::TinyXML)
++    set(TINYXML_LIBRARIES tinyxml::tinyxml)
 +    set(TINYXML_VERSION "${TinyXML_VERSION}")
 +    list(APPEND EXTERNAL_LIBRARIES ${TINYXML_LIBRARIES})
 +
@@ -51,7 +51,7 @@ index e4f31196..b73396b4 100644
      set(YAML_VERSION_MIN "0.3.0")
 +    find_package(yaml-cpp REQUIRED)
 +    set(YAML_CPP_INCLUDE_DIRS "${CONAN_INCLUDE_DIRS_YAML-CPP}")
-+    set(YAML_CPP_LIBRARIES yaml-cpp::yaml-cpp)
++    set(YAML_CPP_LIBRARIES yaml-cpp)
 +    set(YAML_CPP_VERSION "${yaml-cpp_VERSION}")
 +    list(APPEND EXTERNAL_LIBRARIES ${YAML_CPP_LIBRARIES})
 +
@@ -110,7 +110,7 @@ index e4f31196..b73396b4 100644
 -install(FILES "${CMAKE_BINARY_DIR}/OpenColorIOConfig.cmake" DESTINATION .)
 +install(FILES "${PROJECT_BINARY_DIR}/OpenColorIOConfig.cmake" DESTINATION .)
 diff --git a/share/cmake/OCIOMacros.cmake b/share/cmake/OCIOMacros.cmake
-index b9fb2393..b1a206e7 100644
+index b9fb239..b1a206e 100644
 --- a/share/cmake/OCIOMacros.cmake
 +++ b/share/cmake/OCIOMacros.cmake
 @@ -356,9 +356,9 @@ ENDMACRO()
@@ -138,7 +138,7 @@ index b9fb2393..b1a206e7 100644
        COMMENT "Extracting reStructuredText from ${INFILE}"
     )
 diff --git a/src/apps/ociobakelut/CMakeLists.txt b/src/apps/ociobakelut/CMakeLists.txt
-index d31b4e34..4aa1efb2 100644
+index d31b4e3..4aa1efb 100644
 --- a/src/apps/ociobakelut/CMakeLists.txt
 +++ b/src/apps/ociobakelut/CMakeLists.txt
 @@ -1,6 +1,10 @@
@@ -172,7 +172,7 @@ index d31b4e34..4aa1efb2 100644
      ${Boost_INCLUDE_DIR}
  )
 diff --git a/src/apps/ociocheck/CMakeLists.txt b/src/apps/ociocheck/CMakeLists.txt
-index 4955f4db..14b5017f 100644
+index 4955f4d..14b5017 100644
 --- a/src/apps/ociocheck/CMakeLists.txt
 +++ b/src/apps/ociocheck/CMakeLists.txt
 @@ -1,9 +1,9 @@
@@ -190,7 +190,7 @@ index 4955f4db..14b5017f 100644
      )
  
 diff --git a/src/core/CDLTransform.cpp b/src/core/CDLTransform.cpp
-index 8b05debc..a7d6031f 100644
+index 8b05deb..a7d6031 100644
 --- a/src/core/CDLTransform.cpp
 +++ b/src/core/CDLTransform.cpp
 @@ -126,7 +126,11 @@ OCIO_NAMESPACE_ENTER
@@ -207,7 +207,7 @@ index 8b05debc..a7d6031f 100644
      }
      
 diff --git a/src/core/CMakeLists.txt b/src/core/CMakeLists.txt
-index 1eb691b6..a2f099ab 100644
+index 1eb691b..a2f099a 100644
 --- a/src/core/CMakeLists.txt
 +++ b/src/core/CMakeLists.txt
 @@ -2,29 +2,29 @@
@@ -269,7 +269,7 @@ index 1eb691b6..a2f099ab 100644
  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/OpenColorIO.pc
      DESTINATION ${CMAKE_INSTALL_EXEC_PREFIX}/lib${LIB_SUFFIX}/pkgconfig/)
 diff --git a/src/core/OCIOYaml.cpp b/src/core/OCIOYaml.cpp
-index 68fcef60..a1c1c1d8 100644
+index 68fcef6..a1c1c1d 100644
 --- a/src/core/OCIOYaml.cpp
 +++ b/src/core/OCIOYaml.cpp
 @@ -1442,7 +1442,7 @@ OCIO_NAMESPACE_ENTER
