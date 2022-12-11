@@ -73,6 +73,10 @@ class MSYS2Conan(ConanFile):
         if self.info.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Only Windows x64 supported")
 
+    def configure(self):
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
