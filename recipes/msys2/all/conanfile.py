@@ -54,11 +54,13 @@ class MSYS2Conan(ConanFile):
         "exclude_files": ["ANY"],
         "packages": ["ANY"],
         "additional_packages": [None, "ANY"],
+        "no_kill": [True, False]
     }
     default_options = {
         "exclude_files": "*/link.exe",
         "packages": "base-devel,binutils,gcc",
         "additional_packages": None,
+        "no_kill": False,
     }
 
     short_paths = True
@@ -82,10 +84,10 @@ class MSYS2Conan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+            destination=self.source_folder, strip_root=False) # Preserve tarball root dir (msys64/)
 
     def _update_pacman(self):
-        with chdir(self, os.path.join(self.source_folder, "usr", "bin")):
+        with chdir(self, os.path.join(self._msys_dir, "usr", "bin")):
             try:
                 self._kill_pacman()
 
@@ -102,6 +104,8 @@ class MSYS2Conan(ConanFile):
 
     # https://github.com/msys2/MSYS2-packages/issues/1966
     def _kill_pacman(self):
+        if self.options.no_kill:
+            return
         if (self.settings.os == "Windows"):
             taskkill_exe = os.path.join(os.environ.get('SystemRoot'), 'system32', 'taskkill.exe')
 
@@ -110,7 +114,7 @@ class MSYS2Conan(ConanFile):
                 out = subprocess.PIPE
                 err = subprocess.STDOUT
             else:
-                out = open(os.devnull, 'w')
+                out = open(os.devnull, 'w', encoding='UTF-8')
                 err = subprocess.PIPE
 
             if os.path.exists(taskkill_exe):
@@ -126,11 +130,12 @@ class MSYS2Conan(ConanFile):
                         proc.wait()
                     except OSError as e:
                         if e.errno == errno.ENOENT:
-                            raise ConanException("Cannot kill pacman")
+                            raise ConanException("Cannot kill pacman") from e
 
     @property
     def _msys_dir(self):
-        return "msys64"
+        subdir = "msys64" # top-level directoy in tarball
+        return os.path.join(self.source_folder, subdir)
 
     def build(self):
         with lock():
@@ -145,7 +150,7 @@ class MSYS2Conan(ConanFile):
 
         self._update_pacman()
 
-        with chdir(self, os.path.join(self.source_folder, "usr", "bin")):
+        with chdir(self, os.path.join(self._msys_dir, "usr", "bin")):
             for package in packages:
                 self.run(f'bash -l -c "pacman -S {package} --noconfirm"')
             for package in ['pkgconf']:
@@ -155,15 +160,15 @@ class MSYS2Conan(ConanFile):
 
         # create /tmp dir in order to avoid
         # bash.exe: warning: could not find /tmp, please create!
-        tmp_dir = os.path.join(self.source_folder, 'tmp')
+        tmp_dir = os.path.join(self._msys_dir, 'tmp')
         if not os.path.isdir(tmp_dir):
             os.makedirs(tmp_dir)
         tmp_name = os.path.join(tmp_dir, 'dummy')
-        with open(tmp_name, 'a'):
+        with open(tmp_name, 'a', encoding='UTF-8'):
             os.utime(tmp_name, None)
 
         # Prepend the PKG_CONFIG_PATH environment variable with an eventual PKG_CONFIG_PATH environment variable
-        replace_in_file(self, os.path.join(self.source_folder, "etc", "profile"),
+        replace_in_file(self, os.path.join(self._msys_dir, "etc", "profile"),
                               'PKG_CONFIG_PATH="', 'PKG_CONFIG_PATH="$PKG_CONFIG_PATH:')
 
     def package(self):
@@ -176,8 +181,9 @@ class MSYS2Conan(ConanFile):
                     fullname = os.path.join(root, filename)
                     if fnmatch.fnmatch(fullname, exclude):
                         os.unlink(fullname)
-        copy(self, "*", dst=os.path.join(self.package_folder, self._msys_dir), src=self.source_folder, excludes=excludes)
-        shutil.copytree(os.path.join(self.source_folder, "usr", "share", "licenses"),
+        # See https://github.com/conan-io/conan-center-index/blob/master/docs/error_knowledge_base.md#kb-h013-default-package-layout
+        copy(self, "*", dst=os.path.join(self.package_folder, "bin", "msys64"), src=self._msys_dir, excludes=excludes)
+        shutil.copytree(os.path.join(self._msys_dir, "usr", "share", "licenses"),
                         os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
@@ -185,7 +191,7 @@ class MSYS2Conan(ConanFile):
         self.cpp_info.includedirs = []
         self.cpp_info.resdirs = []
 
-        msys_root = os.path.join(self.package_folder, self._msys_dir)
+        msys_root = os.path.join(self.package_folder, "bin", "msys64")
         msys_bin = os.path.join(msys_root, "usr", "bin")
         self.cpp_info.bindirs.append(msys_bin)
 
