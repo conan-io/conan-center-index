@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc
 import os
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class MsdfgenConan(ConanFile):
@@ -43,10 +43,7 @@ class MsdfgenConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -57,11 +54,11 @@ class MsdfgenConan(ConanFile):
         self.requires("tinyxml2/9.0.0")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-        if is_msvc(self) and self.info.options.shared:
+        if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} shared not supported by Visual Studio")
-        if self.info.options.with_skia:
+        if self.options.with_skia:
             raise ConanInvalidConfiguration("skia recipe not available yet in CCI")
 
     def source(self):
