@@ -1,3 +1,4 @@
+#define JSMN_STATIC
 #include <jsmn.h>
 
 int main() {
