@@ -81,24 +81,9 @@ class MsdfgenConan(ConanFile):
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         # workaround against CMAKE_FIND_PACKAGE_PREFER_CONFIG ON in conan toolchain
         replace_in_file(self, cmakelists, "find_package(Freetype REQUIRED)", "find_package(Freetype REQUIRED MODULE)")
-        # unvendor lodepng & tinyxml2
+        # remove bundled lodepng & tinyxml2
         rmdir(self, os.path.join(self.source_folder, "lib"))
-        replace_in_file(self, cmakelists, "\"lib/*.cpp\"", "")
-        inject_libs = textwrap.dedent("""\
-            find_package(lodepng REQUIRED CONFIG)
-            find_package(tinyxml2 REQUIRED CONFIG)
-            target_link_libraries(msdfgen-ext PUBLIC
-                msdfgen::msdfgen Freetype::Freetype
-                lodepng::lodepng tinyxml2::tinyxml2
-            )
-        """
-        )
-        replace_in_file(
-            self,
-            cmakelists,
-            "target_link_libraries(msdfgen-ext PUBLIC msdfgen::msdfgen Freetype::Freetype)",
-            inject_libs,
-        )
+        rmdir(self, os.path.join(self.source_folder, "include"))
         # very weird but required for Visual Studio when libs are unvendored (at least for Ninja generator)
         if is_msvc(self):
             replace_in_file(
