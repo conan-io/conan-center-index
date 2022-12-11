@@ -2,11 +2,11 @@ from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path, VCVars
+from conan.tools.microsoft import is_msvc
 import os
 import shutil
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.53.0"
 
 
 class NASMConan(ConanFile):
@@ -51,6 +51,8 @@ class NASMConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         tc = AutotoolsToolchain(self)
         if is_msvc(self):
             tc.configure_args.append("-nologo")
@@ -97,4 +99,4 @@ class NASMConan(ConanFile):
         self.cpp_info.includedirs = []
 
         # TODO: Legacy, to be removed on Conan 2.0
-        self.runenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
