@@ -1,11 +1,10 @@
 from conan import ConanFile
-from conan.tools.files import save, load, chdir, patch, copy, rmdir, rm, replace_in_file, apply_conandata_patches
+from conan.tools.files import save, load, chdir, copy, rmdir, replace_in_file, apply_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
-from conan.tools.microsoft import unix_path, is_msvc
+from conan.tools.microsoft import unix_path
 from conan.errors import ConanException
-import contextlib
 import os
 import re
 import shlex
@@ -60,7 +59,7 @@ class MpfrConan(ConanFile):
             self.requires("mpir/3.0.0")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not os.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not os.getenv("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def layout(self):
@@ -70,7 +69,8 @@ class MpfrConan(ConanFile):
             basic_layout(self, src_folder="src")
 
     def source(self):
-        get(**self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def generate(self):
         if self.settings.os == "Windows":
@@ -78,11 +78,10 @@ class MpfrConan(ConanFile):
             tc.generate()
         else:
             tc = AutotoolsToolchain(self)
-            yes_no = lambda v: "yes" if v else "no"
             tc.configure_args.append("--enable-thread-safe")
-            tc.configure_args.append(f"--with-gmp={unix_path(self, self.dependencies[str(self.options.exact_int)].package_folder)}")
-            tc.configure_args.append(f"--enable-shared={yes_no(self.options.shared)}")
-            tc.configure_args.append(f"--enable-static={yes_no(not self.options.shared)}")
+            tc.configure_args.append(f'--with-gmp={unix_path(self, self.dependencies[str(self.options.exact_int)].package_folder)}')
+            tc.configure_args.append(f'--enable-shared={"yes" if self.options.shared else "no"}')
+            tc.configure_args.append(f'--enable-static={"yes" if not self.options.shared else "no"}')
             if self.settings.compiler == "clang":
                 # warning: optimization flag '-ffloat-store' is not supported
                 tc.configure_args.append("mpfr_cv_gcc_floatconv_bug=no")
@@ -111,7 +110,7 @@ class MpfrConan(ConanFile):
 
     def _extract_makefile_variable(self, makefile, variable):
         makefile_contents = load(self, makefile)
-        match = re.search("{}[ \t]*=[ \t]*((?:(?:[a-zA-Z0-9 \t.=/_-])|(?:\\\\\"))*(?:\\\\\n(?:(?:[a-zA-Z0-9 \t.=/_-])|(?:\\\"))*)*)\n".format(variable), makefile_contents)
+        match = re.search(f'{variable}[ \t]*=[ \t]*((?:(?:[a-zA-Z0-9 \t.=/_-])|(?:\\\\\"))*(?:\\\\\n(?:(?:[a-zA-Z0-9 \t.=/_-])|(?:\\\"))*)*)\n', makefile_contents)
         if not match:
             raise ConanException(f"Cannot extract variable {variable} from {makefile_contents}")
         lines = [line.strip(" \t\\") for line in match.group(1).split()]
@@ -134,7 +133,7 @@ class MpfrConan(ConanFile):
         if self.options.exact_int == "mpir":
             replace_in_file(self, os.path.join(self.source_folder, "configure"),
                                        "-lgmp", "-lmpir")
-            replace_in_file(os.path.join(self.source_folder, "src", "mpfr.h"),
+            replace_in_file(self, os.path.join(self.source_folder, "src", "mpfr.h"),
                                        "<gmp.h>", "<mpir.h>")
             save(self, "gmp.h", "#pragma once\n#include <mpir.h>\n")
 
@@ -146,7 +145,7 @@ class MpfrConan(ConanFile):
                 mpfr_headers=" ".join(headers),
                 definitions=" ".join(definitions),
             ))
-            cmake = Cmake(self)
+            cmake = CMake(self)
             cmake.build()
         else:
             autotools = Autotools(self)
