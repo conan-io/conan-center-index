@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
-from conan.tools.files import chdir, get, replace_in_file
+from conan.tools.files import chdir, get, replace_in_file, copy
+from conan.tools.layout import basic_layout
 import fnmatch
 import os
 import shutil
@@ -52,7 +53,7 @@ class MSYS2Conan(ConanFile):
     options = {
         "exclude_files": ["ANY"],
         "packages": ["ANY"],
-        "additional_packages": ["ANY"],
+        "additional_packages": [None, "ANY"],
     }
     default_options = {
         "exclude_files": "*/link.exe",
@@ -72,12 +73,15 @@ class MSYS2Conan(ConanFile):
         if self.info.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Only Windows x64 supported")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def source(self):
-        # sources are different per configuration - do download in build
-        pass
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def _update_pacman(self):
-        with chdir(self, os.path.join(self._msys_dir, "usr", "bin")):
+        with chdir(self, os.path.join(self.source_folder, "usr", "bin")):
             try:
                 self._kill_pacman()
 
@@ -122,12 +126,9 @@ class MSYS2Conan(ConanFile):
 
     @property
     def _msys_dir(self):
-        subdir = "msys64"
-        return os.path.join(self.package_folder, "bin", subdir)
+        return "msys64"
 
     def build(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=os.path.join(self.package_folder, "bin"))
         with lock():
             self._do_build()
 
@@ -140,7 +141,7 @@ class MSYS2Conan(ConanFile):
 
         self._update_pacman()
 
-        with chdir(self, os.path.join(self._msys_dir, "usr", "bin")):
+        with chdir(self, os.path.join(self.source_folder, "usr", "bin")):
             for package in packages:
                 self.run(f'bash -l -c "pacman -S {package} --noconfirm"')
             for package in ['pkgconf']:
@@ -150,7 +151,7 @@ class MSYS2Conan(ConanFile):
 
         # create /tmp dir in order to avoid
         # bash.exe: warning: could not find /tmp, please create!
-        tmp_dir = os.path.join(self._msys_dir, 'tmp')
+        tmp_dir = os.path.join(self.source_folder, 'tmp')
         if not os.path.isdir(tmp_dir):
             os.makedirs(tmp_dir)
         tmp_name = os.path.join(tmp_dir, 'dummy')
@@ -158,21 +159,21 @@ class MSYS2Conan(ConanFile):
             os.utime(tmp_name, None)
 
         # Prepend the PKG_CONFIG_PATH environment variable with an eventual PKG_CONFIG_PATH environment variable
-        replace_in_file(self, os.path.join(self._msys_dir, "etc", "profile"),
+        replace_in_file(self, os.path.join(self.source_folder, "etc", "profile"),
                               'PKG_CONFIG_PATH="', 'PKG_CONFIG_PATH="$PKG_CONFIG_PATH:')
 
     def package(self):
         excludes = None
         if self.options.exclude_files:
             excludes = tuple(str(self.options.exclude_files).split(","))
-        #self.copy("*", dst="bin", src=self._msys_dir, excludes=excludes)
         for exclude in excludes:
             for root, _, filenames in os.walk(self._msys_dir):
                 for filename in filenames:
                     fullname = os.path.join(root, filename)
                     if fnmatch.fnmatch(fullname, exclude):
                         os.unlink(fullname)
-        shutil.copytree(os.path.join(self._msys_dir, "usr", "share", "licenses"),
+        copy(self, "*", dst=os.path.join(self.package_folder, self._msys_dir), src=self.source_folder, excludes=excludes)
+        shutil.copytree(os.path.join(self.source_folder, "usr", "share", "licenses"),
                         os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
@@ -180,7 +181,7 @@ class MSYS2Conan(ConanFile):
         self.cpp_info.includedirs = []
         self.cpp_info.resdirs = []
 
-        msys_root = self._msys_dir
+        msys_root = os.path.join(self.package_folder, self._msys_dir)
         msys_bin = os.path.join(msys_root, "usr", "bin")
         self.cpp_info.bindirs.append(msys_bin)
 
