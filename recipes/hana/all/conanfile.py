@@ -1,5 +1,7 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import get, save
+from conan.tools.build import check_min_cppstd
+from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
@@ -32,7 +34,7 @@ class HanaConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "14")
+            check_min_cppstd(self, "14")
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -49,11 +51,11 @@ class HanaConan(ConanFile):
         raise ConanInvalidConfiguration(f"{self.ref} is deprecated of Boost. Please, use boost package.")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(**self.conan_data["sources"][self.version],
+              destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
@@ -73,7 +75,7 @@ class HanaConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        save(module_file, content)
 
     @property
     def _module_subfolder(self):
