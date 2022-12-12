@@ -2,6 +2,9 @@ name: Check Markdown links
 
 on: [push,  pull_request]
 
+env:
+  PYVER: "3.8"
+
 jobs:
   markdown-link-check-push:
     if: github.event_name == 'push' && github.repository_owner != 'conan-io' # We do not want to see red in CCI
