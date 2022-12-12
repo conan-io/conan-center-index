@@ -15,6 +15,7 @@ class HanaConan(ConanFile):
     topics = ("hana", "metaprogramming", "boost")
     settings = "compiler"
     no_copy_source = True
+    deprecated = "boost"
 
     @property
     def _source_subfolder(self):
@@ -44,6 +45,8 @@ class HanaConan(ConanFile):
             self.output.warn("{} {} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name, self.version))
         elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration("{} {} requires C++14, which your compiler does not support.".format(self.name, self.version))
+
+        raise ConanInvalidConfiguration(f"{self.ref} is deprecated of Boost. Please, use boost package.")
 
     def package_id(self):
         self.info.header_only()
