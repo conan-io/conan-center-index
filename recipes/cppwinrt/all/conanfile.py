@@ -44,7 +44,6 @@ class CppWinRtConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        self.conf.define("tools.microsoft.msbuild:verbosity", "Diagnostic")
         tc = MSBuildToolchain(self)
         tc.generate()
         tc = MSBuildDeps(self)
@@ -62,7 +61,7 @@ class CppWinRtConan(ConanFile):
     @property
     def msbuild_folder(self):
         return os.path.join(
-            self.build_folder, '_build', msbuild.msbuild_arch(self.info.settings.arch), self.msbuild_type)
+            self.build_folder, "_build", msbuild.msbuild_arch(self.info.settings.arch), self.msbuild_type)
 
     def build(self):
         self._patch_sources()
@@ -70,10 +69,10 @@ class CppWinRtConan(ConanFile):
         msbuild.build_type = self.msbuild_type
         # use Win32 instead of the default value when building x86
         msbuild.platform = "Win32" if self.info.settings.arch == "x86" else msbuild.platform
-        self.run(' '.join([msbuild.command(sln="cppwinrt.sln", targets=[
+        self.run(" ".join([msbuild.command(sln="cppwinrt.sln", targets=[
                  "prebuild", "cppwinrt"]), f"/p:CppWinRTBuildVersion={self.version}"]))
-        self.run(' '.join([os.path.join(self.msbuild_folder, 'cppwinrt.exe'),
-                    '-in', 'local', '-out', self.msbuild_folder, '-verbose']))
+        self.run(" ".join([os.path.join(self.msbuild_folder, "cppwinrt.exe"),
+                    "-in", "local", "-out", self.msbuild_folder, "-verbose"]))
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(
