@@ -30,8 +30,12 @@ sources:
     url: "https://github.com/open62541/open62541/archive/v1.0.3.tar.gz"
     sha256: "3e4c939d702d06d89f32a1cafe2b992c7f3d81c8f8579e093a972d4bc4fb3d50"
 patches:
+  "1.3.4":
+    - patch_file: "patches/0001-fix-cmake-find-deps-1_3_4.patch"
+      patch_description: "Use Cmake find_package(*) to resolve external dependencies"
+      patch_type: "portability"
   "1.3.1":
-    - patch_file: "patches/0001-fix-cmake-find-deps-1_3_x.patch"
+    - patch_file: "patches/0001-fix-cmake-find-deps-1_3_1.patch"
       patch_description: "Use Cmake find_package(*) to resolve external dependencies"
       patch_type: "portability"
   "1.2.4":

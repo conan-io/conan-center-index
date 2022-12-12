@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 2a140ebd..605aed72 100644
+index 2a140ebd..bbca9b1f 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -11,7 +11,7 @@ endif()
@@ -32,6 +32,15 @@ index 2a140ebd..605aed72 100644
  
  # Examples for the version string are:
  # v1.2
+@@ -580,7 +577,7 @@ if(UA_ENABLE_ENCRYPTION_OPENSSL OR UA_ENABLE_MQTT_TLS_OPENSSL)
+     # use the OpenSSL encryption library
+     # https://cmake.org/cmake/help/v3.0/module/FindOpenSSL.html
+     find_package(OpenSSL REQUIRED)
+-    list(APPEND open62541_LIBRARIES ${OPENSSL_LIBRARIES})
++    list(APPEND open62541_LIBRARIES ${OpenSSL_LIBRARIES})
+     endif ()
+ 
+ if(UA_ENABLE_ENCRYPTION_LIBRESSL)
 @@ -598,7 +595,7 @@ if(UA_ENABLE_ENCRYPTION_MBEDTLS OR UA_ENABLE_PUBSUB_ENCRYPTION)
      # that is not possible, manually compile mbedTLS and set the cmake variables
      # defined in /tools/cmake/FindMbedTLS.cmake.
@@ -108,7 +117,7 @@ index 2a140ebd..605aed72 100644
          ${lib_sources})
  endif()
  
-@@ -1349,7 +1320,7 @@ if(UA_ENABLE_AMALGAMATION)
+@@ -1349,10 +1320,10 @@ if(UA_ENABLE_AMALGAMATION)
      target_include_directories(open62541-object PRIVATE ${PROJECT_BINARY_DIR})
      target_include_directories(open62541-object PRIVATE "${ua_architecture_directories_to_include}")
      if(UA_ENABLE_ENCRYPTION_MBEDTLS)
@@ -116,7 +125,11 @@ index 2a140ebd..605aed72 100644
 +        target_include_directories(open62541-object PRIVATE ${MbedTLS_INCLUDE_DIRS})
      endif()
      if(UA_ENABLE_ENCRYPTION_OPENSSL OR UA_ENABLE_MQTT_TLS_OPENSSL)
-         target_include_directories(open62541-object PRIVATE ${OPENSSL_INCLUDE_DIR})
+-        target_include_directories(open62541-object PRIVATE ${OPENSSL_INCLUDE_DIR})
++        target_include_directories(open62541-object PRIVATE ${OpenSSL_INCLUDE_DIR})
+     endif()
+     if(UA_ENABLE_ENCRYPTION_LIBRESSL)
+         target_include_directories(open62541-object PRIVATE ${LIBRESSL_INCLUDE_DIR})
 @@ -1391,6 +1362,12 @@ else()
                        )
  
@@ -144,7 +157,7 @@ index 2a140ebd..605aed72 100644
  
      if(UA_FORCE_CPP)
          set_source_files_properties(${lib_sources} PROPERTIES LANGUAGE CXX)
-@@ -1444,7 +1428,7 @@ else()
+@@ -1444,10 +1428,10 @@ else()
      include_directories_private("${PROJECT_BINARY_DIR}")
  
      if(UA_ENABLE_ENCRYPTION_MBEDTLS)
@@ -152,7 +165,11 @@ index 2a140ebd..605aed72 100644
 +        include_directories_private(${MbedTLS_INCLUDE_DIRS})
      endif()
      if(UA_ENABLE_ENCRYPTION_OPENSSL OR UA_ENABLE_MQTT_TLS_OPENSSL)
-         include_directories_private(${OPENSSL_INCLUDE_DIR})
+-        include_directories_private(${OPENSSL_INCLUDE_DIR})
++        include_directories_private(${OpenSSL_INCLUDE_DIR})
+     endif()
+     if(UA_ENABLE_ENCRYPTION_LIBRESSL)
+         include_directories_private(${LIBRESSL_INCLUDE_DIR})
 diff --git a/src/server/ua_discovery_manager.h b/src/server/ua_discovery_manager.h
 index e0f48c0f..bae9bd65 100644
 --- a/src/server/ua_discovery_manager.h
