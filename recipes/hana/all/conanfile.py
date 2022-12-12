@@ -61,11 +61,13 @@ class HanaConan(ConanFile):
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
         self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self._create_cmake_module_alias_targets(
+            self,
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"hana": "hana::hana"}
         )
 
-    def _create_cmake_module_alias_targets(module_file, targets):
+    @staticmethod
+    def _create_cmake_module_alias_targets(conanfile, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent("""\
@@ -74,7 +76,7 @@ class HanaConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        save(self, module_file, content)
+        save(conanfile, module_file, content)
 
     @property
     def _module_subfolder(self):
