@@ -4,7 +4,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, rmdir, copy, save, replace_in_file, get, rm
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
@@ -12,7 +11,7 @@ from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class LibxlsConan(ConanFile):
     name = "libxls"
@@ -42,18 +41,9 @@ class LibxlsConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         basic_layout(self, src_folder='src')
@@ -63,8 +53,8 @@ class LibxlsConan(ConanFile):
             self.requires("libiconv/1.17")
 
     def validate(self):
-        if is_msvc_static_runtime(self) and self.info.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} does not support shared and static runtime together.")
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Windows(yet).")
 
     def build_requirements(self):
         if self.settings.os == "Windows":
@@ -82,9 +72,6 @@ class LibxlsConan(ConanFile):
         toolchain.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
-        if self.settings.os == "Windows":
-            tc = VirtualBuildEnv(self)
-            tc.generate()
 
     def _patch_sources(self):
         config_h_content = """
@@ -96,15 +83,6 @@ class LibxlsConan(ConanFile):
             config_h_content += "#define HAVE_XLOCALE_H 1\n"
         save(self, os.path.join(self.source_folder, "include", "config.h"), config_h_content)
         apply_conandata_patches(self)
-        if is_msvc(self) and Version(self.settings.compiler.version).major < 16:
-            replace_in_file(self,
-                os.path.join(self.source_folder, "include", "libxls", "locale.h"),
-                "restrict",
-                "__restrict")
-            replace_in_file(self,
-                os.path.join(self.source_folder, "src", "locale.c"),
-                "restrict",
-                "__restrict")
 
     def build(self):
         self._patch_sources()
