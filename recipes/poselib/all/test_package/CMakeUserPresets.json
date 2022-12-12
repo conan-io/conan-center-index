@@ -1,0 +1,9 @@
+{
+    "version": 4,
+    "vendor": {
+        "conan": {}
+    },
+    "include": [
+        "/home/victor/git/conan-center-index/recipes/poselib/all/test_package/build/generators/CMakePresets.json"
+    ]
+}
