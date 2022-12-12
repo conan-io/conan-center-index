@@ -65,7 +65,6 @@ class HanaConan(ConanFile):
             {"hana": "hana::hana"}
         )
 
-    @staticmethod
     def _create_cmake_module_alias_targets(module_file, targets):
         content = ""
         for alias, aliased in targets.items():
@@ -75,7 +74,7 @@ class HanaConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        save(module_file, content)
+        save(self, module_file, content)
 
     @property
     def _module_subfolder(self):
