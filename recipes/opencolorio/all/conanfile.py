@@ -87,8 +87,6 @@ class OpenColorIOConan(ConanFile):
 
         tc.variables["OCIO_USE_SSE"] = self.options.get_safe("use_sse", False)
 
-        tc.variables["CMAKE_VERBOSE_MAKEFILE"] = True
-
         # openexr 2.x provides Half library
         tc.variables["OCIO_USE_OPENEXR_HALF"] = True
 
@@ -104,6 +102,8 @@ class OpenColorIOConan(ConanFile):
         if is_msvc(self) and not self.options.shared:
             # define any value because ifndef is used
             tc.variables["OpenColorIO_SKIP_IMPORTS"] = True
+
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
