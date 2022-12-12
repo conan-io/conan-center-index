@@ -74,7 +74,7 @@ class SoundTouchConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "SoundTouch")
 
         self.cpp_info.components["_soundtouch"].set_property("cmake_target_name", "SoundTouch::SoundTouch")
-        self.cpp_info.components["_soundtouch"].set_property("pkg_config_name", "SoundTouch")
+        self.cpp_info.components["_soundtouch"].set_property("pkg_config_name", "soundtouch")
         self.cpp_info.components["_soundtouch"].libs = ["SoundTouch"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_soundtouch"].system_libs.append("m")
