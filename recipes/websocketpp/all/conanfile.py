@@ -1,5 +1,6 @@
 from conan import ConanFile
-from conan.tools import files
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.layout import basic_layout
 import os
 
 required_conan_version = ">=1.52.0"
@@ -26,37 +27,49 @@ class WebsocketPPConan(ConanFile):
     }
 
     def export_sources(self):
-        files.export_conandata_patches(self)
+        export_conandata_patches(self)
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/1.1.1s", transitive_headers=True, transitive_libs=True)
 
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/1.2.13", transitive_headers=True, transitive_libs=True)
 
         if self.options.asio == "standalone":
-            self.requires("asio/1.24.0")
+            self.requires("asio/1.24.0", transitive_headers=True)
         elif self.options.asio == "boost":
-            self.requires("boost/1.80.0")
+            self.requires("boost/1.80.0", transitive_headers=True)
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def build(self):
-        files.apply_conandata_patches(self)
+        apply_conandata_patches(self)
 
     def package(self):
-        files.copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        # We have to copy the headers manually, since the upstream cmake.install() step doesn't do so.
-        files.copy(self, pattern=os.path.join("websocketpp","*.hpp"), dst=os.path.join(self.package_folder, "include"), src=self.source_folder)
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, os.path.join("websocketpp","*.hpp"), src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "websocketpp")
         self.cpp_info.set_property("cmake_target_name", "websocketpp::websocketpp")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.requires = []
+        if self.options.with_openssl:
+            self.cpp_info.requires.append("openssl::openssl")
+        if self.options.with_zlib:
+            self.cpp_info.requires.append("zlib::zlib")
         if self.options.asio == "standalone":
             self.cpp_info.defines.extend(["ASIO_STANDALONE", "_WEBSOCKETPP_CPP11_STL_"])
+            self.cpp_info.requires.append("asio::asio")
+        elif self.options.asio == "boost":
+            self.cpp_info.requires.append("boost::headers")
