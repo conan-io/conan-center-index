@@ -181,7 +181,7 @@ class Open62541Conan(ConanFile):
         if self.options.encryption == "mbedtls":
             self.requires("mbedtls/3.2.1")
         elif self.options.encryption == "openssl":
-            self.requires("openssl/3.0.7")
+            self.requires("openssl/1.1.1s")
         if self.options.web_socket:
             self.requires("libwebsockets/4.3.2")
         if self.options.discovery == "With Multicast" or "multicast" in str(self.options.discovery):
