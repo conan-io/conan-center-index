@@ -38,6 +38,16 @@ patches:
     - patch_file: "patches/0001-fix-cmake-find-deps-1_3_1.patch"
       patch_description: "Use Cmake find_package(*) to resolve external dependencies"
       patch_type: "portability"
+  "1.2.6":
+    - patch_file: "patches/0001-fix-cmake-find-deps-1_2_x.patch"
+      patch_description: "Use Cmake find_package(*) to resolve external dependencies"
+      patch_type: "portability"
+    - patch_file: "patches/0003-disable-sanitizers-1_2_x.patch"
+      patch_description: "Disable static code analysis"
+      patch_type: "conan"
+    - patch_file: "patches/0003-fix-use-usr-bin-env-python3.patch"
+      patch_description: "Use python3 instead of default python interpreter"
+      patch_type: "conan"
   "1.2.4":
     - patch_file: "patches/0001-fix-cmake-find-deps-1_2_x.patch"
       patch_description: "Use Cmake find_package(*) to resolve external dependencies"
