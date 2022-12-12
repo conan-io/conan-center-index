@@ -22,7 +22,7 @@ class SVTAV1Conan(ConanFile):
     default_options = {
         "fPIC": False,
         "build_encoder": True,
-        "build_decoder": False,
+        "build_decoder": True,
     }
 
     def config_options(self):
