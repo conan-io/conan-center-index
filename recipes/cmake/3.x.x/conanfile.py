@@ -60,15 +60,15 @@ class CMakeConan(ConanFile):
         compiler = str(self.settings.compiler)
         if compiler not in minimal_version:
             self.output.warning(
-                "{} recipe lacks information about the {} compiler standard version support".format(self.name, compiler))
+                f"{self.name} recipe lacks information about the {compiler} compiler standard version support")
             self.output.warning(
-                "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
+                f"{self.name} requires a compiler that supports at least C++{minimal_cpp_standard}")
             return
 
         version = Version(self.settings.compiler.version)
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
-                "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
+                f"{self.name} requires a compiler that supports at least C++{minimal_cpp_standard}")
 
     def layout(self):
         if self.options.bootstrap:
@@ -144,7 +144,7 @@ class CMakeConan(ConanFile):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
 
-        # Needed for compatibility with v1.x - Remmove when 2.0 becomes the default
+        # Needed for compatibility with v1.x - Remove when 2.0 becomes the default
         bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.output.info(f"Appending PATH environment variable: {bindir}")
         self.env_info.PATH.append(bindir)
