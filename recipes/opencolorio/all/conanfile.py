@@ -101,6 +101,7 @@ class OpenColorIOConan(ConanFile):
             tc.variables["OpenColorIO_SKIP_IMPORTS"] = True
 
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "OLD"
         tc.generate()
 
         deps = CMakeDeps(self)
