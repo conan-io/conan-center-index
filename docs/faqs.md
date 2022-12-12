@@ -421,4 +421,4 @@ There are good arguments for permitting some boost libraries but we feel doing s
 
 ### Can I add my project which I will submit to Boost?
 
-Yes, but make sure it does not have Boost in the nam. Use the [`author-name` convention](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#what-is-the-policy-on-recipe-name-collisions) so there are no conflicts.
+Yes, but make sure it does not have Boost in the name. Use the [`author-name` convention](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#what-is-the-policy-on-recipe-name-collisions) so there are no conflicts.
