@@ -63,14 +63,6 @@ diff --git a/src/OpenColorIO/CMakeLists.txt b/src/OpenColorIO/CMakeLists.txt
 index ab9c048..bac5cf7 100755
 --- a/src/OpenColorIO/CMakeLists.txt
 +++ b/src/OpenColorIO/CMakeLists.txt
-@@ -210,6 +210,7 @@ file(GLOB_RECURSE INSTALL_HEADERS "${HEADER_LOCATION}/*.h")
- # notably the documentation.
- set(ABI_HEADER_LOCATION "${CMAKE_BINARY_DIR}/include/OpenColorIO")
- list(APPEND INSTALL_HEADERS ${ABI_HEADER_LOCATION}/OpenColorABI.h)
-+message("aaaaaaaaaaaaaaaaaaaaaaaa ${HEADER_LOCATION}/OpenColorABI.h.in")
- configure_file("${HEADER_LOCATION}/OpenColorABI.h.in" "${ABI_HEADER_LOCATION}/OpenColorABI.h" @ONLY)
- 
- # Built-in configs
 @@ -277,7 +278,7 @@ target_link_libraries(OpenColorIO
          "$<BUILD_INTERFACE:utils::strings>"
          "$<BUILD_INTERFACE:xxHash>"
