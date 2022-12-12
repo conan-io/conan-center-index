@@ -1,0 +1,17 @@
+sources:
+  # Newer versions at the top
+  "0.2.2":
+    url:
+    - "https://github.com/CD3/BoostUnitDefinitions/archive/refs/tags/0.2.2.tar.gz"
+    sha256: "84b374ce94bd4792994205a40e3a92b4d70694203f596c18f00de2520ba55db3"
+# patches:
+#   # Newer versions at the top
+#   "1.1.0":
+#     - patch_file: "patches/0001-fix-cmake.patch"
+#       patch_description: "correct the order of cmake min and project"
+#       patch_type: "backport"
+#       patch_source: "https://github.com/owner/package/pulls/42"
+#     - patch_file: "patches/0002-fix-linux.patch"
+#       patch_description: "add missing header to support linux"
+#       patch_type: "portability"
+#       patch_source: "https://github.com/owner/package/issues/0"
