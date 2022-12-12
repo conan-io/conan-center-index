@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.tools.scm import Version
-from conan.tools.files import apply_conandata_patches, collect_libs, export_conandata_patches, rename, rm, rmdir, mkdir, get
+from conan.tools.files import apply_conandata_patches, collect_libs, export_conandata_patches, rename, rm, rmdir, get
 from conan.errors import ConanInvalidConfiguration
 import glob
 import os
