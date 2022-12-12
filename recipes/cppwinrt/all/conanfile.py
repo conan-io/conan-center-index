@@ -45,6 +45,8 @@ class CppWinRtConan(ConanFile):
 
     def generate(self):
         tc = MSBuildToolchain(self)
+        tc.properties["WindowsTargetPlatformVersion"] = "10.0"
+        tc.properties["WindowsTargetPlatformMinVersion"] = "10.0.17763.0"
         tc.generate()
         tc = MSBuildDeps(self)
         tc.generate()
