@@ -138,7 +138,6 @@ class Open62541Conan(ConanFile):
         "readable_statuscodes": True
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     exports = "submoduledata.yml"
 
     short_paths = True
