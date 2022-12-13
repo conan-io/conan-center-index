@@ -1,6 +1,6 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -170,7 +170,7 @@ if(MSDFGEN_INSTALL)
+@@ -168,7 +168,7 @@ if(MSDFGEN_INSTALL)
      )
  
      if(MSDFGEN_BUILD_MSDFGEN_STANDALONE)

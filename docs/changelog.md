@@ -1,5 +1,15 @@
 # Changelog
 
+### 09-December-2022 - 11:38 CET
+
+- [feature] Add environment variable to build with different Xcode/apple-clang compilers on Macos agents.
+- [feature] Add `MACOSX_DEPLOYMENT_TARGET` and `SDKROOT` env variables to build stages on Macos.
+- [feature] Add `LongPathsEnabled` registry key check on Windows to Validate Infrastructure job.
+- [fix] Fix git user on commits when updating docs for supported platforms and configurations.
+- [fix] Fix getting commit hash when writing GitHub error messages.
+- [fix] Fix Conan v2 inspect command.
+- [fix] Fix condition when waiting for another job to finish.
+
 ### 14-November-2022 - 11:54 CET
 
 - [feature] Disable inactivity count for Access Request job.
