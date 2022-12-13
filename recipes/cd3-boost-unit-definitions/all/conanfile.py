@@ -16,7 +16,7 @@ required_conan_version = ">=1.52.0"
 
 
 class PackageConan(ConanFile):
-    name = "boost-unit-definitions"
+    name = "cd3-boost-unit-definitions"
     description = "A collection of pre-defined types and unit instances for working with Boost.Units quantities."
     # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
     # In case not listed there, use "LicenseRef-<license-file-name>"
