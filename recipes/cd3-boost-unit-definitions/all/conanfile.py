@@ -13,13 +13,9 @@ required_conan_version = ">=1.52.0"
 class PackageConan(ConanFile):
     name = "cd3-boost-unit-definitions"
     description = "A collection of pre-defined types and unit instances for working with Boost.Units quantities."
-    # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
-    # In case not listed there, use "LicenseRef-<license-file-name>"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/CD3/BoostUnitDefinitions"
-    # no "conan" and project name in topics. Use topics from the upstream listed on GH
-    # Keep 'hearder-only' as topic
     topics = ("physical dimensions", "header-only")
     settings = "os", "arch", "compiler", "build_type"  # even for header only
     no_copy_source = True  # do not copy sources to build folder for header only projects, unless, need to apply patches
@@ -28,7 +24,6 @@ class PackageConan(ConanFile):
     def _min_cppstd(self):
         return 14
 
-    # in case the project requires C++14/17/20/... the minimum compiler version should be listed
     @property
     def _compilers_minimum_version(self):
         return {
@@ -39,28 +34,20 @@ class PackageConan(ConanFile):
             "apple-clang": "5.1",
         }
 
-    # no exports_sources attribute, but export_sources(self) method instead
-    # this allows finer grain exportation of patches per version
     def export_sources(self):
-        # export_conandata_patches(self)
         pass
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         basic_layout(self)
 
     def requirements(self):
-        # prefer self.requires method instead of requires attribute
-        # direct dependencies of header only libs are always transitive since they are included in public headers
         self.requires("boost/1.72.0", transitive_headers=True)
 
-    # same package ID for any package
     def package_id(self):
         self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            # validate the minimum cpp standard supported when installing the package. For C++ projects only
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(
             str(self.settings.compiler), False
@@ -74,16 +61,11 @@ class PackageConan(ConanFile):
             )
 
     def source(self):
-        # download source package and extract to source folder
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    # not mandatory when there is no patch, but will suppress warning message about missing build() method
     def build(self):
-        # The attribute no_copy_source should not be used when applying patches in build
-        # apply_conandata_patches(self)
         pass
 
-    # copy all files to the package folder
     def package(self):
         copy(
             self,
@@ -99,11 +81,9 @@ class PackageConan(ConanFile):
         )
 
     def package_info(self):
-        # folders not used for header-only
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
-        # if package provides a CMake config file (package-config.cmake or packageConfig.cmake, with package::package target, usually installed in <prefix>/lib/cmake/<package>/)
         self.cpp_info.set_property("cmake_file_name", "BoostUnitDefinitions")
         self.cpp_info.set_property(
             "cmake_target_name", "BoostUnitDefinitions::BoostUnitDefinitions"
