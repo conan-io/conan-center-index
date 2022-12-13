@@ -58,8 +58,6 @@ class PackageConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        # FIXME: `self.settings` is not available in 2.0 but there are plenty of open issues about
-        # the migration point. For now we are only going to write valid 1.x recipes until we have a proper answer
         if self.settings.compiler.get_safe("cppstd"):
             # validate the minimum cpp standard supported when installing the package. For C++ projects only
             check_min_cppstd(self, self._min_cppstd)
@@ -74,7 +72,7 @@ class PackageConan(ConanFile):
 
     def source(self):
         # download source package and extract to source folder
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     # not mandatory when there is no patch, but will suppress warning message about missing build() method
     def build(self):

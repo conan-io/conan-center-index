@@ -52,10 +52,10 @@ class OpenTelemetryCppConan(ConanFile):
 
     def requirements(self):
         self.requires("abseil/20220623.0")
-        self.requires("grpc/1.48.0")
-        self.requires("libcurl/7.85.0")
+        self.requires("grpc/1.50.1")
+        self.requires("libcurl/7.86.0")
         self.requires("nlohmann_json/3.11.2")
-        self.requires("openssl/1.1.1q")
+        self.requires("openssl/1.1.1s")
         if Version(self.version) <= "1.4.1":
             self.requires("opentelemetry-proto/0.11.0")
         else:

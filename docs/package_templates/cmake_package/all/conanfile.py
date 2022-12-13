@@ -75,17 +75,17 @@ class PackageConan(ConanFile):
 
     def validate(self):
         # validate the minimum cpp standard supported. For C++ projects only
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 191)
         if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
         # in case it does not work in another configuration, it should validated here too
-        if is_msvc(self) and self.info.options.shared:
+        if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
@@ -93,7 +93,7 @@ class PackageConan(ConanFile):
         self.tool_requires("tool/x.y.z")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
