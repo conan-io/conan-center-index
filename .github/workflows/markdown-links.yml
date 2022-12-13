@@ -1,6 +1,6 @@
 name: Check Markdown links
 
-on: [push,  pull_request]
+on: [push, pull_request]
 
 env:
   PYVER: "3.8"
