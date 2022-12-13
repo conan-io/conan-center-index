@@ -1,8 +1,9 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conans.tools import stdcpp_library
+from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, collect_libs, rm, rename
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -64,13 +65,20 @@ class ProjConan(ConanFile):
             self.requires("libcurl/7.85.0")
 
     def build_requirements(self):
-        self.tool_requires("sqlite3/3.40.0")
+        if hasattr(self, "settings_build") and cross_building(self):
+            self.tool_requires("sqlite3/3.40.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-
     def generate(self):
+        if hasattr(self, "settings_build") and cross_building(self):
+            env = VirtualBuildEnv(self)
+            env.generate()
+        else:
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         tc = CMakeToolchain(self)
         tc.variables["USE_THREAD"] = self.options.threadsafe
         tc.variables["BUILD_CCT"] = self.options.build_executables
@@ -95,17 +103,12 @@ class ProjConan(ConanFile):
         if Version(self.version) >= "8.1.0":
             tc.variables["NLOHMANN_JSON_ORIGIN"] = "external"
         tc.variables["CMAKE_MACOSX_BUNDLE"] = False
-
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-
         tc.generate()
 
-        tc = CMakeDeps(self)
-        tc.generate()
-
-        tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -134,7 +137,10 @@ class ProjConan(ConanFile):
             else:
                 cmake_sqlite_call = "generate_proj_db.cmake"
                 pattern = "\"${EXE_SQLITE3}\""
-            lib_paths = self.dependencies.build["sqlite3"].cpp_info.libdirs
+            if hasattr(self, "settings_build") and cross_building(self):
+                lib_paths = self.dependencies.build["sqlite3"].cpp_info.libdirs
+            else:
+                lib_paths = self.dependencies["sqlite3"].cpp_info.libdirs
             replace_in_file(self,
                 os.path.join(self.source_folder, "data", cmake_sqlite_call),
                 f"COMMAND {pattern}",
@@ -144,7 +150,6 @@ class ProjConan(ConanFile):
         # unvendor nlohmann_json
         if Version(self.version) < "8.1.0":
             rmdir(self, os.path.join(self.source_folder, "include", "proj", "internal", "nlohmann"))
-
 
     def build(self):
         self._patch_sources()
