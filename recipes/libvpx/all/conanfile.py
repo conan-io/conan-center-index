@@ -203,6 +203,16 @@ class LibVPXConan(ConanFile):
         autotools.configure()
         autotools.make()
 
+        # Helpful lines for recipe debugging.  The configure script is not real autotools and is a pain to debug.
+        # replace_in_file(self, os.path.join(self.source_folder, "configure"), "#!/bin/sh", "#!/bin/sh -x\nprintenv")
+        # autotools = Autotools(self)
+        # autotools.configure()
+        # self.output.info("config.log file generated is:")
+        # self.output.info(open(os.path.join(self.build_folder, "config.log")).read())
+        # self.output.info("mk file generated is:")
+        # self.output.info(open(os.path.join(self.build_folder, "libs-x86_64-linux-gcc.mk")).read())
+        # autotools.make("SHELL='sh -x'")
+
     def package(self):
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
