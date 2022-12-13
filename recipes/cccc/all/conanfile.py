@@ -39,8 +39,10 @@ class CCCCConan(ConanFile):
             files.copy(self,patch["patch_file"],self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+        pass 
+    
+    def configure(self):
+        pass
     
     def validate(self):
         if (not is_msvc(self) and (shutil.which("g++") == None)):
