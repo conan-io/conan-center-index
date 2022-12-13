@@ -19,25 +19,21 @@ class MqttCppConan(ConanFile):
 
     options = {
         "cpp17": [True, False],
-        "fPIC": [True, False],
-        "with_static_boost": [True, False],
-        "with_static_openssl": [True, False],
         "with_tls": [True, False],
         "with_websocket": [True, False],
         "mqtt_always_send_reason_code": [True, False],
         "utf8_string": [True, False],
         "with_logs": [True, False],
+        "with_tuple_any_workaround": [True, False],
     }
     default_options = {
         "cpp17":  False,
-        "fPIC":  True,
-        "with_static_boost":  False,
-        "with_static_openssl":  False,
-        "with_tls":  False,
-        "with_websocket":  False,
+        "with_tls":  True,
+        "with_websocket":  True,
         "mqtt_always_send_reason_code":  True,
         "utf8_string":  False,
-        "with_logs": False
+        "with_logs": False,
+        "with_tuple_any_workaround":False
     }
 
     def source(self):
@@ -48,13 +44,9 @@ class MqttCppConan(ConanFile):
     def _min_cppstd(self):
         return 11
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def requirements(self):
         self.requires("boost/1.80.0")
-        if self.options.with_tls or self.options.with_websocket:
+        if self.options.with_tls:
             self.requires("openssl/1.1.1s")
             self.requires("zlib/1.2.13")
 
@@ -77,14 +69,11 @@ class MqttCppConan(ConanFile):
         tc.variables["MQTT_BUILD_EXAMPLES"] = False
         tc.variables["MQTT_BUILD_TESTS"] = False
         tc.variables["MQTT_ALWAYS_SEND_REASON_CODE"] = self.options.mqtt_always_send_reason_code
-        tc.variables["MQTT_USE_STATIC_BOOST"] = self.options.with_static_boost
-        if self.options.with_static_boost:
-            openssl = self.dependencies["boost"]
-            openssl.shared = True
-        tc.variables["MQTT_USE_STATIC_OPENSSL"] = self.options.with_static_openssl
-        if self.options.with_static_openssl:
-            openssl = self.dependencies["openssl"]
-            openssl.shared = False
+        tc.variables["MQTT_USE_STATIC_BOOST"] = not self.dependencies.direct_host["boost"].options.get_safe(
+            "shared")
+        if self.options.with_tls:
+            tc.variables["MQTT_USE_STATIC_OPENSSL"] = not self.dependencies["openssl"].options.get_safe(
+                "shared")
         tc.variables["MQTT_USE_TLS"] = self.options.with_tls
         tc.variables["MQTT_USE_WS"] = self.options.with_websocket
         if self.options.get_safe("cpp17"):
@@ -105,12 +94,31 @@ class MqttCppConan(ConanFile):
                   src=os.path.join(self.source_folder, "include"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "mqtt_cpp")
+        if self.options.mqtt_always_send_reason_code:
+            self.cpp_info.defines.append("MQTT_ALWAYS_SEND_REASON_CODE")
+        if self.options.with_tls:
+            self.cpp_info.defines.append("MQTT_USE_TLS")
+        if self.options.with_websocket:
+            self.cpp_info.defines.append("MQTT_USE_WS")
+        if self.options.with_logs:
+            self.cpp_info.defines.append("MQTT_USE_LOG")
+        if self.options.cpp17:
+            self.cpp_info.defines.append("MQTT_STD_VARIANT")
+            self.cpp_info.defines.append("MQTT_STD_OPTIONAL")
+            self.cpp_info.defines.append("MQTT_STD_STRING_VIEW")
+            self.cpp_info.defines.append("MQTT_STD_ANY")
+            self.cpp_info.defines.append("MQTT_STD_SHARED_PTR_ARRAY")
+            self.cpp_info.defines.append("MQTT_USE_LOG")
+        if self.options.with_tuple_any_workaround:
+            self.cpp_info.defines.append("MQTT_DISABLE_LIBSTDCXX_TUPLE_ANY_WORKAROUND")
+
+        self.cpp_info.set_property("cmake_file_name", "mqtt_cpp_iface")
+        self.cpp_info.set_property("cmake_file_name", "mqtt_cpp_iface")
         self.cpp_info.set_property(
             "cmake_target_name", "mqtt_cpp_iface::mqtt_cpp_iface")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "mqtt_cpp"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "mqtt_cpp"
-        self.cpp_info.names["cmake_find_package"] = "mqtt_cpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "mqtt_cpp"
+        self.cpp_info.filenames["cmake_find_package"] = "mqtt_cpp_iface"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "mqtt_cpp_iface"
+        self.cpp_info.names["cmake_find_package"] = "mqtt_cpp_iface"
+        self.cpp_info.names["cmake_find_package_multi"] = "mqtt_cpp_iface"
