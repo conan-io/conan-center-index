@@ -1,8 +1,14 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.scm import Version
 import os
-import contextlib
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibdisasmConan(ConanFile):
@@ -10,11 +16,10 @@ class LibdisasmConan(ConanFile):
     description = "The libdisasm library provides basic disassembly of Intel x86 instructions from a binary stream."
     homepage = "http://bastard.sourceforge.net/libdisasm.html"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "libdisasm", "disassembler", "x86", "asm")
+    topics = ("disassembler", "x86", "asm")
     license = "MIT"
+
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake"
-    exports_sources = "patches/**"
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
@@ -24,12 +29,6 @@ class LibdisasmConan(ConanFile):
         "shared": False,
     }
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
@@ -38,90 +37,79 @@ class LibdisasmConan(ConanFile):
     def _user_info_build(self):
         return getattr(self, "user_info_build", self.deps_user_info)
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        self.tool_requires("libtool/2.4.7")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        env = {}
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                env.update({
-                    "CC": "cl -nologo",
-                    "CXX": "cl -nologo",
-                    "CPP": "cl -E -nologo",
-                    "AR": "{} lib".format(self._user_info_build["automake"].ar_lib.replace("\\", "/")),
-                    "LD": "link -nologo",
-                    "NM": "dumpbin -symbols",
-                    "STRIP": ":",
-                    "RANLIB": ":",
-                })
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        yes_no = lambda v: "yes" if v else "no"
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.libs = []
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) >= "12":
-            self._autotools.flags.append("-FS")
-
-        conf_args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-        ]
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
+        tc = AutotoolsToolchain(self)
+        if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
+           (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+            tc.extra_cflags.append("-FS")
+        env = tc.environment()
+        if is_msvc(self):
+            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
+            env.define("CC", "cl -nologo")
+            env.define("CXX", "cl -nologo")
+            env.define("CPP", "cl -E -nologo")
+            env.define("LD", "link -nologo")
+            env.define("AR", f"{ar_wrapper} lib")
+            env.define("NM", "dumpbin -symbols")
+            env.define("STRIP", ":")
+            env.define("RANLIB", ":")
+        tc.generate(env)
 
     def build(self):
-        for patch in self.conan_data["patches"].get(self.version, []):
-            tools.patch(**patch)
-        with tools.chdir(self._source_subfolder):
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make()
-            if self.settings.os != "Windows":
-                autotools.make(args=["-C", "x86dis"])
+        apply_conandata_patches(self)
+        autotools = Autotools(self)
+        autotools.autoreconf()
+        autotools.configure()
+        autotools.make()
+        if self.settings.os != "Windows":
+            autotools.make(args=["-C", "x86dis"])
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
-            if self.settings.os != "Windows":
-                autotools.install(args=["-C", "x86dis"])
-
-        os.unlink(os.path.join(self.package_folder, "lib", "libdisasm.la"))
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
+        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        if self.settings.os != "Windows":
+            autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}", "-C", "x86dis"])
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        fix_apple_shared_install_name(self)
+        if is_msvc(self) and self.options.shared:
             dlllib = os.path.join(self.package_folder, "lib", "disasm.dll.lib")
             if os.path.exists(dlllib):
-                tools.rename(dlllib, os.path.join(self.package_folder, "lib", "disasm.lib"))
+                rename(self, dlllib, os.path.join(self.package_folder, "lib", "disasm.lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["disasm"]
 
         if self.settings.os != "Windows":
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

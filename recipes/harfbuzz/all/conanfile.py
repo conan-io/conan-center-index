@@ -95,7 +95,7 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_icu:
             self.requires("icu/71.1")
         if self.options.with_glib:
-            self.requires("glib/2.74.1")
+            self.requires("glib/2.75.0")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -124,7 +124,8 @@ class HarfbuzzConan(ConanFile):
             "freetype": is_enabled(self.options.with_freetype),
             "gdi": is_enabled(self.options.get_safe("with_gdi")),
             "directwrite": is_enabled(self.options.get_safe("with_directwrite")),
-            "gobject": is_enabled(can_run(self)),
+            "gobject": is_enabled(can_run(self) and self.options.with_glib),
+            "introspection": is_enabled(False),
             "tests": "disabled",
             "docs": "disabled",
             "benchmark": "disabled",
@@ -140,9 +141,10 @@ class HarfbuzzConan(ConanFile):
                   destination=self.source_folder, strip_root=True)
 
     def build_requirements(self):
-        self.tool_requires("meson/0.63.3")
+        self.tool_requires("meson/0.64.1")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
+        self.tool_requires("glib/2.75.0")
 
     def build(self):
         apply_conandata_patches(self)

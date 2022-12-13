@@ -338,9 +338,7 @@ The duality creates a heterogeneous way of solving dependencies, making it diffi
 
 #### **<a name="KB-H056">#KB-H056</a>: "LICENSE PUBLIC DOMAIN"**
 
-[Public Domain](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) is not a license by itself, but consists of all the creative work to which
-no exclusive intellectual property rights apply. If a project is under Public Domain and there is no license listed, the
-[Unlicense](https://spdx.org/licenses/Unlicense) should be used as described in the [FAQ](faqs.md#what-license-should-i-use-for-public-domain).
+See [License Attribute](adding_packages/conanfile_attributes.md#license-attribute) for details.
 
 #### **<a name="KB-H057">#KB-H057</a>: "TOOLS RENAME"**
 
@@ -447,7 +445,7 @@ class SomeRecipe(ConanFile):
 
 There is the case when the package is header-only, but the options affects the generated artifact, (e.g. kanguru, pagmo2 ...), so you need to use `self.info.settings.clear()` instead.
 
-- For "tool" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/cmake/3.x.x/conanfile.py#L104-L105)) which only provide binaries, see [our packing policy](adding_packages/packaging_policy.md#settings) for more, should do as follows:
+- For "tool" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/cmake/3.x.x/conanfile.py#L104-L105)) which only provide binaries, see [our packing policy](adding_packages/conanfile_attributes.md#settings) for more, should do as follows:
 
     ```python
         def package_id(self):
@@ -470,6 +468,10 @@ Pylint is executed by default over all `conanfile.py` files in ConanCenterIndex 
 #### **<a name="KB-H073">#KB-H073</a>: "TEST V1 PACKAGE FOLDER"**
 
 The legacy content in test_package should not be removed. Instead, rename that folder to `test_v1_package` and create a new `test_package` folder following the [file structure](adding_packages/README.md#recipe-files-structure) related to Conan v2 and v1 compatibility. Also, you can obtain good examples of Conan v2 test packages from the [template packages](package_templates/README.md) folder.
+
+#### **<a name="KB-H075">#KB-H075</a>: "REQUIREMENT OVERRIDE PARAMETER"**
+
+The [self.requires()](https://docs.conan.io/en/latest/reference/conanfile/methods.html#requirements) allows to override a dependency version, forcing to use that version imposed by the recipe only. As a side-effect, dependencies can use different versions of the same project at the same package, which may cause unpredicted errors, like ABI incompatibility. For that reason, the `override` parameter is forbidden and should not be used. Instead, all dependencies should align their package versions, even when it's necessary to open more pull requests to update dependency versions.
 
 ## Deprecated errors
 

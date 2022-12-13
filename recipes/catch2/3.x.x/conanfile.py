@@ -47,7 +47,7 @@ class Catch2Conan(ConanFile):
 
     @property
     def _default_reporter_str(self):
-        return '"{}"'.format(str(self.options.default_reporter).strip('"'))
+        return str(self.options.default_reporter).strip('"')
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -146,11 +146,14 @@ class Catch2Conan(ConanFile):
         self.cpp_info.components["catch2_with_main"].system_libs = ["log"] if self.settings.os == "Android" else []
         self.cpp_info.components["catch2_with_main"].set_property("cmake_target_name", "Catch2::Catch2WithMain")
         self.cpp_info.components["catch2_with_main"].set_property("pkg_config_name", "catch2-with-main")
-        defines = self.cpp_info.components["catch2_with_main"].defines
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["catch2_with_main"].system_libs.append("m")
+        defines = []
         if self.options.with_prefix:
             defines.append("CATCH_CONFIG_PREFIX_ALL")
         if self.options.default_reporter:
             defines.append(f"CATCH_CONFIG_DEFAULT_REPORTER={self._default_reporter_str}")
+        self.cpp_info.components["catch2_with_main"].defines = defines
 
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.filenames["cmake_find_package"] = "Catch2"

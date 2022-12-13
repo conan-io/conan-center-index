@@ -97,8 +97,9 @@ For ConanCenter Hook errors, go to the [Error Knowledge Base](error_knowledge_ba
 To test with the same environment, the [build images](supported_platforms_and_configurations.md#build-images) are available.
 Instructions for using these images can be found in [Testing more environments](#testing-more-environments) section.
 
-In ConanCenterIndex, the most common failure point is upstream
-build script that are tailored to their specific use cases. It's not uncommon to [patch build scripts](adding_packages/policy_patching.md#policy-about-patching) but make sure to read the [patch policy](adding_packages/policy_patching.md). You are encouraged to submit pull requests upstream.
+In ConanCenterIndex, the most common failure point is upstream build scripts tailored to their specific use cases.
+It's not uncommon to [patch build scripts](adding_packages/sources_and_patches.md#rules) but make sure to read the
+[patch policy](adding_packages/sources_and_patches.md#policy-about-patching). You are encouraged to submit pull requests upstream.
 
 ## Running the Python Linters
 
@@ -133,8 +134,8 @@ It is possible to run the linter locally the same way it is being run [using Git
 
 There's two levels of YAML validation, first is syntax and the second is schema.
 The style rules are located in [`linter/yamllint_rules.yml`](../linter/yamllint_rules.yml) and are used to ensure consistence.
-The [`config.yml](how_to_add_packages.md#configyml) is required for the build infrastructure and the
-[`conandata.yml` patch fields](conandata_yml_format.md#patches-fields) have required elements that are enforced with
+The [`config.yml`](adding_packages/README.md#configyml) is required for the build infrastructure and the
+[`conandata.yml` patch fields](adding_packages/conandata_yml_format.md#patches-fields) have required elements that are enforced with
 schema validation. There's are to encourage the best possible quality of recipes and make reviewing faster.
 
 ### Yamllint

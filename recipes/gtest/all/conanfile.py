@@ -1,14 +1,13 @@
-import os
-
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, replace_in_file, rm, rmdir
-from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
+import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class GTestConan(ConanFile):
@@ -25,7 +24,7 @@ class GTestConan(ConanFile):
         "build_gmock": [True, False],
         "no_main": [True, False],
         "hide_symbols": [True, False],
-        "debug_postfix": ["ANY", "deprecated"], # option that no longer exist
+        "debug_postfix": ["ANY"],
     }
     default_options = {
         "shared": False,
@@ -33,7 +32,7 @@ class GTestConan(ConanFile):
         "build_gmock": True,
         "no_main": False,
         "hide_symbols": False,
-        "debug_postfix": "deprecated", # option that no longer exist
+        "debug_postfix": "d",
     }
 
     @property
@@ -60,30 +59,18 @@ class GTestConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "1.12.0" and self.settings.build_type != "Debug":
+        if Version(self.version) >= "1.12.0" or self.settings.build_type != "Debug":
             del self.options.debug_postfix
-
-        if Version(self.version) < "1.12.0" and self.settings.build_type == "Debug":
-            if self.options.debug_postfix == "deprecated":
-                # in 1.10.0,  use 'd' as default
-                self.default_options["debug_postfix"] = "d"
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        if Version(self.version) >= "1.12.0":
-            if self.options.debug_postfix != "deprecated":
-                self.output.warn(f"{self.ref}:debug_postfix is deprecated in 1.12.0.")
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def package_id(self):
         del self.info.options.no_main # Only used to expose more targets
-        del self.info.options.debug_postfix # deprecated option that no longer exist
 
     def validate(self):
         if self.info.options.shared and (is_msvc(self) or self._is_clang_cl) and is_msvc_static_runtime(self):
@@ -154,10 +141,7 @@ class GTestConan(ConanFile):
 
     @property
     def _postfix(self):
-        # In 1.12.0, gtest remove debug postfix.
-        if Version(self.version) >= "1.12.0":
-            return ""
-        return self.options.debug_postfix if self.settings.build_type == "Debug" else ""
+        return self.options.get_safe("debug_postfix", "")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
