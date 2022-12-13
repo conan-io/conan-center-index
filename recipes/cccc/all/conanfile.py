@@ -44,7 +44,7 @@ class CCCCConan(ConanFile):
     
     def validate(self):
         if (not is_msvc(self) and (shutil.which("g++") == None)):
-            raise ConanInvalidConfiguration(f"{self.ref} requires msvc or"\
+            raise ConanInvalidConfiguration(f"{self.ref} requires msvc or "\
                                             "g++")
 
     def source(self):
@@ -54,7 +54,7 @@ class CCCCConan(ConanFile):
     def build(self):
         if is_msvc(self):
             self.run(f"{self._msbuild_bat_file} --clean")
-        elif (shutil.which("make") != None):
+        else:
             self.run("make cccc")
 
     def package(self):
