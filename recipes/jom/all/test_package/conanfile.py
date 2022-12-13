@@ -10,6 +10,9 @@ class TestPackageConan(ConanFile):
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
 
+    def build(self):
+        pass
+
     def test(self):
         if can_run(self):
             self.run("jom /VERSION")
