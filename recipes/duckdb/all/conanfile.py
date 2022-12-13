@@ -7,7 +7,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class DuckdbConan(ConanFile):
     name = "duckdb"
@@ -70,10 +70,7 @@ class DuckdbConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -83,7 +80,7 @@ class DuckdbConan(ConanFile):
         if self.options.with_odbc:
             self.requires("odbc/2.3.11")
         if self.options.with_httpfs:
-            self.requires("openssl/3.0.5")
+            self.requires("openssl/3.0.7")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
