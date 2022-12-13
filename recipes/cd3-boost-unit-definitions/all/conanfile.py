@@ -47,7 +47,7 @@ class PackageConan(ConanFile):
 
     def layout(self):
         # src_folder must use the same source folder name the project
-        cmake_layout(self)
+        basic_layout(self)
 
     def requirements(self):
         # prefer self.requires method instead of requires attribute
