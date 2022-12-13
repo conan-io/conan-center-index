@@ -2,7 +2,7 @@
 
 int main()
 {
-    puts("Bincrafters\n");
+    puts("Hello, World!\n");
     return 0;
 }
 

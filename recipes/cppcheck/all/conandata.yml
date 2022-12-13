@@ -1,22 +1,38 @@
 sources:
+  "2.9.2":
+    url: "https://github.com/danmar/cppcheck/archive/2.9.2.tar.gz"
+    sha256: "93920d24d4442856bf7916ee0e3fc31308bc23948e7029b4fd332e01cac63c3e"
+  "2.8.2":
+    url: "https://github.com/danmar/cppcheck/archive/2.8.2.tar.gz"
+    sha256: "30ba99ab54089c44b83f02e2453da046a7edff5237950d4A0eb1eba4afcb4f45"
   "2.7.5":
     url: "https://github.com/danmar/cppcheck/archive/2.7.5.tar.gz"
     sha256: "6c7ac29e57fa8b3ac7be224510200e579d5a90217e2152591ef46ffc947d8f78"
-  "2.7.4":
-    url: "https://github.com/danmar/cppcheck/archive/2.7.4.tar.gz"
-    sha256: "f0558c497b7807763325f3a821f1c72b743e5d888b037b8d32157dd07d6c26e1"
 patches:
+  "2.9.2":
+    - patch_file: "patches/0001-cli-remove-dmake-cmake.patch"
+      patch_description: "Remove dmake tool from target ALL"
+      patch_type: "portability"
+    - patch_file: "patches/0002-htmlreport-python3.patch"
+      patch_description: "Use Python 3 in Shebang Header"
+      patch_type: "portability"
+    - patch_file: "patches/0003-pcre-debuglib-name.patch"
+      patch_description: "Consider the Debug suffix for Windows"
+      patch_type: "portability"
+  "2.8.2":
+    - patch_file: "patches/0001-cli-remove-dmake-cmake-2.8.patch"
+      patch_description: "Remove dmake tool from target ALL"
+      patch_type: "portability"
+    - patch_file: "patches/0002-htmlreport-python3.patch"
+      patch_description: "Use Python 3 in Shebang Header"
+      patch_type: "portability"
+    - patch_file: "patches/0003-pcre-debuglib-name.patch"
+      patch_description: "Consider the Debug suffix for Windows"
+      patch_type: "portability"
   "2.7.5":
-    - patch_file: "patches/0001-cmake-source-dir-2.5.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-htmlreport-python3.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0003-handle-exename-on-macos.patch"
-      base_path: "source_subfolder"
-  "2.7.4":
-    - patch_file: "patches/0001-cmake-source-dir-2.5.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-htmlreport-python3.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0003-handle-exename-on-macos.patch"
-      base_path: "source_subfolder"
+      patch_description: "Use Python 3 in Shebang Header"
+      patch_type: "portability"
+    - patch_file: "patches/0003-pcre-debuglib-name-2.7.patch"
+      patch_description: "Consider the Debug suffix for Windows"
+      patch_type: "portability"

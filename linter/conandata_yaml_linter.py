@@ -30,7 +30,7 @@ def main():
             "patch_file": Str(),
             "patch_description": Str(),
             "patch_type": Enum(
-                ["official", "conan", "portability", "backport", "vulnerability"]
+                ["official", "conan", "portability", "bugfix", "vulnerability"]
             ),
             Optional("patch_source"): Str(),
             Optional("sha256"): Str(),  # Really uncommon
@@ -57,7 +57,7 @@ def main():
                 for i, patch in enumerate(patches):
                     type = parsed["patches"][version][i]["patch_type"]
                     if (
-                        type in ["official", "backport", "vulnerability"]
+                        type in ["official", "bugfix", "vulnerability"]
                         and not "patch_source" in patch
                     ):
                         print(

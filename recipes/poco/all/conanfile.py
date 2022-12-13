@@ -1,13 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, VCVars
 from conan.tools.scm import Version
 from collections import namedtuple
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class PocoConan(ConanFile):
@@ -77,8 +77,7 @@ class PocoConan(ConanFile):
     del comp
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -102,7 +101,7 @@ class PocoConan(ConanFile):
         if self.options.enable_active_record != "deprecated":
             self.output.warn("enable_active_record option is deprecated, use 'enable_activerecord' instead")
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if not self.options.enable_xml:
             util_dependencies = self._poco_component_tree["Util"].dependencies
             self._poco_component_tree["Util"] = self._poco_component_tree["Util"]._replace(dependencies = [x for x in util_dependencies if x != "XML"])
@@ -121,23 +120,23 @@ class PocoConan(ConanFile):
             self.requires("pcre/8.45")
         else:
             self.requires("pcre2/10.40")
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         if self.options.enable_xml:
-            self.requires("expat/2.4.8")
+            self.requires("expat/2.5.0")
         if self.options.enable_data_sqlite:
-            self.requires("sqlite3/3.39.3")
+            self.requires("sqlite3/3.39.4")
         if self.options.enable_apacheconnector:
             self.requires("apr/1.7.0")
             self.requires("apr-util/1.6.1")
         if self.options.enable_netssl or self.options.enable_crypto or \
            self.options.get_safe("enable_jwt"):
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
         if self.options.enable_data_odbc and self.settings.os != "Windows":
-            self.requires("odbc/2.3.9")
+            self.requires("odbc/2.3.11")
         if self.options.get_safe("enable_data_postgresql"):
-            self.requires("libpq/14.2")
+            self.requires("libpq/14.5")
         if self.options.get_safe("enable_data_mysql"):
-            self.requires("libmysqlclient/8.0.29")
+            self.requires("libmysqlclient/8.0.30")
 
     def package_id(self):
         del self.info.options.enable_active_record

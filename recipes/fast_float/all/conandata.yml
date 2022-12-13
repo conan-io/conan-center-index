@@ -1,4 +1,16 @@
 sources:
+  "3.8.1":
+    url: "https://github.com/fastfloat/fast_float/archive/v3.8.1.tar.gz"
+    sha256: "823d7f8df7fadc3ed24738eb0cf4a40f0450068edd92805698916be40966d87a"
+  "3.8.0":
+    url: "https://github.com/fastfloat/fast_float/archive/v3.8.0.tar.gz"
+    sha256: "8cb82dc35da3b745b3beb1a9974402307c9ded0e875aea077dbb3ea63833dd2e"
+  "3.7.0":
+    url: "https://github.com/fastfloat/fast_float/archive/v3.7.0.tar.gz"
+    sha256: "4a30c43d14bbc979130a7807aecb2de5ff513951dd99a8b77cc32acfc610f850"
+  "3.6.0":
+    url: "https://github.com/fastfloat/fast_float/archive/v3.6.0.tar.gz"
+    sha256: "0852175e5ebf2b59bcde9c3be2ccd50441f2997350884652302d034785a4fbf5"
   "3.5.1":
     url: "https://github.com/fastfloat/fast_float/archive/v3.5.1.tar.gz"
     sha256: "8558bf9c66ccd2f7d03c94461a107f49ad9cf6e4f6c0c84e148fec0aa32b4dd9"

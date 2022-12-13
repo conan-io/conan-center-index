@@ -1,0 +1,46 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.1)
++cmake_minimum_required(VERSION 3.8)
+ 
+ project(hydrogen LANGUAGES C)
+ 
+@@ -39,6 +39,7 @@ set(arduino_files "library.properties")
+ 
+ # Compile options
+ 
++if(0)
+ get_setting(target_arch STRING "Target system architecture (fed to the compiler's -march=XXX).")
+ if(NOT target_arch AND NOT CMAKE_CROSSCOMPILING)
+   set(target_arch native)
+@@ -84,6 +85,7 @@ set(compile_options
+             #   unsigned"
+     /wd4310 # * suppress warning "cast truncates constant value"
+     >)
++endif()
+ 
+ # Prefix project files with the project root
+ 
+@@ -106,6 +108,7 @@ set(targets_export_name "${PROJECT_NAME}-targets")
+ 
+ install(TARGETS "${PROJECT_NAME}"
+         EXPORT "${targets_export_name}"
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+         LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+         ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+ 
+@@ -134,6 +137,8 @@ install(FILES "${config_file}" DESTINATION "${install_config_dir}")
+ 
+ export(EXPORT "${targets_export_name}" FILE "${targets_export_file}" NAMESPACE "${PROJECT_NAME}::")
+ 
++target_compile_features(${PROJECT_NAME} PUBLIC c_std_99)
++if(0)
+ export(PACKAGE "${PROJECT_NAME}")
+ 
+ # Tests
+@@ -191,3 +196,4 @@ add_custom_command(OUTPUT "${arduino_package_file}"
+                    VERBATIM)
+ 
+ add_custom_target("${PROJECT_NAME}-arduino-package" DEPENDS "${arduino_package_file}" VERBATIM)
++endif()

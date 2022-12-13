@@ -1,10 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.apple import is_apple_os
 import os
 
 required_conan_version = ">=1.52.0"
@@ -73,6 +74,26 @@ class ScreenCaptureLiteConan(ConanFile):
         if self.info.settings.compiler == "clang" and self.info.settings.compiler.get_safe("libcxx") == "libstdc++":
             raise ConanInvalidConfiguration(f"{self.ref} does not support clang with libstdc++")
 
+        # Since 17.1.451, screen_capture_lite uses CGPreflightScreenCaptureAccess which is provided by macOS SDK 11 later.
+        if Version(self.version) >= "17.1.451" and \
+            is_apple_os(self) and Version(self.info.settings.compiler.version) <= "11":
+            raise ConanInvalidConfiguration(f"{self.ref} requires CGPreflightScreenCaptureAccess which support macOS SDK 11 later.")
+
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output=output)
+            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
+    def build_requirements(self):
+        if Version(self.version) >= "17.1.596" and not self._cmake_new_enough("3.16"):
+            self.tool_requires("cmake/3.25.0")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
@@ -82,6 +103,9 @@ class ScreenCaptureLiteConan(ConanFile):
         if is_msvc(self):
             # fix "error C2039: 'CheckForDuplicateEntries': is not a member of 'Microsoft::WRL::Details'"
             tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0.18362.0"
+        if Version(self.version) >= "17.1.613":
+            tc.variables["BUILD_CSHARP"] = False
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -99,6 +123,7 @@ class ScreenCaptureLiteConan(ConanFile):
         cmake.install()
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["screen_capture_lite_shared" if self.options.shared else "screen_capture_lite_static"]
