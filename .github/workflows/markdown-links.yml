@@ -1,38 +1,25 @@
 name: Check Markdown links
 
-on: [push, pull_request]
+on: push
 
 env:
   PYVER: "3.8"
 
 jobs:
-  markdown-link-check-push:
-    if: github.event_name == 'push' && github.repository_owner != 'conan-io' # We do not want to see red in CCI
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Get changed files
-      uses: ./.github/actions/pr_changed_files
-      id: changed_files
-      with:
-        files: |
-          docs/**
-    - uses: gaurav-nelson/github-action-markdown-link-check@v1
-      if: steps.changed_files.outputs.any_changed == 'true'
-      with:
-        config-file: .github/workflows/mlc_config.json
-
   markdown-link-check-pr:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
     - name: Get changed files
       uses: ./.github/actions/pr_changed_files
       id: changed_files
       with:
         files: |
           docs/**
+          README
+          CONTRIBUTING.md
+    - uses: actions/checkout@v3
+      if: steps.changed_files.outputs.any_changed == 'true'
     - uses: gaurav-nelson/github-action-markdown-link-check@v1
       if: steps.changed_files.outputs.any_changed == 'true'
       with:
