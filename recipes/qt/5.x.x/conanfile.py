@@ -1447,7 +1447,7 @@ Examples = bin/datadir/examples""")
                 _add_build_modules_for_component(req)
             build_modules_list.extend(build_modules.pop(component, []))
 
-        for c in self.cpp_info.components:
+        for c in list(self.cpp_info.components.keys()):
             _add_build_modules_for_component(c)
 
         self.cpp_info.set_property("cmake_build_modules", build_modules_list)
