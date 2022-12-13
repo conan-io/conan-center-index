@@ -53,9 +53,9 @@ class CCCCConan(ConanFile):
 
     def build(self):
         if is_msvc(self):
-            os.system(f"{self._msbuild_bat_file} --clean")
+            self.run(f"{self._msbuild_bat_file} --clean")
         elif (shutil.which("make") != None):
-            os.system("make cccc")
+            self.run("make cccc")
 
     def package(self):
         files.copy(self, "cccc", self._cccc_binary_folder, self._bin_package_folder)
