@@ -17,8 +17,6 @@ jobs:
       with:
         files: |
           docs/**
-          README
-          CONTRIBUTING.md
     - uses: gaurav-nelson/github-action-markdown-link-check@v1
       if: steps.changed_files.outputs.any_changed == 'true'
       with:
@@ -35,8 +33,6 @@ jobs:
       with:
         files: |
           docs/**
-          README
-          CONTRIBUTING.md
     - uses: gaurav-nelson/github-action-markdown-link-check@v1
       if: steps.changed_files.outputs.any_changed == 'true'
       with:
