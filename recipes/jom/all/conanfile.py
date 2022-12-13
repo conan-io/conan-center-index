@@ -44,8 +44,8 @@ class JomInstallerConan(ConanFile):
 
         bin_folder = os.path.join(self.package_folder, "bin")
         # In case need to find packaged tools when building a package
-        self.buildenv_info.append("PATH", bin_folder)
+        self.buildenv_info.prepend_path("PATH", bin_folder)
         # In case need to find packaged tools at runtime
-        self.runenv_info.append("PATH", bin_folder)
+        self.runenv_info.prepend_path("PATH", bin_folder)
         # TODO: Legacy, to be removed on Conan 2.0
         self.env_info.PATH.append(bin_folder)
