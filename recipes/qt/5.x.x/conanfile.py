@@ -771,7 +771,7 @@ class QtConan(ConanFile):
                         save(self, ".qmake.stash" , "")
                         save(self, ".qmake.super" , "")
 
-                    self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)), run_environment=True)
+                    self.run("%s %s" % (os.path.join(self.source_folder, "qt5", "configure"), " ".join(args)), run_environment=True)
                     if self._settings_build.os == "Macos":
                         save(self, "bash_env", 'export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
                     with tools.environment_append({
