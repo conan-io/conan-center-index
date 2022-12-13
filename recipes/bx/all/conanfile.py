@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.files import copy, get, rename
 from conan.tools.build import check_min_cppstd
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, check_min_vs
+from conan.tools.microsoft import is_msvc, check_min_vs, is_msvc_static_runtime
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import MSBuild, VCVars
@@ -47,41 +47,28 @@ class bxConan(ConanFile):
 
     def configure(self):
         if self.settings.os == "Windows":
-            self.libExt = "*.lib"
-            self.binExt = "*.exe"
-            self.packageLibPrefix = ""
-            self.binFolder = "windows"
+            self.lib_ext = "*.lib"
+            self.package_lib_prefix = ""
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.libExt = "*.a"
-            self.binExt = ""
-            self.packageLibPrefix = "lib"
-            self.binFolder = "linux"
+            self.lib_ext = "*.a"
+            self.package_lib_prefix = "lib"
         elif self.settings.os == "Macos":
-            self.libExt = "*.a"
-            self.binExt = ""
-            self.packageLibPrefix = "lib"
-            self.binFolder = "darwin"
+            self.lib_ext = "*.a"
+            self.package_lib_prefix = "lib"
         
-        self.genieExtra = ""
+        self.genie_extra = ""
         self.projs = ["bx"]
         if self.options.tools:
             self.projs.extend(["bin2c", "lemon"])
-        if is_msvc(self):
-            # TODO Gotta support old "Visual Studio" compiler until 2.0, then we can remove it
-            if self.settings.compiler == "Visual Studio":
-                if self.settings.compiler.runtime in ["MD", "MDd"]:
-                    self.genieExtra += " --with-dynamic-runtime"
-            elif self.settings.compiler == "msvc":
-                if self.settings.compiler.runtime == "dynamic":
-                    self.genieExtra += " --with-dynamic-runtime"
+        if is_msvc(self) and not is_msvc_static_runtime(self):
+            self.genie_extra += " --with-dynamic-runtime"
 
     def layout(self):
-        basic_layout(self, src_folder=".")
+        basic_layout(self, src_folder="src")
 
     def validate(self):
-        if not self.settings.os == "Windows":
-            if not self.options.fPIC:
-                raise ConanInvalidConfiguration("This package does not support builds without fPIC.")
+        if not self.options.get_safe("fPIC", True):
+            raise ConanInvalidConfiguration("This package does not support builds without fPIC.")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 14)
         check_min_vs(self, 191)
@@ -116,100 +103,100 @@ class bxConan(ConanFile):
 
     def build(self):
         # Save bx path for convencience
-        self.bxPath = os.path.join(self.source_folder, self._bx_folder)
+        self.bx_path = os.path.join(self.source_folder, self._bx_folder)
 
         if is_msvc(self):
             # Conan to Genie translation maps
-            vsVerToGenie = {"17": "2022", "16": "2019", "15": "2017",
+            vs_ver_to_genie = {"17": "2022", "16": "2019", "15": "2017",
                             "193": "2022", "192": "2019", "191": "2017"}
 
             # Use genie directly, then msbuild on specific projects based on requirements
-            genieVS = f"vs{vsVerToGenie[str(self.settings.compiler.version)]}"
-            genieGen = f"{self.genieExtra} {genieVS}"
-            self.run(f"genie {genieGen}", cwd=self.bxPath)
+            genie_VS = f"vs{vs_ver_to_genie[str(self.settings.compiler.version)]}"
+            genie_gen = f"{self.genie_extra} {genie_VS}"
+            self.run(f"genie {genie_gen}", cwd=self.bx_path)
 
             msbuild = MSBuild(self)
             # customize to Release when RelWithDebInfo
             msbuild.build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
             # use Win32 instead of the default value when building x86
             msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
-            msbuild.build(os.path.join(self.bxPath, ".build", "projects", genieVS, "bx.sln"), targets=self.projs)
+            msbuild.build(os.path.join(self.bx_path, ".build", "projects", genie_VS, "bx.sln"), targets=self.projs)
         else:
             # Not sure if XCode can be spefically handled by conan for building through, so assume everything not VS is make
             # gcc-multilib and g++-multilib required for 32bit cross-compilation, should see if we can check and install through conan
             
             # Conan to Genie translation maps
-            compilerStr = str(self.settings.compiler)
-            compilerAndOsToGenie = {"Windows": f"--gcc=mingw-{compilerStr}", "Linux": f"--gcc=linux-{compilerStr}",
-                                    "FreeBSD": "--gcc=freebsd", "Macos": "--gcc=osx",
-                                    "Android": "--gcc=android", "iOS": "--gcc=ios"}
-            gmakeOsToProj = {"Windows": "mingw", "Linux": "linux", "FreeBSD": "freebsd", "Macos": "osx", "Android": "android", "iOS": "ios"}
-            gmakeArchToGenieSuffix = {"x86": "-x86", "x86_64": "-x64", "armv8": "-arm64", "armv7": "-arm"}
-            osToUseArchConfigSuffix = {"Windows": False, "Linux": False, "FreeBSD": False, "Macos": True, "Android": True, "iOS": True}
+            compiler_str = str(self.settings.compiler)
+            compiler_and_os_to_genie = {"Windows": f"--gcc=mingw-{compiler_str}", "Linux": f"--gcc=linux-{compiler_str}",
+                                        "FreeBSD": "--gcc=freebsd", "Macos": "--gcc=osx",
+                                        "Android": "--gcc=android", "iOS": "--gcc=ios"}
+            gmake_os_to_proj = {"Windows": "mingw", "Linux": "linux", "FreeBSD": "freebsd", "Macos": "osx", "Android": "android", "iOS": "ios"}
+            gmake_arch_to_genie_suffix = {"x86": "-x86", "x86_64": "-x64", "armv8": "-arm64", "armv7": "-arm"}
+            os_to_use_arch_config_suffix = {"Windows": False, "Linux": False, "FreeBSD": False, "Macos": True, "Android": True, "iOS": True}
 
-            buildTypeToMakeConfig = {"Debug": "config=debug", "Release": "config=release"}
-            archToMakeConfigSuffix = {"x86": "32", "x86_64": "64"}
-            osToUseMakeConfigSuffix = {"Windows": True, "Linux": True, "FreeBSD": True, "Macos": False, "Android": False, "iOS": False}
+            build_type_to_make_config = {"Debug": "config=debug", "Release": "config=release"}
+            arch_to_make_config_suffix = {"x86": "32", "x86_64": "64"}
+            os_to_use_make_config_suffix = {"Windows": True, "Linux": True, "FreeBSD": True, "Macos": False, "Android": False, "iOS": False}
 
             # Generate projects through genie
-            genieGen = f"{self.genieExtra} {compilerAndOsToGenie[str(self.settings.os)]}"
-            if osToUseArchConfigSuffix[str(self.settings.os)]:
-                genieGen += f"{gmakeArchToGenieSuffix[str(self.settings.arch)]}"
+            genieGen = f"{self.genie_extra} {compiler_and_os_to_genie[str(self.settings.os)]}"
+            if os_to_use_arch_config_suffix[str(self.settings.os)]:
+                genieGen += f"{gmake_arch_to_genie_suffix[str(self.settings.arch)]}"
             genieGen += " gmake"
-            self.run(f"genie {genieGen}", cwd=self.bxPath)
+            self.run(f"genie {genieGen}", cwd=self.bx_path)
 
             # Build project folder and path from given settings
-            projFolder = f"gmake-{gmakeOsToProj[str(self.settings.os)]}"
-            if self.settings.os == "Windows" or compilerStr not in ["gcc", "apple-clang"]:
-                projFolder += f"-{compilerStr}" #mingw-gcc or mingw-clang for windows; -clang for linux (where gcc on linux has no extra)
-            if osToUseArchConfigSuffix[str(self.settings.os)]:
-                projFolder += gmakeArchToGenieSuffix[str(self.settings.arch)]
-            projPath = os.path.sep.join([self.bxPath, ".build", "projects", projFolder])
+            projFolder = f"gmake-{gmake_os_to_proj[str(self.settings.os)]}"
+            if self.settings.os == "Windows" or compiler_str not in ["gcc", "apple-clang"]:
+                projFolder += f"-{compiler_str}" #mingw-gcc or mingw-clang for windows; -clang for linux (where gcc on linux has no extra)
+            if os_to_use_arch_config_suffix[str(self.settings.os)]:
+                projFolder += gmake_arch_to_genie_suffix[str(self.settings.arch)]
+            proj_path = os.path.sep.join([self.bx_path, ".build", "projects", projFolder])
 
             # Build make args from settings
-            conf = buildTypeToMakeConfig[str(self.settings.build_type)]
-            if osToUseMakeConfigSuffix[str(self.settings.os)]:
-                conf += archToMakeConfigSuffix[str(self.settings.arch)]
+            conf = build_type_to_make_config[str(self.settings.build_type)]
+            if os_to_use_make_config_suffix[str(self.settings.os)]:
+                conf += arch_to_make_config_suffix[str(self.settings.arch)]
             if self.settings.os == "Windows":
                 mingw = "MINGW=$MINGW_PREFIX"
-                projPath = projPath.replace("\\", "/") # Fix path for msys...
+                proj_path = proj_path.replace("\\", "/") # Fix path for msys...
             else:
                 mingw = ""
             autotools = Autotools(self)
             # Build with make
             for proj in self.projs:
-                autotools.make(target=proj, args=["-R", f"-C {projPath}", mingw, conf])
+                autotools.make(target=proj, args=["-R", f"-C {proj_path}", mingw, conf])
 
     def package(self):
         # Get build bin folder
-        for bxdir in os.listdir(os.path.join(self.bxPath, ".build")):
-            if not bxdir=="projects":
-                buildBin = os.path.join(self.bxPath, ".build", bxdir, "bin")
+        for bx_out_dir in os.listdir(os.path.join(self.bx_path, ".build")):
+            if not bx_out_dir=="projects":
+                build_bin = os.path.join(self.bx_path, ".build", bx_out_dir, "bin")
                 break
 
         # Copy license
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.bxPath)
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.bx_path)
         # Copy includes
-        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.bxPath, "include"))
-        copy(self, pattern="*.inl", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.bxPath, "include"))
+        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.bx_path, "include"))
+        copy(self, pattern="*.inl", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.bx_path, "include"))
         # Copy libs
-        copy(self, pattern=self.libExt, dst=os.path.join(self.package_folder, "lib"), src=buildBin, keep_path=False)
+        copy(self, pattern=self.lib_ext, dst=os.path.join(self.package_folder, "lib"), src=build_bin, keep_path=False)
         # Copy tools
         if self.options.tools:
-            copy(self, pattern="bin2c*", dst=os.path.join(self.package_folder, "bin"), src=buildBin, keep_path=False)
-            copy(self, pattern="lemon*", dst=os.path.join(self.package_folder, "bin"), src=buildBin, keep_path=False)
+            copy(self, pattern="bin2c*", dst=os.path.join(self.package_folder, "bin"), src=build_bin, keep_path=False)
+            copy(self, pattern="lemon*", dst=os.path.join(self.package_folder, "bin"), src=build_bin, keep_path=False)
         
         # Rename for consistency across platforms and configs
-        for bxFile in Path(os.path.join(self.package_folder, "lib")).glob("*bx*"):
-            rename(self, os.path.join(self.package_folder, "lib", bxFile.name), 
-                    os.path.join(self.package_folder, "lib", f"{self.packageLibPrefix}bx{bxFile.suffix}"))
+        for bx_file in Path(os.path.join(self.package_folder, "lib")).glob("*bx*"):
+            rename(self, os.path.join(self.package_folder, "lib", bx_file.name), 
+                    os.path.join(self.package_folder, "lib", f"{self.package_lib_prefix}bx{bx_file.suffix}"))
         if self.options.tools:
-            for bxFile in Path(os.path.join(self.package_folder, "bin")).glob("*bin2c*"):
-                rename(self, os.path.join(self.package_folder, "bin", bxFile.name), 
-                        os.path.join(self.package_folder, "bin", f"bin2c{bxFile.suffix}"))
-            for bxFile in Path(os.path.join(self.package_folder, "bin")).glob("*lemon*"):
-                rename(self, os.path.join(self.package_folder, "bin", bxFile.name), 
-                        os.path.join(self.package_folder, "bin", f"lemon{bxFile.suffix}"))
+            for bx_file in Path(os.path.join(self.package_folder, "bin")).glob("*bin2c*"):
+                rename(self, os.path.join(self.package_folder, "bin", bx_file.name), 
+                        os.path.join(self.package_folder, "bin", f"bin2c{bx_file.suffix}"))
+            for bx_file in Path(os.path.join(self.package_folder, "bin")).glob("*lemon*"):
+                rename(self, os.path.join(self.package_folder, "bin", bx_file.name), 
+                        os.path.join(self.package_folder, "bin", f"lemon{bx_file.suffix}"))
 
     def package_info(self):
         self.cpp_info.includedirs = ["include"]
