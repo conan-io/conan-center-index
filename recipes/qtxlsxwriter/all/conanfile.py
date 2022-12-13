@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get
@@ -48,9 +49,12 @@ class QtXlsxWriterConan(ConanFile):
     def validate(self):
         if not self.dependencies["qt"].options.gui:
             raise ConanInvalidConfiguration(f"{self.ref} requires qt gui")
+        # FIXME: to remove once https://github.com/conan-io/conan/issues/11385 fixed
+        if hasattr(self, "settings_build") and cross_building(self):
+            raise ConanInvalidConfiguration(f"{self.ref} recipe does not support cross-compilation yet")
 
     def build_requirements(self):
-        if hasattr(self, "settings_build"):
+        if hasattr(self, "settings_build") and cross_building(self):
             self.tool_requires("qt/5.15.7")
 
     def source(self):
@@ -59,7 +63,7 @@ class QtXlsxWriterConan(ConanFile):
         download(self, **self.conan_data["sources"][self.version]["license"], filename="LICENSE")
 
     def generate(self):
-        if hasattr(self, "settings_build"):
+        if hasattr(self, "settings_build") and cross_building(self):
             env = VirtualBuildEnv(self)
             env.generate()
         else:
