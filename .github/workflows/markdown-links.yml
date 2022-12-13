@@ -20,6 +20,7 @@ jobs:
           README
           CONTRIBUTING.md
     - uses: gaurav-nelson/github-action-markdown-link-check@v1
+      if: steps.changed_files.outputs.any_changed == 'true'
       with:
         config-file: .github/workflows/mlc_config.json
 
@@ -37,6 +38,7 @@ jobs:
           README
           CONTRIBUTING.md
     - uses: gaurav-nelson/github-action-markdown-link-check@v1
+      if: steps.changed_files.outputs.any_changed == 'true'
       with:
         config-file: .github/workflows/mlc_config.json
         use-quiet-mode: 'yes'
