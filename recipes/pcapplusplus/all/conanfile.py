@@ -89,7 +89,7 @@ class PcapplusplusConan(ConanFile):
                 "--pcap-sdk", self.deps_cpp_info["npcap"].rootpath,
                 "--vs-version", "vs2015",
             ]
-            if self.vestion < "22.11":
+            if self.version < "22.11":
                 config_args += ["--pthreads-home", self.deps_cpp_info["pthreads4w"].rootpath]
             self.run(" ".join(config_args), run_environment=True)
             msbuild = MSBuild(self)
