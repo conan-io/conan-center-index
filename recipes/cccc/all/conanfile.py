@@ -45,7 +45,7 @@ class CCCCConan(ConanFile):
     def validate(self):
         if (not is_msvc(self) and (shutil.which("g++") == None)):
             raise ConanInvalidConfiguration(f"{self.ref} requires msvc or "\
-                                            "g++")
+                                            " g++")
 
     def source(self):
         files.get(self,**self.conan_data["sources"][self.version], strip_root=True,
