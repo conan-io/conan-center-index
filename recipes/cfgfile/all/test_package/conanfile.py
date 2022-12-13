@@ -9,7 +9,7 @@ class TestPackageConan(ConanFile):
     generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
 
     def build_requirements(self):
-        self.tool_requires(str(self.requires["cfgfile"]))
+        self.tool_requires(self.tested_reference_str)
 
     def layout(self):
         cmake_layout(self)

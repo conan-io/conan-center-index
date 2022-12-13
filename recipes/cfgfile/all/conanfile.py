@@ -18,7 +18,6 @@ class CfgfileConan(ConanFile):
     description = "Header-only library for reading/saving configuration files with schema defined in sources."
     topics = ("cfgfile", "configuration", "file")
     settings = "os", "arch", "compiler", "build_type"
-    tool_requires = "cmake/3.25.0"
 
     @property
     def _min_cppstd(self):
@@ -53,6 +52,9 @@ class CfgfileConan(ConanFile):
             self.requires("args-parser/6.2.0.1")
         elif self.version == "0.2.9.0":
             self.requires("args-parser/6.0.1.0")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/3.25.0")
 
     def build(self):
         cmake = CMake(self)
