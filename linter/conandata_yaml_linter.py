@@ -43,7 +43,7 @@ def main():
     schema = Map(
         {
             "sources": MapPattern(Str(), Any(), minimum_keys=1),
-            Optional("patches"): MapPattern(Str(), Seq(Any), minimum_keys=1),
+            Optional("patches"): MapPattern(Str(), Seq(Any()), minimum_keys=1),
         }
     )
 
@@ -88,7 +88,7 @@ def pretty_print_yaml_validate_error(args, error):
     print(
         f"::error file={args.path},line={error.context_mark.line},endline={error.problem_mark.line},"
         f"title=conandata.yml schema error"
-        f"::Schema outline in{CONANDATA_YAML_URL}#patches-fields is not followed.%0A%0A{error.problem} in %0A{snippet}%0A\n"
+        f"::Schema outlined in {CONANDATA_YAML_URL}#patches-fields is not followed.%0A%0A{error.problem} in %0A{snippet}%0A\n"
     )
 
 
