@@ -965,7 +965,12 @@ Examples = bin/datadir/examples""")
         def _get_corrected_reqs(requires):
             reqs = []
             for r in requires:
-                reqs.append(r if "::" in r else f"qt{r}")
+                if "::" in r:
+                    corrected_req = r 
+                else:
+                    corrected_req = f"qt{r}"
+                    assert corrected_req in self.cpp_info.components, f"{corrected_req} required but not yet present in self.cpp_info.components"
+                reqs.append(corrected_req)
             return reqs
 
         def _create_module(module, requires=[], has_include_dir=True):
