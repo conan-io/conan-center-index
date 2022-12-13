@@ -1296,7 +1296,7 @@ class QtConan(ConanFile):
             _create_module("SerialPort")
 
         if self.options.get_safe("qtserialbus"):
-            _create_module("SerialBus", ["SerialPort"])
+            _create_module("SerialBus", ["SerialPort"] if self.options.get_safe("qtserialport") else [])
             _create_plugin("PassThruCanBusPlugin", "qtpassthrucanbus", "canbus", [])
             _create_plugin("PeakCanBusPlugin", "qtpeakcanbus", "canbus", [])
             _create_plugin("SocketCanBusPlugin", "qtsocketcanbus", "canbus", [])
@@ -1418,7 +1418,7 @@ class QtConan(ConanFile):
                 _add_build_modules_for_component(req)
             build_modules_list.extend(build_modules.pop(component, []))
 
-        for c in list(self.cpp_info.components.keys()):
+        for c in self.cpp_info.components:
             _add_build_modules_for_component(c)
 
         self.cpp_info.set_property("cmake_build_modules", build_modules_list)
