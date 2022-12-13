@@ -183,6 +183,22 @@ class LibVPXConan(ConanFile):
             else:
                 self.output.info("Enabling LTO")
 
+        # The compile script wants to use CC for some of the platforms (Linux, etc),
+        # but incorrectly assumes gcc is the compiler for those platforms.
+        # This can fail some of the configure tests, and -lpthread isn't added to the link command.
+        replace_in_file(self,
+            os.path.join(self.source_folder, "build", "make", "configure.sh"),
+            "  LD=${LD:-${CROSS}${link_with_cc:-ld}}",
+            """
+  LD=${LD:-${CROSS}${link_with_cc:-ld}}
+  if [ "${link_with_cc}" = "gcc" ]
+  then
+   echo "using compiler as linker"
+   LD=${CC}
+  fi
+"""
+            )
+
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
