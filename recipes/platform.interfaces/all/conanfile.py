@@ -31,9 +31,9 @@ class PlatformInterfacesConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "17",
-            "msvc": "193",
             "gcc": "11",
+            "Visual Studio": "16",
+            "msvc": "193",
             "clang": "13",
         }
 
@@ -61,7 +61,7 @@ class PlatformInterfacesConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
         if Version(self.version) >= "0.3.41":
-            get(self, **self.conan_data["sources"][self.version]["license"], strip_root=True)
+            download(self, **self.conan_data["sources"][self.version]["license"], filename="LICENSE")
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
