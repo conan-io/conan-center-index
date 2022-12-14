@@ -83,7 +83,7 @@ class Catch2Conan(ConanFile):
             if int(self.options.console_width) < self._min_console_width:
                 raise ConanInvalidConfiguration(
                         f"option 'console_width' must be >= {self._min_console_width}, "
-                        f"got {self.options.console_width}")
+                        f"got {self.options.console_width}. Contributions welcome if this should work!")
         except ValueError as e:
             raise ConanInvalidConfiguration(f"option 'console_width' must be an integer, "
                                             f"got '{self.options.console_width}'") from e
