@@ -1,11 +1,11 @@
-from conan import ConanFile, tools
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import is_msvc, unix_path, VCVars
 from conan.tools.files import replace_in_file, rmdir
 from conan.tools.scm import Version
 import os
@@ -49,6 +49,13 @@ class LibpqConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    @property
+    def _make_args(self):
+        args = []
+        if self.settings.os == "Windows":
+            args.append("MAKE_DLL={}".format(str(self.options.shared).lower()))
+        return args
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -86,6 +93,30 @@ class LibpqConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        if is_msvc(self):
+            vcvars = VCVars(self)
+            vcvars.generate()
+        else:
+            if not cross_building(self):
+                env = VirtualRunEnv(self)
+                env.generate(scope="build")
+            tc = AutotoolsToolchain(self)
+            tc.configure_args.append('--without-readline')
+            tc.configure_args.append('--without-zlib')
+            tc.configure_args.append('--with-openssl' if self.options.with_openssl else '--without-openssl')
+            if cross_building(self) and not self.options.with_openssl:
+                tc.configure_args.append("--disable-strong-random")
+            if cross_building(self, skip_x64_x86=True):
+                tc.configure_args.append("USE_DEV_URANDOM=1")
+            if self.settings.os != "Windows" and self.options.disable_rpath:
+                tc.configure_args.append('--disable-rpath')
+            if self._is_clang8_x86:
+                tc.extra_cflags.append("-msse2")
+            tc.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
         if is_msvc(self):
             # https://www.postgresql.org/docs/8.3/install-win32-libpq.html
             # https://github.com/postgres/postgres/blob/master/src/tools/msvc/README
@@ -130,48 +161,20 @@ class LibpqConan(ConanFile):
                 replace_in_file(self,config_default_pl,
                                       "openssl   => undef",
                                       "openssl   => '%s'" % self.deps_cpp_info["openssl"].rootpath.replace("\\", "/"))
-            config = "DEBUG" if self.settings.build_type == "Debug" else "RELEASE"
-            env = VirtualBuildEnv(self)
-            env.define("CONFIG", config)
-            env.generate()
-        else:
-            env = VirtualBuildEnv(self)
-            env.generate()
-            if not cross_building(self):
-                env = VirtualRunEnv(self)
-                env.generate(scope="build")
-            tc = AutotoolsDeps(self)
-            tc.generate()
-            tc = AutotoolsToolchain(self)
-            tc.configure_args.append('--without-readline')
-            tc.configure_args.append('--without-zlib')
-            tc.configure_args.append('--with-openssl' if self.options.with_openssl else '--without-openssl')
-            if cross_building(self) and not self.options.with_openssl:
-                tc.configure_args.append("--disable-strong-random")
-            if cross_building(self, skip_x64_x86=True):
-                tc.configure_args.append("USE_DEV_URANDOM=1")
-            if self.settings.os != "Windows" and self.options.disable_rpath:
-                tc.configure_args.append('--disable-rpath')
-            if self._is_clang8_x86:
-                tc.extra_cflags.append("-msse2")
-            tc.generate()
-
-    @property
-    def _make_args(self):
-        args = []
-        if self.settings.os == "Windows":
-            args.append("MAKE_DLL={}".format(str(self.options.shared).lower()))
-        return args
 
     def build(self):
-        apply_conandata_patches(self)
-
+        self._patch_sources()
         if is_msvc(self):
-            with tools.vcvars(self.settings):
-                dir = os.path.join(self.source_folder, "src", "tools", "msvc")
-                self.run("perl build.pl libpq", cwd=dir)
-                if not self.options.shared:
-                    self.run("perl build.pl libpgport", cwd=dir)
+            config = "DEBUG" if self.settings.build_type == "Debug" else "RELEASE"
+            build_env = VirtualRunEnv(self)
+            env = build_env.environment()
+            env.define("CONFIG", config)
+            build_env.generate()
+
+            dir = os.path.join(self.source_folder, "src", "tools", "msvc")
+            self.run("perl build.pl libpq", cwd=dir)
+            if not self.options.shared:
+                self.run("perl build.pl libpgport", cwd=dir)
         else:
             autotools = Autotools(self)
             autotools.configure()
@@ -223,7 +226,7 @@ class LibpqConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def _construct_library_name(self, name):
-        if self._is_msvc:
+        if is_msvc(self):
             return "lib{}".format(name)
         return  name
 
