@@ -18,10 +18,9 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def build(self):
-        if can_run(self):
-            cmake = CMake(self)
-            cmake.configure()
-            cmake.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def test(self):
         if can_run(self):
