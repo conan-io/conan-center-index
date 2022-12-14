@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
-from conan.tools.microsoft import MSBuild, MSBuildDeps, MSBuildToolchain, VCVars, check_min_vs, is_msvc, msbuild, vs_layout
+from conan.tools.microsoft import MSBuild, MSBuildDeps, MSBuildToolchain, VCVars, check_min_vs, is_msvc, vs_layout
 
 required_conan_version = ">=1.53.0"
 
@@ -56,37 +56,33 @@ class CppWinRtConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-    @property
-    def msbuild_type(self):
-        return "Debug" if self.info.settings.build_type == "Debug" else "Release"
-
-    @property
-    def msbuild_folder(self):
-        return os.path.join(
-            self.build_folder, "_build", msbuild.msbuild_arch(self.info.settings.arch), self.msbuild_type)
-
     def build(self):
         self._patch_sources()
         msbuild = MSBuild(self)
-        msbuild.build_type = self.msbuild_type
         # use Win32 instead of the default value when building x86
         msbuild.platform = "Win32" if self.info.settings.arch == "x86" else msbuild.platform
+        build_folder = os.path.join(self.build_folder, "_build", msbuild.platform, str(
+            self.info.settings.build_type))
         self.run(" ".join([msbuild.command(sln="cppwinrt.sln", targets=[
                  "prebuild", "cppwinrt"]), f"/p:CppWinRTBuildVersion={self.version}"]))
-        self.run(" ".join([os.path.join(self.msbuild_folder, "cppwinrt.exe"),
-                    "-in", "local", "-out", self.msbuild_folder, "-verbose"]))
+        self.run(" ".join([os.path.join(build_folder, "cppwinrt.exe"),
+                           "-in", "local", "-out", build_folder, "-verbose"]))
 
     def package(self):
+        msbuild = MSBuild(self)
+        build_folder = os.path.join(self.build_folder, "_build", msbuild.platform, str(
+            self.info.settings.build_type))
+
         copy(self, pattern="LICENSE", dst=os.path.join(
             self.package_folder, "licenses"), src=self.source_folder)
         copy(
-            self, pattern="cppwinrt.exe", dst=os.path.join(self.package_folder, "bin"), src=self.msbuild_folder, keep_path=False
+            self, pattern="cppwinrt.exe", dst=os.path.join(self.package_folder, "bin"), src=build_folder, keep_path=False
         )
         copy(
             self,
             pattern="*.h",
             dst=os.path.join(self.package_folder, "include"),
-            src=os.path.join(self.msbuild_folder),
+            src=os.path.join(build_folder),
             excludes="strings.h"
         )
 
