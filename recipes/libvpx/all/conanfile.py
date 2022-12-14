@@ -115,7 +115,7 @@ class LibVPXConan(ConanFile):
     # and doesn't support some parameters like --host --build and --prefix=/
     # so we will avoid using conan's configure() call generator and run our own.
     def _execute_configure(self):
-        configure_args = [os.path.join(self.source_folder, "configure")]
+        configure_args = [unix_path(self,os.path.join(self.source_folder, "configure"))]
 
         if self.options.shared:
             configure_args.extend(["--enable-shared", "--disable-static"])
