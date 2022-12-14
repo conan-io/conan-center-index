@@ -110,8 +110,7 @@ class Stlab(ConanFile):
         return "none"
 
     def _validate_thread_system(self):
-        if self.options.thread_system == "pthread-apple":
-            if self.settings.os != "Macos":
+        if self.options.thread_system == "pthread-apple" and self.settings.os != "Macos":
                 raise ConanInvalidConfiguration("{}/{} thread_system=pthread-apple is not supported on {}. Try using thread_system=auto".format(self.name, self.version, self.settings.os))
         elif self.options.thread_system == "pthread":
             if self.settings.os != "Linux":
