@@ -90,10 +90,37 @@ class LibVPXConan(ConanFile):
 
         tc = AutotoolsToolchain(self)
 
+        if is_apple_os(self) and self.settings.get_safe("compiler.libcxx") == "libc++":
+            # special case, as gcc/g++ is hard-coded in makefile, it implicitly assumes -lstdc++
+# FIXME what to do
+            tc.extra_ldflags.append("-stdlib=libc++")
+
+        env = Environment()
+
+        if is_msvc(self):
+            # gen_msvs_vcxproj.sh doesn't like custom flags
+            env.define("CC", "")
+            # FIXME can we leave these alone?
+            # env.define("CFLAGS", "")
+            # env.define("CXXFLAGS", "")
+
+        tc.generate(env=env)
+
+        if is_msvc(self):
+            tc = VCVars(self)
+            tc.generate()
+
+
+    # libvpx's configure script is not a standard autotools script,
+    # and doesn't support some parameters like --host --build and --prefix=/
+    # so we will avoid using conan's configure() call generator and run our own.
+    def _execute_configure(self):
+        configure_args = [os.path.join(self.source_folder, "configure")]
+
         # Note the output_goes_here workaround, libvpx does not like --prefix=/
         # as it fails the test for "libdir must be a subfolder of prefix"
         # libvpx src/build/make/configure.sh:683
-        tc.configure_args.extend([
+        configure_args.extend([
             "--prefix=/output_goes_here",
             "--libdir=/output_goes_here/lib",
             "--disable-examples",
@@ -105,7 +132,7 @@ class LibVPXConan(ConanFile):
         ])
 # FIXME is this handled by toolchain?
         if is_msvc(self) and "MT" in msvc_runtime_flag(self):
-            tc.configure_args.append('--enable-static-msvcrt')
+            configure_args.append('--enable-static-msvcrt')
 
         arch = {'x86': 'x86',
                 'x86_64': 'x86_64',
@@ -141,31 +168,16 @@ class LibVPXConan(ConanFile):
         elif host_os == 'Android':
             os_name = 'android'
         target = f"{arch}-{os_name}-{compiler}"
-        tc.configure_args.append(f"--target={target}")
+        configure_args.append(f"--target={target}")
         if str(self.settings.arch) in ["x86", "x86_64"]:
             for name in self._arch_options:
                 if not self.options.get_safe(name):
-                    tc.configure_args.append(f"--disable-{name}")
+                    configure_args.append(f"--disable-{name}")
 
-        if is_apple_os(self) and self.settings.get_safe("compiler.libcxx") == "libc++":
-            # special case, as gcc/g++ is hard-coded in makefile, it implicitly assumes -lstdc++
-# FIXME what to do
-            tc.extra_ldflags.append("-stdlib=libc++")
+        configure_command = " ".join(configure_args)
+        self.output.info(configure_command)
+        self.run(configure_command)
 
-        env = Environment()
-
-        if is_msvc(self):
-            # gen_msvs_vcxproj.sh doesn't like custom flags
-            env.define("CC", "")
-            # FIXME can we leave these alone?
-            # env.define("CFLAGS", "")
-            # env.define("CXXFLAGS", "")
-
-        tc.generate(env=env)
-
-        if is_msvc(self):
-            tc = VCVars(self)
-            tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -200,13 +212,15 @@ class LibVPXConan(ConanFile):
             )
 
         # autotools = Autotools(self)
-        # autotools.configure()
+        # # autotools.configure()
+        # self._execute_configure()
         # autotools.make()
 
         # Helpful lines for recipe debugging.  The configure script is not real autotools and is a pain to debug.
         # replace_in_file(self, os.path.join(self.source_folder, "configure"), "#!/bin/sh", "#!/bin/sh -x\nprintenv")
         autotools = Autotools(self)
-        autotools.configure()
+        # autotools.configure()
+        self._execute_configure()
         self.output.info("config.log file generated is:")
         self.output.info(open(os.path.join(self.build_folder, "config.log")).read())
         # self.output.info("mk file generated is:")
