@@ -28,16 +28,16 @@ patches:
   1.0.2u:
     - patch_file: patches/1.0.2u-darwin-arm64.patch
       patch_description: "Darwin ARM64 support"
-      patch_type: "conan"
+      patch_type: "portability"
   1.1.1p:
     - patch_file: patches/1.1.1-tvos-watchos.patch
       patch_description: "TVOS and WatchOS don't like fork()"
-      patch_type: "conan"
+      patch_type: "portability"
   1.1.1q:
     - patch_file: patches/1.1.1-tvos-watchos.patch
       patch_description: "TVOS and WatchOS don't like fork()"
-      patch_type: "conan"
+      patch_type: "portability"
   1.1.1s:
     - patch_file: patches/1.1.1-tvos-watchos.patch
       patch_description: "TVOS and WatchOS don't like fork()"
-      patch_type: "conan"
+      patch_type: "portability"
