@@ -117,6 +117,11 @@ class LibVPXConan(ConanFile):
     def _execute_configure(self):
         configure_args = [os.path.join(self.source_folder, "configure")]
 
+        if self.options.shared:
+            configure_args.extend(["--enable-shared", "--disable-static"])
+        else:
+            configure_args.extend(["--disable-shared", "--enable-static"])
+
         # Note the output_goes_here workaround, libvpx does not like --prefix=/
         # as it fails the test for "libdir must be a subfolder of prefix"
         # libvpx src/build/make/configure.sh:683
