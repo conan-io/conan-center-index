@@ -1,6 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
+from conan.tools.microsoft import is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -100,7 +99,7 @@ class OpenColorIOConan(ConanFile):
             tc.variables["OpenColorIO_SKIP_IMPORTS"] = True
 
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "OLD"
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
