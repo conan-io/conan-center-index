@@ -143,7 +143,6 @@ class LibpqConan(ConanFile):
             tc = AutotoolsDeps(self)
             tc.generate()
             tc = AutotoolsToolchain(self)
-            args = tc.configure_args
             tc.configure_args.append('--without-readline')
             tc.configure_args.append('--without-zlib')
             tc.configure_args.append('--with-openssl' if self.options.with_openssl else '--without-openssl')
