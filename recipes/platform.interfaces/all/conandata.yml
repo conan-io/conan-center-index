@@ -7,5 +7,6 @@ sources:
       url: "https://raw.githubusercontent.com/linksplatform/Interfaces/cpp_0.3.41/LICENSE"
       sha256: "79d0fc44716007dddc375601bca8879ad45bc1165bf9342b7a16572b4f41abe8"
   "0.1.2":
-    url: "https://github.com/linksplatform/Interfaces/archive/refs/tags/0.4.0_0.1.2.tar.gz"
-    sha256: "61283bf6488b9051e9f9e80e89ab0d1f85b76a1dbee3fd27f193e678f23903e2"
+    source:
+      url: "https://github.com/linksplatform/Interfaces/archive/refs/tags/0.4.0_0.1.2.tar.gz"
+      sha256: "61283bf6488b9051e9f9e80e89ab0d1f85b76a1dbee3fd27f193e678f23903e2"
