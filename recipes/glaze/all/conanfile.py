@@ -25,8 +25,8 @@ class GlazeConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "17",
-            "msvc": "193",
+            "Visual Studio": "16",
+            "msvc": "192",
             "gcc": "11",
             "clang": "12",
             "apple-clang": "13.1",
