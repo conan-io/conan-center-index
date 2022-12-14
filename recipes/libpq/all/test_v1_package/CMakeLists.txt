@@ -4,7 +4,7 @@ project(test_package LANGUAGES C)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(libpq REQUIRED CONFIG)
+find_package(PostgreSQL REQUIRED CONFIG)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package/
                  ${CMAKE_CURRENT_BINARY_DIR}/test_package/)

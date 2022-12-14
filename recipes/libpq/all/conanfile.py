@@ -7,6 +7,7 @@ from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.files import replace_in_file, rmdir
+from conan.tools.scm import Version
 import os
 import glob
 
@@ -196,21 +197,21 @@ class LibpqConan(ConanFile):
                 os.remove(file)
 
     def package(self):
-        self.copy(pattern="COPYRIGHT", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="COPYRIGHT", dst="licenses", src=self.source_folder)
         if is_msvc(self):
-            self.copy("*postgres_ext.h", src=self._source_subfolder, dst="include", keep_path=False)
-            self.copy("*pg_config.h", src=self._source_subfolder, dst="include", keep_path=False)
-            self.copy("*pg_config_ext.h", src=self._source_subfolder, dst="include", keep_path=False)
-            self.copy("*libpq-fe.h", src=self._source_subfolder, dst="include", keep_path=False)
-            self.copy("*libpq-events.h", src=self._source_subfolder, dst="include", keep_path=False)
-            self.copy("*.h", src=os.path.join(self._source_subfolder, "src", "include", "libpq"), dst=os.path.join("include", "libpq"), keep_path=False)
-            self.copy("*genbki.h", src=self._source_subfolder, dst=os.path.join("include", "catalog"), keep_path=False)
-            self.copy("*pg_type.h", src=self._source_subfolder, dst=os.path.join("include", "catalog"), keep_path=False)
+            self.copy("*postgres_ext.h", src=self.source_folder, dst="include", keep_path=False)
+            self.copy("*pg_config.h", src=self.source_folder, dst="include", keep_path=False)
+            self.copy("*pg_config_ext.h", src=self.source_folder, dst="include", keep_path=False)
+            self.copy("*libpq-fe.h", src=self.source_folder, dst="include", keep_path=False)
+            self.copy("*libpq-events.h", src=self.source_folder, dst="include", keep_path=False)
+            self.copy("*.h", src=os.path.join(self.source_folder, "src", "include", "libpq"), dst=os.path.join("include", "libpq"), keep_path=False)
+            self.copy("*genbki.h", src=self.source_folder, dst=os.path.join("include", "catalog"), keep_path=False)
+            self.copy("*pg_type.h", src=self.source_folder, dst=os.path.join("include", "catalog"), keep_path=False)
             if self.options.shared:
-                self.copy("**/libpq.dll", src=self._source_subfolder, dst="bin", keep_path=False)
-                self.copy("**/libpq.lib", src=self._source_subfolder, dst="lib", keep_path=False)
+                self.copy("**/libpq.dll", src=self.source_folder, dst="bin", keep_path=False)
+                self.copy("**/libpq.lib", src=self.source_folder, dst="lib", keep_path=False)
             else:
-                self.copy("*.lib", src=self._source_subfolder, dst="lib", keep_path=False)
+                self.copy("*.lib", src=self.source_folder, dst="lib", keep_path=False)
         else:
             autotools = Autotools(self)
             autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
@@ -239,7 +240,7 @@ class LibpqConan(ConanFile):
 
         if not self.options.shared:
             if is_msvc(self):
-                if tools.Version(self.version) < "12":
+                if self.version < "12":
                     self.cpp_info.components["pgport"].libs = ["libpgport"]
                     self.cpp_info.components["pq"].requires.extend(["pgport"])
                 else:
@@ -247,7 +248,7 @@ class LibpqConan(ConanFile):
                     self.cpp_info.components["pgport"].libs = ["libpgport"]
                     self.cpp_info.components["pq"].requires.extend(["pgport", "pgcommon"])
             else:
-                if tools.Version(self.version) < "12":
+                if Version(self.version) < "12":
                     self.cpp_info.components["pgcommon"].libs = ["pgcommon"]
                     self.cpp_info.components["pq"].requires.extend(["pgcommon"])
                 else:
