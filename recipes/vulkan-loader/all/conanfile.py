@@ -75,12 +75,12 @@ class VulkanLoaderConan(ConanFile):
             self.requires("wayland/1.21.0")
 
     def validate(self):
-        if self.info.options.get_safe("with_wsi_directfb"):
+        if self.options.get_safe("with_wsi_directfb"):
             # TODO: directfb package
             raise ConanInvalidConfiguration("Conan recipe for DirectFB is not available yet.")
-        if not is_apple_os(self) and not self.info.options.shared:
+        if not is_apple_os(self) and not self.options.shared:
             raise ConanInvalidConfiguration(f"Static builds are not supported on {self.settings.os}")
-        if self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) < 15:
+        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < 15:
             # FIXME: It should build but Visual Studio 2015 container in CI of CCI seems to lack some Win SDK headers
             raise ConanInvalidConfiguration("Visual Studio < 2017 not yet supported in this recipe")
         # TODO: to replace by some version range check
