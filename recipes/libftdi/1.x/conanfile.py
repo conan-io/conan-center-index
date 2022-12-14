@@ -16,14 +16,14 @@ class LibFtdiConan(ConanFile):
     generators = "CMakeDeps", "CMakeToolchain"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-            "shared"             : [True, False], 
+            "shared"             : [True, False],
             "fPIC"               : [True, False],
             "enable_cpp_wrapper" : [True, False],
             "build_eeprom_tool"  : [True, False],
             "use_streaming"      : [True, False],
     }
     default_options = {
-            "shared": False, 
+            "shared": False,
             "fPIC": True,
             "enable_cpp_wrapper": True,
             "build_eeprom_tool" : False,
@@ -58,7 +58,7 @@ class LibFtdiConan(ConanFile):
             "EXAMPLES": False,
             "FTDI_EEPROM": self.options.build_eeprom_tool,
             "FTDIPP" : self.options.enable_cpp_wrapper,
-            "STATICLIBS": not self.options.shared,
+            "BUILD_SHARED_LIBS": self.options.shared,
             "ENABLE_STREAMING": self.options.use_streaming,
             "LIB_SUFFIX": "",
         }

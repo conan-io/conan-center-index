@@ -5,3 +5,5 @@ sources:
 patches:
     "1.5":
         - patch_file: "patches/0001-cmake-targets.patch"
+          patch_description: "Fix cmake targets"
+          patch_type: "conan"
