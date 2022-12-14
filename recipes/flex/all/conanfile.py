@@ -53,11 +53,7 @@ class FlexConan(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
-        def yes_no(v):
-            return "yes" if v else "no"
         tc.configure_args.extend([
-            f"--enable-shared={yes_no(self.options.shared)}",
-            f"--enable-static={yes_no(not self.options.shared)}",
             "--disable-nls",
             "--disable-bootstrap",
             "HELP2MAN=/bin/true",
@@ -72,7 +68,7 @@ class FlexConan(ConanFile):
         tc.generate()
 
         tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
+        tc.generate()
 
     def build(self):
         autotools = Autotools(self)
