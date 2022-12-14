@@ -62,7 +62,7 @@ class ProjConan(ConanFile):
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.4.0")
         if self.options.get_safe("with_curl"):
-            self.requires("libcurl/7.85.0")
+            self.requires("libcurl/7.86.0")
 
     def build_requirements(self):
         if hasattr(self, "settings_build") and cross_building(self):
