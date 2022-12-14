@@ -112,14 +112,11 @@ class Stlab(ConanFile):
     def _validate_thread_system(self):
         if self.options.thread_system == "pthread-apple" and self.settings.os != "Macos":
                 raise ConanInvalidConfiguration("{}/{} thread_system=pthread-apple is not supported on {}. Try using thread_system=auto".format(self.name, self.version, self.settings.os))
-        elif self.options.thread_system == "pthread":
-            if self.settings.os != "Linux":
+        elif self.options.thread_system == "pthread" and self.settings.os != "Linux":
                 raise ConanInvalidConfiguration("{}/{} thread_system=pthread is not supported on {}. Try using thread_system=auto".format(self.name, self.version, self.settings.os))
-        elif self.options.thread_system == "win32":
-            if self.settings.os != "Windows":
+        elif self.options.thread_system == "win32" and self.settings.os != "Windows":
                 raise ConanInvalidConfiguration("{}/{} thread_system=win32 is not supported on {}. Try using thread_system=auto".format(self.name, self.version, self.settings.os))
-        elif self.options.thread_system == "pthread-emscripten":
-            if self.settings.os != "Emscripten":
+        elif self.options.thread_system == "pthread-emscripten" and self.settings.os != "Emscripten":
                 raise ConanInvalidConfiguration("{}/{} thread_system=pthread-emscripten is not supported on {}. Try using thread_system=auto".format(self.name, self.version, self.settings.os))
 
     def _validate_boost_components(self):
