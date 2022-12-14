@@ -35,7 +35,6 @@ class PlatformInterfacesConan(ConanFile):
             "msvc": "193",
             "gcc": "11",
             "clang": "13",
-            "apple-clang": "13"
         }
 
     def layout(self):
@@ -45,6 +44,11 @@ class PlatformInterfacesConan(ConanFile):
         self.info.clear()
 
     def validate(self):
+        if self.settings.compiler == "apple-clang":
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, "
+                                            "which is not supported "
+                                            f"by {self.settings.compiler}.")
+
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
