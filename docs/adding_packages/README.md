@@ -36,7 +36,7 @@ You can follow the three steps (:one: :two: :three:) described below! :tada:
 ## Request access
 
 :one: The first step to add packages to ConanCenter is requesting access. To enroll in ConanCenter repository, please write a comment
-requesting access in this GitHub [issue](https://github.com/conan-io/conan-center-index/issues/4). Feel free to introduce yourself and
+requesting access in this GitHub [issue](https://github.comm/conan-io/conan-center-index/issues/4). Feel free to introduce yourself and
 your motivation to join ConanCenter community.
 
 This process helps ConanCenter against spam and malicious code. The process is not not automated on purpose and the requests are generally approved
