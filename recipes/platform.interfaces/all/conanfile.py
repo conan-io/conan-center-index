@@ -59,7 +59,7 @@ class PlatformInterfacesConan(ConanFile):
                                             "by {self.settings.compiler} {self.settings.compiler.version}.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
         if Version(self.version) >= "0.3.41":
             download(
                     self,
