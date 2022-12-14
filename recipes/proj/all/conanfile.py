@@ -120,7 +120,7 @@ class ProjConan(ConanFile):
         rm(self, "FindSqlite3.cmake", os.path.join(self.source_folder, "cmake"))
         replace_in_file(self, cmakelists, "SQLITE3_FOUND", "SQLite3_FOUND")
         replace_in_file(self, cmakelists, "SQLITE3_VERSION", "SQLite3_VERSION")
-        replace_in_file(self, cmakelists, "find_package(Sqlite3 REQUIRED)", "find_package(SQLite3 REQUIRED MODULE)")
+        replace_in_file(self, cmakelists, "find_package(Sqlite3 REQUIRED)", "find_package(SQLite3 REQUIRED)")
 
         # Let CMake install shared lib with a clean rpath !
         if Version(self.version) >= "7.1.0" and Version(self.version) < "9.0.0":
