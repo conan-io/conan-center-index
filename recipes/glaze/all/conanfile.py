@@ -4,7 +4,6 @@ from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import check_min_vs
 import os
 
 required_conan_version = ">=1.51.1"
@@ -26,6 +25,8 @@ class GlazeConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
+            "Visual Studio": "17",
+            "msvc": "193",
             "gcc": "11",
             "clang": "12",
             "apple-clang": "13.1",
@@ -48,7 +49,6 @@ class GlazeConan(ConanFile):
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
-        check_min_vs(self, 192)
 
         def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
