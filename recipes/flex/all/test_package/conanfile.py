@@ -15,7 +15,7 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def build_requirements(self):
-        self.build_requires(self.tested_reference_str)
+        self.tool_requires(self.tested_reference_str)
 
     def generate(self):
         tc = CMakeToolchain(self)

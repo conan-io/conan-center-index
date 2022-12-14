@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(test_package)
+project(test_package LANGUAGES C)
 
 find_package(FLEX REQUIRED)
 
