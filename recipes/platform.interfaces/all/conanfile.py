@@ -61,12 +61,7 @@ class PlatformInterfacesConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
         if Version(self.version) >= "0.3.41":
-            download(
-                    self,
-                    url="https://raw.githubusercontent.com/linksplatform/Interfaces/cpp_0.3.41/LICENSE",
-                    filename=os.path.join(self.source_folder, "LICENSE"),
-                    sha256="79d0fc44716007dddc375601bca8879ad45bc1165bf9342b7a16572b4f41abe8",
-                    )
+            get(self, **self.conan_data["sources"][self.version]["license"], strip_root=True)
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
