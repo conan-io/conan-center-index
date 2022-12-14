@@ -951,7 +951,12 @@ Examples = bin/datadir/examples""")
         def _get_corrected_reqs(requires):
             reqs = []
             for r in requires:
-                reqs.append(r if "::" in r else f"qt{r}")
+                if "::" in r:
+                    corrected_req = r 
+                else:
+                    corrected_req = f"qt{r}"
+                    assert corrected_req in self.cpp_info.components, f"{corrected_req} required but not yet present in self.cpp_info.components"
+                reqs.append(corrected_req)
             return reqs
 
         def _create_module(module, requires=[], has_include_dir=True):
@@ -1447,7 +1452,7 @@ Examples = bin/datadir/examples""")
                 _add_build_modules_for_component(req)
             build_modules_list.extend(build_modules.pop(component, []))
 
-        for c in list(self.cpp_info.components.keys()):
+        for c in self.cpp_info.components:
             _add_build_modules_for_component(c)
 
         self.cpp_info.set_property("cmake_build_modules", build_modules_list)
