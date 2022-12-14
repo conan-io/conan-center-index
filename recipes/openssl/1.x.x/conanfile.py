@@ -226,7 +226,7 @@ class OpenSSLConan(ConanFile):
             self.requires("zlib/1.2.12")
 
     def validate(self):
-        if self.info.settings.os == "Emscripten":
+        if self.settings.os == "Emscripten":
             if not all((self.options.no_asm, self.options.no_threads, self.options.no_stdio, self.options.no_tests)):
                 raise ConanInvalidConfiguration("os=Emscripten requires openssl:{no_asm,no_threads,no_stdio,no_tests}=True")
 
