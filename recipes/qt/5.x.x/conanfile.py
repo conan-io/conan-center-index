@@ -1236,7 +1236,7 @@ Examples = bin/datadir/examples""")
             _create_module("SerialPort")
 
         if self.options.qtserialbus:
-            _create_module("SerialBus", ["SerialPort"])
+            _create_module("SerialBus", ["SerialPort"] if self.options.get_safe("qtserialport") else [])
             _create_plugin("PassThruCanBusPlugin", "qtpassthrucanbus", "canbus", [])
             _create_plugin("PeakCanBusPlugin", "qtpeakcanbus", "canbus", [])
             _create_plugin("SocketCanBusPlugin", "qtsocketcanbus", "canbus", [])
