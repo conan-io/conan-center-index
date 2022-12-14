@@ -1,11 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 import os
 
 required_conan_version = ">=1.53.0"
@@ -52,7 +51,7 @@ class OpenColorIOConan(ConanFile):
         if Version(self.version) < "2.0.0":
             self.requires("tinyxml/2.6.2")
         else:
-            self.requires("pystring/1.1.3")
+            self.requires("pystring/1.1.4")
         self.requires("imath/3.1.5")
         if Version(self.version) >= "2.2.0":
             self.requires("minizip-ng/3.0.7")
