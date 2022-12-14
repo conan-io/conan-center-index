@@ -122,6 +122,21 @@ class WaveletBufferConan(ConanFile):
         if not self._cmake_new_enough("3.16"):
             self.tool_requires("cmake/3.25.0")
 
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output=output)
+            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
+    def build_requirements(self):
+        if not self._cmake_new_enough("3.16"):
+            self.tool_requires("cmake/3.25.0")
+
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
