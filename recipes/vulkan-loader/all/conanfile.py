@@ -134,9 +134,10 @@ class VulkanLoaderConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "FindVulkanHeaders.cmake"),
-                              "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
-                              "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
+        if Version(self.version) < "1.3.234":
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "FindVulkanHeaders.cmake"),
+                                  "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
+                                  "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
         # Honor settings.compiler.runtime
         replace_in_file(self, os.path.join(self.source_folder, "loader", "CMakeLists.txt"),
                               "if(${configuration} MATCHES \"/MD\")",
