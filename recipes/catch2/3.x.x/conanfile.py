@@ -84,9 +84,9 @@ class Catch2Conan(ConanFile):
                 raise ConanInvalidConfiguration(
                         f"option 'console_width' must be >= {self._min_console_width}, "
                         f"got {self.options.console_width}")
-        except ValueError:
+        except ValueError as e:
             raise ConanInvalidConfiguration(f"option 'console_width' must be an integer, "
-                                            f"got '{self.options.console_width}'")
+                                            f"got '{self.options.console_width}'") from e
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
