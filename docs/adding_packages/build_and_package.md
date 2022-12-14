@@ -3,6 +3,7 @@
 This document gathers all the relevant information regarding the general lines to follow while writing either the `build()` or the `package()` methods.
 Both methods often use build helpers to build binaries and install them into the `package_folder`.
 
+
 <!-- toc -->
 ## Contents
 
