@@ -12,14 +12,6 @@ jobs:
   markdown-link-check-pr:
     runs-on: ubuntu-latest
     steps:
-    - name: Get changed files
-      uses: ./.github/actions/pr_changed_files
-      id: changed_files
-      with:
-        files: |
-          docs/**
-          README
-          CONTRIBUTING.md
     - uses: actions/checkout@v3
       if: steps.changed_files.outputs.any_changed == 'true'
     - uses: gaurav-nelson/github-action-markdown-link-check@v1
