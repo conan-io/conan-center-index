@@ -252,7 +252,7 @@ class QtConan(ConanFile):
         if os.getenv('NOT_ON_C3I', '0') == '0':
             if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) >= "11" or \
                 self.info.settings.compiler == "clang" and Version(self.info.settings.compiler.version) >= "12":
-                raise ConanInvalidConfiguration("qt is not supported on gcc11 and clang >= 12 on C3I until conan-io/conan-center-index#13472 is fixed\n"/
+                raise ConanInvalidConfiguration("qt is not supported on gcc11 and clang >= 12 on C3I until conan-io/conan-center-index#13472 is fixed\n"\
                                                 "If your distro is modern enough (xcb >= 1.12), set environment variable NOT_ON_C3I=1")
 
         # C++ minimum standard required
