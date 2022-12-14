@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
 from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import chdir, copy, rename, rmdir, load, save, get, apply_conandata_patches, replace_in_file
+from conan.tools.files import chdir, copy, rename, rmdir, load, save, get, apply_conandata_patches, export_conandata_patches, replace_in_file
 from contextlib import contextmanager
 from functools import total_ordering
 import fnmatch
@@ -170,8 +170,7 @@ class OpenSSLConan(ConanFile):
         return OpenSSLVersion(self.version)
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, patch["patch_file"], self.recipe_folder, self.export_sources_folder )
+        export_conandata_patches(self)
 
     def config_options(self):
         if self._full_version >= "1.1.0":
@@ -914,8 +913,8 @@ class OpenSSLConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "OpenSSL"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenSSL"
-        #self.cpp_info.components["ssl"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        #self.cpp_info.components["crypto"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["ssl"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["crypto"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["crypto"].names["cmake_find_package"] = "Crypto"
         self.cpp_info.components["crypto"].names["cmake_find_package_multi"] = "Crypto"
         self.cpp_info.components["ssl"].names["cmake_find_package"] = "SSL"
