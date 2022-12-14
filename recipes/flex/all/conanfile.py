@@ -103,5 +103,6 @@ class FlexConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "_FLEX"  # Don't replace CMake's built-in
         self.cpp_info.names["cmake_find_package_multi"] = "_FLEX"
         flex_root = self.package_folder
-        self.output.info("Setting FLEX_ROOT environment variable: {flex_root}")
+        self.output.info(f"Setting FLEX_ROOT environment variable: {flex_root}")
         self.env_info.FLEX_ROOT = flex_root
+        self.buildenv_info.define_path("FLEX_ROOT", flex_root)
