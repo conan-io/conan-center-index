@@ -124,7 +124,7 @@ class Stlab(ConanFile):
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
-             check_min_cppstd(self, 17)
+            check_min_cppstd(self, 17)
 
         if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < "9":
             raise ConanInvalidConfiguration("Need GCC >= 9")
