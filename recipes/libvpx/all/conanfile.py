@@ -84,8 +84,6 @@ class LibVPXConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        # breakpoint()
-        # self.output.info(f"lib name is {self._lib_name}")
         env = VirtualBuildEnv(self)
         env.generate()
 
@@ -200,7 +198,6 @@ class LibVPXConan(ConanFile):
         # Disable LTO for Visual Studio when CFLAGS doesn't contain -GL
         if is_msvc(self):
             cflags = " ".join(self.conf.get("tools.build:cflags", default=[], check_type=list))
-            # self.output.info(f"CFLAGS = {cflags}")
             lto = any(re.finditer("(^| )[/-]GL($| )", cflags))
             if not lto:
                 self.output.info("Disabling LTO")
@@ -236,7 +233,7 @@ class LibVPXConan(ConanFile):
         # Helpful lines for recipe debugging.  The configure script is not real autotools and is a pain to debug.
         # replace_in_file(self, os.path.join(self.source_folder, "configure"), "#!/bin/sh", "#!/bin/sh -x\nprintenv")
         autotools = Autotools(self)
-        # autotools.configure()
+        # NOT USED # autotools.configure()
         self._execute_configure()
         self.output.info("config.log file generated is:")
         self.output.info(open(os.path.join(self.build_folder, "config.log")).read())
@@ -252,9 +249,6 @@ class LibVPXConan(ConanFile):
     def package(self):
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # FIXME must use DESTDIR=unix_path, otherwise the install fails with messages about
-        # "unable to install ..." and then every letter of the path split into a separate argument.
-        # breakpoint()
         autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
 
         # The workaround requires us to move the outputs into place now
@@ -263,16 +257,20 @@ class LibVPXConan(ConanFile):
                 os.path.join(self.package_folder, "include")
                 )
 
-        # breakpoint()
-        # self.output.info(f"lib name is {self._lib_name}")
-
-        libs_from = os.path.join(self.package_folder, "output_goes_here", "lib")
         if is_msvc(self):
-            # Libs may be in subfolders with lib folder
-            libs_from = os.path.join(libs_from, "Win32" if self.settings.arch == "x86" else "x64")
+            # Libs are still in the build folder, get from there directly.
+            # The makefile cannot correctly install the debug libs (see note about --enable-debug_libs)
+            libs_from = os.path.join(
+                    self.build_folder,
+                    "Win32" if self.settings.arch == "x86" else "x64",
+                    "Debug" if self.settings.build_type == "Debug" else "Release"
+                    )
             # Copy for msvc, as it will generate a release and debug library, so take what we want
-            copy(self, f"{self._lib_name}.*", libs_from, os.path.join(self.package_folder, "lib"))
+            # Note that libvpx's configure/make doesn't support shared lib builds on windows yet.
+            copy(self, f"{self._lib_name}.lib", libs_from, os.path.join(self.package_folder, "lib"))
         else:
+            # if not msvc, then libs were installed into package (in the wrong place), move them
+            libs_from = os.path.join(self.package_folder, "output_goes_here", "lib")
             rename(self, libs_from, os.path.join(self.package_folder, "lib"))
 
         rmdir(self, os.path.join(self.package_folder, "output_goes_here"))
