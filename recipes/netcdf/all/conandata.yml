@@ -8,9 +8,9 @@ sources:
 patches:
   "4.7.4":
     - patch_file: "patches/4.7.4-0001-fix-cmake.patch"
-      patch_description: "fixes for cmake target_link_libraries and other problems"
+      patch_description: "fixes for cmake target_link_libraries and using deps"
       patch_type: "conan"
   "4.8.1":
     - patch_file: "patches/4.8.1-0001-fix-cmake.patch"
-      patch_description: "fixes for cmake target_link_libraries and other problems"
+      patch_description: "fixes for cmake target_link_libraries and using deps"
       patch_type: "conan"
