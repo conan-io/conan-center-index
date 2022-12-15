@@ -39,7 +39,7 @@ Where the SPDX guidelines do not apply, packages should do the following:
 
 ## Settings
 
-As a general rule, recipes should set the `settings` attribute to: `os`, `arch`, `compiler` and `build_type`, and let Conan compute the package ID based on the settings. Some exceptions apply, as detailed below. The following list is not exhaustive:
+As a general rule, recipes should set the `settings` attribute to: `os`, `arch`, `compiler` and `build_type`, and let Conan compute the package ID based on the settings. Some exceptions apply, as detailed below. For cases not covered here, please reach out to the Conan Center maintainers team for assistance. The following list is not exhaustive:
 
 * **Recipes for _header only_ libraries** or where the contents of the package are the same irrespective of settings, might omit the `settings` attribute altogether, unless there is any logic conditional on a setting value. If the recipe has options or dependencies, but the contents of the package are invariant irrespective of their values, the following logic must be added to ensure a single, unique package ID:
 
