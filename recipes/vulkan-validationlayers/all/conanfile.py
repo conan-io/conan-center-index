@@ -94,13 +94,13 @@ class VulkanValidationLayersConan(ConanFile):
         return f"{recipe_name}/{self._dependencies_versions[recipe_name]}"
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
         if self.dependencies["spirv-tools"].options.shared:
             raise ConanInvalidConfiguration("vulkan-validationlayers can't depend on shared spirv-tools")
 
-        if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < "5":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("gcc < 5 is not supported")
 
     def build_requirements(self):
