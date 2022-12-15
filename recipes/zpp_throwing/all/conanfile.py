@@ -82,8 +82,6 @@ class ZppThrowingConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
-        if is_msvc(self):
-            self.cpp_info.cxxflags.append("/await:strict")
         if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++":
             self.cpp_info.cxxflags.append("-fcoroutines-ts")
 
