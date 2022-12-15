@@ -1,4 +1,7 @@
 sources:
+  "1.3.236.0":
+    url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/refs/tags/sdk-1.3.236.0.tar.gz"
+    sha256: "68f2cf70b1960f85e931ef56935e6ceda1beeb214f8fa319e6b95128b02b485a"
   "1.3.231.1":
     url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/refs/tags/sdk-1.3.231.1.tar.gz"
     sha256: "ea40af0f499e7e97a86ee54410c5c78e7f7bac40f65ae09a1549773b6501bf4d"
