@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.scm import Version
 from conans import tools as tools_legacy
 import os
 
@@ -68,7 +69,10 @@ class TaglibConan(ConanFile):
             os.path.join(self.source_folder, "taglib", "CMakeLists.txt"),
             os.path.join(self.source_folder, "bindings", "c", "CMakeLists.txt"),
         ]:
-            replace_in_file(self, cmakelists, "INSTALL_NAME_DIR ${LIB_INSTALL_DIR}", "")
+            if Version(self.version) >= "1.13":
+                replace_in_file(self, cmakelists, "INSTALL_NAME_DIR ${CMAKE_INSTALL_LIBDIR}", "")
+            else:
+                replace_in_file(self, cmakelists, "INSTALL_NAME_DIR ${LIB_INSTALL_DIR}", "")
 
     def build(self):
         self._patch_sources()

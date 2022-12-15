@@ -1,6 +1,7 @@
 Specify library name and version:  **lib/1.0**
 
-This is also a good place to share with all of us **why you are submitting this PR** (specially if it is a new addition to ConanCenter): is it a dependency of other libraries you want to package? Are you the author of the library? Thanks!
+<!-- This is also a good place to share with all of us **why you are submitting this PR** (specially if it is a new addition to ConanCenter): is it a dependency of other libraries you want to package? Are you the author of the library? Thanks! -->
+
 
 ---
 

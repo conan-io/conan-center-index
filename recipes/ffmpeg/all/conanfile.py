@@ -350,6 +350,8 @@ class FFMpegConan(ConanFile):
             target_os = triplet.split("-")[2]
             if target_os == "gnueabihf":
                 target_os = "gnu" # could also be "linux"
+            if target_os.startswith("android"):
+                target_os = "android"
             return target_os
 
     def _patch_sources(self):
