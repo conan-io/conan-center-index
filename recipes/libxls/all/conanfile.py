@@ -51,7 +51,7 @@ class LibxlsConan(ConanFile):
 
     def validate(self):
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Windows(yet).")
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Windows (yet). Contributions are always welcomed")
 
     def build_requirements(self):
         if self.settings.os == "Windows":
