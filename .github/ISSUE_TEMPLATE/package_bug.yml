@@ -26,12 +26,12 @@ body:
       label: Package and Environment Details
       description: (Include every applicable attribute)
       value: |
-       * Package Name/Version: **zlib/1.2.8**
-       * Operating System+version: **Linux Ubuntu 18.04**
-       * Compiler+version: **GCC 8**
-       * Docker image: **conanio/gcc8**
-       * Conan version: **conan 1.18.0**
-       * Python version: **Python 3.7.4**
+        * Package Name/Version: **zlib/1.2.8**
+        * Operating System+version: **Linux Ubuntu 18.04**
+        * Compiler+version: **GCC 8**
+        * Docker image: **conanio/gcc8**
+        * Conan version: **conan 1.18.0**
+        * Python version: **Python 3.7.4**
       placeholder: |
         cat /etc/lsb-release | grep
         gcc --version
