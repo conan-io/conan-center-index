@@ -41,7 +41,7 @@ class PackageConan(ConanFile):
         basic_layout(self)
 
     def requirements(self):
-        self.requires("boost/1.72.0", transitive_headers=True)
+        self.requires("boost/[>=1.69.0]", transitive_headers=True)
 
     def package_id(self):
         self.info.clear()
