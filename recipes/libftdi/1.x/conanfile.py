@@ -1,7 +1,8 @@
 import os
 from conan import ConanFile
-from conan.tools.files import get, patch, rmdir
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.files import get, rmdir, export_conandata_patches
+from conan.tools.files import apply_conandata_patches, copy
+from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
 from conan.errors import ConanInvalidConfiguration
 
 
@@ -12,8 +13,6 @@ class LibFtdiConan(ConanFile):
     topics = ("conan", "libftdi1")
     homepage = "https://www.intra2net.com/en/developer/libftdi/"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "CMakeDeps", "CMakeToolchain"
     settings = "os", "arch", "compiler", "build_type"
     options = {
             "shared"             : [True, False],
@@ -29,7 +28,9 @@ class LibFtdiConan(ConanFile):
             "build_eeprom_tool" : False,
             "use_streaming"     : True,
     }
-    _cmake = None
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -48,22 +49,19 @@ class LibFtdiConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        options = {
-            "BUILD_TESTS": False,
-            "EXAMPLES": False,
-            "FTDI_EEPROM": self.options.build_eeprom_tool,
-            "FTDIPP" : self.options.enable_cpp_wrapper,
-            "BUILD_SHARED_LIBS": self.options.shared,
-            "ENABLE_STREAMING": self.options.use_streaming,
-            "LIB_SUFFIX": "",
-        }
-        self._cmake.configure(variables = options)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        # Boolean values are preferred instead of "ON"/"OFF"
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["EXAMPLES"] = False
+        tc.variables["FTDI_EEPROM"] = self.options.build_eeprom_tool
+        tc.variables["FTDIPP"] = self.options.enable_cpp_wrapper
+        tc.variables["ENABLE_STREAMING"] = self.options.use_streaming
+        tc.variables["LIB_SUFFIX"] = ""
+        tc.generate()
+        # In case there are dependencies listed on requirements, CMakeDeps should be used
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def requirements(self):
         self.requires("libusb/1.0.24")
@@ -75,14 +73,14 @@ class LibFtdiConan(ConanFile):
             raise ConanInvalidConfiguration("VS doesn't not compile with enabled option use_streaming")
 
     def build(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(self, **p)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
         lib_folder = os.path.join(self.package_folder, "lib",)
         rmdir(self, os.path.join(lib_folder, "cmake"))
