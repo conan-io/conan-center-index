@@ -1,4 +1,3 @@
-from audioop import cross
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
