@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
+from conan.tools.layout import basic_layout
 
 required_conan_version = ">=1.52.0"
 
@@ -33,9 +34,9 @@ class Stlab(ConanFile):
     no_copy_source = True
     _source_subfolder = 'source_subfolder'
 
-    # short_paths = True
-    # def layout(self):
-    #     cmake_layout(self, src_folder="src")
+    def layout(self):
+        # src_folder must use the same source folder name the project
+        basic_layout(self, src_folder="src")
 
     def _use_boost(self):
         return self.options.boost_optional or self.options.boost_variant
