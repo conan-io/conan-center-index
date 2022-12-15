@@ -5,8 +5,6 @@ from conan.tools.layout import basic_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, rmdir, copy, save, get, rm
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.scm import Version
 
 import os
 
