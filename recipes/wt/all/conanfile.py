@@ -243,7 +243,7 @@ class WtConan(ConanFile):
         self.cpp_info.components["wtmain"].set_property("cmake_target_name", "Wt::Wt")
         self.cpp_info.components["wtmain"].libs = ["wt{}".format(suffix)]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["wtmain"].system_libs = ["m", "rt"]
+            self.cpp_info.components["wtmain"].system_libs = ["m", "rt", "atomic"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["wtmain"].system_libs = ["ws2_32", "mswsock", "winmm"]
         self.cpp_info.components["wtmain"].requires = ["boost::boost"]
