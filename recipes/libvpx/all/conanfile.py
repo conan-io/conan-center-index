@@ -137,10 +137,14 @@ class LibVPXConan(ConanFile):
             "--as=yasm",
         ])
 
-        # Note: release libs are always built, we just avoid keeping the release lib
+        # Note for MSVC: release libs are always built, we just avoid keeping the release lib
+        # Note2: Can't use --enable-debug_libs (to help install on Windows),
+        #     the makefile's install step fails as it wants to install a library that doesn't exist.
+        #     Instead, we will copy the desired library manually in the package step.
         if self.settings.build_type == "Debug":
             configure_args.extend([
-                "--enable-debug_libs",
+                # "--enable-debug_libs",
+                "--enable-debug",
             ])
 
         if is_msvc(self) and "MT" in msvc_runtime_flag(self):
