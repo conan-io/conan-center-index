@@ -1,9 +1,8 @@
 from conan import ConanFile
-from conan.tools.files import save, load, chdir, copy, rmdir, rm, apply_conandata_patches
+from conan.tools.files import chdir, copy, get, rmdir, rm, apply_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
-from conan.tools.microsoft import unix_path, VCVars, is_msvc
-from conan.tools.apple import is_apple_os
+from conan.tools.microsoft import unix_path
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -47,7 +46,7 @@ class MpcConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not os.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not os.getenv("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def layout(self):
