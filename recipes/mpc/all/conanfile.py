@@ -80,7 +80,7 @@ class MpcConan(ConanFile):
         autotools.make()
 
     def package(self):
-        copy(self, pattern="COPYING.LESSER", dst="licenses", src=self.source_folder)
+        copy(self, "COPYING.LESSER", self.source_folder, os.path.join(self.package_folder, "licenses"), keep_path=False)
         autotools = Autotools(self)
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
