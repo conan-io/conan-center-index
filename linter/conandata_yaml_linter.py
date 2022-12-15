@@ -1,4 +1,5 @@
 import argparse
+import sys
 from strictyaml import (
     load,
     Map,
@@ -52,43 +53,60 @@ def main():
 
     try:
         parsed = load(content, schema)
-
-        if "patches" in parsed:
-            for version in parsed["patches"]:
-                patches = parsed["patches"][version]
-                for i, patch in enumerate(patches):
-                    # Individual report errors for each patch object
-                    try:
-                        parsed["patches"][version][i].revalidate(patch_fields)
-                    except YAMLValidationError as error:
-                        pretty_print_yaml_validate_error(args, error)
-
-                    # Make sure `patch_source` exists where it's encouraged
-                    type = parsed["patches"][version][i]["patch_type"]
-                    if (
-                        type in ["official", "bugfix", "vulnerability"]
-                        and not "patch_source" in patch
-                    ):
-                        print(
-                            f"::warning file={args.path},line={type.start_line},endline={type.end_line},"
-                            f"title=conandata.yml schema warning"
-                            f"::'patch_type' should have 'patch_source' as per {CONANDATA_YAML_URL}#patch_type"
-                            " it is expected to have a source (e.g. a URL) to where it originates from to help with reviewing and consumers to evaluate patches\n"
-                        )
     except YAMLValidationError as error:
         pretty_print_yaml_validate_error(args, error)
+        sys.exit(1)
     except BaseException as error:
-        e = error.__str__().replace("\n", "%0A")
-        print(f"::error ::{e}")
+        pretty_print_yaml_validate_error(args, error)
+        sys.exit(1)
+
+    exit_code = 0
+    if "patches" in parsed:
+        for version in parsed["patches"]:
+            patches = parsed["patches"][version]
+            for i, patch in enumerate(patches):
+                # Individual report errors for each patch object
+                try:
+                    parsed["patches"][version][i].revalidate(patch_fields)
+                except YAMLValidationError as error:
+                    pretty_print_yaml_validate_error(args, error)
+                    exit_code = 1
+                    continue
+
+                # Make sure `patch_source` exists where it's encouraged
+                type = parsed["patches"][version][i]["patch_type"]
+                if (
+                    type in ["official", "bugfix", "vulnerability"]
+                    and not "patch_source" in patch
+                ):
+                    print(
+                        f"::warning file={args.path},line={type.start_line},endline={type.end_line},"
+                        f"title=conandata.yml schema warning"
+                        f"::'patch_type' should have 'patch_source' as per {CONANDATA_YAML_URL}#patch_type"
+                        " it is expected to have a source (e.g. a URL) to where it originates from to help with"
+                        " reviewing and consumers to evaluate patches"
+                    )
+
+                # v2 migrations suggestion
+                if "base_path" in parsed["patches"][version][i]:
+                    base_path = parsed["patches"][version][i]["base_path"]
+                    print(
+                        f"::notice file={args.path},line={base_path.start_line},endline={base_path.end_line},"
+                        f"title=conandata.yml v2 migration suggestion"
+                        "::'base_path' should not be required once a recipe has been upgraded to take advantage of"
+                        " layouts (see https://docs.conan.io/en/latest/reference/conanfile/tools/layout.html) and"
+                        " the new helper (see https://docs.conan.io/en/latest/reference/conanfile/tools/files/patches.html#conan-tools-files-apply-conandata-patches)"
+                    )
+
+    sys.exit(exit_code)
 
 
 def pretty_print_yaml_validate_error(args, error):
-    e = error.__str__().replace("\n", "%0A")
     snippet = error.context_mark.get_snippet().replace("\n", "%0A")
     print(
         f"::error file={args.path},line={error.context_mark.line},endline={error.problem_mark.line},"
         f"title=conandata.yml schema error"
-        f"::Schema outlined in {CONANDATA_YAML_URL}#patches-fields is not followed.%0A%0A{error.problem} in %0A{snippet}%0A\n"
+        f"::Schema outlined in {CONANDATA_YAML_URL}#patches-fields is not followed.%0A%0A{error.problem} in %0A{snippet}%0A"
     )
 
 
