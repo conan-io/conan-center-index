@@ -231,7 +231,13 @@ class LibpqConan(ConanFile):
         return  name
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "PostgreSQL")
+        self.cpp_info.set_property("cmake_target_name", "PostgreSQL::PostgreSQL")
         self.cpp_info.set_property("pkg_config_name", "libpq")
+
+        self.cpp_info.names["cmake_find_package"] = "PostgreSQL"
+        self.cpp_info.names["cmake_find_package_multi"] = "PostgreSQL"
 
         self.env_info.PostgreSQL_ROOT = self.package_folder
 
