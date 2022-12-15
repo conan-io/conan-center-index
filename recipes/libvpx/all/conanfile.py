@@ -8,7 +8,6 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars, unix_path, msvc_runtime_flag
 from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
 from conan.tools.scm import Version
-from conans.tools import get_env # FIXME how to port this?
 from conans.tools import stdcpp_library # TODO: import from conan.tools.build in conan 1.54.0 (https://github.com/conan-io/conan/pull/12269)
 import os
 import re
@@ -85,6 +84,8 @@ class LibVPXConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        # breakpoint()
+        # self.output.info(f"lib name is {self._lib_name}")
         env = VirtualBuildEnv(self)
         env.generate()
 
@@ -135,7 +136,13 @@ class LibVPXConan(ConanFile):
             "--enable-vp9-highbitdepth",
             "--as=yasm",
         ])
-# FIXME is this handled by toolchain?
+
+        # Note: release libs are always built, we just avoid keeping the release lib
+        if self.settings.build_type == "Debug":
+            configure_args.extend([
+                "--enable-debug_libs",
+            ])
+
         if is_msvc(self) and "MT" in msvc_runtime_flag(self):
             configure_args.append('--enable-static-msvcrt')
 
@@ -188,8 +195,9 @@ class LibVPXConan(ConanFile):
         apply_conandata_patches(self)
         # Disable LTO for Visual Studio when CFLAGS doesn't contain -GL
         if is_msvc(self):
-            self.output.info(f"CFLAGS = {get_env('CFLAGS', '')}")
-            lto = any(re.finditer("(^| )[/-]GL($| )", get_env("CFLAGS", "")))
+            cflags = " ".join(self.conf.get("tools.build:cflags", default=[], check_type=list))
+            # self.output.info(f"CFLAGS = {cflags}")
+            lto = any(re.finditer("(^| )[/-]GL($| )", cflags))
             if not lto:
                 self.output.info("Disabling LTO")
                 replace_in_file(self,
@@ -232,11 +240,17 @@ class LibVPXConan(ConanFile):
         # self.output.info(open(os.path.join(self.build_folder, "libs-x86_64-linux-gcc.mk")).read())
         autotools.make("SHELL='sh -x'")
 
+    @property
+    def _lib_name(self):
+        suffix = msvc_runtime_flag(self).lower() if is_msvc(self) else ""
+        return f"vpx{suffix}"
+
     def package(self):
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         # FIXME must use DESTDIR=unix_path, otherwise the install fails with messages about
         # "unable to install ..." and then every letter of the path split into a separate argument.
+        # breakpoint()
         autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
 
         # The workaround requires us to move the outputs into place now
@@ -245,22 +259,26 @@ class LibVPXConan(ConanFile):
                 os.path.join(self.package_folder, "include")
                 )
 
+        # breakpoint()
+        # self.output.info(f"lib name is {self._lib_name}")
+
         libs_from = os.path.join(self.package_folder, "output_goes_here", "lib")
         if is_msvc(self):
             # Libs may be in subfolders with lib folder
             libs_from = os.path.join(libs_from, "Win32" if self.settings.arch == "x86" else "x64")
-        rename(self, libs_from, os.path.join(self.package_folder, "lib"))
+            # Copy for msvc, as it will generate a release and debug library, so take what we want
+            copy(self, f"{self._lib_name}.*", libs_from, os.path.join(self.package_folder, "lib"))
+        else:
+            rename(self, libs_from, os.path.join(self.package_folder, "lib"))
 
         rmdir(self, os.path.join(self.package_folder, "output_goes_here"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         fix_apple_shared_install_name(self)
 
-
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "vpx")
-        suffix = msvc_runtime_flag(self).lower() if is_msvc(self) else ""
-        self.cpp_info.libs = [f"vpx{suffix}"]
+        self.cpp_info.libs = [self._lib_name]
         if not self.options.shared:
             libcxx = stdcpp_library(self)
             if libcxx:
