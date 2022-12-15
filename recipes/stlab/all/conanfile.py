@@ -169,7 +169,7 @@ class Stlab(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # tc.variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
+        tc.variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
         tc.variables['BUILD_TESTING'] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
         tc.variables["STLAB_USE_BOOST_CPP17_SHIMS"] = self.options.with_boost
         tc.variables["STLAB_NO_STD_COROUTINES"] = self.options.no_std_coroutines
