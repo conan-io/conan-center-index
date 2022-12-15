@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 2fd6ef2..e3bc6a5 100755
+index 2fd6ef29..0aa072b6 100755
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -7,9 +7,8 @@ endif()
@@ -31,7 +31,14 @@ index 2fd6ef2..e3bc6a5 100755
  
  #################
  # Build Options #
-@@ -462,7 +460,7 @@ if(UA_ENABLE_ENCRYPTION)
+@@ -456,13 +454,13 @@ if(UA_ENABLE_ENCRYPTION)
+         # use the OpenSSL encryption library
+         # https://cmake.org/cmake/help/v3.0/module/FindOpenSSL.html
+         find_package(OpenSSL REQUIRED)
+-        list(APPEND open62541_LIBRARIES ${OPENSSL_LIBRARIES})
++        list(APPEND open62541_LIBRARIES ${OpenSSL_LIBRARIES})
+     else()
+         # The recommended way is to install mbedtls via the OS package manager. If
          # that is not possible, manually compile mbedTLS and set the cmake variables
          # defined in /tools/cmake/FindMbedTLS.cmake.
          find_package(MbedTLS REQUIRED)
@@ -66,7 +73,7 @@ index 2fd6ef2..e3bc6a5 100755
  
      # Use a strict subset of the C and C++ languages
      check_add_cc_flag("-Wc++-compat")
-@@ -632,8 +620,6 @@ if(APPLE)
+@@ -632,8 +632,6 @@ if(APPLE)
  endif()
  
  if(MSVC)
@@ -75,7 +82,7 @@ index 2fd6ef2..e3bc6a5 100755
    if(UA_MSVC_FORCE_STATIC_CRT AND NOT BUILD_SHARED_LIBS)
      set(CompilerFlags CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_C_FLAGS
          CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE)
-@@ -659,8 +645,8 @@ configure_file(include/open62541/config.h.in ${PROJECT_BINARY_DIR}/src_generated
+@@ -659,8 +657,8 @@ configure_file(include/open62541/config.h.in ${PROJECT_BINARY_DIR}/src_generated
  configure_file(open62541.pc.in ${PROJECT_BINARY_DIR}/src_generated/open62541.pc @ONLY)
  
  if(UA_ENABLE_DISCOVERY_MULTICAST)
@@ -85,7 +92,7 @@ index 2fd6ef2..e3bc6a5 100755
  endif()
  
  set(exported_headers ${exported_headers}
-@@ -946,18 +932,7 @@ if(UA_DEBUG_DUMP_PKGS)
+@@ -946,18 +944,7 @@ if(UA_DEBUG_DUMP_PKGS)
  endif()
  
  if(UA_ENABLE_DISCOVERY_MULTICAST)
@@ -104,7 +111,7 @@ index 2fd6ef2..e3bc6a5 100755
          ${lib_sources})
  endif()
  
-@@ -1147,11 +1122,14 @@ if(UA_ENABLE_AMALGAMATION)
+@@ -1147,10 +1134,13 @@ if(UA_ENABLE_AMALGAMATION)
      target_include_directories(open62541-object PRIVATE ${PROJECT_BINARY_DIR})
      target_include_directories(open62541-object PRIVATE "${ua_architecture_directories_to_include}")
      if(UA_ENABLE_ENCRYPTION_MBEDTLS)
@@ -112,15 +119,15 @@ index 2fd6ef2..e3bc6a5 100755
 +        target_include_directories(open62541-object PRIVATE ${MbedTLS_INCLUDE_DIRS})
      endif()
      if(UA_ENABLE_ENCRYPTION_OPENSSL)
-         target_include_directories(open62541-object PRIVATE ${OPENSSL_INCLUDE_DIR})
-     endif()
+-        target_include_directories(open62541-object PRIVATE ${OPENSSL_INCLUDE_DIR})
++        target_include_directories(open62541-object PRIVATE ${OpenSSL_INCLUDE_DIR})
++    endif()
 +    if(UA_ENABLE_WEBSOCKET_SERVER)
 +        target_include_directories(open62541-plugins PRIVATE ${Libwebsockets_INCLUDE_DIR})
-+    endif()
+     endif()
  
      # make sure the open62541_amalgamation target builds before so that amalgamation is finished and it is not executed again for open62541-object
-     # and thus may overwrite the amalgamation result during multiprocessor compilation
-@@ -1186,6 +1164,9 @@ else()
+@@ -1186,6 +1176,9 @@ else()
                        )
  
      target_include_directories(open62541-object PRIVATE ${PROJECT_SOURCE_DIR}/src)
@@ -130,7 +137,7 @@ index 2fd6ef2..e3bc6a5 100755
  
      add_library(open62541-plugins OBJECT ${default_plugin_sources} ${ua_architecture_sources} ${exported_headers})
      add_dependencies(open62541-plugins open62541-generator-types open62541-generator-transport open62541-generator-namespace)
-@@ -1194,6 +1175,10 @@ else()
+@@ -1194,6 +1187,10 @@ else()
      target_compile_definitions(open62541-plugins PRIVATE -DUA_DYNAMIC_LINKING_EXPORT)
      set_target_properties(open62541-plugins PROPERTIES FOLDER "open62541/lib")
  
@@ -141,7 +148,7 @@ index 2fd6ef2..e3bc6a5 100755
      if(UA_PACK_DEBIAN)
          add_library(open62541-static STATIC $<TARGET_OBJECTS:open62541-object> $<TARGET_OBJECTS:open62541-plugins>)
          set_target_properties(open62541-static PROPERTIES OUTPUT_NAME open62541)
-@@ -1232,7 +1217,7 @@ else()
+@@ -1232,10 +1229,10 @@ else()
      include_directories_private("${PROJECT_BINARY_DIR}")
  
      if(UA_ENABLE_ENCRYPTION_MBEDTLS)
@@ -149,9 +156,13 @@ index 2fd6ef2..e3bc6a5 100755
 +        include_directories_private(${MbedTLS_INCLUDE_DIRS})
      endif()
      if(UA_ENABLE_ENCRYPTION_OPENSSL)
-         include_directories_private(${OPENSSL_INCLUDE_DIR})
+-        include_directories_private(${OPENSSL_INCLUDE_DIR})
++        include_directories_private(${OpenSSL_INCLUDE_DIR})
+     endif()
+ 
+     # Option-specific includes
 diff --git a/src/server/ua_discovery_manager.h b/src/server/ua_discovery_manager.h
-index 7787b40..99dc884 100644
+index 7787b40e..99dc884b 100644
 --- a/src/server/ua_discovery_manager.h
 +++ b/src/server/ua_discovery_manager.h
 @@ -50,7 +50,7 @@ typedef struct periodicServerRegisterCallback_entry {
@@ -164,7 +175,7 @@ index 7787b40..99dc884 100644
  /**
   * TXT record:
 diff --git a/src/server/ua_server_discovery_mdns.c b/src/server/ua_server_discovery_mdns.c
-index 6121b8c..e4cae7c 100644
+index 6121b8c3..e4cae7c5 100644
 --- a/src/server/ua_server_discovery_mdns.c
 +++ b/src/server/ua_server_discovery_mdns.c
 @@ -11,8 +11,8 @@
