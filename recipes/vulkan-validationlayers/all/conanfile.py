@@ -60,6 +60,25 @@ class VulkanValidationLayersConan(ConanFile):
                self.options.get_safe("with_wsi_xlib") or \
                self._needs_wayland_for_build
 
+    @property
+    def _min_cppstd(self):
+        if Version(self.version) >= "1.3.235":
+            return "17"
+        return "11"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "11": {},
+            "17": {
+                "apple-clang": "9",
+                "clang": "6",
+                "gcc": "7",
+                "msvc": "191",
+                "Visual Studio": "15.7",
+            },
+        }[self._min_cppstd]
+
     def export(self):
         copy(self, f"dependencies/{self._dependencies_filename}", self.recipe_folder, self.export_folder)
 
@@ -92,7 +111,19 @@ class VulkanValidationLayersConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
+
+        def loose_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
+        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+        if minimum_version and loose_lt_semver(str(self.info.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
+            )
 
         if self.dependencies["spirv-tools"].options.shared:
             raise ConanInvalidConfiguration("vulkan-validationlayers can't depend on shared spirv-tools")
