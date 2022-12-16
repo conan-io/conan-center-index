@@ -12,7 +12,7 @@ class LibFtdiConan(ConanFile):
     name = "libftdi"
     description = "A library to talk to FTDI chips"
     license = "LGPL-2.0-only", "GPLv2-or-later"
-    topics = ("conan", "libftdi1")
+    topics = "ftdi"
     homepage = "https://www.intra2net.com/en/developer/libftdi/"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
@@ -50,6 +50,7 @@ class LibFtdiConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.license = ("LGPL-2.1-only", "GPL-2.0-only") if self.options.build_eeprom_tool or self.options.enable_cpp_wrapper else ("LGPL-2.1-only")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -64,9 +65,9 @@ class LibFtdiConan(ConanFile):
         tc.generate()
 
     def requirements(self):
-        self.requires("libusb/1.0.24")
+        self.requires("libusb/1.0.26")
         if self.options.enable_cpp_wrapper:
-            self.requires("boost/1.75.0")
+            self.requires("boost/1.80.0")
 
     def validate(self):
         if is_msvc(self) and self.options.use_streaming:
@@ -79,7 +80,10 @@ class LibFtdiConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "COPYING.LIB", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        if self.options.build_eeprom_tool or self.options.enable_cpp_wrapper:
+            copy(self, "COPYING.GPL", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         lib_folder = os.path.join(self.package_folder, "lib")
