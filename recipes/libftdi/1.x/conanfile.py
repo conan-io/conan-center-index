@@ -65,9 +65,9 @@ class LibFtdiConan(ConanFile):
         tc.generate()
 
     def requirements(self):
-        self.requires("libusb/1.0.26")
+        self.requires("libusb/1.0.24")
         if self.options.enable_cpp_wrapper:
-            self.requires("boost/1.80.0")
+            self.requires("boost/1.75.0")
 
     def validate(self):
         if is_msvc(self) and self.options.use_streaming:
@@ -91,13 +91,16 @@ class LibFtdiConan(ConanFile):
         rmdir(self, os.path.join(lib_folder, "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.names['cmake_find_package_multi'] = "LibFTDI1"
         self.cpp_info.set_property("cmake_file_name", "LibFTDI1")
         self.cpp_info.components["ftdi"].set_property("pkg_config_name", "libftdi1")
+        self.cpp_info.components["ftdi"].set_property("cmake_target_name", "LibFTDI1::ftdi")
         self.cpp_info.components["ftdi"].libs = ["ftdi1"]
         self.cpp_info.components["ftdi"].requires = ["libusb::libusb"]
         self.cpp_info.components["ftdi"].includedirs.append(os.path.join("include", "libftdi1"))
 
         if self.options.enable_cpp_wrapper:
             self.cpp_info.components["ftdipp"].set_property("pkg_config_name", "libftdipp1")
+            self.cpp_info.components["ftdipp"].set_property("cmake_target_name", "LibFTDI1::ftdipp")
             self.cpp_info.components["ftdipp"].libs = ["ftdipp1"]
             self.cpp_info.components["ftdipp"].requires = ["ftdi", "boost::headers"]
