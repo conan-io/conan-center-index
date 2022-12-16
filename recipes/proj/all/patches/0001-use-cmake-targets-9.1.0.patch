@@ -1,6 +1,6 @@
---- a/src/lib_proj.cmake
-+++ b/src/lib_proj.cmake
-@@ -393,8 +393,7 @@ if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+--- a/src/src/lib_proj.cmake	2022-08-29 01:53:05.000000000 +0800
++++ b/src/lib_proj.cmake	2022-11-09 00:03:25.165493175 +0800
+@@ -447,8 +447,7 @@
    target_link_libraries(proj PRIVATE ${CMAKE_THREAD_LIBS_INIT})
  endif()
  
@@ -10,7 +10,7 @@
  
  if(NLOHMANN_JSON STREQUAL "external")
    target_compile_definitions(proj PRIVATE EXTERNAL_NLOHMANN_JSON)
-@@ -403,16 +402,14 @@ endif()
+@@ -458,16 +458,14 @@
  
  if(TIFF_ENABLED)
    target_compile_definitions(proj PRIVATE -DTIFF_ENABLED)
@@ -21,10 +21,10 @@
  
  if(CURL_ENABLED)
    target_compile_definitions(proj PRIVATE -DCURL_ENABLED)
--  target_include_directories(proj PRIVATE ${CURL_INCLUDE_DIR})
+-  target_include_directories(proj PRIVATE ${CURL_INCLUDE_DIRS})
    target_link_libraries(proj
      PRIVATE
--      ${CURL_LIBRARY}
+-      ${CURL_LIBRARIES}
 +      CURL::libcurl
        $<$<CXX_COMPILER_ID:MSVC>:ws2_32>
        $<$<CXX_COMPILER_ID:MSVC>:wldap32>
