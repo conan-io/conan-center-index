@@ -63,6 +63,7 @@ class LibZipppConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_CXX_STANDARD"] = 11
         tc.variables["LIBZIPPP_INSTALL"] = True
         tc.variables["LIBZIPPP_INSTALL_HEADERS"] = True
         tc.variables["LIBZIPPP_ENABLE_ENCRYPTION"] = self.options.with_encryption
