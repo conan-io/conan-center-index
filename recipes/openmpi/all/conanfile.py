@@ -5,9 +5,10 @@ from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class OpenMPIConan(ConanFile):
@@ -33,24 +34,23 @@ class OpenMPIConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+            self.settings.rm_safe("compiler.libcxx")
+            self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        # FIXME : self.requires("libevent/2.1.12") - try to use libevent from conan
+        # TODO FIX :
+        #  OpenMPI will compile with this, but,
+        #  hdf5 (as a consumer) wont compile with this enabled,
+        #   find_package(MPI) fails, probably because the configure test
+        #   tries to link to the mpi libs, but probably doesn't also
+        #   link in the required libevent libraries ...
+        #   I was not able to confirm this theory.
+        # self.requires("libevent/2.1.12")
+        # -------------------------------------
         self.requires("zlib/1.2.13")
         # used for hwloc component...
         self.requires("libudev/system")
@@ -78,6 +78,7 @@ class OpenMPIConan(ConanFile):
         tc.configure_args.append("--datarootdir=${prefix}/res")
         if self.settings.build_type == "Debug":
             tc.configure_args.append("--enable-debug")
+        tc.configure_args.append(f"PACKAGE_VERSION={Version(self.version)}")
         tc.generate()
 
         tc = AutotoolsDeps(self)
@@ -108,7 +109,7 @@ class OpenMPIConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["mpi", "open-rte", "open-pal"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["dl", "pthread", "rt", "util"]
+            self.cpp_info.system_libs.extend(["m", "dl", "pthread", "rt", "util"])
 
         self.output.info("Creating MPI_HOME environment variable: {self.package_folder}")
         self.env_info.MPI_HOME = self.package_folder
