@@ -1,7 +1,8 @@
 from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rm, replace_in_file
+from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
-from conans import CMake
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -24,7 +25,10 @@ class DoxygenConan(ConanFile):
         "enable_parse": True,
         "enable_search": True,
     }
-    generators = "cmake", "cmake_find_package"
+    generators = "virtualrunenv"
+
+    def layout(self):
+        cmake_layout(self)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -49,10 +53,10 @@ class DoxygenConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os == "Windows":
-            self.build_requires("winflexbison/2.5.24")
+            self.tool_requires("winflexbison/2.5.24")
         else:
-            self.build_requires("flex/2.6.4")
-            self.build_requires("bison/3.8.2")
+            self.tool_requires("flex/2.6.4")
+            self.tool_requires("bison/3.8.2")
 
     def validate(self):
         minimum_compiler_version = self._minimum_compiler_version()
@@ -77,6 +81,18 @@ class DoxygenConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def generate(self):
+        # This generates "conan_toolchain.cmake" in self.generators_folder
+        tc = CMakeToolchain(self)
+        tc.variables["build_parse"] = self.options.enable_parse
+        tc.variables["build_search"] = self.options.enable_search
+        tc.variables["use_libc++"] = self.settings.compiler.get_safe("libcxx") == "libc++"
+        tc.variables["win_static"] = is_msvc_static_runtime(self)
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
     def build(self):
         if os.path.isfile("Findflex.cmake"):
             os.unlink("Findflex.cmake")
@@ -90,10 +106,6 @@ class DoxygenConan(ConanFile):
                             "\"uuid.lib rpcrt4.lib ws2_32.lib\"", "uuid.lib rpcrt4.lib ws2_32.lib")
             rm(self, "FindXapian.cmake", "cmake")
         cmake = CMake(self)
-        cmake.definitions["build_parse"] = self.options.enable_parse
-        cmake.definitions["build_search"] = self.options.enable_search
-        cmake.definitions["use_libc++"] = self.settings.compiler.get_safe("libcxx") == "libc++"
-        cmake.definitions["win_static"] = "MT" in self.settings.compiler.get_safe("runtime", "")
         cmake.configure()
         cmake.build()
 
