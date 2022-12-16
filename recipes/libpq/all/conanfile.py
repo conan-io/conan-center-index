@@ -78,7 +78,7 @@ class LibpqConan(ConanFile):
         if self.options.with_openssl:
             self.requires("openssl/1.1.1s")
 
-    def validate(self):
+    def validate_build(self):
         if self.settings.os == "Windows" and self.settings.compiler == "gcc" and self.options.shared:
             raise ConanInvalidConfiguration("shared mingw build is not possible")
 
