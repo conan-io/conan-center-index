@@ -81,7 +81,7 @@ class MBedTLSConan(ConanFile):
 
     def _jsonchema_installed(self):
         try:
-            import jsonschema
+            self.run("python -m jsonschema --version")
             return True
         except:
             return False
