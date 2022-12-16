@@ -97,7 +97,7 @@ class VtkConan(ConanFile):
     # h5part:           internal (not available in CCI - TODO)
     # hdf5:             conan (hdf5)
     # ioss:             internal (not available in CCI - TODO)
-    # jpeg:             conan (I'm trying libjpeg-turbo)
+    # jpeg:             conan (libjpeg or libjpeg-turbo)
     # jsoncpp:          conan (jsoncpp)
     # kissfft:          conan (kissfft)
     # libharu:          conan (libharu)
@@ -130,7 +130,11 @@ class VtkConan(ConanFile):
             "shared": [True, False],
             "fPIC": [True, False],
 
+            ### Helpful option when hacking on VTK - faster to extract on linux too ###
             "use_source_from_git": [True, False],
+
+            ### Conan package choices ###
+            "with_jpeg":        ["libjpeg", "libjpeg-turbo"],
 
             ### Debugging / future proofing ###
             "legacy_remove":    [True, False],
@@ -203,7 +207,11 @@ class VtkConan(ConanFile):
             "shared": False,
             "fPIC":   True,
 
+            ### Helpful option when hacking on VTK - faster to extract on linux too ###
             "use_source_from_git": False, # False = use the tarball
+
+            ### Conan package choices ###
+            "with_jpeg":        "libjpeg",  # the current standard in other packages on CCI
 
             ### Debugging / future proofing ###
             "legacy_remove":    False,
@@ -353,9 +361,13 @@ class VtkConan(ConanFile):
                 "utfcpp":            "utfcpp/3.2.1",
                 "xz_utils":          "xz_utils/5.2.5", # note: VTK calls this lzma
                 "zlib":              "zlib/1.2.12",
-                "jpeg":              "libjpeg-turbo/2.1.2",
                 "TIFF":              "libtiff/4.3.0",
                 }
+
+        if self.options.with_jpeg == "libjpeg":
+            parties["jpeg"] = "libjpeg/9e"
+        elif self.options.with_jpeg == "libjpeg-turbo":
+            parties["jpeg"] = "libjpeg-turbo/2.1.2"
 
 
         if self.options.build_all_modules or _is_module_enabled(self.options.group_enable_StandAlone):
@@ -423,6 +435,10 @@ class VtkConan(ConanFile):
         if self.options.use_tk and not self.options.wrap_python:
             raise ConanInvalidConfiguration("use_tk can only be enabled with wrap_python")
 
+        libtiff = self.dependencies["libtiff"]
+        if libtiff.options.jpeg != self.info.options.with_jpeg:
+            raise ConanInvalidConfiguration(f"{self.ref} requires option value {self.name}:with_jpeg equal to libtiff:jpeg.")
+
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -452,6 +468,7 @@ class VtkConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.options["libtiff"].jpeg = self.options.with_jpeg
 
 
     def layout(self):
@@ -730,13 +747,15 @@ class VtkConan(ConanFile):
             # hard code the replacement 3rd party targets we are supplying,
             # it doesn't seem to be listed in VTK anywhere
             thirds = {
+                    # "VTK::module": "conan_package::conan_package",      # if the whole package required
+                    # "VTK::module": "conan_package::package_component",  # if subcomponent required
+                    # Note that we aren't using the cmake package::component here, this is for conan.
                     "VTK::eigen":    "eigen::eigen",
                     "VTK::exprtk":   "exprtk::exprtk",
                     "VTK::expat":    "expat::expat",
                     "VTK::glew":     "glew::glew",
                     "VTK::fmt":      "fmt::fmt",
                     "VTK::freetype": "freetype::freetype",
-                    "VTK::jpeg":     "libjpeg-turbo::jpeg",
                     "VTK::jsoncpp":  "jsoncpp::jsoncpp",
                     "VTK::libharu":  "libharu::libharu",
                     "VTK::libproj":  "proj::proj",
@@ -753,6 +772,11 @@ class VtkConan(ConanFile):
                     # Note that the component name is qt::qtOpenGL, different to CMake's target name
                     "VTK::QtOpenGL": "qt::qtOpenGL",
                     }
+
+            if self.options.with_jpeg == "libjpeg":
+                thirds["VTK::jpeg"] = "libjpeg::libjpeg"
+            elif self.options.with_jpeg == "libjpeg-turbo":
+                thirds["VTK::jpeg"] = "libjpeg-turbo::jpeg"
 
             if _is_module_enabled(self.options.group_enable_Rendering):
                 thirds["VTK::opengl"] = "opengl::opengl"
