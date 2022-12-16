@@ -19,6 +19,10 @@ class BoostLEAFConan(ConanFile):
               "header-only", "low-latency", "no-dependencies", "single-header")
     settings = "os", "compiler", "arch", "build_type"
     no_copy_source = True
+    deprecated = True
+
+    def configure(self):
+        raise ConanInvalidConfiguration(f"{self.ref} is deprecated in favor of Boost >=1.75.0")
 
     def package_id(self):
         self.info.clear()
