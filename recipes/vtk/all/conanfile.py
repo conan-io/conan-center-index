@@ -1,19 +1,3 @@
-# TODO LIST
-# - Make cmake a build requirement for conan-CI to work
-# - Why are cmake_wrapper cmake files being deployed?
-# - How can I utilise VTK's built-in cmake module dependency system, rather than recreate it here?
-# - 3rd party deps are required for different enabled module configurations, how to take that info out of VTK's module system?
-# - patching with src in local folder seems to fail - export_sources_folder = None?
-# - use build/modules.json to compute the components and dependencies
-#
-# - how do i make one component depend on another (in cpp_info), ie i'm attaching the custom-cmake-module to all of the components, but technically it should only be connected to the "common" one.
-#   BUT, logically it is a bit weird, because WHICH "common" module (VTK::Common or VTK::CommonCore) depends on VTK_ENABLE_KITS,
-#   which is what i'm trying to attach and export.
-# So I need some kind of general component that the user could import, to determine which modules they further need to import?
-#
-# freetype_MAJOR_VERSION or whatever it was... proj?
-# SpaceIm: CMakeDeps creates a config version file for each dependency, so if find_package(<package>) is resolved, it will define <package>_VERSION
-
 # RECIPE MAINTAINER NOTES:
 # - Read vtk's Documentation/release/9.1.md for important notes about versions and forks
 # - Also read vtk's Documentation/build.md for information about build settings and flags
@@ -349,39 +333,6 @@ class VtkConan(ConanFile):
             ])
 
 
-    def _patch_source(self):
-        # Note that VTK's cmake will insert its own CMAKE_MODULE_PATH at the
-        # front of the list.  This is ok as long as there is nothing in that
-        # path that will be found before our conan cmake files...
-        # That is why we delete the third party finders.
-        # Else, we have to patch VTK's CMakeLists.txt, like so:
-        #####
-        # diff --git a/CMakeLists.txt b/CMakeLists.txt
-        # index c15890cfdc..022f704d75 100644
-        # --- a/CMakeLists.txt
-        # +++ b/CMakeLists.txt
-        # @@ -7,7 +7,7 @@ if (POLICY CMP0127)
-        #  endif ()
-        #
-        #  set(vtk_cmake_dir "${VTK_SOURCE_DIR}/CMake")
-        # -list(INSERT CMAKE_MODULE_PATH 0 "${vtk_cmake_dir}")
-        # +list(APPEND CMAKE_MODULE_PATH "${vtk_cmake_dir}")
-        #####
-
-        # DELETE any of the third party finders, before we build - see note above
-# ALLOW FINDERS #        rm(self, "Find*.cmake", os.path.join(self.source_folder,"CMake"))
-
-        # Delete VTK's cmake patches (these support older cmake programs).
-        # We do not have to support old cmake: we require an updated cmake instead.
-# ALLOW FINDERS #        if _support_old_ci_20220514:
-# ALLOW FINDERS #            rmdir(self, os.path.join(self.source_folder,"CMake","patches"))
-# ALLOW FINDERS #        else:
-# ALLOW FINDERS #            rmdir(self, os.path.join(self.source_folder,"CMake","patches"))
-
-        # And apply our patches.  I do it here rather than in build, so I can repeatedly call build without applying patches.
-        apply_conandata_patches(self)
-
-
     def source(self):
         if self.options.use_source_from_git:
             self.run("git clone -b release --single-branch " + self.git_url + " " + self.source_folder)
@@ -397,8 +348,9 @@ class VtkConan(ConanFile):
                     strip_root=True,
                     destination=self.source_folder)
 
+        # And apply our patches.  I do it here rather than in build, so I can repeatedly call build without applying patches.
         if self.no_copy_source:
-            self._patch_source()
+            apply_conandata_patches(self)
 
 
     def _third_party(self):
@@ -427,11 +379,13 @@ class VtkConan(ConanFile):
                 "TIFF":              "libtiff/4.4.0",
                 }
 
+        # NOTE: You may NOT be able to just adjust the version numbers in here, without
+        #   also adjusting the patch, as the versions are also mentioned in ThirdParty/*/CMakeLists.txt
+
         if self.options.with_jpeg == "libjpeg":
             parties["jpeg"] = "libjpeg/9e"
         elif self.options.with_jpeg == "libjpeg-turbo":
             parties["jpeg"] = "libjpeg-turbo/2.1.4"
-
 
         if self._is_module_enabled([self.options.group_enable_StandAlone]):
             parties["hdf5"]    = "hdf5/1.13.1"
@@ -441,9 +395,8 @@ class VtkConan(ConanFile):
             parties["libxml2"] = "libxml2/2.10.3"
             parties["cgns"]    = "cgns/4.3.0"
 
-        # unused
-        if False:
-            parties["zfp"]     = "zfp/0.5.5"
+        # unused dependency, mentioned in vtk but not actually used
+        # parties["zfp"]     = "zfp/0.5.5"
 
         if self.options.build_all_modules:
             parties["boost"]  = "boost/1.80.0"
@@ -461,10 +414,8 @@ class VtkConan(ConanFile):
             self.requires("opengl/system")
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.requires("xorg/system")
-
         for pack in self._third_party().values():
             self.requires(pack)
-
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -473,10 +424,7 @@ class VtkConan(ConanFile):
         if not is_msvc(self):
             minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
             if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
-
+                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
         if not self.options.shared and self.options.enable_kits:
             raise ConanInvalidConfiguration("KITS can only be enabled with shared")
 
@@ -515,25 +463,18 @@ class VtkConan(ConanFile):
         return {
             "gcc": "9",
             "Visual Studio": "15.7",
+            "msvc": "191",
             "clang": "7",
             "apple-clang": "11",
         }
-
-        # TODO for debugging weird behaviour on mac on CCI
-        #if str(self.settings.compiler) != "apple-clang":
-            #raise ConanInvalidConfiguration("Not building, just want to focus on apple-clang for now")
-
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.options["libtiff"].jpeg = self.options.with_jpeg
 
-
     def layout(self):
         cmake_layout(self, src_folder="src")
-        # WTF resdirs # self.cpp.package.resdirs = ["res"]
-
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -549,7 +490,7 @@ class VtkConan(ConanFile):
         tc.variables["VTK_IGNORE_CMAKE_CXX11_CHECKS"] = True
 
 
-        # no need for versions on installed names?
+        # No need for versions on installed names
         tc.variables["VTK_VERSIONED_INSTALL"] = False
 
         # Turn these off for CCI
@@ -703,14 +644,9 @@ class VtkConan(ConanFile):
 
 
     def build(self):
-        if not self.no_copy_source:
-            self._patch_source()
-
-        # RunEnvironment needed to build shared version with ALL modules
-        # Still needed with 1.53.0 ? # env_build = RunEnvironment(self)
-        # Still needed with 1.53.0 ? # with environment_append(env_build.vars):
+        if not self.no_copy_source:     # might be done in def source()
+            apply_conandata_patches(self)
         cmake = CMake(self)
-            # Still needed with 1.53.0 ? # cmake.configure(build_script_folder=self.source_folder)
         cmake.configure()
         cmake.build()
 
@@ -756,23 +692,8 @@ class VtkConan(ConanFile):
 
 
     def package_info(self):
-        # Note: I don't currently import the explicit dependency list for each component from VTK,
-        # so every module will depend on "everything" external, and there are no internal dependencies.
-        # Consumers just have to figure out what they have to link.
-
-        # get keys as a list and make a list of target::target
-        all_requires = [k + "::" + k for k in self._third_party().keys()]
-
-        if self._is_module_enabled([self.options.group_enable_Rendering]):
-            all_requires += [ "opengl::opengl" ]
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                all_requires += [ "xorg::xorg" ]
-        all_requires.sort()
-
-
         # auto-include these .cmake files (generated by conan)
         vtk_cmake_build_modules = [self._module_file_rel_path]
-
 
         # Just generate 'config' version, FindVTK.cmake hasn't existed since CMake 3.1, according to:
         # https://cmake.org/cmake/help/latest/module/FindVTK.html
@@ -783,160 +704,224 @@ class VtkConan(ConanFile):
         self.cpp_info.builddirs = [os.path.join("lib", "cmake", "vtk")]
         self.cpp_info.set_property("cmake_build_modules", vtk_cmake_build_modules)
 
-        # Should not be added to the VTK::VTK target... right?
+        # FIXME Should not be added to the VTK::VTK target... right?
         # self.cpp_info.libdirs   = ["lib"]
 
         existing_libs = collect_libs(self, folder="lib")
 
-        if False:
-            # old way - work from the list of library files and build a component list
-            # does not handle internal module dependencies.
-            for libname in existing_libs:
-                comp = libname[3:]
-                self.cpp_info.components[comp].set_property("cmake_target_name", "VTK::" + comp)
-                self.cpp_info.components[comp].libs          = ["vtk" + comp]
-                # NEEDED with 1.53? # self.cpp_info.components[comp].libdirs       = ["lib"]
-                # NEEDED with 1.53? # # WTF resdirs # self.cpp_info.components[comp].resdirs       = ["res"]
-                self.cpp_info.components[comp].requires      = all_requires
+        # Specify what VTK 3rd party targets we are supplying with conan packages
+        # Note that we aren't using cmake_package::cmake_component here, this is for conan so we use conan package names.
+        thirds = {
+                # Format for this map:
+                # "VTK::module": "conan_package::conan_package",      # if the whole package required
+                # "VTK::module": "conan_package::package_component",  # if subcomponent required
+                "VTK::eigen":    "eigen::eigen",
+                "VTK::exprtk":   "exprtk::exprtk",
+                "VTK::expat":    "expat::expat",
+                "VTK::glew":     "glew::glew",
+                "VTK::fmt":      "fmt::fmt",
+                "VTK::freetype": "freetype::freetype",
+                "VTK::jsoncpp":  "jsoncpp::jsoncpp",
+                "VTK::libharu":  "libharu::libharu",
+                "VTK::libproj":  "proj::proj",
+                "VTK::lz4":      "lz4::lz4",
+                "VTK::lzma":     "xz_utils::xz_utils",
+                "VTK::png":      "libpng::libpng",
+                "VTK::pugixml":  "pugixml::pugixml",
+                "VTK::tiff":     "libtiff::libtiff",
+                "VTK::utf8":     "utfcpp::utfcpp",
+                "VTK::zlib":     "zlib::zlib",
+                "VTK::doubleconversion": "double-conversion::double-conversion",
+
+                # VTK::QtOpenGL doesn't currently exist in VTK, I have added this.
+                # Note that the component name is qt::qtOpenGL, different to CMake's target name
+                "VTK::QtOpenGL": "qt::qtOpenGL",
+                }
+
+        if self.options.with_jpeg == "libjpeg":
+            thirds["VTK::jpeg"] = "libjpeg::libjpeg"
+        elif self.options.with_jpeg == "libjpeg-turbo":
+            thirds["VTK::jpeg"] = "libjpeg-turbo::jpeg"
+
+        if self._is_module_enabled([self.options.group_enable_Rendering]):
+            thirds["VTK::opengl"] = "opengl::opengl"    # TODO can we always leave this in the thirds list?
+
+        # parse the modules.json file and generate a list of components
+        modfile = load(self, os.path.join(self.package_folder,"lib","conan","modules.json"))
+        vtkmods = json.loads(modfile)
+
+        if self._is_any_Qt_enabled:
+            # VTK::QtOpenGL doesn't currently exist in VTK, I have added this.
+            # Check it doesn't appear in the future, if so then we should check it out.
+            if "VTK::QtOpenGL" in vtkmods["modules"]:
+                raise ConanException("Did not expect to find VTK::QtOpenGL in modules.json - please investigate and adjust recipe")
+            vtkmods["modules"]["VTK::QtOpenGL"] = {
+                    "library_name": "EXTERNAL_LIB",
+                    "depends": [],
+                    "private_depends": [],
+                    }
+            # GUISupportQt requires Qt6::QtOpenGL as a dependency
+            vtkmods["modules"]["VTK::GUISupportQt"]["depends"].append("VTK::QtOpenGL")
+
+        self.output.info("All module keys: {}".format(vtkmods["modules"].keys()))
+
+        self.output.info(f"Found libs: {existing_libs}")
+        self.output.info("Processing modules")
+        for module_name in vtkmods["modules"]:
+            comp = module_name.split(':')[2]
+            comp_libname = vtkmods["modules"][module_name]["library_name"]
+
+            if comp_libname in existing_libs:
+                self.output.info(f"Processing module {module_name}")
+                self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
+                self.cpp_info.components[comp].libs          = [comp_libname]
+                # not sure how to be more specific here, the modules.json doesn't specify which other modules are required
+            elif module_name in thirds:
+                self.output.info("Processing external module {} --> {}".format(module_name, thirds[module_name]))
+                self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
+                self.cpp_info.components[comp].requires.append(thirds[module_name])
+            else:
+                self.output.warning(f"Skipping module (lib file does not exist) {module_name}")
+
+        # second loop for internal dependencies
+        for module_name in vtkmods["modules"]:
+            comp = module_name.split(':')[2]
+            if comp in self.cpp_info.components:
+
+                # always depend on the headers mini-module
+                # which also includes the cmake extra file definitions (declared afterwards)
+                self.cpp_info.components[comp].requires.append("headers")
+
+                # these are the public depends + private depends
+                # FIXME should private be added as a different kind of private-requires?
+                for section in ["depends", "private_depends"]:
+                    for dep in vtkmods["modules"][module_name][section]:
+                        dep_libname = vtkmods["modules"][dep]["library_name"]
+                        if dep_libname in existing_libs:
+                            depname = dep.split(':')[2]
+                            self.output.info(f"{comp}   depends on {depname}")
+                            self.cpp_info.components[comp].requires.append(depname)
+                        elif dep in thirds:
+                            extern = thirds[dep]
+                            self.output.info(f"{comp}   depends on external {dep} --> {extern}")
+                            self.cpp_info.components[comp].requires.append(extern)
+                        else:
+                            self.output.info(f"{comp}   skipping depends (lib file does not exist): {dep}")
+
+                # DEBUG # self.output.info("  Final deps: {}".format(self.cpp_info.components[comp].requires))
+
                 self.cpp_info.components[comp].set_property("cmake_build_modules", vtk_cmake_build_modules)
                 if self.settings.os in ("FreeBSD", "Linux"):
-                    self.cpp_info.system_libs.extend(["dl","pthread","m"])
+                    self.cpp_info.components[comp].system_libs.extend(["dl","pthread","m"])
+            else:
+                self.output.warning("Skipping module, did not become a component: {}".format(module_name))
 
-        else:
-            # Specify what VTK 3rd party targets we are supplying with conan packages
-            # Note that we aren't using cmake_package::cmake_component here, this is for conan so we use conan package names.
-            thirds = {
-                    # "VTK::module": "conan_package::conan_package",      # if the whole package required
-                    # "VTK::module": "conan_package::package_component",  # if subcomponent required
-                    "VTK::eigen":    "eigen::eigen",
-                    "VTK::exprtk":   "exprtk::exprtk",
-                    "VTK::expat":    "expat::expat",
-                    "VTK::glew":     "glew::glew",
-                    "VTK::fmt":      "fmt::fmt",
-                    "VTK::freetype": "freetype::freetype",
-                    "VTK::jsoncpp":  "jsoncpp::jsoncpp",
-                    "VTK::libharu":  "libharu::libharu",
-                    "VTK::libproj":  "proj::proj",
-                    "VTK::lz4":      "lz4::lz4",
-                    "VTK::lzma":     "xz_utils::xz_utils",
-                    "VTK::png":      "libpng::libpng",
-                    "VTK::pugixml":  "pugixml::pugixml",
-                    "VTK::tiff":     "libtiff::libtiff",
-                    "VTK::utf8":     "utfcpp::utfcpp",
-                    "VTK::zlib":     "zlib::zlib",
-                    "VTK::doubleconversion": "double-conversion::double-conversion",
 
-                    # VTK::QtOpenGL doesn't currently exist in VTK, I have added this.
-                    # Note that the component name is qt::qtOpenGL, different to CMake's target name
-                    "VTK::QtOpenGL": "qt::qtOpenGL",
+        # add some more system libs
+        if self.settings.os == "Windows" and "vtksys" in self.cpp_info.components:
+            self.cpp_info.components["vtksys"].system_libs = ["ws2_32", "dbghelp", "psapi"]
+
+        # All modules use the same include dir.
+        #
+        # Cannot just be vtk_include_dirs = "include",
+        # as vtk files include themselves with #include <vtkCommand.h>
+        # and the files can't find each other in the same dir when included with <>
+        #
+        # Plus, it is standard to include vtk files with #include <vtkWhatever.h>
+        #
+        # Note also we aren't using "-9" in include/vtk-9: VTK_VERSIONED_INSTALL=False
+        # With versioned_install, we would do: "include/vtk-%s" % self.short_version,
+        #
+
+        if self._is_any_Qt_enabled:
+            # VTK::QtOpenGL doesn't currently exist in VTK, I have added this.
+            # Check it doesn't appear in the future, if so then we should check it out.
+            if "VTK::QtOpenGL" in vtkmods["modules"]:
+                raise ConanException("Did not expect to find VTK::QtOpenGL in modules.json - please investigate and adjust recipe")
+            vtkmods["modules"]["VTK::QtOpenGL"] = {
+                    "library_name": "EXTERNAL_LIB",
+                    "depends": [],
+                    "private_depends": [],
                     }
 
-            if self.options.with_jpeg == "libjpeg":
-                thirds["VTK::jpeg"] = "libjpeg::libjpeg"
-            elif self.options.with_jpeg == "libjpeg-turbo":
-                thirds["VTK::jpeg"] = "libjpeg-turbo::jpeg"
+            # GUISupportQt requires Qt6::QtOpenGL as a dependency
+            vtkmods["modules"]["VTK::GUISupportQt"]["depends"].append("VTK::QtOpenGL")
 
-            if self._is_module_enabled([self.options.group_enable_Rendering]):
-                thirds["VTK::opengl"] = "opengl::opengl"    # TODO can we always leave this in the thirds list?
+        self.output.info(f"All module keys: {vtkmods['modules'].keys()}")
 
-            # TODO check out abseil recipe, it parses the generated cmake-targets file for extra info.
+        self.output.info(f"Found libs: {existing_libs}")
+        self.output.info("Processing modules")
+        for module_name in vtkmods["modules"]:
+            comp = module_name.split(':')[2]
+            comp_libname = vtkmods["modules"][module_name]["library_name"]
 
-            # new way - parse the modules.json file and generate a list of components
-            modfile = load(self, os.path.join(self.package_folder,"lib","conan","modules.json"))
-            vtkmods = json.loads(modfile)
+            if comp_libname in existing_libs:
+                self.output.info(f"Processing module {module_name}")
+                self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
+                self.cpp_info.components[comp].libs          = [comp_libname]
+                # NEEDED with 1.53? # self.cpp_info.components[comp].libdirs       = ["lib"]
+                # NEEDED with 1.53? # # WTF resdirs # self.cpp_info.components[comp].resdirs       = ["res"]
 
-            if self._is_any_Qt_enabled:
-                # VTK::QtOpenGL doesn't currently exist in VTK, I have added this.
-                # Check it doesn't appear in the future, if so then we should check it out.
-                if "VTK::QtOpenGL" in vtkmods["modules"]:
-                    raise ConanException("Did not expect to find VTK::QtOpenGL in modules.json - please investigate and adjust recipe")
-                vtkmods["modules"]["VTK::QtOpenGL"] = {
-                        "library_name": "EXTERNAL_LIB",
-                        "depends": [],
-                        "private_depends": [],
-                        }
+                # not sure how to be more specific here, the modules.json doesn't specify which other modules are required
+            elif module_name in thirds:
+                self.output.info(f"Processing external module {module_name} --> {thirds[module_name]}")
+                self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
+                self.cpp_info.components[comp].requires.append(thirds[module_name])
 
-                # GUISupportQt requires Qt6::QtOpenGL as a dependency
-                vtkmods["modules"]["VTK::GUISupportQt"]["depends"].append("VTK::QtOpenGL")
+            else:
+                self.output.warning(f"Skipping module (lib file does not exist) {module_name}")
 
-            self.output.info(f"All module keys: {vtkmods['modules'].keys()}")
+        # second loop for internal dependencies
+        for module_name in vtkmods["modules"]:
+            comp = module_name.split(':')[2]
+            if comp in self.cpp_info.components:
 
-            self.output.info(f"Found libs: {existing_libs}")
-            self.output.info("Processing modules")
-            for module_name in vtkmods["modules"]:
-                comp = module_name.split(':')[2]
-                comp_libname = vtkmods["modules"][module_name]["library_name"]
+                # always depend on the headers mini-module
+                # which also includes the cmake extra file definitions (declared afterwards)
+                self.cpp_info.components[comp].requires.append("headers")
 
-                if comp_libname in existing_libs:
-                    self.output.info(f"Processing module {module_name}")
-                    self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
-                    self.cpp_info.components[comp].libs          = [comp_libname]
-                    # NEEDED with 1.53? # self.cpp_info.components[comp].libdirs       = ["lib"]
-                    # NEEDED with 1.53? # # WTF resdirs # self.cpp_info.components[comp].resdirs       = ["res"]
+                # these are the public depends + private depends
+                # FIXME should private be added as a different kind of private-requires?
+                for section in ["depends", "private_depends"]:
+                    for dep in vtkmods["modules"][module_name][section]:
+                        dep_libname = vtkmods["modules"][dep]["library_name"]
+                        if dep_libname in existing_libs:
+                            depname = dep.split(':')[2]
+                            self.output.info(f"{comp}   depends on {depname}")
+                            self.cpp_info.components[comp].requires.append(depname)
+                        elif dep in thirds:
+                            extern = thirds[dep]
+                            self.output.info(f"{comp}   depends on external {dep} --> {extern}")
+                            self.cpp_info.components[comp].requires.append(extern)
+                        else:
+                            self.output.info(f"{comp}   skipping depends (lib file does not exist): {dep}")
 
-                    # not sure how to be more specific here, the modules.json doesn't specify which other modules are required
-                elif module_name in thirds:
-                    self.output.info(f"Processing external module {module_name} --> {thirds[module_name]}")
-                    self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
-                    self.cpp_info.components[comp].requires.append(thirds[module_name])
+                # DEBUG # self.output.info(f"  Final deps: {self.cpp_info.components[comp].requires}")
 
-                else:
-                    self.output.warning(f"Skipping module (lib file does not exist) {module_name}")
-
-                # this is how we used to add ALL the requires at once
-                # self.cpp_info.components[comp].requires      = all_requires.copy() # else, []
-
-            # second loop for internal dependencies
-            for module_name in vtkmods["modules"]:
-                comp = module_name.split(':')[2]
-                if comp in self.cpp_info.components:
-
-                    # always depend on the headers mini-module
-                    # which also includes the cmake extra file definitions (declared afterwards)
-                    self.cpp_info.components[comp].requires.append("headers")
-
-                    # these are the public depends + private depends
-                    # FIXME should private be added as a different kind of private-requires?
-                    for section in ["depends", "private_depends"]:
-                        for dep in vtkmods["modules"][module_name][section]:
-                            dep_libname = vtkmods["modules"][dep]["library_name"]
-                            if dep_libname in existing_libs:
-                                depname = dep.split(':')[2]
-                                self.output.info(f"{comp}   depends on {depname}")
-                                self.cpp_info.components[comp].requires.append(depname)
-                            elif dep in thirds:
-                                extern = thirds[dep]
-                                self.output.info(f"{comp}   depends on external {dep} --> {extern}")
-                                self.cpp_info.components[comp].requires.append(extern)
-                            else:
-                                self.output.info(f"{comp}   skipping depends (lib file does not exist): {dep}")
-
-                    # DEBUG # self.output.info(f"  Final deps: {self.cpp_info.components[comp].requires}")
-
-                    self.cpp_info.components[comp].set_property("cmake_build_modules", vtk_cmake_build_modules)
-                    if self.settings.os in ("FreeBSD", "Linux"):
-                        self.cpp_info.components[comp].system_libs.extend(["dl","pthread","m"])
-                else:
-                    self.output.warning(f"Skipping module, did not become a component: {module_name}")
+                self.cpp_info.components[comp].set_property("cmake_build_modules", vtk_cmake_build_modules)
+                if self.settings.os in ("FreeBSD", "Linux"):
+                    self.cpp_info.components[comp].system_libs.extend(["dl","pthread","m"])
+            else:
+                self.output.warning(f"Skipping module, did not become a component: {module_name}")
 
 
-            # add some more system libs
-            if self.settings.os == "Windows" and "vtksys" in self.cpp_info.components:
-                self.cpp_info.components["vtksys"].system_libs = ["ws2_32", "dbghelp", "psapi"]
+        # add some more system libs
+        if self.settings.os == "Windows" and "vtksys" in self.cpp_info.components:
+            self.cpp_info.components["vtksys"].system_libs = ["ws2_32", "dbghelp", "psapi"]
 
-            # All modules use the same include dir.
-            #
-            # Cannot just be vtk_include_dirs = "include",
-            # as vtk files include themselves with #include <vtkCommand.h>
-            # and the files can't find each other in the same dir when included with <>
-            #
-            # Plus, it is standard to include vtk files with #include <vtkWhatever.h>
-            #
-            # Note also we aren't using "-9" in include/vtk-9: VTK_VERSIONED_INSTALL=False
-            # With versioned_install, we would do: "include/vtk-%s" % self.short_version,
-            #
+        # All modules use the same include dir.
+        #
+        # Cannot just be vtk_include_dirs = "include",
+        # as vtk files include themselves with #include <vtkCommand.h>
+        # and the files can't find each other in the same dir when included with <>
+        #
+        # Plus, it is standard to include vtk files with #include <vtkWhatever.h>
+        #
+        # Note also we aren't using "-9" in include/vtk-9: VTK_VERSIONED_INSTALL=False
+        # With versioned_install, we would do: "include/vtk-%s" % self.short_version,
+        #
 
-            # mini component just for the headers and the cmake build modules
-            self.cpp_info.components["headers"].set_property("cmake_target_name", "headers")
-            self.cpp_info.components["headers"].includedirs = [os.path.join("include", "vtk")]
-            self.cpp_info.components["headers"].set_property("cmake_build_modules", vtk_cmake_build_modules)
+        # mini component just for the headers and the cmake build modules
+        self.cpp_info.components["headers"].set_property("cmake_target_name", "headers")
+        self.cpp_info.components["headers"].includedirs = [os.path.join("include", "vtk")]
+        self.cpp_info.components["headers"].set_property("cmake_build_modules", vtk_cmake_build_modules)
