@@ -97,6 +97,9 @@ class LibZipppConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["zippp" if self.options.shared else "zippp_static"]
 
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
+
         self.cpp_info.names["cmake_find_package"] = "libzippp"
         self.cpp_info.names["cmake_find_package_multi"] = "libzippp"
         self.cpp_info.set_property("cmake_file_name", "libzippp")
