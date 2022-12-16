@@ -82,15 +82,15 @@ class MBedTLSConan(ConanFile):
 
     def _jsonchema_installed(self):
         try:
-            interpreter = sys.executable
-            self.run(f"{interpreter} -m jsonschema --version")
+            self.run(f"{sys.executable} -m jsonschema --version")
             return True
         except:
+            self.output(f"{sys.execute} doesn't have jsonschema. This recipe will install jsonschema.")
             return False
 
     def build(self):
         if Version(self.version) >= "3.3.0" and not self._jsonchema_installed():
-            pip = os.path.join(os.path.dirname(sys.executable), "pip")
+            pip = os.path.join(os.path.dirname(sys.executable), os.path.basename(sys.executable).replace("python", "pip"))
             self.run(f"{pip} install jsonschema")
         cmake = CMake(self)
         cmake.configure()
