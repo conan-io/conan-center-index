@@ -21,6 +21,9 @@ class TestPackageConan(ConanFile):
             # FIXME: Remove once CMake on macOS/M1 CI runners is upgraded.
             self.build_requires("cmake/3.22.0")
 
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()

@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path, VCVars
@@ -199,29 +199,29 @@ class LibpqConan(ConanFile):
                 os.remove(file)
 
     def package(self):
-        self.copy(pattern="COPYRIGHT", dst="licenses", src=self.source_folder)
+        copy(self, pattern="COPYRIGHT", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder, keep_path=False)
         if is_msvc(self):
-            self.copy("*postgres_ext.h", src=self.source_folder, dst="include", keep_path=False)
-            self.copy("*pg_config.h", src=self.source_folder, dst="include", keep_path=False)
-            self.copy("*pg_config_ext.h", src=self.source_folder, dst="include", keep_path=False)
-            self.copy("*libpq-fe.h", src=self.source_folder, dst="include", keep_path=False)
-            self.copy("*libpq-events.h", src=self.source_folder, dst="include", keep_path=False)
-            self.copy("*.h", src=os.path.join(self.source_folder, "src", "include", "libpq"), dst=os.path.join("include", "libpq"), keep_path=False)
-            self.copy("*genbki.h", src=self.source_folder, dst=os.path.join("include", "catalog"), keep_path=False)
-            self.copy("*pg_type.h", src=self.source_folder, dst=os.path.join("include", "catalog"), keep_path=False)
+            copy(self, pattern="*postgres_ext.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
+            copy(self, pattern="*pg_config.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
+            copy(self, pattern="*pg_config_ext.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
+            copy(self, pattern="*libpq-fe.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
+            copy(self, pattern="*libpq-events.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
+            copy(self, pattern="*.h", dst=os.path.join(self.package_folder, os.path.join("include", "libpq")), src=os.path.join(self.source_folder, "src", "include", "libpq"), keep_path=False)
+            copy(self, pattern="*genbki.h", dst=os.path.join(self.package_folder, os.path.join("include", "catalog")), src=self.source_folder, keep_path=False)
+            copy(self, pattern="*pg_type.h", dst=os.path.join(self.package_folder, os.path.join("include", "catalog")), src=self.source_folder, keep_path=False)
             if self.options.shared:
-                self.copy("**/libpq.dll", src=self.source_folder, dst="bin", keep_path=False)
-                self.copy("**/libpq.lib", src=self.source_folder, dst="lib", keep_path=False)
+                copy(self, pattern="**/libpq.dll", dst=os.path.join(self.package_folder, "bin"), src=self.source_folder, keep_path=False)
+                copy(self, pattern="**/libpq.lib", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)
             else:
-                self.copy("*.lib", src=self.source_folder, dst="lib", keep_path=False)
+                copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)
         else:
             autotools = Autotools(self)
             autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
-            self._remove_unused_libraries_from_package()
 
             rmdir(self, os.path.join(self.package_folder, "include", "postgresql", "server"))
-            self.copy(pattern="*.h", dst=os.path.join("include", "catalog"), src=os.path.join(self.source_folder, "src", "include", "catalog"))
-        self.copy(pattern="*.h", dst=os.path.join("include", "catalog"), src=os.path.join(self.source_folder, "src", "backend", "catalog"))
+            copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include", "catalog"), src=os.path.join(self.source_folder, "src", "include", "catalog"), keep_path=False)
+        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include", "catalog"), src=os.path.join(self.source_folder, "src", "backend", "catalog"), keep_path=False)
+        self._remove_unused_libraries_from_package()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
@@ -248,21 +248,18 @@ class LibpqConan(ConanFile):
 
         if not self.options.shared:
             if is_msvc(self):
-                if self.version < "12":
-                    self.cpp_info.components["pgport"].libs = ["libpgport"]
-                    self.cpp_info.components["pq"].requires.extend(["pgport"])
-                else:
+                self.cpp_info.components["pgport"].libs = ["libpgport"]
+                self.cpp_info.components["pq"].requires.append("pgport")
+                if Version(self.version) >= "12":
                     self.cpp_info.components["pgcommon"].libs = ["libpgcommon"]
-                    self.cpp_info.components["pgport"].libs = ["libpgport"]
-                    self.cpp_info.components["pq"].requires.extend(["pgport", "pgcommon"])
+                    self.cpp_info.components["pq"].requires.append("pgcommon")
             else:
-                if Version(self.version) < "12":
-                    self.cpp_info.components["pgcommon"].libs = ["pgcommon"]
-                    self.cpp_info.components["pq"].requires.extend(["pgcommon"])
-                else:
-                    self.cpp_info.components["pgcommon"].libs = ["pgcommon", "pgcommon_shlib"]
+                self.cpp_info.components["pgcommon"].libs = ["pgcommon"]
+                self.cpp_info.components["pq"].requires.append("pgcommon")
+                if Version(self.version) >= "12":
+                    self.cpp_info.components["pgcommon"].libs.append("pgcommon_shlib")
                     self.cpp_info.components["pgport"].libs = ["pgport", "pgport_shlib"]
-                    self.cpp_info.components["pq"].requires.extend(["pgport", "pgcommon"])
+                    self.cpp_info.components["pq"].requires.append("pgport")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["pq"].system_libs = ["pthread"]
