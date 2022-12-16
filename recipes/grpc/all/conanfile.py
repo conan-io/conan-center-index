@@ -176,7 +176,9 @@ class grpcConan(ConanFile):
         self._cmake.definitions["gRPC_BUILD_GRPC_RUBY_PLUGIN"] = self.options.ruby_plugin
 
         # Consumed targets (abseil) via interface target_compiler_feature can propagate newer standards
-        if not valid_min_cppstd(self, self._cxxstd_required):
+        if valid_min_cppstd(self, 17):
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = 17
+        elif not valid_min_cppstd(self, self._cxxstd_required):
             self._cmake.definitions["CMAKE_CXX_STANDARD"] = self._cxxstd_required
 
         if cross_building(self):
