@@ -192,8 +192,9 @@ class LibpqConan(ConanFile):
                 os.path.join(self.package_folder, "bin", "*.dll"),
                 os.path.join(self.package_folder, "lib", "libpq*.dylib")
             ]
-        if self.settings.os == "Windows":
-            os.unlink(os.path.join(self.package_folder, "lib", "libpq.dll"))
+        dll_path = os.path.join(self.package_folder, "lib", "libpq.dll")
+        if self.settings.os == "Windows" and os.path.exists(dll_path):
+            os.unlink(dll_path)
         for globi in globs:
             for file in glob.glob(globi):
                 os.remove(file)
