@@ -86,7 +86,7 @@ class MBedTLSConan(ConanFile):
             self.run(f"{sys.executable} -m jsonschema --version")
             return True
         except:
-            self.output(f"{sys.execute} doesn't have jsonschema. This recipe will install jsonschema.")
+            print(f"{sys.executable} doesn't have jsonschema. This recipe will install jsonschema.")
             return False
 
     def build(self):
