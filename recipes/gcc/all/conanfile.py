@@ -88,11 +88,11 @@ class GccConan(ConanFile):
         tc.configure_args.append(
             f"--libexecdir={os.path.join(self.package_folder, 'bin', 'libexec')}"
         )
-        tc.configure_args.append(f"--with-zlib={self.deps_cpp_info['zlib'].rootpath}")
-        tc.configure_args.append(f"--with-isl={self.deps_cpp_info['isl'].rootpath}")
-        tc.configure_args.append(f"--with-gmp={self.deps_cpp_info['gmp'].rootpath}")
-        tc.configure_args.append(f"--with-mpc={self.deps_cpp_info['mpc'].rootpath}")
-        tc.configure_args.append(f"--with-mpfr={self.deps_cpp_info['mpfr'].rootpath}")
+        tc.configure_args.append(f"--with-zlib={self.dependencies['zlib'].package_folder}")
+        tc.configure_args.append(f"--with-isl={self.dependencies['isl'].package_folder}")
+        tc.configure_args.append(f"--with-gmp={self.dependencies['gmp'].package_folder}")
+        tc.configure_args.append(f"--with-mpc={self.dependencies['mpc'].package_folder}")
+        tc.configure_args.append(f"--with-mpfr={self.dependencies['mpfr'].package_folder}")
         tc.configure_args.append(f"--with-pkgversion=conan GCC {self.version}")
         tc.configure_args.append(f"--program-suffix=-{self.version}")
         tc.configure_args.append(f"--with-bugurl={self.url}/issues")
