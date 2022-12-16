@@ -20,7 +20,7 @@
 # - Modify build_requirements() to match the version of CMake that VTK tested with that release.
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.microsoft import check_min_vs, is_msvc
@@ -717,7 +717,7 @@ class VtkConan(ConanFile):
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "vtk", "conan-official-{}-variables.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "vtk", f"conan-official-{self.name}-variables.cmake")
 
 
     def package(self):
@@ -859,7 +859,7 @@ class VtkConan(ConanFile):
                 # GUISupportQt requires Qt6::QtOpenGL as a dependency
                 vtkmods["modules"]["VTK::GUISupportQt"]["depends"].append("VTK::QtOpenGL")
 
-            self.output.info("All module keys: {}".format(vtkmods["modules"].keys()))
+            self.output.info(f"All module keys: {vtkmods['modules'].keys()}")
 
             self.output.info(f"Found libs: {existing_libs}")
             self.output.info("Processing modules")
@@ -876,7 +876,7 @@ class VtkConan(ConanFile):
 
                     # not sure how to be more specific here, the modules.json doesn't specify which other modules are required
                 elif module_name in thirds:
-                    self.output.info("Processing external module {} --> {}".format(module_name, thirds[module_name]))
+                    self.output.info(f"Processing external module {module_name} --> {thirds[module_name]}")
                     self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
                     self.cpp_info.components[comp].requires.append(thirds[module_name])
 
@@ -911,13 +911,13 @@ class VtkConan(ConanFile):
                             else:
                                 self.output.info(f"{comp}   skipping depends (lib file does not exist): {dep}")
 
-                    # DEBUG # self.output.info("  Final deps: {}".format(self.cpp_info.components[comp].requires))
+                    # DEBUG # self.output.info(f"  Final deps: {self.cpp_info.components[comp].requires}")
 
                     self.cpp_info.components[comp].set_property("cmake_build_modules", vtk_cmake_build_modules)
                     if self.settings.os in ("FreeBSD", "Linux"):
                         self.cpp_info.components[comp].system_libs.extend(["dl","pthread","m"])
                 else:
-                    self.output.warning("Skipping module, did not become a component: {}".format(module_name))
+                    self.output.warning(f"Skipping module, did not become a component: {module_name}")
 
 
             # add some more system libs
