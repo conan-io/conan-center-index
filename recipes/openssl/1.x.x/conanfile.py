@@ -234,7 +234,7 @@ class OpenSSLConan(ConanFile):
         if self._settings_build.os == "Windows":
             if not self.win_bash:
                 self.tool_requires("strawberryperl/5.30.0.1")
-            if not self.options.no_asm and not shutil.which("nasm"):
+            if not self.options.no_asm:
                 self.tool_requires("nasm/2.15.05")
         if self.win_bash and not os.getenv("CONAN_BASH_PATH") and not self._use_nmake:
             self.build_requires("msys2/cci.latest")
