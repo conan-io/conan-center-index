@@ -3,8 +3,10 @@ from conan import ConanFile
 from conan.tools.files import get, rmdir, export_conandata_patches
 from conan.tools.files import apply_conandata_patches, copy
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
+from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.53.0"
 
 class LibFtdiConan(ConanFile):
     name = "libftdi"
@@ -39,19 +41,18 @@ class LibFtdiConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            if self.settings.compiler == "Visual Studio":
+            if is_msvc(self):
                 self.options.use_streaming = False
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # Boolean values are preferred instead of "ON"/"OFF"
         tc.variables["BUILD_TESTS"] = False
         tc.variables["EXAMPLES"] = False
         tc.variables["FTDI_EEPROM"] = self.options.build_eeprom_tool
@@ -59,7 +60,6 @@ class LibFtdiConan(ConanFile):
         tc.variables["ENABLE_STREAMING"] = self.options.use_streaming
         tc.variables["LIB_SUFFIX"] = ""
         tc.generate()
-        # In case there are dependencies listed on requirements, CMakeDeps should be used
         tc = CMakeDeps(self)
         tc.generate()
 
@@ -69,7 +69,7 @@ class LibFtdiConan(ConanFile):
             self.requires("boost/1.75.0")
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio" and self.options.use_streaming:
+        if is_msvc(self) and self.options.use_streaming:
             raise ConanInvalidConfiguration("VS doesn't not compile with enabled option use_streaming")
 
     def build(self):
@@ -82,17 +82,18 @@ class LibFtdiConan(ConanFile):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        lib_folder = os.path.join(self.package_folder, "lib",)
+        lib_folder = os.path.join(self.package_folder, "lib")
         rmdir(self, os.path.join(lib_folder, "cmake"))
         rmdir(self, os.path.join(lib_folder, "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names['cmake_find_package'] = "LibFTDI1"
-        self.cpp_info.names['cmake_find_package_multi'] = "LibFTDI1"
+        self.cpp_info.set_property("cmake_file_name", "LibFTDI1")
+        self.cpp_info.components["ftdi"].set_property("pkg_config_name", "libftdi1")
         self.cpp_info.components["ftdi"].libs = ["ftdi1"]
         self.cpp_info.components["ftdi"].requires = ["libusb::libusb"]
         self.cpp_info.components["ftdi"].includedirs.append(os.path.join("include", "libftdi1"))
 
         if self.options.enable_cpp_wrapper:
+            self.cpp_info.components["ftdipp"].set_property("pkg_config_name", "libftdipp1")
             self.cpp_info.components["ftdipp"].libs = ["ftdipp1"]
             self.cpp_info.components["ftdipp"].requires = ["ftdi", "boost::headers"]

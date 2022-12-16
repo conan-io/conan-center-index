@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.10)
 
 project(test_package LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
 
 find_package(LibFTDI1 REQUIRED)
 
