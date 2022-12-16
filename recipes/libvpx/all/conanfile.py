@@ -155,14 +155,16 @@ class LibVPXConan(ConanFile):
                 'mips': 'mips32',
                 'mips64': 'mips64',
                 'sparc': 'sparc'}.get(str(self.settings.arch))
-        if is_msvc(self):
-            if self.settings.compiler == "Visual Studio":
-                vc_version = self.settings.compiler.version
-            else:
-                vc_version = msvc_version_to_vs_ide_version(self.settings.compiler.version)
+        if self.settings.compiler == "Visual Studio":
+            vc_version = self.settings.compiler.version
+            compiler = f"vs{vc_version}"
+        elif is_msvc(self):
+            vc_version = msvc_version_to_vs_ide_version(self.settings.compiler.version)
             compiler = f"vs{vc_version}"
         elif self.settings.compiler in ["gcc", "clang", "apple-clang"]:
             compiler = 'gcc'
+        else:
+            raise ConanInvalidConfiguration(f"Unknown compiler '{self.settings.compiler}'")
 
         host_os = str(self.settings.os)
         if host_os == 'Windows':
