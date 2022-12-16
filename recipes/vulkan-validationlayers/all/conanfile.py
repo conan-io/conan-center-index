@@ -3,7 +3,7 @@ from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, rm
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import functools
@@ -64,7 +64,6 @@ class VulkanValidationLayersConan(ConanFile):
         copy(self, f"dependencies/{self._dependencies_filename}", self.recipe_folder, self.export_folder)
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
         export_conandata_patches(self)
 
     def config_options(self):
@@ -116,7 +115,8 @@ class VulkanValidationLayersConan(ConanFile):
         env.generate()
 
         tc = CMakeToolchain(self)
-        tc.variables["VULKAN_HEADERS_INSTALL_DIR"] = self.dependencies["vulkan-headers"].package_folder.replace("\\", "/")
+        if Version(self.version) < "1.3.234":
+            tc.variables["VULKAN_HEADERS_INSTALL_DIR"] = self.dependencies["vulkan-headers"].package_folder.replace("\\", "/")
         tc.variables["USE_CCACHE"] = False
         if self.settings.os in ["Linux", "FreeBSD"]:
             tc.variables["BUILD_WSI_XCB_SUPPORT"] = self.options.with_wsi_xcb
@@ -142,23 +142,6 @@ class VulkanValidationLayersConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        if Version(self.version) < "1.3.234":
-            # Unusual but prefer custom FindVulkanHeaders.cmake from upstream instead of config file of conan
-            replace_in_file(self, cmakelists,
-                                  "find_package(VulkanHeaders REQUIRED)",
-                                  "find_package(VulkanHeaders REQUIRED MODULE)")
-            replace_in_file(self, os.path.join(self.source_folder, "cmake", "FindVulkanHeaders.cmake"),
-                                  "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
-                                  "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
-        # Ensure to use upstream FindWayland.cmake
-        if self._needs_wayland_for_build:
-            replace_in_file(self, cmakelists,
-                                  "find_package(Wayland REQUIRED)",
-                                  "find_package(Wayland REQUIRED MODULE)")
-        # Useless and may fail
-        if Version(self.version) >= "1.3.231":
-            replace_in_file(self, cmakelists, "include(VVLGenerateSourceCode)", "")
         # FIXME: two CMake module/config files should be generated (SPIRV-ToolsConfig.cmake and SPIRV-Tools-optConfig.cmake),
         # but it can't be modeled right now in spirv-tools recipe
         if not os.path.exists(os.path.join(self.generators_folder, "SPIRV-Tools-optConfig.cmake")):
@@ -170,7 +153,7 @@ class VulkanValidationLayersConan(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        cmake.configure()
         cmake.build()
 
     def package(self):
