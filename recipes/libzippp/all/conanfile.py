@@ -58,6 +58,9 @@ class LibZipppConan(ConanFile):
         if libzippp_version != "4.0" and len(libzippp_version.split("-")) != 2:
             raise ConanInvalidConfiguration("{}: version number must include '-'. (ex. '5.0-1.8.0')".format(self.name))
 
+        if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support clang with libc++. Use libstdc++ instead.")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
