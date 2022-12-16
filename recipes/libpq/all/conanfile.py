@@ -94,7 +94,6 @@ class LibpqConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        self._patch_sources()
         if is_msvc(self):
             vcvars = VCVars(self)
             vcvars.generate()
@@ -133,18 +132,12 @@ class LibpqConan(ConanFile):
             replace_in_file(self,os.path.join(self.source_folder, "src", "tools", "msvc", "Project.pm"),
                                   "libraries             => [],",
                                   "libraries             => [{}],".format(system_libs))
-            if self.settings.compiler == "Visual Studio":
-                runtime = {
-                    "MT": "MultiThreaded",
-                    "MTd": "MultiThreadedDebug",
-                    "MD": "MultiThreadedDLL",
-                    "MDd": "MultiThreadedDebugDLL",
-                }.get(msvc_runtime_flag(self))
-            else:
-                runtime = "MultiThreaded{}{}".format(
-                    "Debug" if self.settings.compiler.runtime_type == "Debug" else "",
-                    "DLL" if self.settings.compiler.runtime == "dynamic" else "",
-                )
+            runtime = {
+                "MT": "MultiThreaded",
+                "MTd": "MultiThreadedDebug",
+                "MD": "MultiThreadedDLL",
+                "MDd": "MultiThreadedDebugDLL",
+            }.get(msvc_runtime_flag(self))
             msbuild_project_pm = os.path.join(self.source_folder, "src", "tools", "msvc", "MSBuildProject.pm")
             replace_in_file(self,msbuild_project_pm, "</Link>", """</Link>
     <Lib>
@@ -170,6 +163,7 @@ class LibpqConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        self._patch_sources()
         if is_msvc(self):
             workdir = os.path.join(self.source_folder, "src", "tools", "msvc")
             self.run("perl build.pl libpq", cwd=workdir)
