@@ -8,11 +8,11 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars, unix_path, msvc_runtime_flag
 from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
 from conan.tools.scm import Version
-from conans.tools import stdcpp_library # TODO: import from conan.tools.build in conan 1.54.0 (https://github.com/conan-io/conan/pull/12269)
+from conan.tools.build import stdcpp_library
 import os
 import re
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class LibVPXConan(ConanFile):
