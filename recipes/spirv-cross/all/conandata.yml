@@ -45,6 +45,9 @@ sources:
     url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/2020-04-03.tar.gz"
     sha256: "93f3a6dfad17c9ca0bf4d2d80809e90118e13b47502eb395baba8784025d7e97"
 patches:
+  "1.3.236.0":
+    - patch_file: "patches/1.3.236.0-0001-fix-gcc5.patch"
+      base_path: "source_subfolder"
   "cci.20210621":
     - patch_file: "patches/0001-fix-bundle-install-cci.20210621.patch"
       base_path: "source_subfolder"
