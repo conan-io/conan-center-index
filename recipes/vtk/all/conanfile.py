@@ -39,8 +39,32 @@ required_conan_version = ">=1.53.0"
 
 
 # for self.options.group_* and self.options.
-def _is_module_enabled(flag):
+
+# https://vtk.org/doc/nightly/html/group__module.html
+# QUOTE #
+# QUOTE # Modules and groups are enable and disable preferences are specified using a 5-way flag setting:
+# QUOTE #
+# QUOTE # YES: The module or group must be built.
+# QUOTE # NO: The module or group must not be built.
+# QUOTE # WANT: The module or group should be built if possible.
+# QUOTE # DONT_WANT: The module or group should only be built if required (e.g., via a dependency).
+# QUOTE # DEFAULT: Acts as either WANT or DONT_WANT based on the group settings for the module or WANT_BY_DEFAULT option to vtk_module_scan if no other preference is specified. This is usually handled via another setting in the main project.
+# QUOTE # If a YES module preference requires a module with a NO preference, an error is raised.
+# QUOTE #
+# QUOTE # A module with a setting of DEFAULT will look for its first non-DEFAULT group setting and only if all of those are set to DEFAULT is the WANT_BY_DEFAULT setting used.
+
+# This means we don't truly know what is required until after configuration,
+# and we can't configure without the correct requires!
+# So we will just do our best and the consumer can adjust as required.
+
+# See notes below in _is_module_enabled()
+
+def _is_module_YES_or_WANT(flag):
     return flag in ["YES", "WANT"]
+
+def _is_module_NO(flag):
+    return flag in ["NO"]
+
 
 
 
@@ -288,6 +312,41 @@ class VtkConan(ConanFile):
             }
 
 
+    # If build_all_modules=True, then we will ask the consumer will set modules=NO if they really don't want that requirement.
+    # Else, if build_all_modules=False, then we will ask the consumer to set modules=YES/WANT to get the requirement.
+    #
+    # options_to_check is a list/array
+    def _is_module_enabled(self, options_to_check):
+        # assume module is enabled if any of the options_to_check are WANT or YES,
+        # but assume module is DISABLED if build_all_modules=True and ALL of the options_to_check are "NO"
+        #
+        # See notes above, VTK may do even deeper checks but this hopefully will be good enough.
+        #
+        if self.options.build_all_modules:
+            for option in options_to_check:
+                if not _is_module_NO(option):
+                    return True # something was not 'NO', then this module is at least partially enabled
+            # ALL are NO, then assume this module is disabled
+            return False
+        else:
+            for option in options_to_check:
+                if _is_module_YES_or_WANT(option):
+                    return True
+            return False
+
+
+    # special case for QT as it is more involved
+    @property
+    def _is_any_Qt_enabled(self):
+        return self._is_module_enabled([
+            self.options.group_enable_Qt,
+            self.options.module_enable_GUISupportQt,
+            self.options.module_enable_GUISupportQtQuick,
+            self.options.module_enable_GUISupportQtSQL,
+            self.options.module_enable_RenderingQt,
+            self.options.module_enable_ViewsQt
+            ])
+
 
     def _patch_source(self):
         # Note that VTK's cmake will insert its own CMAKE_MODULE_PATH at the
@@ -370,7 +429,7 @@ class VtkConan(ConanFile):
             parties["jpeg"] = "libjpeg-turbo/2.1.2"
 
 
-        if self.options.build_all_modules or _is_module_enabled(self.options.group_enable_StandAlone):
+        if self._is_module_enabled([self.options.group_enable_StandAlone]):
             parties["hdf5"]    = "hdf5/1.13.1"
             parties["theora"]  = "theora/1.1.1"
             parties["ogg"]     = "ogg/1.3.5"
@@ -387,20 +446,14 @@ class VtkConan(ConanFile):
             parties["openvr"] = "openvr/1.16.8"
             parties["odbc"]   = "odbc/2.3.9"
 
-        if (self.options.build_all_modules
-                or _is_module_enabled(self.options.group_enable_Qt)
-                or _is_module_enabled(self.options.module_enable_GUISupportQt)
-                or _is_module_enabled(self.options.module_enable_GUISupportQtQuick)
-                or _is_module_enabled(self.options.module_enable_GUISupportQtSQL)
-                or _is_module_enabled(self.options.module_enable_RenderingQt)
-                or _is_module_enabled(self.options.module_enable_ViewsQt)):
+        if self._is_any_Qt_enabled:
             parties["qt"] = "qt/6.3.1"
 
         return parties
 
 
     def requirements(self):
-        if _is_module_enabled(self.options.group_enable_Rendering):
+        if self._is_module_enabled([self.options.group_enable_Rendering]):
             self.requires("opengl/system")
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.requires("xorg/system")
@@ -423,7 +476,7 @@ class VtkConan(ConanFile):
         if not self.options.shared and self.options.enable_kits:
             raise ConanInvalidConfiguration("KITS can only be enabled with shared")
 
-        if _is_module_enabled(self.options.group_enable_Web) and not self.options.wrap_python:
+        if self._is_module_enabled([self.options.group_enable_Web]) and not self.options.wrap_python:
             raise ConanInvalidConfiguration("group_enable_Web can only be enabled with wrap_python")
 
         if self.options.wrap_python and not self.options.enable_wrapping:
@@ -706,7 +759,7 @@ class VtkConan(ConanFile):
         # get keys as a list and make a list of target::target
         all_requires = [k + "::" + k for k in self._third_party().keys()]
 
-        if _is_module_enabled(self.options.group_enable_Rendering):
+        if self._is_module_enabled([self.options.group_enable_Rendering]):
             all_requires += [ "opengl::opengl" ]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 all_requires += [ "xorg::xorg" ]
@@ -746,12 +799,11 @@ class VtkConan(ConanFile):
                     self.cpp_info.system_libs.extend(["dl","pthread","m"])
 
         else:
-            # hard code the replacement 3rd party targets we are supplying,
-            # it doesn't seem to be listed in VTK anywhere
+            # Specify what VTK 3rd party targets we are supplying with conan packages
+            # Note that we aren't using cmake_package::cmake_component here, this is for conan so we use conan package names.
             thirds = {
                     # "VTK::module": "conan_package::conan_package",      # if the whole package required
                     # "VTK::module": "conan_package::package_component",  # if subcomponent required
-                    # Note that we aren't using the cmake package::component here, this is for conan.
                     "VTK::eigen":    "eigen::eigen",
                     "VTK::exprtk":   "exprtk::exprtk",
                     "VTK::expat":    "expat::expat",
@@ -780,8 +832,8 @@ class VtkConan(ConanFile):
             elif self.options.with_jpeg == "libjpeg-turbo":
                 thirds["VTK::jpeg"] = "libjpeg-turbo::jpeg"
 
-            if _is_module_enabled(self.options.group_enable_Rendering):
-                thirds["VTK::opengl"] = "opengl::opengl"
+            if self._is_module_enabled([self.options.group_enable_Rendering]):
+                thirds["VTK::opengl"] = "opengl::opengl"    # TODO can we always leave this in the thirds list?
 
             # TODO check out abseil recipe, it parses the generated cmake-targets file for extra info.
 
@@ -789,15 +841,19 @@ class VtkConan(ConanFile):
             modfile = load(self, os.path.join(self.package_folder,"lib","conan","modules.json"))
             vtkmods = json.loads(modfile)
 
-            # VTK::QtOpenGL doesn't currently exist in VTK, I have added this.
-            vtkmods["modules"]["VTK::QtOpenGL"] = {
-                    "library_name": "EXTERNAL_LIB",
-                    "depends": [],
-                    "private_depends": [],
-                    }
+            if self._is_any_Qt_enabled:
+                # VTK::QtOpenGL doesn't currently exist in VTK, I have added this.
+                # Check it doesn't appear in the future, if so then we should check it out.
+                if "VTK::QtOpenGL" in vtkmods["modules"]:
+                    raise ConanException("Did not expect to find VTK::QtOpenGL in modules.json - please investigate and adjust recipe")
+                vtkmods["modules"]["VTK::QtOpenGL"] = {
+                        "library_name": "EXTERNAL_LIB",
+                        "depends": [],
+                        "private_depends": [],
+                        }
 
-            # GUISupportQt requires Qt6::QtOpenGL as a dependency
-            vtkmods["modules"]["VTK::GUISupportQt"]["depends"].append("VTK::QtOpenGL")
+                # GUISupportQt requires Qt6::QtOpenGL as a dependency
+                vtkmods["modules"]["VTK::GUISupportQt"]["depends"].append("VTK::QtOpenGL")
 
             self.output.info("All module keys: {}".format(vtkmods["modules"].keys()))
 
