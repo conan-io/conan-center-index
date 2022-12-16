@@ -1,9 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path, VCVars
 from conan.tools.files import replace_in_file, rmdir
@@ -171,10 +171,10 @@ class LibpqConan(ConanFile):
             env.define("CONFIG", config)
             build_env.generate()
 
-            dir = os.path.join(self.source_folder, "src", "tools", "msvc")
-            self.run("perl build.pl libpq", cwd=dir)
+            workdir = os.path.join(self.source_folder, "src", "tools", "msvc")
+            self.run("perl build.pl libpq", cwd=workdir)
             if not self.options.shared:
-                self.run("perl build.pl libpgport", cwd=dir)
+                self.run("perl build.pl libpgport", cwd=workdir)
         else:
             autotools = Autotools(self)
             autotools.configure()
