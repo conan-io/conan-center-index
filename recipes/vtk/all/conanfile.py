@@ -435,9 +435,11 @@ class VtkConan(ConanFile):
         if self.options.use_tk and not self.options.wrap_python:
             raise ConanInvalidConfiguration("use_tk can only be enabled with wrap_python")
 
-        libtiff = self.dependencies["libtiff"]
-        if libtiff.options.jpeg != self.info.options.with_jpeg:
+        if self.dependencies["libtiff"].options.jpeg != self.info.options.with_jpeg:
             raise ConanInvalidConfiguration(f"{self.ref} requires option value {self.name}:with_jpeg equal to libtiff:jpeg.")
+
+        if self.dependencies["pugixml"].options.wchar_mode:
+            raise ConanInvalidConfiguration(f"{self.ref} requires pugixml:wchar_mode=False")
 
 
     def export_sources(self):
