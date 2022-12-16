@@ -1,4 +1,7 @@
 sources:
+  "2.0.9":
+    url: "https://github.com/simdutf/simdutf/archive/v2.0.9.tar.gz"
+    sha256: "ff6a19de4c23671e7f1077cf6c0f60bc01197f29c6e4f56fa485c9cd732576ac"
   "2.0.8":
     url: "https://github.com/simdutf/simdutf/archive/refs/tags/v2.0.8.tar.gz"
     sha256: "bd7aa550a8d9a1aba2c0b4eb2088f90c964375b13394f9076f7ba49f51dc40b5"
@@ -15,6 +18,10 @@ sources:
     url: "https://github.com/simdutf/simdutf/archive/refs/tags/v1.0.1.tar.gz"
     sha256: "e7832ba58fb95fe00de76dbbb2f17d844a7ad02a6f5e3e9e5ce9520e820049a0"
 patches:
+  "2.0.9":
+    - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
+      patch_description: "remove static build, enable rpath on macOS"
+      patch_type: "conan"
   "2.0.8":
     - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
       patch_description: "remove static build, enable rpath on macOS"
@@ -35,7 +42,8 @@ patches:
       patch_type: "portability"
   "2.0.2":
     - patch_file: "patches/2.0.2-0001-fix-cmake.patch"
-      patch_description: "remove static build, stop to link static libc++ and enable rpath on macOS"
+      patch_description: "remove static build, stop to link static libc++ and enable\
+        \ rpath on macOS"
       patch_type: "conan"
     - patch_file: "patches/2.0.2-0002-add-workaround-gcc9.patch"
       patch_description: "apply gcc8 workaround to gcc9"
