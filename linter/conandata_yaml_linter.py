@@ -104,7 +104,7 @@ def main():
 def pretty_print_yaml_validate_error(args, error):
     snippet = error.context_mark.get_snippet().replace("\n", "%0A")
     print(
-        f"::error file={args.path},line={error.context_mark.line},endline={error.problem_mark.line},"
+        f"::error file={args.path},line={error.context_mark.line},endline={error.problem_mark.line+1},"
         f"title=conandata.yml schema error"
         f"::Schema outlined in {CONANDATA_YAML_URL}#patches-fields is not followed.%0A%0A{error.problem} in %0A{snippet}%0A"
     )
