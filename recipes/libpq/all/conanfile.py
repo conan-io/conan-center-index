@@ -1,11 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path, VCVars
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, VCVars
 from conan.tools.files import replace_in_file, rmdir
 from conan.tools.scm import Version
 import os
@@ -75,7 +76,7 @@ class LibpqConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
 
     def validate(self):
         if self.settings.os == "Windows" and self.settings.compiler == "gcc" and self.options.shared:
@@ -93,9 +94,15 @@ class LibpqConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        self._patch_sources()
         if is_msvc(self):
             vcvars = VCVars(self)
             vcvars.generate()
+            config = "DEBUG" if self.settings.build_type == "Debug" else "RELEASE"
+            build_env = VirtualRunEnv(self)
+            env = build_env.environment()
+            env.define("CONFIG", config)
+            build_env.generate()
         else:
             if not cross_building(self):
                 env = VirtualRunEnv(self)
@@ -115,8 +122,6 @@ class LibpqConan(ConanFile):
             tc.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
-
         if is_msvc(self):
             # https://www.postgresql.org/docs/8.3/install-win32-libpq.html
             # https://github.com/postgres/postgres/blob/master/src/tools/msvc/README
@@ -134,7 +139,7 @@ class LibpqConan(ConanFile):
                     "MTd": "MultiThreadedDebug",
                     "MD": "MultiThreadedDLL",
                     "MDd": "MultiThreadedDebugDLL",
-                }.get(str(self.settings.compiler.runtime))
+                }.get(msvc_runtime_flag(self))
             else:
                 runtime = "MultiThreaded{}{}".format(
                     "Debug" if self.settings.compiler.runtime_type == "Debug" else "",
@@ -150,27 +155,22 @@ class LibpqConan(ConanFile):
             config_default_pl = os.path.join(self.source_folder, "src", "tools", "msvc", "config_default.pl")
             solution_pm = os.path.join(self.source_folder, "src", "tools", "msvc", "Solution.pm")
             if self.options.with_openssl:
+                openssl = self.dependencies["openssl"]
                 for ssl in ["VC\libssl32", "VC\libssl64", "libssl"]:
                     replace_in_file(self,solution_pm,
                                           "%s.lib" % ssl,
-                                          "%s.lib" % self.deps_cpp_info["openssl"].libs[0])
+                                          "%s.lib" % openssl.libs[0])
                 for crypto in ["VC\libcrypto32", "VC\libcrypto64", "libcrypto"]:
                     replace_in_file(self,solution_pm,
                                           "%s.lib" % crypto,
-                                          "%s.lib" % self.deps_cpp_info["openssl"].libs[1])
+                                          "%s.lib" % openssl.libs[1])
                 replace_in_file(self,config_default_pl,
                                       "openssl   => undef",
-                                      "openssl   => '%s'" % self.deps_cpp_info["openssl"].rootpath.replace("\\", "/"))
+                                      "openssl   => '%s'" % openssl.package_folder.replace("\\", "/"))
 
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         if is_msvc(self):
-            config = "DEBUG" if self.settings.build_type == "Debug" else "RELEASE"
-            build_env = VirtualRunEnv(self)
-            env = build_env.environment()
-            env.define("CONFIG", config)
-            build_env.generate()
-
             workdir = os.path.join(self.source_folder, "src", "tools", "msvc")
             self.run("perl build.pl libpq", cwd=workdir)
             if not self.options.shared:
@@ -224,6 +224,7 @@ class LibpqConan(ConanFile):
         self._remove_unused_libraries_from_package()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        fix_apple_shared_install_name(self)
 
     def _construct_library_name(self, name):
         if is_msvc(self):

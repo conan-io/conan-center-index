@@ -9,9 +9,6 @@ class TestPackageConan(ConanFile):
     generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
     test_type = "explicit"
 
-    def layout(self):
-        cmake_layout(self)
-
     def build_requirements(self):
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             # Workaround for CMake bug with error message:
