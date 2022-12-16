@@ -10,17 +10,19 @@ class SVTAV1Conan(ConanFile):
     name = "libsvtav1"
     license = "BSD-3-Clause"
     description = "An AV1-compliant software encoder/decoder library"
-    topics = "encoder", "ffmpeg", "av1"
+    topics = "av1", "codec", "encoder", "ffmpeg", "video"
     homepage = "https://gitlab.com/AOMediaCodec/SVT-AV1"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "shared": [True, False],
         "fPIC": [True, False],
         "build_encoder": [True, False],
         "build_decoder": [True, False],
     }
     default_options = {
-        "fPIC": False,
+        "shared": False,
+        "fPIC": True,
         "build_encoder": True,
         "build_decoder": True,
     }
@@ -29,12 +31,16 @@ class SVTAV1Conan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def build_requirements(self):
         if self.settings.arch in ("x86", "x86_64"):
             self.tool_requires("nasm/2.15.05")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -44,6 +50,7 @@ class SVTAV1Conan(ConanFile):
         tc.variables["BUILD_APPS"] = False
         tc.variables["BUILD_DEC"] = self.options.build_decoder
         tc.variables["BUILD_ENC"] = self.options.build_encoder
+        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         if self.settings.arch in ("x86", "x86_64"):
             tc.variables["ENABLE_NASM"] = True
         tc.generate()
