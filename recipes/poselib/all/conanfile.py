@@ -83,7 +83,10 @@ class PoseLibConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["PoseLib"]
+        if self.settings.build_type == "Debug":
+            self.cpp_info.libs = ["PoseLibd"]
+        else:
+            self.cpp_info.libs = ["PoseLib"]
 
         self.cpp_info.set_property("cmake_file_name", "poselib")
         self.cpp_info.set_property("cmake_target_name", "poselib::poselib")
