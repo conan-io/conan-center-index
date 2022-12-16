@@ -79,7 +79,16 @@ class MBedTLSConan(ConanFile):
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
+    def _jsonchema_installed(self):
+        try:
+            import jsonschema
+            return True
+        except:
+            return False
+
     def build(self):
+        if Version(self.version) >= "3.3.0" and not self._jsonchema_installed():
+            self.run("pip install jsonschema")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
