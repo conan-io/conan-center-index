@@ -308,6 +308,7 @@ class VtkConan(ConanFile):
             "module_CommonArchive":     "NO",
 
             # kissfft - we want the double format (also known as kiss_fft_scalar)
+            # FIXME should this be in configure/validate? I recall it was required for some reason...
             "kissfft:datatype": "double",
             }
 
