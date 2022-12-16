@@ -405,10 +405,10 @@ class VtkConan(ConanFile):
         parties = {
                 # LEFT field:  target name for linking, will be used as TARGET::TARGET in package_info()
                 # RIGHT field: package/version to require
-                "cli11":             "cli11/2.2.0",
-                "double-conversion": "double-conversion/3.2.0",
+                "cli11":             "cli11/2.3.1",
+                "double-conversion": "double-conversion/3.2.1",
                 "eigen":             "eigen/3.4.0",
-                "expat":             "expat/2.4.8",
+                "expat":             "expat/2.5.0",
                 "exprtk":            "exprtk/0.0.1",
                 "fmt":               "fmt/8.1.1",      # 9.1.0 release docs mention a PR - confirmed merged 8.1.0
                 "freetype":          "freetype/2.12.1",
@@ -416,21 +416,21 @@ class VtkConan(ConanFile):
                 "jsoncpp":           "jsoncpp/1.9.5",
                 "libharu":           "libharu/2.4.3",
                 "kissfft":           "kissfft/131.1.0",
-                "lz4":               "lz4/1.9.3",
-                "libpng":            "libpng/1.6.37",
+                "lz4":               "lz4/1.9.4",
+                "libpng":            "libpng/1.6.39",
                 "proj":              "proj/9.0.1", # if MAJOR version changes, update ThirdParty/libproj/CMakeLists.txt
-                "pugixml":           "pugixml/1.12.1",
-                "sqlite3":           "sqlite3/3.38.5",
-                "utfcpp":            "utfcpp/3.2.1",
+                "pugixml":           "pugixml/1.13",
+                "sqlite3":           "sqlite3/3.40.0",
+                "utfcpp":            "utfcpp/3.2.2",
                 "xz_utils":          "xz_utils/5.2.5", # note: VTK calls this lzma
-                "zlib":              "zlib/1.2.12",
-                "TIFF":              "libtiff/4.3.0",
+                "zlib":              "zlib/1.2.13",
+                "TIFF":              "libtiff/4.4.0",
                 }
 
         if self.options.with_jpeg == "libjpeg":
             parties["jpeg"] = "libjpeg/9e"
         elif self.options.with_jpeg == "libjpeg-turbo":
-            parties["jpeg"] = "libjpeg-turbo/2.1.2"
+            parties["jpeg"] = "libjpeg-turbo/2.1.4"
 
 
         if self._is_module_enabled([self.options.group_enable_StandAlone]):
@@ -438,7 +438,7 @@ class VtkConan(ConanFile):
             parties["theora"]  = "theora/1.1.1"
             parties["ogg"]     = "ogg/1.3.5"
             parties["netcdf"]  = "netcdf/4.8.1"
-            parties["libxml2"] = "libxml2/2.9.14"
+            parties["libxml2"] = "libxml2/2.10.3"
             parties["cgns"]    = "cgns/4.3.0"
 
         # unused
@@ -446,12 +446,12 @@ class VtkConan(ConanFile):
             parties["zfp"]     = "zfp/0.5.5"
 
         if self.options.build_all_modules:
-            parties["boost"]  = "boost/1.79.0"
+            parties["boost"]  = "boost/1.80.0"
             parties["openvr"] = "openvr/1.16.8"
-            parties["odbc"]   = "odbc/2.3.9"
+            parties["odbc"]   = "odbc/2.3.11"
 
         if self._is_any_Qt_enabled:
-            parties["qt"] = "qt/6.3.1"
+            parties["qt"] = "qt/6.4.1"
 
         return parties
 
