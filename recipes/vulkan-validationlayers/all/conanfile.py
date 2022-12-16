@@ -76,12 +76,10 @@ class VulkanValidationLayersConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("robin-hood-hashing/3.11.5")
         # TODO: set private=True, once the issue is resolved https://github.com/conan-io/conan/issues/9390
         self.requires(self._require("spirv-tools"), private=not hasattr(self, "settings_build"))
         self.requires(self._require("vulkan-headers"))
-        # TODO: use Version comparison once https://github.com/conan-io/conan/issues/10000 is fixed
-        if Version(self.version) >= "1.2.173":
-            self.requires("robin-hood-hashing/3.11.5")
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
         if self._needs_wayland_for_build:
