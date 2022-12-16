@@ -47,8 +47,9 @@ class LibZipppConan(ConanFile):
         if Version(self.version) == "4.0":
             self.requires("libzip/1.7.3")
         else:
-            libzip_version = str(self.version).split("-")[1]
-            self.requires("libzip/{}".format(libzip_version))
+            versions = str(self.version).split("-")
+            if len(versions) == 2:
+                self.requires(f"libzip/{versions[1]}")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -56,7 +57,7 @@ class LibZipppConan(ConanFile):
 
         libzippp_version = str(self.version)
         if libzippp_version != "4.0" and len(libzippp_version.split("-")) != 2:
-            raise ConanInvalidConfiguration("{}: version number must include '-'. (ex. '5.0-1.8.0')".format(self.name))
+            raise ConanInvalidConfiguration(f"{self.ref}: version number must include '-'. (ex. '5.0-1.8.0')")
 
         if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++":
             raise ConanInvalidConfiguration(f"{self.ref} does not support clang with libc++. Use libstdc++ instead.")
@@ -95,7 +96,9 @@ class LibZipppConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["zippp" if self.options.shared else "zippp_static"]
+        prefix = "lib" if self.settings.os == "Windows" else ""
+        postfix = "" if self.options.shared else "_static"
+        self.cpp_info.libs = [f"{prefix}zippp{postfix}"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
