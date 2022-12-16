@@ -4,6 +4,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 import os
+import sys
 
 required_conan_version = ">=1.53.0"
 
@@ -81,14 +82,16 @@ class MBedTLSConan(ConanFile):
 
     def _jsonchema_installed(self):
         try:
-            self.run("python -m jsonschema --version")
+            interpreter = sys.executable
+            self.run(f"{interpreter} -m jsonschema --version")
             return True
         except:
             return False
 
     def build(self):
         if Version(self.version) >= "3.3.0" and not self._jsonchema_installed():
-            self.run("pip install jsonschema")
+            pip = os.path.join(os.path.dirname(sys.executable), "pip")
+            self.run(f"{pip} install jsonschema")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
