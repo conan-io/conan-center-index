@@ -1,9 +1,11 @@
-from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
-from fnmatch import fnmatch
 import os
 import tarfile
+from fnmatch import fnmatch
+
+from conan.tools.files import apply_conandata_patches
+from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 
 
 class FruitConan(ConanFile):
@@ -99,13 +101,8 @@ class FruitConan(ConanFile):
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
-    def _patch_files(self):
-        if self.version in self.conan_data["patches"]:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
-
     def build(self):
-        self._patch_files()
+        apply_conandata_patches(self)
 
         cmake = self._configure_cmake()
         cmake.build()

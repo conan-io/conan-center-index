@@ -35,7 +35,7 @@ patches:
       base_path: "source_subfolder"
       patch_description: "remove CMake extra target"
       patch_type: "conan"
-    - patch_file: "patches/0003-supports-cmake-multi-configuration-generator-3.6.0.patch"
+    - patch_file: "patches/0003-supports-cmake-multi-configuration-generator.patch"
       base_path: "source_subfolder"
       patch_description: "support CMake multi configuration generator"
       patch_type: "conan"
