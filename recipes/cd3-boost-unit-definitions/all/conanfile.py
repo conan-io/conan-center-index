@@ -17,8 +17,8 @@ class PackageConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/CD3/BoostUnitDefinitions"
     topics = ("physical dimensions", "header-only")
-    settings = "os", "arch", "compiler", "build_type"  # even for header only
-    no_copy_source = True  # do not copy sources to build folder for header only projects, unless, need to apply patches
+    settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     @property
     def _min_cppstd(self):
@@ -28,7 +28,7 @@ class PackageConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15",
-            "msvc": "14.1",
+            "msvc": "19.0",
             "gcc": "5",
             "clang": "5",
             "apple-clang": "5.1",
@@ -41,7 +41,7 @@ class PackageConan(ConanFile):
         basic_layout(self)
 
     def requirements(self):
-        self.requires("boost/1.72.0", transitive_headers=True)
+        self.requires("boost/1.80.0", transitive_headers=True)
 
     def package_id(self):
         self.info.clear()
