@@ -158,14 +158,3 @@ Only modules under `conan.tools` and `conan.tools.xxx` are allowed:
 from conan.tools.files import rmdir
 from conan.tools import scm
 ````
-
-### W9012 - conan-cmake-layout-src-folder: Do not add src_folder to cmake_layout
-
-Style warning.
-
-Call to `cmake_layout` does not need `src_folder`. Linter emits a warning for this call:
-
-```python
-cmake_layout(self, src_folder="src")
-```
-
