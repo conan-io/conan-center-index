@@ -15,14 +15,14 @@ patches:
       patch_description: "Fix CMake to be more robust & predictable"
       patch_type: "conan"
   "1845":
-    - patch_file: "patches/0001-fix-cmake-1841.patch"
+    - patch_file: "patches/1841-0001-fix-cmake.patch"
       patch_description: "Fix CMake to be more robust & predictable"
-      patch_type: "compatibility"
+      patch_type: "conan"
   "1841":
-    - patch_file: "patches/0001-fix-cmake-1841.patch"
+    - patch_file: "patches/1841-0001-fix-cmake.patch"
       patch_description: "Fix CMake to be more robust & predictable"
-      patch_type: "compatibility"
+      patch_type: "conan"
   "1768":
-    - patch_file: "patches/0001-fix-cmake-1768.patch"
+    - patch_file: "patches/1768-0001-fix-cmake.patch"
       patch_description: "Fix CMake to be more robust & predictable"
-      patch_type: "compatibility"
+      patch_type: "conan"
