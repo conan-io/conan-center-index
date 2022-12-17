@@ -105,3 +105,12 @@ class MBitsSemverConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "mbits-semver")
         self.cpp_info.set_property("cmake_target_name", "mbits::semver")
+
+        self.cpp_info.filenames["cmake_find_package"] = "mbits-semver"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "mbits-semver"
+        self.cpp_info.names["cmake_find_package"] = "mbits"
+        self.cpp_info.names["cmake_find_package_multi"] = "mbits"
+        self.cpp_info.components["semver"].set_property(
+            "cmake_target_name", "mbits::semver"
+        )
+        self.cpp_info.components["semver"].libs = ["semver"]
