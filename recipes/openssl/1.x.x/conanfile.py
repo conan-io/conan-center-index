@@ -20,8 +20,9 @@ required_conan_version = ">=1.53.0"
 
 @total_ordering
 class OpenSSLVersion(object):
-    def __init__(self, version_str):
+    def __init__(self, version):
         self._pre = ""
+        version_str = str(version)
 
         tokens = version_str.split("-")
         if len(tokens) > 1:
@@ -219,7 +220,6 @@ class OpenSSLConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-        self.conf.define("tools.gnu:make_program", self._make_program)
 
     def requirements(self):
         if self._full_version < "1.1.0" and not self.options.get_safe("no_zlib"):
@@ -267,6 +267,14 @@ class OpenSSLConan(ConanFile):
         gen_info["CXXFLAGS"] = tc.cxxflags
         gen_info["DEFINES"] = tc.defines
         gen_info["LDFLAGS"] = tc.ldflags
+        # Workaround lack of support for self.dependencies in build() method in Conan 1.x
+        if self._full_version < "1.1.0" and not self.options.get_safe("no_zlib"):
+            zlib_cpp_info = self.dependencies["zlib"].cpp_info
+            gen_info["zlib_include_path"] = zlib_cpp_info.includedirs[0]
+            if self.settings.os == "Windows":
+                gen_info["zlib_lib_path"] = f"{zlib_cpp_info.libdirs[0]}/{zlib_cpp_info.libs[0]}.lib"
+            else:
+                gen_info["zlib_lib_path"] = zlib_cpp_info.libdirs[0]  # Just path, linux will find the right file
         save(self, "gen_info.conf", json.dumps(gen_info))
         tc = AutotoolsDeps(self)
         tc.generate()
@@ -550,23 +558,12 @@ class OpenSSLConan(ConanFile):
             if self.options.get_safe("no_zlib"):
                 args.append("no-zlib")
             else:
-                if Version(conan_version).major < 2:
-                    zlib_info = self.deps_cpp_info["zlib"]
-                    include_path = zlib_info.include_paths[0]
-                    if self.settings.os == "Windows":
-                        lib_path = "%s/%s.lib" % (zlib_info.lib_paths[0], zlib_info.libs[0])
-                    else:
-                        lib_path = zlib_info.lib_paths[0]  # Just path, linux will find the right file
-                else:
-                    zlib_cpp_info = self.dependencies["zlib"].cpp_info
-                    include_path = zlib_cpp_info.includedirs[0]
-                    if self.settings.os == "Windows":
-                        lib_path = "%s/%s.lib" % (zlib_cpp_info.libdirs[0], zlib_cpp_info.libs[0])
-                    else:
-                        lib_path = zlib_cpp_info.libdirs[0]  # Just path, linux will find the right file
+                gen_info = json.loads(load(self, os.path.join(self.generators_folder, "gen_info.conf")))
+                include_path = gen_info["zlib_include_path"]
+                lib_path     = gen_info["zlib_lib_path"]
                 # clang-cl doesn't like backslashes in #define CFLAGS (builldinf.h -> cversion.c)
                 include_path = self._adjust_path(include_path)
-                lib_path = self._adjust_path(lib_path)
+                lib_path     = self._adjust_path(lib_path)
 
                 if Version(conan_version).major <2 :
                     if self.options["zlib"].shared:
@@ -614,7 +611,7 @@ class OpenSSLConan(ConanFile):
 );
 """
         gen_info = json.loads(load(self, os.path.join(self.generators_folder, "gen_info.conf")))
-        self.output.info("gen_info = %s" % gen_info)
+        self.output.info(f"gen_info = {gen_info}")
         cflags = []
         cxxflags = []
         cflags.extend(gen_info["CFLAGS"])
@@ -728,35 +725,31 @@ class OpenSSLConan(ConanFile):
 
                 self._patch_install_name()
 
-                if self._use_nmake and self._full_version < "1.1.0":
-                    if not self.options.no_asm and self.settings.arch == "x86":
-                        self.run(r"ms\do_nasm")
-                    else:
-                        self.run(r"ms\do_ms" if self.settings.arch == "x86" else r"ms\do_win64a")
-
-                    self._replace_runtime_in_file(os.path.join("ms", "nt.mak"))
-                    self._replace_runtime_in_file(os.path.join("ms", "ntdll.mak"))
-                    if self.settings.arch == "x86":
-                        replace_in_file(self, os.path.join("ms", "nt.mak"), "-WX", "")
-                        replace_in_file(self, os.path.join("ms", "ntdll.mak"), "-WX", "")
-
-                    # NMAKE interprets trailing backslash as line continuation
-                    replace_in_file(self, self._nmake_makefile, 'INSTALLTOP=\\', 'INSTALLTOP=/')
-                        
-                    autotools.make(args=[f'-f {self._nmake_makefile}'])
-                else:
+                if not self._use_nmake:
                     autotools.make()
-  
-    @property
-    def _make_program(self):
-        if self._use_nmake:
-            return "nmake"
-        make_program = os.getenv("CONAN_MAKE_PROGRAM") or shutil.which("make") or shutil.which('mingw32-make')
-        make_program = unix_path(self, make_program) if self._settings_build.os == "Windows" else make_program
-        if not make_program:
-            raise Exception('could not find "make" executable. please set "CONAN_MAKE_PROGRAM" environment variable')
-        return make_program
+                else:
+                    if self._full_version >= "1.1.0":
+                        self.run(f'nmake /F Makefile')
+                    else: # nmake 1.0.2 support
+                        # Note: 1.0.2 should not be used according to the OpenSSL Project
+                        #       See https://www.openssl.org/source/
 
+                        if not self.options.no_asm and self.settings.arch == "x86":
+                            self.run(r"ms\do_nasm")
+                        else:
+                            self.run(r"ms\do_ms" if self.settings.arch == "x86" else r"ms\do_win64a")
+
+                        self._replace_runtime_in_file(os.path.join("ms", "nt.mak"))
+                        self._replace_runtime_in_file(os.path.join("ms", "ntdll.mak"))
+                        if self.settings.arch == "x86":
+                            replace_in_file(self, os.path.join("ms", "nt.mak"), "-WX", "")
+                            replace_in_file(self, os.path.join("ms", "ntdll.mak"), "-WX", "")
+
+                        # NMAKE interprets trailing backslash as line continuation
+                        replace_in_file(self, self._nmake_makefile, 'INSTALLTOP=\\', 'INSTALLTOP=/')
+
+                        self.run(f'nmake /F {self._nmake_makefile}')
+  
     def _patch_install_name(self):
         if is_apple_os(self) and self.options.shared:
             old_str = '-install_name $(INSTALLTOP)/$(LIBDIR)/'
@@ -777,24 +770,32 @@ class OpenSSLConan(ConanFile):
     def package(self):
         copy(self, "*LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"), keep_path=False)
         autotools = Autotools(self)
-        if self._use_nmake and self._full_version < "1.1.0":
-            target = "install"
-            args = [f'-f {self._nmake_makefile}']
-        else:
-            target = "install_sw"
-            args = []
+        args = []
         if self._full_version >= "1.1.0":
+            target = "install_sw"
             args.append(f"DESTDIR={self.package_folder}")
-        else:
+        else: # 1.0.2 support
+            # Note: 1.0.2 should not be used according to the OpenSSL Project
+            #       See https://www.openssl.org/source/
             if not self._use_nmake:
+                target = "install_sw"
                 args.append(f"INSTALL_PREFIX={self.package_folder}")
             else:
+                target = "install"
                 args.append(f"INSTALLTOP={self.package_folder}")
                 openssldir = self.options.openssldir or self._get_default_openssl_dir()
                 args.append(f"OPENSSLDIR={os.path.join(self.package_folder, openssldir)}")
 
         with chdir(self, self.source_folder):
-            autotools.make(target=target, args=args)
+            if not self._use_nmake:
+                autotools.make(target=target, args=args)
+            else:
+                if self._full_version >= "1.1.0":
+                    self.run(f'nmake /F Makefile {target} {" ".join(args)}')
+                else: # nmake 1.0.2 support
+                    # Note: 1.0.2 should not be used according to the OpenSSL Project
+                    #       See https://www.openssl.org/source/
+                    self.run(f'nmake /F {self._nmake_makefile} {target} {" ".join(args)}')
 
         for root, _, files in os.walk(self.package_folder):
             for filename in files:
