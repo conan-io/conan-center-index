@@ -3,7 +3,7 @@ from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, rm
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import functools
@@ -171,6 +171,17 @@ class VulkanValidationLayersConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        # Vulkan-ValidationLayers relies on Vulkan-Headers version from CMake config file
+        # to set api_version in its manifest file, but this value MUST have format x.y.z (no extra number).
+        # FIXME: find a way to force correct version in CMakeDeps of vulkan-headers recipe?
+        if Version(self.version) >= "1.3.235":
+            vk_version = Version(self.dependencies["vulkan-headers"].ref.version)
+            sanitized_vk_version = f"{vk_version.major}.{vk_version.minor}.{vk_version.patch}"
+            replace_in_file(
+                self, os.path.join(self.source_folder, "layers", "CMakeLists.txt"),
+                "set(JSON_API_VERSION ${VulkanHeaders_VERSION})",
+                f"set(JSON_API_VERSION \"{sanitized_vk_version}\")",
+            )
         # FIXME: two CMake module/config files should be generated (SPIRV-ToolsConfig.cmake and SPIRV-Tools-optConfig.cmake),
         # but it can't be modeled right now in spirv-tools recipe
         if not os.path.exists(os.path.join(self.generators_folder, "SPIRV-Tools-optConfig.cmake")):
