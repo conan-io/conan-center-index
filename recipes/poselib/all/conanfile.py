@@ -54,6 +54,8 @@ class PoseLibConan(ConanFile):
         self.requires("eigen/3.4.0")
 
     def validate(self):
+        if self.settings.compiler == "apple-clang":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support apple-clang compiler")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 191)

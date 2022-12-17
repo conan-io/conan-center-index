@@ -6,4 +6,4 @@ patches:
   "cci.20221204":
     - patch_file: "patches/0001-fix-clang-build.patch"
       patch_description: "Fixes errors for clang builds"
-      patch_type: "compiler support"
+      patch_type: "bugfix"
