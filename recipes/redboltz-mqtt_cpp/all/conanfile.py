@@ -31,9 +31,9 @@ class MqttCppConan(ConanFile):
         "with_tls":  True,
         "with_websocket":  True,
         "mqtt_always_send_reason_code":  True,
-        "utf8_string":  False,
-        "with_logs": False,
-        "with_tuple_any_workaround":False
+        "utf8_string":  True,
+        "with_logs": True,
+        "with_tuple_any_workaround": False
     }
 
     def source(self):
@@ -42,7 +42,9 @@ class MqttCppConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        if self.options.get_safe("cpp17"):
+            return 17
+        return 14
 
     def requirements(self):
         self.requires("boost/1.80.0")
@@ -60,9 +62,7 @@ class MqttCppConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
-            if self.options.get_safe("cpp17"):
-                check_min_cppstd(self, 17)
+            check_min_cppstd(self, _min_cppstd(self))
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -83,6 +83,7 @@ class MqttCppConan(ConanFile):
             tc.variables["MQTT_STD_ANY"] = True
             tc.variables["MQTT_STD_SHARED_PTR_ARRAY"] = True
         tc.variables["MQTT_USE_LOG"] = self.options.with_logs
+        tc.variables["MQTT_DISABLE_LIBSTDCXX_TUPLE_ANY_WORKAROUND"] = self.options.with_tuple_any_workaround
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -110,7 +111,8 @@ class MqttCppConan(ConanFile):
             self.cpp_info.defines.append("MQTT_STD_SHARED_PTR_ARRAY")
             self.cpp_info.defines.append("MQTT_USE_LOG")
         if self.options.with_tuple_any_workaround:
-            self.cpp_info.defines.append("MQTT_DISABLE_LIBSTDCXX_TUPLE_ANY_WORKAROUND")
+            self.cpp_info.defines.append(
+                "MQTT_DISABLE_LIBSTDCXX_TUPLE_ANY_WORKAROUND")
 
         self.cpp_info.set_property("cmake_file_name", "mqtt_cpp_iface")
         self.cpp_info.set_property("cmake_file_name", "mqtt_cpp_iface")

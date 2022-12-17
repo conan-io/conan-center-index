@@ -8,6 +8,10 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        if self.options["redboltz-mqtt_cpp"].cpp17:
+            cmake.definitions["CMAKE_CXX_STANDARD"] = 17
+        else:
+            cmake.definitions["CMAKE_CXX_STANDARD"] = 14
         cmake.configure()
         cmake.build()
 
