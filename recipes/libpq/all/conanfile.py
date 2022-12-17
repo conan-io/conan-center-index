@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, VCVars
@@ -49,13 +49,6 @@ class LibpqConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
-
-    @property
-    def _make_args(self):
-        args = []
-        if self.settings.os == "Windows":
-            args.append("MAKE_DLL={}".format(str(self.options.shared).lower()))
-        return args
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -118,6 +111,9 @@ class LibpqConan(ConanFile):
                 tc.configure_args.append('--disable-rpath')
             if self._is_clang8_x86:
                 tc.extra_cflags.append("-msse2")
+            tc.make_args.append(f"DESTDIR={unix_path(self, self.package_folder)}")
+            if self.settings.os == "Windows":
+                tc.make_args.append("MAKE_DLL={}".format(str(self.options.shared).lower()))
             tc.generate()
 
     def _patch_sources(self):
@@ -165,14 +161,26 @@ class LibpqConan(ConanFile):
         apply_conandata_patches(self)
         self._patch_sources()
         if is_msvc(self):
-            workdir = os.path.join(self.source_folder, "src", "tools", "msvc")
-            self.run("perl build.pl libpq", cwd=workdir)
+            with chdir(self, os.path.join(self.build_folder, "src", "tools", "msvc")):
+                self.run("perl build.pl libpq")
             if not self.options.shared:
-                self.run("perl build.pl libpgport", cwd=workdir)
+                self.run("perl build.pl libpgport")
         else:
             autotools = Autotools(self)
             autotools.configure()
-            autotools.make()
+            with chdir(self, os.path.join(self.build_folder, "src", "backend")):
+                autotools.make(target="generated-headers")
+            with chdir(self, os.path.join(self.build_folder, "src", "common")):
+                autotools.make()
+            with chdir(self, os.path.join(self.build_folder, "src", "include")):
+                autotools.make()
+            with chdir(self, os.path.join(self.build_folder, "src", "interfaces", "libpq")):
+                autotools.make()
+            if Version(self.version) >= 12:
+                with chdir(self, os.path.join(self.build_folder, "src", "port")):
+                    autotools.make()
+            with chdir(self, os.path.join(self.build_folder, "src", "bin", "pg_config")):
+                autotools.make()
 
     def _remove_unused_libraries_from_package(self):
         if self.options.shared:
@@ -196,35 +204,41 @@ class LibpqConan(ConanFile):
     def package(self):
         copy(self, pattern="COPYRIGHT", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder, keep_path=False)
         if is_msvc(self):
-            copy(self, pattern="*postgres_ext.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
-            copy(self, pattern="*pg_config.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
-            copy(self, pattern="*pg_config_ext.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
-            copy(self, pattern="*libpq-fe.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
-            copy(self, pattern="*libpq-events.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
-            copy(self, pattern="*.h", dst=os.path.join(self.package_folder, os.path.join("include", "libpq")), src=os.path.join(self.source_folder, "src", "include", "libpq"), keep_path=False)
-            copy(self, pattern="*genbki.h", dst=os.path.join(self.package_folder, os.path.join("include", "catalog")), src=self.source_folder, keep_path=False)
-            copy(self, pattern="*pg_type.h", dst=os.path.join(self.package_folder, os.path.join("include", "catalog")), src=self.source_folder, keep_path=False)
+            copy(self, pattern="*postgres_ext.h", dst=os.path.join(self.package_folder, "include"), src=self.build_folder, keep_path=False)
+            copy(self, pattern="*pg_config.h", dst=os.path.join(self.package_folder, "include"), src=self.build_folder, keep_path=False)
+            copy(self, pattern="*pg_config_ext.h", dst=os.path.join(self.package_folder, "include"), src=self.build_folder, keep_path=False)
+            copy(self, pattern="*libpq-fe.h", dst=os.path.join(self.package_folder, "include"), src=self.build_folder, keep_path=False)
+            copy(self, pattern="*libpq-events.h", dst=os.path.join(self.package_folder, "include"), src=self.build_folder, keep_path=False)
+            copy(self, pattern="*.h", dst=os.path.join(self.package_folder, os.path.join("include", "libpq")), src=os.path.join(self.build_folder, "src", "include", "libpq"), keep_path=False)
+            copy(self, pattern="*genbki.h", dst=os.path.join(self.package_folder, os.path.join("include", "catalog")), src=self.build_folder, keep_path=False)
+            copy(self, pattern="*pg_type.h", dst=os.path.join(self.package_folder, os.path.join("include", "catalog")), src=self.build_folder, keep_path=False)
             if self.options.shared:
-                copy(self, pattern="**/libpq.dll", dst=os.path.join(self.package_folder, "bin"), src=self.source_folder, keep_path=False)
-                copy(self, pattern="**/libpq.lib", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)
+                copy(self, pattern="**/libpq.dll", dst=os.path.join(self.package_folder, "bin"), src=self.build_folder, keep_path=False)
+                copy(self, pattern="**/libpq.lib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
             else:
-                copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)
+                copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
         else:
             autotools = Autotools(self)
-            autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+            with chdir(self, os.path.join(self.build_folder, "src", "common")):
+                autotools.install()
+            with chdir(self, os.path.join(self.build_folder, "src", "include")):
+                autotools.install()
+            with chdir(self, os.path.join(self.build_folder, "src", "interfaces", "libpq")):
+                autotools.install()
+            if Version(self.version) >= 12:
+                with chdir(self, os.path.join(self.build_folder, "src", "port")):
+                    autotools.install()
+            with chdir(self, os.path.join(self.build_folder, "src", "bin", "pg_config")):
+                autotools.install()
+
+            self._remove_unused_libraries_from_package()
 
             rmdir(self, os.path.join(self.package_folder, "include", "postgresql", "server"))
-            copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include", "catalog"), src=os.path.join(self.source_folder, "src", "include", "catalog"), keep_path=False)
-        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include", "catalog"), src=os.path.join(self.source_folder, "src", "backend", "catalog"), keep_path=False)
-        self._remove_unused_libraries_from_package()
+            copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include", "catalog"), src=os.path.join(self.build_folder, "src", "include", "catalog"), keep_path=False)
+        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include", "catalog"), src=os.path.join(self.build_folder, "src", "backend", "catalog"), keep_path=False)
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         fix_apple_shared_install_name(self)
-
-    def _construct_library_name(self, name):
-        if is_msvc(self):
-            return "lib{}".format(name)
-        return  name
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
@@ -232,12 +246,9 @@ class LibpqConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "PostgreSQL::PostgreSQL")
         self.cpp_info.set_property("pkg_config_name", "libpq")
 
-        self.cpp_info.names["cmake_find_package"] = "PostgreSQL"
-        self.cpp_info.names["cmake_find_package_multi"] = "PostgreSQL"
-
         self.env_info.PostgreSQL_ROOT = self.package_folder
 
-        self.cpp_info.components["pq"].libs = [self._construct_library_name("pq")]
+        self.cpp_info.components["pq"].libs = [f"{'lib' if is_msvc(self) else ''}pq"]
 
         if self.options.with_openssl:
             self.cpp_info.components["pq"].requires.append("openssl::openssl")
@@ -261,3 +272,6 @@ class LibpqConan(ConanFile):
             self.cpp_info.components["pq"].system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]
+
+        self.cpp_info.names["cmake_find_package"] = "PostgreSQL"
+        self.cpp_info.names["cmake_find_package_multi"] = "PostgreSQL"
