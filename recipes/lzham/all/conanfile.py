@@ -41,72 +41,6 @@ class PackageConan(ConanFile):
         "fPIC": True,
     }
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
-        if not is_msvc(self):
-            # Remove lzhamtest from root CMakeLists.txt.
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "CMakeLists.txt"),
-                "add_subdirectory(lzhamtest)\n",
-                ""
-            )
-
-            # This line in the root CMakeLists.txt can cause issues, see
-            # https://cmake.org/cmake/help/latest/policy/CMP0077.html.
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "CMakeLists.txt"),
-                "option(BUILD_SHARED_LIBS \"build shared/static libs\" ON)",
-                ""
-            )
-            return
-        new_sln = []
-        # Remove example and test projects from sln.
-        with open(os.path.join(
-            self.source_folder, "lzham.sln"
-        ), encoding="utf-8") as f:
-            line = f.readline()
-            while line:
-                if (
-                    line.startswith("Project(")
-                    and ("lzhamtest" in line or "example" in line)
-                ):
-                    # Don't write the current line and skip the "EndProject"
-                    # line.
-                    f.readline()
-                else:
-                    new_sln.append(line)
-                line = f.readline()
-        with open(os.path.join(
-            self.source_folder, "lzham.sln"
-        ), "w", encoding="utf-8") as f:
-            f.write("".join(new_sln))
-
-        # Inject conantoolchain.props so that correct platform toolset is used.
-        projects = [(x, f"{x}.vcxproj") for x in (
-            "lzhamcomp",
-            "lzhamdecomp",
-            "lzhamlib",
-        )]
-        projects.append(("lzhamdll", "lzham.vcxproj"))
-        search_str = (
-            '  <Import Project='
-            '"$(VCTargetsPath)\\Microsoft.Cpp.Default.props" />'
-        )
-
-        for p in projects:
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, *p),
-                search_str,
-                '  <ImportGroup Label="PropertySheets">\n'
-                    '    <Import Project="..\\conan\\conantoolchain.props" />\n'
-                    '  </ImportGroup>\n'
-                    + search_str
-            )
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -142,10 +76,14 @@ class PackageConan(ConanFile):
             tc.generate()
         else:
             tc = CMakeToolchain(self)
+
+            # Honor BUILD_SHARED_LIBS from conan_toolchain (see
+            # https://github.com/conan-io/conan/issues/11840)
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
             tc.generate()
 
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         if is_msvc(self):
             msbuild = MSBuild(self)
             msbuild.build_type = (
