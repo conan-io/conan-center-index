@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 import os
@@ -48,13 +47,7 @@ class LibyuvConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.0.5")
-
-    def validate(self):
-        if self.info.options.with_jpeg == "libjpeg-turbo":
-            raise ConanInvalidConfiguration(
-                "libjpeg-turbo is an invalid option right now, as it is not supported by the cmake script.",
-            )
+            self.requires("libjpeg-turbo/2.1.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder)
@@ -80,6 +73,8 @@ class LibyuvConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["yuv"]
+        if self.options.with_jpeg == "libjpeg-turbo":
+            self.cpp_info.requires = ["libjpeg-turbo::jpeg"]
 
         # TODO: to remove in conan v2
         bin_path = os.path.join(self.package_folder, "bin")
