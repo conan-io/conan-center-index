@@ -21,10 +21,13 @@ class LayoutSrcFolder(BaseChecker):
 
     def visit_call(self, node: nodes.Call) -> None:
         if not isinstance(node.func, nodes.Name):
-            return # Not sure what this is ignoring ???
+            return
 
         if node.func.name in ["cmake_layout", "vs_layout", "basic_layout"]:
-            if not "src_folder" in (kw.arg for kw in node.keywords):
-                self.add_message("conan-cmake-layout-src-folder", node=node, line=node.lineno)
+            for kw in node.keywords:
+                if kw.arg == 'src_folder':
+                    if not kw.value or kw.value.as_string().strip('"\'') != 'src':
+                        self.add_message("conan-cmake-layout-src-folder", node=node, line=node.lineno)
+                    break
             else:
-                pass # this should check to make sure it's set to `"src"`
+                self.add_message("conan-cmake-layout-src-folder", node=node, line=node.lineno)

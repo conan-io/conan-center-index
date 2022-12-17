@@ -9,7 +9,7 @@ from linter.check_package_name import PackageName
 from linter.check_import_conanfile import ImportConanFile
 from linter.check_import_errors import ImportErrorsConanException, ImportErrorsConanInvalidConfiguration, ImportErrors
 from linter.check_import_tools import ImportTools
-from linter.check_cmake_layout import LayoutSrcFolder
+from linter.check_layout_src_folder import LayoutSrcFolder
 
 
 def register(linter: PyLinter) -> None:
