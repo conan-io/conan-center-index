@@ -89,6 +89,8 @@ class PoseLibConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        if is_msvc(self):
+            self.settings.libdirs = ["bin"]
         if self.settings.build_type == "Debug":
             self.cpp_info.libs = ["PoseLibd"]
         else:
