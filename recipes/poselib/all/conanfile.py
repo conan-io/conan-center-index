@@ -89,7 +89,8 @@ class PoseLibConan(ConanFile):
 
     def package_info(self):
         if is_msvc(self):
-            self.cpp_info.libdirs = ["bin"]
+            self.cpp_info.libdirs = ["bin", "lib"]
+
         if self.settings.build_type == "Debug":
             self.cpp_info.libs = ["PoseLibd"]
         else:
