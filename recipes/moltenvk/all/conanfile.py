@@ -162,8 +162,10 @@ class MoltenVKConan(ConanFile):
 
         if self.options.shared:
             moltenvk_icd_path = os.path.join(self.package_folder, "lib", "MoltenVK_icd.json")
+            self.runenv_info.prepend_path("VK_DRIVER_FILES", moltenvk_icd_path)
             self.runenv_info.prepend_path("VK_ICD_FILENAMES", moltenvk_icd_path)
             # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
+            self.env_info.VK_DRIVER_FILES.append(moltenvk_icd_path)
             self.env_info.VK_ICD_FILENAMES.append(moltenvk_icd_path)
 
         if self.options.tools:
