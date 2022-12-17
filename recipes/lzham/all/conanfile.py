@@ -7,7 +7,6 @@ from conan.tools.files import (
     copy,
     export_conandata_patches,
     get,
-    replace_in_file,
     rmdir
 )
 from conan.tools.microsoft import (

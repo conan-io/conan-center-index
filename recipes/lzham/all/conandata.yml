@@ -28,6 +28,6 @@ patches:
       patch_type: conan
 
     - patch_file: "patches/msvc-conan-cci.20220103.patch"
-      patch_description: 'Skips building of lzhamtest and examples for MSVC, 
+      patch_description: 'Skips building of lzhamtest and examples for MSVC,
         and injects conan toolchain for MSVC'
       patch_type: conan
