@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualRunEnv
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -87,14 +87,15 @@ class LibpqConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         if is_msvc(self):
             vcvars = VCVars(self)
             vcvars.generate()
             config = "DEBUG" if self.settings.build_type == "Debug" else "RELEASE"
-            build_env = VirtualRunEnv(self)
-            env = build_env.environment()
+            env = Environment()
             env.define("CONFIG", config)
-            build_env.generate()
+            env.vars(self).save_script("conanbuild_msvc")
         else:
             if not cross_building(self):
                 env = VirtualRunEnv(self)
