@@ -39,7 +39,7 @@ class MBitsSemverConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "11",
-            "clang": "11",
+            "clang": "12",
             "Visual Studio": "16",
             "apple-clang": "11.0.3",
         }
