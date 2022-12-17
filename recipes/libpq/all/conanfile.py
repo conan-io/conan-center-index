@@ -161,10 +161,10 @@ class LibpqConan(ConanFile):
         apply_conandata_patches(self)
         self._patch_sources()
         if is_msvc(self):
-            with chdir(self, os.path.join(self.build_folder, "src", "tools", "msvc")):
+            with chdir(self, os.path.join(self.source_folder, "src", "tools", "msvc")):
                 self.run("perl build.pl libpq")
-            if not self.options.shared:
-                self.run("perl build.pl libpgport")
+                if not self.options.shared:
+                    self.run("perl build.pl libpgport")
         else:
             autotools = Autotools(self)
             autotools.configure()
@@ -204,19 +204,19 @@ class LibpqConan(ConanFile):
     def package(self):
         copy(self, pattern="COPYRIGHT", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder, keep_path=False)
         if is_msvc(self):
-            copy(self, pattern="*postgres_ext.h", dst=os.path.join(self.package_folder, "include"), src=self.build_folder, keep_path=False)
-            copy(self, pattern="*pg_config.h", dst=os.path.join(self.package_folder, "include"), src=self.build_folder, keep_path=False)
-            copy(self, pattern="*pg_config_ext.h", dst=os.path.join(self.package_folder, "include"), src=self.build_folder, keep_path=False)
-            copy(self, pattern="*libpq-fe.h", dst=os.path.join(self.package_folder, "include"), src=self.build_folder, keep_path=False)
-            copy(self, pattern="*libpq-events.h", dst=os.path.join(self.package_folder, "include"), src=self.build_folder, keep_path=False)
-            copy(self, pattern="*.h", dst=os.path.join(self.package_folder, os.path.join("include", "libpq")), src=os.path.join(self.build_folder, "src", "include", "libpq"), keep_path=False)
-            copy(self, pattern="*genbki.h", dst=os.path.join(self.package_folder, os.path.join("include", "catalog")), src=self.build_folder, keep_path=False)
-            copy(self, pattern="*pg_type.h", dst=os.path.join(self.package_folder, os.path.join("include", "catalog")), src=self.build_folder, keep_path=False)
+            copy(self, pattern="*postgres_ext.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
+            copy(self, pattern="*pg_config.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
+            copy(self, pattern="*pg_config_ext.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
+            copy(self, pattern="*libpq-fe.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
+            copy(self, pattern="*libpq-events.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
+            copy(self, pattern="*.h", dst=os.path.join(self.package_folder, os.path.join("include", "libpq")), src=os.path.join(self.source_folder, "src", "include", "libpq"), keep_path=False)
+            copy(self, pattern="*genbki.h", dst=os.path.join(self.package_folder, os.path.join("include", "catalog")), src=self.source_folder, keep_path=False)
+            copy(self, pattern="*pg_type.h", dst=os.path.join(self.package_folder, os.path.join("include", "catalog")), src=self.source_folder, keep_path=False)
             if self.options.shared:
-                copy(self, pattern="**/libpq.dll", dst=os.path.join(self.package_folder, "bin"), src=self.build_folder, keep_path=False)
-                copy(self, pattern="**/libpq.lib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
+                copy(self, pattern="**/libpq.dll", dst=os.path.join(self.package_folder, "bin"), src=self.source_folder, keep_path=False)
+                copy(self, pattern="**/libpq.lib", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)
             else:
-                copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
+                copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)
         else:
             autotools = Autotools(self)
             with chdir(self, os.path.join(self.build_folder, "src", "common")):
