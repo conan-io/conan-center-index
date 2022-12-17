@@ -1,16 +1,16 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 13c28b2..d58e394 100644
+index 13c28b2..53cbb9b 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -14,6 +14,12 @@ endif ()
  
  if (YACLIB_CXX_STANDARD)
    set(CMAKE_CXX_STANDARD ${YACLIB_CXX_STANDARD})
-+elseif (NOT CMAKE_CXX_STANDARD AND NOT CORO IN_LIST YACLIB_FLAGS)
-+  message("SETTING DEFAULT 17")
++elseif (NOT CORO IN_LIST YACLIB_FLAGS)
++  message("Set default standard to c++17")
 +  set(CMAKE_CXX_STANDARD 17)
 +else ()
-+  message("SETTING DEFAULT 20")
++message("Set default standard to c++20")
 +  set(CMAKE_CXX_STANDARD 20)
  endif ()
  

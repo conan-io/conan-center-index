@@ -56,6 +56,7 @@ class YACLibConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables['YACLIB_INSTALL'] = True
         if self.settings.compiler.get_safe("cppstd"):
             tc.variables["YACLIB_CXX_STANDARD"] = self.settings.compiler.cppstd
 
@@ -106,5 +107,8 @@ class YACLibConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "yaclib")
         self.cpp_info.libs = ["yaclib"]
         if self.options.get_safe("coro"):
-            if self.settings.libcxx == 'libstdc++11':
+            if self.settings.compiler.libcxx == "libstdc++11":
                 self.cpp_info.cxxflags.append("-fcoroutines")
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread"]
