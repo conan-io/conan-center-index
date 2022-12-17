@@ -35,11 +35,10 @@ class MBitsSemverConan(ConanFile):
     def _min_cppstd(self):
         return 17
 
-    # in case the project requires C++14/17/20/... the minimum compiler version should be listed
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "8",
+            "gcc": "11",
             "clang": "11",
             "Visual Studio": "16",
             "apple-clang": "11.0.3",
