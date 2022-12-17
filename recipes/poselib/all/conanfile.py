@@ -36,7 +36,6 @@ class PoseLibConan(ConanFile):
         return {
             "gcc": "9",
             "clang": "7",
-            "apple-clang": "10",
         }
 
     def export_sources(self):
@@ -90,7 +89,7 @@ class PoseLibConan(ConanFile):
 
     def package_info(self):
         if is_msvc(self):
-            self.settings.libdirs = ["bin"]
+            self.cpp_info.libdirs = ["bin"]
         if self.settings.build_type == "Debug":
             self.cpp_info.libs = ["PoseLibd"]
         else:
