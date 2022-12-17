@@ -87,7 +87,7 @@ class LcmsConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("CMS_DLL")
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.system_libs.extend(["m", "pthread"])
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib"""
