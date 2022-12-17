@@ -2,10 +2,10 @@ import os
 import tarfile
 from fnmatch import fnmatch
 
-from conan.tools.files import apply_conandata_patches
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
+from conan import ConanFile, Version
+from conan.errors import ConanInvalidConfiguration
+from conan.tools import files
+from conans import CMake, tools
 
 
 class FruitConan(ConanFile):
@@ -56,9 +56,9 @@ class FruitConan(ConanFile):
 
         if compiler in minimal_version and \
            compiler_version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration("%s requires a compiler that supports"
-                                            " at least C++11. %s %s is not"
-                                            " supported." % (self.name, compiler, compiler_version))
+            raise ConanInvalidConfiguration(f"{self.name} requires a compiler that supports"
+                                            " at least C++11. {compiler} {compiler_version} is not"
+                                            " supported.")
 
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
@@ -78,12 +78,12 @@ class FruitConan(ConanFile):
                 # Extraction fails on a case-insensitive file system due to file
                 # name conflicts.
                 # Exclude build as a workaround.
-                exclude_pattern = "%s/extras/bazel_root/third_party/fruit/build" % (self._extracted_dir,)
+                exclude_pattern = f"{self._extracted_dir}/extras/bazel_root/third_party/fruit/build"
                 members = list(filter(lambda m: not fnmatch(m.name, exclude_pattern),
                                     tarredgzippedFile.getmembers()))
                 tarredgzippedFile.extractall(".", members=members)
         else:
-            tools.get(**self.conan_data["sources"][self.version])
+            files.get(self, **self.conan_data["sources"][self.version])
 
     def source(self):
         self._get_source()
@@ -102,7 +102,7 @@ class FruitConan(ConanFile):
         return self._cmake
 
     def build(self):
-        apply_conandata_patches(self)
+        files.apply_conandata_patches(self)
 
         cmake = self._configure_cmake()
         cmake.build()
