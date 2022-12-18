@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
-project(test_package)
+project(test_package LANGUAGES C CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 find_package(libconfig REQUIRED CONFIG)
 
