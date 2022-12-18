@@ -14,6 +14,7 @@
 #endif
 #ifdef BUILT_WITH_FFMPEG
 #include <opencv2/videoio.hpp>
+#include <opencv2/videoio/registry.hpp>
 #endif
 #ifdef BUILT_CONTRIB_SFM
 #include <opencv2/sfm.hpp>
