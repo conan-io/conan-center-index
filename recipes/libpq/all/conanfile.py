@@ -71,10 +71,6 @@ class LibpqConan(ConanFile):
         if self.options.with_openssl:
             self.requires("openssl/1.1.1s")
 
-    def validate_build(self):
-        if self.settings.os == "Windows" and self.settings.compiler == "gcc" and self.options.shared:
-            raise ConanInvalidConfiguration("shared mingw build is not possible")
-
     def build_requirements(self):
         if is_msvc(self):
             self.tool_requires("strawberryperl/5.32.1.1")
@@ -196,9 +192,6 @@ class LibpqConan(ConanFile):
                 os.path.join(self.package_folder, "bin", "*.dll"),
                 os.path.join(self.package_folder, "lib", "libpq*.dylib")
             ]
-        dll_path = os.path.join(self.package_folder, "lib", "libpq.dll")
-        if self.settings.os == "Windows" and os.path.exists(dll_path):
-            os.unlink(dll_path)
         for globi in globs:
             for file in glob.glob(globi):
                 os.remove(file)
