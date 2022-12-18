@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, replace_in_file
 from conan.tools.layout import basic_layout
 import os
 
@@ -51,9 +51,12 @@ class PackageConan(ConanFile):
         apply_conandata_patches(self)
         if valid_min_cppstd(self, 17):
             rm(self, "filesystem.hpp", os.path.join(self.source_folder, "vtu11", "inc"))
+        else:
+            replace_in_file(self,  os.path.join(self.source_folder, "vtu11", "inc", "filesystem.hpp"), "nullptr", "std::nullptr", strict=False)
 
     def build(self):
         self._patch_sources()
+
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
