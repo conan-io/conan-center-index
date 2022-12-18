@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 from conans import CMake
 import os
 import textwrap
@@ -119,12 +120,8 @@ class OpenCVConan(ConanFile):
 
             def openexr_library_names(name):
                 # OpenEXR library may have different names, depends on namespace versioning, static, debug, etc.
-                reference = str(self.requires["openexr"])
-                version_name = reference.split("@")[0]
-                version = version_name.split("/")[1]
-                version_tokens = version.split(".")
-                major, minor = version_tokens[0], version_tokens[1]
-                suffix = f"{major}_{minor}"
+                openexr_version = Version(self.dependencies["openexr"].ref.version)
+                suffix = f"{openexr_version.major}_{openexr_version.minor}"
                 names = [
                     f"{name}-{suffix}",
                     f"{name}-{suffix}_s",
