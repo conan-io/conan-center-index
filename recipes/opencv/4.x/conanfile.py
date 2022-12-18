@@ -376,7 +376,7 @@ class OpenCVConan(ConanFile):
             self._cmake.definitions["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = False
             self._cmake.definitions["FFMPEG_LIBRARIES"] = "ffmpeg::avcodec;ffmpeg::avformat;ffmpeg::avutil;ffmpeg::swscale"
             for component in ["avcodec", "avformat", "avutil", "swscale", "avresample"]:
-                self._cmake.definitions[f"FFMPEG_lib{component}_VERSION"] = self.dependencies["ffmpeg"].cpp_info[component].version
+                self._cmake.definitions[f"FFMPEG_lib{component}_VERSION"] = self.deps_cpp_info["ffmpeg"].components[component].version
 
         self._cmake.definitions["WITH_GSTREAMER"] = False
         self._cmake.definitions["WITH_HALIDE"] = False
