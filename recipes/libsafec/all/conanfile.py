@@ -46,9 +46,9 @@ class LibSafeCConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.rm_safe("fPIC")
-        del self.settings.rm_safe("compiler.libcxx")
-        del self.settings.rm_safe("compiler.cppstd")
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.6")
