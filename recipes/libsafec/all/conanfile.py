@@ -23,11 +23,13 @@ class LibSafeCConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "strmax": ["ANY"],
+        "memmax": ["ANY"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "strmax": 4096,
+        "memmax": 268435456,
     }
 
     _autotools = None
@@ -91,6 +93,7 @@ class LibSafeCConan(ConanFile):
             "--disable-doc",
             "--disable-Werror",
             "--enable-strmax={}".format(self.options.strmax),
+            "--enable-memmax={}".format(self.options.memmax),
         ]
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
