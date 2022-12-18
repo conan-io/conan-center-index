@@ -32,9 +32,9 @@ class FruitConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def build_requirements(self):
+    def requirements(self):
         if self.options.use_boost:
-            self.build_requires("boost/1.72.0")
+            self.requires("boost/1.72.0")
 
     def config_options(self):
         if self.settings.os == "Windows":
