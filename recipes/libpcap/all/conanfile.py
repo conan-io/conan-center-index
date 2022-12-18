@@ -159,6 +159,7 @@ class LibPcapConan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.install()
+            rmdir(self, os.path.join(self.package_folder, "bin"))
             rmdir(self, os.path.join(self.package_folder, "share"))
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             if self.options.shared:
@@ -171,6 +172,3 @@ class LibPcapConan(ConanFile):
         self.cpp_info.libs = [f"pcap{suffix}"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
