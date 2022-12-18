@@ -376,7 +376,7 @@ class OpenCVConan(ConanFile):
             self._cmake.definitions["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = False
             self._cmake.definitions["FFMPEG_LIBRARIES"] = "ffmpeg::avcodec;ffmpeg::avformat;ffmpeg::avutil;ffmpeg::swscale"
             for component in ["avcodec", "avformat", "avutil", "swscale", "avresample"]:
-                self._cmake.definitions["FFMPEG_lib%s_VERSION" % component] = self.deps_cpp_info["ffmpeg"].components[component].version
+                self._cmake.definitions[f"FFMPEG_lib{component}_VERSION"] = self.dependencies["ffmpeg"].cpp_info[component].version
 
         self._cmake.definitions["WITH_GSTREAMER"] = False
         self._cmake.definitions["WITH_HALIDE"] = False
@@ -390,7 +390,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_ipp:
             self._cmake.definitions["WITH_IPP"] = True
             if self.options.with_ipp == "intel-ipp":
-                ipp_root = self.deps_cpp_info["intel-ipp"].rootpath
+                ipp_root = self.dependencies["intel-ipp"].package_folder.replace("\\", "/")
                 if self.settings.os == "Windows":
                     ipp_root = ipp_root.replace("\\", "/")
                 self._cmake.definitions["IPPROOT"] = ipp_root
@@ -463,9 +463,9 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["BUILD_opencv_sfm"] = self.options.get_safe("contrib_sfm", False)
 
         if self.options.with_openexr:
-            self._cmake.definitions["OPENEXR_ROOT"] = self.deps_cpp_info["openexr"].rootpath
+            self._cmake.definitions["OPENEXR_ROOT"] = self.dependencies["openexr"].package_folder.replace("\\", "/")
         if self.options.get_safe("with_jpeg2000") == "openjpeg":
-            openjpeg_version = Version(self.deps_cpp_info["openjpeg"].version)
+            openjpeg_version = Version(self.dependencies["openjpeg"].ref.version)
             self._cmake.definitions["OPENJPEG_MAJOR_VERSION"] = openjpeg_version.major
             self._cmake.definitions["OPENJPEG_MINOR_VERSION"] = openjpeg_version.minor
             self._cmake.definitions["OPENJPEG_BUILD_VERSION"] = openjpeg_version.patch
@@ -555,7 +555,7 @@ class OpenCVConan(ConanFile):
     def _is_gtk_version2(self):
         if not self.options.get_safe("with_gtk", False):
             return False
-        gtk_version = self.deps_cpp_info["gtk"].version
+        gtk_version = self.dependencies["gtk"].ref.version
         if gtk_version == "system":
             return self.options["gtk"].version == 2
         else:

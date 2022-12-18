@@ -278,7 +278,7 @@ class OpenCVConan(ConanFile):
         if is_msvc(self):
             self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
         if self.options.with_openexr:
-            self._cmake.definitions["OPENEXR_ROOT"] = self.deps_cpp_info["openexr"].rootpath.replace("\\", "/")
+            self._cmake.definitions["OPENEXR_ROOT"] = self.dependencies["openexr"].package_folder.replace("\\", "/")
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         self._cmake.definitions["ENABLE_CCACHE"] = False
 
