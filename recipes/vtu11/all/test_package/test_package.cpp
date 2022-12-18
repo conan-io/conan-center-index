@@ -39,8 +39,8 @@ int main(void) {
     // Create tuples with (name, association, number of components) for each data set
     std::vector<vtu11::DataSetInfo> dataSetInfo
     {
-        { "Temperature", vtu11::DataSetType::PointData, 1 },
-        { "Conductivity", vtu11::DataSetType::CellData, 1 },
+        vtu11::DataSetInfo{ "Temperature", vtu11::DataSetType::PointData, 1 },
+        vtu11::DataSetInfo{ "Conductivity", vtu11::DataSetType::CellData, 1 },
     };
 
     // Write data to .vtu file using Ascii format
