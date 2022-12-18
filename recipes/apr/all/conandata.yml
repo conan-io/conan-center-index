@@ -10,3 +10,4 @@ patches:
     - patch_file: "patches/0004-autotools-mingw.patch"
     - patch_file: "patches/0005-clang12-apple.patch"
     - patch_file: "patches/0006-sys_siglist-fix.patch"
+    - patch_file: "patches/0007-cmake-minimum-required.patch"
