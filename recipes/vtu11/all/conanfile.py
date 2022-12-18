@@ -71,6 +71,9 @@ class PackageConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
+        if not valid_min_cppstd(self, 17):
+            self.cpp_info.cxxflags = ["-std=c++11"]
+
         if self.options.with_zlib:
             self.cpp_info.defines = ["VTU11_ENABLE_ZLIB"]
 
