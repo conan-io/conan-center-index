@@ -220,19 +220,19 @@ class OpenCVConan(ConanFile):
             self.requires("ade/0.1.2a")
 
     def validate(self):
-        if self.info.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
+        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio with static runtime is not supported for shared library.")
-        if self.info.settings.compiler == "clang" and Version(self.info.settings.compiler.version) < "4":
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "4":
             raise ConanInvalidConfiguration("Clang 3.x can't build OpenCV 4.x due to an internal bug.")
-        if self.info.options.with_cuda and not self.info.options.contrib:
+        if self.options.with_cuda and not self.options.contrib:
             raise ConanInvalidConfiguration("contrib must be enabled for cuda")
-        if self.info.options.get_safe("dnn_cuda") and \
-            (not self.info.options.with_cuda or not self.info.options.contrib or not self.info.options.with_cublas or not self.info.options.with_cudnn):
+        if self.options.get_safe("dnn_cuda") and \
+            (not self.options.with_cuda or not self.options.contrib or not self.options.with_cublas or not self.options.with_cudnn):
             raise ConanInvalidConfiguration("with_cublas, with_cudnn and contrib must be enabled for dnn_cuda")
-        if self.info.options.with_ipp == "opencv-icv" and \
-            (not str(self.info.settings.arch) in ["x86", "x86_64"] or \
-             not str(self.info.settings.os) in ["Linux", "Macos", "Windows"]):
-            raise ConanInvalidConfiguration(f"opencv-icv is not available for {self.info.settings.os}/{self.info.settings.arch}")
+        if self.options.with_ipp == "opencv-icv" and \
+            (not str(self.settings.arch) in ["x86", "x86_64"] or \
+             not str(self.settings.os) in ["Linux", "Macos", "Windows"]):
+            raise ConanInvalidConfiguration(f"opencv-icv is not available for {self.settings.os}/{self.settings.arch}")
 
     def build_requirements(self):
         if self.options.dnn and hasattr(self, "settings_build"):

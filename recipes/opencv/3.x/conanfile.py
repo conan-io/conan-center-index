@@ -113,9 +113,9 @@ class OpenCVConan(ConanFile):
             self.requires("gtk/system")
 
     def validate(self):
-        if self.info.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
+        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio with static runtime is not supported for shared library.")
-        if self.info.settings.compiler == "clang" and Version(self.info.settings.compiler.version) < "4":
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "4":
             raise ConanInvalidConfiguration("Clang 3.x cannot build OpenCV 3.x due an internal bug.")
 
     def source(self):

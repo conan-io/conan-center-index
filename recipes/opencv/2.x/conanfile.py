@@ -95,7 +95,7 @@ class OpenCVConan(ConanFile):
             self.requires("gtk/system")
 
     def validate(self):
-        if self.info.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
+        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio with static runtime is not supported for shared library.")
 
     def source(self):
