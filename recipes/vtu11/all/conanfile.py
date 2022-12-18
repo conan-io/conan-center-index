@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, replace_in_file
 from conan.tools.layout import basic_layout
 import os
 
@@ -49,6 +49,7 @@ class PackageConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "vtu11", "impl", "zlibWriter_impl.hpp"), "uLong", "size_t", strict=False)
         if valid_min_cppstd(self, 17):
             rm(self, "filesystem.hpp", os.path.join(self.source_folder, "vtu11", "inc"))
 
