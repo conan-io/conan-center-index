@@ -148,9 +148,9 @@ class AprConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines = ["APR_DECLARE_STATIC"]
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs = ["dl", "pthread"]
+                self.cpp_info.system_libs = ["crypt", "dl", "pthread", "rt"]
             if self.settings.os == "Windows":
-                self.cpp_info.system_libs = ["rpcrt4"]
+                self.cpp_info.system_libs = ["mswsock", "rpcrt4", "ws2_32"]
 
         # TODO: to remove in conan v2
         self.env_info.APR_ROOT = self.package_folder
