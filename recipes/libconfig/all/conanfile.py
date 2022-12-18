@@ -25,9 +25,6 @@ class LibconfigConan(ConanFile):
         "fPIC": True,
     }
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -41,7 +38,6 @@ class LibconfigConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
 
     def generate(self):
         tc = CMakeToolchain(self)
