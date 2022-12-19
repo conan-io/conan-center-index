@@ -1,16 +1,17 @@
 from conan import ConanFile
-from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, get, copy, rm, rmdir, export_conandata_patches
 from conan.tools.build import cross_building
-from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
+
 
 class MozjpegConan(ConanFile):
     name = "mozjpeg"
@@ -18,7 +19,7 @@ class MozjpegConan(ConanFile):
     license = ("BSD", "BSD-3-Clause", "ZLIB")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mozilla/mozjpeg"
-    topics = ("conan", "image", "format", "mozjpeg", "jpg", "jpeg", "picture", "multimedia", "graphics")
+    topics = ("image", "format", "mozjpeg", "jpg", "jpeg", "picture", "multimedia", "graphics")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -62,18 +63,9 @@ class MozjpegConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
         self.provides = ["libjpeg", "libjpeg-turbo"] if self.options.turbojpeg else "libjpeg"
 
     @property
@@ -87,9 +79,10 @@ class MozjpegConan(ConanFile):
             basic_layout(self, src_folder='src')
 
     def build_requirements(self):
-        if not self._use_cmake and self.settings.os != "Windows":
+        if not self._use_cmake:
             self.tool_requires("libtool/2.4.7")
-            self.tool_requires("pkgconf/1.7.4")
+            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                self.tool_requires("pkgconf/1.9.3")
         if self.options.get_safe("SIMD"):
             self.tool_requires("nasm/2.15.05")
 
@@ -125,35 +118,30 @@ class MozjpegConan(ConanFile):
             tc.variables["WITH_CRT_DLL"] = not is_msvc_static_runtime(self)
         tc.generate()
 
-        tc = CMakeDeps(self)
+    def generate_autotools(self):
+        tc = AutotoolsToolchain(self)
+        yes_no = lambda v: "yes" if v else "no"
+        tc.configure_args.extend([
+            "--with-pic={}".format(yes_no(self.options.get_safe("fPIC", True))),
+            "--with-simd={}".format(yes_no(self.options.get_safe("SIMD", False))),
+            "--with-arith-enc={}".format(yes_no(self.options.arithmetic_encoder)),
+            "--with-arith-dec={}".format(yes_no(self.options.arithmetic_decoder)),
+            "--with-jpeg7={}".format(yes_no(self.options.libjpeg7_compatibility)),
+            "--with-jpeg8={}".format(yes_no(self.options.libjpeg8_compatibility)),
+            "--with-mem-srcdst={}".format(yes_no(self.options.mem_src_dst)),
+            "--with-turbojpeg={}".format(yes_no(self.options.turbojpeg)),
+            "--with-java={}".format(yes_no(self.options.java)),
+            "--with-12bit={}".format(yes_no(self.options.enable12bit)),
+        ])
         tc.generate()
 
-    def generate_autotools(self):
-        toolchain = AutotoolsToolchain(self)
-        yes_no = lambda v: "yes" if v else "no"
-        toolchain.configure_args.append("--with-pic={}".format(yes_no(self.options.get_safe("fPIC", True))))
-        toolchain.configure_args.append("--with-simd={}".format(yes_no(self.options.get_safe("SIMD", False))))
-        toolchain.configure_args.append("--with-arith-enc={}".format(yes_no(self.options.arithmetic_encoder)))
-        toolchain.configure_args.append("--with-arith-dec={}".format(yes_no(self.options.arithmetic_decoder)))
-        toolchain.configure_args.append("--with-jpeg7={}".format(yes_no(self.options.libjpeg7_compatibility)))
-        toolchain.configure_args.append("--with-jpeg8={}".format(yes_no(self.options.libjpeg8_compatibility)))
-        toolchain.configure_args.append("--with-mem-srcdst={}".format(yes_no(self.options.mem_src_dst)))
-        toolchain.configure_args.append("--with-turbojpeg={}".format(yes_no(self.options.turbojpeg)))
-        toolchain.configure_args.append("--with-java={}".format(yes_no(self.options.java)))
-        toolchain.configure_args.append("--with-12bit={}".format(yes_no(self.options.enable12bit)))
-        toolchain.generate()
-
-        deps = AutotoolsDeps(self)
-        deps.generate()
-
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         if self._use_cmake:
             self.generate_cmake()
         else:
             self.generate_autotools()
-
-        tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
 
     def build(self):
         apply_conandata_patches(self)
