@@ -181,14 +181,32 @@ class MozjpegConan(ConanFile):
         return name
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_module_file_name", "JPEG")
+        self.cpp_info.set_property("cmake_file_name", "mozjpeg")
+
+        cmake_target_suffix = "-static" if not self.options.shared else ""
+
         # libjpeg
-        self.cpp_info.components["libjpeg"].names["pkg_config"] = "libjpeg"
+        self.cpp_info.components["libjpeg"].set_property("cmake_module_target_name", "JPEG::JPEG")
+        self.cpp_info.components["libjpeg"].set_property("cmake_target_name", f"mozjpeg::jpeg{cmake_target_suffix}")
+        self.cpp_info.components["libjpeg"].set_property("pkg_config_name", "libjpeg")
         self.cpp_info.components["libjpeg"].libs = [self._lib_name("jpeg")]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libjpeg"].system_libs.append("m")
         # libturbojpeg
         if self.options.turbojpeg:
-            self.cpp_info.components["libturbojpeg"].names["pkg_config"] = "libturbojpeg"
+            self.cpp_info.components["libturbojpeg"].set_property("cmake_target_name", f"mozjpeg::turbojpeg{cmake_target_suffix}")
+            self.cpp_info.components["libturbojpeg"].set_property("pkg_config_name", "libturbojpeg")
             self.cpp_info.components["libturbojpeg"].libs = [self._lib_name("turbojpeg")]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["libturbojpeg"].system_libs.append("m")
+
+        # TODO: to remove in conan v2
+        self.cpp_info.names["cmake_find_package"] = "JPEG"
+        self.cpp_info.names["cmake_find_package_multi"] = "mozjpeg"
+        self.cpp_info.components["libjpeg"].names["cmake_find_package"] = "JPEG"
+        self.cpp_info.components["libjpeg"].names["cmake_find_package_multi"] = f"jpeg{cmake_target_suffix}"
+        if self.options.turbojpeg:
+            self.cpp_info.components["libturbojpeg"].names["cmake_find_package"] = f"turbojpeg{cmake_target_suffix}"
+            self.cpp_info.components["libturbojpeg"].names["cmake_find_package_multi"] = f"turbojpeg{cmake_target_suffix}"
