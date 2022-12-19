@@ -1,5 +1,11 @@
 # Changelog
 
+### 15-December-2022 - 11:12 CET
+
+- [feature] Set github feeback title via config file (`feedback_title`).
+- [fix] Fix log summary html table for shared option with Conan v2.
+- [fix] ValidateInfra: Remove same OS version check for Macos nodes.
+
 ### 09-December-2022 - 11:38 CET
 
 - [feature] Add environment variable to build with different Xcode/apple-clang compilers on Macos agents.
