@@ -1,24 +1,26 @@
-from conans import ConanFile, CMake, tools
-from conan.tools.files import rename
-from conans.errors import ConanInvalidConfiguration
-from conans.tools import os_info
 import os
-import functools
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rename
+from conan.tools.microsoft import is_msvc
+
+required_conan_version = ">=1.53.0"
+
 
 class OsgearthConan(ConanFile):
     name = "osgearth"
+    description = ("osgEarth is a C++ geospatial SDK and terrain engine. Just create a simple XML file, "
+                   "point it at your map data, and go! osgEarth supports all kinds of data and comes with "
+                   "lots of examples to help you get up and running quickly and easily.")
     license = "LGPL-3.0"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "osgEarth is a C++ geospatial SDK and terrain engine. \
-                   Just create a simple XML file, point it at your map data, \
-                   and go! osgEarth supports all kinds of data and comes with \
-                   lots of examples to help you get up and running quickly \
-                   and easily."
-    topics = "openscenegraph", "graphics"
-    settings = "os", "compiler", "build_type", "arch"
     homepage = "http://osgearth.org/"
+    topics = ("openscenegraph", "graphics")
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -40,7 +42,6 @@ class OsgearthConan(ConanFile):
         "enable_nvtt_cpu_mipmaps": [True, False],
         "enable_wininet_for_http": [True, False],
     }
-
     default_options = {
         "shared": False,
         "fPIC": True,
@@ -62,37 +63,24 @@ class OsgearthConan(ConanFile):
         "enable_nvtt_cpu_mipmaps": False,
         "enable_wininet_for_http": False,
     }
-
     short_paths = True
-    exports_sources = "CMakeLists.txt", "patches/*.patch"
-    generators = "cmake", "cmake_find_package"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return 11
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
-        elif self.settings.compiler == "apple-clang":
-            raise ConanInvalidConfiguration("With apple-clang cppstd needs to be set, since default is not at least c++11.")
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
+        if self.settings.os == "Windows":
+            self.options.rm_safe("fPIC")
+
         if self.settings.os != "Windows":
             self.options.enable_wininet_for_http = False
 
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             self.options.build_procedural_nodekit = False
 
         if self.settings.compiler == "gcc" and self.settings.compiler.version == "11":
@@ -100,17 +88,23 @@ class OsgearthConan(ConanFile):
             # https://github.com/google/draco/issues/635
             self.options.with_draco = False
 
-    def requirements(self):
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
         self.requires("opengl/system")
-        self.requires("gdal/3.4.3")
+        self.requires("gdal/3.8.0")
         self.requires("openscenegraph/3.6.5")
-        self.requires("libcurl/8.2.0")
-        self.requires("lerc/2.2")
-        self.requires("rapidjson/1.1.0")
+        self.requires("libcurl/[>=7.78.0 <9]")
+        self.requires("lerc/4.0.1")
+        self.requires("rapidjson/cci.20230929")
 
         self.requires("zlib/[>=1.2.11 <2]")  # override
-        self.requires("libtiff/4.5.1")  # override
+        self.requires("libtiff/4.6.0")  # override
         self.requires("libpng/1.6.40")  # override
 
         # if self.options.build_triton_nodekit:
@@ -118,87 +112,91 @@ class OsgearthConan(ConanFile):
         # if self.options.build_silverlining_nodekit:
         #     self.requires("silverlining_nodekit")
         if self.options.build_leveldb_cache:
-            self.requires("leveldb/1.22")
+            self.requires("leveldb/1.23")
         if self.options.build_rocksdb_cache:
             self.requires("rocksdb/6.29.5")
         if self.options.build_zip_plugin:
             self.requires("zstd/1.5.5")  # override
         if self.options.with_geos:
-            self.requires("geos/3.11.1")
+            self.requires("geos/3.12.0")
         if self.options.with_sqlite3:
             self.requires("sqlite3/[>=3.42 <4]")
         if self.options.with_draco:
-            self.requires("draco/1.4.3")
+            self.requires("draco/1.5.6")
         # if self.options.with_basisu:
         #     self.requires("basisu")
         # if self.options.with_glew:
         #     self.requires("glew/2.2.0")
         if self.options.with_protobuf:
-            self.requires("protobuf/3.21.9")
+            self.requires("protobuf/3.21.12")
         if self.options.with_webp:
-            self.requires("libwebp/1.3.1")
+            self.requires("libwebp/1.3.2")
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-        for package in ("Draco", "GEOS", "LevelDB", "OSG", "RocksDB", "Sqlite3", "WEBP"):
-            # Prefer conan's find package scripts over osgEarth's
-            os.unlink(os.path.join(self._source_subfolder, "CMakeModules", "Find{}.cmake".format(package)))
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-        self._patch_sources()
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["OSGEARTH_SRC_DIR"] = self.source_folder.replace("\\", "/")
 
-    @functools.lru_cache(1)
-    def _configured_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["OSGEARTH_BUILD_SHARED_LIBS"] = self.options.shared
-        cmake.definitions["OSGEARTH_BUILD_TOOLS"] = False
-        cmake.definitions["OSGEARTH_BUILD_EXAMPLES"] = False
-        cmake.definitions["OSGEARTH_BUILD_TESTS"] = False
+        tc.variables["OSGEARTH_BUILD_SHARED_LIBS"] = self.options.shared
+        tc.variables["OSGEARTH_BUILD_TOOLS"] = False
+        tc.variables["OSGEARTH_BUILD_EXAMPLES"] = False
+        tc.variables["OSGEARTH_BUILD_TESTS"] = False
 
-        cmake.definitions["OSGEARTH_BUILD_PROCEDURAL_NODEKIT"] = self.options.build_procedural_nodekit
-        # cmake.definitions["OSGEARTH_BUILD_TRITON_NODEKIT"] = self.options.build_triton_nodekit
-        # cmake.definitions["OSGEARTH_BUILD_SILVERLINING_NODEKIT"] = self.options.build_silverlining_nodekit
-        cmake.definitions["OSGEARTH_BUILD_LEVELDB_CACHE"] = self.options.build_leveldb_cache
-        cmake.definitions["OSGEARTH_BUILD_ROCKSDB_CACHE"] = self.options.build_rocksdb_cache
-        cmake.definitions["OSGEARTH_BUILD_ZIP_PLUGIN"] = self.options.build_zip_plugin
-        cmake.definitions["OSGEARTH_ENABLE_GEOCODER"] = self.options.enable_geocoder
+        tc.variables["OSGEARTH_BUILD_PROCEDURAL_NODEKIT"] = self.options.build_procedural_nodekit
+        # tc.variables["OSGEARTH_BUILD_TRITON_NODEKIT"] = self.options.build_triton_nodekit
+        # tc.variables["OSGEARTH_BUILD_SILVERLINING_NODEKIT"] = self.options.build_silverlining_nodekit
+        tc.variables["OSGEARTH_BUILD_LEVELDB_CACHE"] = self.options.build_leveldb_cache
+        tc.variables["OSGEARTH_BUILD_ROCKSDB_CACHE"] = self.options.build_rocksdb_cache
+        tc.variables["OSGEARTH_BUILD_ZIP_PLUGIN"] = self.options.build_zip_plugin
+        tc.variables["OSGEARTH_ENABLE_GEOCODER"] = self.options.enable_geocoder
 
-        cmake.definitions["WITH_EXTERNAL_DUKTAPE"] = False
-        cmake.definitions["WITH_EXTERNAL_TINYXML"] = False
-        cmake.definitions["CURL_IS_STATIC"] = not self.options["libcurl"].shared
-        cmake.definitions["CURL_INCLUDE_DIR"] = self.deps_cpp_info["libcurl"].include_paths[0]
-        cmake.definitions["OSGEARTH_INSTALL_SHADERS"] = self.options.install_shaders
-        cmake.definitions["OSGEARTH_ENABLE_NVTT_CPU_MIPMAPS"] = self.options.enable_nvtt_cpu_mipmaps
-        cmake.definitions["OSGEARTH_ENABLE_WININET_FOR_HTTP"] = self.options.enable_wininet_for_http
+        tc.variables["WITH_EXTERNAL_DUKTAPE"] = False
+        tc.variables["WITH_EXTERNAL_TINYXML"] = False
+        tc.variables["CURL_IS_STATIC"] = not self.dependencies["libcurl"].options.shared
+        tc.variables["CURL_INCLUDE_DIR"] = self.dependencies["libcurl"].cpp_info.includedir
+        tc.variables["OSGEARTH_INSTALL_SHADERS"] = self.options.install_shaders
+        tc.variables["OSGEARTH_ENABLE_NVTT_CPU_MIPMAPS"] = self.options.enable_nvtt_cpu_mipmaps
+        tc.variables["OSGEARTH_ENABLE_WININET_FOR_HTTP"] = self.options.enable_wininet_for_http
 
         # our own defines for using in our top-level CMakeLists.txt
-        cmake.definitions["OSGEARTH_WITH_GEOS"] = self.options.with_geos
-        cmake.definitions["OSGEARTH_WITH_SQLITE3"] = self.options.with_sqlite3
-        cmake.definitions["OSGEARTH_WITH_WEBP"] = self.options.with_webp
+        tc.variables["OSGEARTH_WITH_GEOS"] = self.options.with_geos
+        tc.variables["OSGEARTH_WITH_SQLITE3"] = self.options.with_sqlite3
+        tc.variables["OSGEARTH_WITH_WEBP"] = self.options.with_webp
+        tc.generate()
 
-        cmake.configure()
+        dpes = CMakeDeps(self)
+        dpes.generate()
 
-        return cmake
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        for package in ("Draco", "GEOS", "LevelDB", "OSG", "RocksDB", "Sqlite3", "WEBP"):
+            # Prefer conan's find package scripts over osgEarth's
+            os.unlink(os.path.join(self.source_folder, "CMakeModules", f"Find{package}.cmake"))
 
     def build(self):
-        self._configured_cmake().build()
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=self.source_path.parent)
+        cmake.build()
 
     def package(self):
-        self._configured_cmake().install()
-        self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
+        cmake.install()
 
         if self.options.install_shaders:
             rename(self, os.path.join(self.package_folder, "resources"), os.path.join(self.package_folder, "res"))
 
-        if os_info.is_linux:
+        if self.settings.os in ["Linux", "FreeBSD"]:
             rename(self, os.path.join(self.package_folder, "lib64"), os.path.join(self.package_folder, "lib"))
 
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
         if self.settings.build_type == "Debug":
@@ -220,16 +218,16 @@ class OsgearthConan(ConanFile):
             return lib
 
         # osgEarth the main lib
-        required_libs = {"openscenegraph": ["osg", "osgUtil", "osgSim", "osgViewer", "osgText", "osgGA", "osgShadow",
-                                            "OpenThreads", "osgManipulator"],
-                         "libcurl": ["libcurl"],
-                         "gdal": ["gdal"],
-                         "opengl": ["opengl"],
-                         }
+        required_libs = {
+            "openscenegraph": ["osg", "osgUtil", "osgSim", "osgViewer", "osgText", "osgGA", "osgShadow", "OpenThreads", "osgManipulator"],
+            "libcurl": ["libcurl"],
+            "gdal": ["gdal"],
+            "opengl": ["opengl"],
+        }
 
         osgearth = setup_lib("osgEarth", required_libs)
 
-        if not self.options.shared and self.settings.compiler == "Visual Studio":
+        if not self.options.shared and is_msvc(self):
             osgearth.defines += ["OSGEARTH_LIBRARY_STATIC"]
         if self.options.build_zip_plugin:
             osgearth.requires += ["zstd::zstd"]
@@ -253,8 +251,8 @@ class OsgearthConan(ConanFile):
             plugin_library.libs = [] if self.options.shared else [libname + postfix]
             plugin_library.requires = ["osgEarth"]
             if not self.options.shared:
-                plugin_library.libdirs = [os.path.join("lib", "osgPlugins-{}"
-                                                       .format(self.deps_cpp_info["openscenegraph"].version))]
+                osg_version = self.dependencies["openscenegraph"].ref.version
+                plugin_library.libdirs = [os.path.join("lib", f"osgPlugins-{osg_version}")]
             return plugin_library
 
         setup_plugin("osgearth_bumpmap")
@@ -296,7 +294,7 @@ class OsgearthConan(ConanFile):
 
         if self.settings.os == "Windows":
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin/osgPlugins-{}"
-                                                   .format(self.deps_cpp_info["openscenegraph"].version)))
-        elif self.settings.os == "Linux":
+            osg_version = self.dependencies["openscenegraph"].ref.version
+            self.env_info.PATH.append(os.path.join(self.package_folder, f"bin/osgPlugins-{osg_version}"))
+        elif self.settings.os in ["Linux", "FreeBSD"]:
             self.env_info.LD_LIBRARY_PATH.append(os.path.join(self.package_folder, "lib"))
