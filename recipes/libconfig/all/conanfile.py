@@ -48,7 +48,7 @@ class LibconfigConan(ConanFile):
         tc.generate()
 
     def build(self):
-        if Version(self) == "1.7.2":
+        if Version(self.version) == "1.7.2":
             # https://github.com/hyperrealm/libconfig/issues/119
             replace_in_file(self,
                 os.path.join(self.source_folder, "lib", "CMakeLists.txt"),
@@ -69,7 +69,7 @@ class LibconfigConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        prefix = "lib" if self.settings.os == "Windows" else ""
+        prefix = "lib" if Version(self.version) < "1.7.3" else ""
 
         self.cpp_info.components["libconfig_"].set_property("cmake_file_name", "libconfig")
         self.cpp_info.components["libconfig_"].set_property("cmake_target_name", "libconfig::libconfig")
