@@ -190,7 +190,10 @@ class OpenCVConan(ConanFile):
         if self.options.with_png:
             self.requires("libpng/1.6.39")
         if self.options.with_openexr:
-            self.requires("openexr/2.5.7")
+            if Version(self.version) < "4.5.3":
+                self.requires("openexr/2.5.7")
+            else:
+                self.requires("openexr/3.1.5")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.4.0")
         if self.options.with_eigen:
@@ -249,13 +252,6 @@ class OpenCVConan(ConanFile):
         apply_conandata_patches(self)
         for directory in ["libjasper", "libjpeg-turbo", "libjpeg", "libpng", "libtiff", "libwebp", "openexr", "protobuf", "zlib", "quirc"]:
             rmdir(self, os.path.join(self._source_folder, "3rdparty", directory))
-        if self.options.with_openexr:
-            find_openexr = os.path.join(self._source_folder, "cmake", "OpenCVFindOpenEXR.cmake")
-            replace_in_file(self, find_openexr,
-                                  r'SET(OPENEXR_ROOT "C:/Deploy" CACHE STRING "Path to the OpenEXR \"Deploy\" folder")',
-                                  "")
-            replace_in_file(self, find_openexr, "SET(OPENEXR_LIBSEARCH_SUFFIXES x64/Release x64 x64/Debug)", "")
-            replace_in_file(self, find_openexr, "SET(OPENEXR_LIBSEARCH_SUFFIXES Win32/Release Win32 Win32/Debug)", "")
 
         replace_in_file(self, os.path.join(self._source_folder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
         replace_in_file(self, os.path.join(self._source_folder, "CMakeLists.txt"), "elseif(EMSCRIPTEN)", "elseif(QNXNTO)\nelseif(EMSCRIPTEN)")
@@ -464,8 +460,6 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["BUILD_opencv_freetype"] = self.options.get_safe("contrib_freetype", False)
         self._cmake.definitions["BUILD_opencv_sfm"] = self.options.get_safe("contrib_sfm", False)
 
-        if self.options.with_openexr:
-            self._cmake.definitions["OPENEXR_ROOT"] = self.dependencies["openexr"].package_folder.replace("\\", "/")
         if self.options.get_safe("with_jpeg2000") == "openjpeg":
             openjpeg_version = Version(self.dependencies["openjpeg"].ref.version)
             self._cmake.definitions["OPENJPEG_MAJOR_VERSION"] = openjpeg_version.major
