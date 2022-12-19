@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 project(cmake_wrapper)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
-
 if(WIN32)
     add_compile_definitions(NOGDI)
 endif()
@@ -19,14 +16,14 @@ endif()
 # find modules.
 
 # OSG
-find_package(OpenSceneGraph REQUIRED)
+find_package(OpenSceneGraph REQUIRED CONFIG)
 
-set(OSG_PLUGINS "osgPlugins-${OPENSCENEGRAPH_VERSION}"  CACHE STRING "" FORCE)
-set(OSG_LIBRARY ${OPENSCENEGRAPH_LIBRARIES})
-set(OSG_FOUND ${OPENSCENEGRAPH_FOUND})
-set(OSG_INCLUDE_DIRS ${OPENSCENEGRAPH_INCLUDE_DIRS})
-set(OSG_INCLUDE_DIR "${OPENSCENEGRAPH_INCLUDE_DIRS}")
-set(OSG_GEN_INCLUDE_DIR "${OPENSCENEGRAPH_INCLUDE_DIRS}")
+set(OSG_PLUGINS "osgPlugins-${openscenegraph_VERSION}"  CACHE STRING "" FORCE)
+set(OSG_LIBRARY ${openscenegraph_LIBRARIES})
+set(OSG_FOUND ${openscenegraph_FOUND})
+set(OSG_INCLUDE_DIRS ${openscenegraph_INCLUDE_DIRS})
+set(OSG_INCLUDE_DIR "${openscenegraph_INCLUDE_DIRS}")
+set(OSG_GEN_INCLUDE_DIR "${openscenegraph_INCLUDE_DIRS}")
 
 # gdal
 find_package(GDAL REQUIRED)
@@ -82,4 +79,6 @@ find_package(RapidJSON)
 
 find_package(lerc)
 
-add_subdirectory(source_subfolder)
+include_directories("${OSGEARTH_SRC_DIR}/src/osgEarth")
+
+add_subdirectory(${OSGEARTH_SRC_DIR})
