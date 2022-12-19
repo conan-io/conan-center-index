@@ -61,7 +61,7 @@ class JasperConan(ConanFile):
             self.requires("libjpeg/9e")
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) == "16":
+        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) == "16" and os.getenv('CCI') != None:
             raise ConanInvalidConfiguration(f"{self.name} Current can not build in CCI due to windows SDK version. See https://github.com/conan-io/conan-center-index/pull/13285 for the solution hopefully")
 
     def source(self):
