@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 from conans import CMake
 import os
 import textwrap
@@ -107,38 +106,6 @@ class OpenCVConan(ConanFile):
         rmdir(self, os.path.join(self._source_folder, "3rdparty"))
 
         cmakelists = os.path.join(self._source_folder, "CMakeLists.txt")
-
-        # allow to find conan-supplied OpenEXR
-        if self.options.with_openexr:
-            find_openexr = os.path.join(self._source_folder, "cmake", "OpenCVFindOpenEXR.cmake")
-            replace_in_file(self, find_openexr,
-                                  r'SET(OPENEXR_ROOT "C:/Deploy" CACHE STRING "Path to the OpenEXR \"Deploy\" folder")',
-                                  "")
-            replace_in_file(self, find_openexr, r'set(OPENEXR_ROOT "")', "")
-            replace_in_file(self, find_openexr, "SET(OPENEXR_LIBSEARCH_SUFFIXES x64/Release x64 x64/Debug)", "")
-            replace_in_file(self, find_openexr, "SET(OPENEXR_LIBSEARCH_SUFFIXES Win32/Release Win32 Win32/Debug)", "")
-
-            def openexr_library_names(name):
-                # OpenEXR library may have different names, depends on namespace versioning, static, debug, etc.
-                openexr_version = Version(self.dependencies["openexr"].ref.version)
-                suffix = f"{openexr_version.major}_{openexr_version.minor}"
-                names = [
-                    f"{name}-{suffix}",
-                    f"{name}-{suffix}_s",
-                    f"{name}-{suffix}_d",
-                    f"{name}-{suffix}_s_d",
-                    name,
-                    f"{name}_s",
-                    f"{name}_d",
-                    f"{name}_s_d",
-                ]
-                return " ".join(names)
-
-            for lib in ["Half", "Iex", "Imath", "IlmImf", "IlmThread"]:
-                replace_in_file(self, find_openexr, f"NAMES {lib}", f"NAMES {openexr_library_names(lib)}")
-
-            replace_in_file(self, cmakelists,
-                                "project(OpenCV CXX C)", "project(OpenCV CXX C)\nset(CMAKE_CXX_STANDARD 11)")
 
         for cascade in ["lbpcascades", "haarcascades"]:
             replace_in_file(self, os.path.join(self._source_folder, "data", "CMakeLists.txt"),
