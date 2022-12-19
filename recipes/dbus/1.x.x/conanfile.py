@@ -1,17 +1,17 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
+from conan.tools.cmake import CMake, cmake_layout, CMakeDeps, CMakeToolchain
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, rm, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.layout import basic_layout, cmake_layout
+from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class DbusConan(ConanFile):
@@ -20,7 +20,7 @@ class DbusConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.freedesktop.org/wiki/Software/dbus"
     description = "D-Bus is a simple system for interprocess communication and coordination."
-    topics = ("bus", "interprocess", "message")
+    topics = "bus", "interprocess", "message"
     settings = "os", "arch", "compiler", "build_type"
     short_paths = True
     options = {
@@ -56,14 +56,8 @@ class DbusConan(ConanFile):
             del self.options.with_x11
 
     def configure(self):
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         if self._meson_available:
@@ -73,13 +67,13 @@ class DbusConan(ConanFile):
 
     def build_requirements(self):
         if self._meson_available:
-            self.tool_requires("meson/0.63.3")
+            self.tool_requires("meson/0.64.1")
             self.tool_requires("pkgconf/1.9.3")
 
     def requirements(self):
-        self.requires("expat/2.4.9")
+        self.requires("expat/2.5.0")
         if self.options.with_glib:
-            self.requires("glib/2.74.0")
+            self.requires("glib/2.75.0")
         if self.options.get_safe("with_systemd"):
             self.requires("libsystemd/251.4")
         if self.options.with_selinux:
@@ -91,12 +85,13 @@ class DbusConan(ConanFile):
         if Version(self.version) >= "1.14.0":
             if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < 7:
                 raise ConanInvalidConfiguration(f"{self.ref} requires at least gcc 7.")
-            
+
         if not self._meson_available and self.info.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} does not support Windows. Contributions welcome.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def generate(self):
         if self._meson_available:

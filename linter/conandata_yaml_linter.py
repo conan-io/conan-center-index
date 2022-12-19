@@ -30,7 +30,7 @@ def main():
             "patch_file": Str(),
             "patch_description": Str(),
             "patch_type": Enum(
-                ["official", "conan", "portability", "backport", "vulnerability"]
+                ["official", "conan", "portability", "bugfix", "vulnerability"]
             ),
             Optional("patch_source"): Str(),
             Optional("sha256"): Str(),  # Really uncommon

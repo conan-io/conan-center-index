@@ -7,16 +7,16 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class BenchmarkConan(ConanFile):
     name = "benchmark"
     description = "A microbenchmark support library."
-    topics = ("benchmark", "google", "microbenchmark")
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index/"
     homepage = "https://github.com/google/benchmark"
-    license = "Apache-2.0"
+    topics = ("google", "microbenchmark")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -38,10 +38,7 @@ class BenchmarkConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -51,6 +48,21 @@ class BenchmarkConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support Visual Studio <= 12")
         if Version(self.version) < "1.7.0" and is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support msvc shared builds")
+
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output=output)
+            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
+    def build_requirements(self):
+        if Version(self.version) >= "1.7.1" and not self._cmake_new_enough("3.16.3"):
+            self.tool_requires("cmake/3.25.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -97,7 +109,7 @@ class BenchmarkConan(ConanFile):
         if Version(self.version) >= "1.7.0" and not self.options.shared:
             self.cpp_info.components["_benchmark"].defines.append("BENCHMARK_STATIC_DEFINE")
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.components["_benchmark"].system_libs.extend(["pthread", "rt"])
+            self.cpp_info.components["_benchmark"].system_libs.extend(["pthread", "rt", "m"])
         elif self.settings.os == "Windows":
             self.cpp_info.components["_benchmark"].system_libs.append("shlwapi")
         elif self.settings.os == "SunOS":

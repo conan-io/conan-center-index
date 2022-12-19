@@ -7,7 +7,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class DuckdbConan(ConanFile):
     name = "duckdb"
@@ -70,10 +70,7 @@ class DuckdbConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -83,7 +80,7 @@ class DuckdbConan(ConanFile):
         if self.options.with_odbc:
             self.requires("odbc/2.3.11")
         if self.options.with_httpfs:
-            self.requires("openssl/3.0.5")
+            self.requires("openssl/3.0.7")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -167,6 +164,9 @@ class DuckdbConan(ConanFile):
                 "duckdb_fastpforlib",
                 "duckdb_mbedtls",
             ]
+            if Version(self.version) >= "0.6.0":
+                self.cpp_info.libs.append("duckdb_fsst")
+
             if self.options.with_icu:
                 self.cpp_info.libs.append("icu_extension")
             if self.options.with_parquet:
@@ -181,6 +181,8 @@ class DuckdbConan(ConanFile):
                 self.cpp_info.libs.append("httpfs_extension")
             if self.options.with_visualizer:
                 self.cpp_info.libs.append("visualizer_extension")
+            if Version(self.version) >= "0.6.0" and self.settings.os == "Linux":
+                self.cpp_info.libs.append("jemalloc_extension")
             if self.options.with_json:
                 self.cpp_info.libs.append("json_extension")
             if self.options.with_excel:

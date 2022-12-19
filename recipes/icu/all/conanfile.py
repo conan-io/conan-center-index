@@ -82,7 +82,7 @@ class ICUConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
-        if cross_building(self, skip_x64_x86=True) and hasattr(self, "settings_build"):
+        if cross_building(self) and hasattr(self, "settings_build"):
             self.tool_requires(self.ref)
 
     def source(self):
@@ -116,12 +116,25 @@ class ICUConan(ConanFile):
             f"--enable-tests={yes_no(self._with_unit_tests)}",
             "--disable-samples",
         ])
-        if cross_building(self, skip_x64_x86=True):
+        if cross_building(self):
             base_path = unix_path(self, self.dependencies.build["icu"].package_folder)
             tc.configure_args.append(f"--with-cross-build={base_path}")
+            if (not is_msvc(self)):
+                # --with-cross-build above prevents tc.generate() from setting --build option.
+                # Workaround for https://github.com/conan-io/conan/issues/12642
+                gnu_triplet = get_gnu_triplet(str(self._settings_build.os), str(self._settings_build.arch), str(self.settings.compiler))
+                tc.configure_args.append(f"--build={gnu_triplet}")
             if self.settings.os in ["iOS", "tvOS", "watchOS"]:
                 gnu_triplet = get_gnu_triplet("Macos", str(self.settings.arch))
                 tc.configure_args.append(f"--host={gnu_triplet}")
+            elif is_msvc(self):
+                # ICU doesn't like GNU triplet of conan for msvc (see https://github.com/conan-io/conan/issues/12546)
+                host = get_gnu_triplet(str(self.settings.os), str(self.settings.arch), "gcc")
+                build = get_gnu_triplet(str(self._settings_build.os), str(self._settings_build.arch), "gcc")
+                tc.configure_args.extend([
+                    f"--host={host}",
+                    f"--build={build}",
+                ])
         else:
             arch64 = ["x86_64", "sparcv9", "ppc64", "ppc64le", "armv8", "armv8.3", "mips64"]
             bits = "64" if self.settings.arch in arch64 else "32"

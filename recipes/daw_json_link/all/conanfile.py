@@ -1,9 +1,10 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc, check_min_vs
 
 import os
 
@@ -27,8 +28,6 @@ class DawJsonLinkConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "16",
-            "msvc": "192",
             "gcc": "8",
             "clang": "7",
             "apple-clang": "12",
@@ -38,24 +37,22 @@ class DawJsonLinkConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("daw_header_libraries/2.74.2")
-        self.requires("daw_utf_range/2.2.2")
+        self.requires("daw_header_libraries/2.76.3")
+        self.requires("daw_utf_range/2.2.3")
 
     def package_id(self):
         self.info.clear()
 
-    @property
-    def _info(self):
-        return self if Version(conan_version).major < 2 else self.info
-
     def validate(self):
-        if self._info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
-        minimum_version = self._compilers_minimum_version.get(str(self._info.settings.compiler), False)
-        if minimum_version and Version(self._info.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
-            )
+        check_min_vs(self, 192)
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
+                )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)

@@ -46,7 +46,6 @@ class ArrowConan(ConanFile):
         "with_gflags": ["auto", True, False],
         "with_glog": ["auto", True, False],
         "with_grpc": ["auto", True, False],
-        "with_hiveserver2": [True, False],
         "with_jemalloc": ["auto", True, False],
         "with_mimalloc": ["auto", True, False],
         "with_json": [True, False],
@@ -96,7 +95,6 @@ class ArrowConan(ConanFile):
         "with_mimalloc": False,
         "with_glog": "auto",
         "with_grpc": "auto",
-        "with_hiveserver2": False,
         "with_json": False,
         "with_llvm": "auto",
         "with_openssl": "auto",
@@ -194,11 +192,9 @@ class ArrowConan(ConanFile):
         if self.options.with_openssl == False and self._with_openssl(True):
             raise ConanInvalidConfiguration("with_openssl options is required (or choose auto)")
         if self.options.with_llvm == False and self._with_llvm(True):
-            raise ConanInvalidConfiguration("with_openssl options is required (or choose auto)")
+            raise ConanInvalidConfiguration("with_llvm options is required (or choose auto)")
         if self.options.with_cuda:
             raise ConanInvalidConfiguration("CCI has no cuda recipe (yet)")
-        if self.options.with_hiveserver2:
-            raise ConanInvalidConfiguration("CCI has no hiveserver2 recipe (yet)")
         if self.options.with_orc:
             raise ConanInvalidConfiguration("CCI has no orc recipe (yet)")
         if self.options.with_s3 and not self.options["aws-sdk-cpp"].config:
@@ -216,7 +212,7 @@ class ArrowConan(ConanFile):
 
     def _compute(self, required=False):
         if required or self.options.compute == "auto":
-            return bool(self._dataset_modules()) or bool(self.options.get_safe("substrait", False))
+            return bool(self._parquet() or self._dataset_modules()) or bool(self.options.get_safe("substrait", False))
         else:
             return bool(self.options.compute)
 
@@ -295,11 +291,11 @@ class ArrowConan(ConanFile):
 
     def _with_thrift(self, required=False):
         # No self.options.with_thift exists
-        return bool(required or self.options.with_hiveserver2 or self._parquet())
+        return bool(required or self._parquet())
 
     def _with_utf8proc(self, required=False):
         if required or self.options.with_utf8proc == "auto":
-            return False
+            return bool(self._compute() or self.options.gandiva)
         else:
             return bool(self.options.with_utf8proc)
 
@@ -380,7 +376,7 @@ class ArrowConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+                  filename=f"apache-arrow-{self.version}.tar.gz", destination=self.source_folder, strip_root=True)
 
     def generate(self):
         # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
@@ -410,7 +406,6 @@ class ArrowConan(ConanFile):
         tc.variables["ARROW_NO_DEPRECATED_API"] = not bool(self.options.deprecated)
         tc.variables["ARROW_FLIGHT"] = self._with_flight_rpc()
         tc.variables["ARROW_FLIGHT_SQL"] = bool(self.options.get_safe("with_flight_sql", False))
-        tc.variables["ARROW_HIVESERVER2"] = bool(self.options.with_hiveserver2)
         tc.variables["ARROW_COMPUTE"] = self._compute()
         tc.variables["ARROW_CSV"] = bool(self.options.with_csv)
         tc.variables["ARROW_CUDA"] = bool(self.options.with_cuda)
@@ -572,6 +567,8 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libparquet"].names["cmake_find_package_multi"] = "parquet"
             self.cpp_info.components["libparquet"].names["pkg_config"] = "parquet"
             self.cpp_info.components["libparquet"].requires = ["libarrow"]
+            if not self.options.shared:
+                self.cpp_info.components["libparquet"].defines = ["PARQUET_STATIC"]            
 
         if self.options.get_safe("substrait", False):
             self.cpp_info.components["libarrow_substrait"].libs = [self._lib_name("arrow_substrait")]
@@ -593,6 +590,8 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libgandiva"].names["cmake_find_package_multi"] = "gandiva"
             self.cpp_info.components["libgandiva"].names["pkg_config"] = "gandiva"
             self.cpp_info.components["libgandiva"].requires = ["libarrow"]
+            if not self.options.shared:
+                self.cpp_info.components["libgandiva"].defines = ["GANDIVA_STATIC"]            
 
         if self._with_flight_rpc():
             self.cpp_info.components["libarrow_flight"].libs = [self._lib_name("arrow_flight")]
@@ -649,8 +648,6 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("libbacktrace::libbacktrace")
         if self.options.with_cuda:
             self.cpp_info.components["libarrow"].requires.append("cuda::cuda")
-        if self.options.with_hiveserver2:
-            self.cpp_info.components["libarrow"].requires.append("hiveserver2::hiveserver2")
         if self._with_rapidjson():
             self.cpp_info.components["libarrow"].requires.append("rapidjson::rapidjson")
         if self.options.with_s3:

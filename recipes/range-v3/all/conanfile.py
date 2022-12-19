@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy
@@ -24,13 +25,14 @@ class Rangev3Conan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "5" if Version(self.version) < "0.10.0" else "6.5",
-            "Visual Studio": "16",
+            "msvc": "192",
+            "Visual Studio": "16", # TODO: remove when only Conan2 is supported
             "clang": "3.6" if Version(self.version) < "0.10.0" else "3.9"
         }
 
     @property
     def _min_cppstd(self):
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             return "17"
         else:
             return "14"
@@ -47,7 +49,7 @@ class Rangev3Conan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(
             str(self.settings.compiler), False)
         if not minimum_version:
-            self.output.warn(
+            self.output.warning(
                 f"{self.settings.compiler} {self.settings.compiler.version} support for range-v3 is unknown, assuming it is supported.")
         elif Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
@@ -67,7 +69,7 @@ class Rangev3Conan(ConanFile):
     def package_info(self):
         self.cpp_info.components["range-v3-meta"].names["cmake_find_package"] = "meta"
         self.cpp_info.components["range-v3-meta"].names["cmake_find_package_multi"] = "meta"
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             self.cpp_info.components["range-v3-meta"].cxxflags = ["/permissive-"]
 
             if "0.9.0" <= Version(self.version) < "0.11.0":
