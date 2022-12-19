@@ -235,10 +235,6 @@ class BoostConan(ConanFile):
         return self.settings.os == "Windows" and self.settings.compiler == "clang"
 
     @property
-    def _zip_bzip2_requires_needed(self):
-        return not self.options.without_iostreams and not self.options.header_only
-
-    @property
     def _python_executable(self):
         """
         obtain full path to the python interpreter executable
@@ -831,7 +827,6 @@ class BoostConan(ConanFile):
             self._build_bcp()
             self._run_bcp()
 
-        # Help locating bzip2 and zlib
         self._create_user_config_jam(self._boost_build_dir)
 
         # JOIN ALL FLAGS
@@ -1176,33 +1171,31 @@ class BoostConan(ConanFile):
         return ""
 
     def _create_user_config_jam(self, folder):
-        """To help locating the zlib and bzip2 deps"""
-        self.output.warn("Patching user-config.jam")
+        self.output.info("Patching user-config.jam")
+
+        def create_library_config(deps_name, name):
+            aggregated_cpp_info = self.dependencies[deps_name].cpp_info.aggregated_components()
+            includedir = aggregated_cpp_info.includedirs[0].replace("\\", "/")
+            includedir = f"\"{includedir}\""
+            libdir = aggregated_cpp_info.libdirs[0].replace("\\", "/")
+            libdir = f"\"{libdir}\""
+            lib = aggregated_cpp_info.libs[0]
+            version = self.dependencies[deps_name].ref.version
+            return f"\nusing {name} : {version} : " \
+                   f"<include>{includedir} " \
+                   f"<search>{libdir} " \
+                   f"<name>{lib} ;"
 
         contents = ""
-        if self._zip_bzip2_requires_needed:
-            def create_library_config(deps_name, name):
-                aggregated_cpp_info = self.dependencies[deps_name].cpp_info.aggregated_components()
-                includedir = aggregated_cpp_info.includedirs[0].replace("\\", "/")
-                includedir = f"\"{includedir}\""
-                libdir = aggregated_cpp_info.libdirs[0].replace("\\", "/")
-                libdir = f"\"{libdir}\""
-                lib = aggregated_cpp_info.libs[0]
-                version = self.dependencies[deps_name].ref.version
-                return f"\nusing {name} : {version} : " \
-                       f"<include>{includedir} " \
-                       f"<search>{libdir} " \
-                       f"<name>{lib} ;"
 
-            contents = ""
-            if self._with_zlib:
-                contents += create_library_config("zlib", "zlib")
-            if self._with_bzip2:
-                contents += create_library_config("bzip2", "bzip2")
-            if self._with_lzma:
-                contents += create_library_config("xz_utils", "lzma")
-            if self._with_zstd:
-                contents += create_library_config("zstd", "zstd")
+        if self._with_zlib:
+            contents += create_library_config("zlib", "zlib")
+        if self._with_bzip2:
+            contents += create_library_config("bzip2", "bzip2")
+        if self._with_lzma:
+            contents += create_library_config("xz_utils", "lzma")
+        if self._with_zstd:
+            contents += create_library_config("zstd", "zstd")
 
         if not self.options.without_python:
             # https://www.boost.org/doc/libs/1_70_0/libs/python/doc/html/building/configuring_boost_build.html
