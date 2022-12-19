@@ -565,8 +565,10 @@ class OpenCVConan(ConanFile):
                 components.append("{0}::{0}".format(self.options.with_jpeg2000))
             if self.options.with_png:
                 components.append("libpng::libpng")
-            if self.options.with_jpeg:
-                components.append("{0}::{0}".format(self.options.with_jpeg))
+            if self.options.with_jpeg == "libjpeg":
+                components.append("libjpeg::libjpeg")
+            elif self.options.with_jpeg == "libjpeg-turbo":
+                components.append("libjpeg-turbo::jpeg")
             if self.options.get_safe("with_tiff"):
                 components.append("libtiff::libtiff")
             if self.options.with_openexr:
