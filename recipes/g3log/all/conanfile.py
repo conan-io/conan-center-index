@@ -13,15 +13,14 @@ required_conan_version = ">=1.50.0"
 
 class G3logConan(ConanFile):
     name = "g3log"
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/KjellKod/g3log"
-    license = "The Unlicense"
     description = (
         "G3log is an asynchronous, \"crash safe\", logger that is easy to use "
         "with default logging sinks or you can add your own."
     )
-    topics = ("g3log", "log")
-
+    license = "The Unlicense"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/KjellKod/g3log"
+    topics = ("logging", "log", "asynchronous")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -47,13 +46,27 @@ class G3logConan(ConanFile):
     }
 
     @property
+    def _min_cppstd(self):
+        return 14 if Version(self.version) < "2.0" else 17
+
+    @property
     def _compilers_minimum_version(self):
-        return {
-            "gcc": "6.1",
-            "clang": "3.4",
-            "apple-clang": "5.1",
-            "Visual Studio": "15",
-        }
+        if Version(self.version) < "2.0":
+            return {
+                "gcc": "6.1",
+                "clang": "3.4",
+                "apple-clang": "5.1",
+                "Visual Studio": "15",
+                "msvc": "191",
+            }
+        else:
+            return {
+                "gcc": "8",
+                "clang": "7",
+                "apple-clang": "12",
+                "Visual Studio": "16",
+                "msvc": "192",
+            }
 
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
@@ -72,7 +85,7 @@ class G3logConan(ConanFile):
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, "14")
+            check_min_cppstd(self, self._min_cppstd)
 
         def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -82,9 +95,7 @@ class G3logConan(ConanFile):
 
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
         if minimum_version and loose_lt_semver(str(self.info.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration(
-                "{} requires C++14, which your compiler does not support.".format(self.name)
-            )
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++14, which your compiler does not support.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
