@@ -104,4 +104,5 @@ class LibFtdiConan(ConanFile):
         if self.options.enable_cpp_wrapper:
             self.cpp_info.components["ftdipp"].set_property("pkg_config_name", "libftdipp1")
             self.cpp_info.components["ftdipp"].libs = ["ftdipp1"]
-            self.cpp_info.components["ftdipp"].requires = ["ftdi", "boost::headers"]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["ftdipp"].system_libs.append("m")
