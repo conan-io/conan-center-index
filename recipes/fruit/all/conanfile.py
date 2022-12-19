@@ -1,6 +1,5 @@
 import os
 import tarfile
-import tempfile
 import shutil
 from fnmatch import fnmatch
 
@@ -9,6 +8,9 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, download, rmdir
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, cmake_layout, CMake
 from conan.tools.build import check_min_cppstd
+
+
+required_conan_version = "1.53.0"
 
 
 class FruitConan(ConanFile):
