@@ -8,6 +8,7 @@
 #include <vector>
 
 int main() {
+try {
  std::vector<cl::Platform> platforms;
     cl::Platform::get(&platforms);
     cl::Platform plat;
@@ -23,4 +24,9 @@ int main() {
     }
 
     return 0;
+    }
+    catch( const cl::Error & ex) {
+        std::cout << "No OpenCL platform available\n";
+        return 0;
+    }
 }
