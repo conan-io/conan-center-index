@@ -1081,6 +1081,14 @@ Examples = bin/datadir/examples""")
             if self.options.get_safe("with_vulkan"):
                 _create_module("VulkanSupport", ["Core", "Gui"])
 
+            if self.options.widgets:
+                _create_module("Widgets", ["Gui"])
+                _add_build_module("qtWidgets", self._cmake_qt5_private_file("Widgets"))
+                if self.settings.os not in ["iOS", "watchOS", "tvOS"]:
+                    _create_module("PrintSupport", ["Gui", "Widgets"])
+                    if self.settings.os == "Macos" and not self.options.shared:
+                        self.cpp_info.components["qtPrintSupport"].system_libs.append("cups")
+                    
             if is_apple_os(self):
                 _create_module("ClipboardSupport", ["Core", "Gui"])
                 self.cpp_info.components["qtClipboardSupport"].frameworks = ["ImageIO"]
@@ -1163,13 +1171,6 @@ Examples = bin/datadir/examples""")
         _create_module("Network", networkReqs)
         _create_module("Sql")
         _create_module("Test")
-        if self.options.widgets:
-            _create_module("Widgets", ["Gui"])
-            _add_build_module("qtWidgets", self._cmake_qt5_private_file("Widgets"))
-        if self.options.gui and self.options.widgets and self.settings.os not in ["iOS", "watchOS", "tvOS"]:
-            _create_module("PrintSupport", ["Gui", "Widgets"])
-            if self.settings.os == "Macos" and not self.options.shared:
-                self.cpp_info.components["PrintSupport"].system_libs.append("cups")
         if self.options.get_safe("opengl", "no") != "no" and self.options.gui:
             _create_module("OpenGL", ["Gui"])
         if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
