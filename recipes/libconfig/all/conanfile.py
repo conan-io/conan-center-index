@@ -69,15 +69,17 @@ class LibconfigConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        prefix = "lib" if self.settings.os == "Windows" else ""
+
         self.cpp_info.components["libconfig_"].set_property("cmake_file_name", "libconfig")
         self.cpp_info.components["libconfig_"].set_property("cmake_target_name", "libconfig::libconfig")
         self.cpp_info.components["libconfig_"].set_property("pkg_config_name", "libconfig")
-        self.cpp_info.components["libconfig_"].libs = ["libconfig"]
+        self.cpp_info.components["libconfig_"].libs = [f"{prefix}config"]
 
         self.cpp_info.components["libconfig++"].set_property("cmake_file_name", "libconfig")
         self.cpp_info.components["libconfig++"].set_property("cmake_target_name", "libconfig::libconfig++")
         self.cpp_info.components["libconfig++"].set_property("pkg_config_name", "libconfig++")
-        self.cpp_info.components["libconfig++"].libs = ["libconfig++"]
+        self.cpp_info.components["libconfig++"].libs = [f"{prefix}config++"]
 
         if not self.options.shared:
             self.cpp_info.components["libconfig_"].defines.append("LIBCONFIG_STATIC")
