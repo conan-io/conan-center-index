@@ -44,7 +44,7 @@ class LibconfigConan(ConanFile):
         tc.variables['BUILD_EXAMPLES'] = False
         tc.variables['BUILD_TESTS'] = False
         if is_apple_os(self):
-            tc.preprocessor_definitions[HAVE_XLOCALE_H] = 1
+            tc.preprocessor_definitions["HAVE_XLOCALE_H"] = 1
         tc.generate()
 
     def build(self):
