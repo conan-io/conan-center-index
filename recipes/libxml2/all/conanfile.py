@@ -187,7 +187,8 @@ class Libxml2Conan(ConanFile):
             def fix_library(option, package, old_libname):
                 if option:
                     libs = []
-                    for lib in itertools.chain(self.dependencies[package].cpp_info.libs, self.dependencies[package].cpp_info.system_libs):
+                    aggregated_cpp_info = self.dependencies[package].cpp_info.aggregated_components()
+                    for lib in itertools.chain(aggregated_cpp_info.libs, aggregated_cpp_info.system_libs):
                         libname = lib
                         if not libname.endswith('.lib'):
                             libname += '.lib'
@@ -246,10 +247,11 @@ class Libxml2Conan(ConanFile):
             # build
             def fix_library(option, package, old_libname):
                 if option:
+                    aggregated_cpp_info = self.dependencies[package].cpp_info.aggregated_components()
                     replace_in_file(self,
                         "Makefile.mingw",
                         f"LIBS += -l{old_libname}",
-                        f"LIBS += -l{' -l'.join(self.dependencies[package].cpp_info.libs)}",
+                        f"LIBS += -l{' -l'.join(aggregated_cpp_info.libs)}",
                     )
 
             fix_library(self.options.iconv, "libiconv", "iconv")
