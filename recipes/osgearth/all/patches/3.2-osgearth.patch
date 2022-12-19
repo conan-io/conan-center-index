@@ -93,7 +93,7 @@ diff --git a/src/osgEarthProcedural/CMakeLists.txt b/src/osgEarthProcedural/CMak
 -INCLUDE(ModuleInstall OPTIONAL)
 \ No newline at end of file
 +INCLUDE(ModuleInstall OPTIONAL)
-+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/source_subfolder/src/osgEarth)
++INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/osgEarth)
 \ No newline at end of file
 diff --git a/src/osgEarth/CMakeLists.txt b/src/osgEarth/CMakeLists.txt
 --- a/src/osgEarth/CMakeLists.txt	(revision 15d5340f174212d6f93ae55c0d9af606c3d361c0)
@@ -126,23 +126,23 @@ diff --git a/CMakeModules/OsgEarthMacroUtils.cmake b/CMakeModules/OsgEarthMacroU
 --- a/CMakeModules/OsgEarthMacroUtils.cmake	(revision 15d5340f174212d6f93ae55c0d9af606c3d361c0)
 +++ b/CMakeModules/OsgEarthMacroUtils.cmake	(date 1639490999842)
 @@ -505,7 +505,7 @@
- 
+
  	# generate the build-time script that will create out cpp file with inline shaders:
  	configure_file(
 -		"${CMAKE_SOURCE_DIR}/CMakeModules/ConfigureShaders.cmake.in"
-+		"${CMAKE_SOURCE_DIR}/source_subfolder/CMakeModules/ConfigureShaders.cmake.in"
++		"${CMAKE_SOURCE_DIR}/src/CMakeModules/ConfigureShaders.cmake.in"
  		"${CMAKE_CURRENT_BINARY_DIR}/ConfigureShaders.cmake"
  		@ONLY)
- 
+
 @@ -518,7 +518,7 @@
  		DEPENDS
  			${GLSL_FILES}
  			"${TEMPLATE_FILE}"
 -			"${CMAKE_SOURCE_DIR}/CMakeModules/ConfigureShaders.cmake.in" )
-+			"${CMAKE_SOURCE_DIR}/source_subfolder/CMakeModules/ConfigureShaders.cmake.in" )
- 
++			"${CMAKE_SOURCE_DIR}/src/CMakeModules/ConfigureShaders.cmake.in" )
+
  endmacro(configure_shaders)
- 
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 --- a/CMakeLists.txt	(revision 15d5340f174212d6f93ae55c0d9af606c3d361c0)
 +++ b/CMakeLists.txt	(date 1639490999923)
