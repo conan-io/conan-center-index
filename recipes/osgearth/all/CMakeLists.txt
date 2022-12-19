@@ -25,7 +25,6 @@ set(OSG_INCLUDE_DIRS ${openscenegraph_INCLUDE_DIRS})
 set(OSG_INCLUDE_DIR "${openscenegraph_INCLUDE_DIRS}")
 set(OSG_GEN_INCLUDE_DIR "${openscenegraph_INCLUDE_DIRS}")
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
 # gdal
 find_package(GDAL REQUIRED)
 set(GDAL_LIBRARY ${GDAL_LIBRARIES})
