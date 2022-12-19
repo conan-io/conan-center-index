@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import copy, get, rename, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 from conans import CMake
@@ -51,7 +51,6 @@ class OpenCVConan(ConanFile):
     }
 
     short_paths = True
-    exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -66,6 +65,10 @@ class OpenCVConan(ConanFile):
     @property
     def _build_folder(self):
         return os.path.join(self.source_folder, "build")
+
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -126,6 +129,7 @@ class OpenCVConan(ConanFile):
             destination=self._contrib_folder, strip_root=True)
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         rmdir(self, os.path.join(self._source_folder, "3rdparty"))
         if self.options.contrib:
             freetype_cmake = os.path.join(self._contrib_folder, "modules", "freetype", "CMakeLists.txt")
@@ -277,8 +281,6 @@ class OpenCVConan(ConanFile):
 
         if is_msvc(self):
             self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
-        if self.options.with_openexr:
-            self._cmake.definitions["OPENEXR_ROOT"] = self.dependencies["openexr"].package_folder.replace("\\", "/")
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         self._cmake.definitions["ENABLE_CCACHE"] = False
 
