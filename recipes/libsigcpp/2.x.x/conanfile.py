@@ -15,7 +15,7 @@ class LibSigCppConan(ConanFile):
     name = "libsigcpp"
     homepage = "https://github.com/libsigcplusplus/libsigcplusplus"
     url = "https://github.com/conan-io/conan-center-index"
-    license = "LGPL-3.0"
+    license = "LGPL-3.0-only"
     description = "libsigc++ implements a typesafe callback system for standard C++."
     topics = ("callback")
 
