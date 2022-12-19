@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, replace_in_file
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
 import os
 
 
@@ -52,6 +53,9 @@ class PackageConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "vtu11", "impl", "zlibWriter_impl.hpp"), "uLong", "size_t", strict=False)
         if valid_min_cppstd(self, 17):
             rm(self, "filesystem.hpp", os.path.join(self.source_folder, "vtu11", "inc"))
+            if is_msvc(self):
+                replace_in_file(self, os.path.join(self.source_folder, "vtu11", "inc", "alias.hpp"), "#include \"vtu11/inc/filesystem.hpp\"", "#include <filesystem>")
+                replace_in_file(self, os.path.join(self.source_folder, "vtu11", "inc", "alias.hpp"), "namespace vtu11fs = ghc::filesystem;", "namespace vtu11fs = std::filesystem;")
 
     def build(self):
         self._patch_sources()
