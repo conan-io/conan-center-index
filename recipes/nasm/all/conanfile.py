@@ -31,8 +31,6 @@ class NASMConan(ConanFile):
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-        if is_msvc(self, build_context=True):
-            self.conf.define("tools.gnu:make_program", "nmake")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -68,7 +66,7 @@ class NASMConan(ConanFile):
         autotools = Autotools(self)
         if is_msvc(self):
             with chdir(self, self.source_folder):
-                autotools.make(f'/f {os.path.join("Mkfiles", "msvc.mak")}')
+                self.run(f'nmake /f {os.path.join("Mkfiles", "msvc.mak")}')
         else:
             autotools.configure()
 
