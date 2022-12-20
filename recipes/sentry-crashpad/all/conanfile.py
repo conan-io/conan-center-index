@@ -66,7 +66,7 @@ class SentryCrashpadConan(ConanFile):
             self.requires("openssl/1.1.1s")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             # Set as required in crashpad CMake file.
             # See https://github.com/getsentry/crashpad/blob/71bcaad4cf30294b8de1bfa02064ab629437163b/CMakeLists.txt#L67
             check_min_cppstd(self, 14)
