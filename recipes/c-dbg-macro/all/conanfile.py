@@ -18,7 +18,7 @@ class DbgMacroConan(ConanFile):
     no_copy_source = True
 
     def validate(self):
-        if self.info.settings.os == "Windows":
+        if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("This library is not compatible with Windows")
 
     def layout(self):
