@@ -6,7 +6,7 @@ from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.55.0"
 
 
 class DoxygenConan(ConanFile):
@@ -81,7 +81,6 @@ class DoxygenConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        # This generates "conan_toolchain.cmake" in self.generators_folder
         tc = CMakeToolchain(self)
         tc.variables["build_parse"] = self.options.enable_parse
         tc.variables["build_search"] = self.options.enable_search
@@ -90,14 +89,12 @@ class DoxygenConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.build_context_activated = ["m4"]
+        if self.settings.os != "Windows":
+            deps.set_property("flex", "cmake_find_mode", "none")
+            deps.set_property("bison", "cmake_find_mode", "none")
         deps.generate()
 
     def build(self):
-        if os.path.isfile("Findflex.cmake"):
-            os.unlink("Findflex.cmake")
-        if os.path.isfile("Findbison.cmake"):
-            os.unlink("Findbison.cmake")
         apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
@@ -114,3 +111,4 @@ class DoxygenConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
+        self.cpp_info.set_property("cmake_find_mode", "none")
