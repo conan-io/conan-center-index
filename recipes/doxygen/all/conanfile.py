@@ -25,7 +25,6 @@ class DoxygenConan(ConanFile):
         "enable_parse": True,
         "enable_search": True,
     }
-    generators = "VirtualRunEnv"
 
     def layout(self):
         cmake_layout(self)
@@ -91,6 +90,7 @@ class DoxygenConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.build_context_activated = ["m4"]
         deps.generate()
 
     def build(self):
