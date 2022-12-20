@@ -19,14 +19,6 @@ You can follow the three steps (:one: :two: :three:) described below! :tada:
     * [`conandata.yml`](#conandatayml)
     * [The _recipe folder_: `conanfile.py`](#the-_recipe-folder_-conanfilepy)
     * [Test Folders](#test-folders)
-  * [How to provide a good recipe](#how-to-provide-a-good-recipe)
-    * [Header Only](#header-only)
-    * [CMake](#cmake)
-      * [Components](#components)
-    * [Autotools](#autotools)
-      * [Components](#components-1)
-    * [No Upstream Build Scripts](#no-upstream-build-scripts)
-    * [System Packages](#system-packages)
   * [Test the recipe locally](#test-the-recipe-locally)
     * [Hooks](#hooks)
     * [Linters](#linters)<!-- endToc -->
@@ -170,44 +162,6 @@ a minimal project to test the package is strictly required. You can read about i
 [Conan documentation](https://docs.conan.io/en/latest/creating_packages/getting_started.html).
 
 Learn more about the ConanCenterIndex requirements in the [test packages](test_packages.md) document.
-
-## How to provide a good recipe
-
-The [recipes](https://github.com/conan-io/conan-center-index/tree/master/recipes) available in CCI can be used as good examples, you can use them as the base for your recipe. However it is important to note Conan features change over time and our best practices evolve so some minor details may be out of date due to the vast number of recipes.
-
-### Header Only
-
-If you are looking for header-only projects, you can take a look on [header-only template](../package_templates/header_only).
-Also, Conan Docs has a section about [how to package header-only libraries](https://docs.conan.io/en/latest/howtos/header_only.html).
-
-### CMake
-
-For C/C++ projects which use CMake for building, you can take a look on [cmake package template](../package_templates/cmake_package).
-
-#### Components
-
-Another common use case for CMake based projects, both header only and compiled, is _modeling components_ to match the `find_package` and export the correct targets from Conan's generators. A basic examples of this is [cpu_features](https://github.com/conan-io/conan-center-index/blob/master/recipes/cpu_features/all/conanfile.py), a moderate/intermediate example is [cpprestsdk](https://github.com/conan-io/conan-center-index/blob/master/recipes/cpprestsdk/all/conanfile.py), and a very complex example is [OpenCV](https://github.com/conan-io/conan-center-index/blob/master/recipes/opencv/4.x/conanfile.py).
-
-### Autotools
-
-However, if you need to use autotools for building, you can take a look on [libalsa](https://github.com/conan-io/conan-center-index/blob/master/recipes/libalsa/all/conanfile.py), [kmod](https://github.com/conan-io/conan-center-index/blob/master/recipes/kmod/all/conanfile.py), [libcap](https://github.com/conan-io/conan-center-index/blob/master/recipes/libcap/all/conanfile.py).
-
-#### Components
-
-Many projects offer **pkg-config**'s `*.pc` files which need to be modeled using components. A prime example of this is [Wayland](https://github.com/conan-io/conan-center-index/blob/master/recipes/wayland/all/conanfile.py).
-
-### No Upstream Build Scripts
-
-For cases where a project only offers source files, but not a build script, you can add CMake support, but first, contact the upstream and open a PR offering building support. If it's rejected because the author doesn't want any kind of build script, or the project is abandoned, CCI can accept your build script. Take a look at [Bzip2](https://github.com/conan-io/conan-center-index/blob/master/recipes/bzip2/all/CMakeLists.txt) and [DirectShowBaseClasses](https://github.com/conan-io/conan-center-index/blob/master/recipes/directshowbaseclasses/all/CMakeLists.txt) as examples.
-
-### System Packages
-
-> :information_source: For exceptional cases where only system packages can be used and a regular Conan package may result in an incompatible and fragile package, a separated system package may be created. See the [FAQs](../faqs.md#can-i-install-packages-from-the-system-package-manager) for more.
-
-The [SystemPackageTool](https://docs.conan.io/en/latest/reference/conanfile/methods.html#systempackagetool) can easily manage a system package manager (e.g. apt,
-pacman, brew, choco) and install packages which are missing on Conan Center but available for most distributions. It is key to correctly fill in the `cpp_info` for the consumers of a system package to have access to whatever was installed.
-
-As example there is [xorg](https://github.com/conan-io/conan-center-index/blob/master/recipes/xorg/all/conanfile.py). Also, it will require an exception rule for [conan-center hook](https://github.com/conan-io/hooks#conan-center), a [pull request](https://github.com/conan-io/hooks/pulls) should be open to allow it over the KB-H032.
 
 ## Test the recipe locally
 
