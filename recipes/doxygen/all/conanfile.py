@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rm, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
@@ -27,7 +27,7 @@ class DoxygenConan(ConanFile):
     }
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def export_sources(self):
         export_conandata_patches(self)
