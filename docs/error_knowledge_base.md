@@ -63,7 +63,7 @@ Here we use [configure()](https://docs.conan.io/en/latest/reference/conanfile/me
 
 #### **<a name="KB-H008">#KB-H008</a>: "VERSION RANGES"**
 
-It is not allowed to use [version ranges](https://docs.conan.io/en/latest/versioning/version_ranges.html) for the recipes in Conan center, where the dependency graph should be deterministic.
+See [Dependencies Version Ranges](adding_packages/dependencies.md#version-ranges) for details.
 
 #### **<a name="KB-H009">#KB-H009</a>: "RECIPE FOLDER SIZE"**
 
