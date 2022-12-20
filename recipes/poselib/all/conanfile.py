@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conans.tools import collect_libs
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.files import copy, rmdir, get, apply_conandata_patches, export_conandata_patches
 from conan.tools.build import check_min_cppstd
@@ -91,10 +92,7 @@ class PoseLibConan(ConanFile):
         if is_msvc(self):
             self.cpp_info.libdirs = ["bin", "lib"]
 
-        if self.settings.build_type == "Debug":
-            self.cpp_info.libs = ["PoseLibd"]
-        else:
-            self.cpp_info.libs = ["PoseLib"]
+        self.cpp_info.libs = collect_libs(self)
 
         self.cpp_info.set_property("cmake_file_name", "poselib")
         self.cpp_info.set_property("cmake_target_name", "poselib::poselib")
