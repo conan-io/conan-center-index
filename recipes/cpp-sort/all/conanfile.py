@@ -97,7 +97,9 @@ class CppSortConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "cpp-sort"
-        self.cpp_info.names["cmake_find_package_multi"] = "cpp-sort"
+        self.cpp_info.set_property("cmake_file_name", "cpp-sort")
+        self.cpp_info.set_property("cmake_target_name", "cpp-sort::cpp-sort")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
         if is_msvc(self):
             self.cpp_info.cxxflags = ["/permissive-"]
