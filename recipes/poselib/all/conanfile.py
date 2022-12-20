@@ -89,8 +89,10 @@ class PoseLibConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        if is_msvc(self):
-            self.cpp_info.libdirs = ["bin", "lib"]
+        if is_msvc(self) and self.options.shared:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
 
         self.cpp_info.libs = collect_libs(self)
 
