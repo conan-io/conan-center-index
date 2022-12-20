@@ -101,14 +101,14 @@ We generally consider tools like CMake as a standard tool to have installed in y
 cmake/3.17.2
 ```
 
-Other packages using more unusual build tools, like `OpenSSL` using `strawberryperl`, will have the build require in the recipe as it is likely that the user that want to build it from sources will not have it installed in their system.
+Other packages using more unusual build tools, like [`OpenSSL`](https://github.com/conan-io/conan-center-index/tree/master/recipes/openssl) using [`strawberryperl`](https://github.com/conan-io/conan-center-index/tree/master/recipes/strawberryperl), will have the build require in the recipe as it is likely that the user that want to build it from sources will not have it installed in their system.
 
 ## How are rare build systems without generators packaged?
 
 The C++ ecosystem has a lot of rare, unique and obscure build systems. Some of these are available in ConanCenter but they do not have built-in generators from the main Conan client.
 For these cases, contributors are asked to help reviewers as much as possible as it's likely we will not have expertise.
 
-For quality assurance the build service is expected to be green and the hooks will ensure the package contents match whats expected given the options. This means they are more likely to have
+For quality assurance the build service is expected to be green and the [hooks](https://github.com/conan-io/hooks) will ensure the package contents match what is expected given the options. This means they are more likely to have
 inconsistency then other projects but make for excellent contributons.
 
 ## Are python requires allowed in the `conan-center-index`?
