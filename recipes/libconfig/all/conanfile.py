@@ -69,7 +69,7 @@ class LibconfigConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        prefix = "lib" if Version(self.version) < "1.7.3" else ""
+        prefix = "lib" if Version(self.version) < "1.7.3" or self.settings.os == "Windows" else ""
 
         self.cpp_info.components["libconfig_"].set_property("cmake_file_name", "libconfig")
         self.cpp_info.components["libconfig_"].set_property("cmake_target_name", "libconfig::libconfig")
