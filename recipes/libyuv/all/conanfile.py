@@ -18,7 +18,7 @@ class LibyuvConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
+        "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
     }
     default_options = {
         "shared": False,
@@ -45,6 +45,8 @@ class LibyuvConan(ConanFile):
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.1.4")
+        elif self.options.with_jpeg == "mozjpeg":
+            self.requires("mozjpeg/4.1.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder)
@@ -70,10 +72,13 @@ class LibyuvConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["yuv"]
-        if self.options.with_jpeg == "libjpeg-turbo":
-            self.cpp_info.requires = ["libjpeg-turbo::jpeg"]
+        self.cpp_info.requires = []
+        if self.options.with_jpeg == "libjpeg":
+            self.cpp_info.requires.append("libjpeg::libjpeg")
+        elif self.options.with_jpeg == "libjpeg-turbo":
+            self.cpp_info.requires.append("libjpeg-turbo::jpeg")
+        elif self.options.with_jpeg == "mozjpeg":
+            self.cpp_info.requires.append("mozjpeg::libjpeg")
 
         # TODO: to remove in conan v2
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
-        self.env_info.PATH.append(bin_path)
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
