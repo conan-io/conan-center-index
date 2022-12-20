@@ -37,10 +37,11 @@ class GlazeConan(ConanFile):
 
     def requirements(self):
         self.requires("fmt/9.1.0")
-        self.requires("fast_float/3.8.1")
         self.requires("frozen/1.1.1")
         self.requires("nanorange/20200505")
-        if Version(self.version) >= "0.1.5":
+        if Version(self.version) < "0.2.3":
+            self.requires("fast_float/3.8.1")
+        if "0.1.5" <= Version(self.version) < "0.2.3":
             self.requires("dragonbox/1.1.3")
 
     def package_id(self):
