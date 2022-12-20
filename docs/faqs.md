@@ -106,10 +106,13 @@ Other packages using more unusual build tools, like [`OpenSSL`](https://github.c
 ## How are rare build systems without generators packaged?
 
 The C++ ecosystem has a lot of rare, unique and obscure build systems. Some of these are available in ConanCenter but they do not have built-in generators from the main Conan client.
+The recipe is expected to encode the specifics of the build system, mapping the `settings`, `options` for the binary configuration, and also mapping `self.dependencies` so the build system can locate the dependencies libraries as required.
 For these cases, contributors are asked to help reviewers as much as possible as it's likely we will not have expertise.
 
-For quality assurance the build service is expected to be green and the [hooks](https://github.com/conan-io/hooks) will ensure the package contents match what is expected given the options. This means they are more likely to have
-inconsistency then other projects but make for excellent contributons.
+> TODO: Add a link to docs.conan.io which explains how to write a custom generator in the 2.0 sense
+
+For quality assurance the build service is expected to be green and the [hooks](https://github.com/conan-io/hooks) will ensure the package contents match what is expected given the options. These recipes are more likely to have
+inconsistency with other recipes but make for excellent contributions.
 
 ## Are python requires allowed in the `conan-center-index`?
 
