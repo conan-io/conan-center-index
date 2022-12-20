@@ -24,7 +24,7 @@ required_conan_version = ">=1.53.0"
 class LibiconvConan(ConanFile):
     name = "libiconv"
     description = "Convert text to and from Unicode"
-    license = "LGPL-2.1-or-later"
+    license = ("LGPL-2.0-or-later", "LGPL-2.1-or-later")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/libiconv/"
     topics = ("iconv", "text", "encoding", "locale", "unicode", "conversion")
@@ -63,7 +63,9 @@ class LibiconvConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-        if Version(self.version) < "1.17":
+        if Version(self.version) >= "1.17":
+            self.license = "LGPL-2.1-or-later"
+        else:
             self.license = "LGPL-2.0-or-later"
 
     def layout(self):
