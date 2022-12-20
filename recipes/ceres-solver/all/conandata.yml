@@ -11,10 +11,23 @@ sources:
 patches:
   "2.1.0":
     - patch_file: "patches/2.1.0-0001-find-libraries-conan.patch"
+      patch_description: "Robust dependencies handling"
+      patch_type: "conan"
     - patch_file: "patches/2.1.0-0002-fix-mingw-build.patch"
+      patch_description: "Fix MinGW build"
+      patch_type: "portability"
   "2.0.0":
     - patch_file: "patches/2.0.0-0001-find-libraries-conan.patch"
+      patch_description: "Robust dependencies handling"
+      patch_type: "conan"
     - patch_file: "patches/2.0.0-0002-fix-mingw-build.patch"
+      patch_description: "Fix MinGW build"
+      patch_type: "portability"
   "1.14.0":
     - patch_file: "patches/1.14.0-0001-find-libraries-conan.patch"
+      patch_description: "Robust dependencies handling"
+      patch_type: "conan"
     - patch_file: "patches/1.14.0-0002-fix-msvc-c++17.patch"
+      patch_description: "Fix compilation with C++17 standard and above"
+      patch_type: "portability"
+      patch_source: "https://github.com/ceres-solver/ceres-solver/commit/1e8e9452d0a7dfaf5697b544810798a58e35443e"
