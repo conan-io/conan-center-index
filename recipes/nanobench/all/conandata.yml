@@ -23,3 +23,4 @@ patches:
     - patch_file: "patches/4.3.9-0001-support-older-msvc.patch"
       patch_description: "fix compilation error on msvc < 1928"
       patch_type: "portability"
+      patch_source: "https://github.com/martinus/nanobench/pull/82"

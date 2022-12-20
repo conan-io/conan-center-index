@@ -1,5 +1,5 @@
 diff --git a/src/include/nanobench.h b/src/include/nanobench.h
-index c03d9ad..9bc6eeb 100644
+index c03d9ad..30f7353 100644
 --- a/src/include/nanobench.h
 +++ b/src/include/nanobench.h
 @@ -405,7 +405,11 @@ struct Config {
@@ -14,7 +14,19 @@ index c03d9ad..9bc6eeb 100644
  };
  ANKERL_NANOBENCH(IGNORE_PADDED_POP)
  
-@@ -2854,7 +2858,11 @@ Config::~Config() = default;
+@@ -431,7 +435,11 @@ public:
+     Result& operator=(Result const&);
+     Result& operator=(Result&&);
+     Result(Result const&);
++#if defined(_MSC_VER) && _MSC_VER < 1928
++    Result(Result&&);
++#else
+     Result(Result&&) noexcept;
++#endif
+ 
+     // adds new measurement results
+     // all values are scaled by iters (except iters...)
+@@ -2854,14 +2862,22 @@ Config::~Config() = default;
  Config& Config::operator=(Config const&) = default;
  Config& Config::operator=(Config&&) = default;
  Config::Config(Config const&) = default;
@@ -26,3 +38,14 @@ index c03d9ad..9bc6eeb 100644
  
  // provide implementation here so it's only generated once
  Result::~Result() = default;
+ Result& Result::operator=(Result const&) = default;
+ Result& Result::operator=(Result&&) = default;
+ Result::Result(Result const&) = default;
++#if defined(_MSC_VER) && _MSC_VER < 1928
++Result::Result(Result&&) = default;
++#else
+ Result::Result(Result&&) noexcept = default;
++#endif
+ 
+ namespace detail {
+ template <typename T>
