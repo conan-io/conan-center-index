@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
 from conan.tools.layout import basic_layout
 import os
 
@@ -15,11 +15,13 @@ class NanobenchConan(ConanFile):
     homepage = "https://github.com/martinus/nanobench"
     topics = ("benchmark", "microbenchmark", "header-only")
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
 
     @property
     def _min_cppstd(self):
         return 11
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -33,6 +35,9 @@ class NanobenchConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build(self):
+        apply_conandata_patches(self)
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
