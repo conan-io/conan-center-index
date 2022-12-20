@@ -203,7 +203,8 @@ class ProtobufConan(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure()
+        cmake_root = "cmake" if Version(self.version) < "3.21" else None
+        cmake.configure(build_script_folder=cmake_root)
         cmake.build()
 
     def package(self):
