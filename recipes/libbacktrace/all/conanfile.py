@@ -5,7 +5,7 @@ from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 from conan.tools.scm import Version
 import os
 
@@ -63,6 +63,7 @@ class LibbacktraceConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
+        check_min_vs(self, "180")
         if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration("libbacktrace shared is not supported with Visual Studio")
 
@@ -83,8 +84,7 @@ class LibbacktraceConan(ConanFile):
         env.generate()
 
         tc = AutotoolsToolchain(self)
-        if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-           (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+        if is_msvc(self):
             tc.extra_cflags.append("-FS")
         tc.generate()
 
