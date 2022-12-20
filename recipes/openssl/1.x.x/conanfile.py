@@ -13,7 +13,6 @@ from functools import total_ordering
 import fnmatch
 import json
 import os
-import shutil
 import textwrap
 
 required_conan_version = ">=1.53.0"
