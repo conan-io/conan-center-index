@@ -73,6 +73,10 @@ class GlfwConan(ConanFile):
         # don't force PIC
         replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
                               "POSITION_INDEPENDENT_CODE ON", "")
+        # don't force static link to libgcc if MinGW
+        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
+                              "target_link_libraries(glfw PRIVATE \"-static-libgcc\")", "")
+
         # Allow to link vulkan-loader into shared glfw
         if self.options.vulkan_static:
             cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
@@ -129,8 +133,9 @@ class GlfwConan(ConanFile):
         libname = "glfw"
         if self.settings.os == "Windows" or not self.options.shared:
             libname += "3"
-        if is_msvc(self) and self.options.shared:
+        if self.settings.os == "Windows" and self.options.shared:
             libname += "dll"
+            self.cpp_info.defines.append("GLFW_DLL")
         self.cpp_info.libs = [libname]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl", "rt"])

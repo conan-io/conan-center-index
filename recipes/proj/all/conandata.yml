@@ -1,4 +1,7 @@
 sources:
+  "9.1.0":
+    url: "https://github.com/OSGeo/PROJ/releases/download/9.1.0/proj-9.1.0.tar.gz"
+    sha256: 81b2239b94cad0886222cde4f53cb49d34905aad2a1317244a0c30a553db2315
   "9.0.1":
     url: "https://github.com/OSGeo/PROJ/releases/download/9.0.1/proj-9.0.1.tar.gz"
     sha256: "737eaacbe7906d0d6ff43f0d9ebedc5c734cccc9e6b8d7beefdec3ab22d9a6a3"
@@ -30,35 +33,50 @@ sources:
     url: "https://github.com/OSGeo/PROJ/releases/download/6.3.1/proj-6.3.1.tar.gz"
     sha256: "6de0112778438dcae30fcc6942dee472ce31399b9e5a2b67e8642529868c86f8"
 patches:
+  "9.1.0":
+    - patch_file: "patches/0001-use-cmake-targets-9.1.0.patch"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
   "9.0.1":
     - patch_file: "patches/0001-use-cmake-targets-9.0.1.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
   "9.0.0":
     - patch_file: "patches/0001-use-cmake-targets-9.0.0.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
     - patch_file: "patches/0002-cmake-configure-proj-pc.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "cmake configure proj pc (fixed by https://github.com/OSGeo/PROJ/pull/3087)"
   "8.2.1":
     - patch_file: "patches/0001-use-cmake-targets-8.2.0.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
   "8.2.0":
     - patch_file: "patches/0001-use-cmake-targets-8.2.0.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
   "8.1.1":
     - patch_file: "patches/0001-use-cmake-targets-8.1.1.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
   "8.1.0":
     - patch_file: "patches/0001-use-cmake-targets-8.1.0.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
   "8.0.1":
     - patch_file: "patches/0001-use-cmake-targets-8.0.0.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
   "8.0.0":
     - patch_file: "patches/0001-use-cmake-targets-8.0.0.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
   "7.2.1":
     - patch_file: "patches/0001-use-cmake-targets-7.2.1.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
   "6.3.1":
     - patch_file: "patches/0001-use-cmake-targets-6.x.x.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"

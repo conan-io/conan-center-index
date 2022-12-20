@@ -47,4 +47,4 @@ class DoctestConan(ConanFile):
         self.cpp_info.build_modules.append("lib/cmake/doctest.cmake")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()

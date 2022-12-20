@@ -1,11 +1,9 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.1)
 
-project(test_package C)
+project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(c-blosc2 REQUIRED CONFIG)
-
-add_executable(${PROJECT_NAME} ../test_package/test_package.c)
-target_link_libraries(${PROJECT_NAME} PRIVATE c-blosc2::c-blosc2)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package/
+                 ${CMAKE_CURRENT_BINARY_DIR}/test_package/)
