@@ -45,6 +45,7 @@ class LibconfigConan(ConanFile):
         tc.variables['BUILD_TESTS'] = False
         if is_apple_os(self):
             tc.preprocessor_definitions["HAVE_XLOCALE_H"] = 1
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):
