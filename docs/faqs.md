@@ -101,7 +101,7 @@ We generally consider tools like CMake as a standard tool to have installed in y
 cmake/3.17.2
 ```
 
-Other packages using more unusual build tools, like [`OpenSSL`](https://github.com/conan-io/conan-center-index/tree/master/recipes/openssl) using [`strawberryperl`](https://github.com/conan-io/conan-center-index/tree/master/recipes/strawberryperl), will have the build require in the recipe as it is likely that the user that want to build it from sources will not have it installed in their system.
+Other packages using more unusual build tools should refer to the [Dependencies - Adding Build Requirements](adding_packages/dependencies.md#build-requirements) section for more information.
 
 ## How are rare build systems without generators packaged?
 
