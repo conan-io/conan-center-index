@@ -1,12 +1,7 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
-project(cfgfile.test)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-
-conan_basic_setup(TARGETS)
-
-find_package(cfgfile REQUIRED)
+find_package(cfgfile REQUIRED CONFIG)
 
 add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/cfg.hpp"
@@ -14,16 +9,7 @@ add_custom_command(
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/session_cfg.conf"
 )
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
-add_executable(${PROJECT_NAME}
-    example.cpp
-    "${CMAKE_CURRENT_BINARY_DIR}/cfg.hpp"
-)
-
-target_link_libraries(${PROJECT_NAME} cfgfile::cfgfile)
-
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    CXX_STANDARD 14
-    CXX_STANDARD_REQUIRED ON
-)
+add_executable(${PROJECT_NAME} test_package.cpp "${CMAKE_CURRENT_BINARY_DIR}/cfg.hpp")
+target_link_libraries(${PROJECT_NAME} PRIVATE cfgfile::cfgfile)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})

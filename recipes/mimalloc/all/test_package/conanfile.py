@@ -1,44 +1,85 @@
-from conans import ConanFile, CMake, RunEnvironment, tools
-import os
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv, Environment
 
+import os
+import functools
 
 class MimallocTestConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package_multi"
+    settings = "os", "arch", "compiler", "build_type"
+    test_type = "explicit"
 
-    def build(self):
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
+
+    @functools.lru_cache(1)
+    def _test_files(self):
+        test_files = []
+
         # No override:
         if not self.options["mimalloc"].override:
-            self._test_files = ["mi_api"]
+            test_files = ["mi_api"]
 
         # Visual Studio overriding:
         elif self.settings.compiler == "Visual Studio" and self.options["mimalloc"].shared:
-            self._test_files = ["include_override", "mi_api"]
+            test_files = ["include_override", "mi_api"]
         elif self.settings.compiler == "Visual Studio" and not self.options["mimalloc"].shared:
-            self._test_files = ["include_override", "mi_api"]
+            test_files = ["include_override", "mi_api"]
 
         # Non Macos injected override:
         elif self.settings.os != "Macos" and \
              self.options["mimalloc"].override and \
              self.options["mimalloc"].shared and \
              self.options["mimalloc"].inject:
-            self._test_files = ["no_changes"]
+            test_files = ["no_changes"]
 
         # Could not simulate Macos preload, so just ignore it:
         elif self.settings.os == "Macos" and \
              self.options["mimalloc"].override and \
              self.options["mimalloc"].shared and \
              self.options["mimalloc"].inject:
-            self._test_files = []
+            test_files = []
 
         # Unix-like non injected override:
         else:
-            self._test_files = ["include_override", "mi_api"]
+            test_files = ["include_override", "mi_api"]
 
+        return test_files
+
+    def generate(self):
+        test_files = self._test_files()
+
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_NO_CHANGES"] = "no_changes" in test_files
+        tc.variables["BUILD_INCLUDE_OVERRIDE"] = "include_override" in test_files
+        tc.variables["BUILD_MI_API"] = "mi_api" in test_files
+        tc.generate()
+
+        env = Environment()
+        env.define("MIMALLOC_VERBOSE", "1")
+
+        if self.settings.os == "Linux":
+            env.define("LD_PRELOAD", f"{self._lib_name}.so")
+        elif self.settings.os == "Macos":
+            env.define("DYLD_FORCE_FLAT_NAMESPACE", "1")
+            insert_library = os.path.join(self.deps_cpp_info["mimalloc"].libdirs[0], self._lib_name +".dylib")
+            env.define("DYLD_INSERT_LIBRARIES", insert_library)
+
+        envvars = env.vars(self, scope="run")
+        envvars.save_script("mimalloc_env_file")
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
+        vbe = VirtualBuildEnv(self)
+        vbe.generate(scope="build")
+
+    def build(self):
         cmake = CMake(self)
-        cmake.definitions["BUILD_NO_CHANGES"] = "no_changes" in self._test_files
-        cmake.definitions["BUILD_INCLUDE_OVERRIDE"] = "include_override" in self._test_files
-        cmake.definitions["BUILD_MI_API"] = "mi_api" in self._test_files
         cmake.configure()
         cmake.build()
 
@@ -53,39 +94,16 @@ class MimallocTestConan(ConanFile):
             name += "-{}".format(str(self.settings.build_type).lower())
         return name
 
-    @property
-    def _environment(self):
-        environment = {"MIMALLOC_VERBOSE": "1"}
-
-        if self.settings.compiler == "Visual Studio" or \
-           not self.options["mimalloc"].shared or \
-           not self.options["mimalloc"].override or \
-           not self.options["mimalloc"].inject:
-            return environment
-
-        if self.settings.os == "Linux":
-            environment["LD_PRELOAD"] = self._lib_name + ".so"
-        elif self.settings.os == "Macos":
-            env_build = RunEnvironment(self)
-            insert_library = os.path.join(env_build.vars["DYLD_LIBRARY_PATH"][0], self._lib_name +".dylib")
-
-            environment["DYLD_FORCE_FLAT_NAMESPACE"] = "1"
-            environment["DYLD_INSERT_LIBRARIES"] = insert_library
-
-        return environment
-
     def test(self):
-        if tools.cross_building(self):
+        if not can_run(self):
             return
 
-        self.output.info("Environment append: {}".format(self._environment))
+        test_files = self._test_files()
+        for file in test_files:
+            test_package = os.path.join(self.cpp.build.bindirs[0], file)
+            self.output.info("test: {}".format(test_package))
+            self.run(test_package, run_environment=True)
 
-        with tools.environment_append(self._environment):
-            for file in self._test_files:
-                test_package = os.path.join("bin", file)
-                self.output.info("test: {}".format(test_package))
-                self.run(test_package, run_environment=True)
-
-                test_package_cpp = os.path.join("bin", file + "_cpp")
-                self.output.info("test: {}".format(test_package_cpp))
-                self.run(test_package_cpp, run_environment=True)
+            test_package_cpp = os.path.join(self.cpp.build.bindirs[0], f"{file}_cpp")
+            self.output.info("test: {}".format(test_package_cpp))
+            self.run(test_package_cpp, run_environment=True)

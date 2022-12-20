@@ -18,7 +18,7 @@ You can follow the three steps (:one: :two: :three:) described below! :tada:
     * [`config.yml`](#configyml)
     * [`conandata.yml`](#conandatayml)
     * [The _recipe folder_: `conanfile.py`](#the-_recipe-folder_-conanfilepy)
-    * [The test package folders: `test_package` and `test_<something>`](#the-test-package-folders-test_package-and-test_something)
+    * [Test Folders](#test-folders)
   * [How to provide a good recipe](#how-to-provide-a-good-recipe)
     * [Header Only](#header-only)
     * [CMake](#cmake)
@@ -27,8 +27,6 @@ You can follow the three steps (:one: :two: :three:) described below! :tada:
       * [Components](#components-1)
     * [No Upstream Build Scripts](#no-upstream-build-scripts)
     * [System Packages](#system-packages)
-    * [Verifying Dependency Version](#verifying-dependency-version)
-    * [Verifying Dependency Options](#verifying-dependency-options)
   * [Test the recipe locally](#test-the-recipe-locally)
     * [Hooks](#hooks)
     * [Linters](#linters)<!-- endToc -->
@@ -47,7 +45,6 @@ on a weekly basis.
 > to the same principals.
 
 When submitting a pull request for the first time, you will be prompted to sign the [CLA](../CONTRIBUTOR_LICENSE_AGREEMENT.md) for your code contributions. You can view your signed CLA's by going to <https://cla-assistant.io/> and signing in.
-
 
 ## Inactivity and user removal
 
@@ -99,6 +96,8 @@ This is the canonical structure of one of these folders, where the same `conanfi
 |       +-- all/
 |           +-- conanfile.py
 |           +-- conandata.yml
+|           +-- patches/
+|               +-- add-missing-string-header-2.0.0.patch
 |           +-- test_package/
 |               +-- conanfile.py
 |               +-- CMakeLists.txt
@@ -152,8 +151,6 @@ def build(self):
     [...]
 ```
 
-More details can be found in the [reviewing preference](reviewing.md) documentation
-
 ### The _recipe folder_: `conanfile.py`
 
 The main files in this repository are the `conanfile.py` ones that contain the logic to build the libraries from sources for all the configurations,
@@ -166,50 +163,13 @@ Together with the recipe, there can be other files that are needed to build the 
 
 Also, **every `conanfile.py` should be accompanied by one or several folder to test the generated packages** as we will see below.
 
-### The test package folders: `test_package` and `test_<something>`
+### Test Folders
 
-All the packages in this repository need to be tested before they join ConanCenter. A `test_package` folder with its corresponding `conanfile.py` and
+All the packages in this repository need to be tested before they join ConanCenter. A `test_package/` folder with its corresponding `conanfile.py` and
 a minimal project to test the package is strictly required. You can read about it in the
 [Conan documentation](https://docs.conan.io/en/latest/creating_packages/getting_started.html).
 
-
-Sometimes it is useful to test the package using different build systems (CMake, Autotools,...). Instead of adding complex logic to one
-`test_package/conanfile.py` file, it is better to add another `test_<something>/conanfile.py` file with a minimal example for that build system. That
-way the examples will be short and easy to understand and maintain. In some other situations it could be useful to test different Conan generators
-(`cmake_find_package`, `CMakeDeps`,...) using different folders and `conanfile.py` files
-([see example](https://github.com/conan-io/conan-center-index/tree/master/recipes/fmt/all)).
-
-When using more than one `test_<something>` folder, create a different project for each of them to keep the content of the `conanfile.py` and the
-project files as simple as possible, without the need of extra logic to handle different scenarios.
-
-```
-.
-+-- recipes
-|   +-- library_name/
-|       +-- config.yml
-|       +-- all/
-|           +-- conanfile.py
-|           +-- conandata.yml
-|           +-- test_package/
-|               +-- conanfile.py
-|               +-- CMakeLists.txt
-|               +-- main.cpp
-|           +-- test_cmakedeps/
-|               +-- conanfile.py
-|               +-- CMakeLists.txt
-|               +-- conanfile.py
-```
-
-The CI will explore all the folders and run the tests for the ones matching `test_*/conanfile.py` pattern. You can find the output of all
-of them together in the testing logs.
-
-> **Note**: If, for any reason, it is useful to write a test that should only be checked using Conan v1, you can do so by using the pattern
-> `test_v1_*/conanfile.py` for the folder. Please, have a look to [linter notes](../v2_linter.md) to know how to prevent the linter from
-> checking these files.
-
-> Remember that the `test_<package>` recipes should **test the package configuration that has just been generated** for the _host_ context, otherwise
-> it will fail in cross-building scenarios.
-
+Learn more about the ConanCenterIndex requirements in the [test packages](test_packages.md) document.
 
 ## How to provide a good recipe
 
@@ -248,30 +208,6 @@ The [SystemPackageTool](https://docs.conan.io/en/latest/reference/conanfile/meth
 pacman, brew, choco) and install packages which are missing on Conan Center but available for most distributions. It is key to correctly fill in the `cpp_info` for the consumers of a system package to have access to whatever was installed.
 
 As example there is [xorg](https://github.com/conan-io/conan-center-index/blob/master/recipes/xorg/all/conanfile.py). Also, it will require an exception rule for [conan-center hook](https://github.com/conan-io/hooks#conan-center), a [pull request](https://github.com/conan-io/hooks/pulls) should be open to allow it over the KB-H032.
-
-### Verifying Dependency Version
-
-Some project requirements need to respect a version constraint. This can be enforced in a recipe by accessing the [`dependencies`](https://docs.conan.io/en/latest/reference/conanfile/dependencies.html) attribute.
-An example of this can be found in the [fcl recipe](https://github.com/conan-io/conan-center-index/blob/1b6b496fe9a9be4714f8a0db45274c29b0314fe3/recipes/fcl/all/conanfile.py#L80).
-
-```py
-def validate(self):
-    foobar = self.dependencies["foobar"]
-    if self.info.options.shared and Version(foobar.ref.version) < "1.2":
-        raise ConanInvalidConfiguration(f"{self.ref} requires 'foobar' >=1.2 to be built as shared.")
-```
-
-### Verifying Dependency Options
-
-Certain projects are dependant on the configuration (a.k.a options) of a dependency. This can be enforced in a recipe by accessing the [`options`](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#options) attribute.
-An example of this can be found in the [sdl_image recipe](https://github.com/conan-io/conan-center-index/blob/1b6b496fe9a9be4714f8a0db45274c29b0314fe3/recipes/sdl_image/all/conanfile.py#L93).
-
-```py
-    def validate(self):
-        foobar = self.dependencies["foobar"]
-        if not foobar.options.enable_feature:
-            raise ConanInvalidConfiguration(f"The project {self.ref} requires foobar:enable_feature=True.")
-```
 
 ## Test the recipe locally
 

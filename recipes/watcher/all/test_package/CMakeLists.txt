@@ -13,3 +13,7 @@ if(watcher_VERSION VERSION_LESS "0.4.0")
 else()
     target_compile_definitions(${PROJECT_NAME} PRIVATE WATCHER_NAMESPACE=wtr)
 endif()
+
+if(watcher_VERSION VERSION_GREATER_EQUAL "0.5.0")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE WATCHER_DIE_WITH_PATH)
+endif()

@@ -1,19 +1,13 @@
 cmake_minimum_required(VERSION 3.8)
 project(geotrans LANGUAGES CXX)
-####
-# Conan
-####
-include(${CMAKE_SOURCE_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
 
 ####
 # Directories
 ####
 
-set(SRC_SUBFOLDER "${CMAKE_SOURCE_DIR}/source_subfolder")
-set(DTCCDIR "${SRC_SUBFOLDER}/CCS/src/dtcc/CoordinateSystems")
-set(CCSERVICEDIR "${SRC_SUBFOLDER}/CCS/src")
-set(SRCDIR "${SRC_SUBFOLDER}/GEOTRANS3/java_gui/geotrans3/jni")
+set(DTCCDIR "${GEOTRANS_SRC_DIR}/CCS/src/dtcc/CoordinateSystems")
+set(CCSERVICEDIR "${GEOTRANS_SRC_DIR}/CCS/src")
+set(SRCDIR "${GEOTRANS_SRC_DIR}/GEOTRANS3/java_gui/geotrans3/jni")
 
 ####
 # Sources
@@ -79,4 +73,4 @@ install(TARGETS MSPdtcc MSPCoordinateConversionService
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
-install(DIRECTORY "${SRC_SUBFOLDER}/data/" DESTINATION res)
+install(DIRECTORY "${GEOTRANS_SRC_DIR}/data/" DESTINATION res)

@@ -9,7 +9,7 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class WaylandConan(ConanFile):
@@ -18,7 +18,7 @@ class WaylandConan(ConanFile):
         "Wayland is a project to define a protocol for a compositor to talk to "
         "its clients as well as a library implementation of the protocol"
     )
-    topics = ("protocol", "compositor", "display")
+    topics = "protocol", "compositor", "display"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://wayland.freedesktop.org"
     license = "MIT"
@@ -38,32 +38,23 @@ class WaylandConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def requirements(self):
         if self.options.enable_libraries:
             self.requires("libffi/3.4.3")
         if self.options.enable_dtd_validation:
-            self.requires("libxml2/2.9.14")
-        self.requires("expat/2.4.9")
+            self.requires("libxml2/2.10.3")
+        self.requires("expat/2.5.0")
 
     def validate(self):
         if self.info.settings.os != "Linux":
             raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
 
     def build_requirements(self):
-        self.tool_requires("meson/0.63.3")
+        self.tool_requires("meson/0.64.1")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if cross_building(self):
