@@ -161,6 +161,20 @@ for consumer, we do impose some limits on Conan features to provide a smoother f
 * Only ConanCenter recipes are allowed in `requires`/`requirements()` and `build_requires`/`build_requirements()`.
 * `python_requires` are not allowed.
 
+### Version Ranges
+
+Version ranges are a useful Conan feature, [documentation here](https://docs.conan.io/en/latest/versioning/version_ranges.html). However,
+in the context of ConanCenter they pose a few key challenges when being used generally to consume packages, most notably:
+
+* Non-Deterministic `package-id`: With version ranges the newest compatible package may yield a different `package_id` than the one built
+  and published by ConanCenter resulting in frustrating error "no binaries found". For more context
+  see [this excellent explanation](https://github.com/conan-io/conan-center-index/pull/8831#issuecomment-1024526780).
+
+* Build Reproducibility: If consumers try to download and build the recipe at a later time, it may resolve to a different package version
+  that may generate a different binary (that may or may not be compatible). In order to prevent these types of issues, we have decided to
+  only allow exact requirements versions. This is a complicated issue,
+  [check this thread](https://github.com/conan-io/conan-center-index/pull/9140#discussion_r795461547) for more information.
+
 ## Handling "internal" dependencies
 
 Vendoring in library source code should be removed (best effort) to avoid potential ODR violations. If upstream takes care to rename
