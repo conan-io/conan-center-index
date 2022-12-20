@@ -11,7 +11,7 @@ required_conan_version = ">=1.53.0"
 class LibconfigConan(ConanFile):
     name = "libconfig"
     description = "C/C++ library for processing configuration files"
-    license = "LGPL-2.1"
+    license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://hyperrealm.github.io/libconfig/"
     topics = ("conf", "config", "cfg", "configuration")
