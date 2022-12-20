@@ -85,6 +85,7 @@ class LibbacktraceConan(ConanFile):
 
         tc = AutotoolsToolchain(self)
         if is_msvc(self):
+            # https://github.com/conan-io/conan/issues/6514
             tc.extra_cflags.append("-FS")
         tc.generate()
 
