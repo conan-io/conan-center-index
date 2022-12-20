@@ -1,15 +1,15 @@
 # Dependencies
 
 This section outlines all the practices and guidelines for the `requirements()` and `build_requirements()` methods. This includes everything
-from "vendored" dependencies to when and how the versions could be changed.
+from handling "vendored" dependencies to what versions should be used.
 
 <!-- toc -->
 ## Contents<!-- endToc -->
 
 ## List Dependencies
 
-Since all ConanCenterIndex recipes are to build and/or package projects, they are exclusively done in `conanfiles.py` which offer a few
-way to add requirements. The most common way is:
+Since all ConanCenterIndex recipes are to build and/or package projects they are exclusively done in `conanfiles.py`. This offers a few
+ways to add requirements. The most common way is:
 
 ```py
     def requirements(self):
@@ -19,13 +19,13 @@ way to add requirements. The most common way is:
 > **Note**: With Conan 2.0, you'll also need to pay attention to new properties like the `transitive_header` attributed which is
 > needed when a project include a dependencies header files in its public headers.
 
-When a project supports a range of version of a dependency, it's generally advised to pick the most recent available in ConanCenter.
-This helps ensure there are fewer conflicts with other, up to date, recipes that share the same requirements.
+When a project supports a range of version of a dependency, it's generally advised to pick the **most recent available in ConanCenter**.
+This helps ensure there are fewer conflicts with other, up to-date, recipes that share the same requirement.
 
 ### Optional Requirements
 
-Many projects support enabling certain features but adding dependencies. In ConanCenterIndex this is done by add an option, see
-[naming recommendation](conanfile_attributes.md#recommended-names), which is set match the upstream build system by default.
+Many projects support enabling certain features by adding dependencies. In ConanCenterIndex this is done by adding an option, see
+[naming recommendation](conanfile_attributes.md#recommended-names), which should be set to match the upstream project's by default.
 
 ```py
 class ExampleConan(ConanFile):
@@ -33,12 +33,12 @@ class ExampleConan(ConanFile):
         "with_zlib": [True, False], # Possible values
     }
     default_options = {
-        "with_zlib": True, # Could match upstream's CMakeLists.txt `option(with_zlib "" ON)`
+        "with_zlib": True, # Should match upstream's CMakeLists.txt `option(...)`
     }
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
 ```
 
 If a dependency was added (or removed) with a release, then the `if` condition could check `self.version`. Another common case is
@@ -57,11 +57,11 @@ If a project requires any other specific tool, those can be added as well. We li
 
 ## Accessing Dependencies
 
-It's fairly common to need to pass information from a dependency to the project. This is the job of the `generate()` method.
-The [`self.dependencies`](https://docs.conan.io/en/latest/reference/conanfile/dependencies.html?highlight=generate) are available
-for the case when built-in generators are not available.
+It's fairly common to need to pass information from a dependency to the project. This is the job of the `generate()` method. This
+is generally covered by the built-in generators like [`CMakeDeps`](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html)
+However the [`self.dependencies`](https://docs.conan.io/en/latest/reference/conanfile/dependencies.html?highlight=generate) are available.
 
-Alternatively, a project may depend on a specific configuration of a dependency. This use case is again covered by the
+Alternatively, a project may depend on a specific versions or configuration of a dependency. This use case is again covered by the
 [`self.dependencies`](https://docs.conan.io/en/latest/reference/conanfile/dependencies.html?highlight=validate) within the
 `validate()` method. Additionally it's possible to suggest the option's values while the graph is built through `configure()`
 this is not guaranteed and not a common practice.
@@ -143,6 +143,11 @@ class ExampleConan(ConanFile):
         # Some magic setup
         self.run(f"./configure.sh {opts_args}")
 ```
+
+### Overriding the provided properties from the consumer
+
+> **Note**: This was adding in [Conan 1.55](https://github.com/conan-io/conan/pull/12609) to the generators... we need to
+> write docs for when that's available
 
 ## Adherence to Build Service
 
