@@ -27,8 +27,6 @@ You can follow the three steps (:one: :two: :three:) described below! :tada:
       * [Components](#components-1)
     * [No Upstream Build Scripts](#no-upstream-build-scripts)
     * [System Packages](#system-packages)
-    * [Verifying Dependency Version](#verifying-dependency-version)
-    * [Verifying Dependency Options](#verifying-dependency-options)
   * [Test the recipe locally](#test-the-recipe-locally)
     * [Hooks](#hooks)
     * [Linters](#linters)<!-- endToc -->
