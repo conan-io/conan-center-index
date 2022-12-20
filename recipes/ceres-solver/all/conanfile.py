@@ -105,9 +105,6 @@ class CeressolverConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
 
-        if self.settings.build_type == "Debug" and self.options.use_glog:
-            raise ConanInvalidConfiguration(f"{self.ref} only links against the release version of glog")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination = self.source_folder, strip_root=True)
