@@ -15,4 +15,3 @@ patches:
       patch_description: "fix msvc compilation error"
       patch_type: "portability"
       patch_source: "https://github.com/skramm/homog2d/issues/2"
-
