@@ -56,9 +56,13 @@ jobs:
       - name: Run schema check (conandata.yml)
         if: steps.changed_files.outputs.any_changed == 'true' && always()
         run: |
+          err=0
           for file in ${{ env.CONANDATA_FILES_PATH }}; do
-            python3 linter/conandata_yaml_linter.py ${file}
+            python3 linter/conandata_yaml_linter.py ${file} || err=1
           done
+          if [[ $err == 1 ]]; then
+              exit 1
+          fi
 
   lint_pr_files:
     # Lint files modified in the pull_request
@@ -114,5 +118,8 @@ jobs:
           echo "::remove-matcher owner=yamllint_matcher::"
 
           for file in ${{ steps.changed_files_conandata.outputs.all_changed_files }}; do
-            python3 linter/conandata_yaml_linter.py ${file}
+            python3 linter/conandata_yaml_linter.py ${file} || err=1
           done
+          if [[ $err == 1 ]]; then
+              exit 1
+          fi

@@ -295,7 +295,7 @@ class ArrowConan(ConanFile):
 
     def _with_utf8proc(self, required=False):
         if required or self.options.with_utf8proc == "auto":
-            return False
+            return bool(self._compute() or self.options.gandiva)
         else:
             return bool(self.options.with_utf8proc)
 
@@ -376,7 +376,7 @@ class ArrowConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+                  filename=f"apache-arrow-{self.version}.tar.gz", destination=self.source_folder, strip_root=True)
 
     def generate(self):
         # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
@@ -567,6 +567,8 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libparquet"].names["cmake_find_package_multi"] = "parquet"
             self.cpp_info.components["libparquet"].names["pkg_config"] = "parquet"
             self.cpp_info.components["libparquet"].requires = ["libarrow"]
+            if not self.options.shared:
+                self.cpp_info.components["libparquet"].defines = ["PARQUET_STATIC"]            
 
         if self.options.get_safe("substrait", False):
             self.cpp_info.components["libarrow_substrait"].libs = [self._lib_name("arrow_substrait")]
@@ -588,6 +590,8 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libgandiva"].names["cmake_find_package_multi"] = "gandiva"
             self.cpp_info.components["libgandiva"].names["pkg_config"] = "gandiva"
             self.cpp_info.components["libgandiva"].requires = ["libarrow"]
+            if not self.options.shared:
+                self.cpp_info.components["libgandiva"].defines = ["GANDIVA_STATIC"]            
 
         if self._with_flight_rpc():
             self.cpp_info.components["libarrow_flight"].libs = [self._lib_name("arrow_flight")]

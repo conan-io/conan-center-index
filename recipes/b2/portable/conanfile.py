@@ -141,6 +141,8 @@ class B2Conan(ConanFile):
         self.output.info("Install..")
         command = os.path.join(
             self._b2_engine_dir, "b2.exe" if use_windows_commands else "b2")
+        if b2_toolset not in ["auto", "cxx", "cross-cxx"]:
+            command += " toolset=" + str(b2_toolset)
         full_command = \
             ("{0} --ignore-site-config " +
              "--prefix={1} " +

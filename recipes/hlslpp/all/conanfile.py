@@ -10,12 +10,15 @@ required_conan_version = ">=1.50.0"
 class HlslppConan(ConanFile):
     name = "hlslpp"
     description = "Header-only Math library using hlsl syntax with SSE/NEON support"
-    topics = ("hlslpp", "hlsl", "math", "shader", "vector", "matrix", "quaternion")
+    topics = ("hlsl", "math", "shader", "vector", "matrix", "quaternion")
     license = "MIT"
     homepage = "https://github.com/redorav/hlslpp"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -23,9 +26,6 @@ class HlslppConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -40,6 +40,4 @@ class HlslppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []

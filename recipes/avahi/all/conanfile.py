@@ -6,7 +6,7 @@ from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgCon
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.51.0"
+required_conan_version = ">=1.53.0"
 
 
 class AvahiConan(ConanFile):
@@ -33,31 +33,22 @@ class AvahiConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.74.0")
-        self.requires("expat/2.4.9")
+        self.requires("glib/2.75.0")
+        self.requires("expat/2.5.0")
         self.requires("libdaemon/0.14")
-        self.requires("dbus/1.15.0")
+        self.requires("dbus/1.15.2")
         self.requires("gdbm/1.19")
         self.requires("libevent/2.1.12")
 
     def validate(self):
         if self.info.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Only Linux is supported for this package.")
+            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux.")
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

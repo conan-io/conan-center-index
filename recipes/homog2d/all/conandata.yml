@@ -1,0 +1,13 @@
+sources:
+  "2.9":
+    url: "https://github.com/skramm/homog2d/archive/refs/tags/v2.9.tar.gz"
+    sha256: "7784237154fd0c1beea5b1ed4349e910ce86ad463d21f4f21019f553834c1dad"
+
+patches:
+  "2.9":
+    - patch_file: "patches/0001-include-array.patch"
+      patch_description: "include array to solve compilation error on appale-clang"
+      patch_type: "portability"
+    - patch_file: "patches/0002-pretty_function-for-msvc.patch"
+      patch_description: "use __FUNCSIG__ instead of __PRETTY_FUNCTION__ on MSVC"
+      patch_type: "portability"

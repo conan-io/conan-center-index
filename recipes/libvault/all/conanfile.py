@@ -1,9 +1,15 @@
-from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile, Version
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+
+required_conan_version = ">=1.53.0"
 
 
 class LibvaultConan(ConanFile):
@@ -15,19 +21,8 @@ class LibvaultConan(ConanFile):
     topics = ("vault", "libvault", "secrets", "passwords")
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _mac_os_minimum_required_version(self):
@@ -39,75 +34,84 @@ class LibvaultConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("libcurl/7.80.0")
-        self.requires("catch2/2.13.7")
+        self.requires("libcurl/7.86.0")
+        self.requires("catch2/3.2.0")
 
     def validate(self):
-        compiler = str(self.settings.compiler)
+        compiler = str(self.info.settings.compiler)
         compiler_version = Version(self.settings.compiler.version.value)
 
         minimum_compiler_version = {
             "Visual Studio": "19",
             "gcc": "8",
             "clang": "7.0",
-            "apple-clang": "12"
+            "apple-clang": "12",
         }
 
         minimum_cpp_standard = 17
 
         if compiler in minimum_compiler_version and \
            compiler_version < minimum_compiler_version[compiler]:
-            raise ConanInvalidConfiguration("{} requires a compiler that supports"
-                                            " at least C++{}. {} {} is not"
-                                            " supported."
-                                            .format(self.name, minimum_cpp_standard, compiler, compiler_version))
+            raise ConanInvalidConfiguration(
+                f"{self.name} requires a compiler that supports at least C++{minimum_cpp_standard}. "
+                f"{compiler} {compiler_version} is not supported.")
 
         if compiler == "clang" and self.settings.compiler.libcxx in ["libstdc++", "libstdc++11"] and self.settings.compiler.version == "11":
             raise ConanInvalidConfiguration("clang 11 with libstdc++ is not supported due to old libstdc++ missing C++17 support")
 
-        if tools.is_apple_os(self.settings.os):
-            os_version = self.settings.get_safe("os.version")
+        if is_apple_os(self):
+            os_version = self.info.settings.get_safe("os.version")
             if os_version and Version(os_version) < self._mac_os_minimum_required_version:
                 raise ConanInvalidConfiguration(
                     "Macos Mojave (10.14) and earlier cannot to be built because C++ standard library too old.")
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, minimum_cpp_standard)
+            check_min_cppstd(self, minimum_cpp_standard)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["ENABLE_TEST"] = False
-            self._cmake.definitions["ENABLE_INTEGRATION_TEST"] = False
-            self._cmake.definitions["ENABLE_COVERAGE"] = False
-            self._cmake.definitions["LINK_CURL"] = False
-            # Set `-mmacosx-version-min` to enable C++17 standard library support.
-            self._cmake.definitions['CMAKE_OSX_DEPLOYMENT_TARGET'] = self._mac_os_minimum_required_version
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["ENABLE_TEST"] = "OFF"
+        tc.variables["ENABLE_INTEGRATION_TEST"] = "OFF"
+        tc.variables["ENABLE_COVERAGE"] = "OFF"
+        tc.variables["LINK_CURL"] = "OFF"
+        tc.variables["CMAKE_OSX_DEPLOYMENT_TARGET"] = self._mac_os_minimum_required_version
+        if is_msvc(self):
+            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
+        tc = VirtualBuildEnv(self)
+        tc.generate(scope="build")
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=self.build_folder)
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["vault"]
+        self.cpp_info.system_libs = ["m"]
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
+            self.cpp_info.system_libs.append("stdc++fs")
+        # TODO: Remove after Conan 2.0
         self.cpp_info.names["cmake_find_package"] = "libvault"
         self.cpp_info.names["cmake_find_package_multi"] = "libvault"
-        self.cpp_info.names["pkg_config"] = "vault"
+
+        self.cpp_info.set_property("pkg_config_name", "vault")
+        self.cpp_info.set_property("cmake_file_name", "libvault")
+        self.cpp_info.set_property("cmake_target_name", "libvault::libvault")

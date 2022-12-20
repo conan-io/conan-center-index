@@ -31,7 +31,7 @@ on a weekly basis.
 
 When submitting a pull request for the first time, you will be prompted to sign the [CLA](../CONTRIBUTOR_LICENSE_AGREEMENT.md) for your code contributions. You can view your signed CLA's by going to <https://cla-assistant.io/> and signing in.
 
-### Inactivity and user removal
+## Inactivity and user removal
 
 For security reasons related to the CI, when a user no longer contributes for a long period, it will be considered inactive and removed from the authorized user's list.
 For now, it's configured for **4 months**, and it's computed based on the latest commit, not comments or opened issues.

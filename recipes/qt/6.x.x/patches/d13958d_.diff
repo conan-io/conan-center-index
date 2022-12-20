@@ -1,0 +1,23 @@
+From d13958dabb9f5542d772c6312cd33e4960bf1137 Mon Sep 17 00:00:00 2001
+From: Eric Lemanissier <eric.lemanissier@gmail.com>
+Date: Tue, 29 Nov 2022 09:15:58 +0000
+Subject: [PATCH] fix pcre2 detection
+
+Pick-to: 6.3
+Change-Id: I89f167e11bf1c72c9fae474ddd12380636ac5df8
+---
+
+diff --git a/cmake/FindWrapSystemPCRE2.cmake b/cmake/FindWrapSystemPCRE2.cmake
+index f8516d3..3ac04b8 100644
+--- a/cmake/FindWrapSystemPCRE2.cmake
++++ b/cmake/FindWrapSystemPCRE2.cmake
+@@ -6,7 +6,7 @@
+ 
+-find_package(PCRE2 ${${CMAKE_FIND_PACKAGE_NAME}_FIND_VERSION} CONFIG QUIET)
++find_package(PCRE2 ${${CMAKE_FIND_PACKAGE_NAME}_FIND_VERSION} COMPONENTS 16BIT QUIET)
+ 
+-set(__pcre2_target_name "PCRE2::pcre2-16")
++set(__pcre2_target_name "PCRE2::16BIT")
+ if(PCRE2_FOUND AND TARGET "${__pcre2_target_name}")
+   # Hunter case.
+   set(__pcre2_found TRUE)

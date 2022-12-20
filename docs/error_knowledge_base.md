@@ -63,7 +63,7 @@ Here we use [configure()](https://docs.conan.io/en/latest/reference/conanfile/me
 
 #### **<a name="KB-H008">#KB-H008</a>: "VERSION RANGES"**
 
-It is not allowed to use [version ranges](https://docs.conan.io/en/latest/versioning/version_ranges.html) for the recipes in Conan center, where the dependency graph should be deterministic.
+See [Dependencies Version Ranges](adding_packages/dependencies.md#version-ranges) for details.
 
 #### **<a name="KB-H009">#KB-H009</a>: "RECIPE FOLDER SIZE"**
 
@@ -340,9 +340,7 @@ The duality creates a heterogeneous way of solving dependencies, making it diffi
 
 #### **<a name="KB-H056">#KB-H056</a>: "LICENSE PUBLIC DOMAIN"**
 
-[Public Domain](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) is not a license by itself, but consists of all the creative work to which
-no exclusive intellectual property rights apply. If a project is under Public Domain and there is no license listed, the
-[Unlicense](https://spdx.org/licenses/Unlicense) should be used as described in the [FAQ](faqs.md#what-license-should-i-use-for-public-domain).
+See [License Attribute](adding_packages/conanfile_attributes.md#license-attribute) for details.
 
 #### **<a name="KB-H057">#KB-H057</a>: "TOOLS RENAME"**
 
