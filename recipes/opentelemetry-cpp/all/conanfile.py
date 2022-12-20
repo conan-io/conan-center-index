@@ -66,7 +66,7 @@ class OpenTelemetryCppConan(ConanFile):
             self.requires("boost/1.80.0")
 
     def validate(self):
-        if self.info.settings.arch != "x86_64":
+        if Version(self.version) == "1.0.1" and self.info.settings.arch != "x86_64":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support architecture : {self.info.settings.arch}")
 
         if self.info.settings.compiler.cppstd:
