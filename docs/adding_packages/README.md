@@ -27,8 +27,6 @@ You can follow the three steps (:one: :two: :three:) described below! :tada:
       * [Components](#components-1)
     * [No Upstream Build Scripts](#no-upstream-build-scripts)
     * [System Packages](#system-packages)
-    * [Verifying Dependency Version](#verifying-dependency-version)
-    * [Verifying Dependency Options](#verifying-dependency-options)
   * [Test the recipe locally](#test-the-recipe-locally)
     * [Hooks](#hooks)
     * [Linters](#linters)<!-- endToc -->
@@ -210,30 +208,6 @@ The [SystemPackageTool](https://docs.conan.io/en/latest/reference/conanfile/meth
 pacman, brew, choco) and install packages which are missing on Conan Center but available for most distributions. It is key to correctly fill in the `cpp_info` for the consumers of a system package to have access to whatever was installed.
 
 As example there is [xorg](https://github.com/conan-io/conan-center-index/blob/master/recipes/xorg/all/conanfile.py). Also, it will require an exception rule for [conan-center hook](https://github.com/conan-io/hooks#conan-center), a [pull request](https://github.com/conan-io/hooks/pulls) should be open to allow it over the KB-H032.
-
-### Verifying Dependency Version
-
-Some project requirements need to respect a version constraint. This can be enforced in a recipe by accessing the [`dependencies`](https://docs.conan.io/en/latest/reference/conanfile/dependencies.html) attribute.
-An example of this can be found in the [fcl recipe](https://github.com/conan-io/conan-center-index/blob/1b6b496fe9a9be4714f8a0db45274c29b0314fe3/recipes/fcl/all/conanfile.py#L80).
-
-```py
-def validate(self):
-    foobar = self.dependencies["foobar"]
-    if self.info.options.shared and Version(foobar.ref.version) < "1.2":
-        raise ConanInvalidConfiguration(f"{self.ref} requires 'foobar' >=1.2 to be built as shared.")
-```
-
-### Verifying Dependency Options
-
-Certain projects are dependant on the configuration (a.k.a options) of a dependency. This can be enforced in a recipe by accessing the [`options`](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#options) attribute.
-An example of this can be found in the [sdl_image recipe](https://github.com/conan-io/conan-center-index/blob/1b6b496fe9a9be4714f8a0db45274c29b0314fe3/recipes/sdl_image/all/conanfile.py#L93).
-
-```py
-    def validate(self):
-        foobar = self.dependencies["foobar"]
-        if not foobar.options.enable_feature:
-            raise ConanInvalidConfiguration(f"The project {self.ref} requires foobar:enable_feature=True.")
-```
 
 ## Test the recipe locally
 
