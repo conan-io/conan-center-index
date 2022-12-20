@@ -158,8 +158,12 @@ class G3logConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "g3log")
         self.cpp_info.set_property("cmake_target_name", "g3log")
         self.cpp_info.libs = ["g3logger" if Version(self.version) < "1.3.4" else "g3log"]
-        if self.settings.os in ["Linux", "Android"]:
+
+        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
+            self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("dbghelp")
 
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
