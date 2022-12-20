@@ -73,8 +73,12 @@ class OpenTelemetryCppConan(ConanFile):
         if self.settings.os != "Linux" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} supports building shared libraries only on Linux")
 
+        if not self.options["grpc"].cpp_plugin:
+            raise ConanInvalidConfiguration(f"{self.ref} requires grpc with cpp_plugin=True")
+
     def build_requirements(self):
         self.tool_requires("protobuf/3.21.4")
+        self.tool_requires("grpc/1.50.1")
 
     def _create_cmake_module_variables(self, module_file):
         content = textwrap.dedent("""\
