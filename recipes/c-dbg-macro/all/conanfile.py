@@ -22,7 +22,7 @@ class DbgMacroConan(ConanFile):
             raise ConanInvalidConfiguration("This library is not compatible with Windows")
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
