@@ -267,7 +267,8 @@ class OpenSSLConan(ConanFile):
         gen_info["CXXFLAGS"] = tc.cxxflags
         gen_info["DEFINES"] = tc.defines
         gen_info["LDFLAGS"] = tc.ldflags
-        # Workaround lack of support for self.dependencies in build() method in Conan 1.x
+        # Support for self.dependencies in build() method is currently restricted to `generate()` and `validate()`
+        # See https://github.com/conan-io/conan/issues/12411 for more details 
         if self._full_version < "1.1.0" and not self.options.get_safe("no_zlib"):
             zlib_cpp_info = self.dependencies["zlib"].cpp_info
             gen_info["zlib_include_path"] = zlib_cpp_info.includedirs[0]
