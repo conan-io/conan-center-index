@@ -119,7 +119,9 @@ class LibgdConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = ["gd"]
+        prefix_libs = "lib" if self.settings.os == "Windows" else ""
+        suffix_libs = "_static" if self.settings.os == "Windows" and not self.options.shared else ""
+        self.cpp_info.libs = [f"{prefix_libs}gd{suffix_libs}"]
         self.cpp_info.set_property("pkg_config_name", "gdlib")
 
         if self.settings.os == "Windows" and not self.options.shared:
