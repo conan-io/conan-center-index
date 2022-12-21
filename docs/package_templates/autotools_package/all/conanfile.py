@@ -10,7 +10,7 @@ from conan.tools.microsoft import is_msvc, unix_path
 import os
 
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 #
 # INFO: Please, remove all comments before pushing your PR!
@@ -58,20 +58,10 @@ class PackageConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                # once removed by config_options, need try..except for a second del
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
         # for plain C projects only
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         # src_folder must use the same source folder name the project
@@ -85,10 +75,10 @@ class PackageConan(ConanFile):
 
     def validate(self):
         # validate the minimum cpp standard supported. Only for C++ projects
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-        if self.info.settings.os not in ["Linux", "FreeBSD", "MacOS"]:
-            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.info.settings.os}.")
+        if self.settings.os not in ["Linux", "FreeBSD", "MacOS"]:
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
 
     # if another tool than the compiler or autotools is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
@@ -107,7 +97,7 @@ class PackageConan(ConanFile):
             self.tool_requires("automake/x.y.z")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         # inject tool_requires env vars in build scope (not needed if there is no tool_requires)
@@ -167,7 +157,7 @@ class PackageConan(ConanFile):
     def package(self):
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
+        # TODO: replace by autotools.install() once Conan 1.54 is available in CCI
         autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
 
         # some files extensions and folders are not allowed. Please, read the FAQs to get informed.

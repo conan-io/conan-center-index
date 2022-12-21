@@ -1,5 +1,45 @@
 # Changelog
 
+### 15-December-2022 - 11:12 CET
+
+- [feature] Set github feeback title via config file (`feedback_title`).
+- [fix] Fix log summary html table for shared option with Conan v2.
+- [fix] ValidateInfra: Remove same OS version check for Macos nodes.
+
+### 09-December-2022 - 11:38 CET
+
+- [feature] Add environment variable to build with different Xcode/apple-clang compilers on Macos agents.
+- [feature] Add `MACOSX_DEPLOYMENT_TARGET` and `SDKROOT` env variables to build stages on Macos.
+- [feature] Add `LongPathsEnabled` registry key check on Windows to Validate Infrastructure job.
+- [fix] Fix git user on commits when updating docs for supported platforms and configurations.
+- [fix] Fix getting commit hash when writing GitHub error messages.
+- [fix] Fix Conan v2 inspect command.
+- [fix] Fix condition when waiting for another job to finish.
+
+### 14-November-2022 - 11:54 CET
+
+- [feature] Disable inactivity count for Access Request job.
+- [feature] Add `github-actions[bot]` to permanent users list.
+- [feature] No need to run ValidateInfrastructure job for Access Request and Reviewers update pull-requests.
+- [fix] JobRelauncher retry property fix.
+
+### 07-November-2022 - 11:17 CET
+
+- [feature] Improve Access Request's pull-request description mentioning users.
+- [fix] Access Request should not remove reviewers and maintainers.
+- [fix] Access Request should count requests done on the same day as the pull request.
+- [fix] Avoid posting pipeline title in GitHub messages if feedback is empty.
+
+### 27-October-2022 - 15:18 CEST
+
+- [feature] Add under maintenance check to AccessRequest and ScheduledExportCheck jobs.
+- [feature] AccessRequest: Remove inactive users.
+- [feature] Accept Major.Minor as bump version.
+- [feature] Add message title to gihtub comments.
+- [fix] Update maintainers list and fix output.
+- [fix] Remove dummy files from tests.
+- [fix] Make sure contributors are not removed in Access request PR.
+
 ### 17-October-2022 - 10:33 CEST
 
 - [feature] Improve management of GitHub labels on pull requests.

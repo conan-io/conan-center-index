@@ -1,4 +1,10 @@
 sources:
+  "3.0.0":
+    url: "https://github.com/martinus/unordered_dense/archive/v3.0.0.tar.gz"
+    sha256: "e73452d7c1e274b4a15b553c0904f1de4bcfa61b00514acd1eaad7deac805ef0"
+  "2.0.1":
+    url: "https://github.com/martinus/unordered_dense/archive/v2.0.1.tar.gz"
+    sha256: "450d53bd8709f9476702a3c4975bf6e40d66059b25b125e480534228d7f5616d"
   "2.0.0":
     url: "https://github.com/martinus/unordered_dense/archive/v2.0.0.tar.gz"
     sha256: "e838bdcf380a1aeb6f1fee17fbdf59d7a14b6b9fb6dfca32981e4cbd60739d20"

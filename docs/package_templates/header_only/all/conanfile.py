@@ -1,4 +1,4 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
@@ -57,27 +57,22 @@ class PackageConan(ConanFile):
     def package_id(self):
         self.info.clear()
 
-    @property
-    def _info(self):
-        return self if Version(conan_version).major < 2 else self.info
-
     def validate(self):
-        # compiler subsettings are not available when building with self.info.clear()
-        if self._info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             # validate the minimum cpp standard supported when installing the package. For C++ projects only
             check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self._info.settings.compiler), False)
-        if minimum_version and Version(self._info.settings.compiler.version) < minimum_version:
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
         # in case it does not work in another configuration, it should validated here too
-        if self._info.settings.os == "Windows":
+        if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} can not be used on Windows.")
 
     def source(self):
         # download source package and extract to source folder
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     # not mandatory when there is no patch, but will suppress warning message about missing build() method
     def build(self):

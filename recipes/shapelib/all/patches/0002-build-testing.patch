@@ -1,0 +1,57 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0a5662f..6214dec 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -149,7 +149,7 @@ set(executables
+ find_program(BASH_EXECUTABLE bash)
+ find_program(SED_EXECUTABLE sed)
+ if(BASH_EXECUTABLE AND SED_EXECUTABLE)
+-  set(BUILD_TEST ON)
++  set(BUILD_TESTING ON CACHE BOOL "")
+ else(BASH_EXECUTABLE AND SED_EXECUTABLE)
+   message(STATUS "WARNING: sed or bash not available so disabling testing")
+ endif(BASH_EXECUTABLE AND SED_EXECUTABLE)
+@@ -158,14 +158,14 @@ endif(BASH_EXECUTABLE AND SED_EXECUTABLE)
+ # from http://dl.maptools.org/dl/shapelib/shape_eg_data.zip, unpacked
+ # that file, and specified the location of that directory with
+ # the cmake option, -DEG_DATA:PATH=whatever
+-if(BUILD_TEST)
++if(BUILD_TESTING)
+   if(EG_DATA)
+     file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/script.sed "s?/u/www/projects/shapelib/eg_data?${EG_DATA}?\n")
+   else(EG_DATA)
+     file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/script.sed "")
+     message(STATUS "WARNING: EG_DATA:PATH not set to point to downloaded eg_data directory so the eg_data part of testing will be ignored.")
+   endif(EG_DATA)
+-endif(BUILD_TEST)
++endif()
+ 
+ foreach(executable ${executables})
+   add_executable(${executable} ${executable}.c)
+@@ -176,17 +176,17 @@ foreach(executable ${executables})
+       INSTALL_RPATH "${CMAKE_INSTALL_LIBDIR}"
+       )
+   endif(USE_RPATH)
+-  if(BUILD_TEST)
++  if(BUILD_TESTING)
+     get_target_property(${executable}_LOC ${executable} LOCATION)
+     file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/script.sed "s?\\./${executable}?${${executable}_LOC}?\n")
+-  endif(BUILD_TEST)
++  endif()
+   install(TARGETS ${executable} DESTINATION ${CMAKE_INSTALL_BINDIR})
+ endforeach(executable ${executables})
+ 
+ # Install header
+ install(FILES shapefil.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ 
+-if(BUILD_TEST)
++if(BUILD_TESTING)
+   # Set up tests:
+ 
+   enable_testing()
+@@ -235,4 +235,4 @@ if(BUILD_TEST)
+     NAME test3
+     COMMAND ${BASH_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/sed_scripted_test3.sh
+     )
+-endif(BUILD_TEST)
++endif()

@@ -1,6 +1,11 @@
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.layout import basic_layout
+from conan.tools.files import get, copy
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
+
 
 class FastPRNGConan(ConanFile):
     name = "fastprng"
@@ -10,23 +15,26 @@ class FastPRNGConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/BrutPitt/fastPRNG"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake",
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self)
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
-            tools.check_min_cppstd(self, "11")
+            check_min_cppstd(self, "11")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(
+            self,
+            **self.conan_data["sources"][self.version],
+            destination=self.source_folder,
+            strip_root=True
+        )
 
     def package(self):
-        self.copy("license.txt", "licenses", self._source_subfolder)
-        self.copy("*.h", "include", self._source_subfolder)
+        copy(self, "*.h", self.source_folder, os.path.join(self.package_folder, "include"))
+        copy(self, "license.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))

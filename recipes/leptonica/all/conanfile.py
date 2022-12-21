@@ -73,7 +73,7 @@ class LeptonicaConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
         if self.options.with_jpeg == "libjpeg":
@@ -96,7 +96,7 @@ class LeptonicaConan(ConanFile):
 
     def build_requirements(self):
         if self.options.with_webp or self.options.with_openjpeg:
-            self.tool_requires("pkgconf/1.7.4")
+            self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

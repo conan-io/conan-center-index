@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 1.52.0
+  version: 1.54.0
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
@@ -33,13 +33,17 @@ slack:
 
 # Things related to Jenkins jobs
 tasks:
-  conan_v2_run_export: true
+  conan_v2_run_export: false
   write_comments: true
   detailed_status_checks: true
   update_labels: true
   automatic_merge:
     reviews_required_total: 2  # Reviews that a PR needs so it can be merged
     reviews_required_team: 1  # Reviews from the Conan team that a PR needs so it can be merged
+  cci_wait_for_multibranch:  # CCI jobs should wait for other multibranch job for that same PR
+    job_name: "prod-v2/cci"  # e.g. "cci-v2/cci" -> this means waiting for cci-v2/cci/PR-<number>
+    timeout_seconds: 600  # Maximum time to wait for the multibranch job
+    merge_messages: true  # Merge messages from the multibranch job waited for
 
 # Profile configurations to build packages
 configurations:
@@ -159,7 +163,7 @@ node_labels:
   Windows:
     x86_64:
       "Visual Studio":
-        default: "windows20220803"
+        default: "windows20221212"
   Macos:
     x86_64:
       "apple-clang":
@@ -184,6 +188,7 @@ pod_size:
   large:
     - "pcl"
     - "duckdb"
+    - "cppfront"
   xlarge:
     - "llvm"
     - "opengv"

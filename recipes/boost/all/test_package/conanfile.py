@@ -1,20 +1,16 @@
+from conan import ConanFile
+from conan.errors import ConanException
+from conan.tools.build import can_run
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
+from conans import tools as tools_legacy
 import os
-
-from conan.tools.build import cross_building
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanException
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake", "cmake_find_package"
-
-    def build_requirements(self):
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            # Attempting to use @rpath without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being
-            # set. This could be because you are using a Mac OS X version less than 10.5
-            # or because CMake's platform configuration is corrupt.
-            self.build_requires("cmake/3.20.1")
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeDeps", "VirtualRunEnv"
+    test_type = "explicit"
 
     def _boost_option(self, name, default):
         try:
@@ -22,73 +18,84 @@ class TestPackageConan(ConanFile):
         except (AttributeError, ConanException):
             return default
 
+    def layout(self):
+        cmake_layout(self)
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["HEADER_ONLY"] = self.dependencies["boost"].options.header_only
+        if not self.dependencies["boost"].options.header_only:
+            tc.variables["Boost_USE_STATIC_LIBS"] = not self.dependencies["boost"].options.shared
+        tc.variables["WITH_PYTHON"] = not self.dependencies["boost"].options.without_python
+        if not self.dependencies["boost"].options.without_python:
+            pyversion = Version(self.dependencies["boost"].options.python_version)
+            tc.variables["Python_ADDITIONAL_VERSIONS"] = f"{pyversion.major}.{pyversion.minor}"
+            tc.variables["PYTHON_COMPONENT_SUFFIX"] = f"{pyversion.major}.{pyversion.minor}"
+        tc.variables["WITH_RANDOM"] = not self.dependencies["boost"].options.without_random
+        tc.variables["WITH_REGEX"] = not self.dependencies["boost"].options.without_regex
+        tc.variables["WITH_TEST"] = not self.dependencies["boost"].options.without_test
+        tc.variables["WITH_COROUTINE"] = not self.dependencies["boost"].options.without_coroutine
+        tc.variables["WITH_CHRONO"] = not self.dependencies["boost"].options.without_chrono
+        tc.variables["WITH_FIBER"] = not self.dependencies["boost"].options.without_fiber
+        tc.variables["WITH_LOCALE"] = not self.dependencies["boost"].options.without_locale
+        tc.variables["WITH_NOWIDE"] = not self._boost_option("without_nowide", True)
+        tc.variables["WITH_JSON"] = not self._boost_option("without_json", True)
+        tc.variables["WITH_STACKTRACE"] = not self.dependencies["boost"].options.without_stacktrace
+        tc.variables["WITH_STACKTRACE_ADDR2LINE"] = self.deps_user_info["boost"].stacktrace_addr2line_available
+        tc.variables["WITH_STACKTRACE_BACKTRACE"] = self._boost_option("with_stacktrace_backtrace", False)
+        if self.dependencies["boost"].options.namespace != 'boost' and not self.dependencies["boost"].options.namespace_alias:
+            tc.variables['BOOST_NAMESPACE'] = self.dependencies["boost"].options.namespace
+        tc.generate()
+
     def build(self):
-        # FIXME: tools.vcvars added for clang-cl. Remove once conan supports clang-cl properly. (https://github.com/conan-io/conan-center-index/pull/1453)
-        with tools.vcvars(self.settings) if (self.settings.os == "Windows" and self.settings.compiler == "clang") else tools.no_op():
-            cmake = CMake(self)
-            cmake.definitions["HEADER_ONLY"] = self.options["boost"].header_only
-            if not self.options["boost"].header_only:
-                cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
-            cmake.definitions["WITH_PYTHON"] = not self.options["boost"].without_python
-            if not self.options["boost"].without_python:
-                pyversion = tools.Version(self.options["boost"].python_version)
-                cmake.definitions["Python_ADDITIONAL_VERSIONS"] = "{}.{}".format(pyversion.major, pyversion.minor)
-                cmake.definitions["PYTHON_COMPONENT_SUFFIX"] = "{}{}".format(pyversion.major, pyversion.minor)
-            cmake.definitions["WITH_RANDOM"] = not self.options["boost"].without_random
-            cmake.definitions["WITH_REGEX"] = not self.options["boost"].without_regex
-            cmake.definitions["WITH_TEST"] = not self.options["boost"].without_test
-            cmake.definitions["WITH_COROUTINE"] = not self.options["boost"].without_coroutine
-            cmake.definitions["WITH_CHRONO"] = not self.options["boost"].without_chrono
-            cmake.definitions["WITH_FIBER"] = not self.options["boost"].without_fiber
-            cmake.definitions["WITH_LOCALE"] = not self.options["boost"].without_locale
-            cmake.definitions["WITH_NOWIDE"] = not self._boost_option("without_nowide", True)
-            cmake.definitions["WITH_JSON"] = not self._boost_option("without_json", True)
-            cmake.definitions["WITH_STACKTRACE"] = not self.options["boost"].without_stacktrace
-            cmake.definitions["WITH_STACKTRACE_ADDR2LINE"] = self.deps_user_info["boost"].stacktrace_addr2line_available
-            cmake.definitions["WITH_STACKTRACE_BACKTRACE"] = self._boost_option("with_stacktrace_backtrace", False)
-            if self.options["boost"].namespace != 'boost' and not self.options["boost"].namespace_alias:
-                cmake.definitions['BOOST_NAMESPACE'] = self.options["boost"].namespace
-            cmake.configure()
-            # Disable parallel builds because c3i (=conan-center's test/build infrastructure) seems to choke here
-            cmake.parallel = False
-            cmake.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def test(self):
-        if cross_building(self):
+        if not can_run(self):
             return
-        self.run(os.path.join("bin", "lambda_exe"), run_environment=True)
+        bindir = self.cpp.build.bindirs[0]
+        self.run(os.path.join(bindir, "lambda_exe"), env="conanrun")
         if self.options["boost"].header_only:
             return
         if not self.options["boost"].without_random:
-            self.run(os.path.join("bin", "random_exe"), run_environment=True)
+            self.run(os.path.join(bindir, "random_exe"), env="conanrun")
         if not self.options["boost"].without_regex:
-            self.run(os.path.join("bin", "regex_exe"), run_environment=True)
+            self.run(os.path.join(bindir, "regex_exe"), env="conanrun")
         if not self.options["boost"].without_test:
-            self.run(os.path.join("bin", "test_exe"), run_environment=True)
+            self.run(os.path.join(bindir, "test_exe"), env="conanrun")
         if not self.options["boost"].without_coroutine:
-            self.run(os.path.join("bin", "coroutine_exe"), run_environment=True)
+            self.run(os.path.join(bindir, "coroutine_exe"), env="conanrun")
         if not self.options["boost"].without_chrono:
-            self.run(os.path.join("bin", "chrono_exe"), run_environment=True)
+            self.run(os.path.join(bindir, "chrono_exe"), env="conanrun")
         if not self.options["boost"].without_fiber:
-            self.run(os.path.join("bin", "fiber_exe"), run_environment=True)
+            self.run(os.path.join(bindir, "fiber_exe"), env="conanrun")
         if not self.options["boost"].without_locale:
-            self.run(os.path.join("bin", "locale_exe"), run_environment=True)
+            self.run(os.path.join(bindir, "locale_exe"), env="conanrun")
         if not self._boost_option("without_nowide", True):
-            self.run("{} {}".format(os.path.join("bin", "nowide_exe"), os.path.join(self.source_folder, "conanfile.py")), run_environment=True)
+            bin_nowide = os.path.join(bindir, "nowide_exe")
+            conanfile = os.path.join(self.source_folder, "conanfile.py")
+            self.run(f"{bin_nowide} {conanfile}", env="conanrun")
         if not self._boost_option("without_json", True):
-            self.run(os.path.join("bin", "json_exe"), run_environment=True)
+            self.run(os.path.join(bindir, "json_exe"), env="conanrun")
         if not self.options["boost"].without_python:
-            with tools.environment_append({"PYTHONPATH": "{}:{}".format("bin", "lib")}):
-                self.run("{} {}".format(self.options["boost"].python_executable, os.path.join(self.source_folder, "python.py")), run_environment=True)
-            self.run(os.path.join("bin", "numpy_exe"), run_environment=True)
+            with tools_legacy.environment_append({"PYTHONPATH": "bin:lib"}):
+                python_executable = self.options["boost"].python_executable
+                python_script = os.path.join(self.source_folder, "python.py")
+                self.run(f"{python_executable} {python_script}", env="conanrun")
+            self.run(os.path.join(bindir, "numpy_exe"), env="conanrun")
         if not self.options["boost"].without_stacktrace:
-            self.run(os.path.join("bin", "stacktrace_noop_exe"), run_environment=True)
+            self.run(os.path.join(bindir, "stacktrace_noop_exe"), env="conanrun")
             if str(self.deps_user_info["boost"].stacktrace_addr2line_available) == "True":
-                self.run(os.path.join("bin", "stacktrace_addr2line_exe"), run_environment=True)
+                self.run(os.path.join(bindir, "stacktrace_addr2line_exe"), env="conanrun")
             if self.settings.os == "Windows":
-                self.run(os.path.join("bin", "stacktrace_windbg_exe"), run_environment=True)
-                self.run(os.path.join("bin", "stacktrace_windbg_cached_exe"), run_environment=True)
+                self.run(os.path.join(bindir, "stacktrace_windbg_exe"), env="conanrun")
+                self.run(os.path.join(bindir, "stacktrace_windbg_cached_exe"), env="conanrun")
             else:
-                self.run(os.path.join("bin", "stacktrace_basic_exe"), run_environment=True)
+                self.run(os.path.join(bindir, "stacktrace_basic_exe"), env="conanrun")
             if self._boost_option("with_stacktrace_backtrace", False):
-                self.run(os.path.join("bin", "stacktrace_backtrace_exe"), run_environment=True)
+                self.run(os.path.join(bindir, "stacktrace_backtrace_exe"), env="conanrun")

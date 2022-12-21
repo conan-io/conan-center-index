@@ -45,8 +45,6 @@ class NinjaConan(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
-        self.conf_info.define("tools.cmake.cmaketoolchain:generator", "Ninja")
 
         # TODO: to remove in conan v2
         if Version(conan_version).major < 2:
