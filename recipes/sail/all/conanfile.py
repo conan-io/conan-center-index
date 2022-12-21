@@ -59,15 +59,15 @@ class SAILConan(ConanFile):
         if self.options.with_jpeg2000:
             self.requires("jasper/2.0.33")
         if self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.2")
+            self.requires("libjpeg-turbo/2.1.4")
         elif self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         if self.options.with_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.39")
         if self.options.with_tiff:
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.4.0")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.3")
+            self.requires("libwebp/1.2.4")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
