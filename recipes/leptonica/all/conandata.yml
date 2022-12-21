@@ -21,4 +21,5 @@ patches:
   "1.78.0":
     - patch_file: "patches/fix-find-modules-variables.patch"
       patch_description: "CMake: robust handling of dependencies"
-      patch_type: "conan"
+      patch_type: "portability"
+      patch_source: "https://github.com/DanBloomberg/leptonica/pull/456"
