@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, rename, rmdir
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.51.0"
@@ -101,6 +102,13 @@ class SAILConan(ConanFile):
         tc.variables["SAIL_ENABLE_CODECS"] = ";".join(enable_codecs)
         tc.variables["SAIL_INSTALL_PDB"] = False
         tc.variables["SAIL_THREAD_SAFE"] = self.options.thread_safe
+
+        # TODO: Remove after fixing https://github.com/conan-io/conan-center-index/issues/13159
+        # C3I workaround to force CMake to choose the highest version of
+        # the windows SDK available in the system
+        if is_msvc(self) and not self.conf.get("tools.cmake.cmaketoolchain:system_version"):
+            tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0"
+
         tc.generate()
 
     def build(self):
