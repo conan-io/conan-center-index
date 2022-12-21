@@ -17,6 +17,7 @@ class GnuTLSConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnutls.org"
     description = "GnuTLS is a secure communications library implementing the SSL, TLS and DTLS protocols"
+    topics = ("tls", "ssl", "secure communications")
     license = "LGPL-2.1"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
