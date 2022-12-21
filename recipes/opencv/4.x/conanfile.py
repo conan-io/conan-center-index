@@ -29,7 +29,7 @@ class OpenCVConan(ConanFile):
         "parallel": [False, "tbb", "openmp"],
         "with_ipp": [False, "intel-ipp", "opencv-icv"],
         "with_ade": [True, False],
-        "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
+        "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
         "with_png": [True, False],
         "with_tiff": [True, False],
         "with_jpeg2000": [False, "jasper", "openjpeg"],
@@ -183,6 +183,8 @@ class OpenCVConan(ConanFile):
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.1.4")
+        elif self.options.with_jpeg == "mozjpeg":
+            self.requires("mozjpeg/4.1.1")
         if self.options.get_safe("with_jpeg2000") == "jasper":
             self.requires("jasper/3.0.6")
         elif self.options.get_safe("with_jpeg2000") == "openjpeg":
@@ -425,7 +427,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_GTK"] = self.options.get_safe("with_gtk", False)
         self._cmake.definitions["WITH_GTK_2_X"] = self._is_gtk_version2
         self._cmake.definitions["WITH_WEBP"] = self.options.with_webp
-        self._cmake.definitions["WITH_JPEG"] = self.options.with_jpeg != False
+        self._cmake.definitions["WITH_JPEG"] = bool(self.options.with_jpeg)
         self._cmake.definitions["WITH_PNG"] = self.options.with_png
         if self._has_with_tiff_option:
             self._cmake.definitions["WITH_TIFF"] = self.options.with_tiff
@@ -570,6 +572,8 @@ class OpenCVConan(ConanFile):
                 components.append("libjpeg::libjpeg")
             elif self.options.with_jpeg == "libjpeg-turbo":
                 components.append("libjpeg-turbo::jpeg")
+            elif self.options.with_jpeg == "mozjpeg":
+                components.append("mozjpeg::libjpeg")
             if self.options.get_safe("with_tiff"):
                 components.append("libtiff::libtiff")
             if self.options.with_openexr:
