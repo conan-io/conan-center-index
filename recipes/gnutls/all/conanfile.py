@@ -81,9 +81,9 @@ class GnuTLSConan(ConanFile):
                           "--enable-shared={}".format(yes_no(self.options.shared)),
                           "--enable-static={}".format(yes_no(not self.options.shared)),
                           "--with-cxx={}".format(yes_no(self.options.enable_cxx)),
-                          "--with-zlib={}".format(yes_no(not self.options.with_zlib)),
-                          "--with-brotli={}".format(yes_no(not self.options.with_brotli)),
-                          "--with-zstd={}".format(yes_no(not self.options.with_zstd)),
+                          "--with-zlib={}".format(yes_no(self.options.with_zlib)),
+                          "--with-brotli={}".format(yes_no(self.options.with_brotli)),
+                          "--with-zstd={}".format(yes_no(self.options.with_zstd)),
                           ])
 
         autotoolstc.generate()
