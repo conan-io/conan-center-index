@@ -130,7 +130,6 @@ class LeptonicaConan(ConanFile):
             replace_in_file(self, cmakelists_src, "if (ZLIB_LIBRARIES)", "if(0)")
             replace_in_file(self, cmake_configure, "if (ZLIB_FOUND)", "if(0)")
         ## giflib
-        replace_in_file(self, cmakelists, "find_package(GIF)", "find_package(GIFLIB)")
         replace_in_file(self, cmakelists_src, "${GIF_LIBRARIES}", "GIF::GIF")
         if not self.options.with_gif:
             replace_in_file(self, cmakelists_src, "if (GIF_LIBRARIES)", "if(0)")
