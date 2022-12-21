@@ -1,0 +1,9 @@
+sources:
+  "2.5.0":
+    url: "https://github.com/googleapis/google-cloud-cpp/archive/refs/tags/v2.5.0.tar.gz"
+    sha256: "ac93ef722d08bfb220343bde2f633c7c11f15e34ec3ecd0a57dbd3ff729cc3a6"
+patches:
+  "2.5.0":
+    - patch_file: "patches/2.5.0/001-use-googleapis-conan-package.patch"
+      patch_description: "Use Conan package for googleapis"
+      patch_type: "conan"
