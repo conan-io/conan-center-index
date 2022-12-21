@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
 import os
 
 
@@ -31,12 +32,19 @@ class LogrConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires("fmt/8.1.1")
+        if Version(self.version) >= "0.6.0":
+            fmt_ref = "fmt/9.1.0"
+            spdlog_ref = "spdlog/1.11.0"
+        else:
+            fmt_ref = "fmt/8.1.1"
+            spdlog_ref = "spdlog/1.9.2"
+
+        self.requires(fmt_ref)
 
         if self.options.backend == "spdlog":
-            self.requires("spdlog/1.9.2")
+            self.requires(spdlog_ref)
         elif self.options.backend == "glog":
-            self.requires("glog/0.5.0")
+            self.requires("glog/0.6.0")
         elif self.options.backend == "log4cplus":
             self.requires("log4cplus/2.0.5")
         elif self.options.backend == "boostlog":
@@ -46,12 +54,22 @@ class LogrConan(ConanFile):
         minimal_cpp_standard = "17"
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, minimal_cpp_standard)
-        minimal_version = {
-            "gcc": "7",
-            "clang": "7",
-            "apple-clang": "10",
-            "Visual Studio": "16",
-        }
+
+        if Version(self.version) >= "0.6.0":
+            minimal_version = {
+                "gcc": "10",
+                "clang": "11",
+                "apple-clang": "12",
+                "Visual Studio": "19",
+            }
+        else:
+            minimal_version = {
+                "gcc": "7",
+                "clang": "7",
+                "apple-clang": "10",
+                "Visual Studio": "16",
+            }
+
         compiler = str(self.settings.compiler)
         if compiler not in minimal_version:
             self.output.warn(
