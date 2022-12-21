@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 project(test_package LANGUAGES CXX)
 
-
-set(CMAKE_VERBOSE_MAKEFILE ON)
 find_package(packio REQUIRED CONFIG)
 
 if (packio_VERSION VERSION_LESS "1.2.0")
