@@ -20,3 +20,5 @@ sources:
 patches:
   "1.78.0":
     - patch_file: "patches/fix-find-modules-variables.patch"
+      patch_description: "CMake: robust handling of dependencies"
+      patch_type: "conan"
