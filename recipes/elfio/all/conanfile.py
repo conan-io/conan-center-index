@@ -23,8 +23,7 @@ class ElfioConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version])
-        rename(self, "elfio-{}".format(self.version), "elfio")
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package_id(self):
         self.info.clear()
