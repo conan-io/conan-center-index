@@ -97,11 +97,22 @@ No, recipes do not need to export a recipe license. Recipes and all files contri
 We generally consider tools like CMake as a standard tool to have installed in your system. Having the `cmake` package as a build require in **all** the recipes that use it will be an overkill, as every build requirement is installed like a requirement and takes time to download. However, `cmake` could still be useful to use in your profile:
 
 ```
-[build_requires]
+[tool_requires]
 cmake/3.17.2
 ```
 
-Other packages using more unusual build tools, like `OpenSSL` using `strawberryperl`, will have the build require in the recipe as it is likely that the user that want to build it from sources will not have it installed in their system
+Other packages using more unusual build tools should refer to the [Dependencies - Adding Build Requirements](adding_packages/dependencies.md#build-requirements) section for more information.
+
+## How are rare build systems without generators packaged?
+
+The C++ ecosystem has a lot of rare, unique and obscure build systems. Some of these are available in ConanCenter but they do not have built-in generators from the main Conan client.
+The recipe is expected to encode the specifics of the build system, mapping the `settings`, `options` for the binary configuration, and also mapping `self.dependencies` so the build system can locate the dependencies libraries as required.
+For these cases, contributors are asked to help reviewers as much as possible as it's likely we will not have expertise.
+
+> TODO: Add a link to docs.conan.io which explains how to write a custom generator in the 2.0 sense
+
+For quality assurance the build service is expected to be green and the [hooks](https://github.com/conan-io/hooks) will ensure the package contents match what is expected given the options. These recipes are more likely to have
+inconsistency with other recipes but make for excellent contributions.
 
 ## Are python requires allowed in the `conan-center-index`?
 
