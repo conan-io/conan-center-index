@@ -80,8 +80,6 @@ class BisonConan(ConanFile):
             "--disable-nls",
             "--datarootdir=${prefix}/res",
         ])
-        if self.settings.os == "Windows":
-            tc.extra_defines.append("_WINDOWS")
         if self.settings.compiler == "apple-clang":
             tc.configure_args.append("gl_cv_compiler_check_decl_option=")
         if is_msvc(self):
