@@ -81,6 +81,7 @@ class LibconfigConan(ConanFile):
         self.cpp_info.components["libconfig++"].set_property("cmake_target_name", "libconfig::libconfig++")
         self.cpp_info.components["libconfig++"].set_property("pkg_config_name", "libconfig++")
         self.cpp_info.components["libconfig++"].libs = [f"{prefix}config++"]
+        self.cpp_info.components["libconfig++"].requires = ["libconfig_"]
 
         if not self.options.shared:
             self.cpp_info.components["libconfig_"].defines.append("LIBCONFIG_STATIC")
