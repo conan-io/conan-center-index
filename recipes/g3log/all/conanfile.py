@@ -161,6 +161,7 @@ class G3logConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
             self.cpp_info.system_libs.append("m")
+            self.cpp_info.system_libs.append("rt")
             self.cpp_info.system_libs.append("pthread")
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("dbghelp")
