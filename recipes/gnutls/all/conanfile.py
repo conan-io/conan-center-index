@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.microsoft import is_msvc
-from conan.tools.files import get, rmdir
+from conan.tools.files import get, rmdir, rm
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps, Autotools
 from conan.tools.build import cross_building
@@ -94,7 +94,6 @@ class GnuTLSConan(ConanFile):
 
     def build(self):
         autotools = Autotools(self)
-        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
@@ -103,6 +102,7 @@ class GnuTLSConan(ConanFile):
         autotools = Autotools(self)
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["gnutls", "gnutlsxx"] if self.options.enable_cxx else ["gnutls"]
