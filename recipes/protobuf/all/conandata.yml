@@ -23,3 +23,5 @@ sources:
 patches:
   "3.19.4":
     - patch_file: "patches/upstream-pr-9153-msvc-runtime.patch"
+      patch_description: "Support protobuf_MSVC_STATIC_RUNTIME when using CMake"
+      patch_type: "backport"

@@ -1,7 +1,7 @@
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import cross_building
 from conan.tools.files import copy, rename, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir, rm
-from conan.tools.microsoft import check_min_vs, msvc_runtime_flag, is_msvc
+from conan.tools.microsoft import check_min_vs, msvc_runtime_flag, is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
 from conan.errors import ConanInvalidConfiguration
@@ -77,7 +77,7 @@ class ProtobufConan(ConanFile):
             self.requires("zlib/1.2.13")
 
     def validate(self):
-        if self.options.shared and str(self.settings.compiler.get_safe("runtime")) in ["MT", "MTd", "static"]:
+        if self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
 
         check_min_vs(self, "190")
