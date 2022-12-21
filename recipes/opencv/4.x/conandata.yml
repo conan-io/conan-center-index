@@ -61,4 +61,6 @@ patches:
       patch_type: "conan"
       base_path: "src"
     - patch_file: "patches/4.1.2-0002-jasper.patch"
+      patch_description: "Compatibility with recent jasper versions"
+      patch_type: "backport"
       base_path: "src"
