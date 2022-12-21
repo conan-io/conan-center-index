@@ -1,14 +1,16 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rename, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
-from conans import CMake, tools as tools_legacy
+from conans.tools import to_android_abi
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class OpenCVConan(ConanFile):
@@ -94,20 +96,10 @@ class OpenCVConan(ConanFile):
     }
 
     short_paths = True
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
-
-    @property
-    def _source_folder(self):
-        return os.path.join(self.source_folder, "src")
 
     @property
     def _contrib_folder(self):
         return os.path.join(self.source_folder, "contrib")
-
-    @property
-    def _build_folder(self):
-        return os.path.join(self.source_folder, "build")
 
     @property
     def _has_with_jpeg2000_option(self):
@@ -126,7 +118,6 @@ class OpenCVConan(ConanFile):
         return "3.17.1"
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
         export_conandata_patches(self)
 
     def config_options(self):
@@ -175,7 +166,7 @@ class OpenCVConan(ConanFile):
             self.options.with_openexr = False  # disabled because this forces linkage to libc++_shared.so
 
     def layout(self):
-        pass
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("zlib/1.2.13")
@@ -241,66 +232,245 @@ class OpenCVConan(ConanFile):
             raise ConanInvalidConfiguration(f"opencv-icv is not available for {self.settings.os}/{self.settings.arch}")
 
     def build_requirements(self):
-        if self.options.dnn and hasattr(self, "settings_build"):
-            self.tool_requires(f"protobuf/{self._protobuf_version}")
+        if self.options.dnn:
+            if hasattr(self, "settings_build") and cross_building(self):
+                self.tool_requires(f"protobuf/{self._protobuf_version}")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0],
-            destination=self._source_folder, strip_root=True)
+            destination=self.source_folder, strip_root=True)
 
         get(self, **self.conan_data["sources"][self.version][1],
             destination=self._contrib_folder, strip_root=True)
 
+    def generate(self):
+        if self.options.dnn:
+            if hasattr(self, "settings_build") and cross_building(self):
+                VirtualBuildEnv(self).generate()
+            else:
+                VirtualRunEnv(self).generate(scope="build")
+
+        tc = CMakeToolchain(self)
+        tc.variables["OPENCV_CONFIG_INSTALL_PATH"] = "cmake"
+        tc.variables["OPENCV_BIN_INSTALL_PATH"] = "bin"
+        tc.variables["OPENCV_LIB_INSTALL_PATH"] = "lib"
+        tc.variables["OPENCV_3P_LIB_INSTALL_PATH"] = "lib"
+        tc.variables["OPENCV_OTHER_INSTALL_PATH"] = "res"
+        tc.variables["OPENCV_LICENSES_INSTALL_PATH"] = "licenses"
+
+        tc.variables["BUILD_CUDA_STUBS"] = False
+        tc.variables["BUILD_DOCS"] = False
+        tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["BUILD_FAT_JAVA_LIB"] = False
+        tc.variables["BUILD_IPP_IW"] = False
+        tc.variables["BUILD_ITT"] = False
+        tc.variables["BUILD_JASPER"] = False
+        tc.variables["BUILD_JAVA"] = False
+        tc.variables["BUILD_JPEG"] = False
+        tc.variables["BUILD_OPENEXR"] = False
+        tc.variables["BUILD_OPENJPEG"] = False
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_PROTOBUF"] = False
+        tc.variables["BUILD_PACKAGE"] = False
+        tc.variables["BUILD_PERF_TESTS"] = False
+        tc.variables["BUILD_USE_SYMLINKS"] = False
+        tc.variables["BUILD_opencv_apps"] = False
+        tc.variables["BUILD_opencv_java"] = False
+        tc.variables["BUILD_opencv_java_bindings_gen"] = False
+        tc.variables["BUILD_opencv_js"] = False
+        tc.variables["BUILD_ZLIB"] = False
+        tc.variables["BUILD_PNG"] = False
+        tc.variables["BUILD_TIFF"] = False
+        tc.variables["BUILD_WEBP"] = False
+        tc.variables["BUILD_TBB"] = False
+        tc.variables["OPENCV_FORCE_3RDPARTY_BUILD"] = False
+        tc.variables["OPENCV_PYTHON_SKIP_DETECTION"] = True
+        tc.variables["BUILD_opencv_python2"] = False
+        tc.variables["BUILD_opencv_python3"] = False
+        tc.variables["BUILD_opencv_python_bindings_g"] = False
+        tc.variables["BUILD_opencv_python_tests"] = False
+        tc.variables["BUILD_opencv_ts"] = False
+
+        tc.variables["WITH_1394"] = False
+        tc.variables["WITH_ADE"] = False
+        tc.variables["WITH_ARAVIS"] = False
+        tc.variables["WITH_CLP"] = False
+        tc.variables["WITH_NVCUVID"] = False
+
+        tc.variables["WITH_FFMPEG"] = self.options.get_safe("with_ffmpeg")
+        if self.options.get_safe("with_ffmpeg"):
+            tc.variables["OPENCV_FFMPEG_SKIP_BUILD_CHECK"] = True
+            tc.variables["OPENCV_FFMPEG_SKIP_DOWNLOAD"] = True
+            # opencv will not search for ffmpeg package, but for
+            # libavcodec;libavformat;libavutil;libswscale modules
+            tc.variables["OPENCV_FFMPEG_USE_FIND_PACKAGE"] = "ffmpeg"
+            tc.variables["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = False
+            tc.variables["FFMPEG_LIBRARIES"] = "ffmpeg::avcodec;ffmpeg::avformat;ffmpeg::avutil;ffmpeg::swscale"
+            for component in ["avcodec", "avformat", "avutil", "swscale", "avresample"]:
+                # TODO: use self.dependencies once https://github.com/conan-io/conan/issues/12728 fixed
+                ffmpeg_component_version = self.deps_cpp_info["ffmpeg"].components[component].version
+                tc.variables[f"FFMPEG_lib{component}_VERSION"] = ffmpeg_component_version
+
+        tc.variables["WITH_GSTREAMER"] = False
+        tc.variables["WITH_HALIDE"] = False
+        tc.variables["WITH_HPX"] = False
+        tc.variables["WITH_IMGCODEC_HDR"] = self.options.with_imgcodec_hdr
+        tc.variables["WITH_IMGCODEC_PFM"] = self.options.with_imgcodec_pfm
+        tc.variables["WITH_IMGCODEC_PXM"] = self.options.with_imgcodec_pxm
+        tc.variables["WITH_IMGCODEC_SUNRASTER"] = self.options.with_imgcodec_sunraster
+        tc.variables["WITH_INF_ENGINE"] = False
+        tc.variables["WITH_IPP"] = False
+        if self.options.with_ipp:
+            tc.variables["WITH_IPP"] = True
+            if self.options.with_ipp == "intel-ipp":
+                ipp_root = self.dependencies["intel-ipp"].package_folder.replace("\\", "/")
+                if self.settings.os == "Windows":
+                    ipp_root = ipp_root.replace("\\", "/")
+                tc.variables["IPPROOT"] = ipp_root
+                tc.variables["IPPIWROOT"] = ipp_root
+            else:
+                tc.variables["BUILD_IPP_IW"] = True
+        tc.variables["WITH_ITT"] = False
+        tc.variables["WITH_LIBREALSENSE"] = False
+        tc.variables["WITH_MFX"] = False
+        tc.variables["WITH_NGRAPH"] = False
+        tc.variables["WITH_OPENCL"] = False
+        tc.variables["WITH_OPENCLAMDBLAS"] = False
+        tc.variables["WITH_OPENCLAMDFFT"] = False
+        tc.variables["WITH_OPENCL_SVM"] = False
+        tc.variables["WITH_OPENGL"] = False
+        tc.variables["WITH_OPENMP"] = False
+        tc.variables["WITH_OPENNI"] = False
+        tc.variables["WITH_OPENNI2"] = False
+        tc.variables["WITH_OPENVX"] = False
+        tc.variables["WITH_PLAIDML"] = False
+        tc.variables["WITH_PVAPI"] = False
+        tc.variables["WITH_QT"] = False
+        tc.variables["WITH_QUIRC"] = False
+        tc.variables["WITH_V4L"] = self.options.get_safe("with_v4l", False)
+        tc.variables["WITH_VA"] = False
+        tc.variables["WITH_VA_INTEL"] = False
+        tc.variables["WITH_VTK"] = False
+        tc.variables["WITH_VULKAN"] = False
+        tc.variables["WITH_XIMEA"] = False
+        tc.variables["WITH_XINE"] = False
+        tc.variables["WITH_LAPACK"] = False
+
+        tc.variables["WITH_GTK"] = self.options.get_safe("with_gtk", False)
+        tc.variables["WITH_GTK_2_X"] = self._is_gtk_version2
+        tc.variables["WITH_WEBP"] = self.options.with_webp
+        tc.variables["WITH_JPEG"] = bool(self.options.with_jpeg)
+        tc.variables["WITH_PNG"] = self.options.with_png
+        if self._has_with_tiff_option:
+            tc.variables["WITH_TIFF"] = self.options.with_tiff
+        if self._has_with_jpeg2000_option:
+            tc.variables["WITH_JASPER"] = self.options.with_jpeg2000 == "jasper"
+            tc.variables["WITH_OPENJPEG"] = self.options.with_jpeg2000 == "openjpeg"
+        tc.variables["WITH_OPENEXR"] = self.options.with_openexr
+        if self.options.with_openexr:
+            tc.variables["CMAKE_CXX_STANDARD"] = 11
+        tc.variables["WITH_EIGEN"] = self.options.with_eigen
+        tc.variables["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc requirement
+        tc.variables["WITH_DSHOW"] = is_msvc(self)
+        tc.variables["WITH_MSMF"] = is_msvc(self)
+        tc.variables["WITH_MSMF_DXVA"] = is_msvc(self)
+        tc.variables["OPENCV_MODULES_PUBLIC"] = "opencv"
+        tc.variables["OPENCV_ENABLE_NONFREE"] = self.options.nonfree
+
+        if self.options.cpu_baseline:
+            tc.variables["CPU_BASELINE"] = self.options.cpu_baseline
+
+        if self.options.cpu_dispatch:
+            tc.variables["CPU_DISPATCH"] = self.options.cpu_dispatch
+
+        if self.options.get_safe("neon") is not None:
+            tc.variables["ENABLE_NEON"] = self.options.get_safe("neon")
+
+        tc.variables["WITH_PROTOBUF"] = self.options.dnn
+        if self.options.dnn:
+            tc.variables["PROTOBUF_UPDATE_FILES"] = True
+            tc.variables["BUILD_opencv_dnn"] = True
+        tc.variables["OPENCV_DNN_CUDA"] = self.options.get_safe("dnn_cuda", False)
+
+        if self.options.contrib:
+            tc.variables["OPENCV_EXTRA_MODULES_PATH"] = os.path.join(self._contrib_folder, "modules").replace("\\", "/")
+        tc.variables["BUILD_opencv_freetype"] = self.options.get_safe("contrib_freetype", False)
+        tc.variables["BUILD_opencv_sfm"] = self.options.get_safe("contrib_sfm", False)
+
+        if self.options.get_safe("with_jpeg2000") == "openjpeg":
+            openjpeg_version = Version(self.dependencies["openjpeg"].ref.version)
+            tc.variables["OPENJPEG_MAJOR_VERSION"] = openjpeg_version.major
+            tc.variables["OPENJPEG_MINOR_VERSION"] = openjpeg_version.minor
+            tc.variables["OPENJPEG_BUILD_VERSION"] = openjpeg_version.patch
+        if self.options.parallel:
+            tc.variables["WITH_TBB"] = self.options.parallel == "tbb"
+            tc.variables["WITH_OPENMP"] = self.options.parallel == "openmp"
+
+        tc.variables["WITH_CUDA"] = self.options.with_cuda
+        tc.variables["WITH_ADE"] = self.options.with_ade
+        if self.options.with_cuda:
+            # This allows compilation on older GCC/NVCC, otherwise build errors.
+            tc.variables["CUDA_NVCC_FLAGS"] = "--expt-relaxed-constexpr"
+            if self.options.cuda_arch_bin:
+                tc.variables["CUDA_ARCH_BIN"] = self.options.cuda_arch_bin
+        tc.variables["WITH_CUBLAS"] = self.options.get_safe("with_cublas", False)
+        tc.variables["WITH_CUFFT"] = self.options.get_safe("with_cufft", False)
+        tc.variables["WITH_CUDNN"] = self.options.get_safe("with_cudnn", False)
+
+        tc.variables["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
+        tc.variables["ENABLE_CCACHE"] = False
+
+        if is_msvc(self):
+            tc.variables["BUILD_WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
+
+        tc.generate()
+
+        CMakeDeps(self).generate()
+
     def _patch_sources(self):
         apply_conandata_patches(self)
         for directory in ["libjasper", "libjpeg-turbo", "libjpeg", "libpng", "libtiff", "libwebp", "openexr", "protobuf", "zlib", "quirc"]:
-            rmdir(self, os.path.join(self._source_folder, "3rdparty", directory))
+            rmdir(self, os.path.join(self.source_folder, "3rdparty", directory))
 
-        replace_in_file(self, os.path.join(self._source_folder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
-        replace_in_file(self, os.path.join(self._source_folder, "CMakeLists.txt"), "elseif(EMSCRIPTEN)", "elseif(QNXNTO)\nelseif(EMSCRIPTEN)")
-        replace_in_file(self, os.path.join(self._source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "elseif(EMSCRIPTEN)", "elseif(QNXNTO)\nelseif(EMSCRIPTEN)")
+        replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
+
+        # Fix detection of ffmpeg
+        replace_in_file(self, os.path.join(self.source_folder, "modules", "videoio", "cmake", "detect_ffmpeg.cmake"),
+                        "FFMPEG_FOUND", "ffmpeg_FOUND")
 
         # Cleanup RPATH
         if Version(self.version) < "4.1.2":
-            install_layout_file = os.path.join(self._source_folder, "CMakeLists.txt")
+            install_layout_file = os.path.join(self.source_folder, "CMakeLists.txt")
         else:
-            install_layout_file = os.path.join(self._source_folder, "cmake", "OpenCVInstallLayout.cmake")
+            install_layout_file = os.path.join(self.source_folder, "cmake", "OpenCVInstallLayout.cmake")
         replace_in_file(self, install_layout_file,
                               "ocv_update(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/${OPENCV_LIB_INSTALL_PATH}\")",
                               "")
         replace_in_file(self, install_layout_file, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
 
         if self.options.dnn:
-            find_protobuf = os.path.join(self._source_folder, "cmake", "OpenCVFindProtobuf.cmake")
-            # variables generated by protobuf recipe have all lowercase prefixes
+            find_protobuf = os.path.join(self.source_folder, "cmake", "OpenCVFindProtobuf.cmake")
+            # OpenCV expects to find FindProtobuf.cmake, not the config file
             replace_in_file(self, find_protobuf,
-                                  "find_package(Protobuf QUIET)",
-                                  """find_package(Protobuf QUIET)
-            if(NOT DEFINED Protobuf_LIBRARIES)
-              set(Protobuf_LIBRARIES ${protobuf_LIBRARIES})
-            endif()
-            if(NOT DEFINED Protobuf_LIBRARY)
-              set(Protobuf_LIBRARY ${protobuf_LIBS})
-            endif()
-            if(NOT DEFINED Protobuf_INCLUDE_DIR)
-              set(Protobuf_INCLUDE_DIR ${protobuf_INCLUDE_DIR})
-            endif()""")
+                            "find_package(Protobuf QUIET)",
+                            "find_package(Protobuf REQUIRED MODULE)")
             # in 'if' block, get_target_property() produces an error
             if Version(self.version) >= "4.4.0":
                 replace_in_file(self, find_protobuf,
                                       'if(TARGET "${Protobuf_LIBRARIES}")',
                                       'if(FALSE)  # patch: disable if(TARGET "${Protobuf_LIBRARIES}")')
-        if self.options.with_ade:
-            ade_cmake = os.path.join(self._source_folder, "modules", "gapi", "cmake", "init.cmake")
-            replacement = """find_package(ade REQUIRED)
-            if(ade_DIR)"""
-            replace_in_file(self, ade_cmake, "if(ade_DIR)", replacement, strict=False)
-            replace_in_file(self, ade_cmake, "if (ade_DIR)", replacement, strict=False)
-            replace_in_file(self, ade_cmake, "TARGET ade", "TARGET ade::ade")
-            gapi_cmake = os.path.join(self._source_folder, "modules", "gapi", "CMakeLists.txt")
-            replace_in_file(self, gapi_cmake, " ade)", " ade::ade)")
 
-        if self.options.contrib and self.options.contrib_sfm and Version(self.version) <= "4.5.2":
+        if self.options.get_safe("contrib_freetype"):
+            freetype_cmake = os.path.join(self._contrib_folder, "modules", "freetype", "CMakeLists.txt")
+            replace_in_file(self, freetype_cmake, "ocv_check_modules(FREETYPE freetype2)", "find_package(Freetype REQUIRED MODULE)")
+            replace_in_file(self, freetype_cmake, "FREETYPE_", "Freetype_")
+
+            replace_in_file(self, freetype_cmake, "ocv_check_modules(HARFBUZZ harfbuzz)", "find_package(harfbuzz REQUIRED)")
+            replace_in_file(self, freetype_cmake, "HARFBUZZ_", "harfbuzz_")
+
+        if self.options.get_safe("contrib_sfm") and Version(self.version) <= "4.5.2":
             sfm_cmake = os.path.join(self._contrib_folder, "modules", "sfm", "CMakeLists.txt")
             ver = Version(self.version)
             if ver <= "4.5.0":
@@ -315,211 +485,15 @@ class OpenCVConan(ConanFile):
               set(GLOG_LIBRARIES glog::glog)
             endif()""")
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["OPENCV_CONFIG_INSTALL_PATH"] = "cmake"
-        self._cmake.definitions["OPENCV_BIN_INSTALL_PATH"] = "bin"
-        self._cmake.definitions["OPENCV_LIB_INSTALL_PATH"] = "lib"
-        self._cmake.definitions["OPENCV_3P_LIB_INSTALL_PATH"] = "lib"
-        self._cmake.definitions["OPENCV_OTHER_INSTALL_PATH"] = "res"
-        self._cmake.definitions["OPENCV_LICENSES_INSTALL_PATH"] = "licenses"
-
-        self._cmake.definitions["BUILD_CUDA_STUBS"] = False
-        self._cmake.definitions["BUILD_DOCS"] = False
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
-        self._cmake.definitions["BUILD_FAT_JAVA_LIB"] = False
-        self._cmake.definitions["BUILD_IPP_IW"] = False
-        self._cmake.definitions["BUILD_ITT"] = False
-        self._cmake.definitions["BUILD_JASPER"] = False
-        self._cmake.definitions["BUILD_JAVA"] = False
-        self._cmake.definitions["BUILD_JPEG"] = False
-        self._cmake.definitions["BUILD_OPENEXR"] = False
-        self._cmake.definitions["BUILD_OPENJPEG"] = False
-        self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.definitions["BUILD_PROTOBUF"] = False
-        self._cmake.definitions["BUILD_PACKAGE"] = False
-        self._cmake.definitions["BUILD_PERF_TESTS"] = False
-        self._cmake.definitions["BUILD_USE_SYMLINKS"] = False
-        self._cmake.definitions["BUILD_opencv_apps"] = False
-        self._cmake.definitions["BUILD_opencv_java"] = False
-        self._cmake.definitions["BUILD_opencv_java_bindings_gen"] = False
-        self._cmake.definitions["BUILD_opencv_js"] = False
-        self._cmake.definitions["BUILD_ZLIB"] = False
-        self._cmake.definitions["BUILD_PNG"] = False
-        self._cmake.definitions["BUILD_TIFF"] = False
-        self._cmake.definitions["BUILD_WEBP"] = False
-        self._cmake.definitions["BUILD_TBB"] = False
-        self._cmake.definitions["OPENCV_FORCE_3RDPARTY_BUILD"] = False
-        self._cmake.definitions["OPENCV_PYTHON_SKIP_DETECTION"] = True
-        self._cmake.definitions["BUILD_opencv_python2"] = False
-        self._cmake.definitions["BUILD_opencv_python3"] = False
-        self._cmake.definitions["BUILD_opencv_python_bindings_g"] = False
-        self._cmake.definitions["BUILD_opencv_python_tests"] = False
-        self._cmake.definitions["BUILD_opencv_ts"] = False
-
-        self._cmake.definitions["WITH_1394"] = False
-        self._cmake.definitions["WITH_ADE"] = False
-        self._cmake.definitions["WITH_ARAVIS"] = False
-        self._cmake.definitions["WITH_CLP"] = False
-        self._cmake.definitions["WITH_NVCUVID"] = False
-
-        self._cmake.definitions["WITH_FFMPEG"] = self.options.get_safe("with_ffmpeg")
-        if self.options.get_safe("with_ffmpeg"):
-            self._cmake.definitions["OPENCV_FFMPEG_SKIP_BUILD_CHECK"] = True
-            self._cmake.definitions["OPENCV_FFMPEG_SKIP_DOWNLOAD"] = True
-            # opencv will not search for ffmpeg package, but for
-            # libavcodec;libavformat;libavutil;libswscale modules
-            self._cmake.definitions["OPENCV_FFMPEG_USE_FIND_PACKAGE"] = "ffmpeg"
-            self._cmake.definitions["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = False
-            self._cmake.definitions["FFMPEG_LIBRARIES"] = "ffmpeg::avcodec;ffmpeg::avformat;ffmpeg::avutil;ffmpeg::swscale"
-            for component in ["avcodec", "avformat", "avutil", "swscale", "avresample"]:
-                # TODO: use self.dependencies once https://github.com/conan-io/conan/issues/12728 fixed
-                ffmpeg_component_version = self.deps_cpp_info["ffmpeg"].components[component].version
-                self._cmake.definitions[f"FFMPEG_lib{component}_VERSION"] = ffmpeg_component_version
-
-        self._cmake.definitions["WITH_GSTREAMER"] = False
-        self._cmake.definitions["WITH_HALIDE"] = False
-        self._cmake.definitions["WITH_HPX"] = False
-        self._cmake.definitions["WITH_IMGCODEC_HDR"] = self.options.with_imgcodec_hdr
-        self._cmake.definitions["WITH_IMGCODEC_PFM"] = self.options.with_imgcodec_pfm
-        self._cmake.definitions["WITH_IMGCODEC_PXM"] = self.options.with_imgcodec_pxm
-        self._cmake.definitions["WITH_IMGCODEC_SUNRASTER"] = self.options.with_imgcodec_sunraster
-        self._cmake.definitions["WITH_INF_ENGINE"] = False
-        self._cmake.definitions["WITH_IPP"] = False
-        if self.options.with_ipp:
-            self._cmake.definitions["WITH_IPP"] = True
-            if self.options.with_ipp == "intel-ipp":
-                ipp_root = self.dependencies["intel-ipp"].package_folder.replace("\\", "/")
-                if self.settings.os == "Windows":
-                    ipp_root = ipp_root.replace("\\", "/")
-                self._cmake.definitions["IPPROOT"] = ipp_root
-                self._cmake.definitions["IPPIWROOT"] = ipp_root
-            else:
-                self._cmake.definitions["BUILD_IPP_IW"] = True
-        self._cmake.definitions["WITH_ITT"] = False
-        self._cmake.definitions["WITH_LIBREALSENSE"] = False
-        self._cmake.definitions["WITH_MFX"] = False
-        self._cmake.definitions["WITH_NGRAPH"] = False
-        self._cmake.definitions["WITH_OPENCL"] = False
-        self._cmake.definitions["WITH_OPENCLAMDBLAS"] = False
-        self._cmake.definitions["WITH_OPENCLAMDFFT"] = False
-        self._cmake.definitions["WITH_OPENCL_SVM"] = False
-        self._cmake.definitions["WITH_OPENGL"] = False
-        self._cmake.definitions["WITH_OPENMP"] = False
-        self._cmake.definitions["WITH_OPENNI"] = False
-        self._cmake.definitions["WITH_OPENNI2"] = False
-        self._cmake.definitions["WITH_OPENVX"] = False
-        self._cmake.definitions["WITH_PLAIDML"] = False
-        self._cmake.definitions["WITH_PVAPI"] = False
-        self._cmake.definitions["WITH_QT"] = False
-        self._cmake.definitions["WITH_QUIRC"] = False
-        self._cmake.definitions["WITH_V4L"] = self.options.get_safe("with_v4l", False)
-        self._cmake.definitions["WITH_VA"] = False
-        self._cmake.definitions["WITH_VA_INTEL"] = False
-        self._cmake.definitions["WITH_VTK"] = False
-        self._cmake.definitions["WITH_VULKAN"] = False
-        self._cmake.definitions["WITH_XIMEA"] = False
-        self._cmake.definitions["WITH_XINE"] = False
-        self._cmake.definitions["WITH_LAPACK"] = False
-
-        self._cmake.definitions["WITH_GTK"] = self.options.get_safe("with_gtk", False)
-        self._cmake.definitions["WITH_GTK_2_X"] = self._is_gtk_version2
-        self._cmake.definitions["WITH_WEBP"] = self.options.with_webp
-        self._cmake.definitions["WITH_JPEG"] = bool(self.options.with_jpeg)
-        self._cmake.definitions["WITH_PNG"] = self.options.with_png
-        if self._has_with_tiff_option:
-            self._cmake.definitions["WITH_TIFF"] = self.options.with_tiff
-        if self._has_with_jpeg2000_option:
-            self._cmake.definitions["WITH_JASPER"] = self.options.with_jpeg2000 == "jasper"
-            self._cmake.definitions["WITH_OPENJPEG"] = self.options.with_jpeg2000 == "openjpeg"
-        self._cmake.definitions["WITH_OPENEXR"] = self.options.with_openexr
-        self._cmake.definitions["WITH_EIGEN"] = self.options.with_eigen
-        self._cmake.definitions["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc requirement
-        self._cmake.definitions["WITH_DSHOW"] = is_msvc(self)
-        self._cmake.definitions["WITH_MSMF"] = is_msvc(self)
-        self._cmake.definitions["WITH_MSMF_DXVA"] = is_msvc(self)
-        self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
-        self._cmake.definitions["OPENCV_ENABLE_NONFREE"] = self.options.nonfree
-
-        if self.options.cpu_baseline:
-            self._cmake.definitions["CPU_BASELINE"] = self.options.cpu_baseline
-
-        if self.options.cpu_dispatch:
-            self._cmake.definitions["CPU_DISPATCH"] = self.options.cpu_dispatch
-
-        if self.options.get_safe("neon") is not None:
-            self._cmake.definitions["ENABLE_NEON"] = self.options.get_safe("neon")
-
-        self._cmake.definitions["WITH_PROTOBUF"] = self.options.dnn
-        if self.options.dnn:
-            self._cmake.definitions["PROTOBUF_UPDATE_FILES"] = True
-            self._cmake.definitions["BUILD_opencv_dnn"] = True
-        self._cmake.definitions["OPENCV_DNN_CUDA"] = self.options.get_safe("dnn_cuda", False)
-
-        if self.options.contrib:
-            self._cmake.definitions["OPENCV_EXTRA_MODULES_PATH"] = os.path.join(self._contrib_folder, "modules")
-        self._cmake.definitions["BUILD_opencv_freetype"] = self.options.get_safe("contrib_freetype", False)
-        self._cmake.definitions["BUILD_opencv_sfm"] = self.options.get_safe("contrib_sfm", False)
-
-        if self.options.get_safe("with_jpeg2000") == "openjpeg":
-            openjpeg_version = Version(self.dependencies["openjpeg"].ref.version)
-            self._cmake.definitions["OPENJPEG_MAJOR_VERSION"] = openjpeg_version.major
-            self._cmake.definitions["OPENJPEG_MINOR_VERSION"] = openjpeg_version.minor
-            self._cmake.definitions["OPENJPEG_BUILD_VERSION"] = openjpeg_version.patch
-        if self.options.parallel:
-            self._cmake.definitions["WITH_TBB"] = self.options.parallel == "tbb"
-            self._cmake.definitions["WITH_OPENMP"] = self.options.parallel == "openmp"
-
-        self._cmake.definitions["WITH_CUDA"] = self.options.with_cuda
-        self._cmake.definitions["WITH_ADE"] = self.options.with_ade
-        if self.options.with_cuda:
-            # This allows compilation on older GCC/NVCC, otherwise build errors.
-            self._cmake.definitions["CUDA_NVCC_FLAGS"] = "--expt-relaxed-constexpr"
-            if self.options.cuda_arch_bin:
-                self._cmake.definitions["CUDA_ARCH_BIN"] = self.options.cuda_arch_bin
-        self._cmake.definitions["WITH_CUBLAS"] = self.options.get_safe("with_cublas", False)
-        self._cmake.definitions["WITH_CUFFT"] = self.options.get_safe("with_cufft", False)
-        self._cmake.definitions["WITH_CUDNN"] = self.options.get_safe("with_cudnn", False)
-
-        self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
-        self._cmake.definitions["ENABLE_CCACHE"] = False
-
-        if is_msvc(self):
-            self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
-
-        if self.settings.os == "Android":
-            self._cmake.definitions["ANDROID_STL"] = "c++_static"
-            self._cmake.definitions["ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
-            self._cmake.definitions["ANDROID_ABI"] = tools_legacy.to_android_abi(str(self.settings.arch))
-            self._cmake.definitions["BUILD_ANDROID_EXAMPLES"] = False
-            if "ANDROID_NDK_HOME" in os.environ:
-                self._cmake.definitions["ANDROID_NDK"] = os.environ.get("ANDROID_NDK_HOME")
-
-        if cross_building(self):
-            # FIXME: too specific and error prone, should be delegated to CMake helper
-            cmake_system_processor = {
-                "armv8": "aarch64",
-                "armv8.3": "aarch64",
-            }.get(str(self.settings.arch), str(self.settings.arch))
-            self._cmake.definitions["CONAN_OPENCV_SYSTEM_PROCESSOR"] = cmake_system_processor
-            # Workaround for cross-build to at least iOS/tvOS/watchOS,
-            # when dependencies are found with find_path() and find_library()
-            self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_INCLUDE"] = "BOTH"
-            self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_LIBRARY"] = "BOTH"
-
-        self._cmake.configure(build_folder=self._build_folder)
-        return self._cmake
-
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self._source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "cmake"))
         if os.path.isfile(os.path.join(self.package_folder, "setup_vars_opencv4.cmd")):
@@ -768,7 +742,7 @@ class OpenCVConan(ConanFile):
                         self.cpp_info.components[conan_component].system_libs.append("mediandk")
                     if not self.options.shared:
                         self.cpp_info.components[conan_component].libdirs.append(
-                            os.path.join("sdk", "native", "staticlibs", tools_legacy.to_android_abi(str(self.settings.arch))))
+                            os.path.join("sdk", "native", "staticlibs", to_android_abi(str(self.settings.arch))))
                         if conan_component == "opencv_core":
                             self.cpp_info.components[conan_component].libdirs.append("lib")
                             self.cpp_info.components[conan_component].libs += collect_libs(self)
