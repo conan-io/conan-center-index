@@ -1,11 +1,16 @@
 #include <stdlib.h>
-#include <gmp.h>
+#include <gnutls/gnutls.h>
 
 int main (void) {
+    int result = 0;
+    gnutls_session_t session;
 
-  mpz_t a,b,c;
-  mpz_inits(a,b,c,NULL);
+    gnutls_global_init();
+    gnutls_global_set_log_level(0);
 
-  mpz_set_str(a, "1234", 10);
-  return EXIT_SUCCESS;
+    gnutls_init(&session, GNUTLS_SERVER);
+    gnutls_deinit(session);
+    gnutls_global_deinit();
+
+    return EXIT_SUCCESS;
 }

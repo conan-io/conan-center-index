@@ -1,7 +1,15 @@
+from conan import ConanFile
+from conan.tools.microsoft import is_msvc
+from conan.tools.files import get, rmdir
+from conan.tools.layout import basic_layout
+from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps, Autotools
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualRunEnv
+from conan.errors import ConanInvalidConfiguration
 import os
-import functools
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+
+
+required_conan_version = ">=1.53.0"
 
 
 class GnuTLSConan(ConanFile):
@@ -11,37 +19,55 @@ class GnuTLSConan(ConanFile):
     description = "GnuTLS is a secure communications library implementing the SSL, TLS and DTLS protocols"
     license = "LGPL-2.1"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {'shared': False, 'fPIC': True}
-    generators = "pkg_config"
-    _configure_vars = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    options = {"shared": [True, False],
+               "fPIC": [True, False],
+               "enable_cxx": [True, False],
+               "with_zlib": [True, False],
+               "with_zstd": [True, False],
+               "with_brotli": [True, False],}
+    default_options = {"shared": False,
+                       "fPIC": True,
+                       "enable_cxx": True,
+                       "with_zlib": True,
+                       "with_zstd": True,
+                       "with_brotli": True,}
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        if not self.options.enable_cxx:
+            self.settings.rm_safe("compiler.libcxx")
+            self.settings.rm_safe("compiler.cppstd")
 
-    def validate(self):
-        if self.settings.os == "Windows" and self.settings.compiler in ("Visual Studio", "msvc"):
-            raise ConanInvalidConfiguration("The GnuTLS package cannot be deployed by Visual Studio.")
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("nettle/3.5")
+        self.requires("nettle/3.8.1")
         self.requires("gmp/6.2.1")
-        self.requires("libiconv/1.16")
+        self.requires("libiconv/1.17")
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.13")
+        if self.options.with_zstd:
+            self.requires("zstd/1.5.2")
+        if self.options.with_brotli:
+            self.requires("brotli/1.0.9")
 
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        configure_args = ["--disable-tests",
+    def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} cannot be deployed by Visual Studio.")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
+
+    def generate(self):
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+        yes_no = lambda v: "yes" if v else "no"
+        autotoolstc = AutotoolsToolchain(self)
+        autotoolstc.configure_args.extend([
+                          "--disable-tests",
                           "--disable-doc",
                           "--disable-manpages",
                           "--disable-full-test-suite",
@@ -51,40 +77,42 @@ class GnuTLSConan(ConanFile):
                           "--without-idn",
                           "--with-included-libtasn1",
                           "--with-included-unistring",
-                          "--with-libiconv-prefix={}".format(self.deps_cpp_info["libiconv"].rootpath)]
-        self._configure_vars = autotools.vars
-        self._configure_vars.update({
-            "NETTLE_CFLAGS": "-I{}".format(self.deps_cpp_info["nettle"].include_paths[0]),
-            "NETTLE_LIBS": "-L{} -lnettle".format(self.deps_cpp_info["nettle"].lib_paths[0]),
-            "HOGWEED_CFLAGS": "-I{}".format(self.deps_cpp_info["nettle"].include_paths[0]),
-            "HOGWEED_LIBS": "-L{} -lhogweed".format(self.deps_cpp_info["nettle"].lib_paths[0]),
-            "GMP_CFLAGS": "-I{}".format(self.deps_cpp_info["gmp"].include_paths[0]),
-            "GMP_LIBS": "-L{} -lgmp".format(self.deps_cpp_info["gmp"].lib_paths[0]),
-        })
+                          "--with-libiconv-prefix={}".format(self.dependencies["libiconv"].package_folder),
+                          "--enable-shared={}".format(yes_no(self.options.shared)),
+                          "--enable-static={}".format(yes_no(not self.options.shared)),
+                          "--with-cxx={}".format(yes_no(self.options.enable_cxx)),
+                          "--with-zlib={}".format(yes_no(not self.options.with_zlib)),
+                          "--with-brotli={}".format(yes_no(not self.options.with_brotli)),
+                          "--with-zstd={}".format(yes_no(not self.options.with_zstd)),
+                          ])
 
-        if self.options.shared:
-            configure_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            configure_args.extend(["--disable-shared", "--enable-static"])
-        autotools.configure(args=configure_args, configure_dir=self._source_subfolder, vars=self._configure_vars)
-        return autotools
+        autotoolstc.generate()
+        autodeps = AutotoolsDeps(self)
+        autodeps.generate()
+        pkgdeps = PkgConfigDeps(self)
+        pkgdeps.generate()
 
     def build(self):
-        autotools = self._configure_autotools()
-        autotools.make(vars=self._configure_vars)
+        autotools = Autotools(self)
+        autotools.autoreconf()
+        autotools.configure()
+        autotools.make()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        autotools = self._configure_autotools()
+        self.copy("COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        autotools = Autotools(self)
         autotools.install()
-        # tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-
+        self.cpp_info.libs = ["gnutls", "gnutlsxx"] if self.options.enable_cxx else ["gnutls"]
         self.cpp_info.set_property("cmake_file_name", "GnuTLS")
-        self.cpp_info.set_property("cmake_target_name", "GnuTLS")
+        self.cpp_info.set_property("cmake_target_name", "GnuTLS::GnuTLS")
+        self.cpp_info.set_property("pkg_config_name", "gnutls")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "GnuTLS"
         self.cpp_info.names["cmake_find_package_multi"] = "GnuTLS"
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH env var with : {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
