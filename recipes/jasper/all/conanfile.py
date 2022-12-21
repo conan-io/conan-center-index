@@ -63,18 +63,21 @@ class JasperConan(ConanFile):
         tc.variables["JAS_LIBJPEG_REQUIRED"] = "REQUIRED"
         tc.variables["JAS_ENABLE_OPENGL"] = False
         tc.variables["JAS_ENABLE_LIBJPEG"] = True
+
         if cross_building(self):
             tc.cache_variables["JAS_CROSSCOMPILING"] = True
             tc.cache_variables["JAS_STDC_VERSION"] = "199901L"
-        tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
 
         # TODO: Remove after fixing https://github.com/conan-io/conan-center-index/issues/13159
         # C3I workaround to force CMake to choose the highest version of
         # the windows SDK available in the system
         if is_msvc(self) and not self.conf.get("tools.cmake.cmaketoolchain:system_version"):
             tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0"
+
+        tc.generate()
+
+        cmakedeps = CMakeDeps(self)
+        cmakedeps.generate()
 
     def build(self):
         apply_conandata_patches(self)
