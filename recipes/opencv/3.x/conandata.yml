@@ -14,9 +14,7 @@ patches:
     - patch_file: "patches/3.4.17-0001-find-openexr.patch"
       patch_description: "Robust discovery & injection of OpenEXR"
       patch_type: "conan"
-      base_path: "src"
   "3.4.12":
     - patch_file: "patches/3.4.12-0001-find-openexr.patch"
       patch_description: "Robust discovery & injection of OpenEXR"
       patch_type: "conan"
-      base_path: "src"
