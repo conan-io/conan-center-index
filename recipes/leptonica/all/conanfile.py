@@ -99,6 +99,9 @@ class LeptonicaConan(ConanFile):
             tc.variables["STATIC"] = not self.options.shared
         tc.variables["BUILD_PROG"] = False
         tc.variables["SW_BUILD"] = False
+        if Version(self.version) >= "1.83.0":
+            tc.variables["LIBWEBP_SUPPORT"] = self.options.with_webp
+            tc.variables["OPENJPEG_SUPPORT"] = self.options.with_openjpeg
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
