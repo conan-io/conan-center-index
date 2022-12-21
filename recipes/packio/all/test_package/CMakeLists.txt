@@ -1,16 +1,17 @@
-cmake_minimum_required(VERSION 3.1)
-project(TestPackage CXX)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
 
-if (PACKIO_VERSION VERSION_LESS "1.2.0")
-    add_executable(main 1.0.x-1.1.x.cpp)
-elseif (PACKIO_VERSION VERSION_LESS "2.0.0")
-    add_executable(main 1.2.x.cpp)
+set(CMAKE_VERBOSE_MAKEFILE ON)
+find_package(packio REQUIRED CONFIG)
+
+if (packio_VERSION VERSION_LESS "1.2.0")
+    add_executable(${PROJECT_NAME} 1.0.x-1.1.x.cpp)
+elseif (packio_VERSION VERSION_LESS "2.0.0")
+    add_executable(${PROJECT_NAME} 1.2.x.cpp)
 else ()
-    add_executable(main latest.cpp)
+    add_executable(${PROJECT_NAME} latest.cpp)
 endif ()
 
-target_link_libraries(main ${CONAN_LIBS})
-set_property(TARGET main PROPERTY CXX_STANDARD 17)
+target_link_libraries(${PROJECT_NAME} PRIVATE packio::packio)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
