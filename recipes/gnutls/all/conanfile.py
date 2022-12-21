@@ -107,6 +107,7 @@ class GnuTLSConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["gnutls", "gnutlsxx"] if self.options.enable_cxx else ["gnutls"]
+        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "GnuTLS")
         self.cpp_info.set_property("cmake_target_name", "GnuTLS::GnuTLS")
         self.cpp_info.set_property("pkg_config_name", "gnutls")
