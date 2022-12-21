@@ -50,7 +50,7 @@ General patterns about how they can be used for OSS in ConanCenterIndex can be f
 ### Header Only
 
 If you are looking for header-only projects, you can take a look on [header-only template](../package_templates/header_only).
-Also, Conan Docs has a section about [how to package header-only libraries](https://docs.conan.io/en/latest/howtos/header_only.html).
+Also, Conan Docs have a section about [how to package header-only libraries](https://docs.conan.io/en/latest/howtos/header_only.html).
 
 ### CMake
 
@@ -64,7 +64,7 @@ There is an [autotools package template](../package_templates/autotools_package/
 
 However, if you need to use autotools for building, you can take a look on [libalsa](https://github.com/conan-io/conan-center-index/blob/master/recipes/libalsa/all/conanfile.py), [kmod](https://github.com/conan-io/conan-center-index/blob/master/recipes/kmod/all/conanfile.py), [libcap](https://github.com/conan-io/conan-center-index/blob/master/recipes/libcap/all/conanfile.py).
 
-Many projects offer **pkg-config**'s `*.pc` files which need to be modeled using components. A prime example of this is [Wayland](https://github.com/conan-io/conan-center-index/blob/master/recipes/wayland/all/conanfile.py).
+Many projects offer [**pkg-config**'s](https://www.freedesktop.org/wiki/Software/pkg-config/) `*.pc` files which need to be modeled using components. A prime example of this is [Wayland](https://github.com/conan-io/conan-center-index/blob/master/recipes/wayland/all/conanfile.py).
 
 ### No Upstream Build Scripts
 
