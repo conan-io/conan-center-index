@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.microsoft import unix_path
 import os
 
 
@@ -34,4 +35,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         self.run("bison --version")
         self.run("yacc --version")
-        self.run(f"bison -d {self._mc_parser_source}")
+        self.run(f"bison -d {unix_path(self, self._mc_parser_source)}")
