@@ -9,7 +9,7 @@ required_conan_version = ">=1.50.0"
 
 class EmioConan(ConanFile):
     name = "emio"
-    description = "Header only C++14 mocking framework"
+    description = "A character input/output library for embedded systems."
     topics = ("format", "scan", "header-only")
     homepage = "https://github.com/viatorus/emio"
     url = "https://github.com/conan-io/conan-center-index"
