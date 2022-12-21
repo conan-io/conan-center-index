@@ -1,19 +1,18 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
+from conan.tools.cmake import CMake, cmake_layout, CMakeDeps, CMakeToolchain
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
-from conan.tools.layout import cmake_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibarchiveConan(ConanFile):
     name = "libarchive"
     description = "Multi-format archive and compression library"
-    topics = "tar", "data-compressor", "file-compression"
+    topics = "archive", "compression", "tar", "data-compressor", "file-compression"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libarchive.org"
     license = "BSD-2-Clause"
@@ -72,18 +71,9 @@ class LibarchiveConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def requirements(self):
         if self.options.with_zlib:
@@ -91,9 +81,9 @@ class LibarchiveConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.9.14")
+            self.requires("libxml2/2.10.3")
         if self.options.with_expat:
-            self.requires("expat/2.4.9")
+            self.requires("expat/2.5.0")
         if self.options.with_iconv:
             self.requires("libiconv/1.17")
         if self.options.with_pcreposix:
