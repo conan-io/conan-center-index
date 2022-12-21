@@ -176,6 +176,8 @@ class LeptonicaConan(ConanFile):
                 replace_in_file(self, cmake_configure, "if (JP2K_FOUND)", "if(0)")
         else:
             replace_in_file(self, cmakelists, "set(JP2K_INCLUDE_DIRS ${OPENJPEG_INCLUDE_DIRS})", "set(JP2K_INCLUDE_DIRS ${OpenJPEG_INCLUDE_DIRS})")
+            if not self.options.with_openjpeg:
+                replace_in_file(self, cmake_configure, "if(JP2K_FOUND)", "if(0)")
 
         replace_in_file(self, cmakelists_src,
                               "if (JP2K_FOUND)",
