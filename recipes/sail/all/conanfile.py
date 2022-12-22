@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rename, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rename, rmdir
 from conan.tools.microsoft import is_msvc
 import os
 
