@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conans.tools import stdcpp_library
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, collect_libs, rm, rename
@@ -10,7 +9,7 @@ from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class ProjConan(ConanFile):
@@ -194,8 +193,10 @@ class ProjConan(ConanFile):
                 self.cpp_info.components["projlib"].system_libs.append("shell32")
             if proj_version >= "7.1.0":
                 self.cpp_info.components["projlib"].system_libs.append("Ole32")
-        if not self.options.shared and stdcpp_library(self):
-            self.cpp_info.components["projlib"].system_libs.append(stdcpp_library(self))
+        if not self.options.shared:
+            libcxx = stdcpp_library(self)
+            if libcxx:
+                self.cpp_info.components["projlib"].system_libs.append(libcxx)
         self.cpp_info.components["projlib"].requires.extend(["nlohmann_json::nlohmann_json", "sqlite3::sqlite3"])
         if self.options.get_safe("with_tiff"):
             self.cpp_info.components["projlib"].requires.append("libtiff::libtiff")
