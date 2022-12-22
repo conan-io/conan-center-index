@@ -33,6 +33,7 @@ class DCMTKConan(ConanFile):
         "builtin_private_tags": [True, False],
         "external_dictionary": [None, True, False],
         "wide_io": [True, False],
+        "enable_stl": [True, False],
     }
     default_options = {
         "shared": False,
@@ -50,6 +51,7 @@ class DCMTKConan(ConanFile):
         "builtin_private_tags": False,
         "external_dictionary": None,
         "wide_io": False,
+        "enable_stl": True,
     }
 
     generators = "cmake", "cmake_find_package"
@@ -146,7 +148,10 @@ class DCMTKConan(ConanFile):
         if self.options.with_zlib:
             cmake.definitions["WITH_ZLIBINC"] = self.deps_cpp_info["zlib"].rootpath
 
-        cmake.definitions["DCMTK_ENABLE_STL"] = "ON"
+        if self.options.enable_stl:
+            cmake.definitions["DCMTK_ENABLE_STL"] = "ON"
+        else:
+            cmake.definitions["DCMTK_ENABLE_STL"] = "OFF"
         cmake.definitions["DCMTK_ENABLE_CXX11"] = True
 
         cmake.definitions["DCMTK_ENABLE_MANPAGE"] = False
