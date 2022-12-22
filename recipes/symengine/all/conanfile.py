@@ -74,6 +74,8 @@ class SymengineConan(ConanFile):
         self.cpp_info.libs = ["symengine"]
         if any("teuchos" in v for v in collect_libs(self)):
             self.cpp_info.libs.append("teuchos")
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("m")
         self.cpp_info.names["cmake_find_package"] = "symengine"
         # FIXME: symengine exports a non-namespaced `symengine` target.
         self.cpp_info.names["cmake_find_package_multi"] = "symengine"
