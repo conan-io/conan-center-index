@@ -1,7 +1,6 @@
 import os
 import functools
 import glob
-from dataclasses import dataclass
 
 from conans import CMake, tools
 
@@ -15,12 +14,6 @@ from conan.errors import ConanInvalidConfiguration
 from helpers import parse_proto_libraries
 
 required_conan_version = ">=1.45.0"
-
-
-@dataclass
-class Node:
-    mark: str
-    deps: list
 
 
 class GoogleAPIS(ConanFile):
@@ -180,38 +173,10 @@ class GoogleAPIS(ConanFile):
         copy(self, pattern="*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, pattern="*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
 
-        graph = {}
-        types = {}
-        for lib in filter(lambda u: u.is_used, self._parse_proto_libraries()):
-            graph[lib.cmake_target] = Node(mark=None, deps=lib.cmake_deps)
-            types[lib.cmake_target] = 'LIB' if lib.srcs else 'INTERFACE'
-
-        def visit(name : str, dag : dict, L : list):
-            # Ignore external deps that are not in the dag, such as protobuf::libprotobuf.
-            # Also skip nodes that are already completely processed
-            if name not in dag or dag[name].mark == 'DONE':
-                return
-            # This would indicate a cycle in the `googleapis` components. The Bazel-based
-            # builds would have failed if such a cycle existed.
-            assert dag[name].mark != 'InProgress'
-            dag[name].mark = 'InProgress'
-            for m in dag[name].deps:
-                visit(m, dag, L)
-            dag[name].mark = 'DONE'
-            L.insert(0, name)
-
-        def tsort():
-            result = []
-            for name in graph:
-                visit(name, graph, result)
-            return result
-
-        ts = tsort()
         with open(os.path.join(self.package_folder, self._DEPS_FILE), "w", encoding="utf-8") as f:
-            for name in ts:
-                if name not in graph:
-                    continue
-                f.write(f"{name} {types[name]} {','.join(graph[name].deps)}\n")
+            for lib in filter(lambda u: u.is_used, self._parse_proto_libraries()):
+                interface = 'LIB' if lib.srcs else 'INTERFACE'
+                f.write(f"{lib.cmake_target} {interface} {','.join(lib.cmake_deps)}\n")
 
     def package_id(self):
         self.info.requires["protobuf"].full_package_mode()
