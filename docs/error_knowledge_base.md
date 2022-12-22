@@ -1,5 +1,7 @@
 # Errors from the conan-center hook (KB-Hxxx)
 
+These are located at [conan-io/hooks](https://github.com/conan-io/hooks/blob/master/hooks/conan-center.py).
+
 #### **<a name="KB-H001">#KB-H001</a>: "DEPRECATED GLOBAL CPPSTD"**
 
 `Conan > 1.15` deprecated the usage of the global ``cppstd`` setting in favor of ``compiler.cppstd`` to [manage C++ standard](https://docs.conan.io/en/latest/howtos/manage_cpp_standard.html). As a subsetting of the compiler, it shouldn't be declared in the `conanfile.py`.
@@ -111,9 +113,9 @@ The binary packages should contain a folder named `licenses` containing the cont
 #### **<a name="KB-H013">#KB-H013</a>: "DEFAULT PACKAGE LAYOUT"**
 
 The binary packages generally do not need any other files or folder except the following: `["lib", "bin", "include", "res", "licenses"]`.
-This closely matches the default [`cpp_info`](https://docs.conan.io/en/latest/reference/conanfile/methods.html#package-info)
-This upstream package layout should be followed as much as possible, if a folder is not in the list( like `"share"`) then an exception
-can very easily be added.
+This closely matches the default [`cpp_info`](https://docs.conan.io/en/latest/reference/conanfile/methods.html#package-info) from the client.
+The upstream package layout should be followed as much as possible, if a folder is not in the list (like `"share"`) then an exception
+can very easily be added by adding it to [this list of exceptions](https://github.com/conan-io/hooks/blob/d587cfebbf2b31c16e477b79c0c2fd4501f60fc8/hooks/conan-center.py#L1089-L1090).
 
 > **Note**: We are in the process of evaluating this rule, looking at calculating the size impact for problematic packages
 
