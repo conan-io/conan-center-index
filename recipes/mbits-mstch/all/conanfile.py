@@ -35,6 +35,7 @@ class MBitsMstchConan(ConanFile):
         return {
             "gcc": "11",
             "clang": "12",
+            "msvc": "192",
             "apple-clang": "11.0.3",
         }
 
@@ -51,7 +52,6 @@ class MBitsMstchConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
-        check_min_vs(self, 192)
         if not is_msvc(self):
             minimum_version = self._compilers_minimum_version.get(
                 str(self.settings.compiler), False
@@ -69,8 +69,6 @@ class MBitsMstchConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # Boolean values are preferred instead of "ON"/"OFF"
-        tc.variables["PACKAGE_CUSTOM_DEFINITION"] = True
         tc.generate()
 
     def build(self):
@@ -88,12 +86,7 @@ class MBitsMstchConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = ["mstch"]
