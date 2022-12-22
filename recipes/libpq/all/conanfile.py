@@ -229,6 +229,8 @@ class LibpqConan(ConanFile):
             self._remove_unused_libraries_from_package()
 
             rmdir(self, os.path.join(self.package_folder, "include", "postgresql", "server"))
+            copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include", "catalog"), src=os.path.join(self.build_folder, "src", "include", "catalog"), keep_path=False)
+        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include", "catalog"), src=os.path.join(self.build_folder, "src", "backend", "catalog"), keep_path=False)
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         fix_apple_shared_install_name(self)
@@ -259,7 +261,7 @@ class LibpqConan(ConanFile):
                 if Version(self.version) >= "12":
                     self.cpp_info.components["pgcommon"].libs.append("pgcommon_shlib")
                     self.cpp_info.components["pgport"].libs = ["pgport", "pgport_shlib"]
-                    self.cpp_info.components["pq"].requires.append("pgport")
+                    self.cpp_info.components["pgcommon"].requires.append("pgport")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["pq"].system_libs = ["pthread"]
