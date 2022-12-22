@@ -110,7 +110,12 @@ The binary packages should contain a folder named `licenses` containing the cont
 
 #### **<a name="KB-H013">#KB-H013</a>: "DEFAULT PACKAGE LAYOUT"**
 
-The binary packages shouldn't contain any other files or folder except the following: `["lib", "bin", "include", "res", "licenses"]`. If you are packaging an application put all the contents inside the `bin` folder.
+The binary packages generally do not need any other files or folder except the following: `["lib", "bin", "include", "res", "licenses"]`.
+This closely matches the default [`cpp_info`](https://docs.conan.io/en/latest/reference/conanfile/methods.html#package-info)
+This upstream package layout should be followed as much as possible, if a folder is not in the list( like `"share"`) then an exception
+can very easily be added.
+
+> **Note**: We are in the process of evaluating this rule, looking at calculating the size impact for problematic packages
 
 #### **<a name="KB-H014">#KB-H014</a>: "MATCHING CONFIGURATION"**
 
