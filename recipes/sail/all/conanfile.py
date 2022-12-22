@@ -48,7 +48,7 @@ class SAILConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            self.options.rm_safe("fPIC").
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         if self.options.with_avif:
