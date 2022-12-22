@@ -7,3 +7,4 @@ conan_basic_setup(TARGETS)
 find_package(symengine REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE symengine::symengine)  # FIXME: Replace `symengine::symengine` with `symengine`
