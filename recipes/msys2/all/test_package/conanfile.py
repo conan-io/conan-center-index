@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.env import Environment
-from conan.tools.files import load
+from io import StringIO
 
 
 class TestPackageConan(ConanFile):
@@ -29,7 +29,7 @@ class TestPackageConan(ConanFile):
         self.run('bash.exe -c ^"! test -f /bin/link^"')
         self.run('bash.exe -c ^"! test -f /usr/bin/link^"')
 
-        self.run('bash.exe -c "echo $PKG_CONFIG_PATH" > output.txt')
-        output = load(self, "output.txt")
-        self.output.info(output)
-        assert self._secret_value in output
+        output = StringIO()
+        self.run('bash.exe -c "echo $PKG_CONFIG_PATH"', output)
+        print(output.getvalue())
+        assert secret_value in output.getvalue()
