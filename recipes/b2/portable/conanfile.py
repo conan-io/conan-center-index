@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
 from conan.tools.files import chdir, copy, get
 from conan.tools.layout import basic_layout
 
@@ -62,6 +63,9 @@ class B2Conan(ConanFile):
         del self.info.options.toolset
 
     def validate(self):
+        if hasattr(self, "settings_build") and cross_building(self):
+            raise ConanInvalidConfiguration(f"{self.ref} recipe doesn't support cross-build yet")
+
         if (self.options.toolset == 'cxx' or self.options.toolset == 'cross-cxx') and not self.options.use_cxx_env:
             raise ConanInvalidConfiguration(
                 "Option toolset 'cxx' and 'cross-cxx' requires 'use_cxx_env=True'")
