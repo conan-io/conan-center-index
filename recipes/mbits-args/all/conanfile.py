@@ -6,7 +6,6 @@ from conan.tools.files import (
     export_conandata_patches,
     get,
     copy,
-    rm,
     rmdir,
 )
 from conan.tools.build import check_min_cppstd
