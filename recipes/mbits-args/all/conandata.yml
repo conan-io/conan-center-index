@@ -6,4 +6,5 @@ patches:
   "0.12.3":
     - patch_file: "patches/0.12.3-0001-export-cmake-config.patch"
       patch_description: "conan v2: drop the unneeded dependency, export cmake config"
+      patch_source: "https://github.com/mbits-libs/args/commit/f0593ed24d8edc33bcef5acaad5a2d27bf566ede"
       patch_type: "conan"
