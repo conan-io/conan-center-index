@@ -48,7 +48,7 @@ class MBitsArgsConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "8",
-            "clang": "7.0",
+            "clang": "12",
             "Visual Studio": "16",
             "msvc": "192",
             "apple-clang": "10.0",
