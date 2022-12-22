@@ -54,8 +54,10 @@ def main():
         parsed = load(content, schema)
     except YAMLValidationError as error:
         pretty_print_yaml_validate_error(args, error) # Error when "source" is missing or when "patches" has no versions
+        return
     except BaseException as error:
         pretty_print_yaml_validate_error(args, error) # YAML could not be parsed
+        return
 
     if "patches" in parsed:
         for version in parsed["patches"]:
