@@ -7,16 +7,9 @@ import os
 import shutil
 import subprocess
 import errno
+import ctypes
 
-try:
-    import ctypes
-except ImportError:
-    pass
-except ValueError:
-    pass
-
-required_conan_version = ">=1.47.0"
-
+required_conan_version = ">=1.49.0"
 
 class lock:
     def __init__(self):
@@ -38,7 +31,6 @@ class lock:
         ctypes.windll.kernel32.CloseHandle(self.handle)
 
     __del__ = close
-
 
 class MSYS2Conan(ConanFile):
     name = "msys2"
