@@ -180,9 +180,6 @@ class ProjConan(ConanFile):
         self.cpp_info.components["projlib"].set_property("cmake_target_name", f"{cmake_namespace}::proj")
         self.cpp_info.components["projlib"].set_property("pkg_config_name", "proj")
 
-        self.cpp_info.filenames["cmake_find_package"] = cmake_config_filename
-        self.cpp_info.filenames["cmake_find_package_multi"] = cmake_config_filename
-
         self.cpp_info.components["projlib"].libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["projlib"].system_libs.append("m")
@@ -210,20 +207,17 @@ class ProjConan(ConanFile):
                 self.cpp_info.components["projlib"].defines.append("PROJ_DLL=")
 
         res_path = os.path.join(self.package_folder, "res")
-        self.output.info(f"Prepending to PROJ_LIB environment variable: {res_path}")
         self.runenv_info.prepend_path("PROJ_LIB", res_path)
-
-        # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
-        self.env_info.PROJ_LIB = res_path
-
         if self.options.build_executables:
             self.buildenv_info.prepend_path("PROJ_LIB", res_path)
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info(f"Appending PATH environment variable: {bin_path}")
-            self.env_info.PATH.append(bin_path)
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = cmake_config_filename
+        self.cpp_info.filenames["cmake_find_package_multi"] = cmake_config_filename
         self.cpp_info.names["cmake_find_package"] = cmake_namespace
         self.cpp_info.names["cmake_find_package_multi"] = cmake_namespace
         self.cpp_info.components["projlib"].names["cmake_find_package"] = "proj"
         self.cpp_info.components["projlib"].names["cmake_find_package_multi"] = "proj"
+        self.env_info.PROJ_LIB = res_path
+        if self.options.build_executables:
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
