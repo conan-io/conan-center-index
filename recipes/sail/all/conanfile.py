@@ -40,8 +40,7 @@ class SAILConan(ConanFile):
     }
 
     def export_sources(self):
-        for patch_file in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, patch_file["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
