@@ -5,6 +5,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps, Autotools
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
+from conan.tools.apple import is_apple_os
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -23,12 +24,16 @@ class GnuTLSConan(ConanFile):
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "enable_cxx": [True, False],
+               "enable_tools": [True, False],
+               "enable_openssl_compatibility": [True, False],
                "with_zlib": [True, False],
                "with_zstd": [True, False],
                "with_brotli": [True, False],}
     default_options = {"shared": False,
                        "fPIC": True,
                        "enable_cxx": True,
+                       "enable_tools": True,
+                       "enable_openssl_compatibility": False,
                        "with_zlib": True,
                        "with_zstd": True,
                        "with_brotli": True,}
@@ -70,11 +75,15 @@ class GnuTLSConan(ConanFile):
         autotoolstc.configure_args.extend([
                           "--disable-tests",
                           "--disable-doc",
+                          "--disable-guile",
+                          "--disable-libdane",
                           "--disable-manpages",
+                          "--disable-silent-rules",
                           "--disable-full-test-suite",
                           "--disable-maintainer-mode",
                           "--disable-option-checking",
                           "--without-p11-kit",
+                          "--disable-rpath",
                           "--without-idn",
                           "--with-included-libtasn1",
                           "--with-included-unistring",
@@ -85,6 +94,8 @@ class GnuTLSConan(ConanFile):
                           "--with-zlib={}".format(yes_no(self.options.with_zlib)),
                           "--with-brotli={}".format(yes_no(self.options.with_brotli)),
                           "--with-zstd={}".format(yes_no(self.options.with_zstd)),
+                          "--enable-tools={}".format(yes_no(self.options.enable_tools)),
+                          "--enable-openssl-compatibility={}".format(yes_no(self.options.enable_openssl_compatibility)),
                           ])
 
         autotoolstc.generate()
@@ -113,9 +124,15 @@ class GnuTLSConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "GnuTLS::GnuTLS")
         self.cpp_info.set_property("pkg_config_name", "gnutls")
 
+        if is_apple_os(self):
+            self.cpp_info.frameworks = ["Security", "CoreFoundation"]
+        elif self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread", "m"]
+
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "GnuTLS"
         self.cpp_info.names["cmake_find_package_multi"] = "GnuTLS"
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH env var with : {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        if self.options.enable_tools:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH env var with : {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
