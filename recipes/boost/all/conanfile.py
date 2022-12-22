@@ -1180,12 +1180,15 @@ class BoostConan(ConanFile):
 
         contents = ""
         if self._zip_bzip2_requires_needed:
-            def create_library_config(deps_name, name):
+            def create_library_config(deps_name, name, component=None):
                 includedir = self.dependencies[deps_name].cpp_info.includedirs[0].replace("\\", "/")
                 includedir = f"\"{includedir}\""
                 libdir = self.dependencies[deps_name].cpp_info.libdirs[0].replace("\\", "/")
                 libdir = f"\"{libdir}\""
-                lib = self.dependencies[deps_name].cpp_info.libs[0]
+                if component is None:
+                    lib = self.dependencies[deps_name].cpp_info.libs[0]
+                else:
+                    lib = self.dependencies[deps_name].cpp_info.components[component].libs[0]                
                 version = self.dependencies[deps_name].ref.version
                 return f"\nusing {name} : {version} : " \
                        f"<include>{includedir} " \
@@ -1200,7 +1203,7 @@ class BoostConan(ConanFile):
             if self._with_lzma:
                 contents += create_library_config("xz_utils", "lzma")
             if self._with_zstd:
-                contents += create_library_config("zstd", "zstd")
+                contents += create_library_config("zstd", "zstd", "zstdlib")
 
         if not self.options.without_python:
             # https://www.boost.org/doc/libs/1_70_0/libs/python/doc/html/building/configuring_boost_build.html
