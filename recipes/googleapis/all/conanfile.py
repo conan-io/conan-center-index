@@ -1,6 +1,7 @@
 import os
 import functools
 import glob
+from dataclasses import dataclass
 
 from conans import CMake, tools
 
@@ -14,6 +15,13 @@ from conan.errors import ConanInvalidConfiguration
 from helpers import parse_proto_libraries
 
 required_conan_version = ">=1.45.0"
+
+
+@dataclass
+class Node:
+    mark: str
+    deps: list
+
 
 class GoogleAPIS(ConanFile):
     name = "googleapis"
@@ -172,12 +180,6 @@ class GoogleAPIS(ConanFile):
         copy(self, pattern="*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, pattern="*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
 
-        from dataclasses import dataclass
-        @dataclass
-        class Node:
-            mark: str
-            deps: list()
-
         graph = {}
         types = {}
         for lib in filter(lambda u: u.is_used, self._parse_proto_libraries()):
@@ -199,11 +201,11 @@ class GoogleAPIS(ConanFile):
             L.insert(0, name)
 
         def tsort():
-            sorted = []
-            for name in graph.keys():
-                visit(name, graph, sorted)
-            return sorted
-        
+            result = []
+            for name in graph:
+                visit(name, graph, result)
+            return result
+
         ts = tsort()
         with open(os.path.join(self.package_folder, self._DEPS_FILE), "w", encoding="utf-8") as f:
             for name in ts:
