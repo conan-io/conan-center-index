@@ -2,7 +2,6 @@ import os
 import functools
 import glob
 import graphlib
-from io import StringIO
 
 from conans import CMake, tools
 
@@ -69,25 +68,10 @@ class GoogleAPIS(ConanFile):
     def requirements(self):
         self.requires('protobuf/3.21.4')
 
-    @property
-    def _cmake_new_enough(self):
-        try:
-            import re
-            output = StringIO()
-            self.run("cmake --version", output=output)
-            m = re.search(r'cmake version (\d+)\.(\d+)\.(\d+)', output.getvalue())
-            major, minor = int(m.group(1)), int(m.group(2))
-            assert major >= 3 and minor >= 20
-        except:
-            return False
-        else:
-            return True
-
     def build_requirements(self):
         self.build_requires('protobuf/3.21.4')
         # CMake >= 3.20 is required. There is a proto with dots in the name 'k8s.min.proto' and CMake fails to generate project files
-        if not self._cmake_new_enough:
-            self.build_requires('cmake/3.23.2')
+        self.build_requires('cmake/[>3.19]')
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -195,7 +179,7 @@ class GoogleAPIS(ConanFile):
             for name in ts.static_order():
                 if name not in graph:
                     continue
-                f.write("{} {} {}\n".format(name, types[name], ','.join(graph[name])))
+                f.write(f"{name} {types[name]} {','.join(graph[name])}\n")
 
     def package_id(self):
         self.info.requires["protobuf"].full_package_mode()
@@ -203,8 +187,8 @@ class GoogleAPIS(ConanFile):
     def package_info(self):
         with open(os.path.join(self.package_folder, "generated_targets.deps"), "r", encoding="utf-8") as f:
             for line in f.read().splitlines():
-                (name, type, deps) = line.rstrip('\n').split(' ')
+                (name, libtype, deps) = line.rstrip('\n').split(' ')
                 self.cpp_info.components[name].requires = deps.split(',')
-                if type == 'LIB':
+                if libtype == 'LIB':
                     self.cpp_info.components[name].libs = [name]
                 self.cpp_info.components[name].names["pkg_config"] = name

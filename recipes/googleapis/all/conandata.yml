@@ -22,9 +22,17 @@ sources:
 patches:
   "cci.20220711":
     - patch_file: "patches/cci.20220711/001-fix-google-api-deps.patch"
+      patch_description: "Fix incorrect dependency name in BUILD.bazel file"
+      patch_type: "bugfix"
   "cci.20220531":
     - patch_file: "patches/cci.20220531/001-fix-google-api-deps.patch"
+      patch_description: "Fix incorrect dependency name in BUILD.bazel file"
+      patch_type: "bugfix"
   "cci.20211122":
     - patch_file: "patches/cci.20211122/001-fix-google-api-deps.patch"
+      patch_description: "Fix incorrect dependency name in BUILD.bazel file"
+      patch_type: "bugfix"
   "cci.20210730":
     - patch_file: "patches/cci.20210730/001-fix-google-api-deps.patch"
+      patch_description: "Fix incorrect dependency name in BUILD.bazel file"
+      patch_type: "bugfix"
