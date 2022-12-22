@@ -47,12 +47,12 @@ class MSYS2Conan(ConanFile):
     license = "MSYS license"
     topics = ("msys", "unix", "subsystem")
 
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "os", "arch"
     # "exclude_files" "packages" "additional_packages" values are a comma separated list
     options = {
         "exclude_files": ["ANY"],
         "packages": ["ANY"],
-        "additional_packages": ["ANY"],
+        "additional_packages": [None, "ANY"],
     }
     default_options = {
         "exclude_files": "*/link.exe",
@@ -62,14 +62,10 @@ class MSYS2Conan(ConanFile):
 
     short_paths = True
 
-    def package_id(self):
-        del self.info.settings.compiler
-        del self.info.settings.build_type
-
     def validate(self):
-        if self.info.settings.os != "Windows":
+        if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Only Windows supported")
-        if self.info.settings.arch != "x86_64":
+        if self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Only Windows x64 supported")
 
     def source(self):
