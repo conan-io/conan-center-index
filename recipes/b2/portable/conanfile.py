@@ -162,6 +162,6 @@ class B2Conan(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.bindirs = ["bin"]
-        self.buildenv_info.prepend_path("PATH", self._pkg_bin_dir)
-        self.env_info.path = [self._pkg_bin_dir]
+
+        # TODO: to remove in conan v2
+        self.env_info.PATH.append(self._pkg_bin_dir)
