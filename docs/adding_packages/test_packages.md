@@ -8,12 +8,12 @@ themselves. It's possible to have ConanCenter run `conan test` on more then one 
 <!-- toc -->
 ## Contents
 
-    * [Files and Structure](#files-and-structure)
-    * [CMake targets](#cmake-targets)
-    * [Testing more generators with `test_<something>`](#testing-more-generators-with-test_something)
-    * [Testing CMake variables from FindModules](#testing-cmake-variables-from-findmodules)
-    * [How it works](#how-it-works)
-    * [Minimalist Source Code](#minimalist-source-code)<!-- endToc -->
+  * [Files and Structure](#files-and-structure)
+  * [CMake targets](#cmake-targets)
+  * [Testing more generators with `test_<something>`](#testing-more-generators-with-test_something)
+  * [Testing CMake variables from FindModules](#testing-cmake-variables-from-findmodules)
+  * [How it works](#how-it-works)
+  * [Minimalist Source Code](#minimalist-source-code)<!-- endToc -->
 
 ### Files and Structure
 
@@ -29,7 +29,7 @@ Please refer to the [Package Templates](../package_templates/) for the current p
 When using CMake to test a package, the information should be consumed using the
 [`CMakeDeps` generator](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html?highlight=cmakedeps).
 
-This typicall will look like a `CMakeLists.txt` which contain lines similar to
+This typically will look like a `CMakeLists.txt` which contain lines similar to
 
 ```cmake
 find_package(fmt REQUIRED CONFIG)
@@ -37,7 +37,7 @@ find_package(fmt REQUIRED CONFIG)
 target_link_libraries(test_ranges PRIVATE fmt::fmt)
 ```
 
-Refere to the [package template](https://github.com/conan-io/conan-center-index/blob/master/docs/package_templates/cmake_package/all/test_package/CMakeLists.txt) for more examples.
+Refer to the [package template](https://github.com/conan-io/conan-center-index/blob/master/docs/package_templates/cmake_package/all/test_package/CMakeLists.txt) for more examples.
 
 > **Notes** It's still important to test targets provided by `cmake_find_package[_multi]` generators.
 > It should help in the migration (and compatibility) with Conan v2. See [v1 test package template](https://github.com/conan-io/conan-center-index/blob/master/docs/package_templates/cmake_package/all/test_v1_package/CMakeLists.txt) for details.

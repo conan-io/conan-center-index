@@ -1,14 +1,11 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.8)
 project(test_package C)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
 
 add_executable(test_package test_package.c)
 if(PROJ_VERSION_GE_7)
   find_package(proj REQUIRED CONFIG)
-  target_link_libraries(test_package PROJ::proj)
+  target_link_libraries(test_package PRIVATE PROJ::proj)
 else()
   find_package(proj4 REQUIRED CONFIG)
-  target_link_libraries(test_package PROJ4::proj)
+  target_link_libraries(test_package PRIVATE PROJ4::proj)
 endif()

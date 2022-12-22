@@ -4,7 +4,7 @@ from io import StringIO
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "os", "arch"
     generators = "VirtualBuildEnv"
     test_type = "explicit"
 

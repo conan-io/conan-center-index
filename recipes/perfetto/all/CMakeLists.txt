@@ -4,7 +4,7 @@ project(perfetto LANGUAGES CXX)
 set(PUBLIC_HEADERS ${PERFETTO_SRC_DIR}/sdk/perfetto.h)
 
 add_library(perfetto ${PERFETTO_SRC_DIR}/sdk/perfetto.cc)
-target_compile_features(perfetto PRIVATE cxx_std_11)
+target_compile_features(perfetto PRIVATE ${PERFETTO_CXX_STANDARD})
 set_target_properties(perfetto PROPERTIES
     PUBLIC_HEADER "${PUBLIC_HEADERS}"
     WINDOWS_EXPORT_ALL_SYMBOLS TRUE
@@ -27,6 +27,8 @@ if (MSVC)
   target_compile_options(perfetto PRIVATE "/bigobj")
   # The perfetto library needs permissive flag on MSVC
   target_compile_options(perfetto PRIVATE "/permissive-")
+  # https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
+  target_compile_options(perfetto PRIVATE "/Zc:__cplusplus")
 endif (MSVC)
 
 include(GNUInstallDirs)

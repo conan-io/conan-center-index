@@ -7,12 +7,10 @@ sources:
     sha256: "bc018cc30d5da402622bf76462480664c6668b55eb16ba205a0dfb8647161dd0"
 patches:
   "4.7.4":
-    - base_path: "source_subfolder"
-      patch_file: "patches/4.7.4-0001-cmake-subproject.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/4.7.4-0002-cmake-msvc.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/4.7.4-0003-cmake-HDF5-cmake-components-wrong.patch"
+    - patch_file: "patches/4.7.4-0001-fix-cmake.patch"
+      patch_description: "fixes for cmake target_link_libraries and using deps"
+      patch_type: "conan"
   "4.8.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/4.8.1-0001-fix-cmake.patch"
+    - patch_file: "patches/4.8.1-0001-fix-cmake.patch"
+      patch_description: "fixes for cmake target_link_libraries and using deps"
+      patch_type: "conan"
