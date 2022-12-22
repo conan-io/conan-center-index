@@ -1,8 +1,11 @@
 import os
 import shutil
 
-from conans import ConanFile, tools, Meson, RunEnvironment, CMake
-from conans.errors import ConanException
+from conan import ConanFile
+from conans import tools, Meson, RunEnvironment, CMake
+from conan.tools.build import cross_building
+from conan.errors import ConanInvalidConfiguration
+
 
 
 class TestPackageConan(ConanFile):
@@ -24,11 +27,16 @@ class TestPackageConan(ConanFile):
 
     def _meson_supported(self):
         return self.options["qt"].shared and\
-            not tools.cross_building(self) and\
+            not cross_building(self) and\
             not tools.os_info.is_macos and\
             not self._is_mingw()
 
+    def _qmake_supported(self):
+        return self.options["qt"].shared
+
     def _build_with_qmake(self):
+        if not self._qmake_supported():
+            return
         tools.mkdir("qmake_folder")
         with tools.chdir("qmake_folder"):
             self.output.info("Building with qmake")
@@ -72,7 +80,7 @@ class TestPackageConan(ConanFile):
                 meson = Meson(self)
                 try:
                     meson.configure(build_folder="meson_folder", defs={"cpp_std": "c++11"})
-                except ConanException:
+                except ConanInvalidConfiguration:
                     self.output.info(open("meson_folder/meson-logs/meson-log.txt", 'r').read())
                     raise
                 meson.build()
@@ -94,6 +102,8 @@ class TestPackageConan(ConanFile):
         self._build_with_cmake_find_package_multi()
 
     def _test_with_qmake(self):
+        if not self._qmake_supported():
+            return
         self.output.info("Testing qmake")
         bin_path = os.path.join("qmake_folder", "bin")
         if tools.os_info.is_macos:
@@ -113,7 +123,7 @@ class TestPackageConan(ConanFile):
         self.run(os.path.join("bin", "test_package"), run_environment=True)
 
     def test(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not cross_building(self, skip_x64_x86=True):
             self._test_with_qmake()
             self._test_with_meson()
             self._test_with_cmake_find_package_multi()
