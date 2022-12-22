@@ -32,4 +32,4 @@ class TestPackageConan(ConanFile):
         output = StringIO()
         self.run('bash.exe -c "echo $PKG_CONFIG_PATH"', output)
         print(output.getvalue())
-        assert secret_value in output.getvalue()
+        assert self._secret_value in output.getvalue()
