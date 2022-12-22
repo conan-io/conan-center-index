@@ -1,6 +1,7 @@
 import os
 import functools
 import glob
+import graphlib
 from io import StringIO
 
 from conans import CMake, tools
@@ -38,9 +39,12 @@ class GoogleAPIS(ConanFile):
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)], destination=self.source_folder, strip_root=True)
+        self._patch_sources()
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -156,11 +160,20 @@ class GoogleAPIS(ConanFile):
 
     def build(self):
         proto_libraries = self._parse_proto_libraries()
-        with open(os.path.join(self.source_folder, "CMakeLists.txt"), "a", encoding="utf-8") as f:
+        # Use a separate file to host the generated code, which is generated in full each time.
+        # This is safe to call multiple times, for example, if you need to invoke `conan build` more than
+        # once.
+        with open(os.path.join(self.source_folder, "generated_targets.cmake"), "w", encoding="utf-8") as f:
+            f.write("# Generated C++ library targets for googleapis\n")
+            f.write("# DO NOT EDIT - change the generation code in conanfile.py instead\n")
             for it in filter(lambda u: u.is_used, proto_libraries):
                 f.write(it.cmake_content)
         cmake = self._configure_cmake()
         cmake.build()
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def package(self):
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -172,12 +185,26 @@ class GoogleAPIS(ConanFile):
         copy(self, pattern="*.so*", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, pattern="*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, pattern="*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        graph = {}
+        types = {}
+        for lib in filter(lambda u: u.is_used, self._parse_proto_libraries()):
+            graph[lib.cmake_target] = lib.cmake_deps
+            types[lib.cmake_target] = 'LIB' if lib.srcs else 'INTERFACE'
+        ts = graphlib.TopologicalSorter(graph)
+        with open(os.path.join(self.package_folder, "generated_targets.deps"), "w", encoding="utf-8") as f:
+            for name in ts.static_order():
+                if name not in graph:
+                    continue
+                f.write("{} {} {}\n".format(name, types[name], ','.join(graph[name])))
 
     def package_id(self):
         self.info.requires["protobuf"].full_package_mode()
 
     def package_info(self):
-        # We are not creating components, we can just collect the libraries
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["m"])
+        with open(os.path.join(self.package_folder, "generated_targets.deps"), "r", encoding="utf-8") as f:
+            for line in f.read().splitlines():
+                (name, type, deps) = line.rstrip('\n').split(' ')
+                self.cpp_info.components[name].requires = deps.split(',')
+                if type == 'LIB':
+                    self.cpp_info.components[name].libs = [name]
+                self.cpp_info.components[name].names["pkg_config"] = name
