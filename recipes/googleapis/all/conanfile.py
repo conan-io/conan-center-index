@@ -1,7 +1,6 @@
 import os
 import functools
 import glob
-import graphlib
 
 from conans import CMake, tools
 
@@ -157,7 +156,10 @@ class GoogleAPIS(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            # Using **patch here results in an error with the required `patch_description` field.
+            tools.patch(patch_file=patch['patch_file'])
+
+    _DEPS_FILE = "res/generated_targets.deps"
 
     def package(self):
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -169,23 +171,51 @@ class GoogleAPIS(ConanFile):
         copy(self, pattern="*.so*", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, pattern="*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, pattern="*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+
+        from dataclasses import dataclass
+        @dataclass
+        class Node:
+            mark: str
+            deps: list()
+
         graph = {}
         types = {}
         for lib in filter(lambda u: u.is_used, self._parse_proto_libraries()):
-            graph[lib.cmake_target] = lib.cmake_deps
+            graph[lib.cmake_target] = Node(mark=None, deps=lib.cmake_deps)
             types[lib.cmake_target] = 'LIB' if lib.srcs else 'INTERFACE'
-        ts = graphlib.TopologicalSorter(graph)
-        with open(os.path.join(self.package_folder, "generated_targets.deps"), "w", encoding="utf-8") as f:
-            for name in ts.static_order():
+
+        def visit(name : str, dag : dict, L : list[str]):
+            # Ignore external deps that are not in the dag, such as protobuf::libprotobuf.
+            # Also skip nodes that are already completely processed
+            if name not in dag or dag[name].mark == 'DONE':
+                return
+            # This would indicate a cycle in the `googleapis` components. The Bazel-based
+            # builds would have failed if such a cycle existed.
+            assert dag[name].mark != 'InProgress'
+            dag[name].mark = 'InProgress'
+            for m in dag[name].deps:
+                visit(m, dag, L)
+            dag[name].mark = 'DONE'
+            L.insert(0, name)
+
+        def tsort():
+            sorted = []
+            for name in graph.keys():
+                visit(name, graph, sorted)
+            return sorted
+        
+        ts = tsort()
+        with open(os.path.join(self.package_folder, self._DEPS_FILE), "w", encoding="utf-8") as f:
+            for name in ts:
                 if name not in graph:
                     continue
-                f.write(f"{name} {types[name]} {','.join(graph[name])}\n")
+                f.write(f"{name} {types[name]} {','.join(graph[name].deps)}\n")
 
     def package_id(self):
         self.info.requires["protobuf"].full_package_mode()
 
     def package_info(self):
-        with open(os.path.join(self.package_folder, "generated_targets.deps"), "r", encoding="utf-8") as f:
+        with open(os.path.join(self.package_folder, self._DEPS_FILE), "r", encoding="utf-8") as f:
             for line in f.read().splitlines():
                 (name, libtype, deps) = line.rstrip('\n').split(' ')
                 self.cpp_info.components[name].requires = deps.split(',')
