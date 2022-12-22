@@ -32,11 +32,11 @@ sources:
 patches:
   "2.74.0":
     - patch_file: "patches/0001-2.74.0-clang-static-assert.patch"
-      patch_type: backport
+      patch_type: bugfix
       patch_description: fix for clang compilation
       patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/2898
   "2.73.3":
     - patch_file: "patches/0001-2.73.3-clang-static-assert.patch"
-      patch_type: backport
+      patch_type: bugfix
       patch_description: fix for clang compilation
       patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/2898
