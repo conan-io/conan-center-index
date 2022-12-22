@@ -4,7 +4,7 @@ from conan.tools.files import apply_conandata_patches, copy, get, rename, rmdir
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.51.0"
+required_conan_version = ">=1.53.0"
 
 class SAILConan(ConanFile):
     name = "sail"
