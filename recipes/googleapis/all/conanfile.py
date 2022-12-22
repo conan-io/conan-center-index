@@ -186,7 +186,7 @@ class GoogleAPIS(ConanFile):
             graph[lib.cmake_target] = Node(mark=None, deps=lib.cmake_deps)
             types[lib.cmake_target] = 'LIB' if lib.srcs else 'INTERFACE'
 
-        def visit(name : str, dag : dict, L : list[str]):
+        def visit(name : str, dag : dict, L : list):
             # Ignore external deps that are not in the dag, such as protobuf::libprotobuf.
             # Also skip nodes that are already completely processed
             if name not in dag or dag[name].mark == 'DONE':
