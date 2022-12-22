@@ -17,7 +17,7 @@ class ElfioConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler.cppstd:
-            if float(self.version < 3.11):
+            if float(self.version) < 3.11:
                 check_min_cppstd(self, 11)
             else:
                 check_min_cppstd(self, 14)
@@ -32,6 +32,21 @@ class ElfioConan(ConanFile):
         self.info.clear()
 
     def package(self):
-        copy(self, pattern="COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, pattern="LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, pattern=os.path.join("elfio", "*.hpp"), src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
+        copy(
+            self,
+            pattern="COPYING",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "licenses"),
+        )
+        copy(
+            self,
+            pattern="LICENSE*",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "licenses"),
+        )
+        copy(
+            self,
+            pattern=os.path.join("elfio", "*.hpp"),
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "include"),
+        )
