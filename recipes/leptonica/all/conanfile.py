@@ -170,6 +170,8 @@ class LeptonicaConan(ConanFile):
         ## openjpeg
         replace_in_file(self, cmakelists_src, "${JP2K_LIBRARIES}", "openjp2")
         if Version(self.version) < "1.83.0":
+            # pkgconfig is prefered to CMake. Disable pkgconfig so only CMake is used
+            replace_in_file(self, cmakelists, "pkg_check_modules(JP2K libopenjp2>=2.0 QUIET)", "")
             # versions below 1.83.0 do not have an option toggle
             replace_in_file(self, cmakelists, "if(NOT JP2K)", "if(0)")
             if not self.options.with_openjpeg:
