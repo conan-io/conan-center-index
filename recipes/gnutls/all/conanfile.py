@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.microsoft import is_msvc
-from conan.tools.files import get, rmdir, rm
+from conan.tools.files import get, rmdir, rm, copy
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps, Autotools
 from conan.tools.build import cross_building
@@ -99,7 +99,7 @@ class GnuTLSConan(ConanFile):
         autotools.make()
 
     def package(self):
-        self.copy("COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         autotools = Autotools(self)
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
