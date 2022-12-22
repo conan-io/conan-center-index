@@ -59,6 +59,8 @@ class JasperConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if Version(self.version) >= "4.0.0":
+            tc.variables["JAS_ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         tc.variables["JAS_ENABLE_DOC"] = False
         tc.variables["JAS_ENABLE_LATEX"] = False
         tc.variables["JAS_ENABLE_PROGRAMS"] = False
