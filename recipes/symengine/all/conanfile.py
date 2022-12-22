@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, get
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rm, rmdir
 import os
 
 required_conan_version = ">=1.54.0"
@@ -65,6 +65,10 @@ class SymengineConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        # [CMAKE-MODULES-CONFIG-FILES (KB-H016)]
+        rm(self, "*.cmake", self.package_folder)
+        # [DEFAULT PACKAGE LAYOUT (KB-H013)]
+        rmdir(self, os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
         self.cpp_info.libs = ["symengine"]
