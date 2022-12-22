@@ -395,7 +395,7 @@ class QtConan(ConanFile):
             self.requires("openal/1.22.2")
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.7.2")
-        if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
+        if self.options.gui and not self.options.qtwayland and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             self.requires("xkbcommon/1.4.1")
         if self.options.get_safe("opengl", "no") != "no":
@@ -405,7 +405,8 @@ class QtConan(ConanFile):
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("expat/2.4.9")
             self.requires("opus/1.3.1")
-            self.requires("xorg-proto/2022.2")
+            if not self.options.qtwayland:
+                self.requires("xorg-proto/2022.2")
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.84")
             self.requires("libdrm/2.4.109")
@@ -1019,7 +1020,7 @@ Examples = bin/datadir/examples""")
                 gui_reqs.append("libpng::libpng")
             if self.options.get_safe("with_fontconfig", False):
                 gui_reqs.append("fontconfig::fontconfig")
-            if self.settings.os in ["Linux", "FreeBSD"]:
+            if not self.options.qtwayland and self.settings.os in ["Linux", "FreeBSD"]:
                 gui_reqs.extend(["xorg::xorg", "xkbcommon::xkbcommon"])
             if self.options.get_safe("opengl", "no") != "no":
                 gui_reqs.append("opengl::opengl")
@@ -1110,15 +1111,17 @@ Examples = bin/datadir/examples""")
                     service_support_reqs.append("DBus")
                 _create_module("ServiceSupport", service_support_reqs)
                 _create_module("EdidSupport")
-                _create_module("XkbCommonSupport", ["Core", "Gui", "xkbcommon::libxkbcommon-x11"])
-                xcb_qpa_reqs = ["Core", "Gui", "ServiceSupport", "ThemeSupport", "FontDatabaseSupport", "EdidSupport", "XkbCommonSupport", "xorg::xorg"]
+                if not self.options.qtwayland:
+                    _create_module("XkbCommonSupport", ["Core", "Gui", "xkbcommon::libxkbcommon-x11"])
+                    xcb_qpa_reqs = ["Core", "Gui", "ServiceSupport", "ThemeSupport", "FontDatabaseSupport", "EdidSupport", "XkbCommonSupport", "xorg::xorg"]
                 if self.options.with_dbus and self.options.with_atspi:
                     _create_module("LinuxAccessibilitySupport", ["Core", "DBus", "Gui", "AccessibilitySupport", "at-spi2-core::at-spi2-core"])
                     xcb_qpa_reqs.append("LinuxAccessibilitySupport")
                 if self.options.get_safe("with_vulkan"):
                     xcb_qpa_reqs.append("VulkanSupport")
-                _create_module("XcbQpa", xcb_qpa_reqs, has_include_dir=False)
-                _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpa"])
+                if not self.options.qtwayland:
+                    _create_module("XcbQpa", xcb_qpa_reqs, has_include_dir=False)
+                    _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpa"])
 
         if self.options.with_sqlite3:
             _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"])
