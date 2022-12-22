@@ -19,7 +19,7 @@ class GnuTLSConan(ConanFile):
     homepage = "https://www.gnutls.org"
     description = "GnuTLS is a secure communications library implementing the SSL, TLS and DTLS protocols"
     topics = ("tls", "ssl", "secure communications")
-    license = "LGPL-2.1"
+    license = ("LGPL-2.1-or-later", "GPL-3-or-later")
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
@@ -82,6 +82,8 @@ class GnuTLSConan(ConanFile):
                           "--disable-full-test-suite",
                           "--disable-maintainer-mode",
                           "--disable-option-checking",
+                          "--disable-dependency-tracking",
+                          "--disable-heartbeat-support",
                           "--without-p11-kit",
                           "--disable-rpath",
                           "--without-idn",
