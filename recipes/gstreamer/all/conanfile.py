@@ -16,10 +16,12 @@ import os
 
 required_conan_version = ">=1.56"
 
+
 class GStreamerConan(ConanFile):
     name = "gstreamer"
     description = "GStreamer is a development framework for creating applications like media players, video editors, streaming media broadcasters and so on"
-    topics = ("multimedia", "video", "audio", "broadcasting", "framework", "media")
+    topics = ("multimedia", "video", "audio",
+              "broadcasting", "framework", "media")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gstreamer.freedesktop.org/"
     license = "LGPL-2.0-or-later"
@@ -34,11 +36,11 @@ class GStreamerConan(ConanFile):
         "fPIC": True,
         "with_introspection": False,
     }
-    
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        
+
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
@@ -47,44 +49,45 @@ class GStreamerConan(ConanFile):
 
     def requirements(self):
         self.requires("glib/2.75.0")
-        
+
     def validate(self):
         if not self.dependencies.direct_host["glib"].options.shared and self.info.options.shared:
             # https://gitlab.freedesktop.org/gstreamer/gst-build/-/issues/133
-            raise ConanInvalidConfiguration("shared GStreamer cannot link to static GLib")
+            raise ConanInvalidConfiguration(
+                "shared GStreamer cannot link to static GLib")
 
     def build_requirements(self):
         if hasattr(self, "settings_build") and cross_building(self):
             self.tool_requires("glib/2.75.0")
-        
+
         self.build_requires("meson/0.64.1")
-        
+
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
-            
+
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.70.0")
-            
+
         if self.settings.os == 'Windows':
             self.tool_requires("winflexbison/2.5.24")
         else:
             self.tool_requires("bison/3.8.2")
             self.tool_requires("flex/2.6.4")
-            
+
     def generate(self):
         tc = MesonToolchain(self)
         if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "14") \
-            or (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "190"):
+                or (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "190"):
             tc.project_options["c_std"] = "c99"
-        
+
         tc.project_options["examples"] = "disabled"
         tc.project_options["tests"] = "disabled"
         tc.project_options["introspection"] = "enabled" if self.options.with_introspection else "disabled"
         tc.generate()
-        
+
         pkg_config_deps = PkgConfigDeps(self)
         pkg_config_deps.generate()
-        
+
         if hasattr(self, "settings_build") and cross_building(self):
             VirtualBuildEnv(self).generate()
         else:
@@ -106,19 +109,23 @@ class GStreamerConan(ConanFile):
             with chdir(self, path):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
-                    self.output.info(f"rename {filename_old} into {filename_new}")
+                    self.output.info(
+                        f"rename {filename_old} into {filename_new}")
                     rename(self, filename_old, filename_new)
 
     def package(self):
-        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING", self.source_folder,
+             os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
         fix_apple_shared_install_name(self)
 
         self._fix_library_names(os.path.join(self.package_folder, "lib"))
-        self._fix_library_names(os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
+        self._fix_library_names(os.path.join(
+            self.package_folder, "lib", "gstreamer-1.0"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder,
+              "lib", "gstreamer-1.0", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
@@ -126,7 +133,8 @@ class GStreamerConan(ConanFile):
         self.info.requires["glib"].full_package_mode()
 
     def package_info(self):
-        gst_plugin_path = os.path.join(self.package_folder, "lib", "gstreamer-1.0")
+        gst_plugin_path = os.path.join(
+            self.package_folder, "lib", "gstreamer-1.0")
 
         pkgconfig_variables = {
             "exec_prefix": "${prefix}",
@@ -140,81 +148,117 @@ class GStreamerConan(ConanFile):
             "libexecdir": "${prefix}/libexec",
             "pluginscannerdir": "${libexecdir}/gstreamer-1.0",
         }
-        pkgconfig_custom_content = "\n".join("{}={}".format(key, value) for key, value in pkgconfig_variables.items())
+        pkgconfig_custom_content = "\n".join("{}={}".format(
+            key, value) for key, value in pkgconfig_variables.items())
 
-        self.cpp_info.components["gstreamer-1.0"].set_property("pkg_config_name", "gstreamer-1.0")
+        self.cpp_info.components["gstreamer-1.0"].set_property(
+            "pkg_config_name", "gstreamer-1.0")
         self.cpp_info.components["gstreamer-1.0"].names["pkg_config"] = "gstreamer-1.0"
-        self.cpp_info.components["gstreamer-1.0"].requires = ["glib::glib-2.0", "glib::gobject-2.0"]
+        self.cpp_info.components["gstreamer-1.0"].requires = [
+            "glib::glib-2.0", "glib::gobject-2.0"]
         if not self.options.shared:
-            self.cpp_info.components["gstreamer-1.0"].requires.append("glib::gmodule-no-export-2.0")
-            self.cpp_info.components["gstreamer-1.0"].defines.append("GST_STATIC_COMPILATION")
+            self.cpp_info.components["gstreamer-1.0"].requires.append(
+                "glib::gmodule-no-export-2.0")
+            self.cpp_info.components["gstreamer-1.0"].defines.append(
+                "GST_STATIC_COMPILATION")
         self.cpp_info.components["gstreamer-1.0"].libs = ["gstreamer-1.0"]
-        self.cpp_info.components["gstreamer-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
+        self.cpp_info.components["gstreamer-1.0"].includedirs = [
+            os.path.join("include", "gstreamer-1.0")]
         if self.settings.os == "Linux":
             self.cpp_info.components["gstreamer-1.0"].system_libs = ["m"]
-        self.cpp_info.components["gstreamer-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
+        self.cpp_info.components["gstreamer-1.0"].set_property(
+            "pkg_config_custom_content", pkgconfig_custom_content)
 
-        self.cpp_info.components["gstreamer-base-1.0"].set_property("pkg_config_name", "gstreamer-base-1.0")
+        self.cpp_info.components["gstreamer-base-1.0"].set_property(
+            "pkg_config_name", "gstreamer-base-1.0")
         self.cpp_info.components["gstreamer-base-1.0"].names["pkg_config"] = "gstreamer-base-1.0"
         self.cpp_info.components["gstreamer-base-1.0"].requires = ["gstreamer-1.0"]
         self.cpp_info.components["gstreamer-base-1.0"].libs = ["gstbase-1.0"]
-        self.cpp_info.components["gstreamer-base-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
-        self.cpp_info.components["gstreamer-base-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
+        self.cpp_info.components["gstreamer-base-1.0"].includedirs = [
+            os.path.join("include", "gstreamer-1.0")]
+        self.cpp_info.components["gstreamer-base-1.0"].set_property(
+            "pkg_config_custom_content", pkgconfig_custom_content)
 
-        self.cpp_info.components["gstreamer-controller-1.0"].set_property("pkg_config_name", "gstreamer-controller-1.0")
+        self.cpp_info.components["gstreamer-controller-1.0"].set_property(
+            "pkg_config_name", "gstreamer-controller-1.0")
         self.cpp_info.components["gstreamer-controller-1.0"].names["pkg_config"] = "gstreamer-controller-1.0"
         self.cpp_info.components["gstreamer-controller-1.0"].requires = ["gstreamer-1.0"]
-        self.cpp_info.components["gstreamer-controller-1.0"].libs = ["gstcontroller-1.0"]
-        self.cpp_info.components["gstreamer-controller-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
+        self.cpp_info.components["gstreamer-controller-1.0"].libs = [
+            "gstcontroller-1.0"]
+        self.cpp_info.components["gstreamer-controller-1.0"].includedirs = [
+            os.path.join("include", "gstreamer-1.0")]
         if self.settings.os == "Linux":
             self.cpp_info.components["gstreamer-controller-1.0"].system_libs = ["m"]
-        self.cpp_info.components["gstreamer-controller-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
+        self.cpp_info.components["gstreamer-controller-1.0"].set_property(
+            "pkg_config_custom_content", pkgconfig_custom_content)
 
-        self.cpp_info.components["gstreamer-net-1.0"].set_property("pkg_config_name", "gstreamer-net-1.0")
+        self.cpp_info.components["gstreamer-net-1.0"].set_property(
+            "pkg_config_name", "gstreamer-net-1.0")
         self.cpp_info.components["gstreamer-net-1.0"].names["pkg_config"] = "gstreamer-net-1.0"
-        self.cpp_info.components["gstreamer-net-1.0"].requires = ["gstreamer-1.0", "glib::gio-2.0"]
+        self.cpp_info.components["gstreamer-net-1.0"].requires = [
+            "gstreamer-1.0", "glib::gio-2.0"]
         self.cpp_info.components["gstreamer-net-1.0"].libs = ["gstnet-1.0"]
-        self.cpp_info.components["gstreamer-net-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
-        self.cpp_info.components["gstreamer-net-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
+        self.cpp_info.components["gstreamer-net-1.0"].includedirs = [
+            os.path.join("include", "gstreamer-1.0")]
+        self.cpp_info.components["gstreamer-net-1.0"].set_property(
+            "pkg_config_custom_content", pkgconfig_custom_content)
 
-        self.cpp_info.components["gstreamer-check-1.0"].set_property("pkg_config_name", "gstreamer-check-1.0")
+        self.cpp_info.components["gstreamer-check-1.0"].set_property(
+            "pkg_config_name", "gstreamer-check-1.0")
         self.cpp_info.components["gstreamer-check-1.0"].names["pkg_config"] = "gstreamer-check-1.0"
         self.cpp_info.components["gstreamer-check-1.0"].requires = ["gstreamer-1.0"]
         self.cpp_info.components["gstreamer-check-1.0"].libs = ["gstcheck-1.0"]
-        self.cpp_info.components["gstreamer-check-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
+        self.cpp_info.components["gstreamer-check-1.0"].includedirs = [
+            os.path.join("include", "gstreamer-1.0")]
         if self.settings.os == "Linux":
             self.cpp_info.components["gstreamer-check-1.0"].system_libs = ["rt", "m"]
-        self.cpp_info.components["gstreamer-check-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
+        self.cpp_info.components["gstreamer-check-1.0"].set_property(
+            "pkg_config_custom_content", pkgconfig_custom_content)
 
         # gstcoreelements and gstcoretracers are plugins which should be loaded dynamicaly, and not linked to directly
         if not self.options.shared:
-            self.cpp_info.components["gstcoreelements"].set_property("pkg_config_name", "gstcoreelements")
+            self.cpp_info.components["gstcoreelements"].set_property(
+                "pkg_config_name", "gstcoreelements")
             self.cpp_info.components["gstcoreelements"].names["pkg_config"] = "gstcoreelements"
-            self.cpp_info.components["gstcoreelements"].requires = ["glib::gobject-2.0", "glib::glib-2.0", "gstreamer-1.0", "gstreamer-base-1.0"]
-            self.cpp_info.components["gstcoreelements"].libs = ["gstcoreelements"]
-            self.cpp_info.components["gstcoreelements"].includedirs = [os.path.join("include", "gstreamer-1.0")]
-            self.cpp_info.components["gstcoreelements"].libdirs = [gst_plugin_path]
+            self.cpp_info.components["gstcoreelements"].requires = [
+                "glib::gobject-2.0", "glib::glib-2.0", "gstreamer-1.0", "gstreamer-base-1.0"]
+            self.cpp_info.components["gstcoreelements"].libs = [
+                "gstcoreelements"]
+            self.cpp_info.components["gstcoreelements"].includedirs = [
+                os.path.join("include", "gstreamer-1.0")]
+            self.cpp_info.components["gstcoreelements"].libdirs = [
+                gst_plugin_path]
 
-            self.cpp_info.components["gstcoretracers"].set_property("pkg_config_name", "gstcoretracers")
+            self.cpp_info.components["gstcoretracers"].set_property(
+                "pkg_config_name", "gstcoretracers")
             self.cpp_info.components["gstcoretracers"].names["pkg_config"] = "gstcoretracers"
-            self.cpp_info.components["gstcoretracers"].requires = ["gstreamer-1.0"]
-            self.cpp_info.components["gstcoretracers"].libs = ["gstcoretracers"]
-            self.cpp_info.components["gstcoretracers"].includedirs = [os.path.join("include", "gstreamer-1.0")]
-            self.cpp_info.components["gstcoretracers"].libdirs = [gst_plugin_path]
+            self.cpp_info.components["gstcoretracers"].requires = [
+                "gstreamer-1.0"]
+            self.cpp_info.components["gstcoretracers"].libs = [
+                "gstcoretracers"]
+            self.cpp_info.components["gstcoretracers"].includedirs = [
+                os.path.join("include", "gstreamer-1.0")]
+            self.cpp_info.components["gstcoretracers"].libdirs = [
+                gst_plugin_path]
 
         if self.options.shared:
-            self.output.info(f"Appending GST_PLUGIN_PATH env var : {gst_plugin_path}")
+            self.output.info(
+                f"Appending GST_PLUGIN_PATH env var : {gst_plugin_path}")
             self.env_info.GST_PLUGIN_PATH.append(gst_plugin_path)
         gstreamer_root = self.package_folder
         self.output.info(f"Creating GSTREAMER_ROOT env var : {gstreamer_root}")
         self.env_info.GSTREAMER_ROOT = gstreamer_root
         gst_plugin_scanner = "gst-plugin-scanner.exe" if self.settings.os == "Windows" else "gst-plugin-scanner"
-        gst_plugin_scanner = os.path.join(self.package_folder, "bin", "gstreamer-1.0", gst_plugin_scanner)
-        self.output.info(f"Creating GST_PLUGIN_SCANNER env var : {gst_plugin_scanner}")
+        gst_plugin_scanner = os.path.join(
+            self.package_folder, "bin", "gstreamer-1.0", gst_plugin_scanner)
+        self.output.info(
+            f"Creating GST_PLUGIN_SCANNER env var : {gst_plugin_scanner}")
         self.env_info.GST_PLUGIN_SCANNER = gst_plugin_scanner
         if self.settings.arch == "x86":
-            self.output.info(f"Creating GSTREAMER_ROOT_X86 env var : {gstreamer_root}")
+            self.output.info(
+                f"Creating GSTREAMER_ROOT_X86 env var : {gstreamer_root}")
             self.env_info.GSTREAMER_ROOT_X86 = gstreamer_root
         elif self.settings.arch == "x86_64":
-            self.output.info(f"Creating GSTREAMER_ROOT_X86_64 env var : {gstreamer_root}")
+            self.output.info(
+                f"Creating GSTREAMER_ROOT_X86_64 env var : {gstreamer_root}")
             self.env_info.GSTREAMER_ROOT_X86_64 = gstreamer_root
