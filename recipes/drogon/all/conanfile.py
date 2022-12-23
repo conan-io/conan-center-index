@@ -6,7 +6,6 @@ from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
-
 required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
 
 class DrogonConan(ConanFile):
@@ -70,8 +69,9 @@ class DrogonConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
+            "Visual Studio": "15" if Version(self.version) < "1.8.2" else "16",
+            "msvc": "191" if Version(self.version) < "1.8.2" else "192",
             "gcc": "6",
-            "Visual Studio": "15.0",
             "clang": "5",
             "apple-clang": "10",
         }
@@ -107,7 +107,7 @@ class DrogonConan(ConanFile):
         if self.options.get_safe("with_sqlite"):
             self.requires("sqlite3/3.40.0")
         if self.options.get_safe("with_redis"):
-            self.requires("hiredis/1.0.2")
+            self.requires("hiredis/1.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
