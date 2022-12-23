@@ -1,12 +1,12 @@
 from conan import ConanFile, conan_version
-from conan.tools.env import Environment
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
 from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import chdir, copy, rename, rmdir, load, save, get, apply_conandata_patches, export_conandata_patches, replace_in_file
 from contextlib import contextmanager
 from functools import total_ordering
@@ -248,6 +248,8 @@ class OpenSSLConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        VirtualBuildEnv(self).generate()
+
         tc = AutotoolsToolchain(self)
         # workaround for random error: size too large (archive member extends past the end of the file)
         # /Library/Developer/CommandLineTools/usr/bin/ar: internal ranlib command failed
