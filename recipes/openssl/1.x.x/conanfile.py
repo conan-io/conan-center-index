@@ -1,13 +1,16 @@
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.layout import basic_layout
+from conan.tools.files import (
+    apply_conandata_patches, chdir, copy, export_conandata_patches,
+    get, load, rename, replace_in_file, rm, rmdir, save
+)
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
-from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.scm import Version
-from conan.tools.files import chdir, copy, rename, rmdir, load, save, get, apply_conandata_patches, export_conandata_patches, replace_in_file
 from contextlib import contextmanager
 from functools import total_ordering
 import fnmatch
@@ -773,59 +776,55 @@ class OpenSSLConan(ConanFile):
 
     def package(self):
         copy(self, "*LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"), keep_path=False)
-        autotools = Autotools(self)
-        args = []
-        if self._full_version >= "1.1.0":
-            target = "install_sw"
-            args.append(f"DESTDIR={self.package_folder}")
-        else: # 1.0.2 support
-            # Note: 1.0.2 should not be used according to the OpenSSL Project
-            #       See https://www.openssl.org/source/
-            if not self._use_nmake:
+        if self._use_nmake:
+            args = []
+            if self._full_version >= "1.1.0":
                 target = "install_sw"
-                args.append(f"INSTALL_PREFIX={self.package_folder}")
-            else:
+                args.append(f"DESTDIR={self.package_folder}")
+            else: # 1.0.2 support
                 target = "install"
                 args.append(f"INSTALLTOP={self.package_folder}")
                 openssldir = self.options.openssldir or self._get_default_openssl_dir()
                 args.append(f"OPENSSLDIR={os.path.join(self.package_folder, openssldir)}")
 
-        with chdir(self, self.source_folder):
-            if not self._use_nmake:
-                autotools.make(target=target, args=args)
-            else:
+            with chdir(self, self.source_folder):
                 if self._full_version >= "1.1.0":
-                    self.run(f'nmake /F Makefile {target} {" ".join(args)}')
-                else: # nmake 1.0.2 support
-                    # Note: 1.0.2 should not be used according to the OpenSSL Project
-                    #       See https://www.openssl.org/source/
-                    self.run(f'nmake /F {self._nmake_makefile} {target} {" ".join(args)}')
-
-        for root, _, files in os.walk(self.package_folder):
-            for filename in files:
-                if fnmatch.fnmatch(filename, "*.pdb"):
-                    os.unlink(os.path.join(self.package_folder, root, filename))
-        if self._use_nmake:
-            if self.settings.build_type == 'Debug' and self._full_version >= "1.1.0":
-                with chdir(self, os.path.join(self.package_folder, 'lib')):
+                    self.run(f'nmake -f Makefile {target} {" ".join(args)}')
+                else: # 1.0.2 support
+                    self.run(f'nmake -f {self._nmake_makefile} {target} {" ".join(args)}')
+            rm(self, "*.pdb", self.package_folder, recursive=True)
+            if self.settings.build_type == "Debug" and self._full_version >= "1.1.0":
+                with chdir(self, os.path.join(self.package_folder, "lib")):
                     rename(self, "libssl.lib", "libssld.lib")
                     rename(self, "libcrypto.lib", "libcryptod.lib")
-        # Old OpenSSL version family has issues with permissions.
-        # See https://github.com/conan-io/conan/issues/5831
-        if self._full_version < "1.1.0" and self.options.shared and self.settings.os in ("Android", "FreeBSD", "Linux"):
-            with chdir(self, os.path.join(self.package_folder, "lib")):
-                os.chmod("libssl.so.1.0.0", 0o755)
-                os.chmod("libcrypto.so.1.0.0", 0o755)
+        else:
+            autotools = Autotools(self)
+            args = []
+            target = "install_sw"
+            if self._full_version >= "1.1.0":
+                args.append(f"DESTDIR={unix_path(self, self.package_folder)}")
+            else: # 1.0.2 support
+                args.append(f"INSTALL_PREFIX={unix_path(self, self.package_folder)}")
 
-        if self.options.shared:
-            libdir = os.path.join(self.package_folder, "lib")
-            for file in os.listdir(libdir):
-                if self._is_mingw and file.endswith(".dll.a"):
-                    continue
-                if file.endswith(".a"):
-                    os.unlink(os.path.join(libdir, file))
+            with chdir(self, self.source_folder):
+                autotools.make(target=target, args=args)
 
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            # Old OpenSSL version family has issues with permissions.
+            # See https://github.com/conan-io/conan/issues/5831
+            if self._full_version < "1.1.0" and self.options.shared and self.settings.os in ("Android", "FreeBSD", "Linux"):
+                with chdir(self, os.path.join(self.package_folder, "lib")):
+                    os.chmod("libssl.so.1.0.0", 0o755)
+                    os.chmod("libcrypto.so.1.0.0", 0o755)
+
+            if self.options.shared:
+                libdir = os.path.join(self.package_folder, "lib")
+                for file in os.listdir(libdir):
+                    if self._is_mingw and file.endswith(".dll.a"):
+                        continue
+                    if file.endswith(".a"):
+                        os.unlink(os.path.join(libdir, file))
+
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path)
