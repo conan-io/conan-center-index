@@ -64,7 +64,7 @@ def main():
 
     exit_code = 0
     patches_path = os.path.join(os.path.dirname(args.path), "patches")
-    actual_patches = os.listdir(patches_path)
+    actual_patches = os.listdir(patches_path) if os.path.isdir(patches_path) else []
     unused_patches = copy.copy(actual_patches)
     if "patches" in parsed:
         for version in parsed["patches"]:
@@ -78,7 +78,7 @@ def main():
                     exit_code = 1
                     continue
 
-                if not patch["patch_file"].startswith("patches/"):
+                if not str(patch["patch_file"]).startswith("patches/"):
                     print(
                         f"::error file={args.path},line={type.start_line},endline={type.end_line},"
                         f"title=conandata.yml patch path error"
