@@ -4,7 +4,19 @@ This section outlines all the practices and guidelines for the `requirements()` 
 from handling "vendored" dependencies to what versions should be used.
 
 <!-- toc -->
-## Contents<!-- endToc -->
+## Contents
+
+  * [List Dependencies](#list-dependencies)
+    * [Optional Requirements](#optional-requirements)
+    * [Build Requirements](#build-requirements)
+  * [Accessing Dependencies](#accessing-dependencies)
+    * [Handling Requirement's Options](#handling-requirements-options)
+    * [Verifying Dependency's Version](#verifying-dependencys-version)
+    * [Passing Requirement's info to `build()`](#passing-requirements-info-to-build)
+    * [Overriding the provided properties from the consumer](#overriding-the-provided-properties-from-the-consumer)
+  * [Adherence to Build Service](#adherence-to-build-service)
+    * [Version Ranges](#version-ranges)
+  * [Handling "internal" dependencies](#handling-internal-dependencies)<!-- endToc -->
 
 ## List Dependencies
 
