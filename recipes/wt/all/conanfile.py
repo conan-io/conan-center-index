@@ -1,12 +1,13 @@
-from conan import ConanFile
-from conan.tools.scm import Version
-from conan.tools import files
-from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
-from conan.errors import ConanInvalidConfiguration
 import os
 import shutil
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools import files
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.53.0"
 
 
 class WtConan(ConanFile):
@@ -57,29 +58,32 @@ class WtConan(ConanFile):
         "connector_fcgi": False,
     }
 
+    @property
+    def _min_cppstd(self):
+        if Version(self.version) >= "4.5.0":
+            return 14
+        return 11
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        files.export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
-            del self.options.connector_fcgi
+            self.options.rm_safe("fPIC")
+            self.options.rm_safe("connector_fcgi")
         else:
-            del self.options.connector_isapi
+            self.options.rm_safe("connector_isapi")
         if self.settings.os not in ["Linux", "FreeBSD"]:
-            del self.options.with_unwind
+            self.options.rm_safe("with_unwind")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if not self.options.with_dbo:
-            del self.options.with_sqlite
-            del self.options.with_postgres
-            del self.options.with_mysql
-            del self.options.with_mssql
+            self.options.rm_safe("with_sqlite")
+            self.options.rm_safe("with_postgres")
+            self.options.rm_safe("with_mysql")
+            self.options.rm_safe("with_mssql")
         self._strict_options_requirements()
 
     def _strict_options_requirements(self):
@@ -112,6 +116,8 @@ class WtConan(ConanFile):
             self.requires("libunwind/1.6.2")
 
     def validate(self):
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
         miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
         if self.options["boost"].header_only or miss_boost_required_comp:
             raise ConanInvalidConfiguration("Wt requires these boost components: {}".format(", ".join(self._required_boost_components)))
@@ -121,8 +127,7 @@ class WtConan(ConanFile):
                   destination=self.source_folder, strip_root=True)
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            files.patch(**patch)
+        files.apply_conandata_patches(self)
 
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         files.replace_in_file(self, cmakelists, "find_package(OpenSSL)", "#find_package(OpenSSL)")
@@ -217,7 +222,7 @@ class WtConan(ConanFile):
         cmake_deps.generate()
 
     def layout(self):
-        cmake_layout(self, src_folder="source_folder")
+        cmake_layout(self, src_folder="src")
 
     def build(self):
         self._patch_sources()

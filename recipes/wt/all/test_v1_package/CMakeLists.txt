@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.8)
 project(test_package)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
+
+add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
 
 set(WT_COMPONENTS Wt HTTP)
