@@ -3,6 +3,7 @@ from conan.tools.files import chdir, copy, rmdir, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path
+from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -46,7 +47,7 @@ class IslConan(ConanFile):
         if self.options.with_int != "gmp":
             # FIXME: missing imath recipe
             raise ConanInvalidConfiguration("imath is not (yet) available on cci")
-        if self.settings.compiler == "msvc" and tools.Version(self.settings.compiler.version) < 16 and self.settings.compiler.runtime == "MDd":
+        if self.settings.compiler == "msvc" and Version(self, self.settings.compiler.version) < 16 and self.settings.compiler.runtime == "MDd":
             # gmp.lib(bdiv_dbm1c.obj) : fatal error LNK1318: Unexpected PDB error; OK (0)
             raise ConanInvalidConfiguration("isl fails to link with this version of visual studio and MDd runtime")
 
@@ -70,7 +71,7 @@ class IslConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self.source_folder)
 
     def generate(self):
@@ -83,15 +84,15 @@ class IslConan(ConanFile):
             tc.configure_args.append("--with-gmp=system")
             tc.configure_args.append(f'--with-gmp-prefix={unix_path(self, self.dependencies["gmp"].package_folder)}')
         if self.settings.compiler == "msvc":
-            if tools.Version(self.settings.compiler.version) >= 15:
+            if Version(self, self.settings.compiler.version) >= 15:
                 tc.extra_cflags = ["-Zf"]
-            if tools.Version(self.settings.compiler.version) >= 12:
+            if Version(self, self.settings.compiler.version) >= 12:
                 tc.extra_cflags = ["-FS"]
         env = tc.environment()
         if self.settings.compiler == "msvc":
-            env.define("AR", f'{tools.unix_path(self.dependencies["automake"].ar_lib)} lib')
-            env.define("CC", f'{tools.unix_path(self.dependencies["automake"].compile)} cl -nologo {self.settings.compiler.runtime}')
-            env.define("CXX", f'{tools.unix_path(self.dependencies["automake"].compile)} cl -nologo {self.settings.compiler.runtime}')
+            env.define("AR", f'{unix_path(self, self.dependencies["automake"].ar_lib)} lib')
+            env.define("CC", f'{unix_path(self, self.dependencies["automake"].compile)} cl -nologo {self.settings.compiler.runtime}')
+            env.define("CXX", f'{unix_path(self, self.dependencies["automake"].compile)} cl -nologo {self.settings.compiler.runtime}')
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
