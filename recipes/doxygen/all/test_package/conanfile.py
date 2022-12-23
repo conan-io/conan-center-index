@@ -5,7 +5,7 @@ from conan.errors import ConanException
 import os
 
 
-# It will become the standard on Conan 2.x
+# It will become the standard on Conan 2
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
