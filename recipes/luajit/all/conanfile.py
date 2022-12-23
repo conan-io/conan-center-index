@@ -4,7 +4,7 @@ from conan.tools.files import get, chdir, replace_in_file, copy, rmdir
 from conan.tools.microsoft import is_msvc, MSBuildToolchain, VCVars
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.env import Environment
+from conan.tools.apple import is_apple_os
 from conan.errors import ConanInvalidConfiguration
 import os
 import platform
@@ -53,12 +53,6 @@ class LuajitConan(ConanFile):
         else:
             tc = AutotoolsToolchain(self)
             tc.generate()
-            if self.info.settings.os == "Macos":
-                env = Environment()
-                env.define("MACOSX_DEPLOYMENT_TARGET", self._macosx_deployment_target)
-                env.define("SYSTEM_VERSION_COMPAT", "1")
-                envvars = env.vars(self, scope="build")
-                envvars.save_script("conanbuildenv_macosx_deploy_target")
 
     def _patch_sources(self):
         if not is_msvc(self):
@@ -95,6 +89,13 @@ class LuajitConan(ConanFile):
             version = f"{macversion.major}.{macversion.minor}"
         return version
 
+    @property
+    def _make_arguments(self):
+        args = [f"PREFIX={self.package_folder}"]
+        if is_apple_os(self):
+            args.append(f"MACOSX_DEPLOYMENT_TARGET={self._macosx_deployment_target}")
+        return args
+
     def build(self):
         if is_msvc(self):
             variant = '' if self.options.shared else 'static'
@@ -103,7 +104,7 @@ class LuajitConan(ConanFile):
             self._patch_sources()
             with chdir(self, self.source_folder):
                 autotools = Autotools(self)
-                autotools.make(args=[f"PREFIX={self.package_folder}"])
+                autotools.make(args=self._make_arguments)
 
     def package(self):
         copy(self, "COPYRIGHT", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
@@ -121,7 +122,7 @@ class LuajitConan(ConanFile):
         else:
             with chdir(self, self.source_folder):
                 autotools = Autotools(self)
-                autotools.install(args=[f"PREFIX={self.package_folder}"])
+                autotools.install(args=self._make_arguments)
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "share"))
 
