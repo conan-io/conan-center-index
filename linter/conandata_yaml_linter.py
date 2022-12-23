@@ -64,7 +64,11 @@ def main():
 
     exit_code = 0
     patches_path = os.path.join(os.path.dirname(args.path), "patches")
-    actual_patches = os.listdir(patches_path) if os.path.isdir(patches_path) else []
+    actual_patches = []
+    if os.path.isdir(patches_path):
+        for root, _, files in os.walk(patches_path):
+            for f in files:
+                actual_patches.append(os.path.join(root[len(patches_path)+1:], f)) 
     unused_patches = copy.copy(actual_patches)
     if "patches" in parsed:
         for version in parsed["patches"]:
