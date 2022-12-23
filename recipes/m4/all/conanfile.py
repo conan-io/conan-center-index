@@ -1,14 +1,15 @@
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, chdir, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, chdir, rmdir,  load, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 import os
+import json
 import shutil
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
 
 class M4Conan(ConanFile):
@@ -20,6 +21,7 @@ class M4Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "GPL-3.0-only"
     settings = "os", "arch", "compiler", "build_type"
+    _needs_msys2 = False
 
     @property
     def _settings_build(self):
@@ -38,6 +40,7 @@ class M4Conan(ConanFile):
         if self._settings_build.os == "Windows":
             if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
                 self.tool_requires("msys2/cci.latest")
+                self._needs_msys2 = True
             self.win_bash = True
 
     def source(self):
@@ -86,6 +89,12 @@ class M4Conan(ConanFile):
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
         tc.generate(env)
+        # See https://github.com/conan-io/conan/issues/12685
+        if self._needs_msys2:
+            bash_info = {}
+            bash_info["subsystem"] = self.conf.get("tools.microsoft.bash:subsystem")
+            bash_info["path"]      = self.conf.get("tools.microsoft.bash:path")
+            save(self, "bash_info.conf", json.dumps(bash_info))
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -116,8 +125,12 @@ class M4Conan(ConanFile):
         else:
             copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        # See https://github.com/conan-io/conan/issues/12685
+        if os.path.exists(os.path.join(self.generators_folder, "bash_info.conf")):
+            bash_info = json.loads(load(self, os.path.join(self.generators_folder, "bash_info.conf")))
+            self.conf.define("tools.microsoft.bash:subsystem", bash_info["subsystem"])
+            self.conf.define("tools.microsoft.bash:path",      bash_info["path"])
+        autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
