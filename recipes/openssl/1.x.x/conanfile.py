@@ -220,6 +220,9 @@ class OpenSSLConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
         if self._full_version < "1.1.0" and not self.options.get_safe("no_zlib"):
             self.requires("zlib/1.2.13")
@@ -239,9 +242,6 @@ class OpenSSLConan(ConanFile):
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                     self.tool_requires("msys2/cci.latest")
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
