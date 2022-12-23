@@ -9,7 +9,7 @@ index 9c75ec6..0d7100d 100644
 -    target_include_directories(fruit
 -        PRIVATE
 -            ${CONAN_INCLUDE_DIRS_BOOST})
-+    find_package(BOOST REQUIRED CONFIG)
++    find_package(Boost REQUIRED CONFIG)
 +    target_link_libraries(fruit PUBLIC Boost::boost)
  endif()
  

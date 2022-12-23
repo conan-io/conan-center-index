@@ -1,16 +1,15 @@
 import os
-import tarfile
 import shutil
+import tarfile
 from fnmatch import fnmatch
 
 from conan import ConanFile, Version
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, download, rmdir
-from conan.tools.cmake import CMakeToolchain, CMakeDeps, cmake_layout, CMake
 from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get
 
-
-required_conan_version = "1.53.0"
+required_conan_version = ">=1.53.0"
 
 
 class FruitConan(ConanFile):
@@ -89,7 +88,6 @@ class FruitConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["FRUIT_USES_BOOST"] = self.options.use_boost
         tc.variables["FRUIT_ENABLE_COVERAGE"] = False
-        tc.variables["RUN_TESTS_UNDER_VALGRIND"] = False
         tc.variables["RUN_TESTS_UNDER_VALGRIND"] = False
         tc.variables["CMAKE_CXX_STANDARD"] = 11
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
