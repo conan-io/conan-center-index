@@ -222,7 +222,7 @@ class OpenSSLConan(ConanFile):
 
     def requirements(self):
         if self._full_version < "1.1.0" and not self.options.get_safe("no_zlib"):
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
 
     def validate(self):
         if self.settings.os == "Emscripten":
@@ -234,7 +234,7 @@ class OpenSSLConan(ConanFile):
             if not self.options.no_asm:
                 self.tool_requires("nasm/2.15.05")
             if self._use_nmake:
-                self.tool_requires("strawberryperl/5.30.0.1")
+                self.tool_requires("strawberryperl/5.32.1.1")
             else:
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
