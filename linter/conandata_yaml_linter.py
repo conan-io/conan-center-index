@@ -88,7 +88,7 @@ def main():
                 else:
                     patch_file_name = patch["patch_file"][8:]
                     if patch_file_name in unused_patches:
-                        unused_patches.remove("patch_file_name")
+                        unused_patches.remove(patch_file_name)
                     if patch_file_name not in actual_patches:
                         print(
                             f"::error file={args.path},line={type.start_line},endline={type.end_line},"
