@@ -179,8 +179,8 @@ class BinutilsConan(ConanFile):
 
         # v1 exports
         bindir = os.path.join(self.package_folder, "bin")
-        self.env_info.prepend_path("PATH", bindir)
-        self.env_info.prepend_path("PATH", absolute_target_bindir)
+        self.runenv_info.prepend_path("PATH", bindir)
+        self.runenv_info.prepend_path("PATH", absolute_target_bindir)
         self.output.info(f"GNU triplet={self.options.target_triplet}")
         self.user_info.gnu_triplet = self.options.target_triplet
         self.user_info.prefix = self.options.prefix
