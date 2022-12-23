@@ -1,3 +1,4 @@
+import os
 import argparse
 import sys
 from strictyaml import (
@@ -126,7 +127,7 @@ def main():
             f"::Patch file {p} is not referenced in {args.path}"
         )
         exit_code = 1
-        
+
     sys.exit(exit_code)
 
 
