@@ -37,7 +37,7 @@ class GStreamerConan(ConanFile):
     }
 
     def configure(self):
-        if self.options.shared:
+        if self.options.shared or self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
 
         self.settings.rm_safe("compiler.libcxx")
