@@ -70,14 +70,6 @@ def main():
         for version in parsed["patches"]:
             patches = parsed["patches"][version]
             for i, patch in enumerate(patches):
-                # Individual report errors for each patch object
-                try:
-                    parsed["patches"][version][i].revalidate(patch_fields)
-                except YAMLValidationError as error:
-                    pretty_print_yaml_validate_error(args, error)
-                    exit_code = 1
-                    continue
-
                 patch_file_name = str(patch["patch_file"])
                 if not patch_file_name.startswith("patches/"):
                     print(
@@ -97,6 +89,14 @@ def main():
                             f"::The file `{patch_file_name}` does not exist in the `patches` folder"
                         )
                         exit_code = 1
+
+                # Individual report errors for each patch object
+                try:
+                    parsed["patches"][version][i].revalidate(patch_fields)
+                except YAMLValidationError as error:
+                    pretty_print_yaml_validate_error(args, error)
+                    exit_code = 1
+                    continue
 
                 # Make sure `patch_source` exists where it's encouraged
                 type = parsed["patches"][version][i]["patch_type"]
