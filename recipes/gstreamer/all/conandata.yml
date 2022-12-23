@@ -5,6 +5,9 @@ sources:
   "1.20.4":
     url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.20.4/gstreamer-1.20.4.tar.gz"
     sha256: "708da129ea27602410262a5a6a6dd91d1d333e68bcc5f10265209c4f11dbc697"
+  "1.19.2":
+    url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.19.2/gstreamer-1.19.2.tar.gz"
+    sha256: "6ec8494867d9b58f145c0c357da631faf21c2c72c7cd8b637b440188fe904ab8"
   "1.19.1":
     url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.19.1/gstreamer-1.19.1.tar.gz"
     sha256: "2e51f61e59564e48883b5f1996871b0d1c404406aadb9aa1b306de8a2a331a90"
@@ -20,3 +23,6 @@ sources:
   "1.16.2":
     url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.16.2/gstreamer-1.16.2.tar.bz2"
     sha256: "dac037ab84d557f5d4e6e66e833f6bf8cf4f84671a311e0b2df99f9b30a9d693"
+  "1.14.5":
+    url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.14.5/gstreamer-1.14.5.tar.gz"
+    sha256: "f46ff7f17d245fad7859a99ef35e52ce8c17fe3f8a715814f35adf3d745e5ea8"

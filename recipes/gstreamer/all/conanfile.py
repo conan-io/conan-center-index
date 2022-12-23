@@ -79,10 +79,12 @@ class GStreamerConan(ConanFile):
         if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "14") \
                 or (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "190"):
             tc.project_options["c_std"] = "c99"
-
-        tc.project_options["examples"] = "disabled"
-        tc.project_options["tests"] = "disabled"
-        tc.project_options["introspection"] = "enabled" if self.options.with_introspection else "disabled"
+            
+        if self.version > Version("1.16.2"):
+            tc.project_options["examples"] = "disabled"
+            tc.project_options["tests"] = "disabled"
+            tc.project_options["introspection"] = "enabled" if self.options.with_introspection else "disabled"
+            
         tc.generate()
 
         pkg_config_deps = PkgConfigDeps(self)
@@ -114,7 +116,11 @@ class GStreamerConan(ConanFile):
                     rename(self, filename_old, filename_new)
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder,
+        licenseFileName = "LICENSE"
+        if self.version < Version("1.20.4"):
+            licenseFileName = "COPYING"
+            
+        copy(self, licenseFileName, src=self.source_folder,
              dst=os.path.join(self.package_folder, "licenses"))
 
         meson = Meson(self)
