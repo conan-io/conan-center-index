@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
-from conan.tools.env import Environment, VirtualRunEnv
+from conan.tools.env import VirtualRunEnv
 from conan.tools.gnu import PkgConfigDeps
 import os
 
