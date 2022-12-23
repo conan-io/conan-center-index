@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import save, load, chdir, copy, get, rmdir, replace_in_file, apply_conandata_patches
 from conan.tools.layout import basic_layout
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.microsoft import unix_path
 from conan.errors import ConanException
@@ -35,8 +35,6 @@ class MpfrConan(ConanFile):
 
     exports_sources = "CMakeLists.txt.in", "patches/**"
 
-    _autotools = None
-    _cmake = None
 
     @property
     def _settings_build(self):
@@ -59,8 +57,10 @@ class MpfrConan(ConanFile):
             self.requires("mpir/3.0.0")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not os.getenv("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def layout(self):
         if self.settings.os == "Windows":
@@ -75,6 +75,8 @@ class MpfrConan(ConanFile):
     def generate(self):
         if self.settings.os == "Windows":
             tc = CMakeToolchain(self)
+            tc.generate()
+            tc = CMakeDeps(self)
             tc.generate()
         else:
             tc = AutotoolsToolchain(self)
