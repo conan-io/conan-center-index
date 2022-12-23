@@ -190,3 +190,5 @@ class GoogleAPIS(ConanFile):
                 if libtype == 'LIB':
                     self.cpp_info.components[name].libs = [name]
                 self.cpp_info.components[name].names["pkg_config"] = name
+                if self.settings.os == "Linux":
+                    self.cpp_info.components[name].system_libs.extend(["m"])
