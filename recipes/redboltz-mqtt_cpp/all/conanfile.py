@@ -41,6 +41,16 @@ class MqttCppConan(ConanFile):
                   destination=self.source_folder, strip_root=True)
 
     @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "6",
+            "Visual Studio": "15.0",
+            "clang": "5",
+            "apple-clang": "10",
+        }
+
+
+    @property
     def _min_cppstd(self):
         if self.options.get_safe("cpp17"):
             return 17
@@ -109,7 +119,6 @@ class MqttCppConan(ConanFile):
             self.cpp_info.defines.append("MQTT_STD_STRING_VIEW")
             self.cpp_info.defines.append("MQTT_STD_ANY")
             self.cpp_info.defines.append("MQTT_STD_SHARED_PTR_ARRAY")
-            self.cpp_info.defines.append("MQTT_USE_LOG")
         if self.options.with_tuple_any_workaround:
             self.cpp_info.defines.append(
                 "MQTT_DISABLE_LIBSTDCXX_TUPLE_ANY_WORKAROUND")
