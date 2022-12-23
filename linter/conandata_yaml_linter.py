@@ -1,5 +1,6 @@
-import os
 import argparse
+import copy
+import os
 import sys
 from strictyaml import (
     load,
@@ -62,7 +63,7 @@ def main():
         sys.exit(1)
 
     exit_code = 0
-    patches_path = os.path.join(os.dirname(args.path), "patches")
+    patches_path = os.path.join(os.path.dirname(args.path), "patches")
     actual_patches = os.listdir(patches_path)
     unused_patches = copy.copy(actual_patches)
     if "patches" in parsed:
