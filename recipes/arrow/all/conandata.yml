@@ -22,9 +22,6 @@ patches:
     - patch_file: "patches/10.0.0-0001-mallctl-takes-size_t.patch"
       patch_description: "use size_t instead of ssize_t"
       patch_type: "backport"
-    - patch_file: "patches/10.0.0-0002-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
   "8.0.1":
     - patch_file: "patches/8.0.0-0003-mallctl-takes-size_t.patch"
       patch_description: "use size_t instead of ssize_t"
