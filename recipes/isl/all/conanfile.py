@@ -1,10 +1,12 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
+from conan import ConanFile
+from conan.tools.files import chdir, copy, rmdir, apply_conandata_patches
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import unix_path
+from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
-
+required_conan_version = ">=1.54.0"
 
 class IslConan(ConanFile):
     name = "isl"
@@ -25,11 +27,6 @@ class IslConan(ConanFile):
         "with_int": "gmp",
     }
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -37,9 +34,9 @@ class IslConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
@@ -49,7 +46,7 @@ class IslConan(ConanFile):
         if self.options.with_int != "gmp":
             # FIXME: missing imath recipe
             raise ConanInvalidConfiguration("imath is not (yet) available on cci")
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 16 and self.settings.compiler.runtime == "MDd":
+        if self.settings.compiler == "msvc" and tools.Version(self.settings.compiler.version) < 16 and self.settings.compiler.runtime == "MDd":
             # gmp.lib(bdiv_dbm1c.obj) : fatal error LNK1318: Unexpected PDB error; OK (0)
             raise ConanInvalidConfiguration("isl fails to link with this version of visual studio and MDd runtime")
 
@@ -62,72 +59,68 @@ class IslConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.4")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+        if self.settings.compiler == "msvc":
+            self.tool_requires("automake/1.16.4")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+                  strip_root=True, destination=self.source_folder)
 
-    @contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
-                env = {
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
-                    "CC": "{} cl -nologo -{}".format(tools.unix_path(self.deps_user_info["automake"].compile), self.settings.compiler.runtime),
-                    "CXX": "{} cl -nologo -{}".format(tools.unix_path(self.deps_user_info["automake"].compile), self.settings.compiler.runtime),
-                    "NM": "dumpbin -symbols",
-                    "OBJDUMP": ":",
-                    "RANLIB": ":",
-                    "STRIP": ":",
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.libs = []
-        yes_no = lambda v: "yes" if v else "no"
-        conf_args = [
-            "--with-int={}".format(self.options.with_int),
-            "--enable-portable-binary",
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-        ]
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.append(f'--with-int={self.options.with_int}')
+        tc.configure_args.append("--enable-portable-binary")
+        tc.configure_args.append(f'--enable-shared={"yes" if self.options.shared else "no"}')
+        tc.configure_args.append(f'--enable-static={"yes" if not self.options.shared else "no"}')
         if self.options.with_int == "gmp":
-            conf_args.extend([
-                "--with-gmp=system",
-                "--with-gmp-prefix={}".format(self.deps_cpp_info["gmp"].rootpath.replace("\\", "/")),
-            ])
-        if self.settings.compiler == "Visual Studio":
+            tc.configure_args.append("--with-gmp=system")
+            tc.configure_args.append(f'--with-gmp-prefix={unix_path(self, self.dependencies["gmp"].package_folder)}')
+        if self.settings.compiler == "msvc":
             if tools.Version(self.settings.compiler.version) >= 15:
-                self._autotools.flags.append("-Zf")
+                tc.extra_cflags = ["-Zf"]
             if tools.Version(self.settings.compiler.version) >= 12:
-                self._autotools.flags.append("-FS")
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
+                tc.extra_cflags = ["-FS"]
+        env = tc.environment()
+        if self.settings.compiler == "msvc":
+            env.define("AR", f'{tools.unix_path(self.dependencies["automake"].ar_lib)} lib')
+            env.define("CC", f'{tools.unix_path(self.dependencies["automake"].compile)} cl -nologo {self.settings.compiler.runtime}')
+            env.define("CXX", f'{tools.unix_path(self.dependencies["automake"].compile)} cl -nologo {self.settings.compiler.runtime}')
+            env.define("NM", "dumpbin -symbols")
+            env.define("OBJDUMP", ":")
+            env.define("RANLIB", ":")
+            env.define("STRIP", ":")
+        tc.generate(env)
 
     def build(self):
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make()
+        # Support building with source from Git reop
+        with chdir(self, self.source_folder):
+            command = "./autogen.sh"
+            if os.path.exists(command) and not os.path.exists("configure"):
+                self.run(command)
+        apply_conandata_patches(self)
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"), keep_path=False)
+        autotools = Autotools(self)
+        autotools.install()
 
         os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libisl.la")))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "isl"
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "ISL")
+        self.cpp_info.set_property("cmake_target_name", "ISL::ISL")
         self.cpp_info.libs = ["isl"]
+
+        self.cpp_info.names["pkg_config"] = "isl"
