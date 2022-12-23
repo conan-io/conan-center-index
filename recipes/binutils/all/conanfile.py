@@ -27,24 +27,22 @@ class BinutilsConan(ConanFile):
     topics = ("binutils", "ld", "linker", "as", "assembler", "objcopy", "objdump")
     settings = "os", "arch", "compiler", "build_type"
 
-    _PLACEHOLDER_TEXT = "__PLACEHOLDER__"
-
     options = {
         "multilib": [True, False],
         "with_libquadmath": [True, False],
-        "target_arch": "ANY",
-        "target_os": "ANY",
-        "target_triplet": "ANY",
-        "prefix": "ANY",
+        "target_arch": [None, "ANY"],
+        "target_os": [None, "ANY"],
+        "target_triplet": [None, "ANY"],
+        "prefix": [None, "ANY"],
     }
 
     default_options = {
         "multilib": True,
         "with_libquadmath": True,
-        "target_arch": _PLACEHOLDER_TEXT,  # Initialized in configure, checked in validate
-        "target_os": _PLACEHOLDER_TEXT,  # Initialized in configure, checked in validate
-        "target_triplet": _PLACEHOLDER_TEXT,  # Initialized in configure, checked in validate
-        "prefix": _PLACEHOLDER_TEXT,  # Initialized in configure (NOT config_options, because it depends on target_{arch,os})
+        "target_arch": None,  # Initialized in configure, checked in validate
+        "target_os": None,  # Initialized in configure, checked in validate
+        "target_triplet": None,  # Initialized in configure, checked in validate
+        "prefix": None,  # Initialized in configure (NOT config_options, because it depends on target_{arch,os})
     }
 
     def layout(self):
@@ -66,11 +64,11 @@ class BinutilsConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def configure(self):
-        if self.options.target_triplet == self._PLACEHOLDER_TEXT:
-            if self.options.target_arch == self._PLACEHOLDER_TEXT:
+        if not self.options.target_triplet:
+            if not self.options.target_arch:
                 # If target triplet and target arch are not set, initialize it from the target settings
                 self.options.target_arch = str(self._settings_target.arch)
-            if self.options.target_os == self._PLACEHOLDER_TEXT:
+            if not self.options.target_os:
                 # If target triplet and target os are not set, initialize it from the target settings
                 self.options.target_os = str(self._settings_target.os)
             # Initialize the target_triplet from the target arch and target os
@@ -78,14 +76,14 @@ class BinutilsConan(ConanFile):
         else:
             gnu_triplet_obj = _GNUTriplet.from_text(str(self.options.target_triplet))
             archos = _ArchOs.from_triplet(gnu_triplet_obj)
-            if self.options.target_arch == self._PLACEHOLDER_TEXT:
+            if not self.options.target_arch:
                 # If target arch is not set, deduce it from the target triplet
                 self.options.target_arch = archos.arch
-            if self.options.target_os == self._PLACEHOLDER_TEXT:
+            if not self.options.target_os:
                 # If target arch is not set, deduce it from the target triplet
                 self.options.target_os = archos.os
 
-        if self.options.prefix == self._PLACEHOLDER_TEXT:
+        if not self.options.prefix:
             self.options.prefix = f"{self.options.target_triplet}-"
 
         self.output.info(f"binutils:target_arch={self.options.target_arch}")
@@ -101,9 +99,9 @@ class BinutilsConan(ConanFile):
 
         # Check whether the actual target_arch and target_os option are valid (they should be in settings.yml)
         # FIXME: does there exist a stable Conan API to accomplish this?
-        if self.options.target_arch not in self.settings.arch.values_range:
+        if str(self.options.target_arch) not in self.settings.arch.values_range:
             raise ConanInvalidConfiguration(f"target_arch={self.options.target_arch} is invalid (possibilities={self.settings.arch.values_range})")
-        if self.options.target_os not in self.settings.os.values_range:
+        if str(self.options.target_os) not in self.settings.os.values_range:
             raise ConanInvalidConfiguration(f"target_os={self.options.target_os} is invalid (possibilities={self.settings.os.values_range})")
 
         target_archos = _ArchOs(str(self.options.target_arch), str(self.options.target_os))
@@ -148,7 +146,7 @@ class BinutilsConan(ConanFile):
         tc.configure_args.append("--disable-nls")
         tc.configure_args.append(f"--target={self.options.target_triplet}")
         tc.configure_args.append(f"--enable-multilib={yes_no(self.options.multilib)}")
-        tc.configure_args.append(f"--with-zlib={self.deps_cpp_info['zlib'].rootpath}")
+        tc.configure_args.append(f"--with-zlib={self.dependencies['zlib'].package_folder}")
         tc.configure_args.append(f"--program-prefix={self.options.prefix}")
         tc.configure_args.append("--exec_prefix=/bin/exec_prefix")
         tc.generate()
@@ -181,16 +179,19 @@ class BinutilsConan(ConanFile):
 
         # v1 exports
         bindir = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bindir)
-        self.env_info.PATH.append(absolute_target_bindir)
+        self.runenv_info.prepend_path("PATH", bindir)
+        self.runenv_info.prepend_path("PATH", absolute_target_bindir)
         self.output.info(f"GNU triplet={self.options.target_triplet}")
         self.user_info.gnu_triplet = self.options.target_triplet
         self.user_info.prefix = self.options.prefix
+        self.conf_info.define("user:gnu_triplet", self.user_info.gnu_triplet)
+        self.conf_info.define("user:prefix", self.user_info.prefix)
         self.output.info(f"executable prefix={self.options.prefix}")
 
         # Add recipe path to enable running the self test in the test package.
         # Don't use this property in production code. It's unsupported.
         self.user_info.recipe_path = os.path.realpath(__file__)
+        self.conf_info.define("user:recipe_path", self.user_info.recipe_path)
 
 
 class _ArchOs:

@@ -1,10 +1,20 @@
-from conans import ConanFile, tools
+from conan import ConanFile, tools
 from io import StringIO
 import os
+import json
+import sys
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
+    test_type = "explicit"
+
+    def build_requirements(self):
+        self.build_requires(self.tested_reference_str)
+
+    @property
+    def _binutils_data(self):
+        return json.loads(tools.files.load(self, "binutils_data"))
 
     @property
     def _settings_build(self):
@@ -12,11 +22,23 @@ class TestPackageConan(ConanFile):
 
     @property
     def _target_arch(self):
-        return str(self.options["binutils"].target_arch)
+        return self._binutils_data["target_arch"]
 
     @property
     def _target_os(self):
-        return str(self.options["binutils"].target_os)
+        return self._binutils_data["target_os"]
+
+    @property
+    def _recipe_path(self):
+        return self._binutils_data["recipe_path"]
+
+    @property
+    def _package_folder(self):
+        return self._binutils_data["package_folder"]
+
+    @property
+    def _package_version(self):
+        return self._binutils_data["version"]
 
     @property
     def _test_linker_args(self):
@@ -35,16 +57,35 @@ class TestPackageConan(ConanFile):
         return os.path.join(self.source_folder, f"{self._target_os}-{part_arch}.s")
 
     def _append_gnu_triplet(self, exe):
-        return f"{self.deps_user_info['binutils'].prefix}{exe}"
+        return f"{self._binutils_data['prefix']}{exe}"
+
+    def _run(self, command, output=None):
+        try: # v1 version
+            self.run(command, output=output, run_environment=True)
+        except TypeError: # v2 version
+            self.run(command, stdout=output)
+
+    def generate(self):
+        binutils_info = [v for k, v in self.dependencies.items() if repr(k.ref) == self.tested_reference_str]
+        # for conan v1
+        if not binutils_info:
+            binutils_info = [v for k, v in self.dependencies.items() if str(k.ref) == self.tested_reference_str]
+        binutils_info = binutils_info[0]
+        binutils_opts = binutils_info.options
+        binutils_ci = binutils_info.conf_info
+        tools.files.save(self, "binutils_data", json.dumps(
+            {"target_arch": str(binutils_opts.target_arch), "target_os": str(binutils_opts.target_os),
+             "prefix": str(binutils_ci.get("user:prefix")), "recipe_path": str(binutils_ci.get("user:recipe_path")),
+             "package_folder": str(binutils_info.package_folder), "version": str(binutils_info.ref.version)}))
 
     def build(self):
-        if not tools.cross_building(self):
-
+        if not tools.build.cross_building(self):
+            # binutils_data = json.loads(self, tools.files.load(self, "binutils_data"))
             if not os.path.isfile(self._test_package_assembly_source):
                 self.output.warn(f"Missing {self._test_package_assembly_source}.\ntest_package does not support this target os/arch. Please consider adding it. (It's a great learning experience)")
             else:
-                tools.mkdir(os.path.join(self.build_folder, "bin"))
-                tools.mkdir(os.path.join(self.build_folder, "lib"))
+                tools.files.mkdir(self, os.path.join(self.build_folder, "bin"))
+                tools.files.mkdir(self, os.path.join(self.build_folder, "lib"))
 
                 gas = self._append_gnu_triplet("as")
                 ld = self._append_gnu_triplet("ld")
@@ -56,14 +97,14 @@ class TestPackageConan(ConanFile):
                     dlltool = f"{self.deps_user_info['binutils'].gnu_triplet}-dlltool"
 
                     dlltool_args = [dlltool, "--input-def", f"{self.source_folder}/Windows-kernel32.def", "--output-lib", f"{self.build_folder}/lib/libkernel32.a"]
-                    self.run(" ".join(dlltool_args))
+                    self._run(" ".join(dlltool_args))
 
 
                 assembler_args = [gas, self._test_package_assembly_source, "-o", f"{self.build_folder}/object.o"]
                 linker_args = [ld, f"{self.build_folder}/object.o", "-o", f"{self.build_folder}/bin/test_package{extension}"] + self._test_linker_args
 
-                self.run(" ".join(assembler_args))
-                self.run(" ".join(linker_args))
+                self._run(" ".join(assembler_args))
+                self._run(" ".join(linker_args))
 
     def _can_run_target(self):
         if self._settings_build.os != self._target_os:
@@ -84,13 +125,14 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         # Run selftest (conversion between conan os/arch <=> gnu triplet)
-        with tools.chdir(os.path.dirname(self.deps_user_info["binutils"].recipe_path)):
-            self.run(f"python -m unittest {os.path.basename(self.deps_user_info['binutils'].recipe_path)} --verbose")
+        recipe_path = self._recipe_path
+        with tools.files.chdir(self, os.path.dirname(recipe_path)):
+            self._run(f"{sys.executable} -m unittest {os.path.basename(recipe_path)} --verbose")
 
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self):
             if self._can_run_target() and os.path.isfile(self._test_package_assembly_source):
                 output = StringIO()
-                self.run(os.path.join("bin", "test_package"), output=output)
+                self._run(os.path.join("bin", "test_package"), output=output)
                 text = output.getvalue()
                 print(text)
                 assert "Hello, world!" in text
@@ -102,12 +144,15 @@ class TestPackageConan(ConanFile):
                 bins.append("ld")
 
             for bin in bins:
-                bin_path = os.path.realpath(tools.which(bin))
+                bin_path = StringIO()
+                command = f'import os, shutil; print(os.path.realpath(shutil.which("{bin}")))'
+                self._run(f"{sys.executable} -c '{command}'", output=bin_path)
+                bin_path = bin_path.getvalue().strip()
                 self.output.info(f"Found {bin} at {bin_path}")
-                assert bin_path.startswith(self.deps_cpp_info["binutils"].rootpath)
+                assert bin_path.startswith(self._package_folder)
 
                 output = StringIO()
-                self.run("{} --version".format(bin_path), run_environment=True, output=output)
+                self._run(f"{bin_path} --version", output=output)
                 text = output.getvalue()
                 print(text)
-                assert str(self.requires["binutils"].ref.version) in text
+                assert self._package_version in text
