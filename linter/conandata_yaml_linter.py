@@ -64,6 +64,15 @@ def main():
     if "patches" in parsed:
         for version in parsed["patches"]:
             patches = parsed["patches"][version]
+            if version not in parsed["sources"]:
+                print(
+                    f"::error file={args.path},line={patches.start_line},endline={patches.end_line},"
+                    f"title=conandata.yml inconsistency"
+                    f"::Patch(es) are listed for version `{version}`, but there is source for this version."
+                    f" You should either remove `{version}` from the `patches` section, or add it to the"
+                    f" `sources` section"
+                )
+                exit_code = 1
             for i, patch in enumerate(patches):
                 # Individual report errors for each patch object
                 try:
