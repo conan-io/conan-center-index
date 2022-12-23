@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.microsoft import is_msvc
-from conan.tools.files import get, rmdir, rm, copy
+from conan.tools.files import get, rmdir, rm, copy, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps, Autotools
 from conan.tools.build import cross_building
@@ -8,6 +8,7 @@ from conan.tools.env import VirtualRunEnv
 from conan.tools.apple import is_apple_os
 from conan.errors import ConanInvalidConfiguration
 import os
+import glob
 
 
 required_conan_version = ">=1.53.0"
@@ -84,11 +85,12 @@ class GnuTLSConan(ConanFile):
                           "--disable-option-checking",
                           "--disable-dependency-tracking",
                           "--disable-heartbeat-support",
+                          "--disable-gtk-doc-html",
                           "--without-p11-kit",
                           "--disable-rpath",
                           "--without-idn",
-                          "--with-included-libtasn1",
                           "--with-included-unistring",
+                          "--with-included-libtasn1",
                           "--with-libiconv-prefix={}".format(self.dependencies["libiconv"].package_folder),
                           "--enable-shared={}".format(yes_no(self.options.shared)),
                           "--enable-static={}".format(yes_no(not self.options.shared)),
@@ -99,12 +101,18 @@ class GnuTLSConan(ConanFile):
                           "--enable-tools={}".format(yes_no(self.options.enable_tools)),
                           "--enable-openssl-compatibility={}".format(yes_no(self.options.enable_openssl_compatibility)),
                           ])
-
         autotoolstc.generate()
         autodeps = AutotoolsDeps(self)
         autodeps.generate()
         pkgdeps = PkgConfigDeps(self)
         pkgdeps.generate()
+
+        if is_apple_os(self):
+            # FIXME Remove it when 1.55.0 be running on CCI
+            # see https://github.com/conan-io/conan/pull/12307
+            for pc in glob.glob(os.path.join(self.generators_folder, "*.pc")):
+                replace_in_file(self, pc, "-F ", "-F", strict=False)
+            replace_in_file(self, os.path.join(self.generators_folder, "conanautotoolsdeps.sh"), "-F ", "-F", strict=False)
 
     def build(self):
         autotools = Autotools(self)
