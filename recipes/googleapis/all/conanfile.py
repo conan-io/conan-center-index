@@ -118,6 +118,7 @@ class GoogleAPIS(ConanFile):
         if Version(self.deps_cpp_info["protobuf"].version) <= "3.21.5" and self.settings.os == "Macos" or \
             self.settings.os == "Android":
             deactivate_library("//google/storagetransfer/v1:storagetransfer_proto")
+            deactivate_library("//google/storagetransfer/v1:storagetransfer_cc_proto")
         #  - Inconvenient macro names from /usr/include/math.h : DOMAIN
         if (self.settings.os == "Linux" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++") or \
             self.settings.compiler in ["Visual Studio", "msvc"]:
