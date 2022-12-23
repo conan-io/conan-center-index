@@ -78,7 +78,8 @@ def main():
                     exit_code = 1
                     continue
 
-                if not str(patch["patch_file"]).startswith("patches/"):
+                patch_file_name = str(patch["patch_file"])
+                if not patch_file_name.startswith("patches/"):
                     print(
                         f"::error file={args.path},line={type.start_line},endline={type.end_line},"
                         f"title=conandata.yml patch path error"
@@ -86,12 +87,12 @@ def main():
                     )
                     exit_code = 1
                 else:
-                    patch_file_name = patch["patch_file"][8:]
+                    patch_file_name = patch_file_name[8:]
                     if patch_file_name in unused_patches:
                         unused_patches.remove(patch_file_name)
                     if patch_file_name not in actual_patches:
                         print(
-                            f"::error file={args.path},line={type.start_line},endline={type.end_line},"
+                            f"::error file={args.path},line={patch['patch_file'].start_line},endline={patch['patch_file'].end_line},"
                             f"title=conandata.yml patch existence"
                             f"::The file `{patch_file_name}` does not exist in the `patches` folder"
                         )
