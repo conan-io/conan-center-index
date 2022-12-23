@@ -61,6 +61,9 @@ def main():
         sys.exit(1)
 
     exit_code = 0
+    patches_path = os.path.join(os.dirname(args.path), "patches")
+    actual_patches = os.listdir(patches_path)
+    unused_patches = copy.copy(actual_patches)
     if "patches" in parsed:
         for version in parsed["patches"]:
             patches = parsed["patches"][version]
@@ -72,6 +75,25 @@ def main():
                     pretty_print_yaml_validate_error(args, error)
                     exit_code = 1
                     continue
+
+                if not patch["patch_file"].startswith("patches/"):
+                    print(
+                        f"::error file={args.path},line={type.start_line},endline={type.end_line},"
+                        f"title=conandata.yml patch path error"
+                        f"::'patches' should be located in `patches` subfolder"
+                    )
+                    exit_code = 1
+                else:
+                    patch_file_name = patch["patch_file"][8:]
+                    if patch_file_name in unused_patches:
+                        unused_patches.remove("patch_file_name")
+                    if patch_file_name not in actual_patches:
+                        print(
+                            f"::error file={args.path},line={type.start_line},endline={type.end_line},"
+                            f"title=conandata.yml patch existence"
+                            f"::The file `{patch_file_name}` does not exist in the `patches` folder"
+                        )
+                        exit_code = 1
 
                 # Make sure `patch_source` exists where it's encouraged
                 type = parsed["patches"][version][i]["patch_type"]
@@ -97,7 +119,14 @@ def main():
                         " layouts (see https://docs.conan.io/en/latest/reference/conanfile/tools/layout.html) and"
                         " the new helper (see https://docs.conan.io/en/latest/reference/conanfile/tools/files/patches.html#conan-tools-files-apply-conandata-patches)"
                     )
-
+    for p in unused_patches:
+        print(
+            f"::error file={patches_path},"
+            f"title=patch file unused"
+            f"::Patch file {p} is not referenced in {args.path}"
+        )
+        exit_code = 1
+        
     sys.exit(exit_code)
 
 
