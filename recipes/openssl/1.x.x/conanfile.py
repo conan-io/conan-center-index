@@ -231,12 +231,14 @@ class OpenSSLConan(ConanFile):
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
-            if not self.win_bash:
-                self.tool_requires("strawberryperl/5.30.0.1")
             if not self.options.no_asm:
                 self.tool_requires("nasm/2.15.05")
-        if self.win_bash and not os.getenv("CONAN_BASH_PATH") and not self._use_nmake:
-            self.build_requires("msys2/cci.latest")
+            if self._use_nmake:
+                self.tool_requires("strawberryperl/5.30.0.1")
+            else:
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -262,12 +264,12 @@ class OpenSSLConan(ConanFile):
         env.define("PERL", self._perl)
         tc.generate(env)
         gen_info = {}
-        gen_info["CFLAGS"] = tc.cflags 
+        gen_info["CFLAGS"] = tc.cflags
         gen_info["CXXFLAGS"] = tc.cxxflags
         gen_info["DEFINES"] = tc.defines
         gen_info["LDFLAGS"] = tc.ldflags
         # Support for self.dependencies in build() method is currently restricted to `generate()` and `validate()`
-        # See https://github.com/conan-io/conan/issues/12411 for more details 
+        # See https://github.com/conan-io/conan/issues/12411 for more details
         if self._full_version < "1.1.0" and not self.options.get_safe("no_zlib"):
             zlib_cpp_info = self.dependencies["zlib"].cpp_info
             gen_info["zlib_include_path"] = zlib_cpp_info.includedirs[0]
@@ -278,7 +280,7 @@ class OpenSSLConan(ConanFile):
         save(self, "gen_info.conf", json.dumps(gen_info))
         tc = AutotoolsDeps(self)
         tc.generate()
-          
+
     @property
     def _target_prefix(self):
         if self._full_version < "1.1.0" and self.settings.build_type == "Debug":
@@ -672,7 +674,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _perl(self):
-        if self._settings_build.os == "Windows" and not self.win_bash:
+        if self._use_nmake:
             # enforce strawberry perl, otherwise wrong perl could be used (from Git bash, MSYS, etc.)
             build_deps = (dependency.ref.name for require, dependency in self.dependencies.build.items())
             if "strawberryperl" in build_deps:
@@ -749,7 +751,7 @@ class OpenSSLConan(ConanFile):
                         replace_in_file(self, self._nmake_makefile, 'INSTALLTOP=\\', 'INSTALLTOP=/')
 
                         self.run(f'nmake /F {self._nmake_makefile}')
-  
+
     def _patch_install_name(self):
         if is_apple_os(self) and self.options.shared:
             old_str = '-install_name $(INSTALLTOP)/$(LIBDIR)/'
