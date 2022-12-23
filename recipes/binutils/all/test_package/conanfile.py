@@ -7,10 +7,11 @@ import sys
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
+    generators = "VirtualBuildEnv"
     test_type = "explicit"
 
     def build_requirements(self):
-        self.build_requires(self.tested_reference_str)
+        self.tool_requires(self.tested_reference_str)
 
     @property
     def _binutils_data(self):
