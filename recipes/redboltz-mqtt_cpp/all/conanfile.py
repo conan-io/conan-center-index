@@ -3,6 +3,7 @@ from conan import ConanFile
 from conan.tools import files
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -71,6 +72,13 @@ class MqttCppConan(ConanFile):
         cmake.build()
 
     def validate(self):
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version:
+            if Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration("{} requires C++14, which your compiler does not support.".format(self.name))
+        else:
+            self.output.warn("{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name))
+
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, _min_cppstd(self))
 
