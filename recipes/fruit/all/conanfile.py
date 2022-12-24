@@ -32,10 +32,6 @@ class FruitConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
