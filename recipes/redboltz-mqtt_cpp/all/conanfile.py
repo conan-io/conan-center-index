@@ -54,8 +54,26 @@ class MqttCppConan(ConanFile):
     @property
     def _min_cppstd(self):
         if self.options.get_safe("cpp17"):
-            return 17
-        return 14
+            return "17"
+        return "14"
+
+    @property
+    def _minimum_compiler_version(self):
+        return {
+            "17": {
+                "Visual Studio": "16",
+                "gcc": "7.3",
+                "clang": "6.0",
+                "apple-clang": "10.0"
+            },
+            "14": {
+                "Visual Studio": "15",
+                "gcc": "5",
+                "clang": "4.0",
+                "apple-clang": "8.0"
+            },
+        }[self._min_cppstd]
+
 
     def requirements(self):
         self.requires("boost/1.80.0")
@@ -72,15 +90,16 @@ class MqttCppConan(ConanFile):
         cmake.build()
 
     def validate(self):
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("{} requires C++14, which your compiler does not support.".format(self.name))
-        else:
-            self.output.warn("{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name))
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, self._min_cppstd)
 
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, _min_cppstd(self))
+        min_version = self._minimum_compiler_version.get(str(self.settings.compiler))
+        if min_version and Version(self.settings.compiler.version) < min_version:
+            raise ConanInvalidConfiguration(
+                "{} requires a compiler that supports at least C++{}".format(
+                    self.name, self._min_cppstd,
+                )
+            )
 
     def generate(self):
         tc = CMakeToolchain(self)
