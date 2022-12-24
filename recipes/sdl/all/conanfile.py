@@ -11,7 +11,7 @@ from conan.tools.env import Environment
 import functools
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.53.0"
 
 
 class SDLConan(ConanFile):
