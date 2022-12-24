@@ -29,8 +29,8 @@ class MqttCppConan(ConanFile):
     }
     default_options = {
         "cpp17":  False,
-        "with_tls":  True,
-        "with_websocket":  True,
+        "with_tls":  False,
+        "with_websocket":  False,
         "mqtt_always_send_reason_code":  True,
         "utf8_string":  True,
         "with_logs": True,
@@ -40,16 +40,6 @@ class MqttCppConan(ConanFile):
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "6",
-            "Visual Studio": "15.0",
-            "clang": "5",
-            "apple-clang": "10",
-        }
-
 
     @property
     def _min_cppstd(self):
