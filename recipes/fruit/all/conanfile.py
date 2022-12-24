@@ -87,6 +87,7 @@ class FruitConan(ConanFile):
         tc.variables["RUN_TESTS_UNDER_VALGRIND"] = False
         tc.variables["CMAKE_CXX_STANDARD"] = 11
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
