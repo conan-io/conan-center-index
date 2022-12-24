@@ -24,7 +24,7 @@ class SDLConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
 
-    generators = "CMakeDeps"
+    generators = "CMakeDeps", "VirtualBuildEnv"
 
     options = {
         "shared": [True, False],
@@ -92,8 +92,9 @@ class SDLConan(ConanFile):
         self.define_toolchain()
         lib_paths = [lib for dep in self.deps_cpp_info.deps for lib in self.deps_cpp_info[dep].lib_paths]
         env = Environment()
-        env.define_path("LIBRARY_PATH", os.pathsep.join(lib_paths))
-        env.vars(self).save_script("sdl_build")
+        env.define("LIBRARY_PATH", os.pathsep.join(lib_paths))
+        env = env.vars(self, scope="build")
+        env.save_script("sdl_env")
 
     def export_sources(self):
         export_conandata_patches(self)
