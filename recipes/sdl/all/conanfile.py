@@ -90,9 +90,9 @@ class SDLConan(ConanFile):
 
     def generate(self):
         self.define_toolchain()
-        lib_paths = [lib for dep in self.deps_cpp_info.deps for lib in self.deps_cpp_info[dep].lib_paths]
+        lib_paths = [lib for _, dep in self.dependencies.items() for lib in dep.cpp_info.libdirs]
         env = Environment()
-        env.define("LIBRARY_PATH", os.pathsep.join(lib_paths))
+        env.define_path("LIBRARY_PATH", os.pathsep.join(lib_paths))
         env = env.vars(self, scope="build")
         env.save_script("sdl_env")
 
@@ -238,25 +238,25 @@ class SDLConan(ConanFile):
 
                 tc.variables["ALSA"] = self.options.alsa
                 if self.options.alsa:
-                    tc.variables["ALSA_SHARED"] = self.deps_cpp_info["libalsa"].shared
+                    tc.variables["ALSA_SHARED"] = self.options["libalsa"].shared
                     tc.variables["HAVE_ASOUNDLIB_H"] = True
                     tc.variables["HAVE_LIBASOUND"] = True
                 tc.variables["JACK"] = self.options.jack
                 if self.options.jack:
-                    tc.variables["JACK_SHARED"] = self.deps_cpp_info["jack"].shared
+                    tc.variables["JACK_SHARED"] = self.options["jack"].shared
                 tc.variables["ESD"] = self.options.esd
                 if self.options.esd:
-                    tc.variables["ESD_SHARED"] = self.deps_cpp_info["esd"].shared
+                    tc.variables["ESD_SHARED"] = self.options["esd"].shared
                 tc.variables["PULSEAUDIO"] = self.options.pulse
                 if self.options.pulse:
-                    tc.variables["PULSEAUDIO_SHARED"] = self.deps_cpp_info["pulseaudio"].shared
+                    tc.variables["PULSEAUDIO_SHARED"] = self.options["pulseaudio"].shared
                 tc.variables["SNDIO"] = self.options.sndio
                 if self.options.sndio:
-                    tc.variables["SNDIO_SHARED"] = self.deps_cpp_info["sndio"].shared
+                    tc.variables["SNDIO_SHARED"] = self.options["sndio"].shared
                 tc.variables["NAS"] = self.options.nas
                 if self.options.nas:
                     cmake_extra_ldflags += ["-lXau"]  # FIXME: SDL sources doesn't take into account transitive dependencies
-                    cmake_required_includes += [os.path.join(self.deps_cpp_info["nas"].rootpath, str(it)) for it in self.deps_cpp_info["nas"].includedirs]
+                    cmake_required_includes += self.dependencies["nas"].cpp_info.includedirs
                     tc.variables["NAS_SHARED"] = self.options["nas"].shared
                 tc.variables["VIDEO_X11"] = self.options.x11
                 if self.options.x11:
@@ -285,7 +285,7 @@ class SDLConan(ConanFile):
                 tc.variables["VIDEO_WAYLAND"] = self.options.wayland
                 if self.options.wayland:
                     # FIXME: Otherwise 2.0.16 links with system wayland (from egl/system requirement)
-                    cmake_extra_ldflags += ["-L{}".format(os.path.join(self.deps_cpp_info["wayland"].rootpath, it)) for it in self.deps_cpp_info["wayland"].libdirs]
+                    cmake_extra_ldflags += ["-L{}".format(it) for it in self.dependencies["wayland"].cpp_info.libdirs]
                     tc.variables["WAYLAND_SHARED"] = self.options["wayland"].shared
                     tc.variables["WAYLAND_SCANNER_1_15_FOUND"] = 1  # FIXME: Check actual build-requires version
 
@@ -304,25 +304,25 @@ class SDLConan(ConanFile):
 
                 tc.variables["SDL_ALSA"] = self.options.alsa
                 if self.options.alsa:
-                    tc.variables["SDL_ALSA_SHARED"] = self.deps_cpp_info["libalsa"].shared
+                    tc.variables["SDL_ALSA_SHARED"] = self.options["libalsa"].shared
                     tc.variables["HAVE_ASOUNDLIB_H"] = True
                     tc.variables["HAVE_LIBASOUND"] = True
                 tc.variables["SDL_JACK"] = self.options.jack
                 if self.options.jack:
-                    tc.variables["SDL_JACK_SHARED"] = self.deps_cpp_info["jack"].shared
+                    tc.variables["SDL_JACK_SHARED"] = self.options["jack"].shared
                 tc.variables["SDL_ESD"] = self.options.esd
                 if self.options.esd:
-                    tc.variables["SDL_ESD_SHARED"] = self.deps_cpp_info["esd"].shared
+                    tc.variables["SDL_ESD_SHARED"] = self.options["esd"].shared
                 tc.variables["SDL_PULSEAUDIO"] = self.options.pulse
                 if self.options.pulse:
-                    tc.variables["SDL_PULSEAUDIO_SHARED"] = self.deps_cpp_info["pulseaudio"].shared
+                    tc.variables["SDL_PULSEAUDIO_SHARED"] = self.options["pulseaudio"].shared
                 tc.variables["SDL_SNDIO"] = self.options.sndio
                 if self.options.sndio:
-                    tc.variables["SDL_SNDIO_SHARED"] = self.deps_cpp_info["sndio"].shared
+                    tc.variables["SDL_SNDIO_SHARED"] = self.options["sndio"].shared
                 tc.variables["SDL_NAS"] = self.options.nas
                 if self.options.nas:
                     cmake_extra_ldflags += ["-lXau"]  # FIXME: SDL sources doesn't take into account transitive dependencies
-                    cmake_required_includes += [os.path.join(self.deps_cpp_info["nas"].rootpath, str(it)) for it in self.deps_cpp_info["nas"].includedirs]
+                    cmake_required_includes += self.dependencies["nas"].cpp_info.includedirs
                     tc.variables["SDL_NAS_SHARED"] = self.options["nas"].shared
                 tc.variables["SDL_X11"] = self.options.x11
                 if self.options.x11:
@@ -351,7 +351,7 @@ class SDLConan(ConanFile):
                 tc.variables["SDL_WAYLAND"] = self.options.wayland
                 if self.options.wayland:
                     # FIXME: Otherwise 2.0.16 links with system wayland (from egl/system requirement)
-                    cmake_extra_ldflags += ["-L{}".format(os.path.join(self.deps_cpp_info["wayland"].rootpath, it)) for it in self.deps_cpp_info["wayland"].libdirs]
+                    cmake_extra_ldflags += ["-L{}".format(it) for it in self.dependencies["wayland"].cpp_info.libdirs]
                     tc.variables["SDL_WAYLAND_SHARED"] = self.options["wayland"].shared
 
                 tc.variables["SDL_DIRECTFB"] = self.options.directfb
