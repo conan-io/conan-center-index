@@ -209,7 +209,7 @@ class SDLConan(ConanFile):
     def define_toolchain(self):
         tc = CMakeToolchain(self)
         if self.settings.os == "Linux" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 5.0:
-            tc.variables["GBM_BO_USE_CURSOR"] = 2
+            tc.preprocessor_definitions["GBM_BO_USE_CURSOR"] = 2
 
         tc.variables["SDL2_DISABLE_INSTALL"] = False  # SDL2_* options will get renamed to SDL_ options in the next SDL release
         if is_apple_os(self):
