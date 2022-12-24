@@ -20,17 +20,37 @@ sources:
 patches:
   "1.22.2":
     - patch_file: "patches/1.22.0-0001-disable-shared-when-static.patch"
+      patch_description: "separate static and shared builds"
+      patch_type: "conan"
     - patch_file: "patches/1.22.0-0002-fix-uninitialized-warning.patch"
+      patch_description: "fix uninitialized variable warning"
+      patch_type: "portability"
     - patch_file: "patches/1.22.0-0003-disable-warning-errors.patch"
+      patch_description: "disable compiler flags to make warnings into errors"
+      patch_type: "conan"
   "1.22.0":
     - patch_file: "patches/1.22.0-0001-disable-shared-when-static.patch"
+      patch_description: "separate static and shared builds"
+      patch_type: "conan"
     - patch_file: "patches/1.22.0-0002-fix-uninitialized-warning.patch"
+      patch_description: "fix uninitialized variable warning"
+      patch_type: "portability"
     - patch_file: "patches/1.22.0-0003-disable-warning-errors.patch"
+      patch_description: "disable compiler flags to make warnings into errors"
+      patch_type: "conan"
   "1.17.6":
     - patch_file: "patches/1.17.6-0001-disable-shared-when-static.patch"
+      patch_description: "separate static and shared builds"
+      patch_type: "conan"
   "1.17.4":
     - patch_file: "patches/1.17.2-0001-disable-shared-when-static.patch"
+      patch_description: "separate static and shared builds"
+      patch_type: "conan"
   "1.17.3":
     - patch_file: "patches/1.17.2-0001-disable-shared-when-static.patch"
+      patch_description: "separate static and shared builds"
+      patch_type: "conan"
   "1.17.2":
     - patch_file: "patches/1.17.2-0001-disable-shared-when-static.patch"
+      patch_description: "separate static and shared builds"
+      patch_type: "conan"
