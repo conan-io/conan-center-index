@@ -1,9 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 import os
 
 required_conan_version = ">=1.50.0"
@@ -11,8 +12,8 @@ required_conan_version = ">=1.50.0"
 
 class BitserializerConan(ConanFile):
     name = "bitserializer"
-    description = "C++ 17 library for serialization to multiple output formats (JSON, XML, YAML)"
-    topics = ("serialization", "json", "xml")
+    description = "C++ 17 library for serialization to multiple output formats (JSON, XML, YAML, CSV)"
+    topics = ("serialization", "json", "xml", "yaml", "csv")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://bitbucket.org/Pavel_Kisliak/bitserializer"
     license = "MIT"
@@ -22,11 +23,15 @@ class BitserializerConan(ConanFile):
         "with_cpprestsdk": [True, False],
         "with_rapidjson": [True, False],
         "with_pugixml": [True, False],
+        "with_rapidyaml": [True, False],
+        "with_csv": [True, False],
     }
     default_options = {
         "with_cpprestsdk": False,
         "with_rapidjson": False,
         "with_pugixml": False,
+        "with_rapidyaml": False,
+        "with_csv": False,
     }
 
     no_copy_source = True
@@ -52,14 +57,29 @@ class BitserializerConan(ConanFile):
         if self.options.with_cpprestsdk:
             self.requires("cpprestsdk/2.10.18", transitive_headers=True, transitive_libs=True)
         if self.options.with_rapidjson:
-            self.requires("rapidjson/cci.20220514", transitive_headers=True, transitive_libs=True)
+            self.requires("rapidjson/cci.20220822", transitive_headers=True, transitive_libs=True)
         if self.options.with_pugixml:
             self.requires("pugixml/1.13", transitive_headers=True, transitive_libs=True)
+        if self.options.with_rapidyaml:
+            self.requires("rapidyaml/0.4.1", transitive_headers=True, transitive_libs=True)
 
     def package_id(self):
         self.info.clear()
 
     def validate(self):
+        # ToDo: remove this after fix linkage the base library
+        if self.options.with_rapidyaml:
+            raise ConanInvalidConfiguration("YAML currently unavailable due an issue with linking the base library")
+    
+        # Check minimal version that supported CSV option
+        if self.options.with_csv and self.version < Version("0.50"):
+            raise ConanInvalidConfiguration("CSV is supported in the BitSerializer starting from version 0.50 (option 'with_csv')")
+
+        # Check minimal version that supported YAML option
+        if self.options.with_rapidyaml and self.version < Version("0.50"):
+            raise ConanInvalidConfiguration("YAML is supported in the BitSerializer starting from version 0.50 (option 'with_rapidyaml')")
+
+        # Check compiler for C++17 support
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
@@ -81,12 +101,27 @@ class BitserializerConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_CPPRESTJSON_ARCHIVE"] = self.options.with_cpprestsdk
+        tc.variables["BUILD_RAPIDJSON_ARCHIVE"] = self.options.with_rapidjson
+        tc.variables["BUILD_PUGIXML_ARCHIVE"] = self.options.with_pugixml
+        tc.variables["BUILD_RAPIDYAML_ARCHIVE"] = self.options.with_rapidyaml
+        tc.variables["BUILD_CSV_ARCHIVE"] = self.options.with_csv
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+
     def build(self):
-        pass
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
+        cmake = CMake(self)
+        cmake.install()
         copy(self, "license.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "bitserializer")
@@ -120,6 +155,20 @@ class BitserializerConan(ConanFile):
             self.cpp_info.components["bitserializer-pugixml"].libdirs = []
             self.cpp_info.components["bitserializer-pugixml"].requires = ["bitserializer-core", "pugixml::pugixml"]
 
+        # rapidyaml-archive
+        if self.options.with_rapidyaml:
+            self.cpp_info.components["bitserializer-rapidyaml"].set_property("cmake_target_name", "BitSerializer::rapidyaml-archive")
+            self.cpp_info.components["bitserializer-rapidyaml"].bindirs = []
+            self.cpp_info.components["bitserializer-rapidyaml"].libdirs = []
+            self.cpp_info.components["bitserializer-rapidyaml"].requires = ["bitserializer-core", "ryml::ryml"]
+
+        # csv-archive
+        if self.options.with_csv:
+            self.cpp_info.components["bitserializer-csv"].set_property("cmake_target_name", "BitSerializer::csv-archive")
+            self.cpp_info.components["bitserializer-csv"].requires = ["bitserializer-core"]
+            self.cpp_info.components["bitserializer-csv"].bindirs = []
+            self.cpp_info.components["bitserializer-csv"].libs = ["csv-archive"]
+
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "bitserializer"
         self.cpp_info.filenames["cmake_find_package_multi"] = "bitserializer"
@@ -136,3 +185,9 @@ class BitserializerConan(ConanFile):
         if self.options.with_pugixml:
             self.cpp_info.components["bitserializer-pugixml"].names["cmake_find_package"] = "pugixml-archive"
             self.cpp_info.components["bitserializer-pugixml"].names["cmake_find_package_multi"] = "pugixml-archive"
+        if self.options.with_rapidyaml:
+            self.cpp_info.components["bitserializer-rapidyaml"].names["cmake_find_package"] = "rapidyaml-archive"
+            self.cpp_info.components["bitserializer-rapidyaml"].names["cmake_find_package_multi"] = "rapidyaml-archive"
+        if self.options.with_csv:
+            self.cpp_info.components["bitserializer-csv"].names["cmake_find_package"] = "csv-archive"
+            self.cpp_info.components["bitserializer-csv"].names["cmake_find_package_multi"] = "csv-archive"
