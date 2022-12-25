@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class SfmlConan(ConanFile):
@@ -45,10 +45,7 @@ class SfmlConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -69,9 +66,9 @@ class SfmlConan(ConanFile):
             self.requires("vorbis/1.3.7")
 
     def validate(self):
-        if self.info.settings.os not in ["Windows", "Linux", "FreeBSD", "Android", "Macos", "iOS"]:
-            raise ConanInvalidConfiguration(f"{self.ref} not supported on {self.info.settings.os}")
-        if self.info.options.graphics and not self.info.options.window:
+        if self.settings.os not in ["Windows", "Linux", "FreeBSD", "Android", "Macos", "iOS"]:
+            raise ConanInvalidConfiguration(f"{self.ref} not supported on {self.settings.os}")
+        if self.options.graphics and not self.options.window:
             raise ConanInvalidConfiguration("sfml:graphics=True requires sfml:window=True")
 
     def source(self):
