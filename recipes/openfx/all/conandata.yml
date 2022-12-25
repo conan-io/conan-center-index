@@ -1,0 +1,4 @@
+sources:
+  "1.4.0":
+    url: "https://github.com/ofxa/openfx/archive/refs/tags/OFX_Release_1_4_TAG.tar.gz"
+    sha256: "1f2d057b2cff025979f631f092f138020315524d4c0c0dcc2dccdadc2313a62f"

@@ -5,6 +5,9 @@ sources:
   "2.13.0":
     url: "https://github.com/nanodbc/nanodbc/archive/v2.13.0.zip"
     sha256: "1287869b6ca82728cb6cc53c54f836c72cde15370c16f32d81c9ef6c257f7e43"
+  "2.14.0":
+    url: "https://github.com/nanodbc/nanodbc/archive/v2.14.0.tar.gz"
+    sha256: "56228372042b689beccd96b0ac3476643ea85b3f57b3f23fb11ca4314e68b9a5"
 patches:
   "cci.20200807":
     - patch_file: "patches/0001-odbc-from-cci.patch"
@@ -12,6 +15,11 @@ patches:
     - patch_file: "patches/0002-allow-windows-shared.patch"
       base_path: "source_subfolder"
   "2.13.0":
+    - patch_file: "patches/0001-odbc-from-cci.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-allow-windows-shared.patch"
+      base_path: "source_subfolder"
+  "2.14.0":
     - patch_file: "patches/0001-odbc-from-cci.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0002-allow-windows-shared.patch"

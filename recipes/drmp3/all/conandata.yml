@@ -1,4 +1,8 @@
 sources:
+  # NOTE: https://github.com/mackron/dr_libs/blob/dd762b861ecadf5ddd5fb03e9ca1db6707b54fbb/dr_mp3.h#L3
+  "0.6.34":
+    url: https://github.com/mackron/dr_libs/archive/dd762b861ecadf5ddd5fb03e9ca1db6707b54fbb.zip
+    sha256: "077d6b29a78da5132065fcc9b44ca50e7e168b94250f2c25614101d3f808bcc1"
   # NOTE: https://github.com/mackron/dr_libs/blob/9497270f581f43e6b795ce5d98d8764861fb6a50/dr_mp3.h#L3
   "0.6.32":
     url: https://github.com/mackron/dr_libs/archive/9497270f581f43e6b795ce5d98d8764861fb6a50.zip

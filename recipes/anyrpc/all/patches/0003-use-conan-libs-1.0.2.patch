@@ -1,0 +1,44 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 2.8)
+ 
+ Project(AnyRPC CXX)
+ 
+-# Some of the cmake find_package files are part of this distribution
+-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+-
+ # Read out version from "version" file
+ file(STRINGS "version" ANYRPC_VERSION_FILE)
+ 
+@@ -91,7 +88,7 @@ CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/version.h.in"
+                 "${PROJECT_SOURCE_DIR}/include/anyrpc/version.h" )
+ 
+ if (BUILD_WITH_LOG4CPLUS)
+-    find_package( Log4cplus )
+-    if (NOT LOG4CPLUS_FOUND)
++    find_package( log4cplus )
++    if (NOT log4cplus_FOUND)
+         # the find_package call for Log4cplus doesn't generate an error even if marked as required
+         message( FATAL_ERROR "LOG4CPLUS library required if BUILD_WITH_LOG4CPLUS on" )
+
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -44,15 +44,15 @@ set(ANYRPC_HEADERS ${ANYRPC_HEADERS} ${ANYRPC_INTERNAL_HEADERS}
+ 
+ # Add the necessary external library references
+ if (BUILD_WITH_LOG4CPLUS)
+-    include_directories(${LOG4CPLUS_INCLUDE_DIRS})
++    set( LOG4CPLUS_TARGET "log4cplus::log4cplus" )
+     add_definitions( -DBUILD_WITH_LOG4CPLUS )
+ else ()
+-    set( LOG4CPLUS_LIBRARIES "" )
++    set( LOG4CPLUS_TARGET "" )
+ endif ()
+ 
+ # Create the libraries with these header and source files
+ add_library( anyrpc ${ANYRPC_LIB_TYPE} ${ANYRPC_SOURCES} ${ANYRPC_HEADERS} )
+-target_link_libraries( anyrpc ${ASAN_LIBRARY} ${LOG4CPLUS_LIBRARIES})
++target_link_libraries( anyrpc ${ASAN_LIBRARY} ${LOG4CPLUS_TARGET})
+ 
+ # Need the winsock library for Windows
+ if (WIN32)

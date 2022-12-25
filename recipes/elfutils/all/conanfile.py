@@ -67,15 +67,15 @@ class ElfutilsConan(ConanFile):
             self.output.warn("Compiler %s is not gcc." % self.settings.compiler)
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.37.0")
+            self.requires("sqlite3/3.38.5")
         if self.options.with_bzlib:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.get_safe("libdebuginfod"):
-            self.requires("libcurl/7.80.0")
+            self.requires("libcurl/7.83.0")
         if self.options.debuginfod:
             # FIXME: missing recipe for libmicrohttpd
             raise ConanInvalidConfiguration("libmicrohttpd is not available (yet) on CCI")

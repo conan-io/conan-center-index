@@ -1,17 +1,19 @@
+import functools
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 
 required_conan_version = ">=1.33.0"
 
 
 class JsonnetConan(ConanFile):
     name = "jsonnet"
+    description = "Jsonnet - The data templating language"
+    topics = ("config", "json", "functional", "configuration")
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/jsonnet"
-    description = "Jsonnet - The data templating language"
-    topics = ("config", "json", "functional", "configuration")
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -21,7 +23,6 @@ class JsonnetConan(ConanFile):
         "fPIC": True,
     }
     generators = "cmake", "cmake_find_package"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -38,11 +39,18 @@ class JsonnetConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+            # This is a workround.
+            # If jsonnet is shared, rapidyaml must be built as shared,
+            # or the c4core functions that rapidyaml depends on will not be able to be found.
+            # This seems to be a issue of rapidyaml.
+            # https://github.com/conan-io/conan-center-index/pull/9786#discussion_r829887879
+            if tools.Version(self.version) >= "0.18.0":
+                self.options["rapidyaml"].shared = True
 
     def requirements(self):
         self.requires("nlohmann_json/3.10.5")
         if tools.Version(self.version) >= "0.18.0":
-            self.requires("rapidyaml/0.3.0")
+            self.requires("rapidyaml/0.4.1")
 
     def validate(self):
         if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
@@ -50,6 +58,9 @@ class JsonnetConan(ConanFile):
 
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
+
+        if self.options.shared and is_msvc(self) and "d" in msvc_runtime_flag(self):
+            raise ConanInvalidConfiguration("shared {} is not supported with MTd/MDd runtime".format(self.name))
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -60,18 +71,17 @@ class JsonnetConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
-        self._cmake.definitions["BUILD_SHARED_BINARIES"] = False
-        self._cmake.definitions["BUILD_JSONNET"] = False
-        self._cmake.definitions["BUILD_JSONNETFMT"] = False
-        self._cmake.definitions["USE_SYSTEM_JSON"] = True
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["BUILD_TESTS"] = False
+        cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
+        cmake.definitions["BUILD_SHARED_BINARIES"] = False
+        cmake.definitions["BUILD_JSONNET"] = False
+        cmake.definitions["BUILD_JSONNETFMT"] = False
+        cmake.definitions["USE_SYSTEM_JSON"] = True
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

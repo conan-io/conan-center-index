@@ -2,3 +2,6 @@ sources:
   "0.1.3":
     url: https://github.com/linksplatform/Delegates/archive/refs/tags/0.1.3.zip
     sha256: e30b2e3c8aff6ffaa366b1c66a7af79f6bc828822f428a4427a7a89e14412fec
+  "0.2.7":
+    url: https://github.com/linksplatform/Delegates/archive/refs/tags/cpp_0.2.7.zip
+    sha256: 440e628dba541497a4d4075b0fd97e42279c5ed73a4156fbcb06556f09109435

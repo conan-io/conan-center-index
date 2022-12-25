@@ -26,10 +26,6 @@ int main()
     #ifdef HAVE_FFMPEG_AVCODEC
         printf("configuration: %s\n", avcodec_configuration());
         printf("avcodec version: %d.%d.%d\n", AV_VERSION_MAJOR(avcodec_version()), AV_VERSION_MINOR(avcodec_version()), AV_VERSION_MICRO(avcodec_version()));
-        if (avcodec_find_encoder_by_name("rawvideo") == NULL) {
-            printf("Unable to find rawvideo encoder\n");
-            return EXIT_FAILURE;
-        }
     #else
         printf("avcodec is disabled!\n");
     #endif

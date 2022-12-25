@@ -1,0 +1,9 @@
+--- python/CMakeLists.txt	2020-08-06 09:02:15.000000000 -0300
++++ python/CMakeLists.txt	2022-10-06 12:38:05.123192352 -0300
+@@ -1,5 +1,5 @@
+ 
+-add_subdirectory(pybind11)
++find_package(pybind11 REQUIRED)
+ 
+ include_directories(${PYTHON_INCLUDE_DIRS})
+ 

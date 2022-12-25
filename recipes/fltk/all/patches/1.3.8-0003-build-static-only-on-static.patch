@@ -1,0 +1,20 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index d153b1c..ef5a492 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -303,6 +303,7 @@ if (USE_XFT)
+   endif (LIB_fontconfig)
+ endif (USE_XFT)
+ 
++if (NOT OPTION_BUILD_SHARED_LIBS)
+ #######################################################################
+ 
+ FL_ADD_LIBRARY (fltk STATIC "${STATIC_FILES}")
+@@ -342,6 +343,7 @@ if (OPENGL_FOUND)
+   FL_ADD_LIBRARY (fltk_gl STATIC "${GLCPPFILES}")
+   target_link_libraries (fltk_gl fltk ${OPENGL_LIBRARIES})
+ endif (OPENGL_FOUND)
++endif (NOT OPTION_BUILD_SHARED_LIBS)
+ 
+ #######################################################################
+ # Build shared libraries (optional)

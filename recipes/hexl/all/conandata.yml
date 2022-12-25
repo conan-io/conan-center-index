@@ -1,0 +1,8 @@
+sources:
+  "1.2.4":
+    url: "https://github.com/intel/hexl/archive/refs/tags/v1.2.4.tar.gz"
+    sha256: "f91dd158e3faa8795035f618286cdef7dacbf488fd0ba4f44409880997b4549f"
+patches:
+  "1.2.4":
+    - patch_file: "patches/fix-cmake.patch"
+      base_path: "source_subfolder"

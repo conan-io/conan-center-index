@@ -2,3 +2,13 @@ sources:
   "1.7.5":
     url: "https://github.com/GM2Calc/GM2Calc/archive/v1.7.5.tar.gz"
     sha256: "5b44b3d51c763238a1f53845c10559c0a8c9a88e524377d698d2c2306b117a7f"
+  "2.0.0":
+    url: "https://github.com/GM2Calc/GM2Calc/archive/v2.0.0.tar.gz"
+    sha256: "1e5fcdc2fc170d1dade7080504ff622c55bdd4167b5c4d1b09f616b403910de5"
+  "2.1.0":
+    url: "https://github.com/GM2Calc/GM2Calc/archive/v2.1.0.tar.gz"
+    sha256: "33fd0d6da089e25ae0a6ac81b70e9bc9152952e7be4383f4c0baa862af7921bb"
+patches:
+  "1.7.5":
+    - patch_file: "patches/0001-update-1.7.5-to-FindMathematica-3.6.0.patch"
+      base_path: "source_subfolder"

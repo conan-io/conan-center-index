@@ -3,3 +3,5 @@ versions:
     folder: all
   "11.0.12":
     folder: all
+  "11.0.15":
+    folder: all

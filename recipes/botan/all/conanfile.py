@@ -1,71 +1,76 @@
-import os
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.45.0"
 
 
 class BotanConan(ConanFile):
-    name = 'botan'
+    name = "botan"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/randombit/botan"
     license = "BSD-2-Clause"
-    exports = ["patches/*"]
     description = "Botan is a cryptography library written in C++11."
     topics = ("cryptography", "crypto", "C++11", "tls")
-    settings = 'os', 'arch', 'compiler', 'build_type'
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
-        'amalgamation': [True, False],
-        'with_bzip2': [True, False],
-        'with_openssl': [True, False],
-        'shared': [True, False],
-        'fPIC': [True, False],
-        'single_amalgamation': [True, False],
-        'with_sqlite3': [True, False],
-        'with_zlib': [True, False],
-        'with_boost': [True, False],
-        'with_sse2': [True, False],
-        'with_ssse3': [True, False],
-        'with_sse4_1': [True, False],
-        'with_sse4_2': [True, False],
-        'with_avx2': [True, False],
-        'with_bmi2': [True, False],
-        'with_rdrand': [True, False],
-        'with_rdseed': [True, False],
-        'with_aes_ni': [True, False],
-        'with_sha_ni': [True, False],
-        'with_altivec': [True, False],
-        'with_neon': [True, False],
-        'with_armv8crypto': [True, False],
-        'with_powercrypto': [True, False],
-        'enable_modules': 'ANY',
-        'system_cert_bundle': 'ANY',
-        'module_policy': [None, 'bsi', 'modern', 'nist']
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "amalgamation": [True, False],
+        "with_bzip2": [True, False],
+        "with_openssl": [True, False],
+        "single_amalgamation": [True, False],
+        "with_sqlite3": [True, False],
+        "with_zlib": [True, False],
+        "with_boost": [True, False],
+        "with_sse2": [True, False],
+        "with_ssse3": [True, False],
+        "with_sse4_1": [True, False],
+        "with_sse4_2": [True, False],
+        "with_avx2": [True, False],
+        "with_bmi2": [True, False],
+        "with_rdrand": [True, False],
+        "with_rdseed": [True, False],
+        "with_aes_ni": [True, False],
+        "with_sha_ni": [True, False],
+        "with_altivec": [True, False],
+        "with_neon": [True, False],
+        "with_armv8crypto": [True, False],
+        "with_powercrypto": [True, False],
+        "enable_modules": "ANY",
+        "system_cert_bundle": "ANY",
+        "module_policy": [None, "bsi", "modern", "nist"],
     }
-    default_options = {'amalgamation': True,
-                       'with_bzip2': False,
-                       'with_openssl': False,
-                       'shared': False,
-                       'fPIC': True,
-                       'single_amalgamation': False,
-                       'with_sqlite3': False,
-                       'with_zlib': False,
-                       'with_boost': False,
-                       'with_sse2': True,
-                       'with_ssse3': True,
-                       'with_sse4_1': True,
-                       'with_sse4_2': True,
-                       'with_avx2': True,
-                       'with_bmi2': True,
-                       'with_rdrand': True,
-                       'with_rdseed': True,
-                       'with_aes_ni': True,
-                       'with_sha_ni': True,
-                       'with_altivec': True,
-                       'with_neon': True,
-                       'with_armv8crypto': True,
-                       'with_powercrypto': True,
-                       'enable_modules': None,
-                       'system_cert_bundle': None,
-                       'module_policy': None}
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "amalgamation": True,
+        "with_bzip2": False,
+        "with_openssl": False,
+        "single_amalgamation": False,
+        "with_sqlite3": False,
+        "with_zlib": False,
+        "with_boost": False,
+        "with_sse2": True,
+        "with_ssse3": True,
+        "with_sse4_1": True,
+        "with_sse4_2": True,
+        "with_avx2": True,
+        "with_bmi2": True,
+        "with_rdrand": True,
+        "with_rdseed": True,
+        "with_aes_ni": True,
+        "with_sha_ni": True,
+        "with_altivec": True,
+        "with_neon": True,
+        "with_armv8crypto": True,
+        "with_powercrypto": True,
+        "enable_modules": None,
+        "system_cert_bundle": None,
+        "module_policy": None,
+    }
 
     @property
     def _is_x86(self):
@@ -79,7 +84,14 @@ class BotanConan(ConanFile):
     def _is_arm(self):
         return 'arm' in str(self.settings.arch)
 
-    _source_subfolder = 'sources' # Required to build at least 2.12.1
+    @property
+    def _source_subfolder(self):
+        # Required to build at least 2.12.1
+        return "sources"
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -112,8 +124,17 @@ class BotanConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-        if self.options.get_safe('single_amalgamation'):
-            self.options.amalgamation = True
+    def requirements(self):
+        if self.options.with_bzip2:
+            self.requires("bzip2/1.0.8")
+        if self.options.with_openssl:
+            self.requires("openssl/1.1.1o")
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.12")
+        if self.options.with_sqlite3:
+            self.requires("sqlite3/3.38.5")
+        if self.options.with_boost:
+            self.requires("boost/1.79.0")
 
     @property
     def _required_boost_components(self):
@@ -149,17 +170,8 @@ class BotanConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     'botan amalgamation is not supported for {}/{}'.format(compiler, version))
 
-    def requirements(self):
-        if self.options.with_bzip2:
-            self.requires('bzip2/1.0.8')
-        if self.options.with_openssl:
-            self.requires('openssl/1.1.1k')
-        if self.options.with_zlib:
-            self.requires('zlib/1.2.11')
-        if self.options.with_sqlite3:
-            self.requires('sqlite3/3.35.5')
-        if self.options.with_boost:
-            self.requires('boost/1.76.0')
+        if self.options.get_safe("single_amalgamation", False) and not self.options.amalgamation:
+            raise ConanInvalidConfiguration("botan:single_amalgamation=True requires botan:amalgamation=True")
 
     def source(self):
         tools.get(**self.conan_data['sources'][self.version], strip_root=True, destination=self._source_subfolder)
@@ -177,7 +189,10 @@ class BotanConan(ConanFile):
             self.run(self._make_install_cmd)
 
     def package_info(self):
-        self.cpp_info.libs = ['botan' if self.settings.compiler == 'Visual Studio' else 'botan-2']
+        major_version = tools.Version(self.version).major
+        self.cpp_info.set_property("pkg_config_name", f"botan-{major_version}")
+        self.cpp_info.names["pkg_config"] = f"botan-{major_version}"
+        self.cpp_info.libs = ["botan" if is_msvc(self) else f"botan-{major_version}"]
         if self.settings.os == 'Linux':
             self.cpp_info.system_libs.extend(['dl', 'rt', 'pthread'])
         if self.settings.os == 'Macos':
@@ -185,7 +200,7 @@ class BotanConan(ConanFile):
         if self.settings.os == 'Windows':
             self.cpp_info.system_libs.extend(['ws2_32', 'crypt32'])
 
-        self.cpp_info.includedirs = [os.path.join('include', 'botan-2')]
+        self.cpp_info.includedirs = [os.path.join("include", f"botan-{major_version}")]
 
     @property
     def _is_mingw_windows(self):
@@ -357,8 +372,8 @@ class BotanConan(ConanFile):
         if self._is_mingw_windows:
             build_flags.append('--without-stack-protector')
 
-        if self.settings.compiler == 'Visual Studio':
-            build_flags.append('--msvc-runtime=%s' % str(self.settings.compiler.runtime))
+        if is_msvc(self):
+            build_flags.append(f"--msvc-runtime={msvc_runtime_flag(self)}")
 
         build_flags.append('--without-pkg-config')
 
@@ -394,7 +409,7 @@ class BotanConan(ConanFile):
 
     @property
     def _make_cmd(self):
-        return self._nmake_cmd if self.settings.compiler == 'Visual Studio' else self._gnumake_cmd
+        return self._nmake_cmd if is_msvc(self) else self._gnumake_cmd
 
     @property
     def _make_program(self):
@@ -416,7 +431,7 @@ class BotanConan(ConanFile):
 
     @property
     def _make_install_cmd(self):
-        if self.settings.compiler == 'Visual Studio':
+        if is_msvc(self):
             vcvars = tools.vcvars_command(self.settings)
             make_install_cmd = vcvars + ' && nmake install'
         else:

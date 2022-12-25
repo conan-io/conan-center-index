@@ -1,0 +1,41 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3b2444f..38e5229 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -6,7 +6,7 @@ project(ryml
+     LANGUAGES CXX)
+ include(./compat.cmake)
+ 
+-c4_project(VERSION 0.4.1 STANDALONE
++c4_project(VERSION 0.4.1
+     AUTHOR "Joao Paulo Magalhaes <dev@jpmag.me>")
+ 
+ 
+@@ -21,8 +21,7 @@ option(RYML_DBG "Enable (very verbose) ryml debug prints." OFF)
+ 
+ #-------------------------------------------------------
+ 
+-c4_require_subproject(c4core INCORPORATE
+-    SUBDIRECTORY ${RYML_EXT_DIR}/c4core)
++find_package(c4core REQUIRED CONFIG)
+ 
+ c4_add_library(ryml
+     SOURCES
+@@ -56,8 +55,7 @@ c4_add_library(ryml
+     INC_DIRS
+         $<BUILD_INTERFACE:${RYML_SRC_DIR}>
+         $<INSTALL_INTERFACE:include>
+-    LIBS c4core
+-    INCORPORATE c4core
++    LIBS c4core::c4core
+     )
+ 
+ if(RYML_WITH_TAB_TOKENS)
+@@ -76,7 +74,6 @@ endif()
+ #-------------------------------------------------------
+ 
+ c4_install_target(ryml)
+-c4_install_exports(DEPENDENCIES c4core)
+ c4_pack_project()
+ 
+ 

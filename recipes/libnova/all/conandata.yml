@@ -1,18 +1,15 @@
 sources:
   "0.16.0":
-    url:
-      post: "https://sourceforge.net/p/libnova/libnova/ci/v0.16/tarball"
-      archive: "https://sourceforge.net/code-snapshots/git/l/li/libnova/libnova.git/libnova-libnova-edbf65abe27ef1a2520eb9e839daaf58f15a6941.zip"
-    sha256: "2703497573f949146895dedb6fdf74c8d1f15dbdb831074bbaabc5052bdedc07"
+    post:
+      url: "https://sourceforge.net/p/libnova/libnova/ci/v0.16/tarball"
+      sha256: "not_needed"
+    archive:
+      url: "https://sourceforge.net/code-snapshots/git/l/li/libnova/libnova.git/libnova-libnova-edbf65abe27ef1a2520eb9e839daaf58f15a6941.zip"
+      sha256: "2703497573f949146895dedb6fdf74c8d1f15dbdb831074bbaabc5052bdedc07"
 patches:
   "0.16.0":
     - patch_file: "patches/0001-fix-cmake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-fix-win32-def.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-no-redefine-nan.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0004-constellation-syntax-error.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0005-fix-mingw-w64.patch"
-      base_path: "source_subfolder"

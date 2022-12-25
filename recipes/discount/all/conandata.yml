@@ -5,6 +5,4 @@ sources:
 patches:
   "2.2.7":
     - patch_file: "patches/0001-fix-cmake-install.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-fix-incomplete-type.patch"
-      base_path: "source_subfolder"

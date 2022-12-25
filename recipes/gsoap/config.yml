@@ -1,9 +1,9 @@
 versions:
-  "2.8.114":
-    folder: all
-  "2.8.115":
+  "2.8.117":
     folder: all
   "2.8.116":
     folder: all
-  "2.8.117":
+  "2.8.115":
+    folder: all
+  "2.8.114":
     folder: all

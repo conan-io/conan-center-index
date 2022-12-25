@@ -1,4 +1,7 @@
 sources:
+  "1.7.0":
+    url: "https://github.com/martinmoene/string-view-lite/archive/v1.7.0.tar.gz"
+    sha256: "265eaec08c4555259b46f5b03004dbc0f7206384edfac1cd5a837efaa642e01c"
   "1.6.0":
     url: "https://github.com/martinmoene/string-view-lite/archive/v1.6.0.tar.gz"
     sha256: "852d6dfec810067258a8cfc478d81fe7c08d473701e1989ec59769f549e50bae"

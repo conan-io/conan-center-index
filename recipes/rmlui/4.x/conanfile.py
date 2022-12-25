@@ -29,7 +29,7 @@ class RmluiConan(ConanFile):
         "with_lua_bindings": False,
         "with_thirdparty_containers": True
     }
-    build_requires = ["cmake/3.20.0"]
+    build_requires = ["cmake/3.23.2"]
     exports_sources = ["CMakeLists.txt"]
     generators = ["cmake", "cmake_find_package"]
 

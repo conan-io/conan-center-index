@@ -1,0 +1,122 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1cee76b..0db1f9c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -28,10 +28,6 @@ if(CMAKE_BUILD_TYPE)
+   endif()
+ endif()
+ 
+-if(NOT CMAKE_BUILD_TYPE)
+-  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
+-endif()
+-
+ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+   set(HEXL_DEBUG ON)
+ else()
+@@ -139,18 +135,12 @@ message(STATUS "CMAKE_INSTALL_PREFIX:     ${CMAKE_INSTALL_PREFIX}")
+ #------------------------------------------------------------------------------
+ # Third-party code...
+ #------------------------------------------------------------------------------
+-find_package(CpuFeatures CONFIG)
+-if (NOT CpuFeatures_FOUND)
+-  message(STATUS "CpuFeatures: pre-installed CpuFeatures not found")
+-  add_subdirectory(cmake/third-party/cpu-features)
+-else()
+-  message(STATUS "CpuFeatures: found")
+-  add_library(cpu_features ALIAS CpuFeatures::cpu_features)
+-  get_target_property(
+-    CpuFeatures_INCLUDE_DIR
+-    CpuFeatures::cpu_features
+-    INTERFACE_INCLUDE_DIRECTORIES)
+-endif()
++find_package(CpuFeatures REQUIRED)
++add_library(cpu_features ALIAS CpuFeatures::cpu_features)
++get_target_property(
++  CpuFeatures_INCLUDE_DIR
++  CpuFeatures::cpu_features
++  INTERFACE_INCLUDE_DIRECTORIES)
+ 
+ if (HEXL_TESTING OR HEXL_BENCHMARK OR HEXL_DEBUG)
+   if(NOT TARGET Threads::Threads)
+@@ -168,18 +158,11 @@ if (HEXL_BENCHMARK)
+ endif()
+ 
+ if (HEXL_DEBUG)
+-  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/third-party/easylogging")
+-  find_package(EASYLOGGINGPP MODULE)
+-  if (EASYLOGGINGPP_FOUND)
+-    message(STATUS "easyloggingpp: pre-installed easyloggingpp found")
+-    get_target_property(
+-      EASYLOGGINGPP_INCLUDE_DIR
+-      easyloggingpp
+-      INTERFACE_INCLUDE_DIRECTORIES)
+-  else()
+-    message(STATUS "easyloggingpp: pre-installed easyloggingpp NOT found, building from source")
+-    add_subdirectory(cmake/third-party/easylogging)
+-  endif()
++  find_package(easyloggingpp REQUIRED)
++  get_target_property(
++    EASYLOGGINGPP_INCLUDE_DIR
++    easyloggingpp::easyloggingpp
++    INTERFACE_INCLUDE_DIRECTORIES)
+ endif()
+ 
+ #------------------------------------------------------------------------------
+diff --git a/hexl/CMakeLists.txt b/hexl/CMakeLists.txt
+index 139f17c..6558256 100644
+--- a/hexl/CMakeLists.txt
++++ b/hexl/CMakeLists.txt
+@@ -53,7 +53,8 @@ else()
+ endif()
+ add_library(HEXL::hexl ALIAS hexl)
+ 
+-hexl_add_asan_flag(hexl)
++# Should come from compiler.sanitizer=Address
++# hexl_add_asan_flag(hexl)
+ 
+ set(HEXL_DEFINES_IN_FILENAME ${CMAKE_CURRENT_SOURCE_DIR}/include/hexl/util/defines.hpp.in)
+ set(HEXL_DEFINES_FILENAME ${CMAKE_CURRENT_SOURCE_DIR}/include/hexl/util/defines.hpp)
+@@ -89,10 +90,15 @@ endif()
+ 
+ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+     target_compile_options(hexl PRIVATE -Wall -Wconversion -Wshadow -pedantic -Wextra
+-        -Wno-unknown-pragmas -march=native -O3 -fomit-frame-pointer
++        -Wno-unknown-pragmas  -O3 -fomit-frame-pointer
+         -Wno-sign-conversion
+         -Wno-implicit-int-conversion
+     )
++
++    if(NOT HEXL_CROSS_COMPILED)
++        target_compile_options(hexl PRIVATE -march=native)
++    endif()
++
+     # Avoid 3rd-party dependency warnings when including HEXL as a dependency
+     target_compile_options(hexl PUBLIC
+         -Wno-unknown-warning
+@@ -121,7 +127,7 @@ if (HEXL_SHARED_LIB)
+         target_link_libraries(hexl PUBLIC easyloggingpp)
+         # Manually add logging include directory
+         target_include_directories(hexl
+-            PUBLIC $<BUILD_INTERFACE:$<TARGET_PROPERTY:easyloggingpp,INCLUDE_DIRECTORIES>>
++            PUBLIC ${EASYLOGGINGPP_INCLUDE_DIR}
+         )
+     endif()
+ else ()
+@@ -132,7 +138,7 @@ else ()
+     if (HEXL_DEBUG)
+         # Manually add logging include directory
+         target_include_directories(hexl
+-            PUBLIC $<BUILD_INTERFACE:$<TARGET_PROPERTY:easyloggingpp,INCLUDE_DIRECTORIES>>
++            PUBLIC ${EASYLOGGINGPP_INCLUDE_DIR}
+         )
+         if (EASYLOGGINGPP_FOUND)
+             target_link_libraries(hexl PRIVATE easyloggingpp)
+@@ -152,8 +158,6 @@ else ()
+       PRIVATE $<TARGET_PROPERTY:cpu_features,INTERFACE_INCLUDE_DIRECTORIES>)
+ endif()
+ 
+-install(TARGETS hexl DESTINATION ${CMAKE_INSTALL_LIBDIR})
+-
+ #------------------------------------------------------------------------------
+ # Config export...
+ #------------------------------------------------------------------------------

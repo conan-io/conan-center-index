@@ -1,4 +1,7 @@
 sources:
+  "3.8.1":
+    url: "https://ftp.gnu.org/gnu/nettle/nettle-3.8.1.tar.gz"
+    sha256: "364f3e2b77cd7dcde83fd7c45219c834e54b0c75e428b6f894a23d12dd41cbfe"
   "3.6":
     url: "https://ftp.gnu.org/gnu/nettle/nettle-3.6.tar.gz"
     sha256: "d24c0d0f2abffbc8f4f34dcf114b0f131ec3774895f3555922fe2f40f3d5e3f1"

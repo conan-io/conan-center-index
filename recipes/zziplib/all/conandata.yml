@@ -5,4 +5,3 @@ sources:
 patches:
   "0.13.71":
     - patch_file: "patches/001_fix.patch"
-      base_path: "source_subfolder"

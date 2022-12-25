@@ -1,0 +1,62 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,8 +2,8 @@
+ # Originally created for "roxlu build system" to compile libyuv on windows
+ # Run with -DTEST=ON to build unit tests
+ 
++CMAKE_MINIMUM_REQUIRED( VERSION 3.8 )
+ PROJECT ( YUV C CXX )	# "C" is required even for C++ projects
+-CMAKE_MINIMUM_REQUIRED( VERSION 2.8.12 )
+ OPTION( TEST "Built unit tests" OFF )
+ 
+ SET ( ly_base_dir	${PROJECT_SOURCE_DIR} )
+@@ -27,26 +27,23 @@ if(MSVC)
+ endif()
+ 
+ # this creates the static library (.a)
+-ADD_LIBRARY				( ${ly_lib_static} STATIC ${ly_source_files} )
++ADD_LIBRARY				( ${ly_lib_static} ${ly_source_files} )
++target_compile_features(${ly_lib_static} PUBLIC cxx_std_11)
++set_target_properties(${ly_lib_static} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ 
+ # this creates the shared library (.so)
+-ADD_LIBRARY				( ${ly_lib_shared} SHARED ${ly_source_files} )
+-SET_TARGET_PROPERTIES	( ${ly_lib_shared} PROPERTIES OUTPUT_NAME "${ly_lib_name}" )
+-SET_TARGET_PROPERTIES	( ${ly_lib_shared} PROPERTIES PREFIX "lib" )
+-if(WIN32)
+-  SET_TARGET_PROPERTIES	( ${ly_lib_shared} PROPERTIES IMPORT_PREFIX "lib" )
+-endif()
+ 
+ # this creates the conversion tool
+ ADD_EXECUTABLE			( yuvconvert ${ly_base_dir}/util/yuvconvert.cc )
+ TARGET_LINK_LIBRARIES	( yuvconvert ${ly_lib_static} )
+ 
+ 
+-INCLUDE ( FindJPEG )
+-if (JPEG_FOUND)
+-  include_directories( ${JPEG_INCLUDE_DIR} )
+-  target_link_libraries( yuvconvert ${JPEG_LIBRARY} )
+-  add_definitions( -DHAVE_JPEG )
++option(LIBYUV_WITH_JPEG "Build libyuv with jpeg" ON)
++if (LIBYUV_WITH_JPEG)
++  find_package(JPEG REQUIRED)
++  target_link_libraries(${ly_lib_static} JPEG::JPEG )
++  target_compile_definitions(${ly_lib_static} PRIVATE HAVE_JPEG)
++  target_compile_definitions(yuvconvert PRIVATE HAVE_JPEG)
+ endif()
+ 
+ if(TEST)
+@@ -82,11 +79,9 @@ endif()
+ 
+ 
+ # install the conversion tool, .so, .a, and all the header files
+-INSTALL ( PROGRAMS ${CMAKE_BINARY_DIR}/yuvconvert			DESTINATION bin )
+-INSTALL ( TARGETS ${ly_lib_static}						DESTINATION lib )
+-INSTALL ( TARGETS ${ly_lib_shared} LIBRARY				DESTINATION lib RUNTIME DESTINATION bin )
++INSTALL ( TARGETS yuvconvert DESTINATION bin)
++INSTALL ( TARGETS ${ly_lib_static} RUNTIME DESTINATION bin ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
+ INSTALL ( DIRECTORY ${PROJECT_SOURCE_DIR}/include/		DESTINATION include )
+ 
+ # create the .deb and .rpm packages using cpack
+-INCLUDE ( CM_linux_packages.cmake )
+ 

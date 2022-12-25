@@ -1,4 +1,7 @@
 sources:
+  "0.2.11":
+    url: "https://github.com/igormironchik/cfgfile/archive/refs/tags/0.2.11.tar.gz"
+    sha256: "fdf76baf157f86acc048fdcaa7e3ed534817026710866265706978a76a8e8238"
   "0.2.10":
     url: "https://github.com/igormironchik/cfgfile/archive/refs/tags/0.2.10.tar.gz"
     sha256: "bfab4deb8c9d71872a62a4f2a06056b56c93faf70b36ebb3bab5f207c8fe2c3f"

@@ -14,7 +14,7 @@ class DecoConan(ConanFile):
     requires = (
         "enhex-generic_serialization/1.0.0",
         "enhex-strong_type/1.0.0",
-        "boost/1.78.0",
+        "boost/1.79.0",
         "rang/3.2",
     )
 

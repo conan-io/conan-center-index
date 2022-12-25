@@ -1,5 +1,8 @@
 import os
+from conan.tools import files
 from conans import ConanFile, CMake, tools
+
+required_conan_version = ">=1.35.0"
 
 
 class Log4cplusConan(ConanFile):
@@ -7,7 +10,7 @@ class Log4cplusConan(ConanFile):
     description = "simple to use C++ logging API, modelled after the Java log4j API"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/log4cplus/log4cplus"
-    topics = ("conan", "log4cplus", "logging", "log", "logging-library")
+    topics = ("log4cplus", "logging", "log", "logging-library")
     license = ("BSD-2-Clause, Apache-2.0")
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
@@ -20,7 +23,8 @@ class Log4cplusConan(ConanFile):
                "working_locale": [True, False],
                "working_c_locale": [True, False],
                "decorated_name": [True, False],
-               "unicode": [True, False]}
+               "unicode": [True, False],
+               "thread_pool": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
                        "single_threaded": False,
@@ -29,7 +33,8 @@ class Log4cplusConan(ConanFile):
                        "working_locale": False,
                        "working_c_locale": False,
                        "decorated_name": False,
-                       "unicode": True}
+                       "unicode": True,
+                       "thread_pool": True}
     short_paths = True
 
     _cmake = None
@@ -57,14 +62,14 @@ class Log4cplusConan(ConanFile):
             self.requires("libiconv/1.16")
 
     def source(self):
-        archive_name = self.name + "-" + self.version
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(archive_name, self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True,
+                destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["LOG4CPLUS_ENABLE_THREAD_POOL"] = self.options.thread_pool
         self._cmake.definitions["UNICODE"] = self.options.unicode
         self._cmake.definitions["LOG4CPLUS_BUILD_TESTING"] = False
         self._cmake.definitions["WITH_UNIT_TESTS"] = False
@@ -93,15 +98,15 @@ class Log4cplusConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.options.unicode:
             self.cpp_info.defines = ["UNICODE", "_UNICODE"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["dl"]
+            self.cpp_info.system_libs = ["dl", "m", "rt", "nsl"]
             if not self.options.single_threaded:
                 self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["advapi32", "Ws2_32"]
+            self.cpp_info.system_libs = ["advapi32", "ws2_32"]

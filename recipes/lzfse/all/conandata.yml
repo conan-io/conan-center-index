@@ -4,5 +4,4 @@ sources:
     sha256: "cf85f373f09e9177c0b21dbfbb427efaedc02d035d2aade65eb58a3cbf9ad267"
 patches:
   "1.0":
-    - patch_file: "patches/0001-fix-cmake-install-bundle.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-fix-cmake.patch"

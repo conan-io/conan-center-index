@@ -1,13 +1,15 @@
 versions:
-  "2.20.6":
-    folder: "2.x.x"
-  "3.0.3":
-    folder: "3.x.x"
-  "3.2.0":
-    folder: "3.x.x"
-  "3.2.1":
-    folder: "3.x.x"
-  "3.2.2":
+  "3.3.0":
     folder: "3.x.x"
   "3.2.3":
     folder: "3.x.x"
+  "3.2.2":
+    folder: "3.x.x"
+  "3.2.1":
+    folder: "3.x.x"
+  "3.2.0":
+    folder: "3.x.x"
+  "3.0.3":
+    folder: "3.x.x"
+  "2.20.6":
+    folder: "2.x.x"

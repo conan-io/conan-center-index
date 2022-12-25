@@ -1,10 +1,11 @@
 sources:
+  "1.4.4":
+    url: "https://github.com/QtExcel/QXlsx/archive/refs/tags/v1.4.4.zip"
+    sha256: "3efbd6f63a1ffd521c535dce7b5a5a7e9ebd23db51e6ae8e3e2eb89796e57675"
   "1.4.3":
     url: "https://github.com/QtExcel/QXlsx/archive/refs/tags/v1.4.3.zip"
     sha256: "d2f7c6aff71f2f30ade8d8020682e36a3d63f422a5d2f1c5831b55573241bd4a"
 patches:
   "1.4.3":
     - patch_file: "patches/0001-allow-shared.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-add-install-target.patch"
-      base_path: "source_subfolder"

@@ -1,5 +1,3 @@
-see https://github.com/mandreyel/mio/pull/73
-
 --- a/include/mio/detail/mmap.ipp
 +++ b/include/mio/detail/mmap.ipp
 @@ -27,7 +27,9 @@

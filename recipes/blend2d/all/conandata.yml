@@ -1,9 +1,15 @@
 sources:
+  "0.0.18":
+    url: "https://blend2d.com/download/blend2d-beta18.zip"
+    sha256: "02d23b185183705215241d7b161937bbda5b427c54cc5aa4c03238ef8dd1e60b"
   "0.0.17":
     url: "https://blend2d.com/download/blend2d-beta17.zip"
     sha256: "06ee8fb0bea281d09291e498900093139426501a1a7f09dba0ec801dd340635e"
 
 patches:
+  "0.0.18":
+    - patch_file: "patches/0.0.17-0001-disable-embed-asmjit.patch"
+    # fix gcc12 compilation error, backport from upstream
+    - patch_file: "patches/0.0.18-0002-fix-gcc12-compilationerror.patch"
   "0.0.17":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0.0.17-0001-disable-embed-asmjit.patch"
+    - patch_file: "patches/0.0.17-0001-disable-embed-asmjit.patch"

@@ -5,4 +5,4 @@ sources:
 patches:
   "cci.20201220":
     - patch_file: "patches/0001-fix-include-windows.patch"
-      base_path: "source_subfolder"
+      patch_source: "https://github.com/mandreyel/mio/pull/73"

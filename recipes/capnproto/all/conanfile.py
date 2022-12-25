@@ -1,8 +1,10 @@
 from conans import ConanFile, CMake, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
 import glob
 import os
 import textwrap
+import functools
 
 required_conan_version = ">=1.43.0"
 
@@ -30,8 +32,6 @@ class CapnprotoConan(ConanFile):
     }
 
     generators = "cmake", "cmake_find_package"
-    _cmake = None
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -40,10 +40,6 @@ class CapnprotoConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _minimum_compilers_version(self):
@@ -71,7 +67,7 @@ class CapnprotoConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1o")
         if self.options.get_safe("with_zlib"):
             self.requires("zlib/1.2.12")
 
@@ -83,7 +79,7 @@ class CapnprotoConan(ConanFile):
             self.output.warn("Cap'n Proto requires C++14. Your compiler is unknown. Assuming it supports C++14.")
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("Cap'n Proto requires C++14, which your compiler does not support.")
-        if self._is_msvc and self.options.shared:
+        if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration("Cap'n Proto doesn't support shared libraries for Visual Studio")
         if self.settings.os == "Windows" and tools.Version(self.version) < "0.8.0" and self.options.with_openssl:
             raise ConanInvalidConfiguration("Cap'n Proto doesn't support OpenSSL on Windows pre 0.8.0")
@@ -96,20 +92,18 @@ class CapnprotoConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["EXTERNAL_CAPNP"] = False
-        self._cmake.definitions["CAPNP_LITE"] = False
-        self._cmake.definitions["WITH_OPENSSL"] = self.options.with_openssl
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["BUILD_TESTING"] = False
+        cmake.definitions["EXTERNAL_CAPNP"] = False
+        cmake.definitions["CAPNP_LITE"] = False
+        cmake.definitions["WITH_OPENSSL"] = self.options.with_openssl
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
         args = [
             "--enable-shared" if self.options.shared else "--disable-shared",
             "--disable-static" if self.options.shared else "--enable-static",
@@ -118,12 +112,12 @@ class CapnprotoConan(ConanFile):
         ]
         if tools.Version(self.version) >= "0.8.0":
             args.append("--with-zlib" if self.options.with_zlib else "--without-zlib")
-        self._autotools = AutoToolsBuildEnvironment(self)
+        autotools = AutoToolsBuildEnvironment(self)
         # Fix rpath on macOS
         if self.settings.os == "Macos":
-            self._autotools.link_flags.append("-Wl,-rpath,@loader_path/../lib")
-        self._autotools.configure(args=args)
-        return self._autotools
+            autotools.link_flags.append("-Wl,-rpath,@loader_path/../lib")
+        autotools.configure(args=args)
+        return autotools
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

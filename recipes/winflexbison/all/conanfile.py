@@ -1,9 +1,10 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, rename, save
 import os
 
-required_conan_version = ">= 1.33.0"
+required_conan_version = ">=1.47.0"
 
 
 class WinflexbisonConan(ConanFile):
@@ -12,70 +13,79 @@ class WinflexbisonConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lexxmark/winflexbison"
     topics = ("flex", "bison")
-    generators = "cmake"
     license = "GPL-3.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
 
-    exports_sources = "CMakeLists.txt", "patches/*"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def validate(self):
-        if self.settings.os != "Windows":
+        if self.info.settings.os != "Windows":
             raise ConanInvalidConfiguration("winflexbison is only supported on Windows.")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def _extract_license(self):
-        with open(os.path.join(self._source_subfolder, "bison", "data", "skeletons", "glr.cc")) as f:
+        with open(os.path.join(self.source_folder, "bison", "data", "skeletons", "glr.cc")) as f:
             content_lines = f.readlines()
         license_content = []
         for i in range(2, 16):
             license_content.append(content_lines[i][2:-1])
-        tools.save("COPYING.GPL3", "\n".join(license_content))
+        return "\n".join(license_content)
 
     def package(self):
-        if self.settings.build_type in ("Release", "Debug") and tools.Version(self.version) < "2.5.23":
-            actual_build_path = "{0}/bin/{1}".format(self._source_subfolder, self.settings.build_type)
-            self.copy("*.exe", src=actual_build_path, dst="bin", keep_path=False)
+        if self.settings.build_type in ("Release", "Debug"):
+            exec_build_path = os.path.join(self.source_folder, "bin")
         else:
-            self.copy("*.exe", src="bin", dst="bin", keep_path=False)
-        self.copy("data/*", src="{}/bison".format(self._source_subfolder), dst="bin", keep_path=True)
-        self.copy("FlexLexer.h", src=os.path.join(self._source_subfolder, "flex", "src"), dst="include", keep_path=False)
+            exec_build_path = self.build_folder
+        package_bin_folder = os.path.join(self.package_folder, "bin")
+        copy(self, "*.exe", src=exec_build_path, dst=package_bin_folder, keep_path=False)
+        copy(self, "data/*", src=os.path.join(self.source_folder, "bison"), dst=package_bin_folder, keep_path=True)
+        copy(self, "FlexLexer.h", src=os.path.join(self.source_folder, "flex", "src"), dst=os.path.join(self.package_folder, "include"), keep_path=False)
 
         # Copy licenses
-        self._extract_license()
-        self.copy("COPYING.GPL3", dst="licenses")
-        self.copy("COPYING", src=os.path.join(self._source_subfolder, "flex", "src"), dst="licenses", keep_path=False)
-        tools.rename(os.path.join(self.package_folder, "licenses", "COPYING"), os.path.join(self.package_folder, "licenses", "bison-license"))
-        self.copy("COPYING", src=os.path.join(self._source_subfolder, "bison", "src"), dst="licenses", keep_path=False)
-        tools.rename(os.path.join(self.package_folder, "licenses", "COPYING"), os.path.join(self.package_folder, "licenses", "flex-license"))
+        package_license_folder = os.path.join(self.package_folder, "licenses")
+        save(self, os.path.join(package_license_folder, "COPYING.GPL3"), self._extract_license())
+        copy(self, "COPYING", src=os.path.join(self.source_folder, "flex", "src"), dst=package_license_folder, keep_path=False)
+        rename(self, os.path.join(package_license_folder, "COPYING"), os.path.join(package_license_folder, "bison-license"))
+        copy(self, "COPYING", src=os.path.join(self.source_folder, "bison", "src"), dst=package_license_folder, keep_path=False)
+        rename(self, os.path.join(package_license_folder, "COPYING"), os.path.join(package_license_folder, "flex-license"))
 
     def package_info(self):
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
+        # A conan recipe can't emulate 2 Find module files,
+        # and FindFLEX.cmake & FindBISON.cmake are too complex to emulate anyway
+        self.cpp_info.set_property("cmake_find_mode", "none")
+
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
 
         lex_path = os.path.join(self.package_folder, "bin", "win_flex").replace("\\", "/")
         self.output.info("Setting LEX environment variable: {}".format(lex_path))
-        self.env_info.LEX = lex_path
+        self.buildenv_info.define_path("LEX", lex_path)
 
         yacc_path = os.path.join(self.package_folder, "bin", "win_bison -y").replace("\\", "/")
         self.output.info("Setting YACC environment variable: {}".format(yacc_path))
+        self.buildenv_info.define_path("YACC", yacc_path)
+
+        # TODO: to remove in conan v2
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.env_info.PATH.append(bindir)
+        self.env_info.LEX = lex_path
         self.env_info.YACC = yacc_path

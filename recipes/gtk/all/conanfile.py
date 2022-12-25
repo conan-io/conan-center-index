@@ -100,16 +100,16 @@ class GtkConan(ConanFile):
                     raise ConanInvalidConfiguration("with_pango option is mandatory when with_wayland or with_x11 is used")
 
     def build_requirements(self):
-        self.build_requires("meson/0.61.2")
+        self.build_requires("meson/0.62.2")
         if self._gtk4:
-            self.build_requires("libxml2/2.9.13") # for xmllint
+            self.build_requires("libxml2/2.9.14") # for xmllint
         self.build_requires("pkgconf/1.7.4")
         if self._gtk4:
             self.build_requires("sassc/3.6.2")
 
     def requirements(self):
         self.requires("gdk-pixbuf/2.42.6")
-        self.requires("glib/2.72.0")
+        self.requires("glib/2.73.0")
         if self._gtk4 or self.settings.compiler != "Visual Studio":
             self.requires("cairo/1.17.4")
         if self._gtk4:
@@ -120,12 +120,12 @@ class GtkConan(ConanFile):
             self.requires("libjpeg/9d")
         if self.settings.os == "Linux":
             if self._gtk4:
-                self.requires("xkbcommon/1.4.0")
+                self.requires("xkbcommon/1.4.1")
             if self._gtk3:
                 self.requires("at-spi2-atk/2.38.0")
             if self.options.with_wayland:
                 if self._gtk3:
-                    self.requires("xkbcommon/1.4.0")
+                    self.requires("xkbcommon/1.4.1")
                 self.requires("wayland/1.20.0")
             if self.options.with_x11:
                 self.requires("xorg/system")

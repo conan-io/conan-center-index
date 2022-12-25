@@ -1,0 +1,23 @@
+sources:
+  "0.5.2":
+    url: "https://github.com/e-dant/watcher/archive/release/0.5.2.tar.gz"
+    sha256: "e18e663f9a72a59fca3e7a9e125ca77823b03a3388aa569398965777c5671173"
+  "0.4.3":
+    url: "https://github.com/e-dant/watcher/archive/release/0.4.3.tar.gz"
+    sha256: "8603b45edfa5023752d9e2fdd731efe5a556a542aaf03f6be0e69c68f552b25a"
+  "0.3.3":
+    url: "https://github.com/e-dant/watcher/archive/release/0.3.3.tar.gz"
+    sha256: "1cb4a898741306bb9089bd24175bcbb2cb434531eac6bbcfe1a3679b8bf1f44c"
+  "0.3.2":
+    url: "https://github.com/e-dant/watcher/archive/release/0.3.2.tar.gz"
+    sha256: "f00247ad8ee492cb70143917bd19f80056227f4ebd4263015727f02750e4fbd5"
+  "0.3.1":
+    url: "https://github.com/e-dant/watcher/archive/release/0.3.1.tar.gz"
+    sha256: "0fa79d21ac16c96b7ca50f2563aed9d8841e5b8f139af27d0b2cf199d0d281dc"
+
+patches:
+  "0.3.1":
+    - patch_file: "patches/0.3.1-fix-include.patch"
+      patch_description: "add missing include headers for some compilers"
+      patch_type: "portability"
+      patch_source: "https://github.com/e-dant/watcher/pull/18"

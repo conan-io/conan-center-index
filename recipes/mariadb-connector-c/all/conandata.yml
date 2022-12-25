@@ -8,23 +8,13 @@ sources:
 patches:
   "3.1.12":
     - patch_file: "patches/0001-fix-install-and-static-or-shared.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-msvc-no-override-md-zi.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-include-order-windows-winsock2.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0004-include-mysqld_error-header.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0005-fix-cmake-connectorname.patch"
-      base_path: "source_subfolder"
   "3.1.11":
     - patch_file: "patches/0001-fix-install-and-static-or-shared.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-msvc-no-override-md-zi.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-include-order-windows-winsock2.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0004-include-mysqld_error-header.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0005-fix-cmake-connectorname.patch"
-      base_path: "source_subfolder"

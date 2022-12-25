@@ -1,0 +1,4 @@
+sources:
+  "cci.20220929":
+    url: "https://github.com/KhronosGroup/OpenGL-Registry/archive/5bae8738b23d06968e7c3a41308568120943ae77.tar.gz"
+    sha256: "e69eb5738a517737d91717c4f9bb8da1e1fac7a04afe0fc24532ca92df1da53d"

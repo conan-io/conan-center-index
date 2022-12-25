@@ -1,0 +1,13 @@
+# We don't need a new verion here for each release of Npcap
+# Only a new version is required if the SDK version changes
+# You can find SDK version in https://github.com/nmap/npcap/blob/{GIT_TAG}/version.h
+
+sources:
+  # Newer versions at the top
+  "1.70":
+    sdk:
+      url: https://npcap.com/dist/npcap-sdk-1.13.zip
+      sha256: dad1f2bf1b02b787be08ca4862f99e39a876c1f274bac4ac0cedc9bbc58f94fd
+    license:
+      url: https://raw.githubusercontent.com/nmap/npcap/v1.70/LICENSE
+      sha256: 112d17c43097ae1740b7cb231850da597beeb02a845c566573504b2fbab233e8

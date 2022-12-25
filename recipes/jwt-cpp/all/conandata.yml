@@ -6,27 +6,32 @@ sources:
     url: "https://github.com/Thalhammer/jwt-cpp/archive/v0.5.1.tar.gz"
     sha256: "d8f5ffb361824630b3b6f4aad26c730c915081071040c232ac57947d6177ef4f"
   "0.5.0":
-    url: https://github.com/Thalhammer/jwt-cpp/archive/v0.5.0.tar.gz
-    sha256: 079a273f070dd11213e301712319a65881e51ab81535cc436d5313191df852a2
+    url: "https://github.com/Thalhammer/jwt-cpp/archive/v0.5.0.tar.gz"
+    sha256: "079a273f070dd11213e301712319a65881e51ab81535cc436d5313191df852a2"
   "0.4.0":
-    url: https://github.com/Thalhammer/jwt-cpp/archive/v0.4.0.tar.gz
-    sha256: f0dcc7b0e8bef8f9c3f434e7121f9941145042c9fe3055a5bdd709085a4f2be4
+    url: "https://github.com/Thalhammer/jwt-cpp/archive/v0.4.0.tar.gz"
+    sha256: "f0dcc7b0e8bef8f9c3f434e7121f9941145042c9fe3055a5bdd709085a4f2be4"
   "0.3.1":
-    url: https://github.com/Thalhammer/jwt-cpp/archive/v0.3.1.tar.gz
-    sha256: 399345e81883f2959df658cd945de39548ddfefdab2acf7b23ee07b9e9a02938
+    url: "https://github.com/Thalhammer/jwt-cpp/archive/v0.3.1.tar.gz"
+    sha256: "399345e81883f2959df658cd945de39548ddfefdab2acf7b23ee07b9e9a02938"
 patches:
   "0.6.0":
-    - patch_file: patches/0005-fix-picojson-header-location-for-conan.patch
-      base_path: source_subfolder
+    - patch_file: "patches/0005-fix-picojson-header-location-for-conan.patch"
+      patch_description: "Remove picojson namespace from its include"
+      patch_type: "conan"
   "0.5.1":
-    - patch_file: patches/0004-fix-picojson-header-location-for-conan.patch
-      base_path: source_subfolder
+    - patch_file: "patches/0004-fix-picojson-header-location-for-conan.patch"
+      patch_description: "Remove picojson namespace from its include"
+      patch_type: "conan"
   "0.5.0":
-    - patch_file: patches/0004-fix-picojson-header-location-for-conan.patch
-      base_path: source_subfolder
+    - patch_file: "patches/0004-fix-picojson-header-location-for-conan.patch"
+      patch_description: "Remove picojson namespace from its include"
+      patch_type: "conan"
   "0.4.0":
-    - patch_file: patches/0003-fix-picojson-header-location-for-conan.patch
-      base_path: source_subfolder
+    - patch_file: "patches/0003-fix-picojson-header-location-for-conan.patch"
+      patch_description: "Remove picojson namespace from its include"
+      patch_type: "conan"
   "0.3.1":
-    - patch_file: patches/0002-fix-openssl-change-version.patch
-      base_path: source_subfolder
+    - patch_file: "patches/0002-fix-openssl-change-version.patch"
+      patch_description: "Remove picojson namespace from its include"
+      patch_type: "conan"

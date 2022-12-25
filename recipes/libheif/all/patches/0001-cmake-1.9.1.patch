@@ -1,27 +1,146 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5076fec..71891d5 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -41,8 +41,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
+@@ -34,14 +34,10 @@ if(NOT MSVC)
+   add_definitions(-Wno-error=deprecated-declarations)
+ endif()
+ 
+-set(CMAKE_CXX_STANDARD 11)
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+-set(CMAKE_CXX_EXTENSIONS OFF)
+ 
  set(CMAKE_CXX_VISIBILITY_PRESET hidden)
  set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
  
 -set(CMAKE_POSITION_INDEPENDENT_CODE ON)
--
+ 
  # Create the compile command database for clang by default
  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
- 
-@@ -54,7 +52,7 @@ if (has_potentially_evaluated_expression)
-   add_definitions(-Wno-error=potentially-evaluated-expression)
+@@ -55,10 +51,20 @@ if (has_potentially_evaluated_expression)
  endif()
  
--LIST (APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
-+LIST (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
- find_package(Libde265 REQUIRED)
- find_package(X265)
- find_package(LibAOM)
-@@ -128,4 +126,3 @@ if(WITH_EXAMPLES)
+ LIST (APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
+-find_package(Libde265 REQUIRED)
+-find_package(X265)
+-find_package(LibAOM)
++if(WITH_LIBDE265)
++find_package(libde265 REQUIRED CONFIG)
++endif()
++if(WITH_X265)
++find_package(libx265 REQUIRED CONFIG)
++endif()
++if(WITH_AOM)
++find_package(libaom-av1 REQUIRED CONFIG)
++endif()
++if(WITH_DAV1D)
++find_package(dav1d REQUIRED CONFIG)
++endif()
+ 
++if(0)
+ if (LIBDE265_FOUND)
+     message("HEIF decoder, libde265: found")
+ else ()
+@@ -88,6 +94,7 @@ if (USE_LOCAL_DAV1D)
+ else ()
+     message("AVIF decoder, use local dav1d: no")
+ endif ()
++endif()
+ 
+ 
+ # Create libheif pkgconfig file
+@@ -128,4 +135,3 @@ if(WITH_EXAMPLES)
      add_subdirectory (examples)
  endif()
  add_subdirectory (libheif)
 -add_subdirectory (gdk-pixbuf)
+--- a/libheif/CMakeLists.txt
++++ b/libheif/CMakeLists.txt
+@@ -59,45 +59,36 @@ target_compile_definitions(heif
+                                LIBHEIF_EXPORTS
+                                HAVE_VISIBILITY)
+ 
+-if(LIBDE265_FOUND)
++target_compile_features(heif PRIVATE cxx_std_11)
++if(WITH_LIBDE265)
+     target_compile_definitions(heif PRIVATE HAVE_LIBDE265=1)
+     target_sources(heif
+                    PRIVATE
+                        heif_decoder_libde265.cc
+                        heif_decoder_libde265.h)
+ 
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LIBDE265_CFLAGS}")
+ 
+-    if (NOT "${LIBDE265_LIBRARY_DIRS}" STREQUAL "")
+-        set(LIBDE265_LINKDIR "-L${LIBDE265_LIBRARY_DIRS}")
+-    endif()
+ 
+-    include_directories(SYSTEM ${LIBDE265_INCLUDE_DIR})
+-    target_link_libraries(heif PRIVATE ${LIBDE265_LIBRARIES} ${LIBDE265_LINKDIR})
++    target_link_libraries(heif PRIVATE libde265)
+ 
+     install(FILES heif_decoder_libde265.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
+ endif()
+ 
+-if(X265_FOUND)
++if(WITH_X265)
+     target_compile_definitions(heif PRIVATE HAVE_X265=1)
+     target_sources(heif PRIVATE
+         heif_encoder_x265.cc
+         heif_encoder_x265.h
+     )
+ 
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${X265_CFLAGS}")
+ 
+-    if (NOT "${X265_LIBRARY_DIRS}" STREQUAL "")
+-        set(X265_LINKDIR "-L${X265_LIBRARY_DIRS}")
+-    endif()
+ 
+-    include_directories(SYSTEM ${X265_INCLUDE_DIR})
+-    target_link_libraries(heif PRIVATE ${X265_LIBRARIES} ${X265_LINKDIR})
++    target_link_libraries(heif PRIVATE libx265::libx265)
+ 
+     install(FILES heif_encoder_x265.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
+ endif()
+ 
+-if(AOM_FOUND)
++if(WITH_AOM)
+   target_compile_definitions(heif PRIVATE HAVE_AOM=1)
+   target_sources(heif PRIVATE
+     heif_decoder_aom.cc
+@@ -105,15 +96,9 @@ if(AOM_FOUND)
+     heif_encoder_aom.cc
+     heif_encoder_aom.h
+   )
+-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${AOM_CFLAGS}")
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${AOM_CFLAGS}")
+ 
+-  if (NOT "${AOM_LIBRARY_DIRS}" STREQUAL "")
+-    set(AOM_LINKDIR "-L${AOM_LIBRARY_DIRS}")
+-  endif()
+ 
+-  include_directories(SYSTEM ${AOM_INCLUDE_DIR})
+-  target_link_libraries(heif PRIVATE ${AOM_LIBRARIES} ${AOM_LINKDIR})
++  target_link_libraries(heif PRIVATE libaom-av1::libaom-av1)
+ endif()
+ 
+ if(USE_LOCAL_RAV1E)
+@@ -126,18 +111,14 @@ if(USE_LOCAL_RAV1E)
+     target_link_libraries(heif PRIVATE ${CMAKE_SOURCE_DIR}/third-party/rav1e/target/release/librav1e.a -ldl)
+ endif()
+ 
+-if(USE_LOCAL_DAV1D)
++if(WITH_DAV1D)
+     target_compile_definitions(heif PRIVATE HAVE_DAV1D=1)
+     target_sources(heif PRIVATE
+             heif_decoder_dav1d.cc
+             heif_decoder_dav1d.h
+             )
+-    target_include_directories(heif PRIVATE ${CMAKE_SOURCE_DIR}/third-party/dav1d/build
+-            ${CMAKE_SOURCE_DIR}/third-party/dav1d/build/include
+-            ${CMAKE_SOURCE_DIR}/third-party/dav1d/build/include/dav1d
+-            ${CMAKE_SOURCE_DIR}/third-party/dav1d/include)
+ 
+-    target_link_libraries(heif PRIVATE ${CMAKE_SOURCE_DIR}/third-party/dav1d/build/src/libdav1d.a -ldl)
++    target_link_libraries(heif PRIVATE dav1d::dav1d)
+ endif ()
+ 
+ write_basic_package_version_file(${PROJECT_NAME}-config-version.cmake COMPATIBILITY ExactVersion)

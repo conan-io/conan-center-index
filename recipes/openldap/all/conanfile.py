@@ -40,7 +40,7 @@ class OpenldapConan(ConanFile):
                   strip_root=True, destination=self._source_subfolder)
 
     def requirements(self):
-        self.requires("openssl/1.1.1n")
+        self.requires("openssl/1.1.1q")
         if self.options.with_cyrus_sasl:
             self.requires("cyrus-sasl/2.1.27")
 

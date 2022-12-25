@@ -1,0 +1,8 @@
+sources:
+  "1.10.2":
+    url: "https://github.com/OGRECave/ogre/archive/refs/tags/v1.10.2.tar.gz"
+    sha256: "db022c682376ace2abc45b42802048ad3a8458f5052cbc180b5fb470e4f06a53"
+patches:
+  "1.10.2":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-ogre-1.10.2-cmake-fixes.patch"

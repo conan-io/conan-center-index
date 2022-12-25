@@ -1,4 +1,7 @@
 sources:
+  "1.2.2":
+    url: "https://github.com/erikerlandson/st_tree/archive/version_1.2.2.tar.gz"
+    sha256: "7accf5e257407512c2025e074c9d990ebb1bf4beff22b4204b432e9b6c2b5e49"
   "1.2.1":
     url: "https://github.com/erikerlandson/st_tree/archive/refs/tags/version_1.2.1.tar.gz"
     sha256: "02161784c9092a3f78b3964fdf98bc58a3699b5e966f00554562428d804bb205"

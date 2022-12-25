@@ -1,0 +1,10 @@
+sources:
+  "3.3.2":
+    url: "https://github.com/microsoft/LightGBM/archive/refs/tags/v3.3.2.tar.gz"
+    sha256: "d7c0f842e94165578d5a0c046ca942838d1574149f98c84400ce511239d17b9f"
+patches:
+  "3.3.2":
+    - patch_file: "patches/0001-fix-includes.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-fix-openmp-clang.patch"
+      base_path: "source_subfolder"
