@@ -4,6 +4,7 @@ import re
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, load, mkdir, rm, save
+from conan.tools.scm import Version
 from conans import Meson, tools
 
 
