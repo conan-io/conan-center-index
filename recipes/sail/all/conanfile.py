@@ -1,9 +1,11 @@
-from conan.tools.files import rename
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rename, rmdir
+
+from conans import CMake
 import functools
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 class SAILConan(ConanFile):
     name = "sail"
@@ -48,9 +50,11 @@ class SAILConan(ConanFile):
         return "build"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        # self.copy("CMakeLists.txt")
+        export_conandata_patches(self)
+        #for patch in self.conan_data.get("patches", {}).get(self.version, []):
+        #    self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -79,8 +83,8 @@ class SAILConan(ConanFile):
             self.requires("libwebp/1.2.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(**self.conan_data["sources"][self.version],
+            strip_root=True, destination=self._source_subfolder)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -114,21 +118,27 @@ class SAILConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
+        #for patch in self.conan_data.get("patches", {}).get(self.version, []):
+        #    tools.patch(**patch)
 
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.txt",       src=self._source_subfolder, dst="licenses")
-        self.copy("LICENSE.INIH.txt",  src=self._source_subfolder, dst="licenses")
-        self.copy("LICENSE.MUNIT.txt", src=self._source_subfolder, dst="licenses")
+        copy(self, "LICENSE.txt",       src=self._source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.INIH.txt",  src=self._source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.MUNIT.txt", src=self._source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        #self.copy("LICENSE.txt",       src=self._source_subfolder, dst="licenses")
+        #self.copy("LICENSE.INIH.txt",  src=self._source_subfolder, dst="licenses")
+        #self.copy("LICENSE.MUNIT.txt", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
         # Remove CMake and pkg-config rules
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        #tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        #tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         # Move icons
         rename(self, os.path.join(self.package_folder, "share"),
                      os.path.join(self.package_folder, "res"))
