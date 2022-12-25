@@ -1,0 +1,42 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-CMAKE_MINIMUM_REQUIRED( VERSION 3.1 )
++CMAKE_MINIMUM_REQUIRED( VERSION 3.8 )
+ PROJECT( OpenDDL-Parser )
+ SET ( openddlparser_VERSION_MAJOR 0 )
+ SET ( openddlparser_VERSION_MINOR 1 )
+@@ -12,8 +12,6 @@ option( COVERALLS               "Generate coveralls data"
+ option( DDL_BUILD_TESTS         "Set to OFF to not build tests by default"                                    ON )
+ option( DDL_BUILD_PARSER_DEMO   "Set to OFF to opt out building parser demo"                                  ON )
+ 
+-set(CMAKE_CXX_STANDARD 11)
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ 
+ if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
+     find_package(Threads)
+@@ -53,7 +51,7 @@ SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/lib )
+ SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/lib )
+ SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin )
+ 
+-if( WIN32 AND NOT CYGWIN )
++if(MSVC)
+   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc" )  # Force to always compile with W4
+   if( CMAKE_CXX_FLAGS MATCHES "/W[0-4]" )
+     string( REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" )
+@@ -109,6 +107,7 @@ if ( DDL_STATIC_LIBRARY )
+ else()
+ 	ADD_LIBRARY( openddlparser SHARED ${openddlparser_src} ${openddlparser_headers})
+ endif()
++target_compile_features(openddlparser PUBLIC cxx_std_11)
+ 
+ set_target_properties( openddlparser PROPERTIES PUBLIC_HEADER "${openddlparser_headers}")
+ 
+@@ -179,6 +178,7 @@ include(GNUInstallDirs)
+ 
+ install(TARGETS openddlparser
+         EXPORT  openddlparser-targets
++        RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}"
+         LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+         ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+         PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/openddlparser")

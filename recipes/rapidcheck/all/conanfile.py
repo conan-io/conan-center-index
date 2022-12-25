@@ -1,6 +1,7 @@
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import functools
 import textwrap
 
 required_conan_version = ">=1.43.0"
@@ -33,7 +34,6 @@ class RapidcheckConan(ConanFile):
     }
 
     generators = "cmake", "cmake_find_package"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -62,7 +62,7 @@ class RapidcheckConan(ConanFile):
 
     def requirements(self):
         if self.options.enable_catch:
-            self.requires("catch2/2.13.8")
+            self.requires("catch2/2.13.9")
         if self.options.enable_gmock or self.options.enable_gtest:
             self.requires("gtest/1.11.0")
 
@@ -78,18 +78,17 @@ class RapidcheckConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["RC_ENABLE_RTTI"] = self.options.enable_rtti
-        self._cmake.definitions["RC_ENABLE_TESTS"] = False
-        self._cmake.definitions["RC_ENABLE_EXAMPLES"] = False
-        self._cmake.definitions["RC_ENABLE_CATCH"] = self.options.enable_catch
-        self._cmake.definitions["RC_ENABLE_GMOCK"] = self.options.enable_gmock
-        self._cmake.definitions["RC_ENABLE_GTEST"] = self.options.enable_gtest
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["RC_ENABLE_RTTI"] = self.options.enable_rtti
+        cmake.definitions["RC_ENABLE_TESTS"] = False
+        cmake.definitions["RC_ENABLE_EXAMPLES"] = False
+        cmake.definitions["RC_ENABLE_CATCH"] = self.options.enable_catch
+        cmake.definitions["RC_ENABLE_GMOCK"] = self.options.enable_gmock
+        cmake.definitions["RC_ENABLE_GTEST"] = self.options.enable_gtest
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -135,7 +134,7 @@ class RapidcheckConan(ConanFile):
 
         self.cpp_info.components["rapidcheck_rapidcheck"].set_property("cmake_target_name", "rapidcheck")
         self.cpp_info.components["rapidcheck_rapidcheck"].libs = ["rapidcheck"]
-        version = self.version[4:]
+        version = str(self.version)[4:]
         if tools.Version(version) < "20201218":
             if self.options.enable_rtti:
                 self.cpp_info.components["rapidcheck_rapidcheck"].defines.append("RC_USE_RTTI")

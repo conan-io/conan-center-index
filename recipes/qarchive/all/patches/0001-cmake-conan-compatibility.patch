@@ -12,16 +12,7 @@
 -find_package(LibArchive)
 -find_package(Qt5Core)
 +find_package(LibArchive REQUIRED)
-+find_package(qt REQUIRED COMPONENTS Core)
++find_package(Qt5 REQUIRED COMPONENTS Core)
  
  # cmake macros used
  include(GNUInstallDirs)
-@@ -73,7 +75,7 @@
-     ${PROJECT_BINARY_DIR}/config.h
- )	
- 
--target_link_libraries(QArchive PUBLIC Qt5::Core LibArchive::LibArchive)
-+target_link_libraries(QArchive PUBLIC qt::qt LibArchive::LibArchive)
- target_include_directories(QArchive INTERFACE "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/include>")
- target_include_directories(QArchive INTERFACE "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/QArchive>" )
- 

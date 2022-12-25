@@ -1,0 +1,35 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.8)
+ cmake_policy(SET CMP0048 NEW)
+ project(ezc3d VERSION 1.3.7)
+ set(EZC3D_NAME ${PROJECT_NAME})
+-set(CMAKE_CXX_STANDARD 11)
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ set(EZC3D_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+ set(EZC3D_VERSION_MINOR ${PROJECT_VERSION_MINOR})
+ set(EZC3D_VERSION_PATCH ${PROJECT_VERSION_PATCH})
+@@ -45,6 +43,7 @@ if (BUILD_SHARED_LIBS)
+ else()
+     add_library(${PROJECT_NAME} STATIC ${SRC_LIST})
+ endif()
++target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
+ set_target_properties(${PROJECT_NAME} PROPERTIES
+     DEBUG_POSTFIX "_debug"
+     CXX_VISIBILITY_PRESET hidden
+@@ -79,12 +78,12 @@ target_include_directories(${PROJECT_NAME} INTERFACE
+ 
+ # Install target
+ if(WIN32)
+-    set(${PROJECT_NAME}_LIB_FOLDER Lib)
++    set(${PROJECT_NAME}_LIB_FOLDER lib)
+     set(${PROJECT_NAME}_BIN_FOLDER bin)
+     set(${PROJECT_NAME}_INCLUDE_FOLDER include/${PROJECT_NAME})
+ else()
+-    set(${PROJECT_NAME}_LIB_FOLDER lib/${PROJECT_NAME})
+-    set(${PROJECT_NAME}_BIN_FOLDER lib/${PROJECT_NAME})
++    set(${PROJECT_NAME}_LIB_FOLDER lib)
++    set(${PROJECT_NAME}_BIN_FOLDER bin)
+     set(${PROJECT_NAME}_INCLUDE_FOLDER include/${PROJECT_NAME})
+ endif()
+ install(TARGETS ${PROJECT_NAME} EXPORT ezc3dTargets

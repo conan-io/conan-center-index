@@ -1,0 +1,41 @@
+From fab66efc6b64cfe6d21e4ab0b60d00a06ceee860 Mon Sep 17 00:00:00 2001
+From: Nicolas Mora <github@babelouest.org>
+Date: Sun, 23 Oct 2022 13:53:08 -0400
+Subject: [PATCH] Include pthread.h with websockets only
+
+Close #243
+---
+ include/ulfius.h | 2 +-
+ src/ulfius.c     | 1 -
+ 2 files changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/include/ulfius.h b/include/ulfius.h
+index 7b327dd..772554b 100644
+--- a/include/ulfius.h
++++ b/include/ulfius.h
+@@ -51,12 +51,12 @@ extern "C"
+ #ifndef U_DISABLE_WEBSOCKET
+   #include <poll.h>
+   #include <zlib.h>
++  #include <pthread.h>
+   #ifndef POLLRDHUP
+     #define POLLRDHUP 0x2000
+   #endif
+ #endif
+ 
+-#include <pthread.h>
+ #include <microhttpd.h>
+ 
+ #if defined(_WIN32) && !defined(U_DISABLE_WEBSOCKET)
+diff --git a/src/ulfius.c b/src/ulfius.c
+index c004048..4a147cf 100644
+--- a/src/ulfius.c
++++ b/src/ulfius.c
+@@ -30,7 +30,6 @@
+ #endif
+ 
+ #include <ctype.h>
+-#include <pthread.h>
+ #include <stdlib.h>
+ #include <string.h>
+ 

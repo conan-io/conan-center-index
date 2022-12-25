@@ -88,26 +88,26 @@ class PopplerConan(ConanFile):
             del self.options.with_libiconv
 
     def requirements(self):
-        self.requires("poppler-data/0.4.10")
-        self.requires("freetype/2.10.4")
+        self.requires("poppler-data/0.4.11")
+        self.requires("freetype/2.12.1")
         if self.options.get_safe("with_libiconv"):
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
         if self.options.fontconfiguration == "fontconfig":
             self.requires("fontconfig/2.13.93")
         if self.options.with_cairo:
             self.requires("cairo/1.17.4")
         if self.options.get_safe("with_glib"):
-            self.requires("glib/2.69.0")
+            self.requires("glib/2.73.2")
         if self.options.get_safe("with_gobject_introspection"):
-            self.requires("gobject-introspection/1.68.0")
+            self.requires("gobject-introspection/1.72.0")
         if self.options.with_qt:
-            self.requires("qt/6.1.2")
+            self.requires("qt/6.3.1")
         if self.options.get_safe("with_gtk"):
-            self.requires("gtk/4.1.2")
+            self.requires("gtk/4.7.0")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.4.0")
+            self.requires("openjpeg/2.5.0")
         if self.options.with_lcms:
-            self.requires("lcms/2.11")
+            self.requires("lcms/2.13.1")
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9d")
         if self.options.with_png:
@@ -115,11 +115,11 @@ class PopplerConan(ConanFile):
         if self.options.with_tiff:
             self.requires("libtiff/4.3.0")
         if self.options.splash:
-            self.requires("boost/1.76.0")
+            self.requires("boost/1.79.0")
         if self.options.with_libcurl:
-            self.requires("libcurl/7.78.0")
+            self.requires("libcurl/7.84.0")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
 
     @property
     def _minimum_compilers_version(self):

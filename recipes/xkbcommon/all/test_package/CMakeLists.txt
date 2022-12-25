@@ -1,8 +1,7 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package)
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(xkbcommon REQUIRED COMPONENTS libxkbcommon)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+add_executable(test_package test_package.cpp)
+target_link_libraries(test_package PRIVATE xkbcommon::libxkbcommon)

@@ -1,9 +1,15 @@
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.build import can_run
 
 
-class TestPackage(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
+    generators = "VirtualRunEnv"
+    test_type = "explicit"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def test(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
-            self.run("yasm --help", run_environment=True)
+        if can_run(self):
+            self.run("yasm --help", env="conanrun")

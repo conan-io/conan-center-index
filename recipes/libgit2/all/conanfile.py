@@ -41,13 +41,16 @@ class LibGit2Conan(ConanFile):
         "with_ntlmclient": True,
         "with_regex": "builtin",
     }
-
-    exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -74,9 +77,9 @@ class LibGit2Conan(ConanFile):
         if self.options.with_libssh2:
             self.requires("libssh2/1.10.0")
         if self._need_openssl:
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1o")
         if self._need_mbedtls:
-            self.requires("mbedtls/2.25.0")
+            self.requires("mbedtls/3.1.0")
         if self.options.get_safe("with_iconv"):
             self.requires("libiconv/1.16")
         if self.options.with_regex == "pcre":
@@ -143,6 +146,8 @@ class LibGit2Conan(ConanFile):
         cmake.definitions["USE_HTTPS"] = self._cmake_https[str(self.options.with_https)]
         cmake.definitions["USE_SHA1"] = self._cmake_sha1[str(self.options.with_sha1)]
 
+        if tools.Version(self.version) >= "1.4.0":
+            cmake.definitions["BUILD_TESTS"] = False
         cmake.definitions["BUILD_CLAR"] = False
         cmake.definitions["BUILD_EXAMPLES"] = False
         cmake.definitions["USE_HTTP_PARSER"] = "system"
@@ -155,27 +160,9 @@ class LibGit2Conan(ConanFile):
         cmake.configure()
         return cmake
 
-    def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
-                              "FIND_PKGLIBRARIES(LIBSSH2 libssh2)",
-                              "FIND_PACKAGE(Libssh2 REQUIRED)\n"
-                              "\tSET(LIBSSH2_FOUND ON)\n"
-                              "\tSET(LIBSSH2_INCLUDE_DIRS ${Libssh2_INCLUDE_DIRS})\n"
-                              "\tSET(LIBSSH2_LIBRARIES ${Libssh2_LIBRARIES})\n"
-                              "\tSET(LIBSSH2_LIBRARY_DIRS ${Libssh2_LIB_DIRS})")
-
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
-                              "FIND_PACKAGE(HTTP_Parser)",
-                              "FIND_PACKAGE(http_parser)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
-                              "AND HTTP_PARSER_VERSION_MAJOR EQUAL 2",
-                              "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
-                              "HTTP_PARSER_",
-                              "http_parser_")
-
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 

@@ -23,6 +23,9 @@ sources:
   "1.3.10":
     url: "https://github.com/eclipse/paho.mqtt.c/archive/v1.3.10.tar.gz"
     sha256: "c70db96e66adacae411d5d875fbb08bca6ff9945de3d215b3af93cbd22792db5"
+  "1.3.11":
+    url: "https://github.com/eclipse/paho.mqtt.c/archive/v1.3.11.tar.gz"
+    sha256: "d7bba3f8b8978802e11e2b1f28e96e6b7f4ed5d8a268af52a4d3b1bcbd1db16b"
 patches:
   "1.3.0":
     - patch_file: "patches/0001-fix-MinGW-and-OSX-builds-for-1-3-0.patch"

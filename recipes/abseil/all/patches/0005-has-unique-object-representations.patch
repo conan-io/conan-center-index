@@ -1,0 +1,11 @@
+--- a/absl/hash/internal/hash.h	2022-06-24 06:22:47.000000000 +1200
++++ b/absl/hash/internal/hash.h	2022-07-28 17:00:02.241173356 +1200
+@@ -444,7 +444,7 @@
+     // On other platforms, we assume that pointers-to-members do not have
+     // padding.
+ #ifdef __cpp_lib_has_unique_object_representations
+-    static_assert(std::has_unique_object_representations_v<T C::*>);
++    static_assert(std::has_unique_object_representations<T C::*>::value);
+ #endif  // __cpp_lib_has_unique_object_representations
+     return n;
+ #endif

@@ -2,3 +2,14 @@ sources:
   "3.5.0":
     url: "https://github.com/raysan5/raylib/archive/3.5.0.tar.gz"
     sha256: "761985876092fa98a99cbf1fef7ca80c3ee0365fb6a107ab901a272178ba69f5"
+  "4.0.0":
+    url: "https://github.com/raysan5/raylib/archive/4.0.0.tar.gz"
+    sha256: "11f6087dc7bedf9efb3f69c0c872f637e421d914e5ecea99bbe7781f173dc38c"
+
+patches:
+  "3.5.0":
+    - patch_file: "patches/0001-3.5.0-enable-cmake-build.patch"
+      base_path: "source_subfolder"
+  "4.0.0":
+    - patch_file: "patches/0001-4.0.0-enable-cmake-build.patch"
+      base_path: "source_subfolder"

@@ -1,0 +1,25 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 22f58c7..af6e3e2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -5,18 +5,8 @@ IF (${CMAKE_MAJOR_VERSION} GREATER 2)
+     CMAKE_POLICY(SET CMP0042 NEW)
+ ENDIF (${CMAKE_MAJOR_VERSION} GREATER 2)
+ 
+-INCLUDE(CheckCXXCompilerFlag)
+-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+-IF (COMPILER_SUPPORTS_CXX11)
+-    SET(STD_VERSION "-std=c++11")
+-ELSEIF(COMPILER_SUPPORTS_CXX0X)
+-    SET(STD_VERSION "-std=c++0x")
+-ELSE()
+-    IF (NOT WIN32)
+-        MESSAGE(FATAL_ERROR "Compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
+-    ENDIF()
+-ENDIF()
++set(CMAKE_CXX_STANDARD 11)
++set(STD_VERSION "")
+ 
+ INCLUDE(CheckFunctionExists)
+ INCLUDE(CheckIncludeFileCXX)

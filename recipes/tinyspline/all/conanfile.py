@@ -1,9 +1,13 @@
-from conans import ConanFile, CMake, tools
-import functools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir, save
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class TinysplineConan(ConanFile):
@@ -29,20 +33,9 @@ class TinysplineConan(ConanFile):
         "floating_point_precision": "double",
     }
 
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -52,68 +45,75 @@ class TinysplineConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         if not self.options.cxx:
-            del self.settings.compiler.libcxx
-            del self.settings.compiler.cppstd
+            try:
+                del self.settings.compiler.libcxx
+            except Exception:
+                pass
+            try:
+                del self.settings.compiler.cppstd
+            except Exception:
+                pass
 
     def validate(self):
-        if tools.Version(self.version) >= "0.4.0" and self.options.cxx:
-            if self.settings.compiler.get_safe("cppstd"):
-                tools.check_min_cppstd(self, 11)
+        if Version(self.version) >= "0.4.0" and self.options.cxx:
+            if self.info.settings.compiler.cppstd:
+                check_min_cppstd(self, 11)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["TINYSPLINE_BUILD_DOCS"] = False
-        cmake.definitions["TINYSPLINE_BUILD_EXAMPLES"] = False
-        cmake.definitions["TINYSPLINE_BUILD_TESTS"] = False
-        cmake.definitions["TINYSPLINE_FLOAT_PRECISION"] = self.options.floating_point_precision == "single"
-        cmake.definitions["TINYSPLINE_INSTALL_BINARY_DIR"] = "bin"
-        cmake.definitions["TINYSPLINE_INSTALL_LIBRARY_DIR"] = "lib"
-        if tools.Version(self.version) < "0.3.0":
-            cmake.definitions["TINYSPLINE_DISABLE_CXX"] = not self.options.cxx
-            cmake.definitions["TINYSPLINE_DISABLE_CSHARP"] = True
-            cmake.definitions["TINYSPLINE_DISABLE_D"] = True
-            cmake.definitions["TINYSPLINE_DISABLE_GOLANG"] = True
-            cmake.definitions["TINYSPLINE_DISABLE_JAVA"] = True
-            cmake.definitions["TINYSPLINE_DISABLE_LUA"] = True
-            cmake.definitions["TINYSPLINE_DISABLE_OCTAVE"] = True
-            cmake.definitions["TINYSPLINE_DISABLE_PHP"] = True
-            cmake.definitions["TINYSPLINE_DISABLE_PYTHON"] = True
-            cmake.definitions["TINYSPLINE_DISABLE_R"] = True
-            cmake.definitions["TINYSPLINE_DISABLE_RUBY"] = True
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["TINYSPLINE_BUILD_DOCS"] = False
+        tc.variables["TINYSPLINE_BUILD_EXAMPLES"] = False
+        tc.variables["TINYSPLINE_BUILD_TESTS"] = False
+        tc.variables["TINYSPLINE_FLOAT_PRECISION"] = self.options.floating_point_precision == "single"
+        tc.variables["TINYSPLINE_INSTALL_BINARY_DIR"] = "bin"
+        tc.variables["TINYSPLINE_INSTALL_LIBRARY_DIR"] = "lib"
+        if Version(self.version) < "0.3.0":
+            tc.variables["TINYSPLINE_DISABLE_CXX"] = not self.options.cxx
+            tc.variables["TINYSPLINE_DISABLE_CSHARP"] = True
+            tc.variables["TINYSPLINE_DISABLE_D"] = True
+            tc.variables["TINYSPLINE_DISABLE_GOLANG"] = True
+            tc.variables["TINYSPLINE_DISABLE_JAVA"] = True
+            tc.variables["TINYSPLINE_DISABLE_LUA"] = True
+            tc.variables["TINYSPLINE_DISABLE_OCTAVE"] = True
+            tc.variables["TINYSPLINE_DISABLE_PHP"] = True
+            tc.variables["TINYSPLINE_DISABLE_PYTHON"] = True
+            tc.variables["TINYSPLINE_DISABLE_R"] = True
+            tc.variables["TINYSPLINE_DISABLE_RUBY"] = True
         else:
-            cmake.definitions["TINYSPLINE_WARNINGS_AS_ERRORS"] = False
-            cmake.definitions["TINYSPLINE_ENABLE_CXX"] = self.options.cxx
-            cmake.definitions["TINYSPLINE_ENABLE_CSHARP"] = False
-            cmake.definitions["TINYSPLINE_ENABLE_DLANG"] = False
-            cmake.definitions["TINYSPLINE_ENABLE_GO"] = False
-            cmake.definitions["TINYSPLINE_ENABLE_JAVA"] = False
-            cmake.definitions["TINYSPLINE_ENABLE_LUA"] = False
-            cmake.definitions["TINYSPLINE_ENABLE_OCTAVE"] = False
-            cmake.definitions["TINYSPLINE_ENABLE_PHP"] = False
-            cmake.definitions["TINYSPLINE_ENABLE_PYTHON"] = False
-            cmake.definitions["TINYSPLINE_ENABLE_R"] = False
-            cmake.definitions["TINYSPLINE_ENABLE_RUBY"] = False
-            cmake.definitions["TINYSPLINE_ENABLE_ALL_INTERFACES"] = False
-        cmake.configure()
-        return cmake
+            tc.variables["TINYSPLINE_WARNINGS_AS_ERRORS"] = False
+            tc.variables["TINYSPLINE_ENABLE_CXX"] = self.options.cxx
+            tc.variables["TINYSPLINE_ENABLE_CSHARP"] = False
+            tc.variables["TINYSPLINE_ENABLE_DLANG"] = False
+            tc.variables["TINYSPLINE_ENABLE_GO"] = False
+            tc.variables["TINYSPLINE_ENABLE_JAVA"] = False
+            tc.variables["TINYSPLINE_ENABLE_LUA"] = False
+            tc.variables["TINYSPLINE_ENABLE_OCTAVE"] = False
+            tc.variables["TINYSPLINE_ENABLE_PHP"] = False
+            tc.variables["TINYSPLINE_ENABLE_PYTHON"] = False
+            tc.variables["TINYSPLINE_ENABLE_R"] = False
+            tc.variables["TINYSPLINE_ENABLE_RUBY"] = False
+            tc.variables["TINYSPLINE_ENABLE_ALL_INTERFACES"] = False
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         if self.options.cxx:
@@ -122,8 +122,7 @@ class TinysplineConan(ConanFile):
                 {"tinysplinecxx::tinysplinecxx": "tinyspline::libtinysplinecxx"}
             )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent("""\
@@ -132,16 +131,16 @@ class TinysplineConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
         return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        if tools.Version(self.version) < "0.3.0":
-            lib_prefix = "lib" if self._is_msvc and not self.options.shared else ""
-            lib_suffix = "d" if self._is_msvc and self.settings.build_type == "Debug" else ""
+        if Version(self.version) < "0.3.0":
+            lib_prefix = "lib" if is_msvc(self) and not self.options.shared else ""
+            lib_suffix = "d" if is_msvc(self) and self.settings.build_type == "Debug" else ""
             cpp_prefix = "cpp"
         else:
             lib_prefix = ""
@@ -155,7 +154,7 @@ class TinysplineConan(ConanFile):
         self.cpp_info.components["libtinyspline"].libs = ["{}tinyspline{}".format(lib_prefix, lib_suffix)]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libtinyspline"].system_libs = ["m"]
-        if tools.Version(self.version) >= "0.3.0" and self.options.shared and self.settings.os == "Windows":
+        if Version(self.version) >= "0.3.0" and self.options.shared and self.settings.os == "Windows":
             self.cpp_info.components["libtinyspline"].defines.append("TINYSPLINE_SHARED")
 
         if self.options.cxx:
@@ -165,7 +164,7 @@ class TinysplineConan(ConanFile):
             self.cpp_info.components["libtinysplinecxx"].libs = ["{}tinyspline{}{}".format(lib_prefix, cpp_prefix, lib_suffix)]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["libtinysplinecxx"].system_libs = ["m"]
-            if tools.Version(self.version) >= "0.3.0" and self.options.shared and self.settings.os == "Windows":
+            if Version(self.version) >= "0.3.0" and self.options.shared and self.settings.os == "Windows":
                 self.cpp_info.components["libtinysplinecxx"].defines.append("TINYSPLINE_SHARED")
 
             # Workaround to always provide a global target or pkg-config file with all components

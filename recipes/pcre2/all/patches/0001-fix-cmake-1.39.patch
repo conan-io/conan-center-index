@@ -1,0 +1,15 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -100,11 +100,11 @@
+ # 2021-08-28 PH increased minimum version
+ # 2021-08-28 PH added test for realpath()
+ 
+-PROJECT(PCRE2 C)
+ 
+ # Increased minimum to 2.8.5 to support GNUInstallDirs.
+ # Increased minimum to 3.0.0 because older than 2.8.12 is deprecated.
+ CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
++PROJECT(PCRE2 C)
+ 
+ # Set policy CMP0026 to avoid warnings for the use of LOCATION in
+ # GET_TARGET_PROPERTY. This should no longer be required.

@@ -1,5 +1,9 @@
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
 import os
-from conans import ConanFile, CMake, tools
+
+required_conan_version = ">=1.46.0"
 
 
 class Chipmunk2DConan(ConanFile):
@@ -10,23 +14,16 @@ class Chipmunk2DConan(ConanFile):
     topics = ("physics", "engine", "game development")
     description = "Chipmunk2D is a simple, lightweight, fast and portable 2D "\
                   "rigid body physics library written in C."
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
     }
     default_options = {
-        "shared": False, 
-        "fPIC": True
+        "shared": False,
+        "fPIC": True,
     }
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
-
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -35,40 +32,43 @@ class Chipmunk2DConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "Chipmunk2D-Chipmunk-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_DEMOS"] = False
-        self._cmake.definitions["INSTALL_DEMOS"] = False
-        self._cmake.definitions["INSTALL_STATIC"] = not self.options.shared
-        self._cmake.definitions["BUILD_SHARED"] = self.options.shared
-        self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_DEMOS"] = False
+        tc.variables["INSTALL_DEMOS"] = False
+        tc.variables["INSTALL_STATIC"] = not self.options.shared
+        tc.variables["BUILD_SHARED"] = self.options.shared
+        tc.variables["BUILD_STATIC"] = not self.options.shared
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
-        chipmunk_name = "chipmunk" if self.options.shared else "chipmunk_static"
-        self.cpp_info.components["chipmunk"].names["cmake_find_package"] = chipmunk_name
-        self.cpp_info.components["chipmunk"].names["cmake_find_package_multi"] = chipmunk_name
-        self.cpp_info.components["chipmunk"].libs = ["chipmunk"]
-        if self.settings.os == "Linux":
-            self.cpp_info.components["chipmunk"].system_libs = ["m", "pthread"]
+        self.cpp_info.libs = ["chipmunk"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["m", "pthread"]

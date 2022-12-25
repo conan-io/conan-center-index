@@ -1,6 +1,8 @@
-from conans import tools, ConanFile
+from conan import ConanFile
+from conan.tools.files import get, copy
+import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.47.0"
 
 
 class GslLiteConan(ConanFile):
@@ -31,7 +33,7 @@ class GslLiteConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return "source_subfolder"
+        return os.path.join(self.source_folder, "source_subfolder")
 
     @property
     def _contract_map(self):
@@ -42,15 +44,15 @@ class GslLiteConan(ConanFile):
         }
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def package(self):
-        self.copy("*gsl-lite.hpp", src=self._source_subfolder)
-        self.copy("*LICENSE", dst="licenses", keep_path=False)
+        copy(self, "*gsl-lite.hpp", src=self._source_subfolder, dst=self.package_folder)
+        copy(self, "LICENSE",  src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "gsl-lite")

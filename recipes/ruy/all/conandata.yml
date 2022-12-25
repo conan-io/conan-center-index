@@ -2,3 +2,6 @@ sources:
   "cci.20210622":
     url: "https://github.com/google/ruy/archive/9c56af3fce210a8a103eda19bd6f47c08a9e3d90.tar.gz"
     sha256: "8895874cfbf7263b028a6ec55b4b1737af0ea2b7bfedac90fd14d0b0a654f2dc"
+  "cci.20220628":
+    url: "https://github.com/google/ruy/archive/841ea4172ba904fe3536789497f9565f2ef64129.tar.gz"
+    sha256: "fbd20e6c8cd5cf8ef159f69600ea0c7ef0f1401a4c16a9cd04e5a12ffa9c6e14"

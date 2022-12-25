@@ -1,0 +1,12 @@
+--- a/tmxlite/CMakeLists.txt
++++ b/tmxlite/CMakeLists.txt
+@@ -70,6 +70,9 @@ else()
+     add_library(${PROJECT_NAME} SHARED ${PROJECT_SRC})
+   endif()
+ endif()
++find_package(miniz REQUIRED CONFIG)
++find_package(pugixml REQUIRED CONFIG)
++target_link_libraries(${PROJECT_NAME} PRIVATE miniz::miniz pugixml::pugixml)
+ 
+ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+ 

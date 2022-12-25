@@ -1,4 +1,6 @@
 versions:
+  "1.79.0":
+    folder: all
   "boost-1.78.0":
     folder: all
   "boost-1.74.0":

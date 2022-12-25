@@ -1,31 +1,33 @@
+from conan import ConanFile
+from conan.tools.cmake import CMake, cmake_layout
 import os
-from conans import ConanFile, tools, CMake
 
 
 class TestPackgeConan(ConanFile):
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeToolchain", "VirtualBuildEnv"
     test_type = "explicit"
-    generators = "cmake"
 
     def build_requirements(self):
-        self.build_requires(self.tested_reference_str)
+        self.tool_requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
-        # It only makes sense to build a library, if the target os is Android
+        # INFO: It only makes sense to build a library, if the target OS is Android
         if self.settings.os == "Android":
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            if self.settings.os == "Windows":
-                self.run("ndk-build.cmd --version", run_environment=True)
-            else:
-                self.run("ndk-build --version", run_environment=True)
+        if self.settings.os == "Windows":
+            self.run("ndk-build.cmd --version")
+        else:
+            self.run("ndk-build --version")
 
-        # Run the project that was built using Android NDK
+        # INFO: Run the project that was built using Android NDK
         if self.settings.os == "Android":
-            test_file = os.path.join("bin", "test_package")
+            test_file = os.path.join(self.cpp.build.bindirs[0], "test_package")
             assert os.path.exists(test_file)
-            # self.run("android-emulator {}".format(test_file), run_environment=True)

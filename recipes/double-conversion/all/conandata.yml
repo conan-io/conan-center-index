@@ -1,16 +1,19 @@
 sources:
-  "3.1.4":
-    url: "https://github.com/google/double-conversion/archive/v3.1.4.tar.gz"
-    sha256: "95004b65e43fefc6100f337a25da27bb99b9ef8d4071a36a33b5e83eb1f82021"
-  "3.1.5":
-    url: "https://github.com/google/double-conversion/archive/v3.1.5.tar.gz"
-    sha256: "a63ecb93182134ba4293fd5f22d6e08ca417caafa244afaa751cbfddf6415b13"
-  "3.1.6":
-    url: https://github.com/google/double-conversion/archive/v3.1.6.tar.gz
-    sha256: 8a79e87d02ce1333c9d6c5e47f452596442a343d8c3e9b234e8a62fce1b1d49c
-  "3.1.7":
-    url: "https://github.com/google/double-conversion/archive/v3.1.7.tar.gz"
-    sha256: "a0204d6ab48223f2c8f53a932014e7f245125e7a5267764b1fbeebe4fa0ee8b9"
+  "3.2.1":
+    url: "https://github.com/google/double-conversion/archive/v3.2.1.tar.gz"
+    sha256: "e40d236343cad807e83d192265f139481c51fc83a1c49e406ac6ce0a0ba7cd35"
   "3.2.0":
     url: "https://github.com/google/double-conversion/archive/v3.2.0.tar.gz"
     sha256: "3dbcdf186ad092a8b71228a5962009b5c96abde9a315257a3452eb988414ea3b"
+  "3.1.7":
+    url: "https://github.com/google/double-conversion/archive/v3.1.7.tar.gz"
+    sha256: "a0204d6ab48223f2c8f53a932014e7f245125e7a5267764b1fbeebe4fa0ee8b9"
+  "3.1.6":
+    url: https://github.com/google/double-conversion/archive/v3.1.6.tar.gz
+    sha256: 8a79e87d02ce1333c9d6c5e47f452596442a343d8c3e9b234e8a62fce1b1d49c
+  "3.1.5":
+    url: "https://github.com/google/double-conversion/archive/v3.1.5.tar.gz"
+    sha256: "a63ecb93182134ba4293fd5f22d6e08ca417caafa244afaa751cbfddf6415b13"
+  "3.1.4":
+    url: "https://github.com/google/double-conversion/archive/v3.1.4.tar.gz"
+    sha256: "95004b65e43fefc6100f337a25da27bb99b9ef8d4071a36a33b5e83eb1f82021"

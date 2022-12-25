@@ -1,0 +1,136 @@
+--- CMakeLists.txt	2022-05-24 09:38:00.964174000 +0200
++++ CMakeLists_new.txt	2022-05-24 10:32:47.001894600 +0200
+@@ -1022,22 +1022,22 @@
+ endif ()
+ 
+ if (BUILD_STATIC)
+-  add_library(cryptopp-static STATIC ${cryptopp_LIBRARY_SOURCES})
+-  cryptopp_target_compile_properties(cryptopp-static)
++  add_library(cryptopp-pem-static STATIC ${cryptopp_LIBRARY_SOURCES})
++  cryptopp_target_compile_properties(cryptopp-pem-static)
+   if (NOT ${CMAKE_VERSION} VERSION_LESS "2.8.11")
+-    target_include_directories(cryptopp-static PUBLIC $<BUILD_INTERFACE:${SRC_DIR}> $<INSTALL_INTERFACE:include>)
++    target_include_directories(cryptopp-pem-static PUBLIC $<BUILD_INTERFACE:${SRC_DIR}> $<INSTALL_INTERFACE:include>)
+   else ()
+-    set_target_properties(cryptopp-static PROPERTIES INCLUDE_DIRECTORIES "$<BUILD_INTERFACE:${SRC_DIR}> $<INSTALL_INTERFACE:include>")
++    set_target_properties(cryptopp-pem-static PROPERTIES INCLUDE_DIRECTORIES "$<BUILD_INTERFACE:${SRC_DIR}> $<INSTALL_INTERFACE:include>")
+   endif ()
+ endif ()
+ 
+ if (BUILD_SHARED)
+-  add_library(cryptopp-shared SHARED ${cryptopp_LIBRARY_SOURCES})
+-  cryptopp_target_compile_properties(cryptopp-shared)
++  add_library(cryptopp-pem-shared SHARED ${cryptopp_LIBRARY_SOURCES})
++  cryptopp_target_compile_properties(cryptopp-pem-shared)
+   if (NOT ${CMAKE_VERSION} VERSION_LESS "2.8.11")
+-    target_include_directories(cryptopp-shared PUBLIC $<BUILD_INTERFACE:${SRC_DIR}> $<INSTALL_INTERFACE:include>)
++    target_include_directories(cryptopp-pem-shared PUBLIC $<BUILD_INTERFACE:${SRC_DIR}> $<INSTALL_INTERFACE:include>)
+   else ()
+-    set_target_properties(cryptopp-shared PROPERTIES INCLUDE_DIRECTORIES "$<BUILD_INTERFACE:${SRC_DIR}> $<INSTALL_INTERFACE:include>")
++    set_target_properties(cryptopp-pem-shared PROPERTIES INCLUDE_DIRECTORIES "$<BUILD_INTERFACE:${SRC_DIR}> $<INSTALL_INTERFACE:include>")
+   endif ()
+ endif ()
+ 
+@@ -1046,15 +1046,15 @@
+   set(COMPAT_VERSION ${cryptopp_VERSION_MAJOR}.${cryptopp_VERSION_MINOR})
+ 
+   if (BUILD_STATIC)
+-    set_target_properties(cryptopp-static
++    set_target_properties(cryptopp-pem-static
+         PROPERTIES
+-        OUTPUT_NAME cryptopp)
++        OUTPUT_NAME cryptopp-pem)
+   endif ()
+   if (BUILD_SHARED)
+-    set_target_properties(cryptopp-shared
++    set_target_properties(cryptopp-pem-shared
+         PROPERTIES
+         SOVERSION ${COMPAT_VERSION}
+-        OUTPUT_NAME cryptopp)
++        OUTPUT_NAME cryptopp-pem)
+   endif ()
+ endif ()
+ 
+@@ -1062,11 +1062,11 @@
+ # similar to how the crypto++ 'make' tool works.
+ # see https://github.com/noloader/cryptopp-cmake/issues/32
+ if (BUILD_STATIC)
+-  add_custom_target(static DEPENDS cryptopp-static)
++  add_custom_target(static DEPENDS cryptopp-pem-static)
+ endif ()
+ if (BUILD_SHARED)
+-  add_custom_target(shared DEPENDS cryptopp-shared)
+-  add_custom_target(dynamic DEPENDS cryptopp-shared)
++  add_custom_target(shared DEPENDS cryptopp-pem-shared)
++  add_custom_target(dynamic DEPENDS cryptopp-pem-shared)
+ endif ()
+ 
+ #============================================================================
+@@ -1075,29 +1075,29 @@
+ 
+ if (WIN32)
+   if (BUILD_STATIC)
+-    target_link_libraries(cryptopp-static ws2_32)
++    target_link_libraries(cryptopp-pem-static ws2_32)
+   endif ()
+   if (BUILD_SHARED)
+-    target_link_libraries(cryptopp-shared ws2_32)
++    target_link_libraries(cryptopp-pem-shared ws2_32)
+   endif ()
+ endif ()
+ 
+ # This may need to be expanded to "Solaris"
+ if (CRYPTOPP_SOLARIS)
+   if (BUILD_STATIC)
+-    target_link_libraries(cryptopp-static nsl socket)
++    target_link_libraries(cryptopp-pem-static nsl socket)
+   endif ()
+   if (BUILD_SHARED)
+-    target_link_libraries(cryptopp-shared nsl socket)
++    target_link_libraries(cryptopp-pem-shared nsl socket)
+   endif ()
+ endif ()
+ 
+ find_package(Threads)
+ if (BUILD_STATIC)
+-  target_link_libraries(cryptopp-static ${CMAKE_THREAD_LIBS_INIT})
++  target_link_libraries(cryptopp-pem-static ${CMAKE_THREAD_LIBS_INIT})
+ endif ()
+ if (BUILD_SHARED)
+-  target_link_libraries(cryptopp-shared ${CMAKE_THREAD_LIBS_INIT})
++  target_link_libraries(cryptopp-pem-shared ${CMAKE_THREAD_LIBS_INIT})
+ endif ()
+ 
+ #============================================================================
+@@ -1107,7 +1107,7 @@
+ enable_testing()
+ if (BUILD_TESTING)
+   add_executable(cryptest ${cryptopp_SOURCES_TEST})
+-  target_link_libraries(cryptest cryptopp-static)
++  target_link_libraries(cryptest cryptopp-pem-static)
+ 
+   # Setting "cryptest" binary name to "cryptest.exe"
+   if (NOT (WIN32 OR CYGWIN))
+@@ -1159,9 +1159,9 @@
+ 
+ # Runtime package
+ if (BUILD_SHARED)
+-  export(TARGETS cryptopp-shared FILE ${export_name}.cmake )
++  export(TARGETS cryptopp-pem-shared FILE ${export_name}.cmake )
+   install(
+-      TARGETS cryptopp-shared
++      TARGETS cryptopp-pem-shared
+       EXPORT ${export_name}
+       DESTINATION ${CMAKE_INSTALL_LIBDIR}
+       RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+@@ -1172,8 +1172,8 @@
+ 
+ # Development package
+ if (BUILD_STATIC)
+-  export(TARGETS cryptopp-static FILE ${export_name}.cmake )
+-  install(TARGETS cryptopp-static EXPORT ${export_name} DESTINATION ${CMAKE_INSTALL_LIBDIR})
++  export(TARGETS cryptopp-pem-static FILE ${export_name}.cmake )
++  install(TARGETS cryptopp-pem-static EXPORT ${export_name} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ endif ()
+ install(FILES ${cryptopp_HEADERS} DESTINATION include/cryptopp)
+ 

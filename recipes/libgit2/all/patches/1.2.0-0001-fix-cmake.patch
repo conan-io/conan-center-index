@@ -1,0 +1,33 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 45dec27..783c657 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -178,11 +178,11 @@ ENDIF()
+ 
+ # Optional external dependency: http-parser
+ IF(USE_HTTP_PARSER STREQUAL "system")
+-	FIND_PACKAGE(HTTP_Parser)
++	FIND_PACKAGE(http_parser)
+ 
+-	IF (HTTP_PARSER_FOUND AND HTTP_PARSER_VERSION_MAJOR EQUAL 2)
+-		LIST(APPEND LIBGIT2_SYSTEM_INCLUDES ${HTTP_PARSER_INCLUDE_DIRS})
+-		LIST(APPEND LIBGIT2_LIBS ${HTTP_PARSER_LIBRARIES})
++	IF (http_parser_FOUND)
++		LIST(APPEND LIBGIT2_SYSTEM_INCLUDES ${http_parser_INCLUDE_DIRS})
++		LIST(APPEND LIBGIT2_LIBS ${http_parser_LIBRARIES})
+ 		LIST(APPEND LIBGIT2_PC_LIBS "-lhttp_parser")
+ 		ADD_FEATURE_INFO(http-parser ON "http-parser support (system)")
+ 	ELSE()
+@@ -231,7 +231,11 @@ ENDIF()
+ 
+ # Optional external dependency: libssh2
+ IF (USE_SSH)
+-	FIND_PKGLIBRARIES(LIBSSH2 libssh2)
++	FIND_PACKAGE(Libssh2 REQUIRED)
++	SET(LIBSSH2_FOUND ON)
++	SET(LIBSSH2_INCLUDE_DIRS ${Libssh2_INCLUDE_DIRS})
++	SET(LIBSSH2_LIBRARIES ${Libssh2_LIBRARIES})
++	SET(LIBSSH2_LIBRARY_DIRS ${Libssh2_LIB_DIRS})
+ ENDIF()
+ IF (LIBSSH2_FOUND)
+ 	SET(GIT_SSH 1)

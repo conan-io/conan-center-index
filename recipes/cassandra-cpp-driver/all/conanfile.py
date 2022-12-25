@@ -58,19 +58,19 @@ class CassandraCppDriverConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libuv/1.41.1")
+        self.requires("libuv/1.44.1")
         self.requires("http_parser/2.9.4")
-        self.requires("rapidjson/cci.20200410")
+        self.requires("rapidjson/cci.20211112")
 
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1q")
 
         if self.options.with_zlib:
-            self.requires("minizip/1.2.11")
-            self.requires("zlib/1.2.11")
+            self.requires("minizip/1.2.12")
+            self.requires("zlib/1.2.12")
 
         if self.options.use_atomic == "boost":
-            self.requires("boost/1.76.0")
+            self.requires("boost/1.79.0")
 
     def validate(self):
         if self.options.use_atomic == "boost":

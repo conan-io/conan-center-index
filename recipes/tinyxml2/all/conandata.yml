@@ -11,7 +11,5 @@ sources:
 patches:
   "8.0.0":
     - patch_file: "patches/0001-cmake-pic.patch"
-      base_path: "source_subfolder"
   "7.1.0":
     - patch_file: "patches/0001-cmake-pic.patch"
-      base_path: "source_subfolder"

@@ -1,0 +1,70 @@
+--- a/core/src/oned/ODCodabarReader.cpp
++++ b/core/src/oned/ODCodabarReader.cpp
+@@ -22,6 +22,7 @@
+ #include "ZXContainerAlgorithms.h"
+ 
+ #include <array>
++#include <limits>
+ 
+ namespace ZXing {
+ 
+--- a/core/src/oned/ODCode39Reader.cpp
++++ b/core/src/oned/ODCode39Reader.cpp
+@@ -23,6 +23,7 @@
+ 
+ #include <algorithm>
+ #include <array>
++#include <limits>
+ 
+ namespace ZXing {
+ 
+--- a/core/src/oned/ODRowReader.cpp
++++ b/core/src/oned/ODRowReader.cpp
+@@ -21,6 +21,7 @@
+ 
+ #include <cmath>
+ #include <algorithm>
++#include <limits>
+ #include <numeric>
+ 
+ namespace ZXing {
+--- a/core/src/oned/rss/ODRSSGenericAppIdDecoder.cpp
++++ b/core/src/oned/rss/ODRSSGenericAppIdDecoder.cpp
+@@ -22,6 +22,7 @@
+ #include "ZXStrConvWorkaround.h"
+ 
+ #include <algorithm>
++#include <limits>
+ #include <stdexcept>
+ 
+ namespace ZXing {
+--- a/core/src/pdf417/PDFReader.cpp
++++ b/core/src/pdf417/PDFReader.cpp
+@@ -27,6 +27,7 @@
+ #include <vector>
+ #include <cstdlib>
+ #include <algorithm>
++#include <limits>
+ 
+ namespace ZXing {
+ namespace Pdf417 {
+--- a/core/src/qrcode/QRDetector.cpp
++++ b/core/src/qrcode/QRDetector.cpp
+@@ -30,6 +30,7 @@
+ #include "DecodeStatus.h"
+ 
+ #include <cstdlib>
++#include <limits>
+ 
+ namespace ZXing {
+ namespace QRCode {
+--- a/core/src/qrcode/QREncoder.cpp
++++ b/core/src/qrcode/QREncoder.cpp
+@@ -30,6 +30,7 @@
+ #include "ZXTestSupport.h"
+ 
+ #include <array>
++#include <limits>
+ 
+ namespace ZXing {
+ namespace QRCode {

@@ -1,0 +1,33 @@
+* cmake_minimum_required() must be before project()
+* Do not force PIC
+* Do not force IPO
+* fix cross-compilation to iOS/tvOS/watchOS
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,5 +1,5 @@
+-project(lzfse C)
+ cmake_minimum_required(VERSION 2.8.6)
++project(lzfse C)
+ 
+ include(CheckCCompilerFlag)
+ 
+@@ -82,9 +82,7 @@ else()
+ endif()
+ 
+ set_target_properties(lzfse PROPERTIES
+-  POSITION_INDEPENDENT_CODE TRUE
+-  C_VISIBILITY_PRESET hidden
+-  INTERPROCEDURAL_OPTIMIZATION TRUE)
++  C_VISIBILITY_PRESET hidden)
+ 
+ if(BUILD_SHARED_LIBS)
+   set_property(TARGET lzfse APPEND PROPERTY COMPILE_DEFINITIONS LZFSE_DLL LZFSE_DLL_EXPORTS)
+@@ -97,6 +95,7 @@ if(NOT LZFSE_BUNDLE_MODE)
+ 
+   install(TARGETS lzfse lzfse_cli
+     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
++    BUNDLE DESTINATION "${CMAKE_INSTALL_BINDIR}"
+     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+   install(FILES src/lzfse.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")

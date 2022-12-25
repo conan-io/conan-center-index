@@ -1,0 +1,15 @@
+sources:
+  "cci.20210730":
+    pdfium-cmake:
+      # FIXME: create release + use hash
+      url: "https://github.com/madebr/pdfium-cmake/archive/0abc6ac8b3ecd2faac45bf46ee79bf381b5b5890.zip"
+      sha256: "8bcbb1eb6ec171604d669585f289c609d3b6c95045525d0e510c3fee7851d44e"
+    pdfium:
+      url: "https://pdfium.googlesource.com/pdfium/+archive/6c8cd905587809a0ff299d1edb34fc85bed4c976.tar.gz"
+      # sha256 is volatile on googlesource, no up-to-date github fork
+    trace_event:
+      url: "https://chromium.googlesource.com/chromium/src/base/trace_event/common/+archive/ad56859ef8c85cc09a3d8e95dcedadb5109a0af8.tar.gz"
+      # sha256 is volatile on googlesource, no up-to-date github fork
+    chromium_build:
+      url: "https://chromium.googlesource.com/chromium/src/build/+archive/95667421554b672f9330df8efb8148b6c2d00594.tar.gz"
+      # sha256 is volatile on googlesource, no up-to-date github fork

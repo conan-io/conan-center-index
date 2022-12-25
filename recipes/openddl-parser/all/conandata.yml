@@ -1,4 +1,10 @@
 sources:
+  "0.5.0":
+    url: "https://github.com/kimkulling/openddl-parser/archive/refs/tags/v0.5.0.tar.gz"
+    sha256: "0ad1a95462932da247a21fc3bb4560c3d9b134e15464f6a518c9e01becc14b60"
   "cci.20211217":
     url: "https://github.com/kimkulling/openddl-parser/archive/debfa7108de3390e3ff89061822f269dc79b2e20.tar.gz"
     sha256: "514c992c28348a47acce84521258447858b2dea5ca73b1563aa3113fae629606"
+patches:
+  "cci.20211217":
+    - patch_file: "patches/0001-fix-cmake.patch"

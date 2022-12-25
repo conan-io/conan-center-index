@@ -1,0 +1,31 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5abcc97..fca45ed 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -144,7 +144,7 @@ else()
+ endif()
+ 
+ check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+-if(COMPILER_SUPPORTS_MARCH_NATIVE)
++if(ENABLE_OPTIMIZATIONS AND COMPILER_SUPPORTS_MARCH_NATIVE)
+   set(MARCH_NATIVE_FLAGS "${MARCH_NATIVE_FLAGS} -march=native")
+   if(NOT CLANG AND MSVC)
+     # clang-cl does not know this argument
+@@ -155,7 +155,7 @@ endif()
+ 
+ message(STATUS "CMAKE_SYSTEM_PROCESSOR=<${CMAKE_SYSTEM_PROCESSOR}>")
+ 
+-if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86|x86_64|AMD64|amd64|i386|i686")
++if(ENABLE_OPTIMIZATIONS AND CMAKE_SYSTEM_PROCESSOR MATCHES "x86|x86_64|AMD64|amd64|i386|i686")
+ 
+   set(HAVE_NEON FALSE)
+   if(MSVC)
+@@ -255,7 +255,7 @@ else()
+   set(HAVE_NEON FALSE)
+   set(HAVE_SSE4_1 FALSE)
+ 
+-endif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86|x86_64|AMD64|amd64|i386|i686")
++endif(ENABLE_OPTIMIZATIONS AND CMAKE_SYSTEM_PROCESSOR MATCHES "x86|x86_64|AMD64|amd64|i386|i686")
+ 
+ # Compiler specific environments
+ if(CMAKE_COMPILER_IS_GNUCXX OR MINGW)

@@ -1,0 +1,8 @@
+sources:
+  "0.5.14":
+    url: "https://crypto.stanford.edu/pbc/files/pbc-0.5.14.tar.gz"
+    sha256: "772527404117587560080241cedaf441e5cac3269009cdde4c588a1dce4c23d2"
+patches:
+  "0.5.14":
+    - patch_file: "patches/0.5.14-0001-fix-config-sub-ios.patch"
+      base_path: ""

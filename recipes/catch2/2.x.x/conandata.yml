@@ -1,50 +1,11 @@
 sources:
-  2.9.2:
-    url: https://github.com/catchorg/Catch2/archive/v2.9.2.tar.gz
-    sha256: 54BEA6D80A388A80F895CD0E2343FCA72B0D9093A776AF40904AEFCE49C13BDA
-  2.11.0:
-    url: https://github.com/catchorg/Catch2/archive/v2.11.0.tar.gz
-    sha256: b9957af46a04327d80833960ae51cf5e67765fd264389bd1e275294907f1a3e0
-  2.11.1:
-    url: https://github.com/catchorg/Catch2/archive/v2.11.1.tar.gz
-    sha256: 9af06ca5b10362620c6c9c729821367e1aeb0f76adfc7bc3a468da83db3c50c6
-  2.11.3:
-    url: https://github.com/catchorg/Catch2/archive/v2.11.3.tar.gz
-    sha256: 9a6967138062688f04374698fce4ce65908f907d8c0fe5dfe8dc33126bd46543
-  2.12.0:
-    url: https://github.com/catchorg/Catch2/archive/v2.12.0.tar.gz
-    sha256: 6606b754363d3a4521bfecf717dc1972c50dca282bd428dfb1370ec8b9c26918
-  2.12.1:
-    url: https://github.com/catchorg/Catch2/archive/v2.12.1.tar.gz
-    sha256: e5635c082282ea518a8dd7ee89796c8026af8ea9068cd7402fb1615deacd91c3
-  2.12.2:
-    url: https://github.com/catchorg/Catch2/archive/v2.12.2.tar.gz
-    sha256: 4075d12aa4dc9a5bab00e82e0140b2969b88b8524b224e06ee129fabb9e2944b
-  2.12.3:
-    url: https://github.com/catchorg/Catch2/archive/v2.12.3.tar.gz
-    sha256: 78425e7055cea5bad1ff8db7ea0d6dfc0722ece156be1ccf3597c15e674e6943
-  2.12.4:
-    url: https://github.com/catchorg/Catch2/archive/v2.12.4.tar.gz
-    sha256: 5436725bbc6ee131a0bc9545bef31f0adabbb21fbc39fb6f1b2a42c12e4f8107
-  2.13.0:
-    url: https://github.com/catchorg/Catch2/archive/v2.13.0.tar.gz
-    sha256: 4e6608d3fb0247e2aa988735bae2064381b0ec712f47beb766dd761838a546b6
-  2.13.1:
-    url: https://github.com/catchorg/Catch2/archive/v2.13.1.tar.gz
-    sha256: 36bcc9e6190923961be11e589d747e606515de95f10779e29853cfeae560bd6c
-  2.13.2:
-    url: https://github.com/catchorg/Catch2/archive/v2.13.2.tar.gz
-    sha256: 5e39d9199f4f174dc3c8896fb4cf0a2ce9b9c358ae759b87fade6d615ca2d27e
-  2.13.3:
-    url: https://github.com/catchorg/Catch2/archive/v2.13.3.tar.gz
-    sha256: fedc5b008f7eb574f45098e7c7138211c543f0f8ad04792090e790511697a877
-  2.13.4:
-    url: https://github.com/catchorg/Catch2/archive/v2.13.4.tar.gz
-    sha256: e7eb70b3d0ac2ed7dcf14563ad808740c29e628edde99e973adad373a2b5e4df
-  2.13.6:
-    url: https://github.com/catchorg/Catch2/archive/v2.13.6.tar.gz
-    sha256: 48dfbb77b9193653e4e72df9633d2e0383b9b625a47060759668480fdf24fbd4
-  2.13.7:
+  "2.11.3":
+    url: "https://github.com/catchorg/Catch2/archive/v2.11.3.tar.gz"
+    sha256: "9a6967138062688f04374698fce4ce65908f907d8c0fe5dfe8dc33126bd46543"
+  "2.12.4":
+    url: "https://github.com/catchorg/Catch2/archive/v2.12.4.tar.gz"
+    sha256: "5436725bbc6ee131a0bc9545bef31f0adabbb21fbc39fb6f1b2a42c12e4f8107"
+  "2.13.7":
     url: "https://github.com/catchorg/Catch2/archive/v2.13.7.tar.gz"
     sha256: "3cdb4138a072e4c0290034fe22d9f0a80d3bcfb8d7a8a5c49ad75d3a5da24fae"
   "2.13.8":
@@ -53,7 +14,3 @@ sources:
   "2.13.9":
     url: "https://github.com/catchorg/Catch2/archive/v2.13.9.tar.gz"
     sha256: "06dbc7620e3b96c2b69d57bf337028bf245a211b3cddb843835bfe258f427a52"
-patches:
-  2.13.4:
-    - patch_file: patches/abs-static-cast.patch
-      base_path: source_subfolder

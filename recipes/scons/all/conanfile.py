@@ -67,7 +67,7 @@ class SConsConan(ConanFile):
             currentdir="$(dirname "$(realpath "$0")")"
 
             export PYTHONPATH="$currentdir/../res:$PYTHONPATH"
-            exec ${PYTHON:-python3} "$currentdir/../res/SCons/__main__.py" $*
+            exec ${PYTHON:-python3} "$currentdir/../res/SCons/__main__.py" "$@"
         """))
         self._chmod_x(self._scons_sh)
         tools.save(self._scons_cmd, textwrap.dedent(r"""

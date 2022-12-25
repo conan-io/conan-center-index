@@ -1,0 +1,290 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2db10e5..612d2cf 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -329,7 +329,7 @@ function(protobuf_generate_grpc_cpp)
+     return()
+   endif()
+ 
+-  set(_protobuf_include_path -I . -I ${_gRPC_PROTOBUF_WELLKNOWN_INCLUDE_DIR})
++  set(_protobuf_include_path -I . -I ${_gRPC_PROTOBUF_WELLKNOWN_INCLUDE_DIR} -I ${googleapis_RES_DIRS} -I ${grpc-proto_RES_DIRS})
+   foreach(FIL ${ARGN})
+     get_filename_component(ABS_FIL ${FIL} ABSOLUTE)
+     get_filename_component(FIL_WE ${FIL} NAME_WE)
+@@ -348,18 +348,15 @@ function(protobuf_generate_grpc_cpp)
+       OUTPUT "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.cc"
+              "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.h"
+              "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}_mock.grpc.pb.h"
+-             "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.cc"
+-             "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.h"
+       COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}
+       ARGS --grpc_out=generate_mock_code=true:${_gRPC_PROTO_GENS_DIR}
+-           --cpp_out=${_gRPC_PROTO_GENS_DIR}
+            --plugin=protoc-gen-grpc=${_gRPC_CPP_PLUGIN}
+            ${_protobuf_include_path}
+-           ${REL_FIL}
+-      DEPENDS ${ABS_FIL} ${_gRPC_PROTOBUF_PROTOC} ${_gRPC_CPP_PLUGIN}
++           ${FIL}
++      DEPENDS ${_gRPC_PROTOBUF_PROTOC} ${_gRPC_CPP_PLUGIN}
+       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+       COMMENT "Running gRPC C++ protocol buffer compiler on ${FIL}"
+-      VERBATIM)
++      )
+   endforeach()
+ endfunction()
+ 
+@@ -413,178 +410,28 @@ add_custom_target(tools
+   DEPENDS tools_c tools_cxx)
+ 
+ protobuf_generate_grpc_cpp(
+-  src/proto/grpc/channelz/channelz.proto
++  grpc/channelz/v1/channelz.proto
+ )
+ protobuf_generate_grpc_cpp(
+-  src/proto/grpc/core/stats.proto
++  grpc/core/stats.proto
+ )
+ protobuf_generate_grpc_cpp(
+-  src/proto/grpc/health/v1/health.proto
++  grpc/health/v1/health.proto
+ )
+ protobuf_generate_grpc_cpp(
+-  src/proto/grpc/lb/v1/load_balancer.proto
++  grpc/lb/v1/load_balancer.proto
+ )
+ protobuf_generate_grpc_cpp(
+-  src/proto/grpc/lookup/v1/rls.proto
++  grpc/lookup/v1/rls.proto
+ )
+ protobuf_generate_grpc_cpp(
+-  src/proto/grpc/lookup/v1/rls_config.proto
++  grpc/lookup/v1/rls_config.proto
+ )
+ protobuf_generate_grpc_cpp(
+-  src/proto/grpc/reflection/v1alpha/reflection.proto
++  grpc/reflection/v1alpha/reflection.proto
+ )
+ protobuf_generate_grpc_cpp(
+-  src/proto/grpc/status/status.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/benchmark_service.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/control.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/duplicate/echo_duplicate.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/echo.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/echo_messages.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/empty.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/messages.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/payloads.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/report_qps_scenario_service.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/simple_messages.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/stats.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/test.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/worker_service.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/ads_for_test.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/cds_for_test.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/eds_for_test.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/lds_rds_for_test.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/lrs_for_test.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/address.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/ads.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/aggregate_cluster.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/base.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/cluster.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/config_dump.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/config_source.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/csds.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/discovery.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/endpoint.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/expr.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/extension.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/fault.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/fault_common.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/http_connection_manager.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/http_filter_rbac.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/listener.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/load_report.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/lrs.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/metadata.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/orca_load_report.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/orca_service.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/path.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/percent.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/protocol.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/range.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/rbac.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/regex.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/route.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/router.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/string.proto
+-)
+-protobuf_generate_grpc_cpp(
+-  src/proto/grpc/testing/xds/v3/tls.proto
++  grpc/status/status.proto
+ )
+ protobuf_generate_grpc_cpp(
+   test/core/tsi/alts/fake_handshaker/handshaker.proto
+@@ -3275,10 +3122,8 @@ endif()
+ 
+ if(gRPC_BUILD_CODEGEN)
+ add_library(grpc++_reflection
+-  ${_gRPC_PROTO_GENS_DIR}/src/proto/grpc/reflection/v1alpha/reflection.pb.cc
+-  ${_gRPC_PROTO_GENS_DIR}/src/proto/grpc/reflection/v1alpha/reflection.grpc.pb.cc
+-  ${_gRPC_PROTO_GENS_DIR}/src/proto/grpc/reflection/v1alpha/reflection.pb.h
+-  ${_gRPC_PROTO_GENS_DIR}/src/proto/grpc/reflection/v1alpha/reflection.grpc.pb.h
++  ${_gRPC_PROTO_GENS_DIR}/grpc/reflection/v1alpha/reflection.grpc.pb.cc
++  ${_gRPC_PROTO_GENS_DIR}/grpc/reflection/v1alpha/reflection.grpc.pb.h
+   src/cpp/ext/proto_server_reflection.cc
+   src/cpp/ext/proto_server_reflection_plugin.cc
+ )
+@@ -3317,6 +3162,7 @@ target_link_libraries(grpc++_reflection
+   ${_gRPC_PROTOBUF_LIBRARIES}
+   ${_gRPC_ALLTARGETS_LIBRARIES}
+   grpc++
++  grpc-proto::grpc-proto
+ )
+ 
+ foreach(_hdr
+@@ -3872,10 +3718,8 @@ endif()
+ # See https://github.com/grpc/grpc/issues/19473
+ if(gRPC_BUILD_CODEGEN AND NOT gRPC_USE_PROTO_LITE)
+ add_library(grpcpp_channelz
+-  ${_gRPC_PROTO_GENS_DIR}/src/proto/grpc/channelz/channelz.pb.cc
+-  ${_gRPC_PROTO_GENS_DIR}/src/proto/grpc/channelz/channelz.grpc.pb.cc
+-  ${_gRPC_PROTO_GENS_DIR}/src/proto/grpc/channelz/channelz.pb.h
+-  ${_gRPC_PROTO_GENS_DIR}/src/proto/grpc/channelz/channelz.grpc.pb.h
++  ${_gRPC_PROTO_GENS_DIR}/grpc/channelz/v1/channelz.grpc.pb.cc
++  ${_gRPC_PROTO_GENS_DIR}/grpc/channelz/v1/channelz.grpc.pb.h
+   src/cpp/server/channelz/channelz_service.cc
+   src/cpp/server/channelz/channelz_service_plugin.cc
+ )
+@@ -3914,6 +3758,7 @@ target_link_libraries(grpcpp_channelz
+   ${_gRPC_PROTOBUF_LIBRARIES}
+   ${_gRPC_ALLTARGETS_LIBRARIES}
+   grpc++
++  grpc-proto::grpc-proto
+ )
+ 
+ foreach(_hdr
+diff --git a/src/cpp/ext/proto_server_reflection.h b/src/cpp/ext/proto_server_reflection.h
+index 04f1e63..82837e8 100644
+--- a/src/cpp/ext/proto_server_reflection.h
++++ b/src/cpp/ext/proto_server_reflection.h
+@@ -24,7 +24,7 @@
+ 
+ #include <grpcpp/grpcpp.h>
+ 
+-#include "src/proto/grpc/reflection/v1alpha/reflection.grpc.pb.h"
++#include "grpc/reflection/v1alpha/reflection.grpc.pb.h"
+ 
+ namespace grpc {
+ 
+diff --git a/src/cpp/server/channelz/channelz_service.h b/src/cpp/server/channelz/channelz_service.h
+index 824f0a9..bfa31a1 100644
+--- a/src/cpp/server/channelz/channelz_service.h
++++ b/src/cpp/server/channelz/channelz_service.h
+@@ -23,7 +23,7 @@
+ 
+ #include <grpcpp/grpcpp.h>
+ 
+-#include "src/proto/grpc/channelz/channelz.grpc.pb.h"
++#include "grpc/channelz/v1/channelz.grpc.pb.h"
+ 
+ namespace grpc {
+ 

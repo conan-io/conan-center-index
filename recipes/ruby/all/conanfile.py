@@ -12,7 +12,7 @@ except ImportError:
 
 from conan.tools.files import apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
-from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conans import tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -49,10 +49,6 @@ class RubyConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     @property
-    def _is_msvc(self):
-        return self.settings.compiler in ["Visual Studio", "msvc"]
-
-    @property
     def _windows_system_libs(self):
         return ["user32", "advapi32", "shell32", "ws2_32", "iphlpapi", "imagehlp", "shlwapi", "bcrypt"]
 
@@ -64,17 +60,17 @@ class RubyConan(ConanFile):
             return "-O2sy-"
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         self.requires("gmp/6.1.2")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1o")
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def validate(self):
-        if self._is_msvc and msvc_runtime_flag(self).startswith('MT'):
+        if is_msvc(self) and msvc_runtime_flag(self).startswith('MT'):
             # see https://github.com/conan-io/conan-center-index/pull/8644#issuecomment-1068974098
             raise ConanInvalidConfiguration("VS static runtime is not supported")
 
@@ -94,23 +90,28 @@ class RubyConan(ConanFile):
             if not os.path.exists(m[1]):
                 td.environment.remove("LDFLAGS", f"-F {m[1]}")
         if self.settings.os == "Windows":
-            if self._is_msvc:
+            if is_msvc(self):
                 td.environment.append("LIBS", [f"{lib}.lib" for lib in self._windows_system_libs])
             else:
                 td.environment.append("LDFLAGS", [f"-l{lib}" for lib in self._windows_system_libs])
         td.generate()
 
         tc = AutotoolsToolchain(self)
+        # TODO: removed in conan 1.49
         tc.default_configure_install_args = True
-        tc.configure_args = ["--disable-install-doc"]
-        if self.options.shared and not self._is_msvc:
-            tc.configure_args.append("--enable-shared")
+
+        tc.configure_args.append("--disable-install-doc")
+        if self.options.shared and not is_msvc(self):
+            # Force fPIC
             tc.fpic = True
+            if "--enable-shared" not in tc.configure_args:
+                tc.configure_args.append("--enable-shared")
+
         if cross_building(self) and is_apple_os(self.settings.os):
             apple_arch = to_apple_arch(self.settings.arch)
             if apple_arch:
                 tc.configure_args.append(f"--with-arch={apple_arch}")
-        if self._is_msvc:
+        if is_msvc(self):
             # this is marked as TODO in https://github.com/conan-io/conan/blob/01f4aecbfe1a49f71f00af8f1b96b9f0174c3aad/conan/tools/gnu/autotoolstoolchain.py#L23
             tc.build_type_flags.append(f"-{msvc_runtime_flag(self)}")
             # https://github.com/conan-io/conan/issues/10338
@@ -118,6 +119,7 @@ class RubyConan(ConanFile):
             if self.settings.build_type in ["Debug", "RelWithDebInfo"]:
                 tc.ldflags.append("-debug")
             tc.build_type_flags = [f if f != "-O2" else self._msvc_optflag for f in tc.build_type_flags]
+
         tc.generate()
 
     def build(self):
@@ -126,7 +128,7 @@ class RubyConan(ConanFile):
         at = Autotools(self)
 
         build_script_folder = self._source_subfolder
-        if self._is_msvc:
+        if is_msvc(self):
             self.conf["tools.gnu:make_program"] = "nmake"
             build_script_folder = os.path.join(build_script_folder, "win32")
 
@@ -166,7 +168,7 @@ class RubyConan(ConanFile):
             os.path.dirname(os.path.dirname(config_file))
         ]
         rubylib.libs = tools.collect_libs(self)
-        if self._is_msvc:
+        if is_msvc(self):
             if self.options.shared:
                 rubylib.libs = list(filter(lambda l: not l.endswith("-static"), rubylib.libs))
             else:

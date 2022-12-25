@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(test_package)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+project(test_package LANGUAGES CXX)
 
 option(TEST_UTIL "Test Util" ON)
 option(TEST_CRYPTO "Test crypto" ON)
@@ -11,6 +8,7 @@ option(TEST_NETSSL "Test NetSSL" ON)
 option(TEST_SQLITE "Test Sqlite" ON)
 option(TEST_ENCODINGS "Test Encodings" ON)
 option(TEST_JWT "Test JWT" ON)
+option(TEST_PROMETHEUS "Test Prometheus" ON)
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -35,6 +33,9 @@ if(TEST_ENCODINGS)
 endif()
 if(TEST_JWT)
     list(APPEND POCO_COMPONENTS JWT)
+endif()
+if(TEST_PROMETHEUS)
+    list(APPEND POCO_COMPONENTS Prometheus)
 endif()
 
 find_package(Poco REQUIRED ${POCO_COMPONENTS} CONFIG)
@@ -84,4 +85,9 @@ endif()
 if(TEST_JWT)
     add_executable(jwt test_jwt.cpp)
     target_link_libraries(jwt Poco::JWT)
+endif()
+
+if(TEST_PROMETHEUS)
+    add_executable(prometheus test_prometheus.cpp)
+    target_link_libraries(prometheus Poco::Prometheus)
 endif()

@@ -42,9 +42,9 @@ class TgbotConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.78.0")
-        self.requires("libcurl/7.80.0")
-        self.requires("openssl/1.1.1m")
+        self.requires("boost/1.79.0")
+        self.requires("libcurl/7.84.0")
+        self.requires("openssl/1.1.1q")
 
     @property
     def _required_boost_components(self):

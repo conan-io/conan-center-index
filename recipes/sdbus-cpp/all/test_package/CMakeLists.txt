@@ -1,8 +1,5 @@
-cmake_minimum_required(VERSION 3.13)
-project(PackageTest CXX)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+cmake_minimum_required(VERSION 3.15)
+project(PackageTest LANGUAGES CXX)
 
 find_package(sdbus-c++ REQUIRED)
 

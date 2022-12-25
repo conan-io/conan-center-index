@@ -1,7 +1,10 @@
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class Toml11Conan(ConanFile):
@@ -14,27 +17,31 @@ class Toml11Conan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
-
-    def package_id(self):
-        self.info.header_only()
+            check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
-        self.copy("toml.hpp", dst=os.path.join("include", "toml11"), src=self._source_subfolder)
-        self.copy("*.hpp", dst=os.path.join("include", "toml11", "toml"), src=os.path.join(self._source_subfolder, "toml"))
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "toml.hpp", src=self.source_folder, dst=os.path.join(self.package_folder, "include", "toml11"))
+        copy(self, "*.hpp", src=os.path.join(self.source_folder, "toml"), dst=os.path.join(self.package_folder, "include", "toml11", "toml"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "toml11")
         self.cpp_info.set_property("cmake_target_name", "toml11::toml11")
+        self.cpp_info.bindirs = []
         self.cpp_info.includedirs.append(os.path.join("include", "toml11"))
+        self.cpp_info.libdirs = []

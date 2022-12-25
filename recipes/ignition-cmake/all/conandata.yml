@@ -1,10 +1,11 @@
 sources:
   "2.5.0":
-    url: "https://github.com/ignitionrobotics/ign-cmake/archive/ignition-cmake2_2.5.0.zip"
-    sha256: "6d35f015e259ec955f3abda64358a705ce5b3376c3df2ab5f0c17bea4b4e2f68"
+    url: "https://github.com/gazebosim/gz-cmake/archive/ignition-cmake2_2.5.0.zip"
+    sha256: "30945958fbe598f654d30de926a798f9055b1c635f7d85441ecba1ebe0804d2d"
   "2.10.0":
-    url: "https://github.com/ignitionrobotics/ign-cmake/archive/refs/tags/ignition-cmake2_2.10.0.tar.gz"
-    sha256: "b6075d0835d50a7fe2e1cdfce9fabe74a76d3e5cf677ce1da203bfa88035e88a"
+    url: "https://github.com/gazebosim/gz-cmake/archive/refs/tags/ignition-cmake2_2.10.0.tar.gz"
+    sha256: "48a01131731b09c32cfc7d577c4db378fb02e49a071e24c9299624766e1d05a2"
+
 patches:
   "2.5.0":
     - base_path: "source_subfolder"

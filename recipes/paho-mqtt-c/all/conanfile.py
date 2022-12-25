@@ -61,7 +61,7 @@ class PahoMqttcConan(ConanFile):
 
     def requirements(self):
         if self.options.ssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1q")
 
     def validate(self):
         if not self.options.shared and tools.Version(self.version) < "1.3.4":

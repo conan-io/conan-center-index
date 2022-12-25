@@ -1,16 +1,40 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import Environment, VirtualRunEnv
+from conan.tools.build import can_run
+
 import os
+from pathlib import PurePath
 import sys
-from platform import python_version
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
+    test_type = "explicit"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def generate(self):
+        deps = CMakeDeps(self)
+        deps.generate()
+
+        toolchain = CMakeToolchain(self)
+        toolchain.variables["PYTHON_EXECUTABLE"] = PurePath(self._python_interpreter).as_posix()
+        toolchain.generate()
+
+        env = Environment()
+        env.append_path("PYTHONPATH", os.path.join(self.build_folder, self.cpp.build.libdirs[0]))
+        env.vars(self, scope="run").save_script("testrun")
+
+        run = VirtualRunEnv(self)
+        run.generate()
+
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["PYTHON_EXECUTABLE"] = self._python_interpreter
         cmake.configure()
         cmake.build()
 
@@ -21,7 +45,6 @@ class TestPackageConan(ConanFile):
         return sys.executable
 
     def test(self):
-        if not tools.cross_building(self.settings):
-            with tools.environment_append({"PYTHONPATH": "lib"}):
-                self.run("{} {}".format(self._python_interpreter, os.path.join(
-                    self.source_folder, "test.py")), run_environment=True)
+        if can_run(self):
+            module_path = os.path.join(self.source_folder, "test.py")
+            self.run(f"{self._python_interpreter} {module_path}", env="conanrun")

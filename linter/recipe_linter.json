@@ -1,0 +1,43 @@
+{
+    "problemMatcher": [
+        {
+            "owner": "recipe_linter_fatals",
+            "severity": "error",
+            "pattern": [
+                {
+                    "regexp": "(\\S+):(\\d+): \\[(F\\d+\\(\\S+\\)),\\s(.+?)?\\](.+)",
+                    "file": 1,
+                    "line": 2,
+                    "message": 5,
+                    "code": 3
+                }
+            ]
+        },
+        {
+            "owner": "recipe_linter_errors",
+            "severity": "error",
+            "pattern": [
+                {
+                    "regexp": "(\\S+):(\\d+): \\[(E\\d+\\(\\S+\\)),\\s(.+?)?\\](.+)",
+                    "file": 1,
+                    "line": 2,
+                    "message": 5,
+                    "code": 3
+                }
+            ]
+        },
+        {
+            "owner": "recipe_linter_warnings",
+            "severity": "warning",
+            "pattern": [
+                {
+                    "regexp": "(\\S+):(\\d+): \\[(W\\d+\\(\\S+\\)),\\s(.+?)?\\](.+)",
+                    "file": 1,
+                    "line": 2,
+                    "message": 5,
+                    "code": 3
+                }
+            ]
+        }
+    ]
+}

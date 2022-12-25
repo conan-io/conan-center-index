@@ -1,5 +1,5 @@
 import os
-from conans import ConanFile, tools
+from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
@@ -11,48 +11,67 @@ class StructoptConan(ConanFile):
         "single-header-lib", "header-library", "command-line", "arguments",
         "mit-license", "modern-cpp", "structopt", "lightweight", "reflection",
         "cross-platform", "library", "type-safety", "type-safe", "argparse",
-        "clap", "visit-struct-library", "magic-enum")
-    homepage = "https://github.com/p-ranav/structopt"
+        "clap",)
     license = "MIT"
+    homepage = "https://github.com/p-ranav/structopt"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "compiler", "os"
-    no_copy_source = True
+    settings = "os", "arch", "compiler", "build_type"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _supported_compiler(self):
-        compiler = str(self.settings.compiler)
-        version = tools.Version(self.settings.compiler.version)
-        if compiler == "Visual Studio" and version >= "15":
-            return True
-        elif compiler == "gcc" and version >= "9":
-            return True
-        elif compiler == "clang" and version >= "5":
-            return True
-        elif compiler == "apple-clang" and version >= "10":
-            return True
-        else:
-            self.output.warn("{} recipe lacks information about the {} compiler standard version support".format(self.name, compiler))
-        return False    
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
-        if not self._supported_compiler:
-            raise ConanInvalidConfiguration("structopt: Unsupported compiler: {}-{} "
-                                            "(https://github.com/p-ranav/structopt#compiler-compatibility)."
-                                            .format(self.settings.compiler, self.settings.compiler.version))
+    def requirements(self):
+        self.requires("magic_enum/0.8.0")
+        self.requires("visit_struct/1.0")
 
     def package_id(self):
         self.info.header_only()
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "9",
+            "Visual Studio": "15.0",
+            "clang": "5",
+            "apple-clang": "10",
+        }
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "17")
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version:
+            if tools.Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration("structopt: Unsupported compiler: {}-{} "
+                                                "(https://github.com/p-ranav/structopt#compiler-compatibility)."
+                                                .format(self.settings.compiler, self.settings.compiler.version))
+        else:
+            self.output.warn("{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
+    def _configure_cmake(self):
+        cmake = CMake(self)
+        cmake.configure(source_folder=self._source_subfolder)
+        return cmake
+
+    def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        tools.rmdir(os.path.join(self._source_subfolder, "include", "structopt", "third_party"))
+
+
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy(pattern="*.h", src=os.path.join(self._source_subfolder, "include"), dst="include")
-        self.copy(pattern="*.hpp", src=os.path.join(self._source_subfolder, "include"), dst="include")
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))

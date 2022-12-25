@@ -1,8 +1,12 @@
 sources:
+  "3.1.8":
+    url: "https://github.com/stephane/libmodbus/releases/download/v3.1.8/libmodbus-3.1.8.tar.gz"
+    sha256: "b122f2bc29f749702a22c0a760a7ca2182d541f5fa26bf25e3431f907b606f3c"
   "3.1.6":
     url: "https://libmodbus.org/releases/libmodbus-3.1.6.tar.gz"
     sha256: "d7d9fa94a16edb094e5fdf5d87ae17a0dc3f3e3d687fead81835d9572cf87c16"
 patches:
+  "3.1.8":
+    - patch_file: "patches/3.1.8-0001-msvc-fixes.patch"
   "3.1.6":
-    - patch_file: "patches/0001-msvc-fixes.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/3.1.6-0001-msvc-fixes.patch"
