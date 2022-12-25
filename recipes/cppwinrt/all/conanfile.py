@@ -38,6 +38,8 @@ class CppWinRtConan(ConanFile):
         if not is_msvc(self):
             raise ConanInvalidConfiguration(
                 f"{self.ref} can be built only by Visual Studio and msvc.")
+        if self.info.settings.build_type not in ["Debug", "Release"]:
+            raise ConanInvalidConfiguration("MSVC build supports only Debug or Release build type")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
