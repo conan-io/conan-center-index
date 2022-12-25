@@ -14,3 +14,6 @@ sources:
   "1.50.10":
     url: "https://download.gnome.org/sources/pango/1.50/pango-1.50.10.tar.xz"
     sha256: "7e5d2f1e40854d24a9a2c4d093bafe75dcdbeccdf1de43e4437332eabed64966"
+  "1.50.12":
+    url: "https://download.gnome.org/sources/pango/1.50/pango-1.50.12.tar.xz"
+    sha256: "caef96d27bbe792a6be92727c73468d832b13da57c8071ef79b9df69ee058fe3"
