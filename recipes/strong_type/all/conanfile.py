@@ -18,7 +18,7 @@ class StrongTypeConan(ConanFile):
     no_copy_source = True
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
