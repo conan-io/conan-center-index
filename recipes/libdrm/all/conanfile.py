@@ -3,9 +3,9 @@ import re
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, load, mkdir, rm, save
+from conan.tools.files import get, load, mkdir, rmdir, save
 from conan.tools.scm import Version
-from conans import Meson, tools
+from conans import Meson
 
 
 class LibdrmConan(ConanFile):
@@ -119,7 +119,7 @@ class LibdrmConan(ConanFile):
     def package(self):
         meson = self._configure_meson()
         meson.install()
-        rm(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         mkdir(self, os.path.join(self.package_folder, "licenses"))
         # Extract the License/s from the header to a file
         tmp = load(self, os.path.join(self._source_subfolder, "include", "drm", "drm.h"))
