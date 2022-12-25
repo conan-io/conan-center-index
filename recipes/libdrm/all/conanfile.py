@@ -1,8 +1,10 @@
 import os
 import re
 
-from conans import ConanFile, Meson, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, load, mkdir, rm, save
+from conans import Meson, tools
 
 
 class LibdrmConan(ConanFile):
@@ -63,7 +65,7 @@ class LibdrmConan(ConanFile):
         return "build_subfolder"
 
     def build_requirements(self):
-        self.build_requires("meson/0.59.0")
+        self.build_requires("meson/0.64.1")
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -86,15 +88,15 @@ class LibdrmConan(ConanFile):
             raise ConanInvalidConfiguration("libdrm supports only Linux or FreeBSD")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
     def _configure_meson(self):
         meson = Meson(self)
 
         defs={
-            "cairo-tests" : "false",
-            "install-test-programs": "false"
+            "cairo-tests" : "disabled" if Version(self.version) >= "2.4.113" else "false,
+            "install-test-programs": "disabled" if Version(self.version) >= "2.4.113" else "false
         }
         for o in ["libkms", "intel", "radeon", "amdgpu","nouveau", "vmwgfx", "omap", "exynos",
                   "freedreno", "tegra", "vc4", "etnaviv", "valgrind", "freedreno-kgsl", "udev"]:
@@ -116,12 +118,12 @@ class LibdrmConan(ConanFile):
     def package(self):
         meson = self._configure_meson()
         meson.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.mkdir(os.path.join(self.package_folder, "licenses"))
+        rm(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        mkdir(self, os.path.join(self.package_folder, "licenses"))
         # Extract the License/s from the header to a file
-        tmp = tools.load(os.path.join(self._source_subfolder, "include", "drm", "drm.h"))
+        tmp = load(self, os.path.join(self._source_subfolder, "include", "drm", "drm.h"))
         license_contents = re.search("\*\/.*(\/\*(\*(?!\/)|[^*])*\*\/)", tmp, re.DOTALL)[1]
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
 
     def package_info(self):
         self.cpp_info.components["libdrm_libdrm"].libs = ["drm"]
