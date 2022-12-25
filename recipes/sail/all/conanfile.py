@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rename, rmdir
-
 from conans import CMake
 import functools
 import os
@@ -47,10 +46,7 @@ class SAILConan(ConanFile):
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
-        # self.copy("CMakeLists.txt")
         export_conandata_patches(self)
-        #for patch in self.conan_data.get("patches", {}).get(self.version, []):
-        #    self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -115,8 +111,6 @@ class SAILConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        #for patch in self.conan_data.get("patches", {}).get(self.version, []):
-        #    tools.patch(**patch)
 
         cmake = self._configure_cmake()
         cmake.build()
@@ -125,14 +119,9 @@ class SAILConan(ConanFile):
         copy(self, "LICENSE.txt",       src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "LICENSE.INIH.txt",  src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "LICENSE.MUNIT.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        #self.copy("LICENSE.txt",       src=self._source_subfolder, dst="licenses")
-        #self.copy("LICENSE.INIH.txt",  src=self._source_subfolder, dst="licenses")
-        #self.copy("LICENSE.MUNIT.txt", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
         # Remove CMake and pkg-config rules
-        #tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        #tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         # Move icons
