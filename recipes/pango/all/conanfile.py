@@ -76,10 +76,10 @@ class PangoConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
         if self.options.with_xft == "auto":
             self.options.with_xft = self.settings.os in ["Linux", "FreeBSD"]
@@ -119,7 +119,7 @@ class PangoConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("pkgconf/1.9.3")
-        self.tool_requires("meson/0.63.3")
+        self.tool_requires("meson/0.64.1")
 
     def requirements(self):
         if self.options.with_freetype:
@@ -133,8 +133,8 @@ class PangoConan(ConanFile):
             self.requires("xorg/system")    # for xorg::xrender
         if self.options.with_cairo:
             self.requires("cairo/1.17.4")
-        self.requires("harfbuzz/5.3.0")
-        self.requires("glib/2.74.0")
+        self.requires("harfbuzz/6.0.0")
+        self.requires("glib/2.75.0")
         self.requires("fribidi/1.0.12")
 
     def source(self):
