@@ -6,5 +6,5 @@ find_package(pango CONFIG REQUIRED)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE pango::pango)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package/
+                 ${CMAKE_CURRENT_BINARY_DIR}/test_package/)
