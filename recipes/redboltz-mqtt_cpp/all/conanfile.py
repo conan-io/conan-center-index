@@ -4,6 +4,7 @@ from conan.tools import files
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
 
@@ -59,9 +60,9 @@ class MqttCppConan(ConanFile):
             "14": {
                 "Visual Studio": "15",
                 "gcc": "6",
-                "clang": "5",
-                "apple-clang": "8.0"
-            },
+                "clang": "3.4",
+                "apple-clang": "5.1"
+        },
         }[self._min_cppstd]
 
 
