@@ -1,0 +1,25 @@
+diff --git a/src/sail-codecs/webp/CMakeLists.txt b/src/sail-codecs/webp/CMakeLists.txt
+index 64d31e5a..d3a34985 100644
+--- a/src/sail-codecs/webp/CMakeLists.txt
++++ b/src/sail-codecs/webp/CMakeLists.txt
+@@ -1,10 +1,6 @@
+-find_library(WEBP_RELEASE_LIBRARY       NAMES webp                 ${SAIL_CODEC_WEBP_REQUIRED_OPTION})
+-find_library(WEBP_DEBUG_LIBRARY         NAMES webpd webp           ${SAIL_CODEC_WEBP_REQUIRED_OPTION})
+-find_library(WEBP_DEMUX_RELEASE_LIBRARY NAMES webpdemux            ${SAIL_CODEC_WEBP_REQUIRED_OPTION})
+-find_library(WEBP_DEMUX_DEBUG_LIBRARY   NAMES webpdemuxd webpdemux ${SAIL_CODEC_WEBP_REQUIRED_OPTION})
+-find_path(WEBP_INCLUDE_DIRS webp/decode.h                          ${SAIL_CODEC_WEBP_REQUIRED_OPTION})
++find_package(WebP ${SAIL_CODEC_WEBP_REQUIRED_OPTION})
+ 
+-if ((NOT WEBP_RELEASE_LIBRARY AND NOT WEBP_DEBUG_LIBRARY) OR (NOT WEBP_DEMUX_RELEASE_LIBRARY AND NOT WEBP_DEMUX_DEBUG_LIBRARY) OR NOT WEBP_INCLUDE_DIRS)
++if (NOT WebP_FOUND)
+     return()
+ endif()
+ 
+@@ -24,5 +20,5 @@ set(SAIL_CODECS_FIND_DEPENDENCIES ${SAIL_CODECS_FIND_DEPENDENCIES} "find_library
+ sail_codec(NAME webp
+             SOURCES helpers.h helpers.c webp.c
+             ICON webp.png
+-            DEPENDENCY_INCLUDE_DIRS ${WEBP_INCLUDE_DIRS}
+-            DEPENDENCY_LIBS optimized ${WEBP_RELEASE_LIBRARY} debug ${WEBP_DEBUG_LIBRARY} optimized ${WEBP_DEMUX_RELEASE_LIBRARY} debug ${WEBP_DEMUX_DEBUG_LIBRARY})
++            DEPENDENCY_INCLUDE_DIRS ${WebP_INCLUDE_DIRS}
++            DEPENDENCY_LIBS ${WebP_LIBRARIES})
