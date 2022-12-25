@@ -8,3 +8,7 @@ patches:
     - patch_file: "patches/0002-allow-non-x86-64-macos.patch"
     - patch_file: "patches/0003-allow-shared-MT.patch"
     - patch_file: "patches/0004-fix-ios.patch"
+    - patch_file: "patches/0005-remove-auto-ptr.patch"
+      patch_description: "Remove usage of auto_ptr to allow compilation with C++17 standard"
+      patch_type: "portability"
+      patch_source: "https://github.com/SFML/SFML/commit/bf92efe9a4035fee0258386173d53556aa196e49"
