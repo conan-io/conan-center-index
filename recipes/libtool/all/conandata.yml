@@ -8,6 +8,12 @@ sources:
 patches:
   "2.4.7":
     - patch_file: "patches/2.4.7-0001-libtool-relocatable.patch"
+      patch_type: portability
+      patch_description: Do not embed build-machine specific paths in the generated sources.
   "2.4.6":
     - patch_file: "patches/2.4.6-0001-libtool-relocatable.patch"
+      patch_type: portability
+      patch_description: Do not embed build-machine specific paths in the generated sources.
     - patch_file: "patches/2.4.6-0002-libtool-fix-type-libtool.patch"
+      patch_type: portability
+      patch_description: Fix error function signature
