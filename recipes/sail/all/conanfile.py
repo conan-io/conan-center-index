@@ -75,8 +75,8 @@ class SAILConan(ConanFile):
             self.requires("libwebp/1.2.4")
 
     def source(self):
-        get(**self.conan_data["sources"][self.version],
-            strip_root=True, destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self.source_folder)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
