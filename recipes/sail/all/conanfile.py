@@ -42,10 +42,6 @@ class SAILConan(ConanFile):
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
     @property
-    def _source_subfolder(self):
-        return "src"
-
-    @property
     def _build_subfolder(self):
         return "build"
 
@@ -84,7 +80,7 @@ class SAILConan(ConanFile):
 
     def source(self):
         get(**self.conan_data["sources"][self.version],
-            strip_root=True, destination=self._source_subfolder)
+            strip_root=True, destination=self.source_folder)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -126,9 +122,9 @@ class SAILConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE.txt",       src=self._source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "LICENSE.INIH.txt",  src=self._source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "LICENSE.MUNIT.txt", src=self._source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.txt",       src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.INIH.txt",  src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.MUNIT.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         #self.copy("LICENSE.txt",       src=self._source_subfolder, dst="licenses")
         #self.copy("LICENSE.INIH.txt",  src=self._source_subfolder, dst="licenses")
         #self.copy("LICENSE.MUNIT.txt", src=self._source_subfolder, dst="licenses")
