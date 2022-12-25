@@ -1,0 +1,28 @@
+diff --git a/src/sail-codecs/jpeg2000/CMakeLists.txt b/src/sail-codecs/jpeg2000/CMakeLists.txt
+index b3fe5c12..6fb3f644 100644
+--- a/src/sail-codecs/jpeg2000/CMakeLists.txt
++++ b/src/sail-codecs/jpeg2000/CMakeLists.txt
+@@ -1,13 +1,9 @@
+-find_library(JPEG2000_RELEASE_LIBRARY NAMES jasper         ${SAIL_CODEC_JPEG2000_REQUIRED_OPTION})
+-find_library(JPEG2000_DEBUG_LIBRARY   NAMES jasperd jasper ${SAIL_CODEC_JPEG2000_REQUIRED_OPTION})
+-find_path(JPEG2000_INCLUDE_DIRS jasper/jasper.h            ${SAIL_CODEC_JPEG2000_REQUIRED_OPTION})
++find_package(Jasper ${SAIL_CODEC_JPEG2000_REQUIRED_OPTION})
+ 
+-if ((NOT JPEG2000_RELEASE_LIBRARY AND NOT JPEG2000_DEBUG_LIBRARY) OR NOT JPEG2000_INCLUDE_DIRS)
++if (NOT Jasper_FOUND)
+     return()
+ endif()
+ 
+-set(JPEG2000_LIBRARY optimized ${JPEG2000_RELEASE_LIBRARY} debug ${JPEG2000_DEBUG_LIBRARY})
+-
+ # This will add the following CMake rules to the CMake config for static builds so a client
+ # application links against the required dependencies:
+ #
+@@ -22,5 +18,5 @@ set(SAIL_CODECS_FIND_DEPENDENCIES ${SAIL_CODECS_FIND_DEPENDENCIES} "find_library
+ sail_codec(NAME jpeg2000
+             SOURCES helpers.h helpers.c jpeg2000.c
+             ICON jpeg2000.png
+-            DEPENDENCY_INCLUDE_DIRS ${JPEG2000_INCLUDE_DIRS}
+-            DEPENDENCY_LIBS optimized ${JPEG2000_RELEASE_LIBRARY} debug ${JPEG2000_DEBUG_LIBRARY})
++            DEPENDENCY_INCLUDE_DIRS ${Jasper_INCLUDE_DIR}
++            DEPENDENCY_LIBS ${Jasper_LIBRARIES})
