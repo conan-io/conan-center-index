@@ -58,8 +58,8 @@ class MqttCppConan(ConanFile):
             },
             "14": {
                 "Visual Studio": "15",
-                "gcc": "5",
-                "clang": "4.0",
+                "gcc": "6",
+                "clang": "5",
                 "apple-clang": "8.0"
             },
         }[self._min_cppstd]
