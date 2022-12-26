@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.files import chdir, copy, get, rmdir, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import unix_path
+from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -64,8 +64,8 @@ class IslConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-        if self.settings.compiler == "msvc":
-            self.tool_requires("automake/1.16.4")
+        if is_msvc(self):
+            self.tool_requires("automake/1.16.5")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -78,21 +78,19 @@ class IslConan(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.configure_args.append(f'--with-int={self.options.with_int}')
         tc.configure_args.append("--enable-portable-binary")
-        tc.configure_args.append(f'--enable-shared={"yes" if self.options.shared else "no"}')
-        tc.configure_args.append(f'--enable-static={"yes" if not self.options.shared else "no"}')
         if self.options.with_int == "gmp":
             tc.configure_args.append("--with-gmp=system")
             tc.configure_args.append(f'--with-gmp-prefix={unix_path(self, self.dependencies["gmp"].package_folder)}')
-        if self.settings.compiler == "msvc":
+        if is_msvc(self):
             if Version(self.settings.compiler.version) >= 15:
                 tc.extra_cflags = ["-Zf"]
             if Version(self.settings.compiler.version) >= 12:
                 tc.extra_cflags = ["-FS"]
         env = tc.environment()
-        if self.settings.compiler == "msvc":
+        if is_msvc(self):
             env.define("AR", f'{unix_path(self, self.dependencies["automake"].ar_lib)} lib')
-            env.define("CC", f'{unix_path(self, self.dependencies["automake"].compile)} cl -nologo {self.settings.compiler.runtime}')
-            env.define("CXX", f'{unix_path(self, self.dependencies["automake"].compile)} cl -nologo {self.settings.compiler.runtime}')
+            env.define("CC", f'{unix_path(self, self.dependencies["automake"].compile)} cl -nologo')
+            env.define("CXX", f'{unix_path(self, self.dependencies["automake"].compile)} cl -nologo')
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
@@ -111,17 +109,13 @@ class IslConan(ConanFile):
         autotools.make()
 
     def package(self):
-        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"), keep_path=False)
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
 
-        os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libisl.la")))
+        rm(self, "*.la", os.path.join(os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_file_name", "ISL")
-        self.cpp_info.set_property("cmake_target_name", "ISL::ISL")
+        self.cpp_info.set_property("pkg_config_name", "isl")
         self.cpp_info.libs = ["isl"]
-
-        self.cpp_info.names["pkg_config"] = "isl"
