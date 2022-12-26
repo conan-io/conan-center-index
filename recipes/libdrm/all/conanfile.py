@@ -71,6 +71,8 @@ class LibdrmConan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
+        if Version(self.version) >= "2.4.111":
+            del self.options.libkms
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -99,9 +101,18 @@ class LibdrmConan(ConanFile):
             "cairo-tests" : "disabled" if Version(self.version) >= "2.4.113" else "false",
             "install-test-programs": "false"
         }
-        for o in ["libkms", "intel", "radeon", "amdgpu","nouveau", "vmwgfx", "omap", "exynos",
-                  "freedreno", "tegra", "vc4", "etnaviv", "valgrind", "freedreno-kgsl", "udev"]:
-            defs[o] = "true" if getattr(self.options, o) else "false"
+        if Version(self.version) < "2.4.111":
+            defs["libkms"] = "true" if self.options.libkms else "false"
+            
+        defs["freedreno-kgsl"] = "true" if self.options.freedreno-kgsl else "false"
+        defs["udev"] = "true" if self.options.udev else "false"
+            
+        for o in ["intel", "radeon", "amdgpu","nouveau", "vmwgfx", "omap", "exynos",
+                  "freedreno", "tegra", "vc4", "etnaviv", "valgrind"]:
+            if Version(self.version) >= "2.4.113":
+                defs[o] = "enabled" if getattr(self.options, o) else "disabled"
+            else:
+                defs[o] = "true" if getattr(self.options, o) else "false"
 
         defs["datadir"] = os.path.join(self.package_folder, "res")
         defs["mandir"] = os.path.join(self.package_folder, "res", "man")
@@ -133,11 +144,12 @@ class LibdrmConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.components["libdrm_libdrm"].requires = ["linux-headers-generic::linux-headers-generic"]
 
-        if self.options.libkms:
-            self.cpp_info.components["libdrm_libkms"].libs = ["kms"]
-            self.cpp_info.components["libdrm_libkms"].includedirs.append(os.path.join('include', 'libkms'))
-            self.cpp_info.components["libdrm_libkms"].requires = ["libdrm_libdrm"]
-            self.cpp_info.components["libdrm_libkms"].set_property("pkg_config_name", "libkms")
+        if Version(self.version) < "2.4.111":
+            if self.options.libkms:
+                self.cpp_info.components["libdrm_libkms"].libs = ["kms"]
+                self.cpp_info.components["libdrm_libkms"].includedirs.append(os.path.join('include', 'libkms'))
+                self.cpp_info.components["libdrm_libkms"].requires = ["libdrm_libdrm"]
+                self.cpp_info.components["libdrm_libkms"].set_property("pkg_config_name", "libkms")
 
         if self.options.vc4:
             self.cpp_info.components["libdrm_vc4"].requires = ["libdrm_libdrm"]
