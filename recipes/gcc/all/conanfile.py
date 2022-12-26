@@ -84,10 +84,6 @@ class GccConan(ConanFile):
         tc.configure_args.append("--disable-nls")
         tc.configure_args.append("--disable-multilib")
         tc.configure_args.append("--disable-bootstrap")
-        tc.configure_args.append(f"--prefix={self.package_folder}")
-        tc.configure_args.append(
-            f"--libexecdir={os.path.join(self.package_folder, 'bin', 'libexec')}"
-        )
         tc.configure_args.append(f"--with-zlib={self.dependencies['zlib'].package_folder}")
         tc.configure_args.append(f"--with-isl={self.dependencies['isl'].package_folder}")
         tc.configure_args.append(f"--with-gmp={self.dependencies['gmp'].package_folder}")
@@ -139,7 +135,7 @@ class GccConan(ConanFile):
 
     def package(self):
         autotools = Autotools(self)
-        autotools.make(target="install-strip")
+        autotools.install(target="install-strip")
 
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", self.package_folder, recursive=True)
