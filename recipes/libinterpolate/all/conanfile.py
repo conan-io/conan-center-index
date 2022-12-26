@@ -34,8 +34,6 @@ class PackageConan(ConanFile):
             "apple-clang": "10",
         }
 
-    def export_sources(self):
-        pass
 
     def layout(self):
         basic_layout(self, src_folder="src")
