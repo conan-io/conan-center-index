@@ -25,7 +25,7 @@ class OpenCVConan(ConanFile):
         "parallel": [False, "tbb", "openmp"],
         "with_ipp": [False, "intel-ipp", "opencv-icv"],
         "with_ade": [True, False],
-        "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
+        "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
         "with_png": [True, False],
         "with_tiff": [True, False],
         "with_jpeg2000": [False, "jasper", "openjpeg"],
@@ -181,6 +181,8 @@ class OpenCVConan(ConanFile):
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.1.4")
+        elif self.options.with_jpeg == "mozjpeg":
+            self.requires("mozjpeg/4.1.1")
         if self.options.get_safe("with_jpeg2000") == "jasper":
             self.requires("jasper/4.0.0")
         elif self.options.get_safe("with_jpeg2000") == "openjpeg":
@@ -575,8 +577,12 @@ class OpenCVConan(ConanFile):
                 components.append("{0}::{0}".format(self.options.with_jpeg2000))
             if self.options.with_png:
                 components.append("libpng::libpng")
-            if self.options.with_jpeg:
-                components.append("{0}::{0}".format(self.options.with_jpeg))
+            if self.options.with_jpeg == "libjpeg":
+                components.append("libjpeg::libjpeg")
+            elif self.options.with_jpeg == "libjpeg-turbo":
+                components.append("libjpeg-turbo::jpeg")
+            elif self.options.with_jpeg == "mozjpeg":
+                components.append("mozjpeg::libjpeg")
             if self.options.get_safe("with_tiff"):
                 components.append("libtiff::libtiff")
             if self.options.with_openexr:
