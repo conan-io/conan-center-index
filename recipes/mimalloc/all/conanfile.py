@@ -143,6 +143,13 @@ class MimallocConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             "mimalloc-redirect.lib",
                             "mimalloc-redirect32.lib")
+        if self.version in ["1.7.9", "2.0.9"]:
+            replace_in_file(self, os.path.join(self.source_folder, "include", "mimalloc.h"),
+                "template<class U> bool is_equal(const _mi_heap_stl_allocator_common<U, destroy>& x) const { return (this->heap == x.heap); }",
+                "template<class U, bool b> bool is_equal(const _mi_heap_stl_allocator_common<U, b>& x) const { return (this->heap == x.heap); }")
+            replace_in_file(self, os.path.join(self.source_folder, "include", "mimalloc.h"),
+                "template<class U> _mi_heap_stl_allocator_common(const _mi_heap_stl_allocator_common<U, destroy>& x) mi_attr_noexcept : heap(x.heap) { }",
+                "template<class U, bool b> _mi_heap_stl_allocator_common(const _mi_heap_stl_allocator_common<U, b>& x) mi_attr_noexcept : heap(x.heap) { }")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
