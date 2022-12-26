@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, rename
+from conan.tools.files import copy, get, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import PkgConfigDeps
 
