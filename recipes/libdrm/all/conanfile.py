@@ -97,7 +97,7 @@ class LibdrmConan(ConanFile):
 
         defs={
             "cairo-tests" : "disabled" if Version(self.version) >= "2.4.113" else "false",
-            "install-test-programs": "disabled" if Version(self.version) >= "2.4.113" else "false"
+            "install-test-programs": "false"
         }
         for o in ["libkms", "intel", "radeon", "amdgpu","nouveau", "vmwgfx", "omap", "exynos",
                   "freedreno", "tegra", "vc4", "etnaviv", "valgrind", "freedreno-kgsl", "udev"]:
