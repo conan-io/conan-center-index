@@ -38,7 +38,7 @@ class PackageConan(ConanFile):
         pass
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("boost/1.80.0", transitive_headers=True)
