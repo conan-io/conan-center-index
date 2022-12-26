@@ -1,12 +1,14 @@
 from conan import ConanFile, conan_version
 from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.gnu.get_gnu_triplet import _get_gnu_triplet
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
 from conan.tools.apple import XCRun
-from conan.tools.files import copy, get, replace_in_file, rmdir, rm
+from conan.tools.files import copy, get, replace_in_file, rmdir, rm, collect_libs
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.microsoft import is_msvc
+from conan.tools.build.cross_building import get_cross_building_settings
 import os
 
 required_conan_version = ">=1.55.0"
@@ -29,6 +31,7 @@ class GccConan(ConanFile):
         if self.settings.compiler in ["clang", "apple-clang"]:
             # Can't remove this from cxxflags with autotools - so get rid of it
             del self.settings.compiler.libcxx
+
 
     def build_requirements(self):
         if self.settings.os == "Linux":

@@ -39,7 +39,7 @@ class TestPackageConan(ConanFile):
         runenv.generate()
 
     def build(self):
-        self.run("echo PATH: $PATH")
+        self.run("echo PATH: $PATH", env="conanbuild")
         for language, files in self.file_io.items():
             self.output.info(f"Testing build using {language} compiler")
             # Confirm compiler is propagated to env
