@@ -104,7 +104,7 @@ class LibdrmConan(ConanFile):
         if Version(self.version) < "2.4.111":
             defs["libkms"] = "true" if self.options.libkms else "false"
             
-        defs["freedreno-kgsl"] = "true" if self.options.freedreno-kgsl else "false"
+        defs["freedreno-kgsl"] = "true" if getattr(self.options, "freedreno-kgsl") else "false"
         defs["udev"] = "true" if self.options.udev else "false"
             
         for o in ["intel", "radeon", "amdgpu","nouveau", "vmwgfx", "omap", "exynos",
