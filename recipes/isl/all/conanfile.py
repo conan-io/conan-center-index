@@ -81,14 +81,14 @@ class IslConan(ConanFile):
             tc.configure_args.append("--with-gmp=system")
             tc.configure_args.append(f'--with-gmp-prefix={unix_path(self, self.dependencies["gmp"].package_folder)}')
         if is_msvc(self):
-            compiler_version = conanfile.settings.get_safe("compiler.version")
+            compiler_version = self.settings.get_safe("compiler.version")
             if compiler_version >= 191:
                 tc.extra_cflags = ["-Zf"]
             if compiler_version >= 180:
                 tc.extra_cflags = ["-FS"]
         # Visual Studio support for Conan 1.x; Can be remvoed when 2.0 is default
         if self.settings.get_safe("compiler") == "Visual Studio":
-            compiler_version = conanfile.settings.get_safe("compiler.version")
+            compiler_version = self.settings.get_safe("compiler.version")
             if compiler_version >= 15:
                 tc.extra_cflags = ["-Zf"]
             if compiler_version >= 12:
