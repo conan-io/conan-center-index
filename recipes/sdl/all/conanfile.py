@@ -364,7 +364,7 @@ class SDLConan(ConanFile):
             tc.variables["SDL2_DISABLE_SDL2MAIN"] = not self.options.sdl2main
 
         # Add extra information collected from the deps
-        tc.variables["EXTRA_LDFLAGS"] = " ".join(cmake_extra_ldflags)
+        tc.variables["EXTRA_LDFLAGS"] = ";".join(cmake_extra_ldflags)
         tc.variables["CMAKE_REQUIRED_INCLUDES"] = ";".join(cmake_required_includes)
         cmake_extra_cflags = ["-I{}".format(path) for _, dep in self.dependencies.items() for path in dep.cpp_info.includedirs]
         tc.variables["EXTRA_CFLAGS"] = ";".join(cmake_extra_cflags)
