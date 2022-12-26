@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 #include "commata/parse_csv.hpp"
 
