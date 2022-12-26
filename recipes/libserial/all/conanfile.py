@@ -33,16 +33,9 @@ class LibserialConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "15",
-            "msvc": "191",
             "gcc": "7",
             "clang": "7",
-            "apple-clang": "10",
         }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
@@ -52,6 +45,9 @@ class LibserialConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration(f"{self.ref} support Linux only.")
+
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
@@ -83,7 +79,6 @@ class LibserialConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        # rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "Makefile.am", os.path.join(self.package_folder, "include", "libserial"))
 
