@@ -1,4 +1,7 @@
 sources:
+  "2.2.3":
+    url: "https://github.com/antony-jr/QArchive/archive/v2.2.3.tar.gz"
+    sha256: "2ada10efda34fe96c25744dd67e74ec68587d30ab01cc20be25cbcfb1e6262c4"
   "2.1.1":
     url: "https://github.com/antony-jr/QArchive/archive/v2.1.1.tar.gz"
     sha256: "4ed51121a5bc9b5981d2fa3927f951a6a91ccca233d6b6dc4fef55b4ca5a2d92"
@@ -11,16 +14,10 @@ sources:
 patches:
   "2.1.1":
     - patch_file: "patches/0001-cmake-conan-compatibility.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-export-symbols.patch"
-      base_path: "source_subfolder"
   "2.0.2":
     - patch_file: "patches/0001-cmake-conan-compatibility.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-export-symbols.patch"
-      base_path: "source_subfolder"
   "2.0.1":
     - patch_file: "patches/0001-cmake-conan-compatibility.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-export-symbols.patch"
-      base_path: "source_subfolder"

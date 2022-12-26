@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
@@ -63,22 +64,30 @@ class QwtConan(ConanFile):
         if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("Qwt recipe does not support cross-compilation yet")
         qt_options = self.dependencies["qt"].options
-        if self.options.widgets and not qt_options.widgets:
+        if self.info.options.widgets and not qt_options.widgets:
             raise ConanInvalidConfiguration("qwt:widgets=True requires qt:widgets=True")
-        if self.options.svg and not qt_options.qtsvg:
+        if self.info.options.svg and not qt_options.qtsvg:
             raise ConanInvalidConfiguration("qwt:svg=True requires qt:qtsvg=True")
-        if self.options.opengl and qt_options.opengl == "no":
+        if self.info.options.opengl and qt_options.opengl == "no":
             raise ConanInvalidConfiguration("qwt:opengl=True is not compatible with qt:opengl=no")
-        if self.options.designer and not (qt_options.qttools and qt_options.gui and qt_options.widgets):
+        if self.info.options.designer and not (qt_options.qttools and qt_options.gui and qt_options.widgets):
             raise ConanInvalidConfiguration("qwt:designer=True requires qt:qttools=True, qt::gui=True and qt::widgets=True")
 
     def build_requirements(self):
-        self.tool_requires("qt/5.15.7")
+        if hasattr(self, "settings_build") and cross_building(self):
+            self.tool_requires("qt/5.15.7")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        if hasattr(self, "settings_build") and cross_building(self):
+            env = VirtualBuildEnv(self)
+            env.generate()
+        else:
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         tc = CMakeToolchain(self)
         tc.variables["QWT_DLL"] = self.options.shared
         tc.variables["QWT_STATIC "] = not self.options.shared

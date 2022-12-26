@@ -1,5 +1,7 @@
 # Errors from the conan-center hook (KB-Hxxx)
 
+These are located at [conan-io/hooks](https://github.com/conan-io/hooks/blob/master/hooks/conan-center.py).
+
 #### **<a name="KB-H001">#KB-H001</a>: "DEPRECATED GLOBAL CPPSTD"**
 
 `Conan > 1.15` deprecated the usage of the global ``cppstd`` setting in favor of ``compiler.cppstd`` to [manage C++ standard](https://docs.conan.io/en/latest/howtos/manage_cpp_standard.html). As a subsetting of the compiler, it shouldn't be declared in the `conanfile.py`.
@@ -63,7 +65,7 @@ Here we use [configure()](https://docs.conan.io/en/latest/reference/conanfile/me
 
 #### **<a name="KB-H008">#KB-H008</a>: "VERSION RANGES"**
 
-It is not allowed to use [version ranges](https://docs.conan.io/en/latest/versioning/version_ranges.html) for the recipes in Conan center, where the dependency graph should be deterministic.
+See [Dependencies Version Ranges](adding_packages/dependencies.md#version-ranges) for details.
 
 #### **<a name="KB-H009">#KB-H009</a>: "RECIPE FOLDER SIZE"**
 
@@ -110,7 +112,12 @@ The binary packages should contain a folder named `licenses` containing the cont
 
 #### **<a name="KB-H013">#KB-H013</a>: "DEFAULT PACKAGE LAYOUT"**
 
-The binary packages shouldn't contain any other files or folder except the following: `["lib", "bin", "include", "res", "licenses"]`. If you are packaging an application put all the contents inside the `bin` folder.
+The binary packages generally do not need any other files or folder except the following: `["lib", "bin", "include", "res", "licenses"]`.
+This closely matches the default [`cpp_info`](https://docs.conan.io/en/latest/reference/conanfile/methods.html#package-info) from the client.
+The upstream package layout should be followed as much as possible, if a folder is not in the list (like `"share"`) then an exception
+can very easily be added by adding it to [this list of exceptions](https://github.com/conan-io/hooks/blob/d587cfebbf2b31c16e477b79c0c2fd4501f60fc8/hooks/conan-center.py#L1089-L1090).
+
+> **Note**: We are in the process of evaluating this rule, looking at calculating the size impact for problematic packages
 
 #### **<a name="KB-H014">#KB-H014</a>: "MATCHING CONFIGURATION"**
 
@@ -338,9 +345,7 @@ The duality creates a heterogeneous way of solving dependencies, making it diffi
 
 #### **<a name="KB-H056">#KB-H056</a>: "LICENSE PUBLIC DOMAIN"**
 
-[Public Domain](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) is not a license by itself, but consists of all the creative work to which
-no exclusive intellectual property rights apply. If a project is under Public Domain and there is no license listed, the
-[Unlicense](https://spdx.org/licenses/Unlicense) should be used as described in the [FAQ](faqs.md#what-license-should-i-use-for-public-domain).
+See [License Attribute](adding_packages/conanfile_attributes.md#license-attribute) for details.
 
 #### **<a name="KB-H057">#KB-H057</a>: "TOOLS RENAME"**
 
@@ -447,7 +452,7 @@ class SomeRecipe(ConanFile):
 
 There is the case when the package is header-only, but the options affects the generated artifact, (e.g. kanguru, pagmo2 ...), so you need to use `self.info.settings.clear()` instead.
 
-- For "tool" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/cmake/3.x.x/conanfile.py#L104-L105)) which only provide binaries, see [our packing policy](adding_packages/conanfile_attributes.md#settings) for more, should do as follows:
+- @prince-chrismc This needs to a better example; For "tool" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/cmake/3.x.x/conanfile.py#L104-L105)) which only provide binaries, see [our packaging policy](adding_packages/build_and_package.md) for more, should do as follows:
 
     ```python
         def package_id(self):

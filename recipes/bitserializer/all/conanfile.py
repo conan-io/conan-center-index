@@ -1,8 +1,12 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class BitserializerConan(ConanFile):
@@ -28,86 +32,92 @@ class BitserializerConan(ConanFile):
     no_copy_source = True
 
     @property
-    def _supported_compilers(self):
-        if tools.Version(self.version) >= "0.44":
-            return {
-                "gcc": "8",
-                "clang": "8",
-                "Visual Studio": "15",
-                "apple-clang": "12",
-            }
+    def _min_cppstd(self):
+        return "17"
 
+    @property
+    def _compilers_minimum_version(self):
         return {
             "gcc": "8",
-            "clang": "7",
+            "clang": "7" if Version(self.version) < "0.44" else "8",
             "Visual Studio": "15",
+            "msvc": "191",
             "apple-clang": "12",
         }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_cpprestsdk:
-            self.requires("cpprestsdk/2.10.18")
+            self.requires("cpprestsdk/2.10.18", transitive_headers=True, transitive_libs=True)
         if self.options.with_rapidjson:
-            self.requires("rapidjson/cci.20211112")
+            self.requires("rapidjson/cci.20220514", transitive_headers=True, transitive_libs=True)
         if self.options.with_pugixml:
-            self.requires("pugixml/1.11")
+            self.requires("pugixml/1.13", transitive_headers=True, transitive_libs=True)
+
+    def package_id(self):
+        self.info.clear()
 
     def validate(self):
-        # Check compiler for supporting C++ 17
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
-        try:
-            minimum_required_compiler_version = self._supported_compilers[str(self.settings.compiler)]
-            if tools.Version(self.settings.compiler.version) < minimum_required_compiler_version:
-                raise ConanInvalidConfiguration("This package requires c++17 support. The current compiler does not support it.")
-        except KeyError:
-            self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
+            )
 
         # Check stdlib ABI compatibility
         compiler_name = str(self.settings.compiler)
         if compiler_name == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
-            raise ConanInvalidConfiguration('Using %s with GCC requires "compiler.libcxx=libstdc++11"' % self.name)
+            raise ConanInvalidConfiguration(f'Using {self.ref} with GCC requires "compiler.libcxx=libstdc++11"')
         elif compiler_name == "clang" and self.settings.compiler.libcxx not in ["libstdc++11", "libc++"]:
-            raise ConanInvalidConfiguration('Using %s with Clang requires either "compiler.libcxx=libstdc++11"'
-                                            ' or "compiler.libcxx=libc++"' % self.name)
-
-    def package_id(self):
-        self.info.header_only()
+            raise ConanInvalidConfiguration(f'Using {self.ref} with Clang requires either "compiler.libcxx=libstdc++11"'
+                                            ' or "compiler.libcxx=libc++"')
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
-        self.copy(pattern="license.txt", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        copy(self, "license.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "bitserializer")
 
         # cpprestjson-core
         self.cpp_info.components["bitserializer-core"].set_property("cmake_target_name", "BitSerializer::core")
+        self.cpp_info.components["bitserializer-core"].bindirs = []
+        self.cpp_info.components["bitserializer-core"].libdirs = []
         if self.settings.compiler == "gcc" or (self.settings.os == "Linux" and self.settings.compiler == "clang"):
-            if tools.Version(self.settings.compiler.version) < 9:
+            if Version(self.settings.compiler.version) < 9:
                 self.cpp_info.components["bitserializer-core"].system_libs = ["stdc++fs"]
 
         # cpprestjson-archive
         if self.options.with_cpprestsdk:
             self.cpp_info.components["bitserializer-cpprestjson"].set_property("cmake_target_name", "BitSerializer::cpprestjson-archive")
+            self.cpp_info.components["bitserializer-cpprestjson"].bindirs = []
+            self.cpp_info.components["bitserializer-cpprestjson"].libdirs = []
             self.cpp_info.components["bitserializer-cpprestjson"].requires = ["bitserializer-core", "cpprestsdk::cpprestsdk"]
 
         # rapidjson-archive
         if self.options.with_rapidjson:
             self.cpp_info.components["bitserializer-rapidjson"].set_property("cmake_target_name", "BitSerializer::rapidjson-archive")
+            self.cpp_info.components["bitserializer-rapidjson"].bindirs = []
+            self.cpp_info.components["bitserializer-rapidjson"].libdirs = []
             self.cpp_info.components["bitserializer-rapidjson"].requires = ["bitserializer-core", "rapidjson::rapidjson"]
 
         # pugixml-archive
         if self.options.with_pugixml:
             self.cpp_info.components["bitserializer-pugixml"].set_property("cmake_target_name", "BitSerializer::pugixml-archive")
+            self.cpp_info.components["bitserializer-pugixml"].bindirs = []
+            self.cpp_info.components["bitserializer-pugixml"].libdirs = []
             self.cpp_info.components["bitserializer-pugixml"].requires = ["bitserializer-core", "pugixml::pugixml"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
