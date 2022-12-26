@@ -74,20 +74,22 @@ class OpenCVConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         if self.options.with_jpeg:
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         if self.options.with_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.39")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.33")
+            self.requires("jasper/4.0.0")
         if self.options.with_openexr:
+            # opencv 2.x doesn't support openexr >= 3
             self.requires("openexr/2.5.7")
         if self.options.with_tiff:
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.4.0")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.with_tbb:
+            # opencv 2.x doesn't support onetbb >= 2021
             self.requires("onetbb/2020.3")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
