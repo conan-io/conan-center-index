@@ -1,8 +1,9 @@
 from conan import ConanFile
-from conan.tools.files import chdir, copy, get, rmdir, apply_conandata_patches
+from conan.tools.files import chdir, copy, get, rm, rmdir, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
+from conan.tools.microsoft.visual import vs_ide_version
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -47,9 +48,9 @@ class IslConan(ConanFile):
         if self.options.with_int != "gmp":
             # FIXME: missing imath recipe
             raise ConanInvalidConfiguration("imath is not (yet) available on cci")
-        if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < 16 and self.settings.compiler.runtime == "MDd":
-            # gmp.lib(bdiv_dbm1c.obj) : fatal error LNK1318: Unexpected PDB error; OK (0)
-            raise ConanInvalidConfiguration("isl fails to link with this version of visual studio and MDd runtime")
+        if msvc_runtime_flag(self) == "MDd":
+            # isl fails to link with this version of visual studio and MDd runtime: gmp.lib(bdiv_dbm1c.obj) : fatal error LNK1318: Unexpected PDB error; OK (0)
+            check_min_vs(self, "192")
 
     def requirements(self):
         if self.options.with_int == "gmp":
@@ -81,13 +82,14 @@ class IslConan(ConanFile):
         if self.options.with_int == "gmp":
             tc.configure_args.append("--with-gmp=system")
             tc.configure_args.append(f'--with-gmp-prefix={unix_path(self, self.dependencies["gmp"].package_folder)}')
-        if is_msvc(self):
-            if Version(self.settings.compiler.version) >= 15:
+        if is_msvc(self) or self.settings.get_safe("compiler") == "Visual Studio":
+            compiler_version = vs_ide_version(self)
+            if compiler_version >= 15:
                 tc.extra_cflags = ["-Zf"]
-            if Version(self.settings.compiler.version) >= 12:
+            if compiler_version >= 12:
                 tc.extra_cflags = ["-FS"]
         env = tc.environment()
-        if is_msvc(self):
+        if is_msvc(self) or self.settings.get_safe("compiler") == "Visual Studio":
             env.define("AR", f'{unix_path(self, self.dependencies["automake"].ar_lib)} lib')
             env.define("CC", f'{unix_path(self, self.dependencies["automake"].compile)} cl -nologo')
             env.define("CXX", f'{unix_path(self, self.dependencies["automake"].compile)} cl -nologo')
@@ -113,7 +115,7 @@ class IslConan(ConanFile):
         autotools = Autotools(self)
         autotools.install()
 
-        rm(self, "*.la", os.path.join(os.path.join(self.package_folder, "lib"))
+        rm(self, "*.la", os.path.join(os.path.join(self.package_folder, "lib")))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
