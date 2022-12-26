@@ -42,9 +42,6 @@ class PackageConan(ConanFile):
         self.requires("boost/1.80.0", transitive_headers=True)
         self.requires("eigen/3.3.7", transitive_headers=True)
 
-    def package_id(self):
-        self.info.clear()
-
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
@@ -78,6 +75,9 @@ class PackageConan(ConanFile):
             dst=os.path.join(self.package_folder, "include"),
             src=os.path.join(self.source_folder, "src"),
         )
+
+    def package_id(self):
+        self.info.clear()
 
     def package_info(self):
         self.cpp_info.bindirs = []
