@@ -3,8 +3,6 @@ from conan.tools.files import chdir, copy, get, rm, rmdir, apply_conandata_patch
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, check_min_vs, unix_path
-from conan.tools.microsoft.visual import vs_ide_version
-from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -82,14 +80,21 @@ class IslConan(ConanFile):
         if self.options.with_int == "gmp":
             tc.configure_args.append("--with-gmp=system")
             tc.configure_args.append(f'--with-gmp-prefix={unix_path(self, self.dependencies["gmp"].package_folder)}')
-        if is_msvc(self) or self.settings.get_safe("compiler") == "Visual Studio":
-            compiler_version = vs_ide_version(self)
+        if is_msvc(self):
+            compiler_version = conanfile.settings.get_safe("compiler.version")
+            if compiler_version >= 191:
+                tc.extra_cflags = ["-Zf"]
+            if compiler_version >= 180:
+                tc.extra_cflags = ["-FS"]
+        # Visual Studio support for Conan 1.x; Can be remvoed when 2.0 is default
+        if self.settings.get_safe("compiler") == "Visual Studio":
+            compiler_version = conanfile.settings.get_safe("compiler.version")
             if compiler_version >= 15:
                 tc.extra_cflags = ["-Zf"]
             if compiler_version >= 12:
                 tc.extra_cflags = ["-FS"]
         env = tc.environment()
-        if is_msvc(self) or self.settings.get_safe("compiler") == "Visual Studio":
+        if is_msvc(self):
             env.define("AR", f'{unix_path(self, self.dependencies["automake"].ar_lib)} lib')
             env.define("CC", f'{unix_path(self, self.dependencies["automake"].compile)} cl -nologo')
             env.define("CXX", f'{unix_path(self, self.dependencies["automake"].compile)} cl -nologo')
