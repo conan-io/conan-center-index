@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.files import chdir, copy, get, rm, rmdir, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, check_min_vs, unix_path
 from conan.tools.microsoft.visual import vs_ide_version
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
