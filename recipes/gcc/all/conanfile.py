@@ -31,7 +31,7 @@ class GccConan(ConanFile):
             del self.settings.compiler.libcxx
 
     def build_requirements(self):
-        if self.info.settings.os == "Linux":
+        if self.settings.os == "Linux":
             # binutils recipe is broken for Macos, and Windows uses tools
             # distributed with msys/mingw
             self.tool_requires("binutils/2.38")
