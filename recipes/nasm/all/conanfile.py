@@ -2,12 +2,12 @@ from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.microsoft import NMakeToolchain, is_msvc
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
 import os
 import shutil
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.55.0"
 
 
 class NASMConan(ConanFile):
@@ -52,22 +52,26 @@ class NASMConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        tc = AutotoolsToolchain(self)
         if is_msvc(self):
-            tc.configure_args.append("-nologo")
-        if self.settings.arch == "x86":
-            tc.extra_cflags.append("-m32")
-        elif self.settings.arch == "x86_64":
-            tc.extra_cflags.append("-m64")
-        tc.generate()
+            tc = NMakeToolchain(self)
+            env = tc.environment
+            env.append("CL", " /nologo")
+            tc.generate() # generate() should take env as a parameter
+        else:
+            tc = AutotoolsToolchain(self)
+            if self.settings.arch == "x86":
+                tc.extra_cflags.append("-m32")
+            elif self.settings.arch == "x86_64":
+                tc.extra_cflags.append("-m64")
+            tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
-        autotools = Autotools(self)
         if is_msvc(self):
             with chdir(self, self.source_folder):
                 self.run(f'nmake /f {os.path.join("Mkfiles", "msvc.mak")}')
         else:
+            autotools = Autotools(self)
             autotools.configure()
 
             # GCC9 - "pure" attribute on function returning "void"
