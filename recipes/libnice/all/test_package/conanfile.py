@@ -1,8 +1,8 @@
 import os
 from conan import ConanFile
-from conans import tools
 from conan.tools.meson import Meson
 from conan.tools.layout import basic_layout
+from conan.tools.build import cross_building
 
 
 class LibniceTestConan(ConanFile):
@@ -23,6 +23,6 @@ class LibniceTestConan(ConanFile):
         basic_layout(self)
 
     def test(self):
-        if not tools.cross_building(self):
+        if not cross_building(self, skip_x64_x86=True):
             cmd = os.path.join(self.cpp.build.bindirs[0], "example")
             self.run(cmd, run_environment=True, env="conanrun")
