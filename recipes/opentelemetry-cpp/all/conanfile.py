@@ -73,7 +73,7 @@ class OpenTelemetryCppConan(ConanFile):
         if self.settings.os != "Linux" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} supports building shared libraries only on Linux")
 
-        if not self.options["grpc"].cpp_plugin:
+        if not self.dependencies["grpc"].options.cpp_plugin:
             raise ConanInvalidConfiguration(f"{self.ref} requires grpc with cpp_plugin=True")
 
     def build_requirements(self):
