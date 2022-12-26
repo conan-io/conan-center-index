@@ -1,4 +1,4 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
@@ -6,11 +6,10 @@ from conan.tools.apple import XCRun
 from conan.tools.files import copy, get, replace_in_file, rmdir, rm
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
 
 class GccConan(ConanFile):
