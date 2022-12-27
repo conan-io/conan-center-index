@@ -10,7 +10,7 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class XkbcommonConan(ConanFile):
@@ -52,25 +52,16 @@ class XkbcommonConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def requirements(self):
         self.requires("xkeyboard-config/system")
         if self.options.with_x11:
             self.requires("xorg/system")
         if self.options.get_safe("xkbregistry"):
-            self.requires("libxml2/2.9.14")
+            self.requires("libxml2/2.10.3")
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.21.0")
             if not self._has_build_profile:
@@ -81,7 +72,7 @@ class XkbcommonConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} is only compatible with Linux and FreeBSD")
 
     def build_requirements(self):
-        self.tool_requires("meson/0.63.3")
+        self.tool_requires("meson/0.64.1")
         self.tool_requires("bison/3.8.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")

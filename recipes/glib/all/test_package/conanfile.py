@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.build import can_run, cross_building
+from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.gnu import PkgConfig, PkgConfigDeps
@@ -22,8 +22,9 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CMAKE_CROSSCOMPILING"] = cross_building(self)
         tc.generate()
+        virtual_run_env = VirtualRunEnv(self)
+        virtual_run_env.generate()
         if self.settings.os == "Windows":
             deps = CMakeDeps(self)
             deps.generate()
@@ -33,15 +34,10 @@ class TestPackageConan(ConanFile):
             env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
             envvars = env.vars(self)
             envvars.save_script("pkg_config")
-
             virtual_build_env = VirtualBuildEnv(self)
             virtual_build_env.generate()
-            virtual_run_env = VirtualRunEnv(self)
-            virtual_run_env.generate()
             pkg_config_deps = PkgConfigDeps(self)
             pkg_config_deps.generate()
-            cmake_deps = CMakeDeps(self)
-            cmake_deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -57,4 +53,3 @@ class TestPackageConan(ConanFile):
                 pkg_config = PkgConfig(self, "gio-2.0", pkg_config_path=self.generators_folder)
                 gdbus_codegen = pkg_config.variables["gdbus_codegen"]
                 self.run(f"{gdbus_codegen} -h", env="conanrun")
-

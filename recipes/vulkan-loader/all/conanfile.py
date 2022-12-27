@@ -8,7 +8,7 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class VulkanLoaderConan(ConanFile):
@@ -60,18 +60,9 @@ class VulkanLoaderConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -84,23 +75,37 @@ class VulkanLoaderConan(ConanFile):
             self.requires("wayland/1.21.0")
 
     def validate(self):
-        if self.info.options.get_safe("with_wsi_directfb"):
+        if self.options.get_safe("with_wsi_directfb"):
             # TODO: directfb package
             raise ConanInvalidConfiguration("Conan recipe for DirectFB is not available yet.")
-        if not is_apple_os(self) and not self.info.options.shared:
+        if not is_apple_os(self) and not self.options.shared:
             raise ConanInvalidConfiguration(f"Static builds are not supported on {self.settings.os}")
-        if self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) < 15:
+        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < 15:
             # FIXME: It should build but Visual Studio 2015 container in CI of CCI seems to lack some Win SDK headers
             raise ConanInvalidConfiguration("Visual Studio < 2017 not yet supported in this recipe")
         # TODO: to replace by some version range check
         if self.dependencies["vulkan-headers"].ref.version != self.version:
             self.output.warn("vulkan-loader should be built & consumed with the same version than vulkan-headers.")
 
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output=output)
+            m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
     def build_requirements(self):
         if self._is_pkgconf_needed:
             self.tool_requires("pkgconf/1.9.3")
         if self._is_mingw:
             self.tool_requires("jwasm/2.13")
+        # see https://github.com/KhronosGroup/Vulkan-Loader/issues/1095#issuecomment-1352420456
+        if Version(self.version) >= "1.3.232" and not self._cmake_new_enough("3.16"):
+            self.tool_requires("cmake/3.25.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -127,6 +132,8 @@ class VulkanLoaderConan(ConanFile):
         tc.variables["BUILD_LOADER"] = True
         if self.settings.os == "Windows":
             tc.variables["USE_MASM"] = True
+        if Version(self.version) >= "1.3.212":
+            tc.variables["ENABLE_WERROR"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -141,9 +148,10 @@ class VulkanLoaderConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "FindVulkanHeaders.cmake"),
-                              "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
-                              "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
+        if Version(self.version) < "1.3.234":
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "FindVulkanHeaders.cmake"),
+                                  "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
+                                  "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
         # Honor settings.compiler.runtime
         replace_in_file(self, os.path.join(self.source_folder, "loader", "CMakeLists.txt"),
                               "if(${configuration} MATCHES \"/MD\")",
@@ -151,7 +159,8 @@ class VulkanLoaderConan(ConanFile):
 
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         # No warnings as errors
-        replace_in_file(self, cmakelists, "/WX", "")
+        if Version(self.version) < "1.3.212":
+            replace_in_file(self, cmakelists, "/WX", "")
         # This fix is needed due to CMAKE_FIND_PACKAGE_PREFER_CONFIG ON in CMakeToolchain (see https://github.com/conan-io/conan/issues/10387).
         # Indeed we want to use upstream Find modules of xcb, x11, wayland and directfb. There are properly using pkgconfig under the hood.
         replace_in_file(self, cmakelists, "find_package(XCB REQUIRED)", "find_package(XCB REQUIRED MODULE)")

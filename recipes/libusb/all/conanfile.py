@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.microsoft import is_msvc
 from conan.tools.files import get, chdir, rmdir, rm, replace_in_file
 from conan.tools.scm import Version
@@ -55,6 +56,9 @@ class LibUSBConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def layout(self):
+        pass
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not is_msvc(self) and not tools.get_env("CONAN_BASH_PATH"):
@@ -143,9 +147,10 @@ class LibUSBConan(ConanFile):
             autotools.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libusb-1.0"
+        self.cpp_info.set_property("pkg_config_name", "libusb-1.0")
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "libusb-1.0"))
         if self.settings.os in ["Linux", "FreeBSD"]:

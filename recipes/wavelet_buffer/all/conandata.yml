@@ -1,0 +1,24 @@
+sources:
+  "0.5.0":
+    url: "https://github.com/panda-official/WaveletBuffer/archive/refs/tags/v0.5.0.tar.gz"
+    sha256: "2b1fa552f9a6e032dfd9f59bd05c049bf0cac46aced7cd42f49ff0d020cfdb50"
+  "0.4.0":
+    url: "https://github.com/panda-official/WaveletBuffer/archive/refs/tags/v0.4.0.tar.gz"
+    sha256: "0a30080a6d1e9e7f8947ae0c3395d3c86888900c7ae09730f8dd0ed5138daab2"
+patches:
+  "0.5.0":
+    - patch_file: "patches/0001-0.4.0-cmake-no-openblas.patch"
+      patch_description: "Fix CMakeLists: OpenBLAS is not a dependency"
+      patch_type: "conan"
+      patch_source: "https://github.com/panda-official/WaveletBuffer/pull/49"
+    - patch_file: "patches/0002-0.4.0-cmake-find-jpeblib.patch"
+      patch_description: "Fix CMakeLists: link to jpeg lib only"
+      patch_type: "conan"
+  "0.4.0":
+    - patch_file: "patches/0001-0.4.0-cmake-no-openblas.patch"
+      patch_description: "Fix CMakeLists: OpenBLAS is not a dependency"
+      patch_type: "conan"
+      patch_source: "https://github.com/panda-official/WaveletBuffer/pull/49"
+    - patch_file: "patches/0002-0.4.0-cmake-find-jpeblib.patch"
+      patch_description: "Fix CMakeLists: link to jpeg lib only"
+      patch_type: "conan"
