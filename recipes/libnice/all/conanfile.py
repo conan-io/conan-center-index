@@ -57,7 +57,7 @@ class LibniceConan(ConanFile):
     def requirements(self):
         self.requires("glib/2.75.0")
         if self.options.crypto_library == "openssl":
-            self.requires("openssl/3.0.7")
+            self.requires("openssl/1.1.1s")
         if self.options.with_gstreamer:
             self.requires("gstreamer/1.19.2")
 
@@ -87,11 +87,6 @@ class LibniceConan(ConanFile):
         tc.generate()
 
     def build(self):
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "meson.build"),
-            "dependency('openssl', required: false,",
-            "dependency('openssl', required: false, method: 'pkg-config',")
         meson = Meson(self)
         meson.configure()
         meson.build()
