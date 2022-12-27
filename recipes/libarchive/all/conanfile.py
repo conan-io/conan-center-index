@@ -91,7 +91,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_nettle:
             self.requires("nettle/3.8.1")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/3.0.7")
         if self.options.with_libb2:
             self.requires("libb2/20190723")
         if self.options.with_lz4:
@@ -99,7 +99,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_lzo:
             self.requires("lzo/2.10")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.2.5")
+            self.requires("xz_utils/5.4.0")
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
         if self.options.get_safe("with_mbedtls"):
