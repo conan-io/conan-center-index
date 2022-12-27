@@ -1,9 +1,5 @@
 #include <SDL.h>
-#include <stdexcept>
-#include <string>
-#include <sstream>
 #include <iostream>
-#include <cstdlib>
 
 int main(int argc, char *argv[])
 {
