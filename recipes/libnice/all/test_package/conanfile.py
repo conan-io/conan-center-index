@@ -8,7 +8,6 @@ from conan.tools.build import cross_building
 class LibniceTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "PkgConfigDeps", "MesonToolchain"
-    apply_env = False
 
     def build_requirements(self):
         self.build_requires("meson/0.64.1")
