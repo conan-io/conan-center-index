@@ -1,7 +1,7 @@
-diff --git CMakeLists.txt CMakeLists.txt
-index 8bc6077..579a7b4 100644
---- CMakeLists.txt
-+++ CMakeLists.txt
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8bc6077..0fbed25 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
 @@ -6,7 +6,7 @@ set (HS_MINOR_VERSION 4)
  set (HS_PATCH_VERSION 0)
  set (HS_VERSION ${HS_MAJOR_VERSION}.${HS_MINOR_VERSION}.${HS_PATCH_VERSION})
@@ -58,6 +58,15 @@ index 8bc6077..579a7b4 100644
  
  # testing a builtin takes a little more work
  CHECK_C_SOURCE_COMPILES("void *aa_test(void *x) { return __builtin_assume_aligned(x, 16);}\nint main(void) { return 0; }" HAVE_CC_BUILTIN_ASSUME_ALIGNED)
+@@ -463,7 +463,7 @@ else()
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+ endif()
+ 
+-add_subdirectory(util)
++# add_subdirectory(util)
+ add_subdirectory(doc/dev-reference)
+ 
+ if (NOT WIN32)
 @@ -472,7 +472,7 @@ if (NOT WIN32)
  set(PCRE_REQUIRED_MAJOR_VERSION 8)
  set(PCRE_REQUIRED_MINOR_VERSION 41)
@@ -67,15 +76,18 @@ index 8bc6077..579a7b4 100644
  if (NOT CORRECT_PCRE_VERSION)
      message(STATUS "PCRE ${PCRE_REQUIRED_VERSION} or above not found")
  endif()
-@@ -483,16 +483,16 @@ if (CORRECT_PCRE_VERSION AND PCRE_BUILD_SOURCE AND BUILD_STATIC_LIBS)
+@@ -482,17 +482,19 @@ if (CORRECT_PCRE_VERSION AND PCRE_BUILD_SOURCE AND BUILD_STATIC_LIBS)
+     set(BUILD_CHIMERA TRUE)
  endif()
  
++if(0)
  add_subdirectory(unit)
 -if (EXISTS ${CMAKE_SOURCE_DIR}/tools/CMakeLists.txt)
 +if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tools/CMakeLists.txt)
      add_subdirectory(tools)
  endif()
 -if (EXISTS ${CMAKE_SOURCE_DIR}/chimera/CMakeLists.txt AND BUILD_CHIMERA)
++endif()
 +if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/chimera/CMakeLists.txt AND BUILD_CHIMERA)
      add_subdirectory(chimera)
  endif()
@@ -87,7 +99,7 @@ index 8bc6077..579a7b4 100644
  configure_file(src/hs_version.h.in ${PROJECT_BINARY_DIR}/hs_version.h)
  
  if (NOT WIN32)
-@@ -505,7 +505,7 @@ if (NOT WIN32)
+@@ -505,7 +507,7 @@ if (NOT WIN32)
      endforeach()
  
      configure_file(libhs.pc.in libhs.pc @ONLY) # only replace @ quoted vars
@@ -96,7 +108,7 @@ index 8bc6077..579a7b4 100644
          DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
  endif()
  
-@@ -524,7 +524,7 @@ if (WIN32)
+@@ -524,7 +526,7 @@ if (WIN32)
  set(PCRE_REQUIRED_MAJOR_VERSION 8)
  set(PCRE_REQUIRED_MINOR_VERSION 41)
  set(PCRE_REQUIRED_VERSION ${PCRE_REQUIRED_MAJOR_VERSION}.${PCRE_REQUIRED_MINOR_VERSION})
@@ -105,20 +117,23 @@ index 8bc6077..579a7b4 100644
  if (NOT CORRECT_PCRE_VERSION)
      message(STATUS "PCRE ${PCRE_REQUIRED_VERSION} or above not found")
  endif()
-@@ -535,10 +535,10 @@ if (CORRECT_PCRE_VERSION AND PCRE_BUILD_SOURCE AND BUILD_STATIC_LIBS)
+@@ -534,11 +536,13 @@ if (CORRECT_PCRE_VERSION AND PCRE_BUILD_SOURCE AND BUILD_STATIC_LIBS)
+     set(BUILD_CHIMERA TRUE)
  endif()
  
++if(0)
  add_subdirectory(unit)
 -if (EXISTS ${CMAKE_SOURCE_DIR}/tools/CMakeLists.txt)
 +if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tools/CMakeLists.txt)
      add_subdirectory(tools)
  endif()
 -if (EXISTS ${CMAKE_SOURCE_DIR}/chimera/CMakeLists.txt AND BUILD_CHIMERA)
++endif()
 +if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/chimera/CMakeLists.txt AND BUILD_CHIMERA)
      add_subdirectory(chimera)
  endif()
  endif()
-@@ -548,14 +548,14 @@ set(RAGEL_C_FLAGS "-Wno-unused")
+@@ -548,14 +552,14 @@ set(RAGEL_C_FLAGS "-Wno-unused")
  endif()
  
  set_source_files_properties(
@@ -135,7 +150,7 @@ index 8bc6077..579a7b4 100644
      PROPERTIES
          COMPILE_FLAGS "${RAGEL_C_FLAGS}")
  
-@@ -1216,28 +1216,28 @@ else (FAT_RUNTIME)
+@@ -1216,28 +1220,28 @@ else (FAT_RUNTIME)
         list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_core2>)
         set_target_properties(hs_exec_core2 PROPERTIES
             COMPILE_FLAGS "-march=core2"
@@ -168,7 +183,7 @@ index 8bc6077..579a7b4 100644
                 )
         endif (BUILD_AVX512)
         if (BUILD_AVX512VBMI)
-@@ -1245,7 +1245,7 @@ else (FAT_RUNTIME)
+@@ -1245,7 +1249,7 @@ else (FAT_RUNTIME)
             list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_avx512vbmi>)
             set_target_properties(hs_exec_avx512vbmi PROPERTIES
                 COMPILE_FLAGS "${ICELAKE_FLAG}"
@@ -177,7 +192,7 @@ index 8bc6077..579a7b4 100644
                 )
         endif (BUILD_AVX512VBMI)
  
-@@ -1280,21 +1280,21 @@ else (FAT_RUNTIME)
+@@ -1280,21 +1284,21 @@ else (FAT_RUNTIME)
          set_target_properties(hs_exec_shared_core2 PROPERTIES
              COMPILE_FLAGS "-march=core2"
              POSITION_INDEPENDENT_CODE TRUE
@@ -202,7 +217,7 @@ index 8bc6077..579a7b4 100644
              )
  
          if (BUILD_AVX512)
-@@ -1303,7 +1303,7 @@ else (FAT_RUNTIME)
+@@ -1303,7 +1307,7 @@ else (FAT_RUNTIME)
              set_target_properties(hs_exec_shared_avx512 PROPERTIES
                  COMPILE_FLAGS "${SKYLAKE_FLAG}"
                  POSITION_INDEPENDENT_CODE TRUE
@@ -211,7 +226,7 @@ index 8bc6077..579a7b4 100644
                  )
          endif (BUILD_AVX512)
          if (BUILD_AVX512VBMI)
-@@ -1312,7 +1312,7 @@ else (FAT_RUNTIME)
+@@ -1312,7 +1316,7 @@ else (FAT_RUNTIME)
              set_target_properties(hs_exec_shared_avx512vbmi PROPERTIES
                  COMPILE_FLAGS "${ICELAKE_FLAG}"
                  POSITION_INDEPENDENT_CODE TRUE
@@ -220,10 +235,10 @@ index 8bc6077..579a7b4 100644
                  )
          endif (BUILD_AVX512VBMI)
          add_library(hs_exec_common_shared OBJECT
-diff --git chimera/CMakeLists.txt chimera/CMakeLists.txt
+diff --git a/chimera/CMakeLists.txt b/chimera/CMakeLists.txt
 index 1cd66a3..ebb3b49 100644
---- chimera/CMakeLists.txt
-+++ chimera/CMakeLists.txt
+--- a/chimera/CMakeLists.txt
++++ b/chimera/CMakeLists.txt
 @@ -44,6 +44,6 @@ if (NOT WIN32)
      set(PRIVATE_LIBS "${PRIVATE_LIBS} -L${LIBDIR} -lpcre")
  
@@ -232,10 +247,10 @@ index 1cd66a3..ebb3b49 100644
 +    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libch.pc
          DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
  endif()
-diff --git chimera/ch_database.h chimera/ch_database.h
+diff --git a/chimera/ch_database.h b/chimera/ch_database.h
 index 28bde86..d757c82 100644
---- chimera/ch_database.h
-+++ chimera/ch_database.h
+--- a/chimera/ch_database.h
++++ b/chimera/ch_database.h
 @@ -38,7 +38,7 @@ extern "C"
  {
  #endif
@@ -245,10 +260,10 @@ index 28bde86..d757c82 100644
  #include <pcre.h>
  
  #include "ch_compile.h" // for CH_MODE_ flags
-diff --git cmake/pcre.cmake cmake/pcre.cmake
-index e0acda5..c68601f 100644
---- cmake/pcre.cmake
-+++ cmake/pcre.cmake
+diff --git a/cmake/pcre.cmake b/cmake/pcre.cmake
+index e0acda5..c3cbbc7 100644
+--- a/cmake/pcre.cmake
++++ b/cmake/pcre.cmake
 @@ -1,4 +1,5 @@
  # first look in pcre-$version or pcre subdirs
 +
@@ -264,21 +279,21 @@ index e0acda5..c68601f 100644
 -    pkg_check_modules(PCRE libpcre>=${PCRE_REQUIRED_VERSION})
 -    if (PCRE_FOUND)
 +    # conan should save us
-+    find_package(PCRE)
-+    if(PCRE_FOUND AND (PCRE_VERSION VERSION_GREATER_EQUAL PCRE_REQUIRED_VERSION))
++    find_package(pcre)
++    if(pcre_FOUND AND (pcre_VERSION VERSION_GREATER_EQUAL PCRE_REQUIRED_VERSION))
          set(CORRECT_PCRE_VERSION TRUE)
 -        message(STATUS "PCRE version ${PCRE_REQUIRED_VERSION} or above")
 -    else ()
 -        message(STATUS "PCRE version ${PCRE_REQUIRED_VERSION} or above not found")
 -        return ()
 -    endif ()
-+        set(PCRE_LDFLAGS "PCRE::libpcre")
++        set(PCRE_LDFLAGS "pcre::pcre")
 +    endif()
  endif (PCRE_BUILD_SOURCE)
-diff --git tools/CMakeLists.txt tools/CMakeLists.txt
+diff --git a/tools/CMakeLists.txt b/tools/CMakeLists.txt
 index 6ca3fd8..378afd0 100644
---- tools/CMakeLists.txt
-+++ tools/CMakeLists.txt
+--- a/tools/CMakeLists.txt
++++ b/tools/CMakeLists.txt
 @@ -1,3 +1,7 @@
 +
 +# Tools are not installed
@@ -287,20 +302,20 @@ index 6ca3fd8..378afd0 100644
  find_package(Threads)
  
  # remove some warnings
-diff --git tools/hsbench/CMakeLists.txt tools/hsbench/CMakeLists.txt
+diff --git a/tools/hsbench/CMakeLists.txt b/tools/hsbench/CMakeLists.txt
 index bbceda4..18545d0 100644
---- tools/hsbench/CMakeLists.txt
-+++ tools/hsbench/CMakeLists.txt
+--- a/tools/hsbench/CMakeLists.txt
++++ b/tools/hsbench/CMakeLists.txt
 @@ -1,4 +1,4 @@
 -include (${CMAKE_MODULE_PATH}/sqlite3.cmake)
 +include (sqlite3)
  if (NOT SQLITE3_FOUND)
      message(STATUS "sqlite3 not found, not building hsbench")
      return()
-diff --git tools/hscollider/CMakeLists.txt tools/hscollider/CMakeLists.txt
+diff --git a/tools/hscollider/CMakeLists.txt b/tools/hscollider/CMakeLists.txt
 index a4d71b2..f733479 100644
---- tools/hscollider/CMakeLists.txt
-+++ tools/hscollider/CMakeLists.txt
+--- a/tools/hscollider/CMakeLists.txt
++++ b/tools/hscollider/CMakeLists.txt
 @@ -5,7 +5,7 @@ endif()
  
  include_directories(${PCRE_INCLUDE_DIRS})
