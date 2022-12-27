@@ -108,6 +108,7 @@ class LiunwindConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["unwind"].names["pkg_config"] = "libunwind"
+        self.cpp_info.components["unwind"].set_property("pkg_config_name", "libunwind")
         self.cpp_info.components["unwind"].libs = ["unwind"]
         if self.options.minidebuginfo:
             self.cpp_info.components["unwind"].requires.append("xz_utils::xz_utils")
@@ -116,17 +117,28 @@ class LiunwindConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.components["unwind"].system_libs.append("pthread")
         self.cpp_info.components["generic"].names["pkg_config"] = "libunwind-generic"
+        self.cpp_info.components["generic"].set_property("pkg_config_name", "libunwind-generic")
         self.cpp_info.components["generic"].libs = ["unwind-generic"]
         self.cpp_info.components["generic"].requires = ["unwind"]
         if self.options.ptrace:
             self.cpp_info.components["ptrace"].names["pkg_config"] = "libunwind-ptrace"
+            self.cpp_info.components["ptrace"].set_property("pkg_config_name", "libunwind-ptrace")
             self.cpp_info.components["ptrace"].libs = ["unwind-ptrace"]
             self.cpp_info.components["ptrace"].requires = ["generic", "unwind"]
         if self.options.setjmp:
             self.cpp_info.components["setjmp"].names["pkg_config"] = "libunwind-setjmp"
+            self.cpp_info.components["setjmp"].set_property("pkg_config_name", "libunwind-setjmp")
             self.cpp_info.components["setjmp"].libs = ["unwind-setjmp"]
             self.cpp_info.components["setjmp"].requires = ["unwind"]
         if self.options.coredump:
             self.cpp_info.components["coredump"].names["pkg_config"] = "libunwind-coredump"
+            self.cpp_info.components["coredump"].set_property("pkg_config_name", "libunwind-coredump")
             self.cpp_info.components["coredump"].libs = ["unwind-coredump"]
             self.cpp_info.components["coredump"].requires = ["generic", "unwind"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.components["unwind"].names["pkg_config"] = "libunwind"
+        self.cpp_info.components["generic"].names["pkg_config"] = "libunwind-generic"
+        self.cpp_info.components["ptrace"].names["pkg_config"] = "libunwind-ptrace"
+        self.cpp_info.components["setjmp"].names["pkg_config"] = "libunwind-setjmp"
+        self.cpp_info.components["coredump"].names["pkg_config"] = "libunwind-coredump"
