@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.1)
 project(test_package)
 
-find_package(opengl_system REQUIRED CONFIG)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
 
 set(SOURCES test_package.cpp)
 
@@ -30,4 +31,4 @@ endif()
 endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES})
-target_link_libraries(${PROJECT_NAME} opengl::opengl ${PLATFORM_LIBS})
+target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS} ${PLATFORM_LIBS})
