@@ -6,7 +6,6 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 import os
-import json
 import shutil
 
 required_conan_version = ">=1.55.0"
@@ -21,7 +20,6 @@ class M4Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "GPL-3.0-only"
     settings = "os", "arch", "compiler", "build_type"
-    _needs_msys2 = False
 
     @property
     def _settings_build(self):
@@ -41,7 +39,6 @@ class M4Conan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-                self._needs_msys2 = True
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -89,12 +86,6 @@ class M4Conan(ConanFile):
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
         tc.generate(env)
-        # See https://github.com/conan-io/conan/issues/12685
-        if self._needs_msys2:
-            bash_info = {}
-            bash_info["subsystem"] = self.conf.get("tools.microsoft.bash:subsystem")
-            bash_info["path"]      = self.conf.get("tools.microsoft.bash:path")
-            save(self, "bash_info.conf", json.dumps(bash_info))
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -125,11 +116,6 @@ class M4Conan(ConanFile):
         else:
             copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # See https://github.com/conan-io/conan/issues/12685
-        if os.path.exists(os.path.join(self.generators_folder, "bash_info.conf")):
-            bash_info = json.loads(load(self, os.path.join(self.generators_folder, "bash_info.conf")))
-            self.conf.define("tools.microsoft.bash:subsystem", bash_info["subsystem"])
-            self.conf.define("tools.microsoft.bash:path",      bash_info["path"])
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
 
