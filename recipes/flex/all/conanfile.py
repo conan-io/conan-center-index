@@ -1,7 +1,11 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
 import functools
 import os
+
+from conan import ConanFile
+from conan.tools.gnu import AutotoolsToolchain
+from conan.tools.build.cross_building import cross_building
+from conan.tools.files import get, rmdir, copy, rm
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
@@ -24,37 +28,33 @@ class FlexConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def requirements(self):
         self.requires("m4/1.4.19")
 
     def build_requirements(self):
         self.build_requires("m4/1.4.19")
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if cross_building(self):
             self.build_requires(f"{self.name}/{self.version}")
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Flex package is not compatible with Windows. Consider using winflexbison instead.")
+            raise ConanInvalidConfiguration("Flex package is not compatible with Windows. "
+                                            "Consider using winflexbison instead.")
 
     @functools.lru_cache(1)
     def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self)
+        autotools = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
         configure_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
@@ -77,11 +77,11 @@ class FlexConan(ConanFile):
         autotools.make()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
+        copy("COPYING", src=self.source_folder, dst="licenses")
         autotools = self._configure_autotools()
         autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["fl"]
