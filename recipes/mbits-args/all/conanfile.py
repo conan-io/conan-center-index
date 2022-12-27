@@ -86,6 +86,7 @@ class MBitsArgsConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["LIBARGS_TESTING"] = False
         tc.variables["LIBARGS_INSTALL"] = True
+        tc.cache_variables["LIBARGS_SHARED"] = self.options.shared
         tc.generate()
 
     def build(self):
