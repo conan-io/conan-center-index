@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.files import copy, get, rmdir, rename, chdir
+from conan.tools.files import copy, get, rmdir, rename, chdir, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import PkgConfigDeps
 from conan.errors import ConanInvalidConfiguration
@@ -87,6 +87,11 @@ class LibniceConan(ConanFile):
         tc.generate()
 
     def build(self):
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "meson.build"),
+            "dependency('openssl', required: false,",
+            "dependency('openssl', required: false, method: 'pkg-config',")
         meson = Meson(self)
         meson.configure()
         meson.build()
