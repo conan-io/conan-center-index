@@ -36,9 +36,8 @@ patches:
   "1.2.0":
     - patch_file: "patches/1.2.0-0001-fix-version-number-icd-json.patch"
       patch_description: "Fix api_version in MoltenVK_icd.json"
-      patch_type: "backport"
+      patch_type: "portability"
       patch_source: "https://github.com/KhronosGroup/MoltenVK/pull/1747"
-      sha256: "80387a47d24c12b538bdcb60d6aa7c402af0800519ce55385abdfbf3d304ee07"
   "1.1.11":
     - patch_file: "patches/1.1.11-0001-vulkan-alias-private-extern.patch"
       patch_description: "Fix vulkan alias symbols when vulkan symbols are hidden"
