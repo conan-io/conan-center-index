@@ -15,9 +15,6 @@ This file is intended to provide all the commands you need to run in order to be
     * [Try it yourself](#try-it-yourself)
   * [Debugging Failed Builds](#debugging-failed-builds)
   * [Running the Python Linters](#running-the-python-linters)
-  * [Running the YAML Linters](#running-the-yaml-linters)
-    * [Yamllint](#yamllint)
-    * [Yamlschema](#yamlschema)
   * [Testing the different `test__package`](#testing-the-different-test__package)
   * [Testing more environments](#testing-more-environments)
   * [Using Conan 2.0](#using-conan-20)
@@ -128,52 +125,6 @@ It is possible to run the linter locally the same way it is being run [using Git
 
   # Lint the test_package
   pylint --rcfile=linter/pylintrc_testpackage recipes/fmt/all/test_package/conanfile.py
-  ```
-
-## Running the YAML Linters
-
-There's two levels of YAML validation, first is syntax and the second is schema.
-The style rules are located in [`linter/yamllint_rules.yml`](../linter/yamllint_rules.yml) and are used to ensure consistence.
-The [`config.yml`](adding_packages/README.md#configyml) is required for the build infrastructure and the
-[`conandata.yml` patch fields](adding_packages/conandata_yml_format.md#patches-fields) have required elements that are enforced with
-schema validation. There's are to encourage the best possible quality of recipes and make reviewing faster.
-
-### Yamllint
-
-* (Recommended) Use a dedicated Python virtualenv.
-* Ensure you have required tools installed: `yamllint` (better to uses fixed versions)
-
-  ```sh
-  pip install yamllint==1.28
-  ```
-
-* Now you just need to execute the `yamllint` commands:
-
-  ```sh
-  # Lint a recipe:
-  yamllint --config-file linter/yamllint_rules.yml -f standard recipes/fmt/all/conanfile.py
-
-  # Lint the test_package (same command)
-  yamllint --config-file linter/yamllint_rules.yml -f standard recipes/fmt/all/test_package/conanfile.py
-  ```
-
-### Yamlschema
-
-* (Recommended) Use a dedicated Python virtualenv.
-* Ensure you have required tools installed: `strictyaml` and `argparse` (better to uses fixed versions)
-
-  ```sh
-  pip install strictyaml==1.16 argparse==1.4
-  ```
-
-* Now you just need to execute the validation scripts:
-
-  ```sh
-  # Lint a config.yml:
-  python3 linter/config_yaml_linter.py recipes/fmt/config.yml
-
-  # Lint a conandata.yml
-  python3 linter/conandata_yaml_linter.py recipes/fmt/all/conandata.yml
   ```
 
 ## Testing the different `test_*_package`

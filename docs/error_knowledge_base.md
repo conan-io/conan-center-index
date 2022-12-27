@@ -75,28 +75,11 @@ The recipe folder (including the `test_package` folder) cannot exceed 256KB.
 
 Create a file [conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html) in the recipe folder containing the source code origins:
 
-**_recipes/lib/1.2.0/conandata.yml_**:
-
-```yaml
-sources:
-  1.2.0:
-    url: "http://downloads.sourceforge.net/project/mylib/1.2.0/sources.tar.gz"
-    sha256: "36658cb768a54c1d4dec43c3116c27ed893e88b02ecfcb44f2166f9c0b7f2a0d"
-```
-
-Then in the recipe, you can access the data to download the URL and validate the checksum doing:
-
-```python
-class SomeRecipe(ConanFile):
-    ...
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-```
+See [Sources](adding_packages/conandata_yml_format.md#sources) for information.
 
 #### **<a name="KB-H011">#KB-H011</a>: "LIBCXX MANAGEMENT"**
 
-If the library is detected as a pure C library (sources doesn't conatain any file with the following extensions: ["cc", "cpp", "cxx", "c++m", "cppm", "cxxm", "h++", "hh", "hxx", "hpp"]) then it has to remove the [compiler.libcxx](https://docs.conan.io/en/latest/reference/config_files/settings.yml.html#c-standard-libraries-aka-compiler-libcxx) subsetting, because the cpp standard library shouldn't affect the binary ID:
+If the library is detected as a pure C library (sources doesn't contain any file with the following extensions: ["cc", "cpp", "cxx", "c++m", "cppm", "cxxm", "h++", "hh", "hxx", "hpp"]) then it has to remove the [compiler.libcxx](https://docs.conan.io/en/latest/reference/config_files/settings.yml.html#c-standard-libraries-aka-compiler-libcxx) subsetting, because the cpp standard library shouldn't affect the binary ID:
 
 ```python
 class SomeRecipe(ConanFile):
@@ -268,7 +251,6 @@ defined in [Adding Packages - `Conandata.yml` Format](adding_packages/conandata_
 #### **<a name="KB-H031">#KB-H031</a>: "CONANDATA.YML REDUCE"**
 
 This [hook](https://docs.conan.io/en/latest/extending/hooks.html) re-creates the information of the [conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html) file, discarding the fields not relevant to the version of the package exported. This avoids creating new recipe revisions for every new change introduced in the file.
-Any additional field in the YAML file will raise an error.
 
 #### **<a name="KB-H032">#KB-H032</a>: "SYSTEM REQUIREMENTS"**
 

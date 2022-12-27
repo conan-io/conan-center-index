@@ -31,7 +31,6 @@ There's a three classes of linters currently in place for ConanCenterIndex
 
 - ConanCenter Hook - these are responsible for validating the structure of the recipes and packages.
 - Pylint Linter - these are used to ensure the code quality and conventions of a recipes (i.e `conanfile.py`)
-- Yaml Checks - stylistic guidance and schema validation check for support files and best practices
 
 ## Running the linters locally
 
