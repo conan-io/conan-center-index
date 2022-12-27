@@ -17,7 +17,6 @@ class LibsodiumConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://doc.libsodium.org/"
     topics = "encryption", "signature", "hashing"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -118,7 +117,13 @@ class LibsodiumConan(ConanFile):
 
     @property
     def _msvc_sln_folder(self):
-        if self.settings.compiler == "Visual Studio":
+        if self.settings.compiler == "msvc":
+            folder = {
+                "190": "vs2015",
+                "191": "vs2017",
+                "192": "vs2019",
+            }
+        elif self.settings.compiler == "Visual Studio":
             folder = {
                 "10": "vs2010",
                 "11": "vs2012",
@@ -126,12 +131,6 @@ class LibsodiumConan(ConanFile):
                 "14": "vs2015",
                 "15": "vs2017",
                 "16": "vs2019",
-            }
-        elif self.settings.compiler == "msvc":
-            folder = {
-                "190": "vs2015",
-                "191": "vs2017",
-                "192": "vs2019",
             }
         else:
             raise ConanException("Should not call this function with any other compiler")
