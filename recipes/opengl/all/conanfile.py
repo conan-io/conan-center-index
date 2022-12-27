@@ -54,4 +54,3 @@ class SysConfigOpenGLConan(ConanFile):
         elif self.settings.os in ["Linux", "FreeBSD"]:
             pkg_config = PkgConfig(self, 'gl')
             pkg_config.fill_cpp_info(self.cpp_info, is_system=self.settings.os != "FreeBSD")
-            print(self.cpp_info)
