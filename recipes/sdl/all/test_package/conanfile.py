@@ -18,15 +18,6 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if self.settings.os == "Linux":
-            tc.variables["WITH_X11"] = self.options["sdl"].x11
-            tc.variables["WITH_ALSA"] = self.options["sdl"].alsa
-            tc.variables["WITH_PULSE"] = self.options["sdl"].pulse
-            tc.variables["WITH_ESD"] = self.options["sdl"].esd
-            tc.variables["WITH_ARTS"] = self.options["sdl"].arts
-            tc.variables["WITH_DIRECTFB"] = self.options["sdl"].directfb
-        if self.settings.os == "Windows":
-            tc.variables["WITH_DIRECTX"] = self.options["sdl"].directx
         tc.generate()
 
 
