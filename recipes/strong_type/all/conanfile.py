@@ -13,7 +13,7 @@ class StrongTypeConan(ConanFile):
     homepage = "https://github.com/rollbear/strong_type"
     description = "An additive strong typedef library for C++14/17/20"
     topics = ("cpp14", "cpp17", "strong_type")
-    license = "Boost Software License 1.0"
+    license = "BSL-1.0"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
