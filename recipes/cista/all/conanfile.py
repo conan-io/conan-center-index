@@ -1,8 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, download, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, download
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.52.0"
@@ -18,6 +19,7 @@ class CistaConan(ConanFile):
     homepage = "https://github.com/felixguendling/cista"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     @property
     def _min_cppstd(self):
@@ -26,15 +28,12 @@ class CistaConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "15.7",
-            "msvc": "191",
+            "Visual Studio": "15.7" if Version(self.version) < "0.11" else "16",
+            "msvc": "191" if Version(self.version) < "0.11" else "192",
             "gcc": "8",
             "clang": "6",
             "apple-clang": "9.1"
         }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def package_id(self):
         self.info.clear()
@@ -62,9 +61,6 @@ class CistaConan(ConanFile):
         for file in self.conan_data["sources"][self.version]:
             filename = os.path.basename(file["url"])
             download(self, filename=filename, **file)
-
-    def build(self):
-        apply_conandata_patches(self)
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
