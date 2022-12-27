@@ -36,7 +36,7 @@ class MBitsArgsConan(ConanFile):
         "argument-parsing",
     )
     settings = "os", "compiler", "build_type", "arch"
-    options = {"fPIC": [True, False]}
+    options = {"fPIC": [True, False], "shared": [True, False, "deprecated"]}
     default_options = {"fPIC": True}
 
     @property
@@ -82,11 +82,14 @@ class MBitsArgsConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def configure(self):
+        if self.options.shared != "deprecated":
+            self.output.warning("shared option is deprecated. This recipe only builds in static mode")
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["LIBARGS_TESTING"] = False
         tc.variables["LIBARGS_INSTALL"] = True
-        tc.cache_variables["LIBARGS_SHARED"] = self.options.shared
         tc.generate()
 
     def build(self):
