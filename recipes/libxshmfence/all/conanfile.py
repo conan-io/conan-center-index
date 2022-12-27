@@ -5,7 +5,7 @@ from conans import tools, AutoToolsBuildEnvironment
 import contextlib
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 class LibxshmfenceConan(ConanFile):
     name = "libxshmfence"
