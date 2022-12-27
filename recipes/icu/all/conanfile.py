@@ -1,19 +1,23 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm, rmdir, save
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsToolchain, get_gnu_triplet
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
-from conan.tools.scm import Version
-from conans.tools import get_gnu_triplet, sha256sum, stdcpp_library
 import glob
 import os
 import shutil
+import io
+import hashlib
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
+def sha256sum(file_path):
+    with open(file_path, "rb") as f:
+        digest = hashlib.file_digest(f, "sha256")
+        return digest.hexdigest()
 
 class ICUConan(ConanFile):
     name = "icu"
@@ -72,8 +76,8 @@ class ICUConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def package_id(self):
-        if self.options.dat_package_file:
-            dat_package_file_sha256 = sha256sum(str(self.options.dat_package_file))
+        if self.info.options.dat_package_file:
+            dat_package_file_sha256 = sha256sum(str(self.info.options.dat_package_file))
             self.info.options.dat_package_file = dat_package_file_sha256
 
     def build_requirements(self):
@@ -94,8 +98,8 @@ class ICUConan(ConanFile):
         env.generate()
 
         tc = AutotoolsToolchain(self)
-        if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-           (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+        if (self.settings.get_safe("compiler") == "Visual Studio" and self.settings.get_safe("compiler.version") >= "12") or \
+           (self.settings.get_safe("compiler") == "msvc" and self.settings.get_safe("compiler.version") >= "180"):
             tc.extra_cflags.append("-FS")
             tc.extra_cxxflags.append("-FS")
         if not self.options.shared:
@@ -201,7 +205,7 @@ class ICUConan(ConanFile):
 
     @property
     def _data_filename(self):
-        vtag = self.version.split(".")[0]
+        vtag = str(self.version).split(".")[0]
         return f"icudt{vtag}l.dat"
 
     @property
@@ -209,14 +213,13 @@ class ICUConan(ConanFile):
         data_dir_name = "icu"
         if self.settings.os == "Windows" and self.settings.build_type == "Debug":
             data_dir_name += "d"
-        data_dir = os.path.join(self.package_folder, "lib", data_dir_name, self.version)
+        data_dir = os.path.join(self.package_folder, "lib", data_dir_name, str(self.version))
         return os.path.join(data_dir, self._data_filename)
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
 
         dll_files = glob.glob(os.path.join(self.package_folder, "lib", "*.dll"))
         if dll_files:
