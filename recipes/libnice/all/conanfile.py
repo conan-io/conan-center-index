@@ -1,9 +1,10 @@
 import os
 from conan import ConanFile
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, rename, chdir
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import PkgConfigDeps
+from conan.errors import ConanInvalidConfiguration
 
 
 class LibniceConan(ConanFile):
@@ -15,16 +16,26 @@ class LibniceConan(ConanFile):
     description = "a GLib ICE implementation"
     topics = ("ice", "stun", "turn")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-
-    @property
-    def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "crypto_library": ["openssl", "win32"],
+        "with_gstreamer": [True, False],
+        "with_gtk_doc": [True, False],
+        "with_introspection": [True, False]}
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_gstreamer": False,
+        "with_gtk_doc": False,
+        "with_introspection": False}
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            self.options.crypto_library = "win32"
+        else:
+            self.options.crypto_library = "openssl"
 
     def configure(self):
         if self.options.shared:
@@ -35,13 +46,26 @@ class LibniceConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def validate(self):
+        if self.settings.os != "Windows" and self.options.crypto_library == "win32":
+            raise ConanInvalidConfiguration(
+                "crypto_library=win32 is not supported on non-Windows")
+        if self.settings.os == "Windows" and self.options.with_gtk_doc:
+            raise ConanInvalidConfiguration(
+                "gtk-doc is disabled by libnice while building on Windows")
+
     def requirements(self):
         self.requires("glib/2.75.0")
+        if self.options.crypto_library == "openssl":
+            self.requires("openssl/3.0.7")
+        if self.options.with_gstreamer:
+            self.requires("gstreamer/1.19.2")
 
     def build_requirements(self):
         self.build_requires("meson/0.64.1")
         self.build_requires("pkgconf/1.9.3")
-        self.build_requires("glib/2.75.0")
+        if self.options.with_introspection:
+            self.build_requires("gobject-introspection/1.72.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -51,6 +75,15 @@ class LibniceConan(ConanFile):
         tc = PkgConfigDeps(self)
         tc.generate()
         tc = MesonToolchain(self)
+        tc.project_options["gupnp"] = "disabled"
+        tc.project_options["gstreamer"] = "enabled" if self.options.with_gstreamer else "disabled"
+        tc.project_options["crypto-library"] = "auto" if self.options.crypto_library == "win32" else str(
+            self.options.crypto_library)
+
+        tc.project_options["examples"] = "disabled"
+        tc.project_options["tests"] = "disabled"
+        tc.project_options["gtk_doc"] = "disabled" if self.options.with_gtk_doc else "disabled"
+        tc.project_options["introspection"] = "enabled" if self.options.with_introspection else "disabled"
         tc.generate()
 
     def build(self):
@@ -64,6 +97,12 @@ class LibniceConan(ConanFile):
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if self.settings.os == "Windows":
+            if not self.options.shared:
+                with chdir(self, os.path.join(self.package_folder, "lib")):
+                    rename(self, "libnice.a", "nice.lib")
 
     def package_info(self):
-        self.cpp_info.libs = ["libnice"]
+        self.cpp_info.libs = ["nice"]
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("advapi32")
