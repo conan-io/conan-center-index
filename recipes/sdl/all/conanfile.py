@@ -10,7 +10,7 @@ from conan.tools.env import Environment
 
 import os
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=1.53.0"
 
 
 class SDLConan(ConanFile):
@@ -92,8 +92,13 @@ class SDLConan(ConanFile):
         lib_paths = [lib for _, dep in self.dependencies.items() for lib in dep.cpp_info.libdirs]
         env = Environment()
         env.define_path("LIBRARY_PATH", os.pathsep.join(lib_paths))
+
+        # FIXME: remove and raise required_conan_version to 1.55 once it's on c3i
+        env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
+
         env = env.vars(self, scope="build")
         env.save_script("sdl_env")
+
 
     def export_sources(self):
         export_conandata_patches(self)
