@@ -211,162 +211,162 @@ class SDLConan(ConanFile):
         if self.settings.os == "Linux" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 5.0:
             tc.preprocessor_definitions["GBM_BO_USE_CURSOR"] = 2
 
-        tc.cache_variables["SDL2_DISABLE_INSTALL"] = False  # SDL2_* options will get renamed to SDL_ options in the next SDL release
+        tc.variables["SDL2_DISABLE_INSTALL"] = False  # SDL2_* options will get renamed to SDL_ options in the next SDL release
         if is_apple_os(self):
-            tc.cache_variables["CMAKE_OSX_ARCHITECTURES"] = {
+            tc.variables["CMAKE_OSX_ARCHITECTURES"] = {
                 "armv8": "arm64",
             }.get(str(self.settings.arch), str(self.settings.arch))
         cmake_required_includes = []  # List of directories used by CheckIncludeFile (https://cmake.org/cmake/help/latest/module/CheckIncludeFile.html)
         cmake_extra_ldflags = []
         # FIXME: self.install_folder not defined? Neccessary?
-        tc.cache_variables["CONAN_INSTALL_FOLDER"] = self.install_folder
+        tc.variables["CONAN_INSTALL_FOLDER"] = self.install_folder
         if self.settings.os != "Windows" and not self.options.shared:
-            tc.cache_variables["SDL_STATIC_PIC"] = self.options.fPIC
+            tc.variables["SDL_STATIC_PIC"] = self.options.fPIC
         if is_msvc(self) and not self.options.shared:
-            tc.cache_variables["HAVE_LIBC"] = True
-        tc.cache_variables["SDL_SHARED"] = self.options.shared
-        tc.cache_variables["SDL_STATIC"] = not self.options.shared
+            tc.variables["HAVE_LIBC"] = True
+        tc.variables["SDL_SHARED"] = self.options.shared
+        tc.variables["SDL_STATIC"] = not self.options.shared
 
         if Version(self.version) < "2.0.18":
-            tc.cache_variables["VIDEO_OPENGL"] = self.options.opengl
-            tc.cache_variables["VIDEO_OPENGLES"] = self.options.opengles
-            tc.cache_variables["VIDEO_VULKAN"] = self.options.vulkan
+            tc.variables["VIDEO_OPENGL"] = self.options.opengl
+            tc.variables["VIDEO_OPENGLES"] = self.options.opengles
+            tc.variables["VIDEO_VULKAN"] = self.options.vulkan
             if self.settings.os == "Linux":
                 # See https://github.com/bincrafters/community/issues/696
-                tc.cache_variables["SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS"] = 1
+                tc.variables["SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS"] = 1
 
-                tc.cache_variables["ALSA"] = self.options.alsa
+                tc.variables["ALSA"] = self.options.alsa
                 if self.options.alsa:
-                    tc.cache_variables["ALSA_SHARED"] = self.options["libalsa"].shared
-                    tc.cache_variables["HAVE_ASOUNDLIB_H"] = True
-                    tc.cache_variables["HAVE_LIBASOUND"] = True
-                tc.cache_variables["JACK"] = self.options.jack
+                    tc.variables["ALSA_SHARED"] = self.options["libalsa"].shared
+                    tc.variables["HAVE_ASOUNDLIB_H"] = True
+                    tc.variables["HAVE_LIBASOUND"] = True
+                tc.variables["JACK"] = self.options.jack
                 if self.options.jack:
-                    tc.cache_variables["JACK_SHARED"] = self.options["jack"].shared
-                tc.cache_variables["ESD"] = self.options.esd
+                    tc.variables["JACK_SHARED"] = self.options["jack"].shared
+                tc.variables["ESD"] = self.options.esd
                 if self.options.esd:
-                    tc.cache_variables["ESD_SHARED"] = self.options["esd"].shared
-                tc.cache_variables["PULSEAUDIO"] = self.options.pulse
+                    tc.variables["ESD_SHARED"] = self.options["esd"].shared
+                tc.variables["PULSEAUDIO"] = self.options.pulse
                 if self.options.pulse:
-                    tc.cache_variables["PULSEAUDIO_SHARED"] = self.options["pulseaudio"].shared
-                tc.cache_variables["SNDIO"] = self.options.sndio
+                    tc.variables["PULSEAUDIO_SHARED"] = self.options["pulseaudio"].shared
+                tc.variables["SNDIO"] = self.options.sndio
                 if self.options.sndio:
-                    tc.cache_variables["SNDIO_SHARED"] = self.options["sndio"].shared
-                tc.cache_variables["NAS"] = self.options.nas
+                    tc.variables["SNDIO_SHARED"] = self.options["sndio"].shared
+                tc.variables["NAS"] = self.options.nas
                 if self.options.nas:
                     cmake_extra_ldflags += ["-lXau"]  # FIXME: SDL sources doesn't take into account transitive dependencies
                     cmake_required_includes += self.dependencies["nas"].cpp_info.includedirs
-                    tc.cache_variables["NAS_SHARED"] = self.options["nas"].shared
-                tc.cache_variables["VIDEO_X11"] = self.options.x11
+                    tc.variables["NAS_SHARED"] = self.options["nas"].shared
+                tc.variables["VIDEO_X11"] = self.options.x11
                 if self.options.x11:
-                    tc.cache_variables["HAVE_XEXT_H"] = True
-                tc.cache_variables["VIDEO_X11_XCURSOR"] = self.options.xcursor
+                    tc.variables["HAVE_XEXT_H"] = True
+                tc.variables["VIDEO_X11_XCURSOR"] = self.options.xcursor
                 if self.options.xcursor:
-                    tc.cache_variables["HAVE_XCURSOR_H"] = True
-                tc.cache_variables["VIDEO_X11_XINERAMA"] = self.options.xinerama
+                    tc.variables["HAVE_XCURSOR_H"] = True
+                tc.variables["VIDEO_X11_XINERAMA"] = self.options.xinerama
                 if self.options.xinerama:
-                    tc.cache_variables["HAVE_XINERAMA_H"] = True
-                tc.cache_variables["VIDEO_X11_XINPUT"] = self.options.xinput
+                    tc.variables["HAVE_XINERAMA_H"] = True
+                tc.variables["VIDEO_X11_XINPUT"] = self.options.xinput
                 if self.options.xinput:
-                    tc.cache_variables["HAVE_XINPUT_H"] = True
-                tc.cache_variables["VIDEO_X11_XRANDR"] = self.options.xrandr
+                    tc.variables["HAVE_XINPUT_H"] = True
+                tc.variables["VIDEO_X11_XRANDR"] = self.options.xrandr
                 if self.options.xrandr:
-                    tc.cache_variables["HAVE_XRANDR_H"] = True
-                tc.cache_variables["VIDEO_X11_XSCRNSAVER"] = self.options.xscrnsaver
+                    tc.variables["HAVE_XRANDR_H"] = True
+                tc.variables["VIDEO_X11_XSCRNSAVER"] = self.options.xscrnsaver
                 if self.options.xscrnsaver:
-                    tc.cache_variables["HAVE_XSS_H"] = True
-                tc.cache_variables["VIDEO_X11_XSHAPE"] = self.options.xshape
+                    tc.variables["HAVE_XSS_H"] = True
+                tc.variables["VIDEO_X11_XSHAPE"] = self.options.xshape
                 if self.options.xshape:
-                    tc.cache_variables["HAVE_XSHAPE_H"] = True
-                tc.cache_variables["VIDEO_X11_XVM"] = self.options.xvm
+                    tc.variables["HAVE_XSHAPE_H"] = True
+                tc.variables["VIDEO_X11_XVM"] = self.options.xvm
                 if self.options.xvm:
-                    tc.cache_variables["HAVE_XF86VM_H"] = True
-                tc.cache_variables["VIDEO_WAYLAND"] = self.options.wayland
+                    tc.variables["HAVE_XF86VM_H"] = True
+                tc.variables["VIDEO_WAYLAND"] = self.options.wayland
                 if self.options.wayland:
                     # FIXME: Otherwise 2.0.16 links with system wayland (from egl/system requirement)
                     cmake_extra_ldflags += ["-L{}".format(it) for it in self.dependencies["wayland"].cpp_info.libdirs]
-                    tc.cache_variables["WAYLAND_SHARED"] = self.options["wayland"].shared
-                    tc.cache_variables["WAYLAND_SCANNER_1_15_FOUND"] = 1  # FIXME: Check actual build-requires version
+                    tc.variables["WAYLAND_SHARED"] = self.options["wayland"].shared
+                    tc.variables["WAYLAND_SCANNER_1_15_FOUND"] = 1  # FIXME: Check actual build-requires version
 
-                tc.cache_variables["VIDEO_DIRECTFB"] = self.options.directfb
-                tc.cache_variables["VIDEO_RPI"] = self.options.video_rpi
-                tc.cache_variables["HAVE_LIBUNWIND_H"] = self.options.libunwind
+                tc.variables["VIDEO_DIRECTFB"] = self.options.directfb
+                tc.variables["VIDEO_RPI"] = self.options.video_rpi
+                tc.variables["HAVE_LIBUNWIND_H"] = self.options.libunwind
             elif self.settings.os == "Windows":
-                tc.cache_variables["DIRECTX"] = self.options.directx
+                tc.variables["DIRECTX"] = self.options.directx
         else:
-            tc.cache_variables["SDL_OPENGL"] = self.options.opengl
-            tc.cache_variables["SDL_OPENGLES"] = self.options.opengles
-            tc.cache_variables["SDL_VULKAN"] = self.options.vulkan
+            tc.variables["SDL_OPENGL"] = self.options.opengl
+            tc.variables["SDL_OPENGLES"] = self.options.opengles
+            tc.variables["SDL_VULKAN"] = self.options.vulkan
             if self.settings.os == "Linux":
                 # See https://github.com/bincrafters/community/issues/696
-                tc.cache_variables["SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS"] = 1
+                tc.variables["SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS"] = 1
 
-                tc.cache_variables["SDL_ALSA"] = self.options.alsa
+                tc.variables["SDL_ALSA"] = self.options.alsa
                 if self.options.alsa:
-                    tc.cache_variables["SDL_ALSA_SHARED"] = self.options["libalsa"].shared
-                    tc.cache_variables["HAVE_ASOUNDLIB_H"] = True
-                    tc.cache_variables["HAVE_LIBASOUND"] = True
-                tc.cache_variables["SDL_JACK"] = self.options.jack
+                    tc.variables["SDL_ALSA_SHARED"] = self.options["libalsa"].shared
+                    tc.variables["HAVE_ASOUNDLIB_H"] = True
+                    tc.variables["HAVE_LIBASOUND"] = True
+                tc.variables["SDL_JACK"] = self.options.jack
                 if self.options.jack:
-                    tc.cache_variables["SDL_JACK_SHARED"] = self.options["jack"].shared
-                tc.cache_variables["SDL_ESD"] = self.options.esd
+                    tc.variables["SDL_JACK_SHARED"] = self.options["jack"].shared
+                tc.variables["SDL_ESD"] = self.options.esd
                 if self.options.esd:
-                    tc.cache_variables["SDL_ESD_SHARED"] = self.options["esd"].shared
-                tc.cache_variables["SDL_PULSEAUDIO"] = self.options.pulse
+                    tc.variables["SDL_ESD_SHARED"] = self.options["esd"].shared
+                tc.variables["SDL_PULSEAUDIO"] = self.options.pulse
                 if self.options.pulse:
-                    tc.cache_variables["SDL_PULSEAUDIO_SHARED"] = self.options["pulseaudio"].shared
-                tc.cache_variables["SDL_SNDIO"] = self.options.sndio
+                    tc.variables["SDL_PULSEAUDIO_SHARED"] = self.options["pulseaudio"].shared
+                tc.variables["SDL_SNDIO"] = self.options.sndio
                 if self.options.sndio:
-                    tc.cache_variables["SDL_SNDIO_SHARED"] = self.options["sndio"].shared
-                tc.cache_variables["SDL_NAS"] = self.options.nas
+                    tc.variables["SDL_SNDIO_SHARED"] = self.options["sndio"].shared
+                tc.variables["SDL_NAS"] = self.options.nas
                 if self.options.nas:
                     cmake_extra_ldflags += ["-lXau"]  # FIXME: SDL sources doesn't take into account transitive dependencies
                     cmake_required_includes += self.dependencies["nas"].cpp_info.includedirs
-                    tc.cache_variables["SDL_NAS_SHARED"] = self.options["nas"].shared
-                tc.cache_variables["SDL_X11"] = self.options.x11
+                    tc.variables["SDL_NAS_SHARED"] = self.options["nas"].shared
+                tc.variables["SDL_X11"] = self.options.x11
                 if self.options.x11:
-                    tc.cache_variables["HAVE_XEXT_H"] = True
-                tc.cache_variables["SDL_X11_XCURSOR"] = self.options.xcursor
+                    tc.variables["HAVE_XEXT_H"] = True
+                tc.variables["SDL_X11_XCURSOR"] = self.options.xcursor
                 if self.options.xcursor:
-                    tc.cache_variables["HAVE_XCURSOR_H"] = True
-                tc.cache_variables["SDL_X11_XINERAMA"] = self.options.xinerama
+                    tc.variables["HAVE_XCURSOR_H"] = True
+                tc.variables["SDL_X11_XINERAMA"] = self.options.xinerama
                 if self.options.xinerama:
-                    tc.cache_variables["HAVE_XINERAMA_H"] = True
-                tc.cache_variables["SDL_X11_XINPUT"] = self.options.xinput
+                    tc.variables["HAVE_XINERAMA_H"] = True
+                tc.variables["SDL_X11_XINPUT"] = self.options.xinput
                 if self.options.xinput:
-                    tc.cache_variables["HAVE_XINPUT_H"] = True
-                tc.cache_variables["SDL_X11_XRANDR"] = self.options.xrandr
+                    tc.variables["HAVE_XINPUT_H"] = True
+                tc.variables["SDL_X11_XRANDR"] = self.options.xrandr
                 if self.options.xrandr:
-                    tc.cache_variables["HAVE_XRANDR_H"] = True
-                tc.cache_variables["SDL_X11_XSCRNSAVER"] = self.options.xscrnsaver
+                    tc.variables["HAVE_XRANDR_H"] = True
+                tc.variables["SDL_X11_XSCRNSAVER"] = self.options.xscrnsaver
                 if self.options.xscrnsaver:
-                    tc.cache_variables["HAVE_XSS_H"] = True
-                tc.cache_variables["SDL_X11_XSHAPE"] = self.options.xshape
+                    tc.variables["HAVE_XSS_H"] = True
+                tc.variables["SDL_X11_XSHAPE"] = self.options.xshape
                 if self.options.xshape:
-                    tc.cache_variables["HAVE_XSHAPE_H"] = True
-                tc.cache_variables["SDL_X11_XVM"] = self.options.xvm
+                    tc.variables["HAVE_XSHAPE_H"] = True
+                tc.variables["SDL_X11_XVM"] = self.options.xvm
                 if self.options.xvm:
-                    tc.cache_variables["HAVE_XF86VM_H"] = True
-                tc.cache_variables["SDL_WAYLAND"] = self.options.wayland
+                    tc.variables["HAVE_XF86VM_H"] = True
+                tc.variables["SDL_WAYLAND"] = self.options.wayland
                 if self.options.wayland:
                     # FIXME: Otherwise 2.0.16 links with system wayland (from egl/system requirement)
                     cmake_extra_ldflags += ["-L{}".format(it) for it in self.dependencies["wayland"].cpp_info.libdirs]
-                    tc.cache_variables["SDL_WAYLAND_SHARED"] = self.options["wayland"].shared
+                    tc.variables["SDL_WAYLAND_SHARED"] = self.options["wayland"].shared
 
-                tc.cache_variables["SDL_DIRECTFB"] = self.options.directfb
-                tc.cache_variables["SDL_RPI"] = self.options.video_rpi
-                tc.cache_variables["HAVE_LIBUNWIND_H"] = self.options.libunwind
+                tc.variables["SDL_DIRECTFB"] = self.options.directfb
+                tc.variables["SDL_RPI"] = self.options.video_rpi
+                tc.variables["HAVE_LIBUNWIND_H"] = self.options.libunwind
             elif self.settings.os == "Windows":
-                tc.cache_variables["SDL_DIRECTX"] = self.options.directx
+                tc.variables["SDL_DIRECTX"] = self.options.directx
 
         if Version(self.version) >= "2.0.22":
-            tc.cache_variables["SDL2_DISABLE_SDL2MAIN"] = not self.options.sdl2main
+            tc.variables["SDL2_DISABLE_SDL2MAIN"] = not self.options.sdl2main
 
         # Add extra information collected from the deps
-        tc.cache_variables["EXTRA_LDFLAGS"] = ";".join(cmake_extra_ldflags)
-        tc.cache_variables["CMAKE_REQUIRED_INCLUDES"] = ";".join(cmake_required_includes)
+        tc.variables["EXTRA_LDFLAGS"] = ";".join(cmake_extra_ldflags)
+        tc.variables["CMAKE_REQUIRED_INCLUDES"] = ";".join(cmake_required_includes)
         cmake_extra_cflags = ["-I{}".format(path) for _, dep in self.dependencies.items() for path in dep.cpp_info.includedirs]
-        tc.cache_variables["EXTRA_CFLAGS"] = ";".join(cmake_extra_cflags)
+        tc.variables["EXTRA_CFLAGS"] = ";".join(cmake_extra_cflags)
         tc.generate()
 
     def build(self):
