@@ -64,6 +64,7 @@ class LibniceConan(ConanFile):
     def build_requirements(self):
         self.build_requires("meson/0.64.1")
         self.build_requires("pkgconf/1.9.3")
+        self.build_requires("glib/2.75.0") # for glib-mkenums
         if self.options.with_introspection:
             self.build_requires("gobject-introspection/1.72.0")
 
