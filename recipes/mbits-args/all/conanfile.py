@@ -83,6 +83,9 @@ class MBitsArgsConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def configure(self):
+        # Hush the hooks
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
         if self.options.shared != "deprecated":
             self.output.warning("shared option is deprecated. This recipe only builds in static mode")
 
