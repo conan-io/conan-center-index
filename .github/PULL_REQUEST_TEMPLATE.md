@@ -6,5 +6,5 @@ Specify library name and version:  **lib/1.0**
 ---
 
 - [ ] I've read the [contributing guidelines](https://github.com/conan-io/conan-center-index/blob/master/CONTRIBUTING.md).
-- [ ] I've used the [latest](https://github.com/conan-io/conan/releases/latest) Conan client version.
+- [ ] I've used a [recent](https://github.com/conan-io/conan/releases/latest) Conan client version close to the [currently deployed](https://github.com/conan-io/conan-center-index/blob/docs/recent-client/.c3i/config_v1.yml#L6).
 - [ ] I've tried at least one configuration locally with the [conan-center hook](https://github.com/conan-io/hooks.git) activated.
