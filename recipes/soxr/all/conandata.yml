@@ -5,4 +5,8 @@ sources:
 patches:
   "0.1.3":
     - patch_file: "patches/findpackage-openmp.patch"
+      patch_description: make OpenMP required to fail when not found
+      patch_type: conan
     - patch_file: "patches/cmake-source-dir.patch"
+      patch_description: point to the right source dir
+      patch_type: conan
