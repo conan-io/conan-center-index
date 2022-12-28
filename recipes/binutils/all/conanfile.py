@@ -60,8 +60,8 @@ class BinutilsConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def configure(self):
         if not self.options.target_triplet:
