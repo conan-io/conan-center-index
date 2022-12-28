@@ -11,7 +11,8 @@ class LibniceTestConan(ConanFile):
     test_type = "explicit"
 
     def requirements(self):
-        self.requires(tested_reference_str)
+        self.requires(self.tested_reference_str)
+        
     def build_requirements(self):
         self.tool_requires("meson/0.64.1")
         self.tool_requires("pkgconf/1.9.3")
