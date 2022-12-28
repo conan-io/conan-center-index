@@ -6,7 +6,7 @@ from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class RapidYAMLConan(ConanFile):
     name = "rapidyaml"
@@ -44,10 +44,7 @@ class RapidYAMLConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -94,3 +91,5 @@ class RapidYAMLConan(ConanFile):
 
         self.cpp_info.names["cmake_find_package"] = "ryml"
         self.cpp_info.names["cmake_find_package_multi"] = "ryml"
+        self.cpp_info.filenames["cmake_find_package"] = "ryml"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "ryml"
