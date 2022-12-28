@@ -9,9 +9,8 @@ from conan.errors import ConanInvalidConfiguration
 
 class LibniceConan(ConanFile):
     name = "libnice"
-    version = "0.1.19"
     homepage = "https://libnice.freedesktop.org/"
-    license = "MPL-1.1 AND LGPL-2.1-only"
+    license = ("MPL-1.1", "LGPL-2.1-only")
     url = "https://github.com/conan-io/conan-center-index"
     description = "a GLib ICE implementation"
     topics = ("ice", "stun", "turn")
@@ -39,9 +38,9 @@ class LibniceConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+           self.options.rm_safe("fPIC")
+       self.settings.rm_safe("compiler.libcxx")
+       self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -62,11 +61,11 @@ class LibniceConan(ConanFile):
             self.requires("gstreamer/1.19.2")
 
     def build_requirements(self):
-        self.build_requires("meson/0.64.1")
-        self.build_requires("pkgconf/1.9.3")
-        self.build_requires("glib/2.75.0") # for glib-mkenums
+        self.tool_requires("meson/0.64.1")
+        self.tool_requires("pkgconf/1.9.3")
+        self.tool_requires("glib/2.75.0") # for glib-mkenums
         if self.options.with_introspection:
-            self.build_requires("gobject-introspection/1.72.0")
+            self.tool_requires("gobject-introspection/1.72.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
