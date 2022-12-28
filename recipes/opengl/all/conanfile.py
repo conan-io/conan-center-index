@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.system import package_manager
 from conan.tools.gnu import PkgConfig
 
-required_conan_version = ">=1.47"
+required_conan_version = ">=1.50.0"
 
 
 class SysConfigOpenGLConan(ConanFile):
