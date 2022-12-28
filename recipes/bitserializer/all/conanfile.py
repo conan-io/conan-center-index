@@ -72,7 +72,7 @@ class BitserializerConan(ConanFile):
             raise ConanInvalidConfiguration("YAML currently unavailable due an issue with linking the base library")
     
         # Check minimal version that supported CSV option
-        if self.options.with_csv and self.version < Version("0.50"):
+        if self.options.with_csv and Version(self.version) < "0.50":
             raise ConanInvalidConfiguration("CSV is supported in the BitSerializer starting from version 0.50 (option 'with_csv')")
 
         # Check minimal version that supported YAML option
