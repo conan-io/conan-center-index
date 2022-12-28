@@ -160,7 +160,7 @@ class BitserializerConan(ConanFile):
             self.cpp_info.components["bitserializer-rapidyaml"].set_property("cmake_target_name", "BitSerializer::rapidyaml-archive")
             self.cpp_info.components["bitserializer-rapidyaml"].bindirs = []
             self.cpp_info.components["bitserializer-rapidyaml"].libdirs = []
-            self.cpp_info.components["bitserializer-rapidyaml"].requires = ["bitserializer-core", "ryml::ryml"]
+            self.cpp_info.components["bitserializer-rapidyaml"].requires = ["bitserializer-core", "rapidyaml::rapidyaml"]
 
         # csv-archive
         if self.options.with_csv:
