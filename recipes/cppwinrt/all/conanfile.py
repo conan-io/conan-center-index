@@ -32,13 +32,13 @@ class CppWinRtConan(ConanFile):
         return 17
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 192)
         if not is_msvc(self):
             raise ConanInvalidConfiguration(
                 f"{self.ref} can be built only by Visual Studio and msvc.")
-        if self.info.settings.build_type not in ["Debug", "Release"]:
+        if self.settings.build_type not in ["Debug", "Release"]:
             raise ConanInvalidConfiguration("MSVC build supports only Debug or Release build type")
 
     def source(self):
@@ -62,9 +62,9 @@ class CppWinRtConan(ConanFile):
         self._patch_sources()
         msbuild = MSBuild(self)
         # use Win32 instead of the default value when building x86
-        msbuild.platform = "Win32" if self.info.settings.arch == "x86" else msbuild.platform
+        msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
         build_folder = os.path.join(self.build_folder, "_build", msbuild.platform, str(
-            self.info.settings.build_type))
+            self.settings.build_type))
         self.run(" ".join([msbuild.command(sln="cppwinrt.sln", targets=[
                  "prebuild", "cppwinrt"]), f"/p:CppWinRTBuildVersion={self.version}"]))
         self.run(" ".join([os.path.join(build_folder, "cppwinrt.exe"),
@@ -73,7 +73,7 @@ class CppWinRtConan(ConanFile):
     def package(self):
         msbuild = MSBuild(self)
         build_folder = os.path.join(self.build_folder, "_build", msbuild.platform, str(
-            self.info.settings.build_type))
+            self.settings.build_type))
 
         copy(self, pattern="LICENSE", dst=os.path.join(
             self.package_folder, "licenses"), src=self.source_folder)
@@ -89,19 +89,6 @@ class CppWinRtConan(ConanFile):
         )
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_target_name", "Microsoft::CppWinRT")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "cppwinrt"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "cppwinrt"
-        self.cpp_info.names["cmake_find_package"] = "Microsoft"
-        self.cpp_info.names["cmake_find_package_multi"] = "Microsoft"
-
-        self.cpp_info.components["cppwinrt"].names["cmake_find_package"] = "CppWinRT"
-        self.cpp_info.components["cppwinrt"].names["cmake_find_package_multi"] = "CppWinRT"
-        self.cpp_info.components["cppwinrt"].set_property(
-            "cmake_target_name", "Microsoft::CppWinRT")
-
         # TODO: Legacy, to be removed on Conan 2.0
         bin_folder = os.path.join(self.package_folder, "bin")
         self.env_info.PATH.append(bin_folder)
