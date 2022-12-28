@@ -137,6 +137,7 @@ class BitserializerConan(ConanFile):
             self.info.header_only()
 
     def package_info(self):
+        lib_suffix = "d" if self.info.settings.build_type == "Debug" else ""
         self.cpp_info.set_property("cmake_file_name", "bitserializer")
 
         # cpprestjson-core
@@ -180,7 +181,7 @@ class BitserializerConan(ConanFile):
             self.cpp_info.components["bitserializer-csv"].set_property("cmake_target_name", "BitSerializer::csv-archive")
             self.cpp_info.components["bitserializer-csv"].requires = ["bitserializer-core"]
             self.cpp_info.components["bitserializer-csv"].bindirs = []
-            self.cpp_info.components["bitserializer-csv"].libs = ["csv-archive"]
+            self.cpp_info.components["bitserializer-csv"].libs = [ f"csv-archive{lib_suffix}" ]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "bitserializer"
