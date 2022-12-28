@@ -224,7 +224,7 @@ class SDLConan(ConanFile):
         cmake_required_includes = []  # List of directories used by CheckIncludeFile (https://cmake.org/cmake/help/latest/module/CheckIncludeFile.html)
         cmake_extra_ldflags = []
         # FIXME: self.install_folder not defined? Neccessary?
-        tc.variables["CONAN_INSTALL_FOLDER"] = self.install_folder
+        tc.variables["CONAN_INSTALL_FOLDER"] = self.install_folder.replace("\\", "/")
         if self.settings.os != "Windows" and not self.options.shared:
             tc.variables["SDL_STATIC_PIC"] = self.options.fPIC
         if is_msvc(self) and not self.options.shared:
