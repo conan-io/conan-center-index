@@ -16,7 +16,7 @@ import hashlib
 required_conan_version = ">=1.55.0"
 
 def sha256sum(file_path):
-    with open(file_path, "rb") as f:
+    with open(file_path, "rb") as fh:
         digest = hashlib.new("sha256")
         while True:
             data = fh.read(8192)
