@@ -10,7 +10,6 @@ from conan.tools.microsoft import is_msvc, unix_path
 import glob
 import os
 import shutil
-import io
 import hashlib
 
 required_conan_version = ">=1.55.0"
