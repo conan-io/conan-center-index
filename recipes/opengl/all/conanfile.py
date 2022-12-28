@@ -15,6 +15,9 @@ class SysConfigOpenGLConan(ConanFile):
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
 
+    def layout(self):
+        pass
+
     def package_id(self):
         self.info.clear()
 
@@ -44,6 +47,7 @@ class SysConfigOpenGLConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "opengl_system")
 
+        self.cpp_info.bindirs = []
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
         if self.settings.os == "Macos":
