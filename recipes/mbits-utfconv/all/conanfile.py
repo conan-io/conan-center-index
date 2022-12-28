@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.files import export_conandata_patches, get, copy, rm, rmdir
+from conan.tools.files import export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -13,7 +13,9 @@ required_conan_version = ">=1.53.0"
 
 class MBitsUtfConvConan(ConanFile):
     name = "mbits-utfconv"
-    description = "Conversion library between string, u16string, u32string and u8string."
+    description = (
+        "Conversion library between string, u16string, u32string and u8string."
+    )
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mbits-libs/utfconv"
