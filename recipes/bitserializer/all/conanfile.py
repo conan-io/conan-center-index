@@ -76,7 +76,7 @@ class BitserializerConan(ConanFile):
             raise ConanInvalidConfiguration("CSV is supported in the BitSerializer starting from version 0.50 (option 'with_csv')")
 
         # Check minimal version that supported YAML option
-        if self.options.with_rapidyaml and self.version < Version("0.50"):
+        if self.options.with_rapidyaml and Version(self.version) < "0.50":
             raise ConanInvalidConfiguration("YAML is supported in the BitSerializer starting from version 0.50 (option 'with_rapidyaml')")
 
         # Check compiler for C++17 support
