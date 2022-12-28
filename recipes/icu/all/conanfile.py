@@ -3,7 +3,8 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm, rmdir, save
-from conan.tools.gnu import Autotools, AutotoolsToolchain, get_gnu_triplet
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.gnu.get_gnu_triplet import _get_gnu_triplet # Ugly but not currently exported in Conan 2.0
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 import glob
@@ -16,7 +17,12 @@ required_conan_version = ">=1.55.0"
 
 def sha256sum(file_path):
     with open(file_path, "rb") as f:
-        digest = hashlib.file_digest(f, "sha256")
+        digest = hashlib.new("sha256")
+        while True:
+            data = fh.read(8192)
+            if not data:
+                break
+            digest.update(data)
         return digest.hexdigest()
 
 class ICUConan(ConanFile):
@@ -123,18 +129,18 @@ class ICUConan(ConanFile):
         if cross_building(self):
             base_path = unix_path(self, self.dependencies.build["icu"].package_folder)
             tc.configure_args.append(f"--with-cross-build={base_path}")
-            if (not is_msvc(self)):
+            if not is_msvc(self):
                 # --with-cross-build above prevents tc.generate() from setting --build option.
                 # Workaround for https://github.com/conan-io/conan/issues/12642
-                gnu_triplet = get_gnu_triplet(str(self._settings_build.os), str(self._settings_build.arch), str(self.settings.compiler))
+                gnu_triplet = _get_gnu_triplet(str(self._settings_build.os), str(self._settings_build.arch), str(self.settings.compiler))
                 tc.configure_args.append(f"--build={gnu_triplet}")
             if self.settings.os in ["iOS", "tvOS", "watchOS"]:
-                gnu_triplet = get_gnu_triplet("Macos", str(self.settings.arch))
+                gnu_triplet = _get_gnu_triplet("Macos", str(self.settings.arch))
                 tc.configure_args.append(f"--host={gnu_triplet}")
             elif is_msvc(self):
                 # ICU doesn't like GNU triplet of conan for msvc (see https://github.com/conan-io/conan/issues/12546)
-                host = get_gnu_triplet(str(self.settings.os), str(self.settings.arch), "gcc")
-                build = get_gnu_triplet(str(self._settings_build.os), str(self._settings_build.arch), "gcc")
+                host = _get_gnu_triplet(str(self.settings.os), str(self.settings.arch), "gcc")
+                build = _get_gnu_triplet(str(self._settings_build.os), str(self._settings_build.arch), "gcc")
                 tc.configure_args.extend([
                     f"--host={host}",
                     f"--build={build}",
@@ -205,7 +211,7 @@ class ICUConan(ConanFile):
 
     @property
     def _data_filename(self):
-        vtag = str(self.version).split(".")[0]
+        vtag = str(self.version).split('.', maxsplit=1)[0]
         return f"icudt{vtag}l.dat"
 
     @property
