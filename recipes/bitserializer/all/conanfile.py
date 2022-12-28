@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
@@ -50,6 +50,10 @@ class BitserializerConan(ConanFile):
             "apple-clang": "12",
         }
 
+    def _patch_sources(self):
+        # Remove 'ryml' subdirectory from #include
+        replace_in_file(self, os.path.join(self.source_folder, "include/bitserializer/rapidyaml_archive.h"), "#include <ryml/", "#include <")
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -67,10 +71,6 @@ class BitserializerConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        # ToDo: remove this after fix linkage the base library
-        if self.options.with_rapidyaml:
-            raise ConanInvalidConfiguration("YAML currently unavailable due an issue with linking the base library")
-    
         # Check minimal version that supported CSV option
         if self.options.with_csv and Version(self.version) < "0.50":
             raise ConanInvalidConfiguration("CSV is supported in the BitSerializer starting from version 0.50 (option 'with_csv')")
@@ -113,6 +113,7 @@ class BitserializerConan(ConanFile):
         deps.generate()
 
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
