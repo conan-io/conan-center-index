@@ -50,12 +50,14 @@ class BitserializerConan(ConanFile):
             "apple-clang": "12",
         }
 
+    @property
+    def _is_header_only(self):
+        # All components of library are header-only except csv-archive
+        return not self.options.with_csv
+
     def _patch_sources(self):
         # Remove 'ryml' subdirectory from #include
-        replace_in_file(self, os.path.join(self.source_folder, "include/bitserializer/rapidyaml_archive.h"), "#include <ryml/", "#include <")
-
-    def configure(self):
-        self.settings.clear()
+        replace_in_file(self, os.path.join(self.source_folder, "include/bitserializer/rapidyaml_archive.h"), "#include <ryml/", "#include <", strict=False)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -102,27 +104,37 @@ class BitserializerConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["BUILD_CPPRESTJSON_ARCHIVE"] = self.options.with_cpprestsdk
-        tc.variables["BUILD_RAPIDJSON_ARCHIVE"] = self.options.with_rapidjson
-        tc.variables["BUILD_PUGIXML_ARCHIVE"] = self.options.with_pugixml
-        tc.variables["BUILD_RAPIDYAML_ARCHIVE"] = self.options.with_rapidyaml
-        tc.variables["BUILD_CSV_ARCHIVE"] = self.options.with_csv
-        tc.generate()
-        deps = CMakeDeps(self)
-        deps.generate()
+        if not self._is_header_only:
+            tc = CMakeToolchain(self)
+            tc.variables["BUILD_CPPRESTJSON_ARCHIVE"] = self.options.with_cpprestsdk
+            tc.variables["BUILD_RAPIDJSON_ARCHIVE"] = self.options.with_rapidjson
+            tc.variables["BUILD_PUGIXML_ARCHIVE"] = self.options.with_pugixml
+            tc.variables["BUILD_RAPIDYAML_ARCHIVE"] = self.options.with_rapidyaml
+            tc.variables["BUILD_CSV_ARCHIVE"] = self.options.with_csv
+            tc.generate()
+            deps = CMakeDeps(self)
+            deps.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        if not self._is_header_only:
+            self._patch_sources()
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
     def package(self):
-        cmake = CMake(self)
-        cmake.install()
+        if not self._is_header_only:
+            cmake = CMake(self)
+            cmake.install()
+            rmdir(self, os.path.join(self.package_folder, "share"))
+        else:
+            copy(self, "*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        # Copy license
         copy(self, "license.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
+
+    def package_id(self):
+        if self._is_header_only:
+            self.info.header_only()
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "bitserializer")
