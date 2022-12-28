@@ -44,7 +44,7 @@ class PackageConan(ConanFile):
 
     def validate(self):
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Library is only support for Linux. PR's are welcome.")
+            raise ConanInvalidConfiguration("libInterpolate currently only supports Linux. Upstream PR's are welcome (https://github.com/CD3/libInterpolate/issues/14).")
 
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
