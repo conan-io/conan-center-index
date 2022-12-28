@@ -57,7 +57,7 @@ class TestPackageConan(ConanFile):
             part_arch = "armv7"
         elif part_arch in ("riscv32", "riscv64"):
             part_arch = "riscv"
-        return os.path.join(self.source_folder, f"{self._target_os}-{part_arch}.s")
+        return os.path.join(self.source_folder, "..", "test_package_files", f"{self._target_os}-{part_arch}.s")
 
     def _append_gnu_triplet(self, exe):
         return f"{self._binutils_data['prefix']}{exe}"
