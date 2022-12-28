@@ -16,7 +16,7 @@ class LcmsConan(ConanFile):
     description = "A free, open source, CMM engine."
     license = "MIT"
     homepage = "https://github.com/mm2/Little-CMS"
-    topics = ("little-cms", "cmm", "icc", "cmm-engine", "color-management-engine")
+    topics = ("littlecms", "little-cms", "cmm", "icc", "cmm-engine", "color-management-engine")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
