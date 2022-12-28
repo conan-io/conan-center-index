@@ -37,7 +37,7 @@ class MBitsArgsConan(ConanFile):
     )
     settings = "os", "compiler", "build_type", "arch"
     options = {"fPIC": [True, False], "shared": [True, False, "deprecated"]}
-    default_options = {"fPIC": True}
+    default_options = {"fPIC": True, "shared": "deprecated"}
 
     @property
     def _min_cppstd(self):
