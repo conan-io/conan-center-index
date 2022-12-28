@@ -249,9 +249,11 @@ class QtConan(ConanFile):
                 _enablemodule(module)
 
     def validate(self):
-        if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) >= "11" or \
-            self.info.settings.compiler == "clang" and Version(self.info.settings.compiler.version) >= "12":
-            raise ConanInvalidConfiguration("qt is not supported on gcc11 and clang >= 12 on C3I until conan-io/conan-center-index#13472 is fixed")
+        if os.getenv('NOT_ON_C3I', '0') == '0':
+            if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) >= "11" or \
+                self.info.settings.compiler == "clang" and Version(self.info.settings.compiler.version) >= "12":
+                raise ConanInvalidConfiguration("qt is not supported on gcc11 and clang >= 12 on C3I until conan-io/conan-center-index#13472 is fixed\n"\
+                                                "If your distro is modern enough (xcb >= 1.12), set environment variable NOT_ON_C3I=1")
 
         # C++ minimum standard required
         if self.settings.compiler.get_safe("cppstd"):
@@ -277,6 +279,8 @@ class QtConan(ConanFile):
 
             if not (self.options.gui and self.options.qtdeclarative and self.options.qtwebchannel):
                 raise ConanInvalidConfiguration("option qt:qtwebengine requires also qt:gui, qt:qtdeclarative and qt:qtwebchannel")
+            if not self.options.with_dbus and self.settings.os == "Linux":
+                raise ConanInvalidConfiguration("option qt:webengine requires also qt:with_dbus on Linux")
 
             if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
                 raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
