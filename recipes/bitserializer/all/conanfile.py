@@ -67,9 +67,6 @@ class BitserializerConan(ConanFile):
         if self.options.with_rapidyaml:
             self.requires("rapidyaml/0.4.1", transitive_headers=True, transitive_libs=True)
 
-    def package_id(self):
-        self.info.clear()
-
     def validate(self):
         # Check minimal version that supported CSV option
         if self.options.with_csv and Version(self.version) < "0.50":
