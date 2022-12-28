@@ -5,3 +5,11 @@ sources:
   "1.5.1":
     url: "https://github.com/rui314/mold/archive/refs/tags/v1.5.1.tar.gz"
     sha256: "ec94aa74758f1bc199a732af95c6304ec98292b87f2f4548ce8436a7c5b054a1"
+  "1.7.1":
+    url: "https://github.com/rui314/mold/archive/refs/tags/v1.7.1.tar.gz"
+    sha256: "fa2558664db79a1e20f09162578632fa856b3cde966fbcb23084c352b827dfa9"
+patches:
+  "1.7.1":
+    - patch_file: "patches/0001-fix-install.patch"
+      patch_description: "Change install folder of the ld symlink since conan center doesn't allow the libexec folder"
+      patch_type: "conan"

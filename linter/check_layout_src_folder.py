@@ -32,7 +32,7 @@ class LayoutSrcFolder(BaseChecker):
         if not isinstance(node.func, nodes.Name):
             return
 
-        if node.func.name in ["cmake_layout", "vs_layout", "basic_layout"]:
+        if node.func.name in ["cmake_layout", "bazel_layout", "basic_layout"]:
             for kw in node.keywords:
                 if kw.arg == "src_folder":
                     if not kw.value or kw.value.as_string().strip("\"'") != "src":
