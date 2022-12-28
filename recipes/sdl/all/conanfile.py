@@ -223,6 +223,8 @@ class SDLConan(ConanFile):
             }.get(str(self.settings.arch), str(self.settings.arch))
         cmake_required_includes = []  # List of directories used by CheckIncludeFile (https://cmake.org/cmake/help/latest/module/CheckIncludeFile.html)
         cmake_extra_ldflags = []
+        cmake_extra_libs = []
+
         # FIXME: self.install_folder not defined? Neccessary?
         tc.variables["CONAN_INSTALL_FOLDER"] = self.install_folder.replace("\\", "/")
         if self.settings.os != "Windows" and not self.options.shared:
@@ -320,6 +322,11 @@ class SDLConan(ConanFile):
                 tc.variables["SDL_PULSEAUDIO"] = self.options.pulse
                 if self.options.pulse:
                     tc.variables["SDL_PULSEAUDIO_SHARED"] = self.options["pulseaudio"].shared
+                    for component in self.dependencies["pulseaudio"].cpp_info.components:
+                        if self.dependencies["pulseaudio"].cpp_info.components[component].libs:
+                            cmake_extra_libs += self.dependencies["pulseaudio"].cpp_info.components[component].libs
+                            cmake_extra_ldflags += ["-L{}".format(it) for it in self.dependencies["pulseaudio"].cpp_info.components[component].libdirs]
+                    cmake_extra_ldflags += ["-lxcb", "-lrt"]  # FIXME: SDL sources doesn't take into account transitive dependencies
                 tc.variables["SDL_SNDIO"] = self.options.sndio
                 if self.options.sndio:
                     tc.variables["SDL_SNDIO_SHARED"] = self.options["sndio"].shared
@@ -372,6 +379,7 @@ class SDLConan(ConanFile):
         tc.variables["CMAKE_REQUIRED_INCLUDES"] = ";".join(cmake_required_includes)
         cmake_extra_cflags = ["-I{}".format(path) for _, dep in self.dependencies.items() for path in dep.cpp_info.includedirs]
         tc.variables["EXTRA_CFLAGS"] = ";".join(cmake_extra_cflags)
+        tc.variables["EXTRA_LIBS"] = ";".join(cmake_extra_libs)
         tc.generate()
 
     def build(self):
