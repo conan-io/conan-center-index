@@ -53,7 +53,7 @@ The specific steps to add new packages are:
 
 * Fork the [conan-center-index](https://github.com/conan-io/conan-center-index) git repository, and then clone it locally.
 * Copy a template from [package_templates](../package_templates) folder in the recipes/ folder and rename it to the project name (it should be lower-case). Read templates [documentation](../package_templates/README.md) to find more information.
-* Make sure you are using the latest [Conan client](https://conan.io/downloads) version, as recipes might evolve introducing features of the newer Conan releases.
+* Make sure you are using a recent [Conan client](https://conan.io/downloads) version, as recipes might evolve introducing features of the newer Conan releases.
 * Commit and Push to GitHub then submit a pull request.
 * Our automated build service will build 100+ different configurations, and provide messages that indicate if there were any issues found during the pull request on GitHub.
 
