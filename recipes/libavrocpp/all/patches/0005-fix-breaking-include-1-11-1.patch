@@ -1,0 +1,473 @@
+diff --git a/lang/c++/CMakeLists.txt b/lang/c++/CMakeLists.txt
+index e19b5a9..0249c37 100644
+--- a/lang/c++/CMakeLists.txt
++++ b/lang/c++/CMakeLists.txt
+@@ -106,7 +106,7 @@ set (AVRO_SOURCE_FILES
+         impl/json/JsonIO.cc
+         impl/json/JsonDom.cc
+         impl/Resolver.cc impl/Validator.cc
+-        impl/CustomFields.cc
++        impl/CustomAttributes.cc
+         )
+ 
+ add_library (avrocpp SHARED ${AVRO_SOURCE_FILES})
+diff --git b/lang/c++/api/CustomAttributes.hh b/lang/c++/api/CustomAttributes.hh
+new file mode 100644
+index 0000000..2bd572c
+--- /dev/null
++++ b/lang/c++/api/CustomAttributes.hh
+@@ -0,0 +1,55 @@
++/*
++ * Licensed to the Apache Software Foundation (ASF) under one
++ * or more contributor license agreements.  See the NOTICE file
++ * distributed with this work for additional information
++ * regarding copyright ownership.  The ASF licenses this file
++ * to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance
++ * with the License.  You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#ifndef avro_CustomAttributes_hh__
++#define avro_CustomAttributes_hh__
++
++#include <iostream>
++#include <map>
++#include <string>
++#include "Config.hh"
++
++namespace avro {
++
++// CustomAttributes class stores avro custom attributes.
++// Each attribute is represented by a unique name and value.
++// User is supposed to create CustomAttributes object and then add it to Schema.
++class AVRO_DECL CustomAttributes {
++  public:
++    // Retrieves the custom attribute json entity for that attributeName, returns an
++    // null if the attribute doesn't exist.
++    std::string getAttribute(const std::string &name) const;
++
++    // Adds a custom attribute. If the attribute already exists, throw an exception.
++    void addAttribute(const std::string &name, const std::string &value);
++
++    // Provides a way to iterate over the custom attributes or check attribute size.
++    const std::map<std::string, std::string> &attributes() const {
++        return attributes_;
++    }
++
++    // Prints the attribute value for the specific attribute.
++    void printJson(std::ostream& os, const std::string &name) const;
++
++  private:
++    std::map<std::string, std::string> attributes_;
++};
++
++}  // namespace avro
++
++#endif
+diff --git a/lang/c++/api/CustomFields.hh a/lang/c++/api/CustomFields.hh
+deleted file mode 100644
+index 01468ff..0000000
+--- a/lang/c++/api/CustomFields.hh
++++ /dev/null
+@@ -1,55 +0,0 @@
+-/*
+- * Licensed to the Apache Software Foundation (ASF) under one
+- * or more contributor license agreements.  See the NOTICE file
+- * distributed with this work for additional information
+- * regarding copyright ownership.  The ASF licenses this file
+- * to you under the Apache License, Version 2.0 (the
+- * "License"); you may not use this file except in compliance
+- * with the License.  You may obtain a copy of the License at
+- *
+- *     http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-#ifndef avro_CustomFields_hh__
+-#define avro_CustomFields_hh__
+-
+-#include <iostream>
+-
+-#include "../impl/json/JsonDom.hh"
+-
+-namespace avro {
+-
+-// CustomFields class stores avro custom attributes.
+-// Each field is represented by a unique name and value.
+-// User is supposed to create CustomFields object and then add it to Schema.
+-class AVRO_DECL CustomFields {
+-  public:
+-    // Retrieves the custom field json entity for that fieldName, returns an
+-    // null Entity if the field doesn't exist.
+-    json::Entity getField(const std::string &fieldName) const;
+-
+-    // Adds a custom field. If the field already exists, throw an exception.
+-    void addField(const std::string &fieldName, const json::Entity &fieldValue);
+-    void addField(const std::string &fieldName, const std::string &fieldValue);
+-
+-    // Provides a way to iterate over the custom fields or check field size.
+-    const std::map<std::string, json::Entity> &fields() const {
+-        return fields_;
+-    }
+-
+-    // Prints the json string for the specific field.
+-    void printJson(std::ostream& os, const std::string &fieldName) const;
+-
+-  private:
+-    std::map<std::string, json::Entity> fields_;
+-};
+-
+-}  // namespace avro
+-
+-#endif
+diff --git a/lang/c++/api/Node.hh b/lang/c++/api/Node.hh
+index c9af126..3f5fe5b 100644
+--- a/lang/c++/api/Node.hh
++++ b/lang/c++/api/Node.hh
+@@ -26,7 +26,7 @@
+ #include <memory>
+ #include <utility>
+ 
+-#include "CustomFields.hh"
++#include "CustomAttributes.hh"
+ #include "Exception.hh"
+ #include "LogicalType.hh"
+ #include "SchemaResolution.hh"
+@@ -154,7 +154,7 @@ public:
+     }
+     virtual size_t fixedSize() const = 0;
+ 
+-    void addCustomAttributesForField(const CustomFields& customAttributes) {
++    void addCustomAttributesForField(const CustomAttributes& customAttributes) {
+         checkLock();
+         doAddCustomAttribute(customAttributes);
+     }
+@@ -191,7 +191,7 @@ protected:
+     virtual void doAddLeaf(const NodePtr &newLeaf) = 0;
+     virtual void doAddName(const std::string &name) = 0;
+     virtual void doSetFixedSize(size_t size) = 0;
+-    virtual void doAddCustomAttribute(const CustomFields& customFields) = 0;
++    virtual void doAddCustomAttribute(const CustomAttributes& customAttributes) = 0;
+ 
+ private:
+     const Type type_;
+diff --git a/lang/c++/api/NodeImpl.hh b/lang/c++/api/NodeImpl.hh
+index 62e62eb..bf0e352 100644
+--- a/lang/c++/api/NodeImpl.hh
++++ b/lang/c++/api/NodeImpl.hh
+@@ -32,7 +32,7 @@
+ 
+ #include "Node.hh"
+ #include "NodeConcepts.hh"
+-#include "CustomFields.hh"
++#include "CustomAttributes.hh"
+ 
+ namespace avro {
+ 
+@@ -160,8 +160,8 @@ protected:
+ 
+     void setLeafToSymbolic(size_t index, const NodePtr &node) override;
+ 
+-    void doAddCustomAttribute(const CustomFields &customfields) override {
+-      customAttributes_.add(customfields);
++    void doAddCustomAttribute(const CustomAttributes &customAttributes) override {
++      customAttributes_.add(customAttributes);
+     }
+ 
+     SchemaResolution furtherResolution(const Node &reader) const {
+@@ -223,8 +223,8 @@ using MultiLeaves = concepts::MultiAttribute<NodePtr>;
+ 
+ using NoLeafNames = concepts::NoAttribute<std::string>;
+ using LeafNames = concepts::MultiAttribute<std::string>;
+-using MultiAttributes = concepts::MultiAttribute<CustomFields>;
+-using NoAttributes = concepts::NoAttribute<CustomFields>;
++using MultiAttributes = concepts::MultiAttribute<CustomAttributes>;
++using NoAttributes = concepts::NoAttribute<CustomAttributes>;
+ 
+ using NoSize = concepts::NoAttribute<int>;
+ using HasSize = concepts::SingleAttribute<int>;
+diff --git a/lang/c++/api/Schema.hh b/lang/c++/api/Schema.hh
+index fa50481..b0d1e39 100644
+--- a/lang/c++/api/Schema.hh
++++ b/lang/c++/api/Schema.hh
+@@ -21,7 +21,7 @@
+ 
+ #include "Config.hh"
+ #include "NodeImpl.hh"
+-#include "CustomFields.hh"
++#include "CustomAttributes.hh"
+ #include <string>
+ 
+ /// \file
+@@ -103,7 +103,7 @@ public:
+     void addField(const std::string &name, const Schema &fieldSchema);
+     // Add a field with custom attributes
+     void addField(const std::string &name, const Schema &fieldSchema,
+-                  const CustomFields &customFields);
++                  const CustomAttributes &customFields);
+ 
+     std::string getDoc() const;
+     void setDoc(const std::string &);
+diff --git a/lang/c++/impl/Compiler.cc b/lang/c++/impl/Compiler.cc
+index 014229e..383798c 100644
+--- a/lang/c++/impl/Compiler.cc
++++ b/lang/c++/impl/Compiler.cc
+@@ -21,7 +21,7 @@
+ #include <utility>
+ 
+ #include "Compiler.hh"
+-#include "CustomFields.hh"
++#include "CustomAttributes.hh"
+ #include "NodeConcepts.hh"
+ #include "Schema.hh"
+ #include "Stream.hh"
+@@ -149,8 +149,8 @@ struct Field {
+     const string name;
+     const NodePtr schema;
+     const GenericDatum defaultValue;
+-    const CustomFields customFields;
+-    Field(string n, NodePtr v, GenericDatum dv, const CustomFields& cf) : name(std::move(n)), schema(std::move(v)), defaultValue(std::move(dv)), customFields(std::move(cf)) {}
++    const CustomAttributes customAttributes;
++    Field(string n, NodePtr v, GenericDatum dv, const CustomAttributes& ca) : name(std::move(n)), schema(std::move(v)), defaultValue(std::move(dv)), customAttributes(std::move(ca)) {}
+ };
+ 
+ static void assertType(const Entity &e, EntityType et) {
+@@ -268,14 +268,14 @@ static const std::unordered_set<std::string>& getKnownFields() {
+       return kKnownFields;
+ }
+ 
+-static void getCustomAttributes(const Object& m, CustomFields &customAttributes)
++static void getCustomAttributes(const Object& m, CustomAttributes &customAttributes)
+ {
+   // Don't add known fields on primitive type and fixed type into custom
+   // fields.
+   const std::unordered_set<std::string>& kKnownFields = getKnownFields();
+   for (const auto &entry : m) {
+     if (kKnownFields.find(entry.first) == kKnownFields.end()) {
+-      customAttributes.addField(entry.first, entry.second);
++      customAttributes.addAttribute(entry.first, entry.second.stringValue());
+     }
+   }
+ }
+@@ -291,7 +291,7 @@ static Field makeField(const Entity &e, SymbolTable &st, const string &ns) {
+     }
+     GenericDatum d = (it2 == m.end()) ? GenericDatum() : makeGenericDatum(node, it2->second, st);
+     // Get custom attributes
+-    CustomFields customAttributes;
++    CustomAttributes customAttributes;
+     getCustomAttributes(m, customAttributes);
+ 
+     return Field(n, node, d, customAttributes);
+@@ -304,7 +304,7 @@ static NodePtr makeRecordNode(const Entity &e, const Name &name,
+     const Array &v = getArrayField(e, m, "fields");
+     concepts::MultiAttribute<string> fieldNames;
+     concepts::MultiAttribute<NodePtr> fieldValues;
+-    concepts::MultiAttribute<CustomFields> customAttributes;
++    concepts::MultiAttribute<CustomAttributes> customAttributes;
+     vector<GenericDatum> defaultValues;
+ 
+     for (const auto &it : v) {
+@@ -312,7 +312,7 @@ static NodePtr makeRecordNode(const Entity &e, const Name &name,
+         fieldNames.add(f.name);
+         fieldValues.add(f.schema);
+         defaultValues.push_back(f.defaultValue);
+-        customAttributes.add(f.customFields);
++        customAttributes.add(f.customAttributes);
+     }
+     NodeRecord *node;
+     if (doc == nullptr) {
+diff --git b/lang/c++/impl/CustomAttributes.cc b/lang/c++/impl/CustomAttributes.cc
+new file mode 100644
+index 0000000..bb56438
+--- /dev/null
++++ b/lang/c++/impl/CustomAttributes.cc
+@@ -0,0 +1,51 @@
++
++/**
++ * Licensed to the Apache Software Foundation (ASF) under one
++ * or more contributor license agreements.  See the NOTICE file
++ * distributed with this work for additional information
++ * regarding copyright ownership.  The ASF licenses this file
++ * to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance
++ * with the License.  You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++#include "CustomAttributes.hh"
++#include <map>
++#include <memory>
++#include "Exception.hh"
++
++namespace avro {
++
++std::string CustomAttributes::getAttribute(const std::string &name) const {
++    std::map<std::string, std::string>::const_iterator iter =
++        attributes_.find(name);
++    if (iter == attributes_.end()) {
++      return NULL;
++    }
++    return iter->second;
++}
++
++void CustomAttributes::addAttribute(const std::string& name,
++                                    const std::string& value) {
++  auto iter_and_find =
++      attributes_.insert(std::pair<std::string, std::string>(name, value));
++  if (!iter_and_find.second) {
++    throw Exception(name + " already exists and cannot be added");
++  }
++}
++
++void CustomAttributes::printJson(std::ostream& os,
++                                  const std::string& name) const {
++    if (attributes().find(name) == attributes().end()) {
++        throw Exception(name + " doesn't exist");
++    }
++    os << "\"" << name << "\": \"" << attributes().at(name) << "\"";
++}
++}  // namespace avro
+diff --git a/lang/c++/impl/CustomFields.cc a/lang/c++/impl/CustomFields.cc
+deleted file mode 100644
+index 04541da..0000000
+--- a/lang/c++/impl/CustomFields.cc
++++ /dev/null
+@@ -1,59 +0,0 @@
+-
+-/**
+- * Licensed to the Apache Software Foundation (ASF) under one
+- * or more contributor license agreements.  See the NOTICE file
+- * distributed with this work for additional information
+- * regarding copyright ownership.  The ASF licenses this file
+- * to you under the Apache License, Version 2.0 (the
+- * "License"); you may not use this file except in compliance
+- * with the License.  You may obtain a copy of the License at
+- *
+- *     http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-#include "CustomFields.hh"
+-#include <map>
+-#include <memory>
+-#include "Exception.hh"
+-
+-namespace avro {
+-
+-using json::Entity;
+-
+-Entity CustomFields::getField(const std::string &fieldName) const {
+-    std::map<std::string, Entity>::const_iterator iter =
+-        fields_.find(fieldName);
+-    if (iter == fields_.end()) {
+-      return Entity();
+-    }
+-    return iter->second;
+-}
+-
+-void CustomFields::addField(const std::string& fieldName,
+-                            const std::string& fieldValue) {
+-  addField(fieldName,
+-           json::Entity(std::make_shared<std::string>(fieldValue)));
+-}
+-
+-void CustomFields::addField(const std::string& fieldName,
+-                            const Entity& fieldValue) {
+-  auto iter_and_find =
+-      fields_.insert(std::pair<std::string, Entity>(fieldName, fieldValue));
+-  if (!iter_and_find.second) {
+-    throw Exception(fieldName + " already exists and cannot be added");
+-  }
+-}
+-
+-void CustomFields::printJson(std::ostream& os,
+-                             const std::string& fieldName) const {
+-    if (fields_.find(fieldName) == fields_.end()) {
+-        throw Exception(fieldName + " doesn't exist");
+-    }
+-    os << "\"" << fieldName << "\": " << fields_.at(fieldName).toString();
+-}
+-}  // namespace avro
+diff --git a/lang/c++/impl/NodeImpl.cc b/lang/c++/impl/NodeImpl.cc
+index 37c8555..5549c68 100644
+--- a/lang/c++/impl/NodeImpl.cc
++++ b/lang/c++/impl/NodeImpl.cc
+@@ -83,13 +83,13 @@ std::ostream &operator<<(std::ostream &os, indent x) {
+     return os;
+ }
+ 
+-void printCustomFields(const CustomFields& customFields, int depth,
++void printCustomAttributes(const CustomAttributes& customAttributes, int depth,
+                        std::ostream &os) {
+-    std::map<std::string, json::Entity>::const_iterator iter =
+-        customFields.fields().begin();
+-    while (iter != customFields.fields().end()) {
++    std::map<std::string, std::string>::const_iterator iter =
++        customAttributes.attributes().begin();
++    while (iter != customAttributes.attributes().end()) {
+       os << ",\n" << indent(depth);
+-      customFields.printJson(os, iter->first);
++      customAttributes.printJson(os, iter->first);
+       ++iter;
+     }
+ }
+@@ -287,7 +287,7 @@ void NodeRecord::printJson(std::ostream &os, size_t depth) const {
+             }
+         }
+         if(customAttributes_.size() == fields) {
+-          printCustomFields(customAttributes_.get(i), depth, os);
++          printCustomAttributes(customAttributes_.get(i), depth, os);
+         }
+         os << '\n';
+         os << indent(--depth) << '}';
+diff --git a/lang/c++/impl/Schema.cc b/lang/c++/impl/Schema.cc
+index fa90d34..3315f25 100644
+--- a/lang/c++/impl/Schema.cc
++++ b/lang/c++/impl/Schema.cc
+@@ -19,7 +19,7 @@
+ #include <utility>
+ 
+ #include "Schema.hh"
+-#include "CustomFields.hh"
++#include "CustomAttributes.hh"
+ 
+ namespace avro {
+ 
+@@ -28,11 +28,11 @@ RecordSchema::RecordSchema(const std::string &name) : Schema(new NodeRecord) {
+ }
+ 
+ void RecordSchema::addField(const std::string &name, const Schema &fieldSchema) {
+-    const CustomFields emptyCustomField;
+-    addField(name, fieldSchema, emptyCustomField);
++    const CustomAttributes emptyCustomAttribute;
++    addField(name, fieldSchema, emptyCustomAttribute);
+ }
+ 
+-void RecordSchema::addField(const std::string &name, const Schema &fieldSchema, const CustomFields &customFields) {
++void RecordSchema::addField(const std::string &name, const Schema &fieldSchema, const CustomAttributes &customFields) {
+     // add the name first. it will throw if the name is a duplicate, preventing
+     // the leaf from being added
+     node_->addName(name);
