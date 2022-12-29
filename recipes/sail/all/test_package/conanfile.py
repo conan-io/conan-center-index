@@ -1,6 +1,6 @@
+from conan.tools.build import cross_building
+from conans import ConanFile, CMake
 import os
-
-from conans import ConanFile, CMake, tools
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
@@ -12,7 +12,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not cross_building(self):
             bin_path = os.path.join("bin", "test_package_c")
             self.run(bin_path, run_environment=True)
 

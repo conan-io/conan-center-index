@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rename, rmdir
 from conans import CMake
 import functools
@@ -43,6 +44,9 @@ class SAILConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build"
+
+    def validate(self):
+        check_min_cppstd(self, "11")
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
