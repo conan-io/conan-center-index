@@ -1,7 +1,7 @@
 # Folder and Files Structure
 
-ConanCenter has a specific structure for it's recipes, this allows the [build service](../README.md#the-build-service) to work most
-efficiently.
+ConanCenterIndex has a specific structure for it's recipes, this allows the [build service](../README.md#the-build-service)
+to work most efficiently.
 
 <!-- toc -->
 ## Contents
@@ -21,7 +21,7 @@ folders at a time.
 
 This is the canonical structure of one of these folders, where the same `conanfile.py` recipe is suitable to build all the versions of the library:
 
-> **Note**: For updating the structure during the [v2 migration](../v2_migration.md) see the [test package](test_packages.md) document.
+> **Note**: For updating the structure during the [v2 migration](../v2_migration.md) see the [test package](test_packages.md#cmake-targets) document.
 
 ```txt
 .
@@ -39,15 +39,15 @@ This is the canonical structure of one of these folders, where the same `conanfi
 |               +-- test_pacakge.cpp
 ```
 
-If it becomes too complex to maintain the logic for all the versions in a single `conanfile.py`, it is possible to split the folder `all` into
-two or more folders, dedicated to different versions, each one with its own `conanfile.py` recipe. In any case, those folders should replicate the
+If it becomes too complex to maintain the logic for all the versions in a single `conanfile.py`, it is possible to split the folder `all/` into
+more folders, dedicated to different versions, each one with its own `conanfile.py` recipe. In any case, those folders should replicate the
 same structure.
 
 ### `config.yml`
 
 This file lists the versions that should be built along with the corresponding [recipe folder](#the-recipe-folder) that will be used to package the project.
 
-> **Note**: It's strongly preferred to only have one one recipe - this should be in the `all` folder.
+> **Note**: It's strongly preferred to only have one recipe which should be in the `all/` folder.
 
 ```yml
 versions:
@@ -82,10 +82,13 @@ This contains every needed to build packages.
 
 #### `conandata.yml`
 
-This file lists **all the sources that are needed to build the package**: source code, patch files, license files,... any file that will be used by the recipe
-should be listed here. The file is organized into two sections, `sources` and `patches`, each one of them contains the files that are required
-for each version of the library. All the files that are downloaded from the internet should include a checksum, so we can validate that
-they are not changed.
+This file lists **all the sources** that are needed to build the package. The most common examples are
+source code, build scripts, license files .
+
+The file is organized into two sections, `"sources"` and `"patches"`, each one of them contains the files that are required
+for each version of the library. Resources which need to be downloaded are listed under `"source"` should include a checksum
+to validate that they do not change. This helps to ensure the build are reproducible at a later point in time. Often
+modifications are requires for a variety of reasons, which ones are associated to which version are listed under the `"patches"`.
 
 ```yml
 sources:
@@ -94,7 +97,7 @@ sources:
     sha256: "9a1e0e9e843a356d65c7604e2c8bf9402b50fe294c355de0095ebd42fb9bd2c5"
 ```
 
-For more information about picking source tarballs, adding or removing versions, or what the rules are for patches - continue reading our
+For more information about picking source tarballs, adding or removing versions, or what the rules are for patches, continue reading our
 [Sources and Patches](sources_and_patches.md) guide.
 
 > **Note**: Under our mission to ensure quality, patches undergo extra scrutiny. **Make sure to review** our
@@ -107,7 +110,7 @@ Inside the `conanfile.py` recipe, this data is available in a `self.conan_data` 
 
 ```py
 def source(self):
-    get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+    get(self, **self.conan_data["sources"][self.version], strip_root=True)
 ```
 
 See the [Export Patches](sources_and_patches.md#exporting-patches) and [Applying Patches](sources_and_patches.md#applying-patches)
@@ -115,9 +118,9 @@ for more use case and examples.
 
 #### `conanfile.py`
 
-This file is the recipe contain the logic to build the libraries from sources for all the configurations.
-It's the single most important part of writing a package.
-Every `conanfile.py` should be accompanied by at least one [folder to test the generated packages](#test_package).
+This file is the recipe, it contains the logic to build the libraries from source for all the configurations.
+It's the single most important part of writing a package. Every `conanfile.py` should be accompanied by at least one
+[folder to test the generated packages](#test_package).
 
 Each recipe should derive the `ConanFile` class and implement key attributes and methods.
 
@@ -140,7 +143,7 @@ When a package needs other packages those are can be include with the `requireme
         self.require("fmt/9.0.0")
 ```
 
-For more information see the [Dependencies and Requirements](dependencies_and_requirements.md) documentation for more use cases.
+For more information see the [Dependencies](dependencies.md) documentation for more use cases.
 
 For compiled libraries, the `build()` method is used along side the [build helpers](https://docs.conan.io/en/latest/reference/build_helpers.html).
 List allows you to use the official build script from a project, see [build and package](build_and_package.md) instructions.
@@ -182,7 +185,7 @@ The goal for the test package is to make sure the
 * libraries are available to link against
 * components are correctly exposed
 
-> **Note** It's required to verify old generator are not broken for - you can do so by using the pattern, see
+> **Note** It's required to verify that the old generator are not broken. You can do so by using the pattern, see
 > [KB-H073](../error_knowledge_base.md#kb-h078) for details.
 
 Remember that the `test_<package>` recipes should **test the package configuration that has just been generated** for the
