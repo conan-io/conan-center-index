@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -94,84 +94,45 @@ class LibsodiumConan(ConanFile):
 
     @property
     def _msvc_sln_folder(self):
-        if self.settings.compiler == "Visual Studio":
-            folder = {
+        sln_folders = {
+            "Visual Studio": {
                 "10": "vs2010",
                 "11": "vs2012",
                 "12": "vs2013",
                 "14": "vs2015",
                 "15": "vs2017",
                 "16": "vs2019",
-            }
-        elif self.settings.compiler == "msvc":
-            folder = {
+            },
+            "msvc": {
+                "170": "vs2012",
+                "180": "vs2013",
                 "190": "vs2015",
                 "191": "vs2017",
                 "192": "vs2019",
-            }
-        else:
-            raise ConanException("Should not call this function with any other compiler")
-
-        if self.version != "1.0.18":
-            if self.settings.compiler == "Visual Studio":
-                folder["17"] = "vs2022"
-            else:
-                folder["193"] = "vs2022"
-
-        return folder.get(str(self.settings.compiler.version))
-
-    @property
-    def _msvc_platform(self):
-        return {
-            "x86": "Win32",
-            "x86_64": "x64",
-        }[str(self.settings.arch)]
-
-    # Method copied from xz_utils
-    def _fix_msvc_platform_toolset(self, vcxproj_file, old_toolset):
-        platform_toolset = {
-            "Visual Studio": {
-                "8": "v80",
-                "9": "v90",
-                "10": "v100",
-                "11": "v110",
-                "12": "v120",
-                "14": "v140",
-                "15": "v141",
-                "16": "v142",
-                "17": "v143",
             },
-            "msvc": {
-                "170": "v110",
-                "180": "v120",
-                "190": "v140",
-                "191": "v141",
-                "192": "v142",
-                "193": "v143",
-            }
-        }.get(str(self.settings.compiler), {}).get(str(self.settings.compiler.version))
-        if not platform_toolset:
-            raise ConanException(
-                f"Unknown platform toolset for {self.settings.compiler} {self.settings.compiler.version}",
-            )
-        replace_in_file(
-            self,
-            vcxproj_file,
-            f"<PlatformToolset>{old_toolset}</PlatformToolset>",
-            f"<PlatformToolset>{platform_toolset}</PlatformToolset>",
-        )
+        }
+        default_folder = "vs2019"
+        if self.version != "1.0.18":
+            sln_folders["Visual Studio"]["17"] = "vs2022"
+            sln_folders["msvc"]["193"] = "vs2022"
+            default_folder = "vs2022"
+
+        return sln_folders.get(str(self.settings.compiler), {}).get(str(self.settings.compiler.version), default_folder)
 
     def _build_msvc(self):
-        msvc_ver_subfolder = self._msvc_sln_folder or ("vs2022" if self.version != "1.0.18" else "vs2019")
-        msvc_sln_folder = os.path.join(self.build_folder, self.source_folder, "builds", "msvc", msvc_ver_subfolder)
-
-        msvc_sln_path = os.path.join(msvc_sln_folder, "libsodium.sln")
+        msvc_builds_folder = os.path.join(self.source_folder, "builds", "msvc")
+        msvc_sln_folder = os.path.join(msvc_builds_folder, self._msvc_sln_folder)
 
         # 1.0.18 only supported up to vs2019. Add support for newer toolsets.
-        if self.version == "1.0.18" and msvc_ver_subfolder == "vs2019":
-            vcxproj_path = os.path.join(msvc_sln_folder, "libsodium", "libsodium.vcxproj")
-            self._fix_msvc_platform_toolset(vcxproj_path, "v142")
+        if self.version == "1.0.18" and self._msvc_sln_folder == "vs2019":
+            toolset = MSBuildToolchain(self).toolset
+            replace_in_file(
+                self, os.path.join(msvc_sln_folder, "libsodium", "libsodium.vcxproj"),
+                f"<PlatformToolset>v142</PlatformToolset>",
+                f"<PlatformToolset>{toolset}</PlatformToolset>",
+            )
 
+        msbuild = MSBuild(self)
         build_type = "{}{}".format(
             "Dyn" if self.options.shared else "Static",
             "Debug" if self.settings.build_type == "Debug" else "Release",
@@ -182,10 +143,9 @@ class LibsodiumConan(ConanFile):
             "x86_64": "x64",
         }[str(self.settings.arch)]
 
-        msbuild = MSBuild(self)
         msbuild.build_type = build_type
         msbuild.platform = platform
-        msbuild.build(msvc_sln_path)
+        msbuild.build(os.path.join(msvc_sln_folder, "libsodium.sln"))
 
     def build(self):
         apply_conandata_patches(self)
