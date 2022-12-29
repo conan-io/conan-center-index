@@ -8,7 +8,7 @@ efficiently.
 
   * [Recipe File Structure](#recipe-file-structure)
     * [`config.yml`](#configyml)
-    * [The _recipe folder_](#the-recipe-folder)
+    * [The _recipe folder_](#the-_recipe-folder_)
       * [`conandata.yml`](#conandatayml)
       * [`conanfile.py`](#conanfilepy)
       * [`test_package`](#test_package)<!-- endToc -->
