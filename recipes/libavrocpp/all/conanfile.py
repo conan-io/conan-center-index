@@ -83,7 +83,7 @@ class LibavrocppConan(ConanFile):
 
         if self.settings.os == "Windows":
             for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
-                rm(self, dll_pattern_to_remove, self.package_folder)
+                rm(self, dll_pattern_to_remove, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         # FIXME: avro does not install under a CMake namespace https://github.com/apache/avro/blob/351f589913b9691322966fb77fe72269a0a2ec82/lang/c%2B%2B/CMakeLists.txt#L193
