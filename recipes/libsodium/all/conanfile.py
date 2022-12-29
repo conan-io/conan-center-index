@@ -163,6 +163,8 @@ class LibsodiumConan(ConanFile):
             self._build_msvc()
         else:
             autotools = Autotools(self)
+            if self._is_mingw:
+                autotools.autoreconf()
             autotools.configure()
             autotools.make()
 
