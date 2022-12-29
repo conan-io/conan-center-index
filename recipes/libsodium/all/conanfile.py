@@ -108,31 +108,30 @@ class LibsodiumConan(ConanFile):
 
     @property
     def _msvc_sln_folder(self):
-        if self.settings.compiler == "msvc":
-            folder = {
-                "190": "vs2015",
-                "191": "vs2017",
-                "192": "vs2019",
-            }
-        elif self.settings.compiler == "Visual Studio":
-            folder = {
+        sln_folders = {
+            "Visual Studio": {
                 "10": "vs2010",
                 "11": "vs2012",
                 "12": "vs2013",
                 "14": "vs2015",
                 "15": "vs2017",
                 "16": "vs2019",
+            },
+            "msvc": {
+                "170": "vs2012",
+                "180": "vs2013",
+                "190": "vs2015",
+                "191": "vs2017",
+                "192": "vs2019",
             }
-        else:
-            raise ConanException("Should not call this function with any other compiler")
-
+        }
         if self.version != "1.0.18":
-            if self.settings.compiler == "Visual Studio":
-                folder["17"] = "vs2022"
-            else:
-                folder["193"] = "vs2022"
+            sln_folders["Visual Studio"]["17"] = "vs2022"
+            sln_folders["msvc"]["193"] = "vs2022"
 
-        return folder.get(str(self.settings.compiler.version))
+        backup_folder = "vs2022" if self.version != "1.0.18" else "vs2019"
+
+        return sln_folders.get(str(self.settings.compiler), {}).get(str(self.settings.compiler.version), backup_folder)
 
     @property
     def _msvc_platform(self):
