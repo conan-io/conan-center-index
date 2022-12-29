@@ -118,7 +118,7 @@ class TesseractConan(ConanFile):
             tc.variables["AUTO_OPTIMIZE"] = self.options.with_auto_optimize
 
         # Set Leptonica_DIR to ensure that find_package will be called in original CMake file
-        tc.variables["Leptonica_DIR"] = self.deps_cpp_info["leptonica"].rootpath
+        tc.variables["Leptonica_DIR"] = self.deps_cpp_info["leptonica"].rootpath.replace("\\", "/")
 
         if Version(self.version) >= "5.0.0":
             tc.variables["DISABLE_CURL"] = not self.options.with_libcurl
