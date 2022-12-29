@@ -20,16 +20,20 @@ jobs:
         with:
           files: |
             linter/**
+            .github/workflows/linter-conan-v2.yml
+
       - name: Get Conan v1 version
         id: parse_conan_v1_version
         if: steps.changed_files.outputs.any_changed == 'true'
         uses: mikefarah/yq@master
         with:
           cmd: yq '.conan.version' '.c3i/config_v1.yml'
+
       - uses: actions/setup-python@v4
         if: steps.changed_files.outputs.any_changed == 'true'
         with:
           python-version: ${{ env.PYVER }}
+
       - name: Install requirements
         if: steps.changed_files.outputs.any_changed == 'true'
         run: |
