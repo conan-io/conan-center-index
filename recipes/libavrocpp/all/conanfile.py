@@ -92,3 +92,6 @@ class LibavrocppConan(ConanFile):
         self.cpp_info.components[target].requires = ["boost::boost", "snappy::snappy"]
         if self.options.shared:
             self.cpp_info.components[target].defines.append("AVRO_DYN_LINK")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
+
