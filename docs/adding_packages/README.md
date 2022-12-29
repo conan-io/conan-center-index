@@ -45,8 +45,10 @@ You are set to being.
 
 Make sure you have:
 
-* Fork and then clone the [conan-center-index](https://github.com/conan-io/conan-center-index/fork) git repository.
-* Make sure you are using the latest [Conan client](https://conan.io/downloads) version, as recipes might evolve introducing features of the newer Conan releases.
+* Fork and then clone the [conan-center-index](https://github.com/conan-io/conan-center-index) git repository, and then clone it locally.
+* Copy a template from [package_templates](../package_templates) folder in the recipes/ folder and rename it to the project name (it should be lower-case). Read templates [documentation](../package_templates/README.md) to find more information.
+* Make sure you are using a recent [Conan client](https://conan.io/downloads) version, as recipes might evolve introducing features of the newer Conan releases.
+* Commit and Push to GitHub then submit a pull request.
 
 The easiest way is to copy a template from [package_templates](../package_templates) folder in the recipes/ folder and rename it to the project name (it should be lower-case). Read templates [documentation](../package_templates/README.md) to find more information.
 
