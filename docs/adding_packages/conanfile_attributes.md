@@ -3,7 +3,7 @@
 The `ConanFile` class has a lot of different properties that can help consumers search for projects, help the client build packages for different configurations
 or are known by ConanCenter's build service and have special meaning.
 
-<!-- toc -->`
+<!-- toc -->
 ## Contents
 
   * [Attributes](#attributes)
