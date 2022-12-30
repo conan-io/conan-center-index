@@ -14,7 +14,7 @@ class UniAlgoConan(ConanFile):
     license = ("MIT", "Public Domain")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/uni-algo/uni-algo"
-    topics = ("unicode", "utf-8", "utf-16")
+    topics = ("unicode", "utf-8", "utf-16", "header-only"1)
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
