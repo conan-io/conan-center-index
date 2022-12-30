@@ -343,6 +343,28 @@ class BoostConan(ConanFile):
                 elif Version(self.settings.compiler.version) < min_compiler_version:
                     disable_wave()
 
+        if Version(self.version) >= "1.81.0":
+            # Starting from 1.81.0, Boost.Locale requires a c++11 capable compiler
+            # ==> disable it by default for older compilers or c++ standards
+
+            def disable_locale():
+                super_modules = self._all_super_modules("locale")
+                for smod in super_modules:
+                    try:
+                        setattr(self.options, f"without_{smod}", True)
+                    except ConanException:
+                        pass
+
+            if self.settings.compiler.get_safe("cppstd"):
+                if not valid_min_cppstd(self, 11):
+                    disable_locale()
+            else:
+                min_compiler_version = self._min_compiler_version_default_cxx11
+                if min_compiler_version is None:
+                    self.output.warn("Assuming the compiler supports c++11 by default")
+                elif Version(self.settings.compiler.version) < min_compiler_version:
+                    disable_locale()
+
     @property
     def _configure_options(self):
         return self._dependencies["configure_options"]
@@ -413,6 +435,8 @@ class BoostConan(ConanFile):
             libraries.append("math")
         if Version(self.version) >= "1.79.0":
             libraries.append("wave")
+        if Version(self.version) >= "1.81.0":
+            libraries.append("locale")
         libraries.sort()
         return filter(lambda library: f"without_{library}" in self.options, libraries)
 
@@ -1139,7 +1163,7 @@ class BoostConan(ConanFile):
 
     @property
     def _ar(self):
-        ar = self.buildenv.vars(self).get("AR")
+        ar = VirtualBuildEnv(self).vars().get("AR")
         if ar:
             return ar
         if is_apple_os(self) and self.settings.compiler == "apple-clang":
@@ -1148,7 +1172,7 @@ class BoostConan(ConanFile):
 
     @property
     def _ranlib(self):
-        ranlib = self.buildenv.vars(self).get("RANLIB")
+        ranlib = VirtualBuildEnv(self).vars().get("RANLIB")
         if ranlib:
             return ranlib
         if is_apple_os(self) and self.settings.compiler == "apple-clang":
@@ -1157,7 +1181,8 @@ class BoostConan(ConanFile):
 
     @property
     def _cxx(self):
-        cxx = self.buildenv.vars(self).get("CXX")
+        compilers_by_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
+        cxx = compilers_by_conf.get("cpp") or VirtualBuildEnv(self).vars().get("CXX")
         if cxx:
             return cxx
         if is_apple_os(self) and self.settings.compiler == "apple-clang":
@@ -1229,9 +1254,10 @@ class BoostConan(ConanFile):
             contents += f'<ranlib>"{ranlib_path}" '
         cxxflags = " ".join(self.conf.get("tools.build:cxxflags", default=[], check_type=list)) + " "
         cflags = " ".join(self.conf.get("tools.build:cflags", default=[], check_type=list)) + " "
-        cppflags = self.buildenv.vars(self).get("CPPFLAGS", "") + " "
+        buildenv_vars = VirtualBuildEnv(self).vars()
+        cppflags = buildenv_vars.get("CPPFLAGS", "") + " "
         ldflags = " ".join(self.conf.get("tools.build:sharedlinkflags", default=[], check_type=list)) + " "
-        asflags = self.buildenv.vars(self).get("ASFLAGS", "") + " "
+        asflags = buildenv_vars.get("ASFLAGS", "") + " "
 
         if self._with_stacktrace_backtrace:
             backtrace_aggregated_cpp_info = self.dependencies["libbacktrace"].cpp_info.aggregated_components()
