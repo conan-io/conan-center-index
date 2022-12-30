@@ -5,7 +5,8 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
+
 
 class HyperscanConan(ConanFile):
     name = "hyperscan"
@@ -86,7 +87,6 @@ class HyperscanConan(ConanFile):
         tc.variables["BUILD_CHIMERA"] = self.options.build_chimera
         if self.options.dump_support != "auto":
             tc.variables["DUMP_SUPPORT"] = self.options.dump_support
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
