@@ -47,6 +47,7 @@ set_target_properties(miniscript PROPERTIES
     WINDOWS_EXPORT_ALL_SYMBOLS ON
     C_EXTENSIONS OFF
 )
+target_compile_features(miniscript PRIVATE cxx_std_11)
 
 if(MSVC)
     target_compile_options(miniscript PRIVATE /EHsc /wd4068)
