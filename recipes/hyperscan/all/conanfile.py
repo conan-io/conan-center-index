@@ -55,7 +55,7 @@ class HyperscanConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.80.0");
+        self.requires("boost/1.80.0")
         if self.options.build_chimera:
             self.requires("pcre/8.45")
 
@@ -70,7 +70,7 @@ class HyperscanConan(ConanFile):
             raise ConanInvalidConfiguration("Hyperscan only support x86 architecture")
 
     def build_requirements(self):
-        self.build_requires("ragel/6.10");
+        self.build_requires("ragel/6.10")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
