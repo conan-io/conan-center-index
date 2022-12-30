@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 from conan.tools.env import VirtualBuildEnv
@@ -23,6 +23,8 @@ class MoldConan(ConanFile):
     }
 
     def validate(self):
+        #TODO most of these checks should run on validate_build, but the conan-center hooks are broken and fail the PR because they
+        # think we're raising on the build() method
         if self.settings.build_type == "Debug":
             raise ConanInvalidConfiguration('Mold is a build tool, specify mold:build_type=Release in your build profile, see https://github.com/conan-io/conan-center-index/pull/11536#issuecomment-1195607330')
         if self.settings.compiler in ["gcc", "clang", "intel-cc"] and self.settings.compiler.libcxx != "libstdc++11":
@@ -36,14 +38,14 @@ class MoldConan(ConanFile):
         if self.settings.compiler == "apple-clang" and "armv8" == self.settings.arch :
             raise ConanInvalidConfiguration(f'{self.name} is still not supported by Mac M1.')
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def package_id(self):
         del self.info.settings.compiler
-
-    def build_requirements(self):
-        self.tool_requires("cmake/3.24.1")
 
     def requirements(self):
         self.requires("zlib/1.2.12")
@@ -66,10 +68,12 @@ class MoldConan(ConanFile):
 
         cd = CMakeDeps(self)
         cd.generate()
-        tc = VirtualBuildEnv(self)
-        tc.generate()
+
+        vbe = VirtualBuildEnv(self)
+        vbe.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -81,10 +85,10 @@ class MoldConan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        
+
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
-        mold_location = os.path.join(bindir, "bindir")
+        mold_location = os.path.join(bindir, "mold")
 
         self.output.info('Appending PATH environment variable: {}'.format(bindir))
         self.env_info.PATH.append(bindir)

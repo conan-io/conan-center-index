@@ -48,8 +48,6 @@ class GLibConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            if Version(self.version) < "2.71.1":
-                self.options.shared = True
         if self.settings.os != "Linux":
             del self.options.with_mount
             del self.options.with_selinux
@@ -87,15 +85,8 @@ class GLibConan(ConanFile):
             self.requires("libiconv/1.17")
 
     def validate(self):
-        if Version(self.version) >= "2.69.0" and not self.info.options.with_pcre:
+        if not self.info.options.with_pcre:
             raise ConanInvalidConfiguration("option glib:with_pcre must be True for glib >= 2.69.0")
-        if self.info.settings.os == "Windows" and not self.info.options.shared and Version(self.version) < "2.71.1":
-            raise ConanInvalidConfiguration(
-                "glib < 2.71.1 can not be built as static library on Windows. "
-                "see https://gitlab.gnome.org/GNOME/glib/-/issues/692"
-            )
-        if Version(self.version) < "2.67.0" and not is_msvc(self) and not self.info.options.with_elf:
-            raise ConanInvalidConfiguration("libelf dependency can't be disabled in glib < 2.67.0")
 
     def build_requirements(self):
         self.tool_requires("meson/0.64.1")
@@ -113,28 +104,18 @@ class GLibConan(ConanFile):
         tc.generate()
         tc = MesonToolchain(self)
 
-        if is_apple_os(self):
+        if is_apple_os(self) and Version(self.version) < "2.75.1":
             tc.project_options["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
         tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
         tc.project_options["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
-        if Version(self.version) < "2.69.0":
-            tc.project_options["internal_pcre"] = not self.options.with_pcre
         if self.settings.os == "FreeBSD":
             tc.project_options["xattr"] = "false"
-        if Version(self.version) >= "2.67.2":
-            tc.project_options["tests"] = "false"
-        if Version(self.version) >= "2.67.0":
-            tc.project_options["libelf"] = "enabled" if self.options.get_safe("with_elf") else "disabled"
+        tc.project_options["tests"] = "false"
+        tc.project_options["libelf"] = "enabled" if self.options.get_safe("with_elf") else "disabled"
         tc.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if Version(self.version) < "2.67.2":
-            replace_in_file(self,
-                os.path.join(self.source_folder, "meson.build"),
-                "build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper())",
-                "build_tests = false",
-            )
         replace_in_file(self,
             os.path.join(self.source_folder, "meson.build"),
             "subdir('fuzzing')",
