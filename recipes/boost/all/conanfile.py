@@ -1167,7 +1167,7 @@ class BoostConan(ConanFile):
 
     @property
     def _ar(self):
-        ar = self.buildenv.vars(self).get("AR")
+        ar = VirtualBuildEnv(self).vars().get("AR")
         if ar:
             return ar
         if is_apple_os(self) and self.settings.compiler == "apple-clang":
@@ -1176,7 +1176,7 @@ class BoostConan(ConanFile):
 
     @property
     def _ranlib(self):
-        ranlib = self.buildenv.vars(self).get("RANLIB")
+        ranlib = VirtualBuildEnv(self).vars().get("RANLIB")
         if ranlib:
             return ranlib
         if is_apple_os(self) and self.settings.compiler == "apple-clang":
@@ -1185,7 +1185,8 @@ class BoostConan(ConanFile):
 
     @property
     def _cxx(self):
-        cxx = self.buildenv.vars(self).get("CXX")
+        compilers_by_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
+        cxx = compilers_by_conf.get("cpp") or VirtualBuildEnv(self).vars().get("CXX")
         if cxx:
             return cxx
         if is_apple_os(self) and self.settings.compiler == "apple-clang":
@@ -1258,9 +1259,10 @@ class BoostConan(ConanFile):
             contents += f'<ranlib>"{ranlib_path}" '
         cxxflags = " ".join(self.conf.get("tools.build:cxxflags", default=[], check_type=list)) + " "
         cflags = " ".join(self.conf.get("tools.build:cflags", default=[], check_type=list)) + " "
-        cppflags = self.buildenv.vars(self).get("CPPFLAGS", "") + " "
+        buildenv_vars = VirtualBuildEnv(self).vars()
+        cppflags = buildenv_vars.get("CPPFLAGS", "") + " "
         ldflags = " ".join(self.conf.get("tools.build:sharedlinkflags", default=[], check_type=list)) + " "
-        asflags = self.buildenv.vars(self).get("ASFLAGS", "") + " "
+        asflags = buildenv_vars.get("ASFLAGS", "") + " "
 
         if self._with_stacktrace_backtrace:
             cppflags += " ".join(f"-I{p}" for p in self.dependencies["libbacktrace"].cpp_info.includedirs) + " "
