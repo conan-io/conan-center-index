@@ -71,7 +71,7 @@ class HyperscanConan(ConanFile):
             raise ConanInvalidConfiguration("Hyperscan only support x86 architecture")
 
     def build_requirements(self):
-        self.build_requires("ragel/6.10")
+        self.tool_requires("ragel/6.10")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
