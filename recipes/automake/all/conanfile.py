@@ -1,140 +1,156 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-import os
+from os import path
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir, export_conandata_patches
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.54"
 
 
 class AutomakeConan(ConanFile):
     name = "automake"
+    package_type = "application"
+    description = "Automake is a tool for automatically generating Makefile.in files compliant with the GNU Coding Standards."
+    license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/automake/"
-    description = "Automake is a tool for automatically generating Makefile.in files compliant with the GNU Coding Standards."
     topics = ("conan", "automake", "configure", "build")
-    license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
     settings = "os", "arch", "compiler", "build_type"
-
-    exports_sources = "patches/*"
-
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return os.path.join(self.source_folder, "source_subfolder")
-
-    @property
-    def _version_major_minor(self):
-        [major, minor, _] = self.version.split(".", 2)
-        return '{}.{}'.format(major, minor)
 
     @property
     def _settings_build(self):
+        # TODO: Remove for Conan v2
         return getattr(self, "settings_build", self.settings)
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def configure(self):
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+        self.win_bash = self._settings_build.os == "Windows"
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
-    def requirements(self):
-        self.requires("autoconf/2.71")
-        # automake requires perl-Thread-Queue package
-
-    def build_requirements(self):
-        if hasattr(self, "settings_build"):
-            self.build_requires("autoconf/2.71")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        del self.info.settings.arch
-        del self.info.settings.compiler
-        del self.info.settings.build_type
+        self.info.settings.rm_safe("arch")
+        self.info.settings.rm_safe("compiler")
+        self.info.settings.rm_safe("build_type")
+
+    def build_requirements(self):
+        self.tool_requires("autoconf/2.71")
+        self.tool_requires("m4/1.4.19")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    @property
-    def _datarootdir(self):
-        return os.path.join(self.package_folder, "res")
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.extend([
+            "--datarootdir=${prefix}/res",
+        ])
 
-    @property
-    def _automake_libdir(self):
-        return os.path.join(self._datarootdir, "automake-{}".format(self._version_major_minor))
+        if is_msvc(self):
+            build = "{}-{}-{}".format(
+                "x86_64" if self._settings_build.arch == "x86_64" else "i686",
+                "pc" if self._settings_build.arch == "x86" else "win64",
+                "mingw32")
+            host = "{}-{}-{}".format(
+                "x86_64" if self.settings.arch == "x86_64" else "i686",
+                "pc" if self.settings.arch == "x86" else "win64",
+                "mingw32")
+            tc.configure_args.append(f"--build={build}")
+            tc.configure_args.append(f"--host={host}")
+        tc.generate()
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        conf_args = [
-            "--datarootdir={}".format(tools.unix_path(self._datarootdir)),
-            "--prefix={}".format(tools.unix_path(self.package_folder)),
-        ]
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
-    def _patch_files(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-        if self.settings.os == "Windows":
-            # tracing using m4 on Windows returns Windows paths => use cygpath to convert to unix paths
-            tools.replace_in_file(os.path.join(self._source_subfolder, "bin", "aclocal.in"),
-                                               "          $map_traced_defs{$arg1} = $file;",
-                                               "          $file = `cygpath -u $file`;\n"
-                                               "          $file =~ s/^\\s+|\\s+$//g;\n"
-                                               "          $map_traced_defs{$arg1} = $file;")
+        ms = VirtualBuildEnv(self)
+        ms.generate(scope="build")
 
     def build(self):
-        self._patch_files()
-        autotools = self._configure_autotools()
+        apply_conandata_patches(self)
+        if self.settings.os == "Windows":
+            # tracing using m4 on Windows returns Windows paths => use cygpath to convert to unix paths
+            replace_in_file(self, path.join(self.source_folder, "bin", "aclocal.in"),
+                            "          $map_traced_defs{$arg1} = $file;",
+                            "          $file = `cygpath -u $file`;\n"
+                            "          $file =~ s/^\\s+|\\s+$//g;\n"
+                            "          $map_traced_defs{$arg1} = $file;")
+
+        autotools = Autotools(self)
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        self.copy("COPYING*", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
         autotools.install()
-        tools.rmdir(os.path.join(self._datarootdir, "info"))
-        tools.rmdir(os.path.join(self._datarootdir, "man"))
-        tools.rmdir(os.path.join(self._datarootdir, "doc"))
 
-        if self.settings.os == "Windows":
-            binpath = os.path.join(self.package_folder, "bin")
-            for filename in os.listdir(binpath):
-                fullpath = os.path.join(binpath, filename)
-                if not os.path.isfile(fullpath):
-                    continue
-                os.rename(fullpath, fullpath + ".exe")
+        copy(self, "COPYING*", src=self.source_folder, dst=path.join(self.package_folder, "licenses"))
+        for sub_path in ("info", "man", "doc"):
+            rmdir(self, path.join(self.package_folder, "res", sub_path))
 
     def package_info(self):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable:: {}".format(bin_path))
+        bin_path = path.join(self.package_folder, "bin")
+        self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
 
-        bin_ext = ".exe" if self.settings.os == "Windows" else ""
+        dataroot_path = path.join(self.package_folder, "res")
+        self.output.info(f"Defining AUTOMAKE_DATADIR environment variable: {dataroot_path}")
+        self.env_info.AUTOMAKE_DATADIR = dataroot_path
+        self.buildenv_info.define_path("AUTOMAKE_DATADIR", dataroot_path)
 
-        aclocal = tools.unix_path(os.path.join(self.package_folder, "bin", "aclocal" + bin_ext))
-        self.output.info("Appending ACLOCAL environment variable with: {}".format(aclocal))
-        self.env_info.ACLOCAL.append(aclocal)
+        version = Version(self.version)
+        automake_dataroot_path = path.join(dataroot_path, f"automake-{version.major}.{version.minor}")
+        self.output.info(f"Defining AUTOMAKE_LIBDIR environment variable: {automake_dataroot_path}")
+        self.env_info.AUTOMAKE_LIBDIR = automake_dataroot_path
+        self.buildenv_info.define_path("AUTOMAKE_LIBDIR", automake_dataroot_path)
 
-        automake_datadir = tools.unix_path(self._datarootdir)
-        self.output.info("Setting AUTOMAKE_DATADIR to {}".format(automake_datadir))
-        self.env_info.AUTOMAKE_DATADIR = automake_datadir
+        self.output.info(f"Defining AUTOMAKE_PERLLIBDIR environment variable: {automake_dataroot_path}")
+        self.env_info.AUTOMAKE_PERLLIBDIR = automake_dataroot_path
+        self.buildenv_info.define_path("AUTOMAKE_PERLLIBDIR", automake_dataroot_path)
 
-        automake_libdir = tools.unix_path(self._automake_libdir)
-        self.output.info("Setting AUTOMAKE_LIBDIR to {}".format(automake_libdir))
-        self.env_info.AUTOMAKE_LIBDIR = automake_libdir
+        aclocal_bin = path.join(bin_path, "aclocal")
+        self.output.info(f"Defining ACLOCAL environment variable: {aclocal_bin}")
+        self.env_info.ACLOCAL = aclocal_bin
+        self.buildenv_info.define_path("ACLOCAL", aclocal_bin)
 
-        automake_perllibdir = tools.unix_path(self._automake_libdir)
-        self.output.info("Setting AUTOMAKE_PERLLIBDIR to {}".format(automake_perllibdir))
-        self.env_info.AUTOMAKE_PERLLIBDIR = automake_perllibdir
+        automake_bin = path.join(bin_path, "automake")
+        self.output.info(f"Defining AUTOMAKE environment variable: {automake_bin}")
+        self.env_info.AUTOMAKE = automake_bin
+        self.buildenv_info.define_path("AUTOMAKE", automake_bin)
 
-        automake = tools.unix_path(os.path.join(self.package_folder, "bin", "automake" + bin_ext))
-        self.output.info("Setting AUTOMAKE to {}".format(automake))
-        self.env_info.AUTOMAKE = automake
+        compile_bin = path.join(automake_dataroot_path, "compile")
+        self.output.info(f"Define path to `compile` binary in user_info as: {compile_bin}")
+        self.user_info.compile = compile_bin  # FIXME: Conan V2 will use conf_key instead of user_info
+        compile_conf_key = "user.automake:compile"
+        self.output.info(f"Defining path to `compile` binary in configuration as `{compile_conf_key}` with value: {compile_bin}")
+        self.conf_info.define(compile_conf_key, compile_bin)
 
-        self.output.info("Append M4 include directories to AUTOMAKE_CONAN_INCLUDES environment variable")
+        ar_lib_bin = path.join(automake_dataroot_path, "ar-lib")
+        self.output.info(f"Define path to ar_lib binary in user_info as: {ar_lib_bin}")
+        self.user_info.ar_lib = ar_lib_bin  # FIXME: Conan V2 will use conf_key instead of user_info
+        ar_lib_conf_key = "user.automake:ar-lib"
+        self.output.info(f"Defining path to ar-lib binary in configuration as `{ar_lib_conf_key}` with value: {ar_lib_bin}")
+        self.conf_info.define(ar_lib_conf_key, ar_lib_bin)
 
-        self.user_info.compile = os.path.join(self._automake_libdir, "compile")
-        self.user_info.ar_lib = os.path.join(self._automake_libdir, "ar-lib")
+        install_sh_bin = path.join(automake_dataroot_path, "install-sh")
+        self.output.info(f"Define path to install_sh binary in user_info as: {install_sh_bin}")
+        self.user_info.install_sh = install_sh_bin  # FIXME: Conan  V2 will use conf_key instead of user_info
+        install_sh_conf_key = "user.automake:install-sh"
+        self.output.info(f"Defining path to install_sh binary in configuration as `{install_sh_conf_key}` with value: {install_sh_bin}")
+        self.conf_info.define(install_sh_conf_key, install_sh_bin)
