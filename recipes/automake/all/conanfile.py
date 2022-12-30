@@ -5,7 +5,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.54"
@@ -38,9 +38,9 @@ class AutomakeConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.settings.rm_safe("arch")
-        self.info.settings.rm_safe("compiler")
-        self.info.settings.rm_safe("build_type")
+        del self.info.settings.arch
+        del self.info.settings.compiler
+        del self.info.settings.build_type
 
     def build_requirements(self):
         self.tool_requires("autoconf/2.71")
