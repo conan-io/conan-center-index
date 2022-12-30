@@ -100,39 +100,22 @@ class HyperscanConan(ConanFile):
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-
         cmake = CMake(self)
         cmake.install()
-
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "hyperscan"
-        self.cpp_info.names["cmake_find_package_multi"] = "hyperscan"
-
+        self.cpp_info.components["hs"].set_property("pkg_config_name", "libhs")
         self.cpp_info.components["hs"].libs = ["hs"]
         self.cpp_info.components["hs"].requires = ["boost::headers"]
-        self.cpp_info.components["hs"].names["cmake_find_package"] = "hs"
-        self.cpp_info.components["hs"].names["cmake_find_package_multi"] = "hs"
-        self.cpp_info.components["hs"].set_property("cmake_target_name", "hyperscan::hs")
-        self.cpp_info.components["hs"].set_property("pkg_config_name", "libhs")
-
 
         self.cpp_info.components["hs_runtime"].libs = ["hs_runtime"]
-        self.cpp_info.components["hs_runtime"].names["cmake_find_package"] = "hs_runtime"
-        self.cpp_info.components["hs_runtime"].names["cmake_find_package_multi"] = "hs_runtime"
-        self.cpp_info.components["hs_runtime"].set_property("cmake_target_name", "hyperscan::hs_runtime")
-        self.cpp_info.components["hs_runtime"].set_property("pkg_config_name", "libhs_runtime")
-
 
         if self.options.build_chimera:
+            self.cpp_info.components["chimera"].set_property("pkg_config_name", "libch")
             self.cpp_info.components["chimera"].libs = ["chimera"]
             self.cpp_info.components["chimera"].requires = ["pcre::libpcre", "hs"]
-            self.cpp_info.components["chimera"].names["cmake_find_package"] = "chimera"
-            self.cpp_info.components["chimera"].names["cmake_find_package_multi"] = "chimera"
-            self.cpp_info.components["chimera"].set_property("cmake_target_name", "hyperscan::chimera")
-            self.cpp_info.components["chimera"].set_property("pkg_config_name", "libchimera")
 
         if not self.options.shared:
             if self.settings.os in ["Linux", "FreeBSD"]:
