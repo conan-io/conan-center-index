@@ -61,7 +61,7 @@ class HyperscanConan(ConanFile):
             self.requires("pcre/8.45")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
         if self.options.shared and self.options.build_chimera:
