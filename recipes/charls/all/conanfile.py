@@ -108,6 +108,8 @@ class CharlsConan(ConanFile):
         self.cpp_info.libs = collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines.append("CHARLS_STATIC")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
 
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
