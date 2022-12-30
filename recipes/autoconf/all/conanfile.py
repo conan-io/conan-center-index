@@ -36,8 +36,10 @@ class AutoconfConan(ConanFile):
     def package_id(self):
         self.info.clear()
 
+    def requirements(self):
+        self.requires("m4/1.4.19") # m4 is called by autom4te making it a run-time requirement
+
     def build_requirements(self):
-        self.tool_requires("m4/1.4.19")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
