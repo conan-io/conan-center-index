@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, chdir, rmdir,  load, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, chdir, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -8,7 +8,7 @@ from conan.tools.scm import Version
 import os
 import shutil
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=1.54.0"
 
 
 class M4Conan(ConanFile):
