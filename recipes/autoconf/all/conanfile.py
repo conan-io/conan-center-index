@@ -6,11 +6,12 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path, is_msvc
 import os
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=1.54.0"
 
 
 class AutoconfConan(ConanFile):
     name = "autoconf"
+    package_type = "application"
     description = (
         "Autoconf is an extensible package of M4 macros that produce shell "
         "scripts to automatically configure software source code packages"
@@ -31,9 +32,6 @@ class AutoconfConan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="src")
-
-    def requirements(self):
-        self.requires("m4/1.4.19")
 
     def package_id(self):
         self.info.clear()
@@ -92,8 +90,7 @@ class AutoconfConan(ConanFile):
 
     def package(self):
         autotools = Autotools(self)
-        # TODO: can be replaced by autotools.install() if required_conan_version = ">=1.54.0"
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
 
         copy(self, "COPYING*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "res", "info"))
@@ -104,7 +101,7 @@ class AutoconfConan(ConanFile):
         self.cpp_info.includedirs = []
         self.cpp_info.resdirs = ["res"]
 
-        dataroot_path = unix_path(self, os.path.join(self.package_folder, "res", "autoconf"))
+        dataroot_path = os.path.join(self.package_folder, "res", "autoconf")
         self.output.info(f"Defining AC_MACRODIR environment variable: {dataroot_path}")
         self.buildenv_info.define_path("AC_MACRODIR", dataroot_path)
 
@@ -113,19 +110,19 @@ class AutoconfConan(ConanFile):
 
         bin_path = os.path.join(self.package_folder, "bin")
 
-        autoconf_bin = unix_path(self, os.path.join(bin_path, "autoconf"))
+        autoconf_bin = os.path.join(bin_path, "autoconf")
         self.output.info(f"Defining AUTOCONF environment variable: {autoconf_bin}")
         self.buildenv_info.define_path("AUTOCONF", autoconf_bin)
 
-        autoreconf_bin = unix_path(self, os.path.join(bin_path, "autoreconf"))
+        autoreconf_bin = os.path.join(bin_path, "autoreconf")
         self.output.info(f"Defining AUTORECONF environment variable: {autoreconf_bin}")
         self.buildenv_info.define_path("AUTORECONF", autoreconf_bin)
 
-        autoheader_bin = unix_path(self, os.path.join(bin_path, "autoheader"))
+        autoheader_bin = os.path.join(bin_path, "autoheader")
         self.output.info(f"Defining AUTOHEADER environment variable: {autoheader_bin}")
         self.buildenv_info.define_path("AUTOHEADER", autoheader_bin)
 
-        autom4te_bin = unix_path(self, os.path.join(bin_path, "autom4te"))
+        autom4te_bin = os.path.join(bin_path, "autom4te")
         self.output.info(f"Defining AUTOM4TE environment variable: {autom4te_bin}")
         self.buildenv_info.define_path("AUTOM4TE", autom4te_bin)
 
