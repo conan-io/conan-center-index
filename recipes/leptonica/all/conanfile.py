@@ -72,7 +72,7 @@ class LeptonicaConan(ConanFile):
         if self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.1.4")
         if self.options.with_png:
-            self.requires("libpng/1.6.38")
+            self.requires("libpng/1.6.39")
         if self.options.with_tiff:
             self.requires("libtiff/4.4.0")
         if self.options.with_openjpeg:
