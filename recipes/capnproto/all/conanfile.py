@@ -1,18 +1,19 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import glob
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class CapnprotoConan(ConanFile):
@@ -81,16 +82,16 @@ class CapnprotoConan(ConanFile):
             self.requires("zlib/1.2.13")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._minimum_compilers_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
-        if is_msvc(self) and self.info.options.shared:
+        if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared libraries for Visual Studio")
-        if self.info.settings.os == "Windows" and Version(self.version) < "0.8.0" and self.info.options.with_openssl:
+        if self.settings.os == "Windows" and Version(self.version) < "0.8.0" and self.options.with_openssl:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support OpenSSL on Windows pre 0.8.0")
 
     def build_requirements(self):
@@ -147,8 +148,6 @@ class CapnprotoConan(ConanFile):
                 autotools = Autotools(self)
                 # TODO: replace by a call to autootols.autoreconf() in c++ folder once https://github.com/conan-io/conan/issues/12103 implemented
                 self.run("autoreconf --force --install")
-                # TODO: replace by a call to fix_apple_shared_install_name(self) in package() once https://github.com/conan-io/conan/issues/12107 implemented
-                replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
                 autotools.configure(build_script_folder=os.path.join(self.source_folder, "c++"))
                 autotools.make()
 
@@ -164,9 +163,9 @@ class CapnprotoConan(ConanFile):
         else:
             with chdir(self, os.path.join(self.source_folder, "c++")):
                 autotools = Autotools(self)
-                # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-                autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+                autotools.install()
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            fix_apple_shared_install_name(self)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         for cmake_file in glob.glob(os.path.join(self.package_folder, self._cmake_folder, "*")):
             if os.path.basename(cmake_file) != "CapnProtoMacros.cmake":
