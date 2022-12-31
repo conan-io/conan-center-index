@@ -12,7 +12,7 @@ import os
 import shutil
 import hashlib
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=1.54.0"
 
 def sha256sum(file_path):
     with open(file_path, "rb") as fh:
