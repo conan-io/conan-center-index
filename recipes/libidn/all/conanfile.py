@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
@@ -32,6 +32,10 @@ class LibIdnConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -115,7 +119,7 @@ class LibIdnConan(ConanFile):
             else:
                 ssize = "signed long int"
             replace_in_file(self,
-                os.path.join(self._source_subfolder, "lib", "stringprep.h"),
+                os.path.join(self.source_folder, "lib", "stringprep.h"),
                 "ssize_t", ssize)
         autotools = Autotools(self)
         autotools.autoreconf()
