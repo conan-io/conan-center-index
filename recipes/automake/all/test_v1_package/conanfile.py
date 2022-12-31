@@ -23,6 +23,7 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires(self.tested_reference_str)
+        self.build_requires("autoconf/2.71") # Needed for autoreconf
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
@@ -67,7 +68,7 @@ class TestPackageConan(ConanFile):
     def _build_autotools(self):
         """Test autoreconf + configure + make"""
         with tools.environment_append({"AUTOMAKE_CONAN_INCLUDES": [tools.unix_path(self.source_folder)]}):
-            self.run("{} -fiv".format(os.environ["AUTORECONF"].replace("\\", "/")), win_bash=tools.os_info.is_windows)
+            self.run("autoreconf -fiv", win_bash=tools.os_info.is_windows)
         self.run("{} --help".format(os.path.join(self.build_folder, "configure").replace("\\", "/")), win_bash=tools.os_info.is_windows)
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         with self._build_context():
