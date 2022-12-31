@@ -35,6 +35,7 @@ class LibevConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
+        copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
         export_conandata_patches(self)
 
     def config_options(self):

@@ -10,8 +10,8 @@ sources:
     url: http://dist.schmorp.de/libev/Attic/libev-4.25.tar.gz
 patches:
   "4.33":
-    - patch_file: "patches/0001-cmake-for-msvc.patch"
+    - patch_file: "patches/0001-config-for-windows.patch"
   "4.27":
-    - patch_file: "patches/0001-cmake-for-msvc.patch"
+    - patch_file: "patches/0001-config-for-windows.patch"
   "4.25":
-    - patch_file: "patches/0001-cmake-for-msvc.patch"
+    - patch_file: "patches/0001-config-for-windows.patch"
