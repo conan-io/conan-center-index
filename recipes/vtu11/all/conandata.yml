@@ -1,11 +1,7 @@
 sources:
-  "1.1.0":
+  "1.2.0":
     url:
-      - "https://github.com/phmkopp/vtu11/archive/refs/tags/v1.1.tar.gz"
-    sha256: "0778130f1f3ae61c702d8ec40ee0106445fa81789328642f293b1280189751d1"
-  "1.0.0":
-    url:
-      - "https://github.com/phmkopp/vtu11/archive/refs/tags/v1.0.tar.gz"
-    sha256: "eec7fb296132f7c7e06df445e9945fc51cdb7b19e8157d0075c5badab5d009bd"
+      - "https://github.com/phmkopp/vtu11/archive/refs/tags/v1.2.tar.gz"
+    sha256: "c2b560d397c1a86c10e13f029b4ef08621f70ca4c897c44c19e7d025f11baec3"
 patches:
   "1.1.0": []

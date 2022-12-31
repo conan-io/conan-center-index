@@ -52,9 +52,6 @@ class PackageConan(ConanFile):
         apply_conandata_patches(self)
         if valid_min_cppstd(self, 17):
             rm(self, "filesystem.hpp", os.path.join(self.source_folder, "vtu11", "inc"))
-            if is_msvc(self):
-                replace_in_file(self, os.path.join(self.source_folder, "vtu11", "inc", "alias.hpp"), "#include \"vtu11/inc/filesystem.hpp\"", "#include <filesystem>")
-                replace_in_file(self, os.path.join(self.source_folder, "vtu11", "inc", "alias.hpp"), "namespace vtu11fs = ghc::filesystem;", "namespace vtu11fs = std::filesystem;")
 
     def build(self):
         self._patch_sources()
