@@ -47,6 +47,10 @@ class XZUtils(ConanFile):
             "MT" if is_msvc_static_runtime(self) and self.settings.build_type != "Debug" else "",
         )
 
+    @property
+    def _msbuild_target(self):
+        return "liblzma_dll" if self.options.shared else "liblzma"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -130,10 +134,9 @@ class XZUtils(ConanFile):
                 f"<Import Project=\"{conantoolchain_props}\" /><Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
             )
 
-        target = "liblzma_dll" if self.options.shared else "liblzma"
         msbuild = MSBuild(self)
         msbuild.build_type = self._effective_msbuild_type
-        msbuild.build(os.path.join(build_script_folder, "xz_win.sln"), targets=[target])
+        msbuild.build(os.path.join(build_script_folder, "xz_win.sln"), targets=[self._msbuild_target])
 
     def build(self):
         if is_msvc(self):
@@ -148,15 +151,13 @@ class XZUtils(ConanFile):
         if is_msvc(self):
             inc_dir = os.path.join(self.source_folder, "src", "liblzma", "api")
             copy(self, "*.h", src=inc_dir, dst=os.path.join(self.package_folder, "include"), keep_path=True)
-            arch = {"x86": "Win32", "x86_64": "x64"}.get(str(self.settings.arch))
-            target = "liblzma_dll" if self.options.shared else "liblzma"
             if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler) >= "15") or \
                (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler) >= "191"):
                 msvc_version = "vs2017"
             else:
                 msvc_version = "vs2013"
             bin_dir = os.path.join(self.source_folder, "windows", msvc_version,
-                                   self._effective_msbuild_type, arch, target)
+                                   self._effective_msbuild_type, MSBuild(self).platform, self._msbuild_target)
             copy(self, "*.lib", src=bin_dir, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
             if self.options.shared:
                 copy(self, "*.dll", src=bin_dir, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
