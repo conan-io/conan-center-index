@@ -4,12 +4,12 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import collect_libs, copy, get, rename, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, MSBuild, MSBuildToolchain, unix_path
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, MSBuild, MSBuildToolchain
 from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.54.0"
 
 
 class XZUtils(ConanFile):
@@ -53,24 +53,18 @@ class XZUtils(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not is_msvc(self):
-            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
-                self.tool_requires("msys2/cci.latest")
             self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -82,13 +76,13 @@ class XZUtils(ConanFile):
             tc.configuration = self._effective_msbuild_type
             tc.generate()
         else:
+            env = VirtualBuildEnv(self)
+            env.generate()
             tc = AutotoolsToolchain(self)
             tc.configure_args.append("--disable-doc")
             if self.settings.build_type == "Debug":
                 tc.configure_args.append("--enable-debug")
             tc.generate()
-            env = VirtualBuildEnv(self)
-            env.generate()
 
     def _build_msvc(self):
         if Version(self.version) == "5.2.4":
@@ -170,8 +164,7 @@ class XZUtils(ConanFile):
                          os.path.join(self.package_folder, "lib", "lzma.lib"))
         else:
             autotools = Autotools(self)
-            # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-            autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+            autotools.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "share"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
