@@ -80,4 +80,3 @@ patches:
     - patch_file: "patches/0004-introduce-automake_perllibdir-0.16.1.patch"
       patch_description: "introduce automake perllibdir"
       patch_type: "portability"
-
