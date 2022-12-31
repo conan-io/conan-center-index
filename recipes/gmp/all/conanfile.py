@@ -104,7 +104,7 @@ class GmpConan(ConanFile):
             "--enable-assembly={}".format(yes_no(not self.options.get_safe("disable_assembly", False))),
             "--enable-fat={}".format(yes_no(self.options.get_safe("enable_fat", False))),
             "--enable-cxx={}".format(yes_no(self.options.enable_cxx)),
-            "--srcdir={}".format(unix_path(self, self.source_folder)),
+            "--srcdir={}".format(self.source_folder.replace("\\", "/")),
         ])
         if is_msvc(self):
             tc.configure_args.extend([
