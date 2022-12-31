@@ -119,6 +119,11 @@ class ICUConan(ConanFile):
         if cross_building(self):
             base_path = unix_path(self, self.dependencies.build["icu"].package_folder)
             tc.configure_args.append(f"--with-cross-build={base_path}")
+            if (not is_msvc(self)):
+                # --with-cross-build above prevents tc.generate() from setting --build option.
+                # Workaround for https://github.com/conan-io/conan/issues/12642
+                gnu_triplet = get_gnu_triplet(str(self._settings_build.os), str(self._settings_build.arch), str(self.settings.compiler))
+                tc.configure_args.append(f"--build={gnu_triplet}")
             if self.settings.os in ["iOS", "tvOS", "watchOS"]:
                 gnu_triplet = get_gnu_triplet("Macos", str(self.settings.arch))
                 tc.configure_args.append(f"--host={gnu_triplet}")

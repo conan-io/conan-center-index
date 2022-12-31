@@ -7,12 +7,14 @@ from conans import CMake, tools
 
 from conan import ConanFile
 from conan.tools.files import get, copy
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 from conan.errors import ConanInvalidConfiguration
 
 from helpers import parse_proto_libraries
 
+required_conan_version = ">=1.45.0"
 
 class GoogleAPIS(ConanFile):
     name = "googleapis"
@@ -55,7 +57,7 @@ class GoogleAPIS(ConanFile):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "5":
             raise ConanInvalidConfiguration("Build with GCC 5 fails")
 
-        if self.settings.compiler in ["Visual Studio", "msvc"] and self.options.shared:
+        if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration("Source code generated from protos is missing some export macro")
         if self.options.shared and not self.options["protobuf"].shared:
             raise ConanInvalidConfiguration("If built as shared, protobuf must be shared as well. Please, use `protobuf:shared=True`")
