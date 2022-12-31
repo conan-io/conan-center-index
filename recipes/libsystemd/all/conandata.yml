@@ -21,11 +21,11 @@ patches:
   "246.16":
     - patch_file: "patches/246.16/0001-Drop-bundled-copy-of-linux-if_arp.h.patch"
       patch_description: "fix build error with Linux headers >= 5.14 by removing a bundled copy of it"
-      patch_type: "backport"
+      patch_type: "portability"
       patch_source: "https://github.com/systemd/systemd-stable/commit/06dea04b38ce506c1436cd4fef9bf9919a34f441"
     - patch_file: "patches/246.16/0002-meson.build-change-operator-combining-bools-from-to-.patch"
       patch_description: "allow to build with meson >= 0.60.0 by fixing syntax error"
-      patch_type: "backport"
+      patch_type: "bugfix"
       patch_source: "https://github.com/systemd/systemd-stable/commit/3d0666d9091dd097022f02fae79890b5746285c1"
     - patch_file: "patches/246.16/0003-Remove-dependency-from-coreutils.patch"
       patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
