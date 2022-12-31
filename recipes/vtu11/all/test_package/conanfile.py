@@ -29,5 +29,5 @@ class TestPackageConan(ConanFile):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
             test_vtu = Path(self.build_folder, "test.vtu")
-            if not test_vtu.exists() or "VTKFile" not in test_vtu.read_text():
+            if not test_vtu.exists() or "VTKFile" not in test_vtu.read_text(encoding="utf-8"):
                 raise ConanException("Failed to generate a viable vtu file")
