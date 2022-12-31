@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -10,7 +10,7 @@ from conan.tools.scm import Version
 import os
 import stat
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class GmpConan(ConanFile):
@@ -75,7 +75,7 @@ class GmpConan(ConanFile):
         del self.info.options.run_checks  # run_checks doesn't affect package's ID
 
     def validate(self):
-        if is_msvc(self) and self.info.options.shared:
+        if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(
                 f"{self.ref} cannot be built as a shared library using Visual Studio: some error occurs at link time",
             )
@@ -91,8 +91,7 @@ class GmpConan(ConanFile):
             self.tool_requires("automake/1.16.5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, verify=False)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -114,14 +113,12 @@ class GmpConan(ConanFile):
                 "lt_cv_sys_global_symbol_pipe=cat",  # added to get further in shared MSVC build, but it gets stuck later
             ])
             tc.extra_cxxflags.append("-EHsc")
-            if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-               (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+            if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
+               (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler.version) >= "180"):
                 tc.extra_cflags.append("-FS")
                 tc.extra_cxxflags.append("-FS")
-        tc.generate()
-
+        env = tc.environment()
         if is_msvc(self):
-            env = Environment()
             yasm_wrapper = unix_path(self, os.path.join(self.source_folder, "yasm_wrapper.sh"))
             yasm_machine = {
                 "x86": "x86",
@@ -135,7 +132,7 @@ class GmpConan(ConanFile):
             env.define("LD", "link -nologo")
             env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
             env.define("NM", f"python {dumpbin_nm}")
-            env.vars(self).save_script("conanbuild_gmp_msvc")
+        tc.generate(env)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -158,8 +155,7 @@ class GmpConan(ConanFile):
         copy(self, "COPYINGv2", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "COPYING.LESSERv3", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
