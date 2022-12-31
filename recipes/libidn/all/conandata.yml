@@ -5,4 +5,5 @@ sources:
 patches:
   "1.36":
     - patch_file: "patches/0001-unconditional-system-stdint-h.patch"
-      base_path: "source_subfolder"
+      patch_description: "include system stdint.h"
+      patch_type: "portability"
