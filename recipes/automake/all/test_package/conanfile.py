@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.files import copy
-from conan.tools.gnu import AutotoolsToolchain, Autotools
+from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 
@@ -11,7 +11,6 @@ required_conan_version = ">=1.50.0"
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = "configure.ac", "Makefile.am", "test_package_1.c", "test_package.cpp"
-    generators = "AutotoolsDeps", "VirtualBuildEnv"
     test_type = "explicit"
 
     @property
@@ -30,6 +29,8 @@ class TestPackageConan(ConanFile):
             env.define("CXX", "cl -nologo")
             env.define("LD", "link")
         tc.generate(env)
+        tc = AutotoolsDeps(self)
+        tc.generate()
 
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
