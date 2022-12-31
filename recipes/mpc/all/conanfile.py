@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, copy, get, rmdir, rm, apply_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
@@ -59,6 +60,9 @@ class MpcConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         tc = AutotoolsToolchain(self)
         tc.configure_args.append(f'--with-gmp={unix_path(self, self.dependencies["gmp"].package_folder)}')
         tc.configure_args.append(f'--with-mpfr={unix_path(self, self.dependencies["mpfr"].package_folder)}')
