@@ -49,7 +49,6 @@ class PackageConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         if valid_min_cppstd(self, 17):
             rm(self, "filesystem.hpp", os.path.join(self.source_folder, "vtu11", "inc"))
 
