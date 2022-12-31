@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import collect_libs, copy, get, rename, replace_in_file, rm, rmdir, save
+from conan.tools.files import copy, get, rename, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, MSBuild, MSBuildToolchain
@@ -12,7 +12,7 @@ import textwrap
 required_conan_version = ">=1.54.0"
 
 
-class XZUtils(ConanFile):
+class XZUtilsConan(ConanFile):
     name = "xz_utils"
     description = (
         "XZ Utils is free general-purpose data compression software with a high "
@@ -198,14 +198,13 @@ class XZUtils(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "LibLZMA::LibLZMA")
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.set_property("pkg_config_name", "liblzma")
+        self.cpp_info.libs = ["lzma"]
         if not self.options.shared:
             self.cpp_info.defines.append("LZMA_API_STATIC")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
-        self.cpp_info.libs = collect_libs(self)
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "LibLZMA"
         self.cpp_info.names["cmake_find_package_multi"] = "LibLZMA"
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.names["pkg_config"] = "liblzma"
