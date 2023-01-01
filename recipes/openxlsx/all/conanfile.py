@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 
 required_conan_version = ">=1.53.0"
@@ -46,8 +46,6 @@ class OpenXlsxConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -72,10 +70,6 @@ class OpenXlsxConan(ConanFile):
         tc.variables["OPENXLSX_BUILD_BENCHMARKS"] = False
         tc.variables["OPENXLSX_LIBRARY_TYPE"] = "SHARED" if self.options.shared else "STATIC"
         tc.generate()
-
-        # In case there are dependencies listed on requirements, CMakeDeps should be used
-        dpes = CMakeDeps(self)
-        dpes.generate()
 
     def build(self):
         cmake = CMake(self)
