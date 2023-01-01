@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rename, replace_in_file, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, MSBuild, MSBuildToolchain
@@ -51,6 +51,9 @@ class XZUtilsConan(ConanFile):
     def _msbuild_target(self):
         return "liblzma_dll" if self.options.shared else "liblzma"
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -88,53 +91,48 @@ class XZUtilsConan(ConanFile):
                 tc.configure_args.append("--enable-debug")
             tc.generate()
 
-    def _build_msvc(self):
-        if Version(self.version) == "5.2.4":
-            # Relax Windows SDK restriction
-            # Workaround is required only for 5.2.4 because since 5.2.5 WindowsTargetPlatformVersion is dropped from vcproj file
-            # https://developercommunity.visualstudio.com/content/problem/140294/windowstargetplatformversion-makes-it-impossible-t.html
-            windows_target_platform_version_old = "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>"
-            replace_in_file(self, os.path.join(self.source_folder, "windows", "vs2017", "liblzma.vcxproj"),
-                                  windows_target_platform_version_old, "")
-            replace_in_file(self, os.path.join(self.source_folder, "windows", "vs2017", "liblzma_dll.vcxproj"),
-                                  windows_target_platform_version_old, "")
-
-        # windows\INSTALL-MSVC.txt
+    @property
+    def _msvc_sln_folder(self):
         if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler) >= "15") or \
            (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler) >= "191"):
-            msvc_version = "vs2017"
+            return "vs2017"
+        return "vs2013"
+
+    def _build_msvc(self):
+        build_script_folder = os.path.join(self.source_folder, "windows", self._msvc_sln_folder)
+
+        #==============================
+        # TODO: to remove once https://github.com/conan-io/conan/pull/12817 available in conan client.
+        vcxproj_files = [
+            os.path.join(build_script_folder, "liblzma.vcxproj"),
+            os.path.join(build_script_folder, "liblzma_dll.vcxproj"),
+        ]
+        if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler) >= "15") or \
+           (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler) >= "191"):
             old_toolset = "v141"
         else:
-            msvc_version = "vs2013"
             old_toolset = "v120"
-
-        build_script_folder = os.path.join(self.source_folder, "windows", msvc_version)
-        liblzma_vcxproj = os.path.join(build_script_folder, "liblzma.vcxproj")
-        liblzma_dll_vcxproj = os.path.join(build_script_folder, "liblzma_dll.vcxproj")
-
-        # TODO: replace by some conan helper function (https://github.com/conan-io/conan/issues/12155)?
-        platform_toolset = MSBuildToolchain(self).toolset
-        for vcxproj_file in (liblzma_vcxproj, liblzma_dll_vcxproj):
+        new_toolset = MSBuildToolchain(self).toolset
+        conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)
+        for vcxproj_file in vcxproj_files:
             replace_in_file(
                 self, vcxproj_file,
                 f"<PlatformToolset>{old_toolset}</PlatformToolset>",
-                f"<PlatformToolset>{platform_toolset}</PlatformToolset>",
+                f"<PlatformToolset>{new_toolset}</PlatformToolset>",
             )
-
-        # TODO: to remove once https://github.com/conan-io/conan/pull/12817 available in conan client.
-        conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)
-        for vcxproj_file in (liblzma_vcxproj, liblzma_dll_vcxproj):
             replace_in_file(
                 self, vcxproj_file,
                 "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
                 f"<Import Project=\"{conantoolchain_props}\" /><Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
             )
+        #==============================
 
         msbuild = MSBuild(self)
         msbuild.build_type = self._effective_msbuild_type
         msbuild.build(os.path.join(build_script_folder, "xz_win.sln"), targets=[self._msbuild_target])
 
     def build(self):
+        apply_conandata_patches(self)
         if is_msvc(self):
             self._build_msvc()
         else:
