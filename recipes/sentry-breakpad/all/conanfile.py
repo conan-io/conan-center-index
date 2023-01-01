@@ -17,7 +17,7 @@ class SentryBreakpadConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/getsentry/breakpad"
     license = "Apache-2.0"
-    topics = ("conan", "breakpad", "error-reporting", "crash-reporting")
+    topics = ("breakpad", "error-reporting", "crash-reporting")
     provides = "breakpad"
     settings = "os", "arch", "compiler", "build_type"
     options = {
