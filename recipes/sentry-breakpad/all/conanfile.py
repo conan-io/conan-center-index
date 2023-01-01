@@ -5,7 +5,6 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 import os
 
 required_conan_version = ">=1.53.0"
@@ -64,8 +63,6 @@ class SentryBreakpadConan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
-        tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
 
     def build(self):
         apply_conandata_patches(self)
