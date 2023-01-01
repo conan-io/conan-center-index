@@ -62,8 +62,8 @@ class CairoConan(ConanFile):
         return getattr(self, "user_info_build", self.deps_user_info)
 
     def config_options(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.with_fontconfig
