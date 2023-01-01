@@ -247,7 +247,7 @@ class FFMpegConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_zlib:
@@ -352,7 +352,7 @@ class FFMpegConan(ConanFile):
         return target_os
 
     def _patch_sources(self):
-        if is_msvc(self) and self.options.with_libx264 and not self.options["libx264"].shared and tools.Version(self.version) <= "5.0":
+        if is_msvc(self) and self.options.with_libx264 and not self.options["libx264"].shared and Version(self.version) <= "5.0":
             # suppress MSVC linker warnings: https://trac.ffmpeg.org/ticket/7396
             # warning LNK4049: locally defined symbol x264_levels imported
             # warning LNK4049: locally defined symbol x264_bit_depth imported
