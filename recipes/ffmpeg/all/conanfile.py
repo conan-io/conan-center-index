@@ -569,7 +569,7 @@ class FFMpegConan(ConanFile):
                 if self.options.with_audiotoolbox:
                     args.append("--disable-outdev=audiotoolbox")
 
-                xcrun = XCRun(self.settings)
+                xcrun = XCRun(self)
                 apple_arch = to_apple_arch(self)
                 extra_cflags.extend(
                     [f"-arch {apple_arch}", f"-isysroot {xcrun.sdk_path}"])
