@@ -3,11 +3,12 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, to_apple_arch, XCRun
 from conan.tools.build import cross_building
 from conan.tools.files import chdir, copy, get, rename, replace_in_file, rm, rmdir
+from conan.tools.gnu.get_gnu_triplet import _get_gnu_triplet
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 from conans import AutoToolsBuildEnvironment
-from conans.tools import apple_deployment_target_flag, environment_append, get_gnu_triplet, vcvars
+from conans.tools import apple_deployment_target_flag, environment_append, vcvars
 import os
 import contextlib
 import glob
@@ -326,7 +327,7 @@ class FFMpegConan(ConanFile):
 
     @property
     def _target_arch(self):
-        triplet = get_gnu_triplet(
+        triplet = _get_gnu_triplet(
             "Macos" if is_apple_os(self) else str(self.settings.os),
             str(self.settings.arch),
             str(self.settings.compiler) if self.settings.os == "Windows" else None,
@@ -338,18 +339,17 @@ class FFMpegConan(ConanFile):
     def _target_os(self):
         if is_msvc(self):
             return "win32"
-        else:
-            triplet = tools.get_gnu_triplet(
-                "Macos" if is_apple_os(self) else str(self.settings.os),
-                str(self.settings.arch),
-                str(self.settings.compiler) if self.settings.os == "Windows" else None,
-            )
-            target_os = triplet.split("-")[2]
-            if target_os == "gnueabihf":
-                target_os = "gnu" # could also be "linux"
-            if target_os.startswith("android"):
-                target_os = "android"
-            return target_os
+        triplet = _get_gnu_triplet(
+            "Macos" if is_apple_os(self) else str(self.settings.os),
+            str(self.settings.arch),
+            str(self.settings.compiler) if self.settings.os == "Windows" else None,
+        )
+        target_os = triplet.split("-")[2]
+        if target_os == "gnueabihf":
+            target_os = "gnu" # could also be "linux"
+        if target_os.startswith("android"):
+            target_os = "android"
+        return target_os
 
     def _patch_sources(self):
         if is_msvc(self) and self.options.with_libx264 and not self.options["libx264"].shared and tools.Version(self.version) <= "5.0":
@@ -524,7 +524,7 @@ class FFMpegConan(ConanFile):
         if is_apple_os(self):
             # relocatable shared libs
             args.append("--install-name-dir=@rpath")
-        args.append(f"--arch={self.settings.arch}")
+        args.append(f"--arch={self._target_arch}")
         if self.settings.build_type == "Debug":
             args.extend([
                 "--disable-optimizations",
@@ -559,11 +559,10 @@ class FFMpegConan(ConanFile):
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
                 self._autotools.defines.append("inline=__inline")
         if cross_building(self):
-            target_os = "Macos" if is_apple_os(self) else str(self.settings.os)
-            if target_os == "emscripten":
+            if self._target_os == "emscripten":
                 args.append("--target-os=none")
             else:
-                args.append(f"--target-os={target_os}")
+                args.append(f"--target-os={self._target_os}")
 
             if is_apple_os(self):
                 if self.options.with_audiotoolbox:
