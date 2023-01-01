@@ -25,6 +25,6 @@ patches:
     - patch_file: "patches/0002-fix-linux_syscall_support-include.patch"
       base_path: "external/breakpad"
   "0.2.6":
-    - patch_file: "patches/0001-fix-cmakelist.patch"
+    - patch_file: "patches/0.2.6-0001-fix-cmakelist.patch"
     - patch_file: "patches/0.2.6-0002-fix-linux_syscall_support-include.patch"
       base_path: "external/breakpad"
