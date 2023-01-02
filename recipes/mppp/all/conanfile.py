@@ -92,7 +92,7 @@ class MpppConan(ConanFile):
         tc.variables["MPPP_WITH_MPC"] = self.options.with_mpc
         tc.variables["MPPP_WITH_QUADMATH"] = self.options.with_quadmath
         tc.variables["MPPP_WITH_BOOST_S11N"] = self.options.with_boost
-        if Version(self.version) < "0.27":
+        if Version(self.version) >= "0.27":
             tc.variables["MPPP_WITH_FMT"] = self.options.with_fmt
         if not self.options.shared:
             tc.variables["MPPP_BUILD_STATIC_LIBRARY_WITH_DYNAMIC_MSVC_RUNTIME"] = not is_msvc_static_runtime(self)
