@@ -14,5 +14,3 @@ endif(CROW_AMALGAMATION)
 unset(CROW_AMALGAMATION CACHE)
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
-
-set(CMAKE_VERBOSE_MAKEFILE ON)
