@@ -50,7 +50,7 @@ class GStreamerConan(ConanFile):
         self.requires("glib/2.75.0")
 
     def validate(self):
-        if not self.dependencies.direct_host["glib"].options.shared and self.info.options.shared:
+        if not self.dependencies.direct_host["glib"].options.shared and self.options.shared:
             # https://gitlab.freedesktop.org/gstreamer/gst-build/-/issues/133
             raise ConanInvalidConfiguration(
                 "shared GStreamer cannot link to static GLib")
