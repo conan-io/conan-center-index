@@ -4,6 +4,6 @@ project(test_package C)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-add_executable(${PROJECT_NAME} test_package.c)
+add_executable(${PROJECT_NAME} example.c)
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
 set_target_properties(${PROJECT_NAME} PROPERTIES C_STANDARD 99)
