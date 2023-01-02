@@ -129,6 +129,7 @@ class XZUtilsConan(ConanFile):
 
         msbuild = MSBuild(self)
         msbuild.build_type = self._effective_msbuild_type
+        msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
         msbuild.build(os.path.join(build_script_folder, "xz_win.sln"), targets=[self._msbuild_target])
 
     def build(self):
