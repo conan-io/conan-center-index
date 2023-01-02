@@ -149,6 +149,7 @@ class LibsodiumConan(ConanFile):
             "Dyn" if self.options.shared else "Static",
             "Debug" if self.settings.build_type == "Debug" else "Release",
         )
+        msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
         msbuild.build(os.path.join(msvc_sln_folder, "libsodium.sln"))
 
     def build(self):
