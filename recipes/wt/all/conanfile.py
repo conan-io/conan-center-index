@@ -1,19 +1,20 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 import shutil
 
-required_conan_version = ">=1.43.0"
-
+required_conan_version = ">=1.53.0"
 
 class WtConan(ConanFile):
     name = "wt"
     description = "Wt is a C++ library for developing web applications"
+    license = "GPL-2.0-only"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/emweb/wt"
-    topics = ("wt", "web", "webapp")
-    license = "GPL-2.0-only"
-
+    topics = ("server", "web", "webapp", "websocket", "cgi", "fastcgi", "orm")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -54,21 +55,8 @@ class WtConan(ConanFile):
         "connector_fcgi": False,
     }
 
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -81,13 +69,16 @@ class WtConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if not self.options.with_dbo:
             del self.options.with_sqlite
             del self.options.with_postgres
             del self.options.with_mysql
             del self.options.with_mssql
         self._strict_options_requirements()
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def _strict_options_requirements(self):
         self.options["boost"].header_only = False
@@ -99,22 +90,22 @@ class WtConan(ConanFile):
         return ["program_options", "filesystem", "thread"]
 
     def requirements(self):
-        if tools.Version(self.version) >= "4.6.0":
-            self.requires("boost/1.79.0")
-        else:
+        if Version(self.version) < "4.6.0":
             self.requires("boost/1.76.0")
+        else:
+            self.requires("boost/1.81.0")
         if self.options.connector_http:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.39.1")
+            self.requires("sqlite3/3.40.0")
         if self.options.get_safe("with_mysql"):
-            self.requires("libmysqlclient/8.0.29")
+            self.requires("libmysqlclient/8.0.30")
         if self.options.get_safe("with_postgres"):
-            self.requires("libpq/14.2")
+            self.requires("libpq/14.5")
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
-            self.requires("odbc/2.3.9")
+            self.requires("odbc/2.3.11")
         if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.6.2")
 
@@ -124,56 +115,36 @@ class WtConan(ConanFile):
             raise ConanInvalidConfiguration("Wt requires these boost components: {}".format(", ".join(self._required_boost_components)))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
 
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmakelists, "find_package(OpenSSL)", "#find_package(OpenSSL)")
-        tools.replace_in_file(cmakelists, "INCLUDE(cmake/WtFindMysql.txt)", "#INCLUDE(cmake/WtFindMysql.txt)")
-        tools.replace_in_file(cmakelists, "INCLUDE(cmake/WtFindPostgresql.txt)", "#INCLUDE(cmake/WtFindPostgresql.txt)")
-        if self.settings.os != "Windows":
-            tools.replace_in_file(cmakelists, "INCLUDE(cmake/WtFindOdbc.txt)", "#INCLUDE(cmake/WtFindOdbc.txt)")
-
-        # Do not pollute rpath of shared libs of the install tree on macOS please
-        tools.replace_in_file(
-            cmakelists,
-            "IF(APPLE)\n  SET(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/lib\")",
-            "if(0)",
-        )
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["CONFIGDIR"] = os.path.join(self.package_folder, "bin")
-        self._cmake.definitions["SHARED_LIBS"] = self.options.shared
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
-        self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.definitions["ENABLE_SSL"] = self.options.with_ssl
-        self._cmake.definitions["ENABLE_HARU"] = False
-        self._cmake.definitions["ENABLE_PANGO"] = False
-        self._cmake.definitions["ENABLE_SQLITE"] = self.options.get_safe("with_sqlite", False)
-        self._cmake.definitions["ENABLE_POSTGRES"] = self.options.get_safe("with_postgres", False)
-        self._cmake.definitions["ENABLE_FIREBIRD"] = False
-        self._cmake.definitions["ENABLE_MYSQL"] = self.options.get_safe("with_mysql", False)
-        self._cmake.definitions["ENABLE_MSSQLSERVER"] = self.options.get_safe("with_mssql", False)
-        self._cmake.definitions["ENABLE_QT4"] = False
-        self._cmake.definitions["ENABLE_QT5"] = False
-        self._cmake.definitions["ENABLE_LIBWTTEST"] = self.options.with_test
-        self._cmake.definitions["ENABLE_LIBWTDBO"] = self.options.with_dbo
-        self._cmake.definitions["ENABLE_OPENGL"] = self.options.with_opengl
-        self._cmake.definitions["ENABLE_UNWIND"] = self.options.get_safe("with_unwind", False)
-        self._cmake.definitions["WT_NO_STD_LOCALE"] = self.options.no_std_locale
-        self._cmake.definitions["WT_NO_STD_WSTRING"] = self.options.no_std_wstring
-        self._cmake.definitions["MULTI_THREADED"] = self.options.multi_threaded
-        self._cmake.definitions["USE_SYSTEM_SQLITE3"] = True
-        self._cmake.definitions["DEBUG"] = self.settings.build_type == "Debug"
-        self._cmake.definitions["CONNECTOR_HTTP"] = self.options.connector_http
-        self._cmake.definitions["BOOST_DYNAMIC"] = self.options["boost"].shared
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CONFIGDIR"] = os.path.join(self.package_folder, "bin")
+        tc.variables["SHARED_LIBS"] = self.options.shared
+        tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["ENABLE_SSL"] = self.options.with_ssl
+        tc.variables["ENABLE_HARU"] = False
+        tc.variables["ENABLE_PANGO"] = False
+        tc.variables["ENABLE_SQLITE"] = self.options.get_safe("with_sqlite", False)
+        tc.variables["ENABLE_POSTGRES"] = self.options.get_safe("with_postgres", False)
+        tc.variables["ENABLE_FIREBIRD"] = False
+        tc.variables["ENABLE_MYSQL"] = self.options.get_safe("with_mysql", False)
+        tc.variables["ENABLE_MSSQLSERVER"] = self.options.get_safe("with_mssql", False)
+        tc.variables["ENABLE_QT4"] = False
+        tc.variables["ENABLE_QT5"] = False
+        tc.variables["ENABLE_LIBWTTEST"] = self.options.with_test
+        tc.variables["ENABLE_LIBWTDBO"] = self.options.with_dbo
+        tc.variables["ENABLE_OPENGL"] = self.options.with_opengl
+        tc.variables["ENABLE_UNWIND"] = self.options.get_safe("with_unwind", False)
+        tc.variables["WT_NO_STD_LOCALE"] = self.options.no_std_locale
+        tc.variables["WT_NO_STD_WSTRING"] = self.options.no_std_wstring
+        tc.variables["MULTI_THREADED"] = self.options.multi_threaded
+        tc.variables["USE_SYSTEM_SQLITE3"] = True
+        tc.variables["DEBUG"] = self.settings.build_type == "Debug"
+        tc.variables["CONNECTOR_HTTP"] = self.options.connector_http
+        tc.variables["BOOST_DYNAMIC"] = self.options["boost"].shared
 
         def _gather_libs(p):
             libs = self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs
@@ -185,56 +156,77 @@ class WtConan(ConanFile):
 
         # FIXME: all this logic coming from upstream custom find module files seems fragile, to improve later !
         #        we can't even inject cmake_find_package generator, it breaks the all upstream logic
-        self._cmake.definitions["BOOST_PREFIX"] = self.deps_cpp_info["boost"].rootpath
+        tc.variables["BOOST_PREFIX"] = self.deps_cpp_info["boost"].rootpath
         if self.options.connector_http:
-            self._cmake.definitions["ZLIB_PREFIX"] = self.deps_cpp_info["zlib"].rootpath
+            tc.variables["ZLIB_PREFIX"] = self.deps_cpp_info["zlib"].rootpath
         if self.options.with_ssl:
-            self._cmake.definitions["SSL_PREFIX"] = self.deps_cpp_info["openssl"].rootpath
-            self._cmake.definitions["OPENSSL_LIBRARIES"] = ";".join(_gather_libs("openssl"))
-            self._cmake.definitions["OPENSSL_INCLUDE_DIR"] = ";".join(self.deps_cpp_info["openssl"].include_paths)
-            self._cmake.definitions["OPENSSL_FOUND"] = True
+            tc.variables["SSL_PREFIX"] = self.deps_cpp_info["openssl"].rootpath
+            tc.variables["OPENSSL_LIBRARIES"] = ";".join(_gather_libs("openssl"))
+            tc.variables["OPENSSL_INCLUDE_DIR"] = ";".join(self.deps_cpp_info["openssl"].include_paths)
+            tc.variables["OPENSSL_FOUND"] = True
         if self.options.get_safe("with_sqlite"):
-            self._cmake.definitions["SQLITE3_PREFIX"] = self.deps_cpp_info["sqlite3"].rootpath
+            tc.variables["SQLITE3_PREFIX"] = self.deps_cpp_info["sqlite3"].rootpath
         if self.options.get_safe("with_mysql"):
-            self._cmake.definitions["MYSQL_PREFIX"] = self.deps_cpp_info["libmysqlclient"].rootpath
-            self._cmake.definitions["MYSQL_LIBRARIES"] = ";".join(_gather_libs("libmysqlclient"))
-            self._cmake.definitions["MYSQL_INCLUDE"] = ";".join(self.deps_cpp_info["libmysqlclient"].include_paths)
-            self._cmake.definitions["MYSQL_DEFINITIONS"] = ";".join("-D%s" % d for d in self.deps_cpp_info["libmysqlclient"].defines)
-            self._cmake.definitions["MYSQL_FOUND"] = True
+            tc.variables["MYSQL_PREFIX"] = self.deps_cpp_info["libmysqlclient"].rootpath
+            tc.variables["MYSQL_LIBRARIES"] = ";".join(_gather_libs("libmysqlclient"))
+            tc.variables["MYSQL_INCLUDE"] = ";".join(self.deps_cpp_info["libmysqlclient"].include_paths)
+            tc.variables["MYSQL_DEFINITIONS"] = ";".join("-D%s" % d for d in self.deps_cpp_info["libmysqlclient"].defines)
+            tc.variables["MYSQL_FOUND"] = True
         if self.options.get_safe("with_postgres"):
-            self._cmake.definitions["POSTGRES_PREFIX"] = self.deps_cpp_info["libpq"].rootpath
-            self._cmake.definitions["POSTGRES_LIBRARIES"] = ";".join(_gather_libs("libpq"))
-            self._cmake.definitions["POSTGRES_INCLUDE"] = ";".join(self.deps_cpp_info["libpq"].include_paths)
-            self._cmake.definitions["POSTGRES_FOUND"] = True
+            tc.variables["POSTGRES_PREFIX"] = self.deps_cpp_info["libpq"].rootpath
+            tc.variables["POSTGRES_LIBRARIES"] = ";".join(_gather_libs("libpq"))
+            tc.variables["POSTGRES_INCLUDE"] = ";".join(self.deps_cpp_info["libpq"].include_paths)
+            tc.variables["POSTGRES_FOUND"] = True
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
-            self._cmake.definitions["ODBC_PREFIX"] = self.deps_cpp_info["odbc"].rootpath
-            self._cmake.definitions["ODBC_LIBRARIES"] = ";".join(_gather_libs("odbc"))
-            self._cmake.definitions["ODBC_INCLUDE"] = ";".join(self.deps_cpp_info["odbc"].include_paths)
-            self._cmake.definitions["ODBC_FOUND"] = True
+            tc.variables["ODBC_PREFIX"] = self.deps_cpp_info["odbc"].rootpath
+            tc.variables["ODBC_LIBRARIES"] = ";".join(_gather_libs("odbc"))
+            tc.variables["ODBC_INCLUDE"] = ";".join(self.deps_cpp_info["odbc"].include_paths)
+            tc.variables["ODBC_FOUND"] = True
         if self.options.get_safe("with_unwind"):
-            self._cmake.definitions["UNWIND_PREFIX"] = self.deps_cpp_info["libunwind"].rootpath
+            tc.variables["UNWIND_PREFIX"] = self.deps_cpp_info["libunwind"].rootpath
         if self.settings.os == "Windows":
-            self._cmake.definitions["CONNECTOR_FCGI"] = False
-            self._cmake.definitions["CONNECTOR_ISAPI"] = self.options.connector_isapi
+            tc.variables["CONNECTOR_FCGI"] = False
+            tc.variables["CONNECTOR_ISAPI"] = self.options.connector_isapi
         else:
-            self._cmake.definitions["CONNECTOR_FCGI"] = self.options.connector_fcgi
-            self._cmake.definitions["CONNECTOR_ISAPI"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+            tc.variables["CONNECTOR_FCGI"] = self.options.connector_fcgi
+            tc.variables["CONNECTOR_ISAPI"] = False
+
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmakelists, "find_package(OpenSSL)", "#find_package(OpenSSL)")
+        replace_in_file(self, cmakelists, "INCLUDE(cmake/WtFindMysql.txt)", "#INCLUDE(cmake/WtFindMysql.txt)")
+        replace_in_file(self, cmakelists, "INCLUDE(cmake/WtFindPostgresql.txt)", "#INCLUDE(cmake/WtFindPostgresql.txt)")
+        if self.settings.os != "Windows":
+            replace_in_file(self, cmakelists, "INCLUDE(cmake/WtFindOdbc.txt)", "#INCLUDE(cmake/WtFindOdbc.txt)")
+
+        # Do not pollute rpath of shared libs of the install tree on macOS please
+        replace_in_file(self, 
+            cmakelists,
+            "IF(APPLE)\n  SET(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/lib\")",
+            "if(0)",
+        )
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
         shutil.move(os.path.join(self.package_folder, "share", "Wt"), os.path.join(self.package_folder, "bin"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "var"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "var"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "wt")

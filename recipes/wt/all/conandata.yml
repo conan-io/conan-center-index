@@ -1,4 +1,7 @@
 sources:
+  "4.9.0":
+    url: "https://github.com/emweb/wt/archive/4.9.0.tar.gz"
+    sha256: "2f21b2ee3cbd938fbe1b6a47aa7efc52f5fac9c3e1040847dae50d3100da975a"
   "4.8.0":
     url: "https://github.com/emweb/wt/archive/4.8.0.tar.gz"
     sha256: "e4030d8f530ec7bdd6b341a2bf31a608fb9ebcedb905155f83ec7f300a7d420d"
@@ -26,10 +29,13 @@ sources:
 patches:
   "4.5.0":
     - patch_file: "patches/wt_4_5_0_gcc_11.patch"
-      base_path: "source_subfolder"
+      patch_description: "include limits header"
+      patch_type: "portability"
   "4.4.0":
     - patch_file: "patches/wt_4_5_0_gcc_11.patch"
-      base_path: "source_subfolder"
+      patch_description: "include limits header"
+      patch_type: "portability"
   "4.3.1":
     - patch_file: "patches/wt_4_5_0_gcc_11.patch"
-      base_path: "source_subfolder"
+      patch_description: "include limits header"
+      patch_type: "portability"
