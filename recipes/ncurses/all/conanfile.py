@@ -50,19 +50,21 @@ class NCursesConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _with_ticlib(self):
-        if self.options.with_ticlib == "auto":
+    def _with_ticlib(self, opts=None):
+        if opts is None:
+            opts = self.options
+        if opts.with_ticlib == "auto":
             return self.settings.os != "Windows"
         else:
-            return self.options.with_ticlib
+            return opts.with_ticlib
 
-    @property
-    def _with_tinfo(self):
-        if self.options.with_tinfo == "auto":
+    def _with_tinfo(self, opts=None):
+        if opts is None:
+            opts = self.options
+        if opts.with_tinfo == "auto":
             return self.settings.os != "Windows"
         else:
-            return self.options.with_tinfo
+            return opts.with_tinfo
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -106,7 +108,7 @@ class NCursesConan(ConanFile):
         if self.options.shared and is_msvc(self) and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Cannot build shared libraries with static (MT) runtime")
         if self.settings.os == "Windows":
-            if self._with_tinfo:
+            if self._with_tinfo():
                 raise ConanInvalidConfiguration("terminfo cannot be built on Windows because it requires a term driver")
             if self.options.shared and self._with_ticlib:
                 raise ConanInvalidConfiguration("ticlib cannot be built separately as a shared library on Windows")
@@ -132,8 +134,8 @@ class NCursesConan(ConanFile):
             "--with-pcre2={}".format(yes_no(self.options.with_pcre2)),
             "--with-cxx-binding={}".format(yes_no(self.options.with_cxx)),
             "--with-progs={}".format(yes_no(self.options.with_progs)),
-            "--with-termlib={}".format(yes_no(self._with_tinfo)),
-            "--with-ticlib={}".format(yes_no(self._with_ticlib)),
+            "--with-termlib={}".format(yes_no(self._with_tinfo())),
+            "--with-ticlib={}".format(yes_no(self._with_ticlib())),
             "--without-libtool",
             "--without-ada",
             "--without-manpages",
@@ -249,8 +251,8 @@ class NCursesConan(ConanFile):
         return res
 
     def package_id(self):
-        self.info.options.with_ticlib = self._with_ticlib
-        self.info.options.with_tinfo = self._with_tinfo
+        self.info.options.with_ticlib = self._with_ticlib(self.info.options)
+        self.info.options.with_tinfo = self._with_tinfo(self.info.options)
 
     @property
     def _module_subfolder(self):
@@ -267,7 +269,7 @@ class NCursesConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package"] = "Curses"
         self.cpp_info.filenames["cmake_find_package_multi"] = "Curses"
 
-        if self._with_tinfo:
+        if self._with_tinfo():
             self.cpp_info.components["tinfo"].libs = [f"tinfo{self._lib_suffix}"]
             self.cpp_info.components["tinfo"].names["pkg_config"] = f"tinfo{self._lib_suffix}"
             self.cpp_info.components["tinfo"].includedirs.append(os.path.join("include", f"ncurses{self._suffix}"))
@@ -279,7 +281,7 @@ class NCursesConan(ConanFile):
             self.cpp_info.components["libcurses"].defines = ["NCURSES_STATIC"]
             if self.settings.os == "Linux":
                 self.cpp_info.components["libcurses"].system_libs = ["dl", "m"]
-        if self._with_tinfo:
+        if self._with_tinfo():
             self.cpp_info.components["libcurses"].requires.append("tinfo")
 
         if is_msvc(self):
@@ -316,7 +318,7 @@ class NCursesConan(ConanFile):
             self.cpp_info.components["curses++"].set_property("pkg_config_name", f"ncurses++{self._lib_suffix}")
             self.cpp_info.components["curses++"].requires = ["libcurses"]
 
-        if self._with_ticlib:
+        if self._with_ticlib():
             self.cpp_info.components["ticlib"].libs = [f"tic{self._lib_suffix}"]
             self.cpp_info.components["ticlib"].set_property("pkg_config_name", f"tic{self._lib_suffix}")
             self.cpp_info.components["ticlib"].requires = ["libcurses"]
@@ -330,4 +332,6 @@ class NCursesConan(ConanFile):
         self.output.info(f"Setting TERMINFO environment variable: {terminfo}")
         self.env_info.TERMINFO = terminfo
 
+        self.conf_info.define("user.ncurses:suffix", self._lib_suffix)
+        # FIXME: to remove in conan v2
         self.user_info.lib_suffix = self._lib_suffix
