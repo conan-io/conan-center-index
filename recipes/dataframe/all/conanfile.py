@@ -52,9 +52,10 @@ class DataFrameConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "15",
+            "msvc": "191",
             "gcc": "7",
             "clang": "6",
-            "apple-clang": "10.0" if Version(self.version) >= "1.12.0" else "9.0",
+            "apple-clang": "10.0",
         }
 
     def export_sources(self):
