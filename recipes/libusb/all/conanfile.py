@@ -81,6 +81,7 @@ class LibUSBConan(ConanFile):
         if is_msvc(self):
             tc = MSBuildToolchain(self)
             tc.configuration = self._msbuild_configuration
+            tc.properties["WholeProgramOptimization"] = "false"
             tc.generate()
         else:
             VirtualBuildEnv(self).generate()
@@ -95,15 +96,14 @@ class LibUSBConan(ConanFile):
             solution_msvc_year = "2017" if Version(self.version) < "1.0.24" else "2019"
             solution = f"libusb_{'dll' if self.options.shared else 'static'}_{solution_msvc_year}.vcxproj"
             vcxproj_path = os.path.join(self.source_folder, "msvc", solution)
-            # No whole optimization by default
+
+            #==============================
+            # TODO: to remove once https://github.com/conan-io/conan/pull/12817 available in conan client
             replace_in_file(
                 self, vcxproj_path,
                 "<WholeProgramOptimization Condition=\"'$(Configuration)'=='Release'\">true</WholeProgramOptimization>",
                 "",
             )
-
-            #==============================
-            # TODO: to remove once https://github.com/conan-io/conan/pull/12817 available in conan client
             old_toolset = "v141" if Version(self.version) < "1.0.24" else "v142"
             new_toolset = MSBuildToolchain(self).toolset
             replace_in_file(
