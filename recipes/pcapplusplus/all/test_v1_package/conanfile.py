@@ -33,6 +33,7 @@ class PcapplusplusTestConan(ConanFile):
                     os.path.join(self.deps_cpp_info['libpcap'].bin_paths[0], "pcap.dll"),
                     os.path.join("bin", "wpcap.dll")
                 )
-            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+
+            bin_path = os.path.join("bin", "test_package")
             pcap_file_path = os.path.join(self.source_folder, "1_packet.pcap")
             self.run(f"{bin_path} {pcap_file_path}", run_environment=True)
