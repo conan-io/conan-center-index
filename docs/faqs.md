@@ -11,6 +11,7 @@ This section gathers the most common questions from the community related to pac
   * [Why are CMake find/config files and pkg-config files not packaged?](#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged)
   * [Should recipes export a recipe's license?](#should-recipes-export-a-recipes-license)
   * [Why recipes that use build tools (like CMake) that have packages in Conan Center do not use it as a build require by default?](#why-recipes-that-use-build-tools-like-cmake-that-have-packages-in-conan-center-do-not-use-it-as-a-build-require-by-default)
+  * [How are rare build systems without generators packaged?](#how-are-rare-build-systems-without-generators-packaged)
   * [Are python requires allowed in the `conan-center-index`?](#are-python-requires-allowed-in-the-conan-center-index)
   * [What version should packages use for libraries without official releases?](#what-version-should-packages-use-for-libraries-without-official-releases)
   * [Is the Jenkins orchestration library publicly available?](#is-the-jenkins-orchestration-library-publicly-available)
@@ -38,7 +39,9 @@ This section gathers the most common questions from the community related to pac
   * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)
   * [How to watch only specific recipes?](#how-to-watch-only-specific-recipes)
   * [Is it possible to disable Pylint?](#is-it-possible-to-disable-pylint)
-  * [How long can I be inactive before being removed from the authorized users list?](#how-long-can-i-be-inactive-before-being-removed-from-the-authorized-users-list)<!-- endToc -->
+  * [How long can I be inactive before being removed from the authorized users list?](#how-long-can-i-be-inactive-before-being-removed-from-the-authorized-users-list)
+  * [Can we add package which are parts of bigger projects like Boost?](#can-we-add-package-which-are-parts-of-bigger-projects-like-boost)
+    * [Can I add my project which I will submit to Boost?](#can-i-add-my-project-which-i-will-submit-to-boost)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -97,11 +100,22 @@ No, recipes do not need to export a recipe license. Recipes and all files contri
 We generally consider tools like CMake as a standard tool to have installed in your system. Having the `cmake` package as a build require in **all** the recipes that use it will be an overkill, as every build requirement is installed like a requirement and takes time to download. However, `cmake` could still be useful to use in your profile:
 
 ```
-[build_requires]
+[tool_requires]
 cmake/3.17.2
 ```
 
-Other packages using more unusual build tools, like `OpenSSL` using `strawberryperl`, will have the build require in the recipe as it is likely that the user that want to build it from sources will not have it installed in their system
+Other packages using more unusual build tools should refer to the [Dependencies - Adding Build Requirements](adding_packages/dependencies.md#build-requirements) section for more information.
+
+## How are rare build systems without generators packaged?
+
+The C++ ecosystem has a lot of rare, unique and obscure build systems. Some of these are available in ConanCenter but they do not have built-in generators from the main Conan client.
+The recipe is expected to encode the specifics of the build system, mapping the `settings`, `options` for the binary configuration, and also mapping `self.dependencies` so the build system can locate the dependencies libraries as required.
+For these cases, contributors are asked to help reviewers as much as possible as it's likely we will not have expertise.
+
+> TODO: Add a link to docs.conan.io which explains how to write a custom generator in the 2.0 sense
+
+For quality assurance the build service is expected to be green and the [hooks](https://github.com/conan-io/hooks) will ensure the package contents match what is expected given the options. These recipes are more likely to have
+inconsistency with other recipes but make for excellent contributions.
 
 ## Are python requires allowed in the `conan-center-index`?
 
@@ -242,7 +256,7 @@ The hook [KB-H032](error_knowledge_base.md#KB-H032) does not allow `system_requi
 system packages at same recipe.
 
 There are exceptions where some projects are closer to system drivers or hardware and packaging as a regular library could result
-in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, see the [How-to](adding_packages/README.md#system-packages) for more.
+in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, see the [How-to](adding_packages/build_and_package.md#system-packages) for more.
 
 ## Why ConanCenter does **not** build and execute tests in recipes
 
@@ -354,15 +368,7 @@ Keep reading in the [consuming recipes section](consuming_recipes.md#isolate-you
 
 ## Why are version ranges not allowed?
 
-Version ranges are a useful Conan feature, find the documentation [here](https://docs.conan.io/en/latest/versioning/version_ranges.html). However, in the context of ConanCenter they pose a few key challenges, most notably:
-
-- Non-Deterministic `package-id`
-
-With version ranges the newest compatible package may yield a different package-id than the one built and published by ConanCenter resulting in frustrating error "no binaries found". For more context see [this excellent explanation](https://github.com/conan-io/conan-center-index/pull/8831#issuecomment-1024526780).
-
-- Build Reproducibility
-
-If consumers try to download and build the recipe at a later time, it may resolve to a different package version that may generate a different binary (that may or may not be compatible). In order to prevent these types of issues, we have decided to only allow exact requirements versions. This is a complicated issue, check [this thread](https://github.com/conan-io/conan-center-index/pull/9140#discussion_r795461547) for more.
+See [Dependencies Version Ranges](adding_packages/dependencies.md#version-ranges) for details.
 
 ## How to consume a graph of shared libraries?
 
@@ -410,3 +416,15 @@ difficult to understand [linter errors](linters.md), please comment on your pull
 ## How long can I be inactive before being removed from the authorized users list?
 
 Please, read [Inactivity and user removal section](adding_packages/README.md#inactivity-and-user-removal).
+
+## Can we add package which are parts of bigger projects like Boost?
+
+Sadly no. There have been many efforts in the past and we feel it's not sustainable given the number of combinations of libraries and version. See #14660 for recent discussions.
+
+There is one main "boost" recipe with many versions maintained.
+
+There are good arguments for permitting some boost libraries but we feel doing so is not fair to the rest.
+
+### Can I add my project which I will submit to Boost?
+
+Yes, but make sure it does not have Boost in the name. Use the [`author-name` convention](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#what-is-the-policy-on-recipe-name-collisions) so there are no conflicts.

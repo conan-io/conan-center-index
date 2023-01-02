@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.8)
-project(test_package CXX)
+project(test_package LANGUAGES CXX)
 
 find_package(Drogon CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} Drogon::Drogon)
+target_link_libraries(${PROJECT_NAME} PRIVATE Drogon::Drogon)
 
 # drogon uses string_view when MSVC_VERSION is greater than 1900.
 # https://github.com/drogonframework/drogon/blob/v1.7.5/lib/inc/drogon/utils/string_view.h#L16

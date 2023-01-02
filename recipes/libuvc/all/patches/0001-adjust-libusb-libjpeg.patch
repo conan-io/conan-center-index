@@ -1,0 +1,63 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -19,13 +19,16 @@ set(libuvc_VERSION ${libuvc_VERSION_MAJOR}.${libuvc_VERSION_MINOR}.${libuvc_VERS
+ set(libuvc_DESCRIPTION "A cross-platform library for USB video devices")
+ set(libuvc_URL "https://github.com/ktossell/libuvc")
+ 
+-find_package(PkgConfig)
++find_package(PkgConfig REQUIRED)
+ pkg_check_modules(LIBUSB libusb-1.0)
++link_directories(${LIBUSB_LIBRARY_DIRS})
+ 
+ # Try to find JPEG using a module or pkg-config. If that doesn't work, search for the header.
+-find_package(jpeg QUIET)
+-if(JPEG_FOUND)
+-  set(JPEG_LINK_FLAGS ${JPEG_LIBRARIES})
++option(LIBUVC_WITH_JPEG "Support JPEG decoding" ON)
++if(LIBUVC_WITH_JPEG)
++find_package(JPEG REQUIRED)
++if(1)
++  set(JPEG_LINK_FLAGS JPEG::JPEG)
+ else()
+   pkg_check_modules(JPEG QUIET libjpeg)
+   if(JPEG_FOUND)
+@@ -39,6 +42,7 @@ else()
+     endif()
+   endif()
+ endif()
++endif()
+ 
+ include(GNUInstallDirs)
+ 
+@@ -57,7 +61,7 @@ include_directories(
+   ${LIBUSB_INCLUDE_DIRS}
+ )
+ 
+-if(JPEG_FOUND)
++if(LIBUVC_WITH_JPEG)
+   message(STATUS "Building libuvc with JPEG support.")
+   include_directories(${JPEG_INCLUDE_DIR})
+   SET(LIBUVC_HAS_JPEG TRUE)
+@@ -84,6 +88,10 @@ endif()
+ 
+ if(BUILD_UVC_STATIC)
+   add_library(uvc_static STATIC ${SOURCES})
++  target_link_libraries(uvc_static ${LIBUSB_LIBRARIES})
++  if(LIBUVC_WITH_JPEG)
++    target_link_libraries(uvc_static ${JPEG_LINK_FLAGS})
++  endif()
+   set_target_properties(uvc_static PROPERTIES OUTPUT_NAME uvc)
+   list(APPEND UVC_TARGETS uvc_static)
+ endif()
+@@ -97,9 +105,9 @@ foreach(target_name ${UVC_TARGETS})
+ endforeach()
+ 
+ if(BUILD_UVC_SHARED)
+-  if(JPEG_FOUND)
++  if(LIBUVC_WITH_JPEG)
+     target_link_libraries (uvc ${JPEG_LINK_FLAGS})
+-  endif(JPEG_FOUND)
++  endif()
+ 
+   target_link_libraries(uvc ${LIBUSB_LIBRARIES})
+ 
