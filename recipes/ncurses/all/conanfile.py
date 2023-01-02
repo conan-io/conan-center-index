@@ -86,7 +86,7 @@ class NCursesConan(ConanFile):
     def requirements(self):
         if self.options.with_pcre2:
             self.requires("pcre2/10.42")
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             self.requires("getopt-for-visual-studio/20200201")
             self.requires("dirent/1.23.2")
             if self.options.get_safe("with_extended_colors", False):
@@ -103,7 +103,7 @@ class NCursesConan(ConanFile):
             # FIXME: Cannot build ncurses from x86_64 to armv8 (Apple M1).  Cross building from Linux/x86_64 to Mingw/x86_64 works flawless.
             # FIXME: Need access to environment of build profile to set build compiler (BUILD_CC/CC_FOR_BUILD)
             raise ConanInvalidConfiguration("Cross building to/from arm is (currently) not supported")
-        if self.options.shared and self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
+        if self.options.shared and is_msvc(self) and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Cannot build shared libraries with static (MT) runtime")
         if self.settings.os == "Windows":
             if self._with_tinfo:
@@ -156,7 +156,7 @@ class NCursesConan(ConanFile):
                 "--enable-term-driver",
                 "--enable-interop",
             ])
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             build = host = "{}-w64-mingw32-msvc".format(self.settings.arch)
             tc.configure_args.extend([
                 "ac_cv_func_getopt=yes",
@@ -282,7 +282,7 @@ class NCursesConan(ConanFile):
         if self._with_tinfo:
             self.cpp_info.components["libcurses"].requires.append("tinfo")
 
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             self.cpp_info.components["libcurses"].requires.extend([
                 "getopt-for-visual-studio::getopt-for-visual-studio",
                 "dirent::dirent",
