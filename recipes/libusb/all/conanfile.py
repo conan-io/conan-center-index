@@ -132,9 +132,8 @@ class LibUSBConan(ConanFile):
         if is_msvc(self):
             copy(self, "libusb.h", src=os.path.join(self.source_folder, "libusb"),
                                    dst=os.path.join(self.package_folder, "include", "libusb-1.0"))
-            output_dir = os.path.join(self.source_folder, MSBuild(self).platform, self._msbuild_configuration)
-            copy(self, "*.dll", src=output_dir, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
-            copy(self, "*.lib", src=output_dir, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+            copy(self, "*.dll", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+            copy(self, "*.lib", src=self.source_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         else:
             autotools = Autotools(self)
             autotools.install()
