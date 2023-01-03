@@ -20,7 +20,7 @@ class XkeyboardConfigConan(ConanFile):
             raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def system_requirements(self):
         apt = package_manager.Apt(self)
