@@ -30,9 +30,9 @@ class HttpParserConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.rm_safe("fPIC")
-        del self.settings.compiler.rm_safe("libcxx")
-        del self.settings.compiler.rm_safe("cppstd")
+            self.options.rm_safe("fPIC")
+        self.settings.compiler.rm_safe("libcxx")
+        self.settings.compiler.rm_safe("cppstd")
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
