@@ -120,6 +120,7 @@ class MariadbConnectorcConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "symbols"))
+        rmdir(self, os.path.join(self.package_folder, "man"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
