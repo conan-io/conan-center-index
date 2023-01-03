@@ -150,11 +150,113 @@ class GccConan(ConanFile):
         )
 
     def package_info(self):
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("rt")
-            self.cpp_info.system_libs.append("pthread")
-            self.cpp_info.system_libs.append("dl")
+        # os_build, arch_build, os_host, arch_host = get_cross_building_settings(self)
+        # compiler = self.settings.get_safe("compiler")
+        # # e.g., x86_64-pc-linux-gnu
+        # triplet = _get_gnu_triplet(os_host, arch_host, compiler=compiler)
+        triplet = "x86_64-pc-linux-gnu"
+        self.cpp_info.libdirs = [
+            "lib",
+            "lib64",
+            os.path.join("libexec", "gcc", triplet, self.version),
+            os.path.join("lib", "gcc", triplet, self.version, "plugin"),
+        ]
+        self.cpp_info.libs = collect_libs(self) # asan, atomic, gcc_s, gfortran, gomp, itm, lsan, quadmath, ssp, stdc++, tsan, ubsan
+
+        self.cpp_info.components["gcc_s"].set_property("cmake_target_name", "gcc::gcc_s")
+        self.cpp_info.components["gcc_s"].libdirs = ["lib", "lib64", os.path.join("libexec", "gcc", triplet, self.version)]
+        self.cpp_info.components["gcc_s"].libs = ["gcc_s"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["gcc_s"].system_libs.append("m")
+            self.cpp_info.components["gcc_s"].system_libs.append("rt")
+            self.cpp_info.components["gcc_s"].system_libs.append("pthread")
+            self.cpp_info.components["gcc_s"].system_libs.append("dl")
+
+        self.cpp_info.components["gfortran"].set_property("cmake_target_name", "gcc::gfortran")
+        self.cpp_info.components["gfortran"].libdirs = ["lib"]
+        self.cpp_info.components["gfortran"].libs = ["gfortran"]
+        self.cpp_info.components["gfortran"].requires = ["gcc_s", "quadmath"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["gfortran"].system_libs.append("m")
+
+        self.cpp_info.components["quadmath"].set_property("cmake_target_name", "gcc::quadmath")
+        self.cpp_info.components["quadmath"].libdirs = ["lib"]
+        self.cpp_info.components["quadmath"].libs = ["quadmath"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["quadmath"].system_libs.append("m")
+
+        self.cpp_info.components["itm"].set_property("cmake_target_name", "gcc::itm")
+        self.cpp_info.components["itm"].libdirs = ["lib"]
+        self.cpp_info.components["itm"].libs = ["itm"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["itm"].system_libs.append("pthread")
+
+        self.cpp_info.components["tsan"].set_property("cmake_target_name", "gcc::tsan")
+        self.cpp_info.components["tsan"].libdirs = ["lib"]
+        self.cpp_info.components["tsan"].libs = ["tsan"]
+        self.cpp_info.components["tsan"].requires = ["gcc_s", "stdc++"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["tsan"].system_libs.append("pthread")
+            self.cpp_info.components["tsan"].system_libs.append("m")
+            self.cpp_info.components["tsan"].system_libs.append("dl")
+
+        self.cpp_info.components["stdc++"].set_property("cmake_target_name", "gcc::stdcpp")
+        self.cpp_info.components["stdc++"].libdirs = ["lib"]
+        self.cpp_info.components["stdc++"].libs = ["stdc++"]
+        self.cpp_info.components["stdc++"].requires = ["gcc_s"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["stdc++"].system_libs.append("m")
+
+        self.cpp_info.components["ssp"].set_property("cmake_target_name", "gcc::ssp")
+        self.cpp_info.components["ssp"].libdirs = ["lib"]
+        self.cpp_info.components["ssp"].libs = ["ssp"]
+
+        self.cpp_info.components["atomic"].set_property("cmake_target_name", "gcc::atomic")
+        self.cpp_info.components["atomic"].libdirs = ["lib"]
+        self.cpp_info.components["atomic"].libs = ["atomic"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["atomic"].system_libs.append("pthread")
+
+        self.cpp_info.components["gomp"].set_property("cmake_target_name", "gcc::gomp")
+        self.cpp_info.components["gomp"].libdirs = ["lib"]
+        self.cpp_info.components["gomp"].libs = ["gomp"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["gomp"].system_libs.append("pthread")
+            self.cpp_info.components["gomp"].system_libs.append("dl")
+
+        self.cpp_info.components["asan"].set_property("cmake_target_name", "gcc::asan")
+        self.cpp_info.components["asan"].libdirs = ["lib"]
+        self.cpp_info.components["asan"].libs = ["asan"]
+        self.cpp_info.components["asan"].requires = ["gcc_s", "stdc++"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["asan"].system_libs.append("pthread")
+            self.cpp_info.components["asan"].system_libs.append("m")
+            self.cpp_info.components["asan"].system_libs.append("dl")
+
+        self.cpp_info.components["ubsan"].set_property("cmake_target_name", "gcc::ubsan")
+        self.cpp_info.components["ubsan"].libdirs = ["lib"]
+        self.cpp_info.components["ubsan"].libs = ["ubsan"]
+        self.cpp_info.components["ubsan"].requires = ["gcc_s", "stdc++"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["ubsan"].system_libs.append("pthread")
+            self.cpp_info.components["ubsan"].system_libs.append("dl")
+            self.cpp_info.components["ubsan"].system_libs.append("rt")
+
+        self.cpp_info.components["lsan"].set_property("cmake_target_name", "gcc::lsan")
+        self.cpp_info.components["lsan"].libdirs = ["lib"]
+        self.cpp_info.components["lsan"].libs = ["lsan"]
+        self.cpp_info.components["lsan"].requires = ["gcc_s", "stdc++"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["lsan"].system_libs.append("pthread")
+            self.cpp_info.components["lsan"].system_libs.append("dl")
+            self.cpp_info.components["lsan"].system_libs.append("rt")
+
+        self.cpp_info.components["cc1"].set_property("cmake_target_name", "gcc::cc1")
+        self.cpp_info.components["cc1"].libdirs = ["lib64"]
+        self.cpp_info.components["cc1"].libs = ["cc1"]
+        self.cpp_info.components["cc1"].requires = ["gcc_s", "stdc++"]
+
+
 
         bindir = os.path.join(self.package_folder, "bin")
 
