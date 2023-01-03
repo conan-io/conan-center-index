@@ -14,7 +14,7 @@ class TestPackageConan(ConanFile):
 
     @property
     def _todos_filename(self):
-        return os.path.join(self.recipe_folder, self.folders.generators, "catch2_test_to_do.yml")
+        return os.path.join(self.recipe_folder, "test_output", self.folders.generators, "catch2_test_to_do.yml")
 
     def requirements(self):
         self.requires(self.tested_reference_str)
@@ -22,8 +22,8 @@ class TestPackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         catch_opts = self.dependencies[self.tested_reference_str].options
-        tc.variables["WITH_PREFIX"]    = catch_opts.with_prefix
-        tc.variables["WITH_MAIN"]      = catch_opts.with_main
+        tc.variables["WITH_PREFIX"] = catch_opts.with_prefix
+        tc.variables["WITH_MAIN"] = catch_opts.with_main
         tc.variables["WITH_BENCHMARK"] = not catch_opts.with_prefix and catch_opts.with_main and catch_opts.with_benchmark
         tc.generate()
 
