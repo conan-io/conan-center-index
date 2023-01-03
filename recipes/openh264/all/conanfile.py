@@ -11,7 +11,7 @@ from conan.tools.microsoft import is_msvc, unix_path, msvc_runtime_flag
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class OpenH264Conan(ConanFile):
