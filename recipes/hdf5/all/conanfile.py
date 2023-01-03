@@ -90,6 +90,11 @@ class Hdf5Conan(ConanFile):
         if self.options.parallel:
             self.requires("openmpi/4.1.0")
 
+    def build_requirements(self):
+        if Version(self.version) >= "1.14.0":
+            self.tool_requires("cmake/3.25.0")
+
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
