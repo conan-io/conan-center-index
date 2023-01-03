@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.scm import Version
-from conan.tools.files import get, chdir, replace_in_file, copy, rmdir
+from conan.tools.files import get, chdir, replace_in_file, copy, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc, MSBuildToolchain, VCVars, unix_path
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -23,6 +23,9 @@ class LuajitConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -97,6 +100,7 @@ class LuajitConan(ConanFile):
         return args
 
     def build(self):
+        apply_conandata_patches(self)
         if is_msvc(self):
             variant = '' if self.options.shared else 'static'
             self.run("msvcbuild.bat %s" % variant, env="conanrun")
