@@ -26,9 +26,9 @@ sources:
 patches:
   "0.2":
     - patch_file: "patches/0.2/0001-normalize-buildsystem.patch"
-      description: "Skip tests and examples from build"
+      patch_description: "Skip tests and examples from build"
       patch_type: "conan"
     - patch_file: "patches/0.2/0002-replace-uint.patch"
-      description: "Replace uint (not default type) with unsigned"
+      patch_description: "Replace uint (not default type) with unsigned"
       patch_type: "bugfix"
       source: "https://github.com/CrowCpp/Crow/commit/5fe3a45793604a50f5c9086909dfa1b50dfa3e88"
