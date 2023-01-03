@@ -42,6 +42,9 @@ class Hdf5Conan(ConanFile):
         "szip_encoding": False,
         "parallel": False,
     }
+    @property
+    def _minimum_cpp_standard(self):
+        return 11
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -93,7 +96,6 @@ class Hdf5Conan(ConanFile):
     def build_requirements(self):
         if Version(self.version) >= "1.14.0":
             self.tool_requires("cmake/3.25.0")
-
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
