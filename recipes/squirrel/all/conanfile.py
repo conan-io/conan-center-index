@@ -94,6 +94,8 @@ class SquirrelConan(ConanFile):
         # squirrel
         self.cpp_info.components["libsquirrel"].set_property("cmake_target_name", f"squirrel::squirrel{suffix}")
         self.cpp_info.components["libsquirrel"].libs = [f"squirrel{suffix}"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["libsquirrel"].system_libs.append("m")
 
         # sqstdlib
         self.cpp_info.components["sqstdlib"].set_property("cmake_target_name", f"squirrel::sqstdlib{suffix}")
