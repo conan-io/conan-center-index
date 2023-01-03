@@ -155,16 +155,16 @@ class GccConan(ConanFile):
         # # e.g., x86_64-pc-linux-gnu
         # triplet = _get_gnu_triplet(os_host, arch_host, compiler=compiler)
         triplet = "x86_64-pc-linux-gnu"
-        self.cpp_info.libdirs = [
-            "lib",
-            "lib64",
-            os.path.join("libexec", "gcc", triplet, self.version),
-            os.path.join("lib", "gcc", triplet, self.version, "plugin"),
-        ]
-        self.cpp_info.libs = collect_libs(self) # asan, atomic, gcc_s, gfortran, gomp, itm, lsan, quadmath, ssp, stdc++, tsan, ubsan
+        # self.cpp_info.libdirs = [
+        #     "lib",
+        #     "lib64",
+        #     os.path.join("libexec", "gcc", triplet, self.version),
+        #     os.path.join("lib", "gcc", triplet, self.version, "plugin"),
+        # ]
+        # self.cpp_info.libs = collect_libs(self) # asan, atomic, gcc_s, gfortran, gomp, itm, lsan, quadmath, ssp, stdc++, tsan, ubsan
 
         self.cpp_info.components["gcc_s"].set_property("cmake_target_name", "gcc::gcc_s")
-        self.cpp_info.components["gcc_s"].libdirs = ["lib", "lib64", os.path.join("libexec", "gcc", triplet, self.version)]
+        self.cpp_info.components["gcc_s"].libdirs = ["lib"]
         self.cpp_info.components["gcc_s"].libs = ["gcc_s"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["gcc_s"].system_libs.append("m")
@@ -252,7 +252,7 @@ class GccConan(ConanFile):
             self.cpp_info.components["lsan"].system_libs.append("rt")
 
         self.cpp_info.components["cc1"].set_property("cmake_target_name", "gcc::cc1")
-        self.cpp_info.components["cc1"].libdirs = ["lib64"]
+        self.cpp_info.components["cc1"].libdirs = ["lib"]
         self.cpp_info.components["cc1"].libs = ["cc1"]
         self.cpp_info.components["cc1"].requires = ["gcc_s", "stdc++"]
 
