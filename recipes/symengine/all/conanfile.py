@@ -1,6 +1,13 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rm, rmdir
+from conan.tools.files import (
+    apply_conandata_patches,
+    collect_libs,
+    copy,
+    get,
+    rm,
+    rmdir,
+)
 import os
 
 required_conan_version = ">=1.54.0"
@@ -34,7 +41,9 @@ class SymengineConan(ConanFile):
             self.requires("gmp/6.2.1")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
+        get(
+            self,
+            **self.conan_data["sources"][self.version],
             strip_root=True,
             destination=self.source_folder,
         )
@@ -62,7 +71,12 @@ class SymengineConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(
+            self,
+            "LICENSE",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "licenses"),
+        )
         cmake = CMake(self)
         cmake.install()
         # [CMAKE-MODULES-CONFIG-FILES (KB-H016)]
