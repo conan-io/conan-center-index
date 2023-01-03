@@ -18,7 +18,7 @@ from conan.errors import ConanInvalidConfiguration
 from conans import RunEnvironment, tools
 from conans.model import Generator
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.55.0"
 
 
 class qt(Generator):
