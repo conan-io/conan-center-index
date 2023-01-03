@@ -30,7 +30,6 @@ class AutomakeConan(ConanFile):
         export_conandata_patches(self)
 
     def configure(self):
-        self.win_bash = self._settings_build.os == "Windows"
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
