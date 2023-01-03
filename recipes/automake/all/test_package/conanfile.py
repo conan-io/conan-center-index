@@ -48,7 +48,7 @@ class TestPackageConan(ConanFile):
             copy(self, src, self.source_path, self.build_folder)
 
         autotools = Autotools(self)
-        self.run("autoreconf -fiv", cwd=self.build_path, env="conanbuild")  # Workaround for since the method `autoreconf()` will always run from source
+        self.run("autoreconf -fiv", cwd=self.build_path)  # Workaround for since the method `autoreconf()` will always run from source
         autotools.configure(build_script_folder=self.build_path)
         autotools.make()
 
