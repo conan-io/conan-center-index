@@ -50,11 +50,11 @@ class H5ppConan(ConanFile):
             del self.options.with_spdlog
 
     def requirements(self):
-        self.requires("hdf5/1.12.1")
+        self.requires("hdf5/1.13.1")
         if tools.Version(self.version) < "1.10.0" or self.options.get_safe('with_eigen'):
             self.requires("eigen/3.4.0")
         if tools.Version(self.version) < "1.10.0" or self.options.get_safe('with_spdlog'):
-            self.requires("spdlog/1.10.0")
+            self.requires("spdlog/1.11.0")
 
     def package_id(self):
         self.info.header_only()
