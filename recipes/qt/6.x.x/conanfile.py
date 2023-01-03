@@ -450,6 +450,7 @@ class QtConan(ConanFile):
 
         tc = CMakeDeps(self)
         tc.set_property("libdrm", "cmake_file_name", "libdrm-DO-NOT-USE")
+        tc.set_property("wayland", "cmake_file_name", "wayland-DO-NOT-USE")
         tc.generate()
 
         for f in glob.glob("*.cmake"):
