@@ -3,7 +3,7 @@ import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import can_run
+from conan.tools.build import can_run, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
 from conan.tools.scm import Version
@@ -63,12 +63,15 @@ class Hdf5Conan(ConanFile):
                 self.info.options.szip_encoding and \
                 not self.dependencies["szip"].options.enable_encoding:
             raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._minimum_cpp_standard)
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
+        if Version(self.version) < "1.14.0" or not self.options.enable_cxx:
+            self.settings.rm_safe("compiler.cppstd")
         if self.options.enable_cxx or self.options.hl or (self.settings.os == "Windows" and not self.options.shared):
             del self.options.threadsafe
         if not bool(self.options.szip_support):
