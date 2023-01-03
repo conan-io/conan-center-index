@@ -4,12 +4,5 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(charls CONFIG REQUIRED)
-
-add_executable(test_package_c ../test_package/test_package.c)
-target_link_libraries(test_package_c PRIVATE charls)
-set_target_properties(test_package_c PROPERTIES LINKER_LANGUAGE CXX)
-
-add_executable(test_package_cpp ../test_package/test_package.cpp)
-target_link_libraries(test_package_cpp PRIVATE charls)
-target_compile_features(test_package_cpp PRIVATE cxx_std_14)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package/
+                 ${CMAKE_CURRENT_BINARY_DIR}/test_package/)
