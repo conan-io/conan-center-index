@@ -23,12 +23,11 @@ class LapackConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
-        # self.requires("gcc/12.2.0")
+        self.requires("zlib/1.2.13")
+        self.requires("gcc/12.2.0")
 
     def build_requirements(self):
-        pass
-        # self.tool_requires("gcc/12.2.0")
+        self.tool_requires("gcc/12.2.0")
 
     def configure(self):
         if self.options.shared:
@@ -69,16 +68,10 @@ class LapackConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        # os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
     def generate(self):
         buildenv = VirtualBuildEnv(self)
         buildenv.generate()
-
-        # env = Environment()
-        # env.define("FC", os.path.join(self.deps_cpp_info["gfortran"].bin_paths[0], "gfortran"))
-        # envvars = env.vars(self, scope="build")
-        # envvars.save_script("conanbuild_define_fortran_compiler")
 
         tc = CMakeToolchain(self)
         tc.cache_variables["CMAKE_GNUtoMS"] = self.settings.os == "Windows"
@@ -179,8 +172,7 @@ class LapackConan(ConanFile):
 
         self.cpp_info.components["blas"].set_property("cmake_target_name", "BLAS::BLAS")
         self.cpp_info.components["blas"].libs = [self.get_lib_name("blas")]
-        if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.components["blas"].system_libs.extend(["gfortran"])
+        self.cpp_info.components["blas"].requires = ["gcc::gfortran"]
 
         self.cpp_info.components["cblas"].set_property("cmake_target_name", "BLAS::CBLAS")
         self.cpp_info.components["cblas"].libs = [self.get_lib_name("cblas")]
@@ -188,11 +180,10 @@ class LapackConan(ConanFile):
 
         self.cpp_info.components["lapack"].set_property("cmake_target_name", "LAPACK::LAPACK")
         self.cpp_info.components["lapack"].libs = [self.get_lib_name("lapack")]
+        self.cpp_info.components["lapack"].requires = ["blas", "gcc::gfortran"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["lapack"].system_libs.extend(["m"])
-            self.cpp_info.components["lapack"].system_libs.extend(["gfortran"])
-        self.cpp_info.components["lapack"].requires = ["blas"]
-	
+
         self.cpp_info.components["lapacke"].set_property("cmake_target_name", "LAPACK::LAPACKE")
         self.cpp_info.components["lapacke"].libs = [self.get_lib_name("lapacke")]
         self.cpp_info.components["lapacke"].requires = ["lapack"]
