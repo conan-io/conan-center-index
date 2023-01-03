@@ -5,7 +5,7 @@
 int main(int argc, const char** argv) {
     auto frequency = 32.f;
     auto octaves = 9;
-    auto seed = 74524;
+    auto seed = siv::PerlinNoise::seed_type{74524};
 
     auto generator = siv::PerlinNoise{seed};
 
