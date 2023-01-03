@@ -361,7 +361,7 @@ class QtConan(ConanFile):
             if is_apple_os(self):
                 self.requires("moltenvk/1.2.0")
         if self.options.with_glib:
-            self.requires("glib/2.75.0")
+            self.requires("glib/2.75.1")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.2.1")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
@@ -410,7 +410,7 @@ class QtConan(ConanFile):
             self.requires("xorg-proto/2022.2")
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.85")
-            self.requires("libdrm/2.4.109")
+            self.requires("libdrm/2.4.114")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.2")
         if self.options.get_safe("with_pulseaudio", False):
@@ -449,6 +449,7 @@ class QtConan(ConanFile):
         ms.generate()
 
         tc = CMakeDeps(self)
+        tc.set_property("libdrm", "cmake_file_name", "libdrm-DO-NOT-USE")
         tc.generate()
 
         for f in glob.glob("*.cmake"):
