@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.scm import Version
 from conan.tools.files import get, chdir, replace_in_file, copy, rmdir
-from conan.tools.microsoft import is_msvc, MSBuildToolchain, VCVars
+from conan.tools.microsoft import is_msvc, MSBuildToolchain, VCVars, unix_path
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.apple import is_apple_os
@@ -10,7 +10,7 @@ import os
 import platform
 
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class LuajitConan(ConanFile):
@@ -91,7 +91,7 @@ class LuajitConan(ConanFile):
 
     @property
     def _make_arguments(self):
-        args = [f"PREFIX={self.package_folder}"]
+        args = [f"PREFIX={unix_path(self, self.package_folder)}"]
         if is_apple_os(self):
             args.append(f"MACOSX_DEPLOYMENT_TARGET={self._macosx_deployment_target}")
         return args
@@ -122,7 +122,7 @@ class LuajitConan(ConanFile):
         else:
             with chdir(self, self.source_folder):
                 autotools = Autotools(self)
-                autotools.install(args=self._make_arguments)
+                autotools.install(args=self._make_arguments + ["DESTDIR="])
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "share"))
 
