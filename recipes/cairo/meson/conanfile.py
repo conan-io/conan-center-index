@@ -76,8 +76,8 @@ class CairoConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.settings.os != "Linux":
