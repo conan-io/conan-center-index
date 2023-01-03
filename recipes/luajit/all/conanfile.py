@@ -84,18 +84,12 @@ class LuajitConan(ConanFile):
 
     @property
     def _macosx_deployment_target(self):
-        # Per https://luajit.org/install.html: If MACOSX_DEPLOYMENT_TARGET
-        # is not set then it's forced to 10.4, which breaks compile on Mojave.
-        version = self.settings.get_safe("os.version")
-        if not version and platform.system() == "Darwin":
-            macversion = Version(platform.mac_ver()[0])
-            version = f"{macversion.major}.{macversion.minor}"
-        return version
+        return self.settings.get_safe("os.version")
 
     @property
     def _make_arguments(self):
         args = [f"PREFIX={unix_path(self, self.package_folder)}"]
-        if is_apple_os(self):
+        if is_apple_os(self) and self._macosx_deployment_target:
             args.append(f"MACOSX_DEPLOYMENT_TARGET={self._macosx_deployment_target}")
         return args
 
