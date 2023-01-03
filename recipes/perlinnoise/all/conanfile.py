@@ -36,11 +36,7 @@ class PerlinnoiseConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def package_id(self):
-<<<<<<< HEAD
         self.info.clear()
-=======
-        self.info.header_only()
->>>>>>> ec90b6a10a377ef3b9352c9c47338d0c7bffb804
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
