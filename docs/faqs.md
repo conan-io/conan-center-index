@@ -123,7 +123,7 @@ Unless they are a general and extended utility in recipes (in which case, we sho
 
 ## What version should packages use for libraries without official releases?
 
-This happens for a number of reasons, some have a "live on main" others are less maintained but still merge pull requests.
+This happens for a number of reasons, some projects have a "live on main" others are less maintained but still merge pull requests.
 Read about the [ConanCenter specific version format](adding_packages/conanfile_attributes.md#conancenter-specific-releases-format) for more information.
 
 ## Is the Jenkins orchestration library publicly available?

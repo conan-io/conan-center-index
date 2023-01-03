@@ -1,6 +1,6 @@
 # Folder and Files Structure
 
-ConanCenterIndex has a specific structure for it's recipes, this allows the [build service](../README.md#the-build-service)
+ConanCenterIndex has a specific structure for its recipes, this allows the [build service](../README.md#the-build-service)
 to work most efficiently.
 
 <!-- toc -->
@@ -58,13 +58,13 @@ versions:
     folder: all
 ```
 
-This simply files has the following format:
+This simple file has the following format:
 
 * `versions` is a top level dictionary, containing a list of known versions.
 * `folder` is a string entry providing the name of the folder, relative to the current directory where the `conanfile.py` that
 can package that given folder.
 
-If it's no possible to maintain one recipe for all version, older version maybe moved to a separate folder.
+If it's not possible to maintain one recipe for all version, older version maybe moved to a separate folder.
 
 ```yml
 versions:
@@ -83,12 +83,12 @@ This contains every needed to build packages.
 #### `conandata.yml`
 
 This file lists **all the sources** that are needed to build the package. The most common examples are
-source code, build scripts, license files .
+source code, build scripts, license files.
 
 The file is organized into two sections, `"sources"` and `"patches"`, each one of them contains the files that are required
 for each version of the library. Resources which need to be downloaded are listed under `"source"` should include a checksum
-to validate that they do not change. This helps to ensure the build are reproducible at a later point in time. Often
-modifications are requires for a variety of reasons, which ones are associated to which version are listed under the `"patches"`.
+to validate that they do not change. This helps to ensure the build is reproducible at a later point in time. Often
+modifications are required for a variety of reasons, which ones are associated to which version are listed under the `"patches"`.
 
 ```yml
 sources:
@@ -114,7 +114,7 @@ def source(self):
 ```
 
 See the [Export Patches](sources_and_patches.md#exporting-patches) and [Applying Patches](sources_and_patches.md#applying-patches)
-for more use case and examples.
+for more use cases and examples.
 
 #### `conanfile.py`
 
@@ -125,7 +125,7 @@ It's the single most important part of writing a package. Every `conanfile.py` s
 Each recipe should derive the `ConanFile` class and implement key attributes and methods.
 
 * Basic attributes and conversions can be found in [`ConanFile` attributes](conanfile_attributes.md)
-* Some of the key methods are outline in this document and will link to more details
+* Some of the key methods are outlined in this document and will link to more details
 
 ```python
 from conan import ConanFile
@@ -136,17 +136,17 @@ class FmtConan(ConanFile):
     # ...
 ```
 
-When a package needs other packages those are can be include with the `requirements()` methods.
+When a package needs other packages those can be include with the `requirements()` method.
 
 ```python
     def requirements(self):
         self.require("fmt/9.0.0")
 ```
 
-For more information see the [Dependencies](dependencies.md) documentation for more use cases.
+For more information see the [Dependencies](dependencies.md) documentation.
 
 For compiled libraries, the `build()` method is used along side the [build helpers](https://docs.conan.io/en/latest/reference/build_helpers.html).
-List allows you to use the official build script from a project, see [build and package](build_and_package.md) instructions.
+This allows you to use the official build script from a project, see [build and package](build_and_package.md) instructions.
 
 ```python
     def build(self):
@@ -155,7 +155,7 @@ List allows you to use the official build script from a project, see [build and 
         cmake.build()
 ```
 
-Most project's with build scripts support installing the important files. Avoid installing documentation or examples.
+Most of the projects with build scripts support installing the important files. Avoid installing documentation or examples.
 
 ```python
     def package(self):
@@ -185,7 +185,7 @@ The goal for the test package is to make sure the
 * libraries are available to link against
 * components are correctly exposed
 
-> **Note** It's required to verify that the old generator are not broken. You can do so by using the pattern, see
+> **Note** It's required to verify that the old generators are not broken. You can do so by using the pattern, see
 > [KB-H073](../error_knowledge_base.md#kb-h078) for details.
 
 Remember that the `test_<package>` recipes should **test the package configuration that has just been generated** for the

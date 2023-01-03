@@ -45,11 +45,11 @@ The process will be precisely like for newcomers.
 ## :two: Creating a package
 
 Once you've successfully built an existing recipe following [developing recipes](../developing_recipes_locally.md) tutorial.
-You are set to being.
+You are set to being adding a new package.
 
 Make sure you have:
 
-* Fork and then clone the [conan-center-index](https://github.com/conan-io/conan-center-index) git repository.
+* Forked and then cloned the [conan-center-index](https://github.com/conan-io/conan-center-index) git repository.
 * Make sure you are using a recent [Conan client](https://conan.io/downloads) version, as recipes improve by introducing features of the newer Conan releases.
 
 The easiest way to start is copying a template from our [`package_templates/`](../package_templates) folder to the [`recipes/`](../../recipes/) folder.
@@ -59,14 +59,14 @@ to find more information.
 Quickly, there's a few items to look at:
 
 * Add _only_ the latest version in the [`config.yml`](folders_and_files.md#configyml) and [`conandata.yml`](folders_and_files.md#conandatayml)
-* Make sure to update the [`ConanFile` attributes](conanfile_attributes.md) like `license`, `description`, ect...
+* Make sure to update the [`ConanFile` attributes](conanfile_attributes.md) like `license`, `description`, etc...
 
 In ConanCenter, our belief is recipes should always match upstream, in other words, what the original author(s) intended.
 
 * Options should [follow these recommendations](conanfile_attributes.md#options) as well as match the default value used by the upstream project.
 * [Package information](build_and_package.md), libraries, components should match as well. This includes exposing supported build system names.
 
-Where dependencies are involved, there's no shortcuts, inspect the upstream's build scripts for how they usually consume them. Pick the Conan
+Where dependencies are involved, there's no shortcuts, inspect the upstream's build scripts for how they are usually consumed. Pick the Conan
 generator that matches. The most common example is CMake's `find_package` that can be satisfied by Conan's
 [`CMakeDeps`](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html) generator. There are a few
 things to be cautious about, many projects like to "vendor" other projects within them. This can be files checked into the repository or
@@ -81,12 +81,12 @@ how or when a function is used in other recipes.
 
 > **Note**: Conan features change over time and our best practices evolve so some minor details may be out of date due to the vast number of recipes.
 
-More often then not, ConanCenter recipes are built in more configuration then the upstream project. This means some edge cases need minor tweaks.
-We **strongly encourage** everyone to contribute back to the upstream project. This reduce the burden of re-applying patches and overall makes the
+More often than not, ConanCenter recipes are built in more configuration than the upstream project. This means some edge cases need minor tweaks.
+We **strongly encourage** everyone to contribute back to the upstream project. This reduces the burden of re-applying patches and overall makes the
 the code more accessible.
 
 Read the docs! The [FAQs](../faqs.md) are a great place to find short answers.
-The documents in this folder are written to explain each folder, file, method and attribute and specific conventions.
+The documents in this folder are written to explain each folder, file, method, and attribute.
 
 1. [Folders and Files](folders_and_files.md)
 2. [Sources and Patches](sources_and_patches.md)
@@ -125,7 +125,7 @@ For a C++ library, the system is currently generating more than 100 binary packa
 > **Note**: This not a testing service, it is a binary building service for **released** packages. Unit tests shouldn't be built nor run in recipes by default, see the [FAQs](../faqs.md#why-conancenter-does-not-build-and-execute-tests-in-recipes) for more. Before submitting a pull request, please ensure that it works locally for some configurations.
 
 * The CI bot will start a new build only [after the author is approved](#one-request-access). Your PR may be reviewed in the mean time, but is not guaranteed.
-* The CI system will also report errors and build logs by creating a comment in the pull-request, The message will include links to the logs for inspecting.
+* The CI system will also report errors and build logs by creating a comment in the pull-request, the message will include links to the logs for inspecting.
 * The Actions are used to lint and ensure the latest conventions are being used. You'll see comments from bots letting you know.
 
 Packages generated and uploaded by this build service do not include any _user_ or _channel_ (we generally recommend using `@user/channel` for private package

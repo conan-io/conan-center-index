@@ -19,7 +19,7 @@ or are known by ConanCenter's build service and have special meaning.
 
 ## Attributes
 
-There's are a [key features](https://docs.conan.io/en/latest/reference/conanfile/attributes.html) which allow the Conan client to understand,
+These are a [key feature](https://docs.conan.io/en/latest/reference/conanfile/attributes.html) which allow the Conan client to understand,
 identify, and expose recipes and which project they expose.
 
 In ConanCenter, there are a few conventions that need to be respected to ensure recipes can be discovered there `conan search` command
@@ -36,8 +36,8 @@ Please see the FAQs for:
 
 ### Version
 
-ConanCenter is geared towards quickly added new release, the build service always pass the version it it currently building to the recipe.
-The `version` attribute MUST NOT be added to any recipe - with except to "system packages".
+ConanCenter is geared towards quickly added new release, the build service always pass the version it is currently building to the recipe.
+The `version` attribute MUST NOT be added to any recipe - with exception to "system packages".
 
 #### ConanCenter specific releases format
 
@@ -51,7 +51,7 @@ The mandatory license attribute of each recipe **should** be a [SPDX license](ht
 
 Where the SPDX guidelines do not apply, packages should do the following:
 
-* When no license is provided or it's under the ["public domain"](https://fairuse.stanford.edu/overview/public-domain/welcome/) - these are not a license by itself. Thus, we have [equivalent licenses](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) that should be used instead. If a project fall under these criteria it should be identified as the [Unlicense](https://spdx.org/licenses/Unlicense) license.
+* When no license is provided or it's under the ["public domain"](https://fairuse.stanford.edu/overview/public-domain/welcome/) - these are not a license by itself. Thus, we have [equivalent licenses](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) that should be used instead. If a project falls under these criteria it should be identified as the [Unlicense](https://spdx.org/licenses/Unlicense) license.
 * When a custom (e.g. project specific) license is given, the value should be set to `LicenseRef-` as a prefix, followed by the name of the file which contains the custom license. See [this example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/fft/all/conanfile.py#L8). For more details, [read this conversation](https://github.com/conan-io/conan-center-index/pull/4928/files#r596216206).
 
 
