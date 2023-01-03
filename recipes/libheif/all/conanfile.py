@@ -6,17 +6,16 @@ from conan.tools.scm import Version
 from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibheifConan(ConanFile):
     name = "libheif"
     description = "libheif is an HEIF and AVIF file format decoder and encoder."
-    topics = ("libheif", "heif", "codec", "video")
+    license = ("LGPL-3.0-only", "GPL-3.0-or-later", "MIT")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/strukturag/libheif"
-    license = ("LGPL-3.0-only", "GPL-3.0-or-later", "MIT")
-
+    topics = ("libheif", "heif", "codec", "video")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -45,7 +44,7 @@ class LibheifConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         if self.options.with_libde265:
@@ -72,7 +71,12 @@ class LibheifConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["WITH_LIBDE265"] = self.options.with_libde265
         tc.variables["WITH_X265"] = self.options.with_x265
-        tc.variables["WITH_AOM"] = self.options.with_libaomav1
+        if Version(self.version) < "1.14.0":
+            tc.variables["WITH_AOM"] = self.options.with_libaomav1
+        else:
+            tc.variables["WITH_AOM_ENCODER"] = self.options.with_libaomav1
+            tc.variables["WITH_AOM_DECODER"] = self.options.with_libaomav1
+            tc.variables["WITH_SvtEnc"] = False
         tc.variables["WITH_RAV1E"] = False
         tc.variables["WITH_DAV1D"] = self.options.with_dav1d
         tc.variables["WITH_EXAMPLES"] = False
