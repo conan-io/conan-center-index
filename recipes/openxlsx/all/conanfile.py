@@ -33,10 +33,10 @@ class OpenXlsxConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "16",
-            "msvc": "191",
-            "gcc": "7",
-            "clang": "7",
-            "apple-clang": "10",
+            "msvc": "192",
+            "gcc": "9",
+            "clang": "9",
+            "apple-clang": "12",
         }
 
     def config_options(self):
