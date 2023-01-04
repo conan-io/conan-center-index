@@ -22,6 +22,10 @@ sources:
     url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_8_21.tar.gz"
     sha256: "753520e34a576a64809b8e02d9c015d6126f7974f678c7417a60492d835a88f4"
 patches:
+  "1.14.0":
+    - patch_file: "patches/conanize-link-szip-1.14.0+.patch"
+      patch_type: "conan"
+      patch_description: "Fixup target_link_libraries() targets for szip and zlib"
   "1.13.1":
     - patch_file: "patches/conanize-link-szip-1.12.2+.patch"
       patch_type: "conan"
