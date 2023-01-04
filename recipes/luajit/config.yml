@@ -1,4 +1,6 @@
 versions:
+  "cci.20230104":
+    folder: "all"
   "2.1.0-beta3":
     folder: "all"
   "2.0.5":
