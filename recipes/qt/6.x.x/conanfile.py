@@ -1026,6 +1026,8 @@ class QtConan(ConanFile):
         self.cpp_info.components["qtPlatform"].includedirs = [os.path.join("res", "archdatadir", "mkspecs", self._xplatform())]
         if Version(self.version) < "6.1.0":
             self.cpp_info.components["qtCore"].libs.append("Qt6Core_qobject%s" % libsuffix)
+        if self.options.with_dbus:
+            _create_module("DBus", ["dbus::dbus"])
         if self.options.gui:
             gui_reqs = []
             if self.options.with_dbus:
@@ -1118,8 +1120,6 @@ class QtConan(ConanFile):
             _create_module("OpenGL", ["Gui"])
         if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
             _create_module("OpenGLWidgets", ["OpenGL", "Widgets"])
-        if self.options.with_dbus:
-            _create_module("DBus", ["dbus::dbus"])
         _create_module("Concurrent")
         _create_module("Xml")
 
@@ -1155,6 +1155,9 @@ class QtConan(ConanFile):
             _create_module("Designer", ["Gui", "UiPlugin", "Widgets", "Xml"])
             _create_module("Help", ["Gui", "Sql", "Widgets"])
 
+        if self.options.qtshadertools and self.options.gui:
+            _create_module("ShaderTools", ["Gui"])
+
         if self.options.qtquick3d and qt_quick_enabled:
             _create_module("Quick3DUtils", ["Gui"])
             _create_module("Quick3DAssetImport", ["Gui", "Qml", "Quick3DUtils"])
@@ -1165,9 +1168,6 @@ class QtConan(ConanFile):
             (self.options.qtdeclarative and Version(self.version) >= "6.2.0")) and qt_quick_enabled:
             _create_module("QuickControls2", ["Gui", "Quick"])
             _create_module("QuickTemplates2", ["Gui", "Quick"])
-
-        if self.options.qtshadertools and self.options.gui:
-            _create_module("ShaderTools", ["Gui"])
 
         if self.options.qtsvg and self.options.gui:
             _create_module("Svg", ["Gui"])
