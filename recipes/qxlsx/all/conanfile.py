@@ -25,6 +25,10 @@ class QXlsxConan(ConanFile):
         "fPIC": True
     }
 
+    @property
+    def _qt_version(self):
+        return Version(self.deps_cpp_info["qt"].version).major
+
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
             copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
@@ -49,7 +53,7 @@ class QXlsxConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["QT_VERSION_MAJOR"] = Version(self.deps_cpp_info["qt"].version).major
+        tc.variables["QT_VERSION_MAJOR"] = self._qt_version
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -63,6 +67,7 @@ class QXlsxConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
+        cmake.configure(build_script_folder="QXlsx")
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
@@ -70,7 +75,10 @@ class QXlsxConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "QXlsx")
         self.cpp_info.set_property("cmake_target_name", "QXlsx::Core")
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["qxlsx_core"].libs = ["QXlsx"]
+        if Version(self.version) <= "1.4.4":
+            self.cpp_info.components["qxlsx_core"].libs = ["QXlsx"]
+        else:
+            self.cpp_info.components["qxlsx_core"].libs = [f"QXlsxQt{self._qt_version}"]
         self.cpp_info.components["qxlsx_core"].includedirs = [os.path.join("include", "QXlsx")]
         self.cpp_info.components["qxlsx_core"].requires = ["qt::qtCore", "qt::qtGui"]
 
