@@ -35,7 +35,7 @@ class OpenEXRConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         self.requires("zlib/1.2.13")
