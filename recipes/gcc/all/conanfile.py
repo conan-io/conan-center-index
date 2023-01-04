@@ -97,7 +97,7 @@ class GccConan(ConanFile):
         tc.configure_args.append(f"--program-suffix=-{self.version}")
         tc.configure_args.append(f"--with-bugurl={self.url}/issues")
 
-        if self.info.settings.os == "Macos":
+        if self.settings.os == "Macos":
             xcrun = XCRun(self)
             tc.configure_args.append(f"--with-sysroot={xcrun.sdk_path}")
             # Set native system header dir to ${{sysroot}}/usr/include to
@@ -155,7 +155,7 @@ class GccConan(ConanFile):
         )
 
     def package_info(self):
-        if self.info.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("rt")
             self.cpp_info.system_libs.append("pthread")
