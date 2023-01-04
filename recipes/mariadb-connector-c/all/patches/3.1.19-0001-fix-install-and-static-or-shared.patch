@@ -1,7 +1,7 @@
-diff --git a/a/libmariadb/CMakeLists.txt b/b/libmariadb/CMakeLists.txt
-index f257926..2b308d0 100644
---- a/a/libmariadb/CMakeLists.txt
-+++ b/b/libmariadb/CMakeLists.txt
+diff --git a/libmariadb/CMakeLists.txt b/libmariadb/CMakeLists.txt
+index f257926..a78329e 100644
+--- a/libmariadb/CMakeLists.txt
++++ b/libmariadb/CMakeLists.txt
 @@ -379,7 +379,7 @@ ELSE()
  ENDIF()
  
@@ -59,9 +59,13 @@ index f257926..2b308d0 100644
  
  #
  # Installation
-@@ -459,9 +465,11 @@ ENDIF()
+@@ -457,11 +463,15 @@ IF(WITH_MYSQLCOMPAT)
+   ENDIF()
+ ENDIF()
  
++IF(NOT BUILD_SHARED_LIBS)
  create_symlink(libmariadb${CMAKE_STATIC_LIBRARY_SUFFIX} mariadbclient ${INSTALL_LIBDIR})
++ENDIF()
  
 +IF(BUILD_SHARED_LIBS)
  SET_TARGET_PROPERTIES(libmariadb PROPERTIES VERSION
@@ -71,7 +75,7 @@ index f257926..2b308d0 100644
  
  IF(NOT WIN32)
    SET_TARGET_PROPERTIES(mariadbclient PROPERTIES OUTPUT_NAME "${LIBMARIADB_STATIC_NAME}")
-@@ -469,19 +477,32 @@ ENDIF()
+@@ -469,20 +479,33 @@ ENDIF()
  
  INSTALL(TARGETS mariadbclient
            COMPONENT Development
@@ -95,20 +99,23 @@ index f257926..2b308d0 100644
  #        COMPONENT SharedLibraries NAMELINK_COMPONENT Development)
  # but as long as we build on CentOS 7 with its cmake 2.8.12.2 we have to use
 -INSTALL(TARGETS libmariadb LIBRARY DESTINATION ${INSTALL_LIBDIR}
+-        COMPONENT SharedLibraries NAMELINK_SKIP)
+-INSTALL(TARGETS libmariadb LIBRARY DESTINATION ${INSTALL_LIBDIR}
+-        COMPONENT Development NAMELINK_ONLY)
 +INSTALL(TARGETS libmariadb LIBRARY 
 +        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 +        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 +        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-         COMPONENT SharedLibraries NAMELINK_SKIP)
--INSTALL(TARGETS libmariadb LIBRARY DESTINATION ${INSTALL_LIBDIR}
++        COMPONENT SharedLibraries)
 +INSTALL(TARGETS libmariadb LIBRARY
 +        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 +        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 +        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-         COMPONENT Development NAMELINK_ONLY)
++        COMPONENT Development)
  ENDIF()
  
-@@ -491,3 +512,4 @@ IF(MSVC)
+ IF(MSVC)
+@@ -491,3 +514,4 @@ IF(MSVC)
             CONFIGURATIONS Debug RelWithDebInfo
             COMPONENT Development)
  ENDIF()
