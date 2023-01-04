@@ -11,4 +11,8 @@ sources:
 patches:
   "1.4.3":
     - patch_file: "patches/1.4.3/0001-allow-shared.patch"
+      patch_type: "conan"
+      patch_source: "https://github.com/QtExcel/QXlsx/pull/197"
     - patch_file: "patches/1.4.3/0002-add-install-target.patch"
+      patch_type: "conan"
+      patch_source: "https://github.com/QtExcel/QXlsx/pull/197"
