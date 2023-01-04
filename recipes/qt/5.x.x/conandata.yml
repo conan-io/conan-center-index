@@ -35,8 +35,6 @@ patches:
       base_path: "qt5/qtwebengine"
     - patch_file: "patches/fix-macdeployqt.diff"
       base_path: "qt5/qttools"
-    - patch_file: "patches/dece6f5.diff"
-      base_path: "qt5/qtbase"
     - patch_file: "patches/QTBUG-98813.patch"
       base_path: "qt5/qtwebengine/src/3rdparty"
     - patch_file: "patches/d3396fb6fc.patch"
