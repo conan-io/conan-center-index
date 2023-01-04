@@ -122,7 +122,6 @@ class LibIdnConan(ConanFile):
                 os.path.join(self.source_folder, "lib", "stringprep.h"),
                 "ssize_t", ssize)
         autotools = Autotools(self)
-        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
