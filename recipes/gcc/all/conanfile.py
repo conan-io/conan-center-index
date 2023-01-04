@@ -52,11 +52,11 @@ class GccConan(ConanFile):
             raise ConanInvalidConfiguration("GCC can't be built with MSVC")
 
     def validate(self):
-        if self.info.settings.os == "Windows":
+        if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(
                 "Windows builds aren't currently supported. Contributions to support this are welcome."
             )
-        if self.info.settings.os == "Macos":
+        if self.settings.os == "Macos":
             # FIXME: This recipe should largely support Macos, however the following
             # errors are present when building using the c3i CI:
             # clang: error: unsupported option '-print-multi-os-directory'
