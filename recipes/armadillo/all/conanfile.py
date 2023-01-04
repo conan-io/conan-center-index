@@ -93,7 +93,7 @@ class ArmadilloConan(ConanFile):
             del self.options.use_extern_rng
 
     def configure(self):
-        if self.options.shared:
+        if self.options.shared and self.settings.os != "Windows":
             del self.options.fPIC
 
     def validate(self):
