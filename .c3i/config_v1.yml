@@ -19,6 +19,12 @@ github:
   check_runs:
     - "Lint changed files (YAML files)"
     - "Lint changed conanfile.py (v2 migration)"
+  access_request:
+    request_issue_url: https://github.com/conan-io/conan-center-index/issues/4
+    max_inactivity_days: 0
+  scheduled_export_check:
+    report_issue_url: https://github.com/conan-io/conan-center-index-staging/issues/109
+    report_issue_append: false
 
 # Requirements to merge a given pull-request:
 # * status_checks refers to notifications coming from external tools (Jenkins, CLA,...)
