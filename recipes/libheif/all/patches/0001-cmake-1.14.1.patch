@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 3ee1517..8d16897 100644
+index d88a36a..72dbc2e 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -35,15 +35,9 @@ if(NOT MSVC)
@@ -18,7 +18,7 @@ index 3ee1517..8d16897 100644
  # Create the compile command database for clang by default
  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
  
-@@ -64,7 +58,7 @@ macro(plugin_option variableName packageName displayName displayType defaultPlug
+@@ -72,7 +66,7 @@ macro(plugin_option variableName packageName displayName displayType defaultPlug
      option(WITH_${variableName} "Build ${displayName} ${displayType}" ON)
      option(WITH_${variableName}_PLUGIN "Build ${displayName} as a plugin" ${defaultPlugin})
      if (WITH_${variableName})
@@ -26,8 +26,8 @@ index 3ee1517..8d16897 100644
 +        find_package(${packageName} REQUIRED CONFIG)
      endif ()
  
-     if (${variableName}_FOUND AND WITH_${variableName}_PLUGIN)
-@@ -82,10 +76,10 @@ macro(plugin_option variableName packageName displayName displayType defaultPlug
+     if (${variableName}_FOUND AND WITH_${variableName}_PLUGIN AND PLUGIN_LOADING_SUPPORTED_AND_ENABLED)
+@@ -90,10 +84,10 @@ macro(plugin_option variableName packageName displayName displayType defaultPlug
  endmacro()
  
  plugin_option(LIBDE265 LIBDE265 "libde265" "HEIC decoder" OFF)
@@ -42,15 +42,15 @@ index 3ee1517..8d16897 100644
  plugin_option(SvtEnc SvtEnc "Svt-av1" "AVIF encoder" ON)
  plugin_option(RAV1E RAV1E "Rav1e" "AVIF encoder" ON)
  
-@@ -96,6 +90,7 @@ set(prefix ${CMAKE_INSTALL_PREFIX})
- set(exec_prefix ${CMAKE_INSTALL_PREFIX})
- set(libdir ${CMAKE_INSTALL_FULL_LIBDIR})
- set(includedir ${CMAKE_INSTALL_FULL_INCLUDEDIR})
+@@ -112,6 +106,7 @@ if(IS_ABSOLUTE "${CMAKE_INSTALL_INCLUDEDIR}")
+ else()
+     set(includedir "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
+ endif()
 +if(0)
  if (LIBDE265_FOUND)
      list(APPEND REQUIRES_PRIVATE "libde265")
      set(have_libde265 yes)
-@@ -130,6 +125,7 @@ if (AOM_ENCODER_FOUND OR RAV1E_FOUND)
+@@ -146,6 +141,7 @@ if (AOM_ENCODER_FOUND OR RAV1E_FOUND)
  else()
      set(have_avif_encoder no)
  endif()
@@ -58,7 +58,7 @@ index 3ee1517..8d16897 100644
  list(JOIN REQUIRES_PRIVATE " " REQUIRES_PRIVATE)
  set(VERSION ${PROJECT_VERSION})
  
-@@ -148,8 +144,6 @@ if(WITH_EXAMPLES)
+@@ -166,8 +162,6 @@ if(WITH_EXAMPLES)
      add_subdirectory (examples)
  endif()
  add_subdirectory (libheif)
@@ -68,10 +68,10 @@ index 3ee1517..8d16897 100644
  
  # --- packaging (source code)
 diff --git a/libheif/plugins/CMakeLists.txt b/libheif/plugins/CMakeLists.txt
-index f25effc..d7155be 100644
+index 70dc1b4..75b2aa3 100644
 --- a/libheif/plugins/CMakeLists.txt
 +++ b/libheif/plugins/CMakeLists.txt
-@@ -44,7 +44,7 @@ plugin_compilation(x265 X265 X265 X265)
+@@ -48,7 +48,7 @@ plugin_compilation(x265 X265 X265 X265)
  
  set(LIBDE265_sources heif_decoder_libde265.cc heif_decoder_libde265.h)
  set(LIBDE265_extra_plugin_sources ../heif_image.cc ../error.cc)
