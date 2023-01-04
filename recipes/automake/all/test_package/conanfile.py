@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.files import copy
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -31,14 +32,16 @@ class TestPackageConan(ConanFile):
         tc.generate(env)
         tc = AutotoolsDeps(self)
         tc.generate()
+        tc = VirtualBuildEnv(self)
+        tc.generate()
 
     def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
         self.tool_requires("autoconf/2.71") # Needed for autoreconf
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")  # The conf `tools.microsoft.bash:path` and `tools.microsoft.bash:subsystem` aren't injected for test_package
-        self.tool_requires(self.tested_reference_str)
 
     def build(self):
         if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", check_type=str):
