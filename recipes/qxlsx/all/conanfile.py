@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
@@ -46,6 +47,9 @@ class QXlsxConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
+    def build_requirements(self):
+        self.tool_requires("cmake/3.25.0")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
@@ -56,6 +60,8 @@ class QXlsxConan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
+        tc = VirtualBuildEnv(self)
+        tc.generate(scope="build")
 
     def build(self):
         apply_conandata_patches(self)
