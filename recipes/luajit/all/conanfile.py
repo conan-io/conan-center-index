@@ -7,7 +7,6 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.apple import is_apple_os
 from conan.errors import ConanInvalidConfiguration
 import os
-import platform
 
 
 required_conan_version = ">=1.53.0"
@@ -95,11 +94,12 @@ class LuajitConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        self._patch_sources()
         if is_msvc(self):
-            variant = '' if self.options.shared else 'static'
-            self.run("msvcbuild.bat %s" % variant, env="conanrun")
+            with chdir(self, os.path.join(self.source_folder, "src")):
+                variant = '' if self.options.shared else 'static'
+                self.run(f"msvcbuild.bat {variant}", env="conanbuild")
         else:
-            self._patch_sources()
             with chdir(self, self.source_folder):
                 autotools = Autotools(self)
                 autotools.make(args=self._make_arguments)
@@ -107,14 +107,14 @@ class LuajitConan(ConanFile):
     def package(self):
         copy(self, "COPYRIGHT", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         src_folder = os.path.join(self.source_folder, "src")
-        include_folder = os.path.join(self.package_folder, "include")
+        include_folder = os.path.join(self.package_folder, "include", f"luajit-{Version(self.version).major}.{Version(self.version).minor}")
         if is_msvc(self):
-            copy(self, "lua.h", src=src_folder, dst=os.path.join(include_folder, "luajit-2.0"))
-            copy(self, "lualib.h", src=src_folder, dst=os.path.join(include_folder, "luajit-2.0"))
-            copy(self, "lauxlib.h", src=src_folder, dst=os.path.join(include_folder, "luajit-2.0"))
-            copy(self, "luaconf.h", src=src_folder, dst=os.path.join(include_folder, "luajit-2.0"))
-            copy(self, "lua.hpp", src=src_folder, dst=os.path.join(include_folder, "luajit-2.0"))
-            copy(self, "luajit.h", src=src_folder, dst=os.path.join(include_folder, "luajit-2.0"))
+            copy(self, "lua.h", src=src_folder, dst=include_folder)
+            copy(self, "lualib.h", src=src_folder, dst=include_folder)
+            copy(self, "lauxlib.h", src=src_folder, dst=include_folder)
+            copy(self, "luaconf.h", src=src_folder, dst=include_folder)
+            copy(self, "lua.hpp", src=src_folder, dst=include_folder)
+            copy(self, "luajit.h", src=src_folder, dst=include_folder)
             copy(self, "lua51.lib", src=src_folder, dst=os.path.join(self.package_folder, "lib"))
             copy(self, "lua51.dll", src=src_folder, dst=os.path.join(self.package_folder, "bin"))
         else:
@@ -126,6 +126,7 @@ class LuajitConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["lua51" if is_msvc(self) else "luajit-5.1"]
+        self.cpp_info.set_property("pkg_config_name", "luajit")
         luaversion = Version(self.version)
         self.cpp_info.includedirs = [os.path.join("include", f"luajit-{luaversion.major}.{luaversion.minor}")]
         if self.settings.os in ["Linux", "FreeBSD"]:
