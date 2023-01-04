@@ -71,10 +71,12 @@ class ArmadilloConan(ConanFile):
             "use_lapack",
         ],
     }
-    exports_sources = ["patches/*"]
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def config_options(self):
         if self.settings.os == "Windows":
