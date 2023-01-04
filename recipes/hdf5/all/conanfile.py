@@ -106,7 +106,6 @@ class Hdf5Conan(ConanFile):
 
         tc = CMakeToolchain(self)
         if self.settings.get_safe("compiler.cppstd"):
-            pass
             tc.variables["CMAKE_CXX_STANDARD"] = self._v1_14_minimum_cpp_standard
         if self.options.szip_support == "with_libaec":
             tc.variables["USE_LIBAEC"] = True
