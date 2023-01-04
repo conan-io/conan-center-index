@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class QXlsxConan(ConanFile):
@@ -30,8 +30,7 @@ class QXlsxConan(ConanFile):
         return Version(self.deps_cpp_info["qt"].version).major
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
