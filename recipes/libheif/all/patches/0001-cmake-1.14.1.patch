@@ -1,15 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index d88a36a..72dbc2e 100644
+index d88a36a..5e6f116 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -35,15 +35,9 @@ if(NOT MSVC)
-   endif ()
- endif()
- 
--set(CMAKE_CXX_STANDARD 11)
--set(CMAKE_CXX_STANDARD_REQUIRED ON)
--set(CMAKE_CXX_EXTENSIONS OFF)
--
+@@ -42,8 +42,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
  set(CMAKE_CXX_VISIBILITY_PRESET hidden)
  set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
  
@@ -18,7 +11,7 @@ index d88a36a..72dbc2e 100644
  # Create the compile command database for clang by default
  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
  
-@@ -72,7 +66,7 @@ macro(plugin_option variableName packageName displayName displayType defaultPlug
+@@ -72,7 +70,7 @@ macro(plugin_option variableName packageName displayName displayType defaultPlug
      option(WITH_${variableName} "Build ${displayName} ${displayType}" ON)
      option(WITH_${variableName}_PLUGIN "Build ${displayName} as a plugin" ${defaultPlugin})
      if (WITH_${variableName})
@@ -27,7 +20,7 @@ index d88a36a..72dbc2e 100644
      endif ()
  
      if (${variableName}_FOUND AND WITH_${variableName}_PLUGIN AND PLUGIN_LOADING_SUPPORTED_AND_ENABLED)
-@@ -90,10 +84,10 @@ macro(plugin_option variableName packageName displayName displayType defaultPlug
+@@ -90,10 +88,10 @@ macro(plugin_option variableName packageName displayName displayType defaultPlug
  endmacro()
  
  plugin_option(LIBDE265 LIBDE265 "libde265" "HEIC decoder" OFF)
@@ -42,7 +35,7 @@ index d88a36a..72dbc2e 100644
  plugin_option(SvtEnc SvtEnc "Svt-av1" "AVIF encoder" ON)
  plugin_option(RAV1E RAV1E "Rav1e" "AVIF encoder" ON)
  
-@@ -112,6 +106,7 @@ if(IS_ABSOLUTE "${CMAKE_INSTALL_INCLUDEDIR}")
+@@ -112,6 +110,7 @@ if(IS_ABSOLUTE "${CMAKE_INSTALL_INCLUDEDIR}")
  else()
      set(includedir "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
  endif()
@@ -50,7 +43,7 @@ index d88a36a..72dbc2e 100644
  if (LIBDE265_FOUND)
      list(APPEND REQUIRES_PRIVATE "libde265")
      set(have_libde265 yes)
-@@ -146,6 +141,7 @@ if (AOM_ENCODER_FOUND OR RAV1E_FOUND)
+@@ -146,6 +145,7 @@ if (AOM_ENCODER_FOUND OR RAV1E_FOUND)
  else()
      set(have_avif_encoder no)
  endif()
@@ -58,7 +51,7 @@ index d88a36a..72dbc2e 100644
  list(JOIN REQUIRES_PRIVATE " " REQUIRES_PRIVATE)
  set(VERSION ${PROJECT_VERSION})
  
-@@ -166,8 +162,6 @@ if(WITH_EXAMPLES)
+@@ -166,8 +166,6 @@ if(WITH_EXAMPLES)
      add_subdirectory (examples)
  endif()
  add_subdirectory (libheif)
