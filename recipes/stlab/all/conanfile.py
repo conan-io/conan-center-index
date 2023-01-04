@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -193,6 +193,9 @@ class Stlab(ConanFile):
         cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "msvcp*.dll", os.path.join(self.package_folder, "bin"))
+        rm(self, "concrt*.dll", os.path.join(self.package_folder, "bin"))
+        rm(self, "vcruntime*.dll", os.path.join(self.package_folder, "bin"))
 
     def package_id(self):
         #TODO: is header only but needs a header modified by cmake
