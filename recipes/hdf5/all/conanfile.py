@@ -43,7 +43,7 @@ class Hdf5Conan(ConanFile):
         "parallel": False,
     }
     @property
-    def _minimum_cpp_standard(self):
+    def _v1_14_minimum_cpp_standard(self):
         return 11
 
     def export_sources(self):
@@ -67,7 +67,7 @@ class Hdf5Conan(ConanFile):
                 not self.dependencies["szip"].options.enable_encoding:
             raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
         if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._v1_14_minimum_cpp_standard)
 
     def configure(self):
         if self.options.shared:
@@ -105,6 +105,9 @@ class Hdf5Conan(ConanFile):
         cmakedeps.generate()
 
         tc = CMakeToolchain(self)
+        if self.settings.get_safe("compiler.cppstd"):
+            pass
+            tc.variables["CMAKE_CXX_STANDARD"] = self._v1_14_minimum_cpp_standard
         if self.options.szip_support == "with_libaec":
             tc.variables["USE_LIBAEC"] = True
         tc.variables["HDF5_EXTERNALLY_CONFIGURED"] = True

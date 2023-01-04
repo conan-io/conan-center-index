@@ -21,6 +21,8 @@ class TestPackageConan(ConanFile):
             "HDF5_CXX": self.options["hdf5"].enable_cxx,
             "HDF5_HL": self.options["hdf5"].hl,
         })
+        if self.options["hdf5"].enable_cxx:
+            tc.variables.update({"CMAKE_CXX_STANDARD": 11})
         tc.generate()
 
     def build(self):
