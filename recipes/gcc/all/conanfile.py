@@ -256,8 +256,6 @@ class GccConan(ConanFile):
         self.cpp_info.components["cc1"].libs = ["cc1"]
         self.cpp_info.components["cc1"].requires = ["gcc_s", "stdc++"]
 
-
-
         bindir = os.path.join(self.package_folder, "bin")
 
         cc = os.path.join(bindir, f"gcc-{self.version}")
