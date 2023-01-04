@@ -8,10 +8,3 @@ sources:
   "4.25":
     sha256: 78757e1c27778d2f3795251d9fe09715d51ce0422416da4abb34af3929c02589
     url: http://dist.schmorp.de/libev/Attic/libev-4.25.tar.gz
-patches:
-  "4.33":
-    - patch_file: "patches/0001-config-for-windows.patch"
-  "4.27":
-    - patch_file: "patches/0001-config-for-windows.patch"
-  "4.25":
-    - patch_file: "patches/0001-config-for-windows.patch"
