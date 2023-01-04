@@ -41,7 +41,7 @@ class QXlsxConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("qt/5.15.5")
+        self.requires("qt/5.15.7")
 
     def layout(self):
         cmake_layout(self)
