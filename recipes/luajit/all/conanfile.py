@@ -92,6 +92,13 @@ class LuajitConan(ConanFile):
             args.append(f"MACOSX_DEPLOYMENT_TARGET={self._macosx_deployment_target}")
         return args
 
+    @property
+    def _luajit_include_folder(self):
+        luaversion = Version(self.version)
+        if luaversion.major == "2":
+            return f"luajit-{luaversion.major}.{luaversion.minor}"
+        return "luajit-2.1"
+
     def build(self):
         apply_conandata_patches(self)
         self._patch_sources()
@@ -107,7 +114,7 @@ class LuajitConan(ConanFile):
     def package(self):
         copy(self, "COPYRIGHT", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         src_folder = os.path.join(self.source_folder, "src")
-        include_folder = os.path.join(self.package_folder, "include", f"luajit-{Version(self.version).major}.{Version(self.version).minor}")
+        include_folder = os.path.join(self.package_folder, "include", self._luajit_include_folder)
         if is_msvc(self):
             copy(self, "lua.h", src=src_folder, dst=include_folder)
             copy(self, "lualib.h", src=src_folder, dst=include_folder)
@@ -127,7 +134,6 @@ class LuajitConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["lua51" if is_msvc(self) else "luajit-5.1"]
         self.cpp_info.set_property("pkg_config_name", "luajit")
-        luaversion = Version(self.version)
-        self.cpp_info.includedirs = [os.path.join("include", f"luajit-{luaversion.major}.{luaversion.minor}")]
+        self.cpp_info.includedirs = [os.path.join("include", self._luajit_include_folder)]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "dl"])
