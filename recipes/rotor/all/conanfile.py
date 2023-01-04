@@ -3,7 +3,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, copy
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 
 required_conan_version = ">=1.52.0"
@@ -99,6 +99,7 @@ class RotorConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def package(self):
+        copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
