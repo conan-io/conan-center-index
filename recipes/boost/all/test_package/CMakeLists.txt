@@ -120,7 +120,7 @@ if(NOT HEADER_ONLY)
         add_library(hello_ext MODULE python.cpp)
         set_property(TARGET hello_ext PROPERTY PREFIX "")
 
-        find_package(Python ${PYTHON_VERSION_TO_SEARCH} COMPONENTS Interpreter Development REQUIRED)
+        find_package(Python ${PYTHON_VERSION_TO_SEARCH} COMPONENTS Interpreter Development NumPy REQUIRED)
 
         target_link_libraries(hello_ext PRIVATE Boost::python Python::Python)
         if(WIN32)
@@ -130,7 +130,7 @@ if(NOT HEADER_ONLY)
         set_property(TEST boost_python PROPERTY ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:hello_ext>")
 
         add_executable(numpy_exe numpy.cpp)
-        target_link_libraries(numpy_exe PRIVATE Boost::numpy Python::Python)
+        target_link_libraries(numpy_exe PRIVATE Boost::numpy Python::Python Python::NumPy)
         add_test(NAME boost_numpy COMMAND numpy_exe)
         set_property(TEST boost_numpy PROPERTY ENVIRONMENT "PYTHONPATH=${Python_SITELIB}")
     endif()
