@@ -45,7 +45,10 @@ class RotorConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
 
     def requirements(self):
         self.requires("boost/[>=1.68.0]")
