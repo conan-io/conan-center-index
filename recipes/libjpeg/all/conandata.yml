@@ -4,10 +4,10 @@ sources:
     sha256: "4077d6a6a75aeb01884f708919d25934c93305e49f7e3f36db9129320e6f4f3d"
   "9d":
     url: "http://ijg.org/files/jpegsrc.v9d.tar.gz"
-    sha256: "83d4b17eb45588c6e19405b99038a137c78fe179d8d2f80b7b0f16450d581c31"
+    sha256: "2303a6acfb6cc533e0e86e8a9d29f7e6079e118b9de3f96e07a71a11c082fa6a"
   "9c":
     url: "http://ijg.org/files/jpegsrc.v9c.tar.gz"
-    sha256: "4cad9aa32bb3b74594308c082f8e0991e1491b034d3f2dd39f272f0ca89e262c"
+    sha256: "682aee469c3ca857c4c38c37a6edadbfca4b04d42e56613b11590ec6aa4a278d"
 patches:
   "9e":
     - patch_file: "patches/0001-9e-libjpeg-add-msvc-dll-support.patch"
