@@ -8,7 +8,7 @@ import textwrap
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.build import cross_building, check_min_cppstd, build_jobs
+from conan.tools.build import cross_building, check_min_cppstd, build_jobs, default_cppstd
 from conan.tools.env import VirtualBuildEnv, Environment
 from conan.tools.files import get, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
@@ -595,6 +595,17 @@ class QtConan(ConanFile):
                                #"set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
                                #"set(QT_EXTRA_DEFINES ${CONAN_DEFINES})\n"
                                #"set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS})\n"
+
+        current_cpp_std = self.settings.get_safe("compiler.cppstd", default_cppstd(self))
+        current_cpp_std = str(current_cpp_std).replace("gnu", "")
+        cpp_std_map = {
+            "20": "FEATURE_cxx20"
+            }
+        if Version(self.version) >= "6.5.0":
+            cpp_std_map["23"] = "FEATURE_cxx2b"
+
+        tc.variables[cpp_std_map.get(current_cpp_std, "FEATURE_cxx17")] = "ON"
+
         tc.generate()
 
     def source(self):
