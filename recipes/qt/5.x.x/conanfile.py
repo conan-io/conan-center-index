@@ -343,8 +343,15 @@ class QtConan(ConanFile):
             # https://bugreports.qt.io/browse/QTBUG-95952
             raise ConanInvalidConfiguration("Pulseaudio needs to be built with glib option or qt's configure script won't detect it")
 
-        if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
-            raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
+        if self.settings.os in ['Linux', 'FreeBSD']:
+            if self.options.with_gssapi:
+                raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
+            if self.options.qtwayland:
+                if not self.dependencies.direct_host["xkbcommon"].options.with_wayland:
+                    raise ConanInvalidConfiguration("The 'with_wayland' option for the 'xkbcommon' package must be enabled when the 'qtwayland' option is enabled")
+            else:
+                if not self.dependencies.direct_host["xkbcommon"].options.with_x11:
+                    raise ConanInvalidConfiguration("The 'with_x11' option for the 'xkbcommon' package must be enabled when the 'gui' option is enabled and the 'qtwayland' option is disabled")
 
         if cross_building(self) and self.options.cross_compile == "None":
             raise ConanInvalidConfiguration("option cross_compile must be set for cross compilation "
@@ -395,9 +402,10 @@ class QtConan(ConanFile):
             self.requires("openal/1.22.2")
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.7.2")
-        if self.options.gui and not self.options.qtwayland and self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("xorg/system")
+        if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xkbcommon/1.4.1")
+            if not self.options.qtwayland:
+                self.requires("xorg/system")
         if self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
@@ -1020,8 +1028,10 @@ Examples = bin/datadir/examples""")
                 gui_reqs.append("libpng::libpng")
             if self.options.get_safe("with_fontconfig", False):
                 gui_reqs.append("fontconfig::fontconfig")
-            if not self.options.qtwayland and self.settings.os in ["Linux", "FreeBSD"]:
-                gui_reqs.extend(["xorg::xorg", "xkbcommon::xkbcommon"])
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                gui_reqs.append("xkbcommon::xkbcommon")
+                if not self.options.qtwayland:
+                    gui_reqs.append("xorg::xorg")
             if self.options.get_safe("opengl", "no") != "no":
                 gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
@@ -1111,7 +1121,9 @@ Examples = bin/datadir/examples""")
                     service_support_reqs.append("DBus")
                 _create_module("ServiceSupport", service_support_reqs)
                 _create_module("EdidSupport")
-                if not self.options.qtwayland:
+                if self.options.qtwayland:
+                    _create_module("XkbCommonSupport", ["Core", "Gui", "xkbcommon::libxkbcommon"])
+                else:
                     _create_module("XkbCommonSupport", ["Core", "Gui", "xkbcommon::libxkbcommon-x11"])
                     xcb_qpa_reqs = ["Core", "Gui", "ServiceSupport", "ThemeSupport", "FontDatabaseSupport", "EdidSupport", "XkbCommonSupport", "xorg::xorg"]
                 if self.options.with_dbus and self.options.with_atspi:
