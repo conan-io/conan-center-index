@@ -145,6 +145,7 @@ class RedisPlusPlusConan(ConanFile):
             self.cpp_info.components["redis++lib"].requires.append("libuv::libuv")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["redis++lib"].system_libs.append("pthread")
+            self.cpp_info.components["redis++lib"].system_libs.append("m")
 
         # TODO: to remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "redis++"
