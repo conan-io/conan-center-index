@@ -146,7 +146,7 @@ class WtConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CONFIGDIR"] = os.path.join(self.package_folder, "bin")
+        tc.cache_variables["CONFIGDIR"] = os.path.join(self.package_folder, "bin")
         tc.variables["SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_TESTS"] = False
@@ -182,34 +182,34 @@ class WtConan(ConanFile):
 
         # FIXME: all this logic coming from upstream custom find module files seems fragile, to improve later !
         #        we can't even inject cmake_find_package generator, it breaks the all upstream logic
-        tc.variables["BOOST_PREFIX"] = self.deps_cpp_info["boost"].rootpath
+        tc.cache_variables["BOOST_PREFIX"] = self.deps_cpp_info["boost"].rootpath
         if self.options.connector_http:
-            tc.variables["ZLIB_PREFIX"] = self.deps_cpp_info["zlib"].rootpath
+            tc.cache_variables["ZLIB_PREFIX"] = self.deps_cpp_info["zlib"].rootpath
         if self.options.with_ssl:
-            tc.variables["SSL_PREFIX"] = self.deps_cpp_info["openssl"].rootpath
+            tc.cache_variables["SSL_PREFIX"] = self.deps_cpp_info["openssl"].rootpath
             tc.variables["OPENSSL_LIBRARIES"] = ";".join(_gather_libs("openssl"))
             tc.variables["OPENSSL_INCLUDE_DIR"] = ";".join(self.deps_cpp_info["openssl"].include_paths)
             tc.variables["OPENSSL_FOUND"] = True
         if self.options.get_safe("with_sqlite"):
-            tc.variables["SQLITE3_PREFIX"] = self.deps_cpp_info["sqlite3"].rootpath
+            tc.cache_variables["SQLITE3_PREFIX"] = self.deps_cpp_info["sqlite3"].rootpath
         if self.options.get_safe("with_mysql"):
-            tc.variables["MYSQL_PREFIX"] = self.deps_cpp_info["libmysqlclient"].rootpath
+            tc.cache_variables["MYSQL_PREFIX"] = self.deps_cpp_info["libmysqlclient"].rootpath
             tc.variables["MYSQL_LIBRARIES"] = ";".join(_gather_libs("libmysqlclient"))
             tc.variables["MYSQL_INCLUDE"] = ";".join(self.deps_cpp_info["libmysqlclient"].include_paths)
             tc.variables["MYSQL_DEFINITIONS"] = ";".join("-D%s" % d for d in self.deps_cpp_info["libmysqlclient"].defines)
             tc.variables["MYSQL_FOUND"] = True
         if self.options.get_safe("with_postgres"):
-            tc.variables["POSTGRES_PREFIX"] = self.deps_cpp_info["libpq"].rootpath
+            tc.cache_variables["POSTGRES_PREFIX"] = self.deps_cpp_info["libpq"].rootpath
             tc.variables["POSTGRES_LIBRARIES"] = ";".join(_gather_libs("libpq"))
             tc.variables["POSTGRES_INCLUDE"] = ";".join(self.deps_cpp_info["libpq"].include_paths)
             tc.variables["POSTGRES_FOUND"] = True
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
-            tc.variables["ODBC_PREFIX"] = self.deps_cpp_info["odbc"].rootpath
+            tc.cache_variables["ODBC_PREFIX"] = self.deps_cpp_info["odbc"].rootpath
             tc.variables["ODBC_LIBRARIES"] = ";".join(_gather_libs("odbc"))
             tc.variables["ODBC_INCLUDE"] = ";".join(self.deps_cpp_info["odbc"].include_paths)
             tc.variables["ODBC_FOUND"] = True
         if self.options.get_safe("with_unwind"):
-            tc.variables["UNWIND_PREFIX"] = self.deps_cpp_info["libunwind"].rootpath
+            tc.cache_variables["UNWIND_PREFIX"] = self.deps_cpp_info["libunwind"].rootpath
         if self.settings.os == "Windows":
             tc.variables["CONNECTOR_FCGI"] = False
             tc.variables["CONNECTOR_ISAPI"] = self.options.connector_isapi
