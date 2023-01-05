@@ -12,7 +12,7 @@ required_conan_version = ">=1.50.0"
 class HsmConan(ConanFile):
     name = "erikzenker-hsm"
     license = "MIT"
-    homepage = "https://github.com/erikzenker/hsm.git"
+    homepage = "https://github.com/erikzenker/hsm"
     url = "https://github.com/conan-io/conan-center-index"
     description = (
         "The hana state machine (hsm) is a finite state machine library based "
@@ -26,7 +26,7 @@ class HsmConan(ConanFile):
     generators = "CMakeDeps"
 
     def requirements(self):
-        self.requires("boost/1.79.0")
+        self.requires("boost/1.81.0")
 
     def package_id(self):
         self.info.clear()
