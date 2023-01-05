@@ -72,9 +72,9 @@ class Hdf5Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        if Version(self.version) < "1.14.0" or not self.options.enable_cxx:
+        if not self.options.enable_cxx:
             self.settings.rm_safe("compiler.cppstd")
+            self.settings.rm_safe("compiler.libcxx")
         if self.options.enable_cxx or self.options.hl or (self.settings.os == "Windows" and not self.options.shared):
             del self.options.threadsafe
         if not bool(self.options.szip_support):
