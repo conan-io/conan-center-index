@@ -1,10 +1,15 @@
-from conan.tools.files import apply_conandata_patches
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.54.0"
 
 
 class FaacConan(ConanFile):
@@ -30,14 +35,6 @@ class FaacConan(ConanFile):
     }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
@@ -47,11 +44,10 @@ class FaacConan(ConanFile):
 
     @property
     def _has_mp4_option(self):
-        return tools.Version(self.version) < "1.29.1"
+        return Version(self.version) < "1.29.1"
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,16 +57,19 @@ class FaacConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         # FIXME: libfaac depends on kissfft. Try to unvendor this dependency
         pass
 
     def validate(self):
-        if self._is_msvc:
+        if is_msvc(self):
             # FIXME: add msvc support since there are MSBuild files upstream
             raise ConanInvalidConfiguration("libfaac conan-center recipe doesn't support building with Visual Studio yet")
         if self.options.get_safe("with_mp4"):
@@ -78,52 +77,47 @@ class FaacConan(ConanFile):
             raise ConanInvalidConfiguration("building with mp4v2 is not supported currently")
 
     def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        self.tool_requires("libtool/2.4.7")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        autotools.libs = []
+    def generate(self):
+        VirtualBuildEnv(self).generate()
+        tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
-        args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--enable-drm={}".format(yes_no(self.options.drm)),
-        ]
+        tc.configure_args.append(f"--enable-drm={yes_no(self.options.drm)}")
         if self._has_mp4_option:
-            args.append("--with-mp4v2={}".format(yes_no(self.options.with_mp4)))
-        autotools.configure(configure_dir=self._source_subfolder, args=args)
-        return autotools
+            tc.configure_args.append(f"--with-mp4v2={yes_no(self.options.with_mp4)}")
+        tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
-        with tools.chdir(self._source_subfolder):
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
-            tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
-            if self._is_mingw and self.options.shared:
-                tools.replace_in_file(os.path.join("libfaac", "Makefile"),
-                                      "\nlibfaac_la_LIBADD = ",
-                                      "\nlibfaac_la_LIBADD = -no-undefined ")
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
+        autotools.autoreconf()
+        if self._is_mingw and self.options.shared:
+            replace_in_file(self, os.path.join(self.build_folder, "libfaac", "Makefile"),
+                            "\nlibfaac_la_LIBADD = ",
+                            "\nlibfaac_la_LIBADD = -no-undefined ")
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        autotools = self._configure_autotools()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
         autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["faac"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
+        # TODO: to replace in conan v2
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
