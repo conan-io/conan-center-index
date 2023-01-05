@@ -48,7 +48,9 @@ class QXlsxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.25.0")
+        if Version(self.version) >= "1.4.4":
+            # at least CMake 3.16
+            self.tool_requires("cmake/3.25.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
