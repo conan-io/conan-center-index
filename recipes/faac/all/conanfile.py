@@ -81,7 +81,7 @@ class FaacConan(ConanFile):
             if self.settings.arch not in ["x86", "x86_64"]:
                 raise ConanInvalidConfiguration(f"{self.ref} only supports x86 and x86_64 with Visual Studio")
             if self.options.drm and not self.options.shared:
-                raise ConanInvalidConfiguration(f"{self.ref} drm can't be built as static with Visual Studio")
+                raise ConanInvalidConfiguration(f"{self.ref} with drm support can't be built as static with Visual Studio")
         if self.options.get_safe("with_mp4"):
             # TODO: as mpv4v2 as a conan package
             raise ConanInvalidConfiguration("building with mp4v2 is not supported currently")
