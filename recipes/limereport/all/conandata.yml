@@ -1,4 +1,4 @@
 sources:
-  "1.5.88":
-    url: "https://github.com/Jihadist/LimeReport/archive/refs/tags/1.5.88.tar.gz"
-    sha256: "E42BF878B9AAEE92355976F8A9BDAE98DF361DC3B85F580F8D7726233F920FA6"
+  "1.6.9":
+    url: "https://github.com/Jihadist/LimeReport/archive/bb72b6f3569b3f23ac58de344a2b6e7b45ce91e9.tar.gz"
+    sha256: 6d3baa1511e2c8b2059a02446d331b641fc374c98e3c21f82654310cc7897c08
