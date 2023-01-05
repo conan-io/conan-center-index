@@ -9,6 +9,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches,
     copy,
+    export_conandata_patches,
     get,
     replace_in_file,
     rename,
@@ -80,12 +81,10 @@ class GlibmmConan(ConanFile):
         self.tool_requires("pkgconf/1.9.3")
 
     def requirements(self):
-        self.requires("glib/2.75.0")
+        self.requires("glib/2.75.1")
         if self._abi_version == "2.68":
-            self.requires("glib/2.74.0")
             self.requires("libsigcpp/3.0.7")
         else:
-            self.requires("glib/2.67.6")
             self.requires("libsigcpp/2.10.8")
 
     def generate(self):
@@ -106,6 +105,9 @@ class GlibmmConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -182,7 +184,7 @@ class GlibmmConan(ConanFile):
         if self._abi_version == "2.68":
             self.cpp_info.components[glibmm_component].requires = ["glib::gobject-2.0", "libsigcpp::sigc++"]
         else:
-            self.cpp_info.components[glibmm_component].requires = ["glib::gobject-2.0", "libsigcpp::sigc++-2.0"]
+            self.cpp_info.components[glibmm_component].requires = ["glib::gobject-2.0", "libsigcpp::libsigcpp"]
 
         self.cpp_info.components[giomm_component].set_property("pkg_config_name", giomm_component)
         self.cpp_info.components[giomm_component].libs = [giomm_component]
