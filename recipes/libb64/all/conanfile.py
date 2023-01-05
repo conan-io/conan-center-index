@@ -15,6 +15,14 @@ class Libb64Conan(ConanFile):
     homepage = "https://libb64.sourceforge.net/"
     topics = ("base64", "codec", "encoder", "decoder")
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     def layout(self):
         cmake_layout(self, src_folder="src")
