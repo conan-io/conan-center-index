@@ -4,7 +4,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, copy
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
 
 required_conan_version = ">=1.52.0"
 
@@ -63,7 +63,8 @@ class RotorConan(ConanFile):
         tc.cache_variables["BUILD_THREAD_UNSAFE"] = not self.options.multithreading
         tc.cache_variables["BUILD_TESTING"] = False
         tc.generate()
-
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def validate(self):
         minimal_cpp_standard = "17"
@@ -110,7 +111,6 @@ class RotorConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["core"].libs = ["rotor"]
         self.cpp_info.components["core"].requires = ["boost::date_time", "boost::system", "boost::regex"]
-
 
         if not self.options.multithreading:
             self.cpp_info.components["core"].defines.append("BUILD_THREAD_UNSAFE")
