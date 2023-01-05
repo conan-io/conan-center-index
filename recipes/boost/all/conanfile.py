@@ -587,7 +587,7 @@ class BoostConan(ConanFile):
         command = f'"{self._python_executable}" -c "{script}"'
         self.output.info(f"running {command}")
         try:
-            self.run(command, output)
+            self.run(command, output, scope="run")
         except ConanException:
             self.output.info("(failed)")
             return None
