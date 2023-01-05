@@ -28,7 +28,7 @@ class QXlsxConan(ConanFile):
 
     @property
     def _qt_version(self):
-        return Version(self.deps_cpp_info["qt"].version).major
+        return Version(self.dependencies["qt"].ref.version).major
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -47,9 +47,19 @@ class QXlsxConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output=output)
+            m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
     def build_requirements(self):
-        if Version(self.version) >= "1.4.4":
-            # at least CMake 3.16
+        if Version(self.version) >= "1.4.4" and not self._cmake_new_enough("3.16"):
             self.tool_requires("cmake/3.25.0")
 
     def source(self):
