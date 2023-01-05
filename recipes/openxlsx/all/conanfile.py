@@ -84,7 +84,8 @@ class OpenXlsxConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["OpenXLSX"]
+        lib_suffix = "d" if self.settings.build_type == "Debug" else ""
+        self.cpp_info.libs = [f"OpenXLSX{lib_suffix}"]
 
         self.cpp_info.set_property("cmake_file_name", "OpenXLSX")
         self.cpp_info.set_property("cmake_target_name", "OpenXLSX::OpenXLSX")
