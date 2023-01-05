@@ -1,8 +1,9 @@
 import os
 import shutil
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools import files
+from conan.tools.microsoft import is_msvc
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
 from conan.tools.scm import Version
@@ -144,6 +145,41 @@ class WtConan(ConanFile):
             "if(0)",
         )
 
+    def _get_library_extension(self, dep):
+        if self.options[dep].shared:
+            if self.settings.os == "Windows" :
+                if is_msvc(self):
+                    return ".lib"
+                else:
+                    return ".dll.a"
+            elif self.settings.os == "Macos":
+                return ".dylib"
+            else:
+                return ".so"
+        else:
+            if self.settings.os == "Windows" and is_msvc(self):
+                return ".lib"
+            else:
+                return ".a"
+
+    @property
+    def _get_library_prefix(self):
+        return "" if self.settings.os == "Windows" else "lib"
+
+    def _cmakify_path_list(self, paths):
+        return ";".join(paths).replace("\\", "/")
+
+    def _find_library(self, libname, dep):
+        for path in self.deps_cpp_info[dep].lib_paths:
+            lib_fullpath = os.path.join(path, self._get_library_prefix + libname + self._get_library_extension(dep))
+            self.output.info("_find_library : " + str(lib_fullpath))
+            if os.path.isfile(lib_fullpath):
+                return lib_fullpath
+        raise ConanException("Library {} not found".format(lib_fullpath))
+
+    def _find_libraries(self, dep):
+        return [self._find_library(lib, dep) for lib in self.deps_cpp_info[dep].libs]
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["CONFIGDIR"] = os.path.join(self.package_folder, "bin")
@@ -172,14 +208,6 @@ class WtConan(ConanFile):
         tc.variables["CONNECTOR_HTTP"] = self.options.connector_http
         tc.variables["BOOST_DYNAMIC"] = self.options["boost"].shared
 
-        def _gather_libs(p):
-            libs = self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs
-            for dep in self.deps_cpp_info[p].public_deps:
-                for l in _gather_libs(dep):
-                    if not l in libs:
-                        libs.append(l)
-            return libs
-
         # FIXME: all this logic coming from upstream custom find module files seems fragile, to improve later !
         #        we can't even inject cmake_find_package generator, it breaks the all upstream logic
         tc.cache_variables["BOOST_PREFIX"] = self.deps_cpp_info["boost"].rootpath
@@ -187,26 +215,26 @@ class WtConan(ConanFile):
             tc.cache_variables["ZLIB_PREFIX"] = self.deps_cpp_info["zlib"].rootpath
         if self.options.with_ssl:
             tc.cache_variables["SSL_PREFIX"] = self.deps_cpp_info["openssl"].rootpath
-            tc.variables["OPENSSL_LIBRARIES"] = ";".join(_gather_libs("openssl"))
-            tc.variables["OPENSSL_INCLUDE_DIR"] = ";".join(self.deps_cpp_info["openssl"].include_paths)
+            tc.variables["OPENSSL_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("openssl"))
+            tc.variables["OPENSSL_INCLUDE_DIR"] = self._cmakify_path_list(self.deps_cpp_info["openssl"].include_paths)
             tc.variables["OPENSSL_FOUND"] = True
         if self.options.get_safe("with_sqlite"):
             tc.cache_variables["SQLITE3_PREFIX"] = self.deps_cpp_info["sqlite3"].rootpath
         if self.options.get_safe("with_mysql"):
             tc.cache_variables["MYSQL_PREFIX"] = self.deps_cpp_info["libmysqlclient"].rootpath
-            tc.variables["MYSQL_LIBRARIES"] = ";".join(_gather_libs("libmysqlclient"))
-            tc.variables["MYSQL_INCLUDE"] = ";".join(self.deps_cpp_info["libmysqlclient"].include_paths)
+            tc.variables["MYSQL_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libmysqlclient"))
+            tc.variables["MYSQL_INCLUDE"] = self._cmakify_path_list(self.deps_cpp_info["libmysqlclient"].include_paths)
             tc.variables["MYSQL_DEFINITIONS"] = ";".join("-D%s" % d for d in self.deps_cpp_info["libmysqlclient"].defines)
             tc.variables["MYSQL_FOUND"] = True
         if self.options.get_safe("with_postgres"):
             tc.cache_variables["POSTGRES_PREFIX"] = self.deps_cpp_info["libpq"].rootpath
-            tc.variables["POSTGRES_LIBRARIES"] = ";".join(_gather_libs("libpq"))
-            tc.variables["POSTGRES_INCLUDE"] = ";".join(self.deps_cpp_info["libpq"].include_paths)
+            tc.variables["POSTGRES_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libpq"))
+            tc.variables["POSTGRES_INCLUDE"] = self._cmakify_path_list(self.deps_cpp_info["libpq"].include_paths)
             tc.variables["POSTGRES_FOUND"] = True
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
             tc.cache_variables["ODBC_PREFIX"] = self.deps_cpp_info["odbc"].rootpath
-            tc.variables["ODBC_LIBRARIES"] = ";".join(_gather_libs("odbc"))
-            tc.variables["ODBC_INCLUDE"] = ";".join(self.deps_cpp_info["odbc"].include_paths)
+            tc.variables["ODBC_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("odbc"))
+            tc.variables["ODBC_INCLUDE"] = self._cmakify_path_list(self.deps_cpp_info["odbc"].include_paths)
             tc.variables["ODBC_FOUND"] = True
         if self.options.get_safe("with_unwind"):
             tc.cache_variables["UNWIND_PREFIX"] = self.deps_cpp_info["libunwind"].rootpath
