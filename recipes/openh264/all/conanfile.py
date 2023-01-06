@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conans import tools
+from conan.tools.build import stdcpp_library
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -11,7 +11,7 @@ from conan.tools.microsoft import is_msvc, unix_path, msvc_runtime_flag
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class OpenH264Conan(ConanFile):
@@ -185,7 +185,6 @@ class OpenH264Conan(ConanFile):
             self.cpp_info.system_libs.extend(["m", "pthread"])
         if self.settings.os == "Android":
             self.cpp_info.system_libs.append("m")
-        # TODO: switch to conan.tools.build.stdcpp_library in conan 1.54
-        libcxx = tools.stdcpp_library(self)
+        libcxx = stdcpp_library(self)
         if libcxx:
             self.cpp_info.system_libs.append(libcxx)

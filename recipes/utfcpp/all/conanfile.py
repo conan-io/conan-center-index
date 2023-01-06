@@ -61,9 +61,7 @@ class UtfCppConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "utf8cpp")
         self.cpp_info.includedirs.append(os.path.join("include", "utf8cpp"))
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "utf8cpp"
