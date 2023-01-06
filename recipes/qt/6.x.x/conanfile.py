@@ -10,7 +10,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import cross_building, check_min_cppstd, build_jobs
 from conan.tools.env import VirtualBuildEnv, Environment
-from conan.tools.files import get, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
+from conan.tools.files import copy, get, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
@@ -65,10 +65,10 @@ class QtConan(ConanFile):
 
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
-    topics = ("qt", "ui")
+    topics = ("framework", "ui")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.qt.io"
-    license = "LGPL-3.0"
+    license = "LGPL-3.0-only"
     settings = "os", "arch", "compiler", "build_type"
 
     options = {
@@ -187,7 +187,7 @@ class QtConan(ConanFile):
         export_conandata_patches(self)
 
     def export(self):
-        self.copy("qtmodules%s.conf" % self.version)
+        copy(self, f"qtmodules{self.version}.conf", self.recipe_folder, self.export_folder)
 
     def config_options(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
@@ -791,7 +791,7 @@ class QtConan(ConanFile):
             cmake = CMake(self)
             cmake.install()
         save(self, os.path.join(self.package_folder, "bin", "qt.conf"), qt.content_template("..", "res", self.settings.os))
-        self.copy("*LICENSE*", src=self.source_folder, dst="licenses")
+        copy(self, "*LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"))
         for module in self._get_module_tree:
             if module != "qtbase" and not self.options.get_safe(module):
                 rmdir(self, os.path.join(self.package_folder, "licenses", module))
