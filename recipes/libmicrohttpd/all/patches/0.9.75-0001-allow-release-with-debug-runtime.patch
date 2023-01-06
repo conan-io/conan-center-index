@@ -1,4 +1,3 @@
-This patch allows building libmicrohttpd in Release configuration with a debug runtime (e.g. MTd)
 --- src/microhttpd/mhd_assert.h
 +++ src/microhttpd/mhd_assert.h
 @@ -35,7 +35,7 @@
