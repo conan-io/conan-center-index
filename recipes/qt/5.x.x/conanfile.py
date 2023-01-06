@@ -450,7 +450,18 @@ class QtConan(ConanFile):
         else:
             return "make"
 
+    def _getenvpath(self, var):
+        val = os.getenv(var)
+        if val and self._settings_build.os == "Windows":
+            val = val.replace("\\", "/")
+            os.environ[var] = val
+        return val
+
     def _xplatform(self):
+        cxx = self._getenvpath("CXX")
+        if cxx:
+            return cxx
+
         if self.settings.os == "Linux":
             if self.settings.compiler == "gcc":
                 return {"x86": "linux-g++-32",
@@ -728,21 +739,14 @@ class QtConan(ConanFile):
         if self.options.cross_compile:
             args += [f"-device-option CROSS_COMPILE={self.options.cross_compile}"]
 
-        def _getenvpath(var):
-            val = os.getenv(var)
-            if val and self._settings_build.os == "Windows":
-                val = val.replace("\\", "/")
-                os.environ[var] = val
-            return val
-
         if not is_msvc(self):
-            value = _getenvpath("CC")
+            value = self._getenvpath("CC")
             if value:
                 args += ['QMAKE_CC="' + value + '"',
                          'QMAKE_LINK_C="' + value + '"',
                          'QMAKE_LINK_C_SHLIB="' + value + '"']
 
-            value = _getenvpath('CXX')
+            value = self._getenvpath('CXX')
             if value:
                 args += ['QMAKE_CXX="' + value + '"',
                          'QMAKE_LINK="' + value + '"',
