@@ -1194,7 +1194,9 @@ class BoostConan(ConanFile):
             return shutil.which(f"clang++-{compiler_version}") or shutil.which(f"clang++-{major}") or shutil.which("clang++") or ""
         return ""
 
-    def _create_user_config_jam(self, folder):   
+    def _create_user_config_jam(self, folder):
+        self.output.warning("Patching user-config.jam")
+
         def create_library_config(deps_name, name):
             aggregated_cpp_info = self.dependencies[deps_name].cpp_info.aggregated_components()
             includedir = aggregated_cpp_info.includedirs[0].replace("\\", "/")
@@ -1207,9 +1209,6 @@ class BoostConan(ConanFile):
                    f"<include>{includedir} " \
                    f"<search>{libdir} " \
                    f"<name>{lib} ;"
-
-        """To help locating the zlib and bzip2 deps"""
-        self.output.warning("Patching user-config.jam")
 
         contents = ""
 
