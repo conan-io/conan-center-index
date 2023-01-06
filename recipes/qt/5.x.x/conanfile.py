@@ -52,7 +52,7 @@ class QtConan(ConanFile):
     topics = ("ui", "framework")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.qt.io"
-    license = "LGPL-3.0"
+    license = "LGPL-3.0-only"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -814,7 +814,7 @@ Qml2Imports = bin/archdatadir/qml
 Translations = bin/datadir/translations
 Documentation = bin/datadir/doc
 Examples = bin/datadir/examples""")
-        self.copy("*LICENSE*", src="qt5/", dst="licenses")
+        copy(self, "*LICENSE*", os.path.join(self.source_folder, "qt5/"), os.path.join(self.package_folder, "licenses"))
         for module in self._submodules:
             if not self.options.get_safe(module):
                 rmdir(self, os.path.join(self.package_folder, "licenses", module))
