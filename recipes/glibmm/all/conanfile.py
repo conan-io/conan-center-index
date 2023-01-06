@@ -59,15 +59,16 @@ class GlibmmConan(ConanFile):
             else:
                 check_min_cppstd(self, 11)
 
+        if is_msvc(self) and not self.options.shared:
+            raise ConanInvalidConfiguration("Static library build is not supported by MSVC")
+
         if self.options.shared and not self.options["glib"].shared:
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
 
         if self.options["glib"].shared and is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration(
-                "Linking shared glib with the MSVC static runtime is not supported"
-            )
+            raise ConanInvalidConfiguration("Linking shared glib with the MSVC static runtime is not supported")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -135,7 +136,7 @@ class GlibmmConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if self.options.shared:
             self.options["glib"].shared = True
 
