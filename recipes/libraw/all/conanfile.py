@@ -83,12 +83,13 @@ class LibRawConan(ConanFile):
         copy(self, pattern="COPYRIGHT", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        
+
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
 
         if self.settings.os == "Windows":
             self.cpp_info.defines.append("WIN32")
+            self.cpp_info.system_libs.append("ws2_32")
 
         if not self.options.shared:
             self.cpp_info.defines.append("LIBRAW_NODLL")
