@@ -121,5 +121,4 @@ class CbloscConan(ConanFile):
         prefix = "lib" if is_msvc(self) and not self.options.shared else ""
         self.cpp_info.libs = [f"{prefix}blosc"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["m", "pthread"])
