@@ -1,0 +1,41 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d51cba0..b6faf65 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -419,6 +419,7 @@ if (CZMQ_BUILD_SHARED)
+   ENDIF(APPLE)
+ 
+   set_target_properties (czmq PROPERTIES
++    LINKER_LANGUAGE CXX
+     PUBLIC_HEADER "${public_headers}"
+     DEFINE_SYMBOL "CZMQ_EXPORTS"
+     SOVERSION "4"
+@@ -544,6 +545,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/czmqConfig.cmake
+ ########################################################################
+ # executables
+ ########################################################################
++if(0) # disable executables
+ add_executable(
+     zmakecert
+     "${SOURCE_DIR}/src/zmakecert.c"
+@@ -631,10 +633,12 @@ target_link_libraries(
+     ${OPTIONAL_LIBRARIES_STATIC}
+ )
+ endif()
++endif() # disable executables
+ 
+ ########################################################################
+ # tests
+ ########################################################################
++if(0) # disable tests
+ set(CLASSTEST_TIMEOUT 60 CACHE STRING "Timeout of the selftest of a class")
+ set(TOTAL_TIMEOUT 600 CACHE STRING "Timout of the total testsuite")
+ 
+@@ -743,6 +747,7 @@ foreach(TEST_CLASS ${TEST_CLASSES})
+ endforeach(TEST_CLASS)
+ 
+ include(CTest)
++endif() # disable tests
+ 
+ ########################################################################
+ # cleanup
