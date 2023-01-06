@@ -535,7 +535,7 @@ class BoostConan(ConanFile):
         if self._with_zstd:
             self.requires("zstd/1.5.2")
         if self._with_stacktrace_backtrace:
-            self.requires("libbacktrace/cci.20210118")
+            self.requires("libbacktrace/cci.20210118", transitive_headers=True)
 
         if self._with_icu:
             self.requires("icu/72.1")
@@ -554,8 +554,6 @@ class BoostConan(ConanFile):
             del self.info.options.python_executable  # PATH to the interpreter is not important, only version matters
             if self.info.options.without_python:
                 del self.info.options.python_version
-            else:
-                self.info.options.python_version = self._python_version
 
     def build_requirements(self):
         if not self.options.header_only:
@@ -585,7 +583,7 @@ class BoostConan(ConanFile):
         command = f'"{self._python_executable}" -c "{script}"'
         self.output.info(f"running {command}")
         try:
-            self.run(command=command, output=output)
+            self.run(command, output, scope="run")
         except ConanException:
             self.output.info("(failed)")
             return None
@@ -637,7 +635,7 @@ class BoostConan(ConanFile):
 
         NOTE: distutils is deprecated and breaks the recipe since Python 3.10
         """
-        python_version_parts = self.info.options.python_version.split('.')
+        python_version_parts = str(self.info.options.python_version).split('.')
         python_major = int(python_version_parts[0])
         python_minor = int(python_version_parts[1])
         if(python_major >= 3 and python_minor >= 10):
@@ -719,9 +717,10 @@ class BoostConan(ConanFile):
         multiarch = self._get_python_var("MULTIARCH")
         masd = self._get_python_var("multiarchsubdir")
         with_dyld = self._get_python_var("WITH_DYLD")
-        if libdir and multiarch and masd:
+        if libdir and multiarch and masd and not libdir.endswith(masd):
             if masd.startswith(os.sep):
                 masd = masd[len(os.sep):]
+            self.output.warning(f"Python libdir candidate thingy: {libdir}")
             libdir = os.path.join(libdir, masd)
 
         if not libdir:
@@ -1195,9 +1194,7 @@ class BoostConan(ConanFile):
             return shutil.which(f"clang++-{compiler_version}") or shutil.which(f"clang++-{major}") or shutil.which("clang++") or ""
         return ""
 
-    def _create_user_config_jam(self, folder):
-        self.output.info("Patching user-config.jam")
-
+    def _create_user_config_jam(self, folder):   
         def create_library_config(deps_name, name):
             aggregated_cpp_info = self.dependencies[deps_name].cpp_info.aggregated_components()
             includedir = aggregated_cpp_info.includedirs[0].replace("\\", "/")
@@ -1210,6 +1207,9 @@ class BoostConan(ConanFile):
                    f"<include>{includedir} " \
                    f"<search>{libdir} " \
                    f"<name>{lib} ;"
+
+        """To help locating the zlib and bzip2 deps"""
+        self.output.warning("Patching user-config.jam")
 
         contents = ""
 
@@ -1645,11 +1645,15 @@ class BoostConan(ConanFile):
                 self.cpp_info.components[module].names["cmake_find_package_multi"] = module
                 self.cpp_info.components[module].names["pkg_config"] = f"boost_{module}"
 
+                # extract list of names of direct host dependencies to check for dependencies
+                # of components that exist in other packages
+                dependencies = [d.ref.name for d, _ in self.dependencies.direct_host.items()]
+
                 for requirement in self._dependencies.get("requirements", {}).get(module, []):
                     if self.options.get_safe(requirement, None) == False:
                         continue
                     conan_requirement = self._option_to_conan_requirement(requirement)
-                    if conan_requirement not in self.requires:
+                    if conan_requirement not in dependencies:
                         continue
                     if module == "locale" and requirement in ("icu", "iconv"):
                         if requirement == "icu" and not self._with_icu:
@@ -1734,4 +1738,6 @@ class BoostConan(ConanFile):
                     self.cpp_info.components["headers"].defines.append("BOOST_SP_USE_SPINLOCK")
                 else:
                     self.cpp_info.components["headers"].defines.extend(["BOOST_AC_DISABLE_THREADS", "BOOST_SP_DISABLE_THREADS"])
+        #TODO: remove in the future, user_info deprecated in conan2, but kept for compatibility while recipe is cross-compatible.
         self.user_info.stacktrace_addr2line_available = self._stacktrace_addr2line_available
+        self.conf_info.define("user.boost:stacktrace_addr2line_available", self._stacktrace_addr2line_available)
