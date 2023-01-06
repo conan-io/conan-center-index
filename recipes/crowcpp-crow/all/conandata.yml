@@ -18,10 +18,10 @@ sources:
     url: "https://github.com/CrowCpp/crow/archive/refs/tags/v0.3+2.tar.gz"
     sha256: "982fe978c113506aefe77c413befb3ab21fffb09d9bdf287ec8e8ba59bd786e7"
   "0.3":
-    url: "https://github.com/CrowCpp/crow/archive/v0.3.tar.gz"
+    url: "https://github.com/CrowCpp/Crow/archive/refs/tags/v0.3.tar.gz"
     sha256: "95538db88fba73c0bc87bbc40b62dcf488012c133a895634ade015009ebb4f25"
   "0.2":
-    url: "https://github.com/CrowCpp/crow/archive/0.2.tar.gz"
+    url: "https://github.com/CrowCpp/Crow/archive/refs/tags/0.2.tar.gz"
     sha256: "c419767f0a336f2add71fc8b311ad95434d59601fb8b0e5ba3048407d85d0a71"
 patches:
   "0.2":
