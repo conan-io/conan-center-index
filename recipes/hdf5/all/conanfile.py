@@ -104,6 +104,14 @@ class Hdf5Conan(ConanFile):
         except:
             return False
 
+    def _inject_stdlib_flag(self, tc):
+        if self.settings.os == "Linux":
+            cpp_stdlib = f" -stdlib={self.settings.compiler.libcxx}"
+            tc.variables["CMAKE_CXX_FLAGS"] = tc.variables.get("CMAKE_CXX_FLAGS", "") + cpp_stdlib
+
+        return tc
+
+
     def build_requirements(self):
         if Version(self.version) >= "1.14.0" and not self._cmake_new_enough("3.18"):
             self.tool_requires("cmake/3.25.0")
@@ -118,6 +126,8 @@ class Hdf5Conan(ConanFile):
         tc = CMakeToolchain(self)
         if self.settings.get_safe("compiler.cppstd"):
             tc.variables["CMAKE_CXX_STANDARD"] = self._v1_14_minimum_cpp_standard
+        if self.settings.get_safe("compiler.libcxx"):
+            tc = self._inject_stdlib_flag(tc)
         if self.options.szip_support == "with_libaec":
             tc.variables["USE_LIBAEC"] = True
         tc.variables["HDF5_EXTERNALLY_CONFIGURED"] = True
