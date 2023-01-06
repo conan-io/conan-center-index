@@ -34,8 +34,6 @@ class RotorConan(ConanFile):
         "multithreading": True,
     }
 
-    # exports_sources = "CMakeLists.txt", "src/*", "include/*", "cmake/*"
-
     def export_sources(self):
         export_conandata_patches(self)
 
