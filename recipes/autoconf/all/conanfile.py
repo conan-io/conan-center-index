@@ -37,7 +37,7 @@ class AutoconfConan(ConanFile):
         self.info.clear()
 
     def requirements(self):
-        self.requires("m4/1.4.19") # m4 is called by autom4te making it a run-time requirement
+        self.requires("m4/1.4.19", run=True) # m4 is called by autom4te making it a run-time requirement
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -107,8 +107,8 @@ class AutoconfConan(ConanFile):
         self.output.info(f"Defining AC_MACRODIR environment variable: {dataroot_path}")
         self.buildenv_info.define_path("AC_MACRODIR", dataroot_path)
 
-        self.output.info(f"Defining AUTOM4TE_PERLLIBDIR environment variable: {dataroot_path}")
-        self.buildenv_info.define_path("AUTOM4TE_PERLLIBDIR", dataroot_path)
+        self.output.info(f"Defining autom4te_perllibdir environment variable: {dataroot_path}")
+        self.buildenv_info.define_path("autom4te_perllibdir", dataroot_path)
 
         bin_path = os.path.join(self.package_folder, "bin")
 
@@ -130,8 +130,6 @@ class AutoconfConan(ConanFile):
 
         # TODO: to remove in conan v2
         self.env_info.PATH.append(bin_path)
-        self.env_info.AC_MACRODIR = dataroot_path
-        self.env_info.AUTOM4TE_PERLLIBDIR = dataroot_path
         self.env_info.AUTOCONF = autoconf_bin
         self.env_info.AUTORECONF = autoreconf_bin
         self.env_info.AUTOHEADER = autoheader_bin
