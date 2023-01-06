@@ -8,7 +8,7 @@ from conan.tools.env import Environment
 
 class LibcapTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeToolchain", "PkgConfigDeps", "VirtualRunEnv"
+    generators = "CMakeToolchain", "PkgConfigDeps", "VirtualBuildEnv", "VirtualRunEnv"
     test_type = "explicit"
 
     def requirements(self):
