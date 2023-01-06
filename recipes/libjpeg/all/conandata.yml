@@ -1,7 +1,7 @@
 sources:
   "9e":
     url: "http://ijg.org/files/jpegsrc.v9e.tar.gz"
-    sha256: "5d5349c3aacc978dfcbde11f7904d2965395261dd818ce21c15806f736b8911e"
+    sha256: "4077d6a6a75aeb01884f708919d25934c93305e49f7e3f36db9129320e6f4f3d"
   "9d":
     url: "http://ijg.org/files/jpegsrc.v9d.tar.gz"
     sha256: "2303a6acfb6cc533e0e86e8a9d29f7e6079e118b9de3f96e07a71a11c082fa6a"
