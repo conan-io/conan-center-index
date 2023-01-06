@@ -9,7 +9,7 @@ required_conan_version = ">=1.53.0"
 class LibRawConan(ConanFile):
     name = "libraw"
     description = "LibRaw is a library for reading RAW files obtained from digital photo cameras (CRW/CR2, NEF, RAF, DNG, and others)."
-    license = "CDDL-1.0/LGPL-2.1-only"
+    license = "CDDL-1.0", "LGPL-2.1-only"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libraw.org/"
     topics = ["image", "photography", "raw"]
