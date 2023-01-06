@@ -98,6 +98,7 @@ class QtConan(ConanFile):
         "with_pulseaudio": [True, False],
         "with_gssapi": [True, False],
         "with_md4c": [True, False],
+        "with_x11": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -140,6 +141,7 @@ class QtConan(ConanFile):
         "with_pulseaudio": False,
         "with_gssapi": False,
         "with_md4c": True,
+        "with_x11": True,
 
         "gui": True,
         "widgets": True,
@@ -193,6 +195,7 @@ class QtConan(ConanFile):
             del self.options.with_fontconfig
             self.options.with_glib = False
             del self.options.with_libalsa
+            del self.options.with_x11
 
         if self.settings.os == "Windows":
             self.options.opengl = "dynamic"
@@ -224,6 +227,7 @@ class QtConan(ConanFile):
             del self.options.with_libjpeg
             del self.options.with_libpng
             del self.options.with_md4c
+            del self.options.with_x11
 
         if not self.options.get_safe("qtmultimedia"):
             del self.options.with_libalsa
@@ -344,6 +348,11 @@ class QtConan(ConanFile):
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
 
+        if self.options.get_safe("with_x11", False) and not self.dependencies.direct_host["xkbcommon"].options.with_x11:
+            raise ConanInvalidConfiguration("The 'with_x11' option for the 'xkbcommon' package must be enabled when the 'with_x11' option is enabled")
+        if self.options.get_safe("qtwayland", False) and not self.dependencies.direct_host["xkbcommon"].options.with_wayland:
+            raise ConanInvalidConfiguration("The 'with_wayland' option for the 'xkbcommon' package must be enabled when the 'qtwayland' option is enabled")
+
         if cross_building(self):
             raise ConanInvalidConfiguration("cross compiling qt 6 is not yet supported. Contributions are welcome")
 
@@ -393,14 +402,15 @@ class QtConan(ConanFile):
             self.requires("openal/1.22.2")
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.7.2")
-        if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("xorg/system")
+        if self.options.get_safe("with_x11", False):
             self.requires("xkbcommon/1.4.1")
+            self.requires("xorg/system")
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
         if self.options.qtwayland:
+            self.requires("xkbcommon/1.4.1")
             self.requires("wayland/1.21.0")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
@@ -423,24 +433,24 @@ class QtConan(ConanFile):
             self.requires("md4c/0.4.8")
 
     def build_requirements(self):
-        self.build_requires("cmake/3.25.0")
-        self.build_requires("ninja/1.11.1")
-        self.build_requires("pkgconf/1.9.3")
+        self.tool_requires("cmake/3.25.0")
+        self.tool_requires("ninja/1.11.1")
+        self.tool_requires("pkgconf/1.9.3")
         if self.settings.os == "Windows":
-            self.build_requires('strawberryperl/5.32.1.1')
+            self.tool_requires('strawberryperl/5.32.1.1')
 
         if self.options.get_safe("qtwebengine"):
-            self.build_requires("nodejs/16.3.0")
-            self.build_requires("gperf/3.1")
+            self.tool_requires("nodejs/16.3.0")
+            self.tool_requires("gperf/3.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self.settings.os != "Windows":
-                self.build_requires("bison/3.8.2")
-                self.build_requires("flex/2.6.4")
+                self.tool_requires("bison/3.8.2")
+                self.tool_requires("flex/2.6.4")
             else:
-                self.build_requires("winflexbison/2.5.24")
+                self.tool_requires("winflexbison/2.5.24")
 
         if self.options.qtwayland:
-            self.build_requires("wayland/1.21.0")
+            self.tool_requires("wayland/1.21.0")
         if cross_building(self):
             self.tool_requires(f"qt/{self.version}")
 
@@ -1024,7 +1034,10 @@ class QtConan(ConanFile):
             if self.options.get_safe("with_fontconfig", False):
                 gui_reqs.append("fontconfig::fontconfig")
             if self.settings.os in ["Linux", "FreeBSD"]:
-                gui_reqs.extend(["xorg::xorg", "xkbcommon::xkbcommon"])
+                if self.options.qtwayland or self.options.get_safe("with_x11", False):
+                    gui_reqs.append("xkbcommon::xkbcommon")
+                if self.options.get_safe("with_x11", False):
+                    gui_reqs.append("xorg::xorg")
             if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
                 gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
@@ -1065,7 +1078,7 @@ class QtConan(ConanFile):
                 _create_plugin("QMinimalIntegrationPlugin", "qminimal", "platforms", [])
             elif self.settings.os == "Emscripten":
                 _create_plugin("QWasmIntegrationPlugin", "qwasm", "platforms", ["Core", "Gui"])
-            elif self.settings.os in ["Linux", "FreeBSD"]:
+            elif self.options.get_safe("with_x11", False):
                 _create_module("XcbQpaPrivate", ["xkbcommon::libxkbcommon-x11", "xorg::xorg"], has_include_dir=False)
                 _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpaPrivate"])
 
