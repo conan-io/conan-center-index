@@ -25,6 +25,11 @@ sources:
     sha256: "124f7e8fea58c012b548ba1b643684fe428c7dbfeb8d8a5f701eb7db4356a759"
 
 patches:
+  "0.2.4":
+    - patch_file: "patches/0.2.4-0001-include-climits.patch"
+      patch_description: "include climits"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/stephenberry/glaze/issues/100"
   "0.2.2":
     - patch_file: "patches/0.2.0-0001-use-cci-frozen.patch"
       patch_description: "use cci's frozen"

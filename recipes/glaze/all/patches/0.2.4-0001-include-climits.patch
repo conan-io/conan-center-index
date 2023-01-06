@@ -1,0 +1,13 @@
+diff --git a/include/glaze/api/hash.hpp b/include/glaze/api/hash.hpp
+index ce76e7a..aee2a3e 100644
+--- a/include/glaze/api/hash.hpp
++++ b/include/glaze/api/hash.hpp
+@@ -7,6 +7,8 @@
+ #include "glaze/api/name.hpp"
+ #include "glaze/util/string_view.hpp"
+ 
++#include <climits>
++
+ // Collision calculations done with the formula: e^((-k * (k - 1)/(2 * N)))
+ // The approximation error tends to zero as N increases, and we are dealing with a large N
+ // https://preshing.com/20110504/hash-collision-probabilities/
