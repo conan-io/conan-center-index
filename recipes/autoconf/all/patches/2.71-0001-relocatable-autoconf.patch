@@ -224,4 +224,3 @@ index 9e86c9f..bf3ae42 100644
 +args: --prepend-include 'AUTOCONF_M4DIR'
  args: m4sugar/m4sugar.m4f
  end-language: "M4sugar"
- 
