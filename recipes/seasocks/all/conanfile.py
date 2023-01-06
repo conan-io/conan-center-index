@@ -112,7 +112,7 @@ class SeasocksConan(ConanFile):
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["libseasocks"].libs = ["seasocks"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["libseasocks"].system_libs.append("pthread")
+            self.cpp_info.components["libseasocks"].system_libs.extend(["pthread", "m"])
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "Seasocks"
