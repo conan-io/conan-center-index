@@ -47,7 +47,7 @@ class MongoCxxConan(ConanFile):
     def requirements(self):
         self.requires("mongo-c-driver/1.22.0")
         if self.options.polyfill == "boost":
-            self.requires("boost/1.80.0")
+            self.requires("boost/1.81.0")
 
     @property
     def _minimal_std_version(self):
