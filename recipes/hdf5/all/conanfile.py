@@ -106,7 +106,7 @@ class Hdf5Conan(ConanFile):
 
     def _inject_stdlib_flag(self, tc):
         if self.settings.os == "Linux":
-            cpp_stdlib = f" -stdlib={self.settings.compiler.libcxx}"
+            cpp_stdlib = f" -stdlib={self.settings.compiler.libcxx}".rstrip("1")  # strip 11 from stdlibc++11
             tc.variables["CMAKE_CXX_FLAGS"] = tc.variables.get("CMAKE_CXX_FLAGS", "") + cpp_stdlib
 
         return tc
