@@ -302,17 +302,17 @@ class GccConan(ConanFile):
             self.cpp_info.components["lsan"].system_libs.append("rt")
 
         self.cpp_info.components["cc1"].set_property("cmake_target_name", "gcc::cc1")
-        self.cpp_info.components["cc1"].libdirs = ["lib"]
+        self.cpp_info.components["cc1"].libdirs = ["lib", "lib64"]
         self.cpp_info.components["cc1"].libs = ["cc1"]
         self.cpp_info.components["cc1"].requires = ["gcc_s", "stdc++"]
 
         self.cpp_info.components["cp1plugin"].set_property("cmake_target_name", "gcc::cp1plugin")
-        self.cpp_info.components["cp1plugin"].libdirs = [os.path.join("lib","gcc", triplet, self.version)]
+        self.cpp_info.components["cp1plugin"].libdirs = [os.path.join("lib","gcc", triplet, self.version, "plugin")]
         self.cpp_info.components["cp1plugin"].libs = ["cp1plugin"]
         self.cpp_info.components["cp1plugin"].requires = ["gcc_s", "stdc++"]
 
         self.cpp_info.components["cc1plugin"].set_property("cmake_target_name", "gcc::cc1plugin")
-        self.cpp_info.components["cc1plugin"].libdirs = [os.path.join("lib","gcc", triplet, self.version)]
+        self.cpp_info.components["cc1plugin"].libdirs = [os.path.join("lib","gcc", triplet, self.version, "plugin")]
         self.cpp_info.components["cc1plugin"].libs = ["cc1plugin"]
         self.cpp_info.components["cc1plugin"].requires = ["gcc_s", "stdc++"]
 
