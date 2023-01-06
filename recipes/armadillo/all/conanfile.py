@@ -178,9 +178,9 @@ class ArmadilloConan(ConanFile):
             self.options.use_blas == "intel_mkl"
             and self.options.use_lapack == "intel_mkl"
         ):
-            # Consumers can override this requirement with their own by using
-            # self.requires("intel-mkl/version@user/channel, override=True) in their consumer
-            # conanfile.py
+            # Consumers can override this requirement with their own
+            # by using self.requires("intel-mkl/version@user/channel, override=True)
+            # in their consumer conanfile.py
             if (
                 self.options.use_blas == "intel_mkl"
                 or self.options.use_lapack == "intel_mkl"
