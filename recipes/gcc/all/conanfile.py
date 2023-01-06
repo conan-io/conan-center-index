@@ -1,14 +1,14 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.gnu.get_gnu_triplet import _get_gnu_triplet
+# from conan.tools.gnu.get_gnu_triplet import _get_gnu_triplet
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
 from conan.tools.apple import XCRun
-from conan.tools.files import copy, get, replace_in_file, rmdir, rm, collect_libs
+from conan.tools.files import copy, get, replace_in_file, rmdir, rm
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.microsoft import is_msvc
-from conan.tools.build.cross_building import get_cross_building_settings
+# from conan.tools.build.cross_building import get_cross_building_settings
 import os
 
 required_conan_version = ">=1.55.0"
@@ -150,6 +150,7 @@ class GccConan(ConanFile):
         )
 
     def package_info(self):
+        # FIXME: Add more detailed triplet identification as per https://github.com/conan-io/conan/issues/12789
         # os_build, arch_build, os_host, arch_host = get_cross_building_settings(self)
         # compiler = self.settings.get_safe("compiler")
         # # e.g., x86_64-pc-linux-gnu
