@@ -357,7 +357,7 @@ class QtConan(ConanFile):
             raise ConanInvalidConfiguration("cross compiling qt 6 is not yet supported. Contributions are welcome")
 
     def layout(self):
-        cmake_layout(self, src_folder="qt6")
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("zlib/1.2.13")
