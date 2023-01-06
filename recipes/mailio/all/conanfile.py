@@ -102,3 +102,6 @@ class mailioConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["mailio"]
         self.cpp_info.requires = ["boost::system", "boost::date_time", "boost::regex", "openssl::openssl"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
