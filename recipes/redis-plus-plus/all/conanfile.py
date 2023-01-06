@@ -67,10 +67,7 @@ class RedisPlusPlusConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) < "1.3.0":
-            self.requires("hiredis/1.0.2")
-        else:
-            self.requires("hiredis/1.1.0")
+        self.requires("hiredis/1.1.0")
         if self.options.get_safe("build_async"):
             self.requires("libuv/1.44.2")
 
