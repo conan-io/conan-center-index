@@ -14,7 +14,7 @@ class OpenXlsxConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/troldal/OpenXLSX"
-    topics = ("excel", "xlsx")
+    topics = ("excel", "spreadsheet", "xlsx")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
