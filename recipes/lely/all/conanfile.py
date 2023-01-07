@@ -121,7 +121,7 @@ class LelyConan(ConanFile):
         )
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def generate(self):
         at_toolchain = AutotoolsToolchain(self)
@@ -135,8 +135,10 @@ class LelyConan(ConanFile):
             "--disable-dependency-tracking",
             "--disable-maintainer-mode",
         ]
+
         if self.options.get_safe("ecss-compliance"):
             args.append("--enable-ecss-compliance")
+
         disable_options = {
             "threads",
             "rt",
@@ -174,7 +176,7 @@ class LelyConan(ConanFile):
             "coapp-slave",
         }
         for option in disable_options:
-            if self.options.get_safe(option) == False:
+            if not self.options.get_safe(option):
                 args.append(f"--disable-{option}")
 
         apply_conandata_patches(self)
