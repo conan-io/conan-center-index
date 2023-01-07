@@ -562,6 +562,9 @@ class QtConan(ConanFile):
     def build(self):
         args = ["-confirm-license", "-silent", "-nomake examples", "-nomake tests",
                 f"-prefix {self.package_folder}"]
+        if cross_building(self):
+            native_prefix = os.path.join(self.package_folder, "native")
+            args.extend([f"-extprefix {self.package_folder}", f"-hostprefix {native_prefix}"])
         args.append("-v")
         args.append("-archdatadir  %s" % os.path.join(self.package_folder, "bin", "archdatadir"))
         args.append("-datadir  %s" % os.path.join(self.package_folder, "bin", "datadir"))
@@ -801,6 +804,7 @@ class QtConan(ConanFile):
     def package(self):
         with chdir(self, "build_folder"):
             self.run(f"{self._make_program()} install")
+        rmdir(self, os.path.join(self.package_folder, "native"))
         save(self, os.path.join(self.package_folder, "bin", "qt.conf"), """[Paths]
 Prefix = ..
 ArchData = bin/archdatadir
