@@ -70,6 +70,10 @@ class GStreamerConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
+        pkg_config_deps = PkgConfigDeps(self)
+        pkg_config_deps.generate()
         tc = MesonToolchain(self)
         if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "14") \
             or (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "190"):
@@ -80,10 +84,6 @@ class GStreamerConan(ConanFile):
         tc.project_options["tests"] = "disabled"
         tc.project_options["introspection"] = "enabled" if self.options.with_introspection else "disabled"
         tc.generate()
-        pkg_config_deps = PkgConfigDeps(self)
-        pkg_config_deps.generate()
-        virtual_build_env = VirtualBuildEnv(self)
-        virtual_build_env.generate()
 
     def build(self):
         meson = Meson(self)
