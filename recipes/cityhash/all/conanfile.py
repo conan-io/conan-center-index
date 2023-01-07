@@ -86,7 +86,7 @@ class CityhashConan(ConanFile):
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
-        tc.generate()
+        tc.generate(env)
 
     def build(self):
         autotools = Autotools(self)
