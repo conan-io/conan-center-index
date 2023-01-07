@@ -1,16 +1,8 @@
 diff --git a/external/CMakeLists.txt b/external/CMakeLists.txt
-index ca807f7..9e9bcd6 100644
+index ca807f7..ee4277d 100644
 --- a/external/CMakeLists.txt
 +++ b/external/CMakeLists.txt
-@@ -1,5 +1,7 @@
- # The list of files is drived from: breakpad/Makefile.am
- 
-+cmake_minimum_required(VERSION 3.8)
-+
- set(BREAKPAD_SOURCES_COMMON
-     breakpad/src/common/convert_UTF.cc
-     breakpad/src/common/convert_UTF.h
-@@ -177,3 +179,40 @@ target_include_directories(breakpad_client
+@@ -177,3 +177,38 @@ target_include_directories(breakpad_client
      PUBLIC
      "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
  )
@@ -49,5 +41,3 @@ index ca807f7..9e9bcd6 100644
 +    DESTINATION include/breakpad/google_breakpad
 +    FILES_MATCHING PATTERN *.h
 +)
-+
-+target_compile_features(breakpad_client PRIVATE cxx_std_11)
