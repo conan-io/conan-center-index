@@ -96,12 +96,11 @@ class PackageConan(ConanFile):
         # TODO: to remove once https://github.com/conan-io/conan/pull/12817 available in conan client
         vcxproj_files = ["path/to/vcxproj_file1", "path/to/vcxproj_file2", "..."]
         platform_toolset = MSBuildToolchain(self).toolset
-        props_paths = []
+        import_conan_generators = ""
         for props_file in ["conantoolchain.props", "conandeps.props"]:
             props_path = os.path.join(self.generators_folder, props_file)
             if os.path.exists(props_path):
-                props_paths.append(props_path)
-        props_paths = ";".join(props_paths)
+                import_conan_generators += f"<Import Project=\"{props_path}\" />"
         for vcxproj_file in vcxproj_files:
             replace_in_file(
                 self, vcxproj_file,
@@ -113,7 +112,7 @@ class PackageConan(ConanFile):
                 replace_in_file(
                     self, vcxproj_file,
                     "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
-                    f"<Import Project=\"{props_paths}\" /><Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
+                    f"{import_conan_generators}<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
                 )
 
     def build(self):
