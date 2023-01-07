@@ -12,7 +12,7 @@ class LelyConan(ConanFile):
     # Optional metadata
     license = "Apache"
     url = "https://gitlab.com/lely_industries/lely-core/"
-    description = "<Description of LelyCore here>"
+    description = "The Lely core libraries are a collection of C and C++ libraries and tools, providing hih-performance I/O and sensor/actuator control for robotics and IoT applications. The libraries are cross-platform and have few dependencies. They can be even be used on bare-metal microcontrollers with as little as 32 kB RAM."
     topics = ("canopen",)
 
     # Binary configuration
