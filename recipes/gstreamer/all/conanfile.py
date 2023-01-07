@@ -55,6 +55,7 @@ class GStreamerConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/0.64.1")
+        self.tool_requires("glib/2.75.1")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if self.options.with_introspection:
