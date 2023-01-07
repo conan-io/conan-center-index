@@ -1135,7 +1135,7 @@ Examples = bin/datadir/examples""")
                     xcb_qpa_reqs.append("LinuxAccessibilitySupport")
                 if self.options.get_safe("with_vulkan"):
                     xcb_qpa_reqs.append("VulkanSupport")
-                if not self.options.qtwayland:
+                if self.options.get_safe("with_x11", False):
                     _create_module("XcbQpa", xcb_qpa_reqs, has_include_dir=False)
                     _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpa"])
 
