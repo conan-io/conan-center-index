@@ -12,20 +12,26 @@ index 22a17b3..ac18c85 100644
  M4_GNU = @M4_GNU@
  MAKEINFO = @MAKEINFO@
 diff --git a/bin/autoconf.as b/bin/autoconf.as
-index 1407739..213751c 100644
+index 1407739..12eac08 100644
 --- a/bin/autoconf.as
 +++ b/bin/autoconf.as
-@@ -89,8 +89,11 @@ exit_missing_arg='
+@@ -89,8 +89,17 @@ exit_missing_arg='
  # restore font-lock: '
  
  # Variables.
 -: ${AUTOM4TE='@bindir@/@autom4te-name@'}
 -: ${trailer_m4='@pkgdatadir@/autoconf/trailer.m4'}
 +# Locate autom4ate and support files relative to current script inside package
-+SCRIPT_DIR="$( dirname -- "$BASH_SOURCE"; )";
++SCRIPT_DIR=$(dirname $(which autoconf))
++RES_DIR=$(realpath "$SCRIPT_DIR/../res/autoconf")
++if [[ ! -d "$RES_DIR" ]]
++then
++    echo "Autoconf conan package error, unable to locate resource directory at $RES_DIR\n" 
++    exit 1
++fi
 +
 +: ${AUTOM4TE="$SCRIPT_DIR/autom4te"}
-+: ${trailer_m4="$SCRIPT_DIR/../res/autoconf/autoconf/trailer.m4"}
++: ${trailer_m4="$RES_DIR/autoconf/trailer.m4"}
  autom4te_options=
  outfile=
  verbose=false
