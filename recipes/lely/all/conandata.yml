@@ -1,0 +1,7 @@
+sources:
+  "2.3.1":
+    url: "https://gitlab.com/lely_industries/lely-core/-/archive/v2.3.1/lely-core-v2.3.1.tar.gz"
+    sha256: "f5fdc60359da97a2036be885d88c1ef50e5d49b9f94e89dbc58b414395078285"
+patches:
+  "2.3.1":
+    - patch_file: "patches/0001-strncpy-to-memcpy.patch"
