@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -9,7 +9,7 @@ from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class CityhashConan(ConanFile):
@@ -50,7 +50,7 @@ class CityhashConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if is_msvc(self) and self.info.options.shared:
+        if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration("cityhash does not support shared builds with Visual Studio")
 
     def build_requirements(self):
@@ -71,25 +71,22 @@ class CityhashConan(ConanFile):
         tc = AutotoolsToolchain(self)
         if is_msvc(self):
             tc.extra_cxxflags.append("-EHsc")
-            if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-               (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+            if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
+               (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler.version) >= "180"):
                 tc.extra_cflags.append("-FS")
                 tc.extra_cxxflags.append("-FS")
-        tc.generate()
-
+        env = tc.environment()
         if is_msvc(self):
-            env = Environment()
-            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
             ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
-            env.define("CC", f"{compile_wrapper} cl -nologo")
-            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.define("CC", "cl -nologo")
+            env.define("CXX", "cl -nologo")
             env.define("LD", "link -nologo")
-            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
+            env.define("AR", f"{ar_wrapper} lib")
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
-            env.vars(self).save_script("conanbuild_cityhash_msvc")
+        tc.generate()
 
     def build(self):
         autotools = Autotools(self)
@@ -100,8 +97,7 @@ class CityhashConan(ConanFile):
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)
