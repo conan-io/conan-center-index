@@ -6,7 +6,7 @@ from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.50.0"
 
 
 class H5ppConan(ConanFile):
