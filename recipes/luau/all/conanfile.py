@@ -8,7 +8,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class LuauConan(ConanFile):
     name = "luau"
@@ -57,10 +57,7 @@ class LuauConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
         if Version(self.version) < "0.549":
             del self.options.native_code_gen
 
