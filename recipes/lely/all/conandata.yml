@@ -5,3 +5,5 @@ sources:
 patches:
   "2.3.1":
     - patch_file: "patches/0001-strncpy-to-memcpy.patch"
+      patch_type: "bugfix"
+      patch_description: "This patch fixes compilation bug when building in release since compilers will detect that strncpy is not necessary and hence will emit a warning which will be treated as an error."
