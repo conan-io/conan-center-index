@@ -11,6 +11,7 @@ This section gathers the most common questions from the community related to pac
   * [Why are CMake find/config files and pkg-config files not packaged?](#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged)
   * [Should recipes export a recipe's license?](#should-recipes-export-a-recipes-license)
   * [Why recipes that use build tools (like CMake) that have packages in Conan Center do not use it as a build require by default?](#why-recipes-that-use-build-tools-like-cmake-that-have-packages-in-conan-center-do-not-use-it-as-a-build-require-by-default)
+  * [How are rare build systems without generators packaged?](#how-are-rare-build-systems-without-generators-packaged)
   * [Are python requires allowed in the `conan-center-index`?](#are-python-requires-allowed-in-the-conan-center-index)
   * [What version should packages use for libraries without official releases?](#what-version-should-packages-use-for-libraries-without-official-releases)
   * [Is the Jenkins orchestration library publicly available?](#is-the-jenkins-orchestration-library-publicly-available)
@@ -38,7 +39,9 @@ This section gathers the most common questions from the community related to pac
   * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)
   * [How to watch only specific recipes?](#how-to-watch-only-specific-recipes)
   * [Is it possible to disable Pylint?](#is-it-possible-to-disable-pylint)
-  * [How long can I be inactive before being removed from the authorized users list?](#how-long-can-i-be-inactive-before-being-removed-from-the-authorized-users-list)<!-- endToc -->
+  * [How long can I be inactive before being removed from the authorized users list?](#how-long-can-i-be-inactive-before-being-removed-from-the-authorized-users-list)
+  * [Can we add package which are parts of bigger projects like Boost?](#can-we-add-package-which-are-parts-of-bigger-projects-like-boost)
+    * [Can I add my project which I will submit to Boost?](#can-i-add-my-project-which-i-will-submit-to-boost)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -253,7 +256,7 @@ The hook [KB-H032](error_knowledge_base.md#KB-H032) does not allow `system_requi
 system packages at same recipe.
 
 There are exceptions where some projects are closer to system drivers or hardware and packaging as a regular library could result
-in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, see the [How-to](adding_packages/README.md#system-packages) for more.
+in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, see the [How-to](adding_packages/build_and_package.md#system-packages) for more.
 
 ## Why ConanCenter does **not** build and execute tests in recipes
 
@@ -413,3 +416,15 @@ difficult to understand [linter errors](linters.md), please comment on your pull
 ## How long can I be inactive before being removed from the authorized users list?
 
 Please, read [Inactivity and user removal section](adding_packages/README.md#inactivity-and-user-removal).
+
+## Can we add package which are parts of bigger projects like Boost?
+
+Sadly no. There have been many efforts in the past and we feel it's not sustainable given the number of combinations of libraries and version. See #14660 for recent discussions.
+
+There is one main "boost" recipe with many versions maintained.
+
+There are good arguments for permitting some boost libraries but we feel doing so is not fair to the rest.
+
+### Can I add my project which I will submit to Boost?
+
+Yes, but make sure it does not have Boost in the name. Use the [`author-name` convention](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#what-is-the-policy-on-recipe-name-collisions) so there are no conflicts.
