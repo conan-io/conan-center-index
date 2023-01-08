@@ -125,7 +125,7 @@ class LibarchiveConan(ConanFile):
         tc = CMakeToolchain(self)
         # turn off deps to avoid picking up them accidentally
         tc.variables["ENABLE_NETTLE"] = self.options.with_nettle
-        tc.variables["ENABLE_OPENSSL"] = self.options.with_openssl
+        tc.cache_variables["ENABLE_OPENSSL"] = self.options.with_openssl
         tc.variables["ENABLE_LIBB2"] = self.options.with_libb2
         tc.variables["ENABLE_LZ4"] = self.options.with_lz4
         tc.variables["ENABLE_LZO"] = self.options.with_lzo
