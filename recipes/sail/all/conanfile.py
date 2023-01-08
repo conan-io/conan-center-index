@@ -101,6 +101,8 @@ class SAILConan(ConanFile):
         tc.variables["SAIL_ENABLE_CODECS"] = ";".join(enable_codecs)
         tc.variables["SAIL_INSTALL_PDB"] = False
         tc.variables["SAIL_THREAD_SAFE"] = self.options.thread_safe
+        # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
+        tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
         # TODO: Remove after fixing https://github.com/conan-io/conan-center-index/issues/13159
         # C3I workaround to force CMake to choose the highest version of
         # the windows SDK available in the system
