@@ -1,0 +1,33 @@
+sources:
+  "cci.20220103":
+    sha256: "3e3ccf7a57b1e6a90099784597aa7da30de3249a5f7fe532cefb3a77db5acbfb"
+    url: "https://github.com/richgel999/lzham_codec/archive/d379b1f9121e2197881c61cfc4713c78848bdfe7.zip"
+patches:
+  "cci.20220103":
+    - patch_file: "patches/aarch64-yield-cci.20220103.patch"
+      patch_description: 'Uses "yield" rather than "pause" mneumonic to fix
+        aarch64 build'
+      patch_type: portability
+
+    - patch_file: "patches/cmake-min-req-swap-cci.20220103.patch"
+      patch_description: 'Puts cmake_minimum_required before project in all
+        CMakeLists'
+      patch_type: portability
+
+    - patch_file: "patches/fix-osx-cci.20220103.patch"
+      patch_description: "Fixes building on OSX"
+      patch_type: portability
+
+    - patch_file: "patches/use-lzham-types-cci.20220103.patch"
+      patch_description: 'Uses typedefs prefixed with LZHAM to fix linux build
+        errors'
+      patch_type: portability
+
+    - patch_file: "patches/cmake-rm-tests-cci.20220103.patch"
+      patch_description: "Skips building of lzhamtest for CMake"
+      patch_type: conan
+
+    - patch_file: "patches/msvc-conan-cci.20220103.patch"
+      patch_description: 'Skips building of lzhamtest and examples for MSVC,
+        and injects conan toolchain for MSVC'
+      patch_type: conan
