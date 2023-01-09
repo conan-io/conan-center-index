@@ -48,8 +48,7 @@ class LcmsConan(ConanFile):
         self.tool_requires("meson/1.0.0")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -60,7 +59,7 @@ class LcmsConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         compiler_version = Version(self.settings.compiler.version)
-        if (self.settings.compiler == "Visual Studio" and compiler_version >= "14") or \
+        if (str(self.settings.compiler) == "Visual Studio" and compiler_version >= "14") or \
            (str(self.settings.compiler) == "msvc" and compiler_version >= "190"):
             # since VS2015 vsnprintf is built-in
             path = os.path.join(self.source_folder, "src", "lcms2_internal.h")
