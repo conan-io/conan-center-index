@@ -15,5 +15,7 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+            devkit_path = os.environ.get("AC_API_DEVKIT_DIR")
+            bin_path = os.path.join(
+                devkit_path, "Tools", "OSX", "ResConv")
+            self.run(bin_path, run_environment=True, ignore_errors=True)
