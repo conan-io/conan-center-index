@@ -1,7 +1,7 @@
 sources:
-  "0.2.4":
-    url: "https://github.com/stephenberry/glaze/archive/v0.2.4.tar.gz"
-    sha256: "36fed13875193d1de6211fba93522f7ec8c9c6d20550ba4894c52265dd15be58"
+  "0.2.6":
+    url: "https://github.com/stephenberry/glaze/archive/v0.2.6.tar.gz"
+    sha256: "de6bc549b519bdce8cf4f2be13b63d19b775ff70bb849f026dc123cfdec25d1f"
   "0.2.2":
     url: "https://github.com/stephenberry/glaze/archive/v0.2.2.tar.gz"
     sha256: "d0d2edcc546b0ebb4bedaeedfb4a54aa678a6fdffa6b20dd6b252ef6325a9e75"
@@ -25,11 +25,6 @@ sources:
     sha256: "124f7e8fea58c012b548ba1b643684fe428c7dbfeb8d8a5f701eb7db4356a759"
 
 patches:
-  "0.2.4":
-    - patch_file: "patches/0.2.4-0001-include-climits.patch"
-      patch_description: "include climits"
-      patch_type: "bugfix"
-      patch_source: "https://github.com/stephenberry/glaze/issues/100"
   "0.2.2":
     - patch_file: "patches/0.2.0-0001-use-cci-frozen.patch"
       patch_description: "use cci's frozen"
