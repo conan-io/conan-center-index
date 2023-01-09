@@ -6,13 +6,12 @@
 using namespace lely;
 
 int main() {
-  auto io_guard = io::IoGuard{};
-  auto context  = io::Context{};
-  auto poll     = io::Poll{context};
+  io::IoGuard io_guard{};
+  io::Context context{};
+  io::Poll poll{context};
 
-  auto loop = ev::Loop{poll.get_poll()};
+  ev::Loop loop{poll.get_poll()};
   auto exec = loop.get_executor();
 
   loop.run();
 }
-
