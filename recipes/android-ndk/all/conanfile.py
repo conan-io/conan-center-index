@@ -27,7 +27,7 @@ class AndroidNDKConan(ConanFile):
         settings = self.settings.info if info else self.settings
         major, minor = self._ndk_major_minor
         return ((major == 23 and minor >= "b") or major >= 24) and \
-               settings == "Macos" and settings.arch in ["x86_64", "armv8"]
+               settings.os == "Macos" and settings.arch in ["x86_64", "armv8"]
 
     @property
     def _arch(self):
