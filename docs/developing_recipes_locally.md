@@ -151,10 +151,8 @@ schema validation. There's are to encourage the best possible quality of recipes
 
   ```sh
   # Lint a recipe:
-  yamllint --config-file linter/yamllint_rules.yml -f standard recipes/fmt/all/conanfile.py
-
-  # Lint the test_package (same command)
-  yamllint --config-file linter/yamllint_rules.yml -f standard recipes/fmt/all/test_package/conanfile.py
+  yamllint --config-file linter/yamllint_rules.yml -f standard recipes/config.yml
+  yamllint --config-file linter/yamllint_rules.yml -f standard recipes/fmt/all/conandata.yml
   ```
 
 ### Yamlschema
