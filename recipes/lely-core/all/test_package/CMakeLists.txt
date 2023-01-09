@@ -6,3 +6,4 @@ find_package(Threads REQUIRED)
 
 add_executable("${PROJECT_NAME}" test_package.cpp)
 target_link_libraries("${PROJECT_NAME}" PRIVATE lely-core::lely-core Threads::Threads)
+target_compile_features("${PROJECT_NAME}" PRIVATE cxx_std_11)
