@@ -43,7 +43,9 @@ class Hdf5Conan(ConanFile):
         "parallel": False,
     }
     @property
-    def _v1_14_minimum_cpp_standard(self):
+    def _minimum_cpp_standard(self):
+        if Version(self.version) < "1.14.0":
+            return 98
         return 11
 
     def export_sources(self):
@@ -125,7 +127,7 @@ class Hdf5Conan(ConanFile):
 
         tc = CMakeToolchain(self)
         if self.settings.get_safe("compiler.cppstd"):
-            tc.variables["CMAKE_CXX_STANDARD"] = self._v1_14_minimum_cpp_standard
+            tc.variables["CMAKE_CXX_STANDARD"] = self._minimum_cpp_standard
         if self.settings.get_safe("compiler.libcxx"):
             tc = self._inject_stdlib_flag(tc)
         if self.options.szip_support == "with_libaec":
