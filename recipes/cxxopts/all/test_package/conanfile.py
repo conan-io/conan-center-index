@@ -26,11 +26,11 @@ class TestPackageConan(ConanFile):
             output = StringIO()
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             option_string = "-f 41 --bar baria --baz"
-            if self.options["cxxopts"].unicode:
+            if self.dependencies["cxxopts"].options.unicode:
                 option_string += " -q quxis"
-            self.run(f"{bin_path} {option_string}", env="conanrun", output=output)
+            self.run(f"{bin_path} {option_string}", output, env="conanrun")
             output_lines = set(output.getvalue().splitlines())
             expected_lines = {"foo:41", "bar:baria", "baz:1"}
-            if self.options["cxxopts"].unicode:
+            if self.dependencies["cxxopts"].options.unicode:
                 expected_lines.add("qux:quxis")
             assert(expected_lines.issubset(output_lines))
