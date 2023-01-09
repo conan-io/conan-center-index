@@ -111,6 +111,12 @@ class XkbcommonConan(ConanFile):
         if self.options.get_safe("with_wayland"):
             meson_build_file = os.path.join(self.source_folder, "meson.build")
             # Patch the build system to use the pkg-config files generated for the build context.
+
+            if Version(self.version) >= "1.5.0":
+                get_pkg_config_var = "get_variable(pkgconfig: "
+            else:
+                get_pkg_config_var = "get_pkgconfig_variable("
+
             if self._has_build_profile:
                 replace_in_file(self, meson_build_file,
                                 "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
@@ -128,7 +134,7 @@ class XkbcommonConan(ConanFile):
                                 "if not wayland_client_dep.found() or not wayland_protocols_dep.found()")
 
                 replace_in_file(self, meson_build_file,
-                                "wayland_scanner = find_program(wayland_scanner_dep.get_pkgconfig_variable('wayland_scanner'))",
+                                f"wayland_scanner = find_program(wayland_scanner_dep.{get_pkg_config_var}'wayland_scanner'))",
                                 "wayland_scanner = find_program('wayland-scanner')")
 
         meson = Meson(self)
