@@ -52,6 +52,7 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("tomlplusplus/3.2.0")
         if not self.options.without_python:
             self.requires("openssl/1.1.1s")
             self.requires(f"cpython/{self.options.python_version}")
@@ -70,7 +71,6 @@ class PackageConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/3.21.7")
-        self.tool_requires("tomlplusplus/3.2.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
