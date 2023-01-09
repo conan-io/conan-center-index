@@ -7,7 +7,7 @@ from conan.errors import ConanInvalidConfiguration
 
 
 class LelyConan(ConanFile):
-    name = "lely"
+    name = "lely-core"
 
     # Optional metadata
     license = "Apache"
