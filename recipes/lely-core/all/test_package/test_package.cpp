@@ -11,7 +11,6 @@ int main() {
   io::Poll poll{context};
 
   ev::Loop loop{poll.get_poll()};
-  auto exec = loop.get_executor();
 
   loop.run();
 }
