@@ -35,9 +35,8 @@ class LibevConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
-        if is_msvc(self):
-            copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
-            copy(self, "config.h", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
+        copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
+        copy(self, "config.h", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
         export_conandata_patches(self)
 
     def config_options(self):
@@ -67,6 +66,8 @@ class LibevConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
+        if not is_msvc(self):    
+            rm(self, "config.h", os.path.join(self.export_sources_folder, "src"))
 
     def generate(self):
         if is_msvc(self):
@@ -91,7 +92,6 @@ class LibevConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
         if is_msvc(self):
             cmake = CMake(self)
             cmake.install()
