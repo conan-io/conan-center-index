@@ -4,7 +4,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
+from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 import os
@@ -69,8 +69,6 @@ class LibevConan(ConanFile):
     def generate(self):
         if is_msvc(self):
             tc = CMakeToolchain(self)
-            tc.generate()
-            tc = CMakeDeps(self)
             tc.generate()
         else:    
             env = VirtualBuildEnv(self)
