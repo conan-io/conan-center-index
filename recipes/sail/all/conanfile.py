@@ -103,7 +103,7 @@ class SAILConan(ConanFile):
         tc.variables["SAIL_THREAD_SAFE"] = self.options.thread_safe
         # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
         if is_msvc(self):
-            tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
+            tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         # TODO: Remove after fixing https://github.com/conan-io/conan-center-index/issues/13159
         # C3I workaround to force CMake to choose the highest version of
         # the windows SDK available in the system
