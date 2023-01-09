@@ -24,7 +24,7 @@ class AndroidNDKConan(ConanFile):
     exports_sources = "cmake-wrapper.cmd", "cmake-wrapper"
 
     def _is_universal2(self, info=False):
-        settings = self.settings.info if info else self.settings
+        settings = self.info.settings if info else self.settings
         major, minor = self._ndk_major_minor
         return ((major == 23 and minor >= "b") or major >= 24) and \
                settings.os == "Macos" and settings.arch in ["x86_64", "armv8"]
