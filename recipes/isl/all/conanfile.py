@@ -95,10 +95,11 @@ class IslConan(ConanFile):
                 tc.extra_cflags = ["-FS"]
         env = tc.environment()
         if is_msvc(self):
+            ar_wrapper = unix_path(self, self.conf.get("user.automake:ar-lib"))
             env.define("CC", "cl -nologo")
             env.define("CXX", "cl -nologo")
             env.define("AR", "lib")
-            env.define("AR_FLAGS", "/OUT:")
+            env.define("AR", f'{ar_wrapper} "lib -nologo"')
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
