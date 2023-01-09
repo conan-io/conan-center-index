@@ -1,8 +1,17 @@
+import os
+
 from conan import ConanFile
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.layout import basic_layout
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, get
+from conan.tools.files import (
+    export_conandata_patches,
+    apply_conandata_patches,
+    get,
+    copy,
+    rmdir,
+    rm,
+)
 from conan.errors import ConanInvalidConfiguration
 
 
@@ -190,6 +199,15 @@ class LelyConan(ConanFile):
         autotools = Autotools(self)
         autotools.install()
         fix_apple_shared_install_name(self)
+
+        copy(
+            self,
+            "LICENSE",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "licenses"),
+        )
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         components = {
