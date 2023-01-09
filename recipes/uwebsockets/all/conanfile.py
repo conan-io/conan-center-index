@@ -54,6 +54,8 @@ class UwebsocketsConan(ConanFile):
         if self.options.get_safe("with_libdeflate"):
             self.requires("libdeflate/1.14")
 
+        if Version(self.version) >= "20.36.0":
+            self.requires("usockets/0.8.5")
         if Version(self.version) >= "20.15.0":
             self.requires("usockets/0.8.2")
         elif Version(self.version) >= "19.0.0":
@@ -74,7 +76,7 @@ class UwebsocketsConan(ConanFile):
             )
 
         if Version(self.version) >= "20.14.0" and self.settings.compiler == "clang" and str(self.settings .compiler.libcxx) == "libstdc++":
-            raise ConanInvalidConfiguration("{} needs recent libstdc++ with charconv.".format(self.name))
+            raise ConanInvalidConfiguration(f"{self.ref} needs recent libstdc++ with charconv.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
