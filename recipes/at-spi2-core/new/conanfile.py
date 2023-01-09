@@ -94,25 +94,25 @@ class AtSpi2CoreConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self.source_folder)
         meson = Meson(self)
         meson.install()
-        rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(os.path.join(self.package_folder, "etc"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "etc"))
 
 
     def package_info(self):
         self.cpp_info.components["atspi"].libs = ['atspi']
         self.cpp_info.components["atspi"].includedirs = ["include/at-spi-2.0"]
         self.cpp_info.components["atspi"].requires = ["dbus::dbus", "glib::glib"]
-        self.cpp_info.components["atspi"].names["pkg_config"] = "atspi-2"
+        self.cpp_info.components["atspi"].set_property("pkg_config_name", "atspi-2")
         
         self.cpp_info.components["atk"].libs = ["atk-1.0"]
         self.cpp_info.components["atk"].includedirs = ['include/atk-1.0']
         self.cpp_info.components["atk"].requires = ["glib::glib"]
-        self.cpp_info.components["atk"].names['pkg_config'] = 'atk'
+        self.cpp_info.components["atk"].set_property("pkg_config_name", 'atk')
 
         self.cpp_info.components["atk-bridge"].libs = ['atk-bridge-2.0']
         self.cpp_info.components["atk-bridge"].includedirs = [os.path.join('include', 'at-spi2-atk', '2.0')]
         self.cpp_info.components["atk-bridge"].requires = ["dbus::dbus", "atk", "glib::glib", "atspi"]
-        self.cpp_info.components["atk-bridge"].names['pkg_config'] = 'atk-bridge-2.0'
+        self.cpp_info.components["atk-bridge"].set_property("pkg_config_name", 'atk-bridge-2.0')
 
     def package_id(self):
         self.info.requires["glib"].full_package_mode()
