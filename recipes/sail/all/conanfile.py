@@ -52,7 +52,7 @@ class SAILConan(ConanFile):
 
     def requirements(self):
         if self.options.with_avif:
-            self.requires("libavif/0.9.3")
+            self.requires("libavif/0.11.1")
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
         if self.options.with_jpeg2000:
