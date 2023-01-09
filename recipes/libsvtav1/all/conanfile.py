@@ -3,7 +3,7 @@ from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
 from conan.tools.files import copy, get, rmdir
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class SVTAV1Conan(ConanFile):
@@ -29,11 +29,11 @@ class SVTAV1Conan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def build_requirements(self):
         if self.settings.arch in ("x86", "x86_64"):
@@ -82,15 +82,17 @@ class SVTAV1Conan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.system_libs = ["pthread", "dl", "m"]
         if self.options.build_encoder:
             self.cpp_info.components["encoder"].libs = ["SvtAv1Enc"]
             self.cpp_info.components["encoder"].includedirs = ["include/svt-av1"]
             self.cpp_info.components["encoder"].set_property("pkg_config_name", "SvtAv1Enc")
             self.cpp_info.components["encoder"].names["pkg_config"] = "SvtAv1Enc"
+            if self.settings.os in ("FreeBSD", "Linux"):
+                self.cpp_info.components["encoder"].system_libs = ["pthread", "dl", "m"]
         if self.options.build_decoder:
             self.cpp_info.components["decoder"].libs = ["SvtAv1Dec"]
             self.cpp_info.components["decoder"].includedirs = ["include/svt-av1"]
             self.cpp_info.components["decoder"].set_property("pkg_config_name", "SvtAv1Dec")
             self.cpp_info.components["decoder"].names["pkg_config"] = "SvtAv1Dec"
+            if self.settings.os in ("FreeBSD", "Linux"):
+                self.cpp_info.components["encoder"].system_libs = ["pthread", "dl", "m"]
