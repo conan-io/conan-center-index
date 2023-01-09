@@ -14,7 +14,7 @@ class TestPackageConan(ConanFile):
 
     @property
     def _todos_filename(self):
-        return os.path.join(self.recipe_folder, self.folders.generators, "catch2_test_to_do.yml")
+        return os.path.join(self.recipe_folder, self.folders.generators, "soxr_test_to_do.yml")
 
     def requirements(self):
         self.requires(self.tested_reference_str)
