@@ -10,7 +10,11 @@ class TestPackageConan(ConanFile):
     generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
     test_type = "explicit"
 
+    def build_requirements(self):
+        self.tool_requires("cmake/3.21.7")
+
     def requirements(self):
+        self.requires("openssl/1.1.1s")
         self.requires(self.tested_reference_str)
 
         if "without_python" in self.options["openassetio"] and self.options["openassetio"].without_python:

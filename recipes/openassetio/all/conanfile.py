@@ -53,6 +53,7 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         if not self.options.without_python:
+            self.requires("openssl/1.1.1s")
             self.requires(f"cpython/{self.options.python_version}")
             self.requires("pybind11/2.10.0")
 
@@ -68,6 +69,7 @@ class PackageConan(ConanFile):
                 )
 
     def build_requirements(self):
+        self.tool_requires("cmake/3.21.7")
         self.tool_requires("tomlplusplus/3.2.0")
 
     def source(self):
