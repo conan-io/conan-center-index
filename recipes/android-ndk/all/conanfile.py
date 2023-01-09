@@ -262,7 +262,7 @@ class AndroidNDKConan(ConanFile):
 
         # And if we are not building for Android, why bother at all
         if not self.settings_target.os == "Android":
-            self.output.warn(f"You've added {self.name}/{self.version} as a build requirement, while os={self.settings_target.os} != Android")
+            self.output.warning(f"You've added {self.ref} as a build requirement, while os={self.settings_target.os} != Android")
             return
 
         self.cpp_info.bindirs.append(os.path.join(self._ndk_root_rel_path, "bin"))
@@ -326,7 +326,7 @@ class AndroidNDKConan(ConanFile):
             if cmake_system_processor:
                 self.env_info.CONAN_CMAKE_SYSTEM_PROCESSOR = cmake_system_processor
             else:
-                self.output.warn("Could not find a valid CMAKE_SYSTEM_PROCESSOR variable, supported by CMake")
+                self.output.warning("Could not find a valid CMAKE_SYSTEM_PROCESSOR variable, supported by CMake")
             self.env_info.NDK_ROOT = self._ndk_root
             self.env_info.CHOST = self._llvm_triplet
             self.env_info.CONAN_CMAKE_FIND_ROOT_PATH = ndk_sysroot
