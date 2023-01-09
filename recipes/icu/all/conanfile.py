@@ -103,8 +103,9 @@ class ICUConan(ConanFile):
         env.generate()
 
         tc = AutotoolsToolchain(self)
-        if (self.settings.get_safe("compiler") == "Visual Studio" and self.settings.get_safe("compiler.version") >= "12") or \
-           (self.settings.get_safe("compiler") == "msvc" and self.settings.get_safe("compiler.version") >= "180"):
+        # TODO: cleanup after 2.0 is left -- workaround "visual studio" being used as a compiler
+        if is_msvc(self) and ((self.settings.compiler == "msvc" and self.settings.compiler.version >= "180") or \
+           (self.settings.compiler == "Visual Studio" and self.settings.compiler.version >= "12")):
             tc.extra_cflags.append("-FS")
             tc.extra_cxxflags.append("-FS")
         if not self.options.shared:
@@ -210,7 +211,7 @@ class ICUConan(ConanFile):
 
     @property
     def _data_filename(self):
-        vtag = str(self.version).split('.', maxsplit=1)[0]
+        vtag = str(self.version.major)
         return f"icudt{vtag}l.dat"
 
     @property
