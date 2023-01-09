@@ -1,12 +1,11 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import cross_building
 from conan.tools.files import copy, rename, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir, rm
 from conan.tools.microsoft import check_min_vs, msvc_runtime_flag, is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
-
-from conan.errors import ConanInvalidConfiguration
-from conan import ConanFile
-from conan.tools.apple import is_apple_os
 
 import os
 import textwrap
@@ -42,11 +41,9 @@ class ProtobufConan(ConanFile):
 
     short_paths = True
 
-
-
     @property
     def _is_clang_cl(self):
-        return self.settings.compiler == 'clang' and self.settings.os == 'Windows'
+        return self.settings.compiler == "clang" and self.settings.os == "Windows"
 
     @property
     def _is_clang_x86(self):
@@ -55,9 +52,6 @@ class ProtobufConan(ConanFile):
     @property
     def _can_disable_rtti(self):
         return Version(self.version) >= "3.15.4"
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -71,6 +65,9 @@ class ProtobufConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_zlib:
@@ -115,7 +112,6 @@ class ProtobufConan(ConanFile):
             if not runtime:
                 runtime = self.settings.get_safe("compiler.runtime")
             tc.cache_variables["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in runtime
-        
         tc.generate()
 
         deps = CMakeDeps(self)
