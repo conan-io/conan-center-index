@@ -406,7 +406,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.7.2")
         if self.options.get_safe("with_x11", False):
-            self.requires("xkbcommon/1.4.1")
+            self.requires("xkbcommon/1.5.0")
             self.requires("xorg/system")
         if self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
@@ -429,7 +429,7 @@ class QtConan(ConanFile):
             self.requires("dbus/1.15.2")
         if self.options.qtwayland:
             self.requires("wayland/1.21.0")
-            self.requires("xkbcommon/1.4.1")
+            self.requires("xkbcommon/1.5.0")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_atspi"):
