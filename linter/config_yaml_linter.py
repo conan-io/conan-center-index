@@ -1,9 +1,12 @@
 import argparse
+import sys
+
 from strictyaml import load, Map, Str, YAMLValidationError, MapPattern
 from yaml_linting import file_path
 
 
-def main():
+def main(argv):
+    print(argv)
     parser = argparse.ArgumentParser(
         description="Validate ConanCenterIndex's 'config.yaml' file."
     )
@@ -13,7 +16,7 @@ def main():
         type=file_path,
         help="file to validate.",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     schema = Map(
         {"versions": MapPattern(Str(), Map({"folder": Str()}), minimum_keys=1)}
@@ -34,4 +37,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

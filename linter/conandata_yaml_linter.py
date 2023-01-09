@@ -1,4 +1,6 @@
 import argparse
+import sys
+
 from strictyaml import (
     load,
     Map,
@@ -16,7 +18,8 @@ from yaml_linting import file_path
 CONANDATA_YAML_URL = "https://github.com/conan-io/conan-center-index/blob/master/docs/adding_packages/conandata_yml_format.md"
 
 
-def main():
+def main(argv):
+    print(argv)
     parser = argparse.ArgumentParser(
         description="Validate Conan's 'conandata.yaml' file to ConanCenterIndex's requirements."
     )
@@ -26,7 +29,7 @@ def main():
         type=file_path,
         help="file to validate.",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     patch_fields = Map(
         {
@@ -103,7 +106,7 @@ def pretty_print_yaml_validate_error(args, error):
         f"title=conandata.yml schema error"
         f"::Schema outlined in {CONANDATA_YAML_URL}#patches-fields is not followed.%0A%0A{error.problem} in %0A{snippet}%0A"
     )
-    
+
 def pretty_print_yaml_validate_warning(args, error):
     snippet = error.context_mark.get_snippet().replace("\n", "%0A")
     print(
@@ -114,4 +117,4 @@ def pretty_print_yaml_validate_warning(args, error):
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

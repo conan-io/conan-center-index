@@ -14,7 +14,10 @@ repos:
       additional_dependencies:
         - pylint==2.14
         - conan~=1.0
+        - argparse
       pass_filenames: true
+      types:
+        - python
     - id: lint-test_package
       name: test_package lint
       entry: python linter/pre_commit_linting.py -t
@@ -22,4 +25,29 @@ repos:
       additional_dependencies:
         - pylint==2.14
         - conan~=1.0
+        - argparse
       pass_filenames: true
+      types:
+        - python
+    - id: lint-yaml-scheme
+      name: Yaml lint
+      entry: python linter/pre_commit_linting.py -yl
+      language: python
+      additional_dependencies:
+        - yamllint==1.28
+        - argparse
+      pass_filenames: true
+      types:
+        - yaml
+      verbose: true
+    - id: check-yaml-scheme
+      name: Yaml scheme check
+      entry: python linter/pre_commit_linting.py -ys
+      language: python
+      additional_dependencies:
+        - strictyaml
+        - argparse
+      pass_filenames: true
+      types:
+        - yaml
+      verbose: true
