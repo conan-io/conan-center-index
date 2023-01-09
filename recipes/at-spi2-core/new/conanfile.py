@@ -61,8 +61,8 @@ class AtSpi2CoreConan(ConanFile):
             raise ConanInvalidConfiguration("only linux is supported by this recipe")
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         basic_layout(self, src_folder="src")
+        self.cpp.package.resdirs = ["res"]
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -109,7 +109,7 @@ class AtSpi2CoreConan(ConanFile):
         self.cpp_info.components["atspi"].includedirs = ["include/at-spi-2.0"]
         self.cpp_info.components["atspi"].requires = ["dbus::dbus", "glib::glib"]
         self.cpp_info.components["atspi"].set_property("pkg_config_name", "atspi-2")
-        
+
         self.cpp_info.components["atk"].libs = ["atk-1.0"]
         self.cpp_info.components["atk"].includedirs = ['include/atk-1.0']
         self.cpp_info.components["atk"].requires = ["glib::glib"]
