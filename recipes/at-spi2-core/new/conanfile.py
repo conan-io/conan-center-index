@@ -71,10 +71,11 @@ class AtSpi2CoreConan(ConanFile):
         tc = MesonToolchain(self)
         if Version(self.version) >= "2.47.1":
             tc.project_options["introspection"] = "disabled"
+            tc.project_options["x11"] = "enabled" if self.options.with_x11 else "disabled"
         else:
             tc.project_options["introspection"] = "no"
+            tc.project_options["x11"] = "yes" if self.options.with_x11 else "no"
         tc.project_options["docs"] = "false"
-        tc.project_options["x11"] = "yes" if self.options.with_x11 else "no"
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
