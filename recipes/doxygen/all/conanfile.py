@@ -72,7 +72,6 @@ class DoxygenConan(ConanFile):
 
         # Doxygen doesn't make code. Any package that will run is ok to use.
         # It's ok in general to use a release version of the tool that matches the
-        # build os and architecture.
         compatible_pkg = self.info.clone()
         compatible_pkg.settings.build_type = "Release"
         self.compatible_packages.append(compatible_pkg)
