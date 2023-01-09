@@ -4,6 +4,7 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.scm import Version
 import os
 
 
@@ -68,7 +69,10 @@ class AtSpi2CoreConan(ConanFile):
 
     def generate(self):
         tc = MesonToolchain(self)
-        tc.project_options["introspection"] = "no"
+        if Version(self.version) >= "2.47.1":
+            tc.project_options["introspection"] = "disabled"
+        else:
+            tc.project_options["introspection"] = "no"
         tc.project_options["docs"] = "false"
         tc.project_options["x11"] = "yes" if self.options.with_x11 else "no"
         tc.generate()
