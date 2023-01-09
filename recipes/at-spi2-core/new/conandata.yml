@@ -13,14 +13,10 @@ sources:
     url: "https://ftp.gnome.org/pub/gnome/sources/at-spi2-core/2.45/at-spi2-core-2.45.1.tar.xz"
 patches:
   "2.47.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/93.patch"
+    - patch_file: "patches/93.patch"
   "2.46.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/93.patch"
+    - patch_file: "patches/93.patch"
   "2.45.90":
-    - base_path: "source_subfolder"
-      patch_file: "patches/93.patch"
+    - patch_file: "patches/93.patch"
   "2.45.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/93.patch"
+    - patch_file: "patches/93.patch"
