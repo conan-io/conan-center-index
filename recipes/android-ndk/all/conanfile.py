@@ -23,13 +23,15 @@ class AndroidNDKConan(ConanFile):
     short_paths = True
     exports_sources = "cmake-wrapper.cmd", "cmake-wrapper"
 
-    @property
-    def _is_universal2(self):
-        return self.version in ["r23b", "r23c", "r24", "r25"] and self.settings.os == "Macos" and self.settings.arch in ["x86_64", "armv8"]
+    def _is_universal2(self, info=False):
+        settings = self.settings.info if info else self.settings
+        major, minor = self._ndk_major_minor
+        return ((major == 23 and minor >= "b") or major >= 24) and \
+               settings == "Macos" and settings.arch in ["x86_64", "armv8"]
 
     @property
     def _arch(self):
-        return "x86_64" if self._is_universal2 else self.settings.arch
+        return "x86_64" if self._is_universal2() else self.settings.arch
 
     @property
     def _settings_os_supported(self):
@@ -43,7 +45,7 @@ class AndroidNDKConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def package_id(self):
-        if self._is_universal2:
+        if self._is_universal2(info=True):
             self.info.settings.arch = "universal:armv8/x86_64"
         del self.info.settings.compiler
         del self.info.settings.build_type
