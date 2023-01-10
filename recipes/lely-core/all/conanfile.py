@@ -108,7 +108,6 @@ class LelyConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
-        # return "configure.ac", "src/*", "include/*"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -136,6 +135,10 @@ class LelyConan(ConanFile):
     def generate(self):
         at_toolchain = AutotoolsToolchain(self)
         at_toolchain.generate()
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
 
     def build(self):
         args = [
