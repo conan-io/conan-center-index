@@ -654,39 +654,24 @@ class OpenCVConan(ConanFile):
         tc.variables["OPENCV_DNN_CUDA"] = self.options.get_safe("dnn_cuda", False)
 
         # Main modules
-        ## calib3d
         tc.variables["BUILD_opencv_calib3d"] = True
-        ## core
         tc.variables["BUILD_opencv_core"] = True
-        ## dnn
         tc.variables["BUILD_opencv_dnn"] = self.options.dnn
         tc.variables["WITH_PROTOBUF"] = self.options.dnn
         if self.options.dnn:
             tc.variables["PROTOBUF_UPDATE_FILES"] = True
-        ## features2d
         tc.variables["BUILD_opencv_features2d"] = True
-        ## flann
         tc.variables["BUILD_opencv_flann"] = True
-        ## gapi
         tc.variables["BUILD_opencv_gapi"] = self.options.gapi
         tc.variables["WITH_ADE"] = self.options.gapi
-        ## highgui
         tc.variables["BUILD_opencv_highgui"] = True
-        ## imgcodecs
         tc.variables["BUILD_opencv_imgcodecs"] = True
-        ## imgproc
         tc.variables["BUILD_opencv_imgproc"] = True
-        ## ml
         tc.variables["BUILD_opencv_ml"] = True
-        ## objdetect
         tc.variables["BUILD_opencv_objdetect"] = True
-        ## photo
         tc.variables["BUILD_opencv_photo"] = True
-        ## stitching
         tc.variables["BUILD_opencv_stitching"] = self.options.stitching
-        ## video
         tc.variables["BUILD_opencv_video"] = True
-        ## videoio
         tc.variables["BUILD_opencv_videoio"] = True
 
         # Contrib modules
