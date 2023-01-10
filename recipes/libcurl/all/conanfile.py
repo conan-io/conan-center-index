@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get, load, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
@@ -153,6 +153,12 @@ class LibcurlConan(ConanFile):
             del self.options.with_zstd
         if not self._has_metalink_option:
             del self.options.with_libmetalink
+
+        # Before 7.86.0, enabling unix sockets configure option would fail on windows
+        # It was fixed with this PR: https://github.com/curl/curl/pull/9688
+        if self._is_mingw and Version(self.version) < "7.86.0":
+            del self.options.with_unix_sockets
+
         # Default options
         self.options.with_ssl = "darwinssl" if is_apple_os(self) else "openssl"
 
@@ -299,7 +305,8 @@ class LibcurlConan(ConanFile):
             # add directives to build dll
             # used only for native mingw-make
             if not cross_building(self):
-                added_content = load(self, "lib_Makefile_add.am")
+                # The patch file is located in the base src folder
+                added_content = load(self, os.path.join(self.folders.base_source, "lib_Makefile_add.am"))
                 save(self, lib_makefile, added_content, append=True)
 
     def _patch_cmake(self):
@@ -385,7 +392,7 @@ class LibcurlConan(ConanFile):
             f"--enable-manual={self._yes_no(self.options.with_docs)}",
             f"--enable-verbose={self._yes_no(self.options.with_verbose_debug)}",
             f"--enable-symbol-hiding={self._yes_no(self.options.with_symbol_hiding)}",
-            f"--enable-unix-sockets={self._yes_no(self.options.with_unix_sockets)}",
+            f"--enable-unix-sockets={self._yes_no(self.options.get_safe('with_unix_sockets'))}",
         ])
 
         # Since 7.77.0, disabling TLS must be explicitly requested otherwise it fails
@@ -468,6 +475,8 @@ class LibcurlConan(ConanFile):
             elif self.settings.os == "Android":
                 pass # this just works, conan is great!
 
+        env = tc.environment()
+
         # tweaks for mingw
         if self._is_mingw:
             rcflags = "-O COFF"
@@ -476,7 +485,6 @@ class LibcurlConan(ConanFile):
             elif self.settings.arch == "x86_64":
                 rcflags += " --target=pe-x86-64"
                 tc.extra_defines.append("_AMD64_")
-            env = tc.environment()
             env.define("RCFLAGS", rcflags)
 
         if self.settings.os != "Windows":
@@ -486,7 +494,7 @@ class LibcurlConan(ConanFile):
         if cross_building(self) and is_apple_os(self):
             tc.extra_defines.extend(['HAVE_SOCKET', 'HAVE_FCNTL_O_NONBLOCK'])
 
-        tc.generate()
+        tc.generate(env)
         tc = PkgConfigDeps(self)
         tc.generate()
         tc = AutotoolsDeps(self)
@@ -515,6 +523,8 @@ class LibcurlConan(ConanFile):
         return version
 
     def _generate_with_cmake(self):
+        dc = CMakeDeps(self)
+        dc.generate()
         if self._is_win_x_android:
             tc = CMakeToolchain(self, generator="Ninja")
         else:
@@ -595,9 +605,9 @@ class LibcurlConan(ConanFile):
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
             if self._is_mingw and self.options.shared:
                 # Handle only mingw libs
-                copy(self, pattern="*.dll", src=self.build_folder, dst="bin", keep_path=False)
-                copy(self, pattern="*.dll.a", src=self.build_folder, dst="lib", keep_path=False)
-                copy(self, pattern="*.lib", src=self.build_folder, dst="lib", keep_path=False)
+                copy(self, pattern="*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+                copy(self, pattern="*.dll.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+                copy(self, pattern="*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):

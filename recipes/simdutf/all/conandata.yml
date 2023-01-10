@@ -1,4 +1,7 @@
 sources:
+  "2.1.0":
+    url: "https://github.com/simdutf/simdutf/archive/v2.1.0.tar.gz"
+    sha256: "a8a8bbd71c8d8be1f7da16722776988d0640758fe0a46066eb3129868dad08da"
   "2.0.9":
     url: "https://github.com/simdutf/simdutf/archive/v2.0.9.tar.gz"
     sha256: "ff6a19de4c23671e7f1077cf6c0f60bc01197f29c6e4f56fa485c9cd732576ac"
@@ -18,6 +21,10 @@ sources:
     url: "https://github.com/simdutf/simdutf/archive/refs/tags/v1.0.1.tar.gz"
     sha256: "e7832ba58fb95fe00de76dbbb2f17d844a7ad02a6f5e3e9e5ce9520e820049a0"
 patches:
+  "2.1.0":
+    - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
+      patch_description: "remove static build, enable rpath on macOS"
+      patch_type: "conan"
   "2.0.9":
     - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
       patch_description: "remove static build, enable rpath on macOS"
