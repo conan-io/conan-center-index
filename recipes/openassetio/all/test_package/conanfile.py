@@ -48,6 +48,10 @@ class TestPackageConan(ConanFile):
             tc.variables["Python_EXECUTABLE"] = self._python_exe
             if self.settings.os == "Windows":
                 tc.variables["Python_LIBRARY"] = self._python_lib
+            if self.settings.compiler == "clang":
+                # Work around cpython recipe bug.
+                # FIXME: remove once fixed upstream.
+                tc.variables["CMAKE_EXE_LINKER_FLAGS"] = "-lpthread"
 
         tc.generate()
         tc = CMakeDeps(self)
