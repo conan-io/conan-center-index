@@ -91,6 +91,7 @@ class OpenCVConan(ConanFile):
         "neon": [True, False],
         "dnn": [True, False],
         "gapi": [True, False],
+        "highgui": [True, False],
         "stitching": [True, False],
         "dnn_cuda": [True, False],
         "cuda_arch_bin": [None, "ANY"],
@@ -167,6 +168,7 @@ class OpenCVConan(ConanFile):
         "neon": True,
         "dnn": True,
         "gapi": True,
+        "highgui": True,
         "stitching": True,
         "dnn_cuda": False,
         "cuda_arch_bin": None,
@@ -267,6 +269,8 @@ class OpenCVConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if not self.options.highgui:
+            self.options.rm_safe("with_gtk")
         if not self.options.dnn:
             del self.options.dnn_cuda
         if not self.options.with_cuda:
@@ -297,7 +301,8 @@ class OpenCVConan(ConanFile):
                     self.options.contrib_barcode = True
                 self.options.contrib_bgsegm = True
                 self.options.contrib_bioinspired = True
-                self.options.contrib_ccalib = True
+                if self.options.highgui:
+                    self.options.contrib_ccalib = True
                 self.options.contrib_datasets = True
                 if self.options.dnn:
                     self.options.contrib_dnn_objdetect = True
@@ -413,6 +418,9 @@ class OpenCVConan(ConanFile):
             raise ConanInvalidConfiguration(f"opencv-icv is not available for {self.settings.os}/{self.settings.arch}")
 
         # Check internal dependencies of contribs
+        if not self.options.highgui:
+            if self.options.contrib_ccalib:
+                raise ConanInvalidConfiguration("contrib_ccalib=True requires highgui=True")
         if not self.options.dnn:
             if self.options.get_safe("contrib_barcode"):
                 raise ConanInvalidConfiguration("contrib_barcode=True requires dnn=True")
@@ -664,7 +672,7 @@ class OpenCVConan(ConanFile):
         tc.variables["BUILD_opencv_flann"] = True
         tc.variables["BUILD_opencv_gapi"] = self.options.gapi
         tc.variables["WITH_ADE"] = self.options.gapi
-        tc.variables["BUILD_opencv_highgui"] = True
+        tc.variables["BUILD_opencv_highgui"] = self.options.highgui
         tc.variables["BUILD_opencv_imgcodecs"] = True
         tc.variables["BUILD_opencv_imgproc"] = True
         tc.variables["BUILD_opencv_ml"] = True
@@ -915,10 +923,6 @@ class OpenCVConan(ConanFile):
         def requires_features2d():
             return ["opencv_imgproc", "opencv_flann"] + eigen() + ipp()
 
-        def requires_highgui():
-            return ["opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_videoio"] + \
-                   freetype() + gtk() + eigen() + ipp()
-
         def requires_imgcodecs():
             return ["opencv_imgproc", "zlib::zlib"] + imageformats_deps() + eigen() + ipp()
 
@@ -945,7 +949,6 @@ class OpenCVConan(ConanFile):
             {"target": "opencv_core",       "lib": "core",       "requires": requires_core()},
             {"target": "opencv_features2d", "lib": "features2d", "requires": requires_features2d()},
             {"target": "opencv_flann",      "lib": "flann",      "requires": ["opencv_core"] + eigen() + ipp()},
-            {"target": "opencv_highgui",    "lib": "highgui",    "requires": requires_highgui()},
             {"target": "opencv_imgcodecs",  "lib": "imgcodecs",  "requires": requires_imgcodecs()},
             {"target": "opencv_imgproc",    "lib": "imgproc",    "requires": ["opencv_core"] + eigen() + ipp()},
             {"target": "opencv_ml",         "lib": "ml",         "requires": ["opencv_core"] + eigen() + ipp()},
@@ -971,6 +974,12 @@ class OpenCVConan(ConanFile):
                 requires_gapi.append("opencv_calib3d")
             opencv_components.extend([
                 {"target": "opencv_gapi", "lib": "gapi", "requires": requires_gapi},
+            ])
+        if self.options.highgui:
+            requires_highgui = ["opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_videoio"] + \
+                               freetype() + gtk() + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_highgui", "lib": "highgui", "requires": requires_highgui},
             ])
         if self.options.stitching:
             requires_stitching = ["opencv_imgproc", "opencv_features2d", "opencv_calib3d", "opencv_flann"] + \
@@ -1289,9 +1298,11 @@ class OpenCVConan(ConanFile):
         add_components(self._opencv_components)
 
         if self.settings.os == "Windows":
-            self.cpp_info.components["opencv_highgui"].system_libs = ["comctl32", "gdi32", "ole32", "setupapi", "ws2_32", "vfw32"]
+            if self.options.highgui:
+                self.cpp_info.components["opencv_highgui"].system_libs = ["comctl32", "gdi32", "ole32", "setupapi", "ws2_32", "vfw32"]
         elif self.settings.os == "Macos":
-            self.cpp_info.components["opencv_highgui"].frameworks = ["Cocoa"]
+            if self.options.highgui:
+                self.cpp_info.components["opencv_highgui"].frameworks = ["Cocoa"]
             self.cpp_info.components["opencv_videoio"].frameworks = ["Cocoa", "Accelerate", "AVFoundation", "CoreGraphics", "CoreMedia", "CoreVideo", "QuartzCore"]
         elif self.settings.os == "iOS":
             self.cpp_info.components["opencv_videoio"].frameworks = ["AVFoundation", "QuartzCore"]
