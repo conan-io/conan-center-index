@@ -25,9 +25,47 @@ class OpenCVConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "contrib": [True, False],
+        "contrib": [True, False, "deprecated"],
+        "contrib_alphamat": [True, False],
+        "contrib_aruco": [True, False],
+        "contrib_barcode": [True, False],
+        "contrib_bgsegm": [True, False],
+        "contrib_bioinspired": [True, False],
+        "contrib_ccalib": [True, False],
+        "contrib_datasets": [True, False],
+        "contrib_dnn_objdetect": [True, False],
+        "contrib_dnn_superres": [True, False],
+        "contrib_dpm": [True, False],
+        "contrib_face": [True, False],
         "contrib_freetype": [True, False],
+        "contrib_fuzzy": [True, False],
+        "contrib_hfs": [True, False],
+        "contrib_img_hash": [True, False],
+        "contrib_intensity_transform": [True, False],
+        "contrib_line_descriptor": [True, False],
+        "contrib_mcc": [True, False],
+        "contrib_optflow": [True, False],
+        "contrib_phase_unwrapping": [True, False],
+        "contrib_plot": [True, False],
+        "contrib_quality": [True, False],
+        "contrib_rapid": [True, False],
+        "contrib_reg": [True, False],
+        "contrib_rgbd": [True, False],
+        "contrib_saliency": [True, False],
         "contrib_sfm": [True, False],
+        "contrib_shape": [True, False],
+        "contrib_stereo": [True, False],
+        "contrib_structured_light": [True, False],
+        "contrib_superres": [True, False],
+        "contrib_surface_matching": [True, False],
+        "contrib_text": [True, False],
+        "contrib_tracking": [True, False],
+        "contrib_videostab": [True, False],
+        "contrib_wechat_qrcode": [True, False],
+        "contrib_xfeatures2d": [True, False],
+        "contrib_ximgproc": [True, False],
+        "contrib_xobjdetect": [True, False],
+        "contrib_xphoto": [True, False],
         "parallel": [False, "tbb", "openmp"],
         "with_ipp": [False, "intel-ipp", "opencv-icv"],
         "with_ade": [True, False],
@@ -62,9 +100,47 @@ class OpenCVConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "parallel": False,
-        "contrib": False,
+        "contrib": "deprecated",
+        "contrib_alphamat": False,
+        "contrib_aruco": False,
+        "contrib_barcode": False,
+        "contrib_bgsegm": False,
+        "contrib_bioinspired": False,
+        "contrib_ccalib": False,
+        "contrib_datasets": False,
+        "contrib_dnn_objdetect": False,
+        "contrib_dnn_superres": False,
+        "contrib_dpm": False,
+        "contrib_face": False,
         "contrib_freetype": False,
+        "contrib_fuzzy": False,
+        "contrib_hfs": False,
+        "contrib_img_hash": False,
+        "contrib_intensity_transform": False,
+        "contrib_line_descriptor": False,
+        "contrib_mcc": False,
+        "contrib_optflow": False,
+        "contrib_phase_unwrapping": False,
+        "contrib_plot": False,
+        "contrib_quality": False,
+        "contrib_rapid": False,
+        "contrib_reg": False,
+        "contrib_rgbd": False,
+        "contrib_saliency": False,
         "contrib_sfm": False,
+        "contrib_shape": False,
+        "contrib_stereo": False,
+        "contrib_structured_light": False,
+        "contrib_superres": False,
+        "contrib_surface_matching": False,
+        "contrib_text": False,
+        "contrib_tracking": False,
+        "contrib_videostab": False,
+        "contrib_wechat_qrcode": False,
+        "contrib_xfeatures2d": False,
+        "contrib_ximgproc": False,
+        "contrib_xobjdetect": False,
+        "contrib_xphoto": False,
         "with_ipp": False,
         "with_ade": True,
         "with_jpeg": "libjpeg",
@@ -114,6 +190,34 @@ class OpenCVConan(ConanFile):
         return self.settings.os != "iOS" and self.settings.os != "WindowsStore"
 
     @property
+    def _has_contrib_superres_option(self):
+        return self.settings.os != "iOS"
+
+    @property
+    def _has_contrib_alphamat_option(self):
+        return Version(self.version) >= "4.3.0"
+
+    @property
+    def _has_contrib_intensity_transform_option(self):
+        return Version(self.version) >= "4.3.0"
+
+    @property
+    def _has_contrib_rapid_option(self):
+        return Version(self.version) >= "4.3.0"
+
+    @property
+    def _has_contrib_mcc_option(self):
+        return Version(self.version) >= "4.5.0"
+
+    @property
+    def _has_contrib_wechat_qrcode_option(self):
+        return Version(self.version) >= "4.5.2"
+
+    @property
+    def _has_contrib_barcode_option(self):
+        return Version(self.version) >= "4.5.3"
+
+    @property
     def _protobuf_version(self):
         return "3.17.1"
 
@@ -141,13 +245,24 @@ class OpenCVConan(ConanFile):
             del self.options.with_jpeg2000
         if not self._has_with_tiff_option:
             del self.options.with_tiff
+        if not self._has_contrib_superres_option:
+            del self.options.contrib_superres
+        if not self._has_contrib_alphamat_option:
+            del self.options.contrib_alphamat
+        if not self._has_contrib_intensity_transform_option:
+            del self.options.contrib_intensity_transform
+        if not self._has_contrib_rapid_option:
+            del self.options.contrib_rapid
+        if not self._has_contrib_mcc_option:
+            del self.options.contrib_mcc
+        if not self._has_contrib_wechat_qrcode_option:
+            del self.options.contrib_wechat_qrcode
+        if not self._has_contrib_barcode_option:
+            del self.options.contrib_barcode
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if not self.options.contrib:
-            del self.options.contrib_freetype
-            del self.options.contrib_sfm
         if not self.options.dnn:
             del self.options.dnn_cuda
         if not self.options.with_cuda:
@@ -164,6 +279,60 @@ class OpenCVConan(ConanFile):
 
         if self.settings.os == "Android":
             self.options.with_openexr = False  # disabled because this forces linkage to libc++_shared.so
+
+        # TODO: remove contrib option in few months
+        if self.options.contrib != "deprecated":
+            self.output.warning("contrib option is deprecated")
+            if self.options.contrib:
+                # During deprecation period, keep old behavior of contrib=True, which was to enable
+                # all available contribs (except cuda*, freetype & sfm contribs)
+                if self._has_contrib_alphamat_option:
+                    self.options.contrib_alphamat = True
+                self.options.contrib_aruco = True
+                if self._has_contrib_barcode_option and self.options.dnn:
+                    self.options.contrib_barcode = True
+                self.options.contrib_bgsegm = True
+                self.options.contrib_bioinspired = True
+                self.options.contrib_ccalib = True
+                self.options.contrib_datasets = True
+                if self.options.dnn:
+                    self.options.contrib_dnn_objdetect = True
+                    self.options.contrib_dnn_superres = True
+                self.options.contrib_dpm = True
+                self.options.contrib_face = True
+                self.options.contrib_fuzzy = True
+                self.options.contrib_hfs = True
+                self.options.contrib_img_hash = True
+                if self._has_contrib_intensity_transform_option:
+                    self.options.contrib_intensity_transform = True
+                self.options.contrib_line_descriptor = True
+                if self._has_contrib_mcc_option and self.options.dnn:
+                    self.options.contrib_mcc = True
+                self.options.contrib_optflow = True
+                self.options.contrib_phase_unwrapping = True
+                self.options.contrib_plot = True
+                self.options.contrib_quality = True
+                if self._has_contrib_rapid_option:
+                    self.options.contrib_rapid = True
+                self.options.contrib_reg = True
+                self.options.contrib_rgbd = True
+                self.options.contrib_saliency = True
+                self.options.contrib_shape = True
+                self.options.contrib_stereo = True
+                self.options.contrib_structured_light = True
+                if self._has_contrib_superres_option:
+                    self.options.contrib_superres = True
+                self.options.contrib_surface_matching = True
+                if self.options.dnn:
+                    self.options.contrib_text = True
+                self.options.contrib_tracking = True
+                self.options.contrib_videostab = True
+                if self._has_contrib_wechat_qrcode_option and self.options.dnn:
+                    self.options.contrib_wechat_qrcode = True
+                self.options.contrib_xfeatures2d = True
+                self.options.contrib_ximgproc = True
+                self.options.contrib_xobjdetect = True
+                self.options.contrib_xphoto = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -201,10 +370,10 @@ class OpenCVConan(ConanFile):
             self.requires("intel-ipp/2020")
         if self.options.with_webp:
             self.requires("libwebp/1.2.4")
-        if self.options.get_safe("contrib_freetype"):
+        if self.options.contrib_freetype:
             self.requires("freetype/2.12.1")
             self.requires("harfbuzz/6.0.0")
-        if self.options.get_safe("contrib_sfm"):
+        if self.options.contrib_sfm:
             self.requires("gflags/2.2.2")
             self.requires("glog/0.6.0")
         if self.options.with_quirc:
@@ -216,20 +385,48 @@ class OpenCVConan(ConanFile):
         if self.options.with_ade:
             self.requires("ade/0.1.2a")
 
+    def package_id(self):
+        del self.info.options.contrib # deprecated option
+
     def validate(self):
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio with static runtime is not supported for shared library.")
         if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "4":
             raise ConanInvalidConfiguration("Clang 3.x can't build OpenCV 4.x due to an internal bug.")
-        if self.options.with_cuda and not self.options.contrib:
-            raise ConanInvalidConfiguration("contrib must be enabled for cuda")
         if self.options.get_safe("dnn_cuda") and \
-            (not self.options.with_cuda or not self.options.contrib or not self.options.with_cublas or not self.options.with_cudnn):
-            raise ConanInvalidConfiguration("with_cublas, with_cudnn and contrib must be enabled for dnn_cuda")
+            (not self.options.with_cuda or not self.options.with_cublas or not self.options.with_cudnn):
+            raise ConanInvalidConfiguration("with_cublas and with_cudnn must be enabled for dnn_cuda")
         if self.options.with_ipp == "opencv-icv" and \
             (not str(self.settings.arch) in ["x86", "x86_64"] or \
              not str(self.settings.os) in ["Linux", "Macos", "Windows"]):
             raise ConanInvalidConfiguration(f"opencv-icv is not available for {self.settings.os}/{self.settings.arch}")
+
+        # Check internal dependencies of contribs
+        if not self.options.dnn:
+            if self.options.get_safe("contrib_barcode"):
+                raise ConanInvalidConfiguration("contrib_barcode=True requires dnn=True")
+            if self.options.contrib_dnn_objdetect:
+                raise ConanInvalidConfiguration("contrib_dnn_objdetect=True requires dnn=True")
+            if self.options.contrib_dnn_superres:
+                raise ConanInvalidConfiguration("contrib_dnn_superres=True requires dnn=True")
+            if self.options.get_safe("contrib_mcc"):
+                raise ConanInvalidConfiguration("contrib_mcc=True requires dnn=True")
+            if self.options.contrib_text:
+                raise ConanInvalidConfiguration("contrib_text=True requires dnn=True")
+            if self.options.get_safe("contrib_wechat_qrcode"):
+                raise ConanInvalidConfiguration("contrib_wechat_qrcode=True requires dnn=True")
+        if self.options.contrib_optflow and not self.options.contrib_ximgproc:
+            raise ConanInvalidConfiguration("contrib_optflow=True requires contrib_ximgproc=True")
+        if self.options.contrib_sfm and not self.options.contrib_xfeatures2d:
+            # TODO: Actually it's required only if ceres if found during build of sfm,
+            #       but ceres is not in requirements of this recipe currently...
+            raise ConanInvalidConfiguration("contrib_sfm=True requires contrib_xfeatures2d=True")
+        if self.options.contrib_stereo and not self.options.contrib_tracking:
+            raise ConanInvalidConfiguration("contrib_stereo=True requires contrib_tracking=True")
+        if self.options.contrib_structured_light and not self.options.contrib_phase_unwrapping:
+            raise ConanInvalidConfiguration("contrib_structured_light=True requires contrib_phase_unwrapping=True")
+        if self.options.get_safe("contrib_superres") and not self.options.contrib_optflow:
+            raise ConanInvalidConfiguration("contrib_superres=True requires contrib_optflow=True")
 
     def build_requirements(self):
         if self.options.dnn:
@@ -278,15 +475,15 @@ class OpenCVConan(ConanFile):
                                       'if(TARGET "${Protobuf_LIBRARIES}")',
                                       'if(FALSE)  # patch: disable if(TARGET "${Protobuf_LIBRARIES}")')
 
-        if self.options.get_safe("contrib_freetype"):
+        if self.options.contrib_freetype:
             freetype_cmake = os.path.join(self._contrib_folder, "modules", "freetype", "CMakeLists.txt")
             replace_in_file(self, freetype_cmake, "ocv_check_modules(FREETYPE freetype2)", "find_package(Freetype REQUIRED MODULE)")
             replace_in_file(self, freetype_cmake, "FREETYPE_", "Freetype_")
 
-            replace_in_file(self, freetype_cmake, "ocv_check_modules(HARFBUZZ harfbuzz)", "find_package(harfbuzz REQUIRED)")
+            replace_in_file(self, freetype_cmake, "ocv_check_modules(HARFBUZZ harfbuzz)", "find_package(harfbuzz REQUIRED CONFIG)")
             replace_in_file(self, freetype_cmake, "HARFBUZZ_", "harfbuzz_")
 
-        if self.options.get_safe("contrib_sfm") and Version(self.version) <= "4.5.2":
+        if self.options.contrib_sfm and Version(self.version) <= "4.5.2":
             sfm_cmake = os.path.join(self._contrib_folder, "modules", "sfm", "CMakeLists.txt")
             ver = Version(self.version)
             if ver <= "4.5.0":
@@ -450,10 +647,62 @@ class OpenCVConan(ConanFile):
             tc.variables["BUILD_opencv_dnn"] = True
         tc.variables["OPENCV_DNN_CUDA"] = self.options.get_safe("dnn_cuda", False)
 
-        if self.options.contrib:
-            tc.variables["OPENCV_EXTRA_MODULES_PATH"] = os.path.join(self._contrib_folder, "modules").replace("\\", "/")
-        tc.variables["BUILD_opencv_freetype"] = self.options.get_safe("contrib_freetype", False)
-        tc.variables["BUILD_opencv_sfm"] = self.options.get_safe("contrib_sfm", False)
+        # Handle contribs
+        tc.variables["OPENCV_EXTRA_MODULES_PATH"] = os.path.join(self._contrib_folder, "modules").replace("\\", "/")
+        if self._has_contrib_alphamat_option:
+            tc.variables["BUILD_opencv_alphamat"] = self.options.contrib_alphamat
+        tc.variables["BUILD_opencv_aruco"] = self.options.contrib_aruco
+        if self._has_contrib_barcode_option:
+            tc.variables["BUILD_opencv_barcode"] = self.options.contrib_barcode
+        tc.variables["BUILD_opencv_bgsegm"] = self.options.contrib_bgsegm
+        tc.variables["BUILD_opencv_bioinspired"] = self.options.contrib_bioinspired
+        tc.variables["BUILD_opencv_ccalib"] = self.options.contrib_ccalib
+        tc.variables["BUILD_opencv_cnn_3dobj"] = False
+        tc.variables["BUILD_opencv_cvv"] = False
+        tc.variables["BUILD_opencv_datasets"] = self.options.contrib_datasets
+        tc.variables["BUILD_opencv_dnn_objdetect"] = self.options.contrib_dnn_objdetect
+        tc.variables["BUILD_opencv_dnn_superres"] = self.options.contrib_dnn_superres
+        tc.variables["BUILD_opencv_dpm"] = self.options.contrib_dpm
+        tc.variables["BUILD_opencv_face"] = self.options.contrib_face
+        tc.variables["BUILD_opencv_freetype"] = self.options.contrib_freetype
+        tc.variables["BUILD_opencv_fuzzy"] = self.options.contrib_fuzzy
+        tc.variables["BUILD_opencv_hdf"] = False
+        tc.variables["BUILD_opencv_hfs"] = self.options.contrib_hfs
+        tc.variables["BUILD_opencv_img_hash"] = self.options.contrib_img_hash
+        if self._has_contrib_intensity_transform_option:
+            tc.variables["BUILD_opencv_intensity_transform"] = self.options.contrib_intensity_transform
+        if Version(self.version) >= "4.4.0":
+            tc.variables["BUILD_opencv_julia"] = False
+        tc.variables["BUILD_opencv_line_descriptor"] = self.options.contrib_line_descriptor
+        tc.variables["BUILD_opencv_matlab"] = False
+        if self._has_contrib_mcc_option:
+            tc.variables["BUILD_opencv_mcc"] = self.options.contrib_mcc
+        tc.variables["BUILD_opencv_optflow"] = self.options.contrib_optflow
+        tc.variables["BUILD_opencv_ovis"] = False
+        tc.variables["BUILD_opencv_phase_unwrapping"] = self.options.contrib_phase_unwrapping
+        tc.variables["BUILD_opencv_plot"] = self.options.contrib_plot
+        tc.variables["BUILD_opencv_quality"] = self.options.contrib_quality
+        if self._has_contrib_rapid_option:
+            tc.variables["BUILD_opencv_rapid"] = self.options.contrib_rapid
+        tc.variables["BUILD_opencv_reg"] = self.options.contrib_reg
+        tc.variables["BUILD_opencv_rgbd"] = self.options.contrib_rgbd
+        tc.variables["BUILD_opencv_saliency"] = self.options.contrib_saliency
+        tc.variables["BUILD_opencv_sfm"] = self.options.contrib_sfm
+        tc.variables["BUILD_opencv_shape"] = self.options.contrib_shape
+        tc.variables["BUILD_opencv_stereo"] = self.options.contrib_stereo
+        tc.variables["BUILD_opencv_structured_light"] = self.options.contrib_structured_light
+        tc.variables["BUILD_opencv_superres"] = self.options.get_safe("contrib_superres", False)
+        tc.variables["BUILD_opencv_surface_matching"] = self.options.contrib_surface_matching
+        tc.variables["BUILD_opencv_text"] = self.options.contrib_text
+        tc.variables["BUILD_opencv_tracking"] = self.options.contrib_tracking
+        tc.variables["BUILD_opencv_videostab"] = self.options.contrib_videostab
+        tc.variables["BUILD_opencv_viz"] = False
+        if self._has_contrib_wechat_qrcode_option:
+            tc.variables["BUILD_opencv_wechat_qrcode"] = self.options.contrib_wechat_qrcode
+        tc.variables["BUILD_opencv_xfeatures2d"] = self.options.contrib_xfeatures2d
+        tc.variables["BUILD_opencv_ximgproc"] = self.options.contrib_ximgproc
+        tc.variables["BUILD_opencv_xobjdetect"] = self.options.contrib_xobjdetect
+        tc.variables["BUILD_opencv_xphoto"] = self.options.contrib_xphoto
 
         if self.options.get_safe("with_jpeg2000") == "openjpeg":
             openjpeg_version = Version(self.dependencies["openjpeg"].ref.version)
@@ -572,7 +821,7 @@ class OpenCVConan(ConanFile):
             return ["protobuf::protobuf"] if self.options.dnn else []
 
         def freetype():
-            return ["freetype::freetype"] if self.options.get_safe("contrib_freetype") else []
+            return ["freetype::freetype"] if self.options.contrib_freetype else []
 
         def ffmpeg():
             if self.options.get_safe("with_ffmpeg"):
@@ -624,11 +873,8 @@ class OpenCVConan(ConanFile):
         def opencv_dnn():
             return ["opencv_dnn"] if self.options.dnn else []
 
-        def opencv_text():
-            return ["opencv_text"] if self.options.dnn and self.options.contrib else []
-
         def opencv_xfeatures2d():
-            return ["opencv_xfeatures2d"] if self.options.contrib else []
+            return ["opencv_xfeatures2d"] if self.options.contrib_xfeatures2d else []
 
         # Main components
         def requires_calib3d():
@@ -650,7 +896,7 @@ class OpenCVConan(ConanFile):
         def requires_objdetect():
             requires = ["opencv_core", "opencv_imgproc", "opencv_calib3d"] + quirc() + eigen() + ipp()
             if Version(self.version) >= "4.5.4":
-                requires.append(opencv_dnn())
+                requires.extend(opencv_dnn())
             return requires
 
         def requires_photo():
@@ -664,7 +910,7 @@ class OpenCVConan(ConanFile):
         def requires_video():
             requires = ["opencv_imgproc", "opencv_calib3d"] + eigen() + ipp()
             if Version(self.version) >= "4.5.1":
-                requires.append(opencv_dnn())
+                requires.extend(opencv_dnn())
             return requires
 
         def requires_videoio():
@@ -704,104 +950,242 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_gapi", "lib": "gapi", "requires": requires_gapi},
             ])
 
-        # Define contrib components
-        if self.options.contrib:
+        # Contrib components
+        if self.options.get_safe("contrib_alphamat"):
+            requires_alphamat = ["opencv_core", "opencv_imgproc"] + eigen() + ipp()
             opencv_components.extend([
-                {"target": "opencv_phase_unwrapping",    "lib": "phase_unwrapping",    "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
-                {"target": "opencv_plot",                "lib": "plot",                "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
-                {"target": "opencv_reg",                 "lib": "reg",                 "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
-                {"target": "opencv_surface_matching",    "lib": "surface_matching",    "requires": ["opencv_core", "opencv_flann"] + eigen() + ipp()},
-                {"target": "opencv_xphoto",              "lib": "xphoto",              "requires": ["opencv_core", "opencv_imgproc", "opencv_photo"] + eigen() + ipp()},
-                {"target": "opencv_fuzzy",               "lib": "fuzzy",               "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
-                {"target": "opencv_hfs",                 "lib": "hfs",                 "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
-                {"target": "opencv_img_hash",            "lib": "img_hash",            "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
-                {"target": "opencv_line_descriptor",     "lib": "line_descriptor",     "requires": ["opencv_imgproc", "opencv_features2d"] + eigen() + ipp()},
-                {"target": "opencv_saliency",            "lib": "saliency",            "requires": ["opencv_imgproc", "opencv_features2d"] + eigen() + ipp()},
-                {"target": "opencv_datasets",            "lib": "datasets",            "requires": ["opencv_core", "opencv_flann", "opencv_ml", "opencv_imgcodecs"] + opencv_text() + eigen() + ipp()},
-                {"target": "opencv_rgbd",                "lib": "rgbd",                "requires": ["opencv_core", "opencv_calib3d", "opencv_imgproc"] + eigen() + ipp()},
-                {"target": "opencv_shape",               "lib": "shape",               "requires": ["opencv_core", "opencv_imgproc", "opencv_calib3d"] + eigen() + ipp()},
-                {"target": "opencv_structured_light",    "lib": "structured_light",    "requires": ["opencv_core", "opencv_imgproc", "opencv_calib3d", "opencv_phase_unwrapping"] + eigen() + ipp()},
-                {"target": "opencv_videostab",           "lib": "videostab",           "requires": ["opencv_imgproc", "opencv_features2d", "opencv_video", "opencv_photo", "opencv_calib3d", "opencv_videoio"] +
-                                                                                                    eigen() + ipp() + opencv_cudawarping() + opencv_cudaoptflow()},
-                {"target": "opencv_xfeatures2d",         "lib": "xfeatures2d",         "requires": ["opencv_core", "opencv_imgproc", "opencv_features2d", "opencv_calib3d", "opencv_shape", "opencv_ml"] + eigen() + ipp() + opencv_cudaarithm()},
-                {"target": "opencv_ximgproc",            "lib": "ximgproc",            "requires": ["opencv_core", "opencv_imgproc", "opencv_calib3d", "opencv_imgcodecs", "opencv_video"] + eigen() + ipp()},
-                {"target": "opencv_xobjdetect",          "lib": "xobjdetect",          "requires": ["opencv_core", "opencv_imgproc", "opencv_objdetect", "opencv_imgcodecs"] + eigen() + ipp()},
-                {"target": "opencv_aruco",               "lib": "aruco",               "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d"] + eigen() + ipp()},
-                {"target": "opencv_bgsegm",              "lib": "bgsegm",              "requires": ["opencv_core", "opencv_imgproc", "opencv_video", "opencv_calib3d"] + eigen() + ipp()},
-                {"target": "opencv_bioinspired",         "lib": "bioinspired",         "requires": ["opencv_core", "opencv_highgui"] + eigen() + ipp()},
-                {"target": "opencv_ccalib",              "lib": "ccalib",              "requires": ["opencv_core", "opencv_imgproc", "opencv_calib3d", "opencv_features2d", "opencv_highgui"] + eigen() + ipp()},
-                {"target": "opencv_dpm",                 "lib": "dpm",                 "requires": ["opencv_core", "opencv_imgproc", "opencv_objdetect", "opencv_highgui"] + eigen() + ipp()},
-                {"target": "opencv_face",                "lib": "face",                "requires": ["opencv_core", "opencv_imgproc", "opencv_objdetect", "opencv_calib3d", "opencv_photo"] + eigen() + ipp()},
-                {"target": "opencv_optflow",             "lib": "optflow",             "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_video", "opencv_imgcodecs", "opencv_calib3d", "opencv_ximgproc"] + eigen() + ipp()},
-                {"target": "opencv_tracking",            "lib": "tracking",            "requires": ["opencv_core", "opencv_imgproc", "opencv_video", "opencv_plot", "opencv_datasets"] + opencv_dnn() + eigen() + ipp()},
-                {"target": "opencv_stereo",              "lib": "stereo",              "requires": ["opencv_core", "opencv_imgproc", "opencv_features2d", "opencv_calib3d", "opencv_tracking", "opencv_video"] + eigen() + ipp()},
+                {"target": "opencv_alphamat", "lib": "alphamat", "requires": requires_alphamat},
             ])
-            if self.settings.os != "iOS":
-                opencv_components.extend([
-                    {"target": "opencv_superres", "lib": "superres", "requires": ["opencv_imgproc", "opencv_video", "opencv_optflow", "opencv_videoio"] + eigen() + ipp() +
-                                                                                  opencv_cudaarithm() + opencv_cudafilters() + opencv_cudawarping() + opencv_cudaimgproc() +
-                                                                                  opencv_cudaoptflow() + opencv_cudacodec()},
-                ])
-            if Version(self.version) >= "4.1.0":
-                opencv_components.extend([
-                    {"target": "opencv_quality", "lib": "quality", "requires": ["opencv_core", "opencv_imgproc", "opencv_ml"] + eigen() + ipp()},
-                ])
-            if Version(self.version) >= "4.3.0":
-                opencv_components.extend([
-                    {"target": "opencv_intensity_transform", "lib": "intensity_transform", "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
-                    {"target": "opencv_alphamat",            "lib": "alphamat",            "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
-                    {"target": "opencv_rapid",               "lib": "rapid",               "requires": ["opencv_core", "opencv_imgproc", "opencv_calib3d"] + eigen() + ipp()},
-                ])
-            if self.options.dnn:
-                opencv_components.extend([
-                    {"target": "opencv_dnn_objdetect", "lib": "dnn_objdetect", "requires": ["opencv_core", "opencv_imgproc", "opencv_dnn"] + eigen() + ipp()},
-                    {"target": "opencv_text",          "lib": "text",          "requires": ["opencv_core", "opencv_ml", "opencv_imgproc", "opencv_features2d", "opencv_dnn"] + eigen() + ipp()},
-                ])
-                if Version(self.version) >= "4.1.2":
-                    opencv_components.extend([
-                        {"target": "opencv_dnn_superres", "lib": "dnn_superres", "requires": ["opencv_core", "opencv_imgproc", "opencv_dnn", "opencv_quality"] + eigen() + ipp()},
-                    ])
-                if Version(self.version) >= "4.5.0":
-                    opencv_components.extend([
-                        {"target": "opencv_mcc", "lib": "mcc", "requires": ["opencv_core", "opencv_imgproc", "opencv_calib3d", "opencv_dnn"] + eigen() + ipp()},
-                    ])
-                if Version(self.version) >= "4.5.2":
-                    opencv_components.extend([
-                        {"target": "opencv_wechat_qrcode", "lib": "wechat_qrcode", "requires": ["opencv_core", "opencv_imgproc", "opencv_dnn"] + eigen() + ipp()},
-                    ])
-                if Version(self.version) >= "4.5.3":
-                    opencv_components.extend([
-                        {"target": "opencv_barcode", "lib": "barcode", "requires": ["opencv_core", "opencv_imgproc", "opencv_dnn"] + eigen() + ipp()},
-                    ])
+        if self.options.contrib_aruco:
+            requires_aruco = ["opencv_core", "opencv_imgproc", "opencv_calib3d"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_aruco", "lib": "aruco", "requires": requires_aruco},
+            ])
+        if self.options.get_safe("contrib_barcode"):
+            requires_barcode = ["opencv_core", "opencv_imgproc", "opencv_dnn"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_barcode", "lib": "barcode", "requires": requires_barcode},
+            ])
+        if self.options.contrib_bgsegm:
+            requires_bgsegm = ["opencv_core", "opencv_imgproc", "opencv_video", "opencv_calib3d"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_bgsegm", "lib": "bgsegm", "requires": requires_bgsegm},
+            ])
+        if self.options.contrib_bioinspired:
+            requires_bioinspired = ["opencv_core"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_bioinspired", "lib": "bioinspired", "requires": requires_bioinspired},
+            ])
+        if self.options.contrib_ccalib:
+            requires_ccalib = ["opencv_core", "opencv_imgproc", "opencv_calib3d", "opencv_features2d",
+                               "opencv_highgui"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_ccalib", "lib": "ccalib", "requires": requires_ccalib},
+            ])
+        if self.options.contrib_datasets:
+            requires_datasets = ["opencv_core", "opencv_imgcodecs", "opencv_ml", "opencv_flann"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_datasets", "lib": "datasets", "requires": requires_datasets},
+            ])
+        if self.options.contrib_dnn_objdetect:
+            requires_dnn_objdetect = ["opencv_core", "opencv_imgproc", "opencv_dnn"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_dnn_objdetect", "lib": "dnn_objdetect", "requires": requires_dnn_objdetect},
+            ])
+        if self.options.contrib_dnn_superres:
+            requires_dnn_superres = ["opencv_core", "opencv_imgproc", "opencv_dnn"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_dnn_superres", "lib": "dnn_superres", "requires": requires_dnn_superres},
+            ])
+        if self.options.contrib_dpm:
+            requires_dpm = ["opencv_core", "opencv_imgproc", "opencv_objdetect"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_dpm", "lib": "dpm", "requires": requires_dpm},
+            ])
+        if self.options.contrib_face:
+            requires_face = ["opencv_core", "opencv_imgproc", "opencv_objdetect", "opencv_calib3d", "opencv_photo"] + \
+                            eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_face", "lib": "face", "requires": requires_face},
+            ])
+        if self.options.contrib_freetype:
+            requires_freetype = ["opencv_core", "opencv_imgproc", "freetype::freetype", "harfbuzz::harfbuzz"] + \
+                                eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_freetype", "lib": "freetype", "requires": requires_freetype},
+            ])
+        if self.options.contrib_fuzzy:
+            requires_fuzzy = ["opencv_core", "opencv_imgproc"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_fuzzy", "lib": "fuzzy", "requires": requires_fuzzy},
+            ])
+        if self.options.contrib_hfs:
+            requires_hfs = ["opencv_core", "opencv_imgproc"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_hfs", "lib": "hfs", "requires": requires_hfs},
+            ])
+        if self.options.contrib_img_hash:
+            requires_img_hash = ["opencv_core", "opencv_imgproc"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_img_hash", "lib": "img_hash", "requires": requires_img_hash},
+            ])
+        if self.options.get_safe("contrib_intensity_transform"):
+            requires_intensity_transform = ["opencv_core"] + eigen() + ipp()
+            if Version(self.version) >= "4.4.0":
+                requires_intensity_transform.append("opencv_imgproc")
+            opencv_components.extend([
+                {"target": "opencv_intensity_transform", "lib": "intensity_transform", "requires": requires_intensity_transform},
+            ])
+        if self.options.contrib_line_descriptor:
+            requires_line_descriptor = ["opencv_imgproc"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_line_descriptor", "lib": "line_descriptor", "requires": requires_line_descriptor},
+            ])
+        if self.options.get_safe("contrib_mcc"):
+            requires_mcc = ["opencv_core", "opencv_imgproc", "opencv_calib3d", "opencv_dnn"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_mcc", "lib": "mcc", "requires": requires_mcc},
+            ])
+        if self.options.contrib_optflow:
+            requires_optflow = ["opencv_core", "opencv_imgproc", "opencv_calib3d", "opencv_video", "opencv_ximgproc",
+                                "opencv_imgcodecs", "opencv_flann"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_optflow", "lib": "optflow", "requires": requires_optflow},
+            ])
+        if self.options.contrib_phase_unwrapping:
+            requires_phase_unwrapping = ["opencv_core", "opencv_imgproc"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_phase_unwrapping", "lib": "phase_unwrapping", "requires": requires_phase_unwrapping},
+            ])
+        if self.options.contrib_plot:
+            requires_plot = ["opencv_core", "opencv_imgproc"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_plot", "lib": "plot", "requires": requires_plot},
+            ])
+        if self.options.contrib_quality:
+            requires_quality = ["opencv_core", "opencv_imgproc", "opencv_ml"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_quality", "lib": "quality", "requires": requires_quality},
+            ])
+        if self.options.get_safe("contrib_rapid"):
+            requires_rapid = ["opencv_core", "opencv_imgproc", "opencv_calib3d"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_rapid", "lib": "rapid", "requires": requires_rapid},
+            ])
+        if self.options.contrib_reg:
+            requires_reg = ["opencv_core", "opencv_imgproc"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_reg", "lib": "reg", "requires": requires_reg},
+            ])
+        if self.options.contrib_rgbd:
+            requires_rgbd = ["opencv_core", "opencv_calib3d", "opencv_imgproc"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_rgbd", "lib": "rgbd", "requires": requires_rgbd},
+            ])
+        if self.options.contrib_saliency:
+            requires_saliency = ["opencv_imgproc", "opencv_features2d"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_saliency", "lib": "saliency", "requires": requires_saliency},
+            ])
+        if self.options.contrib_sfm:
+            requires_sfm = ["opencv_core", "opencv_calib3d", "opencv_features2d", "opencv_xfeatures2d", "opencv_imgcodecs",
+                            "correspondence", "multiview", "numeric", "glog::glog", "gflags::gflags"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_sfm",     "lib": "sfm",            "requires": requires_sfm},
+                {"target": "numeric",        "lib": "numeric",        "requires": eigen() + ipp()},
+                {"target": "correspondence", "lib": "correspondence", "requires": ["multiview", "glog::glog"] + eigen() + ipp()},
+                {"target": "multiview",      "lib": "multiview",      "requires": ["numeric", "gflags::gflags"] + eigen() + ipp()},
+            ])
+        if self.options.contrib_shape:
+            requires_shape = ["opencv_core", "opencv_imgproc", "opencv_calib3d"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_shape", "lib": "shape", "requires": requires_shape},
+            ])
+        if self.options.contrib_stereo:
+            requires_stereo = ["opencv_core", "opencv_imgproc", "opencv_features2d", "opencv_tracking"] + eigen() + ipp()
+            if Version(self.version) < "4.3.0":
+                requires_stereo.extend(["opencv_calib3d", "opencv_video"])
+            opencv_components.extend([
+                {"target": "opencv_stereo", "lib": "stereo", "requires": requires_stereo},
+            ])
+        if self.options.contrib_structured_light:
+            requires_structured_light = ["opencv_core", "opencv_imgproc", "opencv_calib3d", "opencv_phase_unwrapping"] + \
+                                        eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_structured_light", "lib": "structured_light", "requires": requires_structured_light},
+            ])
+        if self.options.get_safe("contrib_superres"):
+            requires_superres = ["opencv_imgproc", "opencv_video", "opencv_optflow", "opencv_videoio"] + \
+                                eigen() + ipp() + opencv_cudaarithm() + opencv_cudafilters() + opencv_cudawarping() + \
+                                opencv_cudaimgproc() + opencv_cudaoptflow() + opencv_cudacodec()
+            opencv_components.extend([
+                {"target": "opencv_superres", "lib": "superres", "requires": requires_superres},
+            ])
+        if self.options.contrib_surface_matching:
+            requires_surface_matching = ["opencv_core", "opencv_flann"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_surface_matching", "lib": "surface_matching", "requires": requires_surface_matching},
+            ])
+        if self.options.contrib_text:
+            requires_text = ["opencv_core", "opencv_ml", "opencv_imgproc", "opencv_features2d", "opencv_dnn"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_text", "lib": "text", "requires": requires_text},
+            ])
+        if self.options.contrib_tracking:
+            requires_tracking = ["opencv_core", "opencv_imgproc", "opencv_video"] + opencv_dnn() + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_tracking", "lib": "tracking", "requires": requires_tracking},
+            ])
+        if self.options.contrib_videostab:
+            requires_videostab = ["opencv_imgproc", "opencv_features2d", "opencv_video", "opencv_photo",
+                                  "opencv_calib3d", "opencv_videoio"] + \
+                                 eigen() + ipp() + opencv_cudawarping() + opencv_cudaoptflow()
+            opencv_components.extend([
+                {"target": "opencv_videostab", "lib": "videostab", "requires": requires_videostab},
+            ])
+        if self.options.get_safe("contrib_wechat_qrcode"):
+            requires_wechat_qrcode = ["opencv_core", "opencv_imgproc", "opencv_dnn"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_wechat_qrcode", "lib": "wechat_qrcode", "requires": requires_wechat_qrcode},
+            ])
+        if self.options.contrib_xfeatures2d:
+            requires_xfeatures2d = ["opencv_core", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + \
+                                   eigen() + ipp() + opencv_cudaarithm()
+            opencv_components.extend([
+                {"target": "opencv_xfeatures2d", "lib": "xfeatures2d", "requires": requires_xfeatures2d},
+            ])
+        if self.options.contrib_ximgproc:
+            requires_ximgproc = ["opencv_core", "opencv_imgproc", "opencv_calib3d", "opencv_imgcodecs", "opencv_video"] + \
+                                eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_ximgproc", "lib": "ximgproc", "requires": requires_ximgproc},
+            ])
+        if self.options.contrib_xobjdetect:
+            requires_xobjdetect = ["opencv_core", "opencv_imgproc", "opencv_objdetect", "opencv_imgcodecs"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_xobjdetect", "lib": "xobjdetect", "requires": requires_xobjdetect},
+            ])
+        if self.options.contrib_xphoto:
+            requires_xphoto = ["opencv_core", "opencv_imgproc", "opencv_photo"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_xphoto", "lib": "xphoto", "requires": requires_xphoto},
+            ])
 
-            if self.options.get_safe("contrib_freetype"):
-                opencv_components.extend([
-                    {"target": "opencv_freetype",   "lib": "freetype",          "requires": ["opencv_core", "opencv_imgproc", "freetype::freetype", "harfbuzz::harfbuzz"] + eigen() + ipp()},
-                ])
-
-            if self.options.get_safe("contrib_sfm"):
-                opencv_components.extend([
-                    {"target": "opencv_sfm",        "lib": "sfm",               "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_shape", "opencv_xfeatures2d", "correspondence", "multiview", "numeric", "glog::glog", "gflags::gflags"] + eigen() + ipp()},
-                    {"target": "numeric",           "lib": "numeric",           "requires": eigen() + ipp()},
-                    {"target": "correspondence",    "lib": "correspondence",    "requires": ["multiview", "glog::glog"] + eigen() + ipp()},
-                    {"target": "multiview",         "lib": "multiview",         "requires": ["numeric", "gflags::gflags"] + eigen() + ipp()},
-                ])
-
-            if self.options.with_cuda:
-                opencv_components.extend([
-                    {"target": "opencv_cudaarithm",     "lib": "cudaarithm",        "requires": ["opencv_core"] + eigen() + ipp()},
-                    {"target": "opencv_cudabgsegm",     "lib": "cudabgsegm",        "requires": ["opencv_core", "opencv_video"] + eigen() + ipp()},
-                    {"target": "opencv_cudacodec",      "lib": "cudacodec",         "requires": ["opencv_core"] + eigen() + ipp()},
-                    {"target": "opencv_cudafeatures2d", "lib": "cudafeatures2d",    "requires": ["opencv_core", "opencv_cudafilters"] + eigen() + ipp()},
-                    {"target": "opencv_cudafilters",    "lib": "cudafilters",       "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
-                    {"target": "opencv_cudaimgproc",    "lib": "cudaimgproc",       "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
-                    {"target": "opencv_cudalegacy",     "lib": "cudalegacy",        "requires": ["opencv_core", "opencv_video"] + eigen() + ipp()},
-                    {"target": "opencv_cudaobjdetect",  "lib": "cudaobjdetect",     "requires": ["opencv_core", "opencv_objdetect"] + eigen() + ipp()},
-                    {"target": "opencv_cudaoptflow",    "lib": "cudaoptflow",       "requires": ["opencv_core"] + eigen() + ipp()},
-                    {"target": "opencv_cudastereo",     "lib": "cudastereo",        "requires": ["opencv_core", "opencv_calib3d"] + eigen() + ipp()},
-                    {"target": "opencv_cudawarping",    "lib": "cudawarping",       "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
-                    {"target": "opencv_cudev",          "lib": "cudev",             "requires": [] + eigen() + ipp()},
-                ])
+        if self.options.with_cuda:
+            opencv_components.extend([
+                {"target": "opencv_cudaarithm",     "lib": "cudaarithm",     "requires": ["opencv_core"] + eigen() + ipp()},
+                {"target": "opencv_cudabgsegm",     "lib": "cudabgsegm",     "requires": ["opencv_core", "opencv_video"] + eigen() + ipp()},
+                {"target": "opencv_cudacodec",      "lib": "cudacodec",      "requires": ["opencv_core"] + eigen() + ipp()},
+                {"target": "opencv_cudafeatures2d", "lib": "cudafeatures2d", "requires": ["opencv_core", "opencv_cudafilters"] + eigen() + ipp()},
+                {"target": "opencv_cudafilters",    "lib": "cudafilters",    "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
+                {"target": "opencv_cudaimgproc",    "lib": "cudaimgproc",    "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
+                {"target": "opencv_cudalegacy",     "lib": "cudalegacy",     "requires": ["opencv_core", "opencv_video"] + eigen() + ipp()},
+                {"target": "opencv_cudaobjdetect",  "lib": "cudaobjdetect",  "requires": ["opencv_core", "opencv_objdetect"] + eigen() + ipp()},
+                {"target": "opencv_cudaoptflow",    "lib": "cudaoptflow",    "requires": ["opencv_core"] + eigen() + ipp()},
+                {"target": "opencv_cudastereo",     "lib": "cudastereo",     "requires": ["opencv_core", "opencv_calib3d"] + eigen() + ipp()},
+                {"target": "opencv_cudawarping",    "lib": "cudawarping",    "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
+                {"target": "opencv_cudev",          "lib": "cudev",          "requires": eigen() + ipp()},
+            ])
 
         return opencv_components
 
