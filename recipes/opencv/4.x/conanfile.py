@@ -1338,11 +1338,13 @@ class OpenCVConan(ConanFile):
             if self.options.highgui:
                 self.cpp_info.components["opencv_highgui"].system_libs = ["comctl32", "gdi32", "ole32", "setupapi", "ws2_32", "vfw32"]
         elif self.settings.os == "Macos":
+            self.cpp_info.components["opencv_imgcodecs"].frameworks = ["AppKit", "CoreFoundation", "CoreGraphics"]
             if self.options.highgui:
                 self.cpp_info.components["opencv_highgui"].frameworks = ["Cocoa"]
             if self.options.videoio:
                 self.cpp_info.components["opencv_videoio"].frameworks = ["Cocoa", "Accelerate", "AVFoundation", "CoreGraphics", "CoreMedia", "CoreVideo", "QuartzCore"]
         elif self.settings.os == "iOS":
+            self.cpp_info.components["opencv_imgcodecs"].frameworks = ["UIKit", "CoreFoundation", "CoreGraphics"]
             if self.options.videoio:
                 self.cpp_info.components["opencv_videoio"].frameworks = ["AVFoundation", "QuartzCore"]
 
