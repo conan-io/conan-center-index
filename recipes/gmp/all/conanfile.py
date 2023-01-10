@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, replace_in_file, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -70,13 +70,14 @@ class GmpConan(ConanFile):
     def package_id(self):
         del self.info.options.run_checks  # run_checks doesn't affect package's ID
 
-    def validate_build(self):
-        if is_msvc(self) and self.info.options.shared:
+    def validate(self):
+        if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(
                 f"{self.ref} cannot be built as a shared library using Visual Studio: some error occurs at link time",
             )
 
     def build_requirements(self):
+        self.tool_requires("m4/1.4.19")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -110,8 +111,8 @@ class GmpConan(ConanFile):
                 "lt_cv_sys_global_symbol_pipe=cat",  # added to get further in shared MSVC build, but it gets stuck later
             ])
             tc.extra_cxxflags.append("-EHsc")
-            if (self.settings.get_safe("compiler") == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-               (self.settings.get_safe("compiler") == "msvc" and Version(self.settings.compiler.version) >= "180"):
+            if (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180") or \
+               (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12"):
                 tc.extra_cflags.append("-FS")
                 tc.extra_cxxflags.append("-FS")
 
@@ -120,11 +121,13 @@ class GmpConan(ConanFile):
                 "x86": "x86",
                 "x86_64": "amd64",
             }[str(self.settings.arch)]
+            ar_wrapper = unix_path(self, self.conf.get("user.automake:ar-lib"))
             dumpbin_nm = unix_path(self, os.path.join(self.source_folder, "dumpbin_nm.py"))
             env.define("CC", "cl -nologo")
             env.define("CCAS", f"{yasm_wrapper} -a x86 -m {yasm_machine} -p gas -r raw -f win32 -g null -X gnu")
             env.define("CXX", "cl -nologo")
             env.define("LD", "link -nologo")
+            env.define("AR", f'{ar_wrapper} "lib -nologo"')
             env.define("NM", f"python {dumpbin_nm}")
         tc.generate(env)
 
@@ -135,11 +138,6 @@ class GmpConan(ConanFile):
             configure_file = os.path.join(self.source_folder, "configure")
             configure_stats = os.stat(configure_file)
             os.chmod(configure_file, configure_stats.st_mode | stat.S_IEXEC)
-        if is_msvc(self):
-            # Can't use AR and AR_FLAGS because "-OUT:" has to be right next to library name
-            replace_in_file(self, os.path.join(self.source_folder, "configure"),
-                            "old_archive_cmds='$AR $AR_FLAGS $oldlib$oldobjs'",
-                            "old_archive_cmds='lib -OUT:$oldlib$oldobjs$old_deplibs'")
 
     def build(self):
         self._patch_sources()
@@ -164,18 +162,12 @@ class GmpConan(ConanFile):
         # Workaround to always provide a pkgconfig file depending on all components
         self.cpp_info.set_property("pkg_config_name", "gmp-all-do-not-use")
 
-        self.cpp_info.components["gmp"].set_property("pkg_config_name", "gmp")
-        self.cpp_info.components["gmp"].set_property("cmake_find_mode", "both")
-        self.cpp_info.components["gmp"].set_property("cmake_file_name", "GMP")
-        self.cpp_info.components["gmp"].set_property("cmake_target_name", "gmp::libgmp")
-        self.cpp_info.components["gmp"].libs = ["gmp"]
+        self.cpp_info.components["libgmp"].set_property("pkg_config_name", "gmp")
+        self.cpp_info.components["libgmp"].libs = ["gmp"]
         if self.options.enable_cxx:
             self.cpp_info.components["gmpxx"].set_property("pkg_config_name", "gmpxx")
-            self.cpp_info.components["gmpxx"].set_property("cmake_find_mode", "both")
-            self.cpp_info.components["gmpxx"].set_property("cmake_file_name", "GMPXX")
-            self.cpp_info.components["gmpxx"].set_property("cmake_target_name", "gmp::gmpxx")
             self.cpp_info.components["gmpxx"].libs = ["gmpxx"]
-            self.cpp_info.components["gmpxx"].requires = ["gmp"]
+            self.cpp_info.components["gmpxx"].requires = ["libgmp"]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         #       GMP doesn't have any official CMake Find nor config file, do not port these names to CMakeDeps
