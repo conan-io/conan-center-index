@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
+from conan.tools import files
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
@@ -63,7 +64,7 @@ class ConfuJson(ConanFile):
         self.requires("magic_enum/0.8.0")
 
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
         destination=self._source_subfolder, strip_root=True)
 
     def package(self):
