@@ -93,7 +93,7 @@ class ZXingCppConan(ConanFile):
             tc.variables["BUILD_EXAMPLES"] = False
             tc.variables["BUILD_BLACKBOX_TESTS"] = False
         if is_msvc(self):
-            tc.variables["LINK_CPP_STATICALLY"] = "MT" in str(self.settings.compiler.runtime)
+            tc.variables["LINK_CPP_STATICALLY"] = is_msvc_static_runtime(self)
         tc.generate()
 
     def build(self):
