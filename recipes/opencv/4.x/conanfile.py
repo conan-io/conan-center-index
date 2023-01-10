@@ -93,6 +93,7 @@ class OpenCVConan(ConanFile):
         "gapi": [True, False],
         "highgui": [True, False],
         "ml": [True, False],
+        "photo": [True, False],
         "stitching": [True, False],
         "videoio": [True, False],
         "dnn_cuda": [True, False],
@@ -172,6 +173,7 @@ class OpenCVConan(ConanFile):
         "gapi": True,
         "highgui": True,
         "ml": True,
+        "photo": True,
         "stitching": True,
         "videoio": True,
         "dnn_cuda": False,
@@ -315,7 +317,8 @@ class OpenCVConan(ConanFile):
                     self.options.contrib_dnn_objdetect = True
                     self.options.contrib_dnn_superres = True
                 self.options.contrib_dpm = True
-                self.options.contrib_face = True
+                if self.options.photo:
+                    self.options.contrib_face = True
                 self.options.contrib_fuzzy = True
                 self.options.contrib_hfs = True
                 self.options.contrib_img_hash = True
@@ -343,13 +346,15 @@ class OpenCVConan(ConanFile):
                 if self.options.dnn and self.options.ml:
                     self.options.contrib_text = True
                 self.options.contrib_tracking = True
-                self.options.contrib_videostab = True
+                if self.options.photo:
+                    self.options.contrib_videostab = True
                 if self._has_contrib_wechat_qrcode_option and self.options.dnn:
                     self.options.contrib_wechat_qrcode = True
                 self.options.contrib_xfeatures2d = True
                 self.options.contrib_ximgproc = True
                 self.options.contrib_xobjdetect = True
-                self.options.contrib_xphoto = True
+                if self.options.photo:
+                    self.options.contrib_xphoto = True
 
         # TODO: remove with_ade option in few months
         if self.options.with_ade != "deprecated":
@@ -449,6 +454,13 @@ class OpenCVConan(ConanFile):
                 raise ConanInvalidConfiguration("contrib_quality=True requires ml=True")
             if self.options.contrib_text:
                 raise ConanInvalidConfiguration("contrib_text=True requires ml=True")
+        if not self.options.photo:
+            if self.options.contrib_face:
+                raise ConanInvalidConfiguration("contrib_face=True requires photo=True")
+            if self.options.contrib_videostab:
+                raise ConanInvalidConfiguration("contrib_videostab=True requires photo=True")
+            if self.options.contrib_xphoto:
+                raise ConanInvalidConfiguration("contrib_xphoto=True requires photo=True")
         if self.options.contrib_optflow and not self.options.contrib_ximgproc:
             raise ConanInvalidConfiguration("contrib_optflow=True requires contrib_ximgproc=True")
         if self.options.contrib_sfm and not self.options.contrib_xfeatures2d:
@@ -692,7 +704,7 @@ class OpenCVConan(ConanFile):
         tc.variables["BUILD_opencv_imgproc"] = True
         tc.variables["BUILD_opencv_ml"] = self.options.ml
         tc.variables["BUILD_opencv_objdetect"] = True
-        tc.variables["BUILD_opencv_photo"] = True
+        tc.variables["BUILD_opencv_photo"] = self.options.photo
         tc.variables["BUILD_opencv_stitching"] = self.options.stitching
         tc.variables["BUILD_opencv_video"] = True
         tc.variables["BUILD_opencv_videoio"] = self.options.videoio
@@ -950,9 +962,6 @@ class OpenCVConan(ConanFile):
                 requires.extend(opencv_dnn())
             return requires
 
-        def requires_photo():
-            return ["opencv_imgproc"] + opencv_cudaarithm() + opencv_cudaimgproc() + eigen() + ipp()
-
         def requires_video():
             requires = ["opencv_imgproc", "opencv_calib3d"] + eigen() + ipp()
             if Version(self.version) >= "4.5.1":
@@ -967,7 +976,6 @@ class OpenCVConan(ConanFile):
             {"target": "opencv_imgcodecs",  "lib": "imgcodecs",  "requires": requires_imgcodecs()},
             {"target": "opencv_imgproc",    "lib": "imgproc",    "requires": ["opencv_core"] + eigen() + ipp()},
             {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": requires_objdetect()},
-            {"target": "opencv_photo",      "lib": "photo",      "requires": requires_photo()},
             {"target": "opencv_video",      "lib": "video",      "requires": requires_video()},
         ]
         if self.options.with_ipp == "opencv-icv" and not self.options.shared:
@@ -997,6 +1005,11 @@ class OpenCVConan(ConanFile):
         if self.options.ml:
             opencv_components.extend([
                 {"target": "opencv_ml", "lib": "ml", "requires": ["opencv_core"] + eigen() + ipp()},
+            ])
+        if self.options.photo:
+            requires_photo = ["opencv_imgproc"] + opencv_cudaarithm() + opencv_cudaimgproc() + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_photo", "lib": "photo", "requires": requires_photo},
             ])
         if self.options.stitching:
             requires_stitching = ["opencv_imgproc", "opencv_features2d", "opencv_calib3d", "opencv_flann"] + \
