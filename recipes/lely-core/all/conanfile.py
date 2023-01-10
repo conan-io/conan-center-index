@@ -14,6 +14,7 @@ from conan.tools.files import (
 )
 from conan.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.53.0"
 
 class LelyConan(ConanFile):
     name = "lely-core"
@@ -111,7 +112,7 @@ class LelyConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         # Windows requires proprietary from https://www.ixxat.com/technical-support/support/windows-driver-software
@@ -138,7 +139,7 @@ class LelyConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def build(self):
         args = [
