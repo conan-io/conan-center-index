@@ -226,7 +226,7 @@ class LibcurlConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
-        download(self, "https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True, sha256="fb1ecd641d0a02c01bc9036d513cb658bbda62a75e246bedbc01764560a639f0")
+        download(self, "https://curl.se/ca/cacert-2023-01-10.pem", "cacert.pem", verify=True, sha256="fb1ecd641d0a02c01bc9036d513cb658bbda62a75e246bedbc01764560a639f0")
 
     def generate(self):
         env = VirtualBuildEnv(self)
