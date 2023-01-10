@@ -1,13 +1,12 @@
-import functools
 import os
 
 from conan import ConanFile
-from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.build.cross_building import cross_building
 from conan.tools.files import get, rmdir, copy, rm
+from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class FlexConan(ConanFile):
@@ -52,9 +51,8 @@ class FlexConan(ConanFile):
             raise ConanInvalidConfiguration("Flex package is not compatible with Windows. "
                                             "Consider using winflexbison instead.")
 
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = AutotoolsToolchain(self)
+    def generate(self):
+        at = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
         configure_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
@@ -68,17 +66,17 @@ class FlexConan(ConanFile):
             # https://github.com/easybuilders/easybuild-easyconfigs/pull/5792
             "ac_cv_func_reallocarray=no",
         ]
-
-        autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
-        return autotools
+        at.configure_args.extend(configure_args)
+        at.generate()
 
     def build(self):
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        copy("COPYING", src=self.source_folder, dst="licenses")
-        autotools = self._configure_autotools()
+        copy(self, "COPYING", src=self.source_folder, dst="licenses")
+        autotools = Autotools(self)
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
