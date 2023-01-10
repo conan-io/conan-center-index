@@ -18,6 +18,10 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             devkit_path = os.environ.get("AC_API_DEVKIT_DIR")
-            bin_path = os.path.join(
-                devkit_path, "Tools", "OSX", "ResConv")
+            if self.info.settings.os == "Macos":
+                bin_path = os.path.join(
+                    devkit_path, "Tools", "OSX", "ResConv")
+            elif self.info.settings.os == "Windows":
+                bin_path = os.path.join(
+                    devkit_path, "Tools", "Win", "ResConv.exe")
             self.run(bin_path, run_environment=True, ignore_errors=True)
