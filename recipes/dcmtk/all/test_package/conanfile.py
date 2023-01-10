@@ -5,7 +5,6 @@ import os
 
 
 class TestPackageConan(ConanFile):
-    name = "dcmtk-test-package-conan"
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
 
