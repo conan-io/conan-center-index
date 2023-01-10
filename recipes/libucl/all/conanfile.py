@@ -1,17 +1,18 @@
-from conans import CMake, ConanFile, tools
-import functools
+from conan import ConanFile
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+import os
 
-required_conan_version = ">=1.33.0"
-
+required_conan_version = ">=1.53.0"
 
 class LibuclConan(ConanFile):
     name = "libucl"
     description = "Universal configuration library parser"
     license = "BSD-2-Clause"
-    homepage = "https://github.com/vstakhov/libucl"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/vstakhov/libucl"
     topics = ("universal", "configuration", "language", "parser", "ucl")
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -27,12 +28,8 @@ class LibuclConan(ConanFile):
         "with_lua": False,
     }
 
-    generators = "cmake", "cmake_find_package_multi"
-    exports_sources = "CMakeLists.txt", "patches/*"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,48 +37,56 @@ class LibuclConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.enable_url_include:
-            self.requires("libcurl/7.84.0")
+            self.requires("libcurl/7.86.0")
         if self.options.enable_url_sign:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
         if self.options.with_lua == "lua":
             self.requires("lua/5.4.4")
         elif self.options.with_lua == "luajit":
             self.requires("luajit/2.0.5")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
+    def generate(self):
+        tc = CMakeToolchain(self)
         on_off = lambda v: "ON" if v else "OFF"
-        cmake.definitions["ENABLE_URL_INCLUDE"] = on_off(self.options.enable_url_include)
-        cmake.definitions["ENABLE_URL_SIGN"] = on_off(self.options.enable_url_sign)
-        cmake.definitions["ENABLE_LUA"] = on_off(self.options.with_lua == "lua")
-        cmake.definitions["ENABLE_LUAJIT"] = on_off(self.options.with_lua == "luajit")
-        cmake.configure()
-        return cmake
+        tc.variables["ENABLE_URL_INCLUDE"] = on_off(self.options.enable_url_include)
+        tc.variables["ENABLE_URL_SIGN"] = on_off(self.options.enable_url_sign)
+        tc.variables["ENABLE_LUA"] = on_off(self.options.with_lua == "lua")
+        tc.variables["ENABLE_LUAJIT"] = on_off(self.options.with_lua == "luajit")
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses", keep_path=False)
-        cmake = self._configure_cmake()
+        copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["ucl"]
-        self.cpp_info.names["pkg_config"] = "libucl"
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.defines.append("UCL_STATIC")
+
+        self.cpp_info.set_property("pkg_config_name", "libucl")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.names["pkg_config"] = "libucl"
