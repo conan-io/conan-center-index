@@ -677,7 +677,7 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_face",                "lib": "face",                "requires": ["opencv_core", "opencv_imgproc", "opencv_objdetect", "opencv_calib3d", "opencv_photo"] + eigen() + ipp()},
                 {"target": "opencv_optflow",             "lib": "optflow",             "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_video", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_video", "opencv_ximgproc"] + eigen() + ipp()},
                 {"target": "opencv_superres",            "lib": "superres",            "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_imgcodecs", "opencv_videoio", "opencv_calib3d", "opencv_video", "opencv_ximgproc", "opencv_optflow"] + eigen() + ipp()},
-                {"target": "opencv_tracking",            "lib": "tracking",            "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_plot", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_datasets", "opencv_video"] + eigen() + ipp()},
+                {"target": "opencv_tracking",            "lib": "tracking",            "requires": ["opencv_core", "opencv_imgproc", "opencv_video", "opencv_plot", "opencv_datasets"] + opencv_dnn() + eigen() + ipp()},
                 {"target": "opencv_stereo",              "lib": "stereo",              "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_plot", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_datasets", "opencv_video", "opencv_tracking"] + eigen() + ipp()},
             ])
             if Version(self.version) >= "4.1.0":
