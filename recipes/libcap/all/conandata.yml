@@ -23,29 +23,71 @@ sources:
   "2.65":
     url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.65.tar.xz"
     sha256: "73e350020cc31fe15360879d19384ffa3395a825f065fcf6bda3a5cdf965bebd"
+  "2.66":
+    url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.66.tar.xz"
+    sha256: "15c40ededb3003d70a283fe587a36b7d19c8b3b554e33f86129c059a4bb466b2"
 
 patches:
   "2.45":
     - patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
     - patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"
   "2.46":
     - patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
     - patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"
   "2.48":
     - patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
     - patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"
   "2.50":
     - patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
     - patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"
   "2.57":
     - patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
     - patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"
   "2.58":
     - patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
     - patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"
   "2.62":
     - patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
     - patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"
   "2.65":
     - patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
     - patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"
+  "2.66":
+    - patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
+    - patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"

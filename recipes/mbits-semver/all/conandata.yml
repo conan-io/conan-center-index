@@ -1,0 +1,4 @@
+sources:
+  0.1.1:
+    url: "https://github.com/mbits-libs/semver/archive/v0.1.1.tar.gz"
+    sha256: "edfa9b04bdffd8efbdea31c9cfd7064801483d8cab0b2de5734018bdb318cf18"

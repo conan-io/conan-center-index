@@ -1,4 +1,7 @@
 sources:
+  "8.69":
+    url: "https://github.com/d99kris/rapidcsv/archive/v8.69.tar.gz"
+    sha256: "b63e58b1d18277f0331e211bbe6740587069fcd3e5b5a5fb63be7d2f17250d54"
   "8.64":
     url: "https://github.com/d99kris/rapidcsv/archive/v8.64.tar.gz"
     sha256: "e2ab5231b6e65f1e168dc279bbba2e34afd43c7bc6e2522726b107bcc4e8ebac"
