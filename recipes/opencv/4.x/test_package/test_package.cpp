@@ -7,7 +7,7 @@
  */
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
-#ifdef BUILT_WITH_ADE
+#ifdef BUILT_GAPI
 #include <opencv2/gapi.hpp>
 #include <opencv2/gapi/core.hpp>
 #include <opencv2/gapi/imgproc.hpp>
@@ -204,7 +204,7 @@ void MyLine( Mat img, Point start, Point end )
 */
 void TestGAPI()
 {
-#ifdef BUILT_WITH_ADE
+#ifdef BUILT_GAPI
     cv::GMat in;
     cv::GMat vga      = cv::gapi::resize(in, cv::Size(), 0.5, 0.5);
     cv::GMat gray     = cv::gapi::BGR2Gray(vga);

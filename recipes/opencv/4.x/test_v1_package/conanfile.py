@@ -8,9 +8,9 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["built_with_ade"] = self.options["opencv"].with_ade
+        cmake.definitions["built_gapi"] = self.options["opencv"].gapi
         cmake.definitions["built_with_ffmpeg"] = self.options["opencv"].with_ffmpeg
-        cmake.definitions["built_contrib_sfm"] = self.options["opencv"].contrib and self.options["opencv"].contrib_sfm
+        cmake.definitions["built_contrib_sfm"] = self.options["opencv"].contrib_sfm
         cmake.configure()
         cmake.build()
 

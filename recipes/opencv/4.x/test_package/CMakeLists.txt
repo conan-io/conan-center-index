@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(test_package LANGUAGES CXX)
 
-option(built_with_ade "Enabled if opencv is built with ade" OFF)
+option(built_gapi "Enabled if opencv is built with Graph API" OFF)
 option(built_with_ffmpeg "Enabled if opencv is built with ffmpeg" OFF)
 option(built_contrib_sfm "Enabled if opencv is built contrib sfm" OFF)
 
@@ -17,8 +17,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     $<TARGET_NAME_IF_EXISTS:opencv_sfm>
 )
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
-if(built_with_ade)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE BUILT_WITH_ADE)
+if(built_gapi)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE BUILT_GAPI)
 endif()
 if(built_with_ffmpeg)
     target_compile_definitions(${PROJECT_NAME} PRIVATE BUILT_WITH_FFMPEG)
