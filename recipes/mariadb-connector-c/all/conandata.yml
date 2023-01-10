@@ -16,7 +16,7 @@ patches:
     - patch_file: "patches/3.3.3-0001-fix-install-and-static-or-shared.patch"
       patch_description: "fix install path, separate static/shared build"
       patch_type: "conan"
-    - patch_file: "patches/3.3.3-0002-remove-wx-flag.patch"
+    - patch_file: "patches/3.1.19-0002-remove-wx-flag.patch"
       patch_description: "remove WX flags in MSVC"
       patch_type: "conan"
     - patch_file: "patches/3.1.11-0003-include-order-windows-winsock2.patch"
@@ -28,6 +28,9 @@ patches:
   "3.1.19":
     - patch_file: "patches/3.1.19-0001-fix-install-and-static-or-shared.patch"
       patch_description: "fix install path, separate static/shared build"
+      patch_type: "conan"
+    - patch_file: "patches/3.1.19-0002-remove-wx-flag.patch"
+      patch_description: "remove WX flags in MSVC"
       patch_type: "conan"
     - patch_file: "patches/3.1.11-0003-include-order-windows-winsock2.patch"
       patch_description: "fix include order for windows winsock2"
