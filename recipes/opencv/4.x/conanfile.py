@@ -93,6 +93,7 @@ class OpenCVConan(ConanFile):
         "gapi": [True, False],
         "highgui": [True, False],
         "stitching": [True, False],
+        "videoio": [True, False],
         "dnn_cuda": [True, False],
         "cuda_arch_bin": [None, "ANY"],
         "cpu_baseline": [None, "ANY"],
@@ -170,6 +171,7 @@ class OpenCVConan(ConanFile):
         "gapi": True,
         "highgui": True,
         "stitching": True,
+        "videoio": True,
         "dnn_cuda": False,
         "cuda_arch_bin": None,
         "cpu_baseline": None,
@@ -269,15 +271,17 @@ class OpenCVConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if not self.options.dnn:
+            self.options.rm_safe("dnn_cuda")
         if not self.options.highgui:
             self.options.rm_safe("with_gtk")
-        if not self.options.dnn:
-            del self.options.dnn_cuda
+        if not self.options.videoio:
+            self.options.rm_safe("with_ffmpeg")
         if not self.options.with_cuda:
             del self.options.with_cublas
             del self.options.with_cudnn
             del self.options.with_cufft
-            del self.options.dnn_cuda
+            self.options.rm_safe("dnn_cuda")
             del self.options.cuda_arch_bin
         if bool(self.options.with_jpeg):
             if self.options.get_safe("with_jpeg2000") == "jasper":
@@ -680,7 +684,7 @@ class OpenCVConan(ConanFile):
         tc.variables["BUILD_opencv_photo"] = True
         tc.variables["BUILD_opencv_stitching"] = self.options.stitching
         tc.variables["BUILD_opencv_video"] = True
-        tc.variables["BUILD_opencv_videoio"] = True
+        tc.variables["BUILD_opencv_videoio"] = self.options.videoio
 
         # Contrib modules
         tc.variables["OPENCV_EXTRA_MODULES_PATH"] = os.path.join(self._contrib_folder, "modules").replace("\\", "/")
@@ -910,6 +914,9 @@ class OpenCVConan(ConanFile):
         def opencv_dnn():
             return ["opencv_dnn"] if self.options.dnn else []
 
+        def opencv_videoio():
+            return ["opencv_videoio"] if self.options.videoio else []
+
         def opencv_xfeatures2d():
             return ["opencv_xfeatures2d"] if self.options.contrib_xfeatures2d else []
 
@@ -941,9 +948,6 @@ class OpenCVConan(ConanFile):
                 requires.extend(opencv_dnn())
             return requires
 
-        def requires_videoio():
-            return ["opencv_imgproc", "opencv_imgcodecs"] + ffmpeg() + eigen() + ipp()
-
         opencv_components = [
             {"target": "opencv_calib3d",    "lib": "calib3d",    "requires": requires_calib3d()},
             {"target": "opencv_core",       "lib": "core",       "requires": requires_core()},
@@ -955,7 +959,6 @@ class OpenCVConan(ConanFile):
             {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": requires_objdetect()},
             {"target": "opencv_photo",      "lib": "photo",      "requires": requires_photo()},
             {"target": "opencv_video",      "lib": "video",      "requires": requires_video()},
-            {"target": "opencv_videoio",    "lib": "videoio",    "requires": requires_videoio()},
         ]
         if self.options.with_ipp == "opencv-icv" and not self.options.shared:
             opencv_components.extend([
@@ -976,8 +979,8 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_gapi", "lib": "gapi", "requires": requires_gapi},
             ])
         if self.options.highgui:
-            requires_highgui = ["opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_videoio"] + \
-                               freetype() + gtk() + eigen() + ipp()
+            requires_highgui = ["opencv_core", "opencv_imgproc", "opencv_imgcodecs"] + \
+                               opencv_videoio() + freetype() + gtk() + eigen() + ipp()
             opencv_components.extend([
                 {"target": "opencv_highgui", "lib": "highgui", "requires": requires_highgui},
             ])
@@ -987,6 +990,11 @@ class OpenCVConan(ConanFile):
                                  opencv_cudafeatures2d() + opencv_cudalegacy() + opencv_cudaimgproc() + eigen() + ipp()
             opencv_components.extend([
                 {"target": "opencv_stitching", "lib": "stitching", "requires": requires_stitching},
+            ])
+        if self.options.videoio:
+            requires_videoio = ["opencv_imgproc", "opencv_imgcodecs"] + ffmpeg() + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_videoio", "lib": "videoio", "requires": requires_videoio},
             ])
 
         # Contrib components
@@ -1154,7 +1162,7 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_structured_light", "lib": "structured_light", "requires": requires_structured_light},
             ])
         if self.options.get_safe("contrib_superres"):
-            requires_superres = ["opencv_imgproc", "opencv_video", "opencv_optflow", "opencv_videoio"] + \
+            requires_superres = ["opencv_imgproc", "opencv_video", "opencv_optflow"] + opencv_videoio() + \
                                 eigen() + ipp() + opencv_cudaarithm() + opencv_cudafilters() + opencv_cudawarping() + \
                                 opencv_cudaimgproc() + opencv_cudaoptflow() + opencv_cudacodec()
             opencv_components.extend([
@@ -1176,9 +1184,8 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_tracking", "lib": "tracking", "requires": requires_tracking},
             ])
         if self.options.contrib_videostab:
-            requires_videostab = ["opencv_imgproc", "opencv_features2d", "opencv_video", "opencv_photo",
-                                  "opencv_calib3d", "opencv_videoio"] + \
-                                 eigen() + ipp() + opencv_cudawarping() + opencv_cudaoptflow()
+            requires_videostab = ["opencv_imgproc", "opencv_features2d", "opencv_video", "opencv_photo", "opencv_calib3d"] + \
+                                 opencv_videoio() + eigen() + ipp() + opencv_cudawarping() + opencv_cudaoptflow()
             opencv_components.extend([
                 {"target": "opencv_videostab", "lib": "videostab", "requires": requires_videostab},
             ])
@@ -1303,9 +1310,11 @@ class OpenCVConan(ConanFile):
         elif self.settings.os == "Macos":
             if self.options.highgui:
                 self.cpp_info.components["opencv_highgui"].frameworks = ["Cocoa"]
-            self.cpp_info.components["opencv_videoio"].frameworks = ["Cocoa", "Accelerate", "AVFoundation", "CoreGraphics", "CoreMedia", "CoreVideo", "QuartzCore"]
+            if self.options.videoio:
+                self.cpp_info.components["opencv_videoio"].frameworks = ["Cocoa", "Accelerate", "AVFoundation", "CoreGraphics", "CoreMedia", "CoreVideo", "QuartzCore"]
         elif self.settings.os == "iOS":
-            self.cpp_info.components["opencv_videoio"].frameworks = ["AVFoundation", "QuartzCore"]
+            if self.options.videoio:
+                self.cpp_info.components["opencv_videoio"].frameworks = ["AVFoundation", "QuartzCore"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "OpenCV"
