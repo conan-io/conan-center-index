@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, replace_in_file, rm, rmdir, copy
 from conan.tools.microsoft import is_msvc
 from conan.tools.build import cross_building
 from conan.tools.scm import Version
@@ -225,8 +225,6 @@ class SDLConan(ConanFile):
         cmake_extra_ldflags = []
         cmake_extra_libs = []
 
-        # FIXME: self.install_folder not defined? Neccessary?
-        tc.variables["CONAN_INSTALL_FOLDER"] = self.install_folder.replace("\\", "/")
         if self.settings.os != "Windows" and not self.options.shared:
             tc.variables["SDL_STATIC_PIC"] = self.options.fPIC
         if is_msvc(self) and not self.options.shared:
@@ -392,9 +390,9 @@ class SDLConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         if self.version >= "2.0.16":
-            self.copy(pattern="LICENSE.txt", dst="licenses", src=self.source_folder)
+            copy(self, pattern="LICENSE.txt", src=os.path.join(self.source_folder), dst=os.path.join(self.package_folder, "licenses"))
         else:
-            self.copy(pattern="COPYING.txt", dst="licenses", src=self.source_folder)
+            copy(self, pattern="COPYING.txt", src=os.path.join(self.source_folder), dst=os.path.join(self.package_folder, "licenses"))
         cmake.install()
         rm(self, "sdl2-config", os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))
