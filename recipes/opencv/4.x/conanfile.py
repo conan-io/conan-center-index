@@ -694,6 +694,9 @@ class OpenCVConan(ConanFile):
         tc.variables["BUILD_opencv_superres"] = self.options.get_safe("contrib_superres", False)
         tc.variables["BUILD_opencv_surface_matching"] = self.options.contrib_surface_matching
         tc.variables["BUILD_opencv_text"] = self.options.contrib_text
+        if self.options.contrib_text:
+            # TODO: add tesseract as an optional requirement of text module
+            tc.variables["WITH_TESSERACT"] = False
         tc.variables["BUILD_opencv_tracking"] = self.options.contrib_tracking
         tc.variables["BUILD_opencv_videostab"] = self.options.contrib_videostab
         tc.variables["BUILD_opencv_viz"] = False
