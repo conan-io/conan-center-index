@@ -68,7 +68,7 @@ class OpenCVConan(ConanFile):
         "contrib_xphoto": [True, False],
         "parallel": [False, "tbb", "openmp"],
         "with_ipp": [False, "intel-ipp", "opencv-icv"],
-        "with_ade": [True, False],
+        "with_ade": [True, False, "deprecated"],
         "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
         "with_png": [True, False],
         "with_tiff": [True, False],
@@ -90,6 +90,7 @@ class OpenCVConan(ConanFile):
         "with_imgcodec_sunraster": [True, False],
         "neon": [True, False],
         "dnn": [True, False],
+        "gapi": [True, False],
         "dnn_cuda": [True, False],
         "cuda_arch_bin": [None, "ANY"],
         "cpu_baseline": [None, "ANY"],
@@ -142,7 +143,7 @@ class OpenCVConan(ConanFile):
         "contrib_xobjdetect": False,
         "contrib_xphoto": False,
         "with_ipp": False,
-        "with_ade": True,
+        "with_ade": "deprecated",
         "with_jpeg": "libjpeg",
         "with_png": True,
         "with_tiff": True,
@@ -164,6 +165,7 @@ class OpenCVConan(ConanFile):
         "with_imgcodec_sunraster": False,
         "neon": True,
         "dnn": True,
+        "gapi": True,
         "dnn_cuda": False,
         "cuda_arch_bin": None,
         "cpu_baseline": None,
@@ -334,6 +336,11 @@ class OpenCVConan(ConanFile):
                 self.options.contrib_xobjdetect = True
                 self.options.contrib_xphoto = True
 
+        # TODO: remove with_ade option in few months
+        if self.options.with_ade != "deprecated":
+            self.output.warning("with_ade option is deprecated, use gapi option instead")
+            self.options.gapi = self.options.with_ade
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -382,11 +389,13 @@ class OpenCVConan(ConanFile):
             self.requires("gtk/system")
         if self.options.dnn:
             self.requires(f"protobuf/{self._protobuf_version}")
-        if self.options.with_ade:
+        if self.options.gapi:
             self.requires("ade/0.1.2a")
 
     def package_id(self):
-        del self.info.options.contrib # deprecated option
+        # deprecated options
+        del self.info.options.contrib
+        del self.info.options.with_ade
 
     def validate(self):
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
@@ -547,7 +556,6 @@ class OpenCVConan(ConanFile):
         tc.variables["BUILD_opencv_ts"] = False
 
         tc.variables["WITH_1394"] = False
-        tc.variables["WITH_ADE"] = False
         tc.variables["WITH_ARAVIS"] = False
         tc.variables["WITH_CLP"] = False
         tc.variables["WITH_NVCUVID"] = False
@@ -641,13 +649,45 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("neon") is not None:
             tc.variables["ENABLE_NEON"] = self.options.get_safe("neon")
 
+        tc.variables["OPENCV_DNN_CUDA"] = self.options.get_safe("dnn_cuda", False)
+
+        # Main modules
+        ## calib3d
+        tc.variables["BUILD_opencv_calib3d"] = True
+        ## core
+        tc.variables["BUILD_opencv_core"] = True
+        ## dnn
+        tc.variables["BUILD_opencv_dnn"] = self.options.dnn
         tc.variables["WITH_PROTOBUF"] = self.options.dnn
         if self.options.dnn:
             tc.variables["PROTOBUF_UPDATE_FILES"] = True
-            tc.variables["BUILD_opencv_dnn"] = True
-        tc.variables["OPENCV_DNN_CUDA"] = self.options.get_safe("dnn_cuda", False)
+        ## features2d
+        tc.variables["BUILD_opencv_features2d"] = True
+        ## flann
+        tc.variables["BUILD_opencv_flann"] = True
+        ## gapi
+        tc.variables["BUILD_opencv_gapi"] = self.options.gapi
+        tc.variables["WITH_ADE"] = self.options.gapi
+        ## highgui
+        tc.variables["BUILD_opencv_highgui"] = True
+        ## imgcodecs
+        tc.variables["BUILD_opencv_imgcodecs"] = True
+        ## imgproc
+        tc.variables["BUILD_opencv_imgproc"] = True
+        ## ml
+        tc.variables["BUILD_opencv_ml"] = True
+        ## objdetect
+        tc.variables["BUILD_opencv_objdetect"] = True
+        ## photo
+        tc.variables["BUILD_opencv_photo"] = True
+        ## stitching
+        tc.variables["BUILD_opencv_stitching"] = False
+        ## video
+        tc.variables["BUILD_opencv_video"] = True
+        ## videoio
+        tc.variables["BUILD_opencv_videoio"] = True
 
-        # Handle contribs
+        # Contrib modules
         tc.variables["OPENCV_EXTRA_MODULES_PATH"] = os.path.join(self._contrib_folder, "modules").replace("\\", "/")
         if self._has_contrib_alphamat_option:
             tc.variables["BUILD_opencv_alphamat"] = self.options.contrib_alphamat
@@ -717,7 +757,6 @@ class OpenCVConan(ConanFile):
             tc.variables["WITH_OPENMP"] = self.options.parallel == "openmp"
 
         tc.variables["WITH_CUDA"] = self.options.with_cuda
-        tc.variables["WITH_ADE"] = self.options.with_ade
         if self.options.with_cuda:
             # This allows compilation on older GCC/NVCC, otherwise build errors.
             tc.variables["CUDA_NVCC_FLAGS"] = "--expt-relaxed-constexpr"
@@ -943,7 +982,7 @@ class OpenCVConan(ConanFile):
             opencv_components.extend([
                 {"target": "opencv_dnn", "lib": "dnn", "requires": requires_dnn},
             ])
-        if self.options.with_ade:
+        if self.options.gapi:
             requires_gapi = ["opencv_imgproc", "ade::ade"]
             if Version(self.version) >= "4.3.0":
                 requires_gapi.append("opencv_video")
