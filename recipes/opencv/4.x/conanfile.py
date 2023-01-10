@@ -662,12 +662,33 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_tracking",            "lib": "tracking",            "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_plot", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_datasets", "opencv_video"] + eigen() + ipp()},
                 {"target": "opencv_stereo",              "lib": "stereo",              "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_plot", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_datasets", "opencv_video", "opencv_tracking"] + eigen() + ipp()},
             ])
-            if self.version >= "4.3.0":
+            if Version(self.version) >= "4.3.0":
                 opencv_components.extend([
                     {"target": "opencv_intensity_transform", "lib": "intensity_transform", "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
                     {"target": "opencv_alphamat",            "lib": "alphamat",            "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
                     {"target": "opencv_rapid",               "lib": "rapid",               "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen() + ipp()},
                 ])
+            if self.options.dnn:
+                opencv_components.extend([
+                    {"target": "opencv_dnn_objdetect", "lib": "dnn_objdetect", "requires": ["opencv_core", "opencv_imgproc", "opencv_dnn"] + eigen() + ipp()},
+                    {"target": "opencv_text",          "lib": "text",          "requires": ["opencv_core", "opencv_ml", "opencv_imgproc", "opencv_features2d", "opencv_dnn"] + eigen() + ipp()},
+                ])
+                if Version(self.version) >= "4.1.2":
+                    opencv_components.extend([
+                        {"target": "opencv_dnn_superres", "lib": "dnn_superres", "requires": ["opencv_core", "opencv_imgproc", "opencv_dnn", "opencv_quality"] + eigen() + ipp()},
+                    ])
+                if Version(self.version) >= "4.5.0":
+                    opencv_components.extend([
+                        {"target": "opencv_mcc", "lib": "mcc", "requires": ["opencv_core", "opencv_imgproc", "opencv_calib3d", "opencv_dnn"] + eigen() + ipp()},
+                    ])
+                if Version(self.version) >= "4.5.2":
+                    opencv_components.extend([
+                        {"target": "opencv_wechat_qrcode", "lib": "wechat_qrcode", "requires": ["opencv_core", "opencv_imgproc", "opencv_dnn"] + eigen() + ipp()},
+                    ])
+                if Version(self.version) >= "4.5.3":
+                    opencv_components.extend([
+                        {"target": "opencv_barcode", "lib": "barcode", "requires": ["opencv_core", "opencv_imgproc", "opencv_dnn"] + eigen() + ipp()},
+                    ])
 
             if self.options.get_safe("contrib_freetype"):
                 opencv_components.extend([
