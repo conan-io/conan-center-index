@@ -42,11 +42,11 @@ class ZXingCppConan(ConanFile):
                 "apple-clang": "3.4",
             },
             "17" : {
-                "gcc": "7",
+                "gcc": "7" if Version(self.version) < "2.0.0" else "8",
                 "Visual Studio": "16",
                 "msvc": "192",
-                "clang": "5",
-                "apple-clang": "5",
+                "clang": "5" if Version(self.version) < "2.0.0" else "7",
+                "apple-clang": "5" if Version(self.version) < "2.0.0" else "12",
             }
         }
 
