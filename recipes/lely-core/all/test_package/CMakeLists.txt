@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.2)
 project(test_package)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
 find_package(lely-core REQUIRED)
 find_package(Threads REQUIRED)
 
