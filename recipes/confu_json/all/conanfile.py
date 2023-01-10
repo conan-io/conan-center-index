@@ -38,6 +38,9 @@ class ConfuJson(ConanFile):
         if Version(self.version) >= "1.0.0":
             if self.settings.compiler.get_safe("cppstd"):
                 check_min_cppstd(self, 17)
+            if is_msvc(self) and Version(self.settings.compiler.version) < 17:
+                raise ConanInvalidConfiguration(
+                    "Visual Studio is not supported in versions before 17")
         else:
             if is_msvc(self) and Version(self.version) < "0.0.9":
                 raise ConanInvalidConfiguration(
