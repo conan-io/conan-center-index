@@ -637,7 +637,8 @@ class OpenCVConan(ConanFile):
                                                                               opencv_xfeatures2d() + opencv_cudaarithm() + opencv_cudawarping() +
                                                                               opencv_cudafeatures2d() + opencv_cudalegacy() + opencv_cudaimgproc() +
                                                                               eigen() + ipp()},
-            {"target": "opencv_video",      "lib": "video",      "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen() + ipp()},
+            {"target": "opencv_video",      "lib": "video",      "requires": ["opencv_imgproc", "opencv_calib3d"] + eigen() + ipp() +
+                                                                              opencv_dnn() if Version(self.version) >= "4.5.1" else []},
         ]
         if self.options.with_ipp == "opencv-icv" and not self.options.shared:
             opencv_components.extend([
