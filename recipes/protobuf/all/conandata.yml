@@ -17,6 +17,9 @@ sources:
   "3.18.1":
     url: "https://github.com/protocolbuffers/protobuf/archive/v3.18.1.tar.gz"
     sha256: "9111bf0b542b631165fadbd80aa60e7fb25b25311c532139ed2089d76ddf6dd7"
+  "3.5.1.1":
+    url: "https://github.com/protocolbuffers/protobuf/archive/v3.5.1.1.tar.gz"
+    sha256: "56b5d9e1ab2bf4f5736c4cfba9f4981fbc6976246721e7ded5602fbaee6d6869"
 patches:
   "3.19.6":
     - patch_file: "patches/upstream-pr-9437-msvc-runtime.patch"
