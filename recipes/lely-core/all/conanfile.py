@@ -121,6 +121,10 @@ class LelyConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "This Conan version of this package is only compatible with Linux"
             )
+        if self.settings.compiler != "gcc":
+            raise ConanInvalidConfiguration(
+                "This library can only be compiled with GCC currently"
+            )
 
     def source(self):
         get(
