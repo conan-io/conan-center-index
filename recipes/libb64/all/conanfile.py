@@ -57,4 +57,4 @@ class Libb64Conan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["libb64"]
+        self.cpp_info.libs = ["b64"]
