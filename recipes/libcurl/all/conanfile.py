@@ -529,6 +529,7 @@ class LibcurlConan(ConanFile):
             tc = CMakeToolchain(self, generator="Ninja")
         else:
             tc = CMakeToolchain(self)
+        tc.variables["ENABLE_UNICODE"] = True
         tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_CURL_EXE"] = False
         tc.variables["CURL_DISABLE_LDAP"] = not self.options.with_ldap
