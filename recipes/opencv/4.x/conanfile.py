@@ -91,6 +91,7 @@ class OpenCVConan(ConanFile):
         "neon": [True, False],
         "dnn": [True, False],
         "gapi": [True, False],
+        "stitching": [True, False],
         "dnn_cuda": [True, False],
         "cuda_arch_bin": [None, "ANY"],
         "cpu_baseline": [None, "ANY"],
@@ -166,6 +167,7 @@ class OpenCVConan(ConanFile):
         "neon": True,
         "dnn": True,
         "gapi": True,
+        "stitching": True,
         "dnn_cuda": False,
         "cuda_arch_bin": None,
         "cpu_baseline": None,
@@ -681,7 +683,7 @@ class OpenCVConan(ConanFile):
         ## photo
         tc.variables["BUILD_opencv_photo"] = True
         ## stitching
-        tc.variables["BUILD_opencv_stitching"] = False
+        tc.variables["BUILD_opencv_stitching"] = self.options.stitching
         ## video
         tc.variables["BUILD_opencv_video"] = True
         ## videoio
@@ -944,11 +946,6 @@ class OpenCVConan(ConanFile):
         def requires_photo():
             return ["opencv_imgproc"] + opencv_cudaarithm() + opencv_cudaimgproc() + eigen() + ipp()
 
-        def requires_stitching():
-            return ["opencv_imgproc", "opencv_features2d", "opencv_calib3d", "opencv_flann"] + \
-                   opencv_xfeatures2d() + opencv_cudaarithm() + opencv_cudawarping() + \
-                   opencv_cudafeatures2d() + opencv_cudalegacy() + opencv_cudaimgproc() + eigen() + ipp()
-
         def requires_video():
             requires = ["opencv_imgproc", "opencv_calib3d"] + eigen() + ipp()
             if Version(self.version) >= "4.5.1":
@@ -969,7 +966,6 @@ class OpenCVConan(ConanFile):
             {"target": "opencv_ml",         "lib": "ml",         "requires": ["opencv_core"] + eigen() + ipp()},
             {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": requires_objdetect()},
             {"target": "opencv_photo",      "lib": "photo",      "requires": requires_photo()},
-            {"target": "opencv_stitching",  "lib": "stitching",  "requires": requires_stitching()},
             {"target": "opencv_video",      "lib": "video",      "requires": requires_video()},
             {"target": "opencv_videoio",    "lib": "videoio",    "requires": requires_videoio()},
         ]
@@ -990,6 +986,13 @@ class OpenCVConan(ConanFile):
                 requires_gapi.append("opencv_calib3d")
             opencv_components.extend([
                 {"target": "opencv_gapi", "lib": "gapi", "requires": requires_gapi},
+            ])
+        if self.options.stitching:
+            requires_stitching = ["opencv_imgproc", "opencv_features2d", "opencv_calib3d", "opencv_flann"] + \
+                                 opencv_xfeatures2d() + opencv_cudaarithm() + opencv_cudawarping() + \
+                                 opencv_cudafeatures2d() + opencv_cudalegacy() + opencv_cudaimgproc() + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_stitching", "lib": "stitching", "requires": requires_stitching},
             ])
 
         # Contrib components
