@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -42,9 +43,9 @@ class AtSpi2CoreConan(ConanFile):
             self.options["glib"].shared = True
 
     def build_requirements(self):
-        self.build_requires("meson/1.0.0")
+        self.tool_requires("meson/1.0.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.build_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/1.9.3")
 
     def requirements(self):
         self.requires("glib/2.75.2")
@@ -68,6 +69,8 @@ class AtSpi2CoreConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
         tc = MesonToolchain(self)
         if Version(self.version) >= "2.47.1":
             tc.project_options["introspection"] = "disabled"
