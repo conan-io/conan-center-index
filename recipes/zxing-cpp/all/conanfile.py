@@ -86,6 +86,7 @@ class ZXingCppConan(ConanFile):
         if Version(self.version) < "1.1":
             tc.variables["ENABLE_ENCODERS"] = self.options.enable_encoders
             tc.variables["ENABLE_DECODERS"] = self.options.enable_decoders
+            tc.variables["BUILD_SHARED_LIBRARY"] = self.options.shared
         else:
             tc.variables["BUILD_WRITERS"] = self.options.enable_encoders
             tc.variables["BUILD_READERS"] = self.options.enable_decoders
