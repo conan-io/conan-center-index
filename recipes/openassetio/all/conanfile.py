@@ -40,7 +40,7 @@ class PackageConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "9",
-            "clang": "10",
+            "clang": "12",
             "apple-clang": "12",
         }
 
