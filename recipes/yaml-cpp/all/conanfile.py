@@ -2,12 +2,12 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rmdir, save
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 import textwrap
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class YamlCppConan(ConanFile):
@@ -17,7 +17,6 @@ class YamlCppConan(ConanFile):
     topics = ("yaml", "yaml-parser", "serialization", "data-serialization")
     description = "A YAML parser and emitter in C++"
     license = "MIT"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -29,8 +28,7 @@ class YamlCppConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -38,7 +36,7 @@ class YamlCppConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:

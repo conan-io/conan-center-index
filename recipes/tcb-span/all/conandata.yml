@@ -1,4 +1,7 @@
 sources:
+  "cci.20220616":
+    url: "https://github.com/tcbrindle/span/archive/836dc6a0efd9849cb194e88e4aa2387436bb079b.tar.gz"
+    sha256: "66650479f85b92c6a6230706e4ac4a1bca18a7c7102fc7e02ad332f86548c9b6"
   "cci.20200603":
     url: "https://github.com/tcbrindle/span/archive/5d8d366eca918d0ed3d2d196cbeae6abfd874736.tar.gz"
     sha256: "c294ec2314eeccbcfe12b549ca6c165fbe9f97d2d52a0ad4c9a28f73fa87861a"

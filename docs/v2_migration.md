@@ -10,6 +10,8 @@ Conan v2 in pull requests.
   * [Using Layout](#using-layout)
     * [With New Generators](#with-new-generators)
     * [With Multiple Build Helpers](#with-multiple-build-helpers)
+  * [CMakeToolchain](#cmaketoolchain)
+  * [New conf_info properties](#new-conf_info-properties)
   * [New cpp_info set_property model](#new-cpp_info-set_property-model)
     * [CMakeDeps](#cmakedeps)
     * [Update required_conan_version to ">=1.43.0"](#update-required_conan_version-to-1430)
@@ -37,7 +39,7 @@ and package structure will be required.
 ### With New Generators
 
 When doing this there is no need to manually define `self._subfolder_[...]` in a recipe.
-Simply use `self.source_folder` and `self.build_folder` instead of [subfolder properties](reviewing.md#subfolder-properties)
+Simply use `self.source_folder` and `self.build_folder` instead of "subfolder properties" that used to be the norm.
 
 ### With Multiple Build Helpers
 
@@ -53,6 +55,64 @@ When different build tools are use, at least one layout needs to be set.
 
 The `src_folder` must be the same when using different layouts and should
 not depend on settings or options.
+
+## CMakeToolchain
+
+The old `CMake.definition` should be replaced by `CMakeToolchain.variables` and moved to the `generate` method.
+However, certain options need to be passed as `cache_variables`. You'll need to check project's `CMakeLists.txt`
+as there are a few cases to look out for: 
+
+- When an `option` is configured before `project()` is called.
+
+  ```cmake
+  cmake_minimum_required(3.1)
+  option(BUILD_EXAMPLES "Build examples using foorbar")
+  project(foobar)
+  ```
+
+- When an variable is declared with `CACHE`.
+
+  ```cmake
+  cmake_minimum_required(3.1)
+  project(foobar)
+  set(USE_JPEG ON CACHE BOOL "include jpeg support?")
+  ```
+
+For more information refere to the [CMakeToolchain docs](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmaketoolchain.html)
+or check out the converstaion in conan-io/conan#11937 for the brave.
+
+## New conf_info properties
+
+As described in the documentation `self.user_info` has been depreated and you are now required to use
+`self.conf_info` to define individual properties to expose to downstream recipes.
+The [2.0 migrations docs](https://docs.conan.io/en/latest/migrating_to_2.0/recipes.html#removed-self-user-info)
+should cover the technical details, however for ConanCenterIndex we need to make sure there are no collisions
+`conf_info` must be named `user.<recipe_name>:<variable>`.
+
+For usage options of `conf_info`, the [documenation](https://docs.conan.io/en/latest/reference/config_files/global_conf.html?highlight=conf_info#configuration-in-your-recipes)
+
+In ConanCenterIndex this will typically looks like:
+
+- defining a value
+  ```py
+      def package_info(self):
+          tool_path = os.path.join(self.package_folder, "bin", "tool")
+          self.conf_info.define("user.pkg:tool", tool_path)
+  ```
+- using a value
+  ```py
+      #generators = "VirtualBuildEnv", "VirtualRunEnv"
+
+      def build_requirements(self):
+          self.tool_requires("tool/0.1")
+
+      def build(self):
+          tool_path = self.conf_info.get("user.pkg:tool")
+          self.run(f"{tool_path} --build")
+  ```
+> **Note**: This should only be used when absolutely required. In the vast majority of cases, the new
+> ["Environments"](https://docs.conan.io/en/latest/reference/conanfile/tools/env/environment.html?highlight=Virtual)
+> will include the `self.cpp_info.bindirs` which will provide access to the tools in the correct scopes.
 
 ## New cpp_info set_property model
 

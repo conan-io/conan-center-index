@@ -24,14 +24,14 @@ class LibMysqlClientCConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_ssl": [True, False],
-        "with_zlib": [True, False],
+        "with_ssl": [True, False, "deprecated"],
+        "with_zlib": [True, False, "deprecated"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_ssl": True,
-        "with_zlib": True,
+        "with_ssl": "deprecated",
+        "with_zlib": "deprecated",
     }
 
     short_paths = True
@@ -69,16 +69,22 @@ class LibMysqlClientCConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.with_ssl != "deprecated":
+            self.output.warn("with_ssl option is deprecated, do not use anymore. SSL cannot be disabled")
+        if self.options.with_zlib != "deprecated":
+            self.output.warn("with_zlib option is deprecated, do not use anymore. Zlib cannot be disabled")
+
+    def package_id(self):
+        del self.info.options.with_ssl
+        del self.info.options.with_zlib
 
     def requirements(self):
-        if self.options.with_ssl:
-            self.requires("openssl/1.1.1q")
-        if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+        self.requires("openssl/1.1.1s")
+        self.requires("zlib/1.2.13")
         if self._with_zstd:
             self.requires("zstd/1.5.2")
         if self._with_lz4:
-            self.requires("lz4/1.9.3")
+            self.requires("lz4/1.9.4")
         if self.settings.os == "FreeBSD":
             self.requires("libunwind/1.6.2")
 
@@ -118,9 +124,9 @@ class LibMysqlClientCConan(ConanFile):
     def build_requirements(self):
         if Version(self.version) >= "8.0.25" and is_apple_os(self):
             # CMake 3.18 or higher is required if Apple, but CI of CCI may run CMake 3.15
-            self.build_requires("cmake/3.22.5")
+            self.build_requires("cmake/3.24.2")
         if self.settings.os == "FreeBSD":
-            self.build_requires("pkgconf/1.7.4")
+            self.build_requires("pkgconf/1.9.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -223,11 +229,9 @@ class LibMysqlClientCConan(ConanFile):
         if is_msvc(self):
             cmake.definitions["WINDOWS_RUNTIME_MD"] = "MD" in msvc_runtime_flag(self)
 
-        if self.options.with_ssl:
-            cmake.definitions["WITH_SSL"] = self.deps_cpp_info["openssl"].rootpath
+        cmake.definitions["WITH_SSL"] = self.deps_cpp_info["openssl"].rootpath
 
-        if self.options.with_zlib:
-            cmake.definitions["WITH_ZLIB"] = "system"
+        cmake.definitions["WITH_ZLIB"] = "system"
         cmake.configure(source_dir=self._source_subfolder)
         return cmake
 

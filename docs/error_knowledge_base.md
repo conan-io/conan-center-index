@@ -1,5 +1,7 @@
 # Errors from the conan-center hook (KB-Hxxx)
 
+These are located at [conan-io/hooks](https://github.com/conan-io/hooks/blob/master/hooks/conan-center.py).
+
 #### **<a name="KB-H001">#KB-H001</a>: "DEPRECATED GLOBAL CPPSTD"**
 
 `Conan > 1.15` deprecated the usage of the global ``cppstd`` setting in favor of ``compiler.cppstd`` to [manage C++ standard](https://docs.conan.io/en/latest/howtos/manage_cpp_standard.html). As a subsetting of the compiler, it shouldn't be declared in the `conanfile.py`.
@@ -63,7 +65,7 @@ Here we use [configure()](https://docs.conan.io/en/latest/reference/conanfile/me
 
 #### **<a name="KB-H008">#KB-H008</a>: "VERSION RANGES"**
 
-It is not allowed to use [version ranges](https://docs.conan.io/en/latest/versioning/version_ranges.html) for the recipes in Conan center, where the dependency graph should be deterministic.
+See [Dependencies Version Ranges](adding_packages/dependencies.md#version-ranges) for details.
 
 #### **<a name="KB-H009">#KB-H009</a>: "RECIPE FOLDER SIZE"**
 
@@ -110,7 +112,12 @@ The binary packages should contain a folder named `licenses` containing the cont
 
 #### **<a name="KB-H013">#KB-H013</a>: "DEFAULT PACKAGE LAYOUT"**
 
-The binary packages shouldn't contain any other files or folder except the following: `["lib", "bin", "include", "res", "licenses"]`. If you are packaging an application put all the contents inside the `bin` folder.
+The binary packages generally do not need any other files or folder except the following: `["lib", "bin", "include", "res", "licenses"]`.
+This closely matches the default [`cpp_info`](https://docs.conan.io/en/latest/reference/conanfile/methods.html#package-info) from the client.
+The upstream package layout should be followed as much as possible, if a folder is not in the list (like `"share"`) then an exception
+can very easily be added by adding it to [this list of exceptions](https://github.com/conan-io/hooks/blob/d587cfebbf2b31c16e477b79c0c2fd4501f60fc8/hooks/conan-center.py#L1089-L1090).
+
+> **Note**: We are in the process of evaluating this rule, looking at calculating the size impact for problematic packages
 
 #### **<a name="KB-H014">#KB-H014</a>: "MATCHING CONFIGURATION"**
 
@@ -182,7 +189,7 @@ There is a complete explanation in the [FAQ](faqs.md#should-recipes-export-a-rec
 
 #### **<a name="KB-H024">#KB-H024</a>: "TEST PACKAGE FOLDER"**
 
-The [test_package](https://docs.conan.io/en/latest/creating_packages/getting_started.html#the-test-package-folder) folder is required for every recipe in Conan Center Index.
+The [test_package](https://docs.conan.io/en/latest/creating_packages/getting_started.html) folder is required for every recipe in Conan Center Index.
 
 ```
 . conanfile.py
@@ -226,7 +233,7 @@ class SomeRecipe(ConanFile):
 #### **<a name="KB-H027">#KB-H027</a>: "CONAN CENTER INDEX URL"**
 
 The attribute [url](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#url) should point to the address where the recipe is located.
-The current Conan Center Index address is https://github.com/conan-io/conan-center-index
+The current Conan Center Index address is <https://github.com/conan-io/conan-center-index>
 
 #### **<a name="KB-H028">#KB-H028</a>: "CMAKE MINIMUM VERSION"**
 
@@ -242,7 +249,7 @@ project(conanwrapper)
 
 #### **<a name="KB-H029">#KB-H029</a>: "TEST PACKAGE - RUN ENVIRONMENT"**
 
-The [RunEnvironment()](https://docs.conan.io/en/latest/reference/build_helpers/run_environment.html#runenvironment) build helper is no longer needed in the *test_package/conanfile.py*. It has been integrated by [run_environment](https://docs.conan.io/en/latest/devtools/running_packages.html#running-from-packages) parameter.
+The [RunEnvironment()](https://docs.conan.io/en/latest/reference/build_helpers/run_environment.html#runenvironment) build helper is no longer needed in the `test_package/conanfile.py`. It has been integrated by [run_environment](https://docs.conan.io/en/latest/devtools/running_packages.html#running-from-packages) parameter.
 
 ```python
 # test_package/conanfile.py
@@ -256,7 +263,7 @@ class TestConan(ConanFile):
 #### **<a name="KB-H030">#KB-H030</a>: "CONANDATA.YML FORMAT"**
 
 The structure of the [conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html) file should follow the schema
-defined in [Adding Packages - `Conandata.yml` Format](conandata_yml_format.md).
+defined in [Adding Packages - `Conandata.yml` Format](adding_packages/conandata_yml_format.md).
 
 #### **<a name="KB-H031">#KB-H031</a>: "CONANDATA.YML REDUCE"**
 
@@ -320,7 +327,7 @@ The attribue [default_options](https://docs.conan.io/en/latest/reference/conanfi
 
 #### **<a name="KB-H052">#KB-H052</a>: "CONFIG.YML HAS NEW VERSION"**
 
-It's important to have new library version defined in both [config.yml](how_to_add_packages.md#the-version-folders) and [conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html), otherwise newly added version will not be checked and built by CI and will not be available for download.
+It's important to have new library version defined in both [config.yml](adding_packages/README.md#the-version-folders) and [conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html), otherwise newly added version will not be checked and built by CI and will not be available for download.
 
 #### **<a name="KB-H053">#KB-H053</a>: "PRIVATE IMPORTS"**
 
@@ -338,9 +345,7 @@ The duality creates a heterogeneous way of solving dependencies, making it diffi
 
 #### **<a name="KB-H056">#KB-H056</a>: "LICENSE PUBLIC DOMAIN"**
 
-[Public Domain](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) is not a license by itself, but consists of all the creative work to which
-no exclusive intellectual property rights apply. If a project is under Public Domain and there is no license listed, the
-[Unlicense](https://spdx.org/licenses/Unlicense) should be used as described in the [FAQ](faqs.md#what-license-should-i-use-for-public-domain).
+See [License Attribute](adding_packages/conanfile_attributes.md#license-attribute) for details.
 
 #### **<a name="KB-H057">#KB-H057</a>: "TOOLS RENAME"**
 
@@ -391,7 +396,7 @@ class SomeRecipe(ConanFile):
 
 ```
 
-See also: [Submitting a Package](how_to_add_packages.md#submitting-a-package).
+See also: [Submitting a Package](adding_packages/README.md#submitting-a-package).
 
 #### **<a name="KB-H066">#KB-H066</a>: "SHORT_PATHS USAGE"**
 
@@ -447,7 +452,7 @@ class SomeRecipe(ConanFile):
 
 There is the case when the package is header-only, but the options affects the generated artifact, (e.g. kanguru, pagmo2 ...), so you need to use `self.info.settings.clear()` instead.
 
-- For "tool" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/cmake/3.x.x/conanfile.py#L104-L105)) which only provide binaries, see [our packing policy](packaging_policy.md#settings) for more, should do as follows:
+- @prince-chrismc This needs to a better example; For "tool" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/cmake/3.x.x/conanfile.py#L104-L105)) which only provide binaries, see [our packaging policy](adding_packages/build_and_package.md) for more, should do as follows:
 
     ```python
         def package_id(self):
@@ -469,7 +474,11 @@ Pylint is executed by default over all `conanfile.py` files in ConanCenterIndex 
 
 #### **<a name="KB-H073">#KB-H073</a>: "TEST V1 PACKAGE FOLDER"**
 
-The legacy content in test_package should not be removed. Instead, rename that folder to `test_v1_package` and create a new `test_package` folder following the [file structure](https://github.com/conan-io/conan-center-index/blob/master/docs/how_to_add_packages.md#recipe-files-structure) related to Conan v2 and v1 compatibility. Also, you can obtain good examples of Conan v2 test packages from the [template packages](https://github.com/conan-io/conan-center-index/tree/master/docs/package_templates) folder.
+The legacy content in test_package should not be removed. Instead, rename that folder to `test_v1_package` and create a new `test_package` folder following the [file structure](adding_packages/README.md#recipe-files-structure) related to Conan v2 and v1 compatibility. Also, you can obtain good examples of Conan v2 test packages from the [template packages](package_templates/README.md) folder.
+
+#### **<a name="KB-H075">#KB-H075</a>: "REQUIREMENT OVERRIDE PARAMETER"**
+
+The [self.requires()](https://docs.conan.io/en/latest/reference/conanfile/methods.html#requirements) allows to override a dependency version, forcing to use that version imposed by the recipe only. As a side-effect, dependencies can use different versions of the same project at the same package, which may cause unpredicted errors, like ABI incompatibility. For that reason, the `override` parameter is forbidden and should not be used. Instead, all dependencies should align their package versions, even when it's necessary to open more pull requests to update dependency versions.
 
 ## Deprecated errors
 

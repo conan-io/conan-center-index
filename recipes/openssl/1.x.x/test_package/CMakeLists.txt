@@ -5,30 +5,26 @@ option(OPENSSL_WITH_ZLIB "OpenSSL with zlib support" ON)
 
 set(OpenSSL_DEBUG 1)
 find_package(OpenSSL REQUIRED)
-if(NOT DEFINED OPENSSL_FOUND)
-    message(FATAL_ERROR "variable OPENSSL_FOUND not set")
-endif()
-if(NOT DEFINED OPENSSL_INCLUDE_DIR)
-    message(FATAL_ERROR "variable OPENSSL_INCLUDE_DIR not set")
-endif()
-if(NOT DEFINED OPENSSL_CRYPTO_LIBRARY)
-    message(FATAL_ERROR "variable OPENSSL_CRYPTO_LIBRARY not set")
-endif()
-if(NOT DEFINED OPENSSL_CRYPTO_LIBRARIES)
-    message(FATAL_ERROR "variable OPENSSL_CRYPTO_LIBRARIES not set")
-endif()
-if(NOT DEFINED OPENSSL_SSL_LIBRARY)
-    message(FATAL_ERROR "variable OPENSSL_SSL_LIBRARY not set")
-endif()
-if(NOT DEFINED OPENSSL_SSL_LIBRARIES)
-    message(FATAL_ERROR "variable OPENSSL_SSL_LIBRARIES not set")
-endif()
-if(NOT DEFINED OPENSSL_LIBRARIES)
-    message(FATAL_ERROR "variable OPENSSL_LIBRARIES not set")
-endif()
-if(NOT DEFINED OPENSSL_VERSION)
-    message(FATAL_ERROR "variable OPENSSL_VERSION not set")
-endif()
+
+# Test whether variables from https://cmake.org/cmake/help/latest/module/FindOpenSSL.html
+# are properly defined in conan generators
+set(_custom_vars
+    OPENSSL_FOUND
+    OPENSSL_INCLUDE_DIR
+    OPENSSL_CRYPTO_LIBRARY
+    OPENSSL_CRYPTO_LIBRARIES
+    OPENSSL_SSL_LIBRARY
+    OPENSSL_SSL_LIBRARIES
+    OPENSSL_LIBRARIES
+    OPENSSL_VERSION
+)
+foreach(_custom_var ${_custom_vars})
+    if(DEFINED _custom_var)
+        message(STATUS "${_custom_var}: ${${_custom_var}}")
+    else()
+        message(FATAL_ERROR "${_custom_var} not defined")
+    endif()
+endforeach()
 
 add_executable(digest digest.c)
 target_link_libraries(digest OpenSSL::SSL)

@@ -30,6 +30,7 @@ github:
 
 # Things related to Jenkins jobs:
 tasks:
+  feedback_title: "Conan v2 pipeline (informative, not required for merge)"
   write_comments: false
   detailed_status_checks: false
   update_labels: false
@@ -87,7 +88,7 @@ node_labels:
   Windows:
     x86_64:
       "msvc":
-        default: "windows20220803"
+        default: "windows20221212"
   Macos:
     x86_64:
       "apple-clang":

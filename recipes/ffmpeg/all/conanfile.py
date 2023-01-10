@@ -1,13 +1,17 @@
-from conan.tools.files import rename
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
+from conan.tools.files import get, rename, rmdir
+from conan.tools.scm import Version
+from conans import AutoToolsBuildEnvironment, tools
 import os
 import contextlib
 import glob
 import shutil
 import re
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.51.3"
 
 
 class FFMpegConan(ConanFile):
@@ -236,7 +240,7 @@ class FFMpegConan(ConanFile):
             del self.options.with_coreimage
             del self.options.with_audiotoolbox
             del self.options.with_videotoolbox
-        if not tools.is_apple_os(self.settings.os):
+        if not is_apple_os(self):
             del self.options.with_avfoundation
         if not self._version_supports_vulkan():
             del self.options.with_vulkan
@@ -249,7 +253,7 @@ class FFMpegConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
@@ -269,9 +273,9 @@ class FFMpegConan(ConanFile):
         if self.options.with_zeromq:
             self.requires("zeromq/4.3.4")
         if self.options.with_sdl:
-            self.requires("sdl/2.0.20")
+            self.requires("sdl/2.24.1")
         if self.options.with_libx264:
-            self.requires("libx264/20191217")
+            self.requires("libx264/cci.20220602")
         if self.options.with_libx265:
             self.requires("libx265/3.4")
         if self.options.with_libvpx:
@@ -281,9 +285,9 @@ class FFMpegConan(ConanFile):
         if self.options.with_libfdk_aac:
             self.requires("libfdk_aac/2.0.2")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.2.3")
+            self.requires("libwebp/1.2.4")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.7.2")
         if self.options.get_safe("with_xcb") or self.options.get_safe("with_vaapi"):
@@ -295,10 +299,10 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_vdpau"):
             self.requires("vdpau/system")
         if self._version_supports_vulkan() and self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.221")
+            self.requires("vulkan-loader/1.3.231.1")
 
     def validate(self):
-        if self.options.with_ssl == "securetransport" and not tools.is_apple_os(self.settings.os):
+        if self.options.with_ssl == "securetransport" and not is_apple_os(self):
             raise ConanInvalidConfiguration(
                 "securetransport is only available on Apple")
 
@@ -315,22 +319,22 @@ class FFMpegConan(ConanFile):
     def build_requirements(self):
         if self.settings.arch in ("x86", "x86_64"):
             self.build_requires("yasm/1.3.0")
-        self.build_requires("pkgconf/1.7.4")
+        self.build_requires("pkgconf/1.9.3")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     @property
     def _target_arch(self):
-        target_arch, _, _ = tools.get_gnu_triplet(
-            "Macos" if tools.is_apple_os(
-                self.settings.os) else str(self.settings.os),
+        triplet = tools.get_gnu_triplet(
+            "Macos" if is_apple_os(self) else str(self.settings.os),
             str(self.settings.arch),
             str(self.settings.compiler) if self.settings.os == "Windows" else None,
-        ).split("-")
+        )
+        target_arch = triplet.split("-")[0]
         return target_arch
 
     @property
@@ -338,14 +342,16 @@ class FFMpegConan(ConanFile):
         if self._is_msvc:
             return "win32"
         else:
-            _, _, target_os = tools.get_gnu_triplet(
-                "Macos" if tools.is_apple_os(
-                    self.settings.os) else str(self.settings.os),
+            triplet = tools.get_gnu_triplet(
+                "Macos" if is_apple_os(self) else str(self.settings.os),
                 str(self.settings.arch),
                 str(self.settings.compiler) if self.settings.os == "Windows" else None,
-            ).split("-")
+            )
+            target_os = triplet.split("-")[2]
             if target_os == "gnueabihf":
                 target_os = "gnu" # could also be "linux"
+            if target_os.startswith("android"):
+                target_os = "android"
             return target_os
 
     def _patch_sources(self):
@@ -389,7 +395,7 @@ class FFMpegConan(ConanFile):
         args = [
             "--pkg-config-flags=--static",
             "--disable-doc",
-            opt_enable_disable("cross-compile", tools.cross_building(self)),
+            opt_enable_disable("cross-compile", cross_building(self)),
             opt_enable_disable("asm", self.options.with_asm),
             # Libraries
             opt_enable_disable("shared", self.options.shared),
@@ -517,7 +523,7 @@ class FFMpegConan(ConanFile):
         if self._version_supports_vulkan():
             args.append(opt_enable_disable(
                 "vulkan", self.options.get_safe("with_vulkan")))
-        if tools.is_apple_os(self.settings.os):
+        if is_apple_os(self):
             # relocatable shared libs
             args.append("--install-name-dir=@rpath")
         args.append("--arch={}".format(self._target_arch))
@@ -539,7 +545,7 @@ class FFMpegConan(ConanFile):
             args.append("--cxx={}".format(tools.get_env("CXX")))
         extra_cflags = []
         extra_ldflags = []
-        if tools.is_apple_os(self.settings.os) and self.settings.os.version:
+        if is_apple_os(self) and self.settings.os.version:
             extra_cflags.append(tools.apple_deployment_target_flag(
                 self.settings.os, self.settings.os.version))
             extra_ldflags.append(tools.apple_deployment_target_flag(
@@ -550,13 +556,16 @@ class FFMpegConan(ConanFile):
             if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) <= "12":
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
                 self._autotools.defines.append("inline=__inline")
-        if tools.cross_building(self):
+        if cross_building(self):
             if self._target_os == "emscripten":
                 args.append("--target-os=none")
             else:
                 args.append("--target-os={}".format(self._target_os))
 
-            if tools.is_apple_os(self.settings.os):
+            if is_apple_os(self):
+                if self.options.with_audiotoolbox:
+                    args.append("--disable-outdev=audiotoolbox")
+
                 xcrun = tools.XCRun(self.settings)
                 apple_arch = tools.to_apple_arch(str(self.settings.arch))
                 extra_cflags.extend(
@@ -600,8 +609,8 @@ class FFMpegConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
         if self._is_msvc:
             if self.options.shared:
@@ -774,7 +783,7 @@ class FFMpegConan(ConanFile):
             self.cpp_info.components["avutil"].system_libs = [
                 "user32", "bcrypt"]
             self.cpp_info.components["avformat"].system_libs = ["secur32"]
-        elif tools.is_apple_os(self.settings.os):
+        elif is_apple_os(self):
             if self.options.avdevice:
                 self.cpp_info.components["avdevice"].frameworks = [
                     "CoreFoundation", "Foundation", "CoreGraphics"]
@@ -783,7 +792,7 @@ class FFMpegConan(ConanFile):
                     "CoreGraphics"]
             if self.options.avcodec:
                 self.cpp_info.components["avcodec"].frameworks = [
-                    "CoreVideo", "CoreMedia"]
+                    "CoreFoundation", "CoreVideo", "CoreMedia"]
             if self.settings.os == "Macos":
                 if self.options.avdevice:
                     self.cpp_info.components["avdevice"].frameworks.append(
@@ -886,7 +895,7 @@ class FFMpegConan(ConanFile):
             if self.options.get_safe("with_coreimage"):
                 self.cpp_info.components["avfilter"].frameworks.append(
                     "CoreImage")
-            if tools.Version(self.version) >= "5.0" and tools.is_apple_os(self.settings.os):
+            if Version(self.version) >= "5.0" and is_apple_os(self):
                 self.cpp_info.components["avfilter"].frameworks.append("Metal")
 
         if self.options.get_safe("with_vaapi"):
@@ -901,4 +910,4 @@ class FFMpegConan(ConanFile):
                 "vulkan-loader::vulkan-loader")
 
     def _version_supports_vulkan(self):
-        return tools.Version(self.version) >= "4.3.0"
+        return Version(self.version) >= "4.3.0"

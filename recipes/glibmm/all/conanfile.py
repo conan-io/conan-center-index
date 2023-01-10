@@ -75,11 +75,11 @@ class GlibmmConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        self.build_requires("meson/0.63.1")
-        self.build_requires("pkgconf/1.7.4")
+        self.build_requires("meson/0.64.1")
+        self.build_requires("pkgconf/1.9.3")
 
     def requirements(self):
-        self.requires("glib/2.73.3")
+        self.requires("glib/2.75.0")
 
         if self._abi_version == "2.68":
             self.requires("libsigcpp/3.0.7")

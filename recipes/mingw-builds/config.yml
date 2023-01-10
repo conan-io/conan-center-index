@@ -1,7 +1,9 @@
 versions:
+    "12.2.0":
+        folder: "all"
     "12.1.0":
-      folder: "all"
+        folder: "all"
     "11.2.0":
-      folder: "all"
+        folder: "all"
     "8.1":
-      folder: "all"
+        folder: "all"

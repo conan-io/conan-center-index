@@ -1,8 +1,13 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
+
 
 class RedisPlusPlusConan(ConanFile):
     name = "redis-plus-plus"
@@ -11,129 +16,138 @@ class RedisPlusPlusConan(ConanFile):
     topics = ("database", "redis", "client", "tls")
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
-    generators = "cmake", "cmake_find_package_multi"
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "with_tls": [True, False],
-        "build_async": [True, False]
+        "build_async": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_tls": False,
-        "build_async": False
-    }
-
-    _cmake = None
-
-    _compiler_required_cpp17 = {
-        "Visual Studio": "16",
-        "gcc": "8",
-        "clang": "7",
-        "apple-clang": "12.0",
+        "build_async": False,
     }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return "11" if Version(self.version) < "1.3.0" else "17"
 
     @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def _compilers_minimum_version(self):
+        if Version(self.version) < "1.3.0":
+            return {}
+        return {
+            "Visual Studio": "16",
+            "msvc": "192",
+            "gcc": "8",
+            "clang": "7",
+            "apple-clang": "12",
+        }
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "1.3.0":
+            del self.options.build_async
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("hiredis/1.0.2")
-        if self.options.build_async:  
-            self.requires("libuv/1.44.1")
+        self.requires("hiredis/1.1.0")
+        if self.options.get_safe("build_async"):
+            self.requires("libuv/1.44.2")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            if tools.Version(self.version) >= "1.3.0":
-                tools.check_min_cppstd(self, 17)
-            else:
-                tools.check_min_cppstd(self, 11)
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
-        if tools.Version(self.version) >= "1.3.0":
-            minimum_version = self._compiler_required_cpp17.get(str(self.settings.compiler), False)
-            if minimum_version:
-                if tools.Version(self.settings.compiler.version) < minimum_version:
-                    raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
-            else:
-                self.output.warn("{0} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
+        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
+            )
 
-        if self.options.with_tls != self.options["hiredis"].with_ssl:
-            raise ConanInvalidConfiguration("with_tls must match hiredis.with_ssl option")
+        if self.info.options.with_tls and not self.dependencies["hiredis"].options.with_ssl:
+            raise ConanInvalidConfiguration(f"{self.name}:with_tls=True requires hiredis:with_ssl=True")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["REDIS_PLUS_PLUS_USE_TLS"] = self.options.with_tls
-            if self.options.build_async: 
-                self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_ASYNC"] = "libuv"
-            self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_TEST"] = False
-            self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_STATIC"] = not self.options.shared
-            self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_SHARED"] = self.options.shared
-            if tools.Version(self.version) >= "1.2.3":
-                self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_STATIC_WITH_PIC"] = self.options.shared
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if self.settings.compiler.get_safe("cppstd"):
+            cppstd = str(self.settings.compiler.cppstd)
+            if cppstd.startswith("gnu"):
+                cppstd = cppstd[3:]
+            tc.cache_variables["REDIS_PLUS_PLUS_CXX_STANDARD"] = cppstd
+        tc.variables["REDIS_PLUS_PLUS_USE_TLS"] = self.options.with_tls
+        if self.options.get_safe("build_async"):
+            tc.cache_variables["REDIS_PLUS_PLUS_BUILD_ASYNC"] = "libuv"
+        tc.variables["REDIS_PLUS_PLUS_BUILD_TEST"] = False
+        tc.variables["REDIS_PLUS_PLUS_BUILD_STATIC"] = not self.options.shared
+        tc.variables["REDIS_PLUS_PLUS_BUILD_SHARED"] = self.options.shared
+        if Version(self.version) >= "1.2.3":
+            tc.variables["REDIS_PLUS_PLUS_BUILD_STATIC_WITH_PIC"] = self.options.shared
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        if tools.Version(self.version) < "1.2.3":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        apply_conandata_patches(self)
+        if Version(self.version) < "1.2.3":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                   "set_target_properties(${STATIC_LIB} PROPERTIES POSITION_INDEPENDENT_CODE ON)",
                                   "")
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "redis++")
-        self.cpp_info.set_property("cmake_target_name", "redis++::redis++" + "_static" if not self.options.shared else "")
-        self.cpp_info.components["redis++lib"].set_property("cmake_target_name", "redis++" + "_static" if not self.options.shared else "")
-        self.cpp_info.components["redis++lib"].set_property("pkg_config_name", "redis++" + "_static" if not self.options.shared else "")
-
-        self.cpp_info.names["cmake_find_package"] = "redis++"
-        self.cpp_info.names["cmake_find_package_multi"] = "redis++"
-        self.cpp_info.names["pkg_config"] = "redis++"
-        self.cpp_info.components["redis++lib"].names["cmake_find_package"] = "redis++" + "_static" if not self.options.shared else ""
-        self.cpp_info.components["redis++lib"].names["cmake_find_package_multi"] = "redis++" + "_static" if not self.options.shared else ""
-
-        suffix = "_static" if self.settings.os == "Windows" and not self.options.shared else ""
-        self.cpp_info.components["redis++lib"].libs = ["redis++" + suffix]
+        target_suffix = "" if self.options.shared else "_static"
+        self.cpp_info.set_property("cmake_target_name", f"redis++::redis++{target_suffix}")
+        self.cpp_info.set_property("pkg_config_name", "redis++")
+        # TODO: back to global scope in conan v2
+        lib_suffix = "_static" if self.settings.os == "Windows" and not self.options.shared else ""
+        self.cpp_info.components["redis++lib"].libs = [f"redis++{lib_suffix}"]
         self.cpp_info.components["redis++lib"].requires = ["hiredis::hiredis"]
         if self.options.with_tls:
             self.cpp_info.components["redis++lib"].requires.append("hiredis::hiredis_ssl")
+        if self.options.get_safe("build_async"):
+            self.cpp_info.components["redis++lib"].requires.append("libuv::libuv")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["redis++lib"].system_libs.append("pthread")
+            self.cpp_info.components["redis++lib"].system_libs.append("m")
+
+        # TODO: to remove in conan v2
+        self.cpp_info.names["cmake_find_package"] = "redis++"
+        self.cpp_info.names["cmake_find_package_multi"] = "redis++"
+        self.cpp_info.components["redis++lib"].names["cmake_find_package"] = f"redis++{target_suffix}"
+        self.cpp_info.components["redis++lib"].names["cmake_find_package_multi"] = f"redis++{target_suffix}"
+        self.cpp_info.components["redis++lib"].set_property("cmake_target_name", f"redis++::redis++{target_suffix}")
+        self.cpp_info.components["redis++lib"].set_property("pkg_config_name", "redis++")

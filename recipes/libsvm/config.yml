@@ -1,4 +1,6 @@
 versions:
+  "330":
+    folder: all
   "325":
     folder: all
   "324":

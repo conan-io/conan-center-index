@@ -4,8 +4,6 @@ from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout
 
-required_conan_version = ">=1.50.0"
-
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps", "VirtualRunEnv"

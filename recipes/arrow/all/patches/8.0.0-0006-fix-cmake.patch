@@ -42,7 +42,7 @@ index bb463d0..ce2d1df 100644
 +  if (TARGET mimalloc-static)
 +    list(APPEND ARROW_LINK_LIBS mimalloc-static)
 +    list(APPEND ARROW_STATIC_LINK_LIBS mimalloc-static)
-+    else()
++  else()
 +    list(APPEND ARROW_LINK_LIBS mimalloc)
 +    list(APPEND ARROW_STATIC_LINK_LIBS mimalloc)
 +  endif()

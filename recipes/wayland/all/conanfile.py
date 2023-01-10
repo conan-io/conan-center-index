@@ -3,12 +3,13 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class WaylandConan(ConanFile):
@@ -17,11 +18,10 @@ class WaylandConan(ConanFile):
         "Wayland is a project to define a protocol for a compositor to talk to "
         "its clients as well as a library implementation of the protocol"
     )
-    topics = ("protocol", "compositor", "display")
+    topics = "protocol", "compositor", "display"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://wayland.freedesktop.org"
     license = "MIT"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,34 +36,27 @@ class WaylandConan(ConanFile):
         "enable_dtd_validation": True,
     }
 
-    generators = "PkgConfigDeps"
-
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def requirements(self):
         if self.options.enable_libraries:
-            self.requires("libffi/3.4.2")
+            self.requires("libffi/3.4.3")
         if self.options.enable_dtd_validation:
-            self.requires("libxml2/2.9.14")
-        self.requires("expat/2.4.8")
+            self.requires("libxml2/2.10.3")
+        self.requires("expat/2.5.0")
 
     def validate(self):
         if self.info.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Wayland can be built on Linux only")
+            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
 
     def build_requirements(self):
-        self.tool_requires("meson/0.63.2")
-        self.tool_requires("pkgconf/1.7.4")
+        self.tool_requires("meson/1.0.0")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
         if cross_building(self):
             self.tool_requires(self.ref)
 
@@ -74,12 +67,21 @@ class WaylandConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        pkg_config_deps = PkgConfigDeps(self)
+        if cross_building(self):
+            pkg_config_deps.build_context_activated = ["wayland"]
+        elif self.dependencies["expat"].is_build_context:  # wayland is being built as build_require
+                # If wayland is the build_require, all its dependencies are treated as build_requires
+                pkg_config_deps.build_context_activated = [dep.ref.name for _, dep in self.dependencies.host.items()]
+        pkg_config_deps.generate()
         tc = MesonToolchain(self)
         tc.project_options["libdir"] = "lib"
         tc.project_options["datadir"] = "res"
         tc.project_options["libraries"] = self.options.enable_libraries
         tc.project_options["dtd_validation"] = self.options.enable_dtd_validation
         tc.project_options["documentation"] = False
+        if cross_building(self):
+            tc.project_options["build.pkg_config_path"] = self.generators_folder
         if Version(self.version) >= "1.18.91":
             tc.project_options["scanner"] = True
         tc.generate()
@@ -93,14 +95,6 @@ class WaylandConan(ConanFile):
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
                         "subdir('tests')", "#subdir('tests')")
-
-        if cross_building(self):
-            replace_in_file(self, f"{self.source_folder}/src/meson.build",
-                            "scanner_dep = dependency('wayland-scanner', native: true, version: meson.project_version())",
-                                "# scanner_dep = dependency('wayland-scanner', native: true, version: meson.project_version())")
-            replace_in_file(self, f"{self.source_folder}/src/meson.build",
-                            "wayland_scanner_for_build = find_program(scanner_dep.get_variable(pkgconfig: 'wayland_scanner'))",
-                                "wayland_scanner_for_build = find_program('wayland-scanner')")
 
     def build(self):
         self._patch_sources()
