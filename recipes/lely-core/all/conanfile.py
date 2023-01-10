@@ -214,15 +214,20 @@ class LelyConan(ConanFile):
 
     def package_info(self):
         components = {
-            "can": ["libc", "util"],
-            "co": ["libc", "util", "can"],
-            "coapp": ["libc", "io2", "co"],
-            "ev": ["libc", "util"],
-            "io2": ["libc", "util", "can", "ev"],
-            "libc": [],
-            "tap": ["libc"],
-            "util": ["libc"],
+            "can": {"requires": ["libc", "util"]},
+            "co": {"requires": ["libc", "util", "can"]},
+            "coapp": {"requires": ["libc", "io2", "co"]},
+            "ev": {"requires": ["libc", "util"]},
+            "io2": {"requires": ["libc", "util", "can", "ev"]},
+            "libc": {"requires": [], "system_libs": ["pthread"] if self.options.threads else []},
+            "tap": {"requires": ["libc"]},
+            "util": {"requires": ["libc"], "system_libs": ["m"]},
         }
         for component, dependencies in components.items():
             self.cpp_info.components[component].libs = [f"lely-{component}"]
-            self.cpp_info.components[component].requires = dependencies
+            self.cpp_info.components[component].requires = dependencies.get(
+                "requires", []
+            )
+            self.cpp_info.components[component].system_libs = dependencies.get(
+                "system_libs", []
+            )
