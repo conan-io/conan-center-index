@@ -574,9 +574,6 @@ class OpenCVConan(ConanFile):
         def freetype():
             return ["freetype::freetype"] if self.options.get_safe("contrib_freetype") else []
 
-        def xfeatures2d():
-            return ["opencv_xfeatures2d"] if self.options.contrib else []
-
         def ffmpeg():
             if self.options.get_safe("with_ffmpeg"):
                 return [
@@ -600,15 +597,33 @@ class OpenCVConan(ConanFile):
             else:
                 return []
 
+        def opencv_cudaarithm():
+            return ["opencv_cudaarithm"] if self.options.with_cuda else []
+
+        def opencv_cudafeatures2d():
+            return ["opencv_cudafeatures2d"] if self.options.with_cuda else []
+
+        def opencv_cudaimgproc():
+            return ["opencv_cudaimgproc"] if self.options.with_cuda else []
+
+        def opencv_cudalegacy():
+            return ["opencv_cudalegacy"] if self.options.with_cuda else []
+
+        def opencv_cudawarping():
+            return ["opencv_cudawarping"] if self.options.with_cuda else []
+
         def opencv_dnn():
             return ["opencv_dnn"] if self.options.dnn else []
+
+        def opencv_xfeatures2d():
+            return ["opencv_xfeatures2d"] if self.options.contrib else []
 
         opencv_components = [
             {"target": "opencv_core",       "lib": "core",       "requires": ["zlib::zlib"] + parallel() + eigen() + ipp()},
             {"target": "opencv_flann",      "lib": "flann",      "requires": ["opencv_core"] + eigen() + ipp()},
             {"target": "opencv_imgproc",    "lib": "imgproc",    "requires": ["opencv_core"] + eigen() + ipp()},
             {"target": "opencv_ml",         "lib": "ml",         "requires": ["opencv_core"] + eigen() + ipp()},
-            {"target": "opencv_photo",      "lib": "photo",      "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
+            {"target": "opencv_photo",      "lib": "photo",      "requires": ["opencv_imgproc"] + opencv_cudaarithm() + opencv_cudaimgproc() + eigen() + ipp()},
             {"target": "opencv_features2d", "lib": "features2d", "requires": ["opencv_core", "opencv_flann", "opencv_imgproc"] + eigen() + ipp()},
             {"target": "opencv_imgcodecs",  "lib": "imgcodecs",  "requires": ["opencv_core", "opencv_imgproc", "zlib::zlib"] + eigen() + imageformats_deps() + ipp()},
             {"target": "opencv_videoio",    "lib": "videoio",    "requires": (
@@ -618,7 +633,10 @@ class OpenCVConan(ConanFile):
             {"target": "opencv_highgui",    "lib": "highgui",    "requires": ["opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_videoio"] + freetype() + eigen() + gtk() + ipp()},
             {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": ["opencv_core", "opencv_imgproc", "opencv_calib3d"] + eigen() + ipp() + quirc() +
                                                                               opencv_dnn() if Version(self.version) >= "4.5.4" else []},
-            {"target": "opencv_stitching",  "lib": "stitching",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + xfeatures2d() + eigen() + ipp()},
+            {"target": "opencv_stitching",  "lib": "stitching",  "requires": ["opencv_imgproc", "opencv_features2d", "opencv_calib3d", "opencv_flann"] +
+                                                                              opencv_xfeatures2d() + opencv_cudaarithm() + opencv_cudawarping() +
+                                                                              opencv_cudafeatures2d() + opencv_cudalegacy() + opencv_cudaimgproc() +
+                                                                              eigen() + ipp()},
             {"target": "opencv_video",      "lib": "video",      "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen() + ipp()},
         ]
         if self.options.with_ipp == "opencv-icv" and not self.options.shared:
