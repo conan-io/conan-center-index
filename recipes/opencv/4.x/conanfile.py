@@ -598,28 +598,28 @@ class OpenCVConan(ConanFile):
                 return []
 
         def opencv_cudaarithm():
-            return ["opencv_cudaarithm"] if self.options.with_cuda and self.options.contrib else []
+            return ["opencv_cudaarithm"] if self.options.with_cuda else []
 
         def opencv_cudacodec():
-            return ["opencv_cudacodec"] if self.options.with_cuda and self.options.contrib else []
+            return ["opencv_cudacodec"] if self.options.with_cuda else []
 
         def opencv_cudafeatures2d():
-            return ["opencv_cudafeatures2d"] if self.options.with_cuda and self.options.contrib else []
+            return ["opencv_cudafeatures2d"] if self.options.with_cuda else []
 
         def opencv_cudafilters():
-            return ["opencv_cudafilters"] if self.options.with_cuda and self.options.contrib else []
+            return ["opencv_cudafilters"] if self.options.with_cuda else []
 
         def opencv_cudaimgproc():
-            return ["opencv_cudaimgproc"] if self.options.with_cuda and self.options.contrib else []
+            return ["opencv_cudaimgproc"] if self.options.with_cuda else []
 
         def opencv_cudalegacy():
-            return ["opencv_cudalegacy"] if self.options.with_cuda and self.options.contrib else []
+            return ["opencv_cudalegacy"] if self.options.with_cuda else []
 
         def opencv_cudaoptflow():
-            return ["opencv_cudaoptflow"] if self.options.with_cuda and self.options.contrib else []
+            return ["opencv_cudaoptflow"] if self.options.with_cuda else []
 
         def opencv_cudawarping():
-            return ["opencv_cudawarping"] if self.options.with_cuda and self.options.contrib else []
+            return ["opencv_cudawarping"] if self.options.with_cuda else []
 
         def opencv_dnn():
             return ["opencv_dnn"] if self.options.dnn else []
@@ -630,40 +630,81 @@ class OpenCVConan(ConanFile):
         def opencv_xfeatures2d():
             return ["opencv_xfeatures2d"] if self.options.contrib else []
 
+        # Main components
+        def requires_calib3d():
+            return ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d"] + eigen() + ipp()
+
+        def requires_core():
+            return ["zlib::zlib"] + parallel() + eigen() + ipp()
+
+        def requires_features2d():
+            return ["opencv_imgproc", "opencv_flann"] + eigen() + ipp()
+
+        def requires_highgui():
+            return ["opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_videoio"] + \
+                   freetype() + gtk() + eigen() + ipp()
+
+        def requires_imgcodecs():
+            return ["opencv_imgproc", "zlib::zlib"] + imageformats_deps() + eigen() + ipp()
+
+        def requires_objdetect():
+            requires = ["opencv_core", "opencv_imgproc", "opencv_calib3d"] + quirc() + eigen() + ipp()
+            if Version(self.version) >= "4.5.4":
+                requires.append(opencv_dnn())
+            return requires
+
+        def requires_photo():
+            return ["opencv_imgproc"] + opencv_cudaarithm() + opencv_cudaimgproc() + eigen() + ipp()
+
+        def requires_stitching():
+            return ["opencv_imgproc", "opencv_features2d", "opencv_calib3d", "opencv_flann"] + \
+                   opencv_xfeatures2d() + opencv_cudaarithm() + opencv_cudawarping() + \
+                   opencv_cudafeatures2d() + opencv_cudalegacy() + opencv_cudaimgproc() + eigen() + ipp()
+
+        def requires_video():
+            requires = ["opencv_imgproc", "opencv_calib3d"] + eigen() + ipp()
+            if Version(self.version) >= "4.5.1":
+                requires.append(opencv_dnn())
+            return requires
+
+        def requires_videoio():
+            return ["opencv_imgproc", "opencv_imgcodecs"] + ffmpeg() + eigen() + ipp()
+
         opencv_components = [
-            {"target": "opencv_core",       "lib": "core",       "requires": ["zlib::zlib"] + parallel() + eigen() + ipp()},
+            {"target": "opencv_calib3d",    "lib": "calib3d",    "requires": requires_calib3d()},
+            {"target": "opencv_core",       "lib": "core",       "requires": requires_core()},
+            {"target": "opencv_features2d", "lib": "features2d", "requires": requires_features2d()},
             {"target": "opencv_flann",      "lib": "flann",      "requires": ["opencv_core"] + eigen() + ipp()},
+            {"target": "opencv_highgui",    "lib": "highgui",    "requires": requires_highgui()},
+            {"target": "opencv_imgcodecs",  "lib": "imgcodecs",  "requires": requires_imgcodecs()},
             {"target": "opencv_imgproc",    "lib": "imgproc",    "requires": ["opencv_core"] + eigen() + ipp()},
             {"target": "opencv_ml",         "lib": "ml",         "requires": ["opencv_core"] + eigen() + ipp()},
-            {"target": "opencv_photo",      "lib": "photo",      "requires": ["opencv_imgproc"] + opencv_cudaarithm() + opencv_cudaimgproc() + eigen() + ipp()},
-            {"target": "opencv_features2d", "lib": "features2d", "requires": ["opencv_core", "opencv_flann", "opencv_imgproc"] + eigen() + ipp()},
-            {"target": "opencv_imgcodecs",  "lib": "imgcodecs",  "requires": ["opencv_core", "opencv_imgproc", "zlib::zlib"] + eigen() + imageformats_deps() + ipp()},
-            {"target": "opencv_videoio",    "lib": "videoio",    "requires": (
-                ["opencv_core", "opencv_imgproc", "opencv_imgcodecs"]
-                + eigen() + ffmpeg() + ipp())},
-            {"target": "opencv_calib3d",    "lib": "calib3d",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d"]+ eigen() + ipp()},
-            {"target": "opencv_highgui",    "lib": "highgui",    "requires": ["opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_videoio"] + freetype() + eigen() + gtk() + ipp()},
-            {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": ["opencv_core", "opencv_imgproc", "opencv_calib3d"] + eigen() + ipp() + quirc() +
-                                                                              opencv_dnn() if Version(self.version) >= "4.5.4" else []},
-            {"target": "opencv_stitching",  "lib": "stitching",  "requires": ["opencv_imgproc", "opencv_features2d", "opencv_calib3d", "opencv_flann"] +
-                                                                              opencv_xfeatures2d() + opencv_cudaarithm() + opencv_cudawarping() +
-                                                                              opencv_cudafeatures2d() + opencv_cudalegacy() + opencv_cudaimgproc() +
-                                                                              eigen() + ipp()},
-            {"target": "opencv_video",      "lib": "video",      "requires": ["opencv_imgproc", "opencv_calib3d"] + eigen() + ipp() +
-                                                                              opencv_dnn() if Version(self.version) >= "4.5.1" else []},
+            {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": requires_objdetect()},
+            {"target": "opencv_photo",      "lib": "photo",      "requires": requires_photo()},
+            {"target": "opencv_stitching",  "lib": "stitching",  "requires": requires_stitching()},
+            {"target": "opencv_video",      "lib": "video",      "requires": requires_video()},
+            {"target": "opencv_videoio",    "lib": "videoio",    "requires": requires_videoio()},
         ]
         if self.options.with_ipp == "opencv-icv" and not self.options.shared:
             opencv_components.extend([
                 {"target": "ippiw", "lib": "ippiw", "requires": []}
             ])
         if self.options.dnn:
+            requires_dnn = ["opencv_core", "opencv_imgproc"] + protobuf() + ipp()
             opencv_components.extend([
-                {"target": "opencv_dnn", "lib": "dnn", "requires": ["opencv_core", "opencv_imgproc"] + protobuf() + ipp()},
+                {"target": "opencv_dnn", "lib": "dnn", "requires": requires_dnn},
             ])
         if self.options.with_ade:
+            requires_gapi = ["opencv_imgproc", "ade::ade"]
+            if Version(self.version) >= "4.3.0":
+                requires_gapi.append("opencv_video")
+            if Version(self.version) >= "4.5.2":
+                requires_gapi.append("opencv_calib3d")
             opencv_components.extend([
-                {"target": "opencv_gapi",           "lib": "gapi",              "requires": ["opencv_imgproc", "opencv_calib3d", "opencv_video", "ade::ade"]},
+                {"target": "opencv_gapi", "lib": "gapi", "requires": requires_gapi},
             ])
+
+        # Define contrib components
         if self.options.contrib:
             opencv_components.extend([
                 {"target": "opencv_phase_unwrapping",    "lib": "phase_unwrapping",    "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
