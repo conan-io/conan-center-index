@@ -598,19 +598,19 @@ class OpenCVConan(ConanFile):
                 return []
 
         def opencv_cudaarithm():
-            return ["opencv_cudaarithm"] if self.options.with_cuda else []
+            return ["opencv_cudaarithm"] if self.options.with_cuda and self.options.contrib else []
 
         def opencv_cudafeatures2d():
-            return ["opencv_cudafeatures2d"] if self.options.with_cuda else []
+            return ["opencv_cudafeatures2d"] if self.options.with_cuda and self.options.contrib else []
 
         def opencv_cudaimgproc():
-            return ["opencv_cudaimgproc"] if self.options.with_cuda else []
+            return ["opencv_cudaimgproc"] if self.options.with_cuda and self.options.contrib else []
 
         def opencv_cudalegacy():
-            return ["opencv_cudalegacy"] if self.options.with_cuda else []
+            return ["opencv_cudalegacy"] if self.options.with_cuda and self.options.contrib else []
 
         def opencv_cudawarping():
-            return ["opencv_cudawarping"] if self.options.with_cuda else []
+            return ["opencv_cudawarping"] if self.options.with_cuda and self.options.contrib else []
 
         def opencv_dnn():
             return ["opencv_dnn"] if self.options.dnn else []
@@ -647,10 +647,13 @@ class OpenCVConan(ConanFile):
             opencv_components.extend([
                 {"target": "ippiw", "lib": "ippiw", "requires": []}
             ])
-
         if self.options.dnn:
             opencv_components.extend([
                 {"target": "opencv_dnn", "lib": "dnn", "requires": ["opencv_core", "opencv_imgproc"] + protobuf() + ipp()},
+            ])
+        if self.options.with_ade:
+            opencv_components.extend([
+                {"target": "opencv_gapi",           "lib": "gapi",              "requires": ["opencv_imgproc", "opencv_calib3d", "opencv_video", "ade::ade"]},
             ])
         if self.options.contrib:
             opencv_components.extend([
@@ -728,27 +731,21 @@ class OpenCVConan(ConanFile):
                     {"target": "multiview",         "lib": "multiview",         "requires": ["numeric", "gflags::gflags"] + eigen() + ipp()},
                 ])
 
-
-        if self.options.with_cuda:
-            opencv_components.extend([
-                {"target": "opencv_cudaarithm",     "lib": "cudaarithm",        "requires": ["opencv_core"] + eigen() + ipp()},
-                {"target": "opencv_cudabgsegm",     "lib": "cudabgsegm",        "requires": ["opencv_core", "opencv_video"] + eigen() + ipp()},
-                {"target": "opencv_cudacodec",      "lib": "cudacodec",         "requires": ["opencv_core"] + eigen() + ipp()},
-                {"target": "opencv_cudafeatures2d", "lib": "cudafeatures2d",    "requires": ["opencv_core", "opencv_cudafilters"] + eigen() + ipp()},
-                {"target": "opencv_cudafilters",    "lib": "cudafilters",       "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
-                {"target": "opencv_cudaimgproc",    "lib": "cudaimgproc",       "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
-                {"target": "opencv_cudalegacy",     "lib": "cudalegacy",        "requires": ["opencv_core", "opencv_video"] + eigen() + ipp()},
-                {"target": "opencv_cudaobjdetect",  "lib": "cudaobjdetect",     "requires": ["opencv_core", "opencv_objdetect"] + eigen() + ipp()},
-                {"target": "opencv_cudaoptflow",    "lib": "cudaoptflow",       "requires": ["opencv_core"] + eigen() + ipp()},
-                {"target": "opencv_cudastereo",     "lib": "cudastereo",        "requires": ["opencv_core", "opencv_calib3d"] + eigen() + ipp()},
-                {"target": "opencv_cudawarping",    "lib": "cudawarping",       "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
-                {"target": "opencv_cudev",          "lib": "cudev",             "requires": [] + eigen() + ipp()},
-            ])
-
-        if self.options.with_ade:
-            opencv_components.extend([
-                {"target": "opencv_gapi",           "lib": "gapi",              "requires": ["opencv_imgproc", "opencv_calib3d", "opencv_video", "ade::ade"]},
-            ])
+            if self.options.with_cuda:
+                opencv_components.extend([
+                    {"target": "opencv_cudaarithm",     "lib": "cudaarithm",        "requires": ["opencv_core"] + eigen() + ipp()},
+                    {"target": "opencv_cudabgsegm",     "lib": "cudabgsegm",        "requires": ["opencv_core", "opencv_video"] + eigen() + ipp()},
+                    {"target": "opencv_cudacodec",      "lib": "cudacodec",         "requires": ["opencv_core"] + eigen() + ipp()},
+                    {"target": "opencv_cudafeatures2d", "lib": "cudafeatures2d",    "requires": ["opencv_core", "opencv_cudafilters"] + eigen() + ipp()},
+                    {"target": "opencv_cudafilters",    "lib": "cudafilters",       "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
+                    {"target": "opencv_cudaimgproc",    "lib": "cudaimgproc",       "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
+                    {"target": "opencv_cudalegacy",     "lib": "cudalegacy",        "requires": ["opencv_core", "opencv_video"] + eigen() + ipp()},
+                    {"target": "opencv_cudaobjdetect",  "lib": "cudaobjdetect",     "requires": ["opencv_core", "opencv_objdetect"] + eigen() + ipp()},
+                    {"target": "opencv_cudaoptflow",    "lib": "cudaoptflow",       "requires": ["opencv_core"] + eigen() + ipp()},
+                    {"target": "opencv_cudastereo",     "lib": "cudastereo",        "requires": ["opencv_core", "opencv_calib3d"] + eigen() + ipp()},
+                    {"target": "opencv_cudawarping",    "lib": "cudawarping",       "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
+                    {"target": "opencv_cudev",          "lib": "cudev",             "requires": [] + eigen() + ipp()},
+                ])
 
         return opencv_components
 
