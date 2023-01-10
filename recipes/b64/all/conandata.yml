@@ -1,0 +1,4 @@
+sources:
+  "1.2.1":
+    url: "https://github.com/KGrzeg/libb64-conan/archive/refs/tags/1.2.1_1.tar.gz"
+    sha256: "74E8F1F3002CBD4A8F0BBE677E17AD350D5E5CEAE073FF2F782DC41281D2A75F"

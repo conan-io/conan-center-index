@@ -7,8 +7,8 @@ import os
 required_conan_version = ">=1.53.0"
 
 
-class Libb64Conan(ConanFile):
-    name = "libb64"
+class B64Conan(ConanFile):
+    name = "b64"
     description = "A library of ANSI C routines for fast encoding/decoding data into and from a base64-encoded format."
     license = "CC0-1.0"
     url = "https://github.com/conan-io/conan-center-index"
@@ -46,9 +46,8 @@ class Libb64Conan(ConanFile):
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(
             self.package_folder, "licenses"), src=self.source_folder)
-        copy(
-            self,
-            pattern="*.h",
+        self.copy(
+            "*.h",
             dst=os.path.join(self.package_folder, "include"),
             src=os.path.join(self.source_folder, "include"),
         )
