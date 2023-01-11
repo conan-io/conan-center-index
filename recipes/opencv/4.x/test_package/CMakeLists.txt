@@ -10,6 +10,11 @@ option(OPENCV_WITH_CONTRIB_SFM "Enabled if opencv is built with sfm module" OFF)
 
 find_package(OpenCV REQUIRED core CONFIG)
 
+add_executable(test_core test_core.cpp)
+target_link_libraries(test_core PRIVATE opencv_core)
+target_compile_features(test_core PRIVATE cxx_std_11)
+add_test(NAME test_core COMMAND test_core)
+
 if(OPENCV_WITH_GAPI)
     add_executable(test_gapi test_gapi.cpp)
     target_link_libraries(test_gapi PRIVATE opencv_gapi)
