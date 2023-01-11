@@ -29,6 +29,7 @@ class OpenCVConan(ConanFile):
         "calib3d": [True, False],
         "dnn": [True, False],
         "features2d": [True, False],
+        "flann": [True, False],
         "gapi": [True, False],
         "highgui": [True, False],
         "imgcodecs": [True, False],
@@ -137,6 +138,7 @@ class OpenCVConan(ConanFile):
         "calib3d": True,
         "dnn": True,
         "features2d": True,
+        "flann": True,
         "gapi": True,
         "highgui": True,
         "imgcodecs": True,
@@ -331,9 +333,9 @@ class OpenCVConan(ConanFile):
     @property
     def _modules_mandatory_options(self):
         modules_mandatory_options = {
-            "calib3d": ["features2d"],
+            "calib3d": ["features2d", "flann"],
             "objdetect": ["calib3d"],
-            "stitching": ["calib3d", "features2d"],
+            "stitching": ["calib3d", "features2d", "flann"],
             "videoio": ["imgcodecs"],
             "contrib_aruco": ["calib3d"],
             "contrib_barcode": ["dnn"],
@@ -354,13 +356,13 @@ class OpenCVConan(ConanFile):
             "contrib_cudastereo": ["with_cuda", "calib3d"],
             "contrib_cudawarping": ["with_cuda"],
             "contrib_cudev": ["with_cuda"],
-            "contrib_datasets": ["imgcodecs", "ml"],
+            "contrib_datasets": ["flann", "imgcodecs", "ml"],
             "contrib_dnn_objdetect": ["dnn"],
             "contrib_dnn_superres": ["dnn"],
             "contrib_dpm": ["objdetect"],
             "contrib_face": ["calib3d", "objdetect", "photo"],
             "contrib_mcc": ["calib3d", "dnn"],
-            "contrib_optflow": ["calib3d", "imgcodecs", "video", "contrib_ximgproc"],
+            "contrib_optflow": ["calib3d", "flann", "imgcodecs", "video", "contrib_ximgproc"],
             "contrib_quality": ["ml"],
             "contrib_rapid": ["calib3d"],
             "contrib_rgbd": ["calib3d"],
@@ -370,6 +372,7 @@ class OpenCVConan(ConanFile):
             "contrib_stereo": ["features2d", "contrib_tracking"],
             "contrib_structured_light": ["calib3d", "contrib_phase_unwrapping"],
             "contrib_superres": ["video", "contrib_optflow"],
+            "contrib_surface_matching": ["flann"],
             "contrib_text": ["dnn", "features2d", "ml"],
             "contrib_videostab": ["calib3d", "features2d", "photo", "video"],
             "contrib_wechat_qrcode": ["dnn"],
@@ -472,7 +475,7 @@ class OpenCVConan(ConanFile):
                         self.options.contrib_cudastereo = True
                     self.options.contrib_cudawarping = True
                     self.options.contrib_cudev = True
-                if self.options.imgcodecs and self.options.ml:
+                if self.options.flann and self.options.imgcodecs and self.options.ml:
                     self.options.contrib_datasets = True
                 if self.options.dnn:
                     self.options.contrib_dnn_objdetect = True
@@ -489,7 +492,7 @@ class OpenCVConan(ConanFile):
                 self.options.contrib_line_descriptor = True
                 if self._has_contrib_mcc_option and self.options.calib3d and self.options.dnn:
                     self.options.contrib_mcc = True
-                if self.options.calib3d and self.options.imgcodecs and self.options.video:
+                if self.options.calib3d and self.options.flann and self.options.imgcodecs and self.options.video:
                     self.options.contrib_optflow = True
                 self.options.contrib_phase_unwrapping = True
                 self.options.contrib_plot = True
@@ -510,7 +513,8 @@ class OpenCVConan(ConanFile):
                     self.options.contrib_structured_light = True
                 if self._has_contrib_superres_option and self.options.video:
                     self.options.contrib_superres = True
-                self.options.contrib_surface_matching = True
+                if self.options.flann:
+                    self.options.contrib_surface_matching = True
                 if self.options.dnn and self.options.features2d and self.options.ml:
                     self.options.contrib_text = True
                 self.options.contrib_tracking = True
@@ -861,7 +865,7 @@ class OpenCVConan(ConanFile):
         if self.options.dnn:
             tc.variables["PROTOBUF_UPDATE_FILES"] = True
         tc.variables["BUILD_opencv_features2d"] = self.options.features2d
-        tc.variables["BUILD_opencv_flann"] = True
+        tc.variables["BUILD_opencv_flann"] = self.options.flann
         tc.variables["BUILD_opencv_gapi"] = self.options.gapi
         tc.variables["WITH_ADE"] = self.options.gapi
         tc.variables["BUILD_opencv_highgui"] = self.options.highgui
@@ -1118,6 +1122,9 @@ class OpenCVConan(ConanFile):
         def opencv_dnn():
             return ["opencv_dnn"] if self.options.dnn else []
 
+        def opencv_flann():
+            return ["opencv_flann"] if self.options.flann else []
+
         def opencv_imgcodecs():
             return ["opencv_imgcodecs"] if self.options.imgcodecs else []
 
@@ -1133,7 +1140,6 @@ class OpenCVConan(ConanFile):
         # Main components
         opencv_components = [
             {"target": "opencv_core",    "lib": "core",    "requires": ["zlib::zlib"] + parallel() + eigen() + ipp()},
-            {"target": "opencv_flann",   "lib": "flann",   "requires": ["opencv_core"] + eigen() + ipp()},
             {"target": "opencv_imgproc", "lib": "imgproc", "requires": ["opencv_core"] + eigen() + ipp()},
         ]
         if self.options.with_ipp == "opencv-icv" and not self.options.shared:
@@ -1151,9 +1157,14 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_dnn", "lib": "dnn", "requires": requires_dnn},
             ])
         if self.options.features2d:
-            requires_features2d = ["opencv_imgproc", "opencv_flann"] + eigen() + ipp()
+            requires_features2d = ["opencv_imgproc"] + opencv_flann() + eigen() + ipp()
             opencv_components.extend([
                 {"target": "opencv_features2d", "lib": "features2d", "requires": requires_features2d},
+            ])
+        if self.options.flann:
+            requires_flann = ["opencv_core"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_flann", "lib": "flann", "requires": requires_flann},
             ])
         if self.options.gapi:
             requires_gapi = ["opencv_imgproc", "ade::ade"]
