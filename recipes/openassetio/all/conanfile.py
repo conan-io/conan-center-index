@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.apple import is_apple_os
 from conan.tools.files import apply_conandata_patches, get, copy, rm
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -59,6 +60,10 @@ class PackageConan(ConanFile):
             self.requires("pybind11/2.10.0")
 
     def validate(self):
+        if is_apple_os(self):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} does not support MacOS at this time"
+            )
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 191)
