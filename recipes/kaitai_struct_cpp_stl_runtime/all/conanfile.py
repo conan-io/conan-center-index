@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
@@ -22,6 +22,9 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
         "with_iconv": False,
     }
     short_paths = True
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -47,6 +50,7 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
