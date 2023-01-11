@@ -16,6 +16,7 @@ from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
 
+
 class LelyConan(ConanFile):
     name = "lely-core"
 
@@ -23,7 +24,7 @@ class LelyConan(ConanFile):
     license = "Apache"
     homepage = "https://gitlab.com/lely_industries/lely-core/"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "The Lely core libraries are a collection of C and C++ libraries and tools, providing hih-performance I/O and sensor/actuator control for robotics and IoT applications. The libraries are cross-platform and have few dependencies. They can be even be used on bare-metal microcontrollers with as little as 32 kB RAM."
+    description = "The Lely core libraries are a collection of C and C++ libraries and tools, providing high-performance I/O and sensor/actuator control for robotics and IoT applications. The libraries are cross-platform and have few dependencies. They can be even be used on bare-metal microcontrollers with as little as 32 kB RAM."
     topics = ("canopen",)
 
     # Binary configuration
@@ -115,11 +116,11 @@ class LelyConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def validate(self):
-        # Windows requires proprietary from https://www.ixxat.com/technical-support/support/windows-driver-software
-        # hence support for it will be skipped for now
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(
-                "This Conan version of this package is only compatible with Linux"
+                "This Conan version of this package is only compatible with Linux. "
+                "Windows requires proprietary software from https://www.ixxat.com/technical-support/support/windows-driver-software "
+                "hence support for it will be skipped for now "
             )
         if self.settings.compiler != "gcc":
             raise ConanInvalidConfiguration(
@@ -224,7 +225,10 @@ class LelyConan(ConanFile):
             "coapp": {"requires": ["libc", "io2", "co"]},
             "ev": {"requires": ["libc", "util"]},
             "io2": {"requires": ["libc", "util", "can", "ev"]},
-            "libc": {"requires": [], "system_libs": ["pthread"] if self.options.threads else []},
+            "libc": {
+                "requires": [],
+                "system_libs": ["pthread"] if self.options.threads else [],
+            },
             "tap": {"requires": ["libc"]},
             "util": {"requires": ["libc"], "system_libs": ["m"]},
         }
