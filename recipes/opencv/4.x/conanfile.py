@@ -520,7 +520,7 @@ class OpenCVConan(ConanFile):
             self.options.rm_safe("with_cudnn")
             self.options.rm_safe("with_cufft")
             self.options.rm_safe("dnn_cuda")
-            self.options.cuda_arch_bin
+            self.options.rm_safe("cuda_arch_bin")
         if not self.options.contrib_text:
             self.options.rm_safe("with_tesseract")
 
