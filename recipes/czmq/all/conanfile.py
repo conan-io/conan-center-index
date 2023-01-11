@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.microsoft import is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, save
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, save
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 import textwrap
@@ -64,7 +64,7 @@ class CzmqConan(ConanFile):
         if self.options.get_safe("with_libuuid"):
             self.requires("libuuid/1.0.3")
         if self.options.get_safe("with_systemd"):
-            self.requires("libsystemd/251.4")
+            self.requires("libsystemd/252.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -89,6 +89,8 @@ class CzmqConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        # remove custom Finduuid.cmake to use cci Finduuid.cmake
+        rm(self, "Finduuid.cmake", self.source_folder)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
