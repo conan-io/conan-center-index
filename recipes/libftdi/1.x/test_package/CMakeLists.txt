@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(test_package)
+project(test_package LANGUAGES CXX)
 
 
 find_package(LibFTDI1 REQUIRED)
