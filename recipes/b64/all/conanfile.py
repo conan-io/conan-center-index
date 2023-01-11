@@ -23,6 +23,10 @@ class B64Conan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    
+    def configure(self):
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def layout(self):
         cmake_layout(self, src_folder="src")
