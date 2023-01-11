@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
 from conans import CMake
+from conan.errors import ConanInvalidConfiguration
 import os
 
 
@@ -15,5 +16,8 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not cross_building(self):
+            if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug":
+                raise ConanInvalidConfiguration(
+                    "This recipe does not support this build type")
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
