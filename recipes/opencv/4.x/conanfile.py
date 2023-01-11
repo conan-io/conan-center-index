@@ -94,6 +94,7 @@ class OpenCVConan(ConanFile):
         "with_cudnn": [True, False],
         "with_v4l": [True, False],
         "with_ffmpeg": [True, False],
+        "with_tesseract": [True, False],
         "with_imgcodec_hdr": [True, False],
         "with_imgcodec_pfm": [True, False],
         "with_imgcodec_pxm": [True, False],
@@ -174,6 +175,7 @@ class OpenCVConan(ConanFile):
         "with_cudnn": False,
         "with_v4l": False,
         "with_ffmpeg": True,
+        "with_tesseract": True,
         "with_imgcodec_hdr": False,
         "with_imgcodec_pfm": False,
         "with_imgcodec_pxm": False,
@@ -295,6 +297,8 @@ class OpenCVConan(ConanFile):
                 self.options["jasper"].with_libjpeg = self.options.with_jpeg
             if self.options.get_safe("with_tiff"):
                 self.options["libtiff"].jpeg = self.options.with_jpeg
+        if not self.options.contrib_text:
+            del self.options.with_tesseract
 
         if self.settings.os == "Android":
             self.options.with_openexr = False  # disabled because this forces linkage to libc++_shared.so
@@ -414,6 +418,8 @@ class OpenCVConan(ConanFile):
             self.requires(f"protobuf/{self._protobuf_version}")
         if self.options.gapi:
             self.requires("ade/0.1.2a")
+        if self.options.get_safe("with_tesseract"):
+            self.requires("tesseract/5.2.0")
 
     def package_id(self):
         # deprecated options
@@ -760,8 +766,7 @@ class OpenCVConan(ConanFile):
         tc.variables["BUILD_opencv_surface_matching"] = self.options.contrib_surface_matching
         tc.variables["BUILD_opencv_text"] = self.options.contrib_text
         if self.options.contrib_text:
-            # TODO: add tesseract as an optional requirement of text module
-            tc.variables["WITH_TESSERACT"] = False
+            tc.variables["WITH_TESSERACT"] = self.options.with_tesseract
         tc.variables["BUILD_opencv_tracking"] = self.options.contrib_tracking
         tc.variables["BUILD_opencv_videostab"] = self.options.contrib_videostab
         tc.variables["BUILD_opencv_viz"] = False
@@ -1205,6 +1210,8 @@ class OpenCVConan(ConanFile):
             ])
         if self.options.contrib_text:
             requires_text = ["opencv_core", "opencv_ml", "opencv_imgproc", "opencv_features2d", "opencv_dnn"] + eigen() + ipp()
+            if self.options.with_tesseract:
+                requires_text.append("tesseract::tesseract")
             opencv_components.extend([
                 {"target": "opencv_text", "lib": "text", "requires": requires_text},
             ])
