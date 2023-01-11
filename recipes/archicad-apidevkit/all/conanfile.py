@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import copy, get
 from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -13,12 +14,14 @@ class ArchicadApidevkitConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://archicadapi.graphisoft.com/"
     license = "LicenseRef-LICENSE"
-    settings = "os", "compiler", "arch"
+    settings = "os", "compiler", "arch", "build_type"
     no_copy_source = True
     topics = "api", "archicad", "development"
     short_paths = True
 
     def validate(self):
+        if self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration("Debug configuration is not supported")
         if is_msvc(self):
             # Approximate requirement for toolset >= v142
             check_min_vs(self, "192")
@@ -28,7 +31,7 @@ class ArchicadApidevkitConan(ConanFile):
         if not str(self.settings.arch) in ("x86_64"):
             raise ConanInvalidConfiguration(
                 f"{self.ref} is not supported yet.")
-        if self.settings.compiler == "Visual Studio" and self.settings.compiler.version != "16":
+        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "16":
             raise ConanInvalidConfiguration(
                 "This recipe does not support this compiler version")
 
@@ -46,6 +49,13 @@ class ArchicadApidevkitConan(ConanFile):
         self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
+
+        # These are dependencies of third party vendored libraries
+        if is_msvc(self):
+            self.cpp_info.system_libs = [
+                "WinMM", "MSImg32", "WS2_32", "DNSApi", "USP10", "gdiplus", "iphlpapi"]
+        else:
+            self.cpp_info.system_libs = []
 
         devkit_dir = os.path.join(self.package_folder, "bin")
         self.output.info(f"Setting AC_API_DEVKIT_DIR environment variable: {devkit_dir}")
