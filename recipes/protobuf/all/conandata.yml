@@ -29,3 +29,7 @@ patches:
     - patch_file: "patches/upstream-pr-9437-msvc-runtime.patch"
       patch_description: "Properly handle CMAKE_MSVC_RUNTIME_LIBRARY when using CMake >= 3.15"
       patch_type: "backport"
+  "3.5.1.1":
+    - patch_file: "patches/upstream-pr-4709-remove-js_embed.patch"
+      patch_description: "Remove use of js_embed"
+      patch_type: "backport"
