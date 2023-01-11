@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-import os
 
 
 class TestPackageConan(ConanFile):
@@ -8,13 +7,12 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["built_gapi"] = self.options["opencv"].gapi
-        cmake.definitions["built_with_ffmpeg"] = self.options["opencv"].videoio and self.options["opencv"].with_ffmpeg
-        cmake.definitions["built_contrib_sfm"] = self.options["opencv"].contrib_sfm
+        cmake.definitions["OPENCV_WITH_GAPI"] = self.options["opencv"].gapi
+        cmake.definitions["OPENCV_WITH_VIDEOIO_FFMPEG"] = self.options["opencv"].videoio and self.options["opencv"].with_ffmpeg
+        cmake.definitions["OPENCV_WITH_CONTRIB_SFM"] = self.options["opencv"].contrib_sfm
         cmake.configure()
         cmake.build()
 
     def test(self):
         if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+            self.run(f"ctest --output-on-failure -C {self.settings.build_type}", run_environment=True)
