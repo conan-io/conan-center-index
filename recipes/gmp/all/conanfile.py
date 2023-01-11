@@ -12,7 +12,6 @@ import stat
 
 required_conan_version = ">=1.54.0"
 
-
 class GmpConan(ConanFile):
     name = "gmp"
     description = (
