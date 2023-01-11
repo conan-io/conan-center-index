@@ -511,6 +511,10 @@ class OpenCVConan(ConanFile):
             self.options.rm_safe("with_png")
             self.options.rm_safe("with_tiff")
             self.options.rm_safe("with_webp")
+            self.options.rm_safe("with_imgcodec_hdr")
+            self.options.rm_safe("with_imgcodec_pfm")
+            self.options.rm_safe("with_imgcodec_pxm")
+            self.options.rm_safe("with_imgcodec_sunraster")
         if not self.options.objdetect:
             self.options.rm_safe("with_quirc")
         if not self.options.videoio:
@@ -741,10 +745,10 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_GSTREAMER"] = False
         tc.variables["WITH_HALIDE"] = False
         tc.variables["WITH_HPX"] = False
-        tc.variables["WITH_IMGCODEC_HDR"] = self.options.with_imgcodec_hdr
-        tc.variables["WITH_IMGCODEC_PFM"] = self.options.with_imgcodec_pfm
-        tc.variables["WITH_IMGCODEC_PXM"] = self.options.with_imgcodec_pxm
-        tc.variables["WITH_IMGCODEC_SUNRASTER"] = self.options.with_imgcodec_sunraster
+        tc.variables["WITH_IMGCODEC_HDR"] = self.options.get_safe("with_imgcodec_hdr", False)
+        tc.variables["WITH_IMGCODEC_PFM"] = self.options.get_safe("with_imgcodec_pfm", False)
+        tc.variables["WITH_IMGCODEC_PXM"] = self.options.get_safe("with_imgcodec_pxm", False)
+        tc.variables["WITH_IMGCODEC_SUNRASTER"] = self.options.get_safe("with_imgcodec_sunraster", False)
         tc.variables["WITH_INF_ENGINE"] = False
         tc.variables["WITH_IPP"] = False
         if self.options.with_ipp:
