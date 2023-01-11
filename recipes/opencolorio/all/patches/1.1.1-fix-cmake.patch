@@ -1,11 +1,15 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e4f3119..3ea1955 100644
+index e4f3119..9eb6d07 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -4,11 +4,13 @@ set(OCIO_VERSION_MINOR 1)
+@@ -1,14 +1,16 @@
++cmake_minimum_required(VERSION 2.8)
+ project(OpenColorIO)
+ set(OCIO_VERSION_MAJOR 1)
+ set(OCIO_VERSION_MINOR 1)
  set(OCIO_VERSION_PATCH 1)
  
- cmake_minimum_required(VERSION 2.8)
+-cmake_minimum_required(VERSION 2.8)
 -set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/share/cmake)
 +list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/share/cmake)
  if(NOT DEFINED CMAKE_FIRST_RUN)
