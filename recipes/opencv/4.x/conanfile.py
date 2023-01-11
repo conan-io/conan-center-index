@@ -30,6 +30,7 @@ class OpenCVConan(ConanFile):
         "gapi": [True, False],
         "highgui": [True, False],
         "ml": [True, False],
+        "objdetect": [True, False],
         "photo": [True, False],
         "stitching": [True, False],
         "videoio": [True, False],
@@ -121,13 +122,16 @@ class OpenCVConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        # modules
         "dnn": True,
         "gapi": True,
         "highgui": True,
         "ml": True,
+        "objdetect": True,
         "photo": True,
         "stitching": True,
         "videoio": True,
+        # contrib modules
         "contrib": "deprecated",
         "contrib_alphamat": False,
         "contrib_aruco": False,
@@ -181,6 +185,7 @@ class OpenCVConan(ConanFile):
         "contrib_ximgproc": False,
         "contrib_xobjdetect": False,
         "contrib_xphoto": False,
+        # other options
         "parallel": False,
         "with_ipp": False,
         "with_ade": "deprecated",
@@ -308,6 +313,8 @@ class OpenCVConan(ConanFile):
             self.options.rm_safe("dnn_cuda")
         if not self.options.highgui:
             self.options.rm_safe("with_gtk")
+        if not self.options.objdetect:
+            self.options.rm_safe("with_quirc")
         if not self.options.videoio:
             self.options.rm_safe("with_ffmpeg")
         if not self.options.with_cuda:
@@ -345,12 +352,14 @@ class OpenCVConan(ConanFile):
                 if self.options.with_cuda:
                     self.options.contrib_cudaarithm = True
                     self.options.contrib_cudabgsegm = True
-                    self.options.contrib_cudacodec = True
+                    if self.options.videoio:
+                        self.options.contrib_cudacodec = True
                     self.options.contrib_cudafeatures2d = True
                     self.options.contrib_cudafilters = True
                     self.options.contrib_cudaimgproc = True
                     self.options.contrib_cudalegacy = True
-                    self.options.contrib_cudaobjdetect = True
+                    if self.options.objdetect:
+                        self.options.contrib_cudaobjdetect = True
                     self.options.contrib_cudaoptflow = True
                     self.options.contrib_cudastereo = True
                     self.options.contrib_cudawarping = True
@@ -360,8 +369,9 @@ class OpenCVConan(ConanFile):
                 if self.options.dnn:
                     self.options.contrib_dnn_objdetect = True
                     self.options.contrib_dnn_superres = True
-                self.options.contrib_dpm = True
-                if self.options.photo:
+                if self.options.objdetect:
+                    self.options.contrib_dpm = True
+                if self.options.objdetect and self.options.photo:
                     self.options.contrib_face = True
                 self.options.contrib_fuzzy = True
                 self.options.contrib_hfs = True
@@ -396,7 +406,8 @@ class OpenCVConan(ConanFile):
                     self.options.contrib_wechat_qrcode = True
                 self.options.contrib_xfeatures2d = True
                 self.options.contrib_ximgproc = True
-                self.options.contrib_xobjdetect = True
+                if self.options.objdetect:
+                    self.options.contrib_xobjdetect = True
                 if self.options.photo:
                     self.options.contrib_xphoto = True
 
@@ -447,7 +458,7 @@ class OpenCVConan(ConanFile):
         if self.options.contrib_sfm:
             self.requires("gflags/2.2.2")
             self.requires("glog/0.6.0")
-        if self.options.with_quirc:
+        if self.options.get_safe("with_quirc"):
             self.requires("quirc/1.1")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
@@ -484,14 +495,19 @@ class OpenCVConan(ConanFile):
             ],
             "highgui": ["contrib_ccalib"],
             "ml": ["contrib_datasets", "contrib_quality", "contrib_text"],
+            "objdetect": ["contrib_cudaobjdetect", "contrib_dpm", "contrib_face", "contrib_xobjdetect"],
             "photo": ["contrib_face", "contrib_videostab", "contrib_xphoto"],
+            "videoio": ["contrib_cudacodec"],
             "with_cuda": [
                 "contrib_cudaarithm", "contrib_cudabgsegm", "contrib_cudacodec", "contrib_cudafeatures2d",
                 "contrib_cudafilters", "contrib_cudaimgproc", "contrib_cudalegacy", "contrib_cudaobjdetect",
                 "contrib_cudaoptflow", "contrib_cudastereo", "contrib_cudawarping", "contrib_cudev",
             ],
+            "contrib_cudaarithm": ["contrib_cudaobjdetect", "contrib_cudafilters", "contrib_cudaoptflow"],
             "contrib_cudafilters": ["contrib_cudafeatures2d"],
-            "contrib_optflow": ["contrib_superres"],
+            "contrib_cudaimgproc": ["contrib_cudaoptflow"],
+            "contrib_cudawarping": ["contrib_cudaobjdetect", "contrib_cudafeatures2d", "contrib_cudaoptflow"],
+            "contrib_optflow": ["contrib_superres", "contrib_cudaoptflow"],
             "contrib_phase_unwrapping": ["contrib_structured_light"],
             "contrib_tracking": ["contrib_stereo"],
             "contrib_xfeatures2d": ["contrib_sfm"],
@@ -698,7 +714,6 @@ class OpenCVConan(ConanFile):
         if self.options.with_openexr:
             tc.variables["CMAKE_CXX_STANDARD"] = 11
         tc.variables["WITH_EIGEN"] = self.options.with_eigen
-        tc.variables["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc requirement
         tc.variables["WITH_DSHOW"] = is_msvc(self)
         tc.variables["WITH_MSMF"] = is_msvc(self)
         tc.variables["WITH_MSMF_DXVA"] = is_msvc(self)
@@ -731,7 +746,9 @@ class OpenCVConan(ConanFile):
         tc.variables["BUILD_opencv_imgcodecs"] = True
         tc.variables["BUILD_opencv_imgproc"] = True
         tc.variables["BUILD_opencv_ml"] = self.options.ml
-        tc.variables["BUILD_opencv_objdetect"] = True
+        tc.variables["BUILD_opencv_objdetect"] = self.options.objdetect
+        if self.options.objdetect:
+            tc.variables["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc requirement
         tc.variables["BUILD_opencv_photo"] = self.options.photo
         tc.variables["BUILD_opencv_stitching"] = self.options.stitching
         tc.variables["BUILD_opencv_video"] = True
@@ -915,7 +932,7 @@ class OpenCVConan(ConanFile):
             return ["onetbb::onetbb"] if self.options.parallel == "tbb" else []
 
         def quirc():
-            return ["quirc::quirc"] if self.options.with_quirc else []
+            return ["quirc::quirc"] if self.options.get_safe("with_quirc") else []
 
         def gtk():
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
@@ -995,12 +1012,6 @@ class OpenCVConan(ConanFile):
         def requires_imgcodecs():
             return ["opencv_imgproc", "zlib::zlib"] + imageformats_deps() + eigen() + ipp()
 
-        def requires_objdetect():
-            requires = ["opencv_core", "opencv_imgproc", "opencv_calib3d"] + quirc() + eigen() + ipp()
-            if Version(self.version) >= "4.5.4":
-                requires.extend(opencv_dnn())
-            return requires
-
         def requires_video():
             requires = ["opencv_imgproc", "opencv_calib3d"] + eigen() + ipp()
             if Version(self.version) >= "4.5.1":
@@ -1014,7 +1025,6 @@ class OpenCVConan(ConanFile):
             {"target": "opencv_flann",      "lib": "flann",      "requires": ["opencv_core"] + eigen() + ipp()},
             {"target": "opencv_imgcodecs",  "lib": "imgcodecs",  "requires": requires_imgcodecs()},
             {"target": "opencv_imgproc",    "lib": "imgproc",    "requires": ["opencv_core"] + eigen() + ipp()},
-            {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": requires_objdetect()},
             {"target": "opencv_video",      "lib": "video",      "requires": requires_video()},
         ]
         if self.options.with_ipp == "opencv-icv" and not self.options.shared:
@@ -1044,6 +1054,13 @@ class OpenCVConan(ConanFile):
         if self.options.ml:
             opencv_components.extend([
                 {"target": "opencv_ml", "lib": "ml", "requires": ["opencv_core"] + eigen() + ipp()},
+            ])
+        if self.options.objdetect:
+            requires_objdetect = ["opencv_core", "opencv_imgproc", "opencv_calib3d"] + quirc() + eigen() + ipp()
+            if Version(self.version) >= "4.5.4":
+                requires_objdetect.extend(opencv_dnn())
+            opencv_components.extend([
+                {"target": "opencv_objdetect", "lib": "objdetect", "requires": requires_objdetect},
             ])
         if self.options.photo:
             requires_photo = ["opencv_imgproc"] + opencv_cudaarithm() + opencv_cudaimgproc() + eigen() + ipp()
@@ -1101,27 +1118,27 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_cudaarithm", "lib": "cudaarithm", "requires": requires_cudaarithm},
             ])
         if self.options.contrib_cudabgsegm:
-            requires_cudabgsegm = ["opencv_core", "opencv_video"] + eigen() + ipp()
+            requires_cudabgsegm = ["opencv_video"] + eigen() + ipp()
             opencv_components.extend([
                 {"target": "opencv_cudabgsegm", "lib": "cudabgsegm", "requires": requires_cudabgsegm},
             ])
         if self.options.contrib_cudacodec:
-            requires_cudacodec = ["opencv_core"] + eigen() + ipp()
+            requires_cudacodec = ["opencv_core", "opencv_videio"] + eigen() + ipp()
             opencv_components.extend([
                 {"target": "opencv_cudacodec", "lib": "cudacodec", "requires": requires_cudacodec},
             ])
         if self.options.contrib_cudafeatures2d:
-            requires_cudafeatures2d = ["opencv_core", "opencv_cudafilters"] + eigen() + ipp()
+            requires_cudafeatures2d = ["opencv_features2d", "opencv_cudafilters", "opencv_cudawarping"] + eigen() + ipp()
             opencv_components.extend([
                 {"target": "opencv_cudafeatures2d", "lib": "cudafeatures2d", "requires": requires_cudafeatures2d},
             ])
         if self.options.contrib_cudafilters:
-            requires_cudafilters = ["opencv_core", "opencv_imgproc"] + eigen() + ipp()
+            requires_cudafilters = ["opencv_imgproc", "opencv_cudaarithm"] + eigen() + ipp()
             opencv_components.extend([
                 {"target": "opencv_cudafilters", "lib": "cudafilters", "requires": requires_cudafilters},
             ])
         if self.options.contrib_cudaimgproc:
-            requires_cudaimgproc = ["opencv_core", "opencv_imgproc"] + eigen() + ipp()
+            requires_cudaimgproc = ["opencv_imgproc"] + eigen() + ipp()
             opencv_components.extend([
                 {"target": "opencv_cudaimgproc", "lib": "cudaimgproc", "requires": requires_cudaimgproc},
             ])
@@ -1131,17 +1148,18 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_cudalegacy", "lib": "cudalegacy", "requires": requires_cudalegacy},
             ])
         if self.options.contrib_cudaobjdetect:
-            requires_cudaobjdetect = ["opencv_core", "opencv_objdetect"] + eigen() + ipp()
+            requires_cudaobjdetect = ["opencv_objdetect", "opencv_cudaarithm", "opencv_cudawarping"] + eigen() + ipp()
             opencv_components.extend([
                 {"target": "opencv_cudaobjdetect", "lib": "cudaobjdetect", "requires": requires_cudaobjdetect},
             ])
         if self.options.contrib_cudaoptflow:
-            requires_cudaoptflow = ["opencv_core"] + eigen() + ipp()
+            requires_cudaoptflow = ["opencv_video", "opencv_optflow", "opencv_cudaarithm", "opencv_cudawarping",
+                                    "contrib_cudaimgproc"] + eigen() + ipp()
             opencv_components.extend([
                 {"target": "opencv_cudaoptflow", "lib": "cudaoptflow", "requires": requires_cudaoptflow},
             ])
         if self.options.contrib_cudastereo:
-            requires_cudastereo = ["opencv_core", "opencv_calib3d"] + eigen() + ipp()
+            requires_cudastereo = ["opencv_calib3d"] + eigen() + ipp()
             opencv_components.extend([
                 {"target": "opencv_cudastereo", "lib": "cudastereo", "requires": requires_cudastereo},
             ])
