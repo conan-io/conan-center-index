@@ -116,6 +116,8 @@ class OpenCVConan(ConanFile):
         "with_jpeg2000": [False, "jasper", "openjpeg"],
         "with_openexr": [True, False],
         "with_webp": [True, False],
+        "with_gdal": [True, False],
+        "with_gdcm": [True, False],
         "with_imgcodec_hdr": [True, False],
         "with_imgcodec_pfm": [True, False],
         "with_imgcodec_pxm": [True, False],
@@ -226,6 +228,8 @@ class OpenCVConan(ConanFile):
         "with_jpeg2000": "jasper",
         "with_openexr": True,
         "with_webp": True,
+        "with_gdal": False,
+        "with_gdcm": False,
         "with_imgcodec_hdr": False,
         "with_imgcodec_pfm": False,
         "with_imgcodec_pxm": False,
@@ -578,6 +582,8 @@ class OpenCVConan(ConanFile):
             self.options.rm_safe("with_png")
             self.options.rm_safe("with_tiff")
             self.options.rm_safe("with_webp")
+            self.options.rm_safe("with_gdal")
+            self.options.rm_safe("with_gdcm")
             self.options.rm_safe("with_imgcodec_hdr")
             self.options.rm_safe("with_imgcodec_pfm")
             self.options.rm_safe("with_imgcodec_pxm")
@@ -605,7 +611,24 @@ class OpenCVConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        # core dependencies
         self.requires("zlib/1.2.13")
+        if self.options.with_eigen:
+            self.requires("eigen/3.3.9")
+        if self.options.parallel == "tbb":
+            self.requires("onetbb/2021.7.0")
+        if self.options.with_ipp == "intel-ipp":
+            self.requires("intel-ipp/2020")
+        # dnn dependencies
+        if self.options.dnn:
+            self.requires(f"protobuf/{self._protobuf_version}")
+        # gapi dependencies
+        if self.options.gapi:
+            self.requires("ade/0.1.2a")
+        # highgui dependencies
+        if self.options.get_safe("with_gtk"):
+            self.requires("gtk/system")
+        # imgcodecs dependencies
         if self.options.get_safe("with_jpeg") == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
@@ -626,31 +649,28 @@ class OpenCVConan(ConanFile):
                 self.requires("openexr/3.1.5")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.4.0")
-        if self.options.with_eigen:
-            self.requires("eigen/3.3.9")
+        if self.options.get_safe("with_webp"):
+            self.requires("libwebp/1.2.4")
+        if self.options.get_safe("with_gdal"):
+            self.requires("gdal/3.5.2")
+        if self.options.get_safe("with_gdcm"):
+            self.requires("gdcm/3.0.20")
+        # objdetect dependencies
+        if self.options.get_safe("with_quirc"):
+            self.requires("quirc/1.1")
+        # videoio dependencies
         if self.options.get_safe("with_ffmpeg"):
             # opencv doesn't support ffmpeg >= 5.0.0 for the moment (until 4.5.5 at least)
             self.requires("ffmpeg/4.4")
-        if self.options.parallel == "tbb":
-            self.requires("onetbb/2021.7.0")
-        if self.options.with_ipp == "intel-ipp":
-            self.requires("intel-ipp/2020")
-        if self.options.get_safe("with_webp"):
-            self.requires("libwebp/1.2.4")
+        # contrib_freetype dependencies
         if self.options.contrib_freetype:
             self.requires("freetype/2.12.1")
             self.requires("harfbuzz/6.0.0")
+        # contrib_sfm dependencies
         if self.options.contrib_sfm:
             self.requires("gflags/2.2.2")
             self.requires("glog/0.6.0")
-        if self.options.get_safe("with_quirc"):
-            self.requires("quirc/1.1")
-        if self.options.get_safe("with_gtk"):
-            self.requires("gtk/system")
-        if self.options.dnn:
-            self.requires(f"protobuf/{self._protobuf_version}")
-        if self.options.gapi:
-            self.requires("ade/0.1.2a")
+        # contrib_text dependencies
         if self.options.get_safe("with_tesseract"):
             self.requires("tesseract/5.2.0")
 
@@ -694,6 +714,7 @@ class OpenCVConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "elseif(EMSCRIPTEN)", "elseif(QNXNTO)\nelseif(EMSCRIPTEN)")
         replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
+        replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "${GDAL_LIBRARY}", "GDAL::GDAL")
 
         # Fix detection of ffmpeg
         replace_in_file(self, os.path.join(self.source_folder, "modules", "videoio", "cmake", "detect_ffmpeg.cmake"),
@@ -869,6 +890,8 @@ class OpenCVConan(ConanFile):
             tc.variables["WITH_JASPER"] = self.options.get_safe("with_jpeg2000") == "jasper"
             tc.variables["WITH_OPENJPEG"] = self.options.get_safe("with_jpeg2000") == "openjpeg"
         tc.variables["WITH_OPENEXR"] = self.options.get_safe("with_openexr", False)
+        tc.variables["WITH_GDAL"] = self.options.get_safe("with_gdal", False)
+        tc.variables["WITH_GDCM"] = self.options.get_safe("with_gdcm", False)
         tc.variables["WITH_EIGEN"] = self.options.with_eigen
         tc.variables["WITH_DSHOW"] = is_msvc(self)
         tc.variables["WITH_MSMF"] = is_msvc(self)
@@ -1079,6 +1102,10 @@ class OpenCVConan(ConanFile):
                 components.append("openexr::openexr")
             if self.options.get_safe("with_webp"):
                 components.append("libwebp::libwebp")
+            if self.options.get_safe("with_gdal"):
+                components.append("gdal::gdal")
+            if self.options.get_safe("with_gdcm"):
+                components.append("gdcm::gdcm")
             return components
 
         def eigen():
