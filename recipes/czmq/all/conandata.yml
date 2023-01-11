@@ -10,6 +10,10 @@ patches:
     - patch_file: patches/4.2.1-0001-fix-cmake.patch
       patch_description: "set LINKER_LANGUAGE, disable executable and tests"
       patch_type: "conan"
+    - patch_file: patches/4.2.1-0002-fix-zsys_thread-issue.patch
+      patch_description: "addresses three problems related to ZSYS_THREAD_NAME_PREFIX / ZSYS_THREAD_NAME_PREFIX_STR:"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/zeromq/czmq/pull/2162"
   "4.2.0":
     - patch_file: patches/4.2.0-0001-fix-cmake.patch
       patch_description: "add options which are added in 4.2.1, set LINKER_LANGUAGE, disable executable and tests"
