@@ -18,6 +18,7 @@ class TestPackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["OPENCV_WITH_GAPI"] = self.dependencies["opencv"].options.gapi
+        tc.variables["OPENCV_WITH_IMGPROC"] = self.dependencies["opencv"].options.imgproc
         tc.variables["OPENCV_WITH_VIDEOIO_FFMPEG"] = self.dependencies["opencv"].options.videoio and self.dependencies["opencv"].options.with_ffmpeg
         tc.variables["OPENCV_WITH_CONTRIB_SFM"] = self.dependencies["opencv"].options.contrib_sfm
         tc.generate()

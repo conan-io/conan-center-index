@@ -4,21 +4,24 @@ project(test_package LANGUAGES CXX)
 enable_testing()
 
 option(OPENCV_WITH_GAPI "Enabled if opencv is built with gapi module" OFF)
+option(OPENCV_WITH_IMGPROC "Enabled if opencv is built with imgproc module" OFF)
 option(OPENCV_WITH_VIDEOIO_FFMPEG "Enabled if opencv is built with videoio module and ffmpeg" OFF)
 option(OPENCV_WITH_CONTRIB_SFM "Enabled if opencv is built with sfm module" OFF)
 
-find_package(OpenCV REQUIRED core imgproc CONFIG)
-
-add_executable(test_imgproc test_imgproc.cpp)
-target_link_libraries(test_imgproc PRIVATE opencv_core opencv_imgproc)
-target_compile_features(test_imgproc PRIVATE cxx_std_11)
-add_test(NAME test_imgproc COMMAND test_imgproc)
+find_package(OpenCV REQUIRED core CONFIG)
 
 if(OPENCV_WITH_GAPI)
     add_executable(test_gapi test_gapi.cpp)
     target_link_libraries(test_gapi PRIVATE opencv_gapi)
     target_compile_features(test_gapi PRIVATE cxx_std_11)
     add_test(NAME test_gapi COMMAND test_gapi)
+endif()
+
+if(OPENCV_WITH_IMGPROC)
+    add_executable(test_imgproc test_imgproc.cpp)
+    target_link_libraries(test_imgproc PRIVATE opencv_core opencv_imgproc)
+    target_compile_features(test_imgproc PRIVATE cxx_std_11)
+    add_test(NAME test_imgproc COMMAND test_imgproc)
 endif()
 
 if(OPENCV_WITH_VIDEOIO_FFMPEG)
