@@ -13,7 +13,7 @@ class LibAVIFConan(ConanFile):
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/AOMediaCodec/libavif"
-    topics = "avif"
+    topics = ("avif")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
