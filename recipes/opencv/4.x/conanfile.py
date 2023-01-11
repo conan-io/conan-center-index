@@ -25,7 +25,7 @@ class OpenCVConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        # modules
+        # Main modules
         "calib3d": [True, False],
         "dnn": [True, False],
         "features2d": [True, False],
@@ -40,7 +40,7 @@ class OpenCVConan(ConanFile):
         "stitching": [True, False],
         "video": [True, False],
         "videoio": [True, False],
-        # contrib modules
+        # Extra modules
         "contrib_alphamat": [True, False],
         "contrib_aruco": [True, False],
         "contrib_barcode": [True, False],
@@ -137,7 +137,7 @@ class OpenCVConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        # modules
+        # Main modules
         "calib3d": True,
         "dnn": True,
         "features2d": True,
@@ -152,7 +152,7 @@ class OpenCVConan(ConanFile):
         "stitching": True,
         "video": True,
         "videoio": True,
-        # contrib modules
+        # Extra modules
         "contrib_alphamat": False,
         "contrib_aruco": False,
         "contrib_barcode": False,
@@ -933,7 +933,7 @@ class OpenCVConan(ConanFile):
         tc.variables["BUILD_opencv_video"] = self.options.video
         tc.variables["BUILD_opencv_videoio"] = self.options.videoio
 
-        # Contrib modules
+        # Extra modules
         tc.variables["OPENCV_EXTRA_MODULES_PATH"] = os.path.join(self._contrib_folder, "modules").replace("\\", "/")
         if self._has_contrib_alphamat_option:
             tc.variables["BUILD_opencv_alphamat"] = self.options.contrib_alphamat
@@ -1194,7 +1194,7 @@ class OpenCVConan(ConanFile):
         def opencv_xfeatures2d():
             return ["opencv_xfeatures2d"] if self.options.contrib_xfeatures2d else []
 
-        # Main components
+        # Main modules
         opencv_components = [
             {"target": "opencv_core", "lib": "core", "requires": ["zlib::zlib"] + parallel() + eigen() + ipp()},
         ]
@@ -1283,7 +1283,7 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_videoio", "lib": "videoio", "requires": requires_videoio},
             ])
 
-        # Contrib components
+        # Extra modules
         if self.options.get_safe("contrib_alphamat"):
             requires_alphamat = ["opencv_core", "opencv_imgproc"] + eigen() + ipp()
             opencv_components.extend([
