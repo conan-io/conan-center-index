@@ -1,0 +1,83 @@
+diff --git a/lzham.sln b/lzham.sln
+index 5c0edb6..63343f3 100644
+--- a/lzham.sln
++++ b/lzham.sln
+@@ -3,22 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 11.00
+ # Visual Studio 2010
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lzhamdll", "lzhamdll\lzham.vcxproj", "{763BE79D-1280-41B7-81C5-7DC41E2BDB44}"
+ EndProject
+-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lzhamtest", "lzhamtest\lzhamtest.vcxproj", "{BBE16587-150E-460C-8AB4-F18B92D0B981}"
+-EndProject
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lzhamdecomp", "lzhamdecomp\lzhamdecomp.vcxproj", "{8DA0CD32-701D-48D7-AE92-728338501500}"
+ EndProject
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lzhamcomp", "lzhamcomp\lzhamcomp.vcxproj", "{8DA0CD46-791D-48D7-AE92-728338501500}"
+ EndProject
+-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example1", "example1\example1.vcxproj", "{BBE16587-150E-460C-8AB4-E18B92D0B982}"
+-EndProject
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lzhamlib", "lzhamlib\lzhamlib.vcxproj", "{83A2F0B5-1D02-4A13-B579-714F60E31774}"
+ EndProject
+-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example2", "example2\example2.vcxproj", "{CBE16587-150E-460C-8AB4-E18B92D0B983}"
+-EndProject
+-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example3", "example3\example3.vcxproj", "{1BE16587-150E-460C-8AB4-E18B92D0BA87}"
+-EndProject
+-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example4", "example4\example4.vcxproj", "{1BE16587-260E-460C-8AB4-E18B92D0BA87}"
+-EndProject
+ Global
+ 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+ 		Debug|Win32 = Debug|Win32
+diff --git a/lzhamcomp/lzhamcomp.vcxproj b/lzhamcomp/lzhamcomp.vcxproj
+index 5fd6155..b45f3dc 100644
+--- a/lzhamcomp/lzhamcomp.vcxproj
++++ b/lzhamcomp/lzhamcomp.vcxproj
+@@ -23,6 +23,9 @@
+     <RootNamespace>lzhamcomp</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
++  <ImportGroup Label="PropertySheets">
++    <Import Project="..\conan\conantoolchain.props" />
++  </ImportGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <ConfigurationType>StaticLibrary</ConfigurationType>
+diff --git a/lzhamdecomp/lzhamdecomp.vcxproj b/lzhamdecomp/lzhamdecomp.vcxproj
+index dbaf54c..5f78ca5 100644
+--- a/lzhamdecomp/lzhamdecomp.vcxproj
++++ b/lzhamdecomp/lzhamdecomp.vcxproj
+@@ -23,6 +23,9 @@
+     <RootNamespace>lzhamdecomp</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
++  <ImportGroup Label="PropertySheets">
++    <Import Project="..\conan\conantoolchain.props" />
++  </ImportGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <ConfigurationType>StaticLibrary</ConfigurationType>
+diff --git a/lzhamdll/lzham.vcxproj b/lzhamdll/lzham.vcxproj
+index ec0a280..5536234 100644
+--- a/lzhamdll/lzham.vcxproj
++++ b/lzhamdll/lzham.vcxproj
+@@ -24,6 +24,9 @@
+     <RootNamespace>lzham</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
++  <ImportGroup Label="PropertySheets">
++    <Import Project="..\conan\conantoolchain.props" />
++  </ImportGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+diff --git a/lzhamlib/lzhamlib.vcxproj b/lzhamlib/lzhamlib.vcxproj
+index 954dd99..cdd2c26 100644
+--- a/lzhamlib/lzhamlib.vcxproj
++++ b/lzhamlib/lzhamlib.vcxproj
+@@ -23,6 +23,9 @@
+     <RootNamespace>lzhamlib</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
++  <ImportGroup Label="PropertySheets">
++    <Import Project="..\conan\conantoolchain.props" />
++  </ImportGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <ConfigurationType>StaticLibrary</ConfigurationType>

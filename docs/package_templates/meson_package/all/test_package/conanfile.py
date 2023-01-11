@@ -11,22 +11,21 @@ class TestPackageConan(ConanFile):
     generators = "PkgConfigDeps", "MesonToolchain", "VirtualRunEnv", "VirtualBuildEnv"
     test_type = "explicit"
 
+    def layout(self):
+        basic_layout(self)
+
     def requirements(self):
         self.requires(self.tested_reference_str)
 
     def build_requirements(self):
         self.tool_requires("meson/0.63.3")
-        self.tool_requires("pkgconf/1.9.3")
-        if not self.conf.get("tools.meson.mesontoolchain:backend", default=False, check_type=str):
-            self.tools_requires("ninja/1.11.1")
-
-    def layout(self):
-        basic_layout(self)
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
 
     def build(self):
-        cmake = Meson(self)
-        cmake.configure()
-        cmake.build()
+        meson = Meson(self)
+        meson.configure()
+        meson.build()
 
     def test(self):
         if can_run(self):

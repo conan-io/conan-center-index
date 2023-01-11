@@ -1,17 +1,17 @@
-from conan.tools.files import rename, get, apply_conandata_patches, replace_in_file, rmdir, rm
-from conan.tools.microsoft import msvc_runtime_flag, is_msvc
-from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import cross_building
+from conan.tools.files import copy, rename, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir, rm
+from conan.tools.microsoft import check_min_vs, msvc_runtime_flag, is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
+
 from conan.errors import ConanInvalidConfiguration
 from conan import ConanFile
-from conans import CMake
 from conan.tools.apple import is_apple_os
 
-import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.53"
 
 
 class ProtobufConan(ConanFile):
@@ -41,15 +41,8 @@ class ProtobufConan(ConanFile):
     }
 
     short_paths = True
-    generators = "cmake"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _is_clang_cl(self):
@@ -63,10 +56,11 @@ class ProtobufConan(ConanFile):
     def _can_disable_rtti(self):
         return Version(self.version) >= "3.15.4"
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -76,20 +70,17 @@ class ProtobufConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
 
     def validate(self):
-        if self.options.shared and str(self.settings.compiler.get_safe("runtime")) in ["MT", "MTd", "static"]:
+        if self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
 
-        if self.settings.compiler == "Visual Studio":
-            if Version(self.settings.compiler.version) < "14":
-                raise ConanInvalidConfiguration("On Windows Protobuf can only be built with "
-                                                "Visual Studio 2015 or higher.")
+        check_min_vs(self, "190")
 
         if self.settings.compiler == "clang":
             if Version(self.version) >= "3.15.4" and Version(self.settings.compiler.version) < "4":
@@ -101,35 +92,34 @@ class ProtobufConan(ConanFile):
             raise ConanInvalidConfiguration("protobuf shared not supported yet in CCI while cross-building on Macos")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _cmake_install_base_path(self):
         return os.path.join("lib", "cmake", "protobuf")
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
-        cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
-        cmake.definitions["protobuf_BUILD_TESTS"] = False
-        cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = True
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
+        tc.cache_variables["protobuf_WITH_ZLIB"] = self.options.with_zlib
+        tc.cache_variables["protobuf_BUILD_TESTS"] = False
+        tc.cache_variables["protobuf_BUILD_PROTOC_BINARIES"] = True
         if not self.options.debug_suffix:
-            cmake.definitions["protobuf_DEBUG_POSTFIX"] = ""
+            tc.cache_variables["protobuf_DEBUG_POSTFIX"] = ""
         if Version(self.version) >= "3.14.0":
-            cmake.definitions["protobuf_BUILD_LIBPROTOC"] = True
+            tc.cache_variables["protobuf_BUILD_LIBPROTOC"] = True
         if self._can_disable_rtti:
-            cmake.definitions["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
+            tc.cache_variables["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
         if is_msvc(self) or self._is_clang_cl:
             runtime = msvc_runtime_flag(self)
             if not runtime:
                 runtime = self.settings.get_safe("compiler.runtime")
-            cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in runtime
-        if Version(self.version) < "3.18.0" and self._is_clang_cl:
-            cmake.definitions["CMAKE_RC_COMPILER"] = os.environ.get("RC", "llvm-rc")
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+            tc.cache_variables["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in runtime
+        
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -137,7 +127,7 @@ class ProtobufConan(ConanFile):
         # Provide relocatable protobuf::protoc target and Protobuf_PROTOC_EXECUTABLE cache variable
         # TODO: some of the following logic might be disabled when conan will
         #       allow to create executable imported targets in package_info()
-        protobuf_config_cmake = os.path.join(self._source_subfolder, "cmake", "protobuf-config.cmake.in")
+        protobuf_config_cmake = os.path.join(self.source_folder, "cmake", "protobuf-config.cmake.in")
 
         replace_in_file(self,
             protobuf_config_cmake,
@@ -189,7 +179,7 @@ class ProtobufConan(ConanFile):
 
         # Disable a potential warning in protobuf-module.cmake.in
         # TODO: remove this patch? Is it really useful?
-        protobuf_module_cmake = os.path.join(self._source_subfolder, "cmake", "protobuf-module.cmake.in")
+        protobuf_module_cmake = os.path.join(self.source_folder, "cmake", "protobuf-module.cmake.in")
         replace_in_file(self,
             protobuf_module_cmake,
             "if(DEFINED Protobuf_SRC_ROOT_FOLDER)",
@@ -204,18 +194,20 @@ class ProtobufConan(ConanFile):
         # https://github.com/protocolbuffers/protobuf/issues/9916
         # it will be solved in protobuf 3.21.0
         if Version(self.version) == "3.20.0":
-            replace_in_file(self, os.path.join(self._source_subfolder, "src", "google", "protobuf", "port_def.inc"),
+            replace_in_file(self, os.path.join(self.source_folder, "src", "google", "protobuf", "port_def.inc"),
                 "#elif PROTOBUF_GNUC_MIN(12, 0)",
                 "#elif PROTOBUF_GNUC_MIN(12, 2)")
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake_root = "cmake" if Version(self.version) < "3.21" else None
+        cmake.configure(build_script_folder=cmake_root)
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config-version.cmake"))

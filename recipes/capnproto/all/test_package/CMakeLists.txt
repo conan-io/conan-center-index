@@ -1,20 +1,16 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
 find_package(CapnProto REQUIRED capnp capnp-rpc CONFIG)
 
 capnp_generate_cpp(addressbookSources addressbookHeaders addressbook.capnp)
 add_executable(addressbook addressbook.c++ ${addressbookSources})
-target_link_libraries(addressbook CapnProto::capnp)
 target_include_directories(addressbook PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-set_property(TARGET addressbook PROPERTY CXX_STANDARD 14)
+target_link_libraries(addressbook PRIVATE CapnProto::capnp)
+target_compile_features(addressbook PRIVATE cxx_std_14)
 
 capnp_generate_cpp(calculatorSources calculatorHeaders calculator.capnp)
-add_library(calculator_protocol STATIC)
-target_sources(calculator_protocol PRIVATE ${calculatorSources})
+add_library(calculator_protocol STATIC ${calculatorSources})
 target_include_directories(calculator_protocol PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(calculator_protocol PUBLIC CapnProto::capnp-rpc)
 target_compile_features(calculator_protocol PUBLIC cxx_std_14)

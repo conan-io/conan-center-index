@@ -1,0 +1,4 @@
+sources:
+  "cci.20221102":
+    url: "https://github.com/wangyi-fudan/wyhash/archive/ea3b25e1aef55d90f707c3a292eeb9162e2615d8.tar.gz"
+    sha256: "94c6ca365a1ca39f4327c4e031690441a45a7d9feefbc14f86323d8b42c82cbe"

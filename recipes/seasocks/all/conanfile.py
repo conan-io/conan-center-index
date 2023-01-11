@@ -1,19 +1,20 @@
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, copy, rmdir, replace_in_file
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.43.0"
-
+required_conan_version = ">=1.53.0"
 
 class SeasocksConan(ConanFile):
     name = "seasocks"
     description = "A tiny embeddable C++ HTTP and WebSocket server for Linux"
-    topics = ("seasocks", "embeddable", "webserver", "websockets")
-    homepage = "https://github.com/mattgodbolt/seasocks"
-    url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-2-Clause"
-
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/mattgodbolt/seasocks"
+    topics = ("embeddable", "webserver", "websockets")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -26,12 +27,22 @@ class SeasocksConan(ConanFile):
         "with_zlib": True,
     }
 
-    generators = "cmake", "cmake_find_package"
-    exports_sources = "CMakeLists.txt"
+    @property
+    def _min_cppstd(self):
+        return 11 if Version(self.version) < "1.4.5" else 17
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _compilers_minimum_version(self):
+        if Version(self.version) < "1.4.5":
+            return {}
+        else:
+            return {
+                "Visual Studio": "16",
+                "msvc": "191",
+                "gcc": "7",
+                "clang": "7",
+                "apple-clang": "10",
+            }
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,47 +50,60 @@ class SeasocksConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration(f"Seasocks {self.version} doesn't support this os")
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support this os")
+
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
         # No warnings as errors
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmakelists, "-Werror", "")
-        tools.replace_in_file(cmakelists, "-pedantic-errors", "")
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmakelists, "-Werror", "")
+        replace_in_file(self, cmakelists, "-pedantic-errors", "")
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["DEFLATE_SUPPORT"] = self.options.with_zlib
-        cmake.definitions["SEASOCKS_SHARED"] = self.options.shared
-        cmake.definitions["SEASOCKS_EXAMPLE_APP"] = False
-        cmake.definitions["UNITTESTS"] = False
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["DEFLATE_SUPPORT"] = self.options.with_zlib
+        tc.variables["SEASOCKS_SHARED"] = self.options.shared
+        tc.variables["SEASOCKS_EXAMPLE_APP"] = False
+        tc.variables["UNITTESTS"] = False
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Seasocks")
@@ -88,7 +112,7 @@ class SeasocksConan(ConanFile):
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["libseasocks"].libs = ["seasocks"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["libseasocks"].system_libs.append("pthread")
+            self.cpp_info.components["libseasocks"].system_libs.extend(["pthread", "m"])
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "Seasocks"

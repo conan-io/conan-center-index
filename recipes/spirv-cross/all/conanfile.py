@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, copy, get, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save
 from conans import CMake, tools as tools_legacy
 import os
 import textwrap
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class SpirvCrossConan(ConanFile):
@@ -60,8 +60,7 @@ class SpirvCrossConan(ConanFile):
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -73,6 +72,9 @@ class SpirvCrossConan(ConanFile):
             # these options don't contribute to shared binary
             del self.options.c_api
             del self.options.util
+
+    def layout(self):
+        pass
 
     def validate(self):
         if not self.info.options.glsl and \

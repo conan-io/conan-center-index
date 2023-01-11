@@ -19,7 +19,7 @@ reviewers:
     type: "team"
     request_reviews: false
   - user: "SSE4"
-    type: "team"
+    type: "community"
     request_reviews: true
   - user: "uilianries"
     type: "team"
@@ -28,6 +28,9 @@ reviewers:
     type: "community"
     request_reviews: false
   - user: "SpaceIm"
+    type: "community"
+    request_reviews: false
+  - user: "theirix"
     type: "community"
     request_reviews: false
   - user: "ericLemanissier"
@@ -42,15 +45,6 @@ reviewers:
   - user: "intelligide"
     type: "community"
     request_reviews: false
-  - user: "theirix"
-    type: "community"
-    request_reviews: false
-  - user: "gocarlos"
-    type: "community"
-    request_reviews: false
-  - user: "mathbunnyru"
-    type: "community"
-    request_reviews: false
   - user: "ericriff"
     type: "community"
     request_reviews: false
@@ -61,9 +55,6 @@ reviewers:
     type: "community"
     request_reviews: false
   - user: "MartinDelille"
-    type: "community"
-    request_reviews: false
-  - user: "dmn-star"
     type: "community"
     request_reviews: false
   - user: "jcar87"
@@ -77,4 +68,7 @@ reviewers:
     request_reviews: false
   - user: "jwillikers"
     type: "community"
+    request_reviews: false
+  - user: "RubenRBS"
+    type: "team"
     request_reviews: false

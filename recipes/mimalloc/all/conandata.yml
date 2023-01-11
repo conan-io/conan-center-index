@@ -1,4 +1,7 @@
 sources:
+  "2.0.7":
+    url: "https://github.com/microsoft/mimalloc/archive/v2.0.7.tar.gz"
+    sha256: "f23aac6c73594e417af50cb38f1efed88ef1dc14a490f0eff07c7f7b079810a4"
   "2.0.6":
     url: "https://github.com/microsoft/mimalloc/archive/v2.0.6.tar.gz"
     sha256: "9f05c94cc2b017ed13698834ac2a3567b6339a8bde27640df5a1581d49d05ce5"
@@ -11,6 +14,9 @@ sources:
   "2.0.2":
     url: "https://github.com/microsoft/mimalloc/archive/v2.0.2.tar.gz"
     sha256: "c81a5f443f72373e3105172d6a935e29b0dabd13ba387c080bc444586cbe3021"
+  "1.7.7":
+    url: "https://github.com/microsoft/mimalloc/archive/v1.7.7.tar.gz"
+    sha256: "0f6663be1e1764851bf9563fcf7a6b3330e23b933eb4737dd07e3289b87895fe"
   "1.7.6":
     url: "https://github.com/microsoft/mimalloc/archive/v1.7.6.tar.gz"
     sha256: "d74f86ada2329016068bc5a243268f1f555edd620b6a7d6ce89295e7d6cf18da"
@@ -21,28 +27,45 @@ sources:
     url: "https://github.com/microsoft/mimalloc/archive/v1.6.7.tar.gz"
     sha256: "111b718b496f297f128d842880e72e90e33953cf00b45ba0ccd2167e7340ed17"
 patches:
+  "2.0.7":
+    - patch_file: "patches/2.0.7-0001-change-install-paths.patch"
+      patch_description: "fix install paths"
+      patch_type: "conan"
   "2.0.6":
     - patch_file: "patches/2.0.6-0001-change-install-paths.patch"
-      base_path: "source_subfolder"
+      patch_description: "fix install paths"
+      patch_type: "conan"
   "2.0.5":
     - patch_file: "patches/2.0.6-0001-change-install-paths.patch"
-      base_path: "source_subfolder"
+      patch_description: "fix install paths"
+      patch_type: "conan"
   "2.0.3":
     - patch_file: "patches/2.0.3-0001-change-install-paths-avoid-symlink.patch"
-      base_path: "source_subfolder"
+      patch_description: "fix install paths, disable creating symlink"
+      patch_type: "conan"
   "2.0.2":
     - patch_file: "patches/2.0.2-0001-change-install-paths-avoid-symlink.patch"
-      base_path: "source_subfolder"
+      patch_description: "fix install paths, disable creating symlink"
+      patch_type: "conan"
     - patch_file: "patches/2.0.2-0002-include-cstddef-to-get-std-size-t.patch"
-      base_path: "source_subfolder"
+      patch_description: "include stddef"
+      patch_type: "portability"
+  "1.7.7":
+    - patch_file: "patches/1.7.7-0001-change-install-paths.patch"
+      patch_description: "fix install paths"
+      patch_type: "conan"
   "1.7.6":
-    - patch_file: "patches/1.7.6-0001-change-install-paths-avoid-symlink.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.7.5-0001-change-install-paths.patch"
+      patch_description: "fix install paths"
+      patch_type: "conan"
   "1.7.5":
-    - patch_file: "patches/1.7.5-0001-change-install-paths-avoid-symlink.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.7.5-0001-change-install-paths.patch"
+      patch_description: "fix install paths"
+      patch_type: "conan"
   "1.6.7":
     - patch_file: "patches/1.6.7-0001-change-install-paths-avoid-symlink.patch"
-      base_path: "source_subfolder"
+      patch_description: "fix install paths, disable creating symlink"
+      patch_type: "conan"
     - patch_file: "patches/1.6.7-0002-include-cstddef-to-get-std-size-t.patch"
-      base_path: "source_subfolder"
+      patch_description: "include stddef"
+      patch_type: "portability"

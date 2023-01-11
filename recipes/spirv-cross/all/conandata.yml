@@ -1,4 +1,10 @@
 sources:
+  "1.3.236.0":
+    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/refs/tags/sdk-1.3.236.0.tar.gz"
+    sha256: "8140a2b53d1e218e9be1f8d5e2749b1ebe854d456e5cb356218fd288747d5438"
+  "1.3.231.1":
+    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/refs/tags/sdk-1.3.231.1.tar.gz"
+    sha256: "3b42f5b6e46b45600e09fd55234f59edb7cfca803e49d7830dc6fb5a086143b1"
   "1.3.224.0":
     url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/refs/tags/sdk-1.3.224.0.tar.gz"
     sha256: "00256c33e235c5b9f0fc4b531fb9058d3cf1ff53e21e2db62cd8db848525536c"
@@ -39,6 +45,11 @@ sources:
     url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/2020-04-03.tar.gz"
     sha256: "93f3a6dfad17c9ca0bf4d2d80809e90118e13b47502eb395baba8784025d7e97"
 patches:
+  "1.3.236.0":
+    - patch_file: "patches/1.3.236.0-0001-fix-gcc5.patch"
+      patch_description: "Fix compilation with gcc-5"
+      patch_type: "portability"
+      base_path: "source_subfolder"
   "cci.20210621":
     - patch_file: "patches/0001-fix-bundle-install-cci.20210621.patch"
       base_path: "source_subfolder"

@@ -6,7 +6,6 @@ from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
-
 required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
 
 class DrogonConan(ConanFile):
@@ -70,8 +69,9 @@ class DrogonConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
+            "Visual Studio": "15" if Version(self.version) < "1.8.2" else "16",
+            "msvc": "191" if Version(self.version) < "1.8.2" else "192",
             "gcc": "6",
-            "Visual Studio": "15.0",
             "clang": "5",
             "apple-clang": "10",
         }
@@ -88,26 +88,26 @@ class DrogonConan(ConanFile):
             self.output.warn("{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name))
 
     def requirements(self):
-        self.requires("trantor/1.5.6")
+        self.requires("trantor/1.5.8")
         self.requires("jsoncpp/1.9.5")
-        self.requires("openssl/1.1.1q")
-        self.requires("zlib/1.2.12")
+        self.requires("openssl/1.1.1s")
+        self.requires("zlib/1.2.13")
         if self.settings.os == "Linux":
             self.requires("libuuid/1.0.3")
         if self.options.with_profile:
             self.requires("coz/cci.20210322")
         if self.options.with_boost:
-            self.requires("boost/1.79.0")
+            self.requires("boost/1.80.0")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("with_postgres"):
-            self.requires("libpq/14.2")
+            self.requires("libpq/14.5")
         if self.options.get_safe("with_mysql"):
-            self.requires("libmysqlclient/8.0.25")
+            self.requires("libmysqlclient/8.0.30")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.39.2")
+            self.requires("sqlite3/3.40.0")
         if self.options.get_safe("with_redis"):
-            self.requires("hiredis/1.0.2")
+            self.requires("hiredis/1.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)

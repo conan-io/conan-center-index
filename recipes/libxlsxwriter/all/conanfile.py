@@ -1,17 +1,23 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
+
 
 class LibxlsxwriterConan(ConanFile):
     name = "libxlsxwriter"
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jmcnamara/libxlsxwriter"
-    topics = ("conan", "Excel", "XLSX")
+    topics = ("excel", "xlsx")
     description = "A C library for creating Excel XLSX files"
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -28,14 +34,9 @@ class LibxlsxwriterConan(ConanFile):
         "fmemopen": False,
         "dtoa": False,
     }
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,59 +46,56 @@ class LibxlsxwriterConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
-    def validate(self):
-        if tools.Version(self.version) <= "1.0.5" and self.options.md5 == "openssl":
-            raise ConanInvalidConfiguration("{0}:md5=openssl is not suppported in {0}/{1}".format(self.name, self.version))
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("minizip/1.2.12")
-        self.requires("zlib/1.2.12")
+        self.requires("minizip/1.2.13")
+        self.requires("zlib/1.2.13")
         if self.options.md5 == "openssl":
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
+
+    def validate(self):
+        if Version(self.version) < "1.0.6" and self.info.options.md5 == "openssl":
+            raise ConanInvalidConfiguration(f"{self.name}:md5=openssl is not suppported in {self.ref}")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
-        self._cmake.definitions["USE_STATIC_MSVC_RUNTIME"] = (self.settings.os == "Windows" and "MT" in str(self.settings.compiler.runtime))
-        self._cmake.definitions["USE_SYSTEM_MINIZIP"] = True
-        self._cmake.definitions["USE_STANDARD_TMPFILE"] = self.options.tmpfile
-
-        if self.options.md5 == False:
-            self._cmake.definitions["USE_NO_MD5"] = True
-        elif self.options.md5 == "openssl":
-            self._cmake.definitions["USE_OPENSSL_MD5"] = True
-
-        self._cmake.definitions["USE_FMEMOPEN"] = self.options.get_safe("fmemopen", False)
-        self._cmake.definitions["USE_DTOA_LIBRARY"] = self.options.dtoa
-
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["USE_SYSTEM_MINIZIP"] = True
+        tc.variables["USE_STANDARD_TMPFILE"] = self.options.tmpfile
+        tc.variables["USE_NO_MD5"] = not bool(self.options.md5)
+        if Version(self.version) >= "1.0.6":
+            tc.variables["USE_OPENSSL_MD5"] = self.options.md5 == "openssl"
+        tc.variables["USE_FMEMOPEN"] = self.options.get_safe("fmemopen", False)
+        tc.variables["USE_DTOA_LIBRARY"] = self.options.dtoa
+        if is_msvc(self):
+            tc.variables["USE_STATIC_MSVC_RUNTIME"] = is_msvc_static_runtime(self)
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        copy(self, "License.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        self.copy("License.txt", src=self._source_subfolder, dst="licenses")
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pc")
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "xlsxwriter")
         self.cpp_info.libs = ["xlsxwriter"]

@@ -53,4 +53,3 @@ class TestPackageConan(ConanFile):
         if not self._skip_test and can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "digest")
             self.run(bin_path, env="conanrun")
-        assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE"))

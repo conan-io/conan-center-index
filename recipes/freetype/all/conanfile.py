@@ -62,18 +62,22 @@ class FreetypeConan(ConanFile):
         except Exception:
             pass
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         if self.options.with_png:
-            self.requires("libpng/1.6.38")
+            self.requires("libpng/1.6.39")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_brotli"):
             self.requires("brotli/1.0.9")
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
     def generate(self):
         deps = CMakeDeps(self)
@@ -104,10 +108,6 @@ class FreetypeConan(ConanFile):
         # Generate a relocatable shared lib on Macos
         cmake.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         cmake.generate()
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
 
     def _patch_sources(self):
         # Do not accidentally enable dependencies we have disabled
@@ -207,9 +207,7 @@ class FreetypeConan(ConanFile):
 
     def _create_cmake_module_variables(self, module_file):
         content = textwrap.dedent("""\
-            if(DEFINED Freetype_FOUND)
-                set(FREETYPE_FOUND ${Freetype_FOUND})
-            endif()
+            set(FREETYPE_FOUND TRUE)
             if(DEFINED Freetype_INCLUDE_DIRS)
                 set(FREETYPE_INCLUDE_DIRS ${Freetype_INCLUDE_DIRS})
             endif()
@@ -234,18 +232,12 @@ class FreetypeConan(ConanFile):
         save(self, module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_vars_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            f"conan-official-{self.name}-variables.cmake")
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
 
     @property
     def _module_target_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            f"conan-official-{self.name}-targets.cmake")
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     @staticmethod
     def _chmod_plus_x(filename):
@@ -258,20 +250,15 @@ class FreetypeConan(ConanFile):
         self.cpp_info.set_property("cmake_module_target_name", "Freetype::Freetype")
         self.cpp_info.set_property("cmake_file_name", "freetype")
         self.cpp_info.set_property("cmake_target_name", "freetype")
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
         self.cpp_info.set_property("pkg_config_name", "freetype2")
         self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
         self.cpp_info.includedirs.append(os.path.join("include", "freetype2"))
-        freetype_config = os.path.join(self.package_folder, "bin", "freetype-config")
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.env_info.FT2_CONFIG = freetype_config
-        self._chmod_plus_x(freetype_config)
 
         libtool_version = load(self, self._libtool_version_txt).strip()
-        self.user_info.LIBTOOL_VERSION = libtool_version
+        self.conf_info.define("user.freetype:libtool_version", libtool_version)
         # FIXME: need to do override the pkg_config version (pkg_config_custom_content does not work)
         # self.cpp_info.version["pkg_config"] = pkg_config_version
 
@@ -283,3 +270,8 @@ class FreetypeConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_vars_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_target_rel_path]
         self.cpp_info.names["pkg_config"] = "freetype2"
+        freetype_config = os.path.join(self.package_folder, "bin", "freetype-config")
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        self.env_info.FT2_CONFIG = freetype_config
+        self._chmod_plus_x(freetype_config)
+        self.user_info.LIBTOOL_VERSION = libtool_version
