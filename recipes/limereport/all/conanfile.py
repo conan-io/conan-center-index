@@ -57,7 +57,8 @@ class LimereportConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("libpng/1.6.38")
-
+        if self.options.with_zint:
+            self.build_requires("zint/2.10.0")
 
     def requirements(self):
         self.requires("qt/5.15.7")
@@ -95,6 +96,7 @@ class LimereportConan(ConanFile):
     def package_info(self):
         qt_major = tools.Version(self.deps_cpp_info["qt"].version).major
         self.cpp_info.libs = ["limereport-qt{}".format(qt_major)]
-        # self.cpp_info.names["cmake_find_package"] = ["limereport-qt{}".format(qt_major)]
-        # self.cpp_info.names["cmake_find_package_multi"] = ["limereport-qt{}".format(qt_major)]
+        # self.cpp_info.requires = ["qt::qtCore", "qt::qtGui", "qt::qtWidgets", "qt::qtPrintSupport", "qt::qtQml", "qt::qtSvg"]
+        # # self.cpp_info.names["cmake_find_package"] = ["limereport-qt{}".format(qt_major)]
+        # # self.cpp_info.names["cmake_find_package_multi"] = ["limereport-qt{}".format(qt_major)]
 

@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
+from conan.tools.cmake import CMake, cmake_layout
 import os
 
 
@@ -14,11 +14,6 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["QT_VERSION"] = self.dependencies["qt"].ref.version
-        tc.generate()
 
     def build(self):
         cmake = CMake(self)
