@@ -13,7 +13,7 @@ class ArchicadApidevkitConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://archicadapi.graphisoft.com/"
     license = "LicenseRef-LICENSE"
-    settings = "os", "arch"
+    settings = "os", "compiler", "arch"
     no_copy_source = True
     topics = "api", "archicad", "development"
     short_paths = True
