@@ -1,28 +1,24 @@
 cmake_minimum_required(VERSION 3.8)
 project(test_package LANGUAGES CXX)
 
-option(built_gapi "Enabled if opencv is built with Graph API" OFF)
-option(built_with_ffmpeg "Enabled if opencv is built with ffmpeg" OFF)
-option(built_contrib_sfm "Enabled if opencv is built contrib sfm" OFF)
+option(built_gapi "Enabled if opencv is built with gapi module" OFF)
+option(built_with_ffmpeg "Enabled if opencv is built with videoio module and ffmpeg" OFF)
+option(built_contrib_sfm "Enabled if opencv is built with sfm module" OFF)
 
-find_package(OpenCV REQUIRED imgcodecs highgui objdetect CONFIG)
+find_package(OpenCV REQUIRED core imgproc CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    opencv_imgcodecs
-    opencv_highgui
-    opencv_objdetect
-    $<TARGET_NAME_IF_EXISTS:opencv_gapi>
-    $<TARGET_NAME_IF_EXISTS:opencv_videoio>
-    $<TARGET_NAME_IF_EXISTS:opencv_sfm>
-)
+target_link_libraries(${PROJECT_NAME} PRIVATE opencv_core opencv_imgproc)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
 if(built_gapi)
+    target_link_libraries(${PROJECT_NAME} PRIVATE opencv_gapi)
     target_compile_definitions(${PROJECT_NAME} PRIVATE BUILT_GAPI)
 endif()
 if(built_with_ffmpeg)
+    target_link_libraries(${PROJECT_NAME} PRIVATE opencv_videoio)
     target_compile_definitions(${PROJECT_NAME} PRIVATE BUILT_WITH_FFMPEG)
 endif()
 if(built_contrib_sfm)
+    target_link_libraries(${PROJECT_NAME} PRIVATE opencv_sfm)
     target_compile_definitions(${PROJECT_NAME} PRIVATE BUILT_CONTRIB_SFM)
 endif()
