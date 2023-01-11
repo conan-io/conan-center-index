@@ -39,7 +39,6 @@ class OpenCVConan(ConanFile):
         "video": [True, False],
         "videoio": [True, False],
         # contrib modules
-        "contrib": [True, False, "deprecated"],
         "contrib_alphamat": [True, False],
         "contrib_aruco": [True, False],
         "contrib_barcode": [True, False],
@@ -92,36 +91,44 @@ class OpenCVConan(ConanFile):
         "contrib_ximgproc": [True, False],
         "contrib_xobjdetect": [True, False],
         "contrib_xphoto": [True, False],
-        # other options
+        # core options
         "parallel": [False, "tbb", "openmp"],
         "with_ipp": [False, "intel-ipp", "opencv-icv"],
-        "with_ade": [True, False, "deprecated"],
-        "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
-        "with_png": [True, False],
-        "with_tiff": [True, False],
-        "with_jpeg2000": [False, "jasper", "openjpeg"],
-        "with_openexr": [True, False],
         "with_eigen": [True, False],
-        "with_webp": [True, False],
-        "with_gtk": [True, False],
-        "with_quirc": [True, False],
+        "neon": [True, False],
         "with_cuda": [True, False],
         "with_cublas": [True, False],
         "with_cufft": [True, False],
         "with_cudnn": [True, False],
         "with_v4l": [True, False],
-        "with_ffmpeg": [True, False],
-        "with_tesseract": [True, False],
-        "with_imgcodec_hdr": [True, False],
-        "with_imgcodec_pfm": [True, False],
-        "with_imgcodec_pxm": [True, False],
-        "with_imgcodec_sunraster": [True, False],
-        "neon": [True, False],
-        "dnn_cuda": [True, False],
         "cuda_arch_bin": [None, "ANY"],
         "cpu_baseline": [None, "ANY"],
         "cpu_dispatch": [None, "ANY"],
         "nonfree": [True, False],
+        # dnn options
+        "dnn_cuda": [True, False],
+        # imgcodecs options
+        "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
+        "with_png": [True, False],
+        "with_tiff": [True, False],
+        "with_jpeg2000": [False, "jasper", "openjpeg"],
+        "with_openexr": [True, False],
+        "with_webp": [True, False],
+        "with_imgcodec_hdr": [True, False],
+        "with_imgcodec_pfm": [True, False],
+        "with_imgcodec_pxm": [True, False],
+        "with_imgcodec_sunraster": [True, False],
+        # highgui options
+        "with_gtk": [True, False],
+        # objdetect options
+        "with_quirc": [True, False],
+        # videoio options
+        "with_ffmpeg": [True, False],
+        # contrib_text options
+        "with_tesseract": [True, False],
+        # TODO: deprecated options to remove in few months
+        "contrib": [True, False, "deprecated"],
+        "with_ade": [True, False, "deprecated"],
     }
     default_options = {
         "shared": False,
@@ -140,7 +147,6 @@ class OpenCVConan(ConanFile):
         "video": True,
         "videoio": True,
         # contrib modules
-        "contrib": "deprecated",
         "contrib_alphamat": False,
         "contrib_aruco": False,
         "contrib_barcode": False,
@@ -193,36 +199,44 @@ class OpenCVConan(ConanFile):
         "contrib_ximgproc": False,
         "contrib_xobjdetect": False,
         "contrib_xphoto": False,
-        # other options
+        # core options
         "parallel": False,
         "with_ipp": False,
-        "with_ade": "deprecated",
-        "with_jpeg": "libjpeg",
-        "with_png": True,
-        "with_tiff": True,
-        "with_jpeg2000": "jasper",
-        "with_openexr": True,
         "with_eigen": True,
-        "with_webp": True,
-        "with_gtk": True,
-        "with_quirc": True,
+        "neon": True,
         "with_cuda": False,
         "with_cublas": False,
         "with_cufft": False,
         "with_cudnn": False,
         "with_v4l": False,
-        "with_ffmpeg": True,
-        "with_tesseract": True,
-        "with_imgcodec_hdr": False,
-        "with_imgcodec_pfm": False,
-        "with_imgcodec_pxm": False,
-        "with_imgcodec_sunraster": False,
-        "neon": True,
-        "dnn_cuda": False,
         "cuda_arch_bin": None,
         "cpu_baseline": None,
         "cpu_dispatch": None,
         "nonfree": False,
+        # dnn options
+        "dnn_cuda": False,
+        # imgcodecs options
+        "with_jpeg": "libjpeg",
+        "with_png": True,
+        "with_tiff": True,
+        "with_jpeg2000": "jasper",
+        "with_openexr": True,
+        "with_webp": True,
+        "with_imgcodec_hdr": False,
+        "with_imgcodec_pfm": False,
+        "with_imgcodec_pxm": False,
+        "with_imgcodec_sunraster": False,
+        # highgui options
+        "with_gtk": True,
+        # objdetect options
+        "with_quirc": True,
+        # videoio options
+        "with_ffmpeg": True,
+        # contrib_text options
+        "with_tesseract": True,
+        # TODO: deprecated options to remove in few months
+        "contrib": "deprecated",
+        "with_ade": "deprecated",
     }
 
     short_paths = True
