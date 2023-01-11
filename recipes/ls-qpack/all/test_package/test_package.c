@@ -5,6 +5,12 @@
 
 #include "lsqpack.h"
 
+int
+lsqpack_dec_int (const unsigned char **src_p, const unsigned char *src_end,
+                 unsigned prefix_bits, uint64_t *value_p,
+                 struct lsqpack_dec_int_state *state);
+
+
 struct int_test
 {
     int             it_lineno;
