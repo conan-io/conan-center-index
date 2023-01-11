@@ -41,6 +41,18 @@ class OpenCVConan(ConanFile):
         "contrib_bgsegm": [True, False],
         "contrib_bioinspired": [True, False],
         "contrib_ccalib": [True, False],
+        "contrib_cudaarithm": [True, False],
+        "contrib_cudabgsegm": [True, False],
+        "contrib_cudacodec": [True, False],
+        "contrib_cudafeatures2d": [True, False],
+        "contrib_cudafilters": [True, False],
+        "contrib_cudaimgproc": [True, False],
+        "contrib_cudalegacy": [True, False],
+        "contrib_cudaobjdetect": [True, False],
+        "contrib_cudaoptflow": [True, False],
+        "contrib_cudastereo": [True, False],
+        "contrib_cudawarping": [True, False],
+        "contrib_cudev": [True, False],
         "contrib_datasets": [True, False],
         "contrib_dnn_objdetect": [True, False],
         "contrib_dnn_superres": [True, False],
@@ -123,6 +135,18 @@ class OpenCVConan(ConanFile):
         "contrib_bgsegm": False,
         "contrib_bioinspired": False,
         "contrib_ccalib": False,
+        "contrib_cudaarithm": False,
+        "contrib_cudabgsegm": False,
+        "contrib_cudacodec": False,
+        "contrib_cudafeatures2d": False,
+        "contrib_cudafilters": False,
+        "contrib_cudaimgproc": False,
+        "contrib_cudalegacy": False,
+        "contrib_cudaobjdetect": False,
+        "contrib_cudaoptflow": False,
+        "contrib_cudastereo": False,
+        "contrib_cudawarping": False,
+        "contrib_cudev": False,
         "contrib_datasets": False,
         "contrib_dnn_objdetect": False,
         "contrib_dnn_superres": False,
@@ -308,7 +332,7 @@ class OpenCVConan(ConanFile):
             self.output.warning("contrib option is deprecated")
             if self.options.contrib:
                 # During deprecation period, keep old behavior of contrib=True, which was to enable
-                # all available contribs (except cuda*, freetype & sfm contribs)
+                # all available contribs (except freetype & sfm contribs)
                 if self._has_contrib_alphamat_option:
                     self.options.contrib_alphamat = True
                 self.options.contrib_aruco = True
@@ -318,6 +342,19 @@ class OpenCVConan(ConanFile):
                 self.options.contrib_bioinspired = True
                 if self.options.highgui:
                     self.options.contrib_ccalib = True
+                if self.options.with_cuda:
+                    self.options.contrib_cudaarithm = True
+                    self.options.contrib_cudabgsegm = True
+                    self.options.contrib_cudacodec = True
+                    self.options.contrib_cudafeatures2d = True
+                    self.options.contrib_cudafilters = True
+                    self.options.contrib_cudaimgproc = True
+                    self.options.contrib_cudalegacy = True
+                    self.options.contrib_cudaobjdetect = True
+                    self.options.contrib_cudaoptflow = True
+                    self.options.contrib_cudastereo = True
+                    self.options.contrib_cudawarping = True
+                    self.options.contrib_cudev = True
                 if self.options.ml:
                     self.options.contrib_datasets = True
                 if self.options.dnn:
@@ -439,49 +476,31 @@ class OpenCVConan(ConanFile):
              not str(self.settings.os) in ["Linux", "Macos", "Windows"]):
             raise ConanInvalidConfiguration(f"opencv-icv is not available for {self.settings.os}/{self.settings.arch}")
 
-        # Check internal dependencies of contribs
-        if not self.options.dnn:
-            if self.options.get_safe("contrib_barcode"):
-                raise ConanInvalidConfiguration("contrib_barcode=True requires dnn=True")
-            if self.options.contrib_dnn_objdetect:
-                raise ConanInvalidConfiguration("contrib_dnn_objdetect=True requires dnn=True")
-            if self.options.contrib_dnn_superres:
-                raise ConanInvalidConfiguration("contrib_dnn_superres=True requires dnn=True")
-            if self.options.get_safe("contrib_mcc"):
-                raise ConanInvalidConfiguration("contrib_mcc=True requires dnn=True")
-            if self.options.contrib_text:
-                raise ConanInvalidConfiguration("contrib_text=True requires dnn=True")
-            if self.options.get_safe("contrib_wechat_qrcode"):
-                raise ConanInvalidConfiguration("contrib_wechat_qrcode=True requires dnn=True")
-        if not self.options.highgui:
-            if self.options.contrib_ccalib:
-                raise ConanInvalidConfiguration("contrib_ccalib=True requires highgui=True")
-        if not self.options.ml:
-            if self.options.contrib_datasets:
-                raise ConanInvalidConfiguration("contrib_datasets=True requires ml=True")
-            if self.options.contrib_quality:
-                raise ConanInvalidConfiguration("contrib_quality=True requires ml=True")
-            if self.options.contrib_text:
-                raise ConanInvalidConfiguration("contrib_text=True requires ml=True")
-        if not self.options.photo:
-            if self.options.contrib_face:
-                raise ConanInvalidConfiguration("contrib_face=True requires photo=True")
-            if self.options.contrib_videostab:
-                raise ConanInvalidConfiguration("contrib_videostab=True requires photo=True")
-            if self.options.contrib_xphoto:
-                raise ConanInvalidConfiguration("contrib_xphoto=True requires photo=True")
-        if self.options.contrib_optflow and not self.options.contrib_ximgproc:
-            raise ConanInvalidConfiguration("contrib_optflow=True requires contrib_ximgproc=True")
-        if self.options.contrib_sfm and not self.options.contrib_xfeatures2d:
-            # TODO: Actually it's required only if ceres if found during build of sfm,
-            #       but ceres is not in requirements of this recipe currently...
-            raise ConanInvalidConfiguration("contrib_sfm=True requires contrib_xfeatures2d=True")
-        if self.options.contrib_stereo and not self.options.contrib_tracking:
-            raise ConanInvalidConfiguration("contrib_stereo=True requires contrib_tracking=True")
-        if self.options.contrib_structured_light and not self.options.contrib_phase_unwrapping:
-            raise ConanInvalidConfiguration("contrib_structured_light=True requires contrib_phase_unwrapping=True")
-        if self.options.get_safe("contrib_superres") and not self.options.contrib_optflow:
-            raise ConanInvalidConfiguration("contrib_superres=True requires contrib_optflow=True")
+        # Check internal dependencies of modules
+        for required_option, options in {
+            "dnn": [
+                "contrib_barcode", "contrib_dnn_objdetect", "contrib_dnn_superres",
+                "contrib_mcc", "contrib_text", "contrib_wechat_qrcode"
+            ],
+            "highgui": ["contrib_ccalib"],
+            "ml": ["contrib_datasets", "contrib_quality", "contrib_text"],
+            "photo": ["contrib_face", "contrib_videostab", "contrib_xphoto"],
+            "with_cuda": [
+                "contrib_cudaarithm", "contrib_cudabgsegm", "contrib_cudacodec", "contrib_cudafeatures2d",
+                "contrib_cudafilters", "contrib_cudaimgproc", "contrib_cudalegacy", "contrib_cudaobjdetect",
+                "contrib_cudaoptflow", "contrib_cudastereo", "contrib_cudawarping", "contrib_cudev",
+            ],
+            "contrib_cudafilters": ["contrib_cudafeatures2d"],
+            "contrib_optflow": ["contrib_superres"],
+            "contrib_phase_unwrapping": ["contrib_structured_light"],
+            "contrib_tracking": ["contrib_stereo"],
+            "contrib_xfeatures2d": ["contrib_sfm"],
+            "contrib_ximgproc": ["contrib_optflow"],
+        }.items():
+            if not self.options.get_safe(required_option, False):
+                for option in options:
+                    if self.options.get_safe(option):
+                        raise ConanInvalidConfiguration(f"{option}=True requires {required_option}=True")
 
     def build_requirements(self):
         if self.options.dnn:
@@ -729,6 +748,18 @@ class OpenCVConan(ConanFile):
         tc.variables["BUILD_opencv_bioinspired"] = self.options.contrib_bioinspired
         tc.variables["BUILD_opencv_ccalib"] = self.options.contrib_ccalib
         tc.variables["BUILD_opencv_cnn_3dobj"] = False
+        tc.variables["BUILD_opencv_cudaarithm"] = self.options.contrib_cudaarithm
+        tc.variables["BUILD_opencv_cudabgsegm"] = self.options.contrib_cudabgsegm
+        tc.variables["BUILD_opencv_cudacodec"] = self.options.contrib_cudacodec
+        tc.variables["BUILD_opencv_cudafeatures2d"] = self.options.contrib_cudafeatures2d
+        tc.variables["BUILD_opencv_cudafilters"] = self.options.contrib_cudafilters
+        tc.variables["BUILD_opencv_cudaimgproc"] = self.options.contrib_cudaimgproc
+        tc.variables["BUILD_opencv_cudalegacy"] = self.options.contrib_cudalegacy
+        tc.variables["BUILD_opencv_cudaobjdetect"] = self.options.contrib_cudaobjdetect
+        tc.variables["BUILD_opencv_cudaoptflow"] = self.options.contrib_cudaoptflow
+        tc.variables["BUILD_opencv_cudastereo"] = self.options.contrib_cudastereo
+        tc.variables["BUILD_opencv_cudawarping"] = self.options.contrib_cudawarping
+        tc.variables["BUILD_opencv_cudev"] = self.options.contrib_cudev
         tc.variables["BUILD_opencv_cvv"] = False
         tc.variables["BUILD_opencv_datasets"] = self.options.contrib_datasets
         tc.variables["BUILD_opencv_dnn_objdetect"] = self.options.contrib_dnn_objdetect
@@ -919,28 +950,28 @@ class OpenCVConan(ConanFile):
                 return []
 
         def opencv_cudaarithm():
-            return ["opencv_cudaarithm"] if self.options.with_cuda else []
+            return ["opencv_cudaarithm"] if self.options.contrib_cudaarithm else []
 
         def opencv_cudacodec():
-            return ["opencv_cudacodec"] if self.options.with_cuda else []
+            return ["opencv_cudacodec"] if self.options.contrib_cudacodec else []
 
         def opencv_cudafeatures2d():
-            return ["opencv_cudafeatures2d"] if self.options.with_cuda else []
+            return ["opencv_cudafeatures2d"] if self.options.contrib_cudafeatures2d else []
 
         def opencv_cudafilters():
-            return ["opencv_cudafilters"] if self.options.with_cuda else []
+            return ["opencv_cudafilters"] if self.options.contrib_cudafilters else []
 
         def opencv_cudaimgproc():
-            return ["opencv_cudaimgproc"] if self.options.with_cuda else []
+            return ["opencv_cudaimgproc"] if self.options.contrib_cudaimgproc else []
 
         def opencv_cudalegacy():
-            return ["opencv_cudalegacy"] if self.options.with_cuda else []
+            return ["opencv_cudalegacy"] if self.options.contrib_cudalegacy else []
 
         def opencv_cudaoptflow():
-            return ["opencv_cudaoptflow"] if self.options.with_cuda else []
+            return ["opencv_cudaoptflow"] if self.options.contrib_cudaoptflow else []
 
         def opencv_cudawarping():
-            return ["opencv_cudawarping"] if self.options.with_cuda else []
+            return ["opencv_cudawarping"] if self.options.contrib_cudawarping else []
 
         def opencv_dnn():
             return ["opencv_dnn"] if self.options.dnn else []
@@ -1063,6 +1094,66 @@ class OpenCVConan(ConanFile):
                                "opencv_highgui"] + eigen() + ipp()
             opencv_components.extend([
                 {"target": "opencv_ccalib", "lib": "ccalib", "requires": requires_ccalib},
+            ])
+        if self.options.contrib_cudaarithm:
+            requires_cudaarithm = ["opencv_core"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_cudaarithm", "lib": "cudaarithm", "requires": requires_cudaarithm},
+            ])
+        if self.options.contrib_cudabgsegm:
+            requires_cudabgsegm = ["opencv_core", "opencv_video"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_cudabgsegm", "lib": "cudabgsegm", "requires": requires_cudabgsegm},
+            ])
+        if self.options.contrib_cudacodec:
+            requires_cudacodec = ["opencv_core"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_cudacodec", "lib": "cudacodec", "requires": requires_cudacodec},
+            ])
+        if self.options.contrib_cudafeatures2d:
+            requires_cudafeatures2d = ["opencv_core", "opencv_cudafilters"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_cudafeatures2d", "lib": "cudafeatures2d", "requires": requires_cudafeatures2d},
+            ])
+        if self.options.contrib_cudafilters:
+            requires_cudafilters = ["opencv_core", "opencv_imgproc"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_cudafilters", "lib": "cudafilters", "requires": requires_cudafilters},
+            ])
+        if self.options.contrib_cudaimgproc:
+            requires_cudaimgproc = ["opencv_core", "opencv_imgproc"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_cudaimgproc", "lib": "cudaimgproc", "requires": requires_cudaimgproc},
+            ])
+        if self.options.contrib_cudalegacy:
+            requires_cudalegacy = ["opencv_core", "opencv_video"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_cudalegacy", "lib": "cudalegacy", "requires": requires_cudalegacy},
+            ])
+        if self.options.contrib_cudaobjdetect:
+            requires_cudaobjdetect = ["opencv_core", "opencv_objdetect"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_cudaobjdetect", "lib": "cudaobjdetect", "requires": requires_cudaobjdetect},
+            ])
+        if self.options.contrib_cudaoptflow:
+            requires_cudaoptflow = ["opencv_core"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_cudaoptflow", "lib": "cudaoptflow", "requires": requires_cudaoptflow},
+            ])
+        if self.options.contrib_cudastereo:
+            requires_cudastereo = ["opencv_core", "opencv_calib3d"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_cudastereo", "lib": "cudastereo", "requires": requires_cudastereo},
+            ])
+        if self.options.contrib_cudawarping:
+            requires_cudawarping = ["opencv_core", "opencv_imgproc"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_cudawarping", "lib": "cudawarping", "requires": requires_cudawarping},
+            ])
+        if self.options.contrib_cudev:
+            requires_cudev = eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_cudev", "lib": "cudev", "requires": requires_cudev},
             ])
         if self.options.contrib_datasets:
             requires_datasets = ["opencv_core", "opencv_imgcodecs", "opencv_ml", "opencv_flann"] + eigen() + ipp()
@@ -1252,22 +1343,6 @@ class OpenCVConan(ConanFile):
             requires_xphoto = ["opencv_core", "opencv_imgproc", "opencv_photo"] + eigen() + ipp()
             opencv_components.extend([
                 {"target": "opencv_xphoto", "lib": "xphoto", "requires": requires_xphoto},
-            ])
-
-        if self.options.with_cuda:
-            opencv_components.extend([
-                {"target": "opencv_cudaarithm",     "lib": "cudaarithm",     "requires": ["opencv_core"] + eigen() + ipp()},
-                {"target": "opencv_cudabgsegm",     "lib": "cudabgsegm",     "requires": ["opencv_core", "opencv_video"] + eigen() + ipp()},
-                {"target": "opencv_cudacodec",      "lib": "cudacodec",      "requires": ["opencv_core"] + eigen() + ipp()},
-                {"target": "opencv_cudafeatures2d", "lib": "cudafeatures2d", "requires": ["opencv_core", "opencv_cudafilters"] + eigen() + ipp()},
-                {"target": "opencv_cudafilters",    "lib": "cudafilters",    "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
-                {"target": "opencv_cudaimgproc",    "lib": "cudaimgproc",    "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
-                {"target": "opencv_cudalegacy",     "lib": "cudalegacy",     "requires": ["opencv_core", "opencv_video"] + eigen() + ipp()},
-                {"target": "opencv_cudaobjdetect",  "lib": "cudaobjdetect",  "requires": ["opencv_core", "opencv_objdetect"] + eigen() + ipp()},
-                {"target": "opencv_cudaoptflow",    "lib": "cudaoptflow",    "requires": ["opencv_core"] + eigen() + ipp()},
-                {"target": "opencv_cudastereo",     "lib": "cudastereo",     "requires": ["opencv_core", "opencv_calib3d"] + eigen() + ipp()},
-                {"target": "opencv_cudawarping",    "lib": "cudawarping",    "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp()},
-                {"target": "opencv_cudev",          "lib": "cudev",          "requires": eigen() + ipp()},
             ])
 
         return opencv_components
