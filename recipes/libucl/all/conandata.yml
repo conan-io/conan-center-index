@@ -19,6 +19,9 @@ patches:
     - patch_file: "patches/0004-0.8.2-cmake-minimum-required.patch"
       patch_description: "declare cmake_minimum_required first"
       patch_type: "portability"
+    - patch_file: "patches/0005-0.8.1-add-_tmp.patch"
+      patch_description: "add _tmp variables in sort macros"
+      patch_type: "portability"
   "0.8.1":
     - patch_file: "patches/0001-0.8.1-shared-win32.patch"
       patch_description: "fix UCL_EXTERN definition for shared build on win32"
@@ -31,4 +34,7 @@ patches:
       patch_type: "portability"
     - patch_file: "patches/0004-0.8.1-cmake-minimum-required.patch"
       patch_description: "declare cmake_minimum_required first"
+      patch_type: "portability"
+    - patch_file: "patches/0005-0.8.1-add-_tmp.patch"
+      patch_description: "add _tmp variables in sort macros"
       patch_type: "portability"
