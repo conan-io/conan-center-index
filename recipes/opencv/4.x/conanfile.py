@@ -308,30 +308,99 @@ class OpenCVConan(ConanFile):
         if not self._has_contrib_barcode_option:
             del self.options.contrib_barcode
 
+    @property
+    def _modules_mandatory_options(self):
+        modules_mandatory_options = {
+            "contrib_barcode": ["dnn"],
+            "contrib_bgsegm": ["video"],
+            "contrib_ccalib": ["highgui"],
+            "contrib_cudaarithm": ["with_cuda"],
+            "contrib_cudabgsegm": ["with_cuda", "video"],
+            "contrib_cudacodec": ["with_cuda", "videoio"],
+            "contrib_cudafeatures2d": ["with_cuda", "contrib_cudafilters", "contrib_cudawarping"],
+            "contrib_cudafilters": ["with_cuda", "contrib_cudaarithm"],
+            "contrib_cudaimgproc": ["with_cuda"],
+            "contrib_cudalegacy": ["with_cuda", "video"],
+            "contrib_cudaobjdetect": ["with_cuda", "objdetect", "contrib_cudaarithm", "contrib_cudawarping"],
+            "contrib_cudaoptflow": [
+                "with_cuda", "video", "contrib_cudaarithm", "contrib_cudaimgproc",
+                "contrib_cudawarping", "contrib_optflow",
+            ],
+            "contrib_cudastereo": ["with_cuda"],
+            "contrib_cudawarping": ["with_cuda"],
+            "contrib_cudev": ["with_cuda"],
+            "contrib_datasets": ["ml"],
+            "contrib_dnn_objdetect": ["dnn"],
+            "contrib_dnn_superres": ["dnn"],
+            "contrib_dpm": ["objdetect"],
+            "contrib_face": ["objdetect", "photo"],
+            "contrib_mcc": ["dnn"],
+            "contrib_optflow": ["video", "contrib_ximgproc"],
+            "contrib_quality": ["ml"],
+            "contrib_sfm": ["contrib_xfeatures2d"],
+            "contrib_stereo": ["contrib_tracking"],
+            "contrib_structured_light": ["contrib_phase_unwrapping"],
+            "contrib_superres": ["video", "contrib_optflow"],
+            "contrib_text": ["dnn", "ml"],
+            "contrib_videostab": ["photo", "video"],
+            "contrib_wechat_qrcode": ["dnn"],
+            "contrib_ximgproc": ["video"],
+            "contrib_xobjdetect": ["objdetect"],
+            "contrib_xphoto": ["photo"],
+        }
+        if Version(self.version) < "4.3.0":
+            modules_mandatory_options["contrib_stereo"].append("video")
+
+        return modules_mandatory_options
+
+    def _solve_internal_dependency_graph(self):
+        direct_options_to_enable = {}
+        transitive_options_to_enable = {}
+
+        # Check which direct options have to be enabled
+        base_options = [option for option in self._modules_mandatory_options.keys() if self.options.get_safe(option)]
+        for base_option in base_options:
+            for mandatory_option in self._modules_mandatory_options.get(base_option, []):
+                if not self.options.get_safe(mandatory_option):
+                    direct_options_to_enable.setdefault(mandatory_option, set()).add(base_option)
+
+        # Now traverse the graph to check which transitive options have to be enabled
+        def collect_transitive_options(base_option, option):
+            for mandatory_option in self._modules_mandatory_options.get(option, []):
+                if not self.options.get_safe(mandatory_option):
+                    if mandatory_option not in transitive_options_to_enable:
+                        transitive_options_to_enable[mandatory_option] = set()
+                        collect_transitive_options(base_option, mandatory_option)
+                    if base_option not in direct_options_to_enable.get(mandatory_option, set()):
+                        transitive_options_to_enable[mandatory_option].add(base_option)
+
+        for base_option in base_options:
+            collect_transitive_options(base_option, base_option)
+
+        # Enable mandatory options
+        all_options_to_enable = set(direct_options_to_enable.keys())
+        all_options_to_enable.update(transitive_options_to_enable.keys())
+        if all_options_to_enable:
+            message = ("Several opencv options which were disabled will be enabled because "
+                       "they are required by modules you have explicitly requested:\n")
+
+            for option_to_enable in all_options_to_enable:
+                setattr(self.options, option_to_enable, True)
+
+                direct_and_transitive = []
+                direct = ", ".join(direct_options_to_enable.get(option_to_enable, []))
+                if direct:
+                    direct_and_transitive.append(f"direct dependency of {direct}")
+                transitive = ", ".join(transitive_options_to_enable.get(option_to_enable, []))
+                if transitive:
+                    direct_and_transitive.append(f"transitive dependency of {transitive}")
+                message += f"  - {option_to_enable}: {' / '.join(direct_and_transitive)}\n"
+
+            self.output.warning(message)
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if not self.options.dnn:
-            self.options.rm_safe("dnn_cuda")
-        if not self.options.highgui:
-            self.options.rm_safe("with_gtk")
-        if not self.options.objdetect:
-            self.options.rm_safe("with_quirc")
-        if not self.options.videoio:
-            self.options.rm_safe("with_ffmpeg")
-        if not self.options.with_cuda:
-            del self.options.with_cublas
-            del self.options.with_cudnn
-            del self.options.with_cufft
-            self.options.rm_safe("dnn_cuda")
-            del self.options.cuda_arch_bin
-        if bool(self.options.with_jpeg):
-            if self.options.get_safe("with_jpeg2000") == "jasper":
-                self.options["jasper"].with_libjpeg = self.options.with_jpeg
-            if self.options.get_safe("with_tiff"):
-                self.options["libtiff"].jpeg = self.options.with_jpeg
-        if not self.options.contrib_text:
-            del self.options.with_tesseract
 
         if self.settings.os == "Android":
             self.options.with_openexr = False  # disabled because this forces linkage to libc++_shared.so
@@ -425,6 +494,32 @@ class OpenCVConan(ConanFile):
             self.output.warning("with_ade option is deprecated, use gapi option instead")
             self.options.gapi = self.options.with_ade
 
+        # Call this first before any further manipulation of options based on other options
+        self._solve_internal_dependency_graph()
+
+        if not self.options.dnn:
+            self.options.rm_safe("dnn_cuda")
+        if not self.options.highgui:
+            self.options.rm_safe("with_gtk")
+        if not self.options.objdetect:
+            self.options.rm_safe("with_quirc")
+        if not self.options.videoio:
+            self.options.rm_safe("with_ffmpeg")
+        if not self.options.with_cuda:
+            self.options.rm_safe("with_cublas")
+            self.options.rm_safe("with_cudnn")
+            self.options.rm_safe("with_cufft")
+            self.options.rm_safe("dnn_cuda")
+            self.options.cuda_arch_bin
+        if not self.options.contrib_text:
+            self.options.rm_safe("with_tesseract")
+
+        if bool(self.options.with_jpeg):
+            if self.options.get_safe("with_jpeg2000") == "jasper":
+                self.options["jasper"].with_libjpeg = self.options.with_jpeg
+            if self.options.get_safe("with_tiff"):
+                self.options["libtiff"].jpeg = self.options.with_jpeg
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -483,42 +578,6 @@ class OpenCVConan(ConanFile):
         del self.info.options.contrib
         del self.info.options.with_ade
 
-    @property
-    def _mandatory_modules(self):
-        mandatory_modules = {
-            "dnn": [
-                "contrib_barcode", "contrib_dnn_objdetect", "contrib_dnn_superres",
-                "contrib_mcc", "contrib_text", "contrib_wechat_qrcode"
-            ],
-            "highgui": ["contrib_ccalib"],
-            "ml": ["contrib_datasets", "contrib_quality", "contrib_text"],
-            "objdetect": ["contrib_cudaobjdetect", "contrib_dpm", "contrib_face", "contrib_xobjdetect"],
-            "photo": ["contrib_face", "contrib_videostab", "contrib_xphoto"],
-            "video": [
-                "contrib_bgsegm", "contrib_cudabgsegm", "contrib_cudalegacy", "contrib_cudaoptflow",
-                "contrib_optflow", "contrib_superres", "contrib_videostab", "contrib_ximgproc",
-            ],
-            "videoio": ["contrib_cudacodec"],
-            "with_cuda": [
-                "contrib_cudaarithm", "contrib_cudabgsegm", "contrib_cudacodec", "contrib_cudafeatures2d",
-                "contrib_cudafilters", "contrib_cudaimgproc", "contrib_cudalegacy", "contrib_cudaobjdetect",
-                "contrib_cudaoptflow", "contrib_cudastereo", "contrib_cudawarping", "contrib_cudev",
-            ],
-            "contrib_cudaarithm": ["contrib_cudafilters", "contrib_cudaobjdetect", "contrib_cudaoptflow"],
-            "contrib_cudafilters": ["contrib_cudafeatures2d"],
-            "contrib_cudaimgproc": ["contrib_cudaoptflow"],
-            "contrib_cudawarping": ["contrib_cudafeatures2d", "contrib_cudaobjdetect", "contrib_cudaoptflow"],
-            "contrib_optflow": ["contrib_cudaoptflow", "contrib_superres"],
-            "contrib_phase_unwrapping": ["contrib_structured_light"],
-            "contrib_tracking": ["contrib_stereo"],
-            "contrib_xfeatures2d": ["contrib_sfm"],
-            "contrib_ximgproc": ["contrib_optflow"],
-        }
-        if Version(self.version) < "4.3.0":
-            mandatory_modules["video"].append("contrib_stereo")
-
-        return mandatory_modules
-
     def validate(self):
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio with static runtime is not supported for shared library.")
@@ -531,13 +590,6 @@ class OpenCVConan(ConanFile):
             (not str(self.settings.arch) in ["x86", "x86_64"] or \
              not str(self.settings.os) in ["Linux", "Macos", "Windows"]):
             raise ConanInvalidConfiguration(f"opencv-icv is not available for {self.settings.os}/{self.settings.arch}")
-
-        # Check internal dependencies of modules
-        for required_option, options in self._mandatory_modules.items():
-            if not self.options.get_safe(required_option, False):
-                for option in options:
-                    if self.options.get_safe(option):
-                        raise ConanInvalidConfiguration(f"{option}=True requires {required_option}=True")
 
     def build_requirements(self):
         if self.options.dnn:
