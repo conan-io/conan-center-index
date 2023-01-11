@@ -51,11 +51,13 @@ class ArchicadApidevkitConan(ConanFile):
         self.cpp_info.includedirs = []
 
         # These are dependencies of third party vendored libraries
-        if is_msvc(self):
-            self.cpp_info.system_libs = [
-                "WinMM", "MSImg32", "WS2_32", "DNSApi", "USP10", "gdiplus", "iphlpapi"]
+        self.cpp_info.system_libs = [
+            "WinMM", "MSImg32", "WS2_32", "USP10", "DNSApi"]
+        if self.settings.os == "Macos":
+            self.cpp_info.frameworks = ["CoreText", "CoreFoundation", "CoreServices",
+                                        "ApplicationServices", "Carbon", "CoreGraphics", "AppKit", "Foundation"]
         else:
-            self.cpp_info.system_libs = []
+            self.cpp_info.system_libs.extend(["gdiplus", "iphlpapi"])
 
         devkit_dir = os.path.join(self.package_folder, "bin")
         self.output.info(f"Setting AC_API_DEVKIT_DIR environment variable: {devkit_dir}")
