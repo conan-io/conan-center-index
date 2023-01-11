@@ -396,7 +396,7 @@ class OpenCVConan(ConanFile):
             "contrib_superres": ["imgproc", "video", "contrib_optflow"],
             "contrib_surface_matching": ["flann"],
             "contrib_text": ["dnn", "features2d", "imgproc", "ml"],
-            "contrib_tracking": ["imgproc"],
+            "contrib_tracking": ["imgproc", "video"],
             "contrib_videostab": ["calib3d", "features2d", "imgproc", "photo", "video"],
             "contrib_wechat_qrcode": ["dnn", "imgproc"],
             "contrib_xfeatures2d": ["calib3d", "features2d", "imgproc"],
