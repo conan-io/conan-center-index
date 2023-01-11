@@ -16,11 +16,11 @@ class B64Conan(ConanFile):
     topics = ("base64", "codec", "encoder", "decoder")
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
+        "static": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
+        "static": False,
         "fPIC": True,
     }
 
@@ -29,8 +29,6 @@ class B64Conan(ConanFile):
             del self.options.fPIC
     
     def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
