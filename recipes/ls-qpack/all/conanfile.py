@@ -72,3 +72,5 @@ class LsQpackConan(ConanFile):
         self.cpp_info.libs = ["ls-qpack"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["m"]
+        if self.settings.os == "Windows":
+            self.cpp_info.includedirs.append(os.path.join("include", "wincompat"))

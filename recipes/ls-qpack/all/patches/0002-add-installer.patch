@@ -1,8 +1,8 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index d9d9aa3..826e99b 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -100,3 +100,14 @@ endif()
+diff --git a/a/CMakeLists.txt b/b/CMakeLists.txt
+index 670ea97..f2dd257 100644
+--- a/a/CMakeLists.txt
++++ b/b/CMakeLists.txt
+@@ -100,3 +100,18 @@ endif()
  if(LSQPACK_BIN)
      add_subdirectory(bin)
  endif()
@@ -17,3 +17,7 @@ index d9d9aa3..826e99b 100644
 +)
 +
 +install(FILES lsqpack.h DESTINATION include)
++
++if(WIN32)
++    install(DIRECTORY wincompat DESTINATION include)
++endif()
