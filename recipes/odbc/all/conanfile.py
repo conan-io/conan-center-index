@@ -10,6 +10,7 @@ required_conan_version = ">=1.53.0"
 
 class OdbcConan(ConanFile):
     name = "odbc"
+    package_type = "library"
     description = "Package providing unixODBC"
     topics = ("odbc", "database", "dbms", "data-access")
     url = "https://github.com/conan-io/conan-center-index"
