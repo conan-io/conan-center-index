@@ -26,6 +26,7 @@ class OpenCVConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         # modules
+        "calib3d": [True, False],
         "dnn": [True, False],
         "gapi": [True, False],
         "highgui": [True, False],
@@ -125,6 +126,7 @@ class OpenCVConan(ConanFile):
         "shared": False,
         "fPIC": True,
         # modules
+        "calib3d": True,
         "dnn": True,
         "gapi": True,
         "highgui": True,
@@ -313,10 +315,13 @@ class OpenCVConan(ConanFile):
     @property
     def _modules_mandatory_options(self):
         modules_mandatory_options = {
+            "objdetect": ["calib3d"],
+            "stitching": ["calib3d"],
             "videoio": ["imgcodecs"],
+            "contrib_aruco": ["calib3d"],
             "contrib_barcode": ["dnn"],
-            "contrib_bgsegm": ["video"],
-            "contrib_ccalib": ["highgui"],
+            "contrib_bgsegm": ["calib3d", "video"],
+            "contrib_ccalib": ["calib3d", "highgui"],
             "contrib_cudaarithm": ["with_cuda"],
             "contrib_cudabgsegm": ["with_cuda", "video"],
             "contrib_cudacodec": ["with_cuda", "videoio"],
@@ -329,30 +334,34 @@ class OpenCVConan(ConanFile):
                 "with_cuda", "video", "contrib_cudaarithm", "contrib_cudaimgproc",
                 "contrib_cudawarping", "contrib_optflow",
             ],
-            "contrib_cudastereo": ["with_cuda"],
+            "contrib_cudastereo": ["with_cuda", "calib3d"],
             "contrib_cudawarping": ["with_cuda"],
             "contrib_cudev": ["with_cuda"],
             "contrib_datasets": ["imgcodecs", "ml"],
             "contrib_dnn_objdetect": ["dnn"],
             "contrib_dnn_superres": ["dnn"],
             "contrib_dpm": ["objdetect"],
-            "contrib_face": ["objdetect", "photo"],
-            "contrib_mcc": ["dnn"],
-            "contrib_optflow": ["imgcodecs", "video", "contrib_ximgproc"],
+            "contrib_face": ["calib3d", "objdetect", "photo"],
+            "contrib_mcc": ["calib3d", "dnn"],
+            "contrib_optflow": ["calib3d", "imgcodecs", "video", "contrib_ximgproc"],
             "contrib_quality": ["ml"],
-            "contrib_sfm": ["imgcodecs", "contrib_xfeatures2d"],
+            "contrib_rapid": ["calib3d"],
+            "contrib_rgbd": ["calib3d"],
+            "contrib_sfm": ["calib3d", "imgcodecs", "contrib_xfeatures2d"],
+            "contrib_shape": ["calib3d"],
             "contrib_stereo": ["contrib_tracking"],
-            "contrib_structured_light": ["contrib_phase_unwrapping"],
+            "contrib_structured_light": ["calib3d", "contrib_phase_unwrapping"],
             "contrib_superres": ["video", "contrib_optflow"],
             "contrib_text": ["dnn", "ml"],
-            "contrib_videostab": ["photo", "video"],
+            "contrib_videostab": ["calib3d", "photo", "video"],
             "contrib_wechat_qrcode": ["dnn"],
-            "contrib_ximgproc": ["imgcodecs", "video"],
+            "contrib_xfeatures2d": ["calib3d"],
+            "contrib_ximgproc": ["calib3d", "imgcodecs", "video"],
             "contrib_xobjdetect": ["imgcodecs", "objdetect"],
             "contrib_xphoto": ["photo"],
         }
         if Version(self.version) < "4.3.0":
-            modules_mandatory_options["contrib_stereo"].append("video")
+            modules_mandatory_options.setdefault("contrib_stereo", []).extend(["calib3d", "video"])
 
         return modules_mandatory_options
 
@@ -416,13 +425,14 @@ class OpenCVConan(ConanFile):
                 # all available contribs (except freetype & sfm contribs)
                 if self._has_contrib_alphamat_option:
                     self.options.contrib_alphamat = True
-                self.options.contrib_aruco = True
+                if self.options.calib3d:
+                    self.options.contrib_aruco = True
                 if self._has_contrib_barcode_option and self.options.dnn:
                     self.options.contrib_barcode = True
-                if self.options.video:
+                if self.options.calib3d and self.options.video:
                     self.options.contrib_bgsegm = True
                 self.options.contrib_bioinspired = True
-                if self.options.highgui:
+                if self.options.calib3d and self.options.highgui:
                     self.options.contrib_ccalib = True
                 if self.options.with_cuda:
                     self.options.contrib_cudaarithm = True
@@ -439,7 +449,8 @@ class OpenCVConan(ConanFile):
                         self.options.contrib_cudaobjdetect = True
                     if self.options.video:
                         self.options.contrib_cudaoptflow = True
-                    self.options.contrib_cudastereo = True
+                    if self.options.calib3d:
+                        self.options.contrib_cudastereo = True
                     self.options.contrib_cudawarping = True
                     self.options.contrib_cudev = True
                 if self.options.imgcodecs and self.options.ml:
@@ -449,7 +460,7 @@ class OpenCVConan(ConanFile):
                     self.options.contrib_dnn_superres = True
                 if self.options.objdetect:
                     self.options.contrib_dpm = True
-                if self.options.objdetect and self.options.photo:
+                if self.options.calib3d and self.options.objdetect and self.options.photo:
                     self.options.contrib_face = True
                 self.options.contrib_fuzzy = True
                 self.options.contrib_hfs = True
@@ -457,35 +468,39 @@ class OpenCVConan(ConanFile):
                 if self._has_contrib_intensity_transform_option:
                     self.options.contrib_intensity_transform = True
                 self.options.contrib_line_descriptor = True
-                if self._has_contrib_mcc_option and self.options.dnn:
+                if self._has_contrib_mcc_option and self.options.calib3d and self.options.dnn:
                     self.options.contrib_mcc = True
-                if self.options.imgcodecs and self.options.video:
+                if self.options.calib3d and self.options.imgcodecs and self.options.video:
                     self.options.contrib_optflow = True
                 self.options.contrib_phase_unwrapping = True
                 self.options.contrib_plot = True
                 if self.options.ml:
                     self.options.contrib_quality = True
-                if self._has_contrib_rapid_option:
+                if self._has_contrib_rapid_option and self.options.calib3d:
                     self.options.contrib_rapid = True
                 self.options.contrib_reg = True
-                self.options.contrib_rgbd = True
+                if self.options.calib3d:
+                    self.options.contrib_rgbd = True
                 self.options.contrib_saliency = True
-                self.options.contrib_shape = True
-                if Version(self.version) >= "4.3.0" or self.options.video:
+                if self.options.calib3d:
+                    self.options.contrib_shape = True
+                if Version(self.version) >= "4.3.0" or (self.options.calib3d and self.options.video):
                     self.options.contrib_stereo = True
-                self.options.contrib_structured_light = True
+                if self.options.calib3d:
+                    self.options.contrib_structured_light = True
                 if self._has_contrib_superres_option and self.options.video:
                     self.options.contrib_superres = True
                 self.options.contrib_surface_matching = True
                 if self.options.dnn and self.options.ml:
                     self.options.contrib_text = True
                 self.options.contrib_tracking = True
-                if self.options.photo and self.options.video:
+                if self.options.calib3d and self.options.photo and self.options.video:
                     self.options.contrib_videostab = True
                 if self._has_contrib_wechat_qrcode_option and self.options.dnn:
                     self.options.contrib_wechat_qrcode = True
-                self.options.contrib_xfeatures2d = True
-                if self.options.imgcodecs and self.options.video:
+                if self.options.calib3d:
+                    self.options.contrib_xfeatures2d = True
+                if self.options.calib3d and self.options.imgcodecs and self.options.video:
                     self.options.contrib_ximgproc = True
                 if self.options.imgcodecs and self.options.objdetect:
                     self.options.contrib_xobjdetect = True
@@ -819,7 +834,7 @@ class OpenCVConan(ConanFile):
         tc.variables["OPENCV_DNN_CUDA"] = self.options.get_safe("dnn_cuda", False)
 
         # Main modules
-        tc.variables["BUILD_opencv_calib3d"] = True
+        tc.variables["BUILD_opencv_calib3d"] = self.options.calib3d
         tc.variables["BUILD_opencv_core"] = True
         tc.variables["BUILD_opencv_dnn"] = self.options.dnn
         tc.variables["WITH_PROTOBUF"] = self.options.dnn
@@ -1053,6 +1068,9 @@ class OpenCVConan(ConanFile):
             else:
                 return []
 
+        def opencv_calib3d():
+            return ["opencv_calib3d"] if self.options.calib3d else []
+
         def opencv_cudaarithm():
             return ["opencv_cudaarithm"] if self.options.contrib_cudaarithm else []
 
@@ -1093,9 +1111,6 @@ class OpenCVConan(ConanFile):
             return ["opencv_xfeatures2d"] if self.options.contrib_xfeatures2d else []
 
         # Main components
-        def requires_calib3d():
-            return ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d"] + eigen() + ipp()
-
         def requires_core():
             return ["zlib::zlib"] + parallel() + eigen() + ipp()
 
@@ -1103,7 +1118,6 @@ class OpenCVConan(ConanFile):
             return ["opencv_imgproc", "opencv_flann"] + eigen() + ipp()
 
         opencv_components = [
-            {"target": "opencv_calib3d",    "lib": "calib3d",    "requires": requires_calib3d()},
             {"target": "opencv_core",       "lib": "core",       "requires": requires_core()},
             {"target": "opencv_features2d", "lib": "features2d", "requires": requires_features2d()},
             {"target": "opencv_flann",      "lib": "flann",      "requires": ["opencv_core"] + eigen() + ipp()},
@@ -1112,6 +1126,11 @@ class OpenCVConan(ConanFile):
         if self.options.with_ipp == "opencv-icv" and not self.options.shared:
             opencv_components.extend([
                 {"target": "ippiw", "lib": "ippiw", "requires": []}
+            ])
+        if self.options.calib3d:
+            requires_calib3d = ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_calib3d", "lib": "calib3d", "requires": requires_calib3d},
             ])
         if self.options.dnn:
             requires_dnn = ["opencv_core", "opencv_imgproc"] + protobuf() + ipp()
@@ -1123,7 +1142,7 @@ class OpenCVConan(ConanFile):
             if Version(self.version) >= "4.3.0":
                 requires_gapi.extend(opencv_video())
             if Version(self.version) >= "4.5.2":
-                requires_gapi.append("opencv_calib3d")
+                requires_gapi.extend(opencv_calib3d())
             opencv_components.extend([
                 {"target": "opencv_gapi", "lib": "gapi", "requires": requires_gapi},
             ])
@@ -1162,7 +1181,7 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_stitching", "lib": "stitching", "requires": requires_stitching},
             ])
         if self.options.video:
-            requires_video = ["opencv_imgproc", "opencv_calib3d"] + eigen() + ipp()
+            requires_video = ["opencv_imgproc"] + opencv_calib3d() + eigen() + ipp()
             if Version(self.version) >= "4.5.1":
                 requires_video.extend(opencv_dnn())
             opencv_components.extend([
