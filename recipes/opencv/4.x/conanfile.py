@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
+from conan.tools.build import check_min_cppstd, cross_building, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rename, replace_in_file, rmdir, save
@@ -660,6 +660,8 @@ class OpenCVConan(ConanFile):
         del self.info.options.with_ade
 
     def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio with static runtime is not supported for shared library.")
         if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "4":
@@ -756,6 +758,8 @@ class OpenCVConan(ConanFile):
         tc.variables["OPENCV_3P_LIB_INSTALL_PATH"] = "lib"
         tc.variables["OPENCV_OTHER_INSTALL_PATH"] = "res"
         tc.variables["OPENCV_LICENSES_INSTALL_PATH"] = "licenses"
+
+        tc.variables["OPENCV_SKIP_CMAKE_CXX_STANDARD"] = valid_min_cppstd(self, 11)
 
         tc.variables["BUILD_CUDA_STUBS"] = False
         tc.variables["BUILD_DOCS"] = False
@@ -865,8 +869,6 @@ class OpenCVConan(ConanFile):
             tc.variables["WITH_JASPER"] = self.options.get_safe("with_jpeg2000") == "jasper"
             tc.variables["WITH_OPENJPEG"] = self.options.get_safe("with_jpeg2000") == "openjpeg"
         tc.variables["WITH_OPENEXR"] = self.options.get_safe("with_openexr", False)
-        if self.options.get_safe("with_openexr"):
-            tc.variables["CMAKE_CXX_STANDARD"] = 11
         tc.variables["WITH_EIGEN"] = self.options.with_eigen
         tc.variables["WITH_DSHOW"] = is_msvc(self)
         tc.variables["WITH_MSMF"] = is_msvc(self)
