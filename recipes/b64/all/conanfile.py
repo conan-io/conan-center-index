@@ -27,9 +27,6 @@ class B64Conan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def package_id(self):
-        self.info.clear()
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
