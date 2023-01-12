@@ -1,5 +1,5 @@
 import re
-from six import StringIO
+from io import StringIO
 
 from conan import ConanFile
 
