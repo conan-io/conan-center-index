@@ -1,18 +1,15 @@
+import os
+
 from conan import ConanFile
 from conan.tools.gnu import AutotoolsToolchain, Autotools
-from conan.tools.build import check_min_cppstd, cross_building
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
-from conan.tools.env import Environment, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.env import Environment
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 from conans import tools as tools_legacy
 
-
-
-import contextlib
-import os
 
 required_conan_version = ">=1.53.0"
 
