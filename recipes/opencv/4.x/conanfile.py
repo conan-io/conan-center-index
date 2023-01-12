@@ -1659,6 +1659,8 @@ class OpenCVConan(ConanFile):
         add_components(self._opencv_components)
 
         if self.settings.os == "Windows":
+            if self.options.gapi:
+                self.cpp_info.components["opencv_gapi"].system_libs = ["ws2_32", "wsock32"]
             if self.options.highgui:
                 self.cpp_info.components["opencv_highgui"].system_libs = ["comctl32", "gdi32", "ole32", "setupapi", "ws2_32", "vfw32"]
         elif self.settings.os == "Macos":
