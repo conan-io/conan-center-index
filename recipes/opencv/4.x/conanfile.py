@@ -104,7 +104,6 @@ class OpenCVConan(ConanFile):
         "with_cublas": [True, False],
         "with_cufft": [True, False],
         "with_cudnn": [True, False],
-        "with_v4l": [True, False],
         "cuda_arch_bin": [None, "ANY"],
         "cpu_baseline": [None, "ANY"],
         "cpu_dispatch": [None, "ANY"],
@@ -130,6 +129,7 @@ class OpenCVConan(ConanFile):
         "with_quirc": [True, False],
         # videoio options
         "with_ffmpeg": [True, False],
+        "with_v4l": [True, False],
         # contrib_text options
         "with_tesseract": [True, False],
         # TODO: deprecated options to remove in few months
@@ -218,7 +218,6 @@ class OpenCVConan(ConanFile):
         "with_cublas": False,
         "with_cufft": False,
         "with_cudnn": False,
-        "with_v4l": False,
         "cuda_arch_bin": None,
         "cpu_baseline": None,
         "cpu_dispatch": None,
@@ -244,6 +243,7 @@ class OpenCVConan(ConanFile):
         "with_quirc": True,
         # videoio options
         "with_ffmpeg": True,
+        "with_v4l": False,
         # contrib_text options
         "with_tesseract": True,
         # TODO: deprecated options to remove in few months
@@ -597,6 +597,7 @@ class OpenCVConan(ConanFile):
             self.options.rm_safe("with_quirc")
         if not self.options.videoio:
             self.options.rm_safe("with_ffmpeg")
+            self.options.rm_safe("with_v4l")
         if not self.options.with_cuda:
             self.options.rm_safe("with_cublas")
             self.options.rm_safe("with_cudnn")
