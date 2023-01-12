@@ -1,7 +1,9 @@
 from conan import ConanFile
 from conan.tools.microsoft import is_msvc
+from conan.tools.apple import is_apple_os
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, save
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
@@ -65,6 +67,10 @@ class CzmqConan(ConanFile):
             self.requires("libuuid/1.0.3")
         if self.options.get_safe("with_systemd"):
             self.requires("libsystemd/252.4")
+
+    def validate(self):
+        if is_apple_os(self) and self.options.shared and self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared and debug on apple-clang.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
