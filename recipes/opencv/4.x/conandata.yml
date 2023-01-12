@@ -43,6 +43,9 @@ patches:
     - patch_file: "patches/4.5.2-0001-fix-zlib-static-android.patch"
       patch_description: "Fix discovery of zlib static if Android"
       patch_type: "conan"
+    - patch_file: "patches/4.1.2-0007-android-install-layout.patch"
+      patch_description: "Honor install layout from conan if Android"
+      patch_type: "conan"
   "4.5.3":
     - patch_file: "patches/4.5.3-0001-find-openexr.patch"
       patch_description: "Robust discovery & injection of OpenEXR"
@@ -55,6 +58,9 @@ patches:
       patch_type: "conan"
     - patch_file: "patches/4.5.2-0001-fix-zlib-static-android.patch"
       patch_description: "Fix discovery of zlib static if Android"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.2-0007-android-install-layout.patch"
+      patch_description: "Honor install layout from conan if Android"
       patch_type: "conan"
   "4.5.2":
     - patch_file: "patches/4.1.2-0001-find-openexr.patch"
@@ -69,6 +75,9 @@ patches:
     - patch_file: "patches/4.5.2-0001-fix-zlib-static-android.patch"
       patch_description: "Fix discovery of zlib static if Android"
       patch_type: "conan"
+    - patch_file: "patches/4.1.2-0007-android-install-layout.patch"
+      patch_description: "Honor install layout from conan if Android"
+      patch_type: "conan"
   "4.5.1":
     - patch_file: "patches/4.1.2-0001-find-openexr.patch"
       patch_description: "Robust discovery & injection of OpenEXR"
@@ -79,6 +88,9 @@ patches:
     - patch_file: "patches/4.1.2-0003-find-quirc.patch"
       patch_description: "Robust discovery & injection of quirc"
       patch_type: "conan"
+    - patch_file: "patches/4.1.2-0007-android-install-layout.patch"
+      patch_description: "Honor install layout from conan if Android"
+      patch_type: "conan"
   "4.5.0":
     - patch_file: "patches/4.1.2-0001-find-openexr.patch"
       patch_description: "Robust discovery & injection of OpenEXR"
@@ -88,6 +100,9 @@ patches:
       patch_type: "conan"
     - patch_file: "patches/4.1.2-0003-find-quirc.patch"
       patch_description: "Robust discovery & injection of quirc"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.2-0007-android-install-layout.patch"
+      patch_description: "Honor install layout from conan if Android"
       patch_type: "conan"
   "4.1.2":
     - patch_file: "patches/4.1.2-0001-find-openexr.patch"
@@ -102,3 +117,6 @@ patches:
     - patch_file: "patches/4.1.2-0004-jasper.patch"
       patch_description: "Compatibility with recent jasper versions"
       patch_type: "portability"
+    - patch_file: "patches/4.1.2-0007-android-install-layout.patch"
+      patch_description: "Honor install layout from conan if Android"
+      patch_type: "conan"
