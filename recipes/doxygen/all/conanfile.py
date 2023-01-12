@@ -69,9 +69,6 @@ class DoxygenConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.compiler
-
-        # Doxygen doesn't make code. Any package that will run is ok to use.
-        # It's ok in general to use a release version of the tool that matches the
         compatible_pkg = self.info.clone()
         compatible_pkg.settings.build_type = "Release"
         self.compatible_packages.append(compatible_pkg)
