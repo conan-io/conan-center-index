@@ -135,6 +135,8 @@ class OpenCVConan(ConanFile):
         "with_tesseract": [True, False],
         # TODO: deprecated options to remove in few months
         "contrib": [True, False, "deprecated"],
+        "contrib_freetype": [True, False, "deprecated"],
+        "contrib_sfm": [True, False, "deprecated"],
         "with_ade": [True, False, "deprecated"],
     }
     default_options = {
@@ -250,6 +252,8 @@ class OpenCVConan(ConanFile):
         "with_tesseract": True,
         # TODO: deprecated options to remove in few months
         "contrib": "deprecated",
+        "contrib_freetype": "deprecated",
+        "contrib_sfm": "deprecated",
         "with_ade": "deprecated",
     }
 
@@ -469,6 +473,16 @@ class OpenCVConan(ConanFile):
 
         if self.settings.os == "Android":
             self.options.with_openexr = False  # disabled because this forces linkage to libc++_shared.so
+
+        # TODO: remove contrib_freetype option in few months
+        if self.options.contrib_freetype != "deprecated":
+            self.output.warning("contrib_freetype option is deprecated, use freetype option instead")
+            self.options.freetype = self.options.contrib_freetype
+
+        # TODO: remove contrib_sfm option in few months
+        if self.options.contrib_sfm != "deprecated":
+            self.output.warning("contrib_sfm option is deprecated, use sfm option instead")
+            self.options.sfm = self.options.contrib_sfm
 
         # TODO: remove contrib option in few months
         if self.options.contrib != "deprecated":
