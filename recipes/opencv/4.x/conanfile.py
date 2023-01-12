@@ -435,10 +435,10 @@ class OpenCVConan(ConanFile):
         tc.variables["OPENCV_MODULES_PUBLIC"] = "opencv"
         tc.variables["OPENCV_ENABLE_NONFREE"] = self.options.nonfree
 
-        if self.options.cpu_baseline:
+        if self.options.cpu_baseline or self.options.cpu_baseline == "":
             tc.variables["CPU_BASELINE"] = self.options.cpu_baseline
 
-        if self.options.cpu_dispatch:
+        if self.options.cpu_dispatch or self.options.cpu_dispatch == "":
             tc.variables["CPU_DISPATCH"] = self.options.cpu_dispatch
 
         if self.options.get_safe("neon") is not None:
