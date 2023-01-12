@@ -113,7 +113,7 @@ class PackageConan(ConanFile):
     @property
     def _python_lib(self):
         return os.path.join(
-            self.dependencies["cpython"].cpp_info.rootpath,
+            self.deps_cpp_info["cpython"].rootpath,
             self.dependencies["cpython"].cpp_info.components["embed"].libdirs[0],
             self.dependencies["cpython"].cpp_info.components["embed"].libs[0])
 
