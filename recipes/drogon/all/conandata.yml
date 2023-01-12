@@ -17,6 +17,10 @@ patches:
     - patch_file: "patches/1.8.0-0002-find-package-jsoncpp.patch"
       patch_description: "Fix jsoncpp cmake target name"
       patch_type: "conan"
+    - patch_file: "patches/1.8.0-0003-find-package-sqlite.patch"
+      patch_description: "Fix sqlite cmake target name"
+      patch_type: "conan"
+
   "1.8.0":
     - patch_file: "patches/1.8.0-0001-disable-unused-data.patch"
       patch_description: "Consume Trantor package from Conan instead of using the subproject"
@@ -24,6 +28,10 @@ patches:
     - patch_file: "patches/1.8.0-0002-find-package-jsoncpp.patch"
       patch_description: "Fix jsoncpp cmake target name"
       patch_type: "conan"
+    - patch_file: "patches/1.8.0-0003-find-package-sqlite.patch"
+      patch_description: "Fix sqlite cmake target name"
+      patch_type: "conan"
+
   "1.7.5":
     - patch_file: "patches/1.7.5-0001-disable_trantor.patch"
       patch_description: "Consume Trantor package from Conan instead of using the subproject"
