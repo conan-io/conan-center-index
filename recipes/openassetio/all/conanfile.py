@@ -59,6 +59,9 @@ class PackageConan(ConanFile):
         if not self.options.without_python:
             self.requires("openssl/1.1.1s")
             self.requires(f"cpython/{self.options.python_version}")
+            if is_msvc(self):
+                # Required to create import .lib for building extension module.
+                self.options["cpython"].shared = True
             self.requires("pybind11/2.10.0")
 
     def validate(self):
