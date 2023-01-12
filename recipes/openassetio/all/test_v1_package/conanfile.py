@@ -1,10 +1,10 @@
 import pathlib
 
 from conan import ConanFile
+from conan.tools.microsoft import is_msvc
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.tools.files import get
-import os
 
 
 class TestPackageConan(ConanFile):
@@ -48,8 +48,8 @@ class TestPackageConan(ConanFile):
         else:
             tc.variables["OPENASSETIOTEST_ENABLE_PYTHON"] = True
             tc.variables["Python_EXECUTABLE"] = self._python_exe
-            if self.settings.os == "Windows":
-                tc.variables["Python_LIBRARY"] = self._python_lib
+            if is_msvc(self):
+                tc.variables["Python_LIBRARY"] = self._python_windows_lib
             if self.settings.compiler == "clang":
                 # Work around cpython recipe bug.
                 # FIXME: remove once fixed upstream.
@@ -74,8 +74,10 @@ class TestPackageConan(ConanFile):
         return pathlib.Path(self.deps_user_info["cpython"].python).as_posix()
 
     @property
-    def _python_lib(self):
-        return os.path.join(
-            self.dependencies["cpython"].cpp_info.rootpath,
+    def _python_windows_lib(self):
+        pth = pathlib.Path(
+            self.deps_cpp_info["cpython"].rootpath,
             self.dependencies["cpython"].cpp_info.components["embed"].libdirs[0],
             self.dependencies["cpython"].cpp_info.components["embed"].libs[0])
+        pth = pth.with_suffix(".lib")
+        return pth.as_posix()

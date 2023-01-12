@@ -1,4 +1,5 @@
 import pathlib
+import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -9,7 +10,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-import os
 
 
 required_conan_version = ">=1.53.0"
@@ -99,8 +99,8 @@ class PackageConan(ConanFile):
         else:
             tc.variables["OPENASSETIO_ENABLE_PYTHON"] = True
             tc.variables["Python_EXECUTABLE"] = self._python_exe
-            if self.settings.os == "Windows":
-                tc.variables["Python_LIBRARY"] = self._python_lib
+            if is_msvc(self):
+                tc.variables["Python_LIBRARY"] = self._python_windows_lib
 
         tc.generate()
         tc = CMakeDeps(self)
@@ -113,11 +113,13 @@ class PackageConan(ConanFile):
         return pathlib.Path(self.deps_user_info["cpython"].python).as_posix()
 
     @property
-    def _python_lib(self):
-        return os.path.join(
+    def _python_windows_lib(self):
+        pth = pathlib.Path(
             self.deps_cpp_info["cpython"].rootpath,
             self.dependencies["cpython"].cpp_info.components["embed"].libdirs[0],
             self.dependencies["cpython"].cpp_info.components["embed"].libs[0])
+        pth = pth.with_suffix(".lib")
+        return pth.as_posix()
 
     def build(self):
         apply_conandata_patches(self)
