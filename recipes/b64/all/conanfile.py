@@ -51,11 +51,9 @@ class B64Conan(ConanFile):
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(
             self.package_folder, "licenses"), src=self.source_folder)
-        self.copy(
-            "*.h",
+        copy(self, "*.h",
             dst=os.path.join(self.package_folder, "include"),
-            src=os.path.join(self.source_folder, "include"),
-        )
+            src=os.path.join(self.source_folder, "include"))
 
         cmake = CMake(self)
         cmake.install()
