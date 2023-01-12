@@ -56,10 +56,7 @@ class FlexConan(ConanFile):
 
     def generate(self):
         at = AutotoolsToolchain(self)
-        yes_no = lambda v: "yes" if v else "no"
-        configure_args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(not yes_no(self.options.shared)),
+        at.configure_args.extend([
             "--disable-nls",
             "--disable-bootstrap",
             "HELP2MAN=/bin/true",
@@ -68,8 +65,7 @@ class FlexConan(ConanFile):
             "ac_cv_func_malloc_0_nonnull=yes", "ac_cv_func_realloc_0_nonnull=yes",
             # https://github.com/easybuilders/easybuild-easyconfigs/pull/5792
             "ac_cv_func_reallocarray=no",
-        ]
-        at.configure_args.extend(configure_args)
+        ])
         at.generate()
 
     def build(self):
