@@ -49,6 +49,7 @@ class LsQpackConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["LSQPACK_TESTS"] = False
         tc.variables["LSQPACK_BIN"] = False
         tc.variables["LSQPACK_XXH"] = self.options.with_xxh
