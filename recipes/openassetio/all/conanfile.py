@@ -1,3 +1,5 @@
+import pathlib
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc
@@ -108,7 +110,7 @@ class PackageConan(ConanFile):
 
     @property
     def _python_exe(self):
-        return self.deps_user_info["cpython"].python
+        return pathlib.Path(self.deps_user_info["cpython"].python).as_posix()
 
     @property
     def _python_lib(self):

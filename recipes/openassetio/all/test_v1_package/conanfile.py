@@ -1,3 +1,5 @@
+import pathlib
+
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
@@ -69,7 +71,7 @@ class TestPackageConan(ConanFile):
 
     @property
     def _python_exe(self):
-        return self.deps_user_info["cpython"].python
+        return pathlib.Path(self.deps_user_info["cpython"].python).as_posix()
 
     @property
     def _python_lib(self):
