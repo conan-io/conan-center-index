@@ -364,7 +364,7 @@ class OpenCVConan(ConanFile):
             "video": ["imgproc"],
             "videoio": ["imgcodecs", "imgproc"],
             # Extra modules
-            "alphamat": ["imgproc"],
+            "alphamat": ["with_eigen", "imgproc"],
             "aruco": ["calib3d", "imgproc"],
             "barcode": ["dnn", "imgproc"],
             "bgsegm": ["calib3d", "imgproc", "video"],
