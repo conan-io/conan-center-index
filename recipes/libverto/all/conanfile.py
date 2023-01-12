@@ -1,14 +1,12 @@
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import copy, get, rm, rmdir, chdir, export_conandata_patches, apply_conandata_patches
-from conan.tools.env import Environment
+from conan.tools.files import copy, get, rm, chdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import Autotools, AutotoolsToolchain,AutotoolsDeps, PkgConfigDeps
-from conan.tools.microsoft import is_msvc, VCVars, unix_path
+from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.layout import basic_layout
 from conans import  tools
-import contextlib
 import os
 
 
@@ -136,11 +134,16 @@ class LibVertoConan(ConanFile):
             ])
 
         env = tc.environment()
-        if is_msvc(self):
-            env.define("CC", "{} cl -nologo".format(unix_path(self.deps_user_info["automake"].compile))) 
-            env.define("CXX", "{} cl -nologo".format(unix_path(self.deps_user_info["automake"].compile))) 
-            env.define("LD", "{} link -nologo".format(unix_path(self.deps_user_info["automake"].compile))) 
-            env.define("AR", "{} lib".format(unix_path(self.deps_user_info["automake"].ar_lib))) 
+        # if is_msvc(self):
+        #     # FIXME: Use the conf once https://github.com/conan-io/conan-center-index/pull/12898 is merged
+        #     # env.define("AR", f"{unix_path(self, self.conf.get('tools.automake:ar-lib'))}")
+        #     [version_major, version_minor, _] = self.dependencies.direct_build['automake'].ref.version.split(".", 2)
+        #     automake_version = f"{version_major}.{version_minor}"
+        #     ar_wrapper = unix_path(self, os.path.join(self.dependencies.direct_build['automake'].cpp_info.resdirs[0], f"automake-{automake_version}", "ar-lib"))
+        #     env.define("CC", "{} cl -nologo".format(unix_path(self.dependencies.direct_build["automake"].compile))) 
+        #     env.define("CXX", "{} cl -nologo".format(unix_path(self.deps_user_info["automake"].compile))) 
+        #     env.define("LD", "link -nologo") 
+        #     env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
 
         tc.generate()
         deps = AutotoolsDeps(self)
