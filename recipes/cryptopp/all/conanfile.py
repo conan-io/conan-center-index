@@ -36,9 +36,20 @@ class CryptoPPConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output=output)
+            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
     def build_requirements(self):
-        if Version(self.version) >= "8.7.0":
-            self.tool_requires("cmake/3.24.0")
+        if Version(self.version) >= "8.7.0" and not self._cmake_new_enough("3.20"):
+            self.tool_requires("cmake/3.20.6")
 
     def validate(self):
         if self.options.shared and Version(self.version) >= "8.7.0":
