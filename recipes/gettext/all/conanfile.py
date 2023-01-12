@@ -88,7 +88,7 @@ class GetTextConan(ConanFile):
         host = None
         if is_msvc(self):
             rc = None
-            self._autotools.flags.append("-FS")
+            tc.extra_cflags.append("-FS")
             # INSTALL.windows: Native binaries, built using the MS Visual C/C++ tool chain.
             if self.settings.arch == "x86":
                 host = "i686-w64-mingw32"
