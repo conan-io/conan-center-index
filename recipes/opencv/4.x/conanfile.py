@@ -1048,6 +1048,9 @@ class OpenCVConan(ConanFile):
         if is_msvc(self):
             tc.variables["BUILD_WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
 
+        if self.settings.os == "Android":
+            tc.variables["BUILD_ANDROID_EXAMPLES"] = False
+
         tc.generate()
 
         CMakeDeps(self).generate()
