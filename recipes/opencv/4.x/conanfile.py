@@ -7,6 +7,7 @@ from conan.tools.files import apply_conandata_patches, collect_libs, copy, expor
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
+import re
 import textwrap
 
 required_conan_version = ">=1.54.0"
@@ -745,11 +746,10 @@ class OpenCVConan(ConanFile):
                     if int(str(self.settings.os.api_level)) > 20:
                         self.cpp_info.components[conan_component].system_libs.append("mediandk")
 
-                if self.settings.os in ["Android", "iOS", "Macos", "Linux", "Neutrino"]:
-                    if not self.options.shared:
-                        if conan_component == "opencv_core":
-                            libs = list(filter(lambda x: not x.startswith("opencv"), collect_libs(self)))
-                            self.cpp_info.components[conan_component].libs += libs
+                if conan_component == "opencv_core" and not self.options.shared:
+                    lib_exclude_filter = "(opencv_|ippi|correspondence|multiview|numeric).*"
+                    libs = list(filter(lambda x: not re.match(lib_exclude_filter, x), collect_libs(self)))
+                    self.cpp_info.components[conan_component].libs += libs
 
                 # TODO: to remove in conan v2 once cmake_find_package* generators removed
                 self.cpp_info.components[conan_component].names["cmake_find_package"] = cmake_target
