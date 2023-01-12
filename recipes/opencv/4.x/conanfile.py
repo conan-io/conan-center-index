@@ -108,6 +108,7 @@ class OpenCVConan(ConanFile):
         "cpu_dispatch": [None, "ANY"],
         "nonfree": [True, False],
         # dnn options
+        "with_vulkan": [True, False],
         "dnn_cuda": [True, False],
         # highgui options
         "with_gtk": [True, False],
@@ -221,6 +222,7 @@ class OpenCVConan(ConanFile):
         "cpu_dispatch": None,
         "nonfree": False,
         # dnn options
+        "with_vulkan": False,
         "dnn_cuda": False,
         # highgui options
         "with_gtk": True,
@@ -574,6 +576,7 @@ class OpenCVConan(ConanFile):
 
         if not self.options.dnn:
             self.options.rm_safe("dnn_cuda")
+            self.options.rm_safe("with_vulkan")
         if not self.options.highgui:
             self.options.rm_safe("with_gtk")
         if not self.options.imgcodecs:
@@ -624,6 +627,8 @@ class OpenCVConan(ConanFile):
         # dnn dependencies
         if self.options.dnn:
             self.requires(f"protobuf/{self._protobuf_version}")
+        if self.options.get_safe("with_vulkan"):
+            self.requires("vulkan-headers/1.3.236.0")
         # gapi dependencies
         if self.options.gapi:
             self.requires("ade/0.1.2a")
@@ -882,7 +887,9 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_VA"] = False
         tc.variables["WITH_VA_INTEL"] = False
         tc.variables["WITH_VTK"] = False
-        tc.variables["WITH_VULKAN"] = False
+        tc.variables["WITH_VULKAN"] = self.options.get_safe("with_vulkan", False)
+        if self.options.get_safe("with_vulkan"):
+            tc.variables["VULKAN_INCLUDE_DIRS"] = os.path.join(self.dependencies["vulkan-headers"].package_folder, "include").replace("\\", "/")
         tc.variables["WITH_XIMEA"] = False
         tc.variables["WITH_XINE"] = False
         tc.variables["WITH_LAPACK"] = False
@@ -1157,6 +1164,9 @@ class OpenCVConan(ConanFile):
             else:
                 return []
 
+        def vulkan():
+            return ["vulkan-headers::vulkan-headers"] if self.options.get_safe("with_vulkan") else []
+
         def opencv_calib3d():
             return ["opencv_calib3d"] if self.options.calib3d else []
 
@@ -1216,7 +1226,7 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_calib3d", "lib": "calib3d", "requires": requires_calib3d},
             ])
         if self.options.dnn:
-            requires_dnn = ["opencv_core", "opencv_imgproc"] + protobuf() + ipp()
+            requires_dnn = ["opencv_core", "opencv_imgproc"] + protobuf() + vulkan() + ipp()
             opencv_components.extend([
                 {"target": "opencv_dnn", "lib": "dnn", "requires": requires_dnn},
             ])
