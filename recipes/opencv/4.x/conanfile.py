@@ -58,7 +58,6 @@ class OpenCVConan(ConanFile):
         "contrib_cudaoptflow": [True, False],
         "contrib_cudastereo": [True, False],
         "contrib_cudawarping": [True, False],
-        "contrib_cudev": [True, False],
         "contrib_datasets": [True, False],
         "contrib_dnn_objdetect": [True, False],
         "contrib_dnn_superres": [True, False],
@@ -172,7 +171,6 @@ class OpenCVConan(ConanFile):
         "contrib_cudaoptflow": False,
         "contrib_cudastereo": False,
         "contrib_cudawarping": False,
-        "contrib_cudev": False,
         "contrib_datasets": False,
         "contrib_dnn_objdetect": False,
         "contrib_dnn_superres": False,
@@ -373,7 +371,6 @@ class OpenCVConan(ConanFile):
             ],
             "contrib_cudastereo": ["with_cuda", "calib3d"],
             "contrib_cudawarping": ["with_cuda", "imgproc"],
-            "contrib_cudev": ["with_cuda"],
             "contrib_datasets": ["flann", "imgcodecs", "ml"],
             "contrib_dnn_objdetect": ["dnn", "imgproc"],
             "contrib_dnn_superres": ["dnn", "imgproc"],
@@ -506,7 +503,6 @@ class OpenCVConan(ConanFile):
                         self.options.contrib_cudastereo = True
                     if self.options.imgproc:
                         self.options.contrib_cudawarping = True
-                    self.options.contrib_cudev = True
                 if self.options.flann and self.options.imgcodecs and self.options.ml:
                     self.options.contrib_datasets = True
                 if self.options.dnn and self.options.imgproc:
@@ -967,7 +963,7 @@ class OpenCVConan(ConanFile):
         tc.variables["BUILD_opencv_cudaoptflow"] = self.options.contrib_cudaoptflow
         tc.variables["BUILD_opencv_cudastereo"] = self.options.contrib_cudastereo
         tc.variables["BUILD_opencv_cudawarping"] = self.options.contrib_cudawarping
-        tc.variables["BUILD_opencv_cudev"] = self.options.contrib_cudev
+        tc.variables["BUILD_opencv_cudev"] = self.options.with_cuda
         tc.variables["BUILD_opencv_cvv"] = False
         tc.variables["BUILD_opencv_datasets"] = self.options.contrib_datasets
         tc.variables["BUILD_opencv_dnn_objdetect"] = self.options.contrib_dnn_objdetect
@@ -1383,7 +1379,7 @@ class OpenCVConan(ConanFile):
             opencv_components.extend([
                 {"target": "opencv_cudawarping", "lib": "cudawarping", "requires": requires_cudawarping},
             ])
-        if self.options.contrib_cudev:
+        if self.options.with_cuda:
             requires_cudev = eigen() + ipp()
             opencv_components.extend([
                 {"target": "opencv_cudev", "lib": "cudev", "requires": requires_cudev},
