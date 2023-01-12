@@ -109,6 +109,8 @@ class OpenCVConan(ConanFile):
         "nonfree": [True, False],
         # dnn options
         "dnn_cuda": [True, False],
+        # highgui options
+        "with_gtk": [True, False],
         # imgcodecs options
         "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
         "with_png": [True, False],
@@ -122,8 +124,6 @@ class OpenCVConan(ConanFile):
         "with_imgcodec_pfm": [True, False],
         "with_imgcodec_pxm": [True, False],
         "with_imgcodec_sunraster": [True, False],
-        # highgui options
-        "with_gtk": [True, False],
         # objdetect options
         "with_quirc": [True, False],
         # videoio options
@@ -221,6 +221,8 @@ class OpenCVConan(ConanFile):
         "nonfree": False,
         # dnn options
         "dnn_cuda": False,
+        # highgui options
+        "with_gtk": True,
         # imgcodecs options
         "with_jpeg": "libjpeg",
         "with_png": True,
@@ -234,8 +236,6 @@ class OpenCVConan(ConanFile):
         "with_imgcodec_pfm": False,
         "with_imgcodec_pxm": False,
         "with_imgcodec_sunraster": False,
-        # highgui options
-        "with_gtk": True,
         # objdetect options
         "with_quirc": True,
         # videoio options
