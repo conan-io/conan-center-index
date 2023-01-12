@@ -937,8 +937,7 @@ class OpenCVConan(ConanFile):
         if self.options.cpu_dispatch or self.options.cpu_dispatch == "":
             tc.variables["CPU_DISPATCH"] = self.options.cpu_dispatch
 
-        if self.options.get_safe("neon") is not None:
-            tc.variables["ENABLE_NEON"] = self.options.get_safe("neon")
+        tc.variables["ENABLE_NEON"] = self.options.get_safe("neon", False)
 
         tc.variables["OPENCV_DNN_CUDA"] = self.options.get_safe("dnn_cuda", False)
 
