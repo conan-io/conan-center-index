@@ -61,7 +61,7 @@ class LibVertoConan(ConanFile):
         }
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -121,17 +121,6 @@ class LibVertoConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        if is_msvc(self):
-            ms = VCVars(self)
-            ms.generate()
-            env = Environment()
-            env.define("CC", "{} cl -nologo".format(unix_path(self.deps_user_info["automake"].compile))) 
-            env.define("CXX", "{} cl -nologo".format(unix_path(self.deps_user_info["automake"].compile))) 
-            env.define("LD", "{} link -nologo".format(unix_path(self.deps_user_info["automake"].compile))) 
-            env.define("AR", "{} lib".format(unix_path(self.deps_user_info["automake"].ar_lib))) 
-
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -145,6 +134,14 @@ class LibVertoConan(ConanFile):
             f"--with-libevent={yes_no_builtin(self.options.with_libevent)}",
             f"--with-tevent={yes_no_builtin(self.options.with_tevent)}",
             ])
+
+        env = tc.environment()
+        if is_msvc(self):
+            env.define("CC", "{} cl -nologo".format(unix_path(self.deps_user_info["automake"].compile))) 
+            env.define("CXX", "{} cl -nologo".format(unix_path(self.deps_user_info["automake"].compile))) 
+            env.define("LD", "{} link -nologo".format(unix_path(self.deps_user_info["automake"].compile))) 
+            env.define("AR", "{} lib".format(unix_path(self.deps_user_info["automake"].ar_lib))) 
+
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
@@ -155,16 +152,14 @@ class LibVertoConan(ConanFile):
         apply_conandata_patches(self)
         with chdir(self, self.source_folder):    
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
-        with self._build_context():
-            autotools = Autotools(self)
-            autotools.configure(os.path.join(self.source_folder,"src"))
-            autotools.make()
+        autotools = Autotools(self)
+        autotools.configure(os.path.join(self.source_folder,"src"))
+        autotools.make()
 
     def package(self):
         copy(self,"COPYING", src=self.source_folder, dst="licenses")
-        with self._build_context():
-            autotools = Autotools(self)
-            autotools.install()
+        autotools = Autotools(self)
+        autotools.install()
 
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
