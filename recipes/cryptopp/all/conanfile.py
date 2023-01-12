@@ -41,7 +41,7 @@ class CryptoPPConan(ConanFile):
             import re
             from io import StringIO
             output = StringIO()
-            self.run("cmake --version", output=output)
+            self.run("cmake --version", output)
             m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
             return Version(m.group(1)) >= required_version
         except:
