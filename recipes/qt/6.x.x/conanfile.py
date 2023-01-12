@@ -449,8 +449,13 @@ class QtConan(ConanFile):
         ms.generate()
 
         tc = CMakeDeps(self)
-        tc.set_property("libdrm", "cmake_file_name", "libdrm-DO-NOT-USE")
-        tc.set_property("wayland", "cmake_file_name", "wayland-DO-NOT-USE")
+        tc.set_property("libdrm", "cmake_file_name", "Libdrm")
+        tc.set_property("libdrm::libdrm_libdrm", "cmake_target_name", "Libdrm::Libdrm")
+        tc.set_property("wayland", "cmake_file_name", "Wayland")
+        tc.set_property("wayland::wayland-client", "cmake_target_name", "Wayland::Client")
+        tc.set_property("wayland::wayland-server", "cmake_target_name", "Wayland::Server")
+        tc.set_property("wayland::wayland-cursor", "cmake_target_name", "Wayland::Cursor")
+        tc.set_property("wayland::wayland-egl", "cmake_target_name", "Wayland::Egl")
         tc.generate()
 
         for f in glob.glob("*.cmake"):
