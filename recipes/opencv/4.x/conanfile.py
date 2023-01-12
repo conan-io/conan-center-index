@@ -6,7 +6,6 @@ from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rename, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
-from conans.tools import to_android_abi
 import os
 import textwrap
 
@@ -1636,19 +1635,11 @@ class OpenCVConan(ConanFile):
                     self.cpp_info.components[conan_component].system_libs = ["dl", "m", "pthread", "rt"]
 
                 if self.settings.os == "Android":
-                    self.cpp_info.components[conan_component].includedirs = [
-                        os.path.join("sdk", "native", "jni", "include")]
                     self.cpp_info.components[conan_component].system_libs.append("log")
                     if int(str(self.settings.os.api_level)) > 20:
                         self.cpp_info.components[conan_component].system_libs.append("mediandk")
-                    if not self.options.shared:
-                        self.cpp_info.components[conan_component].libdirs.append(
-                            os.path.join("sdk", "native", "staticlibs", to_android_abi(str(self.settings.arch))))
-                        if conan_component == "opencv_core":
-                            self.cpp_info.components[conan_component].libdirs.append("lib")
-                            self.cpp_info.components[conan_component].libs += collect_libs(self)
 
-                if self.settings.os in ["iOS", "Macos", "Linux", "Neutrino"]:
+                if self.settings.os in ["Android", "iOS", "Macos", "Linux", "Neutrino"]:
                     if not self.options.shared:
                         if conan_component == "opencv_core":
                             libs = list(filter(lambda x: not x.startswith("opencv"), collect_libs(self)))
