@@ -86,6 +86,9 @@ class CzmqConan(ConanFile):
         tc.variables["CZMQ_WITH_LIBMICROHTTPD"] = self.options.enable_drafts
         if is_msvc(self):
             tc.preprocessor_definitions["_NOEXCEPT"] = "noexcept"
+            if self.options.shared:
+                tc.preprocessor_definitions["CZMQ_EXPORTS"] = 1
+
         if self.options.shared:
             tc.preprocessor_definitions["CZMQ_STATIC"] = 1
         tc.generate()
