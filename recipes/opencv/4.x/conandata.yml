@@ -52,6 +52,9 @@ patches:
       base_path: "contrib"
       patch_description: "Robust discovery of hdf"
       patch_type: "conan"
+    - patch_file: "patches/4.5.2-0001-fix-zlib-static-android.patch"
+      patch_description: "Fix discovery of zlib static if Android"
+      patch_type: "conan"
   "4.5.3":
     - patch_file: "patches/4.5.3-0001-find-openexr.patch"
       patch_description: "Robust discovery & injection of OpenEXR"
@@ -70,6 +73,9 @@ patches:
       base_path: "contrib"
       patch_description: "Robust discovery of hdf"
       patch_type: "conan"
+    - patch_file: "patches/4.5.2-0001-fix-zlib-static-android.patch"
+      patch_description: "Fix discovery of zlib static if Android"
+      patch_type: "conan"
   "4.5.2":
     - patch_file: "patches/4.1.2-0001-find-openexr.patch"
       patch_description: "Robust discovery & injection of OpenEXR"
@@ -87,6 +93,9 @@ patches:
     - patch_file: "patches/4.1.2-0006-contrib-hdf.patch"
       base_path: "contrib"
       patch_description: "Robust discovery of hdf"
+      patch_type: "conan"
+    - patch_file: "patches/4.5.2-0001-fix-zlib-static-android.patch"
+      patch_description: "Fix discovery of zlib static if Android"
       patch_type: "conan"
   "4.5.1":
     - patch_file: "patches/4.5.1-0001-contrib-tracking-no-plot-deps.patch"
