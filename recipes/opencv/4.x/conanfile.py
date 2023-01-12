@@ -66,6 +66,7 @@ class OpenCVConan(ConanFile):
         "contrib_face": [True, False],
         "contrib_freetype": [True, False],
         "contrib_fuzzy": [True, False],
+        "contrib_hdf": [True, False],
         "contrib_hfs": [True, False],
         "contrib_img_hash": [True, False],
         "contrib_intensity_transform": [True, False],
@@ -179,6 +180,7 @@ class OpenCVConan(ConanFile):
         "contrib_face": False,
         "contrib_freetype": False,
         "contrib_fuzzy": False,
+        "contrib_hdf": False,
         "contrib_hfs": False,
         "contrib_img_hash": False,
         "contrib_intensity_transform": False,
@@ -471,7 +473,7 @@ class OpenCVConan(ConanFile):
             self.output.warning("contrib option is deprecated")
             if self.options.contrib:
                 # During deprecation period, keep old behavior of contrib=True, which was to enable
-                # all available contribs (except freetype, sfm and new ovis contribs)
+                # all available contribs (except freetype, sfm and new hdf & ovis contribs)
                 if self._has_contrib_alphamat_option and self.options.imgproc:
                     self.options.contrib_alphamat = True
                 if self.options.calib3d and self.options.imgproc:
@@ -669,6 +671,9 @@ class OpenCVConan(ConanFile):
         if self.options.contrib_freetype:
             self.requires("freetype/2.12.1")
             self.requires("harfbuzz/6.0.0")
+        # contrib_hdf dependencies
+        if self.options.contrib_hdf:
+            self.requires("hdf5/1.13.1")
         # contrib_ovis dependencies
         if self.options.contrib_ovis:
             self.requires("ogre/1.10.2")
@@ -970,7 +975,7 @@ class OpenCVConan(ConanFile):
         tc.variables["BUILD_opencv_face"] = self.options.contrib_face
         tc.variables["BUILD_opencv_freetype"] = self.options.contrib_freetype
         tc.variables["BUILD_opencv_fuzzy"] = self.options.contrib_fuzzy
-        tc.variables["BUILD_opencv_hdf"] = False
+        tc.variables["BUILD_opencv_hdf"] = self.options.contrib_hdf
         tc.variables["BUILD_opencv_hfs"] = self.options.contrib_hfs
         tc.variables["BUILD_opencv_img_hash"] = self.options.contrib_img_hash
         if self._has_contrib_intensity_transform_option:
@@ -1419,6 +1424,11 @@ class OpenCVConan(ConanFile):
             opencv_components.extend([
                 {"target": "opencv_fuzzy", "lib": "fuzzy", "requires": requires_fuzzy},
             ])
+        if self.options.contrib_hdf:
+            requires_hdf = ["opencv_core" + "hdf5::hdf5"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_hdf", "lib": "hdf", "requires": requires_hdf},
+            ])
         if self.options.contrib_hfs:
             requires_hfs = ["opencv_core", "opencv_imgproc"] + eigen() + ipp()
             opencv_components.extend([
@@ -1453,7 +1463,7 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_optflow", "lib": "optflow", "requires": requires_optflow},
             ])
         if self.options.contrib_ovis:
-            requires_ovis = ["opencv_core", "opencv_imgproc", "opencv_calib3d"] + eigen() + ipp()
+            requires_ovis = ["opencv_core", "opencv_imgproc", "opencv_calib3d" + "ogre::ogre"] + eigen() + ipp()
             opencv_components.extend([
                 {"target": "opencv_ovis", "lib": "ovis", "requires": requires_ovis},
             ])
