@@ -1,5 +1,13 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import copy, get, rm, rmdir, chdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.env import Environment
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.gnu import Autotools, AutotoolsToolchain,AutotoolsDeps, PkgConfigDeps
+from conan.tools.microsoft import is_msvc, VCVars, unix_path
+from conan.tools.layout import basic_layout
+from conans import  tools
 import contextlib
 import os
 
@@ -37,13 +45,7 @@ class LibVertoConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     exports_sources = "patches/*"
-    generators = "pkg_config"
-
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+   
 
     @property
     def _settings_build(self):
@@ -58,6 +60,9 @@ class LibVertoConan(ConanFile):
             "tevent": self.options.with_tevent,
         }
 
+    def layout(self):
+        basic_layout(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -71,7 +76,7 @@ class LibVertoConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             raise ConanInvalidConfiguration("libverto does not support Visual Studio")
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Shared libraries are not supported on Windows")
@@ -90,9 +95,12 @@ class LibVertoConan(ConanFile):
         if count_builtins > 0 and count_externals > 0:
             raise ConanInvalidConfiguration("Cannot combine builtin and external backends")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def requirements(self):
         if self.options.with_glib:
@@ -108,60 +116,57 @@ class LibVertoConan(ConanFile):
     def build_requirements(self):
         self.build_requires("pkgconf/1.9.3")
         self.build_requires("libtool/2.4.7")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     @contextlib.contextmanager
     def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                env = {
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "LD": "{} link -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
+        if is_msvc(self):
+            ms = VCVars(self)
+            ms.generate()
+            env = Environment()
+            env.define("CC", "{} cl -nologo".format(unix_path(self.deps_user_info["automake"].compile))) 
+            env.define("CXX", "{} cl -nologo".format(unix_path(self.deps_user_info["automake"].compile))) 
+            env.define("LD", "{} link -nologo".format(unix_path(self.deps_user_info["automake"].compile))) 
+            env.define("AR", "{} lib".format(unix_path(self.deps_user_info["automake"].ar_lib))) 
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.libs = []
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
         yes_no_builtin = lambda v: {"external": "yes", "False": "no", "builtin": "builtin"}[str(v)]
-        args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--with-pthread={}".format(yes_no(self.options.get_safe("pthread", False))),
-            "--with-glib={}".format(yes_no_builtin(self.options.with_glib)),
-            "--with-libev={}".format(yes_no_builtin(self.options.with_libev)),
-            "--with-libevent={}".format(yes_no_builtin(self.options.with_libevent)),
-            "--with-tevent={}".format(yes_no_builtin(self.options.with_tevent)),
-        ]
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
+        tc.configure_args.extend([
+            f"--with-pthread={yes_no(self.options.get_safe('pthread'))}",
+            f"--with-glib={yes_no_builtin(self.options.with_glib)}",
+            f"--with-libev={yes_no_builtin(self.options.with_libev)}",
+            f"--with-libevent={yes_no_builtin(self.options.with_libevent)}",
+            f"--with-tevent={yes_no_builtin(self.options.with_tevent)}",
+            ])
+        tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
+        pkg = PkgConfigDeps(self)
+        pkg.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        with tools.chdir(self._source_subfolder):
+        apply_conandata_patches(self)
+        with chdir(self, self.source_folder):    
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
         with self._build_context():
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
+            autotools.configure(os.path.join(self.source_folder,"src"))
             autotools.make()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
+        copy(self,"COPYING", src=self.source_folder, dst="licenses")
         with self._build_context():
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
             autotools.install()
 
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_id(self):
         del self.info.options.default
