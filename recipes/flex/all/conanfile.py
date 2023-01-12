@@ -35,7 +35,7 @@ class FlexConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("m4/1.4.19")
-        if cross_building(self):
+        if hasattr(self, "settings_build") and cross_building(self):
             self.build_requires(f"{self.name}/{self.version}")
 
     def validate(self):
