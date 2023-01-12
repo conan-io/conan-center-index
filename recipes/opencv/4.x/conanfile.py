@@ -72,6 +72,7 @@ class OpenCVConan(ConanFile):
         "contrib_line_descriptor": [True, False],
         "contrib_mcc": [True, False],
         "contrib_optflow": [True, False],
+        "contrib_ovis": [True, False],
         "contrib_phase_unwrapping": [True, False],
         "contrib_plot": [True, False],
         "contrib_quality": [True, False],
@@ -184,6 +185,7 @@ class OpenCVConan(ConanFile):
         "contrib_line_descriptor": False,
         "contrib_mcc": False,
         "contrib_optflow": False,
+        "contrib_ovis": False,
         "contrib_phase_unwrapping": False,
         "contrib_plot": False,
         "contrib_quality": False,
@@ -382,6 +384,7 @@ class OpenCVConan(ConanFile):
             "contrib_line_descriptor": ["imgproc"],
             "contrib_mcc": ["calib3d", "dnn", "imgproc"],
             "contrib_optflow": ["calib3d", "flann", "imgcodecs", "imgproc", "video", "contrib_ximgproc"],
+            "contrib_ovis": ["calib3d", "imgproc"],
             "contrib_phase_unwrapping": ["imgproc"],
             "contrib_plot": ["imgproc"],
             "contrib_quality": ["imgproc", "ml"],
@@ -468,7 +471,7 @@ class OpenCVConan(ConanFile):
             self.output.warning("contrib option is deprecated")
             if self.options.contrib:
                 # During deprecation period, keep old behavior of contrib=True, which was to enable
-                # all available contribs (except freetype & sfm contribs)
+                # all available contribs (except freetype, sfm and new ovis contribs)
                 if self._has_contrib_alphamat_option and self.options.imgproc:
                     self.options.contrib_alphamat = True
                 if self.options.calib3d and self.options.imgproc:
@@ -666,6 +669,9 @@ class OpenCVConan(ConanFile):
         if self.options.contrib_freetype:
             self.requires("freetype/2.12.1")
             self.requires("harfbuzz/6.0.0")
+        # contrib_ovis dependencies
+        if self.options.contrib_ovis:
+            self.requires("ogre/1.10.2")
         # contrib_sfm dependencies
         if self.options.contrib_sfm:
             self.requires("gflags/2.2.2")
@@ -976,7 +982,7 @@ class OpenCVConan(ConanFile):
         if self._has_contrib_mcc_option:
             tc.variables["BUILD_opencv_mcc"] = self.options.contrib_mcc
         tc.variables["BUILD_opencv_optflow"] = self.options.contrib_optflow
-        tc.variables["BUILD_opencv_ovis"] = False
+        tc.variables["BUILD_opencv_ovis"] = self.options.contrib_ovis
         tc.variables["BUILD_opencv_phase_unwrapping"] = self.options.contrib_phase_unwrapping
         tc.variables["BUILD_opencv_plot"] = self.options.contrib_plot
         tc.variables["BUILD_opencv_quality"] = self.options.contrib_quality
@@ -1445,6 +1451,11 @@ class OpenCVConan(ConanFile):
                                 "opencv_imgcodecs", "opencv_flann"] + eigen() + ipp()
             opencv_components.extend([
                 {"target": "opencv_optflow", "lib": "optflow", "requires": requires_optflow},
+            ])
+        if self.options.contrib_ovis:
+            requires_ovis = ["opencv_core", "opencv_imgproc", "opencv_calib3d"] + eigen() + ipp()
+            opencv_components.extend([
+                {"target": "opencv_ovis", "lib": "ovis", "requires": requires_ovis},
             ])
         if self.options.contrib_phase_unwrapping:
             requires_phase_unwrapping = ["opencv_core", "opencv_imgproc"] + eigen() + ipp()
