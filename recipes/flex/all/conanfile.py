@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.build.cross_building import cross_building
+from conan.tools.build import cross_building
 from conan.tools.files import get, rmdir, copy, rm
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conans.errors import ConanInvalidConfiguration
