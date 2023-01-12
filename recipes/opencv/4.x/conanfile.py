@@ -99,6 +99,7 @@ class OpenCVConan(ConanFile):
         "with_ipp": [False, "intel-ipp", "opencv-icv"],
         "with_eigen": [True, False],
         "neon": [True, False],
+        "with_opencl": [True, False],
         "with_cuda": [True, False],
         "with_cublas": [True, False],
         "with_cufft": [True, False],
@@ -213,6 +214,7 @@ class OpenCVConan(ConanFile):
         "with_ipp": False,
         "with_eigen": True,
         "neon": True,
+        "with_opencl": False,
         "with_cuda": False,
         "with_cublas": False,
         "with_cufft": False,
@@ -310,6 +312,8 @@ class OpenCVConan(ConanFile):
         if self.settings.os != "Linux":
             del self.options.with_gtk
             del self.options.with_v4l
+        if self.settings.os in ["iOS", "Android"]:
+            del self.options.with_opencl
 
         if self._has_with_ffmpeg_option:
             # Following the packager choice, ffmpeg is enabled by default when
@@ -870,7 +874,7 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_LIBREALSENSE"] = False
         tc.variables["WITH_MFX"] = False
         tc.variables["WITH_NGRAPH"] = False
-        tc.variables["WITH_OPENCL"] = False
+        tc.variables["WITH_OPENCL"] = self.options.get_safe("with_opencl", False)
         tc.variables["WITH_OPENCLAMDBLAS"] = False
         tc.variables["WITH_OPENCLAMDFFT"] = False
         tc.variables["WITH_OPENCL_SVM"] = False
@@ -1671,6 +1675,8 @@ class OpenCVConan(ConanFile):
             if self.options.highgui:
                 self.cpp_info.components["opencv_highgui"].system_libs = ["comctl32", "gdi32", "ole32", "setupapi", "ws2_32", "vfw32"]
         elif self.settings.os == "Macos":
+            if self.options.with_opencl:
+                self.cpp_info.components["opencv_core"].frameworks = ["OpenCL"]
             if self.options.imgcodecs:
                 self.cpp_info.components["opencv_imgcodecs"].frameworks = ["AppKit", "CoreFoundation", "CoreGraphics"]
             if self.options.highgui:
