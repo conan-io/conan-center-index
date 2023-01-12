@@ -38,6 +38,11 @@ class FlexConan(ConanFile):
         if cross_building(self):
             self.build_requires(f"{self.name}/{self.version}")
 
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Flex package is not compatible with Windows. "
+                                            "Consider using winflexbison instead.")
+
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
@@ -45,11 +50,9 @@ class FlexConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Flex package is not compatible with Windows. "
-                                            "Consider using winflexbison instead.")
 
     def generate(self):
         at = AutotoolsToolchain(self)
