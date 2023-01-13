@@ -16,7 +16,7 @@ class TestPackageConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["BUILD_TRANSUPP"] = self._test_transupp
         if self._test_transupp:
-            cmake.definitions["LIBJPEG_RES_DIR"] = os.path.join(self.deps_cpp_info["libjpeg"].rootpath, "res")
+            cmake.definitions["LIBJPEG_RES_DIR"] = os.path.join(self.deps_cpp_info["libjpeg"].rootpath, "res").replace("\\", "/")
         cmake.configure()
         cmake.build()
 
