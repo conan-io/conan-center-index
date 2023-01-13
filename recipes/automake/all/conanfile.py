@@ -46,6 +46,7 @@ class AutomakeConan(ConanFile):
         if hasattr(self, "settings_build"):
             self.build_requires("autoconf/2.71")
         if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", check_type=str):
+            self.win_bash = True
             self.build_requires("msys2/cci.latest")
 
     def package_id(self):
@@ -80,11 +81,15 @@ class AutomakeConan(ConanFile):
         apply_conandata_patches(self)
         if self.settings.os == "Windows":
             # tracing using m4 on Windows returns Windows paths => use cygpath to convert to unix paths
-            replace_in_file(self, os.path.join(self.source_folder, "bin", "aclocal.in"),
-                                               "          $map_traced_defs{$arg1} = $file;",
-                                               "          $file = `cygpath -u $file`;\n"
-                                               "          $file =~ s/^\\s+|\\s+$//g;\n"
-                                               "          $map_traced_defs{$arg1} = $file;")
+            ac_local_in = os.path.join(self.source_folder, "bin", "aclocal.in")
+            replace_in_file(self, ac_local_in,
+                                "          $map_traced_defs{$arg1} = $file;",
+                                "          $file = `cygpath -u $file`;\n"
+                                "          $file =~ s/^\\s+|\\s+$//g;\n"
+                                "          $map_traced_defs{$arg1} = $file;")
+            # handle relative paths during aclocal.m4 creation
+            replace_in_file(self, ac_local_in, "$map{$m} eq $map_traced_defs{$m}", 
+                                "abs_path($map{$m}) eq abs_path($map_traced_defs{$m})")
 
     def build(self):
         self._patch_sources()
@@ -101,6 +106,7 @@ class AutomakeConan(ConanFile):
         rmdir(self, os.path.join(self._datarootdir, "man"))
         rmdir(self, os.path.join(self._datarootdir, "doc"))
 
+        # TODO: consider whether the following is still necessary on Windows
         if self.settings.os == "Windows":
             binpath = os.path.join(self.package_folder, "bin")
             for filename in os.listdir(binpath):

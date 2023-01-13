@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.files import chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -78,18 +79,18 @@ class TestPackageConan(ConanFile):
     def build(self):
         # Test compilation through compile wrapper script
         compiler = self._system_compiler()
-        self.run(
-            f"$COMPILE {compiler} {self.source_folder}/test_package_1.c -o {self.build_folder}/script_test",
-            env="conanbuild",
-        )
+        source_file = unix_path(self, os.path.join(self.source_folder, "test_package_1.c"))
+        with chdir(self, self.build_folder):
+            self.run(f"$COMPILE {compiler} {source_file} -o script_test", env="conanbuild")
 
         # Build test project
         autotools = Autotools(self)
-        autotools.autoreconf()
+        autotools.autoreconf(args=['--debug'])
         autotools.configure()
         autotools.make()
 
     def test(self):
         if can_run(self):
-            self.run(f"{self.build_folder}/script_test")
-            self.run(f"{self.build_folder}/test_package")
+            with chdir(self, self.build_folder):
+                self.run("./script_test")
+                self.run("./test_package")
