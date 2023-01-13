@@ -12,6 +12,7 @@ required_conan_version = ">=1.52.0"
 
 class M4Conan(ConanFile):
     name = "m4"
+    package_type = "application"
     description = "GNU M4 is an implementation of the traditional Unix macro processor"
     topics = ("macro", "preprocessor")
     homepage = "https://www.gnu.org/software/m4/"

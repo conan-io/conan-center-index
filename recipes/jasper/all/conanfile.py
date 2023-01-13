@@ -3,6 +3,7 @@ from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -20,7 +21,7 @@ class JasperConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_libjpeg": ["libjpeg", "libjpeg-turbo"],
+        "with_libjpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
     }
     default_options = {
         "shared": False,
@@ -45,10 +46,12 @@ class JasperConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.4")
-        elif self.options.with_libjpeg == "libjpeg":
+        if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
+        elif self.options.with_libjpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.1.4")
+        elif self.options.with_libjpeg == "mozjpeg":
+            self.requires("mozjpeg/4.1.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -56,13 +59,17 @@ class JasperConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if Version(self.version) >= "4.0.0":
+            tc.variables["JAS_ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         tc.variables["JAS_ENABLE_DOC"] = False
         tc.variables["JAS_ENABLE_LATEX"] = False
         tc.variables["JAS_ENABLE_PROGRAMS"] = False
         tc.variables["JAS_ENABLE_SHARED"] = self.options.shared
         tc.variables["JAS_LIBJPEG_REQUIRED"] = "REQUIRED"
+        tc.variables["JAS_ENABLE_LIBJPEG"] = bool(self.options.with_libjpeg)
+        if Version(self.version) >= "3.0.0":
+            tc.variables["JAS_ENABLE_LIBHEIF"] = False
         tc.variables["JAS_ENABLE_OPENGL"] = False
-        tc.variables["JAS_ENABLE_LIBJPEG"] = True
 
         if cross_building(self):
             tc.cache_variables["JAS_CROSSCOMPILING"] = True
@@ -126,6 +133,13 @@ class JasperConan(ConanFile):
         self.cpp_info.libs = ["jasper"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
+        self.cpp_info.requires = []
+        if self.options.with_libjpeg == "libjpeg":
+            self.cpp_info.requires.append("libjpeg::libjpeg")
+        elif self.options.with_libjpeg == "libjpeg-turbo":
+            self.cpp_info.requires.append("libjpeg-turbo::jpeg")
+        elif self.options.with_libjpeg == "mozjpeg":
+            self.cpp_info.requires.append("mozjpeg::libjpeg")
 
         # TODO: to remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "Jasper"

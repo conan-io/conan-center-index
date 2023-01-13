@@ -103,6 +103,8 @@ class AutoconfConan(ConanFile):
         self.cpp_info.includedirs = []
         self.cpp_info.resdirs = ["res"]
 
+        # TODO: These variables can be removed since the scripts now locate the resources
+        #       relative to themselves.
         dataroot_path = os.path.join(self.package_folder, "res", "autoconf")
         self.output.info(f"Defining AC_MACRODIR environment variable: {dataroot_path}")
         self.buildenv_info.define_path("AC_MACRODIR", dataroot_path)
@@ -130,7 +132,7 @@ class AutoconfConan(ConanFile):
 
         # TODO: to remove in conan v2
         self.env_info.PATH.append(bin_path)
-        self.env_info.AUTOCONF = autoconf_bin
-        self.env_info.AUTORECONF = autoreconf_bin
-        self.env_info.AUTOHEADER = autoheader_bin
-        self.env_info.AUTOM4TE = autom4te_bin
+        self.env_info.AUTOCONF = "autoconf"
+        self.env_info.AUTORECONF = "autoreconf"
+        self.env_info.AUTOHEADER = "autoheader"
+        self.env_info.AUTOM4TE = "autom4te"

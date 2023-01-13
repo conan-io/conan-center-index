@@ -12,7 +12,7 @@ index 22a17b3..ac18c85 100644
  M4_GNU = @M4_GNU@
  MAKEINFO = @MAKEINFO@
 diff --git a/bin/autoconf.as b/bin/autoconf.as
-index 1407739..12eac08 100644
+index 1407739..50ad1de 100644
 --- a/bin/autoconf.as
 +++ b/bin/autoconf.as
 @@ -89,8 +89,17 @@ exit_missing_arg='
@@ -22,12 +22,12 @@ index 1407739..12eac08 100644
 -: ${AUTOM4TE='@bindir@/@autom4te-name@'}
 -: ${trailer_m4='@pkgdatadir@/autoconf/trailer.m4'}
 +# Locate autom4ate and support files relative to current script inside package
-+SCRIPT_DIR=$(dirname $(which autoconf))
-+RES_DIR=$(realpath "$SCRIPT_DIR/../res/autoconf")
++SCRIPT_DIR=$(dirname "$as_myself")
++RES_DIR="$SCRIPT_DIR/../res/autoconf"
 +if [[ ! -d "$RES_DIR" ]]
 +then
-+    echo "Autoconf conan package error, unable to locate resource directory at $RES_DIR\n" 
-+    exit 1
++    echo "Autoconf conan package error, unable to locate resource directory at $RES_DIR\n"
+     exit 1
 +fi
 +
 +: ${AUTOM4TE="$SCRIPT_DIR/autom4te"}
@@ -36,7 +36,7 @@ index 1407739..12eac08 100644
  outfile=
  verbose=false
 diff --git a/bin/autoheader.in b/bin/autoheader.in
-index 1cbf509..ecad29d 100644
+index 1cbf509..9bdd1cf 100644
 --- a/bin/autoheader.in
 +++ b/bin/autoheader.in
 @@ -29,10 +29,13 @@ eval 'case $# in 0) exec @PERL@ -S "$0";; *) exec @PERL@ -S "$0" "$@";; esac'
@@ -54,6 +54,16 @@ index 1cbf509..ecad29d 100644
    unshift @INC, "$pkgdatadir";
  
    # Override SHELL.  On DJGPP SHELL may not be set to a shell
+@@ -54,7 +57,8 @@ use Autom4te::XFile;
+ our ($config_h, %symbol, %verbatim);
+ 
+ # Lib files.
+-my $autom4te = $ENV{'AUTOM4TE'} || '@bindir@/@autom4te-name@';
++my $scriptpath = abs_path(dirname(__FILE__));
++my $autom4te = $ENV{'AUTOM4TE'} || "$scriptpath/@autom4te-name@";
+ my $config_h_in;
+ my @prepend_include;
+ my @include;
 diff --git a/bin/autom4te.in b/bin/autom4te.in
 index 7ebe419..42f09b4 100644
 --- a/bin/autom4te.in
@@ -106,7 +116,7 @@ index 7ebe419..42f09b4 100644
        if ($type eq 'begin-language:')
  	{
 diff --git a/bin/autoreconf.in b/bin/autoreconf.in
-index ec391a6..e9b1cb2 100644
+index ec391a6..2992b16 100644
 --- a/bin/autoreconf.in
 +++ b/bin/autoreconf.in
 @@ -28,11 +28,14 @@ eval 'case $# in 0) exec @PERL@ -S "$0";; *) exec @PERL@ -S "$0" "$@";; esac'
@@ -125,8 +135,22 @@ index ec391a6..e9b1cb2 100644
    unshift @INC, $pkgdatadir;
  
    $buildauxdir = $ENV{'autom4te_buildauxdir'} || $pkgdatadir . '/build-aux';
+@@ -117,9 +120,10 @@ Written by David J. MacKenzie and Akim Demaille.
+ ";
+ 
+ # Lib files.
+-my $autoconf    = $ENV{'AUTOCONF'}    || '@bindir@/@autoconf-name@';
+-my $autoheader  = $ENV{'AUTOHEADER'}  || '@bindir@/@autoheader-name@';
+-my $autom4te    = $ENV{'AUTOM4TE'}    || '@bindir@/@autom4te-name@';
++my $scriptpath = abs_path(dirname(__FILE__));
++my $autoconf    = $ENV{'AUTOCONF'}    || "$scriptpath/@autoconf-name@";
++my $autoheader  = $ENV{'AUTOHEADER'}  || "$scriptpath/@autoheader-name@";
++my $autom4te    = $ENV{'AUTOM4TE'}    || "$scriptpath/@autom4te-name@";
+ my $automake    = $ENV{'AUTOMAKE'}    || 'automake';
+ my $aclocal     = $ENV{'ACLOCAL'}     || 'aclocal';
+ my $libtoolize  = $ENV{'LIBTOOLIZE'}  || 'libtoolize';
 diff --git a/bin/autoscan.in b/bin/autoscan.in
-index b89fd1a..1088df4 100644
+index b89fd1a..6113d62 100644
 --- a/bin/autoscan.in
 +++ b/bin/autoscan.in
 @@ -27,10 +27,13 @@ eval 'case $# in 0) exec @PERL@ -S "$0";; *) exec @PERL@ -S "$0" "$@";; esac'
@@ -144,8 +168,18 @@ index b89fd1a..1088df4 100644
    unshift @INC, $pkgdatadir;
  
    # Override SHELL.  On DJGPP SHELL may not be set to a shell
+@@ -95,7 +98,8 @@ my %needed_macros =
+ my $log;
+ 
+ # Autoconf and lib files.
+-my $autom4te = $ENV{'AUTOM4TE'} || '@bindir@/@autom4te-name@';
++my $scriptpath = abs_path(dirname(__FILE__));
++my $autom4te = $ENV{'AUTOM4TE'} || "$scriptpath/@autom4te-name@";
+ my $autoconf = "$autom4te --language=autoconf";
+ my @prepend_include;
+ my @include = ('@pkgdatadir@');
 diff --git a/bin/autoupdate.in b/bin/autoupdate.in
-index c86203a..b1d1a9f 100644
+index c86203a..844dd20 100644
 --- a/bin/autoupdate.in
 +++ b/bin/autoupdate.in
 @@ -28,10 +28,13 @@ eval 'case $# in 0) exec @PERL@ -S "$0";; *) exec @PERL@ -S "$0" "$@";; esac'
@@ -163,7 +197,16 @@ index c86203a..b1d1a9f 100644
    unshift @INC, $pkgdatadir;
  
    # Override SHELL.  On DJGPP SHELL may not be set to a shell
-@@ -58,7 +61,7 @@ my @prepend_include;
+@@ -51,14 +54,15 @@ use Autom4te::General;
+ use Autom4te::XFile;
+ 
+ # Lib files.
+-my $autom4te = $ENV{'AUTOM4TE'} || '@bindir@/@autom4te-name@';
++my $scriptpath = abs_path(dirname(__FILE__));
++my $autom4te = $ENV{'AUTOM4TE'} || "$scriptpath/@autom4te-name@";
+ my $autoconf = "$autom4te --language=autoconf";
+ # We need to find m4sugar.
+ my @prepend_include;
  my @include = ('@pkgdatadir@');
  my $force = 0;
  # m4.
