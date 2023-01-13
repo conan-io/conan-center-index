@@ -850,7 +850,7 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_CLP"] = False
         tc.variables["WITH_NVCUVID"] = False
 
-        tc.variables["WITH_FFMPEG"] = self.options.get_safe("with_ffmpeg")
+        tc.variables["WITH_FFMPEG"] = self.options.get_safe("with_ffmpeg", False)
         if self.options.get_safe("with_ffmpeg"):
             tc.variables["OPENCV_FFMPEG_SKIP_BUILD_CHECK"] = True
             tc.variables["OPENCV_FFMPEG_SKIP_DOWNLOAD"] = True
