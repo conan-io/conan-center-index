@@ -147,7 +147,9 @@ class LelyConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def build(self):
-        args = [
+        apply_conandata_patches(self)
+        autotools = Autotools(self)
+        autotools.configure_args += [
             "--disable-cython",
             "--disable-python",
             "--disable-tools",
@@ -156,7 +158,7 @@ class LelyConan(ConanFile):
         ]
 
         if self.options.get_safe("ecss-compliance"):
-            args.append("--enable-ecss-compliance")
+            autotools.configure_args.append("--enable-ecss-compliance")
 
         disable_options = {
             "threads",
@@ -196,12 +198,10 @@ class LelyConan(ConanFile):
         }
         for option in disable_options:
             if not self.options.get_safe(option):
-                args.append(f"--disable-{option}")
+                autotools.configure_args.append(f"--disable-{option}")
 
-        apply_conandata_patches(self)
-        autotools = Autotools(self)
         autotools.autoreconf()
-        autotools.configure(args=args)
+        autotools.configure()
         autotools.make()
 
     def package(self):
