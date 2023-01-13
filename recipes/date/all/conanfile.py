@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get, rmdir, apply_conandata_patches, export_conandata_patches, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -58,11 +58,14 @@ class DateConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def package_id(self):
-        if self.options.header_only:
+        if self.info.options.header_only:
             self.info.header_only()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def layout(self):
+        cmake_layout(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
