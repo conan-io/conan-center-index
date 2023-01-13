@@ -1,0 +1,18 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 064aa06..3edb747 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -19,11 +19,11 @@ set(PROJECT_DESCRIPTION "Open source version of the STMicroelectronics ST-LINK T
+ include(GNUInstallDirs) # Define GNU standard installation directories
+ 
+ ## Determine project version
+-include(${CMAKE_MODULE_PATH}/get_version.cmake)
++include(${CMAKE_SOURCE_DIR}/cmake/modules/get_version.cmake)
+ 
+ ## Set C build flags
+ if (NOT MSVC)
+-    include(${CMAKE_MODULE_PATH}/c_flags.cmake)
++    include(${CMAKE_SOURCE_DIR}/cmake/modules/c_flags.cmake)
+ else ()
+     message(STATUS "MSVC C Flags override to /MT")
+     set(CMAKE_C_FLAGS_DEBUG_INIT          "/D_DEBUG /MTd /Zi /Ob0 /Od /RTC1")
