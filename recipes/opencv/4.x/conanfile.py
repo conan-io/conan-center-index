@@ -922,9 +922,6 @@ class OpenCVConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-        if self.settings.os == "Android":
-            self.options.with_openexr = False  # disabled because this forces linkage to libc++_shared.so
-
         # TODO: remove contrib_freetype option in few months
         if self.options.contrib_freetype != "deprecated":
             self.output.warning("contrib_freetype option is deprecated, use freetype option instead")
