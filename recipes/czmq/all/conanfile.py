@@ -77,6 +77,7 @@ class CzmqConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["CZMQ_BUILD_SHARED"] = self.options.shared
         tc.variables["CZMQ_BUILD_STATIC"] = not self.options.shared
         tc.variables["CZMQ_WITH_UUID"] = self.options.get_safe("with_libuuid", False)
@@ -86,9 +87,6 @@ class CzmqConan(ConanFile):
         tc.variables["CZMQ_WITH_LIBMICROHTTPD"] = self.options.enable_drafts
         if is_msvc(self):
             tc.preprocessor_definitions["_NOEXCEPT"] = "noexcept"
-            if self.options.shared:
-                tc.preprocessor_definitions["CZMQ_EXPORTS"] = 1
-
         if self.options.shared:
             tc.preprocessor_definitions["CZMQ_STATIC"] = 1
         tc.generate()
