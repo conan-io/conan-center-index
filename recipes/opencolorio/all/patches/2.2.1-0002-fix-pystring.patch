@@ -1,5 +1,5 @@
 diff --git a/src/OpenColorIO/Config.cpp b/src/OpenColorIO/Config.cpp
-index bdf9994..d09f9a3 100644
+index 665d522..6abc149 100644
 --- a/src/OpenColorIO/Config.cpp
 +++ b/src/OpenColorIO/Config.cpp
 @@ -33,7 +33,7 @@
@@ -38,7 +38,7 @@ index 62cbb0d..59c1564 100644
  #include "ViewingRules.h"
  #include "yaml-cpp/yaml.h"
 diff --git a/src/OpenColorIO/OCIOZArchive.cpp b/src/OpenColorIO/OCIOZArchive.cpp
-index 52e292e..55df343 100644
+index 85fc7bb..4cd1448 100644
 --- a/src/OpenColorIO/OCIOZArchive.cpp
 +++ b/src/OpenColorIO/OCIOZArchive.cpp
 @@ -11,7 +11,7 @@
@@ -136,7 +136,7 @@ index 7402efd..cc3acb4 100755
  #include "utils/StringUtils.h"
  #include "utils/NumberUtils.h"
 diff --git a/src/OpenColorIO/transforms/FileTransform.cpp b/src/OpenColorIO/transforms/FileTransform.cpp
-index 172c242..2c2e947 100755
+index 4fd4d5d..dc5eb3c 100755
 --- a/src/OpenColorIO/transforms/FileTransform.cpp
 +++ b/src/OpenColorIO/transforms/FileTransform.cpp
 @@ -19,7 +19,7 @@
