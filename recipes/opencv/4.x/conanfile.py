@@ -115,6 +115,7 @@ class OpenCVConan(ConanFile):
         "dnn_cuda": [True, False],
         # highgui module options
         "with_gtk": [True, False],
+        "with_qt": [True, False],
         # imgcodecs module options
         "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
         "with_png": [True, False],
@@ -234,6 +235,7 @@ class OpenCVConan(ConanFile):
         "dnn_cuda": False,
         # highgui module options
         "with_gtk": True,
+        "with_qt": False,
         # imgcodecs module options
         "with_jpeg": "libjpeg",
         "with_png": True,
@@ -387,6 +389,9 @@ class OpenCVConan(ConanFile):
         def quirc():
             return ["quirc::quirc"] if self.options.get_safe("with_quirc") else []
 
+        def qt():
+            return ["qt::qt"] if self.options.get_safe("with_qt") else []
+
         def gtk():
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
 
@@ -502,7 +507,7 @@ class OpenCVConan(ConanFile):
                 "is_built": self.options.highgui,
                 "mandatory_options": ["imgproc"],
                 "requires": ["opencv_core", "opencv_imgproc"] + opencv_imgcodecs() +
-                            opencv_videoio() + freetype() + gtk() + eigen() + ipp(),
+                            opencv_videoio() + freetype() + gtk() + qt() + eigen() + ipp(),
             },
             "imgcodecs": {
                 "is_built": self.options.imgcodecs,
@@ -638,8 +643,8 @@ class OpenCVConan(ConanFile):
             },
             "cvv": {
                 "is_built": self.options.cvv,
-                "mandatory_options": ["features2d", "imgproc"],
-                "requires": ["opencv_core", "opencv_features2d", "opencv_imgproc", "qt::qt"] + eigen() + ipp(),
+                "mandatory_options": ["with_qt", "features2d", "imgproc"],
+                "requires": ["opencv_core", "opencv_features2d", "opencv_imgproc"] + qt() + eigen() + ipp(),
             },
             "datasets": {
                 "is_built": self.options.datasets,
@@ -1044,6 +1049,8 @@ class OpenCVConan(ConanFile):
             self.options.rm_safe("with_vulkan")
         if not self.options.highgui:
             self.options.rm_safe("with_gtk")
+        if not (self.options.highgui or self.options.cvv):
+            self.options.rm_safe("with_qt")
         if not self.options.imgcodecs:
             self.options.rm_safe("with_jpeg")
             self.options.rm_safe("with_jpeg2000")
@@ -1100,6 +1107,8 @@ class OpenCVConan(ConanFile):
         # highgui module dependencies
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
+        if self.options.get_safe("with_qt"):
+            self.requires("qt/5.15.7")
         # imgcodecs module dependencies
         if self.options.get_safe("with_jpeg") == "libjpeg":
             self.requires("libjpeg/9e")
@@ -1134,9 +1143,6 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_ffmpeg"):
             # opencv doesn't support ffmpeg >= 5.0.0 for the moment (until 4.5.5 at least)
             self.requires("ffmpeg/4.4")
-        # cvv module dependencies
-        if self.options.cvv:
-            self.requires("qt/5.15.7")
         # freetype module dependencies
         if self.options.freetype:
             self.requires("freetype/2.12.1")
@@ -1350,7 +1356,7 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_OPENVX"] = False
         tc.variables["WITH_PLAIDML"] = False
         tc.variables["WITH_PVAPI"] = False
-        tc.variables["WITH_QT"] = self.options.cvv
+        tc.variables["WITH_QT"] = self.options.get_safe("with_qt", False)
         tc.variables["WITH_QUIRC"] = False
         tc.variables["WITH_V4L"] = self.options.get_safe("with_v4l", False)
         tc.variables["WITH_VA"] = False
