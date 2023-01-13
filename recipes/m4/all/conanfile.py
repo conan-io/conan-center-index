@@ -8,7 +8,7 @@ from conan.tools.scm import Version
 import os
 import shutil
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.55.0"
 
 
 class M4Conan(ConanFile):
