@@ -39,9 +39,9 @@ set(MINISCRIPT_INC
     ${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src/MiniScript/UnitTest.h
 )
 
-include_directories(${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src)
 
 add_library(miniscript ${MINISCRIPT_SRC})
+target_include_directories(miniscript PRIVATE ${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src)
 set_target_properties(miniscript PROPERTIES
     PUBLIC_HEADER "${MINISCRIPT_INC}"
     WINDOWS_EXPORT_ALL_SYMBOLS ON
