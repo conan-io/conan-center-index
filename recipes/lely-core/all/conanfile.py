@@ -118,13 +118,13 @@ class LelyConan(ConanFile):
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(
-                "This Conan version of this package is only compatible with Linux. "
+                f"{self.ref} is only compatible with Linux. "
                 "Windows requires proprietary software from https://www.ixxat.com/technical-support/support/windows-driver-software "
                 "hence support for it will be skipped for now "
             )
         if self.settings.compiler != "gcc":
             raise ConanInvalidConfiguration(
-                "This library can only be compiled with GCC currently"
+                f"{self.ref} can only be compiled with GCC currently"
             )
 
     def source(self):
