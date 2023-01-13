@@ -5,5 +5,11 @@ sources:
 patches:
   "2.71":
     - patch_file: "patches/2.71-0001-relocatable-autoconf.patch"
+      patch_description: "Relocatable autoconf"
+      patch_type: "portability"
     - patch_file: "patches/2.71-0002-no-perl-path-in-shebang.patch"
+      patch_description: "No Perl path in shebang"
+      patch_type: "portability"
     - patch_file: "patches/2.71-0003-disable-man-regeneration.patch"
+      patch_description: "Disable man regeneration"
+      patch_type: "portability"
