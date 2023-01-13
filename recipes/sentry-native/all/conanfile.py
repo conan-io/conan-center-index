@@ -4,6 +4,7 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 import os
 
 required_conan_version = ">=1.43.0"
@@ -132,9 +133,9 @@ class SentryNativeConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "0.4.0" and self.settings.os == "Windows":
-            self.build_requires("cmake/3.22.0")
+            self.tool_requires("cmake/3.22.0")
         if self.options.backend == "breakpad":
-            self.build_requires("pkgconf/1.7.4")
+            self.tool_requires("pkgconf/1.7.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
@@ -153,6 +154,8 @@ class SentryNativeConan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
+        tc = VirtualBuildEnv(self)
+        tc.generate(scope="build")
 
     def build(self):
         apply_conandata_patches(self)
