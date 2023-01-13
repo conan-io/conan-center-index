@@ -58,6 +58,7 @@ class OpenCVConan(ConanFile):
         "cudaoptflow": [True, False],
         "cudastereo": [True, False],
         "cudawarping": [True, False],
+        "cvv": [True, False],
         "datasets": [True, False],
         "dnn_objdetect": [True, False],
         "dnn_superres": [True, False],
@@ -89,6 +90,7 @@ class OpenCVConan(ConanFile):
         "text": [True, False],
         "tracking": [True, False],
         "videostab": [True, False],
+        "viz": [True, False],
         "wechat_qrcode": [True, False],
         "xfeatures2d": [True, False],
         "ximgproc": [True, False],
@@ -175,6 +177,7 @@ class OpenCVConan(ConanFile):
         "cudaoptflow": False,
         "cudastereo": False,
         "cudawarping": False,
+        "cvv": False,
         "datasets": False,
         "dnn_objdetect": False,
         "dnn_superres": False,
@@ -206,6 +209,7 @@ class OpenCVConan(ConanFile):
         "text": False,
         "tracking": False,
         "videostab": False,
+        "viz": False,
         "wechat_qrcode": False,
         "xfeatures2d": False,
         "ximgproc": False,
@@ -632,6 +636,11 @@ class OpenCVConan(ConanFile):
                 "no_option": True,
                 "requires": eigen() + ipp(),
             },
+            "cvv": {
+                "is_built": self.options.cvv,
+                "mandatory_options": ["features2d", "imgproc"],
+                "requires": ["opencv_core", "opencv_features2d", "opencv_imgproc", "qt::qt"] + eigen() + ipp(),
+            },
             "datasets": {
                 "is_built": self.options.datasets,
                 "mandatory_options": ["flann", "imgcodecs", "ml"],
@@ -791,6 +800,10 @@ class OpenCVConan(ConanFile):
                 "requires": ["opencv_calib3d", "opencv_features2d", "opencv_imgproc", "opencv_photo", "opencv_video"] +
                             opencv_videoio() + eigen() + ipp() + opencv_cudawarping() + opencv_cudaoptflow(),
             },
+            "viz": {
+                "is_built": self.options.viz,
+                "requires": ["opencv_core", "vtk::vtk"] + eigen() + ipp(),
+            },
             "wechat_qrcode": {
                 "is_built": self.options.get_safe("wechat_qrcode"),
                 "mandatory_options": ["dnn", "imgproc"],
@@ -818,7 +831,6 @@ class OpenCVConan(ConanFile):
                 "mandatory_options": ["imgproc", "photo"],
                 "requires": ["opencv_core", "opencv_imgproc", "opencv_photo"] + eigen() + ipp(),
             },
-
             # Extra targets (without prefix in their target & lib name)
             "ippiw": {
                 "is_built": self.options.with_ipp == "opencv-icv" and not self.options.shared,
@@ -1125,6 +1137,9 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_ffmpeg"):
             # opencv doesn't support ffmpeg >= 5.0.0 for the moment (until 4.5.5 at least)
             self.requires("ffmpeg/4.4")
+        # cvv module dependencies
+        if self.options.cvv:
+            self.requires("qt/5.15.7")
         # freetype module dependencies
         if self.options.freetype:
             self.requires("freetype/2.12.1")
@@ -1164,6 +1179,10 @@ class OpenCVConan(ConanFile):
             (not str(self.settings.arch) in ["x86", "x86_64"] or \
              not str(self.settings.os) in ["Linux", "Macos", "Windows"]):
             raise ConanInvalidConfiguration(f"opencv-icv is not available for {self.settings.os}/{self.settings.arch}")
+        if self.options.viz:
+            raise ConanInvalidConfiguration(
+                "viz module can't be enabled yet. It requires VTK which is not available in conan-center."
+            )
 
     def build_requirements(self):
         if self.options.dnn:
@@ -1339,12 +1358,12 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_OPENVX"] = False
         tc.variables["WITH_PLAIDML"] = False
         tc.variables["WITH_PVAPI"] = False
-        tc.variables["WITH_QT"] = False
+        tc.variables["WITH_QT"] = self.options.cvv
         tc.variables["WITH_QUIRC"] = False
         tc.variables["WITH_V4L"] = self.options.get_safe("with_v4l", False)
         tc.variables["WITH_VA"] = False
         tc.variables["WITH_VA_INTEL"] = False
-        tc.variables["WITH_VTK"] = False
+        tc.variables["WITH_VTK"] = self.options.viz
         tc.variables["WITH_VULKAN"] = self.options.get_safe("with_vulkan", False)
         if self.options.get_safe("with_vulkan"):
             tc.variables["VULKAN_INCLUDE_DIRS"] = os.path.join(self.dependencies["vulkan-headers"].package_folder, "include").replace("\\", "/")
@@ -1428,7 +1447,7 @@ class OpenCVConan(ConanFile):
         tc.variables["BUILD_opencv_cudastereo"] = self.options.cudastereo
         tc.variables["BUILD_opencv_cudawarping"] = self.options.cudawarping
         tc.variables["BUILD_opencv_cudev"] = self.options.with_cuda
-        tc.variables["BUILD_opencv_cvv"] = False
+        tc.variables["BUILD_opencv_cvv"] = self.options.cvv
         tc.variables["BUILD_opencv_datasets"] = self.options.datasets
         tc.variables["BUILD_opencv_dnn_objdetect"] = self.options.dnn_objdetect
         tc.variables["BUILD_opencv_dnn_superres"] = self.options.dnn_superres
@@ -1468,7 +1487,7 @@ class OpenCVConan(ConanFile):
             tc.variables["WITH_TESSERACT"] = self.options.with_tesseract
         tc.variables["BUILD_opencv_tracking"] = self.options.tracking
         tc.variables["BUILD_opencv_videostab"] = self.options.videostab
-        tc.variables["BUILD_opencv_viz"] = False
+        tc.variables["BUILD_opencv_viz"] = self.options.viz
         if self._has_wechat_qrcode_option:
             tc.variables["BUILD_opencv_wechat_qrcode"] = self.options.wechat_qrcode
         tc.variables["BUILD_opencv_xfeatures2d"] = self.options.xfeatures2d
