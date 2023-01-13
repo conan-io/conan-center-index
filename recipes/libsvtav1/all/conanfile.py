@@ -50,7 +50,6 @@ class SVTAV1Conan(ConanFile):
         tc.variables["BUILD_APPS"] = False
         tc.variables["BUILD_DEC"] = self.options.build_decoder
         tc.variables["BUILD_ENC"] = self.options.build_encoder
-        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         if self.settings.arch in ("x86", "x86_64"):
             tc.variables["ENABLE_NASM"] = True
         tc.generate()
