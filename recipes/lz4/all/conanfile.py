@@ -15,7 +15,7 @@ class LZ4Conan(ConanFile):
     license = ("BSD-2-Clause", "BSD-3-Clause")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lz4/lz4"
-    topics = ("lz4", "compression")
+    topics = ("compression")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
