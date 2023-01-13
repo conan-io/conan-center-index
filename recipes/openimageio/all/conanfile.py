@@ -49,7 +49,7 @@ class OpenImageIOConan(ConanFile):
         "with_freetype": True,
         "with_hdf5": True,
         "with_opencolorio": True,
-        "with_opencv": True,
+        "with_opencv": False,
         "with_tbb": True,
         "with_dicom": False, # Heavy dependency, disabled by default
         "with_ffmpeg": True,
@@ -88,12 +88,12 @@ class OpenImageIOConan(ConanFile):
 
     def requirements(self):
         # Required libraries
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         self.requires("boost/1.78.0")
-        self.requires("libtiff/4.3.0")
+        self.requires("libtiff/4.4.0")
         self.requires("openexr/2.5.7")
         if self.options.with_libjpeg == "libjpeg":
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.1.2")
         self.requires("pugixml/1.12.1")
@@ -103,9 +103,9 @@ class OpenImageIOConan(ConanFile):
 
         # Optional libraries
         if self.options.with_libpng:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.39")
         if self.options.with_freetype:
-            self.requires("freetype/2.11.1")
+            self.requires("freetype/2.12.1")
         if self.options.with_hdf5:
             self.requires("hdf5/1.12.1")
         if self.options.with_opencolorio:
@@ -129,13 +129,13 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_raw:
             self.requires("libraw/0.20.2")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.4.0")
+            self.requires("openjpeg/2.5.0")
         if self.options.with_openvdb:
             self.requires("openvdb/8.0.1")
         if self.options.with_ptex:
             self.requires("ptex/2.4.0")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.2.2")
+            self.requires("libwebp/1.2.4")
         # TODO: R3DSDK dependency
         # TODO: Nuke dependency
 
