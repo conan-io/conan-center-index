@@ -7,7 +7,7 @@ required_conan_version = ">=1.53.0"
 
 
 class SVTAV1Conan(ConanFile):
-    name = "libsvtav1"
+    name = "svt-av1"
     license = "BSD-3-Clause"
     description = "An AV1-compliant software encoder/decoder library"
     topics = "av1", "codec", "encoder", "ffmpeg", "video"
