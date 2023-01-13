@@ -1,8 +1,9 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
 import os
 import shutil
 
@@ -101,7 +102,7 @@ class WtConan(ConanFile):
         if self.options.with_ssl:
             self.requires("openssl/1.1.1s")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.40.0")
+            self.requires("sqlite3/3.40.1")
         if self.options.get_safe("with_mysql"):
             self.requires("libmysqlclient/8.0.30", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_postgres"):
@@ -119,6 +120,40 @@ class WtConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def _get_library_extension(self, dep):
+        if self.options[dep].shared:
+            if self.settings.os == "Windows" :
+                if is_msvc(self):
+                    return ".lib"
+                else:
+                    return ".dll.a"
+            elif self.settings.os == "Macos":
+                return ".dylib"
+            else:
+                return ".so"
+        else:
+            if self.settings.os == "Windows" and is_msvc(self):
+                return ".lib"
+            else:
+                return ".a"
+
+    @property
+    def _get_library_prefix(self):
+        return "" if self.settings.os == "Windows" else "lib"
+
+    def _cmakify_path_list(self, paths):
+        return ";".join(paths).replace("\\", "/")
+
+    def _find_library(self, libname, dep):
+        for path in self.deps_cpp_info[dep].lib_paths:
+            lib_fullpath = os.path.join(path, self._get_library_prefix + libname + self._get_library_extension(dep))
+            self.output.info("_find_library : " + str(lib_fullpath))
+            if os.path.isfile(lib_fullpath):
+                return lib_fullpath
+        raise ConanException("Library {} not found".format(lib_fullpath))
+
+    def _find_libraries(self, dep):
+        return [self._find_library(lib, dep) for lib in self.deps_cpp_info[dep].libs]
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -148,14 +183,6 @@ class WtConan(ConanFile):
         tc.variables["CONNECTOR_HTTP"] = self.options.connector_http
         tc.variables["BOOST_DYNAMIC"] = self.options["boost"].shared
 
-        def _gather_libs(p):
-            libs = self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs
-            for dep in self.deps_cpp_info[p].public_deps:
-                for l in _gather_libs(dep):
-                    if not l in libs:
-                        libs.append(l)
-            return libs
-
         # FIXME: all this logic coming from upstream custom find module files seems fragile, to improve later !
         #        we can't even inject cmake_find_package generator, it breaks the all upstream logic
         tc.variables["BOOST_PREFIX"] = self.deps_cpp_info["boost"].rootpath
@@ -163,26 +190,25 @@ class WtConan(ConanFile):
             tc.variables["ZLIB_PREFIX"] = self.deps_cpp_info["zlib"].rootpath
         if self.options.with_ssl:
             tc.variables["SSL_PREFIX"] = self.deps_cpp_info["openssl"].rootpath
-            tc.variables["OPENSSL_LIBRARIES"] = ";".join(_gather_libs("openssl"))
-            tc.variables["OPENSSL_INCLUDE_DIR"] = ";".join(self.deps_cpp_info["openssl"].include_paths)
+            tc.variables["OPENSSL_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("openssl"))
+            tc.variables["OPENSSL_INCLUDE_DIR"] = self._cmakify_path_list(self.deps_cpp_info["openssl"].include_paths)
             tc.variables["OPENSSL_FOUND"] = True
         if self.options.get_safe("with_sqlite"):
             tc.variables["SQLITE3_PREFIX"] = self.deps_cpp_info["sqlite3"].rootpath
         if self.options.get_safe("with_mysql"):
-            tc.variables["MYSQL_PREFIX"] = self.deps_cpp_info["libmysqlclient"].rootpath
-            tc.variables["MYSQL_LIBRARIES"] = ";".join(_gather_libs("libmysqlclient"))
-            tc.variables["MYSQL_INCLUDE"] = ";".join(self.deps_cpp_info["libmysqlclient"].include_paths)
+            tc.variables["MYSQL_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libmysqlclient"))
+            tc.variables["MYSQL_INCLUDE"] = self._cmakify_path_list(self.deps_cpp_info["libmysqlclient"].include_paths)
             tc.variables["MYSQL_DEFINITIONS"] = ";".join("-D%s" % d for d in self.deps_cpp_info["libmysqlclient"].defines)
             tc.variables["MYSQL_FOUND"] = True
         if self.options.get_safe("with_postgres"):
             tc.variables["POSTGRES_PREFIX"] = self.deps_cpp_info["libpq"].rootpath
-            tc.variables["POSTGRES_LIBRARIES"] = ";".join(_gather_libs("libpq"))
-            tc.variables["POSTGRES_INCLUDE"] = ";".join(self.deps_cpp_info["libpq"].include_paths)
+            tc.variables["POSTGRES_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libpq"))
+            tc.variables["POSTGRES_INCLUDE"] = self._cmakify_path_list(self.deps_cpp_info["libpq"].include_paths)
             tc.variables["POSTGRES_FOUND"] = True
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
             tc.variables["ODBC_PREFIX"] = self.deps_cpp_info["odbc"].rootpath
-            tc.variables["ODBC_LIBRARIES"] = ";".join(_gather_libs("odbc"))
-            tc.variables["ODBC_INCLUDE"] = ";".join(self.deps_cpp_info["odbc"].include_paths)
+            tc.variables["ODBC_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("odbc"))
+            tc.variables["ODBC_INCLUDE"] = self._cmakify_path_list(self.deps_cpp_info["odbc"].include_paths)
             tc.variables["ODBC_FOUND"] = True
         if self.options.get_safe("with_unwind"):
             tc.variables["UNWIND_PREFIX"] = self.deps_cpp_info["libunwind"].rootpath
