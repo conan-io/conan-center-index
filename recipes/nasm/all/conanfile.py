@@ -7,7 +7,7 @@ from conan.tools.layout import basic_layout
 import os
 import shutil
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=1.56.0"
 
 
 class NASMConan(ConanFile):
