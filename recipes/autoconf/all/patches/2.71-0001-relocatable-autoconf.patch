@@ -27,7 +27,7 @@ index 1407739..50ad1de 100644
 +if [[ ! -d "$RES_DIR" ]]
 +then
 +    echo "Autoconf conan package error, unable to locate resource directory at $RES_DIR\n"
-     exit 1
++    exit 1
 +fi
 +
 +: ${AUTOM4TE="$SCRIPT_DIR/autom4te"}
