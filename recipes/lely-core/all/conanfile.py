@@ -140,25 +140,15 @@ class LelyConan(ConanFile):
 
     def generate(self):
         at_toolchain = AutotoolsToolchain(self)
-        at_toolchain.generate()
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
-    def build(self):
-        apply_conandata_patches(self)
-        autotools = Autotools(self)
-        autotools.configure_args += [
+        at_toolchain.configure_args += [
             "--disable-cython",
             "--disable-python",
             "--disable-tools",
             "--disable-dependency-tracking",
             "--disable-maintainer-mode",
         ]
-
         if self.options.get_safe("ecss-compliance"):
-            autotools.configure_args.append("--enable-ecss-compliance")
+            at_toolchain.configure_args.append("--enable-ecss-compliance")
 
         disable_options = {
             "threads",
@@ -198,8 +188,17 @@ class LelyConan(ConanFile):
         }
         for option in disable_options:
             if not self.options.get_safe(option):
-                autotools.configure_args.append(f"--disable-{option}")
+                at_toolchain.configure_args.append(f"--disable-{option}")
 
+        at_toolchain.generate()
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def build(self):
+        apply_conandata_patches(self)
+        autotools = Autotools(self)
         autotools.autoreconf()
         autotools.configure()
         autotools.make()
