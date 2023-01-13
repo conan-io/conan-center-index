@@ -1276,7 +1276,7 @@ class OpenCVConan(ConanFile):
         tc.variables["BUILD_DOCS"] = False
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_FAT_JAVA_LIB"] = False
-        tc.variables["BUILD_IPP_IW"] = False
+        tc.variables["BUILD_IPP_IW"] = self.options.with_ipp == "opencv-icv"
         tc.variables["BUILD_ITT"] = False
         tc.variables["BUILD_JASPER"] = False
         tc.variables["BUILD_JAVA"] = False
@@ -1332,17 +1332,11 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_IMGCODEC_PXM"] = self.options.get_safe("with_imgcodec_pxm", False)
         tc.variables["WITH_IMGCODEC_SUNRASTER"] = self.options.get_safe("with_imgcodec_sunraster", False)
         tc.variables["WITH_INF_ENGINE"] = False
-        tc.variables["WITH_IPP"] = False
-        if self.options.with_ipp:
-            tc.variables["WITH_IPP"] = True
-            if self.options.with_ipp == "intel-ipp":
-                ipp_root = self.dependencies["intel-ipp"].package_folder.replace("\\", "/")
-                if self.settings.os == "Windows":
-                    ipp_root = ipp_root.replace("\\", "/")
-                tc.variables["IPPROOT"] = ipp_root
-                tc.variables["IPPIWROOT"] = ipp_root
-            else:
-                tc.variables["BUILD_IPP_IW"] = True
+        tc.variables["WITH_IPP"] = bool(self.options.with_ipp)
+        if self.options.with_ipp == "intel-ipp":
+            ipp_root = self.dependencies["intel-ipp"].package_folder.replace("\\", "/")
+            tc.variables["IPPROOT"] = ipp_root
+            tc.variables["IPPIWROOT"] = ipp_root
         tc.variables["WITH_ITT"] = False
         tc.variables["WITH_LIBREALSENSE"] = False
         tc.variables["WITH_MFX"] = False
@@ -1352,7 +1346,8 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_OPENCLAMDFFT"] = False
         tc.variables["WITH_OPENCL_SVM"] = False
         tc.variables["WITH_OPENGL"] = False
-        tc.variables["WITH_OPENMP"] = False
+        tc.variables["WITH_TBB"] = self.options.parallel == "tbb"
+        tc.variables["WITH_OPENMP"] = self.options.parallel == "openmp"
         tc.variables["WITH_OPENNI"] = False
         tc.variables["WITH_OPENNI2"] = False
         tc.variables["WITH_OPENVX"] = False
@@ -1500,9 +1495,6 @@ class OpenCVConan(ConanFile):
             tc.variables["OPENJPEG_MAJOR_VERSION"] = openjpeg_version.major
             tc.variables["OPENJPEG_MINOR_VERSION"] = openjpeg_version.minor
             tc.variables["OPENJPEG_BUILD_VERSION"] = openjpeg_version.patch
-        if self.options.parallel:
-            tc.variables["WITH_TBB"] = self.options.parallel == "tbb"
-            tc.variables["WITH_OPENMP"] = self.options.parallel == "openmp"
 
         tc.variables["WITH_CUDA"] = self.options.with_cuda
         if self.options.with_cuda:
