@@ -1,7 +1,16 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 4465c824c..2d82e229d 100644
+index 4465c824c..7b23fb444 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -140,7 +140,7 @@ message(STATUS "Setting Namespace to: ${PROJ_NAMESPACE_V}")
+ add_definitions (-DOIIO_INTERNAL=1)
+
+ list (APPEND CMAKE_MODULE_PATH
+-      "${PROJECT_SOURCE_DIR}/src/cmake/modules"
++      #"${PROJECT_SOURCE_DIR}/src/cmake/modules"
+       "${PROJECT_SOURCE_DIR}/src/cmake")
+
+ include (GNUInstallDirs)
 @@ -220,7 +220,7 @@ if (OIIO_BUILD_TOOLS AND NOT BUILD_OIIOUTIL_ONLY)
      add_subdirectory (src/iinfo)
      add_subdirectory (src/maketx)
@@ -12,7 +21,7 @@ index 4465c824c..2d82e229d 100644
  endif ()
 
 diff --git a/src/cmake/externalpackages.cmake b/src/cmake/externalpackages.cmake
-index 48e871418..46cb5e309 100644
+index 48e871418..251e9af28 100644
 --- a/src/cmake/externalpackages.cmake
 +++ b/src/cmake/externalpackages.cmake
 @@ -48,11 +48,11 @@ endif ()
@@ -50,6 +59,31 @@ index 48e871418..46cb5e309 100644
                        RECOMMEND_MIN 1.7
                        RECOMMEND_MIN_REASON "for AVIF support")
  if (APPLE AND LIBHEIF_VERSION VERSION_GREATER_EQUAL 1.10 AND LIBHEIF_VERSION VERSION_LESS 1.11)
+@@ -275,13 +275,13 @@ macro (find_or_download_robin_map)
+     # for an installed version. Still prefer a copy that seems to be
+     # locally installed in this tree.
+     if (NOT BUILD_ROBINMAP_FORCE)
+-        find_package (Robinmap QUIET)
++        find_package (tsl-robin-map REQUIRED)
+     endif ()
+     # If an external copy wasn't found and we requested that missing
+     # packages be built, or we we are forcing a local copy to be built, then
+     # download and build it.
+     # Download the headers from github
+-    if ((BUILD_MISSING_ROBINMAP AND NOT ROBINMAP_FOUND) OR BUILD_ROBINMAP_FORCE)
++    if ((BUILD_MISSING_ROBINMAP AND NOT tsl-robin-map_FOUND) OR BUILD_ROBINMAP_FORCE)
+         message (STATUS "Downloading local Tessil/robin-map")
+         set (ROBINMAP_INSTALL_DIR "${PROJECT_SOURCE_DIR}/ext/robin-map")
+         set (ROBINMAP_GIT_REPOSITORY "https://github.com/Tessil/robin-map")
+@@ -299,7 +299,7 @@ macro (find_or_download_robin_map)
+         endif ()
+         set (ROBINMAP_INCLUDE_DIR "${ROBINMAP_INSTALL_DIR}/include")
+     endif ()
+-    checked_find_package (Robinmap REQUIRED)
++    checked_find_package (tsl-robin-map REQUIRED)
+ endmacro()
+
+
 diff --git a/src/include/CMakeLists.txt b/src/include/CMakeLists.txt
 index 52b0936a6..611eadb4e 100644
 --- a/src/include/CMakeLists.txt
