@@ -707,6 +707,8 @@ class OpenCVConan(ConanFile):
     def package_id(self):
         # deprecated options
         del self.info.options.contrib
+        del self.info.options.contrib_freetype
+        del self.info.options.contrib_sfm
         del self.info.options.with_ade
 
     def validate(self):
