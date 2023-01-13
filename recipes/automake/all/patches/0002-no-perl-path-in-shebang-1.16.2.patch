@@ -17,7 +17,7 @@ index 9a20325..0a4eac4 100644
 +++ b/bin/aclocal.in
 @@ -1,4 +1,4 @@
 -#!@PERL@ -w
-+#!/usr/bin/env -S perl -w
++#!/usr/bin/env perl
  # aclocal - create aclocal.m4 by scanning configure.ac      -*- perl -*-
  # @configure_input@
  # Copyright (C) 1996-2020 Free Software Foundation, Inc.
@@ -27,7 +27,7 @@ index 212cb38..cb077a7 100644
 +++ b/bin/automake.in
 @@ -1,4 +1,4 @@
 -#!@PERL@ -w
-+#!/usr/bin/env -S perl -w
++#!/usr/bin/env perl
  # automake - create Makefile.in from Makefile.am            -*- perl -*-
  # @configure_input@
  # Copyright (C) 1994-2020 Free Software Foundation, Inc.

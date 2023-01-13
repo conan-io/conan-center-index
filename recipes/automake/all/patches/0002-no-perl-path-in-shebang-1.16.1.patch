@@ -17,7 +17,7 @@ index b3715d9..acf4792 100644
 +++ b/bin/aclocal.in
 @@ -1,8 +1,8 @@
 -#!@PERL@ -w
-+#!/usr/bin/env -S perl -w
++#!/usr/bin/env perl
  # -*- perl -*-
  # @configure_input@
  
@@ -32,7 +32,7 @@ index a52a489..0abd5f6 100644
 +++ b/bin/automake.in
 @@ -1,8 +1,8 @@
 -#!@PERL@ -w
-+#!/usr/bin/env -S perl -w
++#!/usr/bin/env perl
  # -*- perl -*-
  # @configure_input@
  
