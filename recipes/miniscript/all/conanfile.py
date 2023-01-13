@@ -9,7 +9,7 @@ required_conan_version = ">=1.53.0"
 class MiniscriptConan(ConanFile):
     name = "miniscript"
     description = "modern, elegant, easy to learn, and easy to embed in your own C# or C++ projects."
-    license = "LGPL-3.0"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/JoeStrout/miniscript"
     topics = ("script", "embedded", "programming-language")
