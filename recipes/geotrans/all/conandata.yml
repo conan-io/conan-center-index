@@ -1,6 +1,6 @@
 sources:
   "3.9":
-    url: "https://earth-info.nga.mil/php/download.php?file=wgs-mastertgz"
+    url: "https://c3i.jfrog.io/artifactory/cci-sources-backup/sources/geotrans/geotrans-3.9.tgz"
     sha256: "06712b1c52e0a321bad1b5e6b38babbdbfd89f709669a238644fd878e8ccb4f2"
   "3.8":
     url: "https://c3i.jfrog.io/artifactory/cci-sources-backup/sources/geotrans/geotrans-3.8.tgz"
