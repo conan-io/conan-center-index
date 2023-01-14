@@ -653,7 +653,7 @@ class OpenCVConan(ConanFile):
             },
             "hdf": {
                 "is_built": self.options.hdf,
-                "requires": ["opencv_core" + "hdf5::hdf5"] + eigen() + ipp(),
+                "requires": ["opencv_core", "hdf5::hdf5"] + eigen() + ipp(),
             },
             "hfs": {
                 "is_built": self.options.hfs,
