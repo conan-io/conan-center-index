@@ -3,10 +3,13 @@ project(test_package LANGUAGES CXX)
 
 enable_testing()
 
+# Options to test main modules
+option(OPENCV_WITH_CALIB3D "Enabled if opencv is built with calib3d module" OFF)
 option(OPENCV_WITH_GAPI "Enabled if opencv is built with gapi module" OFF)
 option(OPENCV_WITH_IMGCODECS_PNG "Enabled if opencv is built with imgcodecs module and png support" OFF)
 option(OPENCV_WITH_IMGPROC "Enabled if opencv is built with imgproc module" OFF)
 option(OPENCV_WITH_VIDEOIO_FFMPEG "Enabled if opencv is built with videoio module and ffmpeg" OFF)
+# Options to test extra modules
 option(OPENCV_WITH_SFM "Enabled if opencv is built with sfm module" OFF)
 
 find_package(OpenCV REQUIRED core CONFIG)
@@ -15,6 +18,13 @@ add_executable(test_core test_core.cpp)
 target_link_libraries(test_core PRIVATE opencv_core)
 target_compile_features(test_core PRIVATE cxx_std_11)
 add_test(NAME test_core COMMAND test_core)
+
+if(OPENCV_WITH_CALIB3D)
+    add_executable(test_calib3d test_calib3d.cpp)
+    target_link_libraries(test_calib3d PRIVATE opencv_core opencv_calib3d)
+    target_compile_features(test_calib3d PRIVATE cxx_std_11)
+    add_test(NAME test_calib3d COMMAND test_calib3d)
+endif()
 
 if(OPENCV_WITH_GAPI)
     add_executable(test_gapi test_gapi.cpp)
