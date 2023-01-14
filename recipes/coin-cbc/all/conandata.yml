@@ -2,9 +2,28 @@ sources:
   "2.10.5":
     url: "https://github.com/coin-or/Cbc/archive/releases/2.10.5.tar.gz"
     sha256: "cc44c1950ff4615e7791d7e03ea34318ca001d3cac6dc3f7f5ee392459ce6719"
+  "2.10.8":
+    url: "https://github.com/coin-or/Cbc/archive/releases/2.10.8.tar.gz"
+    sha256: "8525abb541ee1b8e6ff03b00411b66e98bbc58f95be1aefd49d2bca571be2eaf"
+requirements:
+  "2.10.5":
+    - "coin-utils/2.11.4"
+    - "coin-osi/0.108.6"
+    - "coin-clp/1.17.6"
+    - "coin-cgl/0.60.3"
+  "2.10.8":
+    - "coin-utils/2.11.6"
+    - "coin-osi/0.108.7"
+    - "coin-clp/1.17.7"
+    - "coin-cgl/0.60.6"
 patches:
   "2.10.5":
     - patch_file: "patches/0001-no-pkg-config-check.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0002-pthreads4w.patch"
+      base_path: "source_subfolder"
+  "2.10.8":
+    - patch_file: "patches/0003-no-pkg-config-check.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0004-pthreads4w.patch"
       base_path: "source_subfolder"
