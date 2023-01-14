@@ -32,6 +32,7 @@ class TestPackageConan(ConanFile):
         tc.variables["OPENCV_WITH_VIDEOIO_FFMPEG"] = self.dependencies["opencv"].options.videoio and self.dependencies["opencv"].options.with_ffmpeg
         tc.variables["OPENCV_WITH_FREETYPE"] = self.dependencies["opencv"].options.freetype
         tc.variables["OPENCV_WITH_SFM"] = self.dependencies["opencv"].options.sfm
+        tc.variables["OPENCV_WITH_SHAPE"] = self.dependencies["opencv"].options.shape
         tc.variables["OPENCV_WITH_STRUCTURED_LIGHT"] = self.dependencies["opencv"].options.structured_light
         tc.generate()
 
