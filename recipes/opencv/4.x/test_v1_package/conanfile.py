@@ -20,6 +20,7 @@ class TestPackageConan(ConanFile):
         cmake.definitions["OPENCV_WITH_STITCHING"] = self.options["opencv"].stitching
         cmake.definitions["OPENCV_WITH_VIDEO"] = self.options["opencv"].video
         cmake.definitions["OPENCV_WITH_VIDEOIO_FFMPEG"] = self.options["opencv"].videoio and self.options["opencv"].with_ffmpeg
+        cmake.definitions["OPENCV_WITH_FREETYPE"] = self.options["opencv"].freetype
         cmake.definitions["OPENCV_WITH_SFM"] = self.options["opencv"].sfm
         cmake.configure()
         cmake.build()

@@ -30,6 +30,7 @@ class TestPackageConan(ConanFile):
         tc.variables["OPENCV_WITH_STITCHING"] = self.dependencies["opencv"].options.stitching
         tc.variables["OPENCV_WITH_VIDEO"] = self.dependencies["opencv"].options.video
         tc.variables["OPENCV_WITH_VIDEOIO_FFMPEG"] = self.dependencies["opencv"].options.videoio and self.dependencies["opencv"].options.with_ffmpeg
+        tc.variables["OPENCV_WITH_FREETYPE"] = self.dependencies["opencv"].options.freetype
         tc.variables["OPENCV_WITH_SFM"] = self.dependencies["opencv"].options.sfm
         tc.generate()
 

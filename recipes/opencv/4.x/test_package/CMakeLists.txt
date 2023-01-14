@@ -18,6 +18,7 @@ option(OPENCV_WITH_STITCHING "Enabled if opencv is built with stitching module" 
 option(OPENCV_WITH_VIDEO "Enabled if opencv is built with video module" OFF)
 option(OPENCV_WITH_VIDEOIO_FFMPEG "Enabled if opencv is built with videoio module and ffmpeg" OFF)
 # Options to test extra modules
+option(OPENCV_WITH_FREETYPE "Enabled if opencv is built with freetype module" OFF)
 option(OPENCV_WITH_SFM "Enabled if opencv is built with sfm module" OFF)
 
 find_package(OpenCV REQUIRED core CONFIG)
@@ -115,6 +116,13 @@ if(OPENCV_WITH_VIDEOIO_FFMPEG)
     target_link_libraries(test_videoio_with_ffmpeg PRIVATE opencv_videoio)
     target_compile_features(test_videoio_with_ffmpeg PRIVATE cxx_std_11)
     add_test(NAME test_videoio_with_ffmpeg COMMAND test_videoio_with_ffmpeg)
+endif()
+
+if(OPENCV_WITH_FREETYPE)
+    add_executable(test_freetype test_freetype.cpp)
+    target_link_libraries(test_freetype PRIVATE opencv_freetype)
+    target_compile_features(test_freetype PRIVATE cxx_std_11)
+    add_test(NAME test_freetype COMMAND test_freetype)
 endif()
 
 if(OPENCV_WITH_SFM)
