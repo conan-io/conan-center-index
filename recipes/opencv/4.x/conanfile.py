@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, cross_building, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
@@ -875,15 +875,13 @@ class OpenCVConan(ConanFile):
 
         return opencv_modules
 
-    def _solve_internal_dependency_graph(self):
+    def _solve_internal_dependency_graph(self, opencv_modules):
         direct_options_to_enable = {}
         transitive_options_to_enable = {}
 
-        opencv_modules = self._opencv_modules
-
         # Check which direct options have to be enabled
-        base_options = [option for option in opencv_modules.keys()
-                        if not opencv_modules[option].get("no_option") and self.options.get_safe(option)]
+        base_options = [option for option, values in opencv_modules.items()
+                        if not values.get("no_option") and self.options.get_safe(option)]
         for base_option in base_options:
             for mandatory_option in opencv_modules.get(base_option, {}).get("mandatory_options", []):
                 if not self.options.get_safe(mandatory_option):
@@ -927,6 +925,34 @@ class OpenCVConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+        # TODO: remove contrib option in few months
+        if self.options.contrib != "deprecated":
+            self.output.warning("contrib option is deprecated")
+            if self.options.contrib:
+                # During deprecation period, keep old behavior of contrib=True, which was to enable
+                # all available contribs.
+                filtered_options = [
+                    # Main modules
+                    "calib3d", "core", "dnn", "features2d", "flann", "gapi", "highgui", "imgcodecs",
+                    "imgproc", "ml",  "objdetect", "photo", "stitching", "video", "videoio",
+                    # Extra modules not built previously with contrib=True
+                    "cvv", "freetype", "hdf", "ovis", "sfm", "viz",
+                ]
+                if not self.options.with_eigen:
+                    filtered_options.append("alphamat")
+                if not self.options.with_cuda:
+                    filtered_options.extend([
+                        "cudaarithm", "cudabgsegm", "cudacodec", "cudafeatures2d", "cudafilters", "cudaimgproc",
+                        "cudalegacy", "cudaobjdetect", "cudaoptflow", "cudastereo", "cudawarping",
+                    ])
+                for option, values in self._opencv_modules.items():
+                    if option not in filtered_options and not values.get("no_option"):
+                        try:
+                            if hasattr(self.options, option):
+                                setattr(self.options, option, True)
+                        except ConanException:
+                            continue
+
         # TODO: remove contrib_freetype option in few months
         if self.options.contrib_freetype != "deprecated":
             self.output.warning("contrib_freetype option is deprecated, use freetype option instead")
@@ -937,112 +963,13 @@ class OpenCVConan(ConanFile):
             self.output.warning("contrib_sfm option is deprecated, use sfm option instead")
             self.options.sfm = self.options.contrib_sfm
 
-        # TODO: remove contrib option in few months
-        if self.options.contrib != "deprecated":
-            self.output.warning("contrib option is deprecated")
-            if self.options.contrib:
-                # During deprecation period, keep old behavior of contrib=True, which was to enable
-                # all available contribs (except freetype, sfm and new hdf & ovis contribs)
-                if self._has_alphamat_option and self.options.imgproc:
-                    self.options.alphamat = True
-                if self.options.calib3d and self.options.imgproc:
-                    self.options.aruco = True
-                if self._has_barcode_option and self.options.dnn and self.options.imgproc:
-                    self.options.barcode = True
-                if self.options.calib3d and self.options.imgproc and self.options.video:
-                    self.options.bgsegm = True
-                self.options.bioinspired = True
-                if self.options.calib3d and self.options.features2d and self.options.highgui and self.options.imgproc:
-                    self.options.ccalib = True
-                if self.options.with_cuda:
-                    self.options.cudaarithm = True
-                    if self.options.video:
-                        self.options.cudabgsegm = True
-                    if self.options.videoio:
-                        self.options.cudacodec = True
-                    if self.options.features2d:
-                        self.options.cudafeatures2d = True
-                    if self.options.imgproc:
-                        self.options.cudafilters = True
-                        self.options.cudaimgproc = True
-                    if self.options.video:
-                        self.options.cudalegacy = True
-                    if self.options.objdetect:
-                        self.options.cudaobjdetect = True
-                    if self.options.video:
-                        self.options.cudaoptflow = True
-                    if self.options.calib3d:
-                        self.options.cudastereo = True
-                    if self.options.imgproc:
-                        self.options.cudawarping = True
-                if self.options.flann and self.options.imgcodecs and self.options.ml:
-                    self.options.datasets = True
-                if self.options.dnn and self.options.imgproc:
-                    self.options.dnn_objdetect = True
-                    self.options.dnn_superres = True
-                if self.options.imgproc and self.options.objdetect:
-                    self.options.dpm = True
-                if self.options.calib3d and self.options.imgproc and self.options.objdetect and self.options.photo:
-                    self.options.face = True
-                if self.options.imgproc:
-                    self.options.fuzzy = True
-                    self.options.hfs = True
-                    self.options.img_hash = True
-                if self._has_intensity_transform_option and (Version(self.version) < "4.4.0" or self.options.imgproc):
-                    self.options.intensity_transform = True
-                if self.options.imgproc:
-                    self.options.line_descriptor = True
-                if self._has_mcc_option and self.options.calib3d and self.options.dnn and self.options.imgproc:
-                    self.options.mcc = True
-                if self.options.calib3d and self.options.flann and self.options.imgcodecs and self.options.imgproc and self.options.video:
-                    self.options.optflow = True
-                if self.options.imgproc:
-                    self.options.phase_unwrapping = True
-                    self.options.plot = True
-                if self.options.imgproc and self.options.ml:
-                    self.options.quality = True
-                if self._has_rapid_option and self.options.calib3d and self.options.imgproc:
-                    self.options.rapid = True
-                if self.options.imgproc:
-                    self.options.reg = True
-                if self.options.calib3d and self.options.imgproc:
-                    self.options.rgbd = True
-                if self.options.features2d and self.options.imgproc:
-                    self.options.saliency = True
-                if self.options.calib3d and self.options.imgproc:
-                    self.options.shape = True
-                if self.options.features2d and self.options.imgproc and (Version(self.version) >= "4.3.0" or (self.options.calib3d and self.options.video)):
-                    self.options.stereo = True
-                if self.options.calib3d and self.options.imgproc:
-                    self.options.structured_light = True
-                if self._has_superres_option and self.options.imgproc and self.options.video:
-                    self.options.superres = True
-                if self.options.flann:
-                    self.options.surface_matching = True
-                if self.options.dnn and self.options.features2d and self.options.imgproc and self.options.ml:
-                    self.options.text = True
-                if self.options.imgproc:
-                    self.options.tracking = True
-                if self.options.calib3d and self.options.features2d and self.options.imgproc and self.options.photo and self.options.video:
-                    self.options.videostab = True
-                if self._has_wechat_qrcode_option and self.options.dnn and self.options.imgproc:
-                    self.options.wechat_qrcode = True
-                if self.options.calib3d and self.options.features2d and self.options.imgproc:
-                    self.options.xfeatures2d = True
-                if self.options.calib3d and self.options.imgcodecs and self.options.imgproc and self.options.video:
-                    self.options.ximgproc = True
-                if self.options.imgcodecs and self.options.imgproc and self.options.objdetect:
-                    self.options.xobjdetect = True
-                if self.options.imgproc and self.options.photo:
-                    self.options.xphoto = True
-
         # TODO: remove with_ade option in few months
         if self.options.with_ade != "deprecated":
             self.output.warning("with_ade option is deprecated, use gapi option instead")
             self.options.gapi = self.options.with_ade
 
         # Call this first before any further manipulation of options based on other options
-        self._solve_internal_dependency_graph()
+        self._solve_internal_dependency_graph(self._opencv_modules)
 
         if not self.options.dnn:
             self.options.rm_safe("dnn_cuda")
