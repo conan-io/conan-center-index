@@ -1,0 +1,11 @@
+--- a/modules/highgui/CMakeLists.txt
++++ b/modules/highgui/CMakeLists.txt
+@@ -89,7 +89,7 @@ if(HAVE_QT)
+     foreach(dt_dep ${qt_deps})
+       add_definitions(${Qt${QT_VERSION_MAJOR}${dt_dep}_DEFINITIONS})
+       include_directories(${Qt${QT_VERSION_MAJOR}${dt_dep}_INCLUDE_DIRS})
+-      list(APPEND HIGHGUI_LIBRARIES ${Qt${QT_VERSION_MAJOR}${dt_dep}_LIBRARIES})
++      list(APPEND HIGHGUI_LIBRARIES Qt${QT_VERSION_MAJOR}::${dt_dep})
+     endforeach()
+   else()
+     ocv_assert(QT_VERSION_MAJOR EQUAL 4)
