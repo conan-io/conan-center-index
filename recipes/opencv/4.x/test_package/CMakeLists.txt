@@ -20,6 +20,7 @@ option(OPENCV_WITH_VIDEOIO_FFMPEG "Enabled if opencv is built with videoio modul
 # Options to test extra modules
 option(OPENCV_WITH_FREETYPE "Enabled if opencv is built with freetype module" OFF)
 option(OPENCV_WITH_SFM "Enabled if opencv is built with sfm module" OFF)
+option(OPENCV_WITH_STRUCTURED_LIGHT "Enabled if opencv is built with structured_light module" OFF)
 
 find_package(OpenCV REQUIRED core CONFIG)
 
@@ -130,4 +131,11 @@ if(OPENCV_WITH_SFM)
     target_link_libraries(test_sfm PRIVATE opencv_core opencv_sfm)
     target_compile_features(test_sfm PRIVATE cxx_std_11)
     add_test(NAME test_sfm COMMAND test_sfm)
+endif()
+
+if(OPENCV_WITH_STRUCTURED_LIGHT)
+    add_executable(test_structured_light test_structured_light.cpp)
+    target_link_libraries(test_structured_light PRIVATE opencv_structured_light)
+    target_compile_features(test_structured_light PRIVATE cxx_std_11)
+    add_test(NAME test_structured_light COMMAND test_structured_light)
 endif()
