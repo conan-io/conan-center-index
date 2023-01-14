@@ -5,6 +5,7 @@ enable_testing()
 
 # Options to test main modules
 option(OPENCV_WITH_CALIB3D "Enabled if opencv is built with calib3d module" OFF)
+option(OPENCV_WITH_FLANN "Enabled if opencv is built with flann module" OFF)
 option(OPENCV_WITH_GAPI "Enabled if opencv is built with gapi module" OFF)
 option(OPENCV_WITH_IMGCODECS_PNG "Enabled if opencv is built with imgcodecs module and png support" OFF)
 option(OPENCV_WITH_IMGPROC "Enabled if opencv is built with imgproc module" OFF)
@@ -24,6 +25,13 @@ if(OPENCV_WITH_CALIB3D)
     target_link_libraries(test_calib3d PRIVATE opencv_core opencv_calib3d)
     target_compile_features(test_calib3d PRIVATE cxx_std_11)
     add_test(NAME test_calib3d COMMAND test_calib3d)
+endif()
+
+if(OPENCV_WITH_FLANN)
+    add_executable(test_flann test_flann.cpp)
+    target_link_libraries(test_flann PRIVATE opencv_core opencv_flann)
+    target_compile_features(test_flann PRIVATE cxx_std_11)
+    add_test(NAME test_flann COMMAND test_flann)
 endif()
 
 if(OPENCV_WITH_GAPI)

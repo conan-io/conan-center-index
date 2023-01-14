@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.definitions["OPENCV_WITH_CALIB3D"] = self.options["opencv"].calib3d
+        cmake.definitions["OPENCV_WITH_FLANN"] = self.options["opencv"].flann
         cmake.definitions["OPENCV_WITH_GAPI"] = self.options["opencv"].gapi
         cmake.definitions["OPENCV_WITH_IMGCODECS_PNG"] = self.options["opencv"].imgcodecs and self.options["opencv"].with_png
         cmake.definitions["OPENCV_WITH_IMGPROC"] = self.options["opencv"].imgproc
