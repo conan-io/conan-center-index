@@ -1,5 +1,5 @@
---- a/modules/hdf/CMakeLists.txt
-+++ b/modules/hdf/CMakeLists.txt
+--- a/contrib/modules/hdf/CMakeLists.txt
++++ b/contrib/modules/hdf/CMakeLists.txt
 @@ -1,6 +1,4 @@
 -set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
 -

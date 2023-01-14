@@ -1,5 +1,5 @@
---- a/modules/tracking/CMakeLists.txt
-+++ b/modules/tracking/CMakeLists.txt
+--- a/contrib/modules/tracking/CMakeLists.txt
++++ b/contrib/modules/tracking/CMakeLists.txt
 @@ -9,9 +9,9 @@ ocv_define_module(tracking
      opencv_imgproc
      opencv_core
