@@ -22,6 +22,7 @@ class TestPackageConan(ConanFile):
         tc.variables["OPENCV_WITH_GAPI"] = self.dependencies["opencv"].options.gapi
         tc.variables["OPENCV_WITH_IMGCODECS_PNG"] = self.dependencies["opencv"].options.imgcodecs and self.dependencies["opencv"].options.with_png
         tc.variables["OPENCV_WITH_IMGPROC"] = self.dependencies["opencv"].options.imgproc
+        tc.variables["OPENCV_WITH_OBJDETECT"] = self.dependencies["opencv"].options.objdetect
         tc.variables["OPENCV_WITH_VIDEOIO_FFMPEG"] = self.dependencies["opencv"].options.videoio and self.dependencies["opencv"].options.with_ffmpeg
         tc.variables["OPENCV_WITH_SFM"] = self.dependencies["opencv"].options.sfm
         tc.generate()

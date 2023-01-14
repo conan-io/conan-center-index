@@ -12,6 +12,7 @@ class TestPackageConan(ConanFile):
         cmake.definitions["OPENCV_WITH_GAPI"] = self.options["opencv"].gapi
         cmake.definitions["OPENCV_WITH_IMGCODECS_PNG"] = self.options["opencv"].imgcodecs and self.options["opencv"].with_png
         cmake.definitions["OPENCV_WITH_IMGPROC"] = self.options["opencv"].imgproc
+        cmake.definitions["OPENCV_WITH_OBJDETECT"] = self.options["opencv"].objdetect
         cmake.definitions["OPENCV_WITH_VIDEOIO_FFMPEG"] = self.options["opencv"].videoio and self.options["opencv"].with_ffmpeg
         cmake.definitions["OPENCV_WITH_SFM"] = self.options["opencv"].sfm
         cmake.configure()
