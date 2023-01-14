@@ -52,7 +52,7 @@ class ArchicadApidevkitConan(ConanFile):
 
         # These are dependencies of third party vendored libraries
         self.cpp_info.system_libs = [
-            "WinMM", "MSImg32", "WS2_32", "USP10", "DNSApi"]
+            "winmm", "msimg32", "ws2_32", "usp10", "dnsapi"]
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ["CoreText", "CoreFoundation", "CoreServices",
                                         "ApplicationServices", "Carbon", "CoreGraphics", "AppKit", "Foundation"]
