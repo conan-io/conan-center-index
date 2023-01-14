@@ -241,6 +241,10 @@ class WtConan(ConanFile):
             "if(0)",
         )
 
+        dbo_cmakelsts = os.path.join(self.source_folder, "src", "Wt", "Dbo", "backend", "CMakeLists.txt")
+        replace_in_file(self, dbo_cmakelsts, "FIND_PACKAGE( Sqlite3 REQUIRED)", "FIND_PACKAGE( SQLite3 REQUIRED)")
+        replace_in_file(self, dbo_cmakelsts, '${SQLITE3_LIBRARIES}', '${SQLite3_LIBRARIES}')
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
