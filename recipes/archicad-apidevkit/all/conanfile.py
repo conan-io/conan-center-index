@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import copy, get
-from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.scm import Version
+from conan.tools.microsoft import check_min_vs, msvc_runtime_flag
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -20,23 +19,17 @@ class ArchicadApidevkitConan(ConanFile):
     short_paths = True
 
     def validate(self):
-        if self.settings.build_type == "Debug":
-            raise ConanInvalidConfiguration("Debug configuration is not supported")
-        if is_msvc(self):
-            # Approximate requirement for toolset >= v142
-            check_min_vs(self, "192")
-        if not self.info.settings.os in ("Macos", "Windows"):
-            raise ConanInvalidConfiguration(
-                f"{self.ref} is not supported by the OS {self.info.settings.os}")
-        if not str(self.settings.arch) in ("x86_64"):
-            raise ConanInvalidConfiguration(
-                f"{self.ref} is not supported yet.")
-        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "16":
-            raise ConanInvalidConfiguration(
-                "This recipe does not support this compiler version")
+        if msvc_runtime_flag(self).endswith("d"):
+            raise ConanInvalidConfiguration(f"Debug runtime is not supported by {self.ref}")
+        # Approximate requirement for toolset >= v142
+        check_min_vs(self, "192")
+        if not str(self.info.settings.os) in ("Macos", "Windows"):
+            raise ConanInvalidConfiguration(f"{self.info.settings.os} is not supported by {self.ref}")
+        if not str(self.info.settings.arch) in ("x86_64"):
+            raise ConanInvalidConfiguration(f"{self.info.settings.arch} is not supported by {self.ref}")
 
     def build(self):
-        devkit, licenses = self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)]
+        devkit, licenses = self.conan_data["sources"][self.version][str(self.info.settings.os)][str(self.info.settings.arch)]
         get(self, **devkit, destination=os.path.join(self.package_folder, "bin"), strip_root=True)
         get(self, **licenses, destination=os.path.join(self.package_folder, "licenses"), strip_root=True)
 
@@ -53,7 +46,7 @@ class ArchicadApidevkitConan(ConanFile):
         # These are dependencies of third party vendored libraries
         self.cpp_info.system_libs = [
             "winmm", "msimg32", "ws2_32", "usp10", "dnsapi"]
-        if self.settings.os == "Macos":
+        if self.info.settings.os == "Macos":
             self.cpp_info.frameworks = ["CoreText", "CoreFoundation", "CoreServices",
                                         "ApplicationServices", "Carbon", "CoreGraphics", "AppKit", "Foundation"]
         else:
