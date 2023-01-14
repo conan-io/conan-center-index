@@ -18,6 +18,7 @@ class TestPackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["OPENCV_WITH_CALIB3D"] = self.dependencies["opencv"].options.calib3d
+        tc.variables["OPENCV_WITH_FEATURES2D"] = self.dependencies["opencv"].options.features2d
         tc.variables["OPENCV_WITH_FLANN"] = self.dependencies["opencv"].options.flann
         tc.variables["OPENCV_WITH_GAPI"] = self.dependencies["opencv"].options.gapi
         tc.variables["OPENCV_WITH_HIGHGUI"] = self.dependencies["opencv"].options.highgui

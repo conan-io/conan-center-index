@@ -5,6 +5,7 @@ enable_testing()
 
 # Options to test main modules
 option(OPENCV_WITH_CALIB3D "Enabled if opencv is built with calib3d module" OFF)
+option(OPENCV_WITH_FEATURES2D "Enabled if opencv is built with features2d module" OFF)
 option(OPENCV_WITH_FLANN "Enabled if opencv is built with flann module" OFF)
 option(OPENCV_WITH_GAPI "Enabled if opencv is built with gapi module" OFF)
 option(OPENCV_WITH_HIGHGUI "Enabled if opencv is built with highgui module" OFF)
@@ -31,6 +32,13 @@ if(OPENCV_WITH_CALIB3D)
     target_link_libraries(test_calib3d PRIVATE opencv_core opencv_calib3d)
     target_compile_features(test_calib3d PRIVATE cxx_std_11)
     add_test(NAME test_calib3d COMMAND test_calib3d)
+endif()
+
+if(OPENCV_WITH_FEATURES2D)
+    add_executable(test_features2d test_features2d.cpp)
+    target_link_libraries(test_features2d PRIVATE opencv_features2d)
+    target_compile_features(test_features2d PRIVATE cxx_std_11)
+    add_test(NAME test_features2d COMMAND test_features2d)
 endif()
 
 if(OPENCV_WITH_FLANN)
