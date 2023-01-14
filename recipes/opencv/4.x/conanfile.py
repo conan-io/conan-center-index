@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
@@ -421,6 +422,14 @@ class OpenCVConan(ConanFile):
                 "is_built": True,
                 "no_option": True,
                 "requires": ["zlib::zlib"] + parallel() + eigen() + ipp(),
+                "system_libs": [
+                    (self.settings.os == "Android", ["dl", "m", "log"]),
+                    (self.settings.os == "FreeBSD", ["m", "pthread"]),
+                    (self.settings.os == "Linux", ["dl", "m", "pthread", "rt"]),
+                ],
+                "frameworks": [
+                    (self.settings.os == "Macos" and self.options.get_safe("with_opencl"), ["OpenCL"]),
+                ],
             },
             "dnn": {
                 "is_built": self.options.dnn,
@@ -440,17 +449,31 @@ class OpenCVConan(ConanFile):
                 "is_built": self.options.gapi,
                 "mandatory_options": ["imgproc"],
                 "requires": ["opencv_imgproc", "ade::ade"],
+                "system_libs": [
+                    (self.settings.os == "Windows", ["ws2_32", "wsock32"]),
+                ],
             },
             "highgui": {
                 "is_built": self.options.highgui,
                 "mandatory_options": ["imgproc"],
                 "requires": ["opencv_core", "opencv_imgproc"] + opencv_imgcodecs() +
                             opencv_videoio() + freetype() + gtk() + qt() + eigen() + ipp(),
+                "system_libs": [
+                    (self.settings.os == "Windows", ["comctl32", "gdi32", "ole32", "setupapi", "ws2_32", "vfw32"]),
+                ],
+                "frameworks": [
+                    (self.settings.os == "Macos", ["Cocoa"]),
+                ],
             },
             "imgcodecs": {
                 "is_built": self.options.imgcodecs,
                 "mandatory_options": ["imgproc"],
                 "requires": ["opencv_imgproc", "zlib::zlib"] + imageformats_deps() + eigen() + ipp(),
+                "frameworks": [
+                    (is_apple_os(self), ["CoreFoundation", "CoreGraphics"]),
+                    (self.settings.os == "iOS", ["UIKit"]),
+                    (self.settings.os == "Macos", ["AppKit"]),
+                ],
             },
             "imgproc": {
                 "is_built": self.options.imgproc,
@@ -486,6 +509,14 @@ class OpenCVConan(ConanFile):
                 "is_built": self.options.videoio,
                 "mandatory_options": ["imgcodecs", "imgproc"],
                 "requires": ["opencv_imgcodecs", "opencv_imgproc"] + ffmpeg() + eigen() + ipp(),
+                "system_libs": [
+                    (self.settings.os == "Android" and int(str(self.settings.os.api_level)) > 20, ["mediandk"]),
+                ],
+                "frameworks": [
+                    (is_apple_os(self), ["Accelerate", "AVFoundation", "CoreGraphics", "CoreMedia", "CoreVideo", "QuartzCore"]),
+                    (self.settings.os == "iOS", ["CoreImage", "UIKit"]),
+                    (self.settings.os == "Macos", ["Cocoa"]),
+                ],
             },
             # Extra modules
             "alphamat": {
@@ -1468,6 +1499,14 @@ class OpenCVConan(ConanFile):
                     conan_component = cmake_target
                     libs = get_libs(module)
                     requires = values.get("requires", [])
+                    system_libs = []
+                    for _condition, _system_libs in values.get("system_libs", []):
+                        if _condition:
+                            system_libs.extend(_system_libs)
+                    frameworks = []
+                    for _condition, _frameworks in values.get("frameworks", []):
+                        if _condition:
+                            frameworks.extend(_frameworks)
                     # TODO: we should also define COMPONENTS names of each target for find_package() but not possible yet in CMakeDeps
                     #       see https://github.com/conan-io/conan/issues/10258
                     self.cpp_info.components[conan_component].set_property("cmake_target_name", cmake_target)
@@ -1475,12 +1514,8 @@ class OpenCVConan(ConanFile):
                     if self.settings.os != "Windows":
                         self.cpp_info.components[conan_component].includedirs.append(os.path.join("include", "opencv4"))
                     self.cpp_info.components[conan_component].requires = requires
-                    if self.settings.os in ["Linux", "FreeBSD"]:
-                        self.cpp_info.components[conan_component].system_libs = ["dl", "m", "pthread", "rt"]
-                    elif self.settings.os == "Android":
-                        self.cpp_info.components[conan_component].system_libs.append("log")
-                        if int(str(self.settings.os.api_level)) > 20:
-                            self.cpp_info.components[conan_component].system_libs.append("mediandk")
+                    self.cpp_info.components[conan_component].system_libs = system_libs
+                    self.cpp_info.components[conan_component].frameworks = frameworks
 
                     # TODO: to remove in conan v2 once cmake_find_package* generators removed
                     self.cpp_info.components[conan_component].names["cmake_find_package"] = cmake_target
@@ -1499,26 +1534,6 @@ class OpenCVConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "OpenCV")
 
         add_components(self._opencv_modules)
-
-        if self.settings.os == "Windows":
-            if self.options.gapi:
-                self.cpp_info.components["opencv_gapi"].system_libs = ["ws2_32", "wsock32"]
-            if self.options.highgui:
-                self.cpp_info.components["opencv_highgui"].system_libs = ["comctl32", "gdi32", "ole32", "setupapi", "ws2_32", "vfw32"]
-        elif self.settings.os == "Macos":
-            if self.options.with_opencl:
-                self.cpp_info.components["opencv_core"].frameworks = ["OpenCL"]
-            if self.options.imgcodecs:
-                self.cpp_info.components["opencv_imgcodecs"].frameworks = ["AppKit", "CoreFoundation", "CoreGraphics"]
-            if self.options.highgui:
-                self.cpp_info.components["opencv_highgui"].frameworks = ["Cocoa"]
-            if self.options.videoio:
-                self.cpp_info.components["opencv_videoio"].frameworks = ["Cocoa", "Accelerate", "AVFoundation", "CoreGraphics", "CoreMedia", "CoreVideo", "QuartzCore"]
-        elif self.settings.os == "iOS":
-            if self.options.imgcodecs:
-                self.cpp_info.components["opencv_imgcodecs"].frameworks = ["UIKit", "CoreFoundation", "CoreGraphics"]
-            if self.options.videoio:
-                self.cpp_info.components["opencv_videoio"].frameworks = ["AVFoundation", "QuartzCore"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "OpenCV"
