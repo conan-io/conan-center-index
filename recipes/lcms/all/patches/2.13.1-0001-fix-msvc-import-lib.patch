@@ -1,0 +1,10 @@
+--- a/meson.build
++++ b/meson.build
+@@ -73,7 +73,6 @@ liblcms2_lib = library('lcms2', lcms2_srcs,
+   dependencies: deps,
+   c_args: cargs,
+   version: library_version,
+-  vs_module_defs: 'src/lcms2.def',
+   install: true,
+ )
+ 
