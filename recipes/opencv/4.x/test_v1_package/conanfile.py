@@ -14,6 +14,7 @@ class TestPackageConan(ConanFile):
         cmake.definitions["OPENCV_WITH_IMGPROC"] = self.options["opencv"].imgproc
         cmake.definitions["OPENCV_WITH_OBJDETECT"] = self.options["opencv"].objdetect
         cmake.definitions["OPENCV_WITH_PHOTO"] = self.options["opencv"].photo
+        cmake.definitions["OPENCV_WITH_STITCHING"] = self.options["opencv"].stitching
         cmake.definitions["OPENCV_WITH_VIDEO"] = self.options["opencv"].video
         cmake.definitions["OPENCV_WITH_VIDEOIO_FFMPEG"] = self.options["opencv"].videoio and self.options["opencv"].with_ffmpeg
         cmake.definitions["OPENCV_WITH_SFM"] = self.options["opencv"].sfm

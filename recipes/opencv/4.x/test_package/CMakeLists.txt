@@ -11,6 +11,7 @@ option(OPENCV_WITH_IMGCODECS_PNG "Enabled if opencv is built with imgcodecs modu
 option(OPENCV_WITH_IMGPROC "Enabled if opencv is built with imgproc module" OFF)
 option(OPENCV_WITH_OBJDETECT "Enabled if opencv is built with objdetect module" OFF)
 option(OPENCV_WITH_PHOTO "Enabled if opencv is built with photo module" OFF)
+option(OPENCV_WITH_STITCHING "Enabled if opencv is built with stitching module" OFF)
 option(OPENCV_WITH_VIDEO "Enabled if opencv is built with video module" OFF)
 option(OPENCV_WITH_VIDEOIO_FFMPEG "Enabled if opencv is built with videoio module and ffmpeg" OFF)
 # Options to test extra modules
@@ -70,6 +71,13 @@ if(OPENCV_WITH_PHOTO)
     target_link_libraries(test_photo PRIVATE opencv_core opencv_photo)
     target_compile_features(test_photo PRIVATE cxx_std_11)
     add_test(NAME test_photo COMMAND test_photo)
+endif()
+
+if(OPENCV_WITH_STITCHING)
+    add_executable(test_stitching test_stitching.cpp)
+    target_link_libraries(test_stitching PRIVATE opencv_core opencv_stitching)
+    target_compile_features(test_stitching PRIVATE cxx_std_11)
+    add_test(NAME test_stitching COMMAND test_stitching)
 endif()
 
 if(OPENCV_WITH_VIDEO)
