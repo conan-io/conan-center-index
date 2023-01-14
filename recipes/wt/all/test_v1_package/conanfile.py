@@ -15,4 +15,5 @@ class TestPackageV1Conan(ConanFile):
     def test(self):
         if not cross_building(self):
             bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+            args = " --docroot . --http-listen http://127.0.0.1:8080"
+            self.run(bin_path + args, run_environment=True)
