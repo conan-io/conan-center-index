@@ -10,6 +10,7 @@ class TestPackageConan(ConanFile):
         cmake.definitions["OPENCV_WITH_CALIB3D"] = self.options["opencv"].calib3d
         cmake.definitions["OPENCV_WITH_FLANN"] = self.options["opencv"].flann
         cmake.definitions["OPENCV_WITH_GAPI"] = self.options["opencv"].gapi
+        cmake.definitions["OPENCV_WITH_HIGHGUI"] = self.options["opencv"].highgui
         cmake.definitions["OPENCV_WITH_IMGCODECS_PNG"] = self.options["opencv"].imgcodecs and self.options["opencv"].with_png
         cmake.definitions["OPENCV_WITH_IMGPROC"] = self.options["opencv"].imgproc
         cmake.definitions["OPENCV_WITH_ML"] = self.options["opencv"].ml

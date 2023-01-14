@@ -20,6 +20,7 @@ class TestPackageConan(ConanFile):
         tc.variables["OPENCV_WITH_CALIB3D"] = self.dependencies["opencv"].options.calib3d
         tc.variables["OPENCV_WITH_FLANN"] = self.dependencies["opencv"].options.flann
         tc.variables["OPENCV_WITH_GAPI"] = self.dependencies["opencv"].options.gapi
+        tc.variables["OPENCV_WITH_HIGHGUI"] = self.dependencies["opencv"].options.highgui
         tc.variables["OPENCV_WITH_IMGCODECS_PNG"] = self.dependencies["opencv"].options.imgcodecs and self.dependencies["opencv"].options.with_png
         tc.variables["OPENCV_WITH_IMGPROC"] = self.dependencies["opencv"].options.imgproc
         tc.variables["OPENCV_WITH_ML"] = self.dependencies["opencv"].options.ml
