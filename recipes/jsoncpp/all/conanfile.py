@@ -69,7 +69,7 @@ class JsoncppConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if str(self.settings.compiler) == "Visual Studio" and self.settings.compiler.version == "11":
+        if is_msvc(self) and self.settings.compiler.version in ("11", "170"):
             replace_in_file(self, os.path.join(self.source_folder, "include", "json", "value.h"),
                                   "explicit operator bool()",
                                   "operator bool()")
