@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
+from conan.tools.apple import is_apple_os
 import os
 import sys
 
@@ -62,6 +63,13 @@ class MBedTLSConan(ConanFile):
                 f"{self.ref} does not support {self.info.settings.compiler}-{self.info.settings.compiler.version}"
             )
 
+        # TODO: mbedtls/3.3.0 requires jsonschema to generate code.
+        # there are no way to install jsonschema on MacOS
+        if is_apple_os(self) and Version(self.version) == "3.3.0":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} does not support apple os (yet)."
+            )
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root = True)
@@ -82,6 +90,7 @@ class MBedTLSConan(ConanFile):
         tc.generate()
 
     def build(self):
+        # mbedtls/3.3.0 requires extra modules to generate driver codes.
         if Version(self.version) >= "3.3.0":
             driver_requirements = os.path.join(self.source_folder, "scripts", "driver.requirements.txt")
             self.run(f"{sys.executable} -m pip install -r {driver_requirements}") 
