@@ -108,25 +108,28 @@ class AutomakeConan(ConanFile):
         self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
 
+        version = Version(self.version)
+        automake_dataroot_path = path.join(dataroot_path, f'automake-{version.major}.{version.minor}')
+
         compile_bin = path.join(automake_dataroot_path, "compile")
         compile_conf_key = "user.automake:compile"
-        self.output.info(f"Defining path to `compile` binary in configuration as `{compile_conf_key}` with value: {compile_bin}")
+        self.output.info(f'Defining path to `compile` binary in configuration as "{compile_conf_key}" with value: {compile_bin}')
         self.conf_info.define(compile_conf_key, compile_bin)
 
         ar_lib_bin = path.join(automake_dataroot_path, "ar-lib")
         ar_lib_conf_key = "user.automake:ar-lib"
-        self.output.info(f"Defining path to ar-lib binary in configuration as `{ar_lib_conf_key}` with value: {ar_lib_bin}")
+        self.output.info(f'Defining path to ar-lib binary in configuration as "{ar_lib_conf_key}" with value: {ar_lib_bin}')
         self.conf_info.define(ar_lib_conf_key, ar_lib_bin)
 
         install_sh_bin = path.join(automake_dataroot_path, "install-sh")
         install_sh_conf_key = "user.automake:install-sh"
-        self.output.info(f"Defining path to install_sh binary in configuration as `{install_sh_conf_key}` with value: {install_sh_bin}")
+        self.output.info(f'Defining path to install_sh binary in configuration as "{install_sh_conf_key}" with value: {install_sh_bin}')
         self.conf_info.define(install_sh_conf_key, install_sh_bin)
 
         # Legacy v1.x support: Conan V2 will use conf_key instead of user_info
-        self.output.info(f"Define path to `compile` binary in user_info as: {compile_bin}")
+        self.output.info(f'Define path to "compile" binary in user_info as: {compile_bin}')
         self.user_info.compile = compile_bin
-        self.output.info(f"Define path to ar_lib binary in user_info as: {ar_lib_bin}")
+        self.output.info(f'Define path to "ar_lib" binary in user_info as: {ar_lib_bin}')
         self.user_info.ar_lib = ar_lib_bin
-        self.output.info(f"Define path to install_sh binary in user_info as: {install_sh_bin}")
+        self.output.info(f'Define path to "install_sh" binary in user_info as: {install_sh_bin}')
         self.user_info.install_sh = install_sh_bin
