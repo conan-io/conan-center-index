@@ -157,7 +157,7 @@ class WtConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CONFIGDIR"] = os.path.join(self.package_folder, "bin")
+        tc.variables["CONFIGDIR"] = os.path.join(self.package_folder, "bin").replace("\\", "/")
         tc.variables["SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_TESTS"] = False
