@@ -78,7 +78,7 @@ class LibwebpConan(ConanFile):
         if Version(self.version) >= "1.2.1":
             tc.variables["WEBP_BUILD_LIBWEBPMUX"] = True
         tc.variables["WEBP_BUILD_WEBPMUX"] = False
-        if self.options.shared and is_msvc(self):
+        if Version(self.version) < "1.3.0" and self.options.shared and is_msvc(self):
           # Building a dll (see fix-dll-export patch)
           tc.preprocessor_definitions["WEBP_DLL"] = 1
         tc.generate()
