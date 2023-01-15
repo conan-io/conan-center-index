@@ -1,0 +1,26 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 3839bc7..3b271a8 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -86,7 +86,7 @@ if (WIN32 AND NOT MINGW AND NOT MSYS)
+   #	SET_TARGET_PROPERTIES(${GD_LIB} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:msvcrt.lib")
+ 
+   if (BUILD_STATIC_LIBS)
+-    SET_PROPERTY(TARGET ${GD_LIB_STATIC} APPEND PROPERTY COMPILE_DEFINITIONS NONDLL=1)
++    SET_PROPERTY(TARGET ${GD_LIB_STATIC} APPEND PROPERTY COMPILE_DEFINITIONS BGD_NONDLL=1)
+   endif()
+ 
+ ENDIF(WIN32 AND NOT MINGW AND NOT MSYS)
+diff --git a/src/gd.h b/src/gd.h
+index 3056039..e3635ab 100644
+--- a/src/gd.h
++++ b/src/gd.h
+@@ -47,7 +47,7 @@ extern "C" {
+ /* http://gcc.gnu.org/wiki/Visibility */
+ #if defined(_WIN32) || defined(CYGWIN) || defined(_WIN32_WCE)
+ # ifdef BGDWIN32
+-#  ifdef NONDLL
++#  ifdef BGD_NONDLL
+ #   define BGD_EXPORT_DATA_PROT
+ #  else
+ #   ifdef __GNUC__
