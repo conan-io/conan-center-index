@@ -41,8 +41,7 @@ class JsoncppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -70,7 +69,7 @@ class JsoncppConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "11":
+        if str(self.settings.compiler == "Visual Studio") and self.settings.compiler.version == "11":
             replace_in_file(self, os.path.join(self.source_folder, "include", "json", "value.h"),
                                   "explicit operator bool()",
                                   "operator bool()")
