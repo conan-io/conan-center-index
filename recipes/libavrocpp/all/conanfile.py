@@ -93,3 +93,7 @@ class LibavrocppConan(ConanFile):
             self.cpp_info.defines.append("AVRO_DYN_LINK")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+        self.cpp_info.requires = [
+            "boost::headers", "boost::filesystem", "boost::iostreams", "boost::program_options",
+            "boost::regex", "boost::system", "snappy::snappy",
+        ]
