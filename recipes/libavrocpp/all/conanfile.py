@@ -55,7 +55,6 @@ class LibavrocppConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["SNAPPY_ROOT_DIR"] = self.dependencies["snappy"].package_folder.replace("\\", "/")
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
@@ -64,10 +63,10 @@ class LibavrocppConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        replace_in_file(self,
-            os.path.join(self.source_folder, "lang", "c++", "CMakeLists.txt"),
-            "${SNAPPY_LIBRARIES}", "${Snappy_LIBRARIES}"
-        )
+        cmakelists = os.path.join(self.source_folder, "lang", "c++", "CMakeLists.txt")
+        # Fix discovery & link to Snappy
+        replace_in_file(self, cmakelists, "SNAPPY_FOUND", "Snappy_FOUND")
+        replace_in_file(self, cmakelists, "${SNAPPY_LIBRARIES}", "Snappy::snappy")
 
     def build(self):
         self._patch_sources()
