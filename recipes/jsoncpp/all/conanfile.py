@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, save
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 import textwrap
 
