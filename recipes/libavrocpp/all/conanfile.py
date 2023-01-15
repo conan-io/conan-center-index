@@ -67,6 +67,9 @@ class LibavrocppConan(ConanFile):
         # Fix discovery & link to Snappy
         replace_in_file(self, cmakelists, "SNAPPY_FOUND", "Snappy_FOUND")
         replace_in_file(self, cmakelists, "${SNAPPY_LIBRARIES}", "Snappy::snappy")
+        # Install either static or shared
+        target = "avrocpp" if self.options.shared else "avrocpp_s"
+        replace_in_file(self, cmakelists, "install (TARGETS avrocpp avrocpp_s" , f"install (TARGETS {target}")
 
     def build(self):
         self._patch_sources()
