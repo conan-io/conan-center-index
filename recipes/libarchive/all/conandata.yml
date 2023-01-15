@@ -28,6 +28,9 @@ patches:
     - patch_file: "patches/0003-3.6.2-cmake.patch"
       patch_description: "Make CMake build-system compatible with Conan"
       patch_type: "conan"
+    - patch_file: "patches/0005-3.6.2-try-compile-cmakedeps.patch"
+      patch_description: "Patch try_compile check to work with imported CMake targets from Conan packages"
+      patch_type: "conan"
   "3.6.1":
     - patch_file: "patches/0001-3.6.0-zlib-winapi.patch"
       patch_description: "Remove broken ZLIB WINAPI check"
