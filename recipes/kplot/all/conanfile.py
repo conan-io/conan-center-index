@@ -1,6 +1,8 @@
 from conan import ConanFile
 from conan.tools.files import get, copy
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.53.0"
@@ -38,6 +40,10 @@ class KplotConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built on Visual Studio and msvc.")
 
     def requirements(self):
         self.requires("cairo/1.17.4")
