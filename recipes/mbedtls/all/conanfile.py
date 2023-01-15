@@ -81,23 +81,10 @@ class MBedTLSConan(ConanFile):
             tc.cache_variables["MBEDTLS_PYTHON_EXECUTABLE"] = sys.executable
         tc.generate()
 
-    def _jsonchema_installed(self):
-        try:
-            interpreter = sys.executable
-            self.run(f"{interpreter} -m jsonschema --version")
-            self.output.info("python intepreter has jsonschema module.")
-            return True
-        except:
-            self.output.warn("python intepreter has not jsonschema module.")
-            return False
-
     def build(self):
-        if Version(self.version) >= "3.3.0" and not self._jsonchema_installed():
-            pip = os.path.join(os.path.dirname(sys.executable), "pip")
-            self.output.info("try to install jsonschema module.")
-            self.run(f"{pip} install jsonschema")
-            if not self._jsonchema_installed():
-                self.output.error(f"failed to install jsonschema module which is needed by {self.ref}.")
+        if Version(self.version) >= "3.3.0":
+            driver_requirements = os.path.join(self.source_folder, "scripts", "driver.requirements.txt")
+            self.run(f"{sys.executable} -m pip install -r {driver_requirements}") 
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
