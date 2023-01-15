@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class PCRE2Conan(ConanFile):
@@ -44,8 +44,7 @@ class PCRE2Conan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,34 +52,28 @@ class PCRE2Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
         if not self.options.build_pcre2grep:
             del self.options.with_zlib
             del self.options.with_bzip2
             del self.options.grep_support_callout_fork
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.get_safe("with_bzip2"):
             self.requires("bzip2/1.0.8")
 
     def validate(self):
-        if not self.info.options.build_pcre2_8 and not self.info.options.build_pcre2_16 and not self.info.options.build_pcre2_32:
+        if not self.options.build_pcre2_8 and not self.options.build_pcre2_16 and not self.options.build_pcre2_32:
             raise ConanInvalidConfiguration("At least one of build_pcre2_8, build_pcre2_16 or build_pcre2_32 must be enabled")
-        if self.info.options.build_pcre2grep and not self.info.options.build_pcre2_8:
+        if self.options.build_pcre2grep and not self.options.build_pcre2_8:
             raise ConanInvalidConfiguration("build_pcre2_8 must be enabled for the pcre2grep program")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

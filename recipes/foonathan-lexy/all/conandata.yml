@@ -1,0 +1,10 @@
+sources:
+  "2022.12.1":
+    url: "https://github.com/foonathan/lexy/releases/download/v2022.12.1/lexy-src.zip"
+    sha256: "4c16efd31d03f908c7125352ebacbdb6c028de3788ca56940175e7017dbc6c7f"
+  "2022.12.00":
+    url: "https://github.com/foonathan/lexy/releases/download/v2022.12.0/lexy-src.zip"
+    sha256: "62afda502963abce28f051416b977dcc8f11581ba0773f4b1da39a9b4842b19d"
+  "2022.05.01":
+    url: "https://github.com/foonathan/lexy/releases/download/v2022.05.1/lexy-src.zip"
+    sha256: "de2199f8233ea5ed9d4dbe86a8eaf88d754decd28e28554329a7b29b4d952773"

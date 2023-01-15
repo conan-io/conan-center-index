@@ -1,0 +1,49 @@
+diff --git a/include/imutils/paths.h b/include/imutils/paths.h
+index 29bc503..56b78e5 100644
+--- a/include/imutils/paths.h
++++ b/include/imutils/paths.h
+@@ -5,7 +5,8 @@
+ #define PATH_H
+ 
+ #include "filesystem"
+-#include "bits/stdc++.h"
++#include <vector>
++#include <string>
+ /** @file paths.h **/
+ /***************************************************************************//**
+  *@class Path
+@@ -39,4 +40,4 @@ public:
+     std::vector<std::string>
+     listFiles(std::string basePath, std::vector<std::string> validExts = {}, std::string contains = ""
+     );
+-};
+\ No newline at end of file
++};
+diff --git a/src/paths.cpp b/src/paths.cpp
+index 380be73..d0bc7f5 100644
+--- a/src/paths.cpp
++++ b/src/paths.cpp
+@@ -2,7 +2,9 @@
+ // Created by jonsnow on 07/02/22.
+ //
+ #include "filesystem"
+-#include "bits/stdc++.h"
++#include <vector>
++#include <string>
++#include <algorithm>
+ #include "../include/imutils/paths.h"
+ 
+ namespace fs = std::filesystem;
+diff --git a/src/text.cpp b/src/text.cpp
+index 73bec10..6336964 100644
+--- a/src/text.cpp
++++ b/src/text.cpp
+@@ -1,5 +1,7 @@
+ #include "string"
+-#include "bits/stdc++.h"
++#include <map>
++#include <vector>
++#include <sstream>
+ #include "opencv2/core.hpp"
+ #include "opencv2/imgproc.hpp"
+ 

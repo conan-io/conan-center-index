@@ -11,4 +11,3 @@ sources:
 patches:
   "1.16":
     - patch_file: "patches/0001-libcharset-fix-linkage.patch"
-      base_path: "source_subfolder"

@@ -1,0 +1,15 @@
+sources:
+  # upstream don't create tag for releases
+  "2.0":
+    url: "https://github.com/MengRao/tscns/archive/40240b92fc9431710005faccb422d3dbdcb324dd.tar.gz"
+    sha256: "5564f9984e7984a68b767ed44acc70ba605300511bcd7673aa46c207e907263d"
+
+patches:
+  "2.0":
+    - patch_file: "patches/0001-include-thread.patch"
+      patch_description: "include thread header (this patch is already applied upstream)"
+      patch_type: "backport"
+      patch_source: "https://github.com/MengRao/tscns/commit/3d9179de9af88358eef66d9f03c8e2126d35296a"
+    - patch_file: "patches/0002-support-older-compiler.patch"
+      patch_description: "support older compiler by fix initializer"
+      patch_type: "backport"

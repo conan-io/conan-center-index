@@ -26,19 +26,13 @@ sources:
 patches:
   "0.24.2":
     - patch_file: "patches/0.24.0-cxx11-abi.patch"
-      base_path: "source_subfolder"
   "0.24.0":
     - patch_file: "patches/0.24.0-cxx11-abi.patch"
-      base_path: "source_subfolder"
   "0.23.10":
     - patch_file: "patches/0.23.9-cxx11-abi.patch"
-      base_path: "source_subfolder"
   "0.23.9":
     - patch_file: "patches/0.23.9-cxx11-abi.patch"
-      base_path: "source_subfolder"
   "0.21.5":
     - patch_file: "patches/0.21.5-cxx11-abi.patch"
-      base_path: "source_subfolder"
   "0.21.4":
     - patch_file: "patches/0.21.4-cxx11-abi.patch"
-      base_path: "source_subfolder"

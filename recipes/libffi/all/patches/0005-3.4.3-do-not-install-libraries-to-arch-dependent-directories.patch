@@ -1,0 +1,11 @@
+--- Makefile.in
++++ Makefile.in
+@@ -520,7 +520,7 @@
+ target_vendor = @target_vendor@
+ tmake_file = @tmake_file@
+ toolexecdir = @toolexecdir@
+-toolexeclibdir = @toolexeclibdir@
++toolexeclibdir = @libdir@
+ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@

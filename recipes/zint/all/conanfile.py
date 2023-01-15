@@ -1,9 +1,11 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 
 class ZintConan(ConanFile):
@@ -28,20 +30,8 @@ class ZintConan(ConanFile):
         "with_qt": False,
     }
 
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -49,57 +39,70 @@ class ZintConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         if not self.options.with_qt:
-            del self.settings.compiler.libcxx
-            del self.settings.compiler.cppstd
+            try:
+                del self.settings.compiler.libcxx
+            except Exception:
+                pass
+            try:
+                del self.settings.compiler.cppstd
+            except Exception:
+                pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_libpng:
-            self.requires("libpng/1.6.37")
-            self.requires("zlib/1.2.12")
+            self.requires("libpng/1.6.38")
+            self.requires("zlib/1.2.13")
         if self.options.with_qt:
-            self.requires("qt/5.15.3")
+            self.requires("qt/5.15.6")
 
     def validate(self):
-        if self.options.with_qt and not self.options["qt"].gui:
-            raise ConanInvalidConfiguration(f"{self.name} needs qt:gui=True")
+        if self.info.options.with_qt and not self.dependencies["qt"].options.gui:
+            raise ConanInvalidConfiguration(f"{self.ref} needs qt:gui=True")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["DATA_INSTALL_DIR"] = os.path.join(self.package_folder, "lib").replace("\\", "/")
+        tc.variables["ZINT_USE_QT"] = self.options.with_qt
+        if self.options.with_qt:
+            tc.variables["QT_VERSION_MAJOR"] = Version(self.dependencies["qt"].ref.version).major
+        tc.variables["ZINT_USE_PNG"] = self.options.with_libpng
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_source(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         # Don't override CMAKE_OSX_SYSROOT, it can easily break consumers.
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "CMakeLists.txt"),
             "set(CMAKE_OSX_SYSROOT \"/\")",
             "",
         )
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["DATA_INSTALL_DIR"] = os.path.join(self.package_folder, "lib")
-        cmake.definitions["ZINT_USE_QT"] = self.options.with_qt
-        if self.options.with_qt:
-            cmake.definitions["QT_VERSION_MAJOR"] = tools.Version(self.deps_cpp_info["qt"].version).major
-        cmake.definitions["ZINT_USE_PNG"] = self.options.with_libpng
-        cmake.configure()
-        return cmake
-
     def build(self):
         self._patch_source()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Zint")

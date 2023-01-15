@@ -32,3 +32,6 @@ sources:
   "7.4.1":
     url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.4.1.tar.gz"
     sha256: "e6ff9749f402dd77f320a2a28b77a45636cbe186f926d9b5a7b54ea6ee631ada"
+  "7.4.2":
+    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.4.2.tar.gz"
+    sha256: "f0db44c96a80a6ce3dda02c598574f5f0209376bd2c6c176797710da8eb3e108"

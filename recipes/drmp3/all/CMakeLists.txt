@@ -1,18 +1,17 @@
 cmake_minimum_required(VERSION 3.4)
-project(dr_mp3 C)
+project(dr_mp3 LANGUAGES C)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
+include(GNUInstallDirs)
 
 option(NO_SIMD "Build with define DR_MP3_NO_SIMD" OFF)
 option(NO_STDIO "Build with define DR_MP3_NO_STDIO" OFF)
 
 add_library(${CMAKE_PROJECT_NAME} dr_mp3.c)
 
-target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE source_subfolder)
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${DRMP3_SRC_DIR})
 
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES 
-    PUBLIC_HEADER source_subfolder/dr_mp3.h
+    PUBLIC_HEADER ${DRMP3_SRC_DIR}/dr_mp3.h
     C_STANDARD 99
 )
 
@@ -27,8 +26,8 @@ if(NO_STDIO)
 endif()
 
 install(TARGETS ${CMAKE_PROJECT_NAME}
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    PUBLIC_HEADER DESTINATION include
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )

@@ -1,0 +1,28 @@
+diff --git a/lzhamdecomp/lzham_platform.cpp b/lzhamdecomp/lzham_platform.cpp
+index cfc85c1..599a847 100644
+--- a/lzhamdecomp/lzham_platform.cpp
++++ b/lzhamdecomp/lzham_platform.cpp
+@@ -61,7 +61,7 @@ void lzham_debug_break(void)
+ {
+ #if LZHAM_USE_WIN32_API
+    DebugBreak();
+-#elif (TARGET_OS_MAC == 1) && (TARGET_IPHONE_SIMULATOR == 0) && (TARGET_OS_IPHONE == 0)
++#elif (TARGET_OS_MAC == 1) && (TARGET_IPHONE_SIMULATOR == 0) && (TARGET_OS_IPHONE == 0) && !defined(__clang__)
+    __asm {int 3}
+ #else
+    assert(0);
+diff --git a/lzhamdecomp/lzham_traits.h b/lzhamdecomp/lzham_traits.h
+index ea7214f..e103bad 100644
+--- a/lzhamdecomp/lzham_traits.h
++++ b/lzhamdecomp/lzham_traits.h
+@@ -67,7 +67,9 @@ namespace lzham
+    // Defines type Q as bitwise copyable.
+ #define LZHAM_DEFINE_BITWISE_COPYABLE(Q) template<> struct bitwise_copyable<Q> { enum { cFlag = true }; };
+ 
+-#if defined(__APPLE__) || defined(__NetBSD__)
++#if defined(__APPLE__)
++   #define LZHAM_IS_POD(T) std::is_pod<T>::value
++#elif defined(__NetBSD__)
+    #define LZHAM_IS_POD(T) std::__is_pod<T>::__value
+ #else
+    #define LZHAM_IS_POD(T) __is_pod(T)

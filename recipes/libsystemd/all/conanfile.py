@@ -36,7 +36,7 @@ class LibsystemdConan(ConanFile):
         "with_xz": True,
         "with_zstd": True,
     }
-    generators = "PkgConfigDeps"
+    generators = "PkgConfigDeps", "VirtualBuildEnv"
     exports_sources = "patches/**"
 
     def configure(self):
@@ -62,7 +62,7 @@ class LibsystemdConan(ConanFile):
         self.tool_requires("pkgconf/1.7.4")
 
     def requirements(self):
-        self.requires("libcap/2.62")
+        self.requires("libcap/2.65")
         self.requires("libmount/2.36.2")
         if self.options.with_selinux:
             self.requires("libselinux/3.3")
@@ -188,9 +188,9 @@ class LibsystemdConan(ConanFile):
         # FIXME: this `.version` should only happen for the `pkg_config`
         #  generator (see https://github.com/conan-io/conan/issues/8202)
         # systemd uses only major version in its .pc file
-        self.cpp_info.version = Version(self.version).major
+        self.cpp_info.version = str(Version(self.version).major)
         self.cpp_info.set_property("component_version",
-                                   Version(self.version).major)
+                                   str(Version(self.version).major))
         self.cpp_info.system_libs = ["rt", "pthread", "dl"]
 
         # FIXME: remove this block and set required_conan_version to >=1.51.1

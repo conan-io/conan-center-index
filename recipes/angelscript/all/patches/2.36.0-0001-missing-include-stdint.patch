@@ -1,0 +1,10 @@
+--- a/angelscript/source/as_context.cpp
++++ b/angelscript/source/as_context.cpp
+@@ -36,6 +36,7 @@
+ //
+
+ #include <math.h> // fmodf() pow()
++#include <stdint.h>
+
+ #include "as_config.h"
+ #include "as_context.h"

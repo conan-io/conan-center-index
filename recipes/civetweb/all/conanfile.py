@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
+required_conan_version = ">=1.52.0"
 
 
 class CivetwebConan(ConanFile):
@@ -14,7 +14,7 @@ class CivetwebConan(ConanFile):
     homepage = "https://github.com/civetweb/civetweb"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Embedded C/C++ web server"
-    topics = ("civetweb", "web-server", "embedded")
+    topics = ("web-server", "embedded")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -59,8 +59,7 @@ class CivetwebConan(ConanFile):
         return Version(self.version) >= "1.15"
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, patch["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -70,18 +69,27 @@ class CivetwebConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         if not self.options.with_cxx:
-            del self.settings.compiler.cppstd
-            del self.settings.compiler.libcxx
+            try:
+                del self.settings.compiler.libcxx
+            except Exception:
+                pass
+            try:
+                del self.settings.compiler.cppstd
+            except Exception:
+                pass
         if not self.options.with_ssl:
             del self.options.ssl_dynamic_loading
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
         if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
 
     def validate(self):
         if self.options.get_safe("ssl_dynamic_loading") and not self.options["openssl"].shared:
@@ -91,13 +99,13 @@ class CivetwebConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def generate(self):
         tc = CMakeToolchain(self)
 
         if self.options.with_ssl:
-            openssl_version = Version(self.dependencies["openssl"].ref.version[:-1])
+            openssl_version = Version(str(self.dependencies["openssl"].ref.version)[:-1])
             tc.variables["CIVETWEB_ENABLE_SSL"] = self.options.with_ssl
             tc.variables["CIVETWEB_ENABLE_SSL_DYNAMIC_LOADING"] = self.options.ssl_dynamic_loading
             tc.variables["CIVETWEB_SSL_OPENSSL_API_1_0"] = openssl_version.minor == "0"

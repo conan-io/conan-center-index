@@ -1,0 +1,4 @@
+sources:
+  "3.23.0":
+    url: "https://github.com/intel/ittapi/archive/v3.23.0.tar.gz"
+    sha256: "9af1231808c602c2f7a66924c8798b1741d3aa4b15f3874d82ca7a89b5dbb1b1"

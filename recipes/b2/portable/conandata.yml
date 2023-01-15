@@ -47,3 +47,6 @@ sources:
   "4.9.2":
     url: "https://github.com/bfgroup/b2/archive/4.9.2.tar.gz"
     sha256: "7e1a135b308999d2a65fce3eba8f4ffb41ca82ae133f8494cc42cbca63c890de"
+  "4.9.3":
+    url: "https://github.com/bfgroup/b2/archive/4.9.3.tar.gz"
+    sha256: "4524b8ecf138a9087aa24b8889c44ea7ae9f2d373acc9535d72fb048c213e1b9"

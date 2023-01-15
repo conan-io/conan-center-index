@@ -1,7 +1,9 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, replace_in_file, rmdir
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.47.0"
 
 
 class VolkConan(ConanFile):
@@ -20,7 +22,7 @@ class VolkConan(ConanFile):
     )
     topics = ("vulkan", "loader", "extension", "entrypoint", "graphics")
 
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
     }
@@ -28,46 +30,54 @@ class VolkConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("vulkan-headers/" + self.version)
+        self.requires(f"vulkan-headers/{self.version}")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["VOLK_INSTALL"] = True
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["VOLK_PULL_IN_VULKAN"] = True
+        tc.variables["VOLK_INSTALL"] = True
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def _patch_sources(self):
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmakelists, "find_package(Vulkan QUIET)", "find_package(VulkanHeaders REQUIRED)")
+        replace_in_file(self, cmakelists, "Vulkan::Vulkan", "Vulkan::Headers")
 
     def build(self):
-        cmake = self._configure_cmake()
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.md", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "volk")

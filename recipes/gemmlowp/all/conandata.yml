@@ -5,4 +5,3 @@ sources:
 patches:
   "cci.20210928":
     - patch_file: "patches/build-static-libraries.patch"
-      base_path: "source_subfolder"

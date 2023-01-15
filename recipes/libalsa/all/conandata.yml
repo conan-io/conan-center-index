@@ -20,4 +20,3 @@ sources:
 patches:
   "1.2.5.1":
     - patch_file: "patches/1.2.5.1-0001-control-empty-fix-the-static-build.patch"
-      base_path: "source_subfolder"

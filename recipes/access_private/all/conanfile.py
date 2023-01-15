@@ -1,40 +1,48 @@
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 import os
 
-from conans import ConanFile, tools
+required_conan_version = ">=1.50.0"
 
 
 class AccessPrivateConan(ConanFile):
     name = "access_private"
     description = "Access private members and statics of a C++ class"
-    license = ["MIT"]
-    topics = ("conan", "access", "private", "header-only")
+    license = "MIT"
+    topics = ("access", "private", "header-only")
     homepage = "https://github.com/martong/access_private"
     url = "https://github.com/conan-io/conan-center-index"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-    settings = "compiler"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def package_id(self):
+        self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            check_min_cppstd(self, 11)
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        url = self.conan_data["sources"][self.version]["url"]
-        extracted_dir = "access_private-" + \
-            os.path.splitext(os.path.basename(url))[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
-        self.copy("LICENSE",
-                  dst="licenses",
-                  src=self._source_subfolder)
-        self.copy("access_private.hpp",
-                  dst=os.path.join("include", "access_private"),
-                  src=os.path.join(self._source_subfolder, "include"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "access_private.hpp",
+                   src=os.path.join(self.source_folder, "include"),
+                   dst=os.path.join(self.package_folder, "include", "access_private"))
 
-    def package_id(self):
-        self.info.header_only()
+    def package_info(self):
+        self.cpp_info.includedirs.append(os.path.join("include", "access_private"))
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []

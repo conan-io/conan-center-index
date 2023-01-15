@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 52e5571..b97d9d0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -17,7 +17,7 @@ include(GNUInstallDirs)
+ option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+ option(ENABLE_TESTING "Enable unit test build" OFF)
+ 
+-if (NOT MSVC)
++if (0)
+     # Specify the target architecture (Linux). For Windows based generator use rather
+     # '-A Win32' or '-A x64 options'
+     set(TARGET_ARCH x86 CACHE STRING "the target architecture")

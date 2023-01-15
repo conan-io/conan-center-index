@@ -1,16 +1,16 @@
 sources:
-  0.0.12:
-    url: https://github.com/bernedom/bertrand/archive/0.0.12.tar.gz
-    sha256: 0648edbb9ea39a918f718a672e14b26c614d8409f146c1550becd45d881cfcf4
-  0.0.14:
-    url: https://github.com/bernedom/bertrand/archive/0.0.14.tar.gz
-    sha256: f6ba82e715f9371f06a0d0bd6b7f017c3ff0709e8e5142d8fd4ba00aec1228ba
-  0.0.15:
-    url: https://github.com/bernedom/bertrand/archive/0.0.15.tar.gz
-    sha256: 5ad481c2fc3d3166d8660ab3013b4513c5b425c9f13c8925b3cfb40f988d8e9b
-  0.0.17:
-    url: https://github.com/bernedom/bertrand/archive/0.0.17.tar.gz
-    sha256: 72e59971bd8ae48d95da9337ad78004b99ba4e8d0eeb3b613ce17b577ca41012
   "0.013":
     url: "https://github.com/bernedom/bertrand/archive/0.013.tar.gz"
     sha256: "f2f071006d3a9b31382957b84e81405adba44cbf1a9bb8242ad4d0f44d7af7fb"
+  "0.0.17":
+    url: https://github.com/bernedom/bertrand/archive/0.0.17.tar.gz
+    sha256: 72e59971bd8ae48d95da9337ad78004b99ba4e8d0eeb3b613ce17b577ca41012
+  "0.0.15":
+    url: https://github.com/bernedom/bertrand/archive/0.0.15.tar.gz
+    sha256: 5ad481c2fc3d3166d8660ab3013b4513c5b425c9f13c8925b3cfb40f988d8e9b
+  "0.0.14":
+    url: https://github.com/bernedom/bertrand/archive/0.0.14.tar.gz
+    sha256: f6ba82e715f9371f06a0d0bd6b7f017c3ff0709e8e5142d8fd4ba00aec1228ba
+  "0.0.12":
+    url: https://github.com/bernedom/bertrand/archive/0.0.12.tar.gz
+    sha256: 0648edbb9ea39a918f718a672e14b26c614d8409f146c1550becd45d881cfcf4

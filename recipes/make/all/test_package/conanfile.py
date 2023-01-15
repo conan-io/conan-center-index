@@ -1,22 +1,14 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-import contextlib
+from conan import ConanFile
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "VirtualBuildEnv"
+    test_type = "explicit"
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        if hasattr(self, "settings_build"):
-            # Environments are not inherited when cross building, so manually set the `CONANMAKE_PROGRAM' environment variable
-            with tools.environment_append({"CONAN_MAKE_PROGRAM": self.deps_user_info["make"].make}):
-                yield
-        else:
-            yield
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
 
     def test(self):
-        if not tools.cross_building(self):
-            with tools.chdir(self.source_folder):
-                with self._build_context():
-                    env_build = AutoToolsBuildEnvironment(self)
-                    env_build.make(args=["love"])
+        make = self.conf.get("tools.gnu:make_program", check_type=str)
+        self.run(f"{make} -C {self.source_folder} love")

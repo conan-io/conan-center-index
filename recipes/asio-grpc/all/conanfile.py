@@ -1,8 +1,12 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rm
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class AsioGrpcConan(ConanFile):
@@ -16,11 +20,11 @@ class AsioGrpcConan(ConanFile):
     no_copy_source = True
     options = {
         "backend": ["boost", "asio", "unifex"],
-        "use_boost_container": ["auto", True, False],
+        "local_allocator": ["auto", "memory_resource", "boost_container", "recycling_allocator"],
     }
     default_options = {
         "backend": "boost",
-        "use_boost_container": "auto",
+        "local_allocator": "auto",
     }
 
     @property
@@ -38,49 +42,63 @@ class AsioGrpcConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._min_cppstd)
+            check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
+            if Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd}, which your compiler does not support.")
         else:
             self.output.warn(f"{self.name} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
 
     def configure(self):
-        if self.options.use_boost_container == "auto":
+        self._local_allocator_option = self.options.local_allocator
+        if self._local_allocator_option == "auto":
             libcxx = self.settings.compiler.get_safe("libcxx")
-            compiler_version = tools.Version(self.settings.compiler.version)
-            self.options.use_boost_container = libcxx and str(libcxx) == "libc++" or \
+            compiler_version = Version(self.settings.compiler.version)
+            prefer_boost_container = libcxx and str(libcxx) == "libc++" or \
                 (self.settings.compiler == "gcc" and compiler_version < "9")  or \
                 (self.settings.compiler == "clang" and compiler_version < "12" and libcxx and str(libcxx) == "libstdc++")
+            self._local_allocator_option = "boost_container" if prefer_boost_container else "memory_resource"
+        if self._local_allocator_option == "recycling_allocator" and self.options.backend == "unifex":
+            raise ConanInvalidConfiguration(f"{self.name} 'recycling_allocator' cannot be used in combination with the 'unifex' backend.")
 
     def requirements(self):
-        self.requires("grpc/1.47.1")
-        if self.options.use_boost_container or self.options.backend == "boost":
-            self.requires("boost/1.79.0")
+        self.requires("grpc/1.50.1")
+        if self._local_allocator_option == "boost_container" or self.options.backend == "boost":
+            self.requires("boost/1.81.0")
         if self.options.backend == "asio":
-            self.requires("asio/1.23.0")
+            self.requires("asio/1.24.0")
         if self.options.backend == "unifex":
             self.requires("libunifex/cci.20220430")
 
     def package_id(self):
-        self.info.header_only()
-        self.info.options.use_boost_container = self.options.use_boost_container
+        self.info.clear()
+        self.info.options.local_allocator = self._local_allocator_option
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["ASIO_GRPC_USE_BOOST_CONTAINER"] = self._local_allocator_option == "boost_container"
+        tc.variables["ASIO_GRPC_USE_RECYCLING_ALLOCATOR"] = self._local_allocator_option == "recycling_allocator"
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses")
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
-        cmake.definitions["ASIO_GRPC_USE_BOOST_CONTAINER"] = self.options.use_boost_container
-        cmake.configure()
         cmake.install()
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib", "cmake", "asio-grpc"), "asio-grpc*")
+        rm(self, "asio-grpc*", os.path.join(self.package_folder, "lib", "cmake", "asio-grpc"))
 
     def package_info(self):
-        self.cpp_info.builddirs = [os.path.join("lib", "cmake", "asio-grpc")]
-        build_modules = [os.path.join(self.cpp_info.builddirs[0], "AsioGrpcProtobufGenerator.cmake")]
+        build_modules = [os.path.join("lib", "cmake", "asio-grpc", "AsioGrpcProtobufGenerator.cmake")]
         
         self.cpp_info.requires = ["grpc::grpc++_unsecure"]
         if self.options.backend == "boost":
@@ -93,7 +111,7 @@ class AsioGrpcConan(ConanFile):
             self.cpp_info.defines = ["AGRPC_UNIFEX"]
             self.cpp_info.requires.append("libunifex::unifex")
 
-        if self.options.use_boost_container:
+        if self._local_allocator_option == "boost_container":
             self.cpp_info.requires.append("boost::container")
 
         self.cpp_info.set_property("cmake_file_name", "asio-grpc")

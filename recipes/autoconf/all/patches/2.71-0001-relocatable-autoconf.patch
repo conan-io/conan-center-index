@@ -1,0 +1,275 @@
+diff --git a/Makefile.in b/Makefile.in
+index 22a17b3..ac18c85 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -427,7 +427,7 @@ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+ LIBOBJS = @LIBOBJS@
+ LIBS = @LIBS@
+ LTLIBOBJS = @LTLIBOBJS@
+-M4 = @M4@
++M4 = /usr/bin/env m4
+ M4_DEBUGFILE = @M4_DEBUGFILE@
+ M4_GNU = @M4_GNU@
+ MAKEINFO = @MAKEINFO@
+diff --git a/bin/autoconf.as b/bin/autoconf.as
+index 1407739..50ad1de 100644
+--- a/bin/autoconf.as
++++ b/bin/autoconf.as
+@@ -89,8 +89,17 @@ exit_missing_arg='
+ # restore font-lock: '
+ 
+ # Variables.
+-: ${AUTOM4TE='@bindir@/@autom4te-name@'}
+-: ${trailer_m4='@pkgdatadir@/autoconf/trailer.m4'}
++# Locate autom4ate and support files relative to current script inside package
++SCRIPT_DIR=$(dirname "$as_myself")
++RES_DIR="$SCRIPT_DIR/../res/autoconf"
++if [[ ! -d "$RES_DIR" ]]
++then
++    echo "Autoconf conan package error, unable to locate resource directory at $RES_DIR\n"
++    exit 1
++fi
++
++: ${AUTOM4TE="$SCRIPT_DIR/autom4te"}
++: ${trailer_m4="$RES_DIR/autoconf/trailer.m4"}
+ autom4te_options=
+ outfile=
+ verbose=false
+diff --git a/bin/autoheader.in b/bin/autoheader.in
+index 1cbf509..9bdd1cf 100644
+--- a/bin/autoheader.in
++++ b/bin/autoheader.in
+@@ -29,10 +29,13 @@ eval 'case $# in 0) exec @PERL@ -S "$0";; *) exec @PERL@ -S "$0" "$@";; esac'
+ use 5.006;
+ use strict;
+ use warnings FATAL => 'all';
++use Cwd 'abs_path';
++use File::Basename;
+ 
+ BEGIN
+ {
+-  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || '@pkgdatadir@';
++  my $scriptpath = abs_path(dirname(__FILE__));
++  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "$scriptpath/../res/autoconf";
+   unshift @INC, "$pkgdatadir";
+ 
+   # Override SHELL.  On DJGPP SHELL may not be set to a shell
+@@ -54,7 +57,8 @@ use Autom4te::XFile;
+ our ($config_h, %symbol, %verbatim);
+ 
+ # Lib files.
+-my $autom4te = $ENV{'AUTOM4TE'} || '@bindir@/@autom4te-name@';
++my $scriptpath = abs_path(dirname(__FILE__));
++my $autom4te = $ENV{'AUTOM4TE'} || "$scriptpath/@autom4te-name@";
+ my $config_h_in;
+ my @prepend_include;
+ my @include;
+diff --git a/bin/autom4te.in b/bin/autom4te.in
+index 7ebe419..42f09b4 100644
+--- a/bin/autom4te.in
++++ b/bin/autom4te.in
+@@ -25,10 +25,13 @@ eval 'case $# in 0) exec @PERL@ -S "$0";; *) exec @PERL@ -S "$0" "$@";; esac'
+ use 5.006;
+ use strict;
+ use warnings FATAL => 'all';
++use Cwd 'abs_path';
++use File::Basename;
+ 
+ BEGIN
+ {
+-  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || '@pkgdatadir@';
++  my $scriptpath = abs_path(dirname(__FILE__));
++  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "$scriptpath/../res/autoconf";
+   unshift @INC, $pkgdatadir;
+ 
+   # Override SHELL.  On DJGPP SHELL may not be set to a shell
+@@ -48,7 +51,8 @@ use Autom4te::General;
+ use Autom4te::XFile;
+ 
+ # Data directory.
+-my $pkgdatadir = $ENV{'AC_MACRODIR'} || '@pkgdatadir@';
++my $scriptpath = abs_path(dirname(__FILE__));
++my $pkgdatadir = $ENV{'AC_MACRODIR'} || "$scriptpath/../res/autoconf";
+ 
+ # $LANGUAGE{LANGUAGE} -- Automatic options for LANGUAGE.
+ my %language;
+@@ -91,7 +95,7 @@ my @include;
+ my $freeze = 0;
+ 
+ # $M4.
+-my $m4 = $ENV{"M4"} || '@M4@';
++my $m4 = $ENV{"M4"} || '/usr/bin/env m4';
+ # Some non-GNU m4's don't reject the --help option, so give them /dev/null.
+ fatal "need GNU m4 1.4 or later: $m4"
+   if system "$m4 --help </dev/null 2>&1 | grep reload-state >/dev/null";
+@@ -271,6 +275,12 @@ sub load_configuration ($)
+ 	if /^\s*(\#.*)?$/;
+ 
+       my @words = shellwords ($_);
++      # not using: s#AUTOCONF_M4DIR#$pkgdatadir#r to support perl <5.14
++      my @words_clone = @words;
++      @words = ();
++      foreach ( @words_clone ) {
++        push(@words, do { (my $tmp = $_) =~ s#AUTOCONF_M4DIR#$pkgdatadir#; $tmp });
++      }
+       my $type = shift @words;
+       if ($type eq 'begin-language:')
+ 	{
+diff --git a/bin/autoreconf.in b/bin/autoreconf.in
+index ec391a6..2992b16 100644
+--- a/bin/autoreconf.in
++++ b/bin/autoreconf.in
+@@ -28,11 +28,14 @@ eval 'case $# in 0) exec @PERL@ -S "$0";; *) exec @PERL@ -S "$0" "$@";; esac'
+ use 5.006;
+ use strict;
+ use warnings FATAL => 'all';
++use Cwd 'abs_path';
++use File::Basename;
+ 
+ my $buildauxdir;
+ BEGIN
+ {
+-  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || '@pkgdatadir@';
++  my $scriptpath = abs_path(dirname(__FILE__));
++  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "$scriptpath/../res/autoconf";
+   unshift @INC, $pkgdatadir;
+ 
+   $buildauxdir = $ENV{'autom4te_buildauxdir'} || $pkgdatadir . '/build-aux';
+@@ -117,9 +120,10 @@ Written by David J. MacKenzie and Akim Demaille.
+ ";
+ 
+ # Lib files.
+-my $autoconf    = $ENV{'AUTOCONF'}    || '@bindir@/@autoconf-name@';
+-my $autoheader  = $ENV{'AUTOHEADER'}  || '@bindir@/@autoheader-name@';
+-my $autom4te    = $ENV{'AUTOM4TE'}    || '@bindir@/@autom4te-name@';
++my $scriptpath = abs_path(dirname(__FILE__));
++my $autoconf    = $ENV{'AUTOCONF'}    || "$scriptpath/@autoconf-name@";
++my $autoheader  = $ENV{'AUTOHEADER'}  || "$scriptpath/@autoheader-name@";
++my $autom4te    = $ENV{'AUTOM4TE'}    || "$scriptpath/@autom4te-name@";
+ my $automake    = $ENV{'AUTOMAKE'}    || 'automake';
+ my $aclocal     = $ENV{'ACLOCAL'}     || 'aclocal';
+ my $libtoolize  = $ENV{'LIBTOOLIZE'}  || 'libtoolize';
+diff --git a/bin/autoscan.in b/bin/autoscan.in
+index b89fd1a..6113d62 100644
+--- a/bin/autoscan.in
++++ b/bin/autoscan.in
+@@ -27,10 +27,13 @@ eval 'case $# in 0) exec @PERL@ -S "$0";; *) exec @PERL@ -S "$0" "$@";; esac'
+ use 5.006;
+ use strict;
+ use warnings FATAL => 'all';
++use Cwd 'abs_path';
++use File::Basename;
+ 
+ BEGIN
+ {
+-  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || '@pkgdatadir@';
++  my $scriptpath = abs_path(dirname(__FILE__));
++  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "$scriptpath/../res/autoconf";
+   unshift @INC, $pkgdatadir;
+ 
+   # Override SHELL.  On DJGPP SHELL may not be set to a shell
+@@ -95,7 +98,8 @@ my %needed_macros =
+ my $log;
+ 
+ # Autoconf and lib files.
+-my $autom4te = $ENV{'AUTOM4TE'} || '@bindir@/@autom4te-name@';
++my $scriptpath = abs_path(dirname(__FILE__));
++my $autom4te = $ENV{'AUTOM4TE'} || "$scriptpath/@autom4te-name@";
+ my $autoconf = "$autom4te --language=autoconf";
+ my @prepend_include;
+ my @include = ('@pkgdatadir@');
+diff --git a/bin/autoupdate.in b/bin/autoupdate.in
+index c86203a..844dd20 100644
+--- a/bin/autoupdate.in
++++ b/bin/autoupdate.in
+@@ -28,10 +28,13 @@ eval 'case $# in 0) exec @PERL@ -S "$0";; *) exec @PERL@ -S "$0" "$@";; esac'
+ use 5.006;
+ use strict;
+ use warnings FATAL => 'all';
++use Cwd 'abs_path';
++use File::Basename;
+ 
+ BEGIN
+ {
+-  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || '@pkgdatadir@';
++  my $scriptpath = abs_path(dirname(__FILE__));
++  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "$scriptpath/../res/autoconf";
+   unshift @INC, $pkgdatadir;
+ 
+   # Override SHELL.  On DJGPP SHELL may not be set to a shell
+@@ -51,14 +54,15 @@ use Autom4te::General;
+ use Autom4te::XFile;
+ 
+ # Lib files.
+-my $autom4te = $ENV{'AUTOM4TE'} || '@bindir@/@autom4te-name@';
++my $scriptpath = abs_path(dirname(__FILE__));
++my $autom4te = $ENV{'AUTOM4TE'} || "$scriptpath/@autom4te-name@";
+ my $autoconf = "$autom4te --language=autoconf";
+ # We need to find m4sugar.
+ my @prepend_include;
+ my @include = ('@pkgdatadir@');
+ my $force = 0;
+ # m4.
+-my $m4 = $ENV{"M4"} || '@M4@';
++my $m4 = $ENV{"M4"} || '/usr/bin/env m4';
+ 
+ 
+ # $HELP
+diff --git a/bin/ifnames.in b/bin/ifnames.in
+index b04947f..75d014e 100644
+--- a/bin/ifnames.in
++++ b/bin/ifnames.in
+@@ -32,10 +32,13 @@ eval 'case $# in 0) exec @PERL@ -S "$0";; *) exec @PERL@ -S "$0" "$@";; esac'
+ use 5.006;
+ use strict;
+ use warnings FATAL => 'all';
++use Cwd 'abs_path';
++use File::Basename;
+ 
+ BEGIN
+ {
+-  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || '@pkgdatadir@';
++  my $scriptpath = abs_path(dirname(__FILE__));
++  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "$scriptpath/../res/autoconf";
+   unshift @INC, $pkgdatadir;
+ 
+   # Override SHELL.  On DJGPP SHELL may not be set to a shell
+diff --git a/lib/autom4te.in b/lib/autom4te.in
+index 9e86c9f..bf3ae42 100644
+--- a/lib/autom4te.in
++++ b/lib/autom4te.in
+@@ -115,7 +115,7 @@ end-language: "Autoreconf-preselections"
+ # This intermediate language is used by aclocal to build aclocal.m4.
+ 
+ begin-language: "Autoconf-without-aclocal-m4"
+-args: --prepend-include '@pkgdatadir@'
++args: --prepend-include 'AUTOCONF_M4DIR'
+ args: --cache=autom4te.cache
+ args: autoconf/autoconf.m4f
+ args: acsite.m4?
+@@ -142,7 +142,7 @@ end-language: "Autoconf"
+ ## -------- ##
+ 
+ begin-language: "Autotest"
+-args: --prepend-include '@pkgdatadir@'
++args: --prepend-include 'AUTOCONF_M4DIR'
+ args: autotest/autotest.m4f
+ args: package.m4?
+ args: local.at?
+@@ -156,7 +156,7 @@ end-language: "Autotest"
+ ## ---- ##
+ 
+ begin-language: "M4sh"
+-args: --prepend-include '@pkgdatadir@'
++args: --prepend-include 'AUTOCONF_M4DIR'
+ args: m4sugar/m4sh.m4f
+ args: --mode 777
+ args: --language M4sugar
+@@ -168,6 +168,6 @@ end-language: "M4sh"
+ ## ------- ##
+ 
+ begin-language: "M4sugar"
+-args: --prepend-include '@pkgdatadir@'
++args: --prepend-include 'AUTOCONF_M4DIR'
+ args: m4sugar/m4sugar.m4f
+ end-language: "M4sugar"

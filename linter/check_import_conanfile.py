@@ -13,7 +13,7 @@ class ImportConanFile(BaseChecker):
 
     name = "conan-import-conanfile"
     msgs = {
-        "W9006": (
+        "E9006": (
             "Import ConanFile from new module: `from conan import ConanFile`. Old import is deprecated in Conan v2.",
             "conan-import-conanfile",
             "Import ConanFile from new module: `from conan import ConanFile`. Old import is deprecated in Conan v2.",

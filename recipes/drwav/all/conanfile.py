@@ -1,6 +1,9 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.46.0"
 
 
 class DrwavConan(ConanFile):
@@ -10,31 +13,22 @@ class DrwavConan(ConanFile):
     topics = ("audio", "wav", "wave", "sound")
     license = ("Unlicense", "MIT-0")
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False], 
         "fPIC": [True, False],
         "no_conversion_api": [True, False],
-        "no_stdio": [True, False]
+        "no_stdio": [True, False],
+        "no_wchar": [True, False]
     }
     default_options = {
         "shared": False, 
         "fPIC": True,
         "no_conversion_api": False,
-        "no_stdio": False
+        "no_stdio": False,
+        "no_wchar": False
     }
-    generators = "cmake"
     exports_sources = ["CMakeLists.txt", "dr_wav.c"]
-
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -46,25 +40,28 @@ class DrwavConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+    def layout(self):
+        cmake_layout(self)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["NO_CONVERSION_API"] = self.options.no_conversion_api
-        self._cmake.definitions["NO_STDIO"] = self.options.no_stdio
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["DRWAV_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["NO_CONVERSION_API"] = self.options.no_conversion_api
+        tc.variables["NO_STDIO"] = self.options.no_stdio
+        tc.variables["NO_WCHAR"] = self.options.no_wchar
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
@@ -75,3 +72,5 @@ class DrwavConan(ConanFile):
             self.cpp_info.defines.append("DR_WAV_NO_CONVERSION_API")
         if self.options.no_stdio:
             self.cpp_info.defines.append("DR_WAV_NO_STDIO")
+        if self.options.no_wchar:
+            self.cpp_info.defines.append("DR_WAV_NO_WCHAR")     
