@@ -15,11 +15,11 @@ class LibavrocppConan(ConanFile):
     topics = ("serialization", "deserialization","avro")
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False], 
+        "shared": [True, False],
         "fPIC": [True, False]
     }
     default_options = {
-        "shared": False, 
+        "shared": False,
         "fPIC": True
     }
     short_paths = True
@@ -55,7 +55,7 @@ class LibavrocppConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["SNAPPY_ROOT_DIR"] = self.deps_cpp_info["snappy"].rootpath.replace("\\", "/")
+        tc.variables["SNAPPY_ROOT_DIR"] = self.dependencies["snappy"].package_folder.replace("\\", "/")
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
