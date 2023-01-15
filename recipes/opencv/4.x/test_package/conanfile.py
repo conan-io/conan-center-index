@@ -30,11 +30,18 @@ class TestPackageConan(ConanFile):
         tc.variables["OPENCV_WITH_STITCHING"] = self.dependencies["opencv"].options.stitching
         tc.variables["OPENCV_WITH_VIDEO"] = self.dependencies["opencv"].options.video
         tc.variables["OPENCV_WITH_VIDEOIO_FFMPEG"] = self.dependencies["opencv"].options.videoio and self.dependencies["opencv"].options.with_ffmpeg
+        tc.variables["OPENCV_WITH_ARUCO"] = self.dependencies["opencv"].options.aruco
+        tc.variables["OPENCV_WITH_BGSEGM"] = self.dependencies["opencv"].options.bgsegm
         tc.variables["OPENCV_WITH_FREETYPE"] = self.dependencies["opencv"].options.freetype
+        tc.variables["OPENCV_WITH_IMG_HASH"] = self.dependencies["opencv"].options.img_hash
+        tc.variables["OPENCV_WITH_INTENSITY_TRANSFORM"] = self.dependencies["opencv"].options.get_safe("intensity_transform", False)
+        tc.variables["OPENCV_WITH_OPTFLOW"] = self.dependencies["opencv"].options.optflow
         tc.variables["OPENCV_WITH_REG"] = self.dependencies["opencv"].options.reg
+        tc.variables["OPENCV_WITH_RGBD"] = self.dependencies["opencv"].options.rgbd
         tc.variables["OPENCV_WITH_SFM"] = self.dependencies["opencv"].options.sfm
         tc.variables["OPENCV_WITH_SHAPE"] = self.dependencies["opencv"].options.shape
         tc.variables["OPENCV_WITH_STRUCTURED_LIGHT"] = self.dependencies["opencv"].options.structured_light
+        tc.variables["OPENCV_WITH_SURFACE_MATCHING"] = self.dependencies["opencv"].options.surface_matching
         tc.generate()
 
     def build(self):
