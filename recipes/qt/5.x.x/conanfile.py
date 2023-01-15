@@ -93,7 +93,9 @@ class QtConan(ConanFile):
         "cross_compile": "ANY",
         "sysroot": "ANY",
         "config": "ANY",
-        "multiconfiguration": [True, False]
+        "multiconfiguration": [True, False],
+        "configure_verbose": [True, False],
+        "build_silent": [True, False]
     }
     options.update({module: [True, False] for module in _submodules})
 
@@ -134,7 +136,9 @@ class QtConan(ConanFile):
         "cross_compile": None,
         "sysroot": None,
         "config": None,
-        "multiconfiguration": False
+        "multiconfiguration": False,
+        "configure_verbose": True,
+        "build_silent": True
     }
     default_options.update({module: (module in ["qttools", "qttranslations"]) for module in _submodules})
 
@@ -549,9 +553,12 @@ class QtConan(ConanFile):
         return None
 
     def build(self):
-        args = ["-confirm-license", "-silent", "-nomake examples", "-nomake tests",
+        args = ["-confirm-license", "-nomake examples", "-nomake tests",
                 f"-prefix {self.package_folder}"]
-        args.append("-v")
+        if self.options.configure_verbose:
+            args.append("-verbose")
+        if self.options.build_silent:
+            args.append("-silent")
         args.append("-archdatadir  %s" % os.path.join(self.package_folder, "bin", "archdatadir"))
         args.append("-datadir  %s" % os.path.join(self.package_folder, "bin", "datadir"))
         args.append("-sysconfdir  %s" % os.path.join(self.package_folder, "bin", "sysconfdir"))
@@ -917,6 +924,8 @@ Examples = bin/datadir/examples""")
     def package_id(self):
         del self.info.options.cross_compile
         del self.info.options.sysroot
+        del self.info.options.configure_verbose
+        del self.info.options.build_silent
         if self.options.multiconfiguration and is_msvc(self):
             if self.settings.compiler == "Visual Studio":
                 if "MD" in self.settings.compiler.runtime:
