@@ -47,7 +47,7 @@ class LibavrocppConan(ConanFile):
         self.requires("snappy/1.1.9")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
@@ -86,12 +86,8 @@ class LibavrocppConan(ConanFile):
                 rm(self, dll_pattern_to_remove, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        # FIXME: avro does not install under a CMake namespace https://github.com/apache/avro/blob/351f589913b9691322966fb77fe72269a0a2ec82/lang/c%2B%2B/CMakeLists.txt#L193
-        target = "avrocpp" if self.options.shared else "avrocpp_s"
-        self.cpp_info.components[target].libs = [target]
-        self.cpp_info.components[target].requires = ["boost::boost", "snappy::snappy"]
+        self.cpp_info.libs = ["avrocpp" if self.options.shared else "avrocpp_s"]
         if self.options.shared:
-            self.cpp_info.components[target].defines.append("AVRO_DYN_LINK")
+            self.cpp_info.defines.append("AVRO_DYN_LINK")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
-
