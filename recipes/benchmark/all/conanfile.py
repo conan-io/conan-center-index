@@ -44,8 +44,7 @@ class BenchmarkConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        check_min_vs(self, "140")
-        if str(self.settings.compiler == "Visual Studio") and Version(self.settings.compiler.version) <= "12":
+        check_min_vs(self, "190")
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support Visual Studio <= 12")
         if Version(self.version) < "1.7.0" and is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support msvc shared builds")
