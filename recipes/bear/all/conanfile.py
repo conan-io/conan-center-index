@@ -46,7 +46,7 @@ class BearConan(ConanFile):
         self.requires("nlohmann_json/3.11.2")
 
     def build_requirements(self):
-        self.tool_requires("protobuf/3.21.9")
+        self.tool_requires("protobuf/3.21.4")
 
     def package_id(self):
         del self.info.settings.compiler
