@@ -152,11 +152,11 @@ class LibpqConan(ConanFile):
             solution_pm = os.path.join(self.source_folder, "src", "tools", "msvc", "Solution.pm")
             if self.options.with_openssl:
                 openssl = self.dependencies["openssl"]
-                for ssl in ["VC\libssl32", "VC\libssl64", "libssl"]:
+                for ssl in ["VC\\libssl32", "VC\\libssl64", "libssl"]:
                     replace_in_file(self,solution_pm,
                                           "%s.lib" % ssl,
                                           "%s.lib" % openssl.libs[0])
-                for crypto in ["VC\libcrypto32", "VC\libcrypto64", "libcrypto"]:
+                for crypto in ["VC\\libcrypto32", "VC\\libcrypto64", "libcrypto"]:
                     replace_in_file(self,solution_pm,
                                           "%s.lib" % crypto,
                                           "%s.lib" % openssl.libs[1])
