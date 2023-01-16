@@ -28,7 +28,7 @@ class LibMysqlClientCConan(ConanFile):
         "shared": False,
         "fPIC": True
     }
-
+    package_type = "library"
     short_paths = True
     generators = "PkgConfigDeps"
 
