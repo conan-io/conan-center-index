@@ -7,7 +7,7 @@ from conan.tools.microsoft import unix_path
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.56.0"
 
 class MpcConan(ConanFile):
     name = "mpc"
