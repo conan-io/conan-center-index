@@ -83,7 +83,7 @@ class GmpConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
         if is_msvc(self):
             self.tool_requires("yasm/1.3.0")      # Needed for determining 32-bit word size
-            self.tool_requires("automake/1.16.5") # Needed for dumpbin_nm
+            self.tool_requires("automake/1.16.5") # Needed for lib-wrapper
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -120,7 +120,7 @@ class GmpConan(ConanFile):
                 "x86": "x86",
                 "x86_64": "amd64",
             }[str(self.settings.arch)]
-            ar_wrapper = unix_path(self, self.conf.get("user.automake:ar-lib"))
+            ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper"))
             dumpbin_nm = unix_path(self, os.path.join(self.source_folder, "dumpbin_nm.py"))
             env.define("CC", "cl -nologo")
             env.define("CCAS", f"{yasm_wrapper} -a x86 -m {yasm_machine} -p gas -r raw -f win32 -g null -X gnu")
