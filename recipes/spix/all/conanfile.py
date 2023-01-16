@@ -34,12 +34,12 @@ class SpixConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         if self.version == "0.4":
-        return {
-            "Visual Studio": "14",
-            "gcc": "5",
-            "clang": "3.4",
-            "apple-clang": "10"
-        }
+            return {
+                "Visual Studio": "14",
+                "gcc": "5",
+                "clang": "3.4",
+                "apple-clang": "10"
+            }
         else:
             return {
                 "Visual Studio": "15.7",
@@ -67,8 +67,7 @@ class SpixConan(ConanFile):
 
     def requirements(self):
         self.requires("anyrpc/1.0.2")
-        self.requires("qt/6.3.1")
-        self.requires("expat/2.4.9")
+        self.requires("qt/6.4.2")
         
     def validate(self):
         if self.info.settings.compiler.cppstd:
