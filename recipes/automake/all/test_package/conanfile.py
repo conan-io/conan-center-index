@@ -1,66 +1,96 @@
+import os
+
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.files import copy
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
+from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.files import chdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 
-required_conan_version = ">=1.50.0"
+
+required_conan_version = ">=1.53.0"
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = "configure.ac", "Makefile.am", "test_package_1.c", "test_package.cpp"
     test_type = "explicit"
+    win_bash = True
+
+    _default_cc = {
+        "gcc": "gcc",
+        "clang": "clang",
+        "Visual Studio": "cl -nologo",
+        "msvc": "cl -nologo",
+        "apple-clang": "clang",
+    }
+
+    def _system_compiler(self, cxx=False):
+        system_cc = self._default_cc.get(str(self.settings.compiler))
+        if system_cc and cxx:
+            if self.settings.compiler == "gcc":
+                system_cc = "g++"
+            elif "clang" in self.settings.compiler:
+                system_cc = "clang++"
+        return system_cc
 
     @property
     def _settings_build(self):
-        # TODO: Remove for Conan v2
         return getattr(self, "settings_build", self.settings)
 
+    def build_requirements(self):
+        self.build_requires(self.tested_reference_str)
+        self.tool_requires("autoconf/2.71") # Needed for autoreconf
+        if self._settings_build.os == "Windows" and not self.conf.get(
+            "tools.microsoft.bash:path", check_type=str
+        ):
+            self.build_requires("msys2/cci.latest")
+
     def layout(self):
-        basic_layout(self, src_folder=".")
+        basic_layout(self, src_folder="src")
 
     def generate(self):
         tc = AutotoolsToolchain(self)
-        env = tc.environment()
-        if is_msvc(self):
-            env.define("CC", "cl -nologo")
-            env.define("CXX", "cl -nologo")
-            env.define("LD", "link")
-        tc.generate(env)
-        tc = AutotoolsDeps(self)
-        tc.generate()
-        tc = VirtualBuildEnv(self)
         tc.generate()
 
-    def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
-        self.tool_requires("autoconf/2.71") # Needed for autoreconf
-        if self._settings_build.os == "Windows":
-            self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
-                self.tool_requires("msys2/cci.latest")  # The conf `tools.microsoft.bash:path` and `tools.microsoft.bash:subsystem` aren't injected for test_package
+        env = VirtualBuildEnv(self)
+        env.generate()
+
+        env = Environment()
+
+        compile_script = unix_path(self,
+            self.dependencies.build["automake"].conf_info.get("user.automake:compile-wrapper"))
+
+        # define CC and CXX such that if the user hasn't already defined it
+        # via `tools.build:compiler_executables` or buildenv variables,
+        # we tell autotools to guess the name matching the current setting
+        # (otherwise it falls back to finding gcc first)
+        cc = self._system_compiler()
+        cxx = self._system_compiler(cxx=True)
+        if cc and cxx:
+            # Using shell parameter expansion
+            env.define("CC", f"${{CC-{cc}}}")
+            env.define("CXX", f"${{CXX-{cxx}}}")
+
+        env.define("COMPILE", compile_script)
+        env.define("ACLOCAL_PATH", unix_path(self, os.path.join(self.source_folder)))
+        env.vars(self, scope="build").save_script("automake_build_test")
 
     def build(self):
-        if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", check_type=str):
-            return  # autoconf needs a bash if there isn't a bash no need to build
+        # Test compilation through compile wrapper script
+        compiler = self._system_compiler()
+        source_file = unix_path(self, os.path.join(self.source_folder, "test_package_1.c"))
+        with chdir(self, self.build_folder):
+            self.run(f"$COMPILE {compiler} {source_file} -o script_test", env="conanbuild")
 
-        for src in self.exports_sources:
-            copy(self, src, self.source_path, self.build_folder)
-
+        # Build test project
         autotools = Autotools(self)
-        self.run("autoreconf -fiv", cwd=self.build_path)  # Workaround for since the method `autoreconf()` will always run from source
-        autotools.configure(build_script_folder=self.build_path)
+        autotools.autoreconf(args=['--debug'])
+        autotools.configure()
         autotools.make()
 
     def test(self):
-        if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", check_type=str):
-            return  # autoconf needs a bash if there isn't a bash no need to build
-
         if can_run(self):
-            ext = ".exe" if self.settings.os == "Windows" else ""
-            test_cmd = unix_path(self, self.build_path.joinpath(f"test_package{ext}"))
-
-            self.run(test_cmd, scope="run", env="conanbuild")
+            with chdir(self, self.build_folder):
+                self.run("./script_test")
+                self.run("./test_package")

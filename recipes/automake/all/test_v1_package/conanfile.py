@@ -1,5 +1,4 @@
-from conan import ConanFile
-from conans import AutoToolsBuildEnvironment, tools
+from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conan.tools.microsoft import is_msvc
 from contextlib import contextmanager
 import os
@@ -10,7 +9,7 @@ required_conan_version = ">=1.45.0"
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = "../test_package/configure.ac", "../test_package/Makefile.am", "../test_package/test_package_1.c", "../test_package/test_package.cpp"
+    exports_sources = "configure.ac", "Makefile.am", "test_package_1.c", "test_package.cpp"
     # DON'T COPY extra.m4 TO BUILD FOLDER!!!
     test_type = "explicit"
 
@@ -23,7 +22,6 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires(self.tested_reference_str)
-        self.build_requires("autoconf/2.71") # Needed for autoreconf
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
@@ -49,7 +47,7 @@ class TestPackageConan(ConanFile):
         if not system_cc:
             system_cc = self._default_cc.get(str(self.settings.compiler))
         return system_cc
-
+    
     @property
     def _user_info(self):
         return getattr(self, "user_info_build", self.deps_user_info)
@@ -68,7 +66,7 @@ class TestPackageConan(ConanFile):
     def _build_autotools(self):
         """Test autoreconf + configure + make"""
         with tools.environment_append({"AUTOMAKE_CONAN_INCLUDES": [tools.unix_path(self.source_folder)]}):
-            self.run("autoreconf -fiv", win_bash=tools.os_info.is_windows)
+            self.run("{} -fiv".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
         self.run("{} --help".format(os.path.join(self.build_folder, "configure").replace("\\", "/")), win_bash=tools.os_info.is_windows)
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         with self._build_context():
