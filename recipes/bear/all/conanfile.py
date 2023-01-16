@@ -29,7 +29,7 @@ class BearConan(ConanFile):
         return {
             "gcc": "9",
             "clang": "12",
-            "apple-clang": "11",
+            "apple-clang": "12",
         }
 
     def export_sources(self):
