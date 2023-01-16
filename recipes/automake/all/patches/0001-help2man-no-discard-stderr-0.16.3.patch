@@ -1,9 +1,0 @@
---- Makefile.in
-+++ Makefile.in
-@@ -711,4 +711,4 @@
- update_mans = \
-   $(AM_V_GEN): \
-     && $(MKDIR_P) doc \
--    && ./pre-inst-env $(PERL) $(srcdir)/doc/help2man --output=$@
-+    && ./pre-inst-env $(PERL) $(srcdir)/doc/help2man --no-discard-stderr --output=$@
- 

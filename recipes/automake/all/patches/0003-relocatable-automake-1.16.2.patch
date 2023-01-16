@@ -1,0 +1,106 @@
+diff --git a/bin/aclocal.in b/bin/aclocal.in
+index 0a4eac4..487b93d 100644
+--- a/bin/aclocal.in
++++ b/bin/aclocal.in
+@@ -18,10 +18,13 @@
+ 
+ # Written by Tom Tromey <tromey@redhat.com>, and
+ # Alexandre Duret-Lutz <adl@gnu.org>.
++use Cwd 'abs_path';
++use File::Basename;
+ 
+ BEGIN
+ {
+-  unshift (@INC, '@datadir@/@PACKAGE@-@APIVERSION@')
++  my $scriptpath = abs_path(dirname(__FILE__));
++  unshift (@INC, "$scriptpath/../res/@PACKAGE@-@APIVERSION@")
+     unless $ENV{AUTOMAKE_UNINSTALLED};
+ }
+ 
+@@ -61,9 +64,16 @@ $perl_threads = 0;
+ # @system_includes can be augmented with the 'dirlist' file or the
+ # ACLOCAL_PATH environment variable, and reset with the '--system-acdir'
+ # option.
++my $scriptpath = abs_path(dirname(__FILE__));
+ my @user_includes = ();
+-my @automake_includes = ('@datadir@/aclocal-' . $APIVERSION);
+-my @system_includes = ('@datadir@/aclocal');
++my @automake_includes = ("$scriptpath/../res/aclocal-" . $APIVERSION);
++my @system_includes = ("$scriptpath/../res/aclocal");
++my @conan_includes;
++foreach my $conandir (uniq(split(/[:;]/, $ENV{'AUTOMAKE_CONAN_INCLUDES'} || ""))) 
++{
++    push (@conan_includes, $conandir) if $conandir ne '' && -d $conandir;
++    
++}
+ 
+ # Whether we should copy M4 file in $user_includes[0].
+ my $install = 0;
+@@ -445,6 +455,7 @@ sub scan_m4_files ()
+     }
+   scan_m4_dirs (FT_AUTOMAKE, SCAN_M4_DIRS_ERROR, @automake_includes);
+   scan_m4_dirs (FT_SYSTEM, SCAN_M4_DIRS_ERROR, @system_includes);
++  scan_m4_dirs (FT_SYSTEM, SCAN_M4_DIRS_ERROR, @conan_includes);
+ 
+   # Construct a new function that does the searching.  We use a
+   # function (instead of just evaluating $search in the loop) so that
+@@ -767,7 +778,7 @@ sub trace_used_macros ()
+   # to silence m4_require warnings".
+   my $early_m4_code .= "m4_define([m4_require_silent_probe], [-])";
+ 
+-  my $traces = ($ENV{AUTOM4TE} || '@am_AUTOM4TE@');
++  my $traces = ($ENV{AUTOM4TE} || '/usr/bin/env autom4te');
+   $traces .= " --language Autoconf-without-aclocal-m4 ";
+   $traces = "echo '$early_m4_code' | $traces - ";
+ 
+diff --git a/bin/automake.in b/bin/automake.in
+index cb077a7..676593c 100644
+--- a/bin/automake.in
++++ b/bin/automake.in
+@@ -23,10 +23,13 @@
+ package Automake;
+ 
+ use strict;
++use Cwd 'abs_path';
++use File::Basename;
+ 
+ BEGIN
+ {
+-  unshift (@INC, '@datadir@/@PACKAGE@-@APIVERSION@')
++  my $scriptpath = abs_path(dirname(__FILE__));
++  unshift (@INC, "$scriptpath/../res/@PACKAGE@-@APIVERSION@")
+     unless $ENV{AUTOMAKE_UNINSTALLED};
+ 
+   # Override SHELL.  This is required on DJGPP so that system() uses
+@@ -5243,7 +5246,7 @@ sub scan_autoconf_traces
+ 		sinclude => 1,
+ 	      );
+ 
+-  my $traces = ($ENV{AUTOCONF} || '@am_AUTOCONF@') . " ";
++  my $traces = ($ENV{AUTOCONF} || '/usr/bin/env autoconf') . " ";
+ 
+   # Use a separator unlikely to be used, not ':', the default, which
+   # has a precise meaning for AC_CONFIG_FILES and so on.
+diff --git a/lib/Automake/Config.in b/lib/Automake/Config.in
+index f79b8cd..ed78dd2 100644
+--- a/lib/Automake/Config.in
++++ b/lib/Automake/Config.in
+@@ -20,6 +20,8 @@ use strict;
+ 
+ use 5.006;
+ require Exporter;
++use Cwd 'abs_path';
++use File::Basename;
+ 
+ our @ISA = qw (Exporter);
+ our @EXPORT = qw ($APIVERSION $PACKAGE $PACKAGE_BUGREPORT $VERSION
+@@ -32,7 +34,8 @@ our $PACKAGE = '@PACKAGE@';
+ our $PACKAGE_BUGREPORT = '@PACKAGE_BUGREPORT@';
+ our $VERSION = '@VERSION@';
+ our $RELEASE_YEAR = '@RELEASE_YEAR@';
+-our $libdir = $ENV{"AUTOMAKE_LIBDIR"} || '@datadir@/@PACKAGE@-@APIVERSION@';
++my $scriptpath = abs_path(dirname(__FILE__));
++our $libdir = $ENV{"AUTOMAKE_LIBDIR"} || "$scriptpath/../../@PACKAGE@-@APIVERSION@";
+ 
+ our $perl_threads = 0;
+ # We need at least this version for CLONE support.
