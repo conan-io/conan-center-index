@@ -1,17 +1,16 @@
 cmake_minimum_required(VERSION 3.4)
-project(svm C CXX)
+project(svm LANGUAGES C CXX)
 
 include(GNUInstallDirs)
 
-add_library(svm ${LIBSVM_SRC_DIR}/svm.cpp)
-set_property(TARGET svm PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS ON)
+add_library(svm ${LIBSVM_SRC_DIR}/svm.cpp ${LIBSVM_SRC_DIR}/svm.def)
 set_target_properties(svm PROPERTIES PUBLIC_HEADER ${LIBSVM_SRC_DIR}/svm.h)
 
 add_executable(svm-predict ${LIBSVM_SRC_DIR}/svm-predict.c)
-target_link_libraries(svm-predict svm)
+target_link_libraries(svm-predict PRIVATE svm)
 
 add_executable(svm-train ${LIBSVM_SRC_DIR}/svm-train.c)
-target_link_libraries(svm-train svm)
+target_link_libraries(svm-train PRIVATE svm)
 
 add_executable(svm-scale ${LIBSVM_SRC_DIR}/svm-scale.c)
 
