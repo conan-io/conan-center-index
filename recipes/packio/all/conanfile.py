@@ -32,12 +32,20 @@ class PackioConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        return {
-            "apple-clang": 10,
-            "clang": 6,
-            "gcc": 7,
-            "Visual Studio": 16,
-        }
+        if tools.Version(self.version) < "2.4.0":
+            return {
+                "apple-clang": 10,
+                "clang": 6,
+                "gcc": 7,
+                "Visual Studio": 16,
+            }
+        else:
+            return {
+                "apple-clang": 13,
+                "clang": 11,
+                "gcc": 9,
+                "Visual Studio": 16,
+            }
 
     def config_options(self):
         if tools.Version(self.version) < "1.2.0":
