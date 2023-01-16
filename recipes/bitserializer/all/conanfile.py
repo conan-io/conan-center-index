@@ -116,8 +116,8 @@ class BitserializerConan(ConanFile):
             deps.generate()
 
     def build(self):
+        self._patch_sources()
         if not self._is_header_only:
-            self._patch_sources()
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
