@@ -40,6 +40,7 @@ class TestPackageConan(ConanFile):
         cmake.definitions["OPENCV_WITH_STRUCTURED_LIGHT"] = self.options["opencv"].structured_light
         cmake.definitions["OPENCV_WITH_SURFACE_MATCHING"] = self.options["opencv"].surface_matching
         cmake.definitions["OPENCV_WITH_TEXT"] = self.options["opencv"].text
+        cmake.definitions["OPENCV_WITH_XFEATURES2D"] = self.options["opencv"].xfeatures2d
         cmake.configure()
         cmake.build()
 
