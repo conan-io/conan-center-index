@@ -57,6 +57,7 @@ CONFIGURE_OPTIONS = (
     "thread",
     "timer",
     "type_erasure",
+    "url",
     "wave",
 )
 
@@ -271,6 +272,7 @@ class BoostConan(ConanFile):
                 self.options.without_fiber = True
                 self.options.without_nowide = True
                 self.options.without_json = True
+                self.options.without_url = True
         else:
             version_cxx11_standard_json = self._min_compiler_version_default_cxx11
             if version_cxx11_standard_json:
@@ -278,10 +280,12 @@ class BoostConan(ConanFile):
                     self.options.without_fiber = True
                     self.options.without_json = True
                     self.options.without_nowide = True
+                    self.options.without_url = True
             else:
                 self.options.without_fiber = True
                 self.options.without_json = True
                 self.options.without_nowide = True
+                self.options.without_url = True
 
         # iconv is off by default on Windows and Solaris
         if self._is_windows_platform or self.settings.os == "SunOS":
@@ -430,7 +434,7 @@ class BoostConan(ConanFile):
 
     @property
     def _cxx11_boost_libraries(self):
-        libraries = ["fiber", "json", "nowide"]
+        libraries = ["fiber", "json", "nowide", "url"]
         if Version(self.version) >= "1.76.0":
             libraries.append("math")
         if Version(self.version) >= "1.79.0":
@@ -557,7 +561,7 @@ class BoostConan(ConanFile):
 
     def build_requirements(self):
         if not self.options.header_only:
-            self.tool_requires("b2/4.9.2")
+            self.tool_requires("b2/4.9.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
