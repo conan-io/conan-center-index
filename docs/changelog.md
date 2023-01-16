@@ -1,5 +1,16 @@
 # Changelog
 
+### 12-January-2023 - 19:33 CET
+
+- [fix] Fix Conan v2 download/upload recipe commands.
+
+### 12-January-2023 - 11:21 CET
+
+- [feature] Add support for Conan v2 beta 7.
+- [feature] Check complete Conan version on ValidateInfrastructure.
+- [fix] Increase `conan test` timeout value.
+- [fix] Fix stage name when calculating build configurations.
+
 ### 10-January-2023 - 15:20 CET
 
 - [feature] Add entry in config to disable merging labels from the multibranch job.
