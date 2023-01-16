@@ -19,7 +19,7 @@ class LibcapConan(ConanFile):
     description = "This is a library for getting and setting POSIX.1e" \
                   " (formerly POSIX 6) draft 15 capabilities"
     topics = ("capabilities")
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -31,21 +31,21 @@ class LibcapConan(ConanFile):
         "psx_syscals": False,
     }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
-    def validate(self):
-        if self.info.settings.os != "Linux":
-            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def export_sources(self):
-        export_conandata_patches(self)
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration(f"{self.name} only supports Linux")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -60,8 +60,8 @@ class LibcapConan(ConanFile):
         env.define("prefix", "/")
         env.define("lib", "lib")
 
-        if cross_building(self) and not env.vars(self).get("BUILD_CC"):
-            native_cc = VirtualBuildEnv(self).vars().get("CC")
+        if cross_building(self):
+            native_cc = env.vars(self).get("CC", VirtualBuildEnv(self).vars().get("CC"))
             if not native_cc:
                 native_cc = "cc"
             self.output.info(f"Using native compiler '{native_cc}'")
@@ -73,15 +73,14 @@ class LibcapConan(ConanFile):
         apply_conandata_patches(self)
 
         autotools = Autotools(self)
-        with chdir(self, os.path.join(self.source_folder, self.name)):
+        with chdir(self, os.path.join(self.source_folder, "libcap")):
             autotools.make()
 
     def package(self):
-        copy(self, "License", self.source_folder,
-             os.path.join(self.package_folder, "licenses"), keep_path=False)
+        copy(self, "License", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
         autotools = Autotools(self)
-        with chdir(self, os.path.join(self.source_folder, self.name)):
+        with chdir(self, os.path.join(self.source_folder, "libcap")):
             autotools.make(target="install-common-cap")
             install_cap = ("install-shared-cap" if self.options.shared
                            else "install-static-cap")
@@ -96,15 +95,12 @@ class LibcapConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.components["cap"].set_property("pkg_config_name",
-                                                     "libcap")
-        self.cpp_info.components["cap"].names["pkg_config"] = "libcap"
+        self.cpp_info.components["cap"].set_property("pkg_config_name", "libcap")
         self.cpp_info.components["cap"].libs = ["cap"]
         if self.options.psx_syscals:
-            self.cpp_info.components["psx"].set_property("pkg_config_name",
-                                                         "libpsx")
-            self.cpp_info.components["psx"].names["pkg_config"] = "libpsx"
+            self.cpp_info.components["psx"].set_property("pkg_config_name", "libpsx")
             self.cpp_info.components["psx"].libs = ["psx"]
             self.cpp_info.components["psx"].system_libs = ["pthread"]
-            self.cpp_info.components["psx"].exelinkflags = [
-                "-Wl,-wrap,pthread_create"]
+            self.cpp_info.components["psx"].exelinkflags = ["-Wl,-wrap,pthread_create"]
+            # trick to avoid conflicts with cap component
+            self.cpp_info.set_property("pkg_config_name", "libcap-do-not-use")
