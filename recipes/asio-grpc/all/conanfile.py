@@ -20,11 +20,11 @@ class AsioGrpcConan(ConanFile):
     no_copy_source = True
     options = {
         "backend": ["boost", "asio", "unifex"],
-        "use_boost_container": ["auto", True, False],
+        "local_allocator": ["auto", "memory_resource", "boost_container", "recycling_allocator"],
     }
     default_options = {
         "backend": "boost",
-        "use_boost_container": "auto",
+        "local_allocator": "auto",
     }
 
     @property
@@ -51,17 +51,21 @@ class AsioGrpcConan(ConanFile):
             self.output.warn(f"{self.name} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
 
     def configure(self):
-        if self.options.use_boost_container == "auto":
+        self._local_allocator_option = self.options.local_allocator
+        if self._local_allocator_option == "auto":
             libcxx = self.settings.compiler.get_safe("libcxx")
             compiler_version = Version(self.settings.compiler.version)
-            self.options.use_boost_container = libcxx and str(libcxx) == "libc++" or \
+            prefer_boost_container = libcxx and str(libcxx) == "libc++" or \
                 (self.settings.compiler == "gcc" and compiler_version < "9")  or \
                 (self.settings.compiler == "clang" and compiler_version < "12" and libcxx and str(libcxx) == "libstdc++")
+            self._local_allocator_option = "boost_container" if prefer_boost_container else "memory_resource"
+        if self._local_allocator_option == "recycling_allocator" and self.options.backend == "unifex":
+            raise ConanInvalidConfiguration(f"{self.name} 'recycling_allocator' cannot be used in combination with the 'unifex' backend.")
 
     def requirements(self):
-        self.requires("grpc/1.50.0")
-        if self.options.use_boost_container or self.options.backend == "boost":
-            self.requires("boost/1.80.0")
+        self.requires("grpc/1.50.1")
+        if self._local_allocator_option == "boost_container" or self.options.backend == "boost":
+            self.requires("boost/1.81.0")
         if self.options.backend == "asio":
             self.requires("asio/1.24.0")
         if self.options.backend == "unifex":
@@ -69,7 +73,7 @@ class AsioGrpcConan(ConanFile):
 
     def package_id(self):
         self.info.clear()
-        self.info.options.use_boost_container = self.options.use_boost_container
+        self.info.options.local_allocator = self._local_allocator_option
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -79,7 +83,8 @@ class AsioGrpcConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ASIO_GRPC_USE_BOOST_CONTAINER"] = self.options.use_boost_container
+        tc.variables["ASIO_GRPC_USE_BOOST_CONTAINER"] = self._local_allocator_option == "boost_container"
+        tc.variables["ASIO_GRPC_USE_RECYCLING_ALLOCATOR"] = self._local_allocator_option == "recycling_allocator"
         tc.generate()
 
     def build(self):
@@ -106,7 +111,7 @@ class AsioGrpcConan(ConanFile):
             self.cpp_info.defines = ["AGRPC_UNIFEX"]
             self.cpp_info.requires.append("libunifex::unifex")
 
-        if self.options.use_boost_container:
+        if self._local_allocator_option == "boost_container":
             self.cpp_info.requires.append("boost::container")
 
         self.cpp_info.set_property("cmake_file_name", "asio-grpc")

@@ -1,5 +1,13 @@
 # Changelog
 
+### 10-January-2023 - 15:20 CET
+
+- [feature] Add entry in config to disable merging labels from the multibranch job.
+- [feature] Add timeout to `conan test` command.
+- [feature] Add API wrapper support for status page.
+- [refactor] Separate build configuration calculation from pull-request interaction (labels/comments).
+- [feature] Take main repository from configuration for Tapaholes jobs.
+
 ### 15-December-2022 - 11:12 CET
 
 - [feature] Set github feeback title via config file (`feedback_title`).
