@@ -59,6 +59,7 @@ class LibpqConan(ConanFile):
             self.options.rm_safe("fPIC")
             self.options.rm_safe("disable_rpath")
         if self._is_mingw:
+            # TODO: back to static by default once mingw static fixed
             self.options.shared = True
 
     def configure(self):
@@ -84,11 +85,11 @@ class LibpqConan(ConanFile):
             self.tool_requires("strawberryperl/5.32.1.1")
         elif self._settings_build.os == "Windows":
             self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
