@@ -824,7 +824,7 @@ class OpenCVConan(ConanFile):
             "multiview": {
                 "is_built": self.options.sfm,
                 "no_option": True,
-                "multiview": ["numeric", "gflags::gflags"] + eigen() + ipp(),
+                "requires": ["numeric", "gflags::gflags"] + eigen() + ipp(),
             },
         }
 
