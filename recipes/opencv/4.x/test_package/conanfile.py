@@ -42,6 +42,7 @@ class TestPackageConan(ConanFile):
         tc.variables["OPENCV_WITH_SHAPE"] = self.dependencies["opencv"].options.shape
         tc.variables["OPENCV_WITH_STRUCTURED_LIGHT"] = self.dependencies["opencv"].options.structured_light
         tc.variables["OPENCV_WITH_SURFACE_MATCHING"] = self.dependencies["opencv"].options.surface_matching
+        tc.variables["OPENCV_WITH_TEXT"] = self.dependencies["opencv"].options.text
         tc.generate()
 
     def build(self):
