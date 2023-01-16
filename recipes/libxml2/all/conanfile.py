@@ -172,7 +172,7 @@ class Libxml2Conan(ConanFile):
             args.append(f"include=\"{';'.join(incdirs)}\"")
             args.append(f"lib=\"{';'.join(libdirs)}\"")
 
-            for name in self._option_names:
+            for name in self._configure_option_names:
                 cname = {"mem-debug": "mem_debug",
                          "run-debug": "run_debug",
                          "docbook": "docb"}.get(name, name)
