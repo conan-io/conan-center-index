@@ -2,12 +2,10 @@ sources:
   "8.0.31":
     url:
       - "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.31.tar.gz"
-      - "https://mirrors.huaweicloud.com/mysql/Downloads/MySQL-8.0/mysql-8.0.31.tar.gz"
     sha256: "67bb8cba75b28e95c7f7948563f01fb84528fcbb1a35dba839d4ce44fe019baa"
   "8.0.30":
     url:
       - "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.30.tar.gz"
-      - "https://mirrors.huaweicloud.com/mysql/Downloads/MySQL-8.0/mysql-8.0.30.tar.gz"
     sha256: "c988d5c6ba9a56692a6cd6e9813465b5fc9368ed4b461df97059a2fc160c8b84"
   "8.0.29":
     url:
@@ -23,22 +21,14 @@ sources:
 patches:
   "8.0.31":
     - patch_file: "patches/0006-fix-cpp20-build-8.0.29.patch"
-      base_path: "source_subfolder"
   "8.0.30":
     - patch_file: "patches/0006-fix-cpp20-build-8.0.29.patch"
-      base_path: "source_subfolder"
   "8.0.29":
     - patch_file: "patches/0006-fix-cpp20-build-8.0.29.patch"
-      base_path: "source_subfolder"
   "8.0.25":
     - patch_file: "patches/0004-fix-805-cpp17-build.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0005-fix-macos-12.0.x-version-detection.patch"
-      base_path: "source_subfolder"
   "8.0.17":
     - patch_file: "patches/0001-find-cmake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-dont-install-static-libraries+fix-mysql-config.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-msvc-install-no-pdb.patch"
-      base_path: "source_subfolder"
