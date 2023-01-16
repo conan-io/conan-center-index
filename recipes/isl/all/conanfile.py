@@ -95,7 +95,7 @@ class IslConan(ConanFile):
                 tc.extra_cflags = ["-FS"]
         env = tc.environment()
         if is_msvc(self):
-            ar_wrapper = unix_path(self, self.conf.get("user.automake:ar-lib"))
+            ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper"))
             env.define("CC", "cl -nologo")
             env.define("CXX", "cl -nologo")
             env.define("AR", "lib")
