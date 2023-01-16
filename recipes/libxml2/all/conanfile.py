@@ -63,8 +63,9 @@ class Libxml2Conan(ConanFile):
     options = {name: [True, False] for name in default_options.keys()}
 
     @property
-    def _option_names(self):
-        return [name for name in self.info.options.keys() if name not in ["shared", "fPIC", "include_utils"]]
+    def _configure_option_names(self):
+        return [name for name in self.default_options.keys() if (name in self.options)
+                and (name not in ["shared", "fPIC", "include_utils"])]
 
     @property
     def _settings_build(self):
@@ -139,7 +140,7 @@ class Libxml2Conan(ConanFile):
                 f"--enable-shared={yes_no(self.options.shared)}",
                 f"--enable-static={yes_no(not self.options.shared)}",
             ])
-            for option_name in self._option_names:
+            for option_name in self._configure_option_names:
                 option_value = getattr(self.options, option_name)
                 tc.configure_args.append(f"--with-{option_name}={yes_no(option_value)}")
 
