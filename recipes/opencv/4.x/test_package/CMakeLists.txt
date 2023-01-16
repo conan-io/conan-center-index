@@ -32,6 +32,7 @@ option(OPENCV_WITH_STRUCTURED_LIGHT "Enabled if opencv is built with structured_
 option(OPENCV_WITH_SURFACE_MATCHING "Enabled if opencv is built with surface_matching module" OFF)
 option(OPENCV_WITH_TEXT "Enabled if opencv is built with text module" OFF)
 option(OPENCV_WITH_XFEATURES2D "Enabled if opencv is built with xfeatures2d module" OFF)
+option(OPENCV_WITH_XIMGPROC "Enabled if opencv is built with ximgproc module" OFF)
 
 find_package(OpenCV REQUIRED core CONFIG)
 
@@ -226,4 +227,11 @@ if(OPENCV_WITH_XFEATURES2D)
     target_link_libraries(test_xfeatures2d PRIVATE opencv_xfeatures2d)
     target_compile_features(test_xfeatures2d PRIVATE cxx_std_11)
     add_test(NAME test_xfeatures2d COMMAND test_xfeatures2d)
+endif()
+
+if(OPENCV_WITH_XIMGPROC)
+    add_executable(test_ximgproc test_ximgproc.cpp)
+    target_link_libraries(test_ximgproc PRIVATE opencv_ximgproc)
+    target_compile_features(test_ximgproc PRIVATE cxx_std_11)
+    add_test(NAME test_ximgproc COMMAND test_ximgproc)
 endif()

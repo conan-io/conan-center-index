@@ -44,6 +44,7 @@ class TestPackageConan(ConanFile):
         tc.variables["OPENCV_WITH_SURFACE_MATCHING"] = self.dependencies["opencv"].options.surface_matching
         tc.variables["OPENCV_WITH_TEXT"] = self.dependencies["opencv"].options.text
         tc.variables["OPENCV_WITH_XFEATURES2D"] = self.dependencies["opencv"].options.xfeatures2d
+        tc.variables["OPENCV_WITH_XIMGPROC"] = self.dependencies["opencv"].options.ximgproc
         tc.generate()
 
     def build(self):
