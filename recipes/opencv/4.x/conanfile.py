@@ -334,9 +334,6 @@ class OpenCVConan(ConanFile):
         def gtk():
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
 
-        def protobuf():
-            return ["protobuf::protobuf"] if self.options.dnn else []
-
         def freetype():
             return ["freetype::freetype"] if self.options.freetype else []
 
@@ -434,7 +431,7 @@ class OpenCVConan(ConanFile):
             "dnn": {
                 "is_built": self.options.dnn,
                 "mandatory_options": ["imgproc"],
-                "requires": ["opencv_core", "opencv_imgproc"] + protobuf() + vulkan() + ipp(),
+                "requires": ["opencv_core", "opencv_imgproc", "protobuf::protobuf"] + vulkan() + ipp(),
             },
             "features2d": {
                 "is_built": self.options.features2d,
@@ -613,7 +610,7 @@ class OpenCVConan(ConanFile):
             "cvv": {
                 "is_built": self.options.cvv,
                 "mandatory_options": ["with_qt", "features2d", "imgproc"],
-                "requires": ["opencv_core", "opencv_features2d", "opencv_imgproc"] + qt() + eigen() + ipp(),
+                "requires": ["opencv_core", "opencv_features2d", "opencv_imgproc", "qt::qt"] + eigen() + ipp(),
             },
             "datasets": {
                 "is_built": self.options.datasets,
