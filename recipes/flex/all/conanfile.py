@@ -5,6 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.files import get, rmdir, copy, rm
 from conan.tools.gnu import AutotoolsToolchain, Autotools
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -42,6 +43,9 @@ class FlexConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Flex package is not compatible with Windows. "
                                             "Consider using winflexbison instead.")
+        if self.settings.compiler in ("apple-clang", "clang") and Version(self.settings.compiler.version).major == 13:
+            raise ConanInvalidConfiguration("Flex is not working for clang-13")
+
 
     def config_options(self):
         if self.settings.os == "Windows":
