@@ -51,7 +51,7 @@ class DoxygenConan(ConanFile):
             self.requires("zlib/1.2.13")
 
     def build_requirements(self):
-        if self.settings.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.24")
         else:
             self.tool_requires("flex/2.6.4")
@@ -85,9 +85,6 @@ class DoxygenConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        # if self.settings.os != "Windows":
-        #    deps.set_property("flex", "cmake_find_mode", "none", build_context=True)
-        #    deps.set_property("bison", "cmake_find_mode", "none", build_context=True)
         deps.generate()
 
     def build(self):
