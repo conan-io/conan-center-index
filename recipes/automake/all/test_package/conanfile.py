@@ -27,8 +27,11 @@ class TestPackageConan(ConanFile):
 
     def _system_compiler(self, cxx=False):
         system_cc = self._default_cc.get(str(self.settings.compiler))
-        if system_cc and cxx and not is_msvc(self):
-            system_cc = system_cc + "++"
+        if system_cc and cxx:
+            if self.settings.compiler == "gcc":
+                system_cc = "g++"
+            elif "clang" in self.settings.compiler:
+                system_cc = "clang++"
         return system_cc
 
     @property
@@ -54,12 +57,8 @@ class TestPackageConan(ConanFile):
 
         env = Environment()
 
-        compile_script = unix_path(
-            self,
-            self.dependencies.build["automake"].conf_info.get(
-                "user.automake:compile-wrapper"
-            ),
-        )
+        compile_script = unix_path(self,
+            self.dependencies.build["automake"].conf_info.get("user.automake:compile-wrapper"))
 
         # define CC and CXX such that if the user hasn't already defined it
         # via `tools.build:compiler_executables` or buildenv variables,
