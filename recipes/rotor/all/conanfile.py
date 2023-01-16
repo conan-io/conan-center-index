@@ -49,7 +49,7 @@ class RotorConan(ConanFile):
                 pass
 
     def requirements(self):
-        self.requires("boost/[>=1.68.0]")
+        self.requires("boost/1.81.0")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -77,14 +77,14 @@ class RotorConan(ConanFile):
         compiler = str(self.settings.compiler)
         if compiler not in minimal_version:
             self.output.warn(
-                f"{self.name} recipe lacks information about the {compiler} compiler standard version support")
+                f"{self.ref} recipe lacks information about the {compiler} compiler standard version support")
             self.output.warn(
-                f"{self.name} requires a compiler that supports at least C++{minimal_cpp_standard}")
+                f"{self.ref} requires a compiler that supports at least C++{minimal_cpp_standard}")
             return
 
         compiler_version = Version(self.settings.compiler.version)
         if compiler_version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration(f"{self.name} requires a compiler that supports at least C++{minimal_cpp_standard}")
+            raise ConanInvalidConfiguration(f"{self.ref} requires a compiler that supports at least C++{minimal_cpp_standard}")
 
         if self.options.shared and Version(self.version) < "0.23":
             raise ConanInvalidConfiguration("shared option is available from v0.23")
