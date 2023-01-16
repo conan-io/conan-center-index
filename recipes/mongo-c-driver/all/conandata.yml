@@ -1,4 +1,7 @@
 sources:
+  "1.23.2":
+    url: "https://github.com/mongodb/mongo-c-driver/releases/download/1.23.2/mongo-c-driver-1.23.2.tar.gz"
+    sha256: "123c358827eea07cd76a31c40281bb1c81b6744f6587c96d0cf217be8b1234e3"
   "1.22.2":
     url: "https://github.com/mongodb/mongo-c-driver/releases/download/1.22.2/mongo-c-driver-1.22.2.tar.gz"
     sha256: "2e59b9d38d600bd63ccc0b215dd44c6254a66eeb8085a5ac513748cd6220532e"
@@ -18,6 +21,16 @@ sources:
     url: "https://github.com/mongodb/mongo-c-driver/releases/download/1.17.2/mongo-c-driver-1.17.2.tar.gz"
     sha256: "bc53d5f72ab628a1ae549db6888325d6dc34db3ca31c5e16e550c1bb4266d864"
 patches:
+  "1.23.2":
+    - patch_file: "patches/1.23.2-0001-disable-shared-when-static.patch"
+      patch_description: "separate static and shared builds"
+      patch_type: "conan"
+    - patch_file: "patches/1.22.0-0002-fix-uninitialized-warning.patch"
+      patch_description: "fix uninitialized variable warning"
+      patch_type: "portability"
+    - patch_file: "patches/1.22.0-0003-disable-warning-errors.patch"
+      patch_description: "disable compiler flags to make warnings into errors"
+      patch_type: "conan"
   "1.22.2":
     - patch_file: "patches/1.22.0-0001-disable-shared-when-static.patch"
       patch_description: "separate static and shared builds"
