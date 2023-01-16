@@ -55,7 +55,7 @@ class DoxygenConan(ConanFile):
             self.requires("zlib/1.2.13")
 
     def build_requirements(self):
-        if self.settings_build.os == "Windows":
+        if self._settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.24")
         else:
             self.tool_requires("flex/2.6.4")
