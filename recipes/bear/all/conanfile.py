@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
@@ -44,6 +45,9 @@ class BearConan(ConanFile):
         self.requires("spdlog/1.11.0")
         self.requires("nlohmann_json/3.11.2")
 
+    def build_requirements(self):
+        self.tools_requires("protobuf/3.21.9")
+
     def package_id(self):
         del self.info.settings.compiler
         del self.info.settings.build_type
@@ -74,6 +78,9 @@ class BearConan(ConanFile):
         
         pc = PkgConfigDeps(self)
         pc.generate()
+
+        tc = VirtualBuildEnv(self)
+        tc.generate(scope="build")
 
     def build(self):
         apply_conandata_patches(self)
