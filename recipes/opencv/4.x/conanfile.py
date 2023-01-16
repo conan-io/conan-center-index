@@ -322,21 +322,6 @@ class OpenCVConan(ConanFile):
         def eigen():
             return ["eigen::eigen"] if self.options.with_eigen else []
 
-        def parallel():
-            return ["onetbb::onetbb"] if self.options.parallel == "tbb" else []
-
-        def quirc():
-            return ["quirc::quirc"] if self.options.get_safe("with_quirc") else []
-
-        def qt():
-            return ["qt::qt"] if self.options.get_safe("with_qt") else []
-
-        def gtk():
-            return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
-
-        def freetype():
-            return ["freetype::freetype"] if self.options.freetype else []
-
         def ffmpeg():
             if self.options.get_safe("with_ffmpeg"):
                 return [
@@ -349,6 +334,12 @@ class OpenCVConan(ConanFile):
             else:
                 return [ ]
 
+        def freetype():
+            return ["freetype::freetype"] if self.options.freetype else []
+
+        def gtk():
+            return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
+
         def ipp():
             if self.options.with_ipp:
                 if self.options.with_ipp == "intel-ipp":
@@ -359,6 +350,18 @@ class OpenCVConan(ConanFile):
                     return []
             else:
                 return []
+
+        def parallel():
+            return ["onetbb::onetbb"] if self.options.parallel == "tbb" else []
+
+        def qt():
+            return ["qt::qt"] if self.options.get_safe("with_qt") else []
+
+        def quirc():
+            return ["quirc::quirc"] if self.options.get_safe("with_quirc") else []
+
+        def tesseract():
+            return ["tesseract::tesseract"] if self.options.get_safe("with_tesseract") else []
 
         def vulkan():
             return ["vulkan-headers::vulkan-headers"] if self.options.get_safe("with_vulkan") else []
@@ -758,7 +761,8 @@ class OpenCVConan(ConanFile):
             "text": {
                 "is_built": self.options.text,
                 "mandatory_options": ["dnn", "features2d", "imgproc", "ml"],
-                "requires": ["opencv_core", "opencv_dnn", "opencv_features2d", "opencv_imgproc", "opencv_ml"] + eigen() + ipp(),
+                "requires": ["opencv_core", "opencv_dnn", "opencv_features2d", "opencv_imgproc", "opencv_ml"] +
+                            tesseract() + eigen() + ipp(),
             },
             "tracking": {
                 "is_built": self.options.tracking,
