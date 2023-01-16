@@ -29,16 +29,24 @@ class SpixConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
-        return 14
+        return 14 if self.version == "0.4" else 17
 
     @property
     def _compilers_minimum_version(self):
+        if self.version == "0.4":
         return {
             "Visual Studio": "14",
             "gcc": "5",
             "clang": "3.4",
             "apple-clang": "10"
         }
+        else:
+            return {
+                "Visual Studio": "15.7",
+                "gcc": "7",
+                "clang": "5",
+                "apple-clang": "10",
+            }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -91,7 +99,7 @@ class SpixConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if Version(self.deps_cpp_info["qt"].version).major == 6:
+        if self.version == "0.4" and Version(self.deps_cpp_info["qt"].version).major == 6:
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 14)", "set(CMAKE_CXX_STANDARD 17)")
 
     def build(self):
