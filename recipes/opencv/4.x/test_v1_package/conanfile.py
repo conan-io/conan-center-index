@@ -27,9 +27,12 @@ class TestPackageConan(ConanFile):
         cmake.definitions["OPENCV_WITH_STITCHING"] = self.options["opencv"].stitching
         cmake.definitions["OPENCV_WITH_VIDEO"] = self.options["opencv"].video
         cmake.definitions["OPENCV_WITH_VIDEOIO_FFMPEG"] = self.options["opencv"].videoio and self.options["opencv"].with_ffmpeg
+        cmake.definitions["OPENCV_WITH_ALPHAMAT"] = self._opencv_option("alphamat", False)
         cmake.definitions["OPENCV_WITH_ARUCO"] = self.options["opencv"].aruco
         cmake.definitions["OPENCV_WITH_BGSEGM"] = self.options["opencv"].bgsegm
         cmake.definitions["OPENCV_WITH_FREETYPE"] = self.options["opencv"].freetype
+        cmake.definitions["OPENCV_WITH_FUZZY"] = self.options["opencv"].fuzzy
+        cmake.definitions["OPENCV_WITH_HFS"] = self.options["opencv"].hfs
         cmake.definitions["OPENCV_WITH_IMG_HASH"] = self.options["opencv"].img_hash
         cmake.definitions["OPENCV_WITH_INTENSITY_TRANSFORM"] = self._opencv_option("intensity_transform", False)
         cmake.definitions["OPENCV_WITH_OPTFLOW"] = self.options["opencv"].optflow
@@ -38,10 +41,13 @@ class TestPackageConan(ConanFile):
         cmake.definitions["OPENCV_WITH_SFM"] = self.options["opencv"].sfm
         cmake.definitions["OPENCV_WITH_SHAPE"] = self.options["opencv"].shape
         cmake.definitions["OPENCV_WITH_STRUCTURED_LIGHT"] = self.options["opencv"].structured_light
+        cmake.definitions["OPENCV_WITH_SUPERRES"] = self._opencv_option("superres", False)
         cmake.definitions["OPENCV_WITH_SURFACE_MATCHING"] = self.options["opencv"].surface_matching
         cmake.definitions["OPENCV_WITH_TEXT"] = self.options["opencv"].text
         cmake.definitions["OPENCV_WITH_XFEATURES2D"] = self.options["opencv"].xfeatures2d
         cmake.definitions["OPENCV_WITH_XIMGPROC"] = self.options["opencv"].ximgproc
+        cmake.definitions["OPENCV_WITH_XOBJDETECT"] = self.options["opencv"].xobjdetect
+        cmake.definitions["OPENCV_WITH_XPHOTO"] = self.options["opencv"].xphoto
         cmake.configure()
         cmake.build()
 
