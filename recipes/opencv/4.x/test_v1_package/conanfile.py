@@ -1,9 +1,16 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanException
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
+
+    def _opencv_option(self, name, default):
+        try:
+            return getattr(self.options["opencv"], name, default)
+        except (AttributeError, ConanException):
+            return default
 
     def build(self):
         cmake = CMake(self)
@@ -24,7 +31,7 @@ class TestPackageConan(ConanFile):
         cmake.definitions["OPENCV_WITH_BGSEGM"] = self.options["opencv"].bgsegm
         cmake.definitions["OPENCV_WITH_FREETYPE"] = self.options["opencv"].freetype
         cmake.definitions["OPENCV_WITH_IMG_HASH"] = self.options["opencv"].img_hash
-        cmake.definitions["OPENCV_WITH_INTENSITY_TRANSFORM"] = tools.Version(self.deps_cpp_info["opencv"].version) >= "4.3.0" and self.options["opencv"].intensity_transform
+        cmake.definitions["OPENCV_WITH_INTENSITY_TRANSFORM"] = self._opencv_option("intensity_transform", False)
         cmake.definitions["OPENCV_WITH_OPTFLOW"] = self.options["opencv"].optflow
         cmake.definitions["OPENCV_WITH_REG"] = self.options["opencv"].reg
         cmake.definitions["OPENCV_WITH_RGBD"] = self.options["opencv"].rgbd
