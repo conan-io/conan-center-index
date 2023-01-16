@@ -28,7 +28,7 @@ class BearConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "9",
-            "clang": "9",
+            "clang": "12",
             "apple-clang": "11",
         }
 
