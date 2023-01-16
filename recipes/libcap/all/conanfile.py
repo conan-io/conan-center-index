@@ -39,7 +39,7 @@ class LibcapConan(ConanFile):
 
     def validate(self):
         if self.info.settings.os != "Linux":
-            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
+            raise ConanInvalidConfiguration(f"{self.name} only supports Linux")
 
     def layout(self):
         basic_layout(self, src_folder="src")
