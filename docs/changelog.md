@@ -1,5 +1,10 @@
 # Changelog
 
+### 16-January-2023 - 16:43 CET
+
+- [fix] ValidateInfrastructure: Fix Conan version check.
+- [feature] TapaholesRepo: Build references when there are 0 packages for a recipe revision.
+
 ### 12-January-2023 - 19:33 CET
 
 - [fix] Fix Conan v2 download/upload recipe commands.
