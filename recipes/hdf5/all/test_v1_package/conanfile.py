@@ -1,5 +1,6 @@
-from conans import ConanFile, CMake, tools
 import os
+
+from conans import CMake, ConanFile, tools
 
 
 class TestPackageConan(ConanFile):
@@ -12,6 +13,8 @@ class TestPackageConan(ConanFile):
             "HDF5_CXX": self.options["hdf5"].enable_cxx,
             "HDF5_HL": self.options["hdf5"].hl,
         })
+        if self.options["hdf5"].enable_cxx:
+            cmake.definitions.update({"CMAKE_CXX_STANDARD": 11})
         cmake.configure()
         cmake.build()
 

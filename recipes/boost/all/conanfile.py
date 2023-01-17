@@ -57,6 +57,7 @@ CONFIGURE_OPTIONS = (
     "thread",
     "timer",
     "type_erasure",
+    "url",
     "wave",
 )
 
@@ -235,10 +236,6 @@ class BoostConan(ConanFile):
         return self.settings.os == "Windows" and self.settings.compiler == "clang"
 
     @property
-    def _zip_bzip2_requires_needed(self):
-        return not self.options.without_iostreams and not self.options.header_only
-
-    @property
     def _python_executable(self):
         """
         obtain full path to the python interpreter executable
@@ -275,6 +272,7 @@ class BoostConan(ConanFile):
                 self.options.without_fiber = True
                 self.options.without_nowide = True
                 self.options.without_json = True
+                self.options.without_url = True
         else:
             version_cxx11_standard_json = self._min_compiler_version_default_cxx11
             if version_cxx11_standard_json:
@@ -282,10 +280,12 @@ class BoostConan(ConanFile):
                     self.options.without_fiber = True
                     self.options.without_json = True
                     self.options.without_nowide = True
+                    self.options.without_url = True
             else:
                 self.options.without_fiber = True
                 self.options.without_json = True
                 self.options.without_nowide = True
+                self.options.without_url = True
 
         # iconv is off by default on Windows and Solaris
         if self._is_windows_platform or self.settings.os == "SunOS":
@@ -434,7 +434,7 @@ class BoostConan(ConanFile):
 
     @property
     def _cxx11_boost_libraries(self):
-        libraries = ["fiber", "json", "nowide"]
+        libraries = ["fiber", "json", "nowide", "url"]
         if Version(self.version) >= "1.76.0":
             libraries.append("math")
         if Version(self.version) >= "1.79.0":
@@ -561,7 +561,7 @@ class BoostConan(ConanFile):
 
     def build_requirements(self):
         if not self.options.header_only:
-            self.tool_requires("b2/4.9.2")
+            self.tool_requires("b2/4.9.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -854,7 +854,6 @@ class BoostConan(ConanFile):
             self._build_bcp()
             self._run_bcp()
 
-        # Help locating bzip2 and zlib
         self._create_user_config_jam(self._boost_build_dir)
 
         # JOIN ALL FLAGS
@@ -1001,7 +1000,7 @@ class BoostConan(ConanFile):
             flags.append("--disable-iconv")
 
         def add_defines(library):
-            for define in self.dependencies[library].cpp_info.defines:
+            for define in self.dependencies[library].cpp_info.aggregated_components().defines:
                 flags.append(f"define={define}")
 
         if self._with_zlib:
@@ -1107,10 +1106,11 @@ class BoostConan(ConanFile):
             flags.append(f"-sICU_PATH={self.dependencies['icu'].package_folder}")
             if not self.dependencies["icu"].options.shared:
                 # Using ICU_OPTS to pass ICU system libraries is not possible due to Boost.Regex disallowing it.
+                icu_system_libs = self.dependencies["icu"].cpp_info.aggregated_components().system_libs
                 if is_msvc(self):
-                    icu_ldflags = " ".join(f"{l}.lib" for l in self.dependencies["icu"].cpp_info.system_libs)
+                    icu_ldflags = " ".join(f"{l}.lib" for l in icu_system_libs)
                 else:
-                    icu_ldflags = " ".join(f"-l{l}" for l in self.dependencies["icu"].cpp_info.system_libs)
+                    icu_ldflags = " ".join(f"-l{l}" for l in icu_system_libs)
                 link_flags.append(icu_ldflags)
 
         link_flags = f'linkflags="{" ".join(link_flags)}"'
@@ -1199,32 +1199,31 @@ class BoostConan(ConanFile):
         return ""
 
     def _create_user_config_jam(self, folder):
-        """To help locating the zlib and bzip2 deps"""
         self.output.warning("Patching user-config.jam")
 
-        contents = ""
-        if self._zip_bzip2_requires_needed:
-            def create_library_config(deps_name, name):
-                includedir = self.dependencies[deps_name].cpp_info.includedirs[0].replace("\\", "/")
-                includedir = f"\"{includedir}\""
-                libdir = self.dependencies[deps_name].cpp_info.libdirs[0].replace("\\", "/")
-                libdir = f"\"{libdir}\""
-                lib = self.dependencies[deps_name].cpp_info.libs[0]
-                version = self.dependencies[deps_name].ref.version
-                return f"\nusing {name} : {version} : " \
-                       f"<include>{includedir} " \
-                       f"<search>{libdir} " \
-                       f"<name>{lib} ;"
+        def create_library_config(deps_name, name):
+            aggregated_cpp_info = self.dependencies[deps_name].cpp_info.aggregated_components()
+            includedir = aggregated_cpp_info.includedirs[0].replace("\\", "/")
+            includedir = f"\"{includedir}\""
+            libdir = aggregated_cpp_info.libdirs[0].replace("\\", "/")
+            libdir = f"\"{libdir}\""
+            lib = aggregated_cpp_info.libs[0]
+            version = self.dependencies[deps_name].ref.version
+            return f"\nusing {name} : {version} : " \
+                   f"<include>{includedir} " \
+                   f"<search>{libdir} " \
+                   f"<name>{lib} ;"
 
-            contents = ""
-            if self._with_zlib:
-                contents += create_library_config("zlib", "zlib")
-            if self._with_bzip2:
-                contents += create_library_config("bzip2", "bzip2")
-            if self._with_lzma:
-                contents += create_library_config("xz_utils", "lzma")
-            if self._with_zstd:
-                contents += create_library_config("zstd", "zstd")
+        contents = ""
+
+        if self._with_zlib:
+            contents += create_library_config("zlib", "zlib")
+        if self._with_bzip2:
+            contents += create_library_config("bzip2", "bzip2")
+        if self._with_lzma:
+            contents += create_library_config("xz_utils", "lzma")
+        if self._with_zstd:
+            contents += create_library_config("zstd", "zstd")
 
         if not self.options.without_python:
             # https://www.boost.org/doc/libs/1_70_0/libs/python/doc/html/building/configuring_boost_build.html
@@ -1238,10 +1237,8 @@ class BoostConan(ConanFile):
         contents += f'\nusing "{self._toolset}" : {self._toolset_version} : '
 
         cxx_fwd_slahes = self._cxx.replace("\\", "/")
-        if is_msvc(self):
-            contents += f' "{cxx_fwd_slahes}"'
-        else:
-            contents += f' {cxx_fwd_slahes}'
+        if cxx_fwd_slahes:
+            contents += f" \"{cxx_fwd_slahes}\""
 
         if is_apple_os(self):
             if self.settings.compiler == "apple-clang":
@@ -1264,8 +1261,9 @@ class BoostConan(ConanFile):
         asflags = buildenv_vars.get("ASFLAGS", "") + " "
 
         if self._with_stacktrace_backtrace:
-            cppflags += " ".join(f"-I{p}" for p in self.dependencies["libbacktrace"].cpp_info.includedirs) + " "
-            ldflags += " ".join(f"-L{p}" for p in self.dependencies["libbacktrace"].cpp_info.libdirs) + " "
+            backtrace_aggregated_cpp_info = self.dependencies["libbacktrace"].cpp_info.aggregated_components()
+            cppflags += " ".join(f"-I{p}" for p in backtrace_aggregated_cpp_info.includedirs) + " "
+            ldflags += " ".join(f"-L{p}" for p in backtrace_aggregated_cpp_info.libdirs) + " "
 
         if cxxflags.strip():
             contents += f'<cxxflags>"{cxxflags.strip()}" '

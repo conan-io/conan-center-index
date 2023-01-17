@@ -3,11 +3,12 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.files import apply_conandata_patches, copy, chdir, get, rmdir
-from conan.tools.layout import basic_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, chdir, export_conandata_patches, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibcapConan(ConanFile):
@@ -17,7 +18,7 @@ class LibcapConan(ConanFile):
     homepage = "https://git.kernel.org/pub/scm/libs/libcap/libcap.git"
     description = "This is a library for getting and setting POSIX.1e" \
                   " (formerly POSIX 6) draft 15 capabilities"
-    topics = ("libcap", "capabilities")
+    topics = ("capabilities")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -29,26 +30,22 @@ class LibcapConan(ConanFile):
         "fPIC": True,
         "psx_syscals": False,
     }
-    exports_sources = "patches/**"
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def validate(self):
         if self.info.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Only Linux supported")
+            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
 
     def layout(self):
-        basic_layout(self, src_folder="source")
+        basic_layout(self, src_folder="src")
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -64,8 +61,10 @@ class LibcapConan(ConanFile):
         env.define("lib", "lib")
 
         if cross_building(self) and not env.vars(self).get("BUILD_CC"):
-            native_cc = "cc"
-            self.output.info("Using native compiler '{}'".format(native_cc))
+            native_cc = VirtualBuildEnv(self).vars().get("CC")
+            if not native_cc:
+                native_cc = "cc"
+            self.output.info(f"Using native compiler '{native_cc}'")
             env.define("BUILD_CC", native_cc)
 
         tc.generate(env)

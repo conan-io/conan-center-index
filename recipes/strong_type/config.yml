@@ -1,3 +1,5 @@
 versions:
   "v7":
     folder: all
+  "v8":
+    folder: all

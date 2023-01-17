@@ -56,7 +56,7 @@ class XtensorConan(ConanFile):
             if Version(self.version) < "0.24.0":
                 self.requires("xsimd/7.5.0")
             else:
-                self.requires("xsimd/9.0.1")
+                self.requires("xsimd/10.0.0")
         if self.options.tbb:
             self.requires("onetbb/2021.7.0")
 
