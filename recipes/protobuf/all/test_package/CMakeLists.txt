@@ -13,7 +13,10 @@ else()
     target_link_libraries(${PROJECT_NAME} PRIVATE protobuf::libprotobuf)
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE protobuf::libprotoc)
+string(FIND "${protobuf_COMPONENTS_RELEASE}" "protobuf::libprotoc" HAS_LIBPROTOC)
+if (${HAS_LIBPROTOC} GREATER_EQUAL 0)
+    target_link_libraries(${PROJECT_NAME} PRIVATE protobuf::libprotoc)
+endif()
 
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS TARGET ${PROJECT_NAME})
 protobuf_generate(LANGUAGE cpp TARGET ${PROJECT_NAME} PROTOS addressbook.proto)
