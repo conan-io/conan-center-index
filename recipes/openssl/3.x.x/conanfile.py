@@ -506,6 +506,10 @@ class OpenSSLConan(ConanFile):
             if self.options.get_safe("fPIC", True):
                 shared_cflag = 'shared_cflag => "-fPIC",'
 
+        if self.settings.os in ["iOS", "tvOS", "watchOS"] and self.conf.get("tools.apple:enable_bitcode", check_type=bool):
+            cflags.append("-fembed-bitcode")
+            cxxflags.append("-fembed-bitcode")
+
         config = config_template.format(
             targets=targets,
             target=self._target,
@@ -606,9 +610,6 @@ class OpenSSLConan(ConanFile):
                 xcrun = tools.XCRun(self.settings)
                 env_vars["CROSS_SDK"] = os.path.basename(xcrun.sdk_path)
                 env_vars["CROSS_TOP"] = os.path.dirname(os.path.dirname(xcrun.sdk_path))
-                if self.settings.os in ["iOS", "tvOS", "watchOS"] and self.conf.get("tools.apple:enable_bitcode", check_type=bool):
-                    cflags = " ".join(self._get_env_build().vars_dict["CFLAGS"])
-                    env_vars["CFLAGS"] = "%s %s" % (cflags, "-fembed-bitcode")
             with tools.environment_append(env_vars):
                 self._create_targets()
                 with self._make_context():
