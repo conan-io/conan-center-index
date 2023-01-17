@@ -31,6 +31,9 @@ class TestPackageConan(ConanFile):
         cmake.definitions["OPENCV_WITH_ARUCO"] = self.options["opencv"].aruco
         cmake.definitions["OPENCV_WITH_BGSEGM"] = self.options["opencv"].bgsegm
         cmake.definitions["OPENCV_WITH_BIOINSPIRED"] = self.options["opencv"].bioinspired
+        cmake.definitions["OPENCV_WITH_CCALIB"] = self.options["opencv"].ccalib
+        cmake.definitions["OPENCV_WITH_DNN_SUPERRES"] = self.options["opencv"].dnn_superres
+        cmake.definitions["OPENCV_WITH_FACE"] = self.options["opencv"].face
         cmake.definitions["OPENCV_WITH_FREETYPE"] = self.options["opencv"].freetype
         cmake.definitions["OPENCV_WITH_FUZZY"] = self.options["opencv"].fuzzy
         cmake.definitions["OPENCV_WITH_HFS"] = self.options["opencv"].hfs

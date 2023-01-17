@@ -34,6 +34,9 @@ class TestPackageConan(ConanFile):
         tc.variables["OPENCV_WITH_ARUCO"] = self.dependencies["opencv"].options.aruco
         tc.variables["OPENCV_WITH_BGSEGM"] = self.dependencies["opencv"].options.bgsegm
         tc.variables["OPENCV_WITH_BIOINSPIRED"] = self.dependencies["opencv"].options.bioinspired
+        tc.variables["OPENCV_WITH_CCALIB"] = self.dependencies["opencv"].options.ccalib
+        tc.variables["OPENCV_WITH_DNN_SUPERRES"] = self.dependencies["opencv"].options.dnn_superres
+        tc.variables["OPENCV_WITH_FACE"] = self.dependencies["opencv"].options.face
         tc.variables["OPENCV_WITH_FREETYPE"] = self.dependencies["opencv"].options.freetype
         tc.variables["OPENCV_WITH_FUZZY"] = self.dependencies["opencv"].options.fuzzy
         tc.variables["OPENCV_WITH_HFS"] = self.dependencies["opencv"].options.hfs
