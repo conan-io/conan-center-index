@@ -68,6 +68,10 @@ class GperfConan(ConanFile):
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
+            
+            #Prevent msys2 from performing erroneous path conversions for C++ files
+            # when invoking cl.exe as this is already handled by the compile wrapper.
+            env.define("MSYS2_ARG_CONV_EXCL", "-Tp") 
             env.vars(self).save_script("conanbuild_gperf_msvc")
 
     def build(self):
