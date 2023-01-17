@@ -27,7 +27,5 @@ runs:
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: `:robot: **Beep Boop**! This pull request is making changes to '${{ inputs.files }}'.
-
-              ${{ inputs.reviewers }}`
+            body: `:robot: **Beep Boop**! This pull request is making changes to '${{ inputs.files }}'.\n\n:wave: ${{ inputs.reviewers }} you might be interested. :wink:`
           })
