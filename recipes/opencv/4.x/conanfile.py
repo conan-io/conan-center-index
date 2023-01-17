@@ -727,7 +727,7 @@ class OpenCVConan(ConanFile):
             },
             "sfm": {
                 "is_built": self.options.sfm,
-                "mandatory_options": ["calib3d", "features2d", "imgcodecs", "xfeatures2d"],
+                "mandatory_options": ["with_eigen", "calib3d", "features2d", "imgcodecs", "xfeatures2d"],
                 "requires": ["opencv_core", "opencv_calib3d", "opencv_features2d", "opencv_imgcodecs", "opencv_xfeatures2d",
                              "correspondence", "multiview", "numeric", "glog::glog", "gflags::gflags"] + eigen() + ipp(),
             },
