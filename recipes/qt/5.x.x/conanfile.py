@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import build_jobs, check_min_cppstd, cross_building
-from conan.tools.files import chdir, get, load, replace_in_file, rm, rmdir, save, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import chdir, copy, get, load, replace_in_file, rm, rmdir, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
 from conans import tools, RunEnvironment
@@ -52,7 +52,7 @@ class QtConan(ConanFile):
     topics = ("ui", "framework")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.qt.io"
-    license = "LGPL-3.0"
+    license = "LGPL-3.0-only"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -85,6 +85,7 @@ class QtConan(ConanFile):
         "with_gssapi": [True, False],
         "with_atspi": [True, False],
         "with_md4c": [True, False],
+        "with_x11": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -126,6 +127,7 @@ class QtConan(ConanFile):
         "with_gssapi": False,
         "with_atspi": False,
         "with_md4c": True,
+        "with_x11": True,
 
         "gui": True,
         "widgets": True,
@@ -147,24 +149,24 @@ class QtConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def export(self):
-        self.copy(f"qtmodules{self.version}.conf")
+        copy(self, f"qtmodules{self.version}.conf", self.recipe_folder, self.export_folder)
 
     def export_sources(self):
         export_conandata_patches(self)
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and is_msvc(self):
-            self.build_requires("jom/1.1.3")
+            self.tool_requires("jom/1.1.3")
         if self.options.qtwebengine:
-            self.build_requires("ninja/1.11.1")
-            self.build_requires("nodejs/16.3.0")
-            self.build_requires("gperf/3.1")
+            self.tool_requires("ninja/1.11.1")
+            self.tool_requires("nodejs/16.3.0")
+            self.tool_requires("gperf/3.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self.settings.os != "Windows":
-                self.build_requires("bison/3.8.2")
-                self.build_requires("flex/2.6.4")
+                self.tool_requires("bison/3.8.2")
+                self.tool_requires("flex/2.6.4")
             else:
-                self.build_requires("winflexbison/2.5.24")
+                self.tool_requires("winflexbison/2.5.24")
 
             # Check if a valid python2 is available in PATH or it will failflex
             # Start by checking if python2 can be found
@@ -202,13 +204,14 @@ class QtConan(ConanFile):
                 raise ConanInvalidConfiguration(msg)
 
         if self.options.qtwayland:
-            self.build_requires("wayland/1.21.0")
+            self.tool_requires("wayland/1.21.0")
 
     def config_options(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_icu
             del self.options.with_fontconfig
             del self.options.with_libalsa
+            del self.options.with_x11
             del self.options.qtx11extras
         if self.settings.compiler == "apple-clang":
             if Version(self.settings.compiler.version) < "10.0":
@@ -246,6 +249,7 @@ class QtConan(ConanFile):
             del self.options.with_libjpeg
             del self.options.with_libpng
             del self.options.with_md4c
+            del self.options.with_x11
 
         if not self.options.with_dbus:
             del self.options.with_atspi
@@ -343,8 +347,14 @@ class QtConan(ConanFile):
             # https://bugreports.qt.io/browse/QTBUG-95952
             raise ConanInvalidConfiguration("Pulseaudio needs to be built with glib option or qt's configure script won't detect it")
 
-        if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
-            raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
+        if self.settings.os in ['Linux', 'FreeBSD']:
+            if self.options.with_gssapi:
+                raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
+
+        if self.options.get_safe("with_x11", False) and not self.dependencies.direct_host["xkbcommon"].options.with_x11:
+            raise ConanInvalidConfiguration("The 'with_x11' option for the 'xkbcommon' package must be enabled when the 'with_x11' option is enabled")
+        if self.options.get_safe("qtwayland", False) and not self.dependencies.direct_host["xkbcommon"].options.with_wayland:
+            raise ConanInvalidConfiguration("The 'with_wayland' option for the 'xkbcommon' package must be enabled when the 'qtwayland' option is enabled")
 
         if cross_building(self) and self.options.cross_compile == "None" and not is_apple_os(self):
             raise ConanInvalidConfiguration("option cross_compile must be set for cross compilation "
@@ -361,7 +371,7 @@ class QtConan(ConanFile):
             if is_apple_os(self):
                 self.requires("moltenvk/1.1.10")
         if self.options.with_glib:
-            self.requires("glib/2.74.0")
+            self.requires("glib/2.75.2")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
@@ -380,7 +390,7 @@ class QtConan(ConanFile):
             else:
                 self.requires("libjpeg/9e")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
-            self.requires("libpng/1.6.38")
+            self.requires("libpng/1.6.39")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
             self.requires("sqlite3/3.39.4")
             self.options["sqlite3"].enable_column_metadata = True
@@ -395,9 +405,9 @@ class QtConan(ConanFile):
             self.requires("openal/1.22.2")
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.7.2")
-        if self.options.gui and not self.options.qtwayland and self.settings.os in ["Linux", "FreeBSD"]:
+        if self.options.get_safe("with_x11", False):
+            self.requires("xkbcommon/1.5.0")
             self.requires("xorg/system")
-            self.requires("xkbcommon/1.4.1")
         if self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
@@ -419,6 +429,7 @@ class QtConan(ConanFile):
             self.requires("dbus/1.15.2")
         if self.options.qtwayland:
             self.requires("wayland/1.21.0")
+            self.requires("xkbcommon/1.5.0")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_atspi"):
@@ -551,6 +562,8 @@ class QtConan(ConanFile):
     def build(self):
         args = ["-confirm-license", "-silent", "-nomake examples", "-nomake tests",
                 f"-prefix {self.package_folder}"]
+        if cross_building(self):
+            args.append(f"-extprefix {self.package_folder}")
         args.append("-v")
         args.append("-archdatadir  %s" % os.path.join(self.package_folder, "bin", "archdatadir"))
         args.append("-datadir  %s" % os.path.join(self.package_folder, "bin", "datadir"))
@@ -803,7 +816,7 @@ Qml2Imports = bin/archdatadir/qml
 Translations = bin/datadir/translations
 Documentation = bin/datadir/doc
 Examples = bin/datadir/examples""")
-        self.copy("*LICENSE*", src="qt5/", dst="licenses")
+        copy(self, "*LICENSE*", os.path.join(self.source_folder, "qt5/"), os.path.join(self.package_folder, "licenses"))
         for module in self._submodules:
             if not self.options.get_safe(module):
                 rmdir(self, os.path.join(self.package_folder, "licenses", module))
@@ -1020,8 +1033,11 @@ Examples = bin/datadir/examples""")
                 gui_reqs.append("libpng::libpng")
             if self.options.get_safe("with_fontconfig", False):
                 gui_reqs.append("fontconfig::fontconfig")
-            if not self.options.qtwayland and self.settings.os in ["Linux", "FreeBSD"]:
-                gui_reqs.extend(["xorg::xorg", "xkbcommon::xkbcommon"])
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                if self.options.qtwayland or self.options.get_safe("with_x11", False):
+                    gui_reqs.append("xkbcommon::xkbcommon")
+                if self.options.get_safe("with_x11", False):
+                    gui_reqs.append("xorg::xorg")
             if self.options.get_safe("opengl", "no") != "no":
                 gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
@@ -1111,15 +1127,17 @@ Examples = bin/datadir/examples""")
                     service_support_reqs.append("DBus")
                 _create_module("ServiceSupport", service_support_reqs)
                 _create_module("EdidSupport")
-                if not self.options.qtwayland:
+                if self.options.get_safe("with_x11", False):
                     _create_module("XkbCommonSupport", ["Core", "Gui", "xkbcommon::libxkbcommon-x11"])
                     xcb_qpa_reqs = ["Core", "Gui", "ServiceSupport", "ThemeSupport", "FontDatabaseSupport", "EdidSupport", "XkbCommonSupport", "xorg::xorg"]
+                elif self.options.qtwayland:
+                    _create_module("XkbCommonSupport", ["Core", "Gui", "xkbcommon::libxkbcommon"])
                 if self.options.with_dbus and self.options.with_atspi:
                     _create_module("LinuxAccessibilitySupport", ["Core", "DBus", "Gui", "AccessibilitySupport", "at-spi2-core::at-spi2-core"])
                     xcb_qpa_reqs.append("LinuxAccessibilitySupport")
                 if self.options.get_safe("with_vulkan"):
                     xcb_qpa_reqs.append("VulkanSupport")
-                if not self.options.qtwayland:
+                if self.options.get_safe("with_x11", False):
                     _create_module("XcbQpa", xcb_qpa_reqs, has_include_dir=False)
                     _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpa"])
 
