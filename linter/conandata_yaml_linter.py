@@ -19,7 +19,6 @@ CONANDATA_YAML_URL = "https://github.com/conan-io/conan-center-index/blob/master
 
 
 def main(argv):
-    print(argv)
     parser = argparse.ArgumentParser(
         description="Validate Conan's 'conandata.yaml' file to ConanCenterIndex's requirements."
     )

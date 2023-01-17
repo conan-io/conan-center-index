@@ -6,7 +6,6 @@ from yaml_linting import file_path
 
 
 def main(argv):
-    print(argv)
     parser = argparse.ArgumentParser(
         description="Validate ConanCenterIndex's 'config.yaml' file."
     )
