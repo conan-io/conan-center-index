@@ -12,6 +12,7 @@ required_conan_version = ">=1.33.0"
 
 class CtreConan(ConanFile):
     name = "ctre"
+    package_type = "header-library"
     homepage = "https://github.com/hanickadot/compile-time-regular-expressions"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Compile Time Regular Expression for C++17/20"
@@ -56,5 +57,5 @@ class CtreConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def package(self):
-        copy(self, pattern="*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder,"include" ))
-        copy(self, "LICENSE", src=self.source_folder,dst=os.path.join(self.package_folder,"licenses"))
+        copy(self, pattern="*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
