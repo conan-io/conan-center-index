@@ -13,17 +13,16 @@ lint_group.add_argument("-ys", "--yamlscheme", action="store_true", help="Lint y
 
 parser.add_argument('filenames', nargs="*", help="Filenames to potentially lint")
 args = parser.parse_args()
-
 for file in args.filenames:
     basename = os.path.basename(file)
     if basename == 'conanfile.py':
         # The recipe linters need access to the files in cci
         sys.path.append(os.getcwd())
         dirname = os.path.dirname(file)
-        if args.recipe and 'test_package' not in dirname:
+        if args.recipe and ('test_package' not in dirname and 'test_v1_package' not in dirname):
             from pylint import run_pylint
             run_pylint(['--rcfile=linter/pylintrc_recipe', file])
-        elif args.test and 'test_package' in dirname:
+        elif args.test and ('test_package' in dirname or 'test_v1_package' in dirname):
             from pylint import run_pylint
             run_pylint(['--rcfile=linter/pylintrc_testpackage', file])
     elif basename.endswith('.yml') or basename.endswith('.yaml'):
