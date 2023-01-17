@@ -1,0 +1,25 @@
+name: alter community
+
+on:
+  pull_request:
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/pr_changed_files
+        id: changed_files
+        with:
+          files: |
+            docs/**
+      - if: always() && steps.changed_files.outputs.any_changed == 'true'
+        uses: actions/github-script@v6
+        with:
+          script: |
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: "I am a robot"
+              })
