@@ -19,7 +19,7 @@ class CppcheckConan(ConanFile):
     default_options = {"with_z3": True, "have_rules": True}
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -68,7 +68,7 @@ class CppcheckConan(ConanFile):
         self.cpp_info.libdirs = []
 
         bin_folder = os.path.join(self.package_folder, "bin")
-        self.output.info("Append %s to environment variable PATH" % bin_folder)
+        self.output.info(f"Append {bin_folder} to environment variable PATH")
         self.env_info.PATH.append(bin_folder)
         cppcheck_htmlreport = os.path.join(bin_folder, "cppcheck-htmlreport")
         self.env_info.CPPCHECK_HTMLREPORT = cppcheck_htmlreport
