@@ -50,15 +50,13 @@ class IslConan(ConanFile):
             # isl fails to link with this version of visual studio and MDd runtime: gmp.lib(bdiv_dbm1c.obj) : fatal error LNK1318: Unexpected PDB error; OK (0)
             check_min_vs(self, "192")
 
-    def requirements(self):
-        if self.options.with_int == "gmp":
-            self.requires("gmp/6.2.1")
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
+        if self.options.with_int == "gmp":
+            self.requires("gmp/6.2.1")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
