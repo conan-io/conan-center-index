@@ -10,7 +10,7 @@ from conan.tools.scm import Version
 import os
 import stat
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.56.0"
 
 class GmpConan(ConanFile):
     name = "gmp"
