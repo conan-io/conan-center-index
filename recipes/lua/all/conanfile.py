@@ -10,6 +10,7 @@ required_conan_version = ">=1.33.0"
 
 class LuaConan(ConanFile):
     name = "lua"
+    package_type = "library"
     description = "Lua is a powerful, efficient, lightweight, embeddable scripting language."
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.lua.org/"
@@ -51,7 +52,7 @@ class LuaConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["LUA_SRC_DIR"] = self.source_folder
+        tc.variables["LUA_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.variables["SKIP_INSTALL_TOOLS"] = True
         tc.variables["COMPILE_AS_CPP"] = self.options.compile_as_cpp
         tc.generate()
