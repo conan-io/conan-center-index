@@ -6,7 +6,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.56.0"
 
 
 class AutomakeConan(ConanFile):
