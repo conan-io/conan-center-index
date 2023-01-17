@@ -1,0 +1,5 @@
+sources:
+  "2.6.2":
+    url:
+      - "https://github.com/CD3/libInterpolate/archive/refs/tags/2.6.2.tar.gz"
+    sha256: "42f40c9b77fda6e0c52ed39b522458456e89fb4981d63f812aa158c6f4be8ab0"

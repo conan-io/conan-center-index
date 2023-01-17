@@ -63,8 +63,9 @@ class Libxml2Conan(ConanFile):
     options = {name: [True, False] for name in default_options.keys()}
 
     @property
-    def _option_names(self):
-        return [name for name in self.info.options.keys() if name not in ["shared", "fPIC", "include_utils"]]
+    def _configure_option_names(self):
+        return [name for name in self.default_options.keys() if (name in self.options)
+                and (name not in ["shared", "fPIC", "include_utils"])]
 
     @property
     def _settings_build(self):
@@ -86,6 +87,9 @@ class Libxml2Conan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
         if self.options.zlib:
             self.requires("zlib/1.2.13")
@@ -94,10 +98,7 @@ class Libxml2Conan(ConanFile):
         if self.options.iconv:
             self.requires("libiconv/1.17")
         if self.options.icu:
-            self.requires("icu/71.1")
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
+            self.requires("icu/72.1")
 
     def build_requirements(self):
         if not (is_msvc(self) or self._is_mingw_windows):
@@ -139,7 +140,7 @@ class Libxml2Conan(ConanFile):
                 f"--enable-shared={yes_no(self.options.shared)}",
                 f"--enable-static={yes_no(not self.options.shared)}",
             ])
-            for option_name in self._option_names:
+            for option_name in self._configure_option_names:
                 option_value = getattr(self.options, option_name)
                 tc.configure_args.append(f"--with-{option_name}={yes_no(option_value)}")
 
@@ -150,7 +151,6 @@ class Libxml2Conan(ConanFile):
 
             tc = AutotoolsDeps(self)
             tc.generate()
-
 
     def _build_msvc(self):
         with chdir(self, os.path.join(self.source_folder, 'win32')):
@@ -172,7 +172,7 @@ class Libxml2Conan(ConanFile):
             args.append(f"include=\"{';'.join(incdirs)}\"")
             args.append(f"lib=\"{';'.join(libdirs)}\"")
 
-            for name in self._option_names:
+            for name in self._configure_option_names:
                 cname = {"mem-debug": "mem_debug",
                          "run-debug": "run_debug",
                          "docbook": "docb"}.get(name, name)
@@ -188,7 +188,8 @@ class Libxml2Conan(ConanFile):
             def fix_library(option, package, old_libname):
                 if option:
                     libs = []
-                    for lib in itertools.chain(self.dependencies[package].cpp_info.libs, self.dependencies[package].cpp_info.system_libs):
+                    aggregated_cpp_info = self.dependencies[package].cpp_info.aggregated_components()
+                    for lib in itertools.chain(aggregated_cpp_info.libs, aggregated_cpp_info.system_libs):
                         libname = lib
                         if not libname.endswith('.lib'):
                             libname += '.lib'
@@ -215,7 +216,6 @@ class Libxml2Conan(ConanFile):
             if self.options.include_utils:
                 self.run("nmake /f Makefile.msvc install-dist")
 
-
     def _build_mingw(self):
         with chdir(self, os.path.join(self.source_folder, "win32")):
             # configuration
@@ -234,7 +234,7 @@ class Libxml2Conan(ConanFile):
             args.append(f"include=\"{' -I'.join(incdirs)}\"")
             args.append(f"lib=\"{' -L'.join(libdirs)}\"")
 
-            for name in self._option_names:
+            for name in self._configure_option_names:
                 cname = {
                     "mem-debug": "mem_debug",
                     "run-debug": "run_debug",
@@ -248,10 +248,11 @@ class Libxml2Conan(ConanFile):
             # build
             def fix_library(option, package, old_libname):
                 if option:
+                    aggregated_cpp_info = self.dependencies[package].cpp_info.aggregated_components()
                     replace_in_file(self,
                         "Makefile.mingw",
                         f"LIBS += -l{old_libname}",
-                        f"LIBS += -l{' -l'.join(self.dependencies[package].cpp_info.libs)}",
+                        f"LIBS += -l{' -l'.join(aggregated_cpp_info.libs)}",
                     )
 
             fix_library(self.options.iconv, "libiconv", "iconv")
@@ -269,7 +270,6 @@ class Libxml2Conan(ConanFile):
             if self.options.include_utils:
                 self.run("mingw32-make -f Makefile.mingw install-dist")
 
-
     def _patch_sources(self):
         # Break dependency of install on build
         for makefile in ("Makefile.mingw", "Makefile.msvc"):
@@ -280,7 +280,6 @@ class Libxml2Conan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "configure"),
                               "-install_name \\$rpath/",
                               "-install_name @rpath/")
-
 
     def build(self):
         self._patch_sources()
@@ -345,22 +344,31 @@ class Libxml2Conan(ConanFile):
     def _create_cmake_module_variables(self, module_file):
         # FIXME: also define LIBXML2_XMLLINT_EXECUTABLE variable
         content = textwrap.dedent("""\
-            if(DEFINED LibXml2_FOUND)
-                set(LIBXML2_FOUND ${LibXml2_FOUND})
-            endif()
-            if(DEFINED LibXml2_INCLUDE_DIR)
-                set(LIBXML2_INCLUDE_DIR ${LibXml2_INCLUDE_DIR})
-                set(LIBXML2_INCLUDE_DIRS ${LibXml2_INCLUDE_DIR})
+            set(LibXml2_FOUND TRUE)
+            set(LIBXML2_FOUND TRUE)
+            if(DEFINED LibXml2_INCLUDE_DIRS)
+                set(LIBXML2_INCLUDE_DIR ${LibXml2_INCLUDE_DIRS})
+                set(LIBXML2_INCLUDE_DIRS ${LibXml2_INCLUDE_DIRS})
+            elseif(DEFINED libxml2_INCLUDE_DIRS)
+                set(LIBXML2_LIBRARIES ${libxml2_INCLUDE_DIRS})
+                set(LIBXML2_LIBRARY ${libxml2_INCLUDE_DIRS})
             endif()
             if(DEFINED LibXml2_LIBRARIES)
                 set(LIBXML2_LIBRARIES ${LibXml2_LIBRARIES})
                 set(LIBXML2_LIBRARY ${LibXml2_LIBRARIES})
+            elseif(DEFINED libxml2_LIBRARIES)
+                set(LIBXML2_LIBRARIES ${libxml2_LIBRARIES})
+                set(LIBXML2_LIBRARY ${libxml2_LIBRARIES})
             endif()
             if(DEFINED LibXml2_DEFINITIONS)
                 set(LIBXML2_DEFINITIONS ${LibXml2_DEFINITIONS})
+            elseif(DEFINED libxml2_DEFINITIONS)
+                set(LIBXML2_DEFINITIONS ${libxml2_DEFINITIONS})
             endif()
             if(DEFINED LibXml2_VERSION)
                 set(LIBXML2_VERSION_STRING ${LibXml2_VERSION})
+            elseif(DEFINED libxml2_VERSION)
+                set(LIBXML2_VERSION_STRING ${libxml2_VERSION})
             endif()
         """)
         save(self, module_file, content)

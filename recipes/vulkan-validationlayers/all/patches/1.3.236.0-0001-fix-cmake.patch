@@ -1,0 +1,10 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -230,7 +230,6 @@ endif()
+ if(BUILD_LAYERS OR BUILD_TESTS)
+     find_package(SPIRV-Headers REQUIRED CONFIG QUIET)
+ 
+-    include(VVLGenerateSourceCode)
+ 
+     find_package(SPIRV-Tools-opt REQUIRED CONFIG QUIET)
+ 

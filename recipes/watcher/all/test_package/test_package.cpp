@@ -20,7 +20,11 @@ int main(int argc, char** argv) {
   std::thread([&]() { WATCHER_NAMESPACE::watcher::watch(".", show_event_json); }).detach();
   auto const time_until_death = std::chrono::seconds(3);
   std::this_thread::sleep_for(time_until_death);
+#ifdef WATCHER_DIE_WITH_PATH
+  auto const is_watch_dead = WATCHER_NAMESPACE::watcher::die(".", show_event_json);
+#else
   auto const is_watch_dead = WATCHER_NAMESPACE::watcher::die(show_event_json);
+#endif
 
   std::cout << "  },\n"
             << R"(  "milliseconds":)" << time_until_death.count() << "," << std::endl

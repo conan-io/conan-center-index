@@ -178,19 +178,6 @@ class BinutilsConan(ConanFile):
         self.cpp_info.bindirs = ["bin", target_bindir]
 
         absolute_target_bindir = os.path.join(self.package_folder, target_bindir)
-        binaries = os.listdir(absolute_target_bindir)
-        self.output.info(f"Binaries built: {', '.join(binaries)}")
-        for binary_name in binaries:
-            binary = os.path.join(absolute_target_bindir, binary_name)
-            if os.path.isfile(binary):
-                # See https://github.com/conan-io/conan-center-index/pull/14137/files/7ed7a48e2c993bb7e748570ee7ab9d021790c7dc..e93ea8d3d318b0ef8be84816cef615043b5f7fa9#r1022730130 for details
-                self.output.info(f"Setting {binary_name.upper()}={binary}")
-                self.buildenv_info.define(f"{binary_name.upper()}", binary)
-        if self.settings.os == "Macos":
-            self.output.warn("Binutils does not support an assembler or "
-                             + "linker for macOS. LD and AS were not generated. "
-                             + "Refer to the native Xcode toolchain or cctools "
-                             + "for an assembler and linker.")
 
         # v1 exports
         bindir = os.path.join(self.package_folder, "bin")
