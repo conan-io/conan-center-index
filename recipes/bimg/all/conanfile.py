@@ -197,13 +197,13 @@ class bimgConan(ConanFile):
     def package(self):
         # Set platform suffixes and prefixes 
         if self.settings.os == "Windows":
-            lib_ext = "bimg*.lib"
+            lib_pat = "*bimg*.lib"
             package_lib_prefix = ""
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            lib_ext = "bimg*.a"
+            lib_pat = "*bimg*.a"
             package_lib_prefix = "lib"
         elif self.settings.os == "Macos":
-            lib_ext = "bimg*.a"
+            lib_pat = "*bimg*.a"
             package_lib_prefix = "lib"
 
         # Get build bin folder
@@ -217,7 +217,7 @@ class bimgConan(ConanFile):
         # Copy includes
         copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self._bimg_path, "include"))
         # Copy libs
-        copy(self, pattern=lib_ext, dst=os.path.join(self.package_folder, "lib"), src=build_bin, keep_path=False)
+        copy(self, pattern=lib_pat, dst=os.path.join(self.package_folder, "lib"), src=build_bin, keep_path=False)
         # Copy tools
         if self.options.tools:
             copy(self, pattern="texturec*", dst=os.path.join(self.package_folder, "bin"), src=build_bin, keep_path=False)
