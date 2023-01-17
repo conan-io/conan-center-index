@@ -1,6 +1,8 @@
 from conan import ConanFile
-from conan.tools.files import get, copy
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import get, copy, chdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path
 import os
 
 
@@ -29,24 +31,24 @@ class B64Conan(ConanFile):
             del self.options.fPIC
     
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        tc = CMakeToolchain(self)
+        tc = AutotoolsToolchain(self)
         tc.generate()
 
     def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            autotools.make(target="all_src")
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(
@@ -54,9 +56,13 @@ class B64Conan(ConanFile):
         copy(self, "*.h",
             dst=os.path.join(self.package_folder, "include"),
             src=os.path.join(self.source_folder, "include"))
+        copy(self, "*.a",
+            dst=os.path.join(self.package_folder, "lib"),
+            src=self.source_folder, keep_path=False)
+        copy(self, "*.lib",
+            dst=os.path.join(self.package_folder, "lib"),
+            src=self.source_folder, keep_path=False)
 
-        cmake = CMake(self)
-        cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["b64"]
