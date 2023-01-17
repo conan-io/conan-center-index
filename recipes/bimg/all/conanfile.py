@@ -118,7 +118,7 @@ class bimgConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True,
                     destination=os.path.join(self.source_folder, self._bimg_folder))
         #We need bx source too
-        get(self, **self.conan_data["sources"][f"bx.{self._bx_version[self.version]}"], strip_root=True,
+        get(self, **self.dependencies["bx"].conan_data["sources"][self._bx_version[self.version]], strip_root=True,
                     destination=os.path.join(self.source_folder, self._bx_folder))
 
     def generate(self):

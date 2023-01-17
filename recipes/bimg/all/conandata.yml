@@ -2,6 +2,3 @@ sources:
   "cci.20230114":
     url: "https://github.com/bkaradzic/bimg/archive/7afa2419254fd466c013a51bdeb0bee3022619c4.tar.gz"
     sha256: "664D2DB41B60E1BEA473898427CD71D43CD33397A24596F1A2CF269D324A305D"
-  "bx.cci.20221116":
-    url: "https://github.com/bkaradzic/bx/archive/aed1086c48884b1b4f1c2f9af34c5198624263f6.tar.gz"
-    sha256: "6867CF7ABD2BB53A1A92C7B70CBC7F424B97D3AE3A8183F284C6A6507EFE4517"
