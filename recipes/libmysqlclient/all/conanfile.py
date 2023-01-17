@@ -36,14 +36,6 @@ class LibMysqlClientCConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     @property
-    def _with_zstd(self):
-        return Version(self.version) > "8.0.17"
-
-    @property
-    def _with_lz4(self):
-        return Version(self.version) > "8.0.17"
-
-    @property
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "16" if Version(self.version) > "8.0.17" else "15",
@@ -66,10 +58,8 @@ class LibMysqlClientCConan(ConanFile):
     def requirements(self):
         self.requires("openssl/1.1.1s")
         self.requires("zlib/1.2.13")
-        if self._with_zstd:
-            self.requires("zstd/1.5.2")
-        if self._with_lz4:
-            self.requires("lz4/1.9.4")
+        self.requires("zstd/1.5.2")
+        self.requires("lz4/1.9.4")
         if self.settings.os == "FreeBSD":
             self.requires("libunwind/1.6.2")
 
@@ -131,8 +121,6 @@ class LibMysqlClientCConan(ConanFile):
         apply_conandata_patches(self)
 
         libs_to_remove = ["icu", "libevent", "re2", "rapidjson", "protobuf", "libedit"]
-        if not self._with_lz4:
-            libs_to_remove.append("lz4")
         for lib in libs_to_remove:
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             f"MYSQL_CHECK_{lib.upper()}()\n",
@@ -167,15 +155,13 @@ class LibMysqlClientCConan(ConanFile):
                             strict=False)
 
         # Upstream does not actually load lz4 directories for system, force it to
-        if self._with_lz4:
-            replace_in_file(self, os.path.join(self.source_folder, "libbinlogevents", "CMakeLists.txt"),
-                            "INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libbinlogevents/include)",
-                            "MY_INCLUDE_SYSTEM_DIRECTORIES(LZ4)\nINCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libbinlogevents/include)")
+        replace_in_file(self, os.path.join(self.source_folder, "libbinlogevents", "CMakeLists.txt"),
+                        "INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libbinlogevents/include)",
+                        "MY_INCLUDE_SYSTEM_DIRECTORIES(LZ4)\nINCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libbinlogevents/include)")
 
-        if self._with_zstd:
-            replace_in_file(self, os.path.join(self.source_folder, "cmake", "zstd.cmake"),
-                            "NAMES zstd",
-                            f"NAMES zstd {self.dependencies['zstd'].cpp_info.components['zstdlib'].libs[0]}")
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "zstd.cmake"),
+                        "NAMES zstd",
+                        f"NAMES zstd {self.dependencies['zstd'].cpp_info.components['zstdlib'].libs[0]}")
 
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "ssl.cmake"),
                         "NAMES ssl",
@@ -218,12 +204,11 @@ class LibMysqlClientCConan(ConanFile):
         cmake.cache_variables["ENABLED_PROFILING"] = False
         cmake.cache_variables["MYSQL_MAINTAINER_MODE"] = False
         cmake.cache_variables["WIX_DIR"] = False
-        if self._with_lz4:
-            cmake.cache_variables["WITH_LZ4"] = "system"
 
-        if self._with_zstd:
-            cmake.cache_variables["WITH_ZSTD"] = "system"
-            cmake.cache_variables["ZSTD_INCLUDE_DIR"] = self.dependencies["zstd"].cpp_info.includedirs[0]
+        cmake.cache_variables["WITH_LZ4"] = "system"
+
+        cmake.cache_variables["WITH_ZSTD"] = "system"
+        cmake.cache_variables["ZSTD_INCLUDE_DIR"] = self.dependencies["zstd"].cpp_info.includedirs[0]
 
         if is_msvc(self):
             cmake.cache_variables["WINDOWS_RUNTIME_MD"] = "MD" in msvc_runtime_flag(self)
