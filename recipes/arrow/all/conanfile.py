@@ -295,7 +295,7 @@ class ArrowConan(ConanFile):
 
     def _with_utf8proc(self, required=False):
         if required or self.options.with_utf8proc == "auto":
-            return False
+            return bool(self._compute() or self.options.gandiva)
         else:
             return bool(self.options.with_utf8proc)
 
@@ -376,7 +376,7 @@ class ArrowConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+                  filename=f"apache-arrow-{self.version}.tar.gz", destination=self.source_folder, strip_root=True)
 
     def generate(self):
         # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
@@ -392,6 +392,7 @@ class ArrowConan(ConanFile):
         if is_msvc(self):
             tc.variables["ARROW_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
         tc.variables["ARROW_DEPENDENCY_SOURCE"] = "SYSTEM"
+        tc.variables["ARROW_PACKAGE_KIND"] = "conan" # See https://github.com/conan-io/conan-center-index/pull/14903/files#r1057938314 for details
         tc.variables["ARROW_GANDIVA"] = bool(self.options.gandiva)
         tc.variables["ARROW_PARQUET"] = self._parquet()
         tc.variables["ARROW_SUBSTRAIT"] = bool(self.options.get_safe("substrait", False))
@@ -410,6 +411,7 @@ class ArrowConan(ConanFile):
         tc.variables["ARROW_CSV"] = bool(self.options.with_csv)
         tc.variables["ARROW_CUDA"] = bool(self.options.with_cuda)
         tc.variables["ARROW_JEMALLOC"] = self._with_jemalloc()
+        tc.variables["jemalloc_SOURCE"] = "SYSTEM"
         tc.variables["ARROW_MIMALLOC"] = bool(self.options.with_mimalloc)
         tc.variables["ARROW_JSON"] = bool(self.options.with_json)
         tc.variables["google_cloud_cpp_SOURCE"] = "SYSTEM"
@@ -498,7 +500,7 @@ class ArrowConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if Version(self.version) >= "7.0.0":
+        if "7.0.0" <= Version(self.version) < "10.0.0":
             for filename in glob.glob(os.path.join(self.source_folder, "cpp", "cmake_modules", "Find*.cmake")):
                 if os.path.basename(filename) not in [
                     "FindArrow.cmake",

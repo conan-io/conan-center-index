@@ -1,20 +1,34 @@
 sources:
   # see https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#what-version-should-packages-use-for-libraries-without-official-releases
-  "cci.20210902":
-    url: "https://github.com/sony/nmos-cpp/archive/d3a8c7935f80ce5de6d4727c307ddcef667b5d57.tar.gz"
-    sha256: "f5bd0b96542810ac1ed3ebaf7237d7471f3c42e68d966ae8b2d39db2601a38f9"
-  "cci.20211015":
-    url: "https://github.com/sony/nmos-cpp/archive/d115866f8f1d2c1c55bb64d05d34aa7d61c039e3.tar.gz"
-    sha256: "74e48497d6d7cc76a97b5a6331f88a58b2c96ce2f24b78176d3631051caceb6a"
-  "cci.20220120":
-    url: "https://github.com/sony/nmos-cpp/archive/46750381f33d19ce6b12a2f760db2f2f5faf2818.tar.gz"
-    sha256: "cd6fd81b1a5a10fd0a917fec362aae517a72f13889ec4418c29beb3ec8996df7"
-  "cci.20220208":
-    url: "https://github.com/sony/nmos-cpp/archive/7ca64c4fb5604fb8a3e0c05db2e8f8ffe7ef3857.tar.gz"
-    sha256: "751e7a35501cdada0e3943dcfd23a4e4f5caa02661d7f961204e8f9fea567c42"
-  "cci.20220428":
-    url: "https://github.com/sony/nmos-cpp/archive/07b8742d5e3413c903a0b0e74d0c87a76e9ecdfa.tar.gz"
-    sha256: "be305ea343822f0aa76376955b7adcbf61807b2fe54084c067daa837ef37b0cd"
+  "cci.20221203":
+    url: "https://github.com/sony/nmos-cpp/archive/0fb6b51737f737ae011cbcc39cdfb2c5236ec59f.tar.gz"
+    sha256: "9e811b2707afe084c4470fcaa5664f57468fd03e86b1eebd03ec9216cf31cac1"
   "cci.20220620":
     url: "https://github.com/sony/nmos-cpp/archive/3a904a3fcc39057a8db74656a697f0d97d8a3651.tar.gz"
     sha256: "49a16ad5c8b1cf45cd519b96c880340b369a737c6814f8c533fff1cf49439fda"
+  "cci.20220428":
+    url: "https://github.com/sony/nmos-cpp/archive/07b8742d5e3413c903a0b0e74d0c87a76e9ecdfa.tar.gz"
+    sha256: "be305ea343822f0aa76376955b7adcbf61807b2fe54084c067daa837ef37b0cd"
+  "cci.20220208":
+    url: "https://github.com/sony/nmos-cpp/archive/7ca64c4fb5604fb8a3e0c05db2e8f8ffe7ef3857.tar.gz"
+    sha256: "751e7a35501cdada0e3943dcfd23a4e4f5caa02661d7f961204e8f9fea567c42"
+  "cci.20220120":
+    url: "https://github.com/sony/nmos-cpp/archive/46750381f33d19ce6b12a2f760db2f2f5faf2818.tar.gz"
+    sha256: "cd6fd81b1a5a10fd0a917fec362aae517a72f13889ec4418c29beb3ec8996df7"
+patches:
+  "cci.20220620":
+    - patch_file: "patches/cmakedeps-targets.patch"
+      patch_type: "conan"
+      patch_description: "Fix upstream/CMakeDeps target names"
+  "cci.20220428":
+    - patch_file: "patches/cmakedeps-targets.patch"
+      patch_type: "conan"
+      patch_description: "Fix upstream/CMakeDeps target names"
+  "cci.20220208":
+    - patch_file: "patches/cmakedeps-targets.patch"
+      patch_type: "conan"
+      patch_description: "Fix upstream/CMakeDeps target names"
+  "cci.20220120":
+    - patch_file: "patches/cmakedeps-targets.patch"
+      patch_type: "conan"
+      patch_description: "Fix upstream/CMakeDeps target names"

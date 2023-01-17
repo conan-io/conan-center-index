@@ -67,7 +67,7 @@ class RedisPlusPlusConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("hiredis/1.0.2")
+        self.requires("hiredis/1.1.0")
         if self.options.get_safe("build_async"):
             self.requires("libuv/1.44.2")
 
@@ -142,6 +142,7 @@ class RedisPlusPlusConan(ConanFile):
             self.cpp_info.components["redis++lib"].requires.append("libuv::libuv")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["redis++lib"].system_libs.append("pthread")
+            self.cpp_info.components["redis++lib"].system_libs.append("m")
 
         # TODO: to remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "redis++"

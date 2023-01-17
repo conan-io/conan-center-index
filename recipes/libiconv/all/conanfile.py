@@ -15,7 +15,6 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
-from conans.tools import get_gnu_triplet
 import os
 
 required_conan_version = ">=1.53.0"
@@ -24,7 +23,7 @@ required_conan_version = ">=1.53.0"
 class LibiconvConan(ConanFile):
     name = "libiconv"
     description = "Convert text to and from Unicode"
-    license = "LGPL-2.1"
+    license = ("LGPL-2.0-or-later", "LGPL-2.1-or-later")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/libiconv/"
     topics = ("iconv", "text", "encoding", "locale", "unicode", "conversion")
@@ -63,6 +62,10 @@ class LibiconvConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+        if Version(self.version) >= "1.17":
+            self.license = "LGPL-2.1-or-later"
+        else:
+            self.license = "LGPL-2.0-or-later"
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -81,17 +84,23 @@ class LibiconvConan(ConanFile):
         env.generate()
 
         tc = AutotoolsToolchain(self)
-        if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-           (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+        msvc_version = {"Visual Studio": "12", "msvc": "180"}
+        if is_msvc(self) and Version(self.settings.compiler.version) >= msvc_version[str(self.settings.compiler)]:
+            # https://github.com/conan-io/conan/issues/6514
             tc.extra_cflags.append("-FS")
         if cross_building(self) and is_msvc(self):
+            triplet_arch_windows = {"x86_64": "x86_64", "x86": "i686", "armv8": "aarch64"}
             # ICU doesn't like GNU triplet of conan for msvc (see https://github.com/conan-io/conan/issues/12546)
-            host = get_gnu_triplet(str(self.settings.os), str(self.settings.arch), "gcc")
-            build = get_gnu_triplet(str(self._settings_build.os), str(self._settings_build.arch), "gcc")
-            tc.configure_args.extend([
-                f"--host={host}",
-                f"--build={build}",
-            ])
+            host_arch = triplet_arch_windows.get(str(self.settings.arch))
+            build_arch = triplet_arch_windows.get(str(self._settings_build.arch))
+            
+            if host_arch and build_arch:
+                host = f"{host_arch}-w64-mingw32"
+                build = f"{build_arch}-w64-mingw32"
+                tc.configure_args.extend([
+                    f"--host={host}",
+                    f"--build={build}",
+                ])
         tc.generate()
 
         if is_msvc(self) or self._is_clang_cl:

@@ -7,7 +7,7 @@
 #include <openssl/crypto.h>
 #include <openssl/ssl.h>
 #if defined(WITH_ZLIB)
-#include <zlib.h>
+#include <openssl/comp.h>
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER < 1900
@@ -98,7 +98,8 @@ int main()
 	printf("SSL library version: %s\n", OpenSSL_version(OPENSSL_VERSION));
 #endif
 #if defined(WITH_ZLIB)
-	printf("ZLIB version: %s\n", ZLIB_VERSION);
+	COMP_METHOD *zlib_comp = COMP_zlib();
+	printf("ZLIB compression method is named: %s\n", SSL_COMP_get_name(zlib_comp));
 #endif
 
 	return 0;

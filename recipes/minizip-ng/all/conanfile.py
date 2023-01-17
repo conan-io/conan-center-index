@@ -85,7 +85,7 @@ class MinizipNgConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.2.5")
+            self.requires("xz_utils/5.4.0")
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
         if self.options.with_openssl:
