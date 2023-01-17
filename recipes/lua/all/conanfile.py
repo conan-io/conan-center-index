@@ -47,11 +47,11 @@ class LuaConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["SOURCE_SUBDIR"] = self.source_folder
+        tc.variables["LUA_SRC_DIR"] = self.source_folder
         tc.variables["SKIP_INSTALL_TOOLS"] = True
         tc.variables["COMPILE_AS_CPP"] = self.options.compile_as_cpp
         tc.generate()
@@ -59,7 +59,7 @@ class LuaConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):

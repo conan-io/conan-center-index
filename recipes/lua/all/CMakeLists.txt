@@ -12,7 +12,7 @@ project(lua)
 #     - This is a source-incompatible change because extern "C" is chosen by the including application.
 # - The lua.hpp header will not be available.
 
-SET(SOURCE_DIR ${CMAKE_SOURCE_DIR})
+SET(SOURCE_DIR ${LUA_SRC_DIR})
 
 # Build Libraries
 FILE(GLOB SRC_LIBLUA "${SOURCE_DIR}/src/*.c")
