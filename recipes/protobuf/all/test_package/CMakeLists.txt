@@ -13,8 +13,7 @@ else()
     target_link_libraries(${PROJECT_NAME} PRIVATE protobuf::libprotobuf)
 endif()
 
-string(FIND "${protobuf_COMPONENTS_RELEASE}" "protobuf::libprotoc" HAS_LIBPROTOC)
-if (${HAS_LIBPROTOC} GREATER_EQUAL 0)
+if(TARGET protobuf::libprotoc)
     target_link_libraries(${PROJECT_NAME} PRIVATE protobuf::libprotoc)
 endif()
 
