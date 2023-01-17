@@ -21,12 +21,5 @@ jobs:
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: "I am a robot"
+                body: ":robot: Beep Boop! This pull request is changing the docs @RubenRBS"
               })
-              // https://octokit.github.io/rest.js/v19#pulls-request-reviewers
-              github.rest.pulls.requestReviewers({
-                pull_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                reviewers: ["RubenRBS"],
-              });
