@@ -819,12 +819,12 @@ class OpenCVConan(ConanFile):
             "correspondence": {
                 "is_built": self.options.sfm,
                 "no_option": True,
-                "requires": ["multiview", "glog::glog"] + eigen() + ipp(),
+                "requires": ["opencv_imgcodecs", "multiview", "glog::glog"] + eigen() + ipp(),
             },
             "multiview": {
                 "is_built": self.options.sfm,
                 "no_option": True,
-                "requires": ["numeric", "gflags::gflags"] + eigen() + ipp(),
+                "requires": ["numeric", "glog::glog"] + eigen() + ipp(),
             },
         }
 
@@ -1137,21 +1137,6 @@ class OpenCVConan(ConanFile):
 
             replace_in_file(self, freetype_cmake, "ocv_check_modules(HARFBUZZ harfbuzz)", "find_package(harfbuzz REQUIRED CONFIG)")
             replace_in_file(self, freetype_cmake, "HARFBUZZ_", "harfbuzz_")
-
-        if self.options.sfm and Version(self.version) <= "4.5.2":
-            sfm_cmake = os.path.join(self._contrib_folder, "modules", "sfm", "CMakeLists.txt")
-            ver = Version(self.version)
-            if ver <= "4.5.0":
-                search = "  find_package(Glog QUIET)\nendif()"
-            else:
-                search = '  set(GLOG_INCLUDE_DIRS "${GLOG_INCLUDE_DIR}")\nendif()'
-            replace_in_file(self, sfm_cmake, search, f"""{search}
-            if(NOT GFLAGS_LIBRARIES AND TARGET gflags::gflags)
-              set(GFLAGS_LIBRARIES gflags::gflags)
-            endif()
-            if(NOT GLOG_LIBRARIES AND TARGET glog::glog)
-              set(GLOG_LIBRARIES glog::glog)
-            endif()""")
 
     def generate(self):
         if self.options.dnn:
