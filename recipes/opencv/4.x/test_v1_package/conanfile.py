@@ -10,14 +10,15 @@ class TestPackageConan(ConanFile):
     def _tested_modules(self):
         return [
             # Main modules
-            "calib3d", "core", "features2d", "flann", "gapi", "highgui", "imgcodecs",
+            "calib3d", "core", "dnn", "features2d", "flann", "gapi", "highgui", "imgcodecs",
             "imgproc", "ml", "objdetect", "photo", "stitching", "video", "videoio",
             # Extra modules
-            "alphamat", "aruco", "bgsegm", "bioinspired", "ccalib", "dnn_superres", "face",
-            "freetype", "fuzzy", "hfs", "img_hash", "intensity_transform", "line_descriptor",
-            "mcc", "optflow", "phase_unwrapping", "quality", "reg", "rgbd", "saliency", "sfm",
-            "shape", "structured_light", "superres", "surface_matching", "text", "tracking",
-            "wechat_qrcode", "xfeatures2d", "ximgproc", "xobjdetect", "xphoto",
+            "alphamat", "aruco", "bgsegm", "bioinspired", "ccalib", "datasets", "dnn_superres",
+            "face", "freetype", "fuzzy", "hdf", "hfs", "img_hash", "intensity_transform",
+            "line_descriptor", "mcc", "optflow", "phase_unwrapping", "plot", "quality", "reg",
+            "rgbd", "saliency", "sfm", "shape", "structured_light", "superres",
+            "surface_matching", "text", "tracking", "wechat_qrcode", "xfeatures2d",
+            "ximgproc", "xobjdetect", "xphoto",
         ]
 
     def _opencv_option(self, name, default):
