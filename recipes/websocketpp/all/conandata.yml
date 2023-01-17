@@ -10,6 +10,7 @@ patches:
     - patch_file: "patches/support-gcc-12.patch"
       patch_type: "portability"
       patch_description: "support gcc 12"
+      patch_source: "https://github.com/zaphoyd/websocketpp/issues/991"
   "0.8.1":
     - patch_file: "patches/websocket_boost_support_1_7_x.patch"
       patch_type: "conan"
@@ -17,3 +18,4 @@ patches:
     - patch_file: "patches/support-gcc-12.patch"
       patch_type: "portability"
       patch_description: "support gcc 12"
+      patch_source: "https://github.com/zaphoyd/websocketpp/issues/991"
