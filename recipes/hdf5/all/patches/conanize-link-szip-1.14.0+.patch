@@ -1,0 +1,45 @@
+diff -u a/CMakeFilters.cmake b/CMakeFilters.cmake
+--- a/CMakeFilters.cmake	2023-01-04 22:29:45.875695757 +0100
++++ b/CMakeFilters.cmake	2023-01-04 22:37:15.356762199 +0100
+@@ -59,9 +59,9 @@
+       find_package (ZLIB NAMES ${ZLIB_PACKAGE_NAME}${HDF_PACKAGE_EXT} COMPONENTS static shared)
+       if (NOT ZLIB_FOUND)
+         find_package (ZLIB) # Legacy find
+-        if (ZLIB_FOUND)
+-          set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ${ZLIB_LIBRARIES})
+-        endif ()
++      endif()
++      if (ZLIB_FOUND)
++        set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ${ZLIB_LIBRARIES})
+       endif ()
+     endif ()
+     if (ZLIB_FOUND)
+@@ -105,20 +105,20 @@
+   if (NOT SZIP_USE_EXTERNAL)
+     set(SZIP_FOUND FALSE)
+     if (USE_LIBAEC)
+-      set(libaec_USE_STATIC_LIBS ${USE_LIBAEC_STATIC})
+-      find_package (libaec 1.0.5 CONFIG)
+-      if (SZIP_FOUND)
+-        set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ${SZIP_LIBRARIES})
+-      endif ()
++      find_package (libaec CONFIG REQUIRED)
++      set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ${SZIP_LIBRARIES})
++      set (SZIP_FOUND TRUE)
+     endif ()
+
+     if (NOT SZIP_FOUND)
+       find_package (SZIP NAMES ${SZIP_PACKAGE_NAME}${HDF_PACKAGE_EXT} COMPONENTS static shared)
+       if (NOT SZIP_FOUND)
+         find_package (SZIP) # Legacy find
+-        if (SZIP_FOUND)
+-          set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ${SZIP_LIBRARIES})
+-        endif ()
++      endif()
++      if (TARGET szip-shared)
++        set (LINK_COMP_LIBS ${LINK_COMP_LIBS} szip-shared)
++      else ()
++        set (LINK_COMP_LIBS ${LINK_COMP_LIBS} szip-static)
+       endif ()
+     endif ()
+   endif ()
