@@ -30,12 +30,15 @@ class TestPackageConan(ConanFile):
         cmake.definitions["OPENCV_WITH_ALPHAMAT"] = self._opencv_option("alphamat", False)
         cmake.definitions["OPENCV_WITH_ARUCO"] = self.options["opencv"].aruco
         cmake.definitions["OPENCV_WITH_BGSEGM"] = self.options["opencv"].bgsegm
+        cmake.definitions["OPENCV_WITH_BIOINSPIRED"] = self.options["opencv"].bioinspired
         cmake.definitions["OPENCV_WITH_FREETYPE"] = self.options["opencv"].freetype
         cmake.definitions["OPENCV_WITH_FUZZY"] = self.options["opencv"].fuzzy
         cmake.definitions["OPENCV_WITH_HFS"] = self.options["opencv"].hfs
         cmake.definitions["OPENCV_WITH_IMG_HASH"] = self.options["opencv"].img_hash
         cmake.definitions["OPENCV_WITH_INTENSITY_TRANSFORM"] = self._opencv_option("intensity_transform", False)
+        cmake.definitions["OPENCV_WITH_LINE_DESCRIPTOR"] = self.options["opencv"].line_descriptor
         cmake.definitions["OPENCV_WITH_OPTFLOW"] = self.options["opencv"].optflow
+        cmake.definitions["OPENCV_WITH_PHASE_UNWRAPPING"] = self.options["opencv"].phase_unwrapping
         cmake.definitions["OPENCV_WITH_REG"] = self.options["opencv"].reg
         cmake.definitions["OPENCV_WITH_RGBD"] = self.options["opencv"].rgbd
         cmake.definitions["OPENCV_WITH_SFM"] = self.options["opencv"].sfm
@@ -44,6 +47,7 @@ class TestPackageConan(ConanFile):
         cmake.definitions["OPENCV_WITH_SUPERRES"] = self._opencv_option("superres", False)
         cmake.definitions["OPENCV_WITH_SURFACE_MATCHING"] = self.options["opencv"].surface_matching
         cmake.definitions["OPENCV_WITH_TEXT"] = self.options["opencv"].text
+        cmake.definitions["OPENCV_WITH_WECHAT_QRCODE"] = self._opencv_option("wechat_qrcode", False)
         cmake.definitions["OPENCV_WITH_XFEATURES2D"] = self.options["opencv"].xfeatures2d
         cmake.definitions["OPENCV_WITH_XIMGPROC"] = self.options["opencv"].ximgproc
         cmake.definitions["OPENCV_WITH_XOBJDETECT"] = self.options["opencv"].xobjdetect
