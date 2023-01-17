@@ -153,6 +153,17 @@ class LibpqConan(ConanFile):
                 replace_in_file(self,config_default_pl,
                                       "openssl   => undef",
                                       "openssl   => '%s'" % openssl.package_folder.replace("\\", "/"))
+        elif self.settings.os == "Windows":
+            # https://www.postgresql.org/message-id/2a6c418e-373b-8466-fcb8-ce729aab255f@gmail.com
+            # https://www.postgresql.org/message-id/attachment/99411/0002-Build-static-libraries.patch
+            # https://www.postgresql.org/message-id/attachment/99410/0001-Fix-import-library-extension.patch
+            shlib_makefile = os.path.join(self.source_folder, "src", "Makefile.shlib")
+            replace_in_file(self, shlib_makefile,
+            "\t$(CC) $(CFLAGS)  -shared -static-libgcc -o $@  $(OBJS) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK) $(LIBS) -Wl,--export-all-symbols -Wl,--out-implib=$(stlib)",
+            "\trm -f $(stlib)\n\t$(LINK.static) $(stlib) $(OBJS)\n\t$(RANLIB) $(stlib)\n\t$(CC) $(CFLAGS)  -shared -static-libgcc -o $@  $(OBJS) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK) $(LIBS) -Wl,--export-all-symbols -Wl,--out-implib=lib$(NAME).dll.a")
+            replace_in_file(self, shlib_makefile,
+            "\t$(CC) $(CFLAGS)  -shared -static-libgcc -o $@  $(OBJS) $(DLL_DEFFILE) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK) $(LIBS) -Wl,--out-implib=$(stlib)",
+            "\trm -f $(stlib)\n\t$(LINK.static) $(stlib) $(OBJS)\n\t$(RANLIB) $(stlib)\n\t$(CC) $(CFLAGS)  -shared -static-libgcc -o $@  $(OBJS) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK) $(LIBS) -Wl,--export-all-symbols -Wl,--out-implib=lib$(NAME).dll.a")
 
     def build(self):
         apply_conandata_patches(self)
@@ -189,6 +200,7 @@ class LibpqConan(ConanFile):
         else:
             globs = [
                 os.path.join(self.package_folder, "lib", "libpq.so*"),
+                os.path.join(self.package_folder, "lib", "*.dll"),
                 os.path.join(self.package_folder, "bin", "*.dll"),
                 os.path.join(self.package_folder, "lib", "libpq*.dylib")
             ]
