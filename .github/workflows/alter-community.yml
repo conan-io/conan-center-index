@@ -4,7 +4,7 @@ on:
   pull_request:
 
 jobs:
-  docs:
+  comment:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -12,3 +12,23 @@ jobs:
         with:
           files: "docs/**"
           reviewers: "@RubenRBS"
+        
+      - uses: ./.github/actions/alter-community
+        with:
+          files: ".github/**"
+          reviewers: "@ericLemanissier @prince-chrismc"
+          
+      - uses: ./.github/actions/alter-community
+        with:
+          files: "recipes/aaf"
+          reviewers: "@MartinDelille"
+          
+      - uses: ./.github/actions/alter-community
+        with:
+          files: "recipes/gtk/**"
+          reviewers: "@ericLemanissier"
+          
+      - uses: ./.github/actions/alter-community
+        with:
+          files: "recipes/qt/**"
+          reviewers: "@ericLemanissier"
