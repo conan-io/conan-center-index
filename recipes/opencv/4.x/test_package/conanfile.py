@@ -22,14 +22,14 @@ class TestPackageConan(ConanFile):
         tc.variables["OPENCV_WITH_FLANN"] = self.dependencies["opencv"].options.flann
         tc.variables["OPENCV_WITH_GAPI"] = self.dependencies["opencv"].options.gapi
         tc.variables["OPENCV_WITH_HIGHGUI"] = self.dependencies["opencv"].options.highgui
-        tc.variables["OPENCV_WITH_IMGCODECS_PNG"] = self.dependencies["opencv"].options.imgcodecs and self.dependencies["opencv"].options.with_png
+        tc.variables["OPENCV_WITH_IMGCODECS"] = self.dependencies["opencv"].options.imgcodecs and self.dependencies["opencv"].options.with_png
         tc.variables["OPENCV_WITH_IMGPROC"] = self.dependencies["opencv"].options.imgproc
         tc.variables["OPENCV_WITH_ML"] = self.dependencies["opencv"].options.ml
         tc.variables["OPENCV_WITH_OBJDETECT"] = self.dependencies["opencv"].options.objdetect
         tc.variables["OPENCV_WITH_PHOTO"] = self.dependencies["opencv"].options.photo
         tc.variables["OPENCV_WITH_STITCHING"] = self.dependencies["opencv"].options.stitching
         tc.variables["OPENCV_WITH_VIDEO"] = self.dependencies["opencv"].options.video
-        tc.variables["OPENCV_WITH_VIDEOIO_FFMPEG"] = self.dependencies["opencv"].options.videoio and self.dependencies["opencv"].options.with_ffmpeg
+        tc.variables["OPENCV_WITH_VIDEOIO"] = self.dependencies["opencv"].options.videoio and self.dependencies["opencv"].options.with_ffmpeg
         tc.variables["OPENCV_WITH_ALPHAMAT"] = self.dependencies["opencv"].options.get_safe("alphamat", False)
         tc.variables["OPENCV_WITH_ARUCO"] = self.dependencies["opencv"].options.aruco
         tc.variables["OPENCV_WITH_BGSEGM"] = self.dependencies["opencv"].options.bgsegm
