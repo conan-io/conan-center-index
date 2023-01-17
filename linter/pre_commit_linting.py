@@ -12,13 +12,11 @@ lint_group.add_argument("-ys", "--yamlscheme", action="store_true", help="Lint y
 parser.add_argument('filenames', nargs="*", help="Filenames to potentially lint")
 args = parser.parse_args()
 
-# FIXME: The script always runs in the base folder for the repo,
-# but we don't get proper linting if setting it here and needs to be set outside
-# os.environ['PYTHONPATH'] = os.getcwd()
-
 for file in args.filenames:
     basename = os.path.basename(file)
     if basename == 'conanfile.py':
+        # The recipe linters need access to the files in cci
+        sys.path.append(os.getcwd())
         dirname = os.path.dirname(file)
         if args.recipe and 'test_package' not in dirname:
             from pylint import run_pylint
