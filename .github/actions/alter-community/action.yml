@@ -1,6 +1,6 @@
-name: Alter Community
-description: Comment on pull request if certain files changes
-author: prince-chrismc
+name: "Alter Community"
+description: "Comment on pull request if certain files changes"
+author: "prince-chrismc"
 inputs:
   files:
     description: "Check for changes using only this list of files (Defaults to the entire repo)"
@@ -23,9 +23,11 @@ runs:
       uses: actions/github-script@v6
       with:
         script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: ":robot: Beep Boop! This pull request is making changes to '${{ inputs.files }}'.\n\n${{ inputs.reviewers }}"
-            })
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `:robot: **Beep Boop**! This pull request is making changes to '${{ inputs.files }}'.
+
+              ${{ inputs.reviewers }}`
+          })
