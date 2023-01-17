@@ -10,3 +10,7 @@ patches:
     - patch_file: "patches/websocket_boost_support_1_7_x.patch"
       patch_type: "conan"
       patch_description: "Boost 1.70+ support: Mostly captures zaphoyd/websocketpp#814"
+  "0.8.2":
+    - patch_file: "patches/websocket_cxx20_compatability.patch"
+      patch_type: "portability"
+      patch_description: "Needed to build with C++20 compilers"
