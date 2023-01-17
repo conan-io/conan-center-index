@@ -1,0 +1,9 @@
+cfgv==3.3.1
+distlib==0.3.6
+filelock==3.9.0
+identify==2.5.13
+nodeenv==1.7.0
+platformdirs==2.6.2
+pre-commit==2.21.0
+PyYAML==6.0
+virtualenv==20.17.1
