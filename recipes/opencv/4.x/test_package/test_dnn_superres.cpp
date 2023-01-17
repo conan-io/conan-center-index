@@ -1,6 +1,6 @@
 #include <opencv2/dnn_superres.hpp>
 
 int main() {
-    auto dnn_superres_impl = cv::dnn_superres::DnnSuperResImpl::create();
+    cv::dnn_superres::DnnSuperResImpl dnn_superres_impl;
     return 0;
 }
