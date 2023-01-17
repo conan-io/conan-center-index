@@ -17,4 +17,4 @@ sources:
 patches:
   "5.3.5":
     - patch_file: "patches/5.3.5/lua_mobile.patch"
-      base_path: "source_subfolder/src"
+      patch_type: "portability"
