@@ -3,17 +3,10 @@ project(test_package LANGUAGES CXX)
 
 enable_testing()
 
-find_package(OpenCV REQUIRED core CONFIG)
-
-add_executable(test_core test_core.cpp)
-target_link_libraries(test_core PRIVATE opencv_core)
-target_compile_features(test_core PRIVATE cxx_std_11)
-add_test(NAME test_core COMMAND test_core)
-
-set(TESTED_OPENCV_MODULES
+set(TESTED_MODULES
     # Main modules
-    "calib3d" "features2d" "flann" "gapi" "highgui" "imgcodecs" "imgproc"
-    "ml" "objdetect" "photo" "stitching" "video" "videoio"
+    "calib3d" "core" "features2d" "flann" "gapi" "highgui" "imgcodecs"
+    "imgproc" "ml" "objdetect" "photo" "stitching" "video" "videoio"
     # Extra modules
     "alphamat" "aruco" "bgsegm" "bioinspired" "ccalib" "dnn_superres" "face"
     "freetype" "fuzzy" "hfs" "img_hash" "intensity_transform" "line_descriptor"
@@ -22,9 +15,10 @@ set(TESTED_OPENCV_MODULES
     "wechat_qrcode" "xfeatures2d" "ximgproc" "xobjdetect" "xphoto"
 )
 
-foreach(_module ${TESTED_OPENCV_MODULES})
+find_package(OpenCV REQUIRED core CONFIG)
+
+foreach(_module ${TESTED_MODULES})
     string(TOUPPER ${_module} _module_upper)
-    option(OPENCV_WITH_${_module_upper} "Enabled if opencv is built with ${_module} module" OFF)
     if(OPENCV_WITH_${_module_upper})
         set(_test_target test_${_module})
         set(_module_target opencv_${_module})
