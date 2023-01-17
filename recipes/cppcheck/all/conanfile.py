@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
@@ -45,8 +44,7 @@ class CppcheckConan(ConanFile):
         tc.variables["HAVE_RULES"] = self.options.have_rules
         tc.variables["USE_MATCHCOMPILER"] = "Auto"
         tc.variables["ENABLE_OSS_FUZZ"] = False
-        if is_apple_os(self):
-            tc.variables["FILESDIR"] = os.path.join(self.package_folder, "bin", "cfg")
+        tc.variables["FILESDIR"] = os.path.join(self.package_folder, "res")
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -60,7 +58,6 @@ class CppcheckConan(ConanFile):
 
     def package(self):
         copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder))
-        copy(self, "*", dst=os.path.join(self.package_folder, "bin", "cfg"), src=os.path.join(self.source_folder, "cfg"))
         copy(self, "cppcheck-htmlreport", dst=os.path.join(self.package_folder, "bin"), src=os.path.join(self.source_folder, "htmlreport"))
         cmake = CMake(self)
         cmake.install()
