@@ -70,7 +70,16 @@ class MpcConan(ConanFile):
             tc.configure_args.extend(["--disable-static", "--enable-shared"])
         else:
             tc.configure_args.extend(["--disable-shared", "--enable-static"])
-        tc.generate() # Create conanbuild.conf
+
+        env = tc.environment() # Environment must be captured *after* setting extra_cflags, etc. to pick up changes
+        if is_msvc(self):
+            ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper"))
+            env.define("CC", "cl -nologo")
+            env.define("CXX", "cl -nologo")
+            env.define("LD", "link -nologo")
+            env.define("AR", f'{ar_wrapper} "lib -nologo"')
+        tc.generate(env) # Create conanbuild.conf
+
         tc = AutotoolsDeps(self)
         tc.generate()
 
