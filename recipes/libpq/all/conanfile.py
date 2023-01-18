@@ -272,7 +272,8 @@ class LibpqConan(ConanFile):
                 if Version(self.version) >= "12":
                     self.cpp_info.components["pgcommon"].libs.append("pgcommon_shlib")
                     self.cpp_info.components["pgport"].libs = ["pgport", "pgport_shlib"]
-                    self.cpp_info.components["pgport"].system_libs = ["ws2_32"]
+                    if self.settings.os == "Windows":
+                        self.cpp_info.components["pgport"].system_libs = ["ws2_32"]
                     self.cpp_info.components["pgcommon"].requires.append("pgport")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
