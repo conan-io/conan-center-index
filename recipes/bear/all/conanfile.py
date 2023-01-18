@@ -18,7 +18,7 @@ class BearConan(ConanFile):
     license = "GPL-3.0-only"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/rizsotto/Bear"
-    topics = ("compilation", "database")
+    topics = ("clang", "compilation", "database", "llvm")
     settings = "os", "arch", "compiler", "build_type"
 
     @property
@@ -67,7 +67,6 @@ class BearConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
         tc = CMakeToolchain(self)
         tc.variables["ENABLE_UNIT_TESTS"] = False
         tc.variables["ENABLE_FUNC_TESTS"] = False

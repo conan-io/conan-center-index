@@ -1,7 +1,6 @@
 from conan import ConanFile
 
 
-# It will become the standard on Conan 2.x
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "VirtualBuildEnv"
