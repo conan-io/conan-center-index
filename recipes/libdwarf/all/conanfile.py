@@ -9,7 +9,7 @@ required_conan_version = ">=1.53.0"
 class LibdwarfConan(ConanFile):
     name = "libdwarf"
     description = "A library and a set of command-line tools for reading and writing DWARF2"
-    license = "LGPL-2.1"
+    license = ("LGPL-2.1-only", "GPL-2.0-only", "BSD-2-Clause-Views")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.prevanders.net/dwarf.html"
     topics = ("libdwarf", "dwarf2", "debugging", "dwarf")
