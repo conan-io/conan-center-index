@@ -1,0 +1,20 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -292,7 +292,7 @@ if(GTSAM_USE_SYSTEM_EIGEN)
+ 	find_package(Eigen3 REQUIRED)
+ 
+ 	# Use generic Eigen include paths e.g. <Eigen/Core>
+-	set(GTSAM_EIGEN_INCLUDE_FOR_INSTALL "${EIGEN3_INCLUDE_DIR}")
++	set(GTSAM_EIGEN_INCLUDE_FOR_INSTALL "${Eigen3_INCLUDE_DIRS}")
+ 
+ 	# check if MKL is also enabled - can have one or the other, but not both!
+ 	# Note: Eigen >= v3.2.5 includes our patches
+@@ -307,7 +307,7 @@ if(GTSAM_USE_SYSTEM_EIGEN)
+ 	endif()
+ 
+ 	# The actual include directory (for BUILD cmake target interface):
+-	set(GTSAM_EIGEN_INCLUDE_FOR_BUILD "${EIGEN3_INCLUDE_DIR}")
++	set(GTSAM_EIGEN_INCLUDE_FOR_BUILD "${Eigen3_INCLUDE_DIRS}")
+ else()
+ 	# Use bundled Eigen include path.
+ 	# Clear any variables set by FindEigen3
