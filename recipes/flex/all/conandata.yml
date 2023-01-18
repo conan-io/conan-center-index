@@ -5,5 +5,5 @@ sources:
 patches:
   "2.6.4":
     - patch_file: patches/darwin-newer-versions.patch
-      patch_description: "Darwin 22.x.x or newer versions link flags"
+      patch_description: "https://github.com/westes/flex/issues/509"
       patch_type: "portability"

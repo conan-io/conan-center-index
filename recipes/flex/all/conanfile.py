@@ -75,12 +75,6 @@ class FlexConan(ConanFile):
         apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.configure()
-        from io import StringIO
-        output = StringIO()
-        print("+++++++++++++++++++++++++++++++++++++++++++++")
-        self.run("cat %s" % os.path.join(self.build_folder, "config.status"), output=output)
-        print(output.getvalue())
-        print("+++++++++++++++++++++++++++++++++++++++++++++")
         autotools.make()
 
     def package(self):
@@ -92,11 +86,19 @@ class FlexConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["fl"]
+        self.cpp_info.set_property("cmake_file_name", "FLEX")
+        self.cpp_info.set_property("cmake_target_name", "FLEX::FLEX")
+        self.cpp_info.set_property("pkg_config_name", "flex")
+
+        self.cpp_info.names["cmake_find_package"] = "FLEX"
+        self.cpp_info.names["cmake_find_package_multi"] = "FLEX"
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
+        self.buildenv_info.prepend_path("PATH", bindir)
 
         lex_path = os.path.join(bindir, "flex").replace("\\", "/")
         self.output.info("Setting LEX environment variable: {}".format(lex_path))
         self.env_info.LEX = lex_path
+        self.buildenv_info.define("LEX", lex_path)
