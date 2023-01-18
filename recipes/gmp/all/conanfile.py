@@ -102,7 +102,6 @@ class GmpConan(ConanFile):
             f'--enable-cxx={yes_no(self.options.enable_cxx)}',
             f'--srcdir={"../src"}', # Use relative path to avoid issues with #include "$srcdir/gmp-h.in" on Windows
         ])
-        env = tc.environment()
         if is_msvc(self):
             tc.configure_args.extend([
                 "ac_cv_c_restrict=restrict",
@@ -114,7 +113,8 @@ class GmpConan(ConanFile):
                (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12"):
                 tc.extra_cflags.append("-FS")
                 tc.extra_cxxflags.append("-FS")
-
+        env = tc.environment() # Environment must be captured *after* setting extra_cflags, etc. to pick up changes
+        if is_msvc(self):
             yasm_wrapper = unix_path(self, os.path.join(self.source_folder, "yasm_wrapper.sh"))
             yasm_machine = {
                 "x86": "x86",
