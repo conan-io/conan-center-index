@@ -36,6 +36,7 @@ class LibpqConan(ConanFile):
         "with_openssl": False,
         "disable_rpath": False,
     }
+    generators = ["AutotoolsDeps"]
 
     _autotools = None
 
