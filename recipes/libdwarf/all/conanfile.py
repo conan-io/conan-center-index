@@ -12,7 +12,7 @@ class LibdwarfConan(ConanFile):
     license = ("LGPL-2.1-only", "GPL-2.0-only", "BSD-2-Clause-Views")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.prevanders.net/dwarf.html"
-    topics = ("libdwarf", "dwarf2", "debugging", "dwarf")
+    topics = ("debug", "dwarf", "dwarf2", "elf")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
