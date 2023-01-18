@@ -1034,6 +1034,8 @@ Examples = bin/datadir/examples""")
             if self.options.get_safe("with_fontconfig", False):
                 gui_reqs.append("fontconfig::fontconfig")
             if self.settings.os in ["Linux", "FreeBSD"]:
+                if self.options.qtwayland:
+                    gui_reqs.append("wayland::wayland")
                 if self.options.qtwayland or self.options.get_safe("with_x11", False):
                     gui_reqs.append("xkbcommon::xkbcommon")
                 if self.options.get_safe("with_x11", False):
