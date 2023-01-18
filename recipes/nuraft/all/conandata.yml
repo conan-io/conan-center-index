@@ -10,9 +10,7 @@ patches:
     - patch_file: "patches/1001-cmake_patches.patch"
       patch_description: "Provide CMake correct dependency discovery logic."
       patch_type: "conan"
-      sha256: cc5649140f662e52b038e4b6788b9b0cd63b36dc36cec8898b222d6efb4bc4e6
   "2.0.0":
     - patch_file: "patches/0001-cmake_patches.patch"
       patch_description: "Provide CMake correct dependency discovery logic."
       patch_type: "conan"
-      sha256: 8147e2f3b950f944433220539376b1c8e0e93207902f48aa2d3bcbca814a674a
