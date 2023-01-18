@@ -236,7 +236,7 @@ class LibMysqlClientCConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "docs"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.os == "Windows" and self.options.shared:
-            copy(self, "*.dll", src=self.package_folder, dst="bin", keep_path=False)
+            copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
         if self.options.shared:
             rm(self, "*.a", self.package_folder, recursive=True)
         else:
