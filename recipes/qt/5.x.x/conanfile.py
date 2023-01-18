@@ -451,7 +451,7 @@ class QtConan(ConanFile):
             "-ldbus-1d",
             "-ldbus-1"
         )
-        open(os.path.join(self.source_folder, "qt5", "qtbase", "mkspecs", "features", "uikit", "bitcode.prf"), "w").close()
+        save(self, os.path.join(self.source_folder, "qt5", "qtbase", "mkspecs", "features", "uikit", "bitcode.prf"), "")
 
     def _make_program(self):
         if is_msvc(self):
