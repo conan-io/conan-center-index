@@ -175,7 +175,7 @@ class Open62541Conan(ConanFile):
             self.options["libwebsockets"].with_ssl = self.options.encryption
 
     def layout(self):
-        cmake_layout(self, src_folder="source")
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.encryption == "mbedtls":
