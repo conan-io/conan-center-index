@@ -70,8 +70,7 @@ class MpcConan(ConanFile):
             tc.configure_args.extend(["--disable-static", "--enable-shared"])
         else:
             tc.configure_args.extend(["--disable-shared", "--enable-static"])
-
-        tc.generate() # Create conanbuild.conf
+        tc.generate()
 
         tc = AutotoolsDeps(self)
         tc.generate()
