@@ -97,11 +97,6 @@ class M4Conan(ConanFile):
                 os.chmod(help2man, os.stat(help2man).st_mode | 0o111)
 
     def build(self):
-        # Support building with source from Git reop
-        with chdir(self, self.source_folder):
-            command = "./bootstrap"
-            if os.path.exists(command) and not os.path.exists("configure"):
-                self.run(command)
         self._patch_sources()
         autotools = Autotools(self)
         autotools.configure()
