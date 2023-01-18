@@ -20,7 +20,7 @@ index 2607e56..e18df2c 100644
  #  it is really #  either elf.h, or if that is missing 
  #  it is assuming  elf.h data is in the supplied libelf.
 +find_package(Libelf REQUIRED)
-+# find_package(ZLIB REQUIRED)
++find_package(ZLIB REQUIRED)
  
  if(HAVE_ELF_H)
      set(HAVE_LOCATION_OF_LIBELFHEADER "<elf.h>")
