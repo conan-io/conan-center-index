@@ -42,7 +42,7 @@ class SdlttfConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
-        if self.settings.os != "Android" and Version(self.version) < "2.20.0":
+        if Version(self.version) < "2.20.0":
             del self.options.with_harfbuzz
 
     def layout(self):
@@ -74,8 +74,6 @@ class SdlttfConan(ConanFile):
             tc.variables["SDL2TTF_SAMPLES"] = False
             tc.variables["SDL2TTF_VENDORED"] = False
             tc.variables["SDL2TTF_HARFBUZZ"] = self.options.with_harfbuzz
-        elif self.settings.os == "Android":
-            tc.variables["TTF_WITH_HARFBUZZ"] = self.options.with_harfbuzz
 
         tc.generate()
         deps = CMakeDeps(self)
@@ -110,16 +108,18 @@ class SdlttfConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        suffix = "-static" if Version(self.version) >= "2.20.0" and not self.options.shared else ""
+
         self.cpp_info.set_property("cmake_file_name", "SDL2_ttf")
-        self.cpp_info.set_property("cmake_target_name", "SDL2_ttf::SDL2_ttf")
+        self.cpp_info.set_property("cmake_target_name",f"SDL2_ttf::SDL2_ttf{suffix}")
         self.cpp_info.set_property("pkg_config_name", "SDL2_ttf")
 
         self.cpp_info.includedirs.append(os.path.join("include", "SDL2"))
         self.cpp_info.libs = ["SDL2_ttf"]
-        self.cpp_info.requires = ["freetype::freetype", "sdl::libsdl2"]
+        self.cpp_info.requires = ["freetype::freetype", f"sdl::libsdl2"]
         if self.options.get_safe("with_harfbuzz"):
             self.cpp_info.requires.append("harfbuzz::harfbuzz")
 
         # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "SDL2_ttf"
-        self.cpp_info.names["cmake_find_package_multi"] = "SDL2_ttf"
+        self.cpp_info.names["cmake_find_package"] = f"SDL2_ttf{suffix}"
+        self.cpp_info.names["cmake_find_package_multi"] = f"SDL2_ttf{suffix}"
