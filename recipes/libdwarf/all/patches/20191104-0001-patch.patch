@@ -1,7 +1,7 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 2607e56..66163a4 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
+diff --git a/a/CMakeLists.txt b/b/CMakeLists.txt
+index 2607e56..e18df2c 100644
+--- a/a/CMakeLists.txt
++++ b/b/CMakeLists.txt
 @@ -73,9 +73,9 @@ check_include_file( "unistd.h"        HAVE_UNISTD_H   )
  check_include_file( "sgidefs.h"       HAVE_SGIDEFS_H  )
  check_include_file( "stdafx.h"        HAVE_STDAFX_H   )
@@ -15,15 +15,16 @@ index 2607e56..66163a4 100644
  check_include_file( "alloca.h"        HAVE_ALLOCA_H   )
  check_include_file( "elfaccess.h"     HAVE_ELFACCESS_H)
  check_include_file( "sys/elf_386.h"   HAVE_SYS_ELF_386_H  )
-@@ -128,6 +128,7 @@ endif()
+@@ -128,6 +128,8 @@ endif()
  #  It's not really setting the location of libelfheader, 
  #  it is really #  either elf.h, or if that is missing 
  #  it is assuming  elf.h data is in the supplied libelf.
 +find_package(Libelf REQUIRED)
++# find_package(ZLIB REQUIRED)
  
  if(HAVE_ELF_H)
      set(HAVE_LOCATION_OF_LIBELFHEADER "<elf.h>")
-@@ -146,12 +147,14 @@ elseif(HAVE_LIBELF_LIBELF_H)
+@@ -146,12 +148,14 @@ elseif(HAVE_LIBELF_LIBELF_H)
  endif()
  
  if (HAVE_LIBELF_H OR HAVE_LIBELF_LIBELF_H)
@@ -39,7 +40,7 @@ index 2607e56..66163a4 100644
  endif()
  
  option(DWARF_WITH_LIBELF "Use libelf (default is YES)" TRUE)
-@@ -166,6 +169,10 @@ if (DWARF_WITH_LIBELF)
+@@ -166,6 +170,10 @@ if (DWARF_WITH_LIBELF)
    message(STATUS "checking using HAVE_ELF_H ... ${HAVE_ELF_H}")
    message(STATUS "checking using elf header ... ${HAVE_LOCATION_OF_LIBELFHEADER}")
    message(STATUS "checking using libelf header ... ${JUST_LIBELF}")
@@ -50,7 +51,7 @@ index 2607e56..66163a4 100644
    check_c_source_compiles("
    #include ${HAVE_LOCATION_OF_LIBELFHEADER}
    int main()      
-@@ -202,7 +209,7 @@ if (DWARF_WITH_LIBELF)
+@@ -202,7 +210,7 @@ if (DWARF_WITH_LIBELF)
    # to set HAVE_LIBELF_OFF64_OK at present. 
    check_c_source_compiles("
    #define _GNU_SOURCE 1
@@ -59,7 +60,7 @@ index 2607e56..66163a4 100644
    int main()
    { 
        off64_t  p; p = 0;
-@@ -210,7 +217,7 @@ if (DWARF_WITH_LIBELF)
+@@ -210,7 +218,7 @@ if (DWARF_WITH_LIBELF)
    }"  HAVE_LIBELF_OFF64_OK)
  
    check_c_source_compiles("
@@ -68,7 +69,7 @@ index 2607e56..66163a4 100644
    /* This must be at global scope */
    struct _Elf;
    typedef struct _Elf Elf;
-@@ -220,6 +227,10 @@ if (DWARF_WITH_LIBELF)
+@@ -220,6 +228,10 @@ if (DWARF_WITH_LIBELF)
     int i = 12;
     return 0;
    }" HAVE_STRUCT_UNDERSCORE_ELF)
@@ -79,7 +80,7 @@ index 2607e56..66163a4 100644
  endif()
  message(STATUS "Assuming struct Elf for the default libdwarf.h")
  # Because cmake treats ; in an interesting way attempting
-@@ -378,10 +389,9 @@ message(STATUS "Checking producer generates only 32bit... ${HAVE_STRICT_DWARF2_3
+@@ -378,10 +390,9 @@ message(STATUS "Checking producer generates only 32bit... ${HAVE_STRICT_DWARF2_3
  
  
  # This references cmake/FindLibElf.cmake. See cmake documentation.
@@ -91,7 +92,7 @@ index 2607e56..66163a4 100644
  
  if(BUILD_NON_SHARED)
  	set(DWARF_TARGETS dwarf-static)
-@@ -395,7 +405,6 @@ if(BUILD_SHARED)
+@@ -395,7 +406,6 @@ if(BUILD_SHARED)
  endif()
  
  add_subdirectory(libdwarf)
@@ -99,10 +100,10 @@ index 2607e56..66163a4 100644
  if ( BUILD_DWARFGEN )
  	if ( DWARF_WITH_LIBELF )
  	    add_subdirectory(dwarfgen)
-diff --git a/dwarfgen/CMakeLists.txt b/dwarfgen/CMakeLists.txt
-index 488b820..bcc92b4 100644
---- a/dwarfgen/CMakeLists.txt
-+++ b/dwarfgen/CMakeLists.txt
+diff --git a/a/dwarfgen/CMakeLists.txt b/b/dwarfgen/CMakeLists.txt
+index 488b820..2abbcae 100644
+--- a/a/dwarfgen/CMakeLists.txt
++++ b/b/dwarfgen/CMakeLists.txt
 @@ -27,9 +27,9 @@ set(LIBDIR lib${SUFFIX})
  set(BINDIR bin${SUFFIX})
  
@@ -116,10 +117,10 @@ index 488b820..bcc92b4 100644
  
  #install(FILES dwarfgen.conf DESTINATION lib)
  
-diff --git a/libdwarf/CMakeLists.txt b/libdwarf/CMakeLists.txt
-index c610522..b5d6eb2 100644
---- a/libdwarf/CMakeLists.txt
-+++ b/libdwarf/CMakeLists.txt
+diff --git a/a/libdwarf/CMakeLists.txt b/b/libdwarf/CMakeLists.txt
+index c610522..3a69533 100644
+--- a/a/libdwarf/CMakeLists.txt
++++ b/b/libdwarf/CMakeLists.txt
 @@ -81,12 +81,9 @@ foreach(i RANGE ${targetCount})
              ${GENNAMES_OUTPUT} ${CONFIGURATION_FILES})
  
@@ -130,7 +131,7 @@ index c610522..b5d6eb2 100644
  	msvc_posix(${target})
  
 -	target_link_libraries(${target} PUBLIC ${LIBELF_LIBRARIES})
-+    target_link_libraries(${target} PUBLIC ${libelf_LIBRARIES})
++    target_link_libraries(${target} PUBLIC ${libelf_LIBRARIES} ${ZLIB_LIBRARIES})
  	
  	set_target_properties(${target} PROPERTIES OUTPUT_NAME dwarf)
  
