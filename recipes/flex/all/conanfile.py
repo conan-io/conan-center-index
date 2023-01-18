@@ -46,10 +46,6 @@ class FlexConan(ConanFile):
             raise ConanInvalidConfiguration("Flex package is not compatible with Windows. "
                                             "Consider using winflexbison instead.")
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -96,9 +92,7 @@ class FlexConan(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
-        self.buildenv_info.prepend_path("PATH", bindir)
 
         lex_path = os.path.join(bindir, "flex").replace("\\", "/")
         self.output.info("Setting LEX environment variable: {}".format(lex_path))
         self.env_info.LEX = lex_path
-        self.buildenv_info.define("LEX", lex_path)

@@ -38,13 +38,12 @@ class TestPackageConan(ConanFile):
         assert os.path.exists(output_file)
 
     def build(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
-            # Let's check flex version installed and create the basic_nr.cpp file
-            self._assert_expected_version()
-            self._create_cpp_file()
-            cmake = CMake(self)
-            cmake.configure()
-            cmake.build()
+        # Let's check flex version installed and create the basic_nr.cpp file
+        self._assert_expected_version()
+        self._create_cpp_file()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def test(self):
         if not tools.cross_building(self, skip_x64_x86=True):
