@@ -99,60 +99,10 @@ index 2607e56..66163a4 100644
  if ( BUILD_DWARFGEN )
  	if ( DWARF_WITH_LIBELF )
  	    add_subdirectory(dwarfgen)
-diff --git a/dwarfdump/CMakeLists.txt b/dwarfdump/CMakeLists.txt
-index b94f6c8..e688ea0 100644
---- a/dwarfdump/CMakeLists.txt
-+++ b/dwarfdump/CMakeLists.txt
-@@ -28,7 +28,7 @@ set_source_group(HEADERS "Header Files"
-   print_reloc.h print_reloc_decls.h section_bitmaps.h uri.h)
- 
- set_source_group(CONFIGURATION_FILES "Configuration Files"
--  ${CMAKE_SOURCE_DIR}/config.h.in.cmake
-+  ${CMAKE_SOURCE_DIR}/source_subfolder/config.h.in.cmake
-   ${CMAKE_BINARY_DIR}/config.h)
- 	
- add_executable(dwarfdump ${SOURCES} ${HEADERS} ${CONFIGURATION_FILES})
-@@ -180,10 +180,10 @@ set(LIBDIR lib${SUFFIX})
- set(BINDIR bin${SUFFIX})
- 
- install(TARGETS dwarfdump DESTINATION
--	RUNTIME DESTINATION ${BINDIR}		
--	LIBRARY DESTINATION ${LIBDIR}
--	ARCHIVE DESTINATION ${LIBDIR})
-+	RUNTIME DESTINATION bin
-+  LIBRARY DESTINATION lib
-+	ARCHIVE DESTINATION lib)
- 
--install(FILES dwarfdump.conf DESTINATION ${LIBDIR})
-+install(FILES dwarfdump.conf DESTINATION res)
- 
- install(FILES dwarfdump.1 DESTINATION share/man/man1)
-diff --git a/dwarfexample/CMakeLists.txt b/dwarfexample/CMakeLists.txt
-index 8104691..7c6cd7e 100644
---- a/dwarfexample/CMakeLists.txt
-+++ b/dwarfexample/CMakeLists.txt
-@@ -1,7 +1,7 @@
- set_source_group(SIMPLE_READER_SOURCES "Source Files" simplereader.c)
- 
- set_source_group(CONFIGURATION_FILES "Configuration Files"
--  ${CMAKE_SOURCE_DIR}/config.h.in.cmake
-+  ${CMAKE_SOURCE_DIR}/source_subfolder/config.h.in.cmake
-   ${CMAKE_BINARY_DIR}/config.h)
- 
- add_executable(simplereader 
 diff --git a/dwarfgen/CMakeLists.txt b/dwarfgen/CMakeLists.txt
 index 488b820..bcc92b4 100644
 --- a/dwarfgen/CMakeLists.txt
 +++ b/dwarfgen/CMakeLists.txt
-@@ -11,7 +11,7 @@ set_source_group(HEADERS "Header Files" createirepfrombinary.h
-     strtabdata.h ../libdwarf/dwgetopt.h)
- 
- set_source_group(CONFIGURATION_FILES "Configuration Files" 
--    ${CMAKE_SOURCE_DIR}/config.h.in.cmake
-+    ${CMAKE_SOURCE_DIR}/source_subfolder/config.h.in.cmake
-     ${CMAKE_BINARY_DIR}/config.h)
-     
- add_executable(dwarfgen ${SOURCES} ${HEADERS} ${CONFIGURATION_FILES})
 @@ -27,9 +27,9 @@ set(LIBDIR lib${SUFFIX})
  set(BINDIR bin${SUFFIX})
  
@@ -170,15 +120,6 @@ diff --git a/libdwarf/CMakeLists.txt b/libdwarf/CMakeLists.txt
 index c610522..b5d6eb2 100644
 --- a/libdwarf/CMakeLists.txt
 +++ b/libdwarf/CMakeLists.txt
-@@ -67,7 +67,7 @@ pro_reloc.h pro_reloc_stream.h pro_reloc_symbolic.h
- pro_section.h pro_types.h pro_util.h)
- 
- set_source_group(CONFIGURATION_FILES "Configuration Files" 
--    ${CMAKE_SOURCE_DIR}/config.h.in.cmake 
-+    ${CMAKE_SOURCE_DIR}/config.h.in.cmake
-     ${CMAKE_BINARY_DIR}/config.h)
- 
- 
 @@ -81,12 +81,9 @@ foreach(i RANGE ${targetCount})
              ${GENNAMES_OUTPUT} ${CONFIGURATION_FILES})
  

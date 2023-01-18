@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rename
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
@@ -18,10 +18,12 @@ class LibdwarfConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_dwarfgen": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_dwarfgen": False,
     }
 
     def export_sources(self):
@@ -52,7 +54,7 @@ class LibdwarfConan(ConanFile):
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["BUILD_NON_SHARED"] = not self.options.shared
         tc.variables["BUILD_SHARED"] = self.options.shared
-        tc.variables["BUILD_DWARFGEN"] = False
+        tc.variables["BUILD_DWARFGEN"] = self.options.with_dwarfgen
         tc.variables["BUILD_DWARFEXAMPLE"] = False
         if cross_building(self):
             tc.variables["HAVE_UNUSED_ATTRIBUTE_EXITCODE"] = "0"
@@ -69,10 +71,33 @@ class LibdwarfConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, "libdwarf"))
+        if self.version == "20191104":
+            copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, "libdwarf"))
+            rename(self, os.path.join(self.package_folder, "licenses", "COPYING"), os.path.join(self.package_folder, "licenses", "COPYING-libdwarf"))
+            if self.options.with_dwarfgen:
+                copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, "dwarfgen"))
+                rename(self, os.path.join(self.package_folder, "licenses", "COPYING"), os.path.join(self.package_folder, "licenses", "COPYING-dwarfgen"))
+            copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        else:
+            copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, "src", "lib", "libdwarf"))
+            rename(self, os.path.join(self.package_folder, "licenses", "COPYING"), os.path.join(self.package_folder, "licenses", "COPYING-libdwarf"))
+            if self.options.with_dwarfgen:
+                copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, "src", "bin", "dwarfgen"))
+                rename(self, os.path.join(self.package_folder, "licenses", "COPYING"), os.path.join(self.package_folder, "licenses", "COPYING-dwarfgen"))
+            copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["dwarf"]
+
+        if self.options.with_dwarfgen:
+            bindir = os.path.join(self.package_folder, "bin")
+            self.output.info(f'Appending PATH environment variable: {bindir}')
+            self.env_info.PATH.append(bindir)
+
+            if self.version != "20191104":
+                self.cpp_info.libs.append = ["dwarfp"]
