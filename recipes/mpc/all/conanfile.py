@@ -49,7 +49,7 @@ class MpcConan(ConanFile):
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             self.win_bash = True
-            toolb_requires("automake/1.16.5") # Neededfor lib-wrapper
+            self.tool_requires("automake/1.16.5") # Neededfor lib-wrapper
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
