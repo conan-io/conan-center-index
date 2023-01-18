@@ -39,7 +39,7 @@ class MpcConan(ConanFile):
 
     def validate(self):
         # FIXME: add msvc support, upstream has a makefile.vc
-        if self.info.settings.compiler == "msvc":
+        if is_msvc(self):
             raise ConanInvalidConfiguration("mpc can be built with msvc, but it's not supported yet in this recipe.")
 
     @property
@@ -49,7 +49,6 @@ class MpcConan(ConanFile):
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             self.win_bash = True
-            self.tool_requires("automake/1.16.5") # Neededfor lib-wrapper
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
@@ -72,14 +71,7 @@ class MpcConan(ConanFile):
         else:
             tc.configure_args.extend(["--disable-shared", "--enable-static"])
 
-        env = tc.environment() # Environment must be captured *after* setting extra_cflags, etc. to pick up changes
-        if is_msvc(self):
-            ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper"))
-            env.define("CC", "cl -nologo")
-            env.define("CXX", "cl -nologo")
-            env.define("LD", "link -nologo")
-            env.define("AR", f'{ar_wrapper} "lib -nologo"')
-        tc.generate(env) # Create conanbuild.conf
+        tc.generate() # Create conanbuild.conf
 
         tc = AutotoolsDeps(self)
         tc.generate()
