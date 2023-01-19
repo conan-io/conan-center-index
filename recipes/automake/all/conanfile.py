@@ -16,7 +16,7 @@ class AutomakeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/automake/"
     description = "Automake is a tool for automatically generating Makefile.in files compliant with the GNU Coding Standards."
-    topics = ("configure", "build")
+    topics = ("autotools", "configure", "build")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
     settings = "os", "arch", "compiler", "build_type"
 
