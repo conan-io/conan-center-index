@@ -25,12 +25,12 @@ class PackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "without_python": [True, False],
+        "with_python": [True, False],
         "python_version": ["3.7.12", "3.8.12", "3.9.7", "3.10.0"]
     }
     default_options = {
         "shared": False,
-        "without_python": False,
+        "with_python": True,
         "python_version": "3.9.7"
     }
     short_paths = True
@@ -48,7 +48,7 @@ class PackageConan(ConanFile):
         }
 
     def configure(self):
-        if self.options.without_python:
+        if not self.options.with_python:
             self.options.rm_safe("python_version")
 
     def layout(self):
@@ -56,7 +56,7 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         self.requires("tomlplusplus/3.2.0")
-        if not self.options.without_python:
+        if self.options.with_python:
             self.requires("openssl/1.1.1s")
             self.requires(f"cpython/{self.options.python_version}")
             if is_msvc(self):
@@ -97,10 +97,8 @@ class PackageConan(ConanFile):
             else:
                 tc.variables["OPENASSETIO_GLIBCXX_USE_CXX11_ABI"] = False
 
-        if self.options.without_python:
-            tc.variables["OPENASSETIO_ENABLE_PYTHON"] = False
-        else:
-            tc.variables["OPENASSETIO_ENABLE_PYTHON"] = True
+        tc.variables["OPENASSETIO_ENABLE_PYTHON"] = self.options.with_python
+        if self.options.with_python:
             tc.variables["Python_EXECUTABLE"] = self._python_exe
             if is_msvc(self):
                 tc.variables["Python_LIBRARY"] = self._python_windows_lib
@@ -131,7 +129,7 @@ class PackageConan(ConanFile):
         cmake.build()
 
     def package_id(self):
-        if not self.options.without_python:
+        if self.options.with_python:
             self.info.requires["cpython"].minor_mode()
 
     def package(self):
@@ -158,7 +156,7 @@ class PackageConan(ConanFile):
         self.cpp_info.components["openassetio-core-c"].libs = ["openassetio-c"]
         if not self.options.shared and self._stdcpp_library:
             self.cpp_info.components["openassetio-core-c"].system_libs.append(self._stdcpp_library)
-        if not self.options.without_python:
+        if self.options.with_python:
             self.cpp_info.components["openassetio-python-bridge"].set_property("cmake_target_name", "OpenAssetIO::openassetio-python-bridge")
             self.cpp_info.components["openassetio-python-bridge"].requires = ["openassetio-core"]
             self.cpp_info.components["openassetio-python-bridge"].libs = ["openassetio-python"]

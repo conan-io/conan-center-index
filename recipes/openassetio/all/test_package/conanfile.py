@@ -19,7 +19,7 @@ class TestPackageConan(ConanFile):
         self.requires("openssl/1.1.1s")
         self.requires(self.tested_reference_str)
 
-        if "without_python" in self.options["openassetio"] and self.options["openassetio"].without_python:
+        if "with_python" in self.options["openassetio"] and not self.options["openassetio"].with_python:
             python_version = None
         elif "python_version" in self.options["openassetio"]:
             python_version = self.options['openassetio'].python_version
@@ -43,10 +43,9 @@ class TestPackageConan(ConanFile):
             else:
                 tc.variables["OPENASSETIOTEST_GLIBCXX_USE_CXX11_ABI"] = False
 
-        if self.dependencies["openassetio"].options.without_python:
-            tc.variables["OPENASSETIOTEST_ENABLE_PYTHON"] = False
-        else:
-            tc.variables["OPENASSETIOTEST_ENABLE_PYTHON"] = True
+        tc.variables["OPENASSETIOTEST_ENABLE_PYTHON"] = self.dependencies["openassetio"].options.with_python
+
+        if self.dependencies["openassetio"].options.with_python:
             tc.variables["Python_EXECUTABLE"] = self._python_exe
             if is_msvc(self):
                 tc.variables["Python_LIBRARY"] = self._python_windows_lib
