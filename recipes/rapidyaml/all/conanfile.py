@@ -1,17 +1,20 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.microsoft import check_min_vs
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
-import functools
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 class RapidYAMLConan(ConanFile):
     name = "rapidyaml"
     description = "a library to parse and emit YAML, and do it fast."
-    topics = ("yaml", "parser", "emitter")
     license = "MIT",
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/biojppm/rapidyaml"
+    topics = ("yaml", "parser", "emitter")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,73 +28,61 @@ class RapidYAMLConan(ConanFile):
         "with_default_callbacks": True,
         "with_tab_tokens": False,
     }
-    generators = "cmake", "cmake_find_package_multi"
-
-    _compiler_required_cpp11 = {
-        "Visual Studio": "13",
-        "gcc": "6",
-        "clang": "4",
-    }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _minimum_cpp_standard(self):
+        return 11
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) < "0.4.0":
+        if Version(self.version) < "0.4.0":
             del self.options.with_tab_tokens
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("c4core/0.1.9")
+        self.requires("c4core/0.1.11")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
-
-        minimum_version = self._compiler_required_cpp11.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("{} requires C++11, which your compiler does not support.".format(self.name))
-        else:
-            self.output.warn("{0} requires C++11. Your compiler is unknown. Assuming it supports C++11.".format(self.name))
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
+        check_min_vs(self, 190)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["RYML_DEFAULT_CALLBACKS"] = self.options.with_default_callbacks
-        if tools.Version(self.version) >= "0.4.0":
-            cmake.definitions["RYML_WITH_TAB_TOKENS"] = self.options.with_tab_tokens
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["RYML_DEFAULT_CALLBACKS"] = self.options.with_default_callbacks
+        if Version(self.version) >= "0.4.0":
+            tc.variables["RYML_WITH_TAB_TOKENS"] = self.options.with_tab_tokens
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "include"), "*.natvis")
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rm(self, "*.natvis", os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ryml")

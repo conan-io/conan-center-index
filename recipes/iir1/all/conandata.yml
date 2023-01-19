@@ -1,11 +1,30 @@
 sources:
-  "1.9.0":
-    url: "https://github.com/berndporr/iir1/archive/refs/tags/1.9.0.tar.gz"
-    sha256: "BF2C3CD819151D5B85E84CC8349C1AA9DD5E4157A7070BDD143130278B4375E8"
   "1.9.1":
     url: "https://github.com/berndporr/iir1/archive/refs/tags/1.9.1.tar.gz"
-    sha256: "97B4A7D62FA4859AC0D80283696B0D91C320B61EC2A455CDD3D8CFBB2BE3AD9A"
-patches:
+    sha256: "97b4a7d62fa4859ac0d80283696b0d91c320b61ec2a455cdd3d8cfbb2be3ad9a"
   "1.9.0":
-    - patch_file: "patches/0002-Add-runtime-export-to-install.patch"
-      base_path: "source_subfolder"
+    url: "https://github.com/berndporr/iir1/archive/refs/tags/1.9.0.tar.gz"
+    sha256: "bf2c3cd819151d5b85e84cc8349c1aa9dd5e4157a7070bdd143130278b4375e8"
+patches:
+  "1.9.1":
+    - patch_file: "patches/1.9.0-0001-no-export-static-win.patch"
+      patch_description: "Avoid to define __declspec(dllexport) on windows at consume time & in static lib"
+      patch_type: "portability"
+      sha256: "b29a0a2f4e6f76c57b7a8e4051173a0e82d7d154571377a0fbd75fd73e4fa73c"
+    - patch_file: "patches/1.9.0-0003-disable-test-demo.patch"
+      patch_description: "Do not build test & demo"
+      patch_type: "conan"
+      sha256: "5b866e0a6d536f12386ecc212c47a993b9e891584879fd507f8b86f596f97cdd"
+  "1.9.0":
+    - patch_file: "patches/1.9.0-0001-no-export-static-win.patch"
+      patch_description: "Avoid to define __declspec(dllexport) on windows at consume time & in static lib"
+      patch_type: "portability"
+      sha256: "b29a0a2f4e6f76c57b7a8e4051173a0e82d7d154571377a0fbd75fd73e4fa73c"
+    - patch_file: "patches/1.9.0-0002-Add-runtime-export-to-install.patch"
+      patch_description: "Install dll to bin folder"
+      patch_type: "portability"
+      sha256: "2f423eb1ee633a03c30d60f58a125f118cf9323402983c908708e7a6478e4bf6"
+    - patch_file: "patches/1.9.0-0003-disable-test-demo.patch"
+      patch_description: "Do not build test & demo"
+      patch_type: "conan"
+      sha256: "5b866e0a6d536f12386ecc212c47a993b9e891584879fd507f8b86f596f97cdd"

@@ -1,0 +1,266 @@
+diff --git a/alg/CMakeLists.txt b/alg/CMakeLists.txt
+index edf75158c7..4200309ca8 100644
+--- a/alg/CMakeLists.txt
++++ b/alg/CMakeLists.txt
+@@ -72,7 +72,7 @@ if (GDAL_USE_OPENCL)
+   target_sources(alg PRIVATE gdalwarpkernel_opencl.h gdalwarpkernel_opencl.cpp)
+ endif ()
+ 
+-gdal_target_link_libraries(alg PRIVATE PROJ::proj)
++target_link_libraries(alg PUBLIC PROJ::proj)
+ 
+ if (GDAL_USE_QHULL_INTERNAL)
+   target_compile_definitions(alg PRIVATE -DINTERNAL_QHULL)
+diff --git a/apps/CMakeLists.txt b/apps/CMakeLists.txt
+index a49165d14a..91d6170067 100644
+--- a/apps/CMakeLists.txt
++++ b/apps/CMakeLists.txt
+@@ -25,7 +25,7 @@ target_include_directories(
+   appslib PRIVATE $<TARGET_PROPERTY:gdal_vrt,SOURCE_DIR> $<TARGET_PROPERTY:ogrsf_generic,SOURCE_DIR>
+                   $<TARGET_PROPERTY:ogr_geojson,SOURCE_DIR> $<TARGET_PROPERTY:ogr_MEM,SOURCE_DIR>)
+ 
+-gdal_target_link_libraries(appslib PRIVATE PROJ::proj)
++target_link_libraries(appslib PUBLIC PROJ::proj)
+ 
+ set_property(TARGET appslib PROPERTY POSITION_INDEPENDENT_CODE ${GDAL_OBJECT_LIBRARIES_POSITION_INDEPENDENT_CODE})
+ if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
+diff --git a/cmake/helpers/CheckDependentLibraries.cmake b/cmake/helpers/CheckDependentLibraries.cmake
+index 7fa3b565c7..77a610f223 100644
+--- a/cmake/helpers/CheckDependentLibraries.cmake
++++ b/cmake/helpers/CheckDependentLibraries.cmake
+@@ -11,7 +11,10 @@ Detect GDAL dependencies and set variable HAVE_*
+ include(CheckFunctionExists)
+ include(CMakeDependentOption)
+ include(FeatureSummary)
+-include(DefineFindPackage2)
++
++# Conan recipes should rely on config files from generators so let's just disble GDAL's
++include(ConanFindPackage)
++
+ include(CheckSymbolExists)
+ 
+ option(
+@@ -111,47 +114,7 @@ macro (gdal_check_package name purpose)
+   set(_find_dependency_args "")
+   find_package2(${name} QUIET OUT_DEPENDENCY _find_dependency)
+   if (NOT DEFINED ${key}_FOUND)
+-    set(_find_package_args)
+-    if (_GCP_VERSION)
+-      list(APPEND _find_package_args ${_GCP_VERSION})
+-    endif ()
+-    if (_GCP_CONFIG)
+-      list(APPEND _find_package_args CONFIG)
+-    endif ()
+-    if (_GCP_COMPONENTS)
+-      list(APPEND _find_package_args COMPONENTS ${_GCP_COMPONENTS})
+-    endif ()
+-    if (_GCP_PATHS)
+-      list(APPEND _find_package_args PATHS ${_GCP_PATHS})
+-    endif ()
+-    if (_GCP_NAMES)
+-      set(GDAL_CHECK_PACKAGE_${name}_NAMES "${_GCP_NAMES}" CACHE STRING "Config file name for ${name}")
+-      mark_as_advanced(GDAL_CHECK_PACKAGE_${name}_NAMES)
+-    endif ()
+-    if (_GCP_TARGETS)
+-      set(GDAL_CHECK_PACKAGE_${name}_TARGETS "${_GCP_TARGETS}" CACHE STRING "Target name candidates for ${name}")
+-      mark_as_advanced(GDAL_CHECK_PACKAGE_${name}_TARGETS)
+-    endif ()
+-    if (GDAL_CHECK_PACKAGE_${name}_NAMES)
+-      find_package(${name} NAMES ${GDAL_CHECK_PACKAGE_${name}_NAMES} ${_find_package_args})
+-      gdal_check_package_target(${name} ${GDAL_CHECK_PACKAGE_${name}_TARGETS} REQUIRED)
+-      if (${name}_FOUND)
+-        get_filename_component(_find_dependency_args "${${name}_CONFIG}" NAME)
+-        string(REPLACE ";" " " _find_dependency_args "${name} NAMES ${GDAL_CHECK_PACKAGE_${name}_NAMES} CONFIGS ${_find_dependency_args} ${_find_package_args}")
+-      endif ()
+-    endif ()
+-    if (NOT ${name}_FOUND)
+-      find_package(${name} ${_find_package_args})
+-      if (${name}_FOUND)
+-        gdal_check_package_target(${name} ${GDAL_CHECK_PACKAGE_${name}_TARGETS})
+-      elseif (${key}_FOUND) # Some find modules do not set <Pkg>_FOUND
+-        gdal_check_package_target(${key} ${GDAL_CHECK_PACKAGE_${name}_TARGETS})
+-        set(${name}_FOUND "${key}_FOUND")
+-      endif ()
+-      if (${name}_FOUND)
+-        string(REPLACE ";" " " _find_dependency_args "${name} ${_find_package_args}")
+-      endif()
+-    endif ()
++      message(FATAL_ERROR "Conan recipes should rely on config files from generators so let's just disble GDAL's")
+   endif ()
+   if (${key}_FOUND OR ${name}_FOUND)
+     set(HAVE_${key} ON)
+@@ -321,14 +284,15 @@ if (GDAL_USE_CRYPTOPP)
+ endif ()
+ 
+ # First check with CMake config files (starting at version 8, due to issues with earlier ones), and then fallback to the FindPROJ module.
+-find_package(PROJ 9 CONFIG QUIET)
+-if (NOT PROJ_FOUND)
+-  find_package(PROJ 8 CONFIG QUIET)
+-endif()
++find_package2(PROJ)
++target_include_directories(PROJ::proj INTERFACE ${PROJ_INCLUDE_DIRS})
++#if (NOT PROJ_FOUND)
++#  find_package(proj 8 CONFIG QUIET)
++#endif()
+ if (PROJ_FOUND)
+   string(APPEND GDAL_IMPORT_DEPENDENCIES "find_dependency(PROJ ${PROJ_VERSION_MAJOR} CONFIG)\n")
+ else()
+-  find_package(PROJ 6.0 REQUIRED)
++  find_package(proj 6.0 REQUIRED)
+   string(APPEND GDAL_IMPORT_DEPENDENCIES "find_dependency(PROJ 6.0)\n")
+ endif ()
+ 
+@@ -379,15 +343,10 @@ gdal_check_package(JSONC "json-c library (external)" CAN_DISABLE
+   TARGETS json-c::json-c JSONC::JSONC
+ )
+ gdal_internal_library(JSONC REQUIRED)
+-if(TARGET json-c::json-c)
+-  get_target_property(include_dirs json-c::json-c INTERFACE_INCLUDE_DIRECTORIES)
+-  find_path(GDAL_JSON_INCLUDE_DIR NAMES json.h PATHS ${include_dirs} PATH_SUFFIXES json-c NO_DEFAULT_PATH)
+-  list(APPEND include_dirs "${GDAL_JSON_INCLUDE_DIR}")
+-  list(REMOVE_DUPLICATES include_dirs)
+-  set_target_properties(json-c::json-c PROPERTIES
+-    INTERFACE_INCLUDE_DIRECTORIES "${GDAL_JSON_INCLUDE_DIR}"
+-  )
+-endif()
++get_target_property(include_dirs json-c::json-c INTERFACE_INCLUDE_DIRECTORIES)
++list(APPEND include_dirs "${JSONC_INCLUDE_DIRS}/json-c")
++set_target_properties(json-c::json-c PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${include_dirs}")
++message("Setting include for json-c: ${include_dirs}")
+ 
+ gdal_check_package(OpenCAD "libopencad (external, used by OpenCAD driver)" CAN_DISABLE)
+ gdal_internal_library(OPENCAD)
+@@ -482,7 +441,7 @@ if (GDAL_USE_RASTERLITE2)
+ endif ()
+ cmake_dependent_option(GDAL_USE_RASTERLITE2 "Set ON to use Rasterlite2" ON HAVE_RASTERLITE2 OFF)
+ 
+-find_package(LibKML COMPONENTS DOM ENGINE)
++find_package(LibKML COMPONENTS kmlengine kmldom kmlbase)
+ if (GDAL_USE_LIBKML)
+   if (NOT LibKML_FOUND)
+     message(FATAL_ERROR "Configured to use GDAL_USE_LIBKML, but not found")
+diff --git a/cmake/helpers/ConanFindPackage.cmake b/cmake/helpers/ConanFindPackage.cmake
+new file mode 100644
+index 0000000000..9dfa8193a3
+--- /dev/null
++++ b/cmake/helpers/ConanFindPackage.cmake
+@@ -0,0 +1,43 @@
++
++function(define_find_package2 pkgname include_file library_name)
++endfunction()
++
++function(find_package2 pkgname)
++    set(_options QUIET REQUIRED)
++    set(_oneValueArgs OUT_DEPENDENCY)
++    set(_multiValueArgs)
++    cmake_parse_arguments(arg "${_options}" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
++    if(arg_QUIET)
++        set(${pkgname}_FIND_QUIETLY TRUE)
++    endif()
++    if(arg_REQUIRED)
++        set(${pkgname}_FIND_REQUIRED TRUE)
++    endif()
++
++    string(TOUPPER ${pkgname} key)
++
++    set(docstring "Configured for conan package ${GDAL_CONAN_PACKAGE_FOR_${key}}")
++    if (DEFINED GDAL_CONAN_PACKAGE_FOR_${key})
++        message("Using conan package ${GDAL_CONAN_PACKAGE_FOR_${key}} for dependency ${pkgname}")
++        set(conan_package ${GDAL_CONAN_PACKAGE_FOR_${key}})
++        string(TOUPPER ${conan_package} conan_package_upper)
++
++        set(${key}_INCLUDE_DIRS "${CONAN_INCLUDE_DIRS_${conan_package_upper}}" CACHE STRING ${docstring})
++        if (NOT TARGET_FOR_${key})
++            set(TARGET_FOR_${key} "${conan_package}::${conan_package}")
++        endif()
++        set(${key}_LIBRARIES "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
++        set(${key}_LIBRARY "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
++        set(${key}_TARGET "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
++        set(${pkgname}_INCLUDE_DIRS "CONAN_INCLUDE_DIRS_${conan_package_upper}" CACHE STRING ${docstring})
++        set(${pkgname}_LIBRARIES "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
++        set(${pkgname}_LIBRARY "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
++        set(${pkgname}_TARGET "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
++        set(${key}_FOUND TRUE CACHE BOOL ${docstring})
++
++    else ()
++        message("dependency ${pkgname} has no conan package")
++        set(${key}_FOUND FALSE CACHE BOOL ${docstring})
++    endif()
++
++endfunction()
+diff --git a/frmts/hfa/CMakeLists.txt b/frmts/hfa/CMakeLists.txt
+index e5b7138e91..039cac7361 100644
+--- a/frmts/hfa/CMakeLists.txt
++++ b/frmts/hfa/CMakeLists.txt
+@@ -15,7 +15,8 @@ add_gdal_driver(
+           hfa_overviews.cpp
+   BUILTIN)
+ gdal_standard_includes(gdal_HFA)
+-target_include_directories(gdal_HFA PRIVATE $<TARGET_PROPERTY:PROJ::proj,INTERFACE_INCLUDE_DIRECTORIES>)
++target_link_libraries(gdal_HFA INTERFACE PROJ::proj)
++target_include_directories(gdal_HFA PRIVATE ${PROJ_INCLUDE_DIRS})
+ target_compile_definitions(gdal_HFA PRIVATE $<TARGET_PROPERTY:PROJ::proj,INTERFACE_COMPILE_DEFINITIONS>)
+ 
+ if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
+diff --git a/gdal.cmake b/gdal.cmake
+index ff1ca7e6f6..e98875f1b9 100644
+--- a/gdal.cmake
++++ b/gdal.cmake
+@@ -795,25 +795,6 @@ if (NOT GDAL_ENABLE_MACOSX_FRAMEWORK)
+                  ${CMAKE_CURRENT_BINARY_DIR}/GDALConfig.cmake @ONLY)
+   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/GDALConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/gdal/)
+ 
+-  # Generate gdal-config utility command and pkg-config module gdal.pc
+-  include(GdalGenerateConfig)
+-  gdal_generate_config(
+-    TARGET
+-    "${GDAL_LIB_TARGET_NAME}"
+-    GLOBAL_PROPERTY
+-    "gdal_private_link_libraries"
+-    GDAL_CONFIG
+-    "${PROJECT_BINARY_DIR}/apps/gdal-config"
+-    PKG_CONFIG
+-    "${CMAKE_CURRENT_BINARY_DIR}/gdal.pc")
+-  install(
+-    PROGRAMS ${PROJECT_BINARY_DIR}/apps/gdal-config
+-    DESTINATION ${CMAKE_INSTALL_BINDIR}
+-    COMPONENT applications)
+-  install(
+-    FILES ${CMAKE_CURRENT_BINARY_DIR}/gdal.pc
+-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+-    COMPONENT libraries)
+ endif ()
+ 
+ configure_file(${GDAL_CMAKE_TEMPLATE_PATH}/uninstall.cmake.in ${PROJECT_BINARY_DIR}/cmake_uninstall.cmake @ONLY)
+diff --git a/ogr/CMakeLists.txt b/ogr/CMakeLists.txt
+index 19ba4e12fe..87cd123c54 100644
+--- a/ogr/CMakeLists.txt
++++ b/ogr/CMakeLists.txt
+@@ -88,12 +88,12 @@ endif ()
+ 
+ target_compile_definitions(ogr PRIVATE HAVE_MITAB)
+ 
+-gdal_target_link_libraries(ogr PRIVATE PROJ::proj)
++target_link_libraries(ogr PUBLIC PROJ::proj)
+ 
+ # External libs then
+ if (GDAL_USE_GEOS)
+   target_compile_definitions(ogr PRIVATE -DHAVE_GEOS=1)
+-  gdal_target_link_libraries(ogr PRIVATE ${GEOS_TARGET})
++  target_link_libraries(ogr PUBLIC ${GEOS_TARGET})
+ endif ()
+ 
+ if (GDAL_USE_SFCGAL)
+diff --git a/ogr/ogr_proj_p.h b/ogr/ogr_proj_p.h
+index 88928ad1ad..7cdd587db7 100644
+--- a/ogr/ogr_proj_p.h
++++ b/ogr/ogr_proj_p.h
+@@ -29,7 +29,7 @@
+ #ifndef OGR_PROJ_P_H_INCLUDED
+ #define OGR_PROJ_P_H_INCLUDED
+ 
+-#include "proj.h"
++#include <proj.h>
+ 
+ #include "cpl_mem_cache.h"
+ 

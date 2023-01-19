@@ -1,12 +1,13 @@
-cmake_minimum_required(VERSION 3.5)
-project(PackageTest CXX)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+find_package(qwt REQUIRED CONFIG)
+find_package(Qt5 REQUIRED Core CONFIG)
 
-add_executable(example example.cpp)
-# Must compile with "-fPIC" since Qt was built with -reduce-relocations.
-target_compile_options(example PRIVATE -fPIC)
-target_link_libraries(example CONAN_PKG::qt CONAN_PKG::qwt)
-set_property(TARGET example PROPERTY CXX_STANDARD 11)
-
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE qwt::qwt Qt5::Core)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+if(NOT WIN32)
+    # Must compile with "-fPIC" since Qt was built with -reduce-relocations.
+    target_compile_options(${PROJECT_NAME} PRIVATE -fPIC)
+endif()

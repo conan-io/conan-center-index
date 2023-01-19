@@ -14,29 +14,13 @@ sources:
 patches:
   "3.6.7":
     - patch_file: "patches/dirs_and_tests.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/link_conan_boost.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/poly_use_std_define.patch"
-      base_path: "source_subfolder"
   "3.6.6":
     - patch_file: "patches/dirs_and_tests.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/link_conan_boost.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/poly_use_std_define.patch"
-      base_path: "source_subfolder"
   "3.6.2":
     - patch_file: "patches/dirs_and_tests.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/link_conan_boost.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/poly_use_std_define.patch"
-      base_path: "source_subfolder"
   "3.6.1":
     - patch_file: "patches/dirs_and_tests.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/link_conan_boost.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/poly_use_std_define.patch"
-      base_path: "source_subfolder"

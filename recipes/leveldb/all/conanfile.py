@@ -1,8 +1,10 @@
-from conans import CMake, ConanFile, tools
-import functools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 
 class LevelDBCppConan(ConanFile):
@@ -30,16 +32,8 @@ class LevelDBCppConan(ConanFile):
         "with_crc32c": True,
     }
 
-    generators = "cmake", "cmake_find_package_multi"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,46 +41,52 @@ class LevelDBCppConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
 
-    # FIXME: tcmalloc is also conditionally included in leveldb, but
-    # there is no "official" conan package yet; when that is available, we
-    # can add similar with options for those
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        # FIXME: tcmalloc is also conditionally included in leveldb, but
+        # there is no "official" conan package yet; when that is available, we
+        # can add similar with options for those
         if self.options.with_snappy:
             self.requires("snappy/1.1.9")
         if self.options.with_crc32c:
             self.requires("crc32c/1.1.2")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["LEVELDB_BUILD_TESTS"] = False
-        cmake.definitions["LEVELDB_BUILD_BENCHMARKS"] = False
-        cmake.definitions["HAVE_SNAPPY"] = self.options.with_snappy
-        cmake.definitions["HAVE_CRC32C"] = self.options.with_crc32c
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["LEVELDB_BUILD_TESTS"] = False
+        tc.variables["LEVELDB_BUILD_BENCHMARKS"] = False
+        tc.variables["HAVE_SNAPPY"] = self.options.with_snappy
+        tc.variables["HAVE_CRC32C"] = self.options.with_crc32c
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "leveldb")

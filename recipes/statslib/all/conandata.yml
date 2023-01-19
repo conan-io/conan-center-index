@@ -1,4 +1,7 @@
 sources:
+  "3.2.0":
+    url: "https://github.com/kthohr/stats/archive/v3.2.0.tar.gz"
+    sha256: "1360ba4fbeed96db04e28541b8044daffecdbabc5565944d5cb67136477003ed"
   "3.1.2":
     url: "https://github.com/kthohr/stats/archive/v3.1.2.tar.gz"
     sha256: "fe82c679dbed0cbea284ce077e2c2503afaec745658a3791f9fe5010e438305e"

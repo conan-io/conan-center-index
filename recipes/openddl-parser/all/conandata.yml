@@ -8,4 +8,3 @@ sources:
 patches:
   "cci.20211217":
     - patch_file: "patches/0001-fix-cmake.patch"
-      base_path: "source_subfolder"

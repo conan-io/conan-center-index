@@ -1,0 +1,12 @@
+sources:
+  "1.5.0":
+    url: "https://github.com/tfussell/xlnt/archive/refs/tags/v1.5.0.tar.gz"
+    sha256: "8dec266d59ab6e4829da5dacea764a02887eeff5a5501c9a51ce796e735b90de"
+patches:
+  "1.5.0":
+    - patch_file: "patches/0001-fix-cmake-and-unvendor-deps.patch"
+      patch_description: "Fix CMakeLists and unvendor dependencies"
+      patch_type: "conan"
+    - patch_file: "patches/0002-include-limits.patch"
+      patch_description: "Add missing includes"
+      patch_type: "portability"

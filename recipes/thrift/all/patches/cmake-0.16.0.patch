@@ -76,7 +76,7 @@ index 218f7dd..b879830 100644
      else()
 -        include_directories(SYSTEM "${OPENSSL_INCLUDE_DIR}")
 -        list(APPEND SYSLIBS "${OPENSSL_LIBRARIES}")
-+        list(APPEND SYSLIBS OpenSSL::OpenSSL)
++        list(APPEND SYSLIBS OpenSSL::SSL OpenSSL::Crypto)
      endif()
  endif()
  
@@ -100,7 +100,7 @@ index 13b41c5..4b2b116 100755
      else()
 -        include_directories(SYSTEM "${OPENSSL_INCLUDE_DIR}")
 -        list(APPEND SYSLIBS "${OPENSSL_LIBRARIES}")
-+        list(APPEND SYSLIBS OpenSSL::OpenSSL)
++        list(APPEND SYSLIBS OpenSSL::SSL OpenSSL::Crypto)
      endif()
  endif()
  

@@ -1,4 +1,11 @@
 sources:
+  "8.7.0":
+    source:
+      url: "https://github.com/weidai11/cryptopp/archive/CRYPTOPP_8_7_0.tar.gz"
+      sha256: "8d6a4064b8e9f34cd3e838f5a12c40067ee7b95ee37d9173ec273cb0913e7ca2"
+    cmake:
+      url: "https://github.com/abdes/cryptopp-cmake/archive/CRYPTOPP_8_7_0.tar.gz"
+      sha256: "c113aba8069842edb201b4aaa2925e2c9d6ca081c4fd6b049ff74fedf6e8bae3"
   "8.6.0":
     source:
       url: "https://github.com/weidai11/cryptopp/archive/CRYPTOPP_8_6_0.tar.gz"
@@ -28,9 +35,9 @@ sources:
       url: "https://github.com/noloader/cryptopp-cmake/archive/CRYPTOPP_8_2_0.tar.gz"
       sha256: "f41f6a32b1177c094c3ef97423916713c902d0ac26cbee30ec70b1e8ab0e6fba"
 patches:
+  "8.7.0":
+    - patch_file: "patches/0001-fix-msvc-arm64-8.7.0.patch"
   "8.6.0":
-    - patch_file: "patches/fix-cmake-8.6.0.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-fix-cmake-8.6.0.patch"
   "8.2.0":
-    - patch_file: "patches/fix-cmake.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-fix-cmake-8.2.0.patch"

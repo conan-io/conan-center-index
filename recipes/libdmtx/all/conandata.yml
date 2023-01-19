@@ -1,0 +1,12 @@
+sources:
+  "0.7.7":
+    url: "https://github.com/dmtx/libdmtx/archive/refs/tags/v0.7.7.tar.gz"
+    sha256: "7aa62adcefdd6e24bdabeb82b3ce41a8d35f4a0c95ab0c4438206aecafd6e1a1"
+patches:
+  "0.7.7":
+    - patch_file: "patches/0001-0.7.7-fix-version.patch"
+      patch_description: "update version in CMakeLists.txt"
+      patch_type: "conan"
+    - patch_file: "patches/0002-0.7.7-add-install.patch"
+      patch_description: "add install command to CMakeLists.txt"
+      patch_type: "conan"

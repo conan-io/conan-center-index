@@ -1,12 +1,13 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class AssimpConan(ConanFile):
@@ -103,8 +104,7 @@ class AssimpConan(ConanFile):
     default_options.update(dict.fromkeys(_format_option_map, True))
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -116,7 +116,10 @@ class AssimpConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     @property
     def _depends_on_kuba_zip(self):
@@ -162,22 +165,22 @@ class AssimpConan(ConanFile):
     def requirements(self):
         # TODO: unvendor others libs:
         # - Open3DGC
-        self.requires("minizip/1.2.12")
+        self.requires("minizip/1.2.13")
         self.requires("utfcpp/3.2.1")
         if Version(self.version) < "5.1.0":
             self.requires("irrxml/1.2")
         else:
             self.requires("pugixml/1.12.1")
         if self._depends_on_kuba_zip:
-            self.requires("kuba-zip/0.2.4")
+            self.requires("kuba-zip/0.2.6")
         if self._depends_on_poly2tri:
             self.requires("poly2tri/cci.20130502")
         if self._depends_on_rapidjson:
-            self.requires("rapidjson/cci.20211112")
+            self.requires("rapidjson/cci.20220822")
         if self._depends_on_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self._depends_on_draco:
-            self.requires("draco/1.5.3")
+            self.requires("draco/1.5.5")
         if self._depends_on_clipper:
             self.requires("clipper/4.10.0")  # Only 4.x supported
         if self._depends_on_stb:
@@ -185,8 +188,9 @@ class AssimpConan(ConanFile):
         if self._depends_on_openddlparser:
             self.requires("openddl-parser/0.5.0")
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+    def validate(self):
+        if self._depends_on_clipper and Version(self.dependencies["clipper"].ref.version).major != "4":
+            raise ConanInvalidConfiguration("Only 'clipper/4.x' is supported")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -252,11 +256,6 @@ class AssimpConan(ConanFile):
             rmdir(self, os.path.join(self.source_folder, "contrib", vendor))
 
     def build(self):
-        # TODO: Move to 'validate()' once there is a way to get the resolved version of dependencies there
-        # FIXME: doesn't work with the new conan v2 model
-        # if self._depends_on_clipper and Version(self.deps_cpp_info["clipper"].version).major != "4":
-        #     raise ConanInvalidConfiguration("Only 'clipper/4.x' is supported")
-
         self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
@@ -282,28 +281,3 @@ class AssimpConan(ConanFile):
             stdcpp_library = tools_legacy.stdcpp_library(self)
             if stdcpp_library:
                 self.cpp_info.system_libs.append(stdcpp_library)
-
-        # FIXME: shouldn't be necessary.
-        # It's a workaround to support conan v1 generators
-        self.cpp_info.requires.append("minizip::minizip")
-        self.cpp_info.requires.append("utfcpp::utfcpp")
-        if Version(self.version) < "5.1.0":
-            self.cpp_info.requires.append("irrxml::irrxml")
-        else:
-            self.cpp_info.requires.append("pugixml::pugixml")
-        if self._depends_on_kuba_zip:
-            self.cpp_info.requires.append("kuba-zip::kuba-zip")
-        if self._depends_on_poly2tri:
-            self.cpp_info.requires.append("poly2tri::poly2tri")
-        if self._depends_on_rapidjson:
-            self.cpp_info.requires.append("rapidjson::rapidjson")
-        if self._depends_on_zlib:
-            self.cpp_info.requires.append("zlib::zlib")
-        if self._depends_on_draco:
-            self.cpp_info.requires.append("draco::draco")
-        if self._depends_on_clipper:
-            self.cpp_info.requires.append("clipper::clipper")
-        if self._depends_on_stb:
-            self.cpp_info.requires.append("stb::stb")
-        if self._depends_on_openddlparser:
-            self.cpp_info.requires.append("openddl-parser::openddl-parser")

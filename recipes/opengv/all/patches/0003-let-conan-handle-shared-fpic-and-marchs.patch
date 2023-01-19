@@ -1,0 +1,24 @@
+--- CMakeLists.txt	2020-08-06 09:02:15.000000000 -0300
++++ CMakeLists.txt	2022-10-06 12:39:57.766560501 -0300
+@@ -19,16 +19,16 @@
+ OPTION(BUILD_TESTS "Build tests" ON)
+ OPTION(BUILD_PYTHON "Build Python extension" OFF)
+ 
+-IF(MSVC)
+-  set(BUILD_SHARED_LIBS OFF)
++IF(1)
++  #set(BUILD_SHARED_LIBS OFF)
+ ELSE()
+   OPTION(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+   OPTION(BUILD_POSITION_INDEPENDENT_CODE "Build position independent code (-fPIC)" ON)
+ ENDIF()
+ 
+-IF(MSVC)
+-  add_compile_options(/wd4514 /wd4267 /bigobj)
+-  add_definitions(-D_USE_MATH_DEFINES)
++IF(1)
++  #add_compile_options(/wd4514 /wd4267 /bigobj)
++  #add_definitions(-D_USE_MATH_DEFINES)
+ ELSE()
+   IF (CMAKE_SYSTEM_PROCESSOR MATCHES "(arm64)|(ARM64)|(aarch64)|(AARCH64)")
+     add_definitions (-march=armv8-a)

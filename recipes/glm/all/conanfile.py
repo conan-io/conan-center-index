@@ -1,7 +1,10 @@
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.files import copy, get, load, save
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class GlmConan(ConanFile):
@@ -14,27 +17,28 @@ class GlmConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
-        glm_version = self.version if self.version.startswith("cci") else tools.Version(self._get_semver())
+        glm_version = self.version if self.version.startswith("cci") else Version(self._get_semver())
         if glm_version == "0.9.8" or (glm_version == "0.9.9" and self._get_tweak_number() < 6):
-            tools.save(os.path.join(self.package_folder, "licenses", "copying.txt"), self._get_license())
+            save(self, os.path.join(self.package_folder, "licenses", "copying.txt"), self._get_license())
         else:
-            self.copy("copying.txt", dst="licenses", src=self._source_subfolder)
-        headers_src_dir = os.path.join(self.source_folder, self._source_subfolder, "glm")
-        self.copy("*.hpp", dst=os.path.join("include", "glm"), src=headers_src_dir)
-        self.copy("*.inl", dst=os.path.join("include", "glm"), src=headers_src_dir)
-        self.copy("*.h", dst=os.path.join("include", "glm"), src=headers_src_dir)
+            copy(self, "copying.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        for headers in ("*.hpp", "*.inl", "*.h"):
+            copy(self, headers, src=os.path.join(self.source_folder, "glm"),
+                                dst=os.path.join(self.package_folder, "include", "glm"))
 
     def _get_semver(self):
         return self.version.rsplit(".", 1)[0]
@@ -43,7 +47,7 @@ class GlmConan(ConanFile):
         return int(self.version.rsplit(".", 1)[-1])
 
     def _get_license(self):
-        manual = tools.load(os.path.join(self.source_folder, self._source_subfolder, "manual.md"))
+        manual = load(self, os.path.join(self.source_folder, "manual.md"))
         begin = manual.find("### The Happy Bunny License (Modified MIT License)")
         end = manual.find("\n![](./doc/manual/frontpage2.png)", begin)
         return manual[begin:end]

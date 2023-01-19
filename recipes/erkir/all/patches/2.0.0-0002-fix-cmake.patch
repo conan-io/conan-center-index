@@ -1,0 +1,20 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b97d9d0..0152f84 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.9)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS OFF)
+ set(CMAKE_CXX_STANDARD 11)
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ 
+ # The project definition
+ project(erkir VERSION 2.0.0
+@@ -14,7 +13,6 @@ project(erkir VERSION 2.0.0
+ include(GNUInstallDirs)
+ 
+ # General options
+-option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+ option(ENABLE_TESTING "Enable unit test build" OFF)
+ 
+ if (0)

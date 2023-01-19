@@ -1,4 +1,8 @@
+#if BEHAVIORTREE_CPP_VERSION < 4
 #include "behaviortree_cpp_v3/bt_factory.h"
+#else
+#include "behaviortree_cpp/bt_factory.h"
+#endif
 
 using namespace BT;
 
@@ -25,8 +29,13 @@ namespace BT{
 
 class CalculateGoal: public SyncActionNode{
 public:
+#if BEHAVIORTREE_CPP_VERSION < 4
     CalculateGoal(const std::string& name, const NodeConfiguration& config):
         SyncActionNode(name,config) {}
+#else
+    CalculateGoal(const std::string& name, const NodeConfig& config):
+        SyncActionNode(name,config) {}
+#endif
 
     NodeStatus tick() override{
         Position2D mygoal = {1.1, 2.3};
@@ -41,8 +50,13 @@ public:
 
 class PrintTarget: public SyncActionNode {
 public:
+#if BEHAVIORTREE_CPP_VERSION < 4
     PrintTarget(const std::string& name, const NodeConfiguration& config):
         SyncActionNode(name,config) {}
+#else
+    PrintTarget(const std::string& name, const NodeConfig& config):
+        SyncActionNode(name,config) {}
+#endif
 
     NodeStatus tick() override {
         auto res = getInput<Position2D>("target");
@@ -83,6 +97,10 @@ int main() {
     factory.registerNodeType<PrintTarget>("PrintTarget");
 
     auto tree = factory.createTreeFromText(xml_text);
+#if BEHAVIORTREE_CPP_VERSION < 4
     tree.tickRoot();
+#else
+    tree.tickWhileRunning();
+#endif
     return 0;
 }

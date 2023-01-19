@@ -1,0 +1,20 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 21e90151..2ce3eb48 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -536,6 +536,7 @@ function(compile_flatbuffers_schema_to_embedded_binary SRC_FBS OPT)
+   register_generated_output(${GEN_BFBS_HEADER})
+ endfunction()
+ 
++if(0)
+ # Look if we have python 3.5 installed so that we can run the generate code
+ # python script after flatc is built.
+ find_package(Python3 3.5 COMPONENTS Interpreter)
+@@ -559,6 +560,7 @@ if(Python3_Interpreter_FOUND)
+ else()
+   message("No Python3 interpreter found! Unable to generate files automatically.")
+ endif()
++endif()
+ 
+ if(FLATBUFFERS_BUILD_TESTS)
+   file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/tests" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")

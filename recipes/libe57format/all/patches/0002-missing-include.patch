@@ -1,0 +1,11 @@
+--- a/src/E57XmlParser.cpp
++++ b/src/E57XmlParser.cpp
+@@ -42,6 +42,8 @@
+ #include "StringNodeImpl.h"
+ #include "VectorNodeImpl.h"
+ 
++#include <limits>
++
+ using namespace e57;
+ using namespace XERCES_CPP_NAMESPACE;
+ 

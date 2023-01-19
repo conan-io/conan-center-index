@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 428cdfc..1857db2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -6,7 +6,6 @@ option(BUILD_SHARED_LIBS "build shared/static libs" ON)
+ add_subdirectory(lzhamdecomp)
+ add_subdirectory(lzhamcomp)
+ add_subdirectory(lzhamdll)
+-add_subdirectory(lzhamtest)
+ 
+ install(FILES include/lzham_dynamic_lib.h
+               include/lzham_exports.inc

@@ -1,0 +1,17 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -83,13 +83,13 @@
+ # 2018-06-19 PH added checks for stdint.h and inttypes.h
+ # 2018-06-27 PH added Daniel's patch to increase the stack for MSVC
+ 
+-PROJECT(PCRE2 C)
+ 
+ # Increased minimum to 2.8.0 to support newer add_test features. Set policy
+ # CMP0026 to avoid warnings for the use of LOCATION in GET_TARGET_PROPERTY.
+ 
+ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
+ CMAKE_POLICY(SET CMP0026 OLD)
++PROJECT(PCRE2 C)
+ 
+ SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake) # for FindReadline.cmake
+ 

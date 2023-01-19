@@ -1,8 +1,12 @@
-from conans import ConanFile, CMake, tools
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
+
 
 class Md4cConan(ConanFile):
     name = "md4c"
@@ -22,16 +26,9 @@ class Md4cConan(ConanFile):
         "fPIC": True,
         "encoding": "utf-8",
     }
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,45 +36,90 @@ class Md4cConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os != "Windows" and self.options.encoding == "utf-16":
-            raise tools.ConanInvalidConfiguration("utf-16 options is not supported on non-Windows platforms")
+        if self.info.settings.os != "Windows" and self.info.options.encoding == "utf-16":
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support utf-16 options on non-Windows platforms")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-
-        if self.options.encoding == "utf-16":
-            cmake.definitions["CONAN_C_FLAGS"] = "-DMD4C_USE_UTF16"
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if self.options.encoding == "utf-8":
+            tc.preprocessor_definitions["MD4C_USE_UTF8"] = "1"
+        elif self.options.encoding == "utf-16":
+            tc.preprocessor_definitions["MD4C_USE_UTF16"] = "1"
         elif self.options.encoding == "ascii":
-            cmake.definitions["CONAN_C_FLAGS"] = "-DMD4C_USE_ASCII"
+            tc.preprocessor_definitions["MD4C_USE_ASCII"] = "1"
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
 
-        cmake.configure()
-        return cmake
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        # Honor encoding option
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "src", "CMakeLists.txt"),
+            "COMPILE_FLAGS \"-DMD4C_USE_UTF8\"",
+            "",
+        )
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-        cmake = self._configure_cmake()
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE.md", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE.md", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["md4c", "md4c-html",]
+        self.cpp_info.set_property("cmake_file_name", "md4c")
 
-        if self.options.encoding == "utf-16":
-            self.cpp_info.defines.append("MD4C_USE_UTF16")
+        self.cpp_info.components["_md4c"].set_property("cmake_target_name", "md4c::md4c")
+        self.cpp_info.components["_md4c"].set_property("pkg_config_name", "md4c")
+        self.cpp_info.components["_md4c"].libs = ["md4c"]
+        if self.settings.os == "Windows" and self.options.encoding == "utf-16":
+            self.cpp_info.components["_md4c"].defines.append("MD4C_USE_UTF16")
+
+        self.cpp_info.components["md4c_html"].set_property("cmake_target_name", "md4c::md4c-html")
+        self.cpp_info.components["md4c_html"].set_property("pkg_config_name", "md4c-html")
+        self.cpp_info.components["md4c_html"].libs = ["md4c-html"]
+        self.cpp_info.components["md4c_html"].requires = ["_md4c"]
+
+        # workaround so that global target & pkgconfig file have all components while avoiding
+        # to create unofficial target or pkgconfig file
+        self.cpp_info.set_property("cmake_target_name", "md4c::md4c-html")
+        self.cpp_info.set_property("pkg_config_name", "md4c-html")
+
+        # TODO: to remove in conan v2
+        self.cpp_info.components["_md4c"].names["cmake_find_package"] = "md4c"
+        self.cpp_info.components["_md4c"].names["cmake_find_package_multi"] = "md4c"
+        self.cpp_info.components["md4c_html"].names["cmake_find_package"] = "md4c-html"
+        self.cpp_info.components["md4c_html"].names["cmake_find_package_multi"] = "md4c-html"
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info(f"Appending PATH environment variable: {bin_path}")
+        self.env_info.PATH.append(bin_path)

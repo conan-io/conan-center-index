@@ -1,6 +1,9 @@
+from conan import ConanFile
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 import os
-import glob
-from conans import ConanFile, tools
+
+required_conan_version = ">=1.50.0"
 
 
 class Utf8HConan(ConanFile):
@@ -10,20 +13,27 @@ class Utf8HConan(ConanFile):
     description = "Single header utf8 string functions for C and C++"
     topics = ("utf8", "unicode", "text")
     license = "Unlicense"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("utf8.h-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def package(self):
-        self.copy("utf8.h", dst="include", src=self._source_subfolder)
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def build(self):
+        pass
+
+    def package(self):
+        copy(self, "utf8.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []

@@ -8,4 +8,3 @@ sources:
 patches:
   "1.3.6":
     - patch_file: "patches/link-libm-find-package-ogg.patch"
-      base_path: "source_subfolder"

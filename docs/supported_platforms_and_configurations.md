@@ -39,10 +39,12 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 - Python: 3.7.9
 - CMake: 3.21.6
 - WinSDK: 10.0.20348
+    > WinSDK version is rolled periodically as [discussed previously](https://github.com/conan-io/conan-center-index/issues/4450).
+    > Please open an issue in case it needs to be updated.
 - Compilers: Visual Studio:
   
   - 2017 (19.16.27048)
-  - 2019 (19.29.30146)
+  - 2019 (19.29.30147)
   
 - Release (MT/MD) and Debug (MTd, MDd)
 - Architectures: x86_64
@@ -75,6 +77,8 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 - Python: 3.7.12
 - CMake: 3.20.1
 - Compilers: Apple-clang versions 11.0.3, 12.0.5, 13.0.0
+- Macos SDK versions (for each apple-clang version respectively): 10.15, 11.3
+- Macos deployment target (`minos`): 11.3
 - C++ Standard Library (`libcxx`): `libc++`
 - Architectures: x86_64, armv8
 - Build types: Release, Debug

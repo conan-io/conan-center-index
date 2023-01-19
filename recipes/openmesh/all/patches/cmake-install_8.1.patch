@@ -1,16 +1,3 @@
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -8,9 +8,7 @@ set( CMAKE_CXX_STANDARD 11 )
- enable_testing()
- 
- # Only set project name if OpenMesh is built as stand-alone library
--if("${PROJECT_NAME}" STREQUAL "")
--    project (OpenMesh)
--endif()
-+project (OpenMesh)
- 
- if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
- 	if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "6.0" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "4.9" OR CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL "4.9")
 --- a/cmake/ACGCommon.cmake
 +++ b/cmake/ACGCommon.cmake
 @@ -69,7 +69,7 @@ endmacro ()

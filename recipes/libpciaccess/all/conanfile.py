@@ -1,10 +1,13 @@
-import os
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.tools.layout import basic_layout
+import os
 
 
-required_conan_version = ">=1.44.0"
+required_conan_version = ">=1.50.0"
 
 
 class LibPciAccessConan(ConanFile):
@@ -16,12 +19,30 @@ class LibPciAccessConan(ConanFile):
     license = "MIT", "X11"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
     def validate(self):
         def is_supported(settings):
@@ -31,48 +52,36 @@ class LibPciAccessConan(ConanFile):
         if not is_supported(self.settings):
             raise ConanInvalidConfiguration("Unsupported architecture.")
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.4")
-        self.build_requires("xorg-macros/1.19.3")
-        self.build_requires("libtool/2.4.6")
+        self.tool_requires("libtool/2.4.6")
+        self.tool_requires("pkgconf/1.7.4")
+        self.tool_requires("xorg-macros/1.19.3")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][str(self.version)],
+            destination=self.source_folder, strip_root=True)
 
     def generate(self):
         tc = AutotoolsToolchain(self)
-        tc.default_configure_install_args = True
         tc.generate()
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        ms = VirtualBuildEnv(self)
+        ms.generate(scope="build")
 
     def build(self):
-        self.run("{} -fiv".format(tools.get_env("AUTORECONF") or "autoreconf"),
-                 win_bash=tools.os_info.is_windows, run_environment=True, cwd=self._source_subfolder)
-
         autotools = Autotools(self)
-        autotools.configure(build_script_folder=self._source_subfolder)
+        autotools.autoreconf()
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses",
-                  src=self._source_subfolder)
-
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
-
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(
-            self.package_folder, "lib"), "*.la")
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["pciaccess"]

@@ -1,8 +1,11 @@
-from conans import CMake, ConanFile, tools
-import functools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class QXlsxConan(ConanFile):
@@ -23,16 +26,12 @@ class QXlsxConan(ConanFile):
         "fPIC": True
     }
 
-    generators = "cmake", "cmake_find_package_multi"
-
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _qt_version(self):
+        return Version(self.dependencies["qt"].ref.version).major
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,38 +39,63 @@ class QXlsxConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("qt/5.15.3")
+        self.requires("qt/5.15.7")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output=output)
+            m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
+    def build_requirements(self):
+        if Version(self.version) >= "1.4.4" and not self._cmake_new_enough("3.16"):
+            self.tool_requires("cmake/3.25.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["QT_VERSION_MAJOR"] = self._qt_version
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
+        tc = VirtualBuildEnv(self)
+        tc.generate(scope="build")
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder="QXlsx")
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.configure(build_script_folder="QXlsx")
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "QXlsx")
         self.cpp_info.set_property("cmake_target_name", "QXlsx::Core")
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["qxlsx_core"].libs = ["QXlsx"]
+        if Version(self.version) <= "1.4.4":
+            self.cpp_info.components["qxlsx_core"].libs = ["QXlsx"]
+        else:
+            self.cpp_info.components["qxlsx_core"].libs = [f"QXlsxQt{self._qt_version}"]
         self.cpp_info.components["qxlsx_core"].includedirs = [os.path.join("include", "QXlsx")]
         self.cpp_info.components["qxlsx_core"].requires = ["qt::qtCore", "qt::qtGui"]
 

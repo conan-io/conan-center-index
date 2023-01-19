@@ -11,12 +11,6 @@ sources:
     sha256: "6113262f6e92c5bd474f2875fa1b01054c4ad5040f6b0da7c03c98821d9ae303"
 patches:
   "3.3.9":
-    - patch_file: "patches/fix-cmake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-simd.patch"
-      base_path: "source_subfolder"
   "3.3.8":
-    - patch_file: "patches/fix-cmake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-simd.patch"
-      base_path: "source_subfolder"

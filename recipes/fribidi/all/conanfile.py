@@ -1,19 +1,24 @@
-from conans import tools, ConanFile, Meson
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, get, rm, rmdir
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.51.0"
 
 
 class FriBiDiCOnan(ConanFile):
     name = "fribidi"
     description = "The Free Implementation of the Unicode Bidirectional Algorithm"
-    topics = ("conan", "fribidi", "unicode", "bidirectional", "text")
+    topics = ("fribidi", "unicode", "bidirectional", "text")
     license = "LGPL-2.1"
     homepage = "https://github.com/fribidi/fribidi"
     url = "https://github.com/conan-io/conan-center-index"
 
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -24,17 +29,10 @@ class FriBiDiCOnan(ConanFile):
         "fPIC": True,
         "with_deprecated": True,
     }
-    exports_sources = "patches/**"
 
-    _meson = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,60 +41,74 @@ class FriBiDiCOnan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
-    def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
-            raise ConanInvalidConfiguration("Cross-building not implemented")
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
     def build_requirements(self):
-        self.build_requires("meson/0.59.0")
+        self.tool_requires("meson/0.63.1")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_meson(self):
-        if self._meson:
-            return self._meson
-        self._meson = Meson(self)
-        self._meson.options["deprecated"] = self.options.with_deprecated
-        self._meson.options["docs"] = False
-        if tools.Version(self.version) >= "1.0.10":
-            self._meson.options["bin"] = False
-            self._meson.options["tests"] = False
-        self._meson.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder)
-        return self._meson
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+    def generate(self):
+        tc = MesonToolchain(self)
+        tc.project_options["deprecated"] = self.options.with_deprecated
+        tc.project_options["docs"] = False
+        if Version(self.version) >= "1.0.10":
+            tc.project_options["bin"] = False
+            tc.project_options["tests"] = False
+        tc.generate()
+        env = VirtualBuildEnv(self)
+        env.generate()
 
     def build(self):
-        self._patch_sources()
-        meson = self._configure_meson()
+        apply_conandata_patches(self)
+        meson = Meson(self)
+        meson.configure()
         meson.build()
 
     def package(self):
-        self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
-        meson = self._configure_meson()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        meson = Meson(self)
         meson.install()
-
-        if self.settings.compiler == "Visual Studio":
-            lib_a = os.path.join(self.package_folder, "lib", "libfribidi.a")
-            if os.path.isfile(lib_a):
-                tools.rename(lib_a, os.path.join(self.package_folder, "lib", "fribidi.lib"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
-
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        fix_apple_shared_install_name(self)
+        fix_msvc_libname(self)
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "fribidi")
         self.cpp_info.libs = ["fribidi"]
         self.cpp_info.includedirs.append(os.path.join("include", "fribidi"))
         if not self.options.shared:
-            if tools.Version(self.version) >= "1.0.10":
+            if Version(self.version) >= "1.0.10":
                 self.cpp_info.defines.append("FRIBIDI_LIB_STATIC")
             else:
                 self.cpp_info.defines.append("FRIBIDI_STATIC")
 
-        self.cpp_info.names["pkg_config"] = "fribidi"
+def fix_msvc_libname(conanfile, remove_lib_prefix=True):
+    """remove lib prefix & change extension to .lib"""
+    from conan.tools.files import rename
+    from conan.tools.microsoft import is_msvc
+    import glob
+    if not is_msvc(conanfile):
+        return
+    libdirs = getattr(conanfile.cpp.package, "libdirs")
+    for libdir in libdirs:
+        for ext in [".dll.a", ".dll.lib", ".a"]:
+            full_folder = os.path.join(conanfile.package_folder, libdir)
+            for filepath in glob.glob(os.path.join(full_folder, f"*{ext}")):
+                libname = os.path.basename(filepath)[0:-len(ext)]
+                if remove_lib_prefix and libname[0:3] == "lib":
+                    libname = libname[3:]
+                rename(conanfile, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))

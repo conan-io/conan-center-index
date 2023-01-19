@@ -1,13 +1,17 @@
 #include <irrXML.h>
-using namespace irr;
-using namespace io;
 
+#include <iostream>
 #include <string> // we use STL strings to store data in this example
 #include <string.h>
 
-int main()
+int main(int argc, char const* argv[])
 {
-    IrrXMLReader* xml = createIrrXMLReader("config.xml");
+    if (argc != 2) {
+        std::cerr << "usage: " << argv[0] << " <xml_file>" << std::endl;
+        return 1;
+    }
+
+    irr::io::IrrXMLReader* xml = irr::io::createIrrXMLReader(argv[1]);
 
     // strings for storing the data we want to get out of the file
     std::string modelFile;
@@ -19,11 +23,11 @@ int main()
     {
         switch(xml->getNodeType())
         {
-        case EXN_TEXT:
+        case irr::io::EXN_TEXT:
             // in this xml file, the only text which occurs is the messageText
             messageText = xml->getNodeData();
             break;
-        case EXN_ELEMENT:
+        case irr::io::EXN_ELEMENT:
             {
                 if (!strcmp("startUpModel", xml->getNodeName()))
                     modelFile = xml->getAttributeValue("file");

@@ -1,18 +1,14 @@
 cmake_minimum_required(VERSION 3.4)
-project(rttopo C)
+project(rttopo LANGUAGES C)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup(TARGETS KEEP_RPATHS)
-
-set(RTTOPO_HDR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/headers)
-set(RTTOPO_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/src)
+set(RTTOPO_HDR_DIR ${LIBRTTOPO_SRC_DIR}/headers)
 
 set(SRID_MAX 999999)
 set(SRID_USR_MAX 998999)
 configure_file(${RTTOPO_HDR_DIR}/librttopo_geom.h.in librttopo_geom.h @ONLY)
-file(WRITE rttopo_config.h "")
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/rttopo_config.h "")
 
-file(GLOB RTTOPO_SRC_FILES ${RTTOPO_SRC_DIR}/*.c)
+file(GLOB RTTOPO_SRC_FILES ${LIBRTTOPO_SRC_DIR}/src/*.c)
 add_library(${PROJECT_NAME} ${RTTOPO_SRC_FILES})
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     $<$<BOOL:${MSVC}>:_CRT_SECURE_NO_WARNINGS>
@@ -26,7 +22,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 target_include_directories(${PROJECT_NAME} PUBLIC ${RTTOPO_HDR_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
-find_package(geos REQUIRED)
+find_package(geos REQUIRED CONFIG)
 target_link_libraries(${PROJECT_NAME} PUBLIC GEOS::geos_c)
 
 find_library(M_LIB m)

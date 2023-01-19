@@ -51,11 +51,11 @@ class GRPCProto(ConanFile):
             raise ConanInvalidConfiguration("If built as shared, protobuf and googleapis must be shared as well. Please, use `protobuf:shared=True` and `googleapis:shared=True`")
 
     def requirements(self):
-        self.requires('protobuf/3.21.1')
+        self.requires('protobuf/3.21.4')
         self.requires('googleapis/cci.20220711')
 
     def build_requirements(self):
-        self.build_requires('protobuf/3.21.1')
+        self.build_requires('protobuf/3.21.4')
 
     @functools.lru_cache(1)
     def _configure_cmake(self):

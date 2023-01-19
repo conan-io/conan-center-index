@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include "veque.hpp"
 
@@ -12,4 +11,5 @@ int main()
     v.pop_back();
 
     std::cout << "veque::veque works!";
+    return 0;
 }

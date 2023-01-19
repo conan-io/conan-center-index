@@ -19,18 +19,12 @@ sources:
     sha256: 3671ba6051e0f30849942cc66d1798fdf0362d089343a83f704c09ee7156604f
 patches:
   "1.9.3":
-     - patch_file: "patches/dont-force-pic-1.9.3.patch"
-       base_path: "source_subfolder"
+    - patch_file: "patches/dont-force-pic-1.9.3.patch"
   "1.9.2":
-     - patch_file: "patches/dont-force-pic-1.9.2.patch"
-       base_path: "source_subfolder"
-     - patch_file: "patches/no-examples.patch"
-       base_path: "source_subfolder"
+    - patch_file: "patches/dont-force-pic-1.9.2.patch"
+    - patch_file: "patches/no-examples.patch"
   "1.9.1":
-     - patch_file: "patches/implicit-conversion-1.9.1.patch"
-       base_path: "source_subfolder"
-     - patch_file: "patches/dont-force-pic-1.9.1.patch"
-       base_path: "source_subfolder"
+    - patch_file: "patches/implicit-conversion-1.9.1.patch"
+    - patch_file: "patches/dont-force-pic-1.9.1.patch"
   "1.8.3":
-     - patch_file: "patches/implicit-conversion-1.8.3.patch"
-       base_path: "source_subfolder"
+    - patch_file: "patches/implicit-conversion-1.8.3.patch"

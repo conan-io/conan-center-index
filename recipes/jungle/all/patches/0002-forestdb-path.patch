@@ -1,0 +1,62 @@
+diff --git a/src/cmd_handler.cc b/src/cmd_handler.cc
+index 12cf591..14c42b4 100644
+--- a/src/cmd_handler.cc
++++ b/src/cmd_handler.cc
+@@ -22,7 +22,7 @@ limitations under the License.
+ #include "skiplist.h"
+ #include "table_mgr.h"
+ 
+-#include <third_party/forestdb/include/libforestdb/forestdb.h>
++#include <libforestdb/forestdb.h>
+ 
+ #include <iostream>
+ #include <sstream>
+diff --git a/src/table_file.cc b/src/table_file.cc
+index 69ca237..80c7648 100644
+--- a/src/table_file.cc
++++ b/src/table_file.cc
+@@ -21,7 +21,7 @@ limitations under the License.
+ #include "internal_helper.h"
+ #include "table_mgr.h"
+ 
+-#include <third_party/forestdb/include/libforestdb/fdb_types.h>
++#include <libforestdb/fdb_types.h>
+ 
+ #include _MACRO_TO_STR(LOGGER_H)
+ 
+diff --git a/src/table_file.h b/src/table_file.h
+index ab7a29d..fd4bc4c 100644
+--- a/src/table_file.h
++++ b/src/table_file.h
+@@ -21,7 +21,7 @@ limitations under the License.
+ #include "table_lookup_booster.h"
+ 
+ #include <libjungle/jungle.h>
+-#include <third_party/forestdb/include/libforestdb/forestdb.h>
++#include <libforestdb/forestdb.h>
+ 
+ #include <list>
+ #include <map>
+@@ -450,4 +450,3 @@ private:
+ 
+ 
+ } // namespace jungle
+-
+--- a/tests/jungle/builder_test.cc
++++ b/tests/jungle/builder_test.cc
+@@ -16,7 +16,7 @@ limitations under the License.
+ 
+ #include "jungle_test_common.h"
+ 
+-#include "jungle_builder.h"
++#include "tools/jungle_builder.h"
+ #include "libjungle/iterator.h"
+ #include "libjungle/jungle.h"
+ #include "libjungle/sized_buf.h"
+@@ -275,4 +275,4 @@ int main(int argc, char** argv) {
+     ts.doTest("build an empty db test", build_an_empty_db_test);
+ 
+     return 0;
+-}
+\ No newline at end of file
++}
