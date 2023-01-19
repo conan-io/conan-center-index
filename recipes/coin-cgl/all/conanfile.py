@@ -51,8 +51,14 @@ class CoinCglConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        for req in self.conan_data["requirements"][self.version]:
-            self.requires(req)
+        if self.version == "0.60.3":
+            self.requires("coin-utils/2.11.4")
+            self.requires("coin-osi/0.108.6")
+            self.requires("coin-clp/1.17.6")
+        else:
+            self.requires("coin-utils/2.11.6")
+            self.requires("coin-osi/0.108.7")
+            self.requires("coin-clp/1.17.7")
 
     @property
     def _settings_build(self):
