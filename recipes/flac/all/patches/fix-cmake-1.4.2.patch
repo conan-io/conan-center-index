@@ -1,0 +1,38 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -43,7 +43,7 @@ if(WITH_OGG)
+         endif()
+     else()
+         if(NOT TARGET Ogg::ogg)
+-            find_package(Ogg REQUIRED)
++            find_package(Ogg REQUIRED CONFIG)
+         else()
+             set(OGG_FOUND 1 CACHE INTERNAL "ogg has already been built")
+         endif()
+--- a/src/flac/CMakeLists.txt
++++ b/src/flac/CMakeLists.txt
+@@ -21,4 +21,4 @@ target_link_libraries(flacapp
+     utf8)
+ 
+ install(TARGETS flacapp EXPORT targets
+-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
++    DESTINATION "${CMAKE_INSTALL_BINDIR}")
+--- a/src/metaflac/CMakeLists.txt
++++ b/src/metaflac/CMakeLists.txt
+@@ -14,4 +14,4 @@ add_executable(metaflac
+ target_link_libraries(metaflac FLAC getopt utf8)
+ 
+ install(TARGETS metaflac EXPORT targets
+-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
++    DESTINATION "${CMAKE_INSTALL_BINDIR}")
+--- a/src/share/getopt/CMakeLists.txt
++++ b/src/share/getopt/CMakeLists.txt
+@@ -1,8 +1,7 @@
+ check_include_file("string.h" HAVE_STRING_H)
+ 
+ if(NOT WIN32)
+-    find_package(Intl)
+ endif()
+ 
+ add_library(getopt STATIC getopt.c getopt1.c)
+ 
