@@ -19,6 +19,9 @@ patches:
     - patch_file: "patches/4.1.1-0003-macos-rpath.patch"
       patch_description: "Relocatable shared libs on Apple OS"
       patch_type: "conan"
+    - patch_file: "patches/4.0.2-0003-cmake-project.patch"
+      patch_description: "CMake: move project() after cmake_minimum_required()"
+      patch_type: "conan"
   "4.0.3":
     - patch_file: "patches/4.0.3-0001-cmake-boost.patch"
       patch_description: "Use boost targets"
@@ -29,6 +32,9 @@ patches:
     - patch_file: "patches/4.0.3-0003-macos-rpath.patch"
       patch_description: "Relocatable shared libs on Apple OS"
       patch_type: "conan"
+    - patch_file: "patches/4.0.2-0003-cmake-project.patch"
+      patch_description: "CMake: move project() after cmake_minimum_required()"
+      patch_type: "conan"
   "4.0.2":
     - patch_file: "patches/4.0.2-0001-cmake-boost.patch"
       patch_description: "Use boost targets"
@@ -38,4 +44,7 @@ patches:
       patch_type: "conan"
     - patch_file: "patches/4.0.2-0003-macos-rpath.patch"
       patch_description: "Relocatable shared libs on Apple OS"
+      patch_type: "conan"
+    - patch_file: "patches/4.0.2-0003-cmake-project.patch"
+      patch_description: "CMake: move project() after cmake_minimum_required()"
       patch_type: "conan"
