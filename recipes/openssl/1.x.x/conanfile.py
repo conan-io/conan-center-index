@@ -21,7 +21,7 @@ import textwrap
 required_conan_version = ">=1.53.0"
 
 @total_ordering
-class OpenSSLVersion(object):
+class OpenSSLVersion:
     def __init__(self, version):
         self._pre = ""
         version_str = str(version)
@@ -328,6 +328,8 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _asm_target(self):
+        # FIXME This function is broken since https://github.com/conan-io/conan-center-index/pull/791
+        # either it returns None (because the_os is not a key of the map below), or it does not return
         the_os = str(self.settings.os)
         if the_os in ["Android", "iOS", "watchOS", "tvOS"]:
             return {
@@ -736,7 +738,7 @@ class OpenSSLConan(ConanFile):
                     autotools.make()
                 else:
                     if self._full_version >= "1.1.0":
-                        self.run(f'nmake /F Makefile')
+                        self.run('nmake /F Makefile')
                     else: # nmake 1.0.2 support
                         # Note: 1.0.2 should not be used according to the OpenSSL Project
                         #       See https://www.openssl.org/source/
