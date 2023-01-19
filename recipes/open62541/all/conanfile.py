@@ -433,7 +433,7 @@ class Open62541Conan(ConanFile):
             self.package_folder, "res", "tools"))
         # v1 legacy support for tools_dir definition
         self.user_info.tools_dir = os.path.join(
-            self.package_folder, "res", "tools")
+            self.package_folder, "res", "tools").replace("\\", "/")
         self._chmod_plus_x(os.path.join(self.package_folder,
                            "res", "tools", "generate_nodeid_header.py"))
 
