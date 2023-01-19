@@ -20,7 +20,7 @@ class TestPackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["open62541_NODESET_DIR"] = self.deps_user_info["ua-nodeset"].nodeset_dir.replace(
-            "\\", "/")
+            "\\", "/")  # ua-nodeset path needs to be sanitized for windows systems
         tc.variables["open62541_TOOLS_DIR"] = self.dependencies["open62541"].conf_info.get(
             "user.open62541:tools_dir")
         tc.generate()
