@@ -53,8 +53,16 @@ class CoinCbcConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        for req in self.conan_data["requirements"][self.version]:
-            self.requires(req)
+        if self.version == "2.10.5":
+            self.requires("coin-utils/2.11.4")
+            self.requires("coin-osi/0.108.6")
+            self.requires("coin-clp/1.17.6")
+            self.requires("coin-cgl/0.60.3")
+        else:
+            self.requires("coin-utils/2.11.6")
+            self.requires("coin-osi/0.108.7")
+            self.requires("coin-clp/1.17.7")
+            self.requires("coin-cgl/0.60.6")
         if self.settings.compiler == "Visual Studio" and self.options.parallel:
             self.requires("pthreads4w/3.0.0")    
 
