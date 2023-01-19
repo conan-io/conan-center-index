@@ -430,7 +430,7 @@ class Open62541Conan(ConanFile):
 
         # required for creating custom servers from ua-nodeset
         self.conf_info.define("user.open62541:tools_dir", os.path.join(
-            self.package_folder, "res", "tools"))
+            self.package_folder, "res", "tools").replace("\\", "/"))
         # v1 legacy support for tools_dir definition
         self.user_info.tools_dir = os.path.join(
             self.package_folder, "res", "tools").replace("\\", "/")
