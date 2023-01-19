@@ -1,9 +1,13 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan import ConanFile
+from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
+from conan.tools.gnu import PkgConfigDeps
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get
+from conan.tools.build import cross_building, check_min_cppstd
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class CcacheConan(ConanFile):
@@ -26,12 +30,6 @@ class CcacheConan(ConanFile):
         "redis_storage_backend": True,
     }
 
-    generators = "cmake", "cmake_find_package_multi"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     @property
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
@@ -46,22 +44,23 @@ class CcacheConan(ConanFile):
             "gcc": "6",
             "clang": "6",
             "apple-clang": "10",
-            "Visual Studio": "15.7" if tools.Version(self.version) < "4.6" else "16.2",
+            "Visual Studio": "15.7" if Version(self.version) < "4.6" else "16.2",
         }
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def requirements(self):
         self.requires("zstd/1.5.2")
         if self.options.redis_storage_backend:
-            self.requires("hiredis/1.0.2")
+            self.requires("hiredis/1.1.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._min_cppstd)
+            check_min_cppstd(self, self._min_cppstd)
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -79,32 +78,33 @@ class CcacheConan(ConanFile):
         del self.info.settings.compiler
 
     def build_requirements(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self) and \
+        if hasattr(self, "settings_build") and cross_building(self) and \
            self.settings.os == "Macos" and self.settings.arch == "armv8":
-            self.build_requires("cmake/3.22.0")
+            self.build_requires("cmake/3.25.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["REDIS_STORAGE_BACKEND"] = self.options.redis_storage_backend
-        cmake.definitions["ENABLE_DOCUMENTATION"] = False
-        cmake.definitions["ENABLE_TESTING"] = False
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["REDIS_STORAGE_BACKEND"] = self.options.redis_storage_backend
+        tc.variables["HIREDIS_FROM_INTERNET"] = False
+        tc.variables["ENABLE_DOCUMENTATION"] = False
+        tc.variables["ENABLE_TESTING"] = False
+        tc.generate()
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("GPL-*.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "GPL-*.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
