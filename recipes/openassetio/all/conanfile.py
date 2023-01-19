@@ -81,7 +81,7 @@ class PackageConan(ConanFile):
                 )
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.21.7")
+        self.tool_requires("cmake/3.25.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)

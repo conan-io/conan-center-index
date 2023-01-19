@@ -13,7 +13,7 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.21.7")
+        self.tool_requires("cmake/3.25.1")
 
     def requirements(self):
         self.requires("openssl/1.1.1s")
