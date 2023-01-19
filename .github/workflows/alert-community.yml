@@ -1,0 +1,39 @@
+name: "[service] Alert Community"
+
+on:
+  pull_request: [created]
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "docs/*/*"
+          reviewers: "@prince-chrismc"
+        
+      - uses: ./.github/actions/alert-community
+        with:
+          files: ".github/*/*"
+          reviewers: "@ericLemanissier @prince-chrismc"
+        
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "linter/*/*"
+          reviewers: "@ericLemanissier @prince-chrismc"
+          
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/aaf/*/*"
+          reviewers: "@MartinDelille"
+          
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/gtk/*/*"
+          reviewers: "@ericLemanissier"
+          
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/qt/*/*"
+          reviewers: "@ericLemanissier"
