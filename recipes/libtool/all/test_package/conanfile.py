@@ -1,7 +1,10 @@
 from conan import ConanFile
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, can_run
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path
 
 import os
 
@@ -31,9 +34,53 @@ class TestPackageConan(ConanFile):
     def layout(self):
         basic_layout(self)
 
-    def generate(self):
+    @property
+    def _autotools_test_dir(self):
+        return os.path.join(self.build_folder, "autotools")
+
+    def _generate_autotools(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
+            run_env = VirtualRunEnv(self)
+            run_env.generate()
+
+        test_env = Environment()
+        test_env.append_path("LD_LIBRARY_PATH", unix_path(self, os.path.join(self._autotools_test_dir, "lib")))
+        test_env.vars(self, scope="run").save_script("autotools_test")
+
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.extend([
+            "--enable-shared",
+            "--enable-static"
+        ])
+        tc.generate()
+
+        if is_msvc(self):
+            env = Environment()
+            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
+            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.define("LD", "link -nologo")
+            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
+            env.define("NM", "dumpbin -symbols")
+            env.define("OBJDUMP", ":")
+            env.define("RANLIB", ":")
+            env.define("STRIP", ":")
+            env.vars(self).save_script("conanbuild_msvc")
+
+    def _generate_cmake(self):
         CMakeDeps(self).generate()
         CMakeToolchain(self).generate()
+
+    def generate(self):
+        self._generate_cmake()
+        self._generate_autotools()
 
     def _build_ltdl(self):
         """ Build library using ltdl library """
@@ -50,13 +97,31 @@ class TestPackageConan(ConanFile):
             "Windows": "dll",
         }[str(self.settings.os)]
 
-        if not cross_building(self):
+        if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             lib_path = os.path.join(self.cpp.build.bindirs[0], f"liba.{lib_suffix}")
             self.run(f"{bin_path} {lib_path}", env="conanrun")
 
+    def _build_autotools(self):
+        """ Test autotools integration """
+        autotools = Autotools(self)
+        autotools.autoreconf(["--install", "autotools"])
+        autotools.configure(build_script_folder="autotools")
+        autotools.make()
+        autotools.install(args=[f"DESTDIR={unix_path(self, self._autotools_test_dir)}"])
+
+    def _test_autotools(self):
+        assert os.path.isdir(os.path.join(self._autotools_test_dir, "bin"))
+        assert os.path.isfile(os.path.join(self._autotools_test_dir, "include", "lib.h"))
+        assert os.path.isdir(os.path.join(self._autotools_test_dir, "lib"))
+
+        if can_run(self):
+            self.run(os.path.join(self._autotools_test_dir, "bin", "test_package"), env="conanrun")
+
     def build(self):
         self._build_ltdl()
+        self._build_autotools()
 
     def test(self):
         self._test_ltdl()
+        self._test_autotools()
