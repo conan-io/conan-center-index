@@ -7,6 +7,7 @@ from conan.tools.microsoft import is_msvc, unix_path
 from conan.errors import ConanInvalidConfiguration
 import os
 
+
 required_conan_version = ">=1.56.0"
 
 class MpcConan(ConanFile):
