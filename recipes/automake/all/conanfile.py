@@ -31,12 +31,12 @@ class AutomakeConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
+    def configure(self):
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
     def layout(self):
         basic_layout(self, src_folder="src")
-
-    def configure(self):
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
 
     def requirements(self):
         self.requires("autoconf/2.71")
@@ -44,10 +44,11 @@ class AutomakeConan(ConanFile):
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
-            self.build_requires("autoconf/2.71")
-        if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", check_type=str):
+            self.tool_requires("autoconf/2.71")
+        if self._settings_build.os == "Windows":
             self.win_bash = True
-            self.build_requires("msys2/cci.latest")
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def package_id(self):
         del self.info.settings.arch
@@ -55,8 +56,7 @@ class AutomakeConan(ConanFile):
         del self.info.settings.build_type
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _datarootdir(self):
