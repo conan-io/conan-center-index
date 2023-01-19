@@ -59,7 +59,7 @@ class PackageConan(ConanFile):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(
             self,
-            pattern="pub.hpp",
+            pattern="*.hpp",
             dst=os.path.join(self.package_folder, "include", "json_dto"),
             src=os.path.join(self.source_folder, "dev", "json_dto"),
         )
