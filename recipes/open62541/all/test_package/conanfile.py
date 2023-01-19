@@ -22,7 +22,7 @@ class TestPackageConan(ConanFile):
         tc.variables["open62541_NODESET_DIR"] = self.deps_user_info["ua-nodeset"].nodeset_dir.replace(
             "\\", "/")
         tc.variables["open62541_TOOLS_DIR"] = self.dependencies["open62541"].conf_info.get(
-            "user.open62541:tools_dir").replace("\\", "/")
+            "user.open62541:tools_dir")
         tc.generate()
 
     def build(self):
