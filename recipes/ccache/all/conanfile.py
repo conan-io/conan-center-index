@@ -36,16 +36,27 @@ class CcacheConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17" if self._is_msvc else "14"
+        if Version(self.version) > "4.7":
+            return "17"
+        else:
+            return "17" if self._is_msvc else "14"
 
     @property
     def _compilers_minimum_version(self):
-        return {
-            "gcc": "6",
-            "clang": "6",
-            "apple-clang": "10",
-            "Visual Studio": "15.7" if Version(self.version) < "4.6" else "16.2",
-        }
+        if Version(self.version) > "4.7":
+            return {
+                "gcc": "8",
+                "clang": "9",
+                "apple-clang": "11",
+                "Visual Studio": "16.2",
+            }
+        else:
+            return {
+                "gcc": "6",
+                "clang": "6",
+                "apple-clang": "10",
+                "Visual Studio": "15.7" if Version(self.version) < "4.6" else "16.2",
+            }
 
     def layout(self):
         cmake_layout(self, src_folder="src")
