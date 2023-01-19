@@ -139,7 +139,7 @@ class PackageConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.libs = ["package_lib"]
+        self.cpp_info.libs = []
         self.cpp_info.set_property("cmake_file_name", "OpenAssetIO")
         self.cpp_info.set_property("cmake_target_name", "OpenAssetIO::OpenAssetIO")
         self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "OpenAssetIO", "OpenAssetIOVariables.cmake")])
