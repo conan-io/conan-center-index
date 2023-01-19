@@ -83,12 +83,12 @@ class FlexConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["fl"]
 
+        # generate both modules and config files
+        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "FLEX")
         self.cpp_info.set_property("cmake_target_name", "FLEX::FLEX")
         self.cpp_info.set_property("pkg_config_name", "flex")
 
-        # generate both modules and config files
-        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.names["cmake_find_package"] = "FLEX"
         self.cpp_info.names["cmake_find_package_multi"] = "FLEX"
 
