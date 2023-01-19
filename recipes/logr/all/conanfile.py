@@ -51,7 +51,6 @@ class LogrConan(ConanFile):
     def package_id(self):
         self.info.settings.clear()
         self.info.requires.clear()
-        self.info.options.backend
 
     def validate(self):
         minimal_cpp_standard = "17"
