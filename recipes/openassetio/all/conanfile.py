@@ -112,7 +112,7 @@ class PackageConan(ConanFile):
     @property
     def _python_windows_lib(self):
         pth = pathlib.Path(
-            self.deps_cpp_info["cpython"].rootpath,
+            self.dependencies["cpython"].package_folder,
             self.dependencies["cpython"].cpp_info.components["embed"].libdirs[0],
             self.dependencies["cpython"].cpp_info.components["embed"].libs[0])
         pth = pth.with_suffix(".lib")
