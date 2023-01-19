@@ -164,6 +164,12 @@ class LibpqConan(ConanFile):
             "\t$(CC) $(CFLAGS)  -shared -static-libgcc -o $@  $(OBJS) $(DLL_DEFFILE) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK) $(LIBS) -Wl,--out-implib=$(stlib)",
             "\trm -f $(stlib)\n\t$(LINK.static) $(stlib) $(OBJS)\n\t$(RANLIB) $(stlib)\n\t$(CC) $(CFLAGS)  -shared -static-libgcc -o $@  $(OBJS) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK) $(LIBS) -Wl,--export-all-symbols -Wl,--out-implib=lib$(NAME).dll.a")
 
+            if self.settings.compiler.threads == "posix":
+                # Use MinGW pthread library
+                replace_in_file(self, os.path.join(self.source_folder, "src", "interfaces", "libpq", "Makefile"),
+                "ifeq ($(enable_thread_safety), yes)\nOBJS += pthread-win32.o\nendif",
+                "")
+
     def build(self):
         apply_conandata_patches(self)
         self._patch_sources()
@@ -280,6 +286,8 @@ class LibpqConan(ConanFile):
             self.cpp_info.components["pq"].system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]
+            if self.settings.compiler.threads == "posix":
+                self.cpp_info.components["pq"].system_libs.append("pthread")
 
         self.cpp_info.names["cmake_find_package"] = "PostgreSQL"
         self.cpp_info.names["cmake_find_package_multi"] = "PostgreSQL"
