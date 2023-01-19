@@ -1,7 +1,8 @@
 name: "[service] Alert Community"
 
 on:
-  pull_request: [created]
+  pull_request:
+   types: [opened] 
 
 jobs:
   comment:
