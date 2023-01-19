@@ -63,7 +63,7 @@ class PackageConan(ConanFile):
         if self.options.with_python:
             self.requires("openssl/1.1.1s")
             self.requires(f"cpython/{self.options.python_version}")
-            self.requires("pybind11/2.10.0")
+            self.requires("pybind11/2.10.1")
 
     def validate(self):
         if is_apple_os(self):
