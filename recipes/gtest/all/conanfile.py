@@ -37,17 +37,26 @@ class GTestConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
-        return 11
+        return 11 if Version(self.version) < "1.13.0" else 14
 
     @property
     def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "14",
-            "msvc": "190",
-            "gcc": "4.8.1" if Version(self.version) < "1.11.0" else "5",
-            "clang": "3.3" if Version(self.version) < "1.11.0" else "5",
-            "apple-clang": "5.0" if Version(self.version) < "1.11.0" else "9.1",
-        }
+        if Version(self.version) < "1.13.0":
+            return {
+                "Visual Studio": "14",
+                "msvc": "190",
+                "gcc": "4.8.1" if Version(self.version) < "1.11.0" else "5",
+                "clang": "3.3" if Version(self.version) < "1.11.0" else "5",
+                "apple-clang": "5.0" if Version(self.version) < "1.11.0" else "9.1",
+            }
+        else:
+            return {
+                "Visual Studio": "15",
+                "msvc": "190",
+                "gcc": "5",
+                "clang": "5",
+                "apple-clang": "5.1",
+            }
 
     @property
     def _is_clang_cl(self):
