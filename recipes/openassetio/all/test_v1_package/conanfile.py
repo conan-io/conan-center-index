@@ -36,13 +36,7 @@ class TestPackageConan(ConanFile):
         get(self, **self.conan_data["sources"][self.dependencies["openassetio"].ref.version], destination=self.source_folder, strip_root=True)
         tc = CMakeToolchain(self)
 
-        libcxx = self.settings.get_safe("compiler.libcxx")
-        if libcxx is not None:
-            if libcxx == "libstdc++11":
-                tc.variables["OPENASSETIOTEST_GLIBCXX_USE_CXX11_ABI"] = True
-            else:
-                tc.variables["OPENASSETIOTEST_GLIBCXX_USE_CXX11_ABI"] = False
-
+        tc.variables["OPENASSETIOTEST_GLIBCXX_USE_CXX11_ABI"] = self.settings.get_safe("compiler.libcxx") == "libstdc++11"
         tc.variables["OPENASSETIOTEST_ENABLE_PYTHON"] = self.dependencies["openassetio"].options.with_python
 
         if self.dependencies["openassetio"].options.with_python:

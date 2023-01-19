@@ -91,12 +91,7 @@ class PackageConan(ConanFile):
 
         tc.variables["OPENASSETIO_ENABLE_TESTS"] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
 
-        libcxx = self.settings.get_safe("compiler.libcxx")
-        if libcxx is not None:
-            if libcxx == "libstdc++11":
-                tc.variables["OPENASSETIO_GLIBCXX_USE_CXX11_ABI"] = True
-            else:
-                tc.variables["OPENASSETIO_GLIBCXX_USE_CXX11_ABI"] = False
+        tc.variables["OPENASSETIO_GLIBCXX_USE_CXX11_ABI"] = self.settings.get_safe("compiler.libcxx") == "libstdc++11"
 
         tc.variables["OPENASSETIO_ENABLE_PYTHON"] = self.options.with_python
         if self.options.with_python:
