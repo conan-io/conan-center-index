@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
+from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.tools.gnu import PkgConfigDeps
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get
@@ -106,6 +106,9 @@ class CcacheConan(ConanFile):
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
+        if self._is_msvc:
+            deps = CMakeDeps(self)
+            deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
