@@ -88,7 +88,7 @@ class AutomakeConan(ConanFile):
                                 "          $file =~ s/^\\s+|\\s+$//g;\n"
                                 "          $map_traced_defs{$arg1} = $file;")
             # handle relative paths during aclocal.m4 creation
-            replace_in_file(self, ac_local_in, "$map{$m} eq $map_traced_defs{$m}", 
+            replace_in_file(self, ac_local_in, "$map{$m} eq $map_traced_defs{$m}",
                                 "abs_path($map{$m}) eq abs_path($map_traced_defs{$m})")
 
     def build(self):
@@ -118,6 +118,7 @@ class AutomakeConan(ConanFile):
     def package_info(self):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
+        self.cpp_info.resdirs = ["res"]
 
         # For consumers with new integrations (Conan 1 and 2 compatible):
         compile_wrapper = os.path.join(self._automake_libdir, "compile")
