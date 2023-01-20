@@ -126,8 +126,14 @@ class OpenCascadeConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
+        requested_cppstd = self.settings.compiler.get_safe("cppstd")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            applicapble_cppstd = patch.pop("cppstd", None)
+            if applicapble_cppstd and requested_cppstd:
+                if requested_cppstd >= applicapble_cppstd:
+                    tools.patch(**patch)
+            else:
+                tools.patch(**patch)
 
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         cmakelists_tools = os.path.join(self._source_subfolder, "tools", "CMakeLists.txt")

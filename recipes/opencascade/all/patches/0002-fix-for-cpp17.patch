@@ -1,0 +1,37 @@
+--- src/QANCollection/QANCollection_Stl.cxx	2023-01-20 08:13:06.606228500 -0800
++++ src/QANCollection/QANCollection_Stl.cxx.patch	2023-01-20 08:12:48.081585800 -0800
+@@ -43,10 +43,14 @@
+ const int THE_TEST_SIZE = 5000;
+ 
+ namespace {
+-  // Auxiliary class to use in std::random_shuffle()
++  // Auxiliary class to use in std::shuffle()
+   struct RandomGenerator {
++	using result_type = int;
++	using type = int;
++	static constexpr int min() { return 0; }
++	static constexpr int max() { return RAND_MAX; }
+     RandomGenerator () { srand(1); }
+-    ptrdiff_t operator () (ptrdiff_t upper) const { return rand() % upper; }
++ 	int operator () () { return rand(); }
+   };
+ }
+ 
+@@ -955,7 +959,7 @@
+       for (Standard_Integer anIdx = 0; anIdx < 10; ++anIdx)
+       {
+         std::sort           (aVector->begin(), aVector->end());
+-        std::random_shuffle (aVector->begin(), aVector->end(), aRandomGen);
++        std::shuffle (aVector->begin(), aVector->end(), aRandomGen);
+       }
+     }
+     aTimer.Stop();
+@@ -969,7 +973,7 @@
+       for (Standard_Integer anIdx = 0; anIdx < 10; ++anIdx)
+       {
+         std::sort           (aCollec->begin(), aCollec->end());
+-        std::random_shuffle (aCollec->begin(), aCollec->end(), aRandomGen);
++        std::shuffle (aCollec->begin(), aCollec->end(), aRandomGen);
+       }
+     }
+     aTimer.Stop();
