@@ -28,7 +28,7 @@ class TestPackageConan(ConanFile):
             return tokens[0].split("/", 1)[1]
 
         output = StringIO()
-        self.run(f"flex --version", output)
+        self.run("flex --version", output)
         output_str = str(output.getvalue()) 
         self.output.info("Installed version: {}".format(output_str))
         expected_version = tested_reference_version()
