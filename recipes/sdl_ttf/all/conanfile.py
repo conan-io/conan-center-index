@@ -111,15 +111,17 @@ class SdlttfConan(ConanFile):
         suffix = "-static" if Version(self.version) >= "2.20.0" and not self.options.shared else ""
 
         self.cpp_info.set_property("cmake_file_name", "SDL2_ttf")
-        self.cpp_info.set_property("cmake_target_name",f"SDL2_ttf::SDL2_ttf{suffix}")
         self.cpp_info.set_property("pkg_config_name", "SDL2_ttf")
 
-        self.cpp_info.includedirs.append(os.path.join("include", "SDL2"))
-        self.cpp_info.libs = [f"SDL2_ttf{'-static' if is_msvc(self) and not self.options.shared else ''}{'d' if self.settings.build_type == 'Debug' else ''}"]
-        self.cpp_info.requires = ["freetype::freetype", f"sdl::libsdl2"]
+        self.cpp_info.components["_sdl2_ttf"].set_property("cmake_target_name",f"SDL2_ttf::SDL2_ttf{suffix}")
+        self.cpp_info.components["_sdl2_ttf"].includedirs.append(os.path.join("include", "SDL2"))
+        self.cpp_info.components["_sdl2_ttf"].libs = [f"SDL2_ttf{'-static' if is_msvc(self) and not self.options.shared else ''}"]
+        self.cpp_info.components["_sdl2_ttf"].requires = ["freetype::freetype", f"sdl::libsdl2"]
         if self.options.get_safe("with_harfbuzz"):
-            self.cpp_info.requires.append("harfbuzz::harfbuzz")
+            self.cpp_info.components["_sdl2_ttf"].requires.append("harfbuzz::harfbuzz")
 
         # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = f"SDL2_ttf{suffix}"
-        self.cpp_info.names["cmake_find_package_multi"] = f"SDL2_ttf{suffix}"
+        self.cpp_info.names["cmake_find_package"] = "SDL2_ttf"
+        self.cpp_info.names["cmake_find_package_multi"] = "SDL2_ttf"
+        self.cpp_info.components["_sdl2_ttf"].names["cmake_find_package"] = f"SDL2_ttf{suffix}"
+        self.cpp_info.components["_sdl2_ttf"].names["cmake_find_package_multi"] = f"SDL2_ttf{suffix}"
