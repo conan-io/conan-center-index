@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, load, save, export_conandata_patches, apply_conandata_patches, collect_libs
+from conan.tools.apple import fix_apple_shared_install_name
 
 
 required_conan_version = ">=1.53.0"
@@ -70,6 +71,7 @@ class LuaConan(ConanFile):
         save(self, os.path.join(self.package_folder, "licenses", "COPYING.txt"), license_contents)
         cmake = CMake(self)
         cmake.install()
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
