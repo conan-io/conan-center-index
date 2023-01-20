@@ -8,7 +8,6 @@ import os
 
 required_conan_version = ">=1.50.0"
 
-
 class H5ppConan(ConanFile):
     name = "h5pp"
     description = "A C++17 wrapper for HDF5 with focus on simplicity"
