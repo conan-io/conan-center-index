@@ -47,6 +47,7 @@ class LibcurlConan(ConanFile):
         "with_libssh2": [True, False],
         "with_libidn": [True, False],
         "with_librtmp": [True, False],
+        "with_libgsasl": [True, False],
         "with_libmetalink": [True, False],
         "with_libpsl": [True, False],
         "with_largemaxwritesize": [True, False],
@@ -91,6 +92,7 @@ class LibcurlConan(ConanFile):
         "with_libssh2": False,
         "with_libidn": False,
         "with_librtmp": False,
+        "with_libgsasl": False,
         "with_libmetalink": False,
         "with_libpsl": False,
         "with_largemaxwritesize": False,
@@ -173,6 +175,7 @@ class LibcurlConan(ConanFile):
             if Version(self.version) < "7.75.0":
                 del self.options.with_libidn
             del self.options.with_libpsl
+            del self.options.with_libgsasl
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
@@ -365,6 +368,7 @@ class LibcurlConan(ConanFile):
             f"--with-libidn2={self._yes_no(self.options.with_libidn)}",
             f"--with-librtmp={self._yes_no(self.options.with_librtmp)}",
             f"--with-libpsl={self._yes_no(self.options.with_libpsl)}",
+            f"--with-libgsasl={self._yes_no(self.options.with_libgsasl)}",
             f"--with-schannel={self._yes_no(self.options.with_ssl == 'schannel')}",
             f"--with-secure-transport={self._yes_no(self.options.with_ssl == 'darwinssl')}",
             f"--with-brotli={self._yes_no(self.options.with_brotli)}",
