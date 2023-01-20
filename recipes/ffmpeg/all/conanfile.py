@@ -543,6 +543,8 @@ class FFMpegConan(ConanFile):
             args.append("--cc={}".format(tools.get_env("CC")))
         if tools.get_env("CXX"):
             args.append("--cxx={}".format(tools.get_env("CXX")))
+        if tools.get_env("STRIP"):
+            args.append("--strip={}".format(tools.get_env("STRIP")))
         extra_cflags = []
         extra_ldflags = []
         if is_apple_os(self) and self.settings.os.version:
