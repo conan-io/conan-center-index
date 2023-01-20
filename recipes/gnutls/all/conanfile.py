@@ -62,6 +62,8 @@ class GnuTLSConan(ConanFile):
     def validate(self):
         if is_msvc(self):
             raise ConanInvalidConfiguration(f"{self.ref} cannot be deployed by Visual Studio.")
+        if is_apple_os(self) and self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration(f"{self.ref} generates linkage errors when building. Contributions are welcome.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
