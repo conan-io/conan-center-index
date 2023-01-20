@@ -113,3 +113,6 @@ class HighwayConan(ConanFile):
             self.cpp_info.components["hwy_test"].set_property("pkg_config_name", "libhwy-test")
             self.cpp_info.components["hwy_test"].libs = ["hwy_test"]
             self.cpp_info.components["hwy_test"].requires = ["hwy"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
