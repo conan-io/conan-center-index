@@ -1,7 +1,8 @@
-from conan.tools.files import rename
 from conan.tools.microsoft import is_msvc
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conans import CMake, tools
+from conan.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools import files, scm
 import functools
 import json
 import os
@@ -60,24 +61,22 @@ class OpenCascadeConan(ConanFile):
 
     @property
     def _link_tk(self):
-        if tools.Version(self.version) >= "7.6.0":
+        if scm.Version(self.version) >= "7.6.0":
             return self.options.with_tk
-        else:
-            return True
+        return True
 
     @property
     def _link_opengl(self):
-        if tools.Version(self.version) >= "7.6.0":
+        if scm.Version(self.version) >= "7.6.0":
             return self.options.with_opengl
-        else:
-            return True
+        return True
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
     def config_options(self):
-        if tools.Version(self.version) < "7.6.0":
+        if scm.Version(self.version) < "7.6.0":
             del self.options.with_tk
             del self.options.with_draco
             del self.options.with_opengl
@@ -122,7 +121,7 @@ class OpenCascadeConan(ConanFile):
             raise ConanInvalidConfiguration("OpenCASCADE {} doesn't support Clang 6.0 if Release build type".format(self.version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
@@ -178,7 +177,7 @@ class OpenCascadeConan(ConanFile):
         csf_tcl_libs = "set (CSF_TclLibs \"{}\")".format(" ".join(self.deps_cpp_info["tcl"].libs))
         tools.replace_in_file(occt_csf_cmake, "set (CSF_TclLibs     \"tcl86\")", csf_tcl_libs)
         tools.replace_in_file(occt_csf_cmake, "set (CSF_TclLibs   Tcl)", csf_tcl_libs)
-        if tools.Version(self.version) >= "7.6.0":
+        if scm.Version(self.version) >= "7.6.0":
             tools.replace_in_file(occt_csf_cmake, "set (CSF_TclLibs   \"tcl8.6\")", csf_tcl_libs)
         else:
             tools.replace_in_file(occt_csf_cmake, "set (CSF_TclLibs     \"tcl8.6\")", csf_tcl_libs)
@@ -189,14 +188,14 @@ class OpenCascadeConan(ConanFile):
             csf_tk_libs = "set (CSF_TclTkLibs \"{}\")".format(" ".join(self.deps_cpp_info["tk"].libs))
             tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs   \"tk86\")", csf_tk_libs)
             tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs Tk)", csf_tk_libs)
-            if tools.Version(self.version) >= "7.6.0":
+            if scm.Version(self.version) >= "7.6.0":
                 tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs \"tk8.6\")", csf_tk_libs)
             else:
                 tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs   \"tk8.6\")", csf_tk_libs)
         ## fontconfig
         if self._is_linux:
             conan_targets.append("CONAN_PKG::fontconfig")
-            if tools.Version(self.version) >= "7.6.0":
+            if scm.Version(self.version) >= "7.6.0":
                 tools.replace_in_file(
                     occt_csf_cmake,
                     "set (CSF_fontconfig \"fontconfig\")",
@@ -261,7 +260,7 @@ class OpenCascadeConan(ConanFile):
             "${{USED_EXTERNAL_LIBS_BY_CURRENT_PROJECT}} {}".format(" ".join(conan_targets)))
 
         # Do not install pdb files
-        if tools.Version(self.version) >= "7.6.0":
+        if scm.Version(self.version) >= "7.6.0":
             tools.replace_in_file(
                 occt_toolkit_cmake,
                 """    install (FILES  ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bin\\${OCCT_INSTALL_BIN_LETTER}/${PROJECT_NAME}.pdb
@@ -286,7 +285,7 @@ class OpenCascadeConan(ConanFile):
                               "set (CSF_ThreadLibs  \"pthread rt\")")
 
         # No hardcoded link through #pragma
-        if tools.Version(self.version) < "7.6.0":
+        if scm.Version(self.version) < "7.6.0":
             tools.replace_in_file(
                 os.path.join(self._source_subfolder, "src", "Font", "Font_FontMgr.cxx"),
                 "#pragma comment (lib, \"freetype.lib\")",
@@ -343,7 +342,7 @@ class OpenCascadeConan(ConanFile):
         cmake.definitions["USE_FFMPEG"] = self.options.with_ffmpeg
         cmake.definitions["USE_TBB"] = self.options.with_tbb
         cmake.definitions["USE_RAPIDJSON"] = self.options.with_rapidjson
-        if tools.Version(self.version) >= "7.6.0":
+        if scm.Version(self.version) >= "7.6.0":
             cmake.definitions["USE_DRACO"] = self.options.with_draco
             cmake.definitions["USE_TK"] = self.options.with_tk
             cmake.definitions["USE_OPENGL"] = self.options.with_opengl
@@ -358,8 +357,8 @@ class OpenCascadeConan(ConanFile):
 
     def _replace_package_folder(self, source, target):
         if os.path.isdir(os.path.join(self.package_folder, source)):
-            tools.rmdir(os.path.join(self.package_folder, target))
-            rename(self, os.path.join(self.package_folder, source),
+            files.rmdir(os.path.join(self.package_folder, target))
+            files.rename(self, os.path.join(self.package_folder, source),
                          os.path.join(self.package_folder, target))
 
     def package(self):
@@ -373,8 +372,8 @@ class OpenCascadeConan(ConanFile):
             "OCCT_LGPL_EXCEPTION.txt",
             src=self._source_subfolder,
             dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        files.rmdir(os.path.join(self.package_folder, "cmake"))
+        files.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         if self.settings.build_type == "Debug":
             self._replace_package_folder("libd", "lib")
             self._replace_package_folder("bind", "bin")
