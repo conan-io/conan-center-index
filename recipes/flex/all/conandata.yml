@@ -5,5 +5,6 @@ sources:
 patches:
   "2.6.4":
     - patch_file: patches/darwin-newer-versions.patch
-      patch_description: "https://github.com/westes/flex/issues/509"
+      patch_description: "missing linker flags skipped due to a problem in configure."
+      patch_source: "https://github.com/westes/flex/issues/509"
       patch_type: "portability"
