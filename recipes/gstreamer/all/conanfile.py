@@ -46,7 +46,7 @@ class GStreamerConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.75.1")
+        self.requires("glib/2.75.2")
 
     def validate(self):
         if not self.dependencies.direct_host["glib"].options.shared and self.info.options.shared:
@@ -110,6 +110,9 @@ class GStreamerConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+
+    def package_id(self):
+        self.info.requires["glib"].full_package_mode()
 
     def package_info(self):
         gst_plugin_path = os.path.join(self.package_folder, "lib", "gstreamer-1.0")
