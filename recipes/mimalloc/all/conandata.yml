@@ -37,6 +37,9 @@ patches:
     - patch_file: "patches/2.0.9-0001-change-install-paths.patch"
       patch_description: "fix install paths"
       patch_type: "conan"
+    - patch_file: "patches/2.0.9-0002-support-older-compiler.patch"
+      patch_description: "fix compilation errors on older compilers"
+      patch_type: "portability"
   "2.0.7":
     - patch_file: "patches/2.0.7-0001-change-install-paths.patch"
       patch_description: "fix install paths"
@@ -64,6 +67,9 @@ patches:
     - patch_file: "patches/1.7.9-0001-change-install-paths.patch"
       patch_description: "fix install paths"
       patch_type: "conan"
+    - patch_file: "patches/1.7.9-0002-support-older-compiler.patch"
+      patch_description: "fix compilation errors on older compilers"
+      patch_type: "portability"
   "1.7.7":
     - patch_file: "patches/1.7.7-0001-change-install-paths.patch"
       patch_description: "fix install paths"
