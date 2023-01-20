@@ -48,7 +48,7 @@ class TclConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
 
     def validate(self):
         if self.settings.os not in ("FreeBSD", "Linux", "Macos", "Windows"):
