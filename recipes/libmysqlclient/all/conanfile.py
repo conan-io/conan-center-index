@@ -38,7 +38,7 @@ class LibMysqlClientCConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "16" if Version(self.version) > "8.0.17" else "15",
+            "Visual Studio": "16",
             "gcc": "7" if Version(self.version) >= "8.0.27" else "5.3",
             "clang": "6",
         }
@@ -77,18 +77,9 @@ class LibMysqlClientCConan(ConanFile):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross compilation not yet supported by the recipe. Contributions are welcomed.")
 
-        # FIXME: patch libmysqlclient 8.0.17 to support apple-clang >= 12?
-        #        current errors:
-        #             error: expected unqualified-id MYSQL_VERSION_MAJOR=8
-        #             error: no member named 'ptrdiff_t' in the global namespace
-        if self.version == "8.0.17" and self.settings.compiler == "apple-clang" and \
-                Version(self.settings.compiler.version) >= "12.0":
-            raise ConanInvalidConfiguration("libmysqlclient 8.0.17 doesn't support apple-clang >= 12.0")
-
         # mysql>=8.0.17 doesn't support shared library on MacOS.
         # https://github.com/mysql/mysql-server/blob/mysql-8.0.17/cmake/libutils.cmake#L333-L335
-        if Version(self.version) >= "8.0.17" and self.settings.compiler == "apple-clang" and \
-                self.options.shared:
+        if self.settings.compiler == "apple-clang" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.name}/{self.version} doesn't support shared library")
 
         # mysql < 8.0.29 uses `requires` in source code. It is the reserved keyword in C++20.
@@ -110,7 +101,6 @@ class LibMysqlClientCConan(ConanFile):
     def build_requirements(self):
         if Version(self.version) >= "8.0.25" and is_apple_os(self) and not self._cmake_new_enough("3.18"):
             # CMake 3.18 or higher is required if Apple, but CI of CCI may run CMake 3.15
-            # Set it to 3.24 as that matches our openssl version too
             self.tool_requires("cmake/3.24.2")
         if self.settings.os == "FreeBSD":
             self.tool_requires("pkgconf/1.9.3")
@@ -178,9 +168,7 @@ class LibMysqlClientCConan(ConanFile):
                         strict=False)
 
         # Do not copy shared libs of dependencies to package folder
-        deps_shared = ["SSL"]
-        if Version(self.version) > "8.0.17":
-            deps_shared.extend(["KERBEROS", "SASL", "LDAP", "PROTOBUF", "CURL"])
+        deps_shared = ["SSL", "KERBEROS", "SASL", "LDAP", "PROTOBUF", "CURL"]
         for dep in deps_shared:
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             f"MYSQL_CHECK_{dep}_DLLS()",
