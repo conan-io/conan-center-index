@@ -10,6 +10,9 @@ patches:
     - patch_file: "patches/0.5.0-0001-fix-cmake.patch"
       patch_description: "use cci package, remove lib64/bin64 install folders"
       patch_type: "conan"
+    - patch_file: "patches/0.5.0-0001-fix-DW_API.patch"
+      patch_description: "fix DW_API definition"
+      patch_type: "portability"
   "20191104":
     - patch_file: "patches/20191104-0001-patch.patch"
       patch_description: "use cci package, remove lib64/bin64 install folders"
