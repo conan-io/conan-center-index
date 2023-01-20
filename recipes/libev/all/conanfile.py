@@ -35,7 +35,7 @@ class LibevConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
+        copy(self, "CMakeLists.txt", self.recipe_folder, dst=self.export_sources_folder)
         copy(self, "config.h", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
@@ -71,6 +71,7 @@ class LibevConan(ConanFile):
     def generate(self):
         if is_msvc(self):
             tc = CMakeToolchain(self)
+            tc.variables["EV_SRC_DIR"] = self.source_folder.replace("\\", "/")
             tc.generate()
         else:    
             env = VirtualBuildEnv(self)
@@ -81,7 +82,7 @@ class LibevConan(ConanFile):
     def build(self):
         if is_msvc(self):
             cmake = CMake(self)
-            cmake.configure()
+            cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
             cmake.build()
         else:    
             autotools = Autotools(self)
