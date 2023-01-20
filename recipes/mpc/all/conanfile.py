@@ -97,3 +97,4 @@ class MpcConan(ConanFile):
         self.cpp_info.set_property("cmake_module_file_name", "mpc")
         self.cpp_info.set_property("cmake_target_name", "MPC::MPC")
         self.cpp_info.libs = ["mpc"]
+        self.cpp_info.system_libs = ["m"]
