@@ -111,9 +111,6 @@ class GStreamerConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
-    def package_id(self):
-        self.info.requires["glib"].full_package_mode()
-
     def package_info(self):
         gst_plugin_path = os.path.join(self.package_folder, "lib", "gstreamer-1.0")
 
