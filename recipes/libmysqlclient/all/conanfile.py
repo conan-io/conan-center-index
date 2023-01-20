@@ -99,7 +99,7 @@ class LibMysqlClientCConan(ConanFile):
             return False
 
     def build_requirements(self):
-        if Version(self.version) >= "8.0.25" and is_apple_os(self) and not self._cmake_new_enough("3.18"):
+        if is_apple_os(self) and not self._cmake_new_enough("3.18"):
             # CMake 3.18 or higher is required if Apple, but CI of CCI may run CMake 3.15
             self.tool_requires("cmake/3.24.2")
         if self.settings.os == "FreeBSD":
@@ -176,7 +176,7 @@ class LibMysqlClientCConan(ConanFile):
 
         if self.settings.os == "Macos":
             replace_in_file(self, os.path.join(self.source_folder, "libmysql", "CMakeLists.txt"),
-                            f"COMMAND {'$<TARGET_FILE:libmysql_api_test>' if Version(self.version) < '8.0.25' else 'libmysql_api_test'}",
+                            f"COMMAND {'libmysql_api_test'}",
                             f"COMMAND DYLD_LIBRARY_PATH={os.path.join(self.build_folder, 'library_output_directory')} {os.path.join(self.build_folder, 'runtime_output_directory', 'libmysql_api_test')}")
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "install_macros.cmake"),
                         "  INSTALL_DEBUG_SYMBOLS(",
@@ -243,11 +243,9 @@ class LibMysqlClientCConan(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.append("m")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            if Version(self.version) >= "8.0.25":
-                self.cpp_info.system_libs.append("resolv")
+            self.cpp_info.system_libs.append("resolv")
         if self.settings.os == "Windows":
-            if Version(self.version) >= "8.0.25":
-                self.cpp_info.system_libs.append("dnsapi")
+            self.cpp_info.system_libs.append("dnsapi")
             self.cpp_info.system_libs.append("secur32")
 
         # TODO: There is no official FindMySQL.cmake, but it's a common Find files in many projects
