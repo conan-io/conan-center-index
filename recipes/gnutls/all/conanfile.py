@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.microsoft import is_msvc
-from conan.tools.files import get, rmdir, rm, copy, replace_in_file
+from conan.tools.files import get, rmdir, rm, copy
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps, Autotools
 from conan.tools.build import cross_building
@@ -8,10 +8,9 @@ from conan.tools.env import VirtualRunEnv
 from conan.tools.apple import is_apple_os
 from conan.errors import ConanInvalidConfiguration
 import os
-import glob
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
 
 class GnuTLSConan(ConanFile):
