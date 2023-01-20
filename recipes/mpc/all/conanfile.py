@@ -68,10 +68,6 @@ class MpcConan(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.configure_args.append(f'--with-gmp={unix_path(self, self.dependencies["gmp"].package_folder)}')
         tc.configure_args.append(f'--with-mpfr={unix_path(self, self.dependencies["mpfr"].package_folder)}')
-        if self.options.shared:
-            tc.configure_args.extend(["--disable-static", "--enable-shared"])
-        else:
-            tc.configure_args.extend(["--disable-shared", "--enable-static"])
         tc.generate()
 
         tc = AutotoolsDeps(self)
