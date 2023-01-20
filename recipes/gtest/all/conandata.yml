@@ -15,5 +15,5 @@ patches:
       patch_type: "conan"
     - patch_file: "patches/gtest-1.10.0-override.patch"
       patch_description: "prevent compiler from complaining while compiling"
-      patch_type: "backport"
+      patch_type: "bugfix"
       patch_source: "https://github.com/google/googletest/pull/2507"
