@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import chdir, copy, get, rmdir, rm, apply_conandata_patches
+from conan.tools.files import copy, get, rmdir, rm, apply_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.microsoft import is_msvc, unix_path
@@ -78,11 +78,9 @@ class MpcConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        with chdir(self, self.source_folder):
-            if not os.path.exists("configure"):
-                command = "autoreconf -i"
-                self.run(command)
         autotools = Autotools(self)
+        if not os.path.exists(os.path.join(self.source_folder, "configure")):
+            autotools.autoreconf(["-i"])
         autotools.configure()
         autotools.make()
 
