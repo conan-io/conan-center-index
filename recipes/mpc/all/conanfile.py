@@ -4,6 +4,7 @@ from conan.tools.files import copy, get, rmdir, rm, apply_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -88,6 +89,7 @@ class MpcConan(ConanFile):
         copy(self, "COPYING.LESSER", self.source_folder, os.path.join(self.package_folder, "licenses"), keep_path=False)
         autotools = Autotools(self)
         autotools.install()
+        fix_apple_shared_install_name(self)
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
 
