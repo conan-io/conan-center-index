@@ -3,16 +3,15 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, VCVars
-from conan.tools.files import replace_in_file, rmdir
 from conan.tools.scm import Version
-import os
 import glob
+import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class LibpqConan(ConanFile):
@@ -37,7 +36,9 @@ class LibpqConan(ConanFile):
         "disable_rpath": False,
     }
 
-    _autotools = None
+    @property
+    def _is_mingw(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     @property
     def _is_clang8_x86(self):
@@ -55,12 +56,15 @@ class LibpqConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.rm_safe('fPIC')
-            self.options.rm_safe('disable_rpath')
+            self.options.rm_safe("fPIC")
+            self.options.rm_safe("disable_rpath")
+        if self._is_mingw:
+            # TODO: back to static by default once mingw static fixed
+            self.options.shared = True
 
     def configure(self):
         if self.options.shared:
-            self.options.rm_safe('fPIC')
+            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
@@ -71,16 +75,21 @@ class LibpqConan(ConanFile):
         if self.options.with_openssl:
             self.requires("openssl/1.1.1s")
 
+    def validate(self):
+        if self._is_mingw and not self.options.shared:
+            # FIXME: Seems like static lib is not created or is overridden at build time by import lib of dll
+            raise ConanInvalidConfiguration("static mingw build is not possible")
+
     def build_requirements(self):
         if is_msvc(self):
             self.tool_requires("strawberryperl/5.32.1.1")
         elif self._settings_build.os == "Windows":
             self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -112,6 +121,7 @@ class LibpqConan(ConanFile):
             if self.settings.os == "Windows":
                 tc.make_args.append("MAKE_DLL={}".format(str(self.options.shared).lower()))
             tc.generate()
+            AutotoolsDeps(self).generate()
 
     def _patch_sources(self):
         if is_msvc(self):
@@ -142,11 +152,11 @@ class LibpqConan(ConanFile):
             solution_pm = os.path.join(self.source_folder, "src", "tools", "msvc", "Solution.pm")
             if self.options.with_openssl:
                 openssl = self.dependencies["openssl"]
-                for ssl in ["VC\libssl32", "VC\libssl64", "libssl"]:
+                for ssl in ["VC\\libssl32", "VC\\libssl64", "libssl"]:
                     replace_in_file(self,solution_pm,
                                           "%s.lib" % ssl,
                                           "%s.lib" % openssl.libs[0])
-                for crypto in ["VC\libcrypto32", "VC\libcrypto64", "libcrypto"]:
+                for crypto in ["VC\\libcrypto32", "VC\\libcrypto64", "libcrypto"]:
                     replace_in_file(self,solution_pm,
                                           "%s.lib" % crypto,
                                           "%s.lib" % openssl.libs[1])
@@ -181,32 +191,31 @@ class LibpqConan(ConanFile):
                 autotools.make()
 
     def _remove_unused_libraries_from_package(self):
+        bin_folder = os.path.join(self.package_folder, "bin")
+        lib_folder = os.path.join(self.package_folder, "lib")
+        rm(self, "*.dll", lib_folder)
         if self.options.shared:
-            if self.settings.os == "Windows":
-                globs = []
-            else:
-                globs = [os.path.join(self.package_folder, "lib", "*.a")]
+            for lib in glob.glob(os.path.join(lib_folder, "*.a")):
+                if not (self.settings.os == "Windows" and os.path.basename(lib) == "libpq.a"):
+                    os.remove(lib)
         else:
-            globs = [
-                os.path.join(self.package_folder, "lib", "libpq.so*"),
-                os.path.join(self.package_folder, "bin", "*.dll"),
-                os.path.join(self.package_folder, "lib", "libpq*.dylib")
-            ]
-        for globi in globs:
-            for file in glob.glob(globi):
-                os.remove(file)
+            rm(self, "*.dll", bin_folder)
+            rm(self, "*.so*", lib_folder)
+            rm(self, "*.dylib", lib_folder)
 
     def package(self):
-        copy(self, pattern="COPYRIGHT", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder, keep_path=False)
+        copy(self, "COPYRIGHT", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
             copy(self, pattern="*postgres_ext.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
             copy(self, pattern="*pg_config.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
             copy(self, pattern="*pg_config_ext.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
             copy(self, pattern="*libpq-fe.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
             copy(self, pattern="*libpq-events.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
-            copy(self, pattern="*.h", dst=os.path.join(self.package_folder, os.path.join("include", "libpq")), src=os.path.join(self.source_folder, "src", "include", "libpq"), keep_path=False)
-            copy(self, pattern="*genbki.h", dst=os.path.join(self.package_folder, os.path.join("include", "catalog")), src=self.source_folder, keep_path=False)
-            copy(self, pattern="*pg_type.h", dst=os.path.join(self.package_folder, os.path.join("include", "catalog")), src=self.source_folder, keep_path=False)
+            copy(self, pattern="*.h", src=os.path.join(self.source_folder, "src", "include", "libpq"),
+                                      dst=os.path.join(self.package_folder, "include", "libpq"),
+                                      keep_path=False)
+            copy(self, pattern="*genbki.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include", "catalog"), keep_path=False)
+            copy(self, pattern="*pg_type.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include", "catalog"), keep_path=False)
             if self.options.shared:
                 copy(self, pattern="**/libpq.dll", dst=os.path.join(self.package_folder, "bin"), src=self.source_folder, keep_path=False)
                 copy(self, pattern="**/libpq.lib", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)
@@ -225,15 +234,15 @@ class LibpqConan(ConanFile):
                     autotools.install()
             with chdir(self, os.path.join(self.source_folder, "src", "bin", "pg_config")):
                 autotools.install()
-
-            self._remove_unused_libraries_from_package()
-
+            copy(self, "*.h", src=os.path.join(self.build_folder, "src", "include", "catalog"),
+                              dst=os.path.join(self.package_folder, "include", "catalog"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "include", "postgresql", "server"))
-            copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include", "catalog"), src=os.path.join(self.build_folder, "src", "include", "catalog"), keep_path=False)
-        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include", "catalog"), src=os.path.join(self.build_folder, "src", "backend", "catalog"), keep_path=False)
-        rmdir(self, os.path.join(self.package_folder, "share"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        fix_apple_shared_install_name(self)
+            self._remove_unused_libraries_from_package()
+            fix_apple_shared_install_name(self)
+        copy(self, "*.h", src=os.path.join(self.build_folder, "src", "backend", "catalog"),
+                          dst=os.path.join(self.package_folder, "include", "catalog"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")

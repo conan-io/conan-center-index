@@ -1,4 +1,7 @@
 sources:
+  "0.7.5":
+    url: "https://github.com/xtensor-stack/xtl/archive/0.7.5.tar.gz"
+    sha256: "3286fef5fee5d58f82f7b91375cd449c819848584bae9367893501114d923cbe"
   "0.7.4":
     url: "https://github.com/xtensor-stack/xtl/archive/0.7.4.tar.gz"
     sha256: "3c88be0e696b64150c4de7a70f9f09c00a335186b0b0b409771ef9f56bca7d9a"
@@ -9,17 +12,17 @@ sources:
     url: "https://github.com/xtensor-stack/xtl/archive/0.7.2.tar.gz"
     sha256: "95c221bdc6eaba592878090916383e5b9390a076828552256693d5d97f78357c"
   "0.6.21":
-    sha256: 97137014fa5da2a3598a267d06c8e28490b2e1c75b8f52358738bedb526fc771
-    url: https://github.com/xtensor-stack/xtl/archive/0.6.21.tar.gz
+    url: "https://github.com/xtensor-stack/xtl/archive/0.6.21.tar.gz"
+    sha256: "97137014fa5da2a3598a267d06c8e28490b2e1c75b8f52358738bedb526fc771"
   "0.6.12":
-    sha256: 25a16958195f939e6fb7c8feccad89b3e450a18124be6aee119c69a1ee2b308c
-    url: https://github.com/xtensor-stack/xtl/archive/0.6.12.tar.gz
+    url: "https://github.com/xtensor-stack/xtl/archive/0.6.12.tar.gz"
+    sha256: "25a16958195f939e6fb7c8feccad89b3e450a18124be6aee119c69a1ee2b308c"
   "0.6.11":
-    sha256: e3cb622def174b76547c29ce0d63ae1407ed19fcbbd233913613e9859568eadd
-    url: https://github.com/xtensor-stack/xtl/archive/0.6.11.tar.gz
+    url: "https://github.com/xtensor-stack/xtl/archive/0.6.11.tar.gz"
+    sha256: "e3cb622def174b76547c29ce0d63ae1407ed19fcbbd233913613e9859568eadd"
   "0.6.10":
-    sha256: 9de012e06a6c24561b2c50cf7650cb32ffcf2c22f73b0314deeba9c775e5036f
-    url: https://github.com/xtensor-stack/xtl/archive/0.6.10.tar.gz
+    url: "https://github.com/xtensor-stack/xtl/archive/0.6.10.tar.gz"
+    sha256: "9de012e06a6c24561b2c50cf7650cb32ffcf2c22f73b0314deeba9c775e5036f"
   "0.6.9":
-    sha256: c348fcf53dd2b355d143ad28e77f1ede7e1d5e6a196d2d5b9c478b1c005dedd0
-    url: https://github.com/xtensor-stack/xtl/archive/0.6.9.tar.gz
+    url: "https://github.com/xtensor-stack/xtl/archive/0.6.9.tar.gz"
+    sha256: "c348fcf53dd2b355d143ad28e77f1ede7e1d5e6a196d2d5b9c478b1c005dedd0"
