@@ -8,5 +8,9 @@ sources:
 patches:
   "1.4.2":
     - patch_file: "patches/fix-cmake-1.4.2.patch"
+      patch_description: "Adapts find_package commands and install destination paths in CMakeLists.txt files."
+      patch_type: "conan"
   "1.3.3":
     - patch_file: "patches/fix-cmake-1.3.3.patch"
+      patch_description: "Various adaptations in CMakeLists.txt files to improve compatibility with Conan."
+      patch_type: "conan"
