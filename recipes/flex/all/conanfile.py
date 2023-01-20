@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.files import get, rmdir, copy, rm, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import AutotoolsToolchain, Autotools
@@ -76,6 +77,8 @@ class FlexConan(ConanFile):
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["fl"]
