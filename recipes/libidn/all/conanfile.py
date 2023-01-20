@@ -46,9 +46,9 @@ class LibIdnConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -98,15 +98,16 @@ class LibIdnConan(ConanFile):
             env = Environment()
             compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
             ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
-            env.define("CC", f"{compile_wrapper} cl -nologo")
-            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env_vars = env.vars(self)
+            env.define("CC", f"{compile_wrapper} {env_vars.get('CC', 'cl')} -nologo")
+            env.define("CXX", f"{compile_wrapper} {env_vars.get('CXX', 'cl')} -nologo")
             env.define("LD", "link -nologo")
             env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
-            env.vars(self).save_script("conanbuild_gsl_msvc")
+            env.vars(self).save_script("conanbuild_libidn_msvc")
 
         deps = AutotoolsDeps(self)
         deps.generate()
@@ -146,4 +147,3 @@ class LibIdnConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
-
