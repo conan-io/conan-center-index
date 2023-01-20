@@ -107,13 +107,6 @@ class GnuTLSConan(ConanFile):
         pkgdeps = PkgConfigDeps(self)
         pkgdeps.generate()
 
-        if is_apple_os(self):
-            # FIXME Remove it when 1.55.0 be running on CCI
-            # see https://github.com/conan-io/conan/pull/12307
-            for pc in glob.glob(os.path.join(self.generators_folder, "*.pc")):
-                replace_in_file(self, pc, "-F ", "-F", strict=False)
-            replace_in_file(self, os.path.join(self.generators_folder, "conanautotoolsdeps.sh"), "-F ", "-F", strict=False)
-
     def build(self):
         autotools = Autotools(self)
         autotools.configure()
