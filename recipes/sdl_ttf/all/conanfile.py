@@ -74,7 +74,7 @@ class SdlttfConan(ConanFile):
             tc.variables["SDL2TTF_SAMPLES"] = False
             tc.variables["SDL2TTF_VENDORED"] = False
             tc.variables["SDL2TTF_HARFBUZZ"] = self.options.with_harfbuzz
-
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -115,8 +115,8 @@ class SdlttfConan(ConanFile):
 
         self.cpp_info.components["_sdl2_ttf"].set_property("cmake_target_name",f"SDL2_ttf::SDL2_ttf{suffix}")
         self.cpp_info.components["_sdl2_ttf"].includedirs.append(os.path.join("include", "SDL2"))
-        self.cpp_info.components["_sdl2_ttf"].libs = [f"SDL2_ttf{'-static' if is_msvc(self) and not self.options.shared else ''}"]
-        self.cpp_info.components["_sdl2_ttf"].requires = ["freetype::freetype", f"sdl::libsdl2"]
+        self.cpp_info.components["_sdl2_ttf"].libs = [f"SDL2_ttf"]
+        self.cpp_info.components["_sdl2_ttf"].requires = ["freetype::freetype", "sdl::libsdl2"]
         if self.options.get_safe("with_harfbuzz"):
             self.cpp_info.components["_sdl2_ttf"].requires.append("harfbuzz::harfbuzz")
 
