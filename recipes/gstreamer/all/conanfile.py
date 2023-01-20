@@ -67,8 +67,7 @@ class GStreamerConan(ConanFile):
             self.tool_requires("flex/2.6.4")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         virtual_build_env = VirtualBuildEnv(self)
@@ -111,9 +110,6 @@ class GStreamerConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-
-    def package_id(self):
-        self.info.requires["glib"].full_package_mode()
 
     def package_info(self):
         gst_plugin_path = os.path.join(self.package_folder, "lib", "gstreamer-1.0")
