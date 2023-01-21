@@ -2,14 +2,12 @@ import os
 import re
 from io import StringIO
 
-from conan import ConanFile
-from conan.tools.build import can_run
-from conan.tools.cmake import CMake, cmake_layout
+from conans import ConanFile, tools, CMake
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeToolchain", "CMakeDeps", "VirtualBuildEnv", "VirtualRunEnv"
+    generators = "cmake", "cmake_find_package"
     test_type = "explicit"
 
     def requirements(self):
@@ -18,9 +16,6 @@ class TestPackageConan(ConanFile):
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
 
-    def layout(self):
-        cmake_layout(self)
-
     def _assert_expected_version(self):
 
         def tested_reference_version():
@@ -28,7 +23,7 @@ class TestPackageConan(ConanFile):
             return tokens[0].split("/", 1)[1]
 
         output = StringIO()
-        self.run("flex --version", output)
+        self.run(f"flex --version", output, run_environment=False)
         output_str = str(output.getvalue()) 
         self.output.info("Installed version: {}".format(output_str))
         expected_version = tested_reference_version()
@@ -39,7 +34,7 @@ class TestPackageConan(ConanFile):
     def _create_cpp_file(self):
         l_file = os.path.join(self.source_folder, "basic_nr.l")
         output_file = os.path.join(self.build_folder, "basic_nr.cpp")
-        self.run(f"flex --outfile={output_file} --c++ {l_file}")
+        self.run(f"flex --outfile={output_file} --c++ {l_file}", run_environment=False)
         assert os.path.exists(output_file)
 
     def build(self):
@@ -51,7 +46,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if can_run(self):
-            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+        if not tools.cross_building(self, skip_x64_x86=True):
+            bin_path = os.path.join("bin", "test_package")
             txt_file = os.path.join(self.source_folder, "basic_nr.txt")
-            self.run(f"{bin_path} {txt_file}", env="conanrun")
+            self.run(f"{bin_path} {txt_file}", run_environment=True)
