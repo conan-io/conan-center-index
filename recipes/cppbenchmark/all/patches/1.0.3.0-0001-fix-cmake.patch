@@ -1,0 +1,82 @@
+diff --git a/a/CMakeLists.txt b/b/CMakeLists.txt
+index a42103b..59309e8 100644
+--- a/a/CMakeLists.txt
++++ b/b/CMakeLists.txt
+@@ -17,41 +17,41 @@ if(DOXYGEN_FOUND)
+   endif()
+ endif()
+ 
+-# CMake module path
+-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+-
+-# Compiler features
+-include(SetCompilerFeatures)
+-include(SetCompilerWarnings)
+-include(SetPlatformFeatures)
+-include(SystemInformation)
+-
+ # External packages
+ find_package(Threads REQUIRED)
+ 
+-# Modules
+-add_subdirectory("modules")
+-
+ # Link libraries
+ list(APPEND LINKLIBS Threads::Threads)
+ 
+-# System directories
+-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/modules")
+-
+ # Library
++find_package(hdr_histogram REQUIRED CONFIG)
++if(TARGET hdr_histogram::hdr_histogram)
++  list(APPEND LINKLIBS hdr_histogram::hdr_histogram)
++else()
++  list(APPEND LINKLIBS hdr_histogram::hdr_histogram_static)
++endif()
++
++find_package(cpp-optparse REQUIRED CONFIG)
++list(APPEND LINKLIBS cpp-optparse::cpp-optparse)
++
++
+ file(GLOB_RECURSE LIB_HEADER_FILES "include/*.h" "source/*.h")
+ file(GLOB_RECURSE LIB_INLINE_FILES "include/*.inl" "source/*.inl")
+ file(GLOB_RECURSE LIB_SOURCE_FILES "include/*.cpp" "source/*.cpp")
+ add_library(cppbenchmark ${LIB_HEADER_FILES} ${LIB_INLINE_FILES} ${LIB_SOURCE_FILES})
+ set_target_properties(cppbenchmark PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "libraries")
+ target_include_directories(cppbenchmark PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+-target_link_libraries(cppbenchmark ${LINKLIBS} cpp-optparse HdrHistogram)
++target_compile_definitions(cppbenchmark PUBLIC _CRT_SECURE_NO_WARNINGS)
++target_compile_features(cppbenchmark PUBLIC cxx_std_17)
++set_target_properties(cppbenchmark PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
++target_link_libraries(cppbenchmark ${LINKLIBS})
+ list(APPEND INSTALL_TARGETS cppbenchmark)
+ list(APPEND LINKLIBS cppbenchmark)
+ 
+ # Additional module components: benchmarks, examples, plugins, tests, tools and install
+ if(NOT CPPBENCHMARK_MODULE)
+ 
++  if(0)
+   # Examples
+   file(GLOB EXAMPLE_HEADER_FILES "examples/*.h")
+   file(GLOB EXAMPLE_INLINE_FILES "examples/*.inl")
+@@ -80,12 +80,16 @@ if(NOT CPPBENCHMARK_MODULE)
+   # CTest
+   enable_testing()
+   add_test(cppbenchmark-tests cppbenchmark-tests --durations yes --order lex)
++  endif()
+ 
+   # Install
+   install(TARGETS ${INSTALL_TARGETS}
+-    RUNTIME DESTINATION "${PROJECT_SOURCE_DIR}/bin"
+-    LIBRARY DESTINATION "${PROJECT_SOURCE_DIR}/bin"
+-    ARCHIVE DESTINATION "${PROJECT_SOURCE_DIR}/bin")
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
++
++  install(FILES ${LIB_HEADER_FILES} ${LIB_INLINE_FILES}
++    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/benchmark)
+ 
+   # Install *.pdb files
+   if(MSVC)
