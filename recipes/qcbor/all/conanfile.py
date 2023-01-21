@@ -19,16 +19,12 @@ class QCBORConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "disable_float_hw_use": [True, False],
-        "disable_float_preferred": [True, False],
-        "disable_float_all": [True, False],
+        "disable_float": [False, "HW_USE", "PREFERRED", "ALL"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "disable_float_hw_use": False,
-        "disable_float_preferred": False,
-        "disable_float_all": False,
+        "disable_float": False,
     }
 
     def export_sources(self):
