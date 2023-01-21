@@ -33,9 +33,10 @@ class WasmtimeConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "15",
+            "msvc": "190",
             "apple-clang": "9.4",
             "clang": "3.3",
-            "gcc": "5.1"
+            "gcc": "5.1",
         }
 
     @property
