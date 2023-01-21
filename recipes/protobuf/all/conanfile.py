@@ -94,11 +94,11 @@ class ProtobufConan(ConanFile):
         tc.cache_variables["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
         tc.cache_variables["protobuf_WITH_ZLIB"] = self.options.with_zlib
         tc.cache_variables["protobuf_BUILD_TESTS"] = False
-        tc.cache_variables["protobuf_BUILD_PROTOC_BINARIES"] = True
+        tc.cache_variables["protobuf_BUILD_PROTOC_BINARIES"] = self.settings.os != "tvOS"
         if not self.options.debug_suffix:
             tc.cache_variables["protobuf_DEBUG_POSTFIX"] = ""
         if Version(self.version) >= "3.14.0":
-            tc.cache_variables["protobuf_BUILD_LIBPROTOC"] = True
+            tc.cache_variables["protobuf_BUILD_LIBPROTOC"] = self.settings.os != "tvOS"
         if self._can_disable_rtti:
             tc.cache_variables["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
         if is_msvc(self) or self._is_clang_cl:
@@ -229,9 +229,10 @@ class ProtobufConan(ConanFile):
                 self.cpp_info.components["libprotobuf"].defines = ["PROTOBUF_USE_DLLS"]
 
         # libprotoc
-        self.cpp_info.components["libprotoc"].set_property("cmake_target_name", "protobuf::libprotoc")
-        self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
-        self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
+        if self.settings.os != "tvOS":
+            self.cpp_info.components["libprotoc"].set_property("cmake_target_name", "protobuf::libprotoc")
+            self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
+            self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
 
         # libprotobuf-lite
         if self.options.lite:

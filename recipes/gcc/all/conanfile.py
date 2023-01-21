@@ -9,7 +9,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
 
 class GccConan(ConanFile):
@@ -83,11 +83,6 @@ class GccConan(ConanFile):
         tc.configure_args.append("--disable-nls")
         tc.configure_args.append("--disable-multilib")
         tc.configure_args.append("--disable-bootstrap")
-        # TODO: Remove --prefix and --libexecdir args when c3i supports conan 1.55.0.
-        # This change should only happen in conjunction with a move to
-        # autotools.install("install-strip")
-        tc.configure_args.append(f"--prefix={self.package_folder}")
-        tc.configure_args.append(f"--libexecdir={os.path.join(self.package_folder, 'bin', 'libexec')}")
         tc.configure_args.append(f"--with-zlib={self.dependencies['zlib'].package_folder}")
         tc.configure_args.append(f"--with-isl={self.dependencies['isl'].package_folder}")
         tc.configure_args.append(f"--with-gmp={self.dependencies['gmp'].package_folder}")
@@ -139,10 +134,7 @@ class GccConan(ConanFile):
 
     def package(self):
         autotools = Autotools(self)
-        # TODO: Use more modern autotools.install(target="install-strip") when c3i supports
-        # conan client version of 1.55.0. Make sure that the minimum conan version is also bumped
-        # when this is changed.
-        autotools.make(target="install-strip")
+        autotools.install(target="install-strip")
 
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", self.package_folder, recursive=True)
