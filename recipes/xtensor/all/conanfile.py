@@ -50,7 +50,7 @@ class XtensorConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("xtl/0.7.4")
+        self.requires("xtl/0.7.5")
         self.requires("nlohmann_json/3.11.2")
         if self.options.xsimd:
             if Version(self.version) < "0.24.0":
