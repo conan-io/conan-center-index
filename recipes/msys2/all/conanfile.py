@@ -178,6 +178,7 @@ class MSYS2Conan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
         self.cpp_info.resdirs = []
+        self.cpp_info.system_libs = ["objdump"]
 
         msys_root = os.path.join(self.package_folder, "bin", "msys64")
         msys_bin = os.path.join(msys_root, "usr", "bin")
