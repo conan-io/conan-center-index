@@ -3,7 +3,7 @@ from conan.tools.files import save, load, chdir, copy, get, rmdir, replace_in_fi
 from conan.tools.layout import basic_layout
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
-from conan.tools.microsoft import unix_path
+from conan.tools.microsoft import is_msvc, unix_path
 from conan.errors import ConanException
 import os
 import re
@@ -93,11 +93,11 @@ class MpfrConan(ConanFile):
 
             if self.options.exact_int == "mpir":
                 tc.extra_cflags.append(f"-I{self.build_folder}")
-            if self.settings.compiler == "msvc":
+            if is_msvc(self):
                 tc.extra_cflags.append("-FS")
 
             env = tc.environment()
-            if self.settings.compiler == "msvc":
+            if is_msvc(self):
                 env.define("AR", "lib")
                 env.define("CC", "cl -nologo")
                 env.define("CXX", "cl -nologo")
@@ -119,7 +119,7 @@ class MpfrConan(ConanFile):
         return [item for line in lines for item in shlex.split(line) if item]
 
     def _extract_mpfr_autotools_variables(self):
-        makefile_am = os.path.join(self.source_folder, "src", "Makefile.am")
+        makefile_am = os.path.join(self.source_folder, "src", "Makefile.am") # src/src/Makefile.am
         makefile = os.path.join("src", "Makefile")
         sources = self._extract_makefile_variable(makefile_am, "libmpfr_la_SOURCES")
         headers = self._extract_makefile_variable(makefile_am, "include_HEADERS")
@@ -140,9 +140,9 @@ class MpfrConan(ConanFile):
             save(self, "gmp.h", "#pragma once\n#include <mpir.h>\n")
 
         if self.settings.os == "Windows":
-            cmakelists_in = load(self, "CMakeLists.txt.in")
+            cmakelists_in = load(self, os.path.join(self.export_sources_folder, "CMakeLists.txt.in"))
             sources, headers, definitions = self._extract_mpfr_autotools_variables()
-            save(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), cmakelists_in.format(
+            save(self, os.path.join(self.source_folder, "CMakeLists.txt"), cmakelists_in.format(
                 mpfr_sources=" ".join(sources),
                 mpfr_headers=" ".join(headers),
                 definitions=" ".join(definitions),
