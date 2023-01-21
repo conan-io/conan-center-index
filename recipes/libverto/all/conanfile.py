@@ -1,7 +1,7 @@
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import copy, get, rm, chdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rm, rmdir, chdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import Autotools, AutotoolsToolchain,AutotoolsDeps, PkgConfigDeps
 from conan.tools.microsoft import is_msvc, unix_path
@@ -160,11 +160,12 @@ class LibVertoConan(ConanFile):
         autotools.make()
 
     def package(self):
-        copy(self,"COPYING", src=self.source_folder, dst="licenses")
+        copy(self,"COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
 
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_id(self):
         del self.info.options.default
