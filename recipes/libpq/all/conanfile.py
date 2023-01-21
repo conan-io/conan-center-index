@@ -151,26 +151,6 @@ class LibpqConan(ConanFile):
                                       "openssl   => undef",
                                       "openssl   => '%s'" % openssl.package_folder.replace("\\", "/"))
         elif self.settings.os == "Windows":
-            # https://www.postgresql.org/message-id/2a6c418e-373b-8466-fcb8-ce729aab255f@gmail.com
-            # https://www.postgresql.org/message-id/attachment/99411/0002-Build-static-libraries.patch
-            # https://www.postgresql.org/message-id/attachment/99410/0001-Fix-import-library-extension.patch
-            shlib_makefile = os.path.join(self.source_folder, "src", "Makefile.shlib")
-            replace_in_file(self, shlib_makefile,
-            "\t$(CC) $(CFLAGS)  -shared -static-libgcc -o $@  $(OBJS) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK) $(LIBS) -Wl,--export-all-symbols -Wl,--out-implib=$(stlib)",
-            "\t$(CC) $(CFLAGS)  -shared -static-libgcc -o $@  $(OBJS) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK) $(LIBS) -Wl,--export-all-symbols -Wl,--out-implib=lib$(NAME).dll.a")
-            replace_in_file(self, shlib_makefile,
-            "\t$(CC) $(CFLAGS)  -shared -static-libgcc -o $@  $(OBJS) $(DLL_DEFFILE) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK) $(LIBS) -Wl,--out-implib=$(stlib)",
-            "\t$(CC) $(CFLAGS)  -shared -static-libgcc -o $@  $(OBJS) $(DLL_DEFFILE) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK) $(LIBS) -Wl,--out-implib=lib$(NAME).dll.a")
-            # Generate static library
-            replace_in_file(self, shlib_makefile,
-            "$(stlib): $(shlib)\n\ttouch $@\n",
-            "$(stlib): $(OBJS) | $(SHLIB_PREREQS)\n\trm -f $@\n\t$(LINK.static) $@ $^\n\t$(RANLIB) $@\n\ttouch $@")
-
-            # Install libpq.dll.a
-            replace_in_file(self, os.path.join(self.source_folder, "src", "interfaces", "libpq", "Makefile"),
-            "install: all installdirs install-lib",
-            "install: all installdirs install-lib\n\t$(INSTALL_DATA) $(srcdir)/libpq.dll.a '$(DESTDIR)$(libdir)'")
-
             if self.settings.get_safe("compiler.threads") == "posix":
                 # Use MinGW pthread library
                 replace_in_file(self, os.path.join(self.source_folder, "src", "interfaces", "libpq", "Makefile"),
@@ -213,6 +193,7 @@ class LibpqConan(ConanFile):
                     os.remove(lib)
         else:
             rm(self, "*.dll", bin_folder)
+            rm(self, "*.dll.a", lib_folder)
             rm(self, "*.so*", lib_folder)
             rm(self, "*.dylib", lib_folder)
 

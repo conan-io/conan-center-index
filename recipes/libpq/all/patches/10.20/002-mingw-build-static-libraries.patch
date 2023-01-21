@@ -1,0 +1,39 @@
+--- a/src/Makefile.shlib
++++ b/src/Makefile.shlib
+@@ -371,7 +371,10 @@ else
+ # Win32 case
+ 
+ # See notes in src/backend/parser/Makefile about the following two rules
+-$(stlib): $(shlib)
++$(stlib): $(OBJS) | $(SHLIB_PREREQS)
++	rm -f $@
++	$(LINK.static) $@ $^
++	$(RANLIB) $@
+ 	touch $@
+ 
+ # XXX A backend that loads a module linked with libgcc_s_dw2-1.dll will exit
+@@ -384,12 +387,12 @@ $(stlib): $(shlib)
+ # Else we just use --export-all-symbols.
+ ifeq (,$(SHLIB_EXPORTS))
+ $(shlib): $(OBJS) | $(SHLIB_PREREQS)
+-	$(CC) $(CFLAGS)  -shared -static-libgcc -o $@  $(OBJS) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK) $(LIBS) -Wl,--export-all-symbols -Wl,--out-implib=$(stlib)
++	$(CC) $(CFLAGS)  -shared -static-libgcc -o $@  $(OBJS) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK) $(LIBS) -Wl,--export-all-symbols -Wl,--out-implib=lib$(NAME).dll.a
+ else
+ DLL_DEFFILE = lib$(NAME)dll.def
+ 
+ $(shlib): $(OBJS) $(DLL_DEFFILE) | $(SHLIB_PREREQS)
+-	$(CC) $(CFLAGS)  -shared -static-libgcc -o $@  $(OBJS) $(DLL_DEFFILE) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK) $(LIBS) -Wl,--out-implib=$(stlib)
++	$(CC) $(CFLAGS)  -shared -static-libgcc -o $@  $(OBJS) $(DLL_DEFFILE) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK) $(LIBS) -Wl,--out-implib=lib$(NAME).dll.a
+ endif
+ 
+ endif # PORTNAME == cygwin
+--- a/src/interfaces/libpq/Makefile
++++ b/src/interfaces/libpq/Makefile
+@@ -130,6 +130,7 @@ $(top_builddir)/src/port/pg_config_paths.h:
+ 	$(MAKE) -C $(top_builddir)/src/port pg_config_paths.h
+ 
+ install: all installdirs install-lib
++	$(INSTALL_DATA) $(srcdir)/libpq.dll.a '$(DESTDIR)$(libdir)'
+ 	$(INSTALL_DATA) $(srcdir)/libpq-fe.h '$(DESTDIR)$(includedir)'
+ 	$(INSTALL_DATA) $(srcdir)/libpq-events.h '$(DESTDIR)$(includedir)'
+ 	$(INSTALL_DATA) $(srcdir)/libpq-int.h '$(DESTDIR)$(includedir_internal)'
