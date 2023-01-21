@@ -103,13 +103,7 @@ class M4Conan(ConanFile):
         autotools.make()
 
     def package(self):
-        if os.path.islink(os.path.join(self.source_folder, "COPYING")):
-            # Use mkdir and copyfile when "COPYING" is a symlink as it is when building with source from Git repo
-            os.mkdir(os.path.join(self.package_folder, "licenses"))
-            shutil.copyfile(os.path.join(self.source_folder, os.readlink(os.path.join(self.source_folder, "COPYING"))),
-                         os.path.join(self.package_folder, "licenses", "COPYING"))
-        else:
-            copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
