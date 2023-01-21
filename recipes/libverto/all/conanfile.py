@@ -156,7 +156,7 @@ class LibVertoConan(ConanFile):
         with chdir(self, self.source_folder):    
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
         autotools = Autotools(self)
-        autotools.configure(os.path.join(self.source_folder,"src"))
+        autotools.configure()
         autotools.make()
 
     def package(self):
