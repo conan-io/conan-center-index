@@ -27,13 +27,13 @@
  endif
  
  endif # PORTNAME == cygwin
---- a/src/interfaces/libpq/Makefile
-+++ b/src/interfaces/libpq/Makefile
-@@ -130,6 +130,7 @@ $(top_builddir)/src/port/pg_config_paths.h:
- 	$(MAKE) -C $(top_builddir)/src/port pg_config_paths.h
- 
- install: all installdirs install-lib
-+	$(INSTALL_DATA) $(srcdir)/libpq.dll.a '$(DESTDIR)$(libdir)'
- 	$(INSTALL_DATA) $(srcdir)/libpq-fe.h '$(DESTDIR)$(includedir)'
- 	$(INSTALL_DATA) $(srcdir)/libpq-events.h '$(DESTDIR)$(includedir)'
- 	$(INSTALL_DATA) $(srcdir)/libpq-int.h '$(DESTDIR)$(includedir_internal)'
+@@ -484,6 +487,9 @@ endif # not aix
+ ifneq (,$(findstring $(PORTNAME),win32 cygwin))
+ 	$(INSTALL_SHLIB) $< '$(DESTDIR)$(bindir)/$(shlib)'
+ endif
++ifneq (,$(findstring $(PORTNAME),win32))
++	$(INSTALL_SHLIB) $< '$(DESTDIR)$(libdir)/lib$(NAME).dll.a'
++endif
+ else # no soname
+ 	$(INSTALL_SHLIB) $< '$(DESTDIR)$(pkglibdir)/$(shlib)'
+ endif
