@@ -1,6 +1,7 @@
 from conan import ConanFile
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rmdir, rm, apply_conandata_patches
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.microsoft import is_msvc, unix_path
@@ -9,7 +10,7 @@ from conan.errors import ConanInvalidConfiguration
 import os
 
 
-required_conan_version = ">=1.56.0"
+required_conan_version = ">=1.54.0"
 
 class MpcConan(ConanFile):
     name = "mpc"
@@ -23,7 +24,9 @@ class MpcConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    exports_sources = "patches/**"
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -64,6 +67,9 @@ class MpcConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
         tc.configure_args.append(f'--with-gmp={unix_path(self, self.dependencies["gmp"].package_folder)}')
@@ -90,9 +96,6 @@ class MpcConan(ConanFile):
         rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_file_name", "MPC")
-        self.cpp_info.set_property("cmake_module_file_name", "mpc")
-        self.cpp_info.set_property("cmake_target_name", "MPC::MPC")
         self.cpp_info.libs = ["mpc"]
-        self.cpp_info.system_libs = ["m"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["m"]
