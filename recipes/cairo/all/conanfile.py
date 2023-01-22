@@ -83,17 +83,7 @@ class CairoConan(ConanFile):
 
     def validate(self):
         if is_msvc(self):
-            version = Version(self.version)
-            if version < "1.17.2" and self.settings.build_type == "Debug":
-                # TODO autotools build results in LNK1127 error from a library in the WindowsSDK on CCI
-                #  should be retested in case this is just a CCI environment issue
-                raise ConanInvalidConfiguration("MSVC Debug build is only supported for 1.17.2 and later")
-            if self.settings.build_type not in ["Debug", "Release"]:
-                raise ConanInvalidConfiguration("MSVC build supports only Debug or Release build type")
-            if self.dependencies["glib"].options.shared and is_msvc_static_runtime(self):
-                raise ConanInvalidConfiguration(
-                    "Linking shared glib with the MSVC static runtime is not supported"
-                )
+            raise ConanInvalidConfiguration("MSVC autotools build is not supported. Use the Meson build instead.")
 
     def requirements(self):
         if self.options.get_safe("with_freetype", True):
