@@ -4,7 +4,6 @@ import shutil
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools import files, microsoft, scm
-from conan.tools.apple import is_apple_os
 from conans import AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from conans import tools
 
@@ -78,9 +77,6 @@ class CairoConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def validate(self):
-        if is_apple_os(self):
-            # TODO V2 autotools can handle macos build - but there are issues building on CCI. See PR #13943
-            raise ConanInvalidConfiguration("Cairo autotools build is not supported on Macos")
         if microsoft.is_msvc(self):
             if self.settings.build_type not in ["Debug", "Release"]:
                 raise ConanInvalidConfiguration("MSVC build supports only Debug or Release build type")
