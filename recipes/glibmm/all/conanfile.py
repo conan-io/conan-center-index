@@ -174,6 +174,7 @@ class GlibmmConan(ConanFile):
 
         for dir_to_remove in ["pkgconfig", self._glibmm_lib, self._giomm_lib]:
             rmdir(self, os.path.join(self.package_folder, "lib", dir_to_remove))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         glibmm_component = f"glibmm-{self._abi_version}"
