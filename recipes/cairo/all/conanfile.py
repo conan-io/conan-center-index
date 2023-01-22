@@ -83,6 +83,8 @@ class CairoConan(ConanFile):
 
     def validate(self):
         if is_msvc(self):
+            # TODO autotools build results in LNK1127 error from a library in the WindowsSDK on CCI
+            #  should be retested in case this is just a CCI environment issue
             raise ConanInvalidConfiguration("MSVC autotools build is not supported. Use the Meson build instead.")
 
     def requirements(self):
