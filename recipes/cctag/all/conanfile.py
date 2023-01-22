@@ -50,7 +50,7 @@ class CCTagConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.80.0")
+        self.requires("boost/1.81.0")
         self.requires("eigen/3.4.0")
         self.requires("onetbb/2020.3")
         self.requires("opencv/4.5.5")
