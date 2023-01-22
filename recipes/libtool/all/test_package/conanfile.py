@@ -50,7 +50,9 @@ class TestPackageConan(ConanFile):
             run_env.generate()
 
         test_env = Environment()
-        test_env.append_path("LD_LIBRARY_PATH", unix_path(self, os.path.join(self._autotools_test_dir, "lib")))
+        runtime_lib_path = unix_path(self, os.path.join(self._autotools_test_dir, "lib"))
+        test_env.append_path("LD_LIBRARY_PATH", runtime_lib_path)
+        test_env.append_path("DYLD_LIBRARY_PATH", runtime_lib_path)
         test_env.vars(self, scope="run").save_script("autotools_test")
 
         tc = AutotoolsToolchain(self)
