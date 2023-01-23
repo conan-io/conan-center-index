@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.microsoft import is_msvc
-from conan.tools.files import get, rmdir, rm, copy
+from conan.tools.files import get, rmdir, rm, copy, export_conandata_patches, apply_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps, Autotools
 from conan.tools.build import cross_building
@@ -38,6 +38,9 @@ class GnuTLSConan(ConanFile):
                        "with_zstd": True,
                        "with_brotli": True,}
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -62,8 +65,6 @@ class GnuTLSConan(ConanFile):
     def validate(self):
         if is_msvc(self):
             raise ConanInvalidConfiguration(f"{self.ref} cannot be deployed by Visual Studio.")
-        if is_apple_os(self) and self.settings.build_type == "Debug":
-            raise ConanInvalidConfiguration(f"{self.ref} generates linkage errors when building. Contributions are welcome.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
@@ -109,6 +110,7 @@ class GnuTLSConan(ConanFile):
         pkgdeps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
