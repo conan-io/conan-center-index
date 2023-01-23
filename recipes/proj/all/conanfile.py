@@ -189,7 +189,7 @@ class ProjConan(ConanFile):
             if proj_version >= "7.0.0":
                 self.cpp_info.components["projlib"].system_libs.append("shell32")
             if proj_version >= "7.1.0":
-                self.cpp_info.components["projlib"].system_libs.append("Ole32")
+                self.cpp_info.components["projlib"].system_libs.append("ole32")
         if not self.options.shared:
             libcxx = stdcpp_library(self)
             if libcxx:
