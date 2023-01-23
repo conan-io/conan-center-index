@@ -85,7 +85,6 @@ class FlexConan(ConanFile):
         self.cpp_info.system_libs = ["m"]
 
         self.cpp_info.set_property("cmake_find_mode", "none")
-        self.buildenv_info.define_path("FLEX_ROOT", self.package_folder.replace("\\", "/"))
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
