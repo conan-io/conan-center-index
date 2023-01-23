@@ -28,7 +28,7 @@ index e0c5be195..1210f4d99 100644
 +    #${AAFSDK_ROOT}/ref-impl/expat
  )
  
-+find_package(EXPAT REQUIRED)
++find_package(EXPAT REQUIRED MODULE)
 +
 +target_link_libraries(OM PUBLIC EXPAT::EXPAT)
 +
