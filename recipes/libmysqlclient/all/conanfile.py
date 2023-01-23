@@ -197,7 +197,7 @@ class LibMysqlClientCConan(ConanFile):
         cmake.cache_variables["WITH_LZ4"] = "system"
 
         cmake.cache_variables["WITH_ZSTD"] = "system"
-        cmake.cache_variables["ZSTD_INCLUDE_DIR"] = self.dependencies["zstd"].cpp_info.includedirs[0]
+        cmake.cache_variables["ZSTD_INCLUDE_DIR"] = self.dependencies["zstd"].cpp_info.aggregated_components().includedirs[0]
 
         if is_msvc(self):
             cmake.cache_variables["WINDOWS_RUNTIME_MD"] = "MD" in msvc_runtime_flag(self)
